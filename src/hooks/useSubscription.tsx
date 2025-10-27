@@ -69,9 +69,8 @@ export const useSubscription = () => {
       if (error) throw error;
 
       if (data?.url) {
-        window.open(data.url, '_blank');
-        // Refresh after a delay to catch any updates
-        setTimeout(checkSubscription, 3000);
+        // Redirect to Stripe Checkout
+        window.location.href = data.url;
       }
     } catch (error) {
       console.error('[useSubscription] Failed to create checkout:', error);
