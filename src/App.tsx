@@ -12,6 +12,7 @@ import Wallet from "./pages/Wallet";
 import Referrals from "./pages/Referrals";
 import Profile from "./pages/Profile";
 import SubscriptionSuccess from "./pages/SubscriptionSuccess";
+import MerchantLanding from "./pages/MerchantLanding";
 import MerchantOnboarding from "./pages/MerchantOnboarding";
 import MerchantDashboard from "./pages/MerchantDashboard";
 import MerchantTransactions from "./pages/MerchantTransactions";
@@ -37,6 +38,7 @@ const App = () => (
           <Route path="/referrals" element={<Referrals />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/subscription-success" element={<SubscriptionSuccess />} />
+          <Route path="/merchants" element={<MerchantLanding />} />
           <Route path="/merchant-onboarding" element={<MerchantOnboarding />} />
           <Route path="/merchant-dashboard" element={<MerchantDashboard />} />
           <Route path="/merchant/transactions" element={<MerchantTransactions />} />
