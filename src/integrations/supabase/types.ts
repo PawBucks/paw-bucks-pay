@@ -14,6 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      funding_requests: {
+        Row: {
+          created_at: string
+          estimated_monthly_sales: number
+          id: string
+          merchant_id: string
+          reason: string
+          requested_amount: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          estimated_monthly_sales: number
+          id?: string
+          merchant_id: string
+          reason: string
+          requested_amount: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          estimated_monthly_sales?: number
+          id?: string
+          merchant_id?: string
+          reason?: string
+          requested_amount?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "funding_requests_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       merchants: {
         Row: {
           address: string | null

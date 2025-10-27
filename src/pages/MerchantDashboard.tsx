@@ -218,12 +218,22 @@ const MerchantDashboard = () => {
 
     try {
       const formData = new FormData(e.currentTarget);
-      const amount = parseFloat(formData.get("amount") as string);
-      const purpose = formData.get("purpose") as string;
+      const requestedAmount = parseFloat(formData.get("requestedAmount") as string);
+      const reason = formData.get("reason") as string;
+      const estimatedMonthlySales = parseFloat(formData.get("estimatedMonthlySales") as string);
 
-      // In a real app, this would create a funding request in the database
-      // and notify the admin/payment processor
-      toast.success(`Funding request for $${amount.toFixed(2)} submitted successfully!`);
+      const { error } = await supabase
+        .from("funding_requests")
+        .insert({
+          merchant_id: merchant.id,
+          requested_amount: requestedAmount,
+          reason,
+          estimated_monthly_sales: estimatedMonthlySales,
+        });
+
+      if (error) throw error;
+
+      toast.success(`Funding request for $${requestedAmount.toFixed(2)} submitted successfully!`);
       setFundingDialogOpen(false);
     } catch (error: any) {
       console.error("Error requesting funding:", error);
@@ -625,10 +635,10 @@ const MerchantDashboard = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="fundingAmount">Funding Amount ($)</Label>
+              <Label htmlFor="requestedAmount">Requested Amount ($)</Label>
               <Input
-                id="fundingAmount"
-                name="amount"
+                id="requestedAmount"
+                name="requestedAmount"
                 type="number"
                 step="0.01"
                 min="100"
@@ -639,12 +649,25 @@ const MerchantDashboard = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="fundingPurpose">Purpose</Label>
+              <Label htmlFor="reason">Reason for Funding</Label>
               <Textarea
-                id="fundingPurpose"
-                name="purpose"
+                id="reason"
+                name="reason"
                 placeholder="Inventory, equipment, marketing, etc."
                 rows={3}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="estimatedMonthlySales">Estimated Monthly Sales ($)</Label>
+              <Input
+                id="estimatedMonthlySales"
+                name="estimatedMonthlySales"
+                type="number"
+                step="0.01"
+                min="0"
+                placeholder="0.00"
                 required
               />
             </div>
