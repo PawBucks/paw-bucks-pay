@@ -341,6 +341,50 @@ export type Database = {
         }
         Relationships: []
       }
+      wallet_activity: {
+        Row: {
+          activity_type: string
+          amount: number
+          balance_after: number
+          balance_before: number
+          created_at: string
+          description: string | null
+          id: string
+          transaction_id: string | null
+          user_id: string
+        }
+        Insert: {
+          activity_type: string
+          amount: number
+          balance_after: number
+          balance_before: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          transaction_id?: string | null
+          user_id: string
+        }
+        Update: {
+          activity_type?: string
+          amount?: number
+          balance_after?: number
+          balance_before?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          transaction_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wallet_activity_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wallets: {
         Row: {
           balance: number

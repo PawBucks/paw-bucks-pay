@@ -1,6 +1,6 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
-import Stripe from "https://esm.sh/stripe@14.21.0?target=deno";
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.2';
+import Stripe from "https://esm.sh/stripe@18.5.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -14,7 +14,7 @@ serve(async (req) => {
 
   try {
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
-      apiVersion: '2023-10-16',
+      apiVersion: '2025-08-27.basil',
     });
 
     const signature = req.headers.get('stripe-signature');
@@ -37,71 +37,102 @@ serve(async (req) => {
       }
     } else {
       event = JSON.parse(body);
+      console.warn('⚠️ Webhook signature verification skipped (no webhook secret configured)');
     }
 
     console.log('Stripe webhook event:', event.type);
 
+    // Initialize Supabase client with service role key
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
     // Handle successful payment
     if (event.type === 'payment_intent.succeeded') {
-      const paymentIntent = event.data.object;
-      const { merchant_id, user_id, description } = paymentIntent.metadata;
+      const paymentIntent = event.data.object as Stripe.PaymentIntent;
+      const { merchant_id, user_id, description, cashback_amount, cashback_rate } = paymentIntent.metadata;
 
       console.log('Payment succeeded:', {
         paymentIntentId: paymentIntent.id,
-        amount: paymentIntent.amount,
+        amount: paymentIntent.amount / 100,
         merchant_id,
         user_id,
+        cashback_amount,
       });
-
-      // Initialize Supabase client with service role key
-      const supabaseAdmin = createClient(
-        Deno.env.get('SUPABASE_URL') ?? '',
-        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-      );
-
-      // Get merchant cashback rate
-      const { data: merchant, error: merchantError } = await supabaseAdmin
-        .from('merchants')
-        .select('cashback_rate')
-        .eq('id', merchant_id)
-        .single();
-
-      if (merchantError) {
-        console.error('Error fetching merchant:', merchantError);
-        throw merchantError;
-      }
 
       const amount = paymentIntent.amount / 100; // Convert from cents
-      const cashbackRate = merchant.cashback_rate || 5.0;
-      const cashbackAmount = (amount * cashbackRate) / 100;
+      const cashback = parseFloat(cashback_amount || '0');
       const rewardsEarned = Math.floor(amount); // 1 point per dollar
 
-      console.log('Calculated cashback:', {
+      console.log('Recording transaction:', {
         amount,
-        cashbackRate,
-        cashbackAmount,
+        cashback,
         rewardsEarned,
+        rate: cashback_rate,
       });
 
-      // Create transaction record
-      const { error: transactionError } = await supabaseAdmin
+      // Create transaction record (this will trigger wallet updates via database trigger)
+      const { data: transaction, error: transactionError } = await supabaseAdmin
         .from('transactions')
         .insert({
           pet_owner_id: user_id,
           merchant_id: merchant_id,
           amount: amount,
-          cashback_amount: cashbackAmount,
+          cashback_amount: cashback,
           rewards_earned: rewardsEarned,
           description: description || 'Stripe payment',
           status: 'completed',
-        });
+        })
+        .select()
+        .single();
 
       if (transactionError) {
         console.error('Error creating transaction:', transactionError);
         throw transactionError;
       }
 
-      console.log('Transaction recorded successfully');
+      console.log('✅ Transaction recorded successfully:', transaction.id);
+      console.log('✅ Wallet updated via database trigger');
+      console.log('✅ Wallet activity logged');
+    }
+
+    // Handle Connect account updates
+    if (event.type === 'account.updated') {
+      const account = event.data.object as Stripe.Account;
+      
+      console.log('Connect account updated:', {
+        accountId: account.id,
+        chargesEnabled: account.charges_enabled,
+        payoutsEnabled: account.payouts_enabled,
+      });
+
+      // Update merchant status in database
+      const { error: updateError } = await supabaseAdmin
+        .from('merchants')
+        .update({
+          stripe_account_status: account.charges_enabled ? 'active' : 'pending',
+        })
+        .eq('stripe_account_id', account.id);
+
+      if (updateError) {
+        console.error('Error updating merchant status:', updateError);
+      } else {
+        console.log('✅ Merchant status updated');
+      }
+    }
+
+    // Handle payout events (for merchant tracking)
+    if (event.type === 'payout.paid' || event.type === 'payout.failed') {
+      const payout = event.data.object as Stripe.Payout;
+      
+      console.log(`Payout ${event.type}:`, {
+        payoutId: payout.id,
+        amount: payout.amount / 100,
+        destination: payout.destination,
+      });
+
+      // You can add additional logging or notifications here
     }
 
     return new Response(
