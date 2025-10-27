@@ -9,6 +9,8 @@ import Dashboard from "./pages/Dashboard";
 import CreatePetProfile from "./pages/CreatePetProfile";
 import Discover from "./pages/Discover";
 import Wallet from "./pages/Wallet";
+import Referrals from "./pages/Referrals";
+import Profile from "./pages/Profile";
 import MerchantOnboarding from "./pages/MerchantOnboarding";
 import MerchantDashboard from "./pages/MerchantDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -30,6 +32,8 @@ const App = () => (
           <Route path="/create-pet-profile" element={<CreatePetProfile />} />
           <Route path="/discover" element={<Discover />} />
           <Route path="/wallet" element={<Wallet />} />
+          <Route path="/referrals" element={<Referrals />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="/merchant-onboarding" element={<MerchantOnboarding />} />
           <Route path="/merchant-dashboard" element={<MerchantDashboard />} />
           <Route path="/admin/login" element={<AdminLogin />} />

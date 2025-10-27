@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { GradientCard } from "@/components/ui/gradient-card";
 import { MerchantCard } from "@/components/MerchantCard";
 import { PaymentDialog } from "@/components/PaymentDialog";
+import { BottomNav } from "@/components/BottomNav";
 import { LogOut, PawPrint, Search, Loader2, MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -134,35 +135,27 @@ const Discover = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b bg-card sticky top-0 z-10">
+    <div className="min-h-screen bg-[var(--gradient-hero)] pb-24">
+      <header className="border-b bg-card/80 backdrop-blur-lg sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/dashboard")}>
-            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
-              <PawPrint className="w-6 h-6 text-primary-foreground" />
+          <div className="flex items-center gap-2">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+              <PawPrint className="w-6 h-6 text-white" />
             </div>
             <h1 className="text-2xl font-bold bg-[var(--gradient-primary)] bg-clip-text text-transparent">
               PetalPay
             </h1>
           </div>
-          <div className="flex gap-2">
-            <Button variant="ghost" onClick={() => navigate("/wallet")}>
-              Wallet
-            </Button>
-            <Button variant="ghost" onClick={handleSignOut}>
-              <LogOut className="w-4 h-4" />
-            </Button>
-          </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="mb-8">
-          <h2 className="text-3xl font-bold mb-2">Discover Pet Services</h2>
-          <p className="text-muted-foreground">Find trusted pet stores, groomers, and trainers near you</p>
+          <h2 className="text-3xl font-bold mb-2">Discover</h2>
+          <p className="text-muted-foreground">Find trusted pet services near you</p>
         </div>
 
-        {/* Search and Filter */}
+        {/* Search */}
         <GradientCard className="mb-6">
           <div className="flex gap-4">
             <div className="flex-1 relative">
@@ -226,6 +219,8 @@ const Discover = () => {
           onSuccess={handlePaymentSuccess}
         />
       )}
+
+      <BottomNav />
     </div>
   );
 };
