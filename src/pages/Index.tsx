@@ -70,9 +70,9 @@ const Index = () => {
               id="hero-heading"
               className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight"
             >
-              The Payment Platform for{" "}
+              The Payment Platform for Pet{" "}
               <span className="bg-[var(--gradient-primary)] bg-clip-text text-transparent">
-                Pet Lovers
+                Lovers
               </span>
             </h2>
             <p className="text-lg sm:text-xl lg:text-2xl text-muted-foreground max-w-3xl mx-auto">
