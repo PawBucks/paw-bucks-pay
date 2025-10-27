@@ -5,8 +5,8 @@ import { format } from "date-fns";
 
 type PetProfile = {
   id: string;
-  pet_name: string;
-  pet_type: "dog" | "cat" | "other";
+  name: string;
+  type: "dog" | "cat" | "other";
   breed?: string;
   birthday?: string;
   photo_url?: string;
@@ -35,7 +35,7 @@ export const PetProfileCard = ({ pet }: PetProfileCardProps) => {
       {pet.photo_url ? (
         <img
           src={pet.photo_url}
-          alt={pet.pet_name}
+          alt={pet.name}
           className="w-20 h-20 rounded-full object-cover border-2 border-primary/20"
         />
       ) : (
@@ -44,13 +44,13 @@ export const PetProfileCard = ({ pet }: PetProfileCardProps) => {
         </div>
       )}
       <div className="flex-1">
-        <h3 className="text-xl font-bold mb-1">{pet.pet_name}</h3>
+        <h3 className="text-xl font-bold mb-1">{pet.name}</h3>
         <div className="flex flex-wrap gap-2 items-center">
           <Badge
             variant="outline"
-            className={petTypeColors[pet.pet_type]}
+            className={petTypeColors[pet.type]}
           >
-            {pet.pet_type.charAt(0).toUpperCase() + pet.pet_type.slice(1)}
+            {pet.type.charAt(0).toUpperCase() + pet.type.slice(1)}
           </Badge>
           {pet.breed && (
             <span className="text-sm text-muted-foreground">{pet.breed}</span>

@@ -54,7 +54,7 @@ type Analytics = {
 type Transaction = {
   id: string;
   amount: number;
-  cashback_amount: number;
+  cashback_earned: number;
   description: string;
   created_at: string;
 };
@@ -448,7 +448,7 @@ const MerchantDashboard = () => {
                       +${transaction.amount.toFixed(2)}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      Cashback: ${transaction.cashback_amount.toFixed(2)}
+                      Cashback: ${transaction.cashback_earned.toFixed(2)}
                     </p>
                   </div>
                 </div>
@@ -598,7 +598,7 @@ const MerchantDashboard = () => {
                       +${transaction.amount.toFixed(2)}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      Cashback: ${transaction.cashback_amount.toFixed(2)}
+                      Cashback: ${transaction.cashback_earned.toFixed(2)}
                     </p>
                   </div>
                 </div>

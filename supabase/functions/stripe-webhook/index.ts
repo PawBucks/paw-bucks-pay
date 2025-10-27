@@ -79,13 +79,14 @@ serve(async (req) => {
       const { data: transaction, error: transactionError } = await supabaseAdmin
         .from('transactions')
         .insert({
-          pet_owner_id: user_id,
+          user_id: user_id,
           merchant_id: merchant_id,
           amount: amount,
-          cashback_amount: cashback,
+          cashback_earned: cashback,
           rewards_earned: rewardsEarned,
           description: description || 'Stripe payment',
           status: 'completed',
+          stripe_payment_intent_id: paymentIntent.id,
         })
         .select()
         .single();

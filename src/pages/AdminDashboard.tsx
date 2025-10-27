@@ -73,7 +73,7 @@ type FundingRequest = {
 type Transaction = {
   id: string;
   amount: number;
-  cashback_amount: number;
+  cashback_earned: number;
   description: string;
   created_at: string;
   merchants?: {
@@ -168,7 +168,7 @@ const AdminDashboard = () => {
       setTransactions(transactionsData || []);
 
       // Calculate total cashback
-      const total = transactionsData?.reduce((sum, t) => sum + (t.cashback_amount || 0), 0) || 0;
+      const total = transactionsData?.reduce((sum, t) => sum + (t.cashback_earned || 0), 0) || 0;
       setTotalCashback(total);
     } catch (error: any) {
       console.error("Error loading admin data:", error);
@@ -482,7 +482,7 @@ const AdminDashboard = () => {
                     <TableCell className="font-medium">{transaction.merchants?.business_name}</TableCell>
                     <TableCell>{transaction.description}</TableCell>
                     <TableCell>${transaction.amount.toFixed(2)}</TableCell>
-                    <TableCell className="text-accent">${transaction.cashback_amount.toFixed(2)}</TableCell>
+                    <TableCell className="text-accent">${transaction.cashback_earned.toFixed(2)}</TableCell>
                     <TableCell>{format(new Date(transaction.created_at), "MMM d, h:mm a")}</TableCell>
                   </TableRow>
                 ))}

@@ -64,9 +64,12 @@ export type Database = {
           contact_person: string | null
           created_at: string
           description: string | null
+          email: string | null
+          funding_status: string | null
           id: string
           latitude: number | null
           longitude: number | null
+          owner_name: string | null
           stripe_account_id: string | null
           stripe_account_status: string | null
           updated_at: string
@@ -80,9 +83,12 @@ export type Database = {
           contact_person?: string | null
           created_at?: string
           description?: string | null
+          email?: string | null
+          funding_status?: string | null
           id?: string
           latitude?: number | null
           longitude?: number | null
+          owner_name?: string | null
           stripe_account_id?: string | null
           stripe_account_status?: string | null
           updated_at?: string
@@ -96,9 +102,12 @@ export type Database = {
           contact_person?: string | null
           created_at?: string
           description?: string | null
+          email?: string | null
+          funding_status?: string | null
           id?: string
           latitude?: number | null
           longitude?: number | null
+          owner_name?: string | null
           stripe_account_id?: string | null
           stripe_account_status?: string | null
           updated_at?: string
@@ -147,9 +156,9 @@ export type Database = {
           breed: string | null
           created_at: string
           id: string
-          pet_name: string
-          pet_type: Database["public"]["Enums"]["pet_type"]
+          name: string
           photo_url: string | null
+          type: Database["public"]["Enums"]["pet_type"]
           updated_at: string
           user_id: string
         }
@@ -158,9 +167,9 @@ export type Database = {
           breed?: string | null
           created_at?: string
           id?: string
-          pet_name: string
-          pet_type: Database["public"]["Enums"]["pet_type"]
+          name: string
           photo_url?: string | null
+          type: Database["public"]["Enums"]["pet_type"]
           updated_at?: string
           user_id: string
         }
@@ -169,9 +178,9 @@ export type Database = {
           breed?: string | null
           created_at?: string
           id?: string
-          pet_name?: string
-          pet_type?: Database["public"]["Enums"]["pet_type"]
+          name?: string
           photo_url?: string | null
+          type?: Database["public"]["Enums"]["pet_type"]
           updated_at?: string
           user_id?: string
         }
@@ -194,6 +203,8 @@ export type Database = {
           id: string
           phone: string | null
           referral_code: string | null
+          role: string | null
+          stripe_customer_id: string | null
           updated_at: string
           user_type: Database["public"]["Enums"]["user_type"]
         }
@@ -205,6 +216,8 @@ export type Database = {
           id: string
           phone?: string | null
           referral_code?: string | null
+          role?: string | null
+          stripe_customer_id?: string | null
           updated_at?: string
           user_type: Database["public"]["Enums"]["user_type"]
         }
@@ -216,6 +229,8 @@ export type Database = {
           id?: string
           phone?: string | null
           referral_code?: string | null
+          role?: string | null
+          stripe_customer_id?: string | null
           updated_at?: string
           user_type?: Database["public"]["Enums"]["user_type"]
         }
@@ -272,39 +287,101 @@ export type Database = {
           },
         ]
       }
+      subscription_events: {
+        Row: {
+          event_type: string
+          id: string
+          subscription_id: string
+          timestamp: string
+        }
+        Insert: {
+          event_type: string
+          id?: string
+          subscription_id: string
+          timestamp?: string
+        }
+        Update: {
+          event_type?: string
+          id?: string
+          subscription_id?: string
+          timestamp?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_events_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscriptions: {
+        Row: {
+          created_at: string
+          current_period_end: string | null
+          id: string
+          start_date: string
+          status: string
+          stripe_subscription_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          start_date?: string
+          status?: string
+          stripe_subscription_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          start_date?: string
+          status?: string
+          stripe_subscription_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       transactions: {
         Row: {
           amount: number
-          cashback_amount: number
+          cashback_earned: number
           created_at: string
           description: string | null
           id: string
           merchant_id: string
-          pet_owner_id: string
           rewards_earned: number
           status: string
+          stripe_payment_intent_id: string | null
+          user_id: string
         }
         Insert: {
           amount: number
-          cashback_amount?: number
+          cashback_earned?: number
           created_at?: string
           description?: string | null
           id?: string
           merchant_id: string
-          pet_owner_id: string
           rewards_earned?: number
           status?: string
+          stripe_payment_intent_id?: string | null
+          user_id: string
         }
         Update: {
           amount?: number
-          cashback_amount?: number
+          cashback_earned?: number
           created_at?: string
           description?: string | null
           id?: string
           merchant_id?: string
-          pet_owner_id?: string
           rewards_earned?: number
           status?: string
+          stripe_payment_intent_id?: string | null
+          user_id?: string
         }
         Relationships: [
           {
@@ -316,7 +393,7 @@ export type Database = {
           },
           {
             foreignKeyName: "transactions_pet_owner_id_fkey"
-            columns: ["pet_owner_id"]
+            columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -343,7 +420,6 @@ export type Database = {
       }
       wallet_activity: {
         Row: {
-          activity_type: string
           amount: number
           balance_after: number
           balance_before: number
@@ -351,10 +427,11 @@ export type Database = {
           description: string | null
           id: string
           transaction_id: string | null
+          type: string
           user_id: string
+          wallet_id: string | null
         }
         Insert: {
-          activity_type: string
           amount: number
           balance_after: number
           balance_before: number
@@ -362,10 +439,11 @@ export type Database = {
           description?: string | null
           id?: string
           transaction_id?: string | null
+          type: string
           user_id: string
+          wallet_id?: string | null
         }
         Update: {
-          activity_type?: string
           amount?: number
           balance_after?: number
           balance_before?: number
@@ -373,7 +451,9 @@ export type Database = {
           description?: string | null
           id?: string
           transaction_id?: string | null
+          type?: string
           user_id?: string
+          wallet_id?: string | null
         }
         Relationships: [
           {
@@ -383,6 +463,13 @@ export type Database = {
             referencedRelation: "transactions"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "wallet_activity_wallet_id_fkey"
+            columns: ["wallet_id"]
+            isOneToOne: false
+            referencedRelation: "wallets"
+            referencedColumns: ["id"]
+          },
         ]
       }
       wallets: {
@@ -390,27 +477,27 @@ export type Database = {
           balance: number
           created_at: string
           id: string
+          last_updated: string
           rewards_points: number
           total_spent: number
-          updated_at: string
           user_id: string
         }
         Insert: {
           balance?: number
           created_at?: string
           id?: string
+          last_updated?: string
           rewards_points?: number
           total_spent?: number
-          updated_at?: string
           user_id: string
         }
         Update: {
           balance?: number
           created_at?: string
           id?: string
+          last_updated?: string
           rewards_points?: number
           total_spent?: number
-          updated_at?: string
           user_id?: string
         }
         Relationships: [

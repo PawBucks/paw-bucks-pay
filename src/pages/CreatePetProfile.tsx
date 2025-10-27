@@ -73,8 +73,8 @@ const CreatePetProfile = () => {
       // Create pet profile
       const { error: profileError } = await supabase.from("pet_profiles").insert({
         user_id: user.id,
-        pet_name: petName,
-        pet_type: petType as Database["public"]["Enums"]["pet_type"],
+        name: petName,
+        type: petType as Database["public"]["Enums"]["pet_type"],
         breed: breed || null,
         birthday: birthday || null,
         photo_url: photoUrl || null,

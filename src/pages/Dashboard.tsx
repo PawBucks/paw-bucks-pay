@@ -21,8 +21,8 @@ type WalletData = {
 
 type PetProfile = {
   id: string;
-  pet_name: string;
-  pet_type: "dog" | "cat" | "other";
+  name: string;
+  type: "dog" | "cat" | "other";
   breed?: string;
   birthday?: string;
   photo_url?: string;

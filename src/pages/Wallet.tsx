@@ -18,7 +18,7 @@ type WalletData = {
 type Transaction = {
   id: string;
   amount: number;
-  cashback_amount: number;
+  cashback_earned: number;
   rewards_earned: number;
   description: string;
   created_at: string;
@@ -72,7 +72,7 @@ const Wallet = () => {
       const { data, error } = await supabase
         .from("transactions")
         .select("*")
-        .eq("pet_owner_id", user.id)
+        .eq("user_id", user.id)
         .order("created_at", { ascending: false })
         .limit(10);
 
@@ -179,7 +179,7 @@ const Wallet = () => {
                   </div>
                   <div className="text-right">
                     <p className="font-bold text-foreground">-${transaction.amount.toFixed(2)}</p>
-                    <p className="text-xs text-accent">+${transaction.cashback_amount.toFixed(2)}</p>
+                    <p className="text-xs text-accent">+${transaction.cashback_earned.toFixed(2)}</p>
                   </div>
                 </div>
               ))}
