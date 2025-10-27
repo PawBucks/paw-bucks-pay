@@ -42,7 +42,10 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-[var(--gradient-hero)] overflow-hidden">
-      <Header />
+      <Header menuItems={[
+        { label: "Explore Pet Merchants", path: "/discover" },
+        { label: "For Pet Merchants", path: "/merchants" }
+      ]} />
 
       {/* Hero Section */}
       <main role="main">

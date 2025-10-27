@@ -8,8 +8,22 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-export const Header = () => {
+interface MenuItem {
+  label: string;
+  path: string;
+}
+
+interface HeaderProps {
+  menuItems?: MenuItem[];
+}
+
+export const Header = ({ menuItems }: HeaderProps) => {
   const navigate = useNavigate();
+  
+  const defaultMenuItems: MenuItem[] = [
+    { label: "For Pet Lovers", path: "/" },
+    { label: "For Pet Merchants", path: "/merchants" }
+  ];
 
   return (
     <header className="border-b bg-card/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm" role="banner">
@@ -40,18 +54,15 @@ export const Header = () => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56 bg-card z-50">
-            <DropdownMenuItem 
-              onClick={() => navigate("/")}
-              className="cursor-pointer"
-            >
-              For Pet Lovers
-            </DropdownMenuItem>
-            <DropdownMenuItem 
-              onClick={() => navigate("/merchants")}
-              className="cursor-pointer"
-            >
-              For Pet Merchants
-            </DropdownMenuItem>
+            {(menuItems || defaultMenuItems).map((item, index) => (
+              <DropdownMenuItem 
+                key={index}
+                onClick={() => navigate(item.path)}
+                className="cursor-pointer"
+              >
+                {item.label}
+              </DropdownMenuItem>
+            ))}
           </DropdownMenuContent>
         </DropdownMenu>
       </nav>
