@@ -10,17 +10,17 @@ interface GradientCardProps {
 
 export const GradientCard = ({ children, className, gradient = false, onClick }: GradientCardProps) => {
   return (
-    <div
+    <article
       className={cn(
-        "rounded-xl border bg-card p-6 shadow-sm transition-all duration-300",
-        gradient && "bg-gradient-to-br from-primary/5 to-secondary/5 border-primary/20",
-        "hover:shadow-[var(--shadow-soft)]",
-        onClick && "cursor-pointer",
+        "rounded-2xl border bg-card p-6 shadow-sm transition-all duration-300",
+        gradient && "bg-gradient-to-br from-primary/5 via-accent/5 to-secondary/5 border-primary/20",
+        "hover:shadow-[var(--shadow-soft)] hover:border-primary/30",
+        onClick && "cursor-pointer hover:scale-[1.02]",
         className
       )}
       onClick={onClick}
     >
       {children}
-    </div>
+    </article>
   );
 };

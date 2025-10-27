@@ -1,14 +1,12 @@
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
-
 User-agent: *
 Allow: /
+Sitemap: https://42786380-3966-427e-b3d0-08c5bc7581ed.lovableproject.com/sitemap.xml
+
+# Disallow admin pages
+User-agent: *
+Disallow: /admin/
+Disallow: /admin-login/
+
+# Disallow auth pages from indexing
+User-agent: *
+Disallow: /auth

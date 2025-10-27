@@ -131,34 +131,55 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-[var(--gradient-hero)]">
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-md shadow-lg animate-scale-in">
         <CardHeader className="space-y-2 text-center">
           <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center">
-              <PawPrint className="w-8 h-8 text-primary-foreground" />
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-md">
+              <PawPrint className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
             </div>
           </div>
-          <CardTitle className="text-3xl font-bold">Welcome to PetalPay</CardTitle>
-          <CardDescription>Connect with pet services or grow your pet business</CardDescription>
+          <CardTitle className="text-2xl sm:text-3xl font-bold">Welcome to PetalPay</CardTitle>
+          <CardDescription className="text-sm sm:text-base">
+            Connect with pet services or grow your pet business
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="signin" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Sign In</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 mb-6">
+              <TabsTrigger value="signin" className="text-sm sm:text-base">Sign In</TabsTrigger>
+              <TabsTrigger value="signup" className="text-sm sm:text-base">Sign Up</TabsTrigger>
             </TabsList>
             
             <TabsContent value="signin">
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="signin-email">Email</Label>
-                  <Input id="signin-email" name="email" type="email" required />
+                  <Label htmlFor="signin-email">Email Address</Label>
+                  <Input 
+                    id="signin-email" 
+                    name="email" 
+                    type="email" 
+                    placeholder="your@email.com"
+                    autoComplete="email"
+                    required 
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signin-password">Password</Label>
-                  <Input id="signin-password" name="password" type="password" required />
+                  <Input 
+                    id="signin-password" 
+                    name="password" 
+                    type="password" 
+                    placeholder="Enter your password"
+                    autoComplete="current-password"
+                    required 
+                  />
                 </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                <Button 
+                  type="submit" 
+                  className="w-full" 
+                  disabled={isLoading}
+                  aria-label="Sign in to your account"
+                >
                   {isLoading ? "Signing in..." : "Sign In"}
                 </Button>
               </form>
@@ -168,24 +189,46 @@ const Auth = () => {
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="fullName">Full Name</Label>
-                  <Input id="fullName" name="fullName" required />
+                  <Input 
+                    id="fullName" 
+                    name="fullName" 
+                    placeholder="John Doe"
+                    autoComplete="name"
+                    required 
+                  />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
-                  <Input id="signup-email" name="email" type="email" required />
+                  <Label htmlFor="signup-email">Email Address</Label>
+                  <Input 
+                    id="signup-email" 
+                    name="email" 
+                    type="email" 
+                    placeholder="your@email.com"
+                    autoComplete="email"
+                    required 
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signup-password">Password</Label>
-                  <Input id="signup-password" name="password" type="password" required />
+                  <Input 
+                    id="signup-password" 
+                    name="password" 
+                    type="password" 
+                    placeholder="Create a strong password"
+                    autoComplete="new-password"
+                    minLength={6}
+                    required 
+                  />
                 </div>
                 <div className="space-y-2">
-                  <Label>I am a</Label>
-                  <div className="flex gap-4">
+                  <Label>Account Type</Label>
+                  <div className="grid grid-cols-2 gap-3">
                     <Button
                       type="button"
                       variant={userType === "pet_owner" ? "default" : "outline"}
                       onClick={() => setUserType("pet_owner")}
                       className="flex-1"
+                      aria-pressed={userType === "pet_owner"}
                     >
                       Pet Owner
                     </Button>
@@ -194,13 +237,14 @@ const Auth = () => {
                       variant={userType === "merchant" ? "default" : "outline"}
                       onClick={() => setUserType("merchant")}
                       className="flex-1"
+                      aria-pressed={userType === "merchant"}
                     >
                       Merchant
                     </Button>
                   </div>
                 </div>
                 {userType === "pet_owner" && (
-                  <div className="space-y-2">
+                  <div className="space-y-2 animate-fade-in">
                     <Label htmlFor="referralCode">Referral Code (Optional)</Label>
                     <Input 
                       id="referralCode" 
@@ -209,13 +253,19 @@ const Auth = () => {
                       value={referralCode}
                       onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
                       maxLength={8}
+                      aria-describedby="referral-help"
                     />
-                    <p className="text-xs text-muted-foreground">
+                    <p id="referral-help" className="text-xs text-muted-foreground">
                       Both you and your referrer get $10 after your first transaction!
                     </p>
                   </div>
                 )}
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                <Button 
+                  type="submit" 
+                  className="w-full" 
+                  disabled={isLoading}
+                  aria-label="Create your PetalPay account"
+                >
                   {isLoading ? "Creating account..." : "Create Account"}
                 </Button>
               </form>
