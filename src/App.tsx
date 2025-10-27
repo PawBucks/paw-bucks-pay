@@ -11,6 +11,7 @@ import Discover from "./pages/Discover";
 import Wallet from "./pages/Wallet";
 import MerchantOnboarding from "./pages/MerchantOnboarding";
 import MerchantDashboard from "./pages/MerchantDashboard";
+import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/wallet" element={<Wallet />} />
           <Route path="/merchant-onboarding" element={<MerchantOnboarding />} />
           <Route path="/merchant-dashboard" element={<MerchantDashboard />} />
+          <Route path="/admin" element={<AdminDashboard />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
