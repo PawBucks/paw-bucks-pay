@@ -45,10 +45,10 @@ const Index = () => {
       <header className="border-b bg-card/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm" role="banner">
         <nav className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between" aria-label="Main navigation">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[var(--gradient-accent)] flex items-center justify-center shadow-lg" aria-hidden="true">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-accent to-secondary flex items-center justify-center shadow-lg" aria-hidden="true">
               <PawPrint className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
             </div>
-            <h1 className="text-xl sm:text-2xl font-bold bg-[var(--gradient-teal)] bg-clip-text text-transparent">
+            <h1 className="text-xl sm:text-2xl font-bold text-accent">
               PetalPay
             </h1>
           </div>
@@ -78,11 +78,11 @@ const Index = () => {
             
             <h2 
               id="hero-heading"
-              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight tracking-tight"
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight tracking-tight text-foreground"
             >
               The Payment Platform
               <br />
-              <span className="bg-[var(--gradient-teal)] bg-clip-text text-transparent">
+              <span className="text-accent">
                 for Pet Lovers
               </span>
             </h2>
@@ -138,9 +138,9 @@ const Index = () => {
           aria-labelledby="features-heading"
         >
           <div className="text-center mb-12 sm:mb-16 animate-fade-in">
-            <h2 id="features-heading" className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
+            <h2 id="features-heading" className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4">
               Everything you need for
-              <span className="block bg-[var(--gradient-teal)] bg-clip-text text-transparent">pet care payments</span>
+              <span className="block text-accent">pet care payments</span>
             </h2>
             <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
               Streamline your pet expenses with powerful features designed for pet owners and businesses
@@ -274,8 +274,7 @@ const Index = () => {
         </section>
 
         {/* CTA Section */}
-        <section className="relative py-20 sm:py-24 lg:py-32 overflow-hidden" aria-labelledby="cta-heading">
-          <div className="absolute inset-0 bg-[var(--gradient-teal)] opacity-90"></div>
+        <section className="relative py-20 sm:py-24 lg:py-32 overflow-hidden bg-gradient-to-br from-accent to-secondary" aria-labelledby="cta-heading">
           <div className="absolute top-0 left-1/4 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
           <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
           
@@ -323,11 +322,11 @@ const Index = () => {
       <footer className="border-t py-12 sm:py-16 bg-card/80 backdrop-blur-sm" role="contentinfo">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center gap-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-[var(--gradient-accent)] flex items-center justify-center shadow-md">
+          <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-accent to-secondary flex items-center justify-center shadow-md">
                 <PawPrint className="w-6 h-6 text-white" />
               </div>
-              <span className="text-xl font-bold">PetalPay</span>
+              <span className="text-xl font-bold text-accent">PetalPay</span>
             </div>
             <p className="text-sm sm:text-base text-muted-foreground text-center max-w-md">
               Making pet care payments simple, secure, and rewarding for everyone who loves pets.

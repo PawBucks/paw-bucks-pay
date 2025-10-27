@@ -37,9 +37,9 @@
     
     /* PetalPay Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(350 75% 85%), hsl(340 70% 80%));
-    --gradient-teal: linear-gradient(135deg, hsl(180 55% 60%), hsl(170 50% 55%));
-    --gradient-hero: linear-gradient(180deg, hsl(0 0% 100%), hsl(350 75% 95%));
-    --gradient-accent: linear-gradient(135deg, hsl(180 55% 60%), hsl(350 75% 85%));
+    --gradient-teal: linear-gradient(135deg, hsl(180 60% 45%), hsl(170 55% 40%));
+    --gradient-hero: linear-gradient(180deg, hsl(0 0% 98%), hsl(180 30% 95%));
+    --gradient-accent: linear-gradient(135deg, hsl(180 60% 45%), hsl(170 55% 40%));
     
     /* Shadows */
     --shadow-soft: 0 2px 12px hsl(180 30% 75% / 0.15);
