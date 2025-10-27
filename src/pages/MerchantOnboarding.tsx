@@ -68,7 +68,6 @@ const MerchantOnboarding = () => {
       const contactPerson = formData.get("contactPerson") as string;
       const address = formData.get("address") as string;
       const description = formData.get("description") as string;
-      const cashbackRate = parseFloat(formData.get("cashbackRate") as string);
 
       // Validate input
       const validatedData = merchantOnboardingSchema.parse({
@@ -77,7 +76,7 @@ const MerchantOnboarding = () => {
         businessType,
         address: address || "",
         description: description || "",
-        cashbackRate: isNaN(cashbackRate) ? 5.0 : cashbackRate,
+        cashbackRate: 10.0, // Default rate, not user-configurable
       });
 
       // Create merchant profile
@@ -187,24 +186,6 @@ const MerchantOnboarding = () => {
                 placeholder="Tell customers about your business..."
                 rows={3}
               />
-            </div>
-
-            {/* Cashback Rate */}
-            <div className="space-y-2">
-              <Label htmlFor="cashbackRate">Cashback Rate (%)</Label>
-              <Input
-                id="cashbackRate"
-                name="cashbackRate"
-                type="number"
-                step="0.01"
-                min="0"
-                max="100"
-                defaultValue="5.00"
-                placeholder="5.00"
-              />
-              <p className="text-sm text-muted-foreground">
-                Percentage of each transaction you'll offer as cashback to customers
-              </p>
             </div>
 
             <div className="bg-muted rounded-lg p-4">
