@@ -14,6 +14,50 @@ export type Database = {
   }
   public: {
     Tables: {
+      funding_deals: {
+        Row: {
+          amount_funded: number
+          created_at: string
+          id: string
+          merchant_id: string
+          repayment_rate: number
+          start_date: string
+          status: string
+          total_repaid: number
+          updated_at: string
+        }
+        Insert: {
+          amount_funded: number
+          created_at?: string
+          id?: string
+          merchant_id: string
+          repayment_rate?: number
+          start_date?: string
+          status?: string
+          total_repaid?: number
+          updated_at?: string
+        }
+        Update: {
+          amount_funded?: number
+          created_at?: string
+          id?: string
+          merchant_id?: string
+          repayment_rate?: number
+          start_date?: string
+          status?: string
+          total_repaid?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "funding_deals_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       funding_requests: {
         Row: {
           created_at: string

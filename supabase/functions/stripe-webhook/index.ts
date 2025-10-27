@@ -300,6 +300,101 @@ serve(async (req) => {
       console.log('✅ Transaction recorded successfully:', transaction.id);
       console.log('✅ Wallet updated via database trigger');
       console.log('✅ Wallet activity logged');
+
+      // ========================================
+      // FUNDING DEALS REPAYMENT LOGIC
+      // ========================================
+      
+      if (merchant_id) {
+        // Check if merchant has an active funding deal
+        const { data: activeDeal, error: dealError } = await supabaseAdmin
+          .from('funding_deals')
+          .select('*')
+          .eq('merchant_id', merchant_id)
+          .eq('status', 'active')
+          .maybeSingle();
+
+        if (dealError) {
+          console.error('Error checking funding deal:', dealError);
+        } else if (activeDeal) {
+          console.log('Active funding deal found:', {
+            dealId: activeDeal.id,
+            amountFunded: activeDeal.amount_funded,
+            totalRepaid: activeDeal.total_repaid,
+            repaymentRate: activeDeal.repayment_rate,
+          });
+
+          // Calculate repayment amount (default 10% or use custom rate)
+          const repaymentAmount = amount * (activeDeal.repayment_rate / 100);
+          const newTotalRepaid = parseFloat(activeDeal.total_repaid) + repaymentAmount;
+          
+          // Check if deal is fully repaid
+          const isFullyRepaid = newTotalRepaid >= parseFloat(activeDeal.amount_funded);
+          const finalRepaymentAmount = isFullyRepaid 
+            ? parseFloat(activeDeal.amount_funded) - parseFloat(activeDeal.total_repaid)
+            : repaymentAmount;
+
+          console.log('Repayment calculation:', {
+            transactionAmount: amount,
+            repaymentRate: activeDeal.repayment_rate,
+            repaymentAmount: finalRepaymentAmount,
+            newTotalRepaid: isFullyRepaid ? activeDeal.amount_funded : newTotalRepaid,
+            isFullyRepaid,
+          });
+
+          // Update funding deal
+          const { error: updateError } = await supabaseAdmin
+            .from('funding_deals')
+            .update({
+              total_repaid: isFullyRepaid ? activeDeal.amount_funded : newTotalRepaid,
+              status: isFullyRepaid ? 'paid_off' : 'active',
+            })
+            .eq('id', activeDeal.id);
+
+          if (updateError) {
+            console.error('Error updating funding deal:', updateError);
+          } else {
+            console.log('✅ Funding deal updated:', {
+              dealId: activeDeal.id,
+              repaymentAmount: finalRepaymentAmount,
+              status: isFullyRepaid ? 'paid_off' : 'active',
+            });
+
+            // Log repayment in wallet_activity for merchant
+            const { data: merchant, error: merchantError } = await supabaseAdmin
+              .from('merchants')
+              .select('user_id')
+              .eq('id', merchant_id)
+              .single();
+
+            if (!merchantError && merchant) {
+              // Get merchant's wallet
+              const { data: merchantWallet, error: walletError } = await supabaseAdmin
+                .from('wallets')
+                .select('id, balance')
+                .eq('user_id', merchant.user_id)
+                .maybeSingle();
+
+              if (!walletError && merchantWallet) {
+                await supabaseAdmin
+                  .from('wallet_activity')
+                  .insert({
+                    user_id: merchant.user_id,
+                    wallet_id: merchantWallet.id,
+                    transaction_id: transaction.id,
+                    type: 'debit',
+                    amount: finalRepaymentAmount,
+                    balance_before: merchantWallet.balance,
+                    balance_after: parseFloat(merchantWallet.balance) - finalRepaymentAmount,
+                    description: `Funding repayment (${activeDeal.repayment_rate}% of transaction)${isFullyRepaid ? ' - Deal paid off!' : ''}`,
+                  });
+                
+                console.log('✅ Repayment activity logged');
+              }
+            }
+          }
+        }
+      }
     }
 
     // Handle Connect account updates
