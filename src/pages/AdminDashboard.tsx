@@ -35,9 +35,22 @@ import {
   Check,
   X,
   Edit,
+  Trash2,
+  UserPlus,
+  RefreshCw,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type Merchant = {
   id: string;
@@ -96,6 +109,22 @@ const AdminDashboard = () => {
   const [editCashbackDialogOpen, setEditCashbackDialogOpen] = useState(false);
   const [selectedMerchant, setSelectedMerchant] = useState<Merchant | null>(null);
   const [sendingNotification, setSendingNotification] = useState(false);
+  
+  // Detail view dialogs
+  const [usersDialogOpen, setUsersDialogOpen] = useState(false);
+  const [merchantsDialogOpen, setMerchantsDialogOpen] = useState(false);
+  const [transactionsDialogOpen, setTransactionsDialogOpen] = useState(false);
+  const [cashbackDialogOpen, setCashbackDialogOpen] = useState(false);
+  
+  // Add/Delete dialogs
+  const [addUserDialogOpen, setAddUserDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{type: 'user' | 'merchant', id: string, name: string} | null>(null);
+  
+  // Refund dialog
+  const [refundDialogOpen, setRefundDialogOpen] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const [issuingRefund, setIssuingRefund] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -273,6 +302,76 @@ const AdminDashboard = () => {
     navigate("/auth");
   };
 
+  const handleDeleteUser = async () => {
+    if (!deleteTarget || deleteTarget.type !== 'user') return;
+
+    try {
+      const { error } = await supabase.auth.admin.deleteUser(deleteTarget.id);
+      if (error) throw error;
+
+      toast.success("User deleted successfully");
+      setDeleteDialogOpen(false);
+      setDeleteTarget(null);
+      loadAdminData();
+    } catch (error: any) {
+      console.error("Error deleting user:", error);
+      toast.error("Failed to delete user");
+    }
+  };
+
+  const handleDeleteMerchant = async () => {
+    if (!deleteTarget || deleteTarget.type !== 'merchant') return;
+
+    try {
+      const { error } = await supabase
+        .from('merchants')
+        .delete()
+        .eq('id', deleteTarget.id);
+
+      if (error) throw error;
+
+      toast.success("Merchant deleted successfully");
+      setDeleteDialogOpen(false);
+      setDeleteTarget(null);
+      loadAdminData();
+    } catch (error: any) {
+      console.error("Error deleting merchant:", error);
+      toast.error("Failed to delete merchant");
+    }
+  };
+
+  const handleIssueRefund = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!selectedTransaction) return;
+
+    setIssuingRefund(true);
+    try {
+      const formData = new FormData(e.currentTarget);
+      const reason = formData.get("reason") as string;
+      const partialAmount = formData.get("partialAmount") as string;
+
+      const { error } = await supabase.functions.invoke('admin-issue-refund', {
+        body: { 
+          transactionId: selectedTransaction.id,
+          amount: partialAmount ? parseFloat(partialAmount) : undefined,
+          reason: reason as 'duplicate' | 'fraudulent' | 'requested_by_customer',
+        },
+      });
+
+      if (error) throw error;
+
+      toast.success("Refund issued successfully!");
+      setRefundDialogOpen(false);
+      setSelectedTransaction(null);
+      loadAdminData();
+    } catch (error: any) {
+      console.error("Error issuing refund:", error);
+      toast.error("Failed to issue refund");
+    } finally {
+      setIssuingRefund(false);
+    }
+  };
+
   if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -311,9 +410,9 @@ const AdminDashboard = () => {
       </header>
 
       <main className="container mx-auto px-4 py-8 space-y-8">
-        {/* Stats Overview */}
+        {/* Stats Overview - Clickable Cards */}
         <div className="grid gap-6 md:grid-cols-4">
-          <GradientCard gradient>
+          <GradientCard gradient className="cursor-pointer hover:opacity-90 transition-opacity" onClick={() => setUsersDialogOpen(true)}>
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
                 <Users className="w-6 h-6 text-primary" />
@@ -325,7 +424,7 @@ const AdminDashboard = () => {
             </div>
           </GradientCard>
 
-          <GradientCard>
+          <GradientCard className="cursor-pointer hover:opacity-90 transition-opacity" onClick={() => setMerchantsDialogOpen(true)}>
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center">
                 <Store className="w-6 h-6 text-accent" />
@@ -337,7 +436,7 @@ const AdminDashboard = () => {
             </div>
           </GradientCard>
 
-          <GradientCard>
+          <GradientCard className="cursor-pointer hover:opacity-90 transition-opacity" onClick={() => setTransactionsDialogOpen(true)}>
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center">
                 <FileText className="w-6 h-6 text-secondary" />
@@ -349,7 +448,7 @@ const AdminDashboard = () => {
             </div>
           </GradientCard>
 
-          <GradientCard>
+          <GradientCard className="cursor-pointer hover:opacity-90 transition-opacity" onClick={() => setCashbackDialogOpen(true)}>
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-full bg-orange-500/10 flex items-center justify-center">
                 <DollarSign className="w-6 h-6 text-orange-500" />
@@ -603,6 +702,268 @@ const AdminDashboard = () => {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Users Detail Dialog */}
+      <Dialog open={usersDialogOpen} onOpenChange={setUsersDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between">
+              <span>All Users ({profiles.length})</span>
+              <Button size="sm" onClick={() => setAddUserDialogOpen(true)}>
+                <UserPlus className="w-4 h-4 mr-2" />
+                Add User
+              </Button>
+            </DialogTitle>
+          </DialogHeader>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Created</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {profiles.map((profile) => (
+                <TableRow key={profile.id}>
+                  <TableCell className="font-medium">{profile.full_name}</TableCell>
+                  <TableCell>{profile.email}</TableCell>
+                  <TableCell>
+                    <Badge variant="outline">{profile.user_type}</Badge>
+                  </TableCell>
+                  <TableCell>{format(new Date(profile.created_at), "MMM d, yyyy")}</TableCell>
+                  <TableCell>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => {
+                        setDeleteTarget({ type: 'user', id: profile.id, name: profile.full_name });
+                        setDeleteDialogOpen(true);
+                      }}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </DialogContent>
+      </Dialog>
+
+      {/* Merchants Detail Dialog */}
+      <Dialog open={merchantsDialogOpen} onOpenChange={setMerchantsDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>All Merchants ({merchants.length})</DialogTitle>
+          </DialogHeader>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Business Name</TableHead>
+                <TableHead>Contact</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Cashback Rate</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {merchants.map((merchant) => (
+                <TableRow key={merchant.id}>
+                  <TableCell className="font-medium">{merchant.business_name}</TableCell>
+                  <TableCell>{merchant.contact_person}</TableCell>
+                  <TableCell>{merchant.business_type}</TableCell>
+                  <TableCell>{merchant.cashback_rate}%</TableCell>
+                  <TableCell>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setSelectedMerchant(merchant);
+                          setEditCashbackDialogOpen(true);
+                        }}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => {
+                          setDeleteTarget({ type: 'merchant', id: merchant.id, name: merchant.business_name });
+                          setDeleteDialogOpen(true);
+                        }}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </DialogContent>
+      </Dialog>
+
+      {/* Transactions Detail Dialog */}
+      <Dialog open={transactionsDialogOpen} onOpenChange={setTransactionsDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>All Transactions ({transactions.length})</DialogTitle>
+          </DialogHeader>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Merchant</TableHead>
+                <TableHead>Amount</TableHead>
+                <TableHead>Cashback</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {transactions.map((transaction) => (
+                <TableRow key={transaction.id}>
+                  <TableCell className="font-medium">{transaction.merchants?.business_name}</TableCell>
+                  <TableCell>${transaction.amount.toFixed(2)}</TableCell>
+                  <TableCell className="text-accent">${transaction.cashback_earned.toFixed(2)}</TableCell>
+                  <TableCell>{format(new Date(transaction.created_at), "MMM d, h:mm a")}</TableCell>
+                  <TableCell>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setSelectedTransaction(transaction);
+                        setRefundDialogOpen(true);
+                      }}
+                    >
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                      Refund
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </DialogContent>
+      </Dialog>
+
+      {/* Cashback Detail Dialog */}
+      <Dialog open={cashbackDialogOpen} onOpenChange={setCashbackDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Cashback Distribution (${totalCashback.toFixed(2)})</DialogTitle>
+          </DialogHeader>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Merchant</TableHead>
+                <TableHead>Transaction Amount</TableHead>
+                <TableHead>Cashback Given</TableHead>
+                <TableHead>Date</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {transactions
+                .filter(t => t.cashback_earned > 0)
+                .map((transaction) => (
+                  <TableRow key={transaction.id}>
+                    <TableCell className="font-medium">{transaction.merchants?.business_name}</TableCell>
+                    <TableCell>${transaction.amount.toFixed(2)}</TableCell>
+                    <TableCell className="text-accent font-semibold">${transaction.cashback_earned.toFixed(2)}</TableCell>
+                    <TableCell>{format(new Date(transaction.created_at), "MMM d, h:mm a")}</TableCell>
+                  </TableRow>
+                ))}
+            </TableBody>
+          </Table>
+        </DialogContent>
+      </Dialog>
+
+      {/* Refund Dialog */}
+      <Dialog open={refundDialogOpen} onOpenChange={setRefundDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Issue Refund</DialogTitle>
+            <DialogDescription>
+              Refund transaction for {selectedTransaction?.merchants?.business_name}
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleIssueRefund} className="space-y-4">
+            <div className="space-y-2">
+              <Label>Original Amount</Label>
+              <p className="text-2xl font-bold">${selectedTransaction?.amount.toFixed(2)}</p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="partialAmount">Refund Amount (optional - full refund if empty)</Label>
+              <Input
+                id="partialAmount"
+                name="partialAmount"
+                type="number"
+                step="0.01"
+                max={selectedTransaction?.amount}
+                placeholder="Leave empty for full refund"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="reason">Reason</Label>
+              <select
+                id="reason"
+                name="reason"
+                className="w-full h-10 px-3 rounded-md border bg-background"
+                required
+              >
+                <option value="requested_by_customer">Requested by Customer</option>
+                <option value="duplicate">Duplicate Charge</option>
+                <option value="fraudulent">Fraudulent</option>
+              </select>
+            </div>
+            <div className="flex gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setRefundDialogOpen(false)}
+                className="flex-1"
+                disabled={issuingRefund}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" className="flex-1" disabled={issuingRefund}>
+                {issuingRefund ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  "Issue Refund"
+                )}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete {deleteTarget?.type} "{deleteTarget?.name}". This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={deleteTarget?.type === 'user' ? handleDeleteUser : handleDeleteMerchant}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

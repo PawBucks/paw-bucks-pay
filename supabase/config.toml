@@ -35,3 +35,6 @@ verify_jwt = true
 
 [functions.admin-update-funding-request]
 verify_jwt = true
+
+[functions.admin-issue-refund]
+verify_jwt = true
