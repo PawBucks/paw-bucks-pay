@@ -99,7 +99,7 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      navigate("/auth");
+      navigate("/admin/login");
     }
   }, [user, authLoading, navigate]);
 
@@ -122,7 +122,8 @@ const AdminDashboard = () => {
 
       if (error || !data) {
         toast.error("Access denied. Admin privileges required.");
-        navigate("/");
+        await supabase.auth.signOut();
+        navigate("/admin/login");
         return;
       }
 
@@ -130,7 +131,8 @@ const AdminDashboard = () => {
       loadAdminData();
     } catch (error) {
       console.error("Error checking admin access:", error);
-      navigate("/");
+      await supabase.auth.signOut();
+      navigate("/admin/login");
     }
   };
 

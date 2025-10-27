@@ -35,11 +35,25 @@ const Dashboard = () => {
   const [pets, setPets] = useState<PetProfile[]>([]);
 
   useEffect(() => {
-    if (!loading && !user) {
-      navigate("/auth");
-    } else if (!loading && profile?.user_type === "merchant") {
-      navigate("/merchant-dashboard");
-    }
+    const checkUserAndRedirect = async () => {
+      if (!loading && !user) {
+        navigate("/auth");
+      } else if (!loading && user) {
+        // Check if user is admin
+        const { data: isAdmin } = await supabase.rpc('has_role', {
+          _user_id: user.id,
+          _role: 'admin'
+        });
+
+        if (isAdmin) {
+          navigate("/admin");
+        } else if (profile?.user_type === "merchant") {
+          navigate("/merchant-dashboard");
+        }
+      }
+    };
+
+    checkUserAndRedirect();
   }, [user, loading, profile, navigate]);
 
   useEffect(() => {

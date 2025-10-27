@@ -18,9 +18,23 @@ const Auth = () => {
   const [userType, setUserType] = useState<"pet_owner" | "merchant">("pet_owner");
 
   useEffect(() => {
-    if (user) {
-      navigate("/");
-    }
+    const checkUserAndRedirect = async () => {
+      if (user) {
+        // Check if user is admin
+        const { data: isAdmin } = await supabase.rpc('has_role', {
+          _user_id: user.id,
+          _role: 'admin'
+        });
+
+        if (isAdmin) {
+          navigate("/admin");
+        } else {
+          navigate("/");
+        }
+      }
+    };
+
+    checkUserAndRedirect();
   }, [user, navigate]);
 
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
