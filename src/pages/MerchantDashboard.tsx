@@ -27,9 +27,11 @@ import {
   Clock,
   CreditCard,
   FileText,
+  ShoppingCart,
 } from "lucide-react";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { format, startOfMonth, parseISO } from "date-fns";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 type Merchant = {
   id: string;
@@ -44,13 +46,13 @@ type Merchant = {
 };
 
 type Analytics = {
+  total_sales: number;
+  total_cashback: number;
+  repayment_rate: number | null;
+  remaining_balance: number;
   total_transactions: number;
   total_customers: number;
-  total_earnings: number;
-  total_cashback_paid: number;
   avg_transaction_amount: number;
-  repayment_rate?: number;
-  remaining_balance?: number;
   funding_deal_status?: string | null;
 };
 
@@ -68,6 +70,7 @@ const MerchantDashboard = () => {
   const [merchant, setMerchant] = useState<Merchant | null>(null);
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [allTransactions, setAllTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editCashbackDialogOpen, setEditCashbackDialogOpen] = useState(false);
@@ -109,10 +112,10 @@ const MerchantDashboard = () => {
 
       setMerchant(merchantData);
 
-      // Load analytics using RPC function
-      const { data: analyticsData, error: analyticsError } = await supabase
-        .rpc("get_merchant_analytics", { _merchant_id: merchantData.id })
-        .single();
+      // Load analytics using edge function
+      const { data: analyticsData, error: analyticsError } = await supabase.functions.invoke(
+        "merchant-dashboard"
+      );
 
       if (!analyticsError && analyticsData) {
         setAnalytics(analyticsData);
@@ -127,6 +130,15 @@ const MerchantDashboard = () => {
         .limit(10);
 
       setTransactions(transactionsData || []);
+
+      // Load all transactions for chart
+      const { data: allTransactionsData } = await supabase
+        .from("transactions")
+        .select("*")
+        .eq("merchant_id", merchantData.id)
+        .order("created_at", { ascending: false });
+
+      setAllTransactions(allTransactionsData || []);
     } catch (error: any) {
       console.error("Error loading merchant data:", error);
       toast.error("Failed to load merchant data");
@@ -246,10 +258,18 @@ const MerchantDashboard = () => {
     }
   };
 
-  const calculatePendingPayouts = () => {
-    // Calculate total earnings minus what's already been paid out
-    // In a real app, you'd track actual payouts from Stripe
-    return analytics?.total_earnings || 0;
+  const getMonthlySalesData = () => {
+    const monthlyData: { [key: string]: number } = {};
+
+    allTransactions.forEach((transaction) => {
+      const month = format(startOfMonth(parseISO(transaction.created_at)), "MMM yyyy");
+      monthlyData[month] = (monthlyData[month] || 0) + transaction.amount;
+    });
+
+    return Object.entries(monthlyData)
+      .map(([month, amount]) => ({ month, amount }))
+      .sort((a, b) => new Date(a.month).getTime() - new Date(b.month).getTime())
+      .slice(-6); // Last 6 months
   };
 
   const handleSignOut = async () => {
@@ -322,7 +342,7 @@ const MerchantDashboard = () => {
           </GradientCard>
         )}
 
-        {/* Analytics Cards */}
+        {/* Analytics Summary Cards */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5 mb-8">
           <GradientCard gradient>
             <div className="flex items-center gap-4">
@@ -330,9 +350,9 @@ const MerchantDashboard = () => {
                 <DollarSign className="w-6 h-6 text-accent" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Total Earnings</p>
+                <p className="text-sm text-muted-foreground">Total Sales</p>
                 <p className="text-2xl font-bold">
-                  ${analytics?.total_earnings?.toFixed(2) || "0.00"}
+                  ${analytics?.total_sales?.toFixed(2) || "0.00"}
                 </p>
               </div>
             </div>
@@ -341,11 +361,13 @@ const MerchantDashboard = () => {
           <GradientCard>
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                <TrendingUp className="w-6 h-6 text-primary" />
+                <Percent className="w-6 h-6 text-primary" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Transactions</p>
-                <p className="text-2xl font-bold">{analytics?.total_transactions || 0}</p>
+                <p className="text-sm text-muted-foreground">Total Cashback Given</p>
+                <p className="text-2xl font-bold">
+                  ${analytics?.total_cashback?.toFixed(2) || "0.00"}
+                </p>
               </div>
             </div>
           </GradientCard>
@@ -353,11 +375,13 @@ const MerchantDashboard = () => {
           <GradientCard>
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center">
-                <Users className="w-6 h-6 text-secondary" />
+                <CreditCard className="w-6 h-6 text-secondary" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Total Customers</p>
-                <p className="text-2xl font-bold">{analytics?.total_customers || 0}</p>
+                <p className="text-sm text-muted-foreground">Repayment Remaining</p>
+                <p className="text-2xl font-bold">
+                  ${analytics?.remaining_balance?.toFixed(2) || "0.00"}
+                </p>
               </div>
             </div>
           </GradientCard>
@@ -365,12 +389,12 @@ const MerchantDashboard = () => {
           <GradientCard>
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-                <Percent className="w-6 h-6 text-muted-foreground" />
+                <TrendingUp className="w-6 h-6 text-muted-foreground" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Cashback Paid</p>
+                <p className="text-sm text-muted-foreground">Repayment Rate</p>
                 <p className="text-2xl font-bold">
-                  ${analytics?.total_cashback_paid?.toFixed(2) || "0.00"}
+                  {analytics?.repayment_rate ? `${analytics.repayment_rate}%` : "N/A"}
                 </p>
               </div>
             </div>
@@ -379,50 +403,44 @@ const MerchantDashboard = () => {
           <GradientCard>
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-full bg-orange-500/10 flex items-center justify-center">
-                <Clock className="w-6 h-6 text-orange-500" />
+                <ShoppingCart className="w-6 h-6 text-orange-500" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Pending Payouts</p>
-                <p className="text-2xl font-bold">
-                  ${calculatePendingPayouts().toFixed(2)}
-                </p>
+                <p className="text-sm text-muted-foreground">Total Transactions</p>
+                <p className="text-2xl font-bold">{analytics?.total_transactions || 0}</p>
               </div>
             </div>
           </GradientCard>
         </div>
 
-        {/* Funding Deal Info */}
-        {analytics?.funding_deal_status === 'active' && (
-          <div className="grid gap-4 md:grid-cols-2 mb-8">
-            <GradientCard gradient className="bg-accent/10 border-accent/20">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center">
-                  <Percent className="w-6 h-6 text-accent" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Repayment Rate</p>
-                  <p className="text-2xl font-bold">{analytics.repayment_rate}%</p>
-                  <p className="text-xs text-muted-foreground">Per transaction</p>
-                </div>
-              </div>
-            </GradientCard>
-
-            <GradientCard gradient className="bg-secondary/10 border-secondary/20">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-secondary/20 flex items-center justify-center">
-                  <CreditCard className="w-6 h-6 text-secondary" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Remaining Balance</p>
-                  <p className="text-2xl font-bold">
-                    ${(analytics.remaining_balance || 0).toFixed(2)}
-                  </p>
-                  <p className="text-xs text-muted-foreground">To be repaid</p>
-                </div>
-              </div>
-            </GradientCard>
-          </div>
-        )}
+        {/* Monthly Sales Chart */}
+        <GradientCard className="mb-8">
+          <h3 className="text-xl font-semibold mb-4">Monthly Sales Volume</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={getMonthlySalesData()}>
+              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+              <XAxis 
+                dataKey="month" 
+                className="text-sm"
+                tick={{ fill: 'hsl(var(--muted-foreground))' }}
+              />
+              <YAxis 
+                className="text-sm"
+                tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                tickFormatter={(value) => `$${value}`}
+              />
+              <Tooltip 
+                contentStyle={{ 
+                  backgroundColor: 'hsl(var(--card))',
+                  border: '1px solid hsl(var(--border))',
+                  borderRadius: '8px'
+                }}
+                formatter={(value: number) => [`$${value.toFixed(2)}`, 'Sales']}
+              />
+              <Bar dataKey="amount" fill="hsl(var(--accent))" radius={[8, 8, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </GradientCard>
 
         {/* Action Buttons */}
         <div className="grid gap-4 md:grid-cols-3 mb-8">
@@ -662,11 +680,11 @@ const MerchantDashboard = () => {
               <div className="flex justify-between text-sm mb-2">
                 <span className="text-muted-foreground">Available to borrow:</span>
                 <span className="font-bold">
-                  ${(calculatePendingPayouts() * 0.8).toFixed(2)}
+                  ${((analytics?.total_sales || 0) * 0.8).toFixed(2)}
                 </span>
               </div>
               <p className="text-xs text-muted-foreground">
-                Up to 80% of your pending payouts
+                Up to 80% of your total sales
               </p>
             </div>
 
@@ -678,7 +696,7 @@ const MerchantDashboard = () => {
                 type="number"
                 step="0.01"
                 min="100"
-                max={calculatePendingPayouts() * 0.8}
+                max={(analytics?.total_sales || 0) * 0.8}
                 placeholder="0.00"
                 required
               />
