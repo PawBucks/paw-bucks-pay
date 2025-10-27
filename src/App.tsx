@@ -9,6 +9,8 @@ import Dashboard from "./pages/Dashboard";
 import CreatePetProfile from "./pages/CreatePetProfile";
 import Discover from "./pages/Discover";
 import Wallet from "./pages/Wallet";
+import MerchantOnboarding from "./pages/MerchantOnboarding";
+import MerchantDashboard from "./pages/MerchantDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +28,8 @@ const App = () => (
           <Route path="/create-pet-profile" element={<CreatePetProfile />} />
           <Route path="/discover" element={<Discover />} />
           <Route path="/wallet" element={<Wallet />} />
+          <Route path="/merchant-onboarding" element={<MerchantOnboarding />} />
+          <Route path="/merchant-dashboard" element={<MerchantDashboard />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

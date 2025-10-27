@@ -37,8 +37,10 @@ const Dashboard = () => {
   useEffect(() => {
     if (!loading && !user) {
       navigate("/auth");
+    } else if (!loading && profile?.user_type === "merchant") {
+      navigate("/merchant-dashboard");
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, profile, navigate]);
 
   useEffect(() => {
     if (user) {

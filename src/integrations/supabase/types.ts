@@ -20,11 +20,14 @@ export type Database = {
           business_name: string
           business_type: string
           cashback_rate: number
+          contact_person: string | null
           created_at: string
           description: string | null
           id: string
           latitude: number | null
           longitude: number | null
+          stripe_account_id: string | null
+          stripe_account_status: string | null
           updated_at: string
           user_id: string
         }
@@ -33,11 +36,14 @@ export type Database = {
           business_name: string
           business_type: string
           cashback_rate?: number
+          contact_person?: string | null
           created_at?: string
           description?: string | null
           id?: string
           latitude?: number | null
           longitude?: number | null
+          stripe_account_id?: string | null
+          stripe_account_status?: string | null
           updated_at?: string
           user_id: string
         }
@@ -46,11 +52,14 @@ export type Database = {
           business_name?: string
           business_type?: string
           cashback_rate?: number
+          contact_person?: string | null
           created_at?: string
           description?: string | null
           id?: string
           latitude?: number | null
           longitude?: number | null
+          stripe_account_id?: string | null
+          stripe_account_status?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -253,6 +262,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_merchant_analytics: {
+        Args: { _merchant_id: string }
+        Returns: {
+          avg_transaction_amount: number
+          business_name: string
+          merchant_id: string
+          total_cashback_paid: number
+          total_customers: number
+          total_earnings: number
+          total_transactions: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
