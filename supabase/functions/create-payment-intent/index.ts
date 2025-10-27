@@ -94,9 +94,26 @@ serve(async (req) => {
       throw new Error('Merchant has not completed Stripe Connect setup');
     }
 
+    // Check if user has active subscription (double cashback for subscribers)
+    const { data: subscription } = await supabaseAdmin
+      .from('subscriptions')
+      .select('status')
+      .eq('user_id', user.id)
+      .eq('status', 'active')
+      .maybeSingle();
+
+    const hasActiveSubscription = !!subscription;
+
     // Calculate amounts
     const amountInCents = Math.round(amount * 100);
-    const cashbackRate = merchant.cashback_rate || 5.0;
+    let cashbackRate = merchant.cashback_rate || 5.0;
+    
+    // Double cashback for active subscribers
+    if (hasActiveSubscription) {
+      cashbackRate *= 2;
+      console.log('Active subscription detected - doubling cashback rate');
+    }
+    
     const cashbackAmount = (amount * cashbackRate) / 100;
     const platformFeeInCents = Math.round(cashbackAmount * 100); // Platform keeps the cashback amount
 
