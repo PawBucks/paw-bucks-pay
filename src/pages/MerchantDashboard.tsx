@@ -49,6 +49,9 @@ type Analytics = {
   total_earnings: number;
   total_cashback_paid: number;
   avg_transaction_amount: number;
+  repayment_rate?: number;
+  remaining_balance?: number;
+  funding_deal_status?: string | null;
 };
 
 type Transaction = {
@@ -387,6 +390,39 @@ const MerchantDashboard = () => {
             </div>
           </GradientCard>
         </div>
+
+        {/* Funding Deal Info */}
+        {analytics?.funding_deal_status === 'active' && (
+          <div className="grid gap-4 md:grid-cols-2 mb-8">
+            <GradientCard gradient className="bg-accent/10 border-accent/20">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center">
+                  <Percent className="w-6 h-6 text-accent" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Repayment Rate</p>
+                  <p className="text-2xl font-bold">{analytics.repayment_rate}%</p>
+                  <p className="text-xs text-muted-foreground">Per transaction</p>
+                </div>
+              </div>
+            </GradientCard>
+
+            <GradientCard gradient className="bg-secondary/10 border-secondary/20">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-secondary/20 flex items-center justify-center">
+                  <CreditCard className="w-6 h-6 text-secondary" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Remaining Balance</p>
+                  <p className="text-2xl font-bold">
+                    ${(analytics.remaining_balance || 0).toFixed(2)}
+                  </p>
+                  <p className="text-xs text-muted-foreground">To be repaid</p>
+                </div>
+              </div>
+            </GradientCard>
+          </div>
+        )}
 
         {/* Action Buttons */}
         <div className="grid gap-4 md:grid-cols-3 mb-8">

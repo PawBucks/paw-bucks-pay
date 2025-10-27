@@ -602,7 +602,10 @@ export type Database = {
         Returns: {
           avg_transaction_amount: number
           business_name: string
+          funding_deal_status: string
           merchant_id: string
+          remaining_balance: number
+          repayment_rate: number
           total_cashback_paid: number
           total_customers: number
           total_earnings: number
