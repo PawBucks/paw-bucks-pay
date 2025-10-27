@@ -5,7 +5,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { GradientCard } from "@/components/ui/gradient-card";
 import { Card } from "@/components/ui/card";
-import { PawPrint, Wallet, Store, Gift, ArrowRight, Shield, Zap, Users, TrendingUp, CheckCircle, Sparkles } from "lucide-react";
+import { PawPrint, Wallet, Store, Gift, ArrowRight, Shield, Zap, Users, TrendingUp, CheckCircle, Sparkles, Menu } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -52,14 +58,32 @@ const Index = () => {
               PetalPay
             </h1>
           </div>
-          <Button 
-            onClick={() => navigate("/auth")} 
-            size="lg"
-            className="shadow-md hover:shadow-xl transition-all hover:scale-105"
-            aria-label="Get started with PetalPay"
-          >
-            Get Started
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                className="shadow-md hover:shadow-xl transition-all"
+                aria-label="Open menu"
+              >
+                <Menu className="h-6 w-6" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56 bg-card z-50">
+              <DropdownMenuItem 
+                onClick={() => navigate("/discover")}
+                className="cursor-pointer"
+              >
+                Explore Pet Merchants
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={() => navigate("/merchants")}
+                className="cursor-pointer"
+              >
+                For Pet Merchants
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </nav>
       </header>
 
