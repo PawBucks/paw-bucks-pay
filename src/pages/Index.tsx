@@ -150,10 +150,10 @@ const Index = () => {
           <div className="grid gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-3 max-w-7xl mx-auto">
             <GradientCard gradient className="group text-center hover:scale-105 transition-all duration-300 hover:shadow-2xl">
               <div className="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center mx-auto mb-6 shadow-lg group-hover:scale-110 transition-transform" aria-hidden="true">
-                <Wallet className="w-10 h-10 text-white" />
+                <Wallet className="w-10 h-10 text-black" />
               </div>
-              <h3 className="text-2xl font-bold mb-3">Digital Wallet</h3>
-              <p className="text-white/90 leading-relaxed">
+              <h3 className="text-2xl font-bold mb-3 text-black">Digital Wallet</h3>
+              <p className="text-black leading-relaxed">
                 Securely store funds and manage all your pet-related expenses in one convenient digital wallet with bank-level security.
               </p>
             </GradientCard>
@@ -307,7 +307,7 @@ const Index = () => {
                   size="lg" 
                   variant="outline"
                   onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="border-2 border-white text-white hover:bg-white/10 text-base sm:text-lg px-8 sm:px-10 py-6 sm:py-7"
+                  className="border-2 border-white text-accent hover:bg-white/10 text-base sm:text-lg px-8 sm:px-10 py-6 sm:py-7"
                   aria-label="View features"
                 >
                   View Features
