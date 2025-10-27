@@ -149,8 +149,8 @@ const Index = () => {
 
           <div className="grid gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-3 max-w-7xl mx-auto">
             <Card className="group p-8 text-center hover:scale-105 transition-all duration-300 hover:shadow-2xl border-2">
-              <div className="w-20 h-20 rounded-2xl bg-accent/10 flex items-center justify-center mx-auto mb-6 shadow-md group-hover:scale-110 group-hover:bg-accent/20 transition-all" aria-hidden="true">
-                <Wallet className="w-10 h-10 text-accent" />
+              <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-6 shadow-md group-hover:scale-110 group-hover:bg-primary/20 transition-all" aria-hidden="true">
+                <Wallet className="w-10 h-10 text-primary" />
               </div>
               <h3 className="text-2xl font-bold mb-3">Digital Wallet</h3>
               <p className="text-muted-foreground leading-relaxed">
