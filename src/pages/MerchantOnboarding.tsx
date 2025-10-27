@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Store, Loader2, PawPrint } from "lucide-react";
+import { merchantOnboardingSchema } from "@/lib/validation";
 
 const MerchantOnboarding = () => {
   const navigate = useNavigate();
@@ -69,15 +70,25 @@ const MerchantOnboarding = () => {
       const description = formData.get("description") as string;
       const cashbackRate = parseFloat(formData.get("cashbackRate") as string);
 
+      // Validate input
+      const validatedData = merchantOnboardingSchema.parse({
+        businessName,
+        contactPerson,
+        businessType,
+        address: address || "",
+        description: description || "",
+        cashbackRate: isNaN(cashbackRate) ? 5.0 : cashbackRate,
+      });
+
       // Create merchant profile
       const { error: merchantError } = await supabase.from("merchants").insert({
         user_id: user.id,
-        business_name: businessName,
-        contact_person: contactPerson,
-        business_type: businessType,
-        address: address || null,
-        description: description || null,
-        cashback_rate: cashbackRate || 5.0,
+        business_name: validatedData.businessName,
+        contact_person: validatedData.contactPerson,
+        business_type: validatedData.businessType,
+        address: validatedData.address || null,
+        description: validatedData.description || null,
+        cashback_rate: validatedData.cashbackRate,
       });
 
       if (merchantError) throw merchantError;
@@ -85,8 +96,13 @@ const MerchantOnboarding = () => {
       toast.success("Merchant profile created successfully!");
       navigate("/merchant-dashboard");
     } catch (error: any) {
+      if (error.errors) {
+        // Zod validation error
+        toast.error(error.errors[0]?.message || "Invalid input");
+      } else {
+        toast.error("Failed to create merchant profile. Please try again.");
+      }
       console.error("Error creating merchant profile:", error);
-      toast.error(error.message || "Failed to create merchant profile");
     } finally {
       setIsLoading(false);
     }

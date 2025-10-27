@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { PawPrint } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect } from "react";
+import { signUpSchema, signInSchema } from "@/lib/validation";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -48,15 +49,23 @@ const Auth = () => {
     const fullName = formData.get("fullName") as string;
 
     try {
+      // Validate input
+      const validatedData = signUpSchema.parse({
+        email,
+        password,
+        fullName,
+        referralCode: referralCode || "",
+      });
+
       const redirectUrl = `${window.location.origin}/`;
       
       const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
+        email: validatedData.email,
+        password: validatedData.password,
         options: {
           emailRedirectTo: redirectUrl,
           data: {
-            full_name: fullName,
+            full_name: validatedData.fullName,
             user_type: userType,
           },
         },
@@ -69,19 +78,19 @@ const Auth = () => {
         const { error: profileError } = await supabase.from("profiles").insert({
           id: data.user.id,
           user_type: userType,
-          full_name: fullName,
-          email: email,
+          full_name: validatedData.fullName,
+          email: validatedData.email,
         });
 
         if (profileError) throw profileError;
 
         // Handle referral code if provided
-        if (referralCode.trim() && userType === "pet_owner") {
+        if (validatedData.referralCode && userType === "pet_owner") {
           // Find the referrer by code
           const { data: referrer, error: referrerError } = await supabase
             .from("profiles")
             .select("id")
-            .eq("referral_code", referralCode.trim().toUpperCase())
+            .eq("referral_code", validatedData.referralCode)
             .single();
 
           if (!referrerError && referrer) {
@@ -89,7 +98,7 @@ const Auth = () => {
             await supabase.from("referrals").insert({
               referrer_id: referrer.id,
               referee_id: data.user.id,
-              referral_code: referralCode.trim().toUpperCase(),
+              referral_code: validatedData.referralCode,
             });
           }
         }
@@ -98,7 +107,13 @@ const Auth = () => {
         navigate("/");
       }
     } catch (error: any) {
-      toast.error(error.message || "Failed to create account");
+      if (error.errors) {
+        // Zod validation error
+        toast.error(error.errors[0]?.message || "Invalid input");
+      } else {
+        toast.error("Failed to create account. Please try again.");
+      }
+      console.error("Sign up error:", error);
     } finally {
       setIsLoading(false);
     }
@@ -113,9 +128,15 @@ const Auth = () => {
     const password = formData.get("password") as string;
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      // Validate input
+      const validatedData = signInSchema.parse({
         email,
         password,
+      });
+
+      const { error } = await supabase.auth.signInWithPassword({
+        email: validatedData.email,
+        password: validatedData.password,
       });
 
       if (error) throw error;
@@ -123,7 +144,13 @@ const Auth = () => {
       toast.success("Signed in successfully!");
       navigate("/");
     } catch (error: any) {
-      toast.error(error.message || "Failed to sign in");
+      if (error.errors) {
+        // Zod validation error
+        toast.error(error.errors[0]?.message || "Invalid input");
+      } else {
+        toast.error("Failed to sign in. Please check your credentials.");
+      }
+      console.error("Sign in error:", error);
     } finally {
       setIsLoading(false);
     }

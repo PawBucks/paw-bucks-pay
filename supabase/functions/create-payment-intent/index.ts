@@ -1,6 +1,24 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import Stripe from "https://esm.sh/stripe@18.5.0";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
+
+// Input validation schema
+const paymentIntentSchema = z.object({
+  amount: z.number()
+    .positive({ message: "Amount must be greater than 0" })
+    .max(1000000, { message: "Amount cannot exceed $1,000,000" }),
+  merchantId: z.string()
+    .uuid({ message: "Invalid merchant ID format" }),
+  currency: z.string()
+    .length(3, { message: "Currency must be 3-letter ISO code" })
+    .toLowerCase()
+    .optional()
+    .default("usd"),
+  description: z.string()
+    .max(500, { message: "Description must be less than 500 characters" })
+    .optional(),
+});
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -36,11 +54,23 @@ serve(async (req) => {
       throw new Error('User not authenticated');
     }
 
-    const { amount, currency = 'usd', merchantId, description } = await req.json();
+    const requestBody = await req.json();
 
-    if (!amount || !merchantId) {
-      throw new Error('Missing required fields: amount, merchantId');
+    // Validate input
+    const validationResult = paymentIntentSchema.safeParse(requestBody);
+    if (!validationResult.success) {
+      const errorMessage = validationResult.error.errors[0]?.message || 'Invalid input';
+      console.error('Validation error:', validationResult.error);
+      return new Response(
+        JSON.stringify({ error: errorMessage }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400,
+        }
+      );
     }
+
+    const { amount, currency, merchantId, description } = validationResult.data;
 
     console.log('Creating payment intent:', { amount, merchantId, userId: user.id, description });
 
@@ -113,10 +143,10 @@ serve(async (req) => {
       }
     );
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error('Error creating payment intent:', errorMessage);
+    console.error('Error creating payment intent:', error);
+    // Return generic error to client, log details server-side
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ error: 'Failed to process payment. Please try again.' }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 400,
