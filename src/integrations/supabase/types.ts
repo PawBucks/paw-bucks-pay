@@ -19,6 +19,7 @@ export type Database = {
           address: string | null
           business_name: string
           business_type: string
+          cashback_rate: number
           created_at: string
           description: string | null
           id: string
@@ -31,6 +32,7 @@ export type Database = {
           address?: string | null
           business_name: string
           business_type: string
+          cashback_rate?: number
           created_at?: string
           description?: string | null
           id?: string
@@ -43,6 +45,7 @@ export type Database = {
           address?: string | null
           business_name?: string
           business_type?: string
+          cashback_rate?: number
           created_at?: string
           description?: string | null
           id?: string
@@ -141,6 +144,7 @@ export type Database = {
       transactions: {
         Row: {
           amount: number
+          cashback_amount: number
           created_at: string
           description: string | null
           id: string
@@ -151,6 +155,7 @@ export type Database = {
         }
         Insert: {
           amount: number
+          cashback_amount?: number
           created_at?: string
           description?: string | null
           id?: string
@@ -161,6 +166,7 @@ export type Database = {
         }
         Update: {
           amount?: number
+          cashback_amount?: number
           created_at?: string
           description?: string | null
           id?: string
@@ -210,6 +216,7 @@ export type Database = {
           created_at: string
           id: string
           rewards_points: number
+          total_spent: number
           updated_at: string
           user_id: string
         }
@@ -218,6 +225,7 @@ export type Database = {
           created_at?: string
           id?: string
           rewards_points?: number
+          total_spent?: number
           updated_at?: string
           user_id: string
         }
@@ -226,6 +234,7 @@ export type Database = {
           created_at?: string
           id?: string
           rewards_points?: number
+          total_spent?: number
           updated_at?: string
           user_id?: string
         }
