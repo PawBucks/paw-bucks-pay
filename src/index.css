@@ -4,46 +4,47 @@
 
 @layer base {
   :root {
-    /* Pastel PetalPay Theme - Light Mode */
-    --background: 28 30% 98%;
-    --foreground: 340 20% 25%;
+    /* PetalPay Theme - Teal & Pastel Pink */
+    --background: 0 0% 100%;
+    --foreground: 180 20% 20%;
     
     --card: 0 0% 100%;
-    --card-foreground: 340 20% 25%;
+    --card-foreground: 180 20% 20%;
     
     --popover: 0 0% 100%;
-    --popover-foreground: 340 20% 25%;
+    --popover-foreground: 180 20% 20%;
     
-    --primary: 340 75% 85%;
-    --primary-foreground: 340 50% 30%;
+    --primary: 350 75% 85%;
+    --primary-foreground: 350 60% 30%;
     
-    --secondary: 140 40% 85%;
-    --secondary-foreground: 140 50% 25%;
+    --secondary: 180 45% 55%;
+    --secondary-foreground: 0 0% 100%;
     
-    --muted: 28 30% 95%;
-    --muted-foreground: 340 15% 45%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 180 10% 45%;
     
-    --accent: 45 70% 88%;
-    --accent-foreground: 45 50% 30%;
+    --accent: 180 55% 60%;
+    --accent-foreground: 0 0% 100%;
     
     --destructive: 0 65% 80%;
     --destructive-foreground: 0 70% 35%;
     
-    --border: 340 20% 90%;
-    --input: 340 20% 90%;
-    --ring: 340 75% 75%;
+    --border: 180 20% 90%;
+    --input: 180 20% 90%;
+    --ring: 180 55% 60%;
     
-    --radius: 1rem;
+    --radius: 0.75rem;
     
-    /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(340 70% 50%), hsl(320 65% 45%));
-    --gradient-secondary: linear-gradient(135deg, hsl(140 40% 85%), hsl(140 35% 75%));
-    --gradient-hero: linear-gradient(180deg, hsl(28 30% 98%), hsl(340 75% 95%));
-    --gradient-accent: linear-gradient(135deg, hsl(45 70% 88%), hsl(340 75% 88%));
+    /* PetalPay Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(350 75% 85%), hsl(340 70% 80%));
+    --gradient-teal: linear-gradient(135deg, hsl(180 55% 60%), hsl(170 50% 55%));
+    --gradient-hero: linear-gradient(180deg, hsl(0 0% 100%), hsl(350 75% 95%));
+    --gradient-accent: linear-gradient(135deg, hsl(180 55% 60%), hsl(350 75% 85%));
     
     /* Shadows */
-    --shadow-soft: 0 2px 12px hsl(340 30% 75% / 0.15);
-    --shadow-medium: 0 4px 20px hsl(340 30% 70% / 0.2);
+    --shadow-soft: 0 2px 12px hsl(180 30% 75% / 0.15);
+    --shadow-medium: 0 4px 20px hsl(180 30% 70% / 0.2);
+    --shadow-glow: 0 0 20px hsl(180 55% 60% / 0.3);
   }
 
   .dark {

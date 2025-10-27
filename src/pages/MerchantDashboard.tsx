@@ -31,7 +31,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { format, startOfMonth, parseISO } from "date-fns";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 
 type Merchant = {
   id: string;
@@ -272,6 +272,35 @@ const MerchantDashboard = () => {
       .slice(-6); // Last 6 months
   };
 
+  const getCashbackDistribution = () => {
+    const totalCashback = analytics?.total_cashback || 0;
+    const remainingBalance = analytics?.remaining_balance || 0;
+    
+    return [
+      { name: "Cashback Given", value: totalCashback, color: "hsl(var(--accent))" },
+      { name: "Remaining Balance", value: remainingBalance, color: "hsl(var(--primary))" }
+    ].filter(item => item.value > 0);
+  };
+
+  const getRepaymentProgress = () => {
+    if (!analytics?.funding_deal_status || analytics.funding_deal_status !== 'active') {
+      return null;
+    }
+    
+    // We need to calculate what was funded originally
+    // remaining_balance = amount_funded - total_repaid
+    // So: amount_funded = remaining_balance + total_repaid (we need total_repaid)
+    // For now, we'll estimate the progress from remaining balance
+    const remaining = analytics.remaining_balance || 0;
+    
+    // This is a simplified calculation - ideally we'd fetch the original funding amount
+    if (remaining === 0) return 100;
+    
+    // Estimate: if repayment rate is 10%, assume they've repaid some portion
+    // This is approximate without the original amount_funded
+    return null; // We can't accurately calculate without amount_funded from the API
+  };
+
   const handleSignOut = async () => {
     await signOut();
     navigate("/auth");
@@ -315,10 +344,18 @@ const MerchantDashboard = () => {
       </header>
 
       <main className="container mx-auto px-4 py-8">
+        {/* Dashboard Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold mb-2">Merchant Dashboard</h1>
+          <p className="text-muted-foreground">
+            Track your PetalPay sales, cashback, and repayments in one place.
+          </p>
+        </div>
+
         {/* Stripe Connect Status */}
         {!merchant.stripe_account_id && (
           <GradientCard gradient className="mb-6 bg-accent/10 border-accent/20">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-4">
               <div>
                 <h3 className="font-semibold mb-1">Connect Your Bank Account</h3>
                 <p className="text-sm text-muted-foreground">
@@ -413,72 +450,154 @@ const MerchantDashboard = () => {
           </GradientCard>
         </div>
 
-        {/* Monthly Sales Chart */}
-        <GradientCard className="mb-8">
-          <h3 className="text-xl font-semibold mb-4">Monthly Sales Volume</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={getMonthlySalesData()}>
-              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-              <XAxis 
-                dataKey="month" 
-                className="text-sm"
-                tick={{ fill: 'hsl(var(--muted-foreground))' }}
-              />
-              <YAxis 
-                className="text-sm"
-                tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                tickFormatter={(value) => `$${value}`}
-              />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: 'hsl(var(--card))',
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '8px'
-                }}
-                formatter={(value: number) => [`$${value.toFixed(2)}`, 'Sales']}
-              />
-              <Bar dataKey="amount" fill="hsl(var(--accent))" radius={[8, 8, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </GradientCard>
-
-        {/* Action Buttons */}
-        <div className="grid gap-4 md:grid-cols-3 mb-8">
-          <GradientCard className="cursor-pointer hover:shadow-[var(--shadow-glow)] transition-all" onClick={() => setEditCashbackDialogOpen(true)}>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <Percent className="w-5 h-5 text-primary" />
+        {/* Repayment Progress */}
+        {analytics?.funding_deal_status === 'active' && analytics?.remaining_balance !== undefined && (
+          <GradientCard className="mb-8">
+            <h3 className="text-xl font-semibold mb-4">Repayment Progress</h3>
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm mb-2">
+                <span className="text-muted-foreground">Funding Balance Remaining</span>
+                <span className="font-bold">${analytics.remaining_balance.toFixed(2)}</span>
               </div>
-              <div>
-                <p className="font-semibold">Edit Cashback Rate</p>
-                <p className="text-sm text-muted-foreground">Current: {merchant.cashback_rate}%</p>
+              <div className="w-full bg-muted rounded-full h-4 overflow-hidden">
+                <div 
+                  className="bg-gradient-to-r from-accent to-secondary h-full transition-all duration-500 rounded-full"
+                  style={{ 
+                    width: analytics.remaining_balance > 0 ? '100%' : '0%'
+                  }}
+                />
               </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                {analytics.repayment_rate}% of each sale goes toward repayment
+              </p>
             </div>
           </GradientCard>
+        )}
 
-          <GradientCard className="cursor-pointer hover:shadow-[var(--shadow-glow)] transition-all" onClick={() => setTransactionsDialogOpen(true)}>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center">
-                <FileText className="w-5 h-5 text-accent" />
-              </div>
-              <div>
-                <p className="font-semibold">View All Transactions</p>
-                <p className="text-sm text-muted-foreground">{analytics?.total_transactions || 0} total</p>
-              </div>
-            </div>
+        {!analytics?.funding_deal_status && (
+          <GradientCard className="mb-8 text-center py-8">
+            <CreditCard className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
+            <p className="text-muted-foreground">No active funding deal</p>
+          </GradientCard>
+        )}
+
+        {/* Charts Row */}
+        <div className="grid gap-6 md:grid-cols-2 mb-8">
+          {/* Monthly Sales Chart */}
+          <GradientCard>
+            <h3 className="text-xl font-semibold mb-4">Monthly Sales Overview</h3>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={getMonthlySalesData()}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                <XAxis 
+                  dataKey="month" 
+                  className="text-sm"
+                  tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                />
+                <YAxis 
+                  className="text-sm"
+                  tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                  tickFormatter={(value) => `$${value}`}
+                />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'hsl(var(--card))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px'
+                  }}
+                  formatter={(value: number) => [`$${value.toFixed(2)}`, 'Sales']}
+                />
+                <Bar dataKey="amount" fill="hsl(var(--accent))" radius={[8, 8, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
           </GradientCard>
 
-          <GradientCard className="cursor-pointer hover:shadow-[var(--shadow-glow)] transition-all" onClick={() => setFundingDialogOpen(true)}>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center">
-                <CreditCard className="w-5 h-5 text-secondary" />
+          {/* Cashback Distribution Chart */}
+          <GradientCard>
+            <h3 className="text-xl font-semibold mb-4">Cashback vs Balance Distribution</h3>
+            {getCashbackDistribution().length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={getCashbackDistribution()}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={100}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {getCashbackDistribution().map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    formatter={(value: number) => `$${value.toFixed(2)}`}
+                    contentStyle={{ 
+                      backgroundColor: 'hsl(var(--card))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px'
+                    }}
+                  />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+                No data available
               </div>
-              <div>
-                <p className="font-semibold">Request Funding</p>
-                <p className="text-sm text-muted-foreground">Get advance on earnings</p>
-              </div>
-            </div>
+            )}
           </GradientCard>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="grid gap-4 md:grid-cols-4 mb-8">
+          <Button 
+            variant="outline" 
+            className="h-auto py-4 justify-start"
+            onClick={() => setTransactionsDialogOpen(true)}
+          >
+            <FileText className="w-5 h-5 mr-3" />
+            <div className="text-left">
+              <p className="font-semibold">View Detailed Transactions</p>
+              <p className="text-xs text-muted-foreground">See all activity</p>
+            </div>
+          </Button>
+          <Button 
+            variant="outline" 
+            className="h-auto py-4 justify-start"
+            onClick={() => setEditCashbackDialogOpen(true)}
+          >
+            <Percent className="w-5 h-5 mr-3" />
+            <div className="text-left">
+              <p className="font-semibold">Edit Cashback Rate</p>
+              <p className="text-xs text-muted-foreground">Current: {merchant.cashback_rate}%</p>
+            </div>
+          </Button>
+
+          <Button 
+            variant="outline" 
+            className="h-auto py-4 justify-start"
+            onClick={() => setFundingDialogOpen(true)}
+          >
+            <CreditCard className="w-5 h-5 mr-3" />
+            <div className="text-left">
+              <p className="font-semibold">Request Funding</p>
+              <p className="text-xs text-muted-foreground">Get advance on earnings</p>
+            </div>
+          </Button>
+
+          <Button 
+            variant="outline" 
+            className="h-auto py-4 justify-start"
+            onClick={() => setEditDialogOpen(true)}
+          >
+            <Edit className="w-5 h-5 mr-3" />
+            <div className="text-left">
+              <p className="font-semibold">Edit Profile</p>
+              <p className="text-xs text-muted-foreground">Update business info</p>
+            </div>
+          </Button>
         </div>
 
         {/* Recent Transactions */}
