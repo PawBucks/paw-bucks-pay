@@ -24,6 +24,9 @@ import {
   ExternalLink,
   Edit,
   Loader2,
+  Clock,
+  CreditCard,
+  FileText,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -64,7 +67,11 @@ const MerchantDashboard = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editCashbackDialogOpen, setEditCashbackDialogOpen] = useState(false);
+  const [transactionsDialogOpen, setTransactionsDialogOpen] = useState(false);
+  const [fundingDialogOpen, setFundingDialogOpen] = useState(false);
   const [connectingStripe, setConnectingStripe] = useState(false);
+  const [requestingFunding, setRequestingFunding] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -179,6 +186,59 @@ const MerchantDashboard = () => {
     }
   };
 
+  const handleUpdateCashback = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!merchant) return;
+
+    try {
+      const formData = new FormData(e.currentTarget);
+      const newRate = parseFloat(formData.get("cashbackRate") as string);
+
+      const { error } = await supabase
+        .from("merchants")
+        .update({ cashback_rate: newRate })
+        .eq("id", merchant.id);
+
+      if (error) throw error;
+
+      toast.success("Cashback rate updated successfully!");
+      setEditCashbackDialogOpen(false);
+      loadMerchantData();
+    } catch (error: any) {
+      console.error("Error updating cashback rate:", error);
+      toast.error("Failed to update cashback rate");
+    }
+  };
+
+  const handleRequestFunding = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!merchant) return;
+
+    setRequestingFunding(true);
+
+    try {
+      const formData = new FormData(e.currentTarget);
+      const amount = parseFloat(formData.get("amount") as string);
+      const purpose = formData.get("purpose") as string;
+
+      // In a real app, this would create a funding request in the database
+      // and notify the admin/payment processor
+      toast.success(`Funding request for $${amount.toFixed(2)} submitted successfully!`);
+      setFundingDialogOpen(false);
+    } catch (error: any) {
+      console.error("Error requesting funding:", error);
+      toast.error("Failed to submit funding request");
+    } finally {
+      setRequestingFunding(false);
+    }
+  };
+
+  const calculatePendingPayouts = () => {
+    // Calculate total earnings minus what's already been paid out
+    // In a real app, you'd track actual payouts from Stripe
+    return analytics?.total_earnings || 0;
+  };
+
   const handleSignOut = async () => {
     await signOut();
     navigate("/auth");
@@ -250,7 +310,7 @@ const MerchantDashboard = () => {
         )}
 
         {/* Analytics Cards */}
-        <div className="grid gap-6 md:grid-cols-4 mb-8">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5 mb-8">
           <GradientCard gradient>
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center">
@@ -299,6 +359,59 @@ const MerchantDashboard = () => {
                 <p className="text-2xl font-bold">
                   ${analytics?.total_cashback_paid?.toFixed(2) || "0.00"}
                 </p>
+              </div>
+            </div>
+          </GradientCard>
+
+          <GradientCard>
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-orange-500/10 flex items-center justify-center">
+                <Clock className="w-6 h-6 text-orange-500" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Pending Payouts</p>
+                <p className="text-2xl font-bold">
+                  ${calculatePendingPayouts().toFixed(2)}
+                </p>
+              </div>
+            </div>
+          </GradientCard>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="grid gap-4 md:grid-cols-3 mb-8">
+          <GradientCard className="cursor-pointer hover:shadow-[var(--shadow-glow)] transition-all" onClick={() => setEditCashbackDialogOpen(true)}>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <Percent className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <p className="font-semibold">Edit Cashback Rate</p>
+                <p className="text-sm text-muted-foreground">Current: {merchant.cashback_rate}%</p>
+              </div>
+            </div>
+          </GradientCard>
+
+          <GradientCard className="cursor-pointer hover:shadow-[var(--shadow-glow)] transition-all" onClick={() => setTransactionsDialogOpen(true)}>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center">
+                <FileText className="w-5 h-5 text-accent" />
+              </div>
+              <div>
+                <p className="font-semibold">View All Transactions</p>
+                <p className="text-sm text-muted-foreground">{analytics?.total_transactions || 0} total</p>
+              </div>
+            </div>
+          </GradientCard>
+
+          <GradientCard className="cursor-pointer hover:shadow-[var(--shadow-glow)] transition-all" onClick={() => setFundingDialogOpen(true)}>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center">
+                <CreditCard className="w-5 h-5 text-secondary" />
+              </div>
+              <div>
+                <p className="font-semibold">Request Funding</p>
+                <p className="text-sm text-muted-foreground">Get advance on earnings</p>
               </div>
             </div>
           </GradientCard>
@@ -399,6 +512,172 @@ const MerchantDashboard = () => {
               </Button>
               <Button type="submit" className="flex-1">
                 Save Changes
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Cashback Rate Dialog */}
+      <Dialog open={editCashbackDialogOpen} onOpenChange={setEditCashbackDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Cashback Rate</DialogTitle>
+            <DialogDescription>
+              Set the percentage of each transaction you'll offer as cashback
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleUpdateCashback} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="newCashbackRate">Cashback Rate (%)</Label>
+              <Input
+                id="newCashbackRate"
+                name="cashbackRate"
+                type="number"
+                step="0.01"
+                min="0"
+                max="100"
+                defaultValue={merchant.cashback_rate}
+                required
+              />
+              <p className="text-sm text-muted-foreground">
+                Higher rates attract more customers but reduce your profit margin
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setEditCashbackDialogOpen(false)}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button type="submit" className="flex-1">
+                Update Rate
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* View All Transactions Dialog */}
+      <Dialog open={transactionsDialogOpen} onOpenChange={setTransactionsDialogOpen}>
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>All Transactions</DialogTitle>
+            <DialogDescription>
+              Complete history of your business transactions
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            {transactions.length > 0 ? (
+              transactions.map((transaction) => (
+                <div
+                  key={transaction.id}
+                  className="flex items-center justify-between p-4 rounded-lg border bg-card"
+                >
+                  <div className="flex-1">
+                    <p className="font-medium">{transaction.description}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {format(new Date(transaction.created_at), "MMM d, yyyy 'at' h:mm a")}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold text-accent">
+                      +${transaction.amount.toFixed(2)}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Cashback: ${transaction.cashback_amount.toFixed(2)}
+                    </p>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">No transactions yet</p>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Request Funding Dialog */}
+      <Dialog open={fundingDialogOpen} onOpenChange={setFundingDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Request Funding</DialogTitle>
+            <DialogDescription>
+              Get an advance on your future earnings to grow your business
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleRequestFunding} className="space-y-4">
+            <div className="bg-muted rounded-lg p-4 mb-4">
+              <div className="flex justify-between text-sm mb-2">
+                <span className="text-muted-foreground">Available to borrow:</span>
+                <span className="font-bold">
+                  ${(calculatePendingPayouts() * 0.8).toFixed(2)}
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Up to 80% of your pending payouts
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="fundingAmount">Funding Amount ($)</Label>
+              <Input
+                id="fundingAmount"
+                name="amount"
+                type="number"
+                step="0.01"
+                min="100"
+                max={calculatePendingPayouts() * 0.8}
+                placeholder="0.00"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="fundingPurpose">Purpose</Label>
+              <Textarea
+                id="fundingPurpose"
+                name="purpose"
+                placeholder="Inventory, equipment, marketing, etc."
+                rows={3}
+                required
+              />
+            </div>
+
+            <div className="bg-accent/10 border border-accent/20 rounded-lg p-4">
+              <p className="text-sm font-semibold mb-1">Funding Terms</p>
+              <ul className="text-xs text-muted-foreground space-y-1">
+                <li>• 5% fee on funded amount</li>
+                <li>• Repaid automatically from future transactions</li>
+                <li>• No fixed repayment schedule</li>
+                <li>• Funds deposited within 1-2 business days</li>
+              </ul>
+            </div>
+
+            <div className="flex gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setFundingDialogOpen(false)}
+                className="flex-1"
+                disabled={requestingFunding}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" className="flex-1" disabled={requestingFunding}>
+                {requestingFunding ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Submitting...
+                  </>
+                ) : (
+                  "Request Funding"
+                )}
               </Button>
             </div>
           </form>
