@@ -26,3 +26,9 @@ verify_jwt = true
 
 [functions.get-wallet-history]
 verify_jwt = true
+
+[functions.admin-update-merchant]
+verify_jwt = true
+
+[functions.admin-update-funding-request]
+verify_jwt = true

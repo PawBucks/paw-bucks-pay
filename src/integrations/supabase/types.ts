@@ -510,12 +510,49 @@ export type Database = {
           },
         ]
       }
+      webhook_logs: {
+        Row: {
+          created_at: string
+          event_id: string
+          event_type: string
+          id: string
+          payload: Json
+          processed: boolean | null
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          event_type: string
+          id?: string
+          payload: Json
+          processed?: boolean | null
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          event_type?: string
+          id?: string
+          payload?: Json
+          processed?: boolean | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
       generate_referral_code: { Args: never; Returns: string }
+      get_admin_analytics: {
+        Args: never
+        Returns: {
+          total_cashback_distributed: number
+          total_gmv: number
+          total_merchants: number
+          total_transactions: number
+          total_users: number
+        }[]
+      }
       get_merchant_analytics: {
         Args: { _merchant_id: string }
         Returns: {

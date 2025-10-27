@@ -43,13 +43,42 @@ serve(async (req) => {
       );
     }
 
-    console.log('Stripe webhook event:', event.type);
+    console.log('Stripe webhook event:', event.type, 'ID:', event.id);
 
     // Initialize Supabase client with service role key
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
+
+    // Check for duplicate events
+    const { data: existingLog } = await supabaseAdmin
+      .from('webhook_logs')
+      .select('id')
+      .eq('event_id', event.id)
+      .maybeSingle();
+
+    if (existingLog) {
+      console.log('Duplicate event detected, skipping:', event.id);
+      return new Response(
+        JSON.stringify({ received: true, duplicate: true }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
+      );
+    }
+
+    // Log webhook event
+    const { error: logError } = await supabaseAdmin
+      .from('webhook_logs')
+      .insert({
+        event_id: event.id,
+        event_type: event.type,
+        payload: event as any,
+        processed: false,
+      });
+
+    if (logError) {
+      console.error('Failed to log webhook event:', logError);
+    }
 
     // ========================================
     // SUBSCRIPTION WEBHOOK HANDLERS
@@ -310,6 +339,12 @@ serve(async (req) => {
 
       // You can add additional logging or notifications here
     }
+
+    // Mark webhook as processed
+    await supabaseAdmin
+      .from('webhook_logs')
+      .update({ processed: true })
+      .eq('event_id', event.id);
 
     return new Response(
       JSON.stringify({ received: true }),

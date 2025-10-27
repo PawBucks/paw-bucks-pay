@@ -138,6 +138,17 @@ const AdminDashboard = () => {
 
   const loadAdminData = async () => {
     try {
+      // Load analytics using the new function
+      const { data: analyticsData, error: analyticsError } = await supabase.rpc('get_admin_analytics');
+      
+      if (analyticsError) {
+        console.error('Analytics error:', analyticsError);
+      } else if (analyticsData && analyticsData.length > 0) {
+        const analytics = analyticsData[0];
+        // Update total cashback from analytics
+        setTotalCashback(Number(analytics.total_cashback_distributed) || 0);
+      }
+
       // Load merchants
       const { data: merchantsData } = await supabase
         .from("merchants")
@@ -166,10 +177,6 @@ const AdminDashboard = () => {
         .order("created_at", { ascending: false })
         .limit(50);
       setTransactions(transactionsData || []);
-
-      // Calculate total cashback
-      const total = transactionsData?.reduce((sum, t) => sum + (t.cashback_earned || 0), 0) || 0;
-      setTotalCashback(total);
     } catch (error: any) {
       console.error("Error loading admin data:", error);
       toast.error("Failed to load admin data");
@@ -180,10 +187,9 @@ const AdminDashboard = () => {
 
   const handleUpdateFundingRequest = async (requestId: string, status: "approved" | "denied") => {
     try {
-      const { error } = await supabase
-        .from("funding_requests")
-        .update({ status })
-        .eq("id", requestId);
+      const { error } = await supabase.functions.invoke('admin-update-funding-request', {
+        body: { requestId, status },
+      });
 
       if (error) throw error;
 
@@ -203,10 +209,9 @@ const AdminDashboard = () => {
       const formData = new FormData(e.currentTarget);
       const newRate = parseFloat(formData.get("cashbackRate") as string);
 
-      const { error } = await supabase
-        .from("merchants")
-        .update({ cashback_rate: newRate })
-        .eq("id", selectedMerchant.id);
+      const { error } = await supabase.functions.invoke('admin-update-merchant', {
+        body: { merchantId: selectedMerchant.id, cashbackRate: newRate },
+      });
 
       if (error) throw error;
 
