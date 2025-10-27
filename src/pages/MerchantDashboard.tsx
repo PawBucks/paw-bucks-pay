@@ -73,7 +73,6 @@ const MerchantDashboard = () => {
   const [allTransactions, setAllTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [editCashbackDialogOpen, setEditCashbackDialogOpen] = useState(false);
   const [transactionsDialogOpen, setTransactionsDialogOpen] = useState(false);
   const [fundingDialogOpen, setFundingDialogOpen] = useState(false);
   const [connectingStripe, setConnectingStripe] = useState(false);
@@ -182,7 +181,6 @@ const MerchantDashboard = () => {
         contact_person: formData.get("contactPerson") as string,
         address: formData.get("address") as string,
         description: formData.get("description") as string,
-        cashback_rate: parseFloat(formData.get("cashbackRate") as string),
       };
 
       const { error } = await supabase
@@ -201,29 +199,6 @@ const MerchantDashboard = () => {
     }
   };
 
-  const handleUpdateCashback = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!merchant) return;
-
-    try {
-      const formData = new FormData(e.currentTarget);
-      const newRate = parseFloat(formData.get("cashbackRate") as string);
-
-      const { error } = await supabase
-        .from("merchants")
-        .update({ cashback_rate: newRate })
-        .eq("id", merchant.id);
-
-      if (error) throw error;
-
-      toast.success("Cashback rate updated successfully!");
-      setEditCashbackDialogOpen(false);
-      loadMerchantData();
-    } catch (error: any) {
-      console.error("Error updating cashback rate:", error);
-      toast.error("Failed to update cashback rate");
-    }
-  };
 
   const handleRequestFunding = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -563,19 +538,7 @@ const MerchantDashboard = () => {
               <p className="text-xs text-muted-foreground">See all activity</p>
             </div>
           </Button>
-          <Button 
-            variant="outline" 
-            className="h-auto py-4 justify-start"
-            onClick={() => setEditCashbackDialogOpen(true)}
-          >
-            <Percent className="w-5 h-5 mr-3" />
-            <div className="text-left">
-              <p className="font-semibold">Edit Cashback Rate</p>
-              <p className="text-xs text-muted-foreground">Current: {merchant.cashback_rate}%</p>
-            </div>
-          </Button>
-
-          <Button 
+          <Button
             variant="outline" 
             className="h-auto py-4 justify-start"
             onClick={() => setFundingDialogOpen(true)}
@@ -678,66 +641,12 @@ const MerchantDashboard = () => {
                 rows={3}
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="cashbackRate">Cashback Rate (%)</Label>
-              <Input
-                id="cashbackRate"
-                name="cashbackRate"
-                type="number"
-                step="0.01"
-                defaultValue={merchant.cashback_rate}
-                required
-              />
-            </div>
             <div className="flex gap-3">
               <Button type="button" variant="outline" onClick={() => setEditDialogOpen(false)} className="flex-1">
                 Cancel
               </Button>
               <Button type="submit" className="flex-1">
                 Save Changes
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit Cashback Rate Dialog */}
-      <Dialog open={editCashbackDialogOpen} onOpenChange={setEditCashbackDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit Cashback Rate</DialogTitle>
-            <DialogDescription>
-              Set the percentage of each transaction you'll offer as cashback
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleUpdateCashback} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="newCashbackRate">Cashback Rate (%)</Label>
-              <Input
-                id="newCashbackRate"
-                name="cashbackRate"
-                type="number"
-                step="0.01"
-                min="0"
-                max="100"
-                defaultValue={merchant.cashback_rate}
-                required
-              />
-              <p className="text-sm text-muted-foreground">
-                Higher rates attract more customers but reduce your profit margin
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setEditCashbackDialogOpen(false)}
-                className="flex-1"
-              >
-                Cancel
-              </Button>
-              <Button type="submit" className="flex-1">
-                Update Rate
               </Button>
             </div>
           </form>
