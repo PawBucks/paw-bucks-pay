@@ -41,10 +41,10 @@ export const Header = () => {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56 bg-card z-50">
             <DropdownMenuItem 
-              onClick={() => navigate("/discover")}
+              onClick={() => navigate("/")}
               className="cursor-pointer"
             >
-              Explore Pet Merchants
+              For Pet Lovers
             </DropdownMenuItem>
             <DropdownMenuItem 
               onClick={() => navigate("/merchants")}
