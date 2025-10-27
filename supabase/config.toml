@@ -3,6 +3,9 @@ project_id = "yxpnkipcoxksmnsvpvwi"
 [functions.merchant-dashboard]
 verify_jwt = true
 
+[functions.merchant-transactions]
+verify_jwt = true
+
 [functions.create-payment-intent]
 verify_jwt = true
 

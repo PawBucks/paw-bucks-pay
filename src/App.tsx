@@ -14,6 +14,7 @@ import Profile from "./pages/Profile";
 import SubscriptionSuccess from "./pages/SubscriptionSuccess";
 import MerchantOnboarding from "./pages/MerchantOnboarding";
 import MerchantDashboard from "./pages/MerchantDashboard";
+import MerchantTransactions from "./pages/MerchantTransactions";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminLogin from "./pages/AdminLogin";
 import NotFound from "./pages/NotFound";
@@ -38,6 +39,7 @@ const App = () => (
           <Route path="/subscription-success" element={<SubscriptionSuccess />} />
           <Route path="/merchant-onboarding" element={<MerchantOnboarding />} />
           <Route path="/merchant-dashboard" element={<MerchantDashboard />} />
+          <Route path="/merchant/transactions" element={<MerchantTransactions />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminDashboard />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
