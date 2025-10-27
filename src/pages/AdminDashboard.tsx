@@ -121,6 +121,11 @@ const AdminDashboard = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<{type: 'user' | 'merchant', id: string, name: string} | null>(null);
   
+  // Edit user role/type dialog
+  const [editUserDialogOpen, setEditUserDialogOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<Profile | null>(null);
+  const [updatingUser, setUpdatingUser] = useState(false);
+  
   // Refund dialog
   const [refundDialogOpen, setRefundDialogOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
@@ -369,6 +374,38 @@ const AdminDashboard = () => {
       toast.error("Failed to issue refund");
     } finally {
       setIssuingRefund(false);
+    }
+  };
+
+  const handleUpdateUserRole = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!selectedUser) return;
+
+    setUpdatingUser(true);
+    try {
+      const formData = new FormData(e.currentTarget);
+      const userType = formData.get("userType") as string;
+      const role = formData.get("role") as string;
+
+      const { error } = await supabase.functions.invoke('admin-update-user-role', {
+        body: { 
+          user_id: selectedUser.id,
+          user_type: userType || undefined,
+          role: role || undefined,
+        },
+      });
+
+      if (error) throw error;
+
+      toast.success("User updated successfully!");
+      setEditUserDialogOpen(false);
+      setSelectedUser(null);
+      loadAdminData();
+    } catch (error: any) {
+      console.error("Error updating user:", error);
+      toast.error("Failed to update user");
+    } finally {
+      setUpdatingUser(false);
     }
   };
 
@@ -735,16 +772,28 @@ const AdminDashboard = () => {
                   </TableCell>
                   <TableCell>{format(new Date(profile.created_at), "MMM d, yyyy")}</TableCell>
                   <TableCell>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => {
-                        setDeleteTarget({ type: 'user', id: profile.id, name: profile.full_name });
-                        setDeleteDialogOpen(true);
-                      }}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setSelectedUser(profile);
+                          setEditUserDialogOpen(true);
+                        }}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => {
+                          setDeleteTarget({ type: 'user', id: profile.id, name: profile.full_name });
+                          setDeleteDialogOpen(true);
+                        }}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -937,6 +986,72 @@ const AdminDashboard = () => {
                   </>
                 ) : (
                   "Issue Refund"
+                )}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit User Role/Type Dialog */}
+      <Dialog open={editUserDialogOpen} onOpenChange={setEditUserDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Update User Account</DialogTitle>
+            <DialogDescription>
+              Change the account type and role for {selectedUser?.full_name}
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleUpdateUserRole} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="userType">Account Type</Label>
+              <select
+                id="userType"
+                name="userType"
+                className="w-full h-10 px-3 rounded-md border bg-background"
+                defaultValue={selectedUser?.user_type}
+              >
+                <option value="">Keep Current</option>
+                <option value="pet_owner">Pet Owner</option>
+                <option value="merchant">Merchant</option>
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="role">User Role</Label>
+              <select
+                id="role"
+                name="role"
+                className="w-full h-10 px-3 rounded-md border bg-background"
+              >
+                <option value="">Keep Current</option>
+                <option value="user">User</option>
+                <option value="moderator">Moderator</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+            <div className="bg-muted p-3 rounded-md text-sm">
+              <p className="font-semibold mb-1">Current Information:</p>
+              <p>Account Type: <Badge variant="outline">{selectedUser?.user_type}</Badge></p>
+              <p className="mt-1 text-muted-foreground">Leave fields as "Keep Current" to maintain existing values.</p>
+            </div>
+            <div className="flex gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setEditUserDialogOpen(false)}
+                className="flex-1"
+                disabled={updatingUser}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" className="flex-1" disabled={updatingUser}>
+                {updatingUser ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Updating...
+                  </>
+                ) : (
+                  "Update User"
                 )}
               </Button>
             </div>

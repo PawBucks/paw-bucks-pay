@@ -41,3 +41,6 @@ verify_jwt = true
 
 [functions.admin-issue-refund]
 verify_jwt = true
+
+[functions.admin-update-user-role]
+verify_jwt = true
