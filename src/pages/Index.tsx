@@ -148,15 +148,15 @@ const Index = () => {
           </div>
 
           <div className="grid gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-3 max-w-7xl mx-auto">
-            <GradientCard gradient className="group text-center hover:scale-105 transition-all duration-300 hover:shadow-2xl">
-              <div className="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center mx-auto mb-6 shadow-lg group-hover:scale-110 transition-transform" aria-hidden="true">
-                <Wallet className="w-10 h-10 text-black" />
+            <Card className="group p-8 text-center hover:scale-105 transition-all duration-300 hover:shadow-2xl border-2">
+              <div className="w-20 h-20 rounded-2xl bg-accent/10 flex items-center justify-center mx-auto mb-6 shadow-md group-hover:scale-110 group-hover:bg-accent/20 transition-all" aria-hidden="true">
+                <Wallet className="w-10 h-10 text-accent" />
               </div>
-              <h3 className="text-2xl font-bold mb-3 text-black">Digital Wallet</h3>
-              <p className="text-black leading-relaxed">
+              <h3 className="text-2xl font-bold mb-3">Digital Wallet</h3>
+              <p className="text-muted-foreground leading-relaxed">
                 Securely store funds and manage all your pet-related expenses in one convenient digital wallet with bank-level security.
               </p>
-            </GradientCard>
+            </Card>
 
             <Card className="group p-8 text-center hover:scale-105 transition-all duration-300 hover:shadow-2xl border-2">
               <div className="w-20 h-20 rounded-2xl bg-accent/10 flex items-center justify-center mx-auto mb-6 shadow-md group-hover:scale-110 group-hover:bg-accent/20 transition-all" aria-hidden="true">
