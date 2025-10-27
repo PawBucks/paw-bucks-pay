@@ -11,6 +11,7 @@ import Discover from "./pages/Discover";
 import Wallet from "./pages/Wallet";
 import Referrals from "./pages/Referrals";
 import Profile from "./pages/Profile";
+import SubscriptionSuccess from "./pages/SubscriptionSuccess";
 import MerchantOnboarding from "./pages/MerchantOnboarding";
 import MerchantDashboard from "./pages/MerchantDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -34,6 +35,7 @@ const App = () => (
           <Route path="/wallet" element={<Wallet />} />
           <Route path="/referrals" element={<Referrals />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/subscription-success" element={<SubscriptionSuccess />} />
           <Route path="/merchant-onboarding" element={<MerchantOnboarding />} />
           <Route path="/merchant-dashboard" element={<MerchantDashboard />} />
           <Route path="/admin/login" element={<AdminLogin />} />

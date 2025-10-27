@@ -51,6 +51,178 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
+    // ========================================
+    // SUBSCRIPTION WEBHOOK HANDLERS
+    // ========================================
+
+    // Handle successful checkout session (subscription created)
+    if (event.type === 'checkout.session.completed') {
+      const session = event.data.object as Stripe.Checkout.Session;
+      
+      if (session.mode === 'subscription') {
+        const userId = session.metadata?.user_id;
+        const subscriptionId = session.subscription as string;
+        
+        console.log('Checkout session completed:', {
+          sessionId: session.id,
+          userId,
+          subscriptionId,
+        });
+
+        if (userId && subscriptionId) {
+          // Fetch subscription details
+          const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
+            apiVersion: '2025-08-27.basil',
+          });
+          
+          const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+          
+          // Create subscription record
+          const { error: subError } = await supabaseAdmin
+            .from('subscriptions')
+            .insert({
+              user_id: userId,
+              stripe_subscription_id: subscriptionId,
+              status: subscription.status,
+              start_date: new Date(subscription.start_date * 1000).toISOString(),
+              current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+            });
+
+          if (subError) {
+            console.error('Error creating subscription record:', subError);
+          } else {
+            console.log('✅ Subscription record created');
+          }
+
+          // Log subscription event
+          const { error: eventError } = await supabaseAdmin
+            .from('subscription_events')
+            .insert({
+              subscription_id: subscriptionId,
+              event_type: 'subscription.created',
+            });
+
+          if (eventError) {
+            console.error('Error logging subscription event:', eventError);
+          }
+        }
+      }
+    }
+
+    // Handle successful invoice payment (renewal)
+    if (event.type === 'invoice.payment_succeeded') {
+      const invoice = event.data.object as Stripe.Invoice;
+      const subscriptionId = invoice.subscription as string;
+
+      console.log('Invoice payment succeeded:', {
+        invoiceId: invoice.id,
+        subscriptionId,
+        amount: invoice.amount_paid / 100,
+      });
+
+      if (subscriptionId) {
+        // Fetch subscription to get current period end
+        const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
+          apiVersion: '2025-08-27.basil',
+        });
+        
+        const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+
+        // Update subscription record
+        const { error: updateError } = await supabaseAdmin
+          .from('subscriptions')
+          .update({
+            status: subscription.status,
+            current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+          })
+          .eq('stripe_subscription_id', subscriptionId);
+
+        if (updateError) {
+          console.error('Error updating subscription:', updateError);
+        } else {
+          console.log('✅ Subscription renewed');
+        }
+
+        // Log renewal event
+        await supabaseAdmin
+          .from('subscription_events')
+          .insert({
+            subscription_id: subscriptionId,
+            event_type: 'invoice.payment_succeeded',
+          });
+      }
+    }
+
+    // Handle subscription deletion
+    if (event.type === 'customer.subscription.deleted') {
+      const subscription = event.data.object as Stripe.Subscription;
+      
+      console.log('Subscription deleted:', {
+        subscriptionId: subscription.id,
+      });
+
+      // Update subscription status to canceled
+      const { error: updateError } = await supabaseAdmin
+        .from('subscriptions')
+        .update({
+          status: 'canceled',
+        })
+        .eq('stripe_subscription_id', subscription.id);
+
+      if (updateError) {
+        console.error('Error canceling subscription:', updateError);
+      } else {
+        console.log('✅ Subscription canceled');
+      }
+
+      // Log cancellation event
+      await supabaseAdmin
+        .from('subscription_events')
+        .insert({
+          subscription_id: subscription.id,
+          event_type: 'subscription.canceled',
+        });
+    }
+
+    // Handle failed invoice payment
+    if (event.type === 'invoice.payment_failed') {
+      const invoice = event.data.object as Stripe.Invoice;
+      const subscriptionId = invoice.subscription as string;
+
+      console.log('Invoice payment failed:', {
+        invoiceId: invoice.id,
+        subscriptionId,
+      });
+
+      if (subscriptionId) {
+        // Update subscription status to past_due
+        const { error: updateError } = await supabaseAdmin
+          .from('subscriptions')
+          .update({
+            status: 'past_due',
+          })
+          .eq('stripe_subscription_id', subscriptionId);
+
+        if (updateError) {
+          console.error('Error updating subscription to past_due:', updateError);
+        } else {
+          console.log('✅ Subscription marked as past_due');
+        }
+
+        // Log failed payment event
+        await supabaseAdmin
+          .from('subscription_events')
+          .insert({
+            subscription_id: subscriptionId,
+            event_type: 'invoice.payment_failed',
+          });
+      }
+    }
+
+    // ========================================
+    // PAYMENT WEBHOOK HANDLERS (existing)
+    // ========================================
+
     // Handle successful payment
     if (event.type === 'payment_intent.succeeded') {
       const paymentIntent = event.data.object as Stripe.PaymentIntent;
