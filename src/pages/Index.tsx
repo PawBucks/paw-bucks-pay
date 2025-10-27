@@ -61,9 +61,8 @@ const Index = () => {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button 
-                variant="ghost" 
                 size="icon"
-                className="shadow-md hover:shadow-xl transition-all"
+                className="shadow-xl hover:shadow-2xl transition-all hover:scale-105"
                 aria-label="Open menu"
               >
                 <Menu className="h-6 w-6" />

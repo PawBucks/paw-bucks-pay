@@ -38,17 +38,9 @@ const Discover = () => {
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      navigate("/auth");
-    }
-  }, [user, authLoading, navigate]);
-
-  useEffect(() => {
-    if (user) {
-      loadMerchants();
-      getUserLocation();
-    }
-  }, [user]);
+    loadMerchants();
+    getUserLocation();
+  }, []);
 
   useEffect(() => {
     if (searchTerm) {
@@ -111,6 +103,11 @@ const Discover = () => {
   };
 
   const handlePayNow = (merchantId: string, merchantName: string, cashbackRate: number) => {
+    if (!user) {
+      toast.error("Please sign in to make a payment");
+      navigate("/auth");
+      return;
+    }
     setSelectedMerchant({ id: merchantId, name: merchantName, cashbackRate });
     setPaymentDialogOpen(true);
   };
@@ -220,7 +217,7 @@ const Discover = () => {
         />
       )}
 
-      <BottomNav />
+      {user && <BottomNav />}
     </div>
   );
 };
