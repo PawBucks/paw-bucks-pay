@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { GradientCard } from "@/components/ui/gradient-card";
 import { PetProfileCard } from "@/components/PetProfileCard";
+import { ReferralCard } from "@/components/ReferralCard";
 import { Wallet, Gift, TrendingUp, LogOut, Store, Users, Plus } from "lucide-react";
 import { toast } from "sonner";
 
@@ -205,6 +206,8 @@ const Dashboard = () => {
                 </div>
               )}
             </GradientCard>
+
+            <ReferralCard />
 
             <GradientCard className="md:col-span-3">
               <h3 className="text-xl font-semibold mb-4">Discover Pet Services</h3>

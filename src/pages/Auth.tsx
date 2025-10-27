@@ -16,6 +16,7 @@ const Auth = () => {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [userType, setUserType] = useState<"pet_owner" | "merchant">("pet_owner");
+  const [referralCode, setReferralCode] = useState("");
 
   useEffect(() => {
     const checkUserAndRedirect = async () => {
@@ -73,6 +74,25 @@ const Auth = () => {
         });
 
         if (profileError) throw profileError;
+
+        // Handle referral code if provided
+        if (referralCode.trim() && userType === "pet_owner") {
+          // Find the referrer by code
+          const { data: referrer, error: referrerError } = await supabase
+            .from("profiles")
+            .select("id")
+            .eq("referral_code", referralCode.trim().toUpperCase())
+            .single();
+
+          if (!referrerError && referrer) {
+            // Create referral record
+            await supabase.from("referrals").insert({
+              referrer_id: referrer.id,
+              referee_id: data.user.id,
+              referral_code: referralCode.trim().toUpperCase(),
+            });
+          }
+        }
 
         toast.success("Account created successfully!");
         navigate("/");
@@ -179,6 +199,22 @@ const Auth = () => {
                     </Button>
                   </div>
                 </div>
+                {userType === "pet_owner" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="referralCode">Referral Code (Optional)</Label>
+                    <Input 
+                      id="referralCode" 
+                      name="referralCode" 
+                      placeholder="Enter code to get $10 bonus"
+                      value={referralCode}
+                      onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                      maxLength={8}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Both you and your referrer get $10 after your first transaction!
+                    </p>
+                  </div>
+                )}
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? "Creating account..." : "Create Account"}
                 </Button>

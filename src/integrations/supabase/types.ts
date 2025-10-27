@@ -193,6 +193,7 @@ export type Database = {
           full_name: string
           id: string
           phone: string | null
+          referral_code: string | null
           updated_at: string
           user_type: Database["public"]["Enums"]["user_type"]
         }
@@ -203,6 +204,7 @@ export type Database = {
           full_name: string
           id: string
           phone?: string | null
+          referral_code?: string | null
           updated_at?: string
           user_type: Database["public"]["Enums"]["user_type"]
         }
@@ -213,10 +215,62 @@ export type Database = {
           full_name?: string
           id?: string
           phone?: string | null
+          referral_code?: string | null
           updated_at?: string
           user_type?: Database["public"]["Enums"]["user_type"]
         }
         Relationships: []
+      }
+      referrals: {
+        Row: {
+          created_at: string | null
+          id: string
+          referee_bonus_amount: number | null
+          referee_bonus_awarded: boolean | null
+          referee_id: string
+          referral_code: string
+          referrer_bonus_amount: number | null
+          referrer_bonus_awarded: boolean | null
+          referrer_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          referee_bonus_amount?: number | null
+          referee_bonus_awarded?: boolean | null
+          referee_id: string
+          referral_code: string
+          referrer_bonus_amount?: number | null
+          referrer_bonus_awarded?: boolean | null
+          referrer_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          referee_bonus_amount?: number | null
+          referee_bonus_awarded?: boolean | null
+          referee_id?: string
+          referral_code?: string
+          referrer_bonus_amount?: number | null
+          referrer_bonus_awarded?: boolean | null
+          referrer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referrals_referee_id_fkey"
+            columns: ["referee_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referrals_referrer_id_fkey"
+            columns: ["referrer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       transactions: {
         Row: {
@@ -330,6 +384,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_referral_code: { Args: never; Returns: string }
       get_merchant_analytics: {
         Args: { _merchant_id: string }
         Returns: {
