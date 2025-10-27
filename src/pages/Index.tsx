@@ -70,10 +70,7 @@ const Index = () => {
               id="hero-heading"
               className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight"
             >
-              The Payment Platform for{" "}
-              <span className="bg-[var(--gradient-primary)] bg-clip-text text-transparent">
-                Pet Lovers
-              </span>
+              The Payment Platform for Pet Lovers
             </h2>
             <p className="text-lg sm:text-xl lg:text-2xl text-muted-foreground max-w-3xl mx-auto">
               Connect with trusted pet stores, groomers, and trainers. Earn cashback rewards with every transaction
