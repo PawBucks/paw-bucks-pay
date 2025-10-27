@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
+import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -101,7 +102,9 @@ const CreatePetProfile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--gradient-hero)] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[var(--gradient-hero)]">
+      <Header />
+      <div className="flex items-center justify-center p-4 py-8">
       <Card className="w-full max-w-lg">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
@@ -209,6 +212,7 @@ const CreatePetProfile = () => {
           </form>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 };

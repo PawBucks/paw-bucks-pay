@@ -2,12 +2,13 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { GradientCard } from "@/components/ui/gradient-card";
 import { MerchantCard } from "@/components/MerchantCard";
 import { PaymentDialog } from "@/components/PaymentDialog";
 import { BottomNav } from "@/components/BottomNav";
-import { LogOut, PawPrint, Search, Loader2, MapPin } from "lucide-react";
+import { Search, Loader2, MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
@@ -133,18 +134,7 @@ const Discover = () => {
 
   return (
     <div className="min-h-screen bg-[var(--gradient-hero)] pb-24">
-      <header className="border-b bg-card/80 backdrop-blur-lg sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-              <PawPrint className="w-6 h-6 text-white" />
-            </div>
-            <h1 className="text-2xl font-bold bg-[var(--gradient-primary)] bg-clip-text text-transparent">
-              PetalPay
-            </h1>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       <main className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="mb-8">
