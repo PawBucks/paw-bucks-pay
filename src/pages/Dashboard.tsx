@@ -4,7 +4,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { GradientCard } from "@/components/ui/gradient-card";
-import { Wallet, Gift, TrendingUp, LogOut, Store, Users } from "lucide-react";
+import { PetProfileCard } from "@/components/PetProfileCard";
+import { Wallet, Gift, TrendingUp, LogOut, Store, Users, Plus } from "lucide-react";
 import { toast } from "sonner";
 
 type Profile = {
@@ -17,11 +18,21 @@ type WalletData = {
   rewards_points: number;
 };
 
+type PetProfile = {
+  id: string;
+  pet_name: string;
+  pet_type: "dog" | "cat" | "other";
+  breed?: string;
+  birthday?: string;
+  photo_url?: string;
+};
+
 const Dashboard = () => {
   const { user, signOut, loading } = useAuth();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [wallet, setWallet] = useState<WalletData | null>(null);
+  const [pets, setPets] = useState<PetProfile[]>([]);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -62,6 +73,18 @@ const Dashboard = () => {
         console.error("Wallet error:", walletError);
       } else {
         setWallet(walletData);
+      }
+
+      // Load pet profiles
+      const { data: petsData, error: petsError } = await supabase
+        .from("pet_profiles")
+        .select("*")
+        .eq("user_id", user.id);
+
+      if (petsError) {
+        console.error("Pets error:", petsError);
+      } else {
+        setPets(petsData || []);
       }
     }
   };
@@ -137,6 +160,34 @@ const Dashboard = () => {
                   <p className="text-2xl font-bold">$0.00</p>
                 </div>
               </div>
+            </GradientCard>
+
+            {/* Pet Profiles Section */}
+            <GradientCard className="md:col-span-3">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-semibold">My Pets</h3>
+                <Button onClick={() => navigate("/create-pet-profile")} size="sm">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Pet
+                </Button>
+              </div>
+              {pets.length > 0 ? (
+                <div className="grid gap-4 md:grid-cols-2">
+                  {pets.map((pet) => (
+                    <PetProfileCard key={pet.id} pet={pet} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground mb-4">
+                    You haven't added any pets yet
+                  </p>
+                  <Button onClick={() => navigate("/create-pet-profile")}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Your First Pet
+                  </Button>
+                </div>
+              )}
             </GradientCard>
 
             <GradientCard className="md:col-span-3">

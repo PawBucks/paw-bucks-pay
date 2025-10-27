@@ -61,6 +61,50 @@ export type Database = {
           },
         ]
       }
+      pet_profiles: {
+        Row: {
+          birthday: string | null
+          breed: string | null
+          created_at: string
+          id: string
+          pet_name: string
+          pet_type: Database["public"]["Enums"]["pet_type"]
+          photo_url: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          birthday?: string | null
+          breed?: string | null
+          created_at?: string
+          id?: string
+          pet_name: string
+          pet_type: Database["public"]["Enums"]["pet_type"]
+          photo_url?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          birthday?: string | null
+          breed?: string | null
+          created_at?: string
+          id?: string
+          pet_name?: string
+          pet_type?: Database["public"]["Enums"]["pet_type"]
+          photo_url?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pet_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -210,6 +254,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      pet_type: "dog" | "cat" | "other"
       user_type: "pet_owner" | "merchant"
     }
     CompositeTypes: {
@@ -339,6 +384,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      pet_type: ["dog", "cat", "other"],
       user_type: ["pet_owner", "merchant"],
     },
   },

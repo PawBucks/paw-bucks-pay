@@ -1,0 +1,68 @@
+import { GradientCard } from "@/components/ui/gradient-card";
+import { Badge } from "@/components/ui/badge";
+import { Calendar, PawPrint } from "lucide-react";
+import { format } from "date-fns";
+
+type PetProfile = {
+  id: string;
+  pet_name: string;
+  pet_type: "dog" | "cat" | "other";
+  breed?: string;
+  birthday?: string;
+  photo_url?: string;
+};
+
+type PetProfileCardProps = {
+  pet: PetProfile;
+};
+
+export const PetProfileCard = ({ pet }: PetProfileCardProps) => {
+  const petTypeColors = {
+    dog: "bg-blue-500/10 text-blue-700 border-blue-500/20",
+    cat: "bg-purple-500/10 text-purple-700 border-purple-500/20",
+    other: "bg-gray-500/10 text-gray-700 border-gray-500/20",
+  };
+
+  const age = pet.birthday
+    ? Math.floor(
+        (new Date().getTime() - new Date(pet.birthday).getTime()) /
+          (365.25 * 24 * 60 * 60 * 1000)
+      )
+    : null;
+
+  return (
+    <GradientCard gradient className="flex items-center gap-4">
+      {pet.photo_url ? (
+        <img
+          src={pet.photo_url}
+          alt={pet.pet_name}
+          className="w-20 h-20 rounded-full object-cover border-2 border-primary/20"
+        />
+      ) : (
+        <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center">
+          <PawPrint className="w-10 h-10 text-muted-foreground" />
+        </div>
+      )}
+      <div className="flex-1">
+        <h3 className="text-xl font-bold mb-1">{pet.pet_name}</h3>
+        <div className="flex flex-wrap gap-2 items-center">
+          <Badge
+            variant="outline"
+            className={petTypeColors[pet.pet_type]}
+          >
+            {pet.pet_type.charAt(0).toUpperCase() + pet.pet_type.slice(1)}
+          </Badge>
+          {pet.breed && (
+            <span className="text-sm text-muted-foreground">{pet.breed}</span>
+          )}
+          {age !== null && (
+            <span className="text-sm text-muted-foreground flex items-center gap-1">
+              <Calendar className="w-3 h-3" />
+              {age} {age === 1 ? "year" : "years"} old
+            </span>
+          )}
+        </div>
+      </div>
+    </GradientCard>
+  );
+};
