@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { PawPrint, Menu } from "lucide-react";
+import { PawPrint, LogOut, Menu } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,9 +15,11 @@ interface MenuItem {
 
 interface HeaderProps {
   menuItems?: MenuItem[];
+  isAuthenticated?: boolean;
+  onLogout?: () => void;
 }
 
-export const Header = ({ menuItems }: HeaderProps) => {
+export const Header = ({ menuItems, isAuthenticated = false, onLogout }: HeaderProps) => {
   const navigate = useNavigate();
   
   const defaultMenuItems: MenuItem[] = [
@@ -43,28 +45,41 @@ export const Header = ({ menuItems }: HeaderProps) => {
             PetalPay
           </h1>
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button 
-              size="icon"
-              className="shadow-xl hover:shadow-2xl transition-all hover:scale-105"
-              aria-label="Open menu"
-            >
-              <Menu className="h-6 w-6" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56 bg-card z-50">
-            {(menuItems || defaultMenuItems).map((item, index) => (
-              <DropdownMenuItem 
-                key={index}
-                onClick={() => navigate(item.path)}
-                className="cursor-pointer"
+        
+        {isAuthenticated && onLogout ? (
+          <Button 
+            onClick={onLogout}
+            variant="outline"
+            className="gap-2"
+            aria-label="Logout"
+          >
+            <LogOut className="h-4 w-4" />
+            <span className="hidden sm:inline">Logout</span>
+          </Button>
+        ) : (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                size="icon"
+                className="shadow-xl hover:shadow-2xl transition-all hover:scale-105"
+                aria-label="Open menu"
               >
-                {item.label}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+                <Menu className="h-6 w-6" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56 bg-card z-50">
+              {(menuItems || defaultMenuItems).map((item, index) => (
+                <DropdownMenuItem 
+                  key={index}
+                  onClick={() => navigate(item.path)}
+                  className="cursor-pointer"
+                >
+                  {item.label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </nav>
     </header>
   );

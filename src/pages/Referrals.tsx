@@ -23,7 +23,7 @@ type Referral = {
 };
 
 const Referrals = () => {
-  const { user, loading: authLoading } = useAuth();
+  const { user, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [referralCode, setReferralCode] = useState<string>("");
   const [referrals, setReferrals] = useState<Referral[]>([]);
@@ -120,6 +120,11 @@ const Referrals = () => {
     }
   };
 
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/auth");
+  };
+
   const totalEarned = referrals.filter(r => r.referrer_bonus_awarded).length * 10;
 
   if (loading || authLoading) {
@@ -132,7 +137,7 @@ const Referrals = () => {
 
   return (
     <div className="min-h-screen bg-[var(--gradient-hero)] pb-24">
-      <Header />
+      <Header isAuthenticated={true} onLogout={handleSignOut} />
       <div className="container mx-auto px-4 py-8 max-w-2xl">
         {/* Header */}
         <div className="mb-8">
