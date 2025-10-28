@@ -42,7 +42,7 @@ export const Header = ({ menuItems, isAuthenticated = false, onLogout }: HeaderP
             <PawPrint className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
           </div>
           <h1 className="text-xl sm:text-2xl font-bold text-accent">
-            PetalPay
+            PawBucks
           </h1>
         </div>
         

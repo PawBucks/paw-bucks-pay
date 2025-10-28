@@ -160,7 +160,7 @@ const MerchantTransactions = () => {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `petalpay-transactions-${format(new Date(), "yyyy-MM-dd")}.csv`;
+    a.download = `pawbucks-transactions-${format(new Date(), "yyyy-MM-dd")}.csv`;
     a.click();
     window.URL.revokeObjectURL(url);
     toast.success("Transactions exported successfully");
@@ -199,7 +199,7 @@ const MerchantTransactions = () => {
         {/* Header */}
         <div className="space-y-2">
           <h1 className="text-3xl font-bold text-foreground">Detailed Transactions</h1>
-          <p className="text-muted-foreground">View and manage all PetalPay sales, cashback, and repayments.</p>
+          <p className="text-muted-foreground">View and manage all PawBucks sales, cashback, and repayments.</p>
         </div>
 
         {/* Summary KPIs */}
@@ -331,7 +331,7 @@ const MerchantTransactions = () => {
               <div className="flex flex-col items-center justify-center py-16 text-center">
                 <span className="text-6xl mb-4">🐾</span>
                 <p className="text-lg text-muted-foreground">
-                  No transactions yet — your PetalPay journey starts with your first sale!
+                  No transactions yet — your PawBucks journey starts with your first sale!
                 </p>
               </div>
             ) : (

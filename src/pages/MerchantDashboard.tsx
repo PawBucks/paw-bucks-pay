@@ -324,7 +324,7 @@ const MerchantDashboard = () => {
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Merchant Dashboard</h1>
           <p className="text-muted-foreground">
-            Track your PetalPay sales, cashback, and repayments in one place.
+            Track your PawBucks sales, cashback, and repayments in one place.
           </p>
         </div>
 

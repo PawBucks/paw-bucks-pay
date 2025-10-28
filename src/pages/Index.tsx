@@ -81,7 +81,7 @@ const Index = () => {
                 size="lg" 
                 onClick={() => navigate("/auth")}
                 className="text-base sm:text-lg px-8 sm:px-10 py-6 sm:py-7 shadow-xl hover:shadow-2xl transition-all hover:scale-105 group"
-                aria-label="Start using PetalPay for free"
+                aria-label="Start using PawBucks for free"
               >
                 Start Free 
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
@@ -91,7 +91,7 @@ const Index = () => {
                 variant="outline"
                 className="text-base sm:text-lg px-8 sm:px-10 py-6 sm:py-7 border-2 hover:bg-accent/5"
                 onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
-                aria-label="Learn more about PetalPay features"
+                aria-label="Learn more about PawBucks features"
               >
                 Learn More
               </Button>
@@ -200,7 +200,7 @@ const Index = () => {
             <div className="max-w-4xl mx-auto">
               <div className="text-center mb-12">
                 <h2 id="benefits-heading" className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
-                  Why pet owners love PetalPay
+                  Why pet owners love PawBucks
                 </h2>
               </div>
               
@@ -274,7 +274,7 @@ const Index = () => {
               </h2>
               
               <p className="text-lg sm:text-xl lg:text-2xl text-white/90 mb-10 max-w-3xl mx-auto leading-relaxed">
-                Join thousands of pet owners and businesses already using PetalPay to simplify pet care payments.
+                Join thousands of pet owners and businesses already using PawBucks to simplify pet care payments.
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -282,7 +282,7 @@ const Index = () => {
                   size="lg" 
                   onClick={() => navigate("/auth")}
                   className="bg-white text-accent hover:bg-white/90 text-base sm:text-lg px-8 sm:px-10 py-6 sm:py-7 shadow-2xl hover:shadow-3xl transition-all hover:scale-105"
-                  aria-label="Create your free PetalPay account"
+                  aria-label="Create your free PawBucks account"
                 >
                   Create Free Account
                   <ArrowRight className="w-5 h-5 ml-2" />
@@ -310,13 +310,13 @@ const Index = () => {
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-accent to-secondary flex items-center justify-center shadow-md">
                 <PawPrint className="w-6 h-6 text-white" />
               </div>
-              <span className="text-xl font-bold text-accent">PetalPay</span>
+              <span className="text-xl font-bold text-accent">PawBucks</span>
             </div>
             <p className="text-sm sm:text-base text-muted-foreground text-center max-w-md">
               Making pet care payments simple, secure, and rewarding for everyone who loves pets.
             </p>
             <p className="text-sm text-muted-foreground">
-              &copy; {new Date().getFullYear()} PetalPay. All rights reserved.
+              &copy; {new Date().getFullYear()} PawBucks. All rights reserved.
             </p>
           </div>
         </div>

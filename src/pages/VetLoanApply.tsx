@@ -224,7 +224,7 @@ const VetLoanApply = () => {
         <div className="text-center mb-8 space-y-2">
           <h1 className="text-4xl font-bold text-foreground">Vet Bill Financing</h1>
           <p className="text-lg text-muted-foreground">
-            Get instant funding for your vet bill — pay over time through PetalPay.
+            Get instant funding for your vet bill — pay over time through PawBucks.
           </p>
           <p className="text-sm text-muted-foreground italic">
             We're here to help you care for your pet — stress-free. 🐾
@@ -426,7 +426,7 @@ const VetLoanApply = () => {
                     onCheckedChange={(checked) => setAgreedToTerms(checked === true)}
                   />
                   <Label htmlFor="terms" className="text-sm cursor-pointer leading-relaxed">
-                    I agree to credit terms and PetalPay's loan policy. I understand that this is a binding financial agreement.
+                    I agree to credit terms and PawBucks's loan policy. I understand that this is a binding financial agreement.
                   </Label>
                 </div>
 

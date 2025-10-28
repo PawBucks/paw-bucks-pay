@@ -106,7 +106,7 @@ const AdminLogin = () => {
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@petalpay.com"
+                placeholder="admin@pawbucks.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required

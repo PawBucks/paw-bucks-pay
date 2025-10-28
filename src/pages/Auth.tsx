@@ -176,7 +176,7 @@ const Auth = () => {
               <PawPrint className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
             </div>
           </div>
-          <CardTitle className="text-2xl sm:text-3xl font-bold">Welcome to PetalPay</CardTitle>
+          <CardTitle className="text-2xl sm:text-3xl font-bold">Welcome to PawBucks</CardTitle>
           <CardDescription className="text-sm sm:text-base">
             Connect with pet services or grow your pet business
           </CardDescription>
@@ -365,7 +365,7 @@ const Auth = () => {
                   type="submit" 
                   className="w-full" 
                   disabled={isLoading}
-                  aria-label="Create your PetalPay account"
+                  aria-label="Create your PawBucks account"
                 >
                   {isLoading ? "Creating account..." : "Create Account"}
                 </Button>

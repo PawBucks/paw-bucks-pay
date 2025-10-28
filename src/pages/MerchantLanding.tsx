@@ -22,7 +22,7 @@ const MerchantLanding = () => {
               <PawPrint className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
             </div>
             <h1 className="text-xl sm:text-2xl font-bold text-accent">
-              PetalPay
+              PawBucks
             </h1>
           </div>
           <Button 
@@ -54,7 +54,7 @@ const MerchantLanding = () => {
               Grow Your Pet Business
               <br />
               <span className="text-accent">
-                with PetalPay
+                with PawBucks
               </span>
             </h2>
             
@@ -68,7 +68,7 @@ const MerchantLanding = () => {
                 size="lg" 
                 onClick={() => navigate("/merchant-onboarding")}
                 className="text-base sm:text-lg px-8 sm:px-10 py-6 sm:py-7 shadow-xl hover:shadow-2xl transition-all hover:scale-105 group"
-                aria-label="Start accepting payments with PetalPay"
+                aria-label="Start accepting payments with PawBucks"
               >
                 Start Accepting Payments
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
@@ -187,7 +187,7 @@ const MerchantLanding = () => {
             <div className="max-w-4xl mx-auto">
               <div className="text-center mb-12">
                 <h2 id="benefits-heading" className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
-                  Why pet businesses choose PetalPay
+                  Why pet businesses choose PawBucks
                 </h2>
               </div>
               
@@ -261,7 +261,7 @@ const MerchantLanding = () => {
               </h2>
               
               <p className="text-lg sm:text-xl lg:text-2xl text-white/90 mb-10 max-w-3xl mx-auto leading-relaxed">
-                Join hundreds of pet businesses already growing their revenue with PetalPay's merchant platform.
+                Join hundreds of pet businesses already growing their revenue with PawBucks's merchant platform.
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -297,13 +297,13 @@ const MerchantLanding = () => {
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-accent to-secondary flex items-center justify-center shadow-md">
                 <PawPrint className="w-6 h-6 text-white" />
               </div>
-              <span className="text-xl font-bold text-accent">PetalPay</span>
+              <span className="text-xl font-bold text-accent">PawBucks</span>
             </div>
             <p className="text-sm sm:text-base text-muted-foreground text-center max-w-md">
               Empowering pet businesses with seamless payment solutions and growth opportunities.
             </p>
             <p className="text-sm text-muted-foreground">
-              &copy; {new Date().getFullYear()} PetalPay. All rights reserved.
+              &copy; {new Date().getFullYear()} PawBucks. All rights reserved.
             </p>
           </div>
         </div>

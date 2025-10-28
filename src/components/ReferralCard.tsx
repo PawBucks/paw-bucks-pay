@@ -93,7 +93,7 @@ export const ReferralCard = () => {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: "Join PetalPay",
+          title: "Join PawBucks",
           text: `Use my referral code ${referralCode} and we both get $10!`,
           url: shareUrl,
         });

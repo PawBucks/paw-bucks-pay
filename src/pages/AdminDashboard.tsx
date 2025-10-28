@@ -431,7 +431,7 @@ const AdminDashboard = () => {
             </div>
             <div>
               <h1 className="text-xl font-bold">Admin Dashboard</h1>
-              <p className="text-xs text-muted-foreground">PetalPay Management</p>
+              <p className="text-xs text-muted-foreground">PawBucks Management</p>
             </div>
           </div>
           <div className="flex gap-2">
