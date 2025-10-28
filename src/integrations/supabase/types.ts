@@ -99,6 +99,41 @@ export type Database = {
           },
         ]
       }
+      loan_activity: {
+        Row: {
+          action: string
+          created_at: string
+          details: Json | null
+          id: string
+          loan_id: string
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          loan_id: string
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          loan_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loan_activity_loan_id_fkey"
+            columns: ["loan_id"]
+            isOneToOne: false
+            referencedRelation: "vet_loans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       merchants: {
         Row: {
           address: string | null
@@ -191,6 +226,36 @@ export type Database = {
           message?: string
           title?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      partner_vets: {
+        Row: {
+          contact_email: string
+          created_at: string
+          id: string
+          location: string
+          name: string
+          stripe_account_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          contact_email: string
+          created_at?: string
+          id?: string
+          location: string
+          name: string
+          stripe_account_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          contact_email?: string
+          created_at?: string
+          id?: string
+          location?: string
+          name?: string
+          stripe_account_id?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -461,6 +526,59 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      vet_loans: {
+        Row: {
+          created_at: string
+          id: string
+          invoice_amount: number
+          invoice_url: string | null
+          purpose: string | null
+          repayment_schedule: Json | null
+          requested_amount: number
+          status: string
+          term_months: number
+          updated_at: string
+          user_id: string
+          vet_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          invoice_amount: number
+          invoice_url?: string | null
+          purpose?: string | null
+          repayment_schedule?: Json | null
+          requested_amount: number
+          status?: string
+          term_months: number
+          updated_at?: string
+          user_id: string
+          vet_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          invoice_amount?: number
+          invoice_url?: string | null
+          purpose?: string | null
+          repayment_schedule?: Json | null
+          requested_amount?: number
+          status?: string
+          term_months?: number
+          updated_at?: string
+          user_id?: string
+          vet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vet_loans_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       wallet_activity: {
         Row: {
