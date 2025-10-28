@@ -33,7 +33,7 @@ serve(async (req) => {
 
     console.log('Processing loan application for user:', user.id);
 
-    // Verify Premium subscription
+    // Verify PawPass subscription
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
       apiVersion: '2025-08-27.basil',
     });
@@ -57,11 +57,11 @@ serve(async (req) => {
     }
 
     if (!hasActiveSub) {
-      console.log('User does not have active Premium subscription');
-      throw new Error('PetalPay Premium subscription required for vet loan financing');
+      console.log('User does not have active PawPass subscription');
+      throw new Error('PawPass subscription required for vet loan financing');
     }
 
-    console.log('Premium subscription verified');
+    console.log('PawPass subscription verified');
 
     const requestData = await req.json();
     const {

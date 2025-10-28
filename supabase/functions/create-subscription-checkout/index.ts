@@ -7,7 +7,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// PetalPay Premium subscription price ID
+// PawPass subscription price ID
 const PREMIUM_PRICE_ID = 'price_1SMsJSK2QqG8Wa5zn0mk0wxw';
 
 serve(async (req) => {

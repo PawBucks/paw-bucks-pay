@@ -235,14 +235,14 @@ const VetLoanApply = () => {
         {!subscription.subscribed && (
           <Alert className="border-accent bg-accent/10">
             <Crown className="h-5 w-5 text-accent" />
-            <AlertTitle className="text-lg font-bold">PetalPay Premium Required</AlertTitle>
+            <AlertTitle className="text-lg font-bold">PawPass Required</AlertTitle>
             <AlertDescription className="space-y-4">
               <p>
-                Vet Bill Financing is an exclusive benefit for PetalPay Premium members. 
-                Upgrade to Premium to unlock instant funding for your pet's veterinary care.
+                Vet Bill Financing is an exclusive benefit for PawPass members. 
+                Upgrade to PawPass to unlock instant funding for your pet's veterinary care.
               </p>
               <div className="space-y-2">
-                <p className="font-semibold">Premium Benefits Include:</p>
+                <p className="font-semibold">PawPass Benefits Include:</p>
                 <ul className="list-disc list-inside space-y-1 text-sm">
                   <li>25% cashback on all purchases (vs 10% for free users)</li>
                   <li>Instant vet bill financing up to $10,000</li>
@@ -254,7 +254,7 @@ const VetLoanApply = () => {
               <div className="flex gap-3">
                 <Button onClick={handleUpgradeToPremium} className="gap-2">
                   <Crown className="h-4 w-4" />
-                  Upgrade to Premium
+                  Upgrade to PawPass
                 </Button>
                 <Button onClick={() => navigate('/dashboard')} variant="outline">
                   Back to Dashboard

@@ -150,7 +150,7 @@ const Profile = () => {
                     <Sparkles className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg">PetalPay Premium</h3>
+                    <h3 className="font-semibold text-lg">PawPass</h3>
                     <p className="text-sm text-muted-foreground">
                       {subscription.subscribed ? "Active Subscription" : "$9.99/month"}
                     </p>
