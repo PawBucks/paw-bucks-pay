@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,7 +12,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { Upload, CheckCircle, XCircle, Clock } from "lucide-react";
+import { Upload, CheckCircle, XCircle, Clock, Crown } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface PartnerVet {
   id: string;
@@ -34,6 +36,7 @@ interface LoanResponse {
 
 const VetLoanApply = () => {
   const { user, loading } = useAuth();
+  const { subscription, loading: subscriptionLoading, createCheckout } = useSubscription();
   const navigate = useNavigate();
 
   const [vets, setVets] = useState<PartnerVet[]>([]);
@@ -196,7 +199,15 @@ const VetLoanApply = () => {
     return selectedVet && invoiceAmount && requestedAmount && termMonths && agreedToTerms && invoiceFile;
   };
 
-  if (loading) {
+  const handleUpgradeToPremium = async () => {
+    try {
+      await createCheckout();
+    } catch (error) {
+      toast.error("Failed to start checkout process");
+    }
+  };
+
+  if (loading || subscriptionLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -219,6 +230,39 @@ const VetLoanApply = () => {
             We're here to help you care for your pet — stress-free. 🐾
           </p>
         </div>
+
+        {/* Premium Required Notice */}
+        {!subscription.subscribed && (
+          <Alert className="border-accent bg-accent/10">
+            <Crown className="h-5 w-5 text-accent" />
+            <AlertTitle className="text-lg font-bold">PetalPay Premium Required</AlertTitle>
+            <AlertDescription className="space-y-4">
+              <p>
+                Vet Bill Financing is an exclusive benefit for PetalPay Premium members. 
+                Upgrade to Premium to unlock instant funding for your pet's veterinary care.
+              </p>
+              <div className="space-y-2">
+                <p className="font-semibold">Premium Benefits Include:</p>
+                <ul className="list-disc list-inside space-y-1 text-sm">
+                  <li>25% cashback on all purchases (vs 10% for free users)</li>
+                  <li>Instant vet bill financing up to $10,000</li>
+                  <li>Flexible repayment terms (3, 6, or 12 months)</li>
+                  <li>Priority customer support</li>
+                  <li>No application fees</li>
+                </ul>
+              </div>
+              <div className="flex gap-3">
+                <Button onClick={handleUpgradeToPremium} className="gap-2">
+                  <Crown className="h-4 w-4" />
+                  Upgrade to Premium
+                </Button>
+                <Button onClick={() => navigate('/dashboard')} variant="outline">
+                  Back to Dashboard
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
 
         {/* Result Display */}
         {result && (
@@ -267,8 +311,8 @@ const VetLoanApply = () => {
           </Card>
         )}
 
-        {/* Application Form */}
-        {!result && (
+        {/* Application Form - Only show if Premium subscriber */}
+        {!result && subscription.subscribed && (
           <Card>
             <CardHeader>
               <CardTitle>Loan Application</CardTitle>

@@ -33,6 +33,36 @@ serve(async (req) => {
 
     console.log('Processing loan application for user:', user.id);
 
+    // Verify Premium subscription
+    const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
+      apiVersion: '2025-08-27.basil',
+    });
+
+    if (!user.email) {
+      throw new Error('User email not found');
+    }
+
+    // Check for active subscription
+    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+    let hasActiveSub = false;
+
+    if (customers.data.length > 0) {
+      const customerId = customers.data[0].id;
+      const subscriptions = await stripe.subscriptions.list({
+        customer: customerId,
+        status: 'active',
+        limit: 1,
+      });
+      hasActiveSub = subscriptions.data.length > 0;
+    }
+
+    if (!hasActiveSub) {
+      console.log('User does not have active Premium subscription');
+      throw new Error('PetalPay Premium subscription required for vet loan financing');
+    }
+
+    console.log('Premium subscription verified');
+
     const requestData = await req.json();
     const {
       vet_id,
