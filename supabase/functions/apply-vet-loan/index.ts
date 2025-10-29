@@ -57,8 +57,8 @@ serve(async (req) => {
     }
 
     if (!hasActiveSub) {
-      console.log('User does not have active PawPass subscription');
-      throw new Error('PawPass subscription required for vet loan financing');
+      console.log('User does not have active PawPass subscription:', user.id);
+      throw new Error('An active subscription is required to apply for vet financing.');
     }
 
     console.log('PawPass subscription verified');
@@ -99,7 +99,8 @@ serve(async (req) => {
       .single();
 
     if (vetError || !vet) {
-      throw new Error('Invalid vet clinic selected');
+      console.error('Vet clinic validation failed:', vet_id, vetError);
+      throw new Error('Unable to process loan application. Please try again.');
     }
 
     console.log('Vet clinic verified:', vet.name);
@@ -142,7 +143,7 @@ serve(async (req) => {
 
     if (loanError) {
       console.error('Error creating loan:', loanError);
-      throw new Error('Failed to create loan application');
+      throw new Error('Unable to process loan application. Please contact support.');
     }
 
     console.log('Loan created:', loan.id);
@@ -193,7 +194,7 @@ serve(async (req) => {
           });
       } catch (stripeError) {
         console.error('Stripe transfer error:', stripeError);
-        const errorMessage = stripeError instanceof Error ? stripeError.message : 'Unknown error';
+        const errorMessage = stripeError instanceof Error ? stripeError.message : 'Transfer failed';
         // Don't fail the whole request, but log it
         await supabase
           .from('loan_activity')

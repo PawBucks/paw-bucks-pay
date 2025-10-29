@@ -80,7 +80,8 @@ serve(async (req) => {
       .single();
 
     if (error) {
-      throw new Error('Failed to update merchant');
+      console.error('Database error updating merchant:', merchantId, error);
+      throw new Error('Failed to update merchant. Please try again.');
     }
 
     console.log('Merchant updated by admin:', user.id, merchantId, updates);
@@ -91,7 +92,7 @@ serve(async (req) => {
     );
   } catch (error: unknown) {
     console.error('Error updating merchant:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorMessage = error instanceof Error ? error.message : 'Failed to update merchant';
     return new Response(
       JSON.stringify({ error: errorMessage }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }

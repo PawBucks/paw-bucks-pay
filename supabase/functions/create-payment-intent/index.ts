@@ -87,11 +87,13 @@ serve(async (req) => {
       .single();
 
     if (merchantError || !merchant) {
-      throw new Error('Merchant not found');
+      console.error('Merchant not found:', merchantId, merchantError);
+      throw new Error('Unable to process payment. Please try again.');
     }
 
     if (!merchant.stripe_account_id) {
-      throw new Error('Merchant has not completed Stripe Connect setup');
+      console.error('Merchant Stripe account not configured:', merchantId);
+      throw new Error('Payment processing is not available for this merchant.');
     }
 
     // Check if user has active subscription (25% for premium, 10% for free)
@@ -158,8 +160,9 @@ serve(async (req) => {
   } catch (error: unknown) {
     console.error('Error creating payment intent:', error);
     // Return generic error to client, log details server-side
+    const errorMessage = error instanceof Error ? error.message : 'Payment processing failed. Please try again.';
     return new Response(
-      JSON.stringify({ error: 'Failed to process payment. Please try again.' }),
+      JSON.stringify({ error: errorMessage }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 400,

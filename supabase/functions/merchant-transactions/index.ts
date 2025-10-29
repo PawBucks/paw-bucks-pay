@@ -1,5 +1,14 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { z } from "https://esm.sh/zod@3.22.4";
+
+// Query parameters validation schema
+const querySchema = z.object({
+  start_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  end_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  status: z.enum(['completed', 'pending', 'refunded', 'all']).optional(),
+  search: z.string().max(100).optional(),
+});
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -40,17 +49,34 @@ serve(async (req) => {
       .single();
 
     if (merchantError || !merchant) {
-      throw new Error('Merchant not found');
+      console.error('Merchant not found for user:', user.id, merchantError);
+      throw new Error('Unable to fetch transactions. Please try again.');
     }
 
     console.log('Found merchant:', merchant.id);
 
-    // Parse query parameters for filtering
+    // Parse and validate query parameters
     const url = new URL(req.url);
-    const startDate = url.searchParams.get('start_date');
-    const endDate = url.searchParams.get('end_date');
-    const status = url.searchParams.get('status');
-    const search = url.searchParams.get('search');
+    const queryParams = {
+      start_date: url.searchParams.get('start_date'),
+      end_date: url.searchParams.get('end_date'),
+      status: url.searchParams.get('status'),
+      search: url.searchParams.get('search'),
+    };
+
+    const validationResult = querySchema.safeParse(queryParams);
+    if (!validationResult.success) {
+      console.error('Invalid query parameters:', validationResult.error);
+      return new Response(
+        JSON.stringify({ error: 'Invalid query parameters' }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400,
+        }
+      );
+    }
+
+    const { start_date: startDate, end_date: endDate, status, search } = validationResult.data;
 
     // Build query
     let query = supabase
@@ -144,7 +170,7 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error in merchant-transactions function:', error);
-    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+    const errorMessage = error instanceof Error ? error.message : 'Failed to fetch transactions';
     return new Response(
       JSON.stringify({ error: errorMessage }),
       { 

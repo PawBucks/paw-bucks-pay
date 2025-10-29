@@ -62,7 +62,8 @@ serve(async (req) => {
       .single();
 
     if (walletError || !wallet) {
-      throw new Error('Wallet not found');
+      console.error('Wallet lookup failed:', user.id, walletError);
+      throw new Error('Unable to process redemption. Please try again.');
     }
 
     // Check sufficient balance
@@ -93,7 +94,8 @@ serve(async (req) => {
       .eq('user_id', user.id);
 
     if (updateError) {
-      throw new Error('Failed to update wallet balance');
+      console.error('Wallet update failed:', user.id, updateError);
+      throw new Error('Failed to process redemption. Please try again.');
     }
 
     // Log wallet activity
@@ -127,7 +129,7 @@ serve(async (req) => {
     );
   } catch (error: unknown) {
     console.error('Error redeeming wallet credits:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorMessage = error instanceof Error ? error.message : 'Failed to redeem credits';
     return new Response(
       JSON.stringify({ error: errorMessage }),
       { 

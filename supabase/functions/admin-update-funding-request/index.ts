@@ -75,7 +75,8 @@ serve(async (req) => {
       .single();
 
     if (error) {
-      throw new Error('Failed to update funding request');
+      console.error('Database error updating funding request:', requestId, error);
+      throw new Error('Failed to update funding request. Please try again.');
     }
 
     console.log('Funding request updated by admin:', user.id, requestId, status);
@@ -86,7 +87,7 @@ serve(async (req) => {
     );
   } catch (error: unknown) {
     console.error('Error updating funding request:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorMessage = error instanceof Error ? error.message : 'Failed to update funding request';
     return new Response(
       JSON.stringify({ error: errorMessage }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
