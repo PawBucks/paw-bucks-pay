@@ -79,6 +79,19 @@ const MerchantOnboarding = () => {
         cashbackRate: 10.0, // Default rate, not user-configurable
       });
 
+      // Update profile to merchant type if needed
+      if (profile?.user_type !== "merchant") {
+        const { error: profileError } = await supabase
+          .from("profiles")
+          .update({ user_type: "merchant" })
+          .eq("id", user.id);
+
+        if (profileError) {
+          console.error("Error updating profile:", profileError);
+          throw new Error("Failed to update account type");
+        }
+      }
+
       // Create merchant profile
       const { error: merchantError } = await supabase.from("merchants").insert({
         user_id: user.id,
@@ -90,7 +103,10 @@ const MerchantOnboarding = () => {
         cashback_rate: validatedData.cashbackRate,
       });
 
-      if (merchantError) throw merchantError;
+      if (merchantError) {
+        console.error("Error creating merchant:", merchantError);
+        throw new Error("Failed to create merchant profile");
+      }
 
       toast.success("Merchant profile created successfully!");
       navigate("/merchant-dashboard");
