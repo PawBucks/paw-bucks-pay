@@ -20,6 +20,7 @@ import VetLoanApply from "./pages/VetLoanApply";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminLogin from "./pages/AdminLogin";
 import PetHealth from "./pages/PetHealth";
+import VetDashboard from "./pages/VetDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -46,6 +47,7 @@ const App = () => (
           <Route path="/merchant/transactions" element={<MerchantTransactions />} />
           <Route path="/vet-loan/apply" element={<VetLoanApply />} />
           <Route path="/pet-health/:petId" element={<PetHealth />} />
+          <Route path="/vet-dashboard" element={<VetDashboard />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminDashboard />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
