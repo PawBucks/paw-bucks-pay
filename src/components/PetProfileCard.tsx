@@ -1,7 +1,9 @@
 import { GradientCard } from "@/components/ui/gradient-card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, PawPrint } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Calendar, PawPrint, FileHeart } from "lucide-react";
 import { format } from "date-fns";
+import { useNavigate } from "react-router-dom";
 
 type PetProfile = {
   id: string;
@@ -17,6 +19,7 @@ type PetProfileCardProps = {
 };
 
 export const PetProfileCard = ({ pet }: PetProfileCardProps) => {
+  const navigate = useNavigate();
   const petTypeColors = {
     dog: "bg-blue-500/10 text-blue-700 border-blue-500/20",
     cat: "bg-purple-500/10 text-purple-700 border-purple-500/20",
@@ -63,6 +66,15 @@ export const PetProfileCard = ({ pet }: PetProfileCardProps) => {
           )}
         </div>
       </div>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => navigate(`/pet-health/${pet.id}`)}
+        className="flex-shrink-0"
+      >
+        <FileHeart className="w-4 h-4 mr-2" />
+        Health Records
+      </Button>
     </GradientCard>
   );
 };

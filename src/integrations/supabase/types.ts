@@ -259,6 +259,63 @@ export type Database = {
         }
         Relationships: []
       }
+      pet_medical_records: {
+        Row: {
+          created_at: string
+          description: string | null
+          file_url: string | null
+          id: string
+          pet_id: string
+          record_date: string
+          record_type: Database["public"]["Enums"]["medical_record_type"]
+          title: string
+          updated_at: string
+          user_id: string
+          vet_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          file_url?: string | null
+          id?: string
+          pet_id: string
+          record_date: string
+          record_type: Database["public"]["Enums"]["medical_record_type"]
+          title: string
+          updated_at?: string
+          user_id: string
+          vet_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          file_url?: string | null
+          id?: string
+          pet_id?: string
+          record_date?: string
+          record_type?: Database["public"]["Enums"]["medical_record_type"]
+          title?: string
+          updated_at?: string
+          user_id?: string
+          vet_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pet_medical_records_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "pet_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_medical_records_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pet_profiles: {
         Row: {
           birthday: string | null
@@ -577,6 +634,51 @@ export type Database = {
           },
         ]
       }
+      vet_messages: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          pet_id: string | null
+          sender_type: Database["public"]["Enums"]["message_sender_type"]
+          user_id: string
+          vet_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          pet_id?: string | null
+          sender_type: Database["public"]["Enums"]["message_sender_type"]
+          user_id: string
+          vet_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          pet_id?: string | null
+          sender_type?: Database["public"]["Enums"]["message_sender_type"]
+          user_id?: string
+          vet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vet_messages_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "pet_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vet_messages_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wallet_activity: {
         Row: {
           amount: number
@@ -737,6 +839,16 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      medical_record_type:
+        | "vaccination"
+        | "checkup"
+        | "surgery"
+        | "lab_results"
+        | "prescription"
+        | "dental"
+        | "emergency"
+        | "other"
+      message_sender_type: "owner" | "vet"
       pet_type: "dog" | "cat" | "other"
       user_type: "pet_owner" | "merchant"
     }
@@ -867,6 +979,17 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      medical_record_type: [
+        "vaccination",
+        "checkup",
+        "surgery",
+        "lab_results",
+        "prescription",
+        "dental",
+        "emergency",
+        "other",
+      ],
+      message_sender_type: ["owner", "vet"],
       pet_type: ["dog", "cat", "other"],
       user_type: ["pet_owner", "merchant"],
     },
