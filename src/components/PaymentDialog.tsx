@@ -182,11 +182,28 @@ export const PaymentDialog = ({
 
       if (error) throw error;
 
+      if (data?.error) {
+        // Handle backend errors with user-friendly messages
+        if (data.error.includes('not available for this merchant')) {
+          toast.error(`${merchantName} hasn't completed their payment setup yet. Please ask them to connect their bank account in their Merchant Dashboard.`);
+        } else {
+          toast.error(data.error);
+        }
+        return;
+      }
+
       setClientSecret(data.clientSecret);
       setShowPaymentForm(true);
     } catch (error: any) {
       console.error("Error creating payment intent:", error);
-      toast.error(error.message || "Failed to initialize payment");
+      const errorMessage = error.message || "Failed to initialize payment";
+      
+      // Provide helpful error messages
+      if (errorMessage.includes('not available for this merchant')) {
+        toast.error(`${merchantName} hasn't completed their payment setup yet. Please contact them to complete their merchant onboarding.`);
+      } else {
+        toast.error(errorMessage);
+      }
     } finally {
       setIsCreatingIntent(false);
     }
