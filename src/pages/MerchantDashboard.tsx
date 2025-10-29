@@ -159,13 +159,43 @@ const MerchantDashboard = () => {
         }
       );
 
-      if (error) throw error;
+      if (error) {
+        console.error("Stripe Connect error:", error);
+        throw error;
+      }
+
+      if (data?.error) {
+        console.error("Stripe Connect API error:", data.error);
+        
+        // Check if it's the platform profile configuration error
+        if (data.error.includes("platform-profile")) {
+          toast.error("Stripe platform not configured. Please contact support.", {
+            description: "The payment platform needs to be set up by the administrator.",
+            duration: 6000,
+          });
+        } else {
+          toast.error("Failed to connect Stripe account", {
+            description: data.error,
+            duration: 6000,
+          });
+        }
+        return;
+      }
 
       // Redirect to Stripe onboarding
-      window.location.href = data.onboardingUrl;
+      if (data?.onboardingUrl) {
+        window.location.href = data.onboardingUrl;
+      } else {
+        throw new Error("No onboarding URL received");
+      }
     } catch (error: any) {
       console.error("Error connecting Stripe:", error);
-      toast.error("Failed to connect Stripe account");
+      const errorMessage = error.message || "An unexpected error occurred";
+      toast.error("Failed to connect Stripe account", {
+        description: errorMessage,
+        duration: 5000,
+      });
+    } finally {
       setConnectingStripe(false);
     }
   };
