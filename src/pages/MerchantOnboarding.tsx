@@ -16,7 +16,7 @@ const MerchantOnboarding = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const [businessType, setBusinessType] = useState("pet_store");
+  const [businessType, setBusinessType] = useState("dog_walker");
   const [profile, setProfile] = useState<any>(null);
 
   useEffect(() => {
@@ -68,6 +68,7 @@ const MerchantOnboarding = () => {
       const contactPerson = formData.get("contactPerson") as string;
       const address = formData.get("address") as string;
       const description = formData.get("description") as string;
+      const otherExplanation = formData.get("otherExplanation") as string;
 
       // Validate input
       const validatedData = merchantOnboardingSchema.parse({
@@ -76,6 +77,7 @@ const MerchantOnboarding = () => {
         businessType,
         address: address || "",
         description: description || "",
+        otherExplanation: otherExplanation || "",
         cashbackRate: 10.0, // Default rate, not user-configurable
       });
 
@@ -175,13 +177,27 @@ const MerchantOnboarding = () => {
                   <SelectValue placeholder="Select business type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="pet_store">Pet Store</SelectItem>
-                  <SelectItem value="groomer">Groomer</SelectItem>
-                  <SelectItem value="trainer">Trainer</SelectItem>
-                  <SelectItem value="veterinarian">Veterinarian</SelectItem>
+                  <SelectItem value="dog_walker">Dog Walker</SelectItem>
+                  <SelectItem value="boarder">Boarder</SelectItem>
+                  <SelectItem value="sitter">Sitter</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
                 </SelectContent>
               </Select>
             </div>
+
+            {/* Other Explanation - shown only when "Other" is selected */}
+            {businessType === "other" && (
+              <div className="space-y-2">
+                <Label htmlFor="otherExplanation">Please Explain Your Business Type *</Label>
+                <Textarea
+                  id="otherExplanation"
+                  name="otherExplanation"
+                  placeholder="Describe what type of business you operate..."
+                  rows={3}
+                  required
+                />
+              </div>
+            )}
 
             {/* Address */}
             <div className="space-y-2">

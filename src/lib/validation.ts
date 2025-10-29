@@ -41,7 +41,7 @@ export const merchantOnboardingSchema = z.object({
     .trim()
     .min(1, { message: "Contact person is required" })
     .max(100, { message: "Contact person name must be less than 100 characters" }),
-  businessType: z.enum(["pet_store", "groomer", "trainer", "veterinarian"], {
+  businessType: z.enum(["dog_walker", "boarder", "sitter", "other"], {
     errorMap: () => ({ message: "Invalid business type" }),
   }),
   address: z.string()
@@ -54,9 +54,22 @@ export const merchantOnboardingSchema = z.object({
     .max(2000, { message: "Description must be less than 2000 characters" })
     .optional()
     .or(z.literal("")),
+  otherExplanation: z.string()
+    .trim()
+    .max(500, { message: "Explanation must be less than 500 characters" })
+    .optional()
+    .or(z.literal("")),
   cashbackRate: z.number()
     .min(0, { message: "Cashback rate must be at least 0%" })
     .max(100, { message: "Cashback rate cannot exceed 100%" }),
+}).refine((data) => {
+  if (data.businessType === "other" && !data.otherExplanation?.trim()) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Please explain your business type when selecting 'Other'",
+  path: ["otherExplanation"],
 });
 
 // Payment validation schemas
