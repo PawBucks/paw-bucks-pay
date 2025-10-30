@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Download, Trash2 } from "lucide-react";
+import { Download, Trash2, ChevronDown, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import {
@@ -13,9 +13,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Card } from "@/components/ui/card";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 type MedicalRecord = {
   id: string;
+  visit_id: string | null;
   record_type: string;
   title: string;
   description: string | null;
@@ -24,6 +27,13 @@ type MedicalRecord = {
   quantity: number | null;
   price: number | null;
   created_at: string;
+};
+
+type Visit = {
+  id: string;
+  visit_date: string;
+  notes: string | null;
+  records: MedicalRecord[];
 };
 
 type MedicalRecordsListProps = {
@@ -43,19 +53,39 @@ const recordTypeColors: Record<string, string> = {
 };
 
 export const MedicalRecordsList = ({ petId, refreshTrigger }: MedicalRecordsListProps) => {
-  const [records, setRecords] = useState<MedicalRecord[]>([]);
+  const [visits, setVisits] = useState<Visit[]>([]);
+  const [expandedVisits, setExpandedVisits] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
 
   const loadRecords = async () => {
     try {
-      const { data, error } = await supabase
+      // Load all visits
+      const { data: visitsData, error: visitsError } = await supabase
+        .from("pet_medical_visits")
+        .select("*")
+        .eq("pet_id", petId)
+        .order("visit_date", { ascending: false });
+
+      if (visitsError) throw visitsError;
+
+      // Load all records
+      const { data: recordsData, error: recordsError } = await supabase
         .from("pet_medical_records")
         .select("*")
         .eq("pet_id", petId)
-        .order("record_date", { ascending: false });
+        .order("created_at", { ascending: true });
 
-      if (error) throw error;
-      setRecords(data || []);
+      if (recordsError) throw recordsError;
+
+      // Group records by visit
+      const groupedVisits: Visit[] = (visitsData || []).map(visit => ({
+        id: visit.id,
+        visit_date: visit.visit_date,
+        notes: visit.notes,
+        records: (recordsData || []).filter(r => r.visit_id === visit.id),
+      }));
+
+      setVisits(groupedVisits);
     } catch (error) {
       console.error("Error loading medical records:", error);
       toast.error("Failed to load medical records");
@@ -68,8 +98,58 @@ export const MedicalRecordsList = ({ petId, refreshTrigger }: MedicalRecordsList
     loadRecords();
   }, [petId, refreshTrigger]);
 
-  const handleDelete = async (recordId: string, fileUrl: string | null) => {
-    if (!confirm("Are you sure you want to delete this medical record?")) return;
+  const toggleVisit = (visitId: string) => {
+    setExpandedVisits(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(visitId)) {
+        newSet.delete(visitId);
+      } else {
+        newSet.add(visitId);
+      }
+      return newSet;
+    });
+  };
+
+  const handleDeleteVisit = async (visitId: string) => {
+    if (!confirm("Are you sure you want to delete this entire visit and all its records?")) return;
+
+    try {
+      // Get all records for this visit to delete their files
+      const { data: records } = await supabase
+        .from("pet_medical_records")
+        .select("file_url")
+        .eq("visit_id", visitId);
+
+      // Delete files from storage
+      if (records) {
+        const filesToDelete = records
+          .filter(r => r.file_url)
+          .map(r => r.file_url!.split("/medical-records/")[1])
+          .filter(Boolean);
+
+        if (filesToDelete.length > 0) {
+          await supabase.storage.from("medical-records").remove(filesToDelete);
+        }
+      }
+
+      // Delete visit (cascade will delete records)
+      const { error } = await supabase
+        .from("pet_medical_visits")
+        .delete()
+        .eq("id", visitId);
+
+      if (error) throw error;
+
+      toast.success("Visit and all records deleted");
+      loadRecords();
+    } catch (error) {
+      console.error("Error deleting visit:", error);
+      toast.error("Failed to delete visit");
+    }
+  };
+
+  const handleDeleteRecord = async (recordId: string, fileUrl: string | null) => {
+    if (!confirm("Are you sure you want to delete this record?")) return;
 
     try {
       // Delete file from storage if exists
@@ -88,11 +168,11 @@ export const MedicalRecordsList = ({ petId, refreshTrigger }: MedicalRecordsList
 
       if (error) throw error;
 
-      toast.success("Medical record deleted");
+      toast.success("Record deleted");
       loadRecords();
     } catch (error) {
       console.error("Error deleting record:", error);
-      toast.error("Failed to delete medical record");
+      toast.error("Failed to delete record");
     }
   };
 
@@ -104,69 +184,122 @@ export const MedicalRecordsList = ({ petId, refreshTrigger }: MedicalRecordsList
     return <div className="text-center py-8 text-muted-foreground">Loading records...</div>;
   }
 
-  if (records.length === 0) {
+  if (visits.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
-        No medical records yet. Upload your pet's health records to keep everything organized.
+        No medical visits yet. Add a visit to track your pet's health records.
       </div>
     );
   }
 
+  const calculateVisitTotal = (records: MedicalRecord[]) => {
+    return records.reduce((sum, record) => sum + (Number(record.price) || 0), 0);
+  };
+
   return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Title</TableHead>
-            <TableHead>Type</TableHead>
-            <TableHead>Date</TableHead>
-            <TableHead className="text-right">Quantity</TableHead>
-            <TableHead className="text-right">Price</TableHead>
-            <TableHead>Description</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {records.map((record) => (
-            <TableRow key={record.id}>
-              <TableCell className="font-medium">{record.title}</TableCell>
-              <TableCell>
-                <Badge variant="outline" className={recordTypeColors[record.record_type]}>
-                  {record.record_type.replace("_", " ")}
-                </Badge>
-              </TableCell>
-              <TableCell>{format(new Date(record.record_date), "MMM d, yyyy")}</TableCell>
-              <TableCell className="text-right">{record.quantity || "-"}</TableCell>
-              <TableCell className="text-right">
-                {record.price ? `$${Number(record.price).toFixed(2)}` : "-"}
-              </TableCell>
-              <TableCell className="max-w-xs truncate">
-                {record.description || "-"}
-              </TableCell>
-              <TableCell className="text-right">
-                <div className="flex gap-2 justify-end">
-                  {record.file_url && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleDownload(record.file_url!, record.title)}
-                    >
-                      <Download className="w-4 h-4" />
-                    </Button>
-                  )}
+    <div className="space-y-4">
+      {visits.map((visit) => {
+        const isExpanded = expandedVisits.has(visit.id);
+        const totalCost = calculateVisitTotal(visit.records);
+
+        return (
+          <Card key={visit.id} className="overflow-hidden">
+            <Collapsible open={isExpanded} onOpenChange={() => toggleVisit(visit.id)}>
+              <CollapsibleTrigger className="w-full">
+                <div className="flex items-center justify-between p-4 hover:bg-accent/50 transition-colors">
+                  <div className="flex items-center gap-3">
+                    {isExpanded ? (
+                      <ChevronDown className="w-5 h-5 text-muted-foreground" />
+                    ) : (
+                      <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                    )}
+                    <div className="text-left">
+                      <div className="font-semibold">
+                        {format(new Date(visit.visit_date), "MMMM d, yyyy")}
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        {visit.records.length} item{visit.records.length !== 1 ? 's' : ''}
+                        {totalCost > 0 && ` • Total: $${totalCost.toFixed(2)}`}
+                      </div>
+                      {visit.notes && (
+                        <div className="text-sm text-muted-foreground mt-1 line-clamp-1">
+                          {visit.notes}
+                        </div>
+                      )}
+                    </div>
+                  </div>
                   <Button
+                    variant="ghost"
                     size="sm"
-                    variant="outline"
-                    onClick={() => handleDelete(record.id, record.file_url)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteVisit(visit.id);
+                    }}
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-4 h-4 text-destructive" />
                   </Button>
                 </div>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+              </CollapsibleTrigger>
+
+              <CollapsibleContent>
+                <div className="border-t">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Title</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead className="text-right">Qty</TableHead>
+                        <TableHead className="text-right">Price</TableHead>
+                        <TableHead>Description</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {visit.records.map((record) => (
+                        <TableRow key={record.id}>
+                          <TableCell className="font-medium">{record.title}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className={recordTypeColors[record.record_type]}>
+                              {record.record_type.replace("_", " ")}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">{record.quantity || "-"}</TableCell>
+                          <TableCell className="text-right">
+                            {record.price ? `$${Number(record.price).toFixed(2)}` : "-"}
+                          </TableCell>
+                          <TableCell className="max-w-xs truncate">
+                            {record.description || "-"}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex gap-2 justify-end">
+                              {record.file_url && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleDownload(record.file_url!, record.title)}
+                                >
+                                  <Download className="w-4 h-4" />
+                                </Button>
+                              )}
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => handleDeleteRecord(record.id, record.file_url)}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+          </Card>
+        );
+      })}
     </div>
   );
 };

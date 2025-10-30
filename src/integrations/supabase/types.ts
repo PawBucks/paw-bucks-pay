@@ -277,6 +277,7 @@ export type Database = {
           updated_at: string
           user_id: string
           vet_id: string | null
+          visit_id: string | null
         }
         Insert: {
           created_at?: string
@@ -292,6 +293,7 @@ export type Database = {
           updated_at?: string
           user_id: string
           vet_id?: string | null
+          visit_id?: string | null
         }
         Update: {
           created_at?: string
@@ -307,6 +309,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
           vet_id?: string | null
+          visit_id?: string | null
         }
         Relationships: [
           {
@@ -323,7 +326,47 @@ export type Database = {
             referencedRelation: "partner_vets"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "pet_medical_records_visit_id_fkey"
+            columns: ["visit_id"]
+            isOneToOne: false
+            referencedRelation: "pet_medical_visits"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      pet_medical_visits: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          pet_id: string
+          updated_at: string
+          user_id: string
+          vet_id: string | null
+          visit_date: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          pet_id: string
+          updated_at?: string
+          user_id: string
+          vet_id?: string | null
+          visit_date: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          pet_id?: string
+          updated_at?: string
+          user_id?: string
+          vet_id?: string | null
+          visit_date?: string
+        }
+        Relationships: []
       }
       pet_profiles: {
         Row: {
