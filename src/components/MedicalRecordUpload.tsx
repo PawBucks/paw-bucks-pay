@@ -40,6 +40,8 @@ export const MedicalRecordUpload = ({ petId, onSuccess }: MedicalRecordUploadPro
       const title = formData.get("title") as string;
       const description = formData.get("description") as string;
       const recordDate = formData.get("recordDate") as string;
+      const quantity = formData.get("quantity") as string;
+      const price = formData.get("price") as string;
 
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
@@ -74,6 +76,8 @@ export const MedicalRecordUpload = ({ petId, onSuccess }: MedicalRecordUploadPro
           title,
           description: description || null,
           record_date: recordDate,
+          quantity: quantity ? parseInt(quantity) : null,
+          price: price ? parseFloat(price) : null,
           file_url: fileUrl,
         });
 
@@ -140,6 +144,30 @@ export const MedicalRecordUpload = ({ petId, onSuccess }: MedicalRecordUploadPro
               name="recordDate"
               type="date"
               required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="quantity">Quantity</Label>
+            <Input
+              id="quantity"
+              name="quantity"
+              type="number"
+              min="0"
+              step="1"
+              placeholder="e.g., 1"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="price">Price</Label>
+            <Input
+              id="price"
+              name="price"
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder="e.g., 99.99"
             />
           </div>
 

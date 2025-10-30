@@ -269,6 +269,8 @@ export type Database = {
           file_url: string | null
           id: string
           pet_id: string
+          price: number | null
+          quantity: number | null
           record_date: string
           record_type: Database["public"]["Enums"]["medical_record_type"]
           title: string
@@ -282,6 +284,8 @@ export type Database = {
           file_url?: string | null
           id?: string
           pet_id: string
+          price?: number | null
+          quantity?: number | null
           record_date: string
           record_type: Database["public"]["Enums"]["medical_record_type"]
           title: string
@@ -295,6 +299,8 @@ export type Database = {
           file_url?: string | null
           id?: string
           pet_id?: string
+          price?: number | null
+          quantity?: number | null
           record_date?: string
           record_type?: Database["public"]["Enums"]["medical_record_type"]
           title?: string
