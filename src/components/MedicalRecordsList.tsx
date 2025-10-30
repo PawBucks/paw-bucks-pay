@@ -200,8 +200,48 @@ export const MedicalRecordsList = ({ petId, refreshTrigger }: MedicalRecordsList
     return records.reduce((sum, record) => sum + (Number(record.price) || 0), 0);
   };
 
+  const calculateMonthlyTotals = () => {
+    const monthlyMap = new Map<string, number>();
+    visits.forEach(visit => {
+      const monthKey = format(new Date(visit.visit_date), "yyyy-MM");
+      const visitTotal = calculateVisitTotal(visit.records);
+      monthlyMap.set(monthKey, (monthlyMap.get(monthKey) || 0) + visitTotal);
+    });
+    return monthlyMap;
+  };
+
+  const calculateAnnualTotal = () => {
+    return visits.reduce((sum, visit) => sum + calculateVisitTotal(visit.records), 0);
+  };
+
+  const monthlyTotals = calculateMonthlyTotals();
+  const annualTotal = calculateAnnualTotal();
+
   return (
     <div className="space-y-4">
+      <Card className="p-6 bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+        <h3 className="font-semibold text-lg mb-4">Spending Summary</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <div className="text-sm text-muted-foreground mb-2">Annual Total</div>
+            <div className="text-3xl font-bold text-primary">${annualTotal.toFixed(2)}</div>
+          </div>
+          <div>
+            <div className="text-sm text-muted-foreground mb-2">Monthly Breakdown</div>
+            <div className="space-y-1">
+              {Array.from(monthlyTotals.entries())
+                .sort(([a], [b]) => b.localeCompare(a))
+                .slice(0, 3)
+                .map(([month, total]) => (
+                  <div key={month} className="flex justify-between text-sm">
+                    <span>{format(new Date(month + "-01"), "MMMM yyyy")}</span>
+                    <span className="font-semibold">${total.toFixed(2)}</span>
+                  </div>
+                ))}
+            </div>
+          </div>
+        </div>
+      </Card>
       {visits.map((visit) => {
         const isExpanded = expandedVisits.has(visit.id);
         const totalCost = calculateVisitTotal(visit.records);
