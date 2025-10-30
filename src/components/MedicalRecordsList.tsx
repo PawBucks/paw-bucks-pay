@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Download, Trash2, ChevronDown, ChevronRight, Pencil } from "lucide-react";
+import { Download, Trash2, ChevronDown, ChevronRight, Pencil, Plus } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import {
@@ -77,6 +77,7 @@ export const MedicalRecordsList = ({ petId, refreshTrigger }: MedicalRecordsList
   const [expandedVisits, setExpandedVisits] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
   const [editingRecord, setEditingRecord] = useState<MedicalRecord | null>(null);
+  const [addingToVisitId, setAddingToVisitId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<{
     title: string;
     record_type: RecordType | "";
@@ -89,6 +90,21 @@ export const MedicalRecordsList = ({ petId, refreshTrigger }: MedicalRecordsList
     description: "",
     quantity: "",
     price: "",
+  });
+  const [newRecordForm, setNewRecordForm] = useState<{
+    title: string;
+    record_type: RecordType | "";
+    description: string;
+    quantity: string;
+    price: string;
+    file: File | null;
+  }>({
+    title: "",
+    record_type: "",
+    description: "",
+    quantity: "",
+    price: "",
+    file: null,
   });
 
   const loadRecords = async () => {
@@ -253,6 +269,71 @@ export const MedicalRecordsList = ({ petId, refreshTrigger }: MedicalRecordsList
     }
   };
 
+  const handleAddNewRecord = async () => {
+    if (!addingToVisitId || !newRecordForm.record_type || !newRecordForm.title) {
+      toast.error("Please fill in required fields");
+      return;
+    }
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const visit = visits.find(v => v.id === addingToVisitId);
+      if (!visit) throw new Error("Visit not found");
+
+      let fileUrl = null;
+      if (newRecordForm.file) {
+        const fileExt = newRecordForm.file.name.split('.').pop();
+        const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('medical-records')
+          .upload(fileName, newRecordForm.file);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('medical-records')
+          .getPublicUrl(fileName);
+        
+        fileUrl = publicUrl;
+      }
+
+      const { error } = await supabase
+        .from("pet_medical_records")
+        .insert({
+          pet_id: petId,
+          user_id: user.id,
+          visit_id: addingToVisitId,
+          title: newRecordForm.title,
+          record_type: newRecordForm.record_type as RecordType,
+          description: newRecordForm.description || null,
+          quantity: newRecordForm.quantity ? parseInt(newRecordForm.quantity) : null,
+          price: newRecordForm.price ? parseFloat(newRecordForm.price) : null,
+          record_date: visit.visit_date,
+          file_url: fileUrl,
+        });
+
+      if (error) throw error;
+
+      toast.success("Record added successfully");
+      setAddingToVisitId(null);
+      setNewRecordForm({
+        title: "",
+        record_type: "",
+        description: "",
+        quantity: "",
+        price: "",
+        file: null,
+      });
+      loadRecords();
+    } catch (error) {
+      console.error("Error adding record:", error);
+      toast.error("Failed to add record");
+    }
+  };
+
   if (isLoading) {
     return <div className="text-center py-8 text-muted-foreground">Loading records...</div>;
   }
@@ -348,16 +429,29 @@ export const MedicalRecordsList = ({ petId, refreshTrigger }: MedicalRecordsList
                       )}
                     </div>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteVisit(visit.id);
-                    }}
-                  >
-                    <Trash2 className="w-4 h-4 text-destructive" />
-                  </Button>
+                  <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setAddingToVisitId(visit.id);
+                      }}
+                    >
+                      <Plus className="w-4 h-4 mr-1" />
+                      Add Item
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteVisit(visit.id);
+                      }}
+                    >
+                      <Trash2 className="w-4 h-4 text-destructive" />
+                    </Button>
+                  </div>
                 </div>
               </CollapsibleTrigger>
 
@@ -498,6 +592,91 @@ export const MedicalRecordsList = ({ petId, refreshTrigger }: MedicalRecordsList
               </Button>
               <Button onClick={handleSaveEdit}>
                 Save Changes
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!addingToVisitId} onOpenChange={() => setAddingToVisitId(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add New Item to Visit</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="new-title">Title *</Label>
+              <Input
+                id="new-title"
+                value={newRecordForm.title}
+                onChange={(e) => setNewRecordForm({ ...newRecordForm, title: e.target.value })}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="new-type">Record Type *</Label>
+              <Select
+                value={newRecordForm.record_type}
+                onValueChange={(value) => setNewRecordForm({ ...newRecordForm, record_type: value as RecordType })}
+              >
+                <SelectTrigger id="new-type">
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="vaccination">Vaccination</SelectItem>
+                  <SelectItem value="checkup">Checkup</SelectItem>
+                  <SelectItem value="surgery">Surgery</SelectItem>
+                  <SelectItem value="lab_results">Lab Results</SelectItem>
+                  <SelectItem value="prescription">Prescription</SelectItem>
+                  <SelectItem value="dental">Dental</SelectItem>
+                  <SelectItem value="emergency">Emergency</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="new-description">Description</Label>
+              <Textarea
+                id="new-description"
+                value={newRecordForm.description}
+                onChange={(e) => setNewRecordForm({ ...newRecordForm, description: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="new-quantity">Quantity</Label>
+                <Input
+                  id="new-quantity"
+                  type="number"
+                  value={newRecordForm.quantity}
+                  onChange={(e) => setNewRecordForm({ ...newRecordForm, quantity: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="new-price">Price ($)</Label>
+                <Input
+                  id="new-price"
+                  type="number"
+                  step="0.01"
+                  value={newRecordForm.price}
+                  onChange={(e) => setNewRecordForm({ ...newRecordForm, price: e.target.value })}
+                />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="new-file">Attachment (optional)</Label>
+              <Input
+                id="new-file"
+                type="file"
+                onChange={(e) => setNewRecordForm({ ...newRecordForm, file: e.target.files?.[0] || null })}
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setAddingToVisitId(null)}>
+                Cancel
+              </Button>
+              <Button onClick={handleAddNewRecord}>
+                Add Record
               </Button>
             </div>
           </div>
