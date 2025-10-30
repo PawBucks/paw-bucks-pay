@@ -338,32 +338,38 @@ export type Database = {
       pet_medical_visits: {
         Row: {
           created_at: string
+          doctor_name: string | null
           id: string
           notes: string | null
           pet_id: string
           updated_at: string
           user_id: string
           vet_id: string | null
+          vet_name: string | null
           visit_date: string
         }
         Insert: {
           created_at?: string
+          doctor_name?: string | null
           id?: string
           notes?: string | null
           pet_id: string
           updated_at?: string
           user_id: string
           vet_id?: string | null
+          vet_name?: string | null
           visit_date: string
         }
         Update: {
           created_at?: string
+          doctor_name?: string | null
           id?: string
           notes?: string | null
           pet_id?: string
           updated_at?: string
           user_id?: string
           vet_id?: string | null
+          vet_name?: string | null
           visit_date?: string
         }
         Relationships: []

@@ -55,6 +55,8 @@ export const MedicalRecordUpload = ({ petId, onSuccess }: MedicalRecordUploadPro
   const [isLoading, setIsLoading] = useState(false);
   const [visitDate, setVisitDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [visitNotes, setVisitNotes] = useState("");
+  const [vetName, setVetName] = useState("");
+  const [doctorName, setDoctorName] = useState("");
   const [lineItems, setLineItems] = useState<LineItem[]>([
     {
       id: crypto.randomUUID(),
@@ -120,6 +122,8 @@ export const MedicalRecordUpload = ({ petId, onSuccess }: MedicalRecordUploadPro
           user_id: user.id,
           visit_date: visitDate,
           notes: visitNotes || null,
+          vet_name: vetName || null,
+          doctor_name: doctorName || null,
         })
         .select()
         .single();
@@ -171,6 +175,8 @@ export const MedicalRecordUpload = ({ petId, onSuccess }: MedicalRecordUploadPro
       setOpen(false);
       setVisitDate(new Date().toISOString().split('T')[0]);
       setVisitNotes("");
+      setVetName("");
+      setDoctorName("");
       setLineItems([
         {
           id: crypto.randomUUID(),
@@ -216,6 +222,26 @@ export const MedicalRecordUpload = ({ petId, onSuccess }: MedicalRecordUploadPro
                 value={visitDate}
                 onChange={(e) => setVisitDate(e.target.value)}
                 required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="vet_name">Vet Clinic Name</Label>
+              <Input
+                id="vet_name"
+                value={vetName}
+                onChange={(e) => setVetName(e.target.value)}
+                placeholder="e.g., Happy Paws Veterinary Clinic"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="doctor_name">Doctor's Name</Label>
+              <Input
+                id="doctor_name"
+                value={doctorName}
+                onChange={(e) => setDoctorName(e.target.value)}
+                placeholder="e.g., Dr. Jane Smith"
               />
             </div>
 

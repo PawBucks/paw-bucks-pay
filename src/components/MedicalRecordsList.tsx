@@ -33,6 +33,8 @@ type Visit = {
   id: string;
   visit_date: string;
   notes: string | null;
+  vet_name: string | null;
+  doctor_name: string | null;
   records: MedicalRecord[];
 };
 
@@ -62,7 +64,7 @@ export const MedicalRecordsList = ({ petId, refreshTrigger }: MedicalRecordsList
       // Load all visits
       const { data: visitsData, error: visitsError } = await supabase
         .from("pet_medical_visits")
-        .select("*")
+        .select("id, visit_date, notes, vet_name, doctor_name")
         .eq("pet_id", petId)
         .order("visit_date", { ascending: false });
 
@@ -82,6 +84,8 @@ export const MedicalRecordsList = ({ petId, refreshTrigger }: MedicalRecordsList
         id: visit.id,
         visit_date: visit.visit_date,
         notes: visit.notes,
+        vet_name: visit.vet_name,
+        doctor_name: visit.doctor_name,
         records: (recordsData || []).filter(r => r.visit_id === visit.id),
       }));
 
@@ -221,6 +225,13 @@ export const MedicalRecordsList = ({ petId, refreshTrigger }: MedicalRecordsList
                         {visit.records.length} item{visit.records.length !== 1 ? 's' : ''}
                         {totalCost > 0 && ` • Total: $${totalCost.toFixed(2)}`}
                       </div>
+                      {(visit.vet_name || visit.doctor_name) && (
+                        <div className="text-sm text-muted-foreground mt-1">
+                          {visit.vet_name && <span>{visit.vet_name}</span>}
+                          {visit.vet_name && visit.doctor_name && <span> • </span>}
+                          {visit.doctor_name && <span>{visit.doctor_name}</span>}
+                        </div>
+                      )}
                       {visit.notes && (
                         <div className="text-sm text-muted-foreground mt-1 line-clamp-1">
                           {visit.notes}
