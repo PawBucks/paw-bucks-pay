@@ -351,11 +351,18 @@ export const MedicalRecordsList = ({ petId, refreshTrigger }: MedicalRecordsList
   };
 
   const calculateMonthlyTotals = () => {
-    const monthlyMap = new Map<string, number>();
+    const monthlyMap = new Map<string, { total: number; date: Date }>();
     visits.forEach(visit => {
-      const monthKey = format(new Date(visit.visit_date), "yyyy-MM");
+      const visitDate = new Date(visit.visit_date);
+      const monthKey = format(visitDate, "yyyy-MM");
       const visitTotal = calculateVisitTotal(visit.records);
-      monthlyMap.set(monthKey, (monthlyMap.get(monthKey) || 0) + visitTotal);
+      const existing = monthlyMap.get(monthKey);
+      
+      if (!existing) {
+        monthlyMap.set(monthKey, { total: visitTotal, date: visitDate });
+      } else {
+        existing.total += visitTotal;
+      }
     });
     return monthlyMap;
   };
@@ -382,9 +389,9 @@ export const MedicalRecordsList = ({ petId, refreshTrigger }: MedicalRecordsList
               {Array.from(monthlyTotals.entries())
                 .sort(([a], [b]) => b.localeCompare(a))
                 .slice(0, 3)
-                .map(([month, total]) => (
+                .map(([month, { total, date }]) => (
                   <div key={month} className="flex justify-between text-sm">
-                    <span>{format(new Date(month + "-01"), "MMMM yyyy")}</span>
+                    <span>{format(date, "MMMM yyyy")}</span>
                     <span className="font-semibold">${total.toFixed(2)}</span>
                   </div>
                 ))}
