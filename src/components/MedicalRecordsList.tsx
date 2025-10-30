@@ -2,9 +2,25 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Download, Trash2, ChevronDown, ChevronRight } from "lucide-react";
+import { Download, Trash2, ChevronDown, ChevronRight, Pencil } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -16,10 +32,12 @@ import {
 import { Card } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
+type RecordType = "vaccination" | "checkup" | "surgery" | "lab_results" | "prescription" | "dental" | "emergency" | "other";
+
 type MedicalRecord = {
   id: string;
   visit_id: string | null;
-  record_type: string;
+  record_type: RecordType;
   title: string;
   description: string | null;
   record_date: string;
@@ -58,6 +76,20 @@ export const MedicalRecordsList = ({ petId, refreshTrigger }: MedicalRecordsList
   const [visits, setVisits] = useState<Visit[]>([]);
   const [expandedVisits, setExpandedVisits] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
+  const [editingRecord, setEditingRecord] = useState<MedicalRecord | null>(null);
+  const [editForm, setEditForm] = useState<{
+    title: string;
+    record_type: RecordType | "";
+    description: string;
+    quantity: string;
+    price: string;
+  }>({
+    title: "",
+    record_type: "",
+    description: "",
+    quantity: "",
+    price: "",
+  });
 
   const loadRecords = async () => {
     try {
@@ -182,6 +214,43 @@ export const MedicalRecordsList = ({ petId, refreshTrigger }: MedicalRecordsList
 
   const handleDownload = (fileUrl: string, title: string) => {
     window.open(fileUrl, "_blank");
+  };
+
+  const handleEditRecord = (record: MedicalRecord) => {
+    setEditingRecord(record);
+    setEditForm({
+      title: record.title,
+      record_type: record.record_type,
+      description: record.description || "",
+      quantity: record.quantity?.toString() || "",
+      price: record.price?.toString() || "",
+    });
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingRecord || !editForm.record_type) return;
+
+    try {
+      const { error } = await supabase
+        .from("pet_medical_records")
+        .update({
+          title: editForm.title,
+          record_type: editForm.record_type as RecordType,
+          description: editForm.description || null,
+          quantity: editForm.quantity ? parseInt(editForm.quantity) : null,
+          price: editForm.price ? parseFloat(editForm.price) : null,
+        })
+        .eq("id", editingRecord.id);
+
+      if (error) throw error;
+
+      toast.success("Record updated successfully");
+      setEditingRecord(null);
+      loadRecords();
+    } catch (error) {
+      console.error("Error updating record:", error);
+      toast.error("Failed to update record");
+    }
   };
 
   if (isLoading) {
@@ -334,6 +403,13 @@ export const MedicalRecordsList = ({ petId, refreshTrigger }: MedicalRecordsList
                               )}
                               <Button
                                 size="sm"
+                                variant="outline"
+                                onClick={() => handleEditRecord(record)}
+                              >
+                                <Pencil className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                size="sm"
                                 variant="ghost"
                                 onClick={() => handleDeleteRecord(record.id, record.file_url)}
                               >
@@ -351,6 +427,82 @@ export const MedicalRecordsList = ({ petId, refreshTrigger }: MedicalRecordsList
           </Card>
         );
       })}
+
+      <Dialog open={!!editingRecord} onOpenChange={() => setEditingRecord(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Medical Record</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="edit-title">Title</Label>
+              <Input
+                id="edit-title"
+                value={editForm.title}
+                onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-type">Record Type</Label>
+              <Select
+                value={editForm.record_type}
+                onValueChange={(value) => setEditForm({ ...editForm, record_type: value as RecordType })}
+              >
+                <SelectTrigger id="edit-type">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="vaccination">Vaccination</SelectItem>
+                  <SelectItem value="checkup">Checkup</SelectItem>
+                  <SelectItem value="surgery">Surgery</SelectItem>
+                  <SelectItem value="lab_results">Lab Results</SelectItem>
+                  <SelectItem value="prescription">Prescription</SelectItem>
+                  <SelectItem value="dental">Dental</SelectItem>
+                  <SelectItem value="emergency">Emergency</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="edit-description">Description</Label>
+              <Textarea
+                id="edit-description"
+                value={editForm.description}
+                onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="edit-quantity">Quantity</Label>
+                <Input
+                  id="edit-quantity"
+                  type="number"
+                  value={editForm.quantity}
+                  onChange={(e) => setEditForm({ ...editForm, quantity: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-price">Price ($)</Label>
+                <Input
+                  id="edit-price"
+                  type="number"
+                  step="0.01"
+                  value={editForm.price}
+                  onChange={(e) => setEditForm({ ...editForm, price: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setEditingRecord(null)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSaveEdit}>
+                Save Changes
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
