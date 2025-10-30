@@ -1,11 +1,18 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { FileText, Download, Calendar, Trash2 } from "lucide-react";
+import { Download, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 type MedicalRecord = {
   id: string;
@@ -14,6 +21,8 @@ type MedicalRecord = {
   description: string | null;
   record_date: string;
   file_url: string | null;
+  quantity: number | null;
+  price: number | null;
   created_at: string;
 };
 
@@ -104,54 +113,60 @@ export const MedicalRecordsList = ({ petId, refreshTrigger }: MedicalRecordsList
   }
 
   return (
-    <div className="space-y-3">
-      {records.map((record) => (
-        <Card key={record.id} className="p-4">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-2">
-                <FileText className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                <h3 className="font-semibold truncate">{record.title}</h3>
-              </div>
-              
-              <div className="flex flex-wrap gap-2 mb-2">
+    <div className="rounded-md border">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Title</TableHead>
+            <TableHead>Type</TableHead>
+            <TableHead>Date</TableHead>
+            <TableHead className="text-right">Quantity</TableHead>
+            <TableHead className="text-right">Price</TableHead>
+            <TableHead>Description</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {records.map((record) => (
+            <TableRow key={record.id}>
+              <TableCell className="font-medium">{record.title}</TableCell>
+              <TableCell>
                 <Badge variant="outline" className={recordTypeColors[record.record_type]}>
                   {record.record_type.replace("_", " ")}
                 </Badge>
-                <span className="text-sm text-muted-foreground flex items-center gap-1">
-                  <Calendar className="w-3 h-3" />
-                  {format(new Date(record.record_date), "MMM d, yyyy")}
-                </span>
-              </div>
-
-              {record.description && (
-                <p className="text-sm text-muted-foreground line-clamp-2">
-                  {record.description}
-                </p>
-              )}
-            </div>
-
-            <div className="flex gap-2 flex-shrink-0">
-              {record.file_url && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => handleDownload(record.file_url!, record.title)}
-                >
-                  <Download className="w-4 h-4" />
-                </Button>
-              )}
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => handleDelete(record.id, record.file_url)}
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
-        </Card>
-      ))}
+              </TableCell>
+              <TableCell>{format(new Date(record.record_date), "MMM d, yyyy")}</TableCell>
+              <TableCell className="text-right">{record.quantity || "-"}</TableCell>
+              <TableCell className="text-right">
+                {record.price ? `$${Number(record.price).toFixed(2)}` : "-"}
+              </TableCell>
+              <TableCell className="max-w-xs truncate">
+                {record.description || "-"}
+              </TableCell>
+              <TableCell className="text-right">
+                <div className="flex gap-2 justify-end">
+                  {record.file_url && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleDownload(record.file_url!, record.title)}
+                    >
+                      <Download className="w-4 h-4" />
+                    </Button>
+                  )}
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleDelete(record.id, record.file_url)}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   );
 };
