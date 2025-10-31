@@ -42,7 +42,7 @@ export const Header = ({ menuItems, isAuthenticated = false, onLogout }: HeaderP
           <img 
             src={logo} 
             alt="PawBucks Logo" 
-            className="h-16 sm:h-20 w-auto object-contain"
+            className="h-24 sm:h-32 w-auto object-contain"
           />
         </div>
         
