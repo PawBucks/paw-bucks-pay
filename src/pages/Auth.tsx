@@ -7,7 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { PawPrint, Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
+import logo from "@/assets/logo.png";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect } from "react";
 import { signUpSchema, signInSchema } from "@/lib/validation";
@@ -172,9 +173,11 @@ const Auth = () => {
       <Card className="w-full max-w-md shadow-lg animate-scale-in">
         <CardHeader className="space-y-2 text-center">
           <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-md">
-              <PawPrint className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
-            </div>
+            <img 
+              src={logo} 
+              alt="PawBucks Logo" 
+              className="h-24 sm:h-32 w-auto object-contain"
+            />
           </div>
           <CardTitle className="text-2xl sm:text-3xl font-bold">Welcome to PawBucks</CardTitle>
           <CardDescription className="text-sm sm:text-base">
