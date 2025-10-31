@@ -1,12 +1,13 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { PawPrint, LogOut, Menu } from "lucide-react";
+import { LogOut, Menu } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import logo from "@/assets/logo.png";
 
 interface MenuItem {
   label: string;
@@ -38,12 +39,11 @@ export const Header = ({ menuItems, isAuthenticated = false, onLogout }: HeaderP
           onKeyDown={(e) => e.key === 'Enter' && navigate("/")}
           aria-label="Go to home page"
         >
-          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-accent to-secondary flex items-center justify-center shadow-lg" aria-hidden="true">
-            <PawPrint className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
-          </div>
-          <h1 className="text-xl sm:text-2xl font-bold text-accent">
-            PawBucks
-          </h1>
+          <img 
+            src={logo} 
+            alt="PawBucks Logo" 
+            className="h-10 sm:h-12 w-auto object-contain"
+          />
         </div>
         
         {isAuthenticated && onLogout ? (
