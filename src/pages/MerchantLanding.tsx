@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { PawPrint, CreditCard, TrendingUp, Users, Shield, BarChart3, Zap, CheckCircle, Sparkles, ArrowRight, DollarSign } from "lucide-react";
+import logo from "@/assets/logo.png";
 
 const MerchantLanding = () => {
   const navigate = useNavigate();
@@ -294,10 +295,11 @@ const MerchantLanding = () => {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center gap-6">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-accent to-secondary flex items-center justify-center shadow-md">
-                <PawPrint className="w-6 h-6 text-white" />
-              </div>
-              <span className="text-xl font-bold text-accent">PawBucks</span>
+              <img
+                src={logo}
+                alt="PawBucks Logo"
+                className="h-12 w-auto object-contain"
+              />
             </div>
             <p className="text-sm sm:text-base text-muted-foreground text-center max-w-md">
               Empowering pet businesses with seamless payment solutions and growth opportunities.
