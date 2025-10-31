@@ -311,7 +311,7 @@ const Index = () => {
               <img
                 src={logo}
                 alt="PawBucks Logo"
-                className="h-12 w-auto object-contain"
+                className="h-24 sm:h-32 w-auto object-contain"
               />
             </div>
             <p className="text-sm sm:text-base text-muted-foreground text-center max-w-md">
