@@ -1,6 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useDebounce } from "@/hooks/useDebounce";
+import { useOptimizedQuery } from "@/hooks/useOptimizedQuery";
+import { DataLoader } from "@/lib/dataLoader";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
@@ -26,10 +29,8 @@ type Merchant = {
 const Discover = () => {
   const { user, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
-  const [merchants, setMerchants] = useState<Merchant[]>([]);
-  const [filteredMerchants, setFilteredMerchants] = useState<Merchant[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearch = useDebounce(searchTerm, 300);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [selectedMerchant, setSelectedMerchant] = useState<{
     id: string;
@@ -38,22 +39,27 @@ const Discover = () => {
   } | null>(null);
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
 
+  // Optimized merchant loading with caching
+  const { data: merchants = [], isLoading: loading } = useOptimizedQuery<Merchant[]>(
+    ['merchants'],
+    () => DataLoader.loadMerchants(),
+    { staleTime: 1000 * 60 * 10 } // Cache for 10 minutes
+  );
+
   useEffect(() => {
-    loadMerchants();
     getUserLocation();
   }, []);
 
-  useEffect(() => {
-    if (searchTerm) {
-      const filtered = merchants.filter((merchant) =>
-        merchant.business_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        merchant.business_type.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      setFilteredMerchants(filtered);
-    } else {
-      setFilteredMerchants(merchants);
-    }
-  }, [searchTerm, merchants]);
+  // Memoized filtered merchants
+  const filteredMerchants = useMemo(() => {
+    if (!debouncedSearch) return merchants;
+    
+    const searchLower = debouncedSearch.toLowerCase();
+    return (merchants as Merchant[]).filter((merchant) =>
+      merchant.business_name.toLowerCase().includes(searchLower) ||
+      merchant.business_type.toLowerCase().includes(searchLower)
+    );
+  }, [debouncedSearch, merchants]);
 
   const getUserLocation = () => {
     if (navigator.geolocation) {
@@ -71,37 +77,23 @@ const Discover = () => {
     }
   };
 
-  const loadMerchants = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("merchants")
-        .select("*")
-        .order("business_name");
+  // Distance calculation memoized
+  const calculateDistance = useMemo(() => {
+    return (lat1: number, lng1: number, lat2: number, lng2: number) => {
+      const R = 3959; // Earth's radius in miles
+      const dLat = ((lat2 - lat1) * Math.PI) / 180;
+      const dLng = ((lng2 - lng1) * Math.PI) / 180;
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos((lat1 * Math.PI) / 180) *
+          Math.cos((lat2 * Math.PI) / 180) *
+          Math.sin(dLng / 2) *
+          Math.sin(dLng / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c;
+    };
+  }, []);
 
-      if (error) throw error;
-      setMerchants(data || []);
-      setFilteredMerchants(data || []);
-    } catch (error: any) {
-      console.error("Error loading merchants:", error);
-      toast.error("Failed to load merchants");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const calculateDistance = (lat1: number, lng1: number, lat2: number, lng2: number) => {
-    const R = 3959; // Earth's radius in miles
-    const dLat = ((lat2 - lat1) * Math.PI) / 180;
-    const dLng = ((lng2 - lng1) * Math.PI) / 180;
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos((lat1 * Math.PI) / 180) *
-        Math.cos((lat2 * Math.PI) / 180) *
-        Math.sin(dLng / 2) *
-        Math.sin(dLng / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
-  };
 
   const handlePayNow = (merchantId: string, merchantName: string, cashbackRate: number) => {
     if (!user) {

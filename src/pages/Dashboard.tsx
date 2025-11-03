@@ -1,12 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useOptimizedQuery } from "@/hooks/useOptimizedQuery";
+import { DataLoader } from "@/lib/dataLoader";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { GradientCard } from "@/components/ui/gradient-card";
 import { PetProfileCard } from "@/components/PetProfileCard";
 import { ReferralCard } from "@/components/ReferralCard";
+import { DashboardSkeleton } from "@/components/LoadingSkeleton";
 import { Wallet, Gift, TrendingUp, LogOut, Store, Users, Plus } from "lucide-react";
 import { toast } from "sonner";
 
@@ -32,15 +35,31 @@ type PetProfile = {
 const Dashboard = () => {
   const { user, signOut, loading } = useAuth();
   const navigate = useNavigate();
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [wallet, setWallet] = useState<WalletData | null>(null);
-  const [pets, setPets] = useState<PetProfile[]>([]);
+  
+  // Batch load all dashboard data in parallel
+  const { data, isLoading: dataLoading } = useOptimizedQuery(
+    ['dashboard', user?.id || ''],
+    async () => {
+      if (!user) return null;
+      
+      return await DataLoader.batchLoad({
+        profile: () => DataLoader.loadUserProfile(user.id),
+        wallet: () => DataLoader.loadWalletData(user.id),
+        pets: () => DataLoader.loadPetProfiles(user.id),
+      });
+    },
+    { staleTime: 1000 * 60 * 5 }
+  );
+
+  const profile = data?.profile;
+  const wallet = data?.wallet;
+  const pets = data?.pets || [];
 
   useEffect(() => {
     const checkUserAndRedirect = async () => {
       if (!loading && !user) {
         navigate("/auth");
-      } else if (!loading && user) {
+      } else if (!loading && user && profile) {
         // Check if user is admin
         const { data: isAdmin } = await supabase.rpc('has_role', {
           _user_id: user.id,
@@ -49,7 +68,7 @@ const Dashboard = () => {
 
         if (isAdmin) {
           navigate("/admin");
-        } else if (profile?.user_type === "merchant") {
+        } else if (profile.user_type === "merchant") {
           navigate("/merchant-dashboard");
         }
       }
@@ -58,64 +77,18 @@ const Dashboard = () => {
     checkUserAndRedirect();
   }, [user, loading, profile, navigate]);
 
-  useEffect(() => {
-    if (user) {
-      loadProfile();
-    }
-  }, [user]);
-
-  const loadProfile = async () => {
-    if (!user) return;
-
-    const { data: profileData, error: profileError } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", user.id)
-      .single();
-
-    if (profileError) {
-      toast.error("Failed to load profile");
-      return;
-    }
-
-    setProfile(profileData);
-
-    if (profileData.user_type === "pet_owner") {
-      const { data: walletData, error: walletError } = await supabase
-        .from("wallets")
-        .select("*")
-        .eq("user_id", user.id)
-        .single();
-
-      if (walletError) {
-        console.error("Wallet error:", walletError);
-      } else {
-        setWallet(walletData);
-      }
-
-      // Load pet profiles
-      const { data: petsData, error: petsError } = await supabase
-        .from("pet_profiles")
-        .select("*")
-        .eq("user_id", user.id);
-
-      if (petsError) {
-        console.error("Pets error:", petsError);
-      } else {
-        setPets(petsData || []);
-      }
-    }
-  };
-
-  const handleSignOut = async () => {
+  const handleSignOut = useCallback(async () => {
     await signOut();
     navigate("/auth");
-  };
+  }, [signOut, navigate]);
 
-  if (loading || !profile) {
+  if (loading || dataLoading || !profile) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-muted-foreground">Loading...</p>
+      <div className="min-h-screen bg-background">
+        <Header isAuthenticated={true} onLogout={handleSignOut} />
+        <main className="container mx-auto px-4 py-8">
+          <DashboardSkeleton />
+        </main>
       </div>
     );
   }

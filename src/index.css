@@ -45,6 +45,10 @@
     --shadow-soft: 0 2px 12px hsl(180 30% 75% / 0.15);
     --shadow-medium: 0 4px 20px hsl(180 30% 70% / 0.2);
     --shadow-glow: 0 0 20px hsl(180 55% 60% / 0.3);
+    
+    /* Smooth Transitions */
+    --transition-base: all 0.2s ease-in-out;
+    --transition-slow: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .dark {
@@ -91,7 +95,26 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "kern" 1, "liga" 1;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  /* Focus visible improvements for accessibility */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+  
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* Improve button and interactive element transitions */
+  button, a, [role="button"] {
+    transition: var(--transition-base);
   }
 }
 

@@ -1,11 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useOptimizedQuery } from "@/hooks/useOptimizedQuery";
+import { DataLoader } from "@/lib/dataLoader";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { GradientCard } from "@/components/ui/gradient-card";
 import { BottomNav } from "@/components/BottomNav";
+import { DashboardSkeleton } from "@/components/LoadingSkeleton";
 import { LogOut, Wallet as WalletIcon, TrendingUp, Gift, ArrowUpRight, ArrowDownRight, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
@@ -29,9 +32,21 @@ type Transaction = {
 const Wallet = () => {
   const { user, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
-  const [wallet, setWallet] = useState<WalletData | null>(null);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [loading, setLoading] = useState(true);
+
+  // Optimized data loading with caching
+  const { data: wallet, isLoading: walletLoading } = useOptimizedQuery<WalletData | null>(
+    ['wallet', user?.id || ''],
+    () => user ? DataLoader.loadWalletData(user.id) : Promise.resolve(null),
+    { staleTime: 1000 * 60 * 2 } // Cache for 2 minutes
+  );
+
+  const { data: transactions = [], isLoading: transactionsLoading } = useOptimizedQuery<Transaction[]>(
+    ['transactions', user?.id || ''],
+    () => user ? DataLoader.loadTransactions(user.id, 10) : Promise.resolve([]),
+    { staleTime: 1000 * 60 * 2 }
+  );
+
+  const loading = walletLoading || transactionsLoading;
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -39,60 +54,18 @@ const Wallet = () => {
     }
   }, [user, authLoading, navigate]);
 
-  useEffect(() => {
-    if (user) {
-      loadWalletData();
-      loadTransactions();
-    }
-  }, [user]);
-
-  const loadWalletData = async () => {
-    if (!user) return;
-
-    try {
-      const { data, error } = await supabase
-        .from("wallets")
-        .select("*")
-        .eq("user_id", user.id)
-        .single();
-
-      if (error) throw error;
-      setWallet(data);
-    } catch (error: any) {
-      console.error("Error loading wallet:", error);
-      toast.error("Failed to load wallet data");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadTransactions = async () => {
-    if (!user) return;
-
-    try {
-      const { data, error } = await supabase
-        .from("transactions")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(10);
-
-      if (error) throw error;
-      setTransactions(data || []);
-    } catch (error: any) {
-      console.error("Error loading transactions:", error);
-    }
-  };
-
-  const handleSignOut = async () => {
+  const handleSignOut = useCallback(async () => {
     await signOut();
     navigate("/auth");
-  };
+  }, [signOut, navigate]);
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="min-h-screen bg-[var(--gradient-hero)] pb-24">
+        <Header isAuthenticated={true} onLogout={handleSignOut} />
+        <main className="container mx-auto px-4 py-8 max-w-4xl">
+          <DashboardSkeleton />
+        </main>
       </div>
     );
   }

@@ -29,10 +29,10 @@ export const Header = ({ menuItems, isAuthenticated = false, onLogout }: HeaderP
   ];
 
   return (
-    <header className="border-b bg-card/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm" role="banner">
-      <nav className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between" aria-label="Main navigation">
+    <header className="border-b bg-card/95 backdrop-blur-lg sticky top-0 z-50 shadow-sm" role="banner">
+      <nav className="container mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex items-center justify-between" aria-label="Main navigation">
         <div 
-          className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+          className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-all duration-200 active:scale-95"
           onClick={() => navigate("/")}
           role="button"
           tabIndex={0}
@@ -41,8 +41,8 @@ export const Header = ({ menuItems, isAuthenticated = false, onLogout }: HeaderP
         >
           <img 
             src={logo} 
-            alt="PawBucks Logo" 
-            className="h-24 sm:h-32 w-auto object-contain"
+            alt="PawBucks Logo - Return to homepage" 
+            className="h-20 sm:h-24 md:h-28 w-auto object-contain"
           />
         </div>
         
