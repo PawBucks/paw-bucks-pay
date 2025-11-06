@@ -168,14 +168,19 @@ const MerchantDashboard = () => {
         console.error("Stripe Connect API error:", data.error);
         
         // Check if it's the platform profile configuration error
-        if (data.error.includes("platform-profile")) {
-          toast.error("Stripe platform not configured. Please contact support.", {
-            description: "The payment platform needs to be set up by the administrator.",
+        if (data.error.includes("PLATFORM_NOT_CONFIGURED")) {
+          toast.error("Stripe Platform Configuration Required", {
+            description: "The Stripe Connect platform needs to be configured by an administrator. Please visit your Stripe Dashboard > Connect > Settings to complete the platform profile setup, including loss liability preferences.",
+            duration: 10000,
+          });
+        } else if (data.error.includes("CAPABILITIES_ERROR")) {
+          toast.error("Payment Capabilities Error", {
+            description: "Unable to enable payment capabilities. Please ensure your Stripe account has the necessary permissions.",
             duration: 6000,
           });
         } else {
           toast.error("Failed to connect Stripe account", {
-            description: data.error,
+            description: data.error.replace(/^[A-Z_]+:\s*/, ''),
             duration: 6000,
           });
         }

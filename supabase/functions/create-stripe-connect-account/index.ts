@@ -144,8 +144,20 @@ serve(async (req) => {
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     console.error('Error creating Stripe Connect account:', errorMessage);
+    
+    // Provide user-friendly error messages
+    let userMessage = errorMessage;
+    if (errorMessage.includes('platform-profile')) {
+      userMessage = 'PLATFORM_NOT_CONFIGURED: The Stripe Connect platform needs to be configured. Please visit https://dashboard.stripe.com/settings/connect to complete the platform setup.';
+    } else if (errorMessage.includes('capabilities')) {
+      userMessage = 'CAPABILITIES_ERROR: Unable to enable payment capabilities for this account.';
+    }
+    
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ 
+        error: userMessage,
+        originalError: errorMessage 
+      }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 400,
