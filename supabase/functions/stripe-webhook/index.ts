@@ -395,7 +395,6 @@ serve(async (req) => {
           }
         }
       }
-      }
 
       // Award PawBucks coins (1 coin per $1 spent)
       const coinsEarned = Math.floor(paymentIntent.amount / 100); // Convert cents to dollars
@@ -496,7 +495,7 @@ serve(async (req) => {
         status: 200,
       }
     );
-  catch (error: unknown) {
+  } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     console.error('Webhook error:', errorMessage);
     return new Response(
