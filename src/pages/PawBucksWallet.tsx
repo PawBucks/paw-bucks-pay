@@ -77,10 +77,11 @@ const PawBucksWallet = () => {
     navigate("/auth");
   };
 
-  // Calculate progress to next reward level (every 2500 coins = $25 credit)
-  const rewardThreshold = 2500;
+  // Calculate progress to next reward level (every 10,000 coins = $10 credit)
+  // Conversion rate: 1,000 coins = $1.00
+  const rewardThreshold = 10000;
   const balance = wallet?.balance || 0;
-  const usdValue = (balance / 100).toFixed(2);
+  const usdValue = (balance / 1000).toFixed(2);
   const coinsToNextReward = rewardThreshold - (balance % rewardThreshold);
   const progressPercent = ((balance % rewardThreshold) / rewardThreshold) * 100;
 
@@ -106,7 +107,7 @@ const PawBucksWallet = () => {
             <Coins className="w-10 h-10 text-yellow-500" />
             <h2 className="text-4xl font-bold">Your PawBucks Wallet</h2>
           </div>
-          <p className="text-muted-foreground text-lg">Earn coins every time you shop, groom, or visit your vet! 🐾</p>
+          <p className="text-muted-foreground text-lg">Earn 10 coins for every dollar you spend! 🐾</p>
         </div>
 
         {/* Main Wallet Card */}
@@ -124,10 +125,11 @@ const PawBucksWallet = () => {
           {/* Progress to Next Reward */}
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Progress to $25 Credit</span>
+              <span className="text-muted-foreground">Progress to $10 Credit</span>
               <span className="font-semibold">{coinsToNextReward} coins to go</span>
             </div>
             <Progress value={progressPercent} className="h-3" />
+            <p className="text-xs text-center text-muted-foreground mt-2">1,000 coins = $1.00</p>
           </div>
         </GradientCard>
 

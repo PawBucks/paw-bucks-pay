@@ -396,8 +396,8 @@ serve(async (req) => {
         }
       }
 
-      // Award PawBucks coins (1 coin per $1 spent)
-      const coinsEarned = Math.floor(paymentIntent.amount / 100); // Convert cents to dollars
+      // Award PawBucks coins (10 coins per $1 spent)
+      const coinsEarned = Math.floor(paymentIntent.amount / 100) * 10; // Convert cents to dollars, then multiply by 10
       
       if (coinsEarned > 0 && user_id) {
         // Get or create PawBucks wallet
