@@ -229,6 +229,47 @@ export type Database = {
         }
         Relationships: []
       }
+      partner_offers: {
+        Row: {
+          coins_required: number
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          partner_id: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          coins_required: number
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          partner_id: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          coins_required?: number
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          partner_id?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_offers_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partner_vets: {
         Row: {
           contact_email: string
@@ -259,6 +300,87 @@ export type Database = {
           stripe_account_id?: string | null
           updated_at?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      pawbucks_activity: {
+        Row: {
+          amount: number
+          created_at: string | null
+          description: string | null
+          id: string
+          partner_id: string | null
+          redemption_code: string | null
+          redemption_used: boolean | null
+          source: string
+          transaction_id: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          partner_id?: string | null
+          redemption_code?: string | null
+          redemption_used?: boolean | null
+          source: string
+          transaction_id?: string | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          partner_id?: string | null
+          redemption_code?: string | null
+          redemption_used?: boolean | null
+          source?: string
+          transaction_id?: string | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pawbucks_activity_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pawbucks_activity_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pawbucks_wallet: {
+        Row: {
+          balance: number
+          created_at: string | null
+          id: string
+          last_updated: string | null
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          created_at?: string | null
+          id?: string
+          last_updated?: string | null
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          created_at?: string | null
+          id?: string
+          last_updated?: string | null
+          user_id?: string
         }
         Relationships: []
       }

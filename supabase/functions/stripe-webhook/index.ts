@@ -397,6 +397,54 @@ serve(async (req) => {
       }
     }
 
+    // Award PawBucks coins (1 coin per $1 spent)
+    const coinsEarned = Math.floor(paymentIntent.amount / 100); // Convert cents to dollars
+    
+    if (coinsEarned > 0 && user_id) {
+      // Get or create PawBucks wallet
+      let { data: wallet } = await supabaseAdmin
+        .from('pawbucks_wallet')
+        .select('*')
+        .eq('user_id', user_id)
+        .single();
+
+      if (!wallet) {
+        // Create wallet if it doesn't exist
+        const { data: newWallet } = await supabaseAdmin
+          .from('pawbucks_wallet')
+          .insert({ user_id: user_id, balance: 0 })
+          .select()
+          .single();
+        wallet = newWallet;
+      }
+
+      if (wallet) {
+        // Update wallet balance
+        await supabaseAdmin
+          .from('pawbucks_wallet')
+          .update({ balance: wallet.balance + coinsEarned })
+          .eq('user_id', user_id);
+
+        // Log PawBucks activity
+        await supabaseAdmin
+          .from('pawbucks_activity')
+          .insert({
+            user_id: user_id,
+            type: 'earn',
+            amount: coinsEarned,
+            source: 'Transaction',
+            transaction_id: transaction.id,
+            partner_id: merchant_id,
+            description: `Earned ${coinsEarned} PawBucks from purchase`
+          });
+
+        console.log(`Awarded ${coinsEarned} PawBucks coins to user ${user_id} for transaction ${transaction.id}`);
+      }
+    }
+
+    console.log('Payment intent succeeded processed:', paymentIntent.id);
+    }
+
     // Handle Connect account updates
     if (event.type === 'account.updated') {
       const account = event.data.object as Stripe.Account;

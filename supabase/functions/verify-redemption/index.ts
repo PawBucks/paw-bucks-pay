@@ -1,0 +1,104 @@
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const supabaseClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
+
+    const { redemption_code } = await req.json();
+
+    if (!redemption_code) {
+      throw new Error("Redemption code is required");
+    }
+
+    // Find redemption activity
+    const { data: activity, error: activityError } = await supabaseClient
+      .from("pawbucks_activity")
+      .select(`
+        *,
+        profiles!inner(full_name, email),
+        partner_offers(title, description)
+      `)
+      .eq("redemption_code", redemption_code)
+      .eq("type", "redeem")
+      .single();
+
+    if (activityError || !activity) {
+      return new Response(
+        JSON.stringify({ 
+          valid: false,
+          message: "Invalid redemption code"
+        }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        }
+      );
+    }
+
+    // Check if already used
+    if (activity.redemption_used) {
+      return new Response(
+        JSON.stringify({ 
+          valid: false,
+          message: "This code has already been used",
+          used_at: activity.updated_at
+        }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        }
+      );
+    }
+
+    // Mark as used
+    const { error: updateError } = await supabaseClient
+      .from("pawbucks_activity")
+      .update({ redemption_used: true })
+      .eq("id", activity.id);
+
+    if (updateError) {
+      throw new Error("Failed to mark redemption as used");
+    }
+
+    console.log(`Redemption code ${redemption_code} verified and marked as used`);
+
+    return new Response(
+      JSON.stringify({
+        valid: true,
+        user_name: activity.profiles?.full_name || "Customer",
+        user_email: activity.profiles?.email,
+        offer_title: activity.partner_offers?.title || activity.description,
+        coins_spent: Math.abs(activity.amount),
+        redeemed_at: activity.created_at,
+        message: "Redemption verified successfully"
+      }),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      }
+    );
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error("Verification error:", errorMessage);
+    return new Response(
+      JSON.stringify({ error: errorMessage }),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 400,
+      }
+    );
+  }
+});
