@@ -136,12 +136,7 @@ const BuyPawBucks = () => {
               <p>1. Choose your PawBucks package above</p>
               <p>2. Complete your purchase securely with Stripe</p>
               <p>3. Coins are instantly added to your wallet</p>
-              <p>4. Use your PawBucks on any purchase through PetalPay!</p>
-            </div>
-            <div className="pt-4 border-t border-border/50">
-              <p className="text-sm text-muted-foreground">
-                💡 <strong>Pro tip:</strong> Buy in bulk and save! The more you buy, the more you get to spend on your pet's needs.
-              </p>
+              <p>4. Use your PawBucks on any purchase throughout the platform!</p>
             </div>
           </div>
         </GradientCard>
