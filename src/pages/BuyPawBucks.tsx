@@ -34,19 +34,30 @@ const BuyPawBucks = () => {
 
     setLoading(amount.toString());
     try {
+      console.log("Invoking create-pawbucks-checkout with:", { priceId, coins });
+      
       const { data, error } = await supabase.functions.invoke("create-pawbucks-checkout", {
         body: { priceId, coins },
       });
 
-      if (error) throw error;
+      console.log("Response from edge function:", { data, error });
+
+      if (error) {
+        console.error("Edge function error:", error);
+        throw error;
+      }
 
       if (data?.url) {
-        window.open(data.url, "_blank");
+        console.log("Redirecting to Stripe checkout:", data.url);
+        // Use window.location.href instead of window.open to avoid popup blockers
+        window.location.href = data.url;
+      } else {
+        console.error("No URL received from checkout session");
+        throw new Error("Failed to create checkout session - no URL received");
       }
     } catch (error: any) {
       console.error("Purchase error:", error);
       toast.error(error.message || "Failed to create checkout session");
-    } finally {
       setLoading(null);
     }
   };
