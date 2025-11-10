@@ -15,9 +15,9 @@ const BuyPawBucks = () => {
   const [loading, setLoading] = useState<string | null>(null);
 
   const packages = [
-    { amount: 500, coins: 5000, popular: false },
-    { amount: 1000, coins: 10000, popular: true },
-    { amount: 2000, coins: 20000, popular: false },
+    { amount: 500, coins: 50000, popular: false },
+    { amount: 1000, coins: 100000, popular: true },
+    { amount: 2000, coins: 200000, popular: false },
   ];
 
   const handleSignOut = async () => {
