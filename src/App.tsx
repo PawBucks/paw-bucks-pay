@@ -26,6 +26,7 @@ import PetHealth from "./pages/PetHealth";
 import VetDashboard from "./pages/VetDashboard";
 import PawBucksWallet from "./pages/PawBucksWallet";
 import PawBucksRedeem from "./pages/PawBucksRedeem";
+import BuyPawBucks from "./pages/BuyPawBucks";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -65,6 +66,7 @@ const AppContent = () => {
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/pawbucks/wallet" element={<PawBucksWallet />} />
           <Route path="/pawbucks/redeem" element={<PawBucksRedeem />} />
+          <Route path="/pawbucks/buy" element={<BuyPawBucks />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

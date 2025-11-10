@@ -164,12 +164,21 @@ const PawBucksWallet = () => {
           </GradientCard>
         </div>
 
-        {/* CTA Button */}
-        <div className="mb-8 text-center">
+        {/* CTA Buttons */}
+        <div className="mb-8 flex flex-col sm:flex-row gap-4 justify-center">
+          <Button 
+            size="lg" 
+            onClick={() => navigate("/pawbucks/buy")}
+            className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground font-semibold px-8"
+          >
+            <Coins className="w-5 h-5 mr-2" />
+            Buy PawBucks
+          </Button>
           <Button 
             size="lg" 
             onClick={() => navigate("/pawbucks/redeem")}
-            className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-semibold px-8"
+            variant="outline"
+            className="font-semibold px-8"
           >
             <Gift className="w-5 h-5 mr-2" />
             Redeem PawBucks

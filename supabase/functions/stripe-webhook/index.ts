@@ -396,8 +396,17 @@ serve(async (req) => {
         }
       }
 
-      // Award PawBucks coins (10 coins per $1 spent)
-      const coinsEarned = Math.floor(paymentIntent.amount / 100) * 10; // Convert cents to dollars, then multiply by 10
+      // Award PawBucks coins
+      let coinsEarned = 0;
+      
+      // Check if this is a direct PawBucks purchase
+      if (session.metadata?.purchase_type === "pawbucks_direct" && session.metadata?.coins_purchased) {
+        coinsEarned = parseInt(session.metadata.coins_purchased);
+        console.log("Direct PawBucks purchase detected:", { coinsEarned });
+      } else {
+        // Regular transaction: 10 coins per $1 spent
+        coinsEarned = Math.floor(paymentIntent.amount / 100) * 10;
+      }
       
       if (coinsEarned > 0 && user_id) {
         // Get or create PawBucks wallet
