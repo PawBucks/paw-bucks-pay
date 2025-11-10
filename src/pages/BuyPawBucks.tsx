@@ -15,9 +15,9 @@ const BuyPawBucks = () => {
   const [loading, setLoading] = useState<string | null>(null);
 
   const packages = [
-    { amount: 500, coins: 50000, priceId: "price_1SRaEJK2QqG8Wa5zcYkGxpUu", popular: false },
-    { amount: 1000, coins: 100000, priceId: "price_1SRaEzK2QqG8Wa5zuAIfqa3C", popular: true },
-    { amount: 2000, coins: 200000, priceId: "price_1SRaGRK2QqG8Wa5zyhNr4yCw", popular: false },
+    { amount: 500, coins: 5000, priceId: "price_1SRaEJK2QqG8Wa5zcYkGxpUu", popular: false },
+    { amount: 1000, coins: 10000, priceId: "price_1SRaEzK2QqG8Wa5zuAIfqa3C", popular: true },
+    { amount: 2000, coins: 20000, priceId: "price_1SRaGRK2QqG8Wa5zyhNr4yCw", popular: false },
   ];
 
   const handleSignOut = async () => {
