@@ -85,8 +85,8 @@ const PawBucksRedeem = () => {
 
   const handleRedeemClick = (offer: PartnerOffer) => {
     if (!wallet || wallet.balance < offer.coins_required) {
-      toast.error("Insufficient PawBucks coins", {
-        description: `You need ${offer.coins_required.toLocaleString()} coins but only have ${wallet?.balance.toLocaleString() || 0}.`,
+      toast.error("Insufficient PawBucks", {
+        description: `You need ${offer.coins_required.toLocaleString()} PawBucks but only have ${wallet?.balance.toLocaleString() || 0}.`,
       });
       return;
     }
@@ -151,7 +151,7 @@ const PawBucksRedeem = () => {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-3xl font-bold mb-2">Redeem Your PawBucks</h2>
-              <p className="text-muted-foreground">Use your coins for products and services from our partners.</p>
+              <p className="text-muted-foreground">Use your PawBucks for products and services from our partners.</p>
             </div>
             <GradientCard className="px-6 py-4">
               <div className="flex items-center gap-2">
@@ -175,7 +175,7 @@ const PawBucksRedeem = () => {
                 <GradientCard key={offer.id} className="relative overflow-hidden">
                   {!canAfford && (
                     <div className="absolute top-2 right-2 bg-red-500/20 text-red-500 px-3 py-1 rounded-full text-xs font-semibold">
-                      Insufficient Coins
+                      Insufficient PawBucks
                     </div>
                   )}
                   
@@ -196,7 +196,7 @@ const PawBucksRedeem = () => {
                     <div className="flex items-center gap-1">
                       <Coins className="w-5 h-5 text-yellow-500" />
                       <span className="font-bold text-lg">{offer.coins_required.toLocaleString()}</span>
-                      <span className="text-sm text-muted-foreground">coins</span>
+                      <span className="text-sm text-muted-foreground">PawBucks</span>
                     </div>
                     <Button
                       onClick={() => handleRedeemClick(offer)}
@@ -238,7 +238,7 @@ const PawBucksRedeem = () => {
                 <p className="text-sm text-muted-foreground mb-2">{selectedOffer.merchants.business_name}</p>
                 <div className="flex items-center gap-2 text-yellow-500">
                   <Coins className="w-5 h-5" />
-                  <span className="font-bold text-xl">{selectedOffer.coins_required.toLocaleString()} coins</span>
+                  <span className="font-bold text-xl">{selectedOffer.coins_required.toLocaleString()} PawBucks</span>
                 </div>
               </div>
               <div className="flex gap-3">
@@ -282,12 +282,12 @@ const PawBucksRedeem = () => {
                   <span className="font-semibold">{redemptionResult.offer_title}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Coins Spent:</span>
+                  <span className="text-muted-foreground">PawBucks Spent:</span>
                   <span className="font-semibold">{redemptionResult.coins_spent.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">New Balance:</span>
-                  <span className="font-semibold">{redemptionResult.new_balance.toLocaleString()} coins</span>
+                  <span className="font-semibold">{redemptionResult.new_balance.toLocaleString()} PawBucks</span>
                 </div>
               </div>
 

@@ -85,7 +85,7 @@ const BuyPawBucks = () => {
                     <Coins className="w-8 h-8 text-yellow-500" />
                   </div>
                   <p className="text-4xl font-bold">{pkg.coins.toLocaleString()}</p>
-                  <p className="text-muted-foreground">PawBucks Coins</p>
+                  <p className="text-muted-foreground">PawBucks</p>
                 </div>
 
                 <div className="py-4 border-t border-b border-border/50">
@@ -135,7 +135,7 @@ const BuyPawBucks = () => {
             <div className="space-y-3 text-muted-foreground">
               <p>1. Choose your PawBucks package above</p>
               <p>2. Complete your purchase securely with Stripe</p>
-              <p>3. Coins are instantly added to your wallet</p>
+              <p>3. PawBucks are instantly added to your wallet</p>
               <p>4. Use your PawBucks on any purchase throughout the platform!</p>
             </div>
           </div>

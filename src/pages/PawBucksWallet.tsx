@@ -107,7 +107,7 @@ const PawBucksWallet = () => {
             <Coins className="w-10 h-10 text-yellow-500" />
             <h2 className="text-4xl font-bold">Your PawBucks Wallet</h2>
           </div>
-          <p className="text-muted-foreground text-lg">Earn 10 coins for every dollar you spend! 🐾</p>
+          <p className="text-muted-foreground text-lg">Earn 10 PawBucks for every dollar you spend! 🐾</p>
         </div>
 
         {/* Main Wallet Card */}
@@ -118,7 +118,7 @@ const PawBucksWallet = () => {
               <p className="text-sm text-muted-foreground">Current Balance</p>
             </div>
             <p className="text-6xl font-bold mb-2">{balance.toLocaleString()}</p>
-            <p className="text-2xl text-muted-foreground">PawBucks Coins</p>
+            <p className="text-2xl text-muted-foreground">PawBucks</p>
             <p className="text-lg text-accent mt-2">≈ ${usdValue} USD</p>
           </div>
 
@@ -126,10 +126,10 @@ const PawBucksWallet = () => {
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Progress to $10 Credit</span>
-              <span className="font-semibold">{coinsToNextReward} coins to go</span>
+              <span className="font-semibold">{coinsToNextReward} PawBucks to go</span>
             </div>
             <Progress value={progressPercent} className="h-3" />
-            <p className="text-xs text-center text-muted-foreground mt-2">1,000 coins = $1.00</p>
+            <p className="text-xs text-center text-muted-foreground mt-2">1,000 PawBucks = $1.00</p>
           </div>
         </GradientCard>
 
