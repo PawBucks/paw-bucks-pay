@@ -27,10 +27,10 @@ serve(async (req) => {
       throw new Error("User not authenticated");
     }
 
-    const { amount, coins } = await req.json();
+    const { priceId, coins } = await req.json();
 
-    if (!amount || !coins) {
-      throw new Error("Amount and coins are required");
+    if (!priceId || !coins) {
+      throw new Error("Price ID and coins are required");
     }
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
@@ -50,15 +50,7 @@ serve(async (req) => {
       customer_email: customerId ? undefined : user.email,
       line_items: [
         {
-          price_data: {
-            currency: "usd",
-            product_data: {
-              name: `${coins.toLocaleString()} PawBucks Coins`,
-              description: `Purchase ${coins.toLocaleString()} PawBucks coins for $${amount}`,
-              images: ["https://yxpnkipcoxksmnsvpvwi.supabase.co/storage/v1/object/public/pet-photos/pawbucks-icon.png"],
-            },
-            unit_amount: amount * 100, // Convert to cents
-          },
+          price: priceId,
           quantity: 1,
         },
       ],
@@ -75,7 +67,7 @@ serve(async (req) => {
     console.log("PawBucks checkout session created:", {
       session_id: session.id,
       user_id: user.id,
-      amount,
+      priceId,
       coins,
     });
 

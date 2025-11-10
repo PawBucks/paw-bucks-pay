@@ -15,9 +15,9 @@ const BuyPawBucks = () => {
   const [loading, setLoading] = useState<string | null>(null);
 
   const packages = [
-    { amount: 500, coins: 50000, popular: false },
-    { amount: 1000, coins: 100000, popular: true },
-    { amount: 2000, coins: 200000, popular: false },
+    { amount: 500, coins: 50000, priceId: "price_1SRaEJK2QqG8Wa5zcYkGxpUu", popular: false },
+    { amount: 1000, coins: 100000, priceId: "price_1SRaEzK2QqG8Wa5zuAIfqa3C", popular: true },
+    { amount: 2000, coins: 200000, priceId: "price_1SRaGRK2QqG8Wa5zyhNr4yCw", popular: false },
   ];
 
   const handleSignOut = async () => {
@@ -25,7 +25,7 @@ const BuyPawBucks = () => {
     navigate("/auth");
   };
 
-  const handlePurchase = async (amount: number, coins: number) => {
+  const handlePurchase = async (priceId: string, coins: number, amount: number) => {
     if (!user) {
       toast.error("Please sign in to purchase PawBucks");
       navigate("/auth");
@@ -35,7 +35,7 @@ const BuyPawBucks = () => {
     setLoading(amount.toString());
     try {
       const { data, error } = await supabase.functions.invoke("create-pawbucks-checkout", {
-        body: { amount, coins },
+        body: { priceId, coins },
       });
 
       if (error) throw error;
@@ -109,7 +109,7 @@ const BuyPawBucks = () => {
                 </div>
 
                 <Button
-                  onClick={() => handlePurchase(pkg.amount, pkg.coins)}
+                  onClick={() => handlePurchase(pkg.priceId, pkg.coins, pkg.amount)}
                   disabled={loading === pkg.amount.toString()}
                   className="w-full"
                   size="lg"
