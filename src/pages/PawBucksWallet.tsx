@@ -77,11 +77,11 @@ const PawBucksWallet = () => {
     navigate("/auth");
   };
 
-  // Calculate progress to next reward level (every 10,000 coins = $10 credit)
-  // Conversion rate: 1,000 coins = $1.00
-  const rewardThreshold = 10000;
+  // Calculate progress to next reward level (every 100 coins = $10 credit)
+  // Conversion rate: 10 PawBucks = $1.00
+  const rewardThreshold = 100;
   const balance = wallet?.balance || 0;
-  const usdValue = (balance / 1000).toFixed(2);
+  const usdValue = (balance / 10).toFixed(2);
   const coinsToNextReward = rewardThreshold - (balance % rewardThreshold);
   const progressPercent = ((balance % rewardThreshold) / rewardThreshold) * 100;
 
@@ -129,7 +129,7 @@ const PawBucksWallet = () => {
               <span className="font-semibold">{coinsToNextReward} PawBucks to go</span>
             </div>
             <Progress value={progressPercent} className="h-3" />
-            <p className="text-xs text-center text-muted-foreground mt-2">1,000 PawBucks = $1.00</p>
+            <p className="text-xs text-center text-muted-foreground mt-2">10 PawBucks = $1.00</p>
           </div>
         </GradientCard>
 
