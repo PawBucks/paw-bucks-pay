@@ -25,6 +25,7 @@ export const Header = ({ menuItems, isAuthenticated = false, onLogout }: HeaderP
   
   const defaultMenuItems: MenuItem[] = [
     { label: "For Pet Lovers", path: "/" },
+    { label: "Pet Store", path: "/pet-store" },
     { label: "For Pet Merchants", path: "/merchants" }
   ];
 

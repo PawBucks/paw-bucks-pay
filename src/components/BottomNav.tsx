@@ -1,10 +1,10 @@
 import { NavLink } from "react-router-dom";
-import { Compass, Wallet, Gift, User, Coins } from "lucide-react";
+import { Compass, Wallet, Gift, User, Coins, Store } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { title: "Discover", to: "/discover", icon: Compass },
-  { title: "Wallet", to: "/wallet", icon: Wallet },
+  { title: "Store", to: "/pet-store", icon: Store },
   { title: "PawBucks", to: "/pawbucks/wallet", icon: Coins },
   { title: "Profile", to: "/profile", icon: User },
 ];

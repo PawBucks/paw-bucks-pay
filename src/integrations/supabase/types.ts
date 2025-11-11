@@ -540,6 +540,114 @@ export type Database = {
           },
         ]
       }
+      pet_store_items: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          name: string
+          price: number
+          stock_quantity: number
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name: string
+          price: number
+          stock_quantity?: number
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name?: string
+          price?: number
+          stock_quantity?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      pet_store_order_items: {
+        Row: {
+          created_at: string
+          id: string
+          item_id: string
+          order_id: string
+          price_per_item: number
+          quantity: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          item_id: string
+          order_id: string
+          price_per_item: number
+          quantity: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          item_id?: string
+          order_id?: string
+          price_per_item?: number
+          quantity?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pet_store_order_items_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "pet_store_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_store_order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "pet_store_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pet_store_orders: {
+        Row: {
+          created_at: string
+          id: string
+          status: string
+          total_amount: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          status?: string
+          total_amount: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          status?: string
+          total_amount?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

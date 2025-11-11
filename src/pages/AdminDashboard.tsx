@@ -439,6 +439,10 @@ const AdminDashboard = () => {
               <Bell className="w-4 h-4 mr-2" />
               Send Notification
             </Button>
+            <Button variant="ghost" size="sm" onClick={() => navigate("/admin/pet-store")}>
+              <Store className="w-4 h-4 mr-2" />
+              Pet Store
+            </Button>
             <Button variant="ghost" size="sm" onClick={handleSignOut}>
               <LogOut className="w-4 h-4" />
             </Button>
