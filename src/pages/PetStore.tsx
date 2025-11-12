@@ -27,6 +27,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { Loader2 } from "lucide-react";
+import { BottomNav } from "@/components/BottomNav";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
 
@@ -478,6 +479,7 @@ export default function PetStore() {
           ) : null}
         </DialogContent>
       </Dialog>
+      <BottomNav />
     </div>
   );
 }
