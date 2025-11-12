@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useOptimizedQuery } from "@/hooks/useOptimizedQuery";
@@ -7,9 +7,11 @@ import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { GradientCard } from "@/components/ui/gradient-card";
 import { BottomNav } from "@/components/BottomNav";
-import { DashboardSkeleton } from "@/components/LoadingSkeleton";
+import { PageLoader } from "@/components/PageLoader";
+import { EmptyState } from "@/components/EmptyState";
 import { Coins, TrendingUp, Gift, ArrowUpRight, ArrowDownRight } from "lucide-react";
-import { format } from "date-fns";
+import { Formatters } from "@/utils/formatters";
+import { PAWBUCKS_CONVERSION, ROUTES } from "@/lib/constants";
 import { Progress } from "@/components/ui/progress";
 
 type PawBucksWallet = {
@@ -77,23 +79,14 @@ const PawBucksWallet = () => {
     navigate("/auth");
   };
 
-  // Calculate progress to next reward level (every 100 coins = $10 credit)
-  // Conversion rate: 10 PawBucks = $1.00
-  const rewardThreshold = 100;
+  // Calculate progress to next reward level
   const balance = wallet?.balance || 0;
-  const usdValue = (balance / 10).toFixed(2);
-  const coinsToNextReward = rewardThreshold - (balance % rewardThreshold);
-  const progressPercent = ((balance % rewardThreshold) / rewardThreshold) * 100;
+  const usdValue = Formatters.pawBucksToUSD(balance);
+  const coinsToNextReward = PAWBUCKS_CONVERSION.REWARD_THRESHOLD - (balance % PAWBUCKS_CONVERSION.REWARD_THRESHOLD);
+  const progressPercent = ((balance % PAWBUCKS_CONVERSION.REWARD_THRESHOLD) / PAWBUCKS_CONVERSION.REWARD_THRESHOLD) * 100;
 
   if (authLoading || loading) {
-    return (
-      <div className="min-h-screen bg-[var(--gradient-hero)] pb-24">
-        <Header isAuthenticated={true} onLogout={handleSignOut} />
-        <main className="container mx-auto px-4 py-8 max-w-4xl">
-          <DashboardSkeleton />
-        </main>
-      </div>
-    );
+    return <PageLoader message="Loading your PawBucks wallet..." />;
   }
 
   return (
@@ -117,9 +110,9 @@ const PawBucksWallet = () => {
               <Coins className="w-8 h-8 text-yellow-400" />
               <p className="text-sm text-muted-foreground">Current Balance</p>
             </div>
-            <p className="text-6xl font-bold mb-2">{balance.toLocaleString()}</p>
+            <p className="text-6xl font-bold mb-2">{Formatters.number(balance)}</p>
             <p className="text-2xl text-muted-foreground">PawBucks</p>
-            <p className="text-lg text-accent mt-2">≈ ${usdValue} USD</p>
+            <p className="text-lg text-accent mt-2">≈ {usdValue}</p>
           </div>
 
           {/* Progress to Next Reward */}
@@ -129,7 +122,9 @@ const PawBucksWallet = () => {
               <span className="font-semibold">{coinsToNextReward} PawBucks to go</span>
             </div>
             <Progress value={progressPercent} className="h-3" />
-            <p className="text-xs text-center text-muted-foreground mt-2">10 PawBucks = $1.00</p>
+            <p className="text-xs text-center text-muted-foreground mt-2">
+              {PAWBUCKS_CONVERSION.USD_CONVERSION} PawBucks = $1.00
+            </p>
           </div>
         </GradientCard>
 
@@ -143,7 +138,7 @@ const PawBucksWallet = () => {
               <div>
                 <p className="text-sm text-muted-foreground">Total Earned</p>
                 <p className="text-2xl font-bold">
-                  {activities.filter(a => a.type === 'earn').reduce((sum, a) => sum + a.amount, 0).toLocaleString()}
+                  {Formatters.number(activities.filter(a => a.type === 'earn').reduce((sum, a) => sum + a.amount, 0))}
                 </p>
               </div>
             </div>
@@ -157,7 +152,7 @@ const PawBucksWallet = () => {
               <div>
                 <p className="text-sm text-muted-foreground">Total Redeemed</p>
                 <p className="text-2xl font-bold">
-                  {Math.abs(activities.filter(a => a.type === 'redeem').reduce((sum, a) => sum + a.amount, 0)).toLocaleString()}
+                  {Formatters.number(Math.abs(activities.filter(a => a.type === 'redeem').reduce((sum, a) => sum + a.amount, 0)))}
                 </p>
               </div>
             </div>
@@ -168,7 +163,7 @@ const PawBucksWallet = () => {
         <div className="mb-8 flex flex-col sm:flex-row gap-4 justify-center">
           <Button 
             size="lg" 
-            onClick={() => navigate("/pawbucks/buy")}
+            onClick={() => navigate(ROUTES.PAWBUCKS_BUY)}
             className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground font-semibold px-8"
           >
             <Coins className="w-5 h-5 mr-2" />
@@ -176,7 +171,7 @@ const PawBucksWallet = () => {
           </Button>
           <Button 
             size="lg" 
-            onClick={() => navigate("/pawbucks/redeem")}
+            onClick={() => navigate(ROUTES.PAWBUCKS_REDEEM)}
             variant="outline"
             className="font-semibold px-8"
           >
@@ -208,7 +203,7 @@ const PawBucksWallet = () => {
                     <div>
                       <p className="font-medium">{activity.description}</p>
                       <p className="text-xs text-muted-foreground">
-                        {format(new Date(activity.created_at), "MMM d, yyyy 'at' h:mm a")}
+                        {Formatters.date(activity.created_at, 'relative')}
                       </p>
                     </div>
                   </div>
@@ -216,7 +211,7 @@ const PawBucksWallet = () => {
                     <p className={`font-bold text-lg ${
                       activity.type === 'earn' ? 'text-green-500' : 'text-orange-500'
                     }`}>
-                      {activity.type === 'earn' ? '+' : ''}{activity.amount.toLocaleString()}
+                      {activity.type === 'earn' ? '+' : ''}{Formatters.number(activity.amount)}
                     </p>
                     <p className="text-xs text-muted-foreground capitalize">{activity.source}</p>
                   </div>
@@ -224,16 +219,15 @@ const PawBucksWallet = () => {
               ))}
             </div>
           ) : (
-            <div className="text-center py-12">
-              <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-3">
-                <Coins className="w-8 h-8 text-muted-foreground" />
-              </div>
-              <p className="text-muted-foreground mb-4">No activity yet</p>
-              <p className="text-sm text-muted-foreground">Start shopping to earn PawBucks! 🐾</p>
-              <Button onClick={() => navigate("/discover")} className="mt-4">
-                Discover Merchants
-              </Button>
-            </div>
+            <EmptyState
+              icon={Coins}
+              title="No activity yet"
+              description="Start shopping to earn PawBucks! Every dollar you spend earns you rewards. 🐾"
+              action={{
+                label: "Discover Merchants",
+                onClick: () => navigate(ROUTES.DISCOVER)
+              }}
+            />
           )}
         </GradientCard>
       </main>
