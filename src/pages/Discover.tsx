@@ -1,19 +1,23 @@
-import { useEffect, useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useOptimizedQuery } from "@/hooks/useOptimizedQuery";
 import { DataLoader } from "@/lib/dataLoader";
-import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { GradientCard } from "@/components/ui/gradient-card";
 import { MerchantCard } from "@/components/MerchantCard";
 import { PaymentDialog } from "@/components/PaymentDialog";
 import { BottomNav } from "@/components/BottomNav";
-import { Search, Loader2, MapPin } from "lucide-react";
+import { PageLoader } from "@/components/PageLoader";
+import { EmptyState } from "@/components/EmptyState";
+import { Search, MapPin, Store } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { ROUTES, ERROR_MESSAGES, QUERY_STALE_TIMES } from "@/lib/constants";
+import { SEO } from "@/components/SEO";
+import { usePersistentState } from "@/hooks/usePersistentState";
 
 type Merchant = {
   id: string;
@@ -29,9 +33,9 @@ type Merchant = {
 const Discover = () => {
   const { user, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = usePersistentState<string>('discover-search', "");
   const debouncedSearch = useDebounce(searchTerm, 300);
-  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [userLocation, setUserLocation] = usePersistentState<{ lat: number; lng: number } | null>('user-location', null);
   const [selectedMerchant, setSelectedMerchant] = useState<{
     id: string;
     name: string;
@@ -43,7 +47,7 @@ const Discover = () => {
   const { data: merchants = [], isLoading: loading } = useOptimizedQuery<Merchant[]>(
     ['merchants'],
     () => DataLoader.loadMerchants(),
-    { staleTime: 1000 * 60 * 10 } // Cache for 10 minutes
+    { staleTime: QUERY_STALE_TIMES.LONG }
   );
 
   useEffect(() => {
@@ -97,8 +101,8 @@ const Discover = () => {
 
   const handlePayNow = (merchantId: string, merchantName: string, cashbackRate: number) => {
     if (!user) {
-      toast.error("Please sign in to make a payment");
-      navigate("/auth");
+      toast.error(ERROR_MESSAGES.AUTH_REQUIRED);
+      navigate(ROUTES.AUTH);
       return;
     }
     setSelectedMerchant({ id: merchantId, name: merchantName, cashbackRate });
@@ -106,48 +110,50 @@ const Discover = () => {
   };
 
   const handlePaymentSuccess = () => {
-    // Optionally refresh data or show updated balance
     toast.success("Redirecting to wallet...");
-    setTimeout(() => navigate("/wallet"), 1000);
+    setTimeout(() => navigate(ROUTES.WALLET), 1000);
   };
 
   const handleSignOut = async () => {
     await signOut();
-    navigate("/auth");
+    navigate(ROUTES.AUTH);
   };
 
   if (authLoading || loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    );
+    return <PageLoader message="Finding amazing pet merchants near you..." />;
   }
 
   return (
-    <div className="min-h-screen bg-[var(--gradient-hero)] pb-24">
-      <Header />
+    <>
+      <SEO 
+        title="Discover Pet Merchants"
+        description="Find trusted pet stores, groomers, trainers and more. Earn cashback rewards with every purchase."
+        keywords={['pet merchants', 'pet stores', 'pet services', 'cashback', 'rewards']}
+      />
+      <div className="min-h-screen bg-[var(--gradient-hero)] pb-24">
+        <Header />
 
-      <main className="container mx-auto px-4 py-8 max-w-4xl">
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold mb-2">Discover</h2>
-          <p className="text-muted-foreground">Find trusted pet services near you</p>
-        </div>
+        <main className="container mx-auto px-4 py-8 max-w-4xl">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold mb-2">Discover</h1>
+            <p className="text-muted-foreground">Find trusted pet services near you</p>
+          </div>
 
         {/* Search */}
         <GradientCard className="mb-6">
           <div className="flex gap-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
               <Input
                 placeholder="Search by name or type..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
+                aria-label="Search merchants"
               />
             </div>
             {userLocation && (
-              <Button variant="outline" size="icon">
+              <Button variant="outline" size="icon" aria-label="Your location">
                 <MapPin className="w-4 h-4" />
               </Button>
             )}
@@ -156,7 +162,7 @@ const Discover = () => {
 
         {/* Merchants Grid */}
         {filteredMerchants.length > 0 ? (
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-2" role="list">
             {filteredMerchants.map((merchant) => {
               const distance =
                 userLocation && merchant.latitude && merchant.longitude
@@ -179,10 +185,15 @@ const Discover = () => {
             })}
           </div>
         ) : (
-          <GradientCard className="text-center py-12">
-            <p className="text-muted-foreground mb-4">No merchants found</p>
-            <Button onClick={() => setSearchTerm("")}>Clear Search</Button>
-          </GradientCard>
+          <EmptyState
+            icon={Store}
+            title="No merchants found"
+            description={searchTerm ? "Try a different search term" : "No merchants available yet"}
+            action={searchTerm ? {
+              label: "Clear Search",
+              onClick: () => setSearchTerm("")
+            } : undefined}
+          />
         )}
       </main>
 
@@ -201,6 +212,7 @@ const Discover = () => {
 
       {user && <BottomNav />}
     </div>
+    </>
   );
 };
 
