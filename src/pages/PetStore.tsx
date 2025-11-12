@@ -21,10 +21,129 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { ShoppingCart, Coins } from "lucide-react";
+import { ShoppingCart, Coins, CreditCard } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
+import { Loader2 } from "lucide-react";
+
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
 
 const CATEGORIES = ["All", "Food", "Treats", "Toys", "Bedding", "Accessories", "Healthcare", "Grooming"];
+
+type PaymentMethod = "pawbucks" | "credit_card";
+
+type PetStorePaymentFormProps = {
+  itemId: string;
+  itemName: string;
+  quantity: number;
+  totalAmount: number;
+  cashbackRate: number;
+  onSuccess: () => void;
+  onCancel: () => void;
+};
+
+const PetStorePaymentForm = ({
+  itemId,
+  itemName,
+  quantity,
+  totalAmount,
+  cashbackRate,
+  onSuccess,
+  onCancel,
+}: PetStorePaymentFormProps) => {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!stripe || !elements) {
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const { error } = await stripe.confirmPayment({
+        elements,
+        confirmParams: {
+          return_url: `${window.location.origin}/pet-store`,
+        },
+        redirect: 'if_required',
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      const cashbackAmount = (totalAmount * cashbackRate) / 100;
+      const pawbucksEarned = Math.floor(cashbackAmount * 10);
+
+      toast.success(
+        `Payment successful! You earned ${pawbucksEarned} PawBucks!`
+      );
+      
+      onSuccess();
+    } catch (error: any) {
+      console.error("Payment error:", error);
+      toast.error(error.message || "Payment failed");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const cashbackAmount = (totalAmount * cashbackRate) / 100;
+  const pawbucksEarned = Math.floor(cashbackAmount * 10);
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="bg-accent/10 border border-accent/20 rounded-lg p-4 mb-4">
+        <div className="flex justify-between text-sm mb-2">
+          <span className="text-muted-foreground">Item:</span>
+          <span className="font-medium">{itemName} x{quantity}</span>
+        </div>
+        <div className="flex justify-between text-sm mb-2">
+          <span className="text-muted-foreground">Amount:</span>
+          <span className="font-medium">${totalAmount.toFixed(2)}</span>
+        </div>
+        <div className="flex justify-between text-sm">
+          <span className="text-muted-foreground">You'll earn ({cashbackRate}%):</span>
+          <span className="font-bold text-accent flex items-center gap-1">
+            <Coins className="h-3 w-3" />
+            {pawbucksEarned} PawBucks
+          </span>
+        </div>
+      </div>
+
+      <PaymentElement />
+
+      <div className="flex gap-3">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onCancel}
+          className="flex-1"
+          disabled={isLoading}
+        >
+          Cancel
+        </Button>
+        <Button type="submit" className="flex-1" disabled={isLoading || !stripe}>
+          {isLoading ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              Processing...
+            </>
+          ) : (
+            "Pay Now"
+          )}
+        </Button>
+      </div>
+    </form>
+  );
+};
 
 export default function PetStore() {
   const { user } = useAuth();
@@ -32,6 +151,10 @@ export default function PetStore() {
   const queryClient = useQueryClient();
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
+  const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [clientSecret, setClientSecret] = useState("");
+  const [isCreatingIntent, setIsCreatingIntent] = useState(false);
 
   // Fetch user's PawBucks balance
   const { data: wallet } = useQuery({
@@ -49,6 +172,26 @@ export default function PetStore() {
     },
     enabled: !!user,
   });
+
+  // Check user's subscription for cashback rate
+  const { data: subscription } = useQuery({
+    queryKey: ["subscription", user?.id],
+    queryFn: async () => {
+      if (!user) return null;
+      const { data, error } = await supabase
+        .from("subscriptions")
+        .select("status")
+        .eq("user_id", user.id)
+        .eq("status", "active")
+        .maybeSingle();
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
+
+  const cashbackRate = subscription ? 25 : 10;
 
   // Fetch active items
   const { data: items, isLoading } = useQuery({
@@ -150,12 +293,57 @@ export default function PetStore() {
     },
   });
 
-  const handlePurchase = (itemId: string) => {
+  const handlePurchaseWithPawBucks = (itemId: string) => {
     if (!user) {
       navigate("/auth");
       return;
     }
     purchaseMutation.mutate({ itemId, quantity: 1 });
+  };
+
+  const handlePurchaseWithCard = async (item: any) => {
+    if (!user) {
+      navigate("/auth");
+      return;
+    }
+
+    setSelectedItem(item);
+    setIsCreatingIntent(true);
+    setPaymentDialogOpen(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('create-pet-store-payment', {
+        body: {
+          itemId: item.id,
+          quantity: 1,
+        },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      setClientSecret(data.clientSecret);
+    } catch (error: any) {
+      console.error("Error creating payment intent:", error);
+      toast.error(error.message || "Failed to initialize payment");
+      setPaymentDialogOpen(false);
+    } finally {
+      setIsCreatingIntent(false);
+    }
+  };
+
+  const handlePaymentSuccess = () => {
+    setPaymentDialogOpen(false);
+    setSelectedItem(null);
+    setClientSecret("");
+    queryClient.invalidateQueries({ queryKey: ["pawbucks-wallet"] });
+    queryClient.invalidateQueries({ queryKey: ["pet-store-items"] });
+  };
+
+  const handlePaymentCancel = () => {
+    setPaymentDialogOpen(false);
+    setSelectedItem(null);
+    setClientSecret("");
   };
 
   const filteredItems = items?.filter(item => {
@@ -242,20 +430,54 @@ export default function PetStore() {
                   </span>
                 </div>
               </CardContent>
-              <CardFooter>
+              <CardFooter className="flex-col gap-2">
                 <Button
                   className="w-full"
-                  onClick={() => handlePurchase(item.id)}
+                  onClick={() => handlePurchaseWithCard(item)}
+                  disabled={!user || item.stock_quantity === 0}
+                >
+                  <CreditCard className="mr-2 h-4 w-4" />
+                  {item.stock_quantity === 0 ? "Out of Stock" : "Pay with Card"}
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => handlePurchaseWithPawBucks(item.id)}
                   disabled={!user || item.stock_quantity === 0 || purchaseMutation.isPending}
                 >
-                  <ShoppingCart className="mr-2 h-4 w-4" />
-                  {item.stock_quantity === 0 ? "Out of Stock" : "Buy Now"}
+                  <Coins className="mr-2 h-4 w-4" />
+                  Pay with PawBucks
                 </Button>
               </CardFooter>
             </Card>
           ))}
         </div>
       )}
+
+      <Dialog open={paymentDialogOpen} onOpenChange={setPaymentDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Pay with Credit Card</DialogTitle>
+          </DialogHeader>
+          {isCreatingIntent ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          ) : clientSecret && selectedItem ? (
+            <Elements stripe={stripePromise} options={{ clientSecret }}>
+              <PetStorePaymentForm
+                itemId={selectedItem.id}
+                itemName={selectedItem.name}
+                quantity={1}
+                totalAmount={selectedItem.price}
+                cashbackRate={cashbackRate}
+                onSuccess={handlePaymentSuccess}
+                onCancel={handlePaymentCancel}
+              />
+            </Elements>
+          ) : null}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
