@@ -396,16 +396,64 @@ serve(async (req) => {
         }
       }
 
+      // Handle Pet Store purchases
+      if (paymentIntent.metadata?.source === 'pet_store') {
+        const { item_id, item_name, quantity, user_id } = paymentIntent.metadata;
+        const totalAmount = paymentIntent.amount / 100;
+
+        console.log('Pet Store purchase detected:', { item_id, item_name, quantity, totalAmount });
+
+        // Create order
+        const { data: order, error: orderError } = await supabaseAdmin
+          .from('pet_store_orders')
+          .insert([{
+            user_id: user_id,
+            total_amount: Math.round(totalAmount),
+            status: 'completed',
+          }])
+          .select()
+          .single();
+
+        if (!orderError && order) {
+          // Create order item
+          await supabaseAdmin
+            .from('pet_store_order_items')
+            .insert([{
+              order_id: order.id,
+              item_id: item_id,
+              quantity: parseInt(quantity),
+              price_per_item: Math.round(totalAmount / parseInt(quantity)),
+            }]);
+
+          // Update stock
+          const { data: item } = await supabaseAdmin
+            .from('pet_store_items')
+            .select('stock_quantity')
+            .eq('id', item_id)
+            .single();
+
+          if (item) {
+            await supabaseAdmin
+              .from('pet_store_items')
+              .update({ stock_quantity: item.stock_quantity - parseInt(quantity) })
+              .eq('id', item_id);
+          }
+
+          console.log('✅ Pet Store order completed:', order.id);
+        }
+      }
+
       // Award PawBucks coins
       let coinsEarned = 0;
       
-      // Check if this is a direct PawBucks purchase
-      if (session.metadata?.purchase_type === "pawbucks_direct" && session.metadata?.coins_purchased) {
-        coinsEarned = parseInt(session.metadata.coins_purchased);
+      // Check if this is a direct PawBucks purchase (from checkout session)
+      if (paymentIntent.metadata?.purchase_type === "pawbucks_direct" && paymentIntent.metadata?.coins_purchased) {
+        coinsEarned = parseInt(paymentIntent.metadata.coins_purchased);
         console.log("Direct PawBucks purchase detected:", { coinsEarned });
       } else {
-        // Regular transaction: 10 coins per $1 spent
-        coinsEarned = Math.floor(paymentIntent.amount / 100) * 10;
+        // Regular transaction: Award PawBucks based on cashback
+        const cashbackAmount = parseFloat(paymentIntent.metadata?.cashback_amount || '0');
+        coinsEarned = Math.floor(cashbackAmount * 10); // Convert dollars to PawBucks (10 PawBucks = $1)
       }
       
       if (coinsEarned > 0 && user_id) {
