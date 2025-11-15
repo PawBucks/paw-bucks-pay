@@ -153,14 +153,16 @@ serve(async (req) => {
       userMessage = 'CAPABILITIES_ERROR: Unable to enable payment capabilities for this account.';
     }
     
+    // Return 200 status with error field so frontend can access the error message
     return new Response(
       JSON.stringify({ 
         error: userMessage,
+        success: false,
         originalError: errorMessage 
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400,
+        status: 200,
       }
     );
   }

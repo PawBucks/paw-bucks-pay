@@ -159,14 +159,21 @@ const MerchantDashboard = () => {
         }
       );
 
-      // Handle edge function errors (400 status returns as error object)
+      // Handle network/invocation errors
       if (error) {
-        console.error("Stripe Connect error:", error);
+        console.error("Stripe Connect invocation error:", error);
+        toast.error("Failed to connect Stripe account", {
+          description: "Network error. Please check your connection and try again.",
+          duration: 5000,
+        });
+        return;
+      }
+
+      // Handle application errors (returned with success: false)
+      if (data?.error || data?.success === false) {
+        console.error("Stripe Connect error:", data.error || data.originalError);
         
-        // Try to parse the error message from the function response
-        const errorData = error.context?.body || error;
-        const errorMessage = typeof errorData === 'string' ? errorData : 
-                            errorData?.error || error.message || "An unexpected error occurred";
+        const errorMessage = data.error || "An unexpected error occurred";
         
         // Check for specific error types
         if (errorMessage.includes("PLATFORM_NOT_CONFIGURED") || errorMessage.includes("platform-profile")) {
@@ -174,55 +181,30 @@ const MerchantDashboard = () => {
             description: "Your Stripe Connect platform needs to be configured. Please go to Stripe Dashboard → Settings → Connect → Platform Profile and complete the setup, including selecting who manages losses for connected accounts.",
             duration: 12000,
           });
-          return;
         } else if (errorMessage.includes("CAPABILITIES_ERROR") || errorMessage.includes("capabilities")) {
-          toast.error("Payment Capabilities Error", {
-            description: "Unable to enable payment capabilities. Please ensure your Stripe account has the necessary permissions.",
-            duration: 6000,
-          });
-          return;
-        }
-        
-        // Generic error
-        toast.error("Failed to connect Stripe account", {
-          description: typeof errorMessage === 'string' ? errorMessage.replace(/^[A-Z_]+:\s*/, '') : "Please try again or contact support.",
-          duration: 6000,
-        });
-        return;
-      }
-
-      if (data?.error) {
-        console.error("Stripe Connect API error:", data.error);
-        
-        if (data.error.includes("PLATFORM_NOT_CONFIGURED")) {
-          toast.error("Stripe Platform Configuration Required", {
-            description: "Your Stripe Connect platform needs to be configured. Please go to Stripe Dashboard → Settings → Connect → Platform Profile and complete the setup.",
-            duration: 10000,
-          });
-        } else if (data.error.includes("CAPABILITIES_ERROR")) {
           toast.error("Payment Capabilities Error", {
             description: "Unable to enable payment capabilities. Please ensure your Stripe account has the necessary permissions.",
             duration: 6000,
           });
         } else {
           toast.error("Failed to connect Stripe account", {
-            description: data.error.replace(/^[A-Z_]+:\s*/, ''),
+            description: errorMessage.replace(/^[A-Z_]+:\s*/, ''),
             duration: 6000,
           });
         }
         return;
       }
 
-      // Redirect to Stripe onboarding
+      // Success - redirect to Stripe onboarding
       if (data?.onboardingUrl) {
         window.location.href = data.onboardingUrl;
       } else {
         throw new Error("No onboarding URL received");
       }
     } catch (error: any) {
-      console.error("Error connecting Stripe:", error);
+      console.error("Unexpected error connecting Stripe:", error);
       toast.error("Failed to connect Stripe account", {
-        description: "An unexpected error occurred. Please check the console for details.",
+        description: "An unexpected error occurred. Please try again.",
         duration: 5000,
       });
     } finally {
