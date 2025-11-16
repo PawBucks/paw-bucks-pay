@@ -8,16 +8,25 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
-      apiVersion: '2025-08-27.basil',
+    // STEP 1: Validate Stripe API Key
+    // TODO: Set STRIPE_SECRET_KEY in your Supabase secrets
+    const stripeKey = Deno.env.get('STRIPE_SECRET_KEY');
+    if (!stripeKey) {
+      throw new Error('STRIPE_SECRET_KEY is not configured. Please add it to your Supabase secrets.');
+    }
+
+    // STEP 2: Initialize Stripe with the latest API version
+    const stripe = new Stripe(stripeKey, {
+      apiVersion: '2025-10-29.clover', // Latest API version
     });
 
-    // Get authenticated user
+    // STEP 3: Authenticate the user making the request
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? ''
@@ -25,7 +34,7 @@ serve(async (req) => {
 
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
-      throw new Error('No authorization header');
+      throw new Error('No authorization header provided');
     }
 
     const token = authHeader.replace('Bearer ', '');
@@ -35,21 +44,22 @@ serve(async (req) => {
       throw new Error('User not authenticated');
     }
 
+    // STEP 4: Get merchant information from request
     const { merchantId } = await req.json();
 
     if (!merchantId) {
-      throw new Error('Missing merchantId');
+      throw new Error('merchantId is required');
     }
 
     console.log('Creating Stripe Connect account for merchant:', merchantId);
 
-    // Initialize Supabase admin client
+    // STEP 5: Initialize Supabase admin client for database operations
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Get merchant details and verify ownership
+    // STEP 6: Retrieve merchant details and verify ownership
     const { data: merchant, error: merchantError } = await supabaseAdmin
       .from('merchants')
       .select('*, profiles!inner(*)')
@@ -61,11 +71,11 @@ serve(async (req) => {
       throw new Error('Merchant not found or access denied');
     }
 
-    // Check if account already exists
+    // STEP 7: Check if Stripe Connect account already exists
     if (merchant.stripe_account_id) {
       console.log('Account already exists, creating new onboarding link');
       
-      // Create a new account link for existing account
+      // Create a new account link for existing account to re-onboard
       const accountLink = await stripe.accountLinks.create({
         account: merchant.stripe_account_id,
         refresh_url: `${req.headers.get('origin')}/merchant-dashboard?refresh=true`,
@@ -86,18 +96,42 @@ serve(async (req) => {
       );
     }
 
-    // Create new Stripe Connect Express account
+    // STEP 8: Create new Stripe Connect account using CONTROLLER properties
+    // IMPORTANT: Do NOT use top-level 'type' property (no type: 'express', 'standard', or 'custom')
+    // Instead, use the controller object to define the account behavior
     const account = await stripe.accounts.create({
-      type: 'express',
+      // Use merchant's email from their profile
       email: merchant.profiles.email,
+      
+      // Define the business details
       business_type: 'company',
       company: {
         name: merchant.business_name,
       },
+      
+      // CRITICAL: Use controller properties to define account behavior
+      controller: {
+        // Platform controls fee collection - connected account pays Stripe fees
+        fees: {
+          payer: 'account' as const, // Connected account pays their own Stripe fees
+        },
+        // Stripe handles payment disputes and losses (not the platform)
+        losses: {
+          payments: 'stripe' as const, // Stripe covers payment losses/disputes
+        },
+        // Connected account gets full access to their Stripe dashboard
+        stripe_dashboard: {
+          type: 'full' as const, // Full dashboard access for the merchant
+        }
+      },
+      
+      // Request payment capabilities for the account
       capabilities: {
         card_payments: { requested: true },
         transfers: { requested: true },
       },
+      
+      // Store metadata for tracking
       metadata: {
         merchant_id: merchantId,
         user_id: user.id,
@@ -106,12 +140,12 @@ serve(async (req) => {
 
     console.log('Stripe Connect account created:', account.id);
 
-    // Update merchant with Stripe account ID
+    // STEP 9: Update merchant record with Stripe account ID
     const { error: updateError } = await supabaseAdmin
       .from('merchants')
       .update({
         stripe_account_id: account.id,
-        stripe_account_status: 'pending',
+        stripe_account_status: 'pending', // Account created but not yet onboarded
       })
       .eq('id', merchantId);
 
@@ -120,16 +154,20 @@ serve(async (req) => {
       throw updateError;
     }
 
-    // Create account link for onboarding
+    // STEP 10: Create account link for onboarding flow
+    // This redirects the merchant to Stripe's onboarding process
     const accountLink = await stripe.accountLinks.create({
       account: account.id,
+      // URL to redirect if link expires or user clicks "refresh"
       refresh_url: `${req.headers.get('origin')}/merchant-dashboard?refresh=true`,
+      // URL to redirect after successful onboarding
       return_url: `${req.headers.get('origin')}/merchant-dashboard?success=true`,
       type: 'account_onboarding',
     });
 
     console.log('Account link created successfully');
 
+    // STEP 11: Return the onboarding URL to redirect the merchant
     return new Response(
       JSON.stringify({
         accountId: account.id,
@@ -147,13 +185,10 @@ serve(async (req) => {
     
     // Provide user-friendly error messages
     let userMessage = errorMessage;
-    if (errorMessage.includes('platform-profile')) {
-      userMessage = 'PLATFORM_NOT_CONFIGURED: The Stripe Connect platform needs to be configured. Please visit https://dashboard.stripe.com/settings/connect to complete the platform setup.';
-    } else if (errorMessage.includes('capabilities')) {
-      userMessage = 'CAPABILITIES_ERROR: Unable to enable payment capabilities for this account.';
+    if (errorMessage.includes('STRIPE_SECRET_KEY')) {
+      userMessage = 'Stripe is not configured. Please contact support.';
     }
     
-    // Return 200 status with error field so frontend can access the error message
     return new Response(
       JSON.stringify({ 
         error: userMessage,
