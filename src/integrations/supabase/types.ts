@@ -146,9 +146,11 @@ export type Database = {
           email: string | null
           funding_status: string | null
           id: string
+          is_sponsored: boolean | null
           latitude: number | null
           longitude: number | null
           owner_name: string | null
+          sponsored_until: string | null
           stripe_account_id: string | null
           stripe_account_status: string | null
           updated_at: string
@@ -165,9 +167,11 @@ export type Database = {
           email?: string | null
           funding_status?: string | null
           id?: string
+          is_sponsored?: boolean | null
           latitude?: number | null
           longitude?: number | null
           owner_name?: string | null
+          sponsored_until?: string | null
           stripe_account_id?: string | null
           stripe_account_status?: string | null
           updated_at?: string
@@ -184,9 +188,11 @@ export type Database = {
           email?: string | null
           funding_status?: string | null
           id?: string
+          is_sponsored?: boolean | null
           latitude?: number | null
           longitude?: number | null
           owner_name?: string | null
+          sponsored_until?: string | null
           stripe_account_id?: string | null
           stripe_account_status?: string | null
           updated_at?: string
