@@ -6,7 +6,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { GradientCard } from "@/components/ui/gradient-card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -67,10 +66,10 @@ const Profile = () => {
     navigate("/auth");
   };
 
-  const handleSubscribe = async () => {
+  const handleSubscribe = async (tier: 'basic' | 'plus') => {
     setIsSubscribing(true);
     try {
-      await createCheckout();
+      await createCheckout(tier);
       toast.success("Opening checkout...");
     } catch (error) {
       console.error("Subscription error:", error);
@@ -121,7 +120,7 @@ const Profile = () => {
         <GradientCard gradient className="mb-6">
           <div className="flex flex-col items-center text-center space-y-4">
             <Avatar className="w-24 h-24 bg-primary/20 border-4 border-background">
-              <AvatarFallback className="text-2xl font-bold text-primary-foreground bg-primary">
+              <AvatarFallback className="text-2xl font-bold bg-gradient-to-br from-primary to-primary/60 text-primary-foreground">
                 {initials}
               </AvatarFallback>
             </Avatar>
@@ -140,91 +139,164 @@ const Profile = () => {
           </div>
         </GradientCard>
 
-        {/* Subscription Card */}
-        {profile.user_type === "pet_owner" && (
+        {/* Subscription Cards */}
+        {profile.user_type === "pet_owner" && !subscription.subscribed && (
+          <div className="space-y-4 mb-6">
+            <h2 className="text-2xl font-bold text-center">Choose Your Plan</h2>
+            <p className="text-center text-muted-foreground mb-6">7-Day Free Trial on Both Plans</p>
+            
+            {/* PawPass Basic */}
+            <GradientCard className="relative" gradient={false}>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center">
+                      <Sparkles className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-lg">PawPass</h3>
+                      <p className="text-sm text-muted-foreground">$9.99/month</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-primary/10 rounded-lg p-3">
+                  <p className="text-sm font-semibold mb-2">Included Benefits:</p>
+                  <ul className="text-xs text-muted-foreground space-y-1">
+                    <li>• Ad-free experience</li>
+                    <li>• 24/7 customer support</li>
+                    <li>• 20% cashback rewards on all purchases</li>
+                    <li>• Priority access to new features</li>
+                  </ul>
+                </div>
+
+                <Button 
+                  className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600"
+                  onClick={() => handleSubscribe('basic')}
+                  disabled={isSubscribing || subLoading}
+                >
+                  {isSubscribing ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <Crown className="w-4 h-4 mr-2" />
+                      Start 7-Day Free Trial
+                    </>
+                  )}
+                </Button>
+              </div>
+            </GradientCard>
+
+            {/* PawPass+ */}
+            <GradientCard className="relative border-2 border-primary" gradient={true}>
+              <Badge className="absolute -top-3 right-4 bg-gradient-to-r from-purple-500 to-pink-500 border-0">
+                Most Popular
+              </Badge>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                      <Crown className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-lg">PawPass+</h3>
+                      <p className="text-sm text-muted-foreground">$19.99/month</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-primary/10 rounded-lg p-3">
+                  <p className="text-sm font-semibold mb-2">Everything in PawPass, plus:</p>
+                  <ul className="text-xs text-muted-foreground space-y-1">
+                    <li>• <span className="font-semibold text-primary">30% total cashback rewards</span> (20% + 10% bonus)</li>
+                    <li>• Exclusive premium partner offers</li>
+                    <li>• VIP customer support with priority response</li>
+                    <li>• Early access to beta features</li>
+                  </ul>
+                </div>
+
+                <Button 
+                  className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+                  onClick={() => handleSubscribe('plus')}
+                  disabled={isSubscribing || subLoading}
+                >
+                  {isSubscribing ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <Crown className="w-4 h-4 mr-2" />
+                      Start 7-Day Free Trial
+                    </>
+                  )}
+                </Button>
+              </div>
+            </GradientCard>
+          </div>
+        )}
+
+        {/* Active Subscription Display */}
+        {profile.user_type === "pet_owner" && subscription.subscribed && (
           <GradientCard className="mb-6" gradient={subscription.subscribed}>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center">
-                    <Sparkles className="w-6 h-6 text-white" />
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                    subscription.product_id === 'prod_TQyZjYzt9DwoIK' 
+                      ? 'bg-gradient-to-br from-purple-500 to-pink-500'
+                      : 'bg-gradient-to-br from-yellow-500 to-orange-500'
+                  }`}>
+                    {subscription.product_id === 'prod_TQyZjYzt9DwoIK' ? (
+                      <Crown className="w-6 h-6 text-white" />
+                    ) : (
+                      <Sparkles className="w-6 h-6 text-white" />
+                    )}
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg">PawPass</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {subscription.subscribed ? "Active Subscription" : "$9.99/month"}
-                    </p>
+                    <h3 className="font-semibold text-lg">
+                      {subscription.product_id === 'prod_TQyZjYzt9DwoIK' ? 'PawPass+' : 'PawPass'}
+                    </h3>
+                    <p className="text-sm text-muted-foreground">Active Subscription</p>
                   </div>
                 </div>
-                {subscription.subscribed && (
-                  <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20">
-                    {subscription.status === 'trialing' ? 'Trial' : 'Active'}
-                  </Badge>
-                )}
+                <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20">
+                  {subscription.status === 'trialing' ? 'Trial' : 'Active'}
+                </Badge>
               </div>
 
-              {subscription.subscribed ? (
-                <div className="space-y-3">
-                  <div className="bg-background/50 rounded-lg p-3 space-y-2">
-                    {subscription.trial_end && new Date(subscription.trial_end) > new Date() && (
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Trial ends:</span>
-                        <span className="font-medium">
-                          {format(new Date(subscription.trial_end), "MMM d, yyyy")}
-                        </span>
-                      </div>
-                    )}
+              <div className="space-y-3">
+                <div className="bg-background/50 rounded-lg p-3 space-y-2">
+                  {subscription.trial_end && new Date(subscription.trial_end) > new Date() && (
                     <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Renews on:</span>
+                      <span className="text-muted-foreground">Trial ends:</span>
                       <span className="font-medium">
-                        {subscription.subscription_end 
-                          ? format(new Date(subscription.subscription_end), "MMM d, yyyy")
-                          : "N/A"}
+                        {format(new Date(subscription.trial_end), "MMM d, yyyy")}
                       </span>
                     </div>
+                  )}
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Renews on:</span>
+                    <span className="font-medium">
+                      {subscription.subscription_end 
+                        ? format(new Date(subscription.subscription_end), "MMM d, yyyy")
+                        : "N/A"}
+                    </span>
                   </div>
-                  <Button 
-                    variant="outline" 
-                    className="w-full"
-                    onClick={handleManageSubscription}
-                  >
-                    <Settings className="w-4 h-4 mr-2" />
-                    Manage Subscription
-                  </Button>
                 </div>
-              ) : (
-                <div className="space-y-3">
-                  <div className="bg-primary/10 rounded-lg p-3">
-                    <p className="text-sm font-semibold mb-2">Premium Benefits:</p>
-                    <ul className="text-xs text-muted-foreground space-y-1">
-                      <li>• Enhanced cashback rewards</li>
-                      <li>• Exclusive merchant offers</li>
-                      <li>• Priority customer support</li>
-                      <li>• Early access to new features</li>
-                    </ul>
-                  </div>
-                  <Button 
-                    className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600"
-                    onClick={handleSubscribe}
-                    disabled={isSubscribing || subLoading}
-                  >
-                    {isSubscribing ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Starting...
-                      </>
-                    ) : (
-                      <>
-                        <Crown className="w-4 h-4 mr-2" />
-                        Start 7-Day Free Trial
-                      </>
-                    )}
-                  </Button>
-                  <p className="text-xs text-center text-muted-foreground">
-                    Cancel anytime. No commitment.
-                  </p>
-                </div>
-              )}
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={handleManageSubscription}
+                >
+                  <Settings className="w-4 h-4 mr-2" />
+                  Manage Subscription
+                </Button>
+              </div>
             </div>
           </GradientCard>
         )}
@@ -232,25 +304,25 @@ const Profile = () => {
         {/* Information Cards */}
         <div className="space-y-4">
           <GradientCard>
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                <Mail className="w-6 h-6 text-primary" />
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <Mail className="w-5 h-5 text-primary" />
               </div>
               <div className="flex-1">
                 <Label className="text-xs text-muted-foreground">Email</Label>
-                <p className="font-medium">{profile.email}</p>
+                <p className="text-sm font-medium">{profile.email}</p>
               </div>
             </div>
           </GradientCard>
 
           <GradientCard>
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center">
-                <User className="w-6 h-6 text-secondary" />
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <User className="w-5 h-5 text-primary" />
               </div>
               <div className="flex-1">
                 <Label className="text-xs text-muted-foreground">Account Type</Label>
-                <p className="font-medium capitalize">
+                <p className="text-sm font-medium capitalize">
                   {profile.user_type.replace("_", " ")}
                 </p>
               </div>
@@ -258,35 +330,32 @@ const Profile = () => {
           </GradientCard>
 
           <GradientCard>
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center">
-                <Calendar className="w-6 h-6 text-accent" />
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <Calendar className="w-5 h-5 text-primary" />
               </div>
               <div className="flex-1">
                 <Label className="text-xs text-muted-foreground">Member Since</Label>
-                <p className="font-medium">
-                  {new Date(profile.created_at).toLocaleDateString("en-US", {
-                    month: "long",
-                    year: "numeric",
-                  })}
+                <p className="text-sm font-medium">
+                  {format(new Date(profile.created_at), "MMMM d, yyyy")}
                 </p>
               </div>
             </div>
           </GradientCard>
         </div>
 
-        {/* Actions */}
+        {/* Action Buttons */}
         <div className="mt-8 space-y-3">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             className="w-full"
             onClick={() => navigate("/dashboard")}
           >
-            Go to Dashboard
+            Back to Dashboard
           </Button>
-          <Button 
-            variant="destructive" 
-            className="w-full"
+          <Button
+            variant="ghost"
+            className="w-full text-destructive hover:text-destructive hover:bg-destructive/10"
             onClick={handleSignOut}
           >
             <LogOut className="w-4 h-4 mr-2" />
@@ -294,7 +363,6 @@ const Profile = () => {
           </Button>
         </div>
       </div>
-
       <BottomNav />
     </div>
   );
