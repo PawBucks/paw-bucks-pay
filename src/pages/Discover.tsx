@@ -7,6 +7,7 @@ import { DataLoader } from "@/lib/dataLoader";
 import { PaymentDialog } from "@/components/PaymentDialog";
 import { BottomNav } from "@/components/BottomNav";
 import { PageLoader } from "@/components/PageLoader";
+import { Header } from "@/components/Header";
 import { Search, Store, Scissors, Home, Stethoscope, Footprints, Bone, ArrowUpDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -138,6 +139,7 @@ const Discover = () => {
         description="Find trusted pet stores, groomers, trainers and more. Earn cashback rewards with every purchase."
         keywords={["pet merchants", "pet stores", "pet services", "cashback", "rewards"]}
       />
+      <Header />
       <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
         {/* Hero Section */}
         <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-background border-b">
