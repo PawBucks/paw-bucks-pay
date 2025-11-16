@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { NavLink } from "react-router-dom";
 import { Compass, Wallet, Gift, User, Coins, Store } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -9,7 +10,7 @@ const navItems = [
   { title: "Profile", to: "/profile", icon: User },
 ];
 
-export const BottomNav = () => {
+const BottomNavComponent = () => {
   return (
     <nav 
       className="fixed bottom-0 left-0 right-0 z-50 bg-card/98 backdrop-blur-xl border-t border-border shadow-[0_-4px_20px_rgba(0,0,0,0.08)] safe-area-inset-bottom"
@@ -23,7 +24,7 @@ export const BottomNav = () => {
             to={item.to}
             className={({ isActive }) =>
               cn(
-                "flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl transition-all duration-200 min-w-[68px] active:scale-95",
+                "flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl transition-all duration-200 min-w-[68px] min-h-[52px] active:scale-95 touch-manipulation",
                 "text-muted-foreground hover:text-foreground hover:bg-muted/50",
                 isActive && "text-primary bg-primary/15 shadow-sm"
               )
@@ -51,3 +52,5 @@ export const BottomNav = () => {
     </nav>
   );
 };
+
+export const BottomNav = memo(BottomNavComponent);
