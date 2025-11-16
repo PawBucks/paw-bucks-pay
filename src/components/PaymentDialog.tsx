@@ -43,6 +43,7 @@ const PaymentForm = ({
   const stripe = useStripe();
   const elements = useElements();
   const [isLoading, setIsLoading] = useState(false);
+  const [isReady, setIsReady] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -107,7 +108,9 @@ const PaymentForm = ({
           <CreditCard className="w-4 h-4" />
           Payment Details
         </Label>
-        <PaymentElement />
+        <PaymentElement 
+          onReady={() => setIsReady(true)}
+        />
       </div>
 
       <div className="flex gap-3">
@@ -120,11 +123,16 @@ const PaymentForm = ({
         >
           Cancel
         </Button>
-        <Button type="submit" className="flex-1" disabled={isLoading || !stripe}>
+        <Button type="submit" className="flex-1" disabled={isLoading || !stripe || !isReady}>
           {isLoading ? (
             <>
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
               Processing...
+            </>
+          ) : !isReady ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              Loading payment form...
             </>
           ) : (
             "Pay Now"
