@@ -222,16 +222,12 @@ const Discover = () => {
                       {/* Logo/Icon Header */}
                       <div className="bg-gradient-to-br from-primary/10 to-primary/5 p-6 flex items-center justify-center relative">
                         {merchant.logo_url ? (
-                          <div className="relative w-32 h-32 rounded-full overflow-hidden bg-background group-hover:scale-105 transition-transform shadow-md">
+                          <div className="w-32 h-32 rounded-full overflow-hidden bg-background group-hover:scale-105 transition-transform shadow-md border-2 border-border">
                             <img
                               src={merchant.logo_url}
                               alt={`${merchant.business_name} logo`}
                               className="w-full h-full object-cover"
                             />
-                            {/* Small business type icon overlay - lower right */}
-                            <div className="absolute bottom-0 right-0 w-10 h-10 rounded-full bg-background flex items-center justify-center shadow-lg border-2 border-background">
-                              <Icon className="w-5 h-5 text-primary" />
-                            </div>
                           </div>
                         ) : (
                           <div className="w-32 h-32 rounded-full bg-background flex items-center justify-center group-hover:scale-105 transition-transform border-2 border-border/50 shadow-md">

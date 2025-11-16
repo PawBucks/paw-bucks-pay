@@ -20,6 +20,7 @@ const MerchantOnboarding = () => {
   const [profile, setProfile] = useState<any>(null);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [logoZoom, setLogoZoom] = useState(1);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -234,12 +235,38 @@ const MerchantOnboarding = () => {
                   onChange={handleLogoChange}
                 />
                 {logoPreview && (
-                  <div className="w-24 h-24 rounded-lg overflow-hidden border border-border">
-                    <img
-                      src={logoPreview}
-                      alt="Logo preview"
-                      className="w-full h-full object-cover"
-                    />
+                  <div className="space-y-3">
+                    <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-border mx-auto relative">
+                      <div 
+                        className="absolute inset-0 flex items-center justify-center"
+                        style={{
+                          transform: `scale(${logoZoom})`,
+                          transition: 'transform 0.2s ease'
+                        }}
+                      >
+                        <img
+                          src={logoPreview}
+                          alt="Logo preview"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="logoZoom" className="text-sm">Adjust Logo Size</Label>
+                      <input
+                        id="logoZoom"
+                        type="range"
+                        min="0.5"
+                        max="2"
+                        step="0.1"
+                        value={logoZoom}
+                        onChange={(e) => setLogoZoom(parseFloat(e.target.value))}
+                        className="w-full"
+                      />
+                      <p className="text-xs text-muted-foreground text-center">
+                        Scale: {logoZoom.toFixed(1)}x
+                      </p>
+                    </div>
                   </div>
                 )}
               </div>
