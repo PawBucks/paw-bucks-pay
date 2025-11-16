@@ -177,27 +177,15 @@ const MerchantOnboarding = () => {
                   <SelectValue placeholder="Select business type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="dog_walker">Dog Walker</SelectItem>
-                  <SelectItem value="boarder">Boarder</SelectItem>
+                  <SelectItem value="vet">Vet</SelectItem>
+                  <SelectItem value="groomer">Groomer</SelectItem>
                   <SelectItem value="sitter">Sitter</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
+                  <SelectItem value="pet_store">Pet Store</SelectItem>
+                  <SelectItem value="walker">Walker</SelectItem>
+                  <SelectItem value="trainer">Trainer</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-
-            {/* Other Explanation - shown only when "Other" is selected */}
-            {businessType === "other" && (
-              <div className="space-y-2">
-                <Label htmlFor="otherExplanation">Please Explain Your Business Type *</Label>
-                <Textarea
-                  id="otherExplanation"
-                  name="otherExplanation"
-                  placeholder="Describe what type of business you operate..."
-                  rows={3}
-                  required
-                />
-              </div>
-            )}
 
             {/* Address */}
             <div className="space-y-2">

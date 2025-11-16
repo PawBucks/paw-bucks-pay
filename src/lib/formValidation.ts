@@ -30,7 +30,7 @@ export const merchantSchema = z.object({
     .string()
     .min(2, 'Contact person name is required')
     .max(100),
-  businessType: z.string().min(1, 'Business type is required'),
+  businessType: z.enum(['vet', 'groomer', 'sitter', 'pet_store', 'walker', 'trainer']),
   address: z.string().optional(),
   description: z.string().max(500, 'Description is too long').optional(),
   cashbackRate: z

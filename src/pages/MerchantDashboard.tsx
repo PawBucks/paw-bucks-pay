@@ -217,13 +217,14 @@ const MerchantDashboard = () => {
     if (!merchant) return;
 
     try {
-      const formData = new FormData(e.currentTarget);
-      const updates = {
-        business_name: formData.get("businessName") as string,
-        contact_person: formData.get("contactPerson") as string,
-        address: formData.get("address") as string,
-        description: formData.get("description") as string,
-      };
+    const formData = new FormData(e.currentTarget);
+    const updates = {
+      business_name: formData.get("businessName") as string,
+      contact_person: formData.get("contactPerson") as string,
+      business_type: formData.get("businessType") as string,
+      address: formData.get("address") as string,
+      description: formData.get("description") as string,
+    };
 
       const { error } = await supabase
         .from("merchants")
@@ -666,6 +667,23 @@ const MerchantDashboard = () => {
                 defaultValue={merchant.contact_person}
                 required
               />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="businessType">Business Type</Label>
+              <select
+                id="businessType"
+                name="businessType"
+                defaultValue={merchant.business_type}
+                className="w-full p-3 rounded-lg border bg-background"
+                required
+              >
+                <option value="vet">Vet</option>
+                <option value="groomer">Groomer</option>
+                <option value="sitter">Sitter</option>
+                <option value="pet_store">Pet Store</option>
+                <option value="walker">Walker</option>
+                <option value="trainer">Trainer</option>
+              </select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="address">Address</Label>
