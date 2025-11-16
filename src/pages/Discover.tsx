@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -7,17 +7,15 @@ import { DataLoader } from "@/lib/dataLoader";
 import { PaymentDialog } from "@/components/PaymentDialog";
 import { BottomNav } from "@/components/BottomNav";
 import { PageLoader } from "@/components/PageLoader";
-import { DiscoverMap } from "@/components/DiscoverMap";
-import { MerchantListDrawer } from "@/components/MerchantListDrawer";
-import { Search, Menu, SlidersHorizontal } from "lucide-react";
+import { Search, Store, Scissors, Home, Stethoscope, Footprints, Bone, ArrowUpDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { ROUTES, QUERY_STALE_TIMES } from "@/lib/constants";
 import { SEO } from "@/components/SEO";
 import { usePersistentState } from "@/hooks/usePersistentState";
-import { geocodeAddress } from "@/lib/geocoding";
-import { supabase } from "@/integrations/supabase/client";
 
 export type Merchant = {
   id: string;
@@ -30,12 +28,34 @@ export type Merchant = {
   cashback_rate: number;
 };
 
+const businessTypes = [
+  { label: "All", value: "all", icon: Store },
+  { label: "Pet Stores", value: "pet_store", icon: Store },
+  { label: "Groomers", value: "groomer", icon: Scissors },
+  { label: "Sitters", value: "sitter", icon: Home },
+  { label: "Vets", value: "vet", icon: Stethoscope },
+  { label: "Walkers", value: "walker", icon: Footprints },
+  { label: "Trainers", value: "trainer", icon: Bone },
+];
+
+const getBusinessIcon = (type: string) => {
+  const lowerType = type.toLowerCase();
+  if (lowerType.includes("store") || lowerType.includes("shop")) return Store;
+  if (lowerType.includes("groom")) return Scissors;
+  if (lowerType.includes("sitter") || lowerType.includes("boarding")) return Home;
+  if (lowerType.includes("vet") || lowerType.includes("clinic")) return Stethoscope;
+  if (lowerType.includes("walker") || lowerType.includes("walking")) return Footprints;
+  if (lowerType.includes("trainer") || lowerType.includes("training")) return Bone;
+  return Store;
+};
+
 const Discover = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = usePersistentState<string>('discover-search', "");
   const debouncedSearch = useDebounce(searchTerm, 300);
-  const [userLocation, setUserLocation] = usePersistentState<{ lat: number; lng: number } | null>('user-location', null);
+  const [selectedCategory, setSelectedCategory] = usePersistentState<string>('discover-category', "all");
+  const [sortBy, setSortBy] = usePersistentState<string>('discover-sort', "name");
   const [selectedMerchant, setSelectedMerchant] = useState<{
     id: string;
     name: string;
@@ -44,108 +64,61 @@ const Discover = () => {
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
 
   // Optimized merchant loading with caching
-  const { data: rawMerchants = [], isLoading: loading } = useOptimizedQuery<Merchant[]>(
+  const { data: merchants = [], isLoading: loading } = useOptimizedQuery<Merchant[]>(
     ['merchants'],
     () => DataLoader.loadMerchants(),
     { staleTime: QUERY_STALE_TIMES.LONG }
   );
 
-  const [merchants, setMerchants] = useState<Merchant[]>([]);
-
-  // Geocode merchants that don't have coordinates
-  useEffect(() => {
-    const geocodeMerchants = async () => {
-      const merchantsWithCoords = await Promise.all(
-        rawMerchants.map(async (merchant) => {
-          if (merchant.latitude && merchant.longitude) {
-            return merchant;
-          }
-          
-          if (merchant.address) {
-            const coords = await geocodeAddress(merchant.address);
-            if (coords) {
-              // Update in database
-              await supabase
-                .from('merchants')
-                .update({ latitude: coords.lat, longitude: coords.lng })
-                .eq('id', merchant.id);
-              
-              return { ...merchant, latitude: coords.lat, longitude: coords.lng };
-            }
-          }
-          
-          return merchant;
-        })
-      );
-      setMerchants(merchantsWithCoords);
-    };
-
-    if (rawMerchants.length > 0) {
-      geocodeMerchants();
-    }
-  }, [rawMerchants]);
-
-  useEffect(() => {
-    getUserLocation();
-  }, []);
-
-  // Memoized filtered merchants
+  // Memoized filtered and sorted merchants
   const filteredMerchants = useMemo(() => {
-    if (!debouncedSearch) return merchants;
-    
-    const searchLower = debouncedSearch.toLowerCase();
-    return (merchants as Merchant[]).filter((merchant) =>
-      merchant.business_name.toLowerCase().includes(searchLower) ||
-      merchant.business_type.toLowerCase().includes(searchLower)
-    );
-  }, [debouncedSearch, merchants]);
+    let filtered = merchants;
 
-  const getUserLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setUserLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          });
-        },
-        (error) => {
-          console.error("Error getting location:", error);
-        }
+    // Filter by category
+    if (selectedCategory !== "all") {
+      filtered = filtered.filter((m) =>
+        m.business_type.toLowerCase().includes(selectedCategory.toLowerCase())
       );
     }
-  };
 
-  // Distance calculation memoized
-  const calculateDistance = useMemo(() => {
-    return (lat1: number, lng1: number, lat2: number, lng2: number) => {
-      const R = 3959; // Earth's radius in miles
-      const dLat = ((lat2 - lat1) * Math.PI) / 180;
-      const dLng = ((lng2 - lng1) * Math.PI) / 180;
-      const a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos((lat1 * Math.PI) / 180) *
-          Math.cos((lat2 * Math.PI) / 180) *
-          Math.sin(dLng / 2) *
-          Math.sin(dLng / 2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      return R * c;
-    };
-  }, []);
+    // Filter by search
+    if (debouncedSearch) {
+      const searchLower = debouncedSearch.toLowerCase();
+      filtered = filtered.filter(
+        (m) =>
+          m.business_name.toLowerCase().includes(searchLower) ||
+          m.business_type.toLowerCase().includes(searchLower) ||
+          m.description?.toLowerCase().includes(searchLower)
+      );
+    }
+
+    // Sort
+    const sorted = [...filtered].sort((a, b) => {
+      switch (sortBy) {
+        case "cashback":
+          return b.cashback_rate - a.cashback_rate;
+        case "name":
+        default:
+          return a.business_name.localeCompare(b.business_name);
+      }
+    });
+
+    return sorted;
+  }, [merchants, selectedCategory, debouncedSearch, sortBy]);
 
 
-  const handlePayNow = (merchantId: string, merchantName: string, cashbackRate: number) => {
+  const handleMerchantClick = (merchant: Merchant) => {
     if (!user) {
       toast.error("Please sign in to make a payment");
       navigate(ROUTES.AUTH);
       return;
     }
-    setSelectedMerchant({ id: merchantId, name: merchantName, cashbackRate });
+    setSelectedMerchant({
+      id: merchant.id,
+      name: merchant.business_name,
+      cashbackRate: merchant.cashback_rate,
+    });
     setPaymentDialogOpen(true);
-  };
-
-  const handlePayNowFromCard = (merchant: Merchant) => {
-    handlePayNow(merchant.id, merchant.business_name, merchant.cashback_rate);
   };
 
   const handlePaymentSuccess = () => {
@@ -159,76 +132,136 @@ const Discover = () => {
 
   return (
     <>
-      <SEO 
+      <SEO
         title="Discover Pet Merchants"
         description="Find trusted pet stores, groomers, trainers and more. Earn cashback rewards with every purchase."
-        keywords={['pet merchants', 'pet stores', 'pet services', 'cashback', 'rewards']}
+        keywords={["pet merchants", "pet stores", "pet services", "cashback", "rewards"]}
       />
-      <div className="h-screen flex flex-col bg-background overflow-hidden">
-        {/* Search Header */}
-        <div className="flex-shrink-0 bg-card/95 backdrop-blur-sm border-b border-border z-10">
-          <div className="flex items-center gap-3 p-4">
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={() => navigate(-1)}
-              className="flex-shrink-0"
-            >
-              <Menu className="w-5 h-5" />
-            </Button>
-            
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+      <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+        {/* Hero Section */}
+        <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-background border-b">
+          <div className="container mx-auto px-4 py-8">
+            <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              Discover Pet Merchants
+            </h1>
+            <p className="text-muted-foreground mb-6">
+              Find trusted pet services and earn cashback on every purchase
+            </p>
+
+            {/* Search Bar */}
+            <div className="relative max-w-2xl">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <Input
-                placeholder="Search..."
+                placeholder="Search for pet stores, groomers, vets..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 bg-muted/50 border-0"
+                className="pl-12 pr-4 h-12 bg-background border-border shadow-sm"
               />
             </div>
-
-            {userLocation && (
-              <div className="flex-shrink-0 bg-primary/10 text-primary px-3 py-2 rounded-lg text-sm font-semibold">
-                ${filteredMerchants.length > 0 ? filteredMerchants[0].cashback_rate.toFixed(2) : '0.00'}
-              </div>
-            )}
-          </div>
-
-          {/* Filter Buttons */}
-          <div className="flex gap-2 px-4 pb-3 overflow-x-auto">
-            <Button variant="secondary" size="sm" className="rounded-full">
-              <SlidersHorizontal className="w-4 h-4 mr-1" />
-              Open
-            </Button>
-            <Button variant="secondary" size="sm" className="rounded-full">
-              Cuisine
-            </Button>
-            <Button variant="secondary" size="sm" className="rounded-full">
-              Rating
-            </Button>
-            <Button variant="secondary" size="sm" className="rounded-full">
-              Price
-            </Button>
           </div>
         </div>
 
-        {/* Map Container */}
-        <div className="flex-1 relative">
-          <DiscoverMap
-            merchants={filteredMerchants}
-            userLocation={userLocation}
-            onMerchantClick={handlePayNowFromCard}
-          />
-
-          {/* Merchant List Drawer */}
-          <div className="absolute bottom-0 left-0 right-0 h-[45%]">
-            <MerchantListDrawer
-              merchants={filteredMerchants}
-              userLocation={userLocation}
-              onMerchantClick={handlePayNowFromCard}
-              calculateDistance={calculateDistance}
-            />
+        <div className="container mx-auto px-4 py-6">
+          {/* Category Filters */}
+          <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
+            {businessTypes.map((type) => {
+              const Icon = type.icon;
+              const isSelected = selectedCategory === type.value;
+              return (
+                <Button
+                  key={type.value}
+                  variant={isSelected ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedCategory(type.value)}
+                  className="flex-shrink-0 gap-2"
+                >
+                  <Icon className="w-4 h-4" />
+                  {type.label}
+                </Button>
+              );
+            })}
           </div>
+
+          {/* Sort & Count */}
+          <div className="flex items-center justify-between mb-6">
+            <p className="text-sm text-muted-foreground">
+              {filteredMerchants.length} {filteredMerchants.length === 1 ? "merchant" : "merchants"} found
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setSortBy(sortBy === "name" ? "cashback" : "name")}
+              className="gap-2"
+            >
+              <ArrowUpDown className="w-4 h-4" />
+              {sortBy === "name" ? "Sort by Cashback" : "Sort by Name"}
+            </Button>
+          </div>
+
+          {/* Merchants Grid */}
+          {filteredMerchants.length === 0 ? (
+            <div className="text-center py-16">
+              <Store className="w-16 h-16 mx-auto text-muted-foreground/40 mb-4" />
+              <h3 className="text-lg font-semibold mb-2">No merchants found</h3>
+              <p className="text-muted-foreground">
+                Try adjusting your search or filters
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-24">
+              {filteredMerchants.map((merchant) => {
+                const Icon = getBusinessIcon(merchant.business_type);
+                return (
+                  <Card
+                    key={merchant.id}
+                    className="group hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden border-border hover:border-primary/50"
+                    onClick={() => handleMerchantClick(merchant)}
+                  >
+                    <CardContent className="p-0">
+                      {/* Icon Header */}
+                      <div className="bg-gradient-to-br from-primary/10 to-primary/5 p-6 flex items-center justify-center">
+                        <div className="w-16 h-16 rounded-full bg-background flex items-center justify-center group-hover:scale-110 transition-transform">
+                          <Icon className="w-8 h-8 text-primary" />
+                        </div>
+                      </div>
+
+                      {/* Content */}
+                      <div className="p-6">
+                        <div className="flex items-start justify-between mb-3">
+                          <h3 className="font-semibold text-lg line-clamp-1 group-hover:text-primary transition-colors">
+                            {merchant.business_name}
+                          </h3>
+                          <Badge className="bg-primary/10 text-primary border-primary/20 flex-shrink-0">
+                            {merchant.cashback_rate.toFixed(1)}% back
+                          </Badge>
+                        </div>
+
+                        <p className="text-sm text-muted-foreground capitalize mb-3">
+                          {merchant.business_type.replace(/_/g, " ")}
+                        </p>
+
+                        {merchant.description && (
+                          <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
+                            {merchant.description}
+                          </p>
+                        )}
+
+                        {merchant.address && (
+                          <p className="text-xs text-muted-foreground line-clamp-1">
+                            📍 {merchant.address}
+                          </p>
+                        )}
+
+                        <Button className="w-full mt-4 group-hover:bg-primary group-hover:text-primary-foreground">
+                          Pay & Earn Cashback
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Payment Dialog */}
