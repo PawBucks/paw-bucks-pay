@@ -28,6 +28,7 @@ import { loadStripe } from "@stripe/stripe-js";
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { Loader2 } from "lucide-react";
 import { BottomNav } from "@/components/BottomNav";
+import { AdPlacement } from "@/components/AdPlacement";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
 
@@ -356,6 +357,11 @@ export default function PetStore() {
 
   return (
     <div className="container mx-auto p-6 max-w-7xl">
+      {/* Ad Placement for Free Users */}
+      <div className="mb-6">
+        <AdPlacement />
+      </div>
+
       <div className="mb-8">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-4xl font-bold">Pet Store</h1>

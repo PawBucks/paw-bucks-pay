@@ -8,6 +8,7 @@ import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { GradientCard } from "@/components/ui/gradient-card";
 import { BottomNav } from "@/components/BottomNav";
+import { AdPlacement } from "@/components/AdPlacement";
 import { DashboardSkeleton } from "@/components/LoadingSkeleton";
 import { LogOut, Wallet as WalletIcon, TrendingUp, Gift, ArrowUpRight, ArrowDownRight, Loader2 } from "lucide-react";
 import { format } from "date-fns";
@@ -75,6 +76,11 @@ const Wallet = () => {
       <Header isAuthenticated={true} onLogout={handleSignOut} />
 
       <main className="container mx-auto px-4 py-8 max-w-4xl">
+        {/* Ad Placement for Free Users */}
+        <div className="mb-6">
+          <AdPlacement />
+        </div>
+
         <div className="mb-8">
           <h2 className="text-3xl font-bold mb-2">Wallet</h2>
           <p className="text-muted-foreground">Track your cashback and spending</p>

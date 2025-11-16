@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { GradientCard } from "@/components/ui/gradient-card";
 import { PetProfileCard } from "@/components/PetProfileCard";
 import { ReferralCard } from "@/components/ReferralCard";
+import { AdPlacement } from "@/components/AdPlacement";
 import { DashboardSkeleton } from "@/components/LoadingSkeleton";
 import { Wallet, Gift, TrendingUp, LogOut, Store, Users, Plus } from "lucide-react";
 import { toast } from "sonner";
@@ -98,6 +99,11 @@ const Dashboard = () => {
       <Header isAuthenticated={true} onLogout={handleSignOut} />
 
       <main className="container mx-auto px-4 py-8">
+        {/* Ad Placement for Free Users */}
+        <div className="mb-6">
+          <AdPlacement />
+        </div>
+
         <div className="mb-8">
           <h2 className="text-3xl font-bold mb-2">Welcome back, {profile.full_name}!</h2>
           <p className="text-muted-foreground">

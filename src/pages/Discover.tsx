@@ -15,6 +15,7 @@ import { EmptyState } from "@/components/EmptyState";
 import { FeaturedMerchants } from "@/components/FeaturedMerchants";
 import { PartnerOffers } from "@/components/PartnerOffers";
 import { PromotionalBanner } from "@/components/PromotionalBanner";
+import { AdPlacement } from "@/components/AdPlacement";
 import { Search, MapPin, Store } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -141,6 +142,9 @@ const Discover = () => {
         <Header isAuthenticated={!!user} onLogout={handleSignOut} />
 
         <main className="container mx-auto px-4 py-6 space-y-6">
+          {/* Ad Placement for Free Users */}
+          <AdPlacement />
+          
           <PromotionalBanner />
           
           <FeaturedMerchants onMerchantClick={handlePayNowFromCard} />
