@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useAutoLogout } from "@/hooks/useAutoLogout";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PageLoader } from "@/components/PageLoader";
+import { PWAInstallBanner } from "@/components/PWAInstallBanner";
 
 // Critical pages - loaded immediately
 import Index from "./pages/Index";
@@ -38,6 +39,7 @@ const PetStoreAdmin = lazy(() => import("./pages/PetStoreAdmin"));
 const MerchantProducts = lazy(() => import("./pages/MerchantProducts"));
 const Storefront = lazy(() => import("./pages/Storefront"));
 const CheckoutSuccess = lazy(() => import("./pages/CheckoutSuccess"));
+const Install = lazy(() => import("./pages/Install"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
@@ -84,6 +86,7 @@ const AppContent = () => {
         <Route path="/merchant/products" element={<MerchantProducts />} />
         <Route path="/storefront/:accountId" element={<Storefront />} />
         <Route path="/checkout-success" element={<CheckoutSuccess />} />
+        <Route path="/install" element={<Install />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Suspense>
@@ -97,6 +100,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <PWAInstallBanner />
           <AppContent />
         </BrowserRouter>
       </TooltipProvider>
