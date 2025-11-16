@@ -12,6 +12,10 @@ import { PaymentDialog } from "@/components/PaymentDialog";
 import { BottomNav } from "@/components/BottomNav";
 import { PageLoader } from "@/components/PageLoader";
 import { EmptyState } from "@/components/EmptyState";
+import { FeaturedMerchants } from "@/components/FeaturedMerchants";
+import { PartnerOffers } from "@/components/PartnerOffers";
+import { PromotionalBanner } from "@/components/PromotionalBanner";
+import { EmptyState } from "@/components/EmptyState";
 import { Search, MapPin, Store } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -109,6 +113,10 @@ const Discover = () => {
     setPaymentDialogOpen(true);
   };
 
+  const handlePayNowFromCard = (merchant: Merchant) => {
+    handlePayNow(merchant.id, merchant.business_name, merchant.cashback_rate);
+  };
+
   const handlePaymentSuccess = () => {
     toast.success("Redirecting to wallet...");
     setTimeout(() => navigate(ROUTES.WALLET), 1000);
@@ -130,14 +138,20 @@ const Discover = () => {
         description="Find trusted pet stores, groomers, trainers and more. Earn cashback rewards with every purchase."
         keywords={['pet merchants', 'pet stores', 'pet services', 'cashback', 'rewards']}
       />
-      <div className="min-h-screen bg-[var(--gradient-hero)] pb-24">
-        <Header />
+      <div className="min-h-screen bg-background pb-20">
+        <Header onSignOut={handleSignOut} />
 
-        <main className="container mx-auto px-4 py-8 max-w-4xl">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-2">Discover</h1>
-            <p className="text-muted-foreground">Find trusted pet services near you</p>
-          </div>
+        <main className="container mx-auto px-4 py-6 space-y-6">
+          <PromotionalBanner />
+          
+          <FeaturedMerchants onMerchantClick={handlePayNowFromCard} />
+          
+          <PartnerOffers />
+
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold">All Merchants</h2>
+            </div>
 
         {/* Search */}
         <GradientCard className="mb-6">
