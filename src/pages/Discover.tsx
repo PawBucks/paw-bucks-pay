@@ -15,7 +15,6 @@ import { EmptyState } from "@/components/EmptyState";
 import { FeaturedMerchants } from "@/components/FeaturedMerchants";
 import { PartnerOffers } from "@/components/PartnerOffers";
 import { PromotionalBanner } from "@/components/PromotionalBanner";
-import { EmptyState } from "@/components/EmptyState";
 import { Search, MapPin, Store } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -139,7 +138,7 @@ const Discover = () => {
         keywords={['pet merchants', 'pet stores', 'pet services', 'cashback', 'rewards']}
       />
       <div className="min-h-screen bg-background pb-20">
-        <Header onSignOut={handleSignOut} />
+        <Header isAuthenticated={!!user} onLogout={handleSignOut} />
 
         <main className="container mx-auto px-4 py-6 space-y-6">
           <PromotionalBanner />
@@ -209,6 +208,7 @@ const Discover = () => {
             } : undefined}
           />
         )}
+          </div>
       </main>
 
       {/* Payment Dialog */}
