@@ -47,3 +47,16 @@ verify_jwt = true
 
 [functions.apply-vet-loan]
 verify_jwt = true
+
+[functions.get-connect-account-status]
+verify_jwt = true
+
+[functions.create-connect-product]
+verify_jwt = true
+
+[functions.list-connect-products]
+verify_jwt = false
+
+[functions.create-connect-checkout]
+verify_jwt = false
+

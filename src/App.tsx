@@ -35,6 +35,9 @@ const PawBucksRedeem = lazy(() => import("./pages/PawBucksRedeem"));
 const BuyPawBucks = lazy(() => import("./pages/BuyPawBucks"));
 const PetStore = lazy(() => import("./pages/PetStore"));
 const PetStoreAdmin = lazy(() => import("./pages/PetStoreAdmin"));
+const MerchantProducts = lazy(() => import("./pages/MerchantProducts"));
+const Storefront = lazy(() => import("./pages/Storefront"));
+const CheckoutSuccess = lazy(() => import("./pages/CheckoutSuccess"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
@@ -78,6 +81,9 @@ const AppContent = () => {
         <Route path="/pawbucks/buy" element={<BuyPawBucks />} />
         <Route path="/pet-store" element={<PetStore />} />
         <Route path="/admin/pet-store" element={<PetStoreAdmin />} />
+        <Route path="/merchant/products" element={<MerchantProducts />} />
+        <Route path="/storefront/:accountId" element={<Storefront />} />
+        <Route path="/checkout-success" element={<CheckoutSuccess />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Suspense>
