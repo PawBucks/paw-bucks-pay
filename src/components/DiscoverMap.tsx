@@ -82,15 +82,34 @@ export const DiscoverMap = ({ merchants, userLocation, onMerchantClick }: Discov
   const map = useRef<mapboxgl.Map | null>(null);
   const markers = useRef<mapboxgl.Marker[]>([]);
   const [mapLoaded, setMapLoaded] = useState(false);
+  const [mapboxToken, setMapboxToken] = useState<string | null>(null);
+
+  // Fetch Mapbox token from edge function
+  useEffect(() => {
+    const fetchToken = async () => {
+      try {
+        const { data, error } = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-mapbox-token`, {
+          headers: {
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
+          }
+        }).then(res => res.json());
+        
+        if (error || !data?.token) {
+          console.error('Failed to fetch Mapbox token');
+          return;
+        }
+        
+        setMapboxToken(data.token);
+      } catch (error) {
+        console.error('Error fetching Mapbox token:', error);
+      }
+    };
+    
+    fetchToken();
+  }, []);
 
   useEffect(() => {
-    if (!mapContainer.current || map.current) return;
-
-    const mapboxToken = import.meta.env.VITE_MAPBOX_PUBLIC_TOKEN;
-    if (!mapboxToken) {
-      console.error('Mapbox token not found');
-      return;
-    }
+    if (!mapContainer.current || map.current || !mapboxToken) return;
 
     mapboxgl.accessToken = mapboxToken;
     
@@ -123,7 +142,7 @@ export const DiscoverMap = ({ merchants, userLocation, onMerchantClick }: Discov
       map.current?.remove();
       map.current = null;
     };
-  }, []);
+  }, [mapboxToken]);
 
   useEffect(() => {
     if (!map.current || !mapLoaded) return;
