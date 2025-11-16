@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { BottomNav } from "@/components/BottomNav";
+import { AdPlacement } from "@/components/AdPlacement";
 import { LogOut, User, Mail, Calendar, Crown, Sparkles, Settings, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -108,6 +109,11 @@ const Profile = () => {
     <div className="min-h-screen bg-[var(--gradient-hero)] pb-24">
       <Header isAuthenticated={true} onLogout={handleSignOut} />
       <div className="container mx-auto px-4 py-8 max-w-2xl">
+        {/* Ad Placement for Free Users */}
+        <div className="mb-6">
+          <AdPlacement />
+        </div>
+
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">Profile</h1>

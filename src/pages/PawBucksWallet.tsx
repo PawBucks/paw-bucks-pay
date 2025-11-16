@@ -7,6 +7,7 @@ import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { GradientCard } from "@/components/ui/gradient-card";
 import { BottomNav } from "@/components/BottomNav";
+import { AdPlacement } from "@/components/AdPlacement";
 import { PageLoader } from "@/components/PageLoader";
 import { EmptyState } from "@/components/EmptyState";
 import { Coins, TrendingUp, Gift, ArrowUpRight, ArrowDownRight } from "lucide-react";
@@ -94,6 +95,11 @@ const PawBucksWallet = () => {
       <Header isAuthenticated={true} onLogout={handleSignOut} />
 
       <main className="container mx-auto px-4 py-8 max-w-4xl">
+        {/* Ad Placement for Free Users */}
+        <div className="mb-6">
+          <AdPlacement />
+        </div>
+
         {/* Header */}
         <div className="mb-8 text-center">
           <div className="flex items-center justify-center gap-3 mb-2">
