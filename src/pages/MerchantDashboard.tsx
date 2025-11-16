@@ -28,6 +28,7 @@ import {
   CreditCard,
   FileText,
   ShoppingCart,
+  AlertCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format, startOfMonth, parseISO } from "date-fns";
@@ -181,9 +182,20 @@ const MerchantDashboard = () => {
         
         // Check for specific error types
         if (errorMessage.includes("PLATFORM_NOT_CONFIGURED") || errorMessage.includes("platform-profile")) {
-          toast.error("Stripe Platform Configuration Required", {
-            description: "Your Stripe Connect platform needs to be configured. Please go to Stripe Dashboard → Settings → Connect → Platform Profile and complete the setup, including selecting who manages losses for connected accounts.",
-            duration: 12000,
+          toast.error("Stripe Platform Setup Required", {
+            description: (
+              <>
+                <p className="mb-2">Before merchants can accept payments, the platform owner must complete Stripe Connect setup:</p>
+                <ol className="list-decimal list-inside space-y-1 text-sm">
+                  <li>Visit <a href="https://dashboard.stripe.com/settings/connect" target="_blank" rel="noopener noreferrer" className="underline font-medium">Stripe Dashboard</a></li>
+                  <li>Go to Settings → Connect → Platform Profile</li>
+                  <li>Complete all required fields</li>
+                  <li>Select who manages losses for connected accounts</li>
+                </ol>
+                <p className="mt-2 text-xs opacity-80">This is a one-time setup required by Stripe.</p>
+              </>
+            ),
+            duration: 20000,
           });
         } else if (errorMessage.includes("CAPABILITIES_ERROR") || errorMessage.includes("capabilities")) {
           toast.error("Payment Capabilities Error", {
@@ -415,26 +427,44 @@ const MerchantDashboard = () => {
         {/* Stripe Connect Status */}
         {!merchant.stripe_account_id && (
           <GradientCard gradient className="mb-6 bg-accent/10 border-accent/20">
-            <div className="flex items-center justify-between flex-wrap gap-4">
-              <div>
-                <h3 className="font-semibold mb-1">Connect Your Bank Account</h3>
-                <p className="text-sm text-muted-foreground">
-                  Set up Stripe Connect to receive payments directly to your bank account
-                </p>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <div className="flex-1">
+                  <h3 className="font-semibold mb-1">Connect Your Bank Account</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Set up Stripe Connect to receive payments directly to your bank account
+                  </p>
+                </div>
+                <Button onClick={handleConnectStripe} disabled={connectingStripe}>
+                  {connectingStripe ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Connecting...
+                    </>
+                  ) : (
+                    <>
+                      <ExternalLink className="w-4 h-4 mr-2" />
+                      Connect Stripe
+                    </>
+                  )}
+                </Button>
               </div>
-              <Button onClick={handleConnectStripe} disabled={connectingStripe}>
-                {connectingStripe ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Connecting...
-                  </>
-                ) : (
-                  <>
-                    <ExternalLink className="w-4 h-4 mr-2" />
-                    Connect Stripe
-                  </>
-                )}
-              </Button>
+              
+              {/* Platform Setup Notice */}
+              <div className="text-xs bg-background/50 p-3 rounded-md border border-border/50">
+                <p className="font-medium mb-2 text-warning flex items-center gap-2">
+                  <AlertCircle className="w-3.5 h-3.5" />
+                  Important: Platform Setup Required
+                </p>
+                <p className="opacity-90 mb-2">
+                  If you see an error when clicking "Connect Stripe", it means the platform owner needs to complete a one-time Stripe Connect setup:
+                </p>
+                <ol className="list-decimal list-inside space-y-1 ml-2 opacity-80">
+                  <li>Visit <a href="https://dashboard.stripe.com/settings/connect" target="_blank" rel="noopener noreferrer" className="underline text-primary hover:text-primary/80">Stripe Dashboard</a></li>
+                  <li>Go to Settings → Connect → Platform Profile</li>
+                  <li>Complete all required fields including loss management selection</li>
+                </ol>
+              </div>
             </div>
           </GradientCard>
         )}
