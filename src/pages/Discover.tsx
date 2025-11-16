@@ -228,14 +228,14 @@ const Discover = () => {
                               alt={`${merchant.business_name} logo`}
                               className="w-full h-full object-cover"
                             />
-                            {/* Small business type icon overlay */}
-                            <div className="absolute bottom-1 left-1 w-8 h-8 rounded-md bg-background/95 flex items-center justify-center shadow-md border border-border">
+                            {/* Small business type icon overlay - lower right */}
+                            <div className="absolute bottom-1 right-1 w-8 h-8 rounded-md bg-background/95 flex items-center justify-center shadow-md border border-border">
                               <Icon className="w-4 h-4 text-primary" />
                             </div>
                           </div>
                         ) : (
-                          <div className="w-16 h-16 rounded-full bg-background flex items-center justify-center group-hover:scale-110 transition-transform">
-                            <Icon className="w-8 h-8 text-primary" />
+                          <div className="w-32 h-32 rounded-lg bg-background flex items-center justify-center group-hover:scale-105 transition-transform border border-border/50">
+                            <Icon className="w-16 h-16 text-primary" />
                           </div>
                         )}
                       </div>
