@@ -7,8 +7,11 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// PawPass subscription price ID
-const PREMIUM_PRICE_ID = 'price_1SMsJSK2QqG8Wa5zn0mk0wxw';
+// PawPass subscription price IDs
+const PRICE_IDS = {
+  basic: 'price_1SMsJSK2QqG8Wa5zn0mk0wxw', // PawPass $9.99/month
+  plus: 'price_1SU6c5K2QqG8Wa5zU5yzCcEP',  // PawPass+ $19.99/month
+};
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -17,6 +20,17 @@ serve(async (req) => {
 
   try {
     console.log('Creating subscription checkout session');
+
+    // Parse request body for tier selection
+    const { tier = 'basic' } = await req.json();
+    console.log('Selected tier:', tier);
+
+    // Validate tier
+    if (!['basic', 'plus'].includes(tier)) {
+      throw new Error('Invalid subscription tier');
+    }
+
+    const selectedPriceId = PRICE_IDS[tier as 'basic' | 'plus'];
 
     // Authenticate user
     const supabaseClient = createClient(
@@ -60,7 +74,7 @@ serve(async (req) => {
       customer_email: customerId ? undefined : user.email,
       line_items: [
         {
-          price: PREMIUM_PRICE_ID,
+          price: selectedPriceId,
           quantity: 1,
         },
       ],
@@ -69,12 +83,14 @@ serve(async (req) => {
         trial_period_days: 7,
         metadata: {
           user_id: user.id,
+          tier: tier,
         },
       },
       success_url: `${req.headers.get('origin')}/subscription-success`,
       cancel_url: `${req.headers.get('origin')}/profile`,
       metadata: {
         user_id: user.id,
+        tier: tier,
       },
     });
 

@@ -61,10 +61,12 @@ export const useSubscription = () => {
     return () => clearInterval(interval);
   }, [user]);
 
-  const createCheckout = async () => {
+  const createCheckout = async (tier: 'basic' | 'plus' = 'basic') => {
     try {
-      console.log('[useSubscription] Creating checkout session');
-      const { data, error } = await supabase.functions.invoke('create-subscription-checkout');
+      console.log('[useSubscription] Creating checkout session for tier:', tier);
+      const { data, error } = await supabase.functions.invoke('create-subscription-checkout', {
+        body: { tier }
+      });
 
       if (error) throw error;
 
