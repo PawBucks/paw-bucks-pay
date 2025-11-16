@@ -685,12 +685,13 @@ const MerchantDashboard = () => {
 
       {/* Edit Profile Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
           <DialogHeader>
             <DialogTitle>Edit Business Profile</DialogTitle>
             <DialogDescription>Update your business information</DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleUpdateProfile} className="space-y-4">
+          <form onSubmit={handleUpdateProfile} className="flex flex-col flex-1 min-h-0">
+            <div className="overflow-y-auto flex-1 space-y-4 pr-2">
             <div className="space-y-2">
               <Label htmlFor="businessName">Business Name</Label>
               <Input
@@ -791,7 +792,8 @@ const MerchantDashboard = () => {
                 rows={3}
               />
             </div>
-            <div className="flex gap-3">
+            </div>
+            <div className="flex gap-3 pt-4 border-t mt-4">
               <Button type="button" variant="outline" onClick={() => setEditDialogOpen(false)} className="flex-1">
                 Cancel
               </Button>
