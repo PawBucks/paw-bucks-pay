@@ -16,6 +16,8 @@ import { toast } from "sonner";
 import { ROUTES, QUERY_STALE_TIMES } from "@/lib/constants";
 import { SEO } from "@/components/SEO";
 import { usePersistentState } from "@/hooks/usePersistentState";
+import { geocodeAddress } from "@/lib/geocoding";
+import { supabase } from "@/integrations/supabase/client";
 
 export type Merchant = {
   id: string;
@@ -42,11 +44,46 @@ const Discover = () => {
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
 
   // Optimized merchant loading with caching
-  const { data: merchants = [], isLoading: loading } = useOptimizedQuery<Merchant[]>(
+  const { data: rawMerchants = [], isLoading: loading } = useOptimizedQuery<Merchant[]>(
     ['merchants'],
     () => DataLoader.loadMerchants(),
     { staleTime: QUERY_STALE_TIMES.LONG }
   );
+
+  const [merchants, setMerchants] = useState<Merchant[]>([]);
+
+  // Geocode merchants that don't have coordinates
+  useEffect(() => {
+    const geocodeMerchants = async () => {
+      const merchantsWithCoords = await Promise.all(
+        rawMerchants.map(async (merchant) => {
+          if (merchant.latitude && merchant.longitude) {
+            return merchant;
+          }
+          
+          if (merchant.address) {
+            const coords = await geocodeAddress(merchant.address);
+            if (coords) {
+              // Update in database
+              await supabase
+                .from('merchants')
+                .update({ latitude: coords.lat, longitude: coords.lng })
+                .eq('id', merchant.id);
+              
+              return { ...merchant, latitude: coords.lat, longitude: coords.lng };
+            }
+          }
+          
+          return merchant;
+        })
+      );
+      setMerchants(merchantsWithCoords);
+    };
+
+    if (rawMerchants.length > 0) {
+      geocodeMerchants();
+    }
+  }, [rawMerchants]);
 
   useEffect(() => {
     getUserLocation();
