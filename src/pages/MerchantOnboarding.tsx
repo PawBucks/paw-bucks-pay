@@ -18,6 +18,8 @@ const MerchantOnboarding = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [businessType, setBusinessType] = useState("dog_walker");
   const [profile, setProfile] = useState<any>(null);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -56,6 +58,18 @@ const MerchantOnboarding = () => {
     }
   };
 
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setLogoFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setLogoPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!user) return;
@@ -69,6 +83,27 @@ const MerchantOnboarding = () => {
       const address = formData.get("address") as string;
       const description = formData.get("description") as string;
       const otherExplanation = formData.get("otherExplanation") as string;
+
+      // Upload logo if provided
+      let logoUrl: string | null = null;
+      if (logoFile) {
+        const fileExt = logoFile.name.split('.').pop();
+        const filePath = `${user.id}/${Date.now()}.${fileExt}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('merchant-logos')
+          .upload(filePath, logoFile);
+
+        if (uploadError) {
+          throw new Error("Failed to upload logo");
+        }
+
+        const { data: urlData } = supabase.storage
+          .from('merchant-logos')
+          .getPublicUrl(filePath);
+        
+        logoUrl = urlData.publicUrl;
+      }
 
       // Validate input
       const validatedData = merchantOnboardingSchema.parse({
@@ -103,6 +138,7 @@ const MerchantOnboarding = () => {
         address: validatedData.address || null,
         description: validatedData.description || null,
         cashback_rate: validatedData.cashbackRate,
+        logo_url: logoUrl,
       });
 
       if (merchantError) {
@@ -185,6 +221,28 @@ const MerchantOnboarding = () => {
                   <SelectItem value="trainer">Trainer</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            {/* Business Logo */}
+            <div className="space-y-2">
+              <Label htmlFor="logo">Business Logo</Label>
+              <div className="flex flex-col gap-4">
+                <Input
+                  id="logo"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleLogoChange}
+                />
+                {logoPreview && (
+                  <div className="w-24 h-24 rounded-lg overflow-hidden border border-border">
+                    <img
+                      src={logoPreview}
+                      alt="Logo preview"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Address */}

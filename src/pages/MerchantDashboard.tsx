@@ -43,6 +43,7 @@ type Merchant = {
   cashback_rate: number;
   stripe_account_id?: string;
   stripe_account_status?: string;
+  logo_url?: string;
 };
 
 type Analytics = {
@@ -77,6 +78,8 @@ const MerchantDashboard = () => {
   const [fundingDialogOpen, setFundingDialogOpen] = useState(false);
   const [connectingStripe, setConnectingStripe] = useState(false);
   const [requestingFunding, setRequestingFunding] = useState(false);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -212,19 +215,54 @@ const MerchantDashboard = () => {
     }
   };
 
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setLogoFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setLogoPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleUpdateProfile = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!merchant) return;
+    if (!merchant || !user) return;
 
     try {
-    const formData = new FormData(e.currentTarget);
-    const updates = {
-      business_name: formData.get("businessName") as string,
-      contact_person: formData.get("contactPerson") as string,
-      business_type: formData.get("businessType") as string,
-      address: formData.get("address") as string,
-      description: formData.get("description") as string,
-    };
+      const formData = new FormData(e.currentTarget);
+      
+      // Upload logo if provided
+      let logoUrl = merchant.logo_url;
+      if (logoFile) {
+        const fileExt = logoFile.name.split('.').pop();
+        const filePath = `${user.id}/${Date.now()}.${fileExt}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('merchant-logos')
+          .upload(filePath, logoFile);
+
+        if (uploadError) {
+          throw new Error("Failed to upload logo");
+        }
+
+        const { data: urlData } = supabase.storage
+          .from('merchant-logos')
+          .getPublicUrl(filePath);
+        
+        logoUrl = urlData.publicUrl;
+      }
+
+      const updates = {
+        business_name: formData.get("businessName") as string,
+        contact_person: formData.get("contactPerson") as string,
+        business_type: formData.get("businessType") as string,
+        address: formData.get("address") as string,
+        description: formData.get("description") as string,
+        logo_url: logoUrl,
+      };
 
       const { error } = await supabase
         .from("merchants")
@@ -235,6 +273,8 @@ const MerchantDashboard = () => {
 
       toast.success("Profile updated successfully!");
       setEditDialogOpen(false);
+      setLogoFile(null);
+      setLogoPreview(null);
       loadMerchantData();
     } catch (error: any) {
       console.error("Error updating profile:", error);
@@ -684,6 +724,26 @@ const MerchantDashboard = () => {
                 <option value="walker">Walker</option>
                 <option value="trainer">Trainer</option>
               </select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="logo">Business Logo</Label>
+              <div className="flex flex-col gap-4">
+                <Input
+                  id="logo"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleLogoChange}
+                />
+                {(logoPreview || merchant.logo_url) && (
+                  <div className="w-24 h-24 rounded-lg overflow-hidden border border-border">
+                    <img
+                      src={logoPreview || merchant.logo_url || ""}
+                      alt="Logo preview"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="address">Address</Label>

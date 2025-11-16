@@ -148,6 +148,7 @@ export type Database = {
           id: string
           is_sponsored: boolean | null
           latitude: number | null
+          logo_url: string | null
           longitude: number | null
           owner_name: string | null
           sponsored_until: string | null
@@ -169,6 +170,7 @@ export type Database = {
           id?: string
           is_sponsored?: boolean | null
           latitude?: number | null
+          logo_url?: string | null
           longitude?: number | null
           owner_name?: string | null
           sponsored_until?: string | null
@@ -190,6 +192,7 @@ export type Database = {
           id?: string
           is_sponsored?: boolean | null
           latitude?: number | null
+          logo_url?: string | null
           longitude?: number | null
           owner_name?: string | null
           sponsored_until?: string | null
