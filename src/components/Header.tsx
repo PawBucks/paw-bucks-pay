@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { LogOut, Menu } from "lucide-react";
@@ -20,7 +21,7 @@ interface HeaderProps {
   onLogout?: () => void;
 }
 
-export const Header = ({ menuItems, isAuthenticated = false, onLogout }: HeaderProps) => {
+const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout }: HeaderProps) => {
   const navigate = useNavigate();
   
   const defaultMenuItems: MenuItem[] = [
@@ -31,9 +32,9 @@ export const Header = ({ menuItems, isAuthenticated = false, onLogout }: HeaderP
 
   return (
     <header className="border-b bg-card/95 backdrop-blur-lg sticky top-0 z-50 shadow-sm" role="banner">
-      <nav className="container mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex items-center justify-between" aria-label="Main navigation">
+      <nav className="container mx-auto px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3.5 flex items-center justify-between" aria-label="Main navigation">
         <div 
-          className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-all duration-200 active:scale-95"
+          className="flex items-center gap-3 cursor-pointer hover:opacity-90 transition-all duration-200 active:scale-95 touch-manipulation"
           onClick={() => navigate("/")}
           role="button"
           tabIndex={0}
@@ -43,7 +44,8 @@ export const Header = ({ menuItems, isAuthenticated = false, onLogout }: HeaderP
           <img 
             src={logo} 
             alt="PawBucks Logo - Return to homepage" 
-            className="h-20 sm:h-24 md:h-28 w-auto object-contain"
+            className="h-16 sm:h-20 md:h-24 w-auto object-contain"
+            loading="eager"
           />
         </div>
         
@@ -51,7 +53,7 @@ export const Header = ({ menuItems, isAuthenticated = false, onLogout }: HeaderP
           <Button 
             onClick={onLogout}
             variant="outline"
-            className="gap-2"
+            className="gap-2 min-h-[44px] touch-manipulation"
             aria-label="Logout"
           >
             <LogOut className="h-4 w-4" />
@@ -62,7 +64,7 @@ export const Header = ({ menuItems, isAuthenticated = false, onLogout }: HeaderP
             <DropdownMenuTrigger asChild>
               <Button 
                 size="icon"
-                className="shadow-xl hover:shadow-2xl transition-all hover:scale-105"
+                className="shadow-lg hover:shadow-xl transition-all hover:scale-105 min-h-[44px] min-w-[44px] touch-manipulation"
                 aria-label="Open menu"
               >
                 <Menu className="h-6 w-6" />
@@ -73,7 +75,7 @@ export const Header = ({ menuItems, isAuthenticated = false, onLogout }: HeaderP
                 <DropdownMenuItem 
                   key={index}
                   onClick={() => navigate(item.path)}
-                  className="cursor-pointer"
+                  className="cursor-pointer min-h-[44px] touch-manipulation"
                 >
                   {item.label}
                 </DropdownMenuItem>
@@ -85,3 +87,5 @@ export const Header = ({ menuItems, isAuthenticated = false, onLogout }: HeaderP
     </header>
   );
 };
+
+export const Header = memo(HeaderComponent);

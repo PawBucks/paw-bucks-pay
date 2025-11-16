@@ -1,3 +1,4 @@
+import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -6,30 +7,35 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useAutoLogout } from "@/hooks/useAutoLogout";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { PageLoader } from "@/components/PageLoader";
+
+// Critical pages - loaded immediately
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
-import Dashboard from "./pages/Dashboard";
-import CreatePetProfile from "./pages/CreatePetProfile";
-import Discover from "./pages/Discover";
-import Wallet from "./pages/Wallet";
-import Referrals from "./pages/Referrals";
-import Profile from "./pages/Profile";
-import SubscriptionSuccess from "./pages/SubscriptionSuccess";
-import MerchantLanding from "./pages/MerchantLanding";
-import MerchantOnboarding from "./pages/MerchantOnboarding";
-import MerchantDashboard from "./pages/MerchantDashboard";
-import MerchantTransactions from "./pages/MerchantTransactions";
-import VetLoanApply from "./pages/VetLoanApply";
-import AdminDashboard from "./pages/AdminDashboard";
-import AdminLogin from "./pages/AdminLogin";
-import PetHealth from "./pages/PetHealth";
-import VetDashboard from "./pages/VetDashboard";
-import PawBucksWallet from "./pages/PawBucksWallet";
-import PawBucksRedeem from "./pages/PawBucksRedeem";
-import BuyPawBucks from "./pages/BuyPawBucks";
-import PetStore from "./pages/PetStore";
-import PetStoreAdmin from "./pages/PetStoreAdmin";
-import NotFound from "./pages/NotFound";
+
+// Lazy-loaded pages for optimal performance
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const CreatePetProfile = lazy(() => import("./pages/CreatePetProfile"));
+const Discover = lazy(() => import("./pages/Discover"));
+const Wallet = lazy(() => import("./pages/Wallet"));
+const Referrals = lazy(() => import("./pages/Referrals"));
+const Profile = lazy(() => import("./pages/Profile"));
+const SubscriptionSuccess = lazy(() => import("./pages/SubscriptionSuccess"));
+const MerchantLanding = lazy(() => import("./pages/MerchantLanding"));
+const MerchantOnboarding = lazy(() => import("./pages/MerchantOnboarding"));
+const MerchantDashboard = lazy(() => import("./pages/MerchantDashboard"));
+const MerchantTransactions = lazy(() => import("./pages/MerchantTransactions"));
+const VetLoanApply = lazy(() => import("./pages/VetLoanApply"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const AdminLogin = lazy(() => import("./pages/AdminLogin"));
+const PetHealth = lazy(() => import("./pages/PetHealth"));
+const VetDashboard = lazy(() => import("./pages/VetDashboard"));
+const PawBucksWallet = lazy(() => import("./pages/PawBucksWallet"));
+const PawBucksRedeem = lazy(() => import("./pages/PawBucksRedeem"));
+const BuyPawBucks = lazy(() => import("./pages/BuyPawBucks"));
+const PetStore = lazy(() => import("./pages/PetStore"));
+const PetStoreAdmin = lazy(() => import("./pages/PetStoreAdmin"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -47,33 +53,34 @@ const AppContent = () => {
   useAutoLogout(!!user);
 
   return (
-    <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/create-pet-profile" element={<CreatePetProfile />} />
-          <Route path="/discover" element={<Discover />} />
-          <Route path="/wallet" element={<Wallet />} />
-          <Route path="/referrals" element={<Referrals />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/subscription-success" element={<SubscriptionSuccess />} />
-          <Route path="/merchants" element={<MerchantLanding />} />
-          <Route path="/merchant-onboarding" element={<MerchantOnboarding />} />
-          <Route path="/merchant-dashboard" element={<MerchantDashboard />} />
-          <Route path="/merchant/transactions" element={<MerchantTransactions />} />
-          <Route path="/vet-loan/apply" element={<VetLoanApply />} />
-          <Route path="/pet-health/:petId" element={<PetHealth />} />
-          <Route path="/vet-dashboard" element={<VetDashboard />} />
-          <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/pawbucks/wallet" element={<PawBucksWallet />} />
-          <Route path="/pawbucks/redeem" element={<PawBucksRedeem />} />
-          <Route path="/pawbucks/buy" element={<BuyPawBucks />} />
-          <Route path="/pet-store" element={<PetStore />} />
-          <Route path="/admin/pet-store" element={<PetStoreAdmin />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+    <Suspense fallback={<PageLoader message="Loading..." />}>
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/auth" element={<Auth />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/create-pet-profile" element={<CreatePetProfile />} />
+        <Route path="/discover" element={<Discover />} />
+        <Route path="/wallet" element={<Wallet />} />
+        <Route path="/referrals" element={<Referrals />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/subscription-success" element={<SubscriptionSuccess />} />
+        <Route path="/merchants" element={<MerchantLanding />} />
+        <Route path="/merchant-onboarding" element={<MerchantOnboarding />} />
+        <Route path="/merchant-dashboard" element={<MerchantDashboard />} />
+        <Route path="/merchant/transactions" element={<MerchantTransactions />} />
+        <Route path="/vet-loan/apply" element={<VetLoanApply />} />
+        <Route path="/pet-health/:petId" element={<PetHealth />} />
+        <Route path="/vet-dashboard" element={<VetDashboard />} />
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/pawbucks/wallet" element={<PawBucksWallet />} />
+        <Route path="/pawbucks/redeem" element={<PawBucksRedeem />} />
+        <Route path="/pawbucks/buy" element={<BuyPawBucks />} />
+        <Route path="/pet-store" element={<PetStore />} />
+        <Route path="/admin/pet-store" element={<PetStoreAdmin />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </Suspense>
   );
 };
 
