@@ -255,25 +255,57 @@ serve(async (req) => {
     // Handle successful payment
     if (event.type === 'payment_intent.succeeded') {
       const paymentIntent = event.data.object as Stripe.PaymentIntent;
-      const { merchant_id, user_id, description, cashback_amount, cashback_rate } = paymentIntent.metadata;
+      const { merchant_id, user_id, description } = paymentIntent.metadata;
 
       console.log('Payment succeeded:', {
         paymentIntentId: paymentIntent.id,
         amount: paymentIntent.amount / 100,
         merchant_id,
         user_id,
-        cashback_amount,
       });
 
       const amount = paymentIntent.amount / 100; // Convert from cents
-      const cashback = parseFloat(cashback_amount || '0');
+      
+      // Determine cashback rate based on subscription tier
+      let cashbackRate = 10; // Default 10% for free accounts
+      
+      if (user_id) {
+        // Check user's subscription tier
+        const { data: subscription } = await supabaseAdmin
+          .from('subscriptions')
+          .select('stripe_subscription_id')
+          .eq('user_id', user_id)
+          .in('status', ['active', 'trialing'])
+          .maybeSingle();
+
+        if (subscription?.stripe_subscription_id) {
+          // Get subscription details from Stripe to check product
+          const stripeSubscription = await stripe.subscriptions.retrieve(subscription.stripe_subscription_id);
+          const productId = stripeSubscription.items.data[0]?.price?.product;
+          
+          console.log('User subscription found:', { productId });
+          
+          // Set cashback rate based on product
+          if (productId === 'prod_TQyZjYzt9DwoIK') {
+            cashbackRate = 30; // PawPass+ gets 30%
+            console.log('PawPass+ subscriber - 30% cashback');
+          } else if (productId === 'prod_TJVK9ZhLiJnnpm') {
+            cashbackRate = 20; // PawPass gets 20%
+            console.log('PawPass subscriber - 20% cashback');
+          }
+        } else {
+          console.log('Free account - 10% cashback');
+        }
+      }
+
+      const cashback = amount * (cashbackRate / 100);
       const rewardsEarned = Math.floor(amount); // 1 point per dollar
 
       console.log('Recording transaction:', {
         amount,
         cashback,
+        cashbackRate: `${cashbackRate}%`,
         rewardsEarned,
-        rate: cashback_rate,
       });
 
       // Create transaction record (this will trigger wallet updates via database trigger)
@@ -452,8 +484,8 @@ serve(async (req) => {
         console.log("Direct PawBucks purchase detected:", { coinsEarned });
       } else {
         // Regular transaction: Award PawBucks based on cashback
-        const cashbackAmount = parseFloat(paymentIntent.metadata?.cashback_amount || '0');
-        coinsEarned = Math.floor(cashbackAmount * 10); // Convert dollars to PawBucks (10 PawBucks = $1)
+        // cashback is already calculated based on subscription tier above
+        coinsEarned = Math.floor(cashback * 10); // Convert dollars to PawBucks (10 PawBucks = $1)
       }
       
       if (coinsEarned > 0 && user_id) {

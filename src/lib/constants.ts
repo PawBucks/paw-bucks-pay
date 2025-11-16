@@ -7,8 +7,9 @@ export const PAWBUCKS_CONVERSION = {
 } as const;
 
 export const CASHBACK_RATES = {
-  STANDARD: 10, // 10% cashback for regular users
-  PREMIUM: 25, // 25% cashback for premium subscribers
+  FREE: 10, // 10% cashback for free accounts
+  PAWPASS: 20, // 20% cashback for PawPass subscribers
+  PAWPASS_PLUS: 30, // 30% cashback for PawPass+ subscribers
 } as const;
 
 export const SUBSCRIPTION = {
