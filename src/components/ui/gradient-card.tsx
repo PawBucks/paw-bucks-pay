@@ -12,10 +12,10 @@ export const GradientCard = ({ children, className, gradient = false, onClick }:
   return (
     <article
       className={cn(
-        "rounded-2xl border bg-card p-6 shadow-sm transition-all duration-300",
-        gradient && "bg-gradient-to-br from-primary/5 via-accent/5 to-secondary/5 border-primary/20",
-        "hover:shadow-[var(--shadow-soft)] hover:border-primary/30",
-        onClick && "cursor-pointer hover:scale-[1.02]",
+        "rounded-2xl border bg-card p-6 shadow-[var(--shadow-soft)] transition-all duration-300 backdrop-blur-sm",
+        gradient && "bg-gradient-to-br from-primary/8 via-accent/6 to-secondary/8 border-primary/25",
+        "hover:shadow-[var(--shadow-medium)] hover:border-primary/35 hover:-translate-y-0.5",
+        onClick && "cursor-pointer hover:scale-[1.01]",
         className
       )}
       onClick={onClick}
