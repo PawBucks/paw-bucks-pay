@@ -96,28 +96,43 @@ serve(async (req) => {
       throw new Error('Payment processing is not available for this merchant.');
     }
 
-    // Check if user has active subscription (25% for premium, 10% for free)
+    // Check user's subscription tier to determine cashback rate
     const { data: subscription } = await supabaseAdmin
       .from('subscriptions')
-      .select('status')
+      .select('stripe_subscription_id')
       .eq('user_id', user.id)
-      .eq('status', 'active')
+      .in('status', ['active', 'trialing'])
       .maybeSingle();
 
-    const hasActiveSubscription = !!subscription;
+    let cashbackRate = 10; // Default 10% for free accounts
+    let subscriptionTier = 'Free';
 
-    // Calculate amounts with flat cashback rates
+    if (subscription?.stripe_subscription_id) {
+      // Get subscription details from Stripe to check product
+      const stripeSubscription = await stripe.subscriptions.retrieve(subscription.stripe_subscription_id);
+      const productId = stripeSubscription.items.data[0]?.price?.product;
+      
+      // Set cashback rate based on product
+      if (productId === 'prod_TQyZjYzt9DwoIK') {
+        cashbackRate = 30; // PawPass+ gets 30%
+        subscriptionTier = 'PawPass+';
+      } else if (productId === 'prod_TJVK9ZhLiJnnpm') {
+        cashbackRate = 20; // PawPass gets 20%
+        subscriptionTier = 'PawPass';
+      }
+    }
+    
+    console.log(`Cashback rate: ${cashbackRate}% (${subscriptionTier} user)`);
+
+    // Calculate amounts with tier-based cashback rates
     const amountInCents = Math.round(amount * 100);
-    const cashbackRate = hasActiveSubscription ? 25.0 : 10.0;
-    
-    console.log(`Cashback rate: ${cashbackRate}% (${hasActiveSubscription ? 'Premium' : 'Free'} user)`);
-    
     const cashbackAmount = (amount * cashbackRate) / 100;
     const platformFeeInCents = Math.round(cashbackAmount * 100); // Platform keeps the cashback amount
 
     console.log('Payment breakdown:', {
       totalAmount: amount,
-      cashbackRate,
+      subscriptionTier,
+      cashbackRate: `${cashbackRate}%`,
       cashbackAmount,
       platformFee: platformFeeInCents / 100,
       merchantReceives: (amountInCents - platformFeeInCents) / 100,
@@ -138,8 +153,7 @@ serve(async (req) => {
         merchant_id: merchantId,
         user_id: user.id,
         description: description || `Payment to ${merchant.business_name}`,
-        cashback_amount: cashbackAmount.toFixed(2),
-        cashback_rate: cashbackRate.toString(),
+        subscription_tier: subscriptionTier,
       },
     });
 
