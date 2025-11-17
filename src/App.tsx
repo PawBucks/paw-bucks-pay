@@ -76,7 +76,7 @@ const AppContent = () => {
         <Route path="/vet-loan/apply" element={<VetLoanApply />} />
         <Route path="/pet-health/:petId" element={<PetHealth />} />
         <Route path="/vet-dashboard" element={<VetDashboard />} />
-        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin-login" element={<AdminLogin />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/pawbucks/wallet" element={<PawBucksWallet />} />
         <Route path="/pawbucks/redeem" element={<PawBucksRedeem />} />

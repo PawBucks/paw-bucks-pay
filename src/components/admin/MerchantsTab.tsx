@@ -1,0 +1,210 @@
+import { useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Search, Edit, Check, X } from 'lucide-react';
+import { toast } from 'sonner';
+
+type Merchant = {
+  id: string;
+  business_name: string;
+  business_type: string;
+  contact_person?: string;
+  email?: string;
+  cashback_rate: number;
+  stripe_account_status?: string;
+  created_at: string;
+};
+
+export function MerchantsTab() {
+  const [merchants, setMerchants] = useState<Merchant[]>([]);
+  const [filteredMerchants, setFilteredMerchants] = useState<Merchant[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedMerchant, setSelectedMerchant] = useState<Merchant | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    loadMerchants();
+  }, []);
+
+  useEffect(() => {
+    if (searchTerm) {
+      const filtered = merchants.filter(m =>
+        m.business_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        m.business_type.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredMerchants(filtered);
+    } else {
+      setFilteredMerchants(merchants);
+    }
+  }, [searchTerm, merchants]);
+
+  const loadMerchants = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('merchants')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setMerchants(data || []);
+      setFilteredMerchants(data || []);
+    } catch (error) {
+      console.error('Error loading merchants:', error);
+      toast.error('Failed to load merchants');
+    }
+  };
+
+  const handleUpdateMerchant = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedMerchant) return;
+
+    setLoading(true);
+    try {
+      const { error } = await supabase
+        .from('merchants')
+        .update({
+          business_name: selectedMerchant.business_name,
+          contact_person: selectedMerchant.contact_person,
+          email: selectedMerchant.email,
+          cashback_rate: selectedMerchant.cashback_rate,
+        })
+        .eq('id', selectedMerchant.id);
+
+      if (error) throw error;
+
+      await supabase.rpc('log_admin_action', {
+        _action: 'UPDATE_MERCHANT',
+        _entity_type: 'merchant',
+        _entity_id: selectedMerchant.id,
+        _changes: {
+          business_name: selectedMerchant.business_name,
+          cashback_rate: selectedMerchant.cashback_rate,
+        },
+      });
+
+      toast.success('Merchant updated successfully');
+      setEditDialogOpen(false);
+      loadMerchants();
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-3xl font-bold">Merchant Management</h2>
+        <p className="text-muted-foreground">Manage all merchants and their settings</p>
+      </div>
+
+      <div className="relative">
+        <Search className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+        <Input
+          placeholder="Search merchants..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="pl-10"
+        />
+      </div>
+
+      <div className="border rounded-lg">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Business Name</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead>Contact</TableHead>
+              <TableHead>Cashback Rate</TableHead>
+              <TableHead>Stripe Status</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredMerchants.map((merchant) => (
+              <TableRow key={merchant.id}>
+                <TableCell className="font-medium">{merchant.business_name}</TableCell>
+                <TableCell>
+                  <Badge variant="outline">{merchant.business_type}</Badge>
+                </TableCell>
+                <TableCell>{merchant.contact_person || 'N/A'}</TableCell>
+                <TableCell>{merchant.cashback_rate}%</TableCell>
+                <TableCell>
+                  <Badge variant={merchant.stripe_account_status === 'active' ? 'default' : 'secondary'}>
+                    {merchant.stripe_account_status || 'pending'}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-right">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setSelectedMerchant(merchant);
+                      setEditDialogOpen(true);
+                    }}
+                  >
+                    <Edit className="w-4 h-4" />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Merchant</DialogTitle>
+            <DialogDescription>Update merchant information</DialogDescription>
+          </DialogHeader>
+          {selectedMerchant && (
+            <form onSubmit={handleUpdateMerchant} className="space-y-4">
+              <div className="space-y-2">
+                <Label>Business Name</Label>
+                <Input
+                  value={selectedMerchant.business_name}
+                  onChange={(e) => setSelectedMerchant({ ...selectedMerchant, business_name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Contact Person</Label>
+                <Input
+                  value={selectedMerchant.contact_person || ''}
+                  onChange={(e) => setSelectedMerchant({ ...selectedMerchant, contact_person: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Email</Label>
+                <Input
+                  type="email"
+                  value={selectedMerchant.email || ''}
+                  onChange={(e) => setSelectedMerchant({ ...selectedMerchant, email: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Cashback Rate (%)</Label>
+                <Input
+                  type="number"
+                  step="0.1"
+                  value={selectedMerchant.cashback_rate}
+                  onChange={(e) => setSelectedMerchant({ ...selectedMerchant, cashback_rate: parseFloat(e.target.value) })}
+                />
+              </div>
+              <Button type="submit" disabled={loading} className="w-full">
+                {loading ? 'Updating...' : 'Update Merchant'}
+              </Button>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
