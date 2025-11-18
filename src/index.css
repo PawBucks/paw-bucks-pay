@@ -153,11 +153,13 @@
 
   /* Safe area insets for mobile notches */
   .safe-area-inset-bottom {
-    padding-bottom: env(safe-area-inset-bottom);
+    /* Clamp bottom safe-area padding so it never becomes excessively large in PWA */
+    padding-bottom: clamp(0.5rem, env(safe-area-inset-bottom), 1.25rem);
   }
 
   .safe-area-inset-top {
-    padding-top: env(safe-area-inset-top);
+    /* Clamp top safe-area padding to keep header visible but not pushed too far down */
+    padding-top: clamp(0.5rem, env(safe-area-inset-top), 1.25rem);
   }
 
   .pb-safe {
