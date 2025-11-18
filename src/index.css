@@ -153,8 +153,8 @@
 
   /* Safe area insets for mobile notches */
   .safe-area-inset-bottom {
-    /* Clamp bottom safe-area padding so it never becomes excessively large in PWA */
-    padding-bottom: clamp(0.5rem, env(safe-area-inset-bottom), 1.25rem);
+    /* Ensure nav/content stays above iOS home indicator */
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
   }
 
   .safe-area-inset-top {
