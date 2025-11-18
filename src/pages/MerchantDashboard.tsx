@@ -691,6 +691,18 @@ const MerchantDashboard = () => {
               </div>
             </Button>
           )}
+
+          <Button 
+            variant="outline" 
+            className="h-auto py-4 justify-start"
+            onClick={() => navigate("/merchant/offers")}
+          >
+            <ShoppingCart className="w-5 h-5 mr-3" />
+            <div className="text-left">
+              <p className="font-semibold">Partner Offers</p>
+              <p className="text-xs text-muted-foreground">PawBucks redemptions</p>
+            </div>
+          </Button>
         </div>
 
         {/* Recent Transactions */}
