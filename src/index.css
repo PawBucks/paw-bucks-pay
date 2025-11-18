@@ -158,8 +158,8 @@
   }
 
   .safe-area-inset-top {
-    /* Clamp top safe-area padding to keep header visible but not pushed too far down */
-    padding-top: clamp(0.5rem, env(safe-area-inset-top), 1.25rem);
+    /* Use full top safe-area so content never sits under the system status bar */
+    padding-top: max(0.75rem, env(safe-area-inset-top));
   }
 
   .pb-safe {
