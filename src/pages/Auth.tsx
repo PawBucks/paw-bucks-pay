@@ -198,7 +198,7 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-[var(--gradient-hero)]">
-      <div className="absolute top-4 left-4">
+      <div className="absolute left-4 top-0 pt-safe z-20">
         <Button
           variant="outline"
           onClick={() => navigate("/")}
