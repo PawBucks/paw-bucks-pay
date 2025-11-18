@@ -310,34 +310,147 @@ export type Database = {
         }
         Relationships: []
       }
+      offer_activity: {
+        Row: {
+          action: string
+          actor_id: string
+          created_at: string | null
+          details: Json | null
+          id: string
+          merchant_id: string
+          offer_id: string
+        }
+        Insert: {
+          action: string
+          actor_id: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          merchant_id: string
+          offer_id: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          merchant_id?: string
+          offer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offer_activity_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "offer_activity_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "partner_offers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      offer_redemptions: {
+        Row: {
+          created_at: string | null
+          id: string
+          offer_id: string
+          partner_confirmed: boolean | null
+          redeemed_at: string | null
+          redemption_code: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          offer_id: string
+          partner_confirmed?: boolean | null
+          redeemed_at?: string | null
+          redemption_code: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          offer_id?: string
+          partner_confirmed?: boolean | null
+          redeemed_at?: string | null
+          redemption_code?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offer_redemptions_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "partner_offers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partner_offers: {
         Row: {
+          cash_equivalent: number | null
           coins_required: number
           created_at: string | null
           description: string | null
+          end_date: string | null
           id: string
+          image_url: string | null
           is_active: boolean | null
           partner_id: string
+          per_user_limit: number | null
+          product_id: string | null
+          redemption_cap: number | null
+          redemption_count: number | null
+          require_approval: boolean | null
+          start_date: string | null
+          status: string | null
           title: string
           updated_at: string | null
         }
         Insert: {
+          cash_equivalent?: number | null
           coins_required: number
           created_at?: string | null
           description?: string | null
+          end_date?: string | null
           id?: string
+          image_url?: string | null
           is_active?: boolean | null
           partner_id: string
+          per_user_limit?: number | null
+          product_id?: string | null
+          redemption_cap?: number | null
+          redemption_count?: number | null
+          require_approval?: boolean | null
+          start_date?: string | null
+          status?: string | null
           title: string
           updated_at?: string | null
         }
         Update: {
+          cash_equivalent?: number | null
           coins_required?: number
           created_at?: string | null
           description?: string | null
+          end_date?: string | null
           id?: string
+          image_url?: string | null
           is_active?: boolean | null
           partner_id?: string
+          per_user_limit?: number | null
+          product_id?: string | null
+          redemption_cap?: number | null
+          redemption_count?: number | null
+          require_approval?: boolean | null
+          start_date?: string | null
+          status?: string | null
           title?: string
           updated_at?: string | null
         }
@@ -1196,6 +1309,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_redemption_code: { Args: never; Returns: string }
       generate_referral_code: { Args: never; Returns: string }
       get_admin_analytics: {
         Args: never
@@ -1229,6 +1343,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_offer_valid: { Args: { offer_uuid: string }; Returns: boolean }
       log_admin_action: {
         Args: {
           _action: string

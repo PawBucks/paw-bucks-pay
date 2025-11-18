@@ -60,3 +60,30 @@ verify_jwt = false
 [functions.create-connect-checkout]
 verify_jwt = false
 
+[functions.merchant-create-offer]
+verify_jwt = true
+
+[functions.merchant-list-offers]
+verify_jwt = true
+
+[functions.merchant-get-offer]
+verify_jwt = true
+
+[functions.merchant-update-offer]
+verify_jwt = true
+
+[functions.merchant-manage-offer-status]
+verify_jwt = true
+
+[functions.merchant-generate-codes]
+verify_jwt = true
+
+[functions.merchant-confirm-redemption]
+verify_jwt = true
+
+[functions.merchant-offer-redemptions]
+verify_jwt = true
+
+[functions.merchant-offer-analytics]
+verify_jwt = true
+
