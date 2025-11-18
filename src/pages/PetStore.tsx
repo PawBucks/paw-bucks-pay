@@ -29,6 +29,8 @@ import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-
 import { Loader2 } from "lucide-react";
 import { BottomNav } from "@/components/BottomNav";
 import { AdPlacement } from "@/components/AdPlacement";
+import { Header } from "@/components/Header";
+import { SEO } from "@/components/SEO";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
 
@@ -348,6 +350,11 @@ export default function PetStore() {
     setClientSecret("");
   };
 
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate("/auth");
+  };
+
   const filteredItems = items?.filter(item => {
     const matchesCategory = selectedCategory === "All" || item.category === selectedCategory;
     const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -356,7 +363,16 @@ export default function PetStore() {
   });
 
   return (
-    <div className="container mx-auto max-w-7xl px-4 pt-12 pb-24">
+    <>
+      <SEO 
+        title="Pet Store - Shop for Pet Supplies | PetalPay"
+        description="Browse our selection of pet supplies including food, treats, toys, and more. Earn PawBucks rewards on every purchase."
+        keywords={["pet store", "pet supplies", "pet food", "pet toys", "pet treats", "earn rewards"]}
+      />
+      <div className="min-h-screen bg-background">
+        <Header isAuthenticated={!!user} onLogout={handleSignOut} />
+        
+        <main className="container mx-auto px-4 py-8 pb-24 max-w-7xl">
       {/* Ad Placement for Free Users */}
       <div className="mb-6">
         <AdPlacement />
@@ -485,7 +501,9 @@ export default function PetStore() {
           ) : null}
         </DialogContent>
       </Dialog>
+        </main>
+      </div>
       <BottomNav />
-    </div>
+    </>
   );
 }
