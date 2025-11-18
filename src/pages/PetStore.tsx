@@ -356,7 +356,7 @@ export default function PetStore() {
   });
 
   return (
-    <div className="container mx-auto p-6 max-w-7xl">
+    <div className="container mx-auto max-w-7xl px-4 pt-12 pb-24">
       {/* Ad Placement for Free Users */}
       <div className="mb-6">
         <AdPlacement />
