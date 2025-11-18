@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, Search, Edit, Pause, Play, Archive, BarChart3, QrCode } from "lucide-react";
 import { toast } from "sonner";
 import { ErrorHandler } from "@/utils/errorHandler";
+import { MerchantOfferImport } from "@/components/MerchantOfferImport";
 
 interface Offer {
   id: string;
@@ -161,10 +162,13 @@ export default function MerchantOffers() {
                   Create and manage PawBucks redemption offers
                 </p>
               </div>
-              <Button onClick={() => navigate("/merchant/offers/new")}>
-                <Plus className="mr-2 h-4 w-4" />
-                Create Offer
-              </Button>
+              <div className="flex gap-2">
+                <MerchantOfferImport onImportComplete={fetchOffers} />
+                <Button onClick={() => navigate("/merchant/offers/new")}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Create Offer
+                </Button>
+              </div>
             </div>
 
             {/* Filters */}
