@@ -41,6 +41,8 @@ const Storefront = lazy(() => import("./pages/Storefront"));
 const CheckoutSuccess = lazy(() => import("./pages/CheckoutSuccess"));
 const Install = lazy(() => import("./pages/Install"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const MerchantOffers = lazy(() => import("./pages/MerchantOffers"));
+const MerchantOfferEditor = lazy(() => import("./pages/MerchantOfferEditor"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -84,6 +86,9 @@ const AppContent = () => {
         <Route path="/pet-store" element={<PetStore />} />
         <Route path="/admin/pet-store" element={<PetStoreAdmin />} />
         <Route path="/merchant/products" element={<MerchantProducts />} />
+        <Route path="/merchant/offers" element={<MerchantOffers />} />
+        <Route path="/merchant/offers/new" element={<MerchantOfferEditor />} />
+        <Route path="/merchant/offers/:id/edit" element={<MerchantOfferEditor />} />
         <Route path="/storefront/:accountId" element={<Storefront />} />
         <Route path="/checkout-success" element={<CheckoutSuccess />} />
         <Route path="/install" element={<Install />} />
