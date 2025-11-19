@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
+import { preloadCriticalRoutes, deferNonCriticalAssets } from '@/lib/pwa-utils';
 
 /**
- * Hook to monitor and optimize performance
+ * Enhanced performance monitoring and optimizations
  */
 export const usePerformance = () => {
   useEffect(() => {
@@ -10,21 +11,45 @@ export const usePerformance = () => {
       // Performance monitoring would go here
     }
 
-    // Prefetch critical resources
-    const prefetchCritical = () => {
-      // Prefetch commonly accessed pages
-      const criticalRoutes = ['/dashboard', '/discover', '/profile'];
-      
-      criticalRoutes.forEach(route => {
-        const link = document.createElement('link');
-        link.rel = 'prefetch';
-        link.href = route;
-        document.head.appendChild(link);
-      });
+    // Preload critical routes for better navigation
+    const initPreload = async () => {
+      try {
+        await preloadCriticalRoutes();
+      } catch (error) {
+        console.warn('Failed to preload critical routes:', error);
+      }
     };
 
-    // Defer prefetching until after initial render
-    requestIdleCallback(prefetchCritical, { timeout: 2000 });
+    // Defer preloading until after initial render
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(() => {
+        initPreload();
+        deferNonCriticalAssets();
+      }, { timeout: 2000 });
+    } else {
+      setTimeout(() => {
+        initPreload();
+        deferNonCriticalAssets();
+      }, 2000);
+    }
+
+    // Monitor long tasks (performance degradation)
+    if ('PerformanceObserver' in window) {
+      try {
+        const observer = new PerformanceObserver((list) => {
+          for (const entry of list.getEntries()) {
+            if (entry.duration > 50) {
+              console.warn('Long task detected:', entry);
+            }
+          }
+        });
+        observer.observe({ entryTypes: ['longtask'] });
+        
+        return () => observer.disconnect();
+      } catch (error) {
+        // PerformanceObserver not fully supported
+      }
+    }
   }, []);
 };
 

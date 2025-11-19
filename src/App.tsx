@@ -9,6 +9,10 @@ import { useAutoLogout } from "@/hooks/useAutoLogout";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PageLoader } from "@/components/PageLoader";
 import { PWAInstallBanner } from "@/components/PWAInstallBanner";
+import { NetworkStatus } from "@/components/NetworkStatus";
+import { UpdatePrompt } from "@/components/UpdatePrompt";
+import { usePerformance } from "@/hooks/usePerformance";
+import { useMobileOptimizations } from "@/hooks/useMobileOptimizations";
 
 // Critical pages - loaded immediately
 import Index from "./pages/Index";
@@ -51,9 +55,19 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 1000 * 60 * 5, // 5 minutes
-      gcTime: 1000 * 60 * 30, // 30 minutes
-      retry: 2,
+      gcTime: 1000 * 60 * 30, // 30 minutes (renamed from cacheTime)
+      retry: (failureCount, error: any) => {
+        // Don't retry on 4xx errors
+        if (error?.status >= 400 && error?.status < 500) return false;
+        return failureCount < 2;
+      },
       refetchOnWindowFocus: false,
+      refetchOnReconnect: true,
+      networkMode: 'online', // Better offline support
+    },
+    mutations: {
+      retry: 1,
+      networkMode: 'online',
     },
   },
 });
@@ -61,6 +75,8 @@ const queryClient = new QueryClient({
 const AppContent = () => {
   const { user } = useAuth();
   useAutoLogout(!!user);
+  usePerformance();
+  useMobileOptimizations();
 
   return (
     <Suspense fallback={<PageLoader message="Loading..." />}>
@@ -111,6 +127,8 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <NetworkStatus />
+          <UpdatePrompt />
           <PWAInstallBanner />
           <AppContent />
         </BrowserRouter>

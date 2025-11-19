@@ -41,9 +41,16 @@
     <meta name="HandheldFriendly" content="true" />
     <meta name="MobileOptimized" content="width" />
     
-    <!-- Performance -->
+    <!-- Performance & Preloading -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="dns-prefetch" href="https://yxpnkipcoxksmnsvpvwi.supabase.co" />
+    <link rel="preconnect" href="https://yxpnkipcoxksmnsvpvwi.supabase.co" crossorigin />
+    
+    <!-- Critical Resource Hints -->
+    <link rel="modulepreload" href="/src/main.tsx" />
+    <link rel="prefetch" href="/dashboard" as="document" />
+    <link rel="prefetch" href="/discover" as="document" />
     
     <!-- Structured Data -->
     <script type="application/ld+json">
