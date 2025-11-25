@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
+import { getSubscriptionTier } from "@/lib/constants";
 
 type SponsoredMerchant = {
   id: string;
@@ -16,11 +17,18 @@ type SponsoredMerchant = {
   address: string | null;
 };
 
-export const AdPlacement = () => {
+type AdPlacementProps = {
+  position?: 'top' | 'bottom';
+};
+
+export const AdPlacement = ({ position = 'top' }: AdPlacementProps) => {
   const { subscription } = useSubscription();
   const [dismissed, setDismissed] = useState(false);
   const [sponsoredMerchant, setSponsoredMerchant] = useState<SponsoredMerchant | null>(null);
   const navigate = useNavigate();
+  
+  // Determine subscription tier
+  const tier = getSubscriptionTier(subscription.product_id);
 
   useEffect(() => {
     const fetchSponsoredMerchant = async () => {
@@ -38,20 +46,21 @@ export const AdPlacement = () => {
       }
     };
 
-    if (!subscription.subscribed) {
+    // Only fetch for non-PawPass+ users
+    if (tier !== 'pawpass_plus') {
       fetchSponsoredMerchant();
     }
-  }, [subscription.subscribed]);
+  }, [tier]);
 
-  // Don't show ads for subscribers or if dismissed
-  if (subscription.subscribed || dismissed) {
+  // Don't show ads for PawPass+ subscribers or if dismissed
+  if (tier === 'pawpass_plus' || dismissed) {
     return null;
   }
 
   // Show sponsored merchant ad if available
   if (sponsoredMerchant) {
     return (
-      <Card className="relative p-4 bg-gradient-to-r from-primary/10 via-primary/5 to-accent/10 border-primary/30">
+      <Card className={`relative p-4 bg-gradient-to-r from-primary/10 via-primary/5 to-accent/10 border-primary/30 ${position === 'bottom' ? 'mt-8' : 'mb-8'}`}>
         <Badge className="absolute top-2 left-2 bg-primary/20 text-primary border-primary/30">
           Sponsored
         </Badge>
@@ -110,7 +119,7 @@ export const AdPlacement = () => {
 
   // Fallback ad promoting upgrades when no sponsored merchants
   return (
-    <Card className="relative p-4 bg-gradient-to-r from-primary/10 to-accent/10 border-primary/30">
+    <Card className={`relative p-4 bg-gradient-to-r from-primary/10 to-accent/10 border-primary/30 ${position === 'bottom' ? 'mt-8' : 'mb-8'}`}>
       <button
         onClick={() => setDismissed(true)}
         className="absolute top-2 right-2 p-1 rounded-full hover:bg-background/50 transition-colors"

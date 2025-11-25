@@ -165,6 +165,11 @@ const Wallet = () => {
             </div>
           )}
         </GradientCard>
+
+        {/* Bottom Ad Placement */}
+        <div className="mt-8">
+          <AdPlacement position="bottom" />
+        </div>
       </main>
 
       <BottomNav />
