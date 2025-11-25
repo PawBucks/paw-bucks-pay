@@ -12,6 +12,20 @@ export const CASHBACK_RATES = {
   PAWPASS_PLUS: 30, // 30% cashback for PawPass+ subscribers
 } as const;
 
+// Map Stripe product IDs to subscription tiers
+// These would be actual Stripe product IDs in production
+export const SUBSCRIPTION_TIERS = {
+  PAWPASS_PLUS_PRODUCT_ID: 'prod_pawpass_plus', // Replace with actual Stripe product ID
+  PAWPASS_PRODUCT_ID: 'prod_pawpass', // Replace with actual Stripe product ID
+} as const;
+
+export const getSubscriptionTier = (productId: string | null): 'free' | 'pawpass' | 'pawpass_plus' => {
+  if (!productId) return 'free';
+  if (productId === SUBSCRIPTION_TIERS.PAWPASS_PLUS_PRODUCT_ID) return 'pawpass_plus';
+  if (productId === SUBSCRIPTION_TIERS.PAWPASS_PRODUCT_ID) return 'pawpass';
+  return 'free';
+};
+
 export const SUBSCRIPTION = {
   TRIAL_DAYS: 7,
   PRICE: 9.99,

@@ -236,6 +236,13 @@ const Dashboard = () => {
             </GradientCard>
           </div>
         )}
+
+        {/* Bottom Ad Placement */}
+        {profile.user_type === "pet_owner" && (
+          <div className="mt-8">
+            <AdPlacement position="bottom" />
+          </div>
+        )}
       </main>
     </div>
   );

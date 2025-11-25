@@ -8,6 +8,7 @@ import { PaymentDialog } from "@/components/PaymentDialog";
 import { BottomNav } from "@/components/BottomNav";
 import { PageLoader } from "@/components/PageLoader";
 import { Header } from "@/components/Header";
+import { AdPlacement } from "@/components/AdPlacement";
 import { Search, Store, Scissors, Home, Stethoscope, Footprints, Bone, ArrowUpDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -275,6 +276,11 @@ const Discover = () => {
               })}
             </div>
           )}
+        </div>
+
+        {/* Bottom Ad Placement */}
+        <div className="mt-8">
+          <AdPlacement position="bottom" />
         </div>
 
         {/* Payment Dialog */}
