@@ -475,18 +475,9 @@ serve(async (req) => {
         }
       }
 
-      // Award PawBucks coins
-      let coinsEarned = 0;
-      
-      // Check if this is a direct PawBucks purchase (from checkout session)
-      if (paymentIntent.metadata?.purchase_type === "pawbucks_direct" && paymentIntent.metadata?.coins_purchased) {
-        coinsEarned = parseInt(paymentIntent.metadata.coins_purchased);
-        console.log("Direct PawBucks purchase detected:", { coinsEarned });
-      } else {
-        // Regular transaction: Award PawBucks based on cashback
-        // cashback is already calculated based on subscription tier above
-        coinsEarned = Math.floor(cashback * 10); // Convert dollars to PawBucks (10 PawBucks = $1)
-      }
+      // Award PawBucks coins based on cashback
+      // cashback is already calculated based on subscription tier above
+      const coinsEarned = Math.floor(cashback * 10); // Convert dollars to PawBucks (10 PawBucks = $1)
       
       if (coinsEarned > 0 && user_id) {
         // Get or create PawBucks wallet

@@ -39,7 +39,6 @@ export const ROUTES = {
   PROFILE: '/profile',
   PET_STORE: '/pet-store',
   PAWBUCKS: '/pawbucks',
-  PAWBUCKS_BUY: '/pawbucks/buy',
   PAWBUCKS_REDEEM: '/pawbucks/redeem',
   MERCHANT_ONBOARDING: '/merchant-onboarding',
   MERCHANT_DASHBOARD: '/merchant-dashboard',
