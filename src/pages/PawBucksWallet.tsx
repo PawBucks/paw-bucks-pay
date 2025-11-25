@@ -166,20 +166,11 @@ const PawBucksWallet = () => {
         </div>
 
         {/* CTA Buttons */}
-        <div className="mb-8 flex flex-col sm:flex-row gap-4 justify-center">
-          <Button 
-            size="lg" 
-            onClick={() => navigate(ROUTES.PAWBUCKS_BUY)}
-            className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground font-semibold px-8"
-          >
-            <Coins className="w-5 h-5 mr-2" />
-            Buy PawBucks
-          </Button>
+        <div className="mb-8 flex justify-center">
           <Button 
             size="lg" 
             onClick={() => navigate(ROUTES.PAWBUCKS_REDEEM)}
-            variant="outline"
-            className="font-semibold px-8"
+            className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground font-semibold px-8"
           >
             <Gift className="w-5 h-5 mr-2" />
             Redeem PawBucks
