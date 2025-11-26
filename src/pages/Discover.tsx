@@ -142,6 +142,13 @@ const Discover = () => {
       />
       <Header />
       <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+        <div className="container mx-auto px-4 pt-4">
+          {/* Top Ad Placement */}
+          <div className="mb-6">
+            <AdPlacement position="top" />
+          </div>
+        </div>
+
         {/* Hero Section */}
         <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-background border-b">
           <div className="container mx-auto px-4 py-8">
@@ -212,7 +219,7 @@ const Discover = () => {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-24">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
               {filteredMerchants.map((merchant) => {
                 const Icon = getBusinessIcon(merchant.business_type);
                 return (
@@ -276,11 +283,11 @@ const Discover = () => {
               })}
             </div>
           )}
-        </div>
 
-        {/* Bottom Ad Placement */}
-        <div className="mt-8">
-          <AdPlacement position="bottom" />
+          {/* Bottom Ad Placement */}
+          <div className="mt-8 mb-6 pb-24">
+            <AdPlacement position="bottom" />
+          </div>
         </div>
 
         {/* Payment Dialog */}
