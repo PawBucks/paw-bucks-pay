@@ -169,7 +169,6 @@ const Profile = () => {
                 <div className="bg-primary/10 rounded-lg p-3">
                   <p className="text-sm font-semibold mb-2">Included Benefits:</p>
                   <ul className="text-xs text-muted-foreground space-y-1">
-                    <li>• Ad-free experience</li>
                     <li>• 24/7 customer support</li>
                     <li>• 20% cashback rewards on all purchases</li>
                     <li>• Priority access to new features</li>
@@ -217,6 +216,7 @@ const Profile = () => {
                 <div className="bg-primary/10 rounded-lg p-3">
                   <p className="text-sm font-semibold mb-2">Everything in PawPass, plus:</p>
                   <ul className="text-xs text-muted-foreground space-y-1">
+                    <li>• <span className="font-semibold text-primary">Ad-Free experience</span></li>
                     <li>• <span className="font-semibold text-primary">30% total cashback rewards</span> (20% + 10% bonus)</li>
                     <li>• Exclusive premium partner offers</li>
                     <li>• VIP customer support with priority response</li>
