@@ -72,10 +72,10 @@ const Wallet = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--gradient-hero)] pb-24">
+    <div className="min-h-screen bg-[var(--gradient-hero)]">
       <Header isAuthenticated={true} onLogout={handleSignOut} />
 
-      <main className="container mx-auto px-4 pt-6 pb-24 max-w-4xl">
+      <main className="container mx-auto px-4 pt-6 pb-24 md:pb-12 max-w-7xl">
         {/* Ad Placement for Free Users */}
         <div className="mb-6">
           <AdPlacement />

@@ -53,7 +53,7 @@ const getBusinessIcon = (type: string) => {
 };
 
 const Discover = () => {
-  const { user, loading: authLoading } = useAuth();
+  const { user, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = usePersistentState<string>('discover-search', "");
   const debouncedSearch = useDebounce(searchTerm, 300);
@@ -129,6 +129,11 @@ const Discover = () => {
     setTimeout(() => navigate(ROUTES.WALLET), 1000);
   };
 
+  const handleLogout = async () => {
+    await signOut();
+    navigate(ROUTES.AUTH);
+  };
+
   if (authLoading || loading) {
     return <PageLoader message="Finding amazing pet merchants near you..." />;
   }
@@ -136,13 +141,13 @@ const Discover = () => {
   return (
     <>
       <SEO
-        title="Discover Pet Merchants"
+        title="Discover Pet Merchants - PawBucks"
         description="Find trusted pet stores, groomers, trainers and more. Earn cashback rewards with every purchase."
         keywords={["pet merchants", "pet stores", "pet services", "cashback", "rewards"]}
       />
-      <Header />
+      <Header isAuthenticated={!!user} onLogout={user ? handleLogout : undefined} />
       <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
-        <div className="container mx-auto px-4 pt-4">
+        <div className="container mx-auto px-4 pt-4 max-w-7xl">
           {/* Top Ad Placement */}
           <div className="mb-6">
             <AdPlacement position="top" />
@@ -172,7 +177,7 @@ const Discover = () => {
           </div>
         </div>
 
-        <div className="container mx-auto px-4 py-6">
+        <div className="container mx-auto px-4 py-6 max-w-7xl">
           {/* Category Filters */}
           <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
             {businessTypes.map((type) => {
@@ -285,7 +290,7 @@ const Discover = () => {
           )}
 
           {/* Bottom Ad Placement */}
-          <div className="mt-8 mb-6 pb-24">
+          <div className="mt-8 mb-6 pb-24 md:pb-12">
             <AdPlacement position="bottom" />
           </div>
         </div>
