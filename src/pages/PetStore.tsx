@@ -372,7 +372,7 @@ export default function PetStore() {
       <div className="min-h-screen bg-background">
         <Header isAuthenticated={!!user} onLogout={handleSignOut} />
         
-        <main className="container mx-auto px-4 pt-6 pb-24 max-w-7xl">
+        <main className="container mx-auto px-4 pt-6 pb-24 md:pb-12 max-w-7xl">
       {/* Ad Placement for Free Users */}
       <div className="mb-6">
         <AdPlacement />

@@ -106,9 +106,9 @@ const Profile = () => {
     .slice(0, 2);
 
   return (
-    <div className="min-h-screen bg-[var(--gradient-hero)] pb-24">
+    <div className="min-h-screen bg-[var(--gradient-hero)]">
       <Header isAuthenticated={true} onLogout={handleSignOut} />
-      <div className="container mx-auto px-4 pt-6 pb-24 max-w-2xl">
+      <div className="container mx-auto px-4 pt-6 pb-24 md:pb-12 max-w-4xl">
         {/* Ad Placement for Free Users */}
         <div className="mb-6">
           <AdPlacement />

@@ -98,7 +98,7 @@ const Dashboard = () => {
     <div className="min-h-screen bg-background">
       <Header isAuthenticated={true} onLogout={handleSignOut} />
 
-      <main className="container mx-auto px-4 pt-6 pb-24">
+      <main className="container mx-auto px-4 pt-6 pb-24 md:pb-12 max-w-7xl">
         {/* Ad Placement for Free Users */}
         <div className="mb-6">
           <AdPlacement />

@@ -59,8 +59,8 @@ export const AdPlacement = ({ position = 'top' }: AdPlacementProps) => {
 
   // Show sponsored merchant ad if available
   if (sponsoredMerchant) {
-    return (
-      <Card className={`relative p-4 bg-gradient-to-r from-primary/10 via-primary/5 to-accent/10 border-primary/30 ${position === 'bottom' ? 'mt-8' : 'mb-8'}`}>
+  return (
+    <Card className={`relative p-4 sm:p-6 bg-gradient-to-r from-primary/10 via-primary/5 to-accent/10 border-primary/30 ${position === 'bottom' ? 'mt-8' : 'mb-8'}`}>
         <Badge className="absolute top-2 left-2 bg-primary/20 text-primary border-primary/30">
           Sponsored
         </Badge>
@@ -119,7 +119,7 @@ export const AdPlacement = ({ position = 'top' }: AdPlacementProps) => {
 
   // Fallback ad promoting upgrades when no sponsored merchants
   return (
-    <Card className={`relative p-4 bg-gradient-to-r from-primary/10 to-accent/10 border-primary/30 ${position === 'bottom' ? 'mt-8' : 'mb-8'}`}>
+    <Card className={`relative p-4 sm:p-6 bg-gradient-to-r from-primary/10 to-accent/10 border-primary/30 ${position === 'bottom' ? 'mt-8' : 'mb-8'}`}>
       <button
         onClick={() => setDismissed(true)}
         className="absolute top-2 right-2 p-1 rounded-full hover:bg-background/50 transition-colors"
