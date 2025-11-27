@@ -108,7 +108,7 @@ const Profile = () => {
   return (
     <div className="min-h-screen bg-[var(--gradient-hero)] pb-24">
       <Header isAuthenticated={true} onLogout={handleSignOut} />
-      <div className="container mx-auto px-4 py-8 max-w-2xl">
+      <div className="container mx-auto px-4 pt-6 pb-24 max-w-2xl">
         {/* Ad Placement for Free Users */}
         <div className="mb-6">
           <AdPlacement />
@@ -351,7 +351,7 @@ const Profile = () => {
         </div>
 
         {/* Action Buttons */}
-        <div className="mt-8 space-y-3">
+        <div className="mt-8 space-y-3 mb-6">
           <Button
             variant="outline"
             className="w-full"

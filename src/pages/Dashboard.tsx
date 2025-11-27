@@ -98,7 +98,7 @@ const Dashboard = () => {
     <div className="min-h-screen bg-background">
       <Header isAuthenticated={true} onLogout={handleSignOut} />
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 pt-6 pb-24">
         {/* Ad Placement for Free Users */}
         <div className="mb-6">
           <AdPlacement />
@@ -239,7 +239,7 @@ const Dashboard = () => {
 
         {/* Bottom Ad Placement */}
         {profile.user_type === "pet_owner" && (
-          <div className="mt-8">
+          <div className="mt-8 mb-6 pb-24">
             <AdPlacement position="bottom" />
           </div>
         )}

@@ -372,7 +372,7 @@ export default function PetStore() {
       <div className="min-h-screen bg-background">
         <Header isAuthenticated={!!user} onLogout={handleSignOut} />
         
-        <main className="container mx-auto px-4 py-8 pb-24 max-w-7xl">
+        <main className="container mx-auto px-4 pt-6 pb-24 max-w-7xl">
       {/* Ad Placement for Free Users */}
       <div className="mb-6">
         <AdPlacement />
@@ -503,12 +503,12 @@ export default function PetStore() {
       </Dialog>
 
       {/* Bottom Ad Placement */}
-      <div className="mt-8">
+      <div className="mt-8 mb-6">
         <AdPlacement position="bottom" />
       </div>
         </main>
       </div>
-      <BottomNav />
+      {user && <BottomNav />}
     </>
   );
 }

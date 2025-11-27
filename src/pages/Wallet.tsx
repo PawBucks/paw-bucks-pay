@@ -75,7 +75,7 @@ const Wallet = () => {
     <div className="min-h-screen bg-[var(--gradient-hero)] pb-24">
       <Header isAuthenticated={true} onLogout={handleSignOut} />
 
-      <main className="container mx-auto px-4 py-8 max-w-4xl">
+      <main className="container mx-auto px-4 pt-6 pb-24 max-w-4xl">
         {/* Ad Placement for Free Users */}
         <div className="mb-6">
           <AdPlacement />
@@ -167,7 +167,7 @@ const Wallet = () => {
         </GradientCard>
 
         {/* Bottom Ad Placement */}
-        <div className="mt-8">
+        <div className="mt-8 mb-6">
           <AdPlacement position="bottom" />
         </div>
       </main>
