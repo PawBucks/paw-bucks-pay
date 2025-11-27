@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -13,6 +14,41 @@ serve(async (req) => {
   }
 
   try {
+    // Authenticate the request
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: "Missing authorization header" }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 401,
+        }
+      );
+    }
+
+    const supabaseClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+      {
+        global: {
+          headers: { Authorization: authHeader },
+        },
+      }
+    );
+
+    // Verify the user is authenticated
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+    
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 401,
+        }
+      );
+    }
+
     // STEP 1: Validate Stripe API Key
     const stripeKey = Deno.env.get('STRIPE_SECRET_KEY');
     if (!stripeKey) {
@@ -25,17 +61,36 @@ serve(async (req) => {
     });
 
     // STEP 3: Parse request body
-    const { accountId, priceId, quantity, successUrl, cancelUrl } = await req.json();
+    const body = await req.json();
+    const { accountId, priceId, quantity, successUrl, cancelUrl } = body;
 
-    // Validate required fields
-    if (!accountId) {
-      throw new Error('accountId is required');
+    // Validate required fields and input types
+    if (!accountId || typeof accountId !== 'string') {
+      return new Response(
+        JSON.stringify({ error: 'accountId is required and must be a string' }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 400,
+        }
+      );
     }
-    if (!priceId) {
-      throw new Error('priceId is required');
+    if (!priceId || typeof priceId !== 'string') {
+      return new Response(
+        JSON.stringify({ error: 'priceId is required and must be a string' }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 400,
+        }
+      );
     }
-    if (!quantity || quantity < 1) {
-      throw new Error('quantity must be at least 1');
+    if (!quantity || typeof quantity !== 'number' || quantity < 1 || quantity > 100) {
+      return new Response(
+        JSON.stringify({ error: 'quantity must be a number between 1 and 100' }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 400,
+        }
+      );
     }
 
     console.log(`Creating checkout for connected account ${accountId}, price ${priceId}`);
