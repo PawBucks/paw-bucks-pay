@@ -12,19 +12,75 @@ serve(async (req) => {
   }
 
   try {
+    // Authenticate the request
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: "Missing authorization header" }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 401,
+        }
+      );
+    }
+
     const supabaseClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+      {
+        global: {
+          headers: { Authorization: authHeader },
+        },
+      }
+    );
+
+    // Verify the user is authenticated
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+    
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 401,
+        }
+      );
+    }
+
+    const { redemption_code } = await req.json();
+
+    if (!redemption_code || typeof redemption_code !== 'string') {
+      return new Response(
+        JSON.stringify({ error: "Valid redemption code is required" }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 400,
+        }
+      );
+    }
+
+    // Validate redemption code format (PBK-XXXXXXXX)
+    if (!/^PBK-[A-Z0-9]{8}$/.test(redemption_code)) {
+      return new Response(
+        JSON.stringify({ 
+          valid: false,
+          message: "Invalid redemption code format"
+        }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        }
+      );
+    }
+
+    // Create service role client for database operations
+    const serviceClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    const { redemption_code } = await req.json();
-
-    if (!redemption_code) {
-      throw new Error("Redemption code is required");
-    }
-
     // Find redemption activity
-    const { data: activity, error: activityError } = await supabaseClient
+    const { data: activity, error: activityError } = await serviceClient
       .from("pawbucks_activity")
       .select(`
         *,
@@ -63,8 +119,25 @@ serve(async (req) => {
       );
     }
 
+    // Verify the authenticated user is the partner who owns this redemption
+    const { data: partnerCheck } = await supabaseClient
+      .from("merchants")
+      .select("id")
+      .eq("user_id", user.id)
+      .single();
+
+    if (!partnerCheck) {
+      return new Response(
+        JSON.stringify({ error: "Only merchants can verify redemptions" }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 403,
+        }
+      );
+    }
+
     // Mark as used
-    const { error: updateError } = await supabaseClient
+    const { error: updateError } = await serviceClient
       .from("pawbucks_activity")
       .update({ redemption_used: true })
       .eq("id", activity.id);
