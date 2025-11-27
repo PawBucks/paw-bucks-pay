@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { GradientCard } from "@/components/ui/gradient-card";
 import { Card } from "@/components/ui/card";
 import { Header } from "@/components/Header";
+import { SEO } from "@/components/SEO";
 import { Wallet, Store, Gift, ArrowRight, Shield, Zap, Users, TrendingUp, CheckCircle, Sparkles } from "lucide-react";
 import logo from "@/assets/logo.png";
 
@@ -43,6 +44,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-[var(--gradient-hero)] overflow-hidden">
+      <SEO 
+        title="PawBucks - Digital Pet Payment Platform"
+        description="Connect with trusted pet stores, groomers, and trainers. Earn cashback rewards with every transaction and manage all your pet expenses in one secure digital wallet."
+        keywords={["pet payments", "pet wallet", "cashback rewards", "pet stores", "groomers", "pet services", "digital wallet", "pet expenses"]}
+      />
       <Header menuItems={[
         { label: "Explore Pet Merchants", path: "/discover" },
         { label: "For Pet Merchants", path: "/merchants" }
