@@ -14,7 +14,7 @@ export const PageLoader = ({ className, message, fullScreen = true }: PageLoader
   return (
     <div 
       className={cn(
-        "flex flex-col items-center justify-center gap-4 bg-background",
+        "flex flex-col items-center justify-center gap-4 bg-background touch-manipulation",
         fullScreen && "min-h-screen",
         !fullScreen && "min-h-[400px]",
         className

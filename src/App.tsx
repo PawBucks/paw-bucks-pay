@@ -6,13 +6,16 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useAutoLogout } from "@/hooks/useAutoLogout";
+import { usePerformance } from "@/hooks/usePerformance";
+import { useMobileOptimizations } from "@/hooks/useMobileOptimizations";
+import { usePageTracking } from "@/hooks/usePageTracking";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PageLoader } from "@/components/PageLoader";
 import { PWAInstallBanner } from "@/components/PWAInstallBanner";
 import { NetworkStatus } from "@/components/NetworkStatus";
 import { UpdatePrompt } from "@/components/UpdatePrompt";
-import { usePerformance } from "@/hooks/usePerformance";
-import { useMobileOptimizations } from "@/hooks/useMobileOptimizations";
+import { FeedbackButton } from "@/components/FeedbackButton";
 
 // Critical pages - loaded immediately
 import Index from "./pages/Index";
@@ -76,6 +79,8 @@ const AppContent = () => {
   useAutoLogout(!!user);
   usePerformance();
   useMobileOptimizations();
+  usePageTracking();
+  useKeyboardShortcuts();
 
   return (
     <Suspense fallback={<PageLoader message="Loading..." />}>
@@ -129,6 +134,7 @@ function App() {
             <NetworkStatus />
             <UpdatePrompt />
             <PWAInstallBanner />
+            <FeedbackButton />
             <AppContent />
           </BrowserRouter>
         </TooltipProvider>

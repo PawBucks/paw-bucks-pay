@@ -153,19 +153,19 @@
     min-width: 44px;
   }
 
-  /* Safe area insets for mobile notches */
+  /* Safe area insets for mobile notches - Enhanced */
   .safe-area-inset-bottom {
     /* Ensure nav/content stays above iOS home indicator */
-    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+    padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
   }
 
   .safe-area-inset-top {
     /* Use full top safe-area so content never sits under the system status bar */
-    padding-top: max(0.75rem, env(safe-area-inset-top));
+    padding-top: max(1.5rem, env(safe-area-inset-top));
   }
 
   .pb-safe {
-    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+    padding-bottom: max(1.5rem, calc(env(safe-area-inset-bottom) + 1rem));
   }
 
   .pt-safe {
@@ -207,10 +207,11 @@
     }
   }
 
-  /* Improve tap targets for mobile */
+  /* Improve tap targets for mobile - Enhanced */
   @media (pointer: coarse) {
     button, a, [role="button"], [role="link"], input, select, textarea {
       min-height: 44px;
+      min-width: 44px;
       padding: 0.75rem;
     }
 
@@ -218,6 +219,11 @@
     svg[role="button"], button > svg {
       width: 24px;
       height: 24px;
+    }
+    
+    /* Better spacing for cards and interactive elements */
+    .card, [role="article"] {
+      padding: 1rem;
     }
   }
 
