@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { preloadCriticalRoutes, deferNonCriticalAssets } from '@/lib/pwa-utils';
+import { prefetchCriticalRoutes } from '@/lib/prefetch';
 
 /**
  * Enhanced performance monitoring and optimizations
@@ -25,11 +26,13 @@ export const usePerformance = () => {
       requestIdleCallback(() => {
         initPreload();
         deferNonCriticalAssets();
+        prefetchCriticalRoutes(); // Add route prefetching
       }, { timeout: 2000 });
     } else {
       setTimeout(() => {
         initPreload();
         deferNonCriticalAssets();
+        prefetchCriticalRoutes(); // Add route prefetching
       }, 2000);
     }
 

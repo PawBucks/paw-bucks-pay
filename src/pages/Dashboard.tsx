@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useCallback, memo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useOptimizedQuery } from "@/hooks/useOptimizedQuery";
@@ -7,12 +7,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { GradientCard } from "@/components/ui/gradient-card";
-import { PetProfileCard } from "@/components/PetProfileCard";
 import { ReferralCard } from "@/components/ReferralCard";
 import { AdPlacement } from "@/components/AdPlacement";
 import { DashboardSkeleton } from "@/components/LoadingSkeleton";
-import { Wallet, Gift, TrendingUp, LogOut, Store, Users, Plus } from "lucide-react";
-import { toast } from "sonner";
+import { WalletStats } from "@/components/dashboard/WalletStats";
+import { PetProfilesSection } from "@/components/dashboard/PetProfilesSection";
+import { DiscoverServicesCard } from "@/components/dashboard/DiscoverServicesCard";
+import { Store, Users, TrendingUp } from "lucide-react";
 
 type Profile = {
   user_type: "pet_owner" | "merchant";
@@ -113,80 +114,16 @@ const Dashboard = () => {
 
         {profile.user_type === "pet_owner" ? (
           <div className="grid gap-6 md:grid-cols-3">
-            <GradientCard gradient>
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Wallet className="w-6 h-6 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Wallet Balance</p>
-                  <p className="text-2xl font-bold">${wallet?.balance?.toFixed(2) || "0.00"}</p>
-                </div>
-              </div>
-            </GradientCard>
-
-            <GradientCard>
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center">
-                  <Gift className="w-6 h-6 text-accent" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Rewards Points</p>
-                  <p className="text-2xl font-bold">{wallet?.rewards_points || 0}</p>
-                </div>
-              </div>
-            </GradientCard>
-
-            <GradientCard>
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center">
-                  <TrendingUp className="w-6 h-6 text-secondary" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Total Saved</p>
-                  <p className="text-2xl font-bold">$0.00</p>
-                </div>
-              </div>
-            </GradientCard>
-
-            {/* Pet Profiles Section */}
-            <GradientCard className="md:col-span-3">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-semibold">My Pets</h3>
-                <Button onClick={() => navigate("/create-pet-profile")} size="sm">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Pet
-                </Button>
-              </div>
-              {pets.length > 0 ? (
-                <div className="grid gap-4 md:grid-cols-2">
-                  {pets.map((pet) => (
-                    <PetProfileCard key={pet.id} pet={pet} />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <p className="text-muted-foreground mb-4">
-                    You haven't added any pets yet
-                  </p>
-                  <Button onClick={() => navigate("/create-pet-profile")}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Your First Pet
-                  </Button>
-                </div>
-              )}
-            </GradientCard>
-
+            <WalletStats 
+              balance={wallet?.balance || 0} 
+              rewardsPoints={wallet?.rewards_points || 0}
+            />
+            
+            <PetProfilesSection pets={pets} />
+            
             <ReferralCard />
-
-            <GradientCard className="md:col-span-3">
-              <h3 className="text-xl font-semibold mb-4">Discover Pet Services</h3>
-              <p className="text-muted-foreground">Find nearby pet stores, groomers, and trainers to earn cashback on your purchases.</p>
-              <div className="mt-4 flex gap-4">
-                <Button onClick={() => navigate("/discover")}>Discover Services</Button>
-                <Button variant="outline" onClick={() => navigate("/wallet")}>View Wallet</Button>
-              </div>
-            </GradientCard>
+            
+            <DiscoverServicesCard />
           </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-3">
