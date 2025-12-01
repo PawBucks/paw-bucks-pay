@@ -82,7 +82,7 @@ serve(async (req) => {
       is_active = true;
     }
 
-    // Create offer
+    // Create offer - convert empty strings to null for optional fields
     const { data: offer, error: offerError } = await supabaseClient
       .from("partner_offers")
       .insert({
@@ -90,12 +90,12 @@ serve(async (req) => {
         title,
         description,
         coins_required,
-        cash_equivalent,
-        product_id,
-        image_url,
-        start_date,
-        end_date,
-        redemption_cap,
+        cash_equivalent: cash_equivalent || null,
+        product_id: product_id || null,
+        image_url: image_url || null,
+        start_date: start_date || null,
+        end_date: end_date || null,
+        redemption_cap: redemption_cap || null,
         per_user_limit: per_user_limit || 1,
         is_active,
         status,
