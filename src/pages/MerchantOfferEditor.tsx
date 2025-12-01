@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
 import { SEO } from "@/components/SEO";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -17,6 +18,7 @@ export default function MerchantOfferEditor() {
   const navigate = useNavigate();
   const { id } = useParams();
   const isEditMode = !!id;
+  const { signOut: globalSignOut } = useAuth();
 
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(false);
@@ -116,24 +118,32 @@ export default function MerchantOfferEditor() {
       };
 
       if (isEditMode) {
-        const { error } = await supabase.functions.invoke(`merchant-update-offer/${id}`, {
+        const { data, error } = await supabase.functions.invoke(`merchant-update-offer/${id}`, {
           body: payload,
           headers: {
-            Authorization: `Bearer ${session.access_token}`
-          }
+            Authorization: `Bearer ${session.access_token}`,
+          },
         });
 
-        if (error) throw error;
+        if (error) {
+          console.error("Update offer error:", error, data);
+          throw new Error(data?.error || error.message);
+        }
+
         toast.success("Offer updated successfully");
       } else {
-        const { error } = await supabase.functions.invoke("merchant-create-offer", {
+        const { data, error } = await supabase.functions.invoke("merchant-create-offer", {
           body: payload,
           headers: {
-            Authorization: `Bearer ${session.access_token}`
-          }
+            Authorization: `Bearer ${session.access_token}`,
+          },
         });
 
-        if (error) throw error;
+        if (error) {
+          console.error("Create offer error:", error, data);
+          throw new Error(data?.error || error.message);
+        }
+
         toast.success("Offer created successfully");
       }
 
@@ -145,10 +155,10 @@ export default function MerchantOfferEditor() {
     }
   };
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    navigate("/auth");
-  };
+const handleSignOut = async () => {
+  await globalSignOut();
+  navigate("/auth");
+};
 
   return (
     <>
