@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { GradientCard } from "@/components/ui/gradient-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, PawPrint, FileHeart } from "lucide-react";
+import { Calendar, PawPrint, FileHeart, Pencil } from "lucide-react";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
+import { EditPetProfileDialog } from "./EditPetProfileDialog";
 
 type PetProfile = {
   id: string;
@@ -16,10 +18,12 @@ type PetProfile = {
 
 type PetProfileCardProps = {
   pet: PetProfile;
+  onUpdate?: () => void;
 };
 
-export const PetProfileCard = ({ pet }: PetProfileCardProps) => {
+export const PetProfileCard = ({ pet, onUpdate }: PetProfileCardProps) => {
   const navigate = useNavigate();
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const petTypeColors = {
     dog: "bg-blue-500/10 text-blue-700 border-blue-500/20",
     cat: "bg-purple-500/10 text-purple-700 border-purple-500/20",
@@ -66,15 +70,28 @@ export const PetProfileCard = ({ pet }: PetProfileCardProps) => {
           )}
         </div>
       </div>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => navigate(`/pet-health/${pet.id}`)}
-        className="flex-shrink-0"
-      >
-        <FileHeart className="w-4 h-4 mr-2" />
-        Health Records
-      </Button>
+      <div className="flex gap-2 flex-shrink-0">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setEditDialogOpen(true)}
+        >
+          <Pencil className="w-4 h-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => navigate(`/pet-health/${pet.id}`)}
+        >
+          <FileHeart className="w-4 h-4" />
+        </Button>
+      </div>
+      <EditPetProfileDialog
+        pet={pet}
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        onSuccess={() => onUpdate?.()}
+      />
     </GradientCard>
   );
 };
