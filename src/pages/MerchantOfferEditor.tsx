@@ -23,14 +23,14 @@ export default function MerchantOfferEditor() {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    coins_required: 0,
-    cash_equivalent: 0,
+    coins_required: "" as string | number,
+    cash_equivalent: "" as string | number,
     product_id: "",
     image_url: "",
     start_date: "",
     end_date: "",
-    redemption_cap: 0,
-    per_user_limit: 1,
+    redemption_cap: "" as string | number,
+    per_user_limit: "" as string | number,
     require_approval: false
   });
 
@@ -90,7 +90,9 @@ export default function MerchantOfferEditor() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.title || !formData.description || formData.coins_required <= 0) {
+    const coinsRequired = typeof formData.coins_required === 'string' ? parseInt(formData.coins_required) : formData.coins_required;
+    
+    if (!formData.title || !formData.description || !coinsRequired || coinsRequired <= 0) {
       toast.error("Please fill in all required fields");
       return;
     }
@@ -105,10 +107,12 @@ export default function MerchantOfferEditor() {
 
       const payload = {
         ...formData,
+        coins_required: coinsRequired,
+        cash_equivalent: formData.cash_equivalent ? (typeof formData.cash_equivalent === 'string' ? parseFloat(formData.cash_equivalent) : formData.cash_equivalent) : null,
+        redemption_cap: formData.redemption_cap ? (typeof formData.redemption_cap === 'string' ? parseInt(formData.redemption_cap) : formData.redemption_cap) : null,
+        per_user_limit: formData.per_user_limit ? (typeof formData.per_user_limit === 'string' ? parseInt(formData.per_user_limit) : formData.per_user_limit) : 1,
         start_date: formData.start_date || null,
-        end_date: formData.end_date || null,
-        redemption_cap: formData.redemption_cap || null,
-        cash_equivalent: formData.cash_equivalent || null
+        end_date: formData.end_date || null
       };
 
       if (isEditMode) {
@@ -202,7 +206,7 @@ export default function MerchantOfferEditor() {
                       type="number"
                       min="1"
                       value={formData.coins_required}
-                      onChange={(e) => setFormData({ ...formData, coins_required: parseInt(e.target.value) || 0 })}
+                      onChange={(e) => setFormData({ ...formData, coins_required: e.target.value })}
                       required
                     />
                   </div>
@@ -215,7 +219,7 @@ export default function MerchantOfferEditor() {
                       min="0"
                       step="0.01"
                       value={formData.cash_equivalent}
-                      onChange={(e) => setFormData({ ...formData, cash_equivalent: parseFloat(e.target.value) || 0 })}
+                      onChange={(e) => setFormData({ ...formData, cash_equivalent: e.target.value })}
                     />
                   </div>
                 </div>
@@ -260,7 +264,7 @@ export default function MerchantOfferEditor() {
                       type="number"
                       min="0"
                       value={formData.redemption_cap}
-                      onChange={(e) => setFormData({ ...formData, redemption_cap: parseInt(e.target.value) || 0 })}
+                      onChange={(e) => setFormData({ ...formData, redemption_cap: e.target.value })}
                       placeholder="0 = unlimited"
                     />
                   </div>
@@ -272,7 +276,7 @@ export default function MerchantOfferEditor() {
                       type="number"
                       min="1"
                       value={formData.per_user_limit}
-                      onChange={(e) => setFormData({ ...formData, per_user_limit: parseInt(e.target.value) || 1 })}
+                      onChange={(e) => setFormData({ ...formData, per_user_limit: e.target.value })}
                     />
                   </div>
                 </div>
