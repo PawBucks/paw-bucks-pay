@@ -206,6 +206,253 @@ export type Database = {
           },
         ]
       }
+      merchant_analytics_products: {
+        Row: {
+          billing_period: string | null
+          created_at: string | null
+          description: string | null
+          features: Json | null
+          id: string
+          is_active: boolean | null
+          name: string
+          price_pawbucks: number
+          price_usd: number
+          product_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          billing_period?: string | null
+          created_at?: string | null
+          description?: string | null
+          features?: Json | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          price_pawbucks: number
+          price_usd: number
+          product_type: string
+          updated_at?: string | null
+        }
+        Update: {
+          billing_period?: string | null
+          created_at?: string | null
+          description?: string | null
+          features?: Json | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          price_pawbucks?: number
+          price_usd?: number
+          product_type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      merchant_analytics_purchases: {
+        Row: {
+          amount_paid: number
+          created_at: string | null
+          id: string
+          merchant_id: string
+          payment_method: string
+          product_id: string
+          purchase_date: string | null
+          report_data: Json | null
+          stripe_payment_intent_id: string | null
+        }
+        Insert: {
+          amount_paid: number
+          created_at?: string | null
+          id?: string
+          merchant_id: string
+          payment_method: string
+          product_id: string
+          purchase_date?: string | null
+          report_data?: Json | null
+          stripe_payment_intent_id?: string | null
+        }
+        Update: {
+          amount_paid?: number
+          created_at?: string | null
+          id?: string
+          merchant_id?: string
+          payment_method?: string
+          product_id?: string
+          purchase_date?: string | null
+          report_data?: Json | null
+          stripe_payment_intent_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_analytics_purchases_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_analytics_purchases_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_analytics_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      merchant_analytics_subscriptions: {
+        Row: {
+          created_at: string | null
+          end_date: string | null
+          id: string
+          merchant_id: string
+          next_billing_date: string | null
+          payment_method: string
+          product_id: string
+          start_date: string | null
+          status: string
+          stripe_subscription_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          merchant_id: string
+          next_billing_date?: string | null
+          payment_method: string
+          product_id: string
+          start_date?: string | null
+          status?: string
+          stripe_subscription_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          merchant_id?: string
+          next_billing_date?: string | null
+          payment_method?: string
+          product_id?: string
+          start_date?: string | null
+          status?: string
+          stripe_subscription_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_analytics_subscriptions_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_analytics_subscriptions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_analytics_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      merchant_customer_analytics: {
+        Row: {
+          average_order_value: number | null
+          cohort_month: string | null
+          created_at: string | null
+          first_transaction_date: string | null
+          id: string
+          last_transaction_date: string | null
+          lifetime_value: number | null
+          merchant_id: string
+          retention_rate: number | null
+          total_spent: number | null
+          total_transactions: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          average_order_value?: number | null
+          cohort_month?: string | null
+          created_at?: string | null
+          first_transaction_date?: string | null
+          id?: string
+          last_transaction_date?: string | null
+          lifetime_value?: number | null
+          merchant_id: string
+          retention_rate?: number | null
+          total_spent?: number | null
+          total_transactions?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          average_order_value?: number | null
+          cohort_month?: string | null
+          created_at?: string | null
+          first_transaction_date?: string | null
+          id?: string
+          last_transaction_date?: string | null
+          lifetime_value?: number | null
+          merchant_id?: string
+          retention_rate?: number | null
+          total_spent?: number | null
+          total_transactions?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_customer_analytics_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      merchant_search_analytics: {
+        Row: {
+          clicks: number | null
+          conversions: number | null
+          created_at: string | null
+          date: string
+          id: string
+          merchant_id: string
+          search_term: string
+          views: number | null
+        }
+        Insert: {
+          clicks?: number | null
+          conversions?: number | null
+          created_at?: string | null
+          date?: string
+          id?: string
+          merchant_id: string
+          search_term: string
+          views?: number | null
+        }
+        Update: {
+          clicks?: number | null
+          conversions?: number | null
+          created_at?: string | null
+          date?: string
+          id?: string
+          merchant_id?: string
+          search_term?: string
+          views?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_search_analytics_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       merchants: {
         Row: {
           address: string | null
