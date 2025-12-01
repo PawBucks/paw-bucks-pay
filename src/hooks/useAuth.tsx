@@ -28,7 +28,29 @@ export const useAuth = () => {
   }, []);
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error("Error signing out:", error);
+      }
+    } catch (error) {
+      console.error("Unexpected sign-out error:", error);
+    } finally {
+      setUser(null);
+      setSession(null);
+
+      // Hard clear any persisted auth token in case the backend session is already gone
+      try {
+        const projectRef = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+        if (typeof window !== "undefined" && projectRef) {
+          const storageKey = `sb-${projectRef}-auth-token`;
+          window.localStorage.removeItem(storageKey);
+          window.sessionStorage.removeItem(storageKey);
+        }
+      } catch (storageError) {
+        console.error("Error clearing local auth storage:", storageError);
+      }
+    }
   };
 
   return { user, session, loading, signOut };

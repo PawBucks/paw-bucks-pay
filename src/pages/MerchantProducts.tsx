@@ -101,8 +101,18 @@ const MerchantProducts = () => {
 
   const loadProducts = async (accountId: string) => {
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (!session) {
+        toast.error("Your session has expired. Please sign in again.");
+        return;
+      }
+
       const { data, error } = await supabase.functions.invoke("list-connect-products", {
         body: { accountId },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
       });
 
       if (error) throw error;
