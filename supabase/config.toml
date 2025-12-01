@@ -96,3 +96,12 @@ verify_jwt = true
 [functions.create-connect-checkout]
 verify_jwt = true
 
+[functions.merchant-purchase-analytics]
+verify_jwt = true
+
+[functions.merchant-get-premium-analytics]
+verify_jwt = true
+
+[functions.merchant-generate-cohort-report]
+verify_jwt = true
+
