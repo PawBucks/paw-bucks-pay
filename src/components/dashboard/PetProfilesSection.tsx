@@ -18,7 +18,7 @@ type PetProfilesSectionProps = {
   pets: Pet[];
 };
 
-export const PetProfilesSection = memo(({ pets }: PetProfilesSectionProps) => {
+export const PetProfilesSection = memo(({ pets, onUpdate }: PetProfilesSectionProps & { onUpdate?: () => void }) => {
   const navigate = useNavigate();
 
   return (
@@ -33,7 +33,7 @@ export const PetProfilesSection = memo(({ pets }: PetProfilesSectionProps) => {
       {pets.length > 0 ? (
         <div className="grid gap-4 md:grid-cols-2">
           {pets.map((pet) => (
-            <PetProfileCard key={pet.id} pet={pet} />
+            <PetProfileCard key={pet.id} pet={pet} onUpdate={onUpdate} />
           ))}
         </div>
       ) : (

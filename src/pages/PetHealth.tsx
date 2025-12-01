@@ -104,7 +104,7 @@ export default function PetHealth() {
           </p>
         </div>
 
-        <PetProfileCard pet={pet} />
+        <PetProfileCard pet={pet} onUpdate={loadPet} />
 
         <Tabs defaultValue="records" className="space-y-4">
           <TabsList className="grid w-full grid-cols-2">

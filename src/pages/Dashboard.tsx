@@ -39,7 +39,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   
   // Batch load all dashboard data in parallel
-  const { data, isLoading: dataLoading } = useOptimizedQuery(
+  const { data, isLoading: dataLoading, refetch } = useOptimizedQuery(
     ['dashboard', user?.id || ''],
     async () => {
       if (!user) return null;
@@ -119,7 +119,7 @@ const Dashboard = () => {
               rewardsPoints={wallet?.rewards_points || 0}
             />
             
-            <PetProfilesSection pets={pets} />
+            <PetProfilesSection pets={pets} onUpdate={() => refetch()} />
             
             <ReferralCard />
             
