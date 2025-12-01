@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
 import { SEO } from "@/components/SEO";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -30,6 +31,7 @@ interface Offer {
 
 export default function MerchantOffers() {
   const navigate = useNavigate();
+  const { signOut: globalSignOut } = useAuth();
   const [user, setUser] = useState<any>(null);
   const [offers, setOffers] = useState<Offer[]>([]);
   const [loading, setLoading] = useState(true);
@@ -120,10 +122,10 @@ export default function MerchantOffers() {
     }
   };
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    navigate("/auth");
-  };
+const handleSignOut = async () => {
+  await globalSignOut();
+  navigate("/auth");
+};
 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, any> = {
