@@ -73,12 +73,17 @@ serve(async (req) => {
       image_url
     } = body;
 
+    // Normalization: convert empty strings to null for nullable fields
+    const normalizedProductId = product_id === "" ? null : product_id;
+    const normalizedStartDate = start_date === "" ? null : start_date;
+    const normalizedEndDate = end_date === "" ? null : end_date;
+
     // Validations
     if (coins_required !== undefined && coins_required <= 0) {
       throw new Error("Coins required must be greater than 0");
     }
 
-    if (start_date && end_date && new Date(start_date) >= new Date(end_date)) {
+    if (normalizedStartDate && normalizedEndDate && new Date(normalizedStartDate) >= new Date(normalizedEndDate)) {
       throw new Error("Start date must be before end date");
     }
 
@@ -92,9 +97,9 @@ serve(async (req) => {
     if (description !== undefined) updates.description = description;
     if (coins_required !== undefined) updates.coins_required = coins_required;
     if (cash_equivalent !== undefined) updates.cash_equivalent = cash_equivalent;
-    if (product_id !== undefined) updates.product_id = product_id;
-    if (start_date !== undefined) updates.start_date = start_date;
-    if (end_date !== undefined) updates.end_date = end_date;
+    if (normalizedProductId !== undefined) updates.product_id = normalizedProductId;
+    if (normalizedStartDate !== undefined) updates.start_date = normalizedStartDate;
+    if (normalizedEndDate !== undefined) updates.end_date = normalizedEndDate;
     if (redemption_cap !== undefined) updates.redemption_cap = redemption_cap;
     if (per_user_limit !== undefined) updates.per_user_limit = per_user_limit;
     if (image_url !== undefined) updates.image_url = image_url;
