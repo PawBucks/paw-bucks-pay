@@ -81,7 +81,7 @@ export class DataLoader {
     return this.retryOperation(async () => {
       const { data, error } = await supabase
         .from('merchants')
-        .select('*')
+        .select('id, business_name, business_type, description, address, latitude, longitude, cashback_rate, logo_url, accepts_pawbucks')
         .order('business_name');
 
       if (error) throw error;

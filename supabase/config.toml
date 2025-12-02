@@ -55,10 +55,10 @@ verify_jwt = true
 verify_jwt = true
 
 [functions.list-connect-products]
-verify_jwt = false
+verify_jwt = true
 
 [functions.create-connect-checkout]
-verify_jwt = false
+verify_jwt = true
 
 [functions.merchant-create-offer]
 verify_jwt = true
@@ -90,12 +90,6 @@ verify_jwt = true
 [functions.verify-redemption]
 verify_jwt = true
 
-[functions.list-connect-products]
-verify_jwt = true
-
-[functions.create-connect-checkout]
-verify_jwt = true
-
 [functions.merchant-purchase-analytics]
 verify_jwt = true
 
@@ -103,5 +97,14 @@ verify_jwt = true
 verify_jwt = true
 
 [functions.merchant-generate-cohort-report]
+verify_jwt = true
+
+[functions.create-combined-payment]
+verify_jwt = true
+
+[functions.process-pawbucks-deduction]
+verify_jwt = false
+
+[functions.create-pet-store-payment]
 verify_jwt = true
 

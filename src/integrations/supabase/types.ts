@@ -455,6 +455,7 @@ export type Database = {
       }
       merchants: {
         Row: {
+          accepts_pawbucks: boolean
           address: string | null
           business_name: string
           business_type: string
@@ -477,6 +478,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          accepts_pawbucks?: boolean
           address?: string | null
           business_name: string
           business_type: string
@@ -499,6 +501,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          accepts_pawbucks?: boolean
           address?: string | null
           business_name?: string
           business_type?: string

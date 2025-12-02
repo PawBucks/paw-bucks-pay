@@ -4,12 +4,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useOptimizedQuery } from "@/hooks/useOptimizedQuery";
 import { DataLoader } from "@/lib/dataLoader";
-import { PaymentDialog } from "@/components/PaymentDialog";
+import { PaymentDialogWithPawBucks } from "@/components/PaymentDialogWithPawBucks";
 import { BottomNav } from "@/components/BottomNav";
 import { PageLoader } from "@/components/PageLoader";
 import { Header } from "@/components/Header";
 import { AdPlacement } from "@/components/AdPlacement";
-import { Search, Store, Scissors, Home, Stethoscope, Footprints, Bone, ArrowUpDown } from "lucide-react";
+import { Search, Store, Scissors, Home, Stethoscope, Footprints, Bone, ArrowUpDown, Coins, CreditCard } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -29,6 +29,7 @@ export type Merchant = {
   longitude?: number;
   cashback_rate: number;
   logo_url?: string;
+  accepts_pawbucks?: boolean;
 };
 
 const businessTypes = [
@@ -63,6 +64,7 @@ const Discover = () => {
     id: string;
     name: string;
     cashbackRate: number;
+    acceptsPawbucks: boolean;
   } | null>(null);
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
 
@@ -120,6 +122,7 @@ const Discover = () => {
       id: merchant.id,
       name: merchant.business_name,
       cashbackRate: merchant.cashback_rate,
+      acceptsPawbucks: merchant.accepts_pawbucks ?? false,
     });
     setPaymentDialogOpen(true);
   };
@@ -262,6 +265,20 @@ const Discover = () => {
                           </Badge>
                         </div>
 
+                        {/* Payment Methods */}
+                        <div className="flex items-center gap-2 mb-3">
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <CreditCard className="w-3 h-3" />
+                            <span>Card</span>
+                          </div>
+                          {merchant.accepts_pawbucks && (
+                            <div className="flex items-center gap-1 text-xs text-primary">
+                              <Coins className="w-3 h-3" />
+                              <span>PawBucks</span>
+                            </div>
+                          )}
+                        </div>
+
                         <p className="text-sm text-muted-foreground capitalize mb-3">
                           {merchant.business_type.replace(/_/g, " ")}
                         </p>
@@ -297,12 +314,13 @@ const Discover = () => {
 
         {/* Payment Dialog */}
         {selectedMerchant && user && (
-          <PaymentDialog
+          <PaymentDialogWithPawBucks
             open={paymentDialogOpen}
             onOpenChange={setPaymentDialogOpen}
             merchantId={selectedMerchant.id}
             merchantName={selectedMerchant.name}
             cashbackRate={selectedMerchant.cashbackRate}
+            acceptsPawbucks={selectedMerchant.acceptsPawbucks}
             userId={user.id}
             onSuccess={handlePaymentSuccess}
           />
