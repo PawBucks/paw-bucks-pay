@@ -1,15 +1,17 @@
 // Platform-wide constants for consistency and maintainability
 
 export const PAWBUCKS_CONVERSION = {
-  EARN_RATE: 10, // 10 PawBucks per $1 spent
-  USD_CONVERSION: 10, // 10 PawBucks = $1 USD
-  REWARD_THRESHOLD: 100, // PawBucks needed for $10 credit
+  // Pet Owner rates
+  PET_OWNER_TO_USD: 100, // 100 PawBucks = $1 USD when pet owners spend
+  // Merchant rates (for platform services like marketing/advertising)
+  MERCHANT_TO_USD: 10, // 10 PawBucks = $1 USD when merchants spend on platform
+  REWARD_THRESHOLD: 1000, // PawBucks needed for $10 credit (100 * 10)
 } as const;
 
 export const CASHBACK_RATES = {
-  FREE: 10, // 10% cashback for free accounts
-  PAWPASS: 20, // 20% cashback for PawPass subscribers
-  PAWPASS_PLUS: 30, // 30% cashback for PawPass+ subscribers
+  FREE: 10, // 10% cashback in PawBucks for free accounts
+  PAWPASS: 20, // 20% cashback in PawBucks for PawPass subscribers
+  PAWPASS_PLUS: 30, // 30% cashback in PawBucks for PawPass+ subscribers
 } as const;
 
 // Map Stripe product IDs to subscription tiers

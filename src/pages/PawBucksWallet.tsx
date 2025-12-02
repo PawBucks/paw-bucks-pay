@@ -129,7 +129,7 @@ const PawBucksWallet = () => {
             </div>
             <Progress value={progressPercent} className="h-3" />
             <p className="text-xs text-center text-muted-foreground mt-2">
-              {PAWBUCKS_CONVERSION.USD_CONVERSION} PawBucks = $1.00
+              {PAWBUCKS_CONVERSION.PET_OWNER_TO_USD} PawBucks = $1.00
             </p>
           </div>
         </GradientCard>
