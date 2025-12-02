@@ -30,7 +30,9 @@ import {
   ShoppingCart,
   AlertCircle,
   Package,
+  Coins,
 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { format, startOfMonth, parseISO } from "date-fns";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
@@ -46,6 +48,7 @@ type Merchant = {
   stripe_account_id?: string;
   stripe_account_status?: string;
   logo_url?: string;
+  accepts_pawbucks?: boolean;
 };
 
 type Analytics = {
@@ -83,6 +86,7 @@ const MerchantDashboard = () => {
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [logoZoom, setLogoZoom] = useState(1);
+  const [togglingPawbucks, setTogglingPawbucks] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -467,6 +471,56 @@ const MerchantDashboard = () => {
                 </ol>
               </div>
             </div>
+          </GradientCard>
+        )}
+
+        {/* PawBucks Acceptance Settings */}
+        {merchant.stripe_account_id && (
+          <GradientCard className="mb-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Coins className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">Accept PawBucks</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Allow customers to pay with PawBucks (10 PawBucks = $1.00)
+                  </p>
+                </div>
+              </div>
+              <Switch
+                checked={merchant.accepts_pawbucks ?? false}
+                onCheckedChange={async (checked) => {
+                  setTogglingPawbucks(true);
+                  try {
+                    const { error } = await supabase
+                      .from("merchants")
+                      .update({ accepts_pawbucks: checked })
+                      .eq("id", merchant.id);
+                    
+                    if (error) throw error;
+                    
+                    setMerchant({ ...merchant, accepts_pawbucks: checked });
+                    toast.success(checked ? "Now accepting PawBucks!" : "PawBucks acceptance disabled");
+                  } catch (error) {
+                    console.error("Error toggling PawBucks:", error);
+                    toast.error("Failed to update PawBucks setting");
+                  } finally {
+                    setTogglingPawbucks(false);
+                  }
+                }}
+                disabled={togglingPawbucks}
+              />
+            </div>
+            {merchant.accepts_pawbucks && (
+              <div className="mt-4 pt-4 border-t text-sm text-muted-foreground">
+                <p className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
+                  Customers can now pay using their PawBucks balance
+                </p>
+              </div>
+            )}
           </GradientCard>
         )}
 
