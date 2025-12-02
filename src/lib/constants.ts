@@ -4,7 +4,7 @@ export const PAWBUCKS_CONVERSION = {
   // Pet Owner rates
   PET_OWNER_TO_USD: 100, // 100 PawBucks = $1 USD when pet owners spend
   // Merchant rates (for platform services like marketing/advertising)
-  MERCHANT_TO_USD: 10, // 10 PawBucks = $1 USD when merchants spend on platform
+  MERCHANT_TO_USD: 50, // 50 PawBucks = $1 USD when merchants spend on platform
   REWARD_THRESHOLD: 1000, // PawBucks needed for $10 credit (100 * 10)
 } as const;
 
