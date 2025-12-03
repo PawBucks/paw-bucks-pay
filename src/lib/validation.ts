@@ -1,6 +1,9 @@
 import { z } from "zod";
 
-// Auth validation schemas
+// ==========================================
+// Auth Validation Schemas
+// ==========================================
+
 export const signUpSchema = z.object({
   email: z.string()
     .trim()
@@ -31,7 +34,10 @@ export const signInSchema = z.object({
     .max(128, { message: "Password must be less than 128 characters" }),
 });
 
-// Merchant validation schemas
+// ==========================================
+// Merchant Validation Schemas
+// ==========================================
+
 export const merchantOnboardingSchema = z.object({
   businessName: z.string()
     .trim()
@@ -76,7 +82,33 @@ export const merchantOnboardingSchema = z.object({
     .max(100, { message: "Cashback rate cannot exceed 100%" }),
 });
 
-// Payment validation schemas
+// Simplified merchant schema for profile updates
+export const merchantSchema = z.object({
+  businessName: z.string()
+    .min(2, "Business name must be at least 2 characters")
+    .max(100, "Business name is too long"),
+  contactPerson: z.string()
+    .min(2, "Contact person name is required")
+    .max(100),
+  businessType: z.enum(["vet", "groomer", "sitter", "pet_store", "walker", "trainer"]),
+  address: z.string().optional(),
+  description: z.string().max(500, "Description is too long").optional(),
+  cashbackRate: z.number()
+    .min(0, "Cashback rate cannot be negative")
+    .max(20, "Cashback rate cannot exceed 20%"),
+});
+
+// ==========================================
+// Payment Validation Schemas
+// ==========================================
+
+export const paymentSchema = z.object({
+  amount: z.number()
+    .positive("Amount must be greater than 0")
+    .max(10000, "Amount cannot exceed $10,000 per transaction"),
+  description: z.string().max(200, "Description too long").optional(),
+});
+
 export const paymentIntentSchema = z.object({
   amount: z.number()
     .positive({ message: "Amount must be greater than 0" })
@@ -88,3 +120,39 @@ export const paymentIntentSchema = z.object({
     .max(500, { message: "Description must be less than 500 characters" })
     .optional(),
 });
+
+// ==========================================
+// Pet Profile Validation Schema
+// ==========================================
+
+export const petProfileSchema = z.object({
+  name: z.string()
+    .min(1, "Pet name is required")
+    .max(50, "Name is too long"),
+  type: z.enum(["dog", "cat", "other"]),
+  breed: z.string().max(50).optional(),
+  birthday: z.string().optional(),
+});
+
+// ==========================================
+// Funding Request Validation Schema
+// ==========================================
+
+export const fundingRequestSchema = z.object({
+  requestedAmount: z.number()
+    .positive("Amount must be greater than 0")
+    .max(1000000, "Amount cannot exceed $1,000,000"),
+  reason: z.string()
+    .min(10, "Please provide a detailed reason (at least 10 characters)")
+    .max(1000, "Reason is too long"),
+  estimatedMonthlySales: z.number()
+    .positive("Estimated monthly sales must be greater than 0"),
+});
+
+// ==========================================
+// Utility Functions
+// ==========================================
+
+export const formatZodErrors = (error: z.ZodError) => {
+  return error.errors.map((err) => err.message).join(", ");
+};

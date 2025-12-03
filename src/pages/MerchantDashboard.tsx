@@ -4,27 +4,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { GradientCard } from "@/components/ui/gradient-card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import {
   LogOut,
   PawPrint,
-  TrendingUp,
-  Users,
-  DollarSign,
-  Percent,
   ExternalLink,
   Edit,
   Loader2,
-  Clock,
   CreditCard,
   FileText,
   ShoppingCart,
@@ -35,7 +20,14 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { format, startOfMonth, parseISO } from "date-fns";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
+
+// Extracted components
+import { MerchantAnalyticsCards } from "@/components/merchant/MerchantAnalyticsCards";
+import { MerchantCharts } from "@/components/merchant/MerchantCharts";
+import { MerchantTransactionList } from "@/components/merchant/MerchantTransactionList";
+import { EditMerchantProfileDialog } from "@/components/merchant/EditMerchantProfileDialog";
+import { FundingRequestDialog } from "@/components/merchant/FundingRequestDialog";
+import { TransactionsDialog } from "@/components/merchant/TransactionsDialog";
 
 type Merchant = {
   id: string;
@@ -84,9 +76,6 @@ const MerchantDashboard = () => {
   const [fundingDialogOpen, setFundingDialogOpen] = useState(false);
   const [connectingStripe, setConnectingStripe] = useState(false);
   const [requestingFunding, setRequestingFunding] = useState(false);
-  const [logoFile, setLogoFile] = useState<File | null>(null);
-  const [logoPreview, setLogoPreview] = useState<string | null>(null);
-  const [logoZoom, setLogoZoom] = useState(1);
   const [togglingPawbucks, setTogglingPawbucks] = useState(false);
 
   useEffect(() => {
@@ -105,7 +94,6 @@ const MerchantDashboard = () => {
     if (!user) return;
 
     try {
-      // Load merchant profile
       const { data: merchantData, error: merchantError } = await supabase
         .from("merchants")
         .select("*")
@@ -122,7 +110,6 @@ const MerchantDashboard = () => {
 
       setMerchant(merchantData);
 
-      // Load analytics using edge function
       const { data: analyticsData, error: analyticsError } = await supabase.functions.invoke(
         "merchant-dashboard"
       );
@@ -131,7 +118,6 @@ const MerchantDashboard = () => {
         setAnalytics(analyticsData);
       }
 
-      // Load recent transactions
       const { data: transactionsData } = await supabase
         .from("transactions")
         .select("*")
@@ -141,7 +127,6 @@ const MerchantDashboard = () => {
 
       setTransactions(transactionsData || []);
 
-      // Load all transactions for chart
       const { data: allTransactionsData } = await supabase
         .from("transactions")
         .select("*")
@@ -170,7 +155,6 @@ const MerchantDashboard = () => {
         }
       );
 
-      // Handle network/invocation errors
       if (error) {
         console.error("Stripe Connect invocation error:", error);
         toast.error("Failed to connect Stripe account", {
@@ -180,13 +164,10 @@ const MerchantDashboard = () => {
         return;
       }
 
-      // Handle application errors (returned with success: false)
       if (data?.error || data?.success === false) {
         console.error("Stripe Connect error:", data.error || data.originalError);
-        
         const errorMessage = data.error || "An unexpected error occurred";
-        
-        // Check for specific error types
+
         if (errorMessage.includes("PLATFORM_NOT_CONFIGURED") || errorMessage.includes("platform-profile")) {
           toast.error("Stripe Platform Setup Required", {
             description: (
@@ -217,7 +198,6 @@ const MerchantDashboard = () => {
         return;
       }
 
-      // Success - redirect to Stripe onboarding
       if (data?.onboardingUrl) {
         window.location.href = data.onboardingUrl;
       } else {
@@ -234,31 +214,15 @@ const MerchantDashboard = () => {
     }
   };
 
-  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setLogoFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setLogoPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleUpdateProfile = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleUpdateProfile = async (formData: FormData, logoFile: File | null) => {
     if (!merchant || !user) return;
 
     try {
-      const formData = new FormData(e.currentTarget);
-      
-      // Upload logo if provided
       let logoUrl = merchant.logo_url;
       if (logoFile) {
         const fileExt = logoFile.name.split('.').pop();
         const filePath = `${user.id}/${Date.now()}.${fileExt}`;
-        
+
         const { error: uploadError } = await supabase.storage
           .from('merchant-logos')
           .upload(filePath, logoFile);
@@ -270,7 +234,7 @@ const MerchantDashboard = () => {
         const { data: urlData } = supabase.storage
           .from('merchant-logos')
           .getPublicUrl(filePath);
-        
+
         logoUrl = urlData.publicUrl;
       }
 
@@ -293,15 +257,12 @@ const MerchantDashboard = () => {
 
       toast.success("Profile updated successfully!");
       setEditDialogOpen(false);
-      setLogoFile(null);
-      setLogoPreview(null);
       loadMerchantData();
     } catch (error: any) {
       console.error("Error updating profile:", error);
       toast.error("Failed to update profile");
     }
   };
-
 
   const handleRequestFunding = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -336,6 +297,28 @@ const MerchantDashboard = () => {
     }
   };
 
+  const handleTogglePawbucks = async (checked: boolean) => {
+    if (!merchant) return;
+    
+    setTogglingPawbucks(true);
+    try {
+      const { error } = await supabase
+        .from("merchants")
+        .update({ accepts_pawbucks: checked })
+        .eq("id", merchant.id);
+
+      if (error) throw error;
+
+      setMerchant({ ...merchant, accepts_pawbucks: checked });
+      toast.success(checked ? "Now accepting PawBucks!" : "PawBucks acceptance disabled");
+    } catch (error) {
+      console.error("Error toggling PawBucks:", error);
+      toast.error("Failed to update PawBucks setting");
+    } finally {
+      setTogglingPawbucks(false);
+    }
+  };
+
   const getMonthlySalesData = () => {
     const monthlyData: { [key: string]: number } = {};
 
@@ -347,36 +330,17 @@ const MerchantDashboard = () => {
     return Object.entries(monthlyData)
       .map(([month, amount]) => ({ month, amount }))
       .sort((a, b) => new Date(a.month).getTime() - new Date(b.month).getTime())
-      .slice(-6); // Last 6 months
+      .slice(-6);
   };
 
   const getCashbackDistribution = () => {
     const totalCashback = analytics?.total_cashback || 0;
     const remainingBalance = analytics?.remaining_balance || 0;
-    
+
     return [
       { name: "Cashback Given", value: totalCashback, color: "hsl(var(--accent))" },
       { name: "Remaining Balance", value: remainingBalance, color: "hsl(var(--primary))" }
     ].filter(item => item.value > 0);
-  };
-
-  const getRepaymentProgress = () => {
-    if (!analytics?.funding_deal_status || analytics.funding_deal_status !== 'active') {
-      return null;
-    }
-    
-    // We need to calculate what was funded originally
-    // remaining_balance = amount_funded - total_repaid
-    // So: amount_funded = remaining_balance + total_repaid (we need total_repaid)
-    // For now, we'll estimate the progress from remaining balance
-    const remaining = analytics.remaining_balance || 0;
-    
-    // This is a simplified calculation - ideally we'd fetch the original funding amount
-    if (remaining === 0) return 100;
-    
-    // Estimate: if repayment rate is 10%, assume they've repaid some portion
-    // This is approximate without the original amount_funded
-    return null; // We can't accurately calculate without amount_funded from the API
   };
 
   const handleSignOut = async () => {
@@ -423,7 +387,6 @@ const MerchantDashboard = () => {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        {/* Dashboard Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Merchant Dashboard</h1>
           <p className="text-muted-foreground">
@@ -456,8 +419,7 @@ const MerchantDashboard = () => {
                   )}
                 </Button>
               </div>
-              
-              {/* Platform Setup Notice */}
+
               <div className="text-xs bg-background/50 p-3 rounded-md border border-border/50">
                 <p className="font-medium mb-2 text-warning flex items-center gap-2">
                   <AlertCircle className="w-3.5 h-3.5" />
@@ -493,25 +455,7 @@ const MerchantDashboard = () => {
               </div>
               <Switch
                 checked={merchant.accepts_pawbucks ?? false}
-                onCheckedChange={async (checked) => {
-                  setTogglingPawbucks(true);
-                  try {
-                    const { error } = await supabase
-                      .from("merchants")
-                      .update({ accepts_pawbucks: checked })
-                      .eq("id", merchant.id);
-                    
-                    if (error) throw error;
-                    
-                    setMerchant({ ...merchant, accepts_pawbucks: checked });
-                    toast.success(checked ? "Now accepting PawBucks!" : "PawBucks acceptance disabled");
-                  } catch (error) {
-                    console.error("Error toggling PawBucks:", error);
-                    toast.error("Failed to update PawBucks setting");
-                  } finally {
-                    setTogglingPawbucks(false);
-                  }
-                }}
+                onCheckedChange={handleTogglePawbucks}
                 disabled={togglingPawbucks}
               />
             </div>
@@ -527,75 +471,7 @@ const MerchantDashboard = () => {
         )}
 
         {/* Analytics Summary Cards */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5 mb-8">
-          <GradientCard gradient>
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center">
-                <DollarSign className="w-6 h-6 text-accent" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Total Sales</p>
-                <p className="text-2xl font-bold">
-                  ${analytics?.total_sales?.toFixed(2) || "0.00"}
-                </p>
-              </div>
-            </div>
-          </GradientCard>
-
-          <GradientCard>
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                <Percent className="w-6 h-6 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Total Cashback Given</p>
-                <p className="text-2xl font-bold">
-                  ${analytics?.total_cashback?.toFixed(2) || "0.00"}
-                </p>
-              </div>
-            </div>
-          </GradientCard>
-
-          <GradientCard>
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center">
-                <CreditCard className="w-6 h-6 text-secondary" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Repayment Remaining</p>
-                <p className="text-2xl font-bold">
-                  ${analytics?.remaining_balance?.toFixed(2) || "0.00"}
-                </p>
-              </div>
-            </div>
-          </GradientCard>
-
-          <GradientCard>
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-                <TrendingUp className="w-6 h-6 text-muted-foreground" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Repayment Rate</p>
-                <p className="text-2xl font-bold">
-                  {analytics?.repayment_rate ? `${analytics.repayment_rate}%` : "N/A"}
-                </p>
-              </div>
-            </div>
-          </GradientCard>
-
-          <GradientCard>
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-orange-500/10 flex items-center justify-center">
-                <ShoppingCart className="w-6 h-6 text-orange-500" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Total Transactions</p>
-                <p className="text-2xl font-bold">{analytics?.total_transactions || 0}</p>
-              </div>
-            </div>
-          </GradientCard>
-        </div>
+        <MerchantAnalyticsCards analytics={analytics} />
 
         {/* Repayment Progress */}
         {analytics?.funding_deal_status === 'active' && analytics?.remaining_balance !== undefined && (
@@ -607,11 +483,9 @@ const MerchantDashboard = () => {
                 <span className="font-bold">${analytics.remaining_balance.toFixed(2)}</span>
               </div>
               <div className="w-full bg-muted rounded-full h-4 overflow-hidden">
-                <div 
+                <div
                   className="bg-gradient-to-r from-accent to-secondary h-full transition-all duration-500 rounded-full"
-                  style={{ 
-                    width: analytics.remaining_balance > 0 ? '100%' : '0%'
-                  }}
+                  style={{ width: analytics.remaining_balance > 0 ? '100%' : '0%' }}
                 />
               </div>
               <p className="text-xs text-muted-foreground mt-2">
@@ -628,79 +502,16 @@ const MerchantDashboard = () => {
           </GradientCard>
         )}
 
-        {/* Charts Row */}
-        <div className="grid gap-6 md:grid-cols-2 mb-8">
-          {/* Monthly Sales Chart */}
-          <GradientCard>
-            <h3 className="text-xl font-semibold mb-4">Monthly Sales Overview</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={getMonthlySalesData()}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis 
-                  dataKey="month" 
-                  className="text-sm"
-                  tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                />
-                <YAxis 
-                  className="text-sm"
-                  tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                  tickFormatter={(value) => `$${value}`}
-                />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'hsl(var(--card))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px'
-                  }}
-                  formatter={(value: number) => [`$${value.toFixed(2)}`, 'Sales']}
-                />
-                <Bar dataKey="amount" fill="hsl(var(--accent))" radius={[8, 8, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </GradientCard>
-
-          {/* Cashback Distribution Chart */}
-          <GradientCard>
-            <h3 className="text-xl font-semibold mb-4">Cashback vs Balance Distribution</h3>
-            {getCashbackDistribution().length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={getCashbackDistribution()}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={100}
-                    paddingAngle={5}
-                    dataKey="value"
-                  >
-                    {getCashbackDistribution().map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip 
-                    formatter={(value: number) => `$${value.toFixed(2)}`}
-                    contentStyle={{ 
-                      backgroundColor: 'hsl(var(--card))',
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px'
-                    }}
-                  />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-                No data available
-              </div>
-            )}
-          </GradientCard>
-        </div>
+        {/* Charts */}
+        <MerchantCharts
+          monthlySalesData={getMonthlySalesData()}
+          cashbackDistribution={getCashbackDistribution()}
+        />
 
         {/* Quick Actions */}
         <div className="grid gap-4 md:grid-cols-4 mb-8">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             className="h-auto py-4 justify-start"
             onClick={() => setTransactionsDialogOpen(true)}
           >
@@ -711,7 +522,7 @@ const MerchantDashboard = () => {
             </div>
           </Button>
           <Button
-            variant="outline" 
+            variant="outline"
             className="h-auto py-4 justify-start"
             onClick={() => setFundingDialogOpen(true)}
           >
@@ -721,9 +532,8 @@ const MerchantDashboard = () => {
               <p className="text-xs text-muted-foreground">Get advance on earnings</p>
             </div>
           </Button>
-
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             className="h-auto py-4 justify-start"
             onClick={() => setEditDialogOpen(true)}
           >
@@ -733,10 +543,9 @@ const MerchantDashboard = () => {
               <p className="text-xs text-muted-foreground">Update business info</p>
             </div>
           </Button>
-
           {merchant.stripe_account_id && (
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="h-auto py-4 justify-start"
               onClick={() => navigate("/merchant/products")}
             >
@@ -747,9 +556,8 @@ const MerchantDashboard = () => {
               </div>
             </Button>
           )}
-
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             className="h-auto py-4 justify-start"
             onClick={() => navigate("/merchant/offers")}
           >
@@ -762,307 +570,30 @@ const MerchantDashboard = () => {
         </div>
 
         {/* Recent Transactions */}
-        <GradientCard>
-          <h3 className="text-xl font-semibold mb-4">Recent Transactions</h3>
-          {transactions.length > 0 ? (
-            <div className="space-y-3">
-              {transactions.map((transaction) => (
-                <div
-                  key={transaction.id}
-                  className="flex items-center justify-between p-4 rounded-lg border bg-card"
-                >
-                  <div>
-                    <p className="font-medium">{transaction.description}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {format(new Date(transaction.created_at), "MMM d, yyyy 'at' h:mm a")}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-bold text-accent">
-                      +${transaction.amount.toFixed(2)}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      Cashback: ${transaction.cashback_earned.toFixed(2)}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <p className="text-muted-foreground">No transactions yet</p>
-            </div>
-          )}
-        </GradientCard>
+        <MerchantTransactionList transactions={transactions} />
       </main>
 
-      {/* Edit Profile Dialog */}
-      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
-          <DialogHeader>
-            <DialogTitle>Edit Business Profile</DialogTitle>
-            <DialogDescription>Update your business information</DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleUpdateProfile} className="flex flex-col flex-1 min-h-0">
-            <div className="overflow-y-auto flex-1 space-y-4 pr-2">
-            <div className="space-y-2">
-              <Label htmlFor="businessName">Business Name</Label>
-              <Input
-                id="businessName"
-                name="businessName"
-                defaultValue={merchant.business_name}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="contactPerson">Contact Person</Label>
-              <Input
-                id="contactPerson"
-                name="contactPerson"
-                defaultValue={merchant.contact_person}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="phone">Phone Number</Label>
-              <Input
-                id="phone"
-                name="phone"
-                type="tel"
-                placeholder="(310) 555-1234"
-                defaultValue={merchant.phone || ""}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="businessType">Business Type</Label>
-              <select
-                id="businessType"
-                name="businessType"
-                defaultValue={merchant.business_type}
-                className="w-full p-3 rounded-lg border bg-background"
-                required
-              >
-                <option value="vet">Vet</option>
-                <option value="groomer">Groomer</option>
-                <option value="sitter">Sitter</option>
-                <option value="pet_store">Pet Store</option>
-                <option value="walker">Walker</option>
-                <option value="trainer">Trainer</option>
-              </select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="logo">Business Logo</Label>
-              <div className="flex flex-col gap-4">
-                <Input
-                  id="logo"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleLogoChange}
-                />
-                {(logoPreview || merchant.logo_url) && (
-                  <div className="space-y-3">
-                    <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-border mx-auto relative">
-                      <div 
-                        className="absolute inset-0 flex items-center justify-center"
-                        style={{
-                          transform: `scale(${logoZoom})`,
-                          transition: 'transform 0.2s ease'
-                        }}
-                      >
-                        <img
-                          src={logoPreview || merchant.logo_url || ""}
-                          alt="Logo preview"
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    </div>
-                    {logoPreview && (
-                      <div className="space-y-2">
-                        <Label htmlFor="logoZoom" className="text-sm">Adjust Logo Size</Label>
-                        <input
-                          id="logoZoom"
-                          type="range"
-                          min="0.5"
-                          max="2"
-                          step="0.1"
-                          value={logoZoom}
-                          onChange={(e) => setLogoZoom(parseFloat(e.target.value))}
-                          className="w-full"
-                        />
-                        <p className="text-xs text-muted-foreground text-center">
-                          Scale: {logoZoom.toFixed(1)}x
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="address">Address</Label>
-              <Input
-                id="address"
-                name="address"
-                defaultValue={merchant.address || ""}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                name="description"
-                defaultValue={merchant.description || ""}
-                rows={3}
-              />
-            </div>
-            </div>
-            <div className="flex gap-3 pt-4 border-t mt-4">
-              <Button type="button" variant="outline" onClick={() => setEditDialogOpen(false)} className="flex-1">
-                Cancel
-              </Button>
-              <Button type="submit" className="flex-1">
-                Save Changes
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
+      {/* Dialogs */}
+      <EditMerchantProfileDialog
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        merchant={merchant}
+        onSubmit={handleUpdateProfile}
+      />
 
-      {/* View All Transactions Dialog */}
-      <Dialog open={transactionsDialogOpen} onOpenChange={setTransactionsDialogOpen}>
-        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>All Transactions</DialogTitle>
-            <DialogDescription>
-              Complete history of your business transactions
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-3">
-            {transactions.length > 0 ? (
-              transactions.map((transaction) => (
-                <div
-                  key={transaction.id}
-                  className="flex items-center justify-between p-4 rounded-lg border bg-card"
-                >
-                  <div className="flex-1">
-                    <p className="font-medium">{transaction.description}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {format(new Date(transaction.created_at), "MMM d, yyyy 'at' h:mm a")}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-bold text-accent">
-                      +${transaction.amount.toFixed(2)}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      Cashback: ${transaction.cashback_earned.toFixed(2)}
-                    </p>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-muted-foreground">No transactions yet</p>
-              </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+      <TransactionsDialog
+        open={transactionsDialogOpen}
+        onOpenChange={setTransactionsDialogOpen}
+        transactions={transactions}
+      />
 
-      {/* Request Funding Dialog */}
-      <Dialog open={fundingDialogOpen} onOpenChange={setFundingDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Request Funding</DialogTitle>
-            <DialogDescription>
-              Get an advance on your future earnings to grow your business
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleRequestFunding} className="space-y-4">
-            <div className="bg-muted rounded-lg p-4 mb-4">
-              <div className="flex justify-between text-sm mb-2">
-                <span className="text-muted-foreground">Available to borrow:</span>
-                <span className="font-bold">
-                  ${((analytics?.total_sales || 0) * 0.8).toFixed(2)}
-                </span>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Up to 80% of your total sales
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="requestedAmount">Requested Amount ($)</Label>
-              <Input
-                id="requestedAmount"
-                name="requestedAmount"
-                type="number"
-                step="0.01"
-                min="100"
-                max={(analytics?.total_sales || 0) * 0.8}
-                placeholder="0.00"
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="reason">Reason for Funding</Label>
-              <Textarea
-                id="reason"
-                name="reason"
-                placeholder="Inventory, equipment, marketing, etc."
-                rows={3}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="estimatedMonthlySales">Estimated Monthly Sales ($)</Label>
-              <Input
-                id="estimatedMonthlySales"
-                name="estimatedMonthlySales"
-                type="number"
-                step="0.01"
-                min="0"
-                placeholder="0.00"
-                required
-              />
-            </div>
-
-            <div className="bg-accent/10 border border-accent/20 rounded-lg p-4">
-              <p className="text-sm font-semibold mb-1">Funding Terms</p>
-              <ul className="text-xs text-muted-foreground space-y-1">
-                <li>• 5% fee on funded amount</li>
-                <li>• Repaid automatically from future transactions</li>
-                <li>• No fixed repayment schedule</li>
-                <li>• Funds deposited within 1-2 business days</li>
-              </ul>
-            </div>
-
-            <div className="flex gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setFundingDialogOpen(false)}
-                className="flex-1"
-                disabled={requestingFunding}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" className="flex-1" disabled={requestingFunding}>
-                {requestingFunding ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Submitting...
-                  </>
-                ) : (
-                  "Request Funding"
-                )}
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
+      <FundingRequestDialog
+        open={fundingDialogOpen}
+        onOpenChange={setFundingDialogOpen}
+        totalSales={analytics?.total_sales || 0}
+        onSubmit={handleRequestFunding}
+        isSubmitting={requestingFunding}
+      />
     </div>
   );
 };

@@ -1,0 +1,202 @@
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
+type Merchant = {
+  id: string;
+  business_name: string;
+  contact_person: string;
+  phone?: string;
+  business_type: string;
+  address?: string;
+  description?: string;
+  cashback_rate: number;
+  logo_url?: string;
+};
+
+type EditMerchantProfileDialogProps = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  merchant: Merchant;
+  onSubmit: (formData: FormData, logoFile: File | null) => Promise<void>;
+};
+
+export const EditMerchantProfileDialog = ({
+  open,
+  onOpenChange,
+  merchant,
+  onSubmit,
+}: EditMerchantProfileDialogProps) => {
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [logoZoom, setLogoZoom] = useState(1);
+
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setLogoFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setLogoPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    await onSubmit(formData, logoFile);
+    setLogoFile(null);
+    setLogoPreview(null);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
+        <DialogHeader>
+          <DialogTitle>Edit Business Profile</DialogTitle>
+          <DialogDescription>Update your business information</DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+          <div className="overflow-y-auto flex-1 space-y-4 pr-2">
+            <div className="space-y-2">
+              <Label htmlFor="businessName">Business Name</Label>
+              <Input
+                id="businessName"
+                name="businessName"
+                defaultValue={merchant.business_name}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="contactPerson">Contact Person</Label>
+              <Input
+                id="contactPerson"
+                name="contactPerson"
+                defaultValue={merchant.contact_person}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone Number</Label>
+              <Input
+                id="phone"
+                name="phone"
+                type="tel"
+                placeholder="(310) 555-1234"
+                defaultValue={merchant.phone || ""}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="businessType">Business Type</Label>
+              <select
+                id="businessType"
+                name="businessType"
+                defaultValue={merchant.business_type}
+                className="w-full p-3 rounded-lg border bg-background"
+                required
+              >
+                <option value="vet">Vet</option>
+                <option value="groomer">Groomer</option>
+                <option value="sitter">Sitter</option>
+                <option value="pet_store">Pet Store</option>
+                <option value="walker">Walker</option>
+                <option value="trainer">Trainer</option>
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="logo">Business Logo</Label>
+              <div className="flex flex-col gap-4">
+                <Input
+                  id="logo"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleLogoChange}
+                />
+                {(logoPreview || merchant.logo_url) && (
+                  <div className="space-y-3">
+                    <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-border mx-auto relative">
+                      <div
+                        className="absolute inset-0 flex items-center justify-center"
+                        style={{
+                          transform: `scale(${logoZoom})`,
+                          transition: "transform 0.2s ease",
+                        }}
+                      >
+                        <img
+                          src={logoPreview || merchant.logo_url || ""}
+                          alt="Logo preview"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    </div>
+                    {logoPreview && (
+                      <div className="space-y-2">
+                        <Label htmlFor="logoZoom" className="text-sm">
+                          Adjust Logo Size
+                        </Label>
+                        <input
+                          id="logoZoom"
+                          type="range"
+                          min="0.5"
+                          max="2"
+                          step="0.1"
+                          value={logoZoom}
+                          onChange={(e) => setLogoZoom(parseFloat(e.target.value))}
+                          className="w-full"
+                        />
+                        <p className="text-xs text-muted-foreground text-center">
+                          Scale: {logoZoom.toFixed(1)}x
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="address">Address</Label>
+              <Input
+                id="address"
+                name="address"
+                defaultValue={merchant.address || ""}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                name="description"
+                defaultValue={merchant.description || ""}
+                rows={3}
+              />
+            </div>
+          </div>
+          <div className="flex gap-3 pt-4 border-t mt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              className="flex-1"
+            >
+              Cancel
+            </Button>
+            <Button type="submit" className="flex-1">
+              Save Changes
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};

@@ -43,6 +43,8 @@ export const PetProfileCard = ({ pet, onUpdate }: PetProfileCardProps) => {
         <img
           src={pet.photo_url}
           alt={pet.name}
+          width={80}
+          height={80}
           className="w-20 h-20 rounded-full object-cover border-2 border-primary/20"
         />
       ) : (
