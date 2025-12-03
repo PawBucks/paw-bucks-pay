@@ -62,9 +62,9 @@ const StripePaymentForm = ({
 
       if (error) throw error;
 
-      const cashbackAmount = (stripeAmount * cashbackRate) / 100;
+      const cashbackPawBucks = Math.round(stripeAmount * cashbackRate / 100);
       toast.success(
-        `Payment successful! You earned $${cashbackAmount.toFixed(2)} cashback!`
+        `Payment successful! You earned ${cashbackPawBucks} PawBucks!`
       );
       onSuccess();
     } catch (error: any) {
@@ -75,7 +75,8 @@ const StripePaymentForm = ({
     }
   };
 
-  const cashbackPreview = (stripeAmount * cashbackRate) / 100;
+  // Cashback is earned as PawBucks directly (10% of dollar amount = that many PawBucks)
+  const cashbackPawBucks = Math.round(stripeAmount * cashbackRate / 100);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -100,7 +101,7 @@ const StripePaymentForm = ({
         </div>
         <div className="flex justify-between text-sm">
           <span className="text-muted-foreground">Cashback ({cashbackRate}%):</span>
-          <span className="font-bold text-accent">+${cashbackPreview.toFixed(2)}</span>
+          <span className="font-bold text-accent">+{cashbackPawBucks} PawBucks</span>
         </div>
       </div>
 
@@ -245,7 +246,8 @@ export const PaymentDialogWithPawBucks = ({
     onOpenChange(false);
   };
 
-  const cashbackPreview = stripeAmount > 0 ? (stripeAmount * cashbackRate) / 100 : 0;
+  // Cashback is earned as PawBucks (10% of dollar amount = that many PawBucks)
+  const cashbackPawBucks = stripeAmount > 0 ? Math.round(stripeAmount * cashbackRate / 100) : 0;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -351,7 +353,7 @@ export const PaymentDialogWithPawBucks = ({
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Cashback ({cashbackRate}%):</span>
-                      <span className="font-bold text-accent">+${cashbackPreview.toFixed(2)}</span>
+                      <span className="font-bold text-accent">+{cashbackPawBucks} PawBucks</span>
                     </div>
                   </>
                 )}
