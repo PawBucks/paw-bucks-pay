@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -9,9 +9,9 @@ import { BottomNav } from "@/components/BottomNav";
 import { PageLoader } from "@/components/PageLoader";
 import { Header } from "@/components/Header";
 import { AdPlacement } from "@/components/AdPlacement";
-import { Search, Store, Scissors, Home, Stethoscope, Footprints, Bone, Coins, CreditCard, ChevronRight, BookOpen, Star, Sparkles, MapPin, SlidersHorizontal, X, List, Map } from "lucide-react";
+import { Search, Store, Scissors, Home, Stethoscope, Footprints, Bone, Coins, CreditCard, ChevronRight, BookOpen, Star, Sparkles, MapPin, SlidersHorizontal, X, List, Map, Navigation, ArrowUpDown } from "lucide-react";
 import { MerchantMap } from "@/components/MerchantMap";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -37,11 +37,44 @@ type MerchantWithRating = {
   price_range?: number;
   avg_rating: number;
   review_count: number;
+  distance?: number; // Distance in miles from user
 };
+
+type UserLocation = {
+  latitude: number;
+  longitude: number;
+} | null;
+
+type SortOption = 'rating' | 'distance' | 'name';
 
 const getPriceRange = (range?: number) => {
   const level = range || 2;
   return '$'.repeat(level);
+};
+
+// Calculate distance between two points using Haversine formula
+const calculateDistance = (
+  lat1: number, 
+  lon1: number, 
+  lat2: number, 
+  lon2: number
+): number => {
+  const R = 3959; // Earth's radius in miles
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+};
+
+const formatDistance = (distance?: number): string => {
+  if (distance === undefined) return '';
+  if (distance < 0.1) return '< 0.1 mi';
+  if (distance < 10) return `${distance.toFixed(1)} mi`;
+  return `${Math.round(distance)} mi`;
 };
 
 const businessTypes = [
@@ -94,11 +127,13 @@ const StarRating = ({ rating, reviewCount }: { rating: number; reviewCount: numb
 const MerchantCard = ({ 
   merchant, 
   onPayClick,
-  isSponsored = false 
+  isSponsored = false,
+  showDistance = false
 }: { 
   merchant: MerchantWithRating; 
   onPayClick: () => void;
   isSponsored?: boolean;
+  showDistance?: boolean;
 }) => {
   const Icon = getBusinessIcon(merchant.business_type);
   
@@ -166,14 +201,22 @@ const MerchantCard = ({
                 </p>
               )}
 
-              {/* Address & Payment Methods */}
+              {/* Address, Distance & Payment Methods */}
               <div className="flex items-center justify-between gap-2">
-                {merchant.address && (
-                  <p className="text-xs text-muted-foreground line-clamp-1 flex items-center gap-1">
-                    <MapPin className="w-3 h-3 flex-shrink-0" />
-                    {merchant.address}
-                  </p>
-                )}
+                <div className="flex items-center gap-2 min-w-0 flex-1">
+                  {merchant.address && (
+                    <p className="text-xs text-muted-foreground line-clamp-1 flex items-center gap-1">
+                      <MapPin className="w-3 h-3 flex-shrink-0" />
+                      {merchant.address}
+                    </p>
+                  )}
+                  {showDistance && merchant.distance !== undefined && (
+                    <Badge variant="outline" className="text-xs flex-shrink-0 gap-1">
+                      <Navigation className="w-3 h-3" />
+                      {formatDistance(merchant.distance)}
+                    </Badge>
+                  )}
+                </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <CreditCard className="w-3.5 h-3.5 text-muted-foreground" />
                   {merchant.accepts_pawbucks && (
@@ -215,6 +258,14 @@ const priceFilters = [
   { label: "$$$$", value: 4 },
 ];
 
+const distanceFilters = [
+  { label: "Any Distance", value: 0 },
+  { label: "Within 5 miles", value: 5 },
+  { label: "Within 10 miles", value: 10 },
+  { label: "Within 25 miles", value: 25 },
+  { label: "Within 50 miles", value: 50 },
+];
+
 const Discover = () => {
   const { user, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -223,6 +274,11 @@ const Discover = () => {
   const [selectedCategory, setSelectedCategory] = usePersistentState<string>('discover-category', "all");
   const [minRating, setMinRating] = usePersistentState<number>('discover-min-rating', 0);
   const [selectedPrices, setSelectedPrices] = usePersistentState<number[]>('discover-prices', []);
+  const [maxDistance, setMaxDistance] = usePersistentState<number>('discover-max-distance', 0);
+  const [sortBy, setSortBy] = usePersistentState<SortOption>('discover-sort', 'rating');
+  const [userLocation, setUserLocation] = useState<UserLocation>(null);
+  const [locationLoading, setLocationLoading] = useState(false);
+  const [locationError, setLocationError] = useState<string | null>(null);
   const [selectedMerchant, setSelectedMerchant] = useState<{
     id: string;
     name: string;
@@ -231,6 +287,50 @@ const Discover = () => {
   } | null>(null);
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
   const [viewMode, setViewMode] = usePersistentState<'list' | 'map'>('discover-view-mode', 'list');
+
+  // Get user's location
+  const requestLocation = useCallback(() => {
+    if (!navigator.geolocation) {
+      setLocationError("Geolocation is not supported by your browser");
+      toast.error("Geolocation is not supported by your browser");
+      return;
+    }
+
+    setLocationLoading(true);
+    setLocationError(null);
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setUserLocation({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        });
+        setLocationLoading(false);
+        toast.success("Location found! Showing nearby merchants.");
+      },
+      (error) => {
+        setLocationLoading(false);
+        let errorMessage = "Unable to get your location";
+        if (error.code === error.PERMISSION_DENIED) {
+          errorMessage = "Location access denied. Please enable location in your browser settings.";
+        } else if (error.code === error.POSITION_UNAVAILABLE) {
+          errorMessage = "Location unavailable. Please try again.";
+        } else if (error.code === error.TIMEOUT) {
+          errorMessage = "Location request timed out. Please try again.";
+        }
+        setLocationError(errorMessage);
+        toast.error(errorMessage);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
+    );
+  }, []);
+
+  // Auto-request location if distance filter or sort is selected
+  useEffect(() => {
+    if ((maxDistance > 0 || sortBy === 'distance') && !userLocation && !locationLoading && !locationError) {
+      requestLocation();
+    }
+  }, [maxDistance, sortBy, userLocation, locationLoading, locationError, requestLocation]);
 
   // Fetch merchants with ratings
   const { data: merchantsWithRatings = [], isLoading: loading } = useOptimizedQuery<MerchantWithRating[]>(
@@ -287,15 +387,28 @@ const Discover = () => {
   const clearFilters = () => {
     setMinRating(0);
     setSelectedPrices([]);
+    setMaxDistance(0);
   };
 
-  const hasActiveFilters = minRating > 0 || selectedPrices.length > 0;
+  const hasActiveFilters = minRating > 0 || selectedPrices.length > 0 || maxDistance > 0;
 
-  // Separate sponsored and regular merchants, sorted by rating
+  // Separate sponsored and regular merchants with distance calculation
   const { sponsoredMerchants, regularMerchants } = useMemo(() => {
     const now = new Date().toISOString();
     
-    let filtered = merchantsWithRatings;
+    // Calculate distances first
+    let filtered = merchantsWithRatings.map(merchant => {
+      let distance: number | undefined;
+      if (userLocation && merchant.latitude && merchant.longitude) {
+        distance = calculateDistance(
+          userLocation.latitude,
+          userLocation.longitude,
+          merchant.latitude,
+          merchant.longitude
+        );
+      }
+      return { ...merchant, distance };
+    });
 
     // Filter by category
     if (selectedCategory !== "all") {
@@ -325,17 +438,41 @@ const Discover = () => {
       filtered = filtered.filter(m => selectedPrices.includes(m.price_range || 2));
     }
 
+    // Filter by max distance (only if user location is available)
+    if (maxDistance > 0 && userLocation) {
+      filtered = filtered.filter(m => m.distance !== undefined && m.distance <= maxDistance);
+    }
+
+    // Sort function based on sortBy
+    const sortMerchants = (merchants: typeof filtered) => {
+      return [...merchants].sort((a, b) => {
+        switch (sortBy) {
+          case 'distance':
+            // Merchants without distance go to the end
+            if (a.distance === undefined && b.distance === undefined) return 0;
+            if (a.distance === undefined) return 1;
+            if (b.distance === undefined) return -1;
+            return a.distance - b.distance;
+          case 'name':
+            return a.business_name.localeCompare(b.business_name);
+          case 'rating':
+          default:
+            return b.avg_rating - a.avg_rating;
+        }
+      });
+    };
+
     // Separate sponsored (active) from regular
-    const sponsored = filtered
-      .filter(m => m.is_sponsored && m.sponsored_until && m.sponsored_until > now)
-      .sort((a, b) => b.avg_rating - a.avg_rating);
+    const sponsored = sortMerchants(
+      filtered.filter(m => m.is_sponsored && m.sponsored_until && m.sponsored_until > now)
+    );
     
-    const regular = filtered
-      .filter(m => !m.is_sponsored || !m.sponsored_until || m.sponsored_until <= now)
-      .sort((a, b) => b.avg_rating - a.avg_rating);
+    const regular = sortMerchants(
+      filtered.filter(m => !m.is_sponsored || !m.sponsored_until || m.sponsored_until <= now)
+    );
 
     return { sponsoredMerchants: sponsored, regularMerchants: regular };
-  }, [merchantsWithRatings, selectedCategory, debouncedSearch, minRating, selectedPrices]);
+  }, [merchantsWithRatings, selectedCategory, debouncedSearch, minRating, selectedPrices, maxDistance, userLocation, sortBy]);
 
   const handleMerchantClick = (merchant: MerchantWithRating) => {
     if (!user) {
@@ -486,6 +623,71 @@ const Discover = () => {
               </DropdownMenuContent>
             </DropdownMenu>
 
+            {/* Distance Filter Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className={`gap-2 ${maxDistance > 0 && !userLocation ? 'animate-pulse' : ''}`}
+                  disabled={locationLoading}
+                >
+                  <Navigation className={`w-4 h-4 ${locationLoading ? 'animate-spin' : ''}`} />
+                  {locationLoading ? 'Locating...' : maxDistance > 0 ? `Within ${maxDistance} mi` : "Near Me"}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                <DropdownMenuLabel>Maximum Distance</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {distanceFilters.map((filter) => (
+                  <DropdownMenuCheckboxItem
+                    key={filter.value}
+                    checked={maxDistance === filter.value}
+                    onCheckedChange={() => setMaxDistance(filter.value)}
+                  >
+                    {filter.label}
+                  </DropdownMenuCheckboxItem>
+                ))}
+                {locationError && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <div className="px-2 py-1.5 text-xs text-destructive">
+                      {locationError}
+                    </div>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="w-full justify-start text-xs"
+                      onClick={requestLocation}
+                    >
+                      Retry location
+                    </Button>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Sort Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-2">
+                  <ArrowUpDown className="w-4 h-4" />
+                  Sort: {sortBy === 'rating' ? 'Rating' : sortBy === 'distance' ? 'Distance' : 'Name'}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                <DropdownMenuLabel>Sort By</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuRadioGroup value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
+                  <DropdownMenuRadioItem value="rating">Highest Rating</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="distance" disabled={!userLocation && !locationLoading}>
+                    Nearest First {!userLocation && '(enable location)'}
+                  </DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="name">Name (A-Z)</DropdownMenuRadioItem>
+                </DropdownMenuRadioGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             {/* Clear Filters */}
             {hasActiveFilters && (
               <Button 
@@ -525,7 +727,8 @@ const Discover = () => {
           {/* Results Count */}
           <div className="mb-6">
             <p className="text-sm text-muted-foreground">
-              {totalMerchants} {totalMerchants === 1 ? "result" : "results"} • Sorted by highest rating
+              {totalMerchants} {totalMerchants === 1 ? "result" : "results"} • Sorted by {sortBy === 'rating' ? 'highest rating' : sortBy === 'distance' ? 'nearest first' : 'name'}
+              {userLocation && <span className="ml-1">• Location enabled</span>}
             </p>
           </div>
 
@@ -568,6 +771,7 @@ const Discover = () => {
                         merchant={merchant}
                         onPayClick={() => handleMerchantClick(merchant)}
                         isSponsored
+                        showDistance={!!userLocation}
                       />
                     ))}
                   </div>
@@ -585,6 +789,7 @@ const Discover = () => {
                       key={merchant.id}
                       merchant={merchant}
                       onPayClick={() => handleMerchantClick(merchant)}
+                      showDistance={!!userLocation}
                     />
                   ))}
                 </div>
