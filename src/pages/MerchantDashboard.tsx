@@ -485,7 +485,7 @@ const MerchantDashboard = () => {
                 <div>
                   <h3 className="font-semibold">Accept PawBucks</h3>
                   <p className="text-sm text-muted-foreground">
-                    Allow customers to pay with PawBucks (10 PawBucks = $1.00)
+                    Allow customers to pay with PawBucks (100 PawBucks = $1.00)
                   </p>
                 </div>
               </div>
