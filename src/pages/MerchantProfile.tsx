@@ -339,11 +339,47 @@ const MerchantProfile = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {merchant.address && (
+                    <>
+                      <div className="flex items-start gap-3">
+                        <MapPin className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                        <div>
+                          <p className="font-medium">Address</p>
+                          <a
+                            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(merchant.address)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:underline"
+                          >
+                            {merchant.address}
+                          </a>
+                        </div>
+                      </div>
+                      {/* Google Maps Embed */}
+                      <div className="rounded-lg overflow-hidden border">
+                        <iframe
+                          title={`Map of ${merchant.business_name}`}
+                          width="100%"
+                          height="250"
+                          style={{ border: 0 }}
+                          loading="lazy"
+                          allowFullScreen
+                          referrerPolicy="no-referrer-when-downgrade"
+                          src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(merchant.address)}`}
+                        />
+                      </div>
+                    </>
+                  )}
+                  {merchant.phone && (
                     <div className="flex items-start gap-3">
-                      <MapPin className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                      <Phone className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
                       <div>
-                        <p className="font-medium">Address</p>
-                        <p className="text-muted-foreground">{merchant.address}</p>
+                        <p className="font-medium">Phone</p>
+                        <a
+                          href={`tel:${merchant.phone}`}
+                          className="text-primary hover:underline"
+                        >
+                          {merchant.phone}
+                        </a>
                       </div>
                     </div>
                   )}
@@ -363,7 +399,7 @@ const MerchantProfile = () => {
                   )}
                   {merchant.contact_person && (
                     <div className="flex items-start gap-3">
-                      <Phone className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                      <Globe className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
                       <div>
                         <p className="font-medium">Contact Person</p>
                         <p className="text-muted-foreground">{merchant.contact_person}</p>
