@@ -53,6 +53,8 @@ const MerchantOfferDetails = lazy(() => import("./pages/MerchantOfferDetails"));
 const MerchantOfferRedemptions = lazy(() => import("./pages/MerchantOfferRedemptions"));
 const MerchantOfferCodes = lazy(() => import("./pages/MerchantOfferCodes"));
 const MerchantAnalytics = lazy(() => import("./pages/MerchantAnalytics"));
+const MerchantProfile = lazy(() => import("./pages/MerchantProfile"));
+const MerchantDirectory = lazy(() => import("./pages/MerchantDirectory"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -116,6 +118,8 @@ const AppContent = () => {
         <Route path="/merchant/offers/:id/redemptions" element={<MerchantOfferRedemptions />} />
         <Route path="/merchant/offers/:id/codes" element={<MerchantOfferCodes />} />
         <Route path="/merchant-analytics" element={<MerchantAnalytics />} />
+        <Route path="/merchant/:merchantId" element={<MerchantProfile />} />
+        <Route path="/directory" element={<MerchantDirectory />} />
         <Route path="/storefront/:accountId" element={<Storefront />} />
         <Route path="/checkout-success" element={<CheckoutSuccess />} />
         <Route path="/install" element={<Install />} />
