@@ -3,13 +3,13 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useOptimizedQuery } from "@/hooks/useOptimizedQuery";
-import { DataLoader } from "@/lib/dataLoader";
+import { supabase } from "@/integrations/supabase/client";
 import { PaymentDialogWithPawBucks } from "@/components/PaymentDialogWithPawBucks";
 import { BottomNav } from "@/components/BottomNav";
 import { PageLoader } from "@/components/PageLoader";
 import { Header } from "@/components/Header";
 import { AdPlacement } from "@/components/AdPlacement";
-import { Search, Store, Scissors, Home, Stethoscope, Footprints, Bone, ArrowUpDown, Coins, CreditCard, ChevronRight, BookOpen } from "lucide-react";
+import { Search, Store, Scissors, Home, Stethoscope, Footprints, Bone, Coins, CreditCard, ChevronRight, BookOpen, Star, Sparkles, MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -19,7 +19,7 @@ import { ROUTES, QUERY_STALE_TIMES } from "@/lib/constants";
 import { SEO } from "@/components/SEO";
 import { usePersistentState } from "@/hooks/usePersistentState";
 
-export type Merchant = {
+type MerchantWithRating = {
   id: string;
   business_name: string;
   business_type: string;
@@ -30,6 +30,10 @@ export type Merchant = {
   cashback_rate: number;
   logo_url?: string;
   accepts_pawbucks?: boolean;
+  is_sponsored?: boolean;
+  sponsored_until?: string;
+  avg_rating: number;
+  review_count: number;
 };
 
 const businessTypes = [
@@ -53,13 +57,144 @@ const getBusinessIcon = (type: string) => {
   return Store;
 };
 
+const StarRating = ({ rating, reviewCount }: { rating: number; reviewCount: number }) => {
+  const fullStars = Math.floor(rating);
+  const hasHalfStar = rating % 1 >= 0.5;
+  
+  return (
+    <div className="flex items-center gap-1.5">
+      <div className="flex items-center">
+        {[...Array(5)].map((_, i) => (
+          <Star
+            key={i}
+            className={`w-4 h-4 ${
+              i < fullStars
+                ? "text-yellow-500 fill-yellow-500"
+                : i === fullStars && hasHalfStar
+                ? "text-yellow-500 fill-yellow-500/50"
+                : "text-muted-foreground/30"
+            }`}
+          />
+        ))}
+      </div>
+      <span className="text-sm font-medium">{rating.toFixed(1)}</span>
+      <span className="text-sm text-muted-foreground">({reviewCount})</span>
+    </div>
+  );
+};
+
+const MerchantCard = ({ 
+  merchant, 
+  onPayClick,
+  isSponsored = false 
+}: { 
+  merchant: MerchantWithRating; 
+  onPayClick: () => void;
+  isSponsored?: boolean;
+}) => {
+  const Icon = getBusinessIcon(merchant.business_type);
+  
+  return (
+    <Card className={`group hover:shadow-lg transition-all duration-300 overflow-hidden ${isSponsored ? 'border-primary/30 bg-primary/5' : 'border-border hover:border-primary/50'}`}>
+      <CardContent className="p-0">
+        <Link to={`/merchant/${merchant.id}`} className="block">
+          <div className="flex gap-4 p-4">
+            {/* Logo */}
+            <div className="flex-shrink-0">
+              {merchant.logo_url ? (
+                <div className="w-24 h-24 rounded-lg overflow-hidden bg-background shadow-sm border border-border">
+                  <img
+                    src={merchant.logo_url}
+                    alt={`${merchant.business_name} logo`}
+                    width={96}
+                    height={96}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="w-24 h-24 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center border border-border/50">
+                  <Icon className="w-10 h-10 text-primary" />
+                </div>
+              )}
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-start justify-between gap-2 mb-1">
+                <h3 className="font-semibold text-lg line-clamp-1 group-hover:text-primary transition-colors">
+                  {merchant.business_name}
+                </h3>
+                {isSponsored && (
+                  <Badge variant="secondary" className="flex-shrink-0 gap-1 bg-primary/10 text-primary text-xs">
+                    <Sparkles className="w-3 h-3" />
+                    Sponsored
+                  </Badge>
+                )}
+              </div>
+
+              {/* Rating */}
+              <div className="mb-2">
+                <StarRating rating={merchant.avg_rating} reviewCount={merchant.review_count} />
+              </div>
+
+              {/* Business Type & Cashback */}
+              <div className="flex items-center gap-2 mb-2 flex-wrap">
+                <Badge variant="outline" className="text-xs capitalize">
+                  {merchant.business_type.replace(/_/g, " ")}
+                </Badge>
+                <Badge className="bg-green-500/10 text-green-600 border-green-500/20 text-xs">
+                  {merchant.cashback_rate.toFixed(0)}% cashback
+                </Badge>
+              </div>
+
+              {/* Description */}
+              {merchant.description && (
+                <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
+                  {merchant.description}
+                </p>
+              )}
+
+              {/* Address & Payment Methods */}
+              <div className="flex items-center justify-between gap-2">
+                {merchant.address && (
+                  <p className="text-xs text-muted-foreground line-clamp-1 flex items-center gap-1">
+                    <MapPin className="w-3 h-3 flex-shrink-0" />
+                    {merchant.address}
+                  </p>
+                )}
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <CreditCard className="w-3.5 h-3.5 text-muted-foreground" />
+                  {merchant.accepts_pawbucks && (
+                    <Coins className="w-3.5 h-3.5 text-primary" />
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Arrow */}
+            <div className="flex-shrink-0 self-center">
+              <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+            </div>
+          </div>
+        </Link>
+
+        {/* Pay Button */}
+        <div className="px-4 pb-4">
+          <Button className="w-full" onClick={onPayClick}>
+            Pay & Earn Cashback
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
 const Discover = () => {
   const { user, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = usePersistentState<string>('discover-search', "");
   const debouncedSearch = useDebounce(searchTerm, 300);
   const [selectedCategory, setSelectedCategory] = usePersistentState<string>('discover-category', "all");
-  const [sortBy, setSortBy] = usePersistentState<string>('discover-sort', "name");
   const [selectedMerchant, setSelectedMerchant] = useState<{
     id: string;
     name: string;
@@ -68,16 +203,53 @@ const Discover = () => {
   } | null>(null);
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
 
-  // Optimized merchant loading with caching
-  const { data: merchants = [], isLoading: loading } = useOptimizedQuery<Merchant[]>(
-    ['merchants'],
-    () => DataLoader.loadMerchants(),
+  // Fetch merchants with ratings
+  const { data: merchantsWithRatings = [], isLoading: loading } = useOptimizedQuery<MerchantWithRating[]>(
+    ['merchants-with-ratings'],
+    async () => {
+      // Fetch merchants
+      const { data: merchants, error: merchantsError } = await supabase
+        .from('merchants')
+        .select('*')
+        .order('business_name');
+      
+      if (merchantsError) throw merchantsError;
+      if (!merchants) return [];
+
+      // Fetch all reviews to calculate ratings
+      const { data: reviews, error: reviewsError } = await supabase
+        .from('merchant_reviews')
+        .select('merchant_id, rating');
+      
+      if (reviewsError) throw reviewsError;
+
+      // Calculate average ratings per merchant
+      const ratingsByMerchant = (reviews || []).reduce((acc, review) => {
+        if (!acc[review.merchant_id]) {
+          acc[review.merchant_id] = { total: 0, count: 0 };
+        }
+        acc[review.merchant_id].total += review.rating;
+        acc[review.merchant_id].count += 1;
+        return acc;
+      }, {} as Record<string, { total: number; count: number }>);
+
+      // Merge merchant data with ratings
+      return merchants.map(merchant => ({
+        ...merchant,
+        avg_rating: ratingsByMerchant[merchant.id] 
+          ? ratingsByMerchant[merchant.id].total / ratingsByMerchant[merchant.id].count 
+          : 0,
+        review_count: ratingsByMerchant[merchant.id]?.count || 0
+      }));
+    },
     { staleTime: QUERY_STALE_TIMES.LONG }
   );
 
-  // Memoized filtered and sorted merchants
-  const filteredMerchants = useMemo(() => {
-    let filtered = merchants;
+  // Separate sponsored and regular merchants, sorted by rating
+  const { sponsoredMerchants, regularMerchants } = useMemo(() => {
+    const now = new Date().toISOString();
+    
+    let filtered = merchantsWithRatings;
 
     // Filter by category
     if (selectedCategory !== "all") {
@@ -97,22 +269,19 @@ const Discover = () => {
       );
     }
 
-    // Sort
-    const sorted = [...filtered].sort((a, b) => {
-      switch (sortBy) {
-        case "cashback":
-          return b.cashback_rate - a.cashback_rate;
-        case "name":
-        default:
-          return a.business_name.localeCompare(b.business_name);
-      }
-    });
+    // Separate sponsored (active) from regular
+    const sponsored = filtered
+      .filter(m => m.is_sponsored && m.sponsored_until && m.sponsored_until > now)
+      .sort((a, b) => b.avg_rating - a.avg_rating);
+    
+    const regular = filtered
+      .filter(m => !m.is_sponsored || !m.sponsored_until || m.sponsored_until <= now)
+      .sort((a, b) => b.avg_rating - a.avg_rating);
 
-    return sorted;
-  }, [merchants, selectedCategory, debouncedSearch, sortBy]);
+    return { sponsoredMerchants: sponsored, regularMerchants: regular };
+  }, [merchantsWithRatings, selectedCategory, debouncedSearch]);
 
-
-  const handleMerchantClick = (merchant: Merchant) => {
+  const handleMerchantClick = (merchant: MerchantWithRating) => {
     if (!user) {
       toast.error("Please sign in to make a payment");
       navigate(ROUTES.AUTH);
@@ -141,6 +310,8 @@ const Discover = () => {
     return <PageLoader message="Finding amazing pet merchants near you..." />;
   }
 
+  const totalMerchants = sponsoredMerchants.length + regularMerchants.length;
+
   return (
     <>
       <SEO
@@ -150,7 +321,7 @@ const Discover = () => {
       />
       <Header isAuthenticated={!!user} onLogout={user ? handleLogout : undefined} />
       <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
-        <div className="container mx-auto px-4 pt-4 max-w-7xl">
+        <div className="container mx-auto px-4 pt-4 max-w-4xl">
           {/* Top Ad Placement */}
           <div className="mb-6">
             <AdPlacement position="top" />
@@ -159,7 +330,7 @@ const Discover = () => {
 
         {/* Hero Section */}
         <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-background border-b">
-          <div className="container mx-auto px-4 py-8">
+          <div className="container mx-auto px-4 py-8 max-w-4xl">
             <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
               Discover Pet Merchants
             </h1>
@@ -168,7 +339,7 @@ const Discover = () => {
             </p>
 
             {/* Search Bar */}
-            <div className="flex flex-col sm:flex-row gap-4 max-w-2xl">
+            <div className="flex flex-col sm:flex-row gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                 <Input
@@ -188,7 +359,7 @@ const Discover = () => {
           </div>
         </div>
 
-        <div className="container mx-auto px-4 py-6 max-w-7xl">
+        <div className="container mx-auto px-4 py-6 max-w-4xl">
           {/* Category Filters */}
           <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
             {businessTypes.map((type) => {
@@ -209,24 +380,15 @@ const Discover = () => {
             })}
           </div>
 
-          {/* Sort & Count */}
-          <div className="flex items-center justify-between mb-6">
+          {/* Results Count */}
+          <div className="mb-6">
             <p className="text-sm text-muted-foreground">
-              {filteredMerchants.length} {filteredMerchants.length === 1 ? "merchant" : "merchants"} found
+              {totalMerchants} {totalMerchants === 1 ? "result" : "results"} • Sorted by highest rating
             </p>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setSortBy(sortBy === "name" ? "cashback" : "name")}
-              className="gap-2"
-            >
-              <ArrowUpDown className="w-4 h-4" />
-              {sortBy === "name" ? "Sort by Cashback" : "Sort by Name"}
-            </Button>
           </div>
 
-          {/* Merchants Grid */}
-          {filteredMerchants.length === 0 ? (
+          {/* No Results */}
+          {totalMerchants === 0 ? (
             <div className="text-center py-16">
               <Store className="w-16 h-16 mx-auto text-muted-foreground/40 mb-4" />
               <h3 className="text-lg font-semibold mb-2">No merchants found</h3>
@@ -235,95 +397,42 @@ const Discover = () => {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-              {filteredMerchants.map((merchant) => {
-                const Icon = getBusinessIcon(merchant.business_type);
-                return (
-                  <Card
-                    key={merchant.id}
-                    className="group hover:shadow-lg transition-all duration-300 overflow-hidden border-border hover:border-primary/50"
-                  >
-                    <CardContent className="p-0">
-                      {/* Clickable Profile Link */}
-                      <Link to={`/merchant/${merchant.id}`} className="block">
-                        {/* Logo/Icon Header */}
-                        <div className="bg-gradient-to-br from-primary/10 to-primary/5 p-6 flex items-center justify-center relative">
-                          {merchant.logo_url ? (
-                            <div className="w-32 h-32 rounded-full overflow-hidden bg-background group-hover:scale-105 transition-transform shadow-md border-2 border-border">
-                              <img
-                                src={merchant.logo_url}
-                                alt={`${merchant.business_name} logo`}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                          ) : (
-                            <div className="w-32 h-32 rounded-full bg-background flex items-center justify-center group-hover:scale-105 transition-transform border-2 border-border/50 shadow-md">
-                              <Icon className="w-16 h-16 text-primary" />
-                            </div>
-                          )}
-                        </div>
+            <div className="space-y-8">
+              {/* Sponsored Merchants Section */}
+              {sponsoredMerchants.length > 0 && (
+                <div>
+                  <div className="flex items-center gap-2 mb-4">
+                    <Sparkles className="w-5 h-5 text-primary" />
+                    <h2 className="text-lg font-semibold">Sponsored Results</h2>
+                  </div>
+                  <div className="space-y-4">
+                    {sponsoredMerchants.map((merchant) => (
+                      <MerchantCard
+                        key={merchant.id}
+                        merchant={merchant}
+                        onPayClick={() => handleMerchantClick(merchant)}
+                        isSponsored
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
 
-                        {/* Content */}
-                        <div className="p-6 pb-3">
-                          <div className="flex items-start justify-between mb-3">
-                            <h3 className="font-semibold text-lg line-clamp-1 group-hover:text-primary transition-colors">
-                              {merchant.business_name}
-                            </h3>
-                            <Badge className="bg-primary/10 text-primary border-primary/20 flex-shrink-0">
-                              {merchant.cashback_rate.toFixed(1)}% back
-                            </Badge>
-                          </div>
-
-                          {/* Payment Methods */}
-                          <div className="flex items-center gap-2 mb-3">
-                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                              <CreditCard className="w-3 h-3" />
-                              <span>Card</span>
-                            </div>
-                            {merchant.accepts_pawbucks && (
-                              <div className="flex items-center gap-1 text-xs text-primary">
-                                <Coins className="w-3 h-3" />
-                                <span>PawBucks</span>
-                              </div>
-                            )}
-                          </div>
-
-                          <p className="text-sm text-muted-foreground capitalize mb-3">
-                            {merchant.business_type.replace(/_/g, " ")}
-                          </p>
-
-                          {merchant.description && (
-                            <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-                              {merchant.description}
-                            </p>
-                          )}
-
-                          {merchant.address && (
-                            <p className="text-xs text-muted-foreground line-clamp-1 mb-3">
-                              📍 {merchant.address}
-                            </p>
-                          )}
-
-                          <div className="flex items-center text-sm text-primary font-medium">
-                            View Profile
-                            <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
-                          </div>
-                        </div>
-                      </Link>
-
-                      {/* Pay Button */}
-                      <div className="px-6 pb-6">
-                        <Button 
-                          className="w-full"
-                          onClick={() => handleMerchantClick(merchant)}
-                        >
-                          Pay & Earn Cashback
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
+              {/* All Results Section */}
+              <div>
+                <h2 className="text-lg font-semibold mb-4">
+                  {sponsoredMerchants.length > 0 ? "All Results" : "Results"}
+                </h2>
+                <div className="space-y-4">
+                  {regularMerchants.map((merchant) => (
+                    <MerchantCard
+                      key={merchant.id}
+                      merchant={merchant}
+                      onPayClick={() => handleMerchantClick(merchant)}
+                    />
+                  ))}
+                </div>
+              </div>
             </div>
           )}
 
