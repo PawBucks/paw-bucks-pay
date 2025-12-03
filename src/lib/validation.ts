@@ -44,11 +44,23 @@ export const merchantOnboardingSchema = z.object({
   businessType: z.enum(["vet", "groomer", "sitter", "pet_store", "walker", "trainer"], {
     errorMap: () => ({ message: "Invalid business type" }),
   }),
-  address: z.string()
+  streetAddress: z.string()
     .trim()
-    .max(500, { message: "Address must be less than 500 characters" })
-    .optional()
-    .or(z.literal("")),
+    .min(1, { message: "Street address is required" })
+    .max(200, { message: "Street address must be less than 200 characters" }),
+  city: z.string()
+    .trim()
+    .min(1, { message: "City is required" })
+    .max(100, { message: "City must be less than 100 characters" }),
+  state: z.string()
+    .trim()
+    .min(1, { message: "State is required" })
+    .max(50, { message: "State must be less than 50 characters" }),
+  zipCode: z.string()
+    .trim()
+    .min(1, { message: "ZIP code is required" })
+    .max(20, { message: "ZIP code must be less than 20 characters" })
+    .regex(/^[0-9]{5}(-[0-9]{4})?$/, { message: "Invalid ZIP code format (e.g., 12345 or 12345-6789)" }),
   description: z.string()
     .trim()
     .max(2000, { message: "Description must be less than 2000 characters" })
