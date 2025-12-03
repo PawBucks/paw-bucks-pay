@@ -43,7 +43,7 @@ export class DataLoader {
         .from('wallets')
         .select('*')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;
