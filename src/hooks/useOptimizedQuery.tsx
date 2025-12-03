@@ -61,24 +61,13 @@ export const useOptimizedMutation = <TData, TVariables>(
 };
 
 // Batch query fetcher - fetches multiple queries in parallel
-export const useBatchQuery = (
+// Note: This is a wrapper that should be used at component level with separate hooks
+export const createBatchQueryConfig = (
   queries: Array<{ key: string[]; fn: () => Promise<any> }>
 ) => {
-  const results = queries.map(({ key, fn }) => {
-    return useQuery({
-      queryKey: key,
-      queryFn: fn,
-      staleTime: 1000 * 60 * 5,
-    });
-  });
-
-  return {
-    data: results.reduce((acc: Record<string, any>, result, index) => {
-      acc[queries[index].key[0]] = result.data;
-      return acc;
-    }, {}),
-    isLoading: results.some((r) => r.isLoading),
-    isError: results.some((r) => r.isError),
-    refetch: () => Promise.all(results.map((r) => r.refetch())),
-  };
+  return queries.map(({ key, fn }) => ({
+    queryKey: key,
+    queryFn: fn,
+    staleTime: 1000 * 60 * 5,
+  }));
 };
