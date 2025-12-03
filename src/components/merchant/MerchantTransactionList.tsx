@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { GradientCard } from "@/components/ui/gradient-card";
 import { format } from "date-fns";
 
@@ -15,7 +16,7 @@ type MerchantTransactionListProps = {
   showCard?: boolean;
 };
 
-export const MerchantTransactionList = ({
+const MerchantTransactionListComponent = ({
   transactions,
   title = "Recent Transactions",
   showCard = true,
@@ -61,3 +62,5 @@ export const MerchantTransactionList = ({
 
   return content;
 };
+
+export const MerchantTransactionList = memo(MerchantTransactionListComponent);
