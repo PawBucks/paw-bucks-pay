@@ -9,13 +9,14 @@ import { BottomNav } from "@/components/BottomNav";
 import { PageLoader } from "@/components/PageLoader";
 import { Header } from "@/components/Header";
 import { AdPlacement } from "@/components/AdPlacement";
-import { Search, Store, Scissors, Home, Stethoscope, Footprints, Bone, Coins, CreditCard, ChevronRight, BookOpen, Star, Sparkles, MapPin, SlidersHorizontal, X, List, Map, Navigation, ArrowUpDown } from "lucide-react";
+import { Search, Store, Scissors, Home, Stethoscope, Footprints, Bone, Coins, CreditCard, ChevronRight, BookOpen, Star, Sparkles, MapPin, SlidersHorizontal, X, List, Map, Navigation, ArrowUpDown, LayoutGrid } from "lucide-react";
 import { MerchantMap } from "@/components/MerchantMap";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import { ROUTES, QUERY_STALE_TIMES } from "@/lib/constants";
 import { SEO } from "@/components/SEO";
@@ -701,8 +702,8 @@ const Discover = () => {
               </Button>
             )}
 
-            {/* View Toggle */}
-            <div className="ml-auto flex items-center border rounded-lg overflow-hidden">
+            {/* View Toggle - Mobile Only */}
+            <div className="ml-auto flex lg:hidden items-center border rounded-lg overflow-hidden">
               <Button
                 variant={viewMode === 'list' ? 'default' : 'ghost'}
                 size="sm"
@@ -721,6 +722,12 @@ const Discover = () => {
                 <Map className="w-4 h-4" />
                 Map
               </Button>
+            </div>
+
+            {/* Split View Indicator - Desktop */}
+            <div className="ml-auto hidden lg:flex items-center gap-2 text-sm text-muted-foreground">
+              <LayoutGrid className="w-4 h-4" />
+              Split View
             </div>
           </div>
 
@@ -741,60 +748,123 @@ const Discover = () => {
                 Try adjusting your search or filters
               </p>
             </div>
-          ) : viewMode === 'map' ? (
-            /* Map View */
-            <div className="space-y-4">
-              <MerchantMap
-                merchants={[...sponsoredMerchants, ...regularMerchants]}
-                onMerchantClick={(merchantId) => {
-                  navigate(`/merchant/${merchantId}`);
-                }}
-              />
-              <p className="text-sm text-muted-foreground text-center">
-                Click on a marker to view merchant details
-              </p>
-            </div>
           ) : (
-            /* List View */
-            <div className="space-y-8">
-              {/* Sponsored Merchants Section */}
-              {sponsoredMerchants.length > 0 && (
-                <div>
-                  <div className="flex items-center gap-2 mb-4">
-                    <Sparkles className="w-5 h-5 text-primary" />
-                    <h2 className="text-lg font-semibold">Sponsored Results</h2>
-                  </div>
-                  <div className="space-y-4">
-                    {sponsoredMerchants.map((merchant) => (
-                      <MerchantCard
-                        key={merchant.id}
-                        merchant={merchant}
-                        onPayClick={() => handleMerchantClick(merchant)}
-                        isSponsored
-                        showDistance={!!userLocation}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
+            <>
+              {/* Desktop Split View */}
+              <div className="hidden lg:flex gap-6 h-[calc(100vh-380px)] min-h-[500px]">
+                {/* List Panel */}
+                <ScrollArea className="flex-1 pr-4">
+                  <div className="space-y-6">
+                    {/* Sponsored Merchants Section */}
+                    {sponsoredMerchants.length > 0 && (
+                      <div>
+                        <div className="flex items-center gap-2 mb-4">
+                          <Sparkles className="w-5 h-5 text-primary" />
+                          <h2 className="text-lg font-semibold">Sponsored Results</h2>
+                        </div>
+                        <div className="space-y-4">
+                          {sponsoredMerchants.map((merchant) => (
+                            <MerchantCard
+                              key={merchant.id}
+                              merchant={merchant}
+                              onPayClick={() => handleMerchantClick(merchant)}
+                              isSponsored
+                              showDistance={!!userLocation}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
-              {/* All Results Section */}
-              <div>
-                <h2 className="text-lg font-semibold mb-4">
-                  {sponsoredMerchants.length > 0 ? "All Results" : "Results"}
-                </h2>
-                <div className="space-y-4">
-                  {regularMerchants.map((merchant) => (
-                    <MerchantCard
-                      key={merchant.id}
-                      merchant={merchant}
-                      onPayClick={() => handleMerchantClick(merchant)}
-                      showDistance={!!userLocation}
-                    />
-                  ))}
+                    {/* All Results Section */}
+                    <div>
+                      <h2 className="text-lg font-semibold mb-4">
+                        {sponsoredMerchants.length > 0 ? "All Results" : "Results"}
+                      </h2>
+                      <div className="space-y-4">
+                        {regularMerchants.map((merchant) => (
+                          <MerchantCard
+                            key={merchant.id}
+                            merchant={merchant}
+                            onPayClick={() => handleMerchantClick(merchant)}
+                            showDistance={!!userLocation}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </ScrollArea>
+
+                {/* Map Panel */}
+                <div className="w-[45%] flex-shrink-0 rounded-xl overflow-hidden border border-border shadow-sm">
+                  <MerchantMap
+                    merchants={[...sponsoredMerchants, ...regularMerchants]}
+                    onMerchantClick={(merchantId) => {
+                      navigate(`/merchant/${merchantId}`);
+                    }}
+                  />
                 </div>
               </div>
-            </div>
+
+              {/* Mobile View */}
+              <div className="lg:hidden">
+                {viewMode === 'map' ? (
+                  /* Map View */
+                  <div className="space-y-4">
+                    <MerchantMap
+                      merchants={[...sponsoredMerchants, ...regularMerchants]}
+                      onMerchantClick={(merchantId) => {
+                        navigate(`/merchant/${merchantId}`);
+                      }}
+                    />
+                    <p className="text-sm text-muted-foreground text-center">
+                      Click on a marker to view merchant details
+                    </p>
+                  </div>
+                ) : (
+                  /* List View */
+                  <div className="space-y-8">
+                    {/* Sponsored Merchants Section */}
+                    {sponsoredMerchants.length > 0 && (
+                      <div>
+                        <div className="flex items-center gap-2 mb-4">
+                          <Sparkles className="w-5 h-5 text-primary" />
+                          <h2 className="text-lg font-semibold">Sponsored Results</h2>
+                        </div>
+                        <div className="space-y-4">
+                          {sponsoredMerchants.map((merchant) => (
+                            <MerchantCard
+                              key={merchant.id}
+                              merchant={merchant}
+                              onPayClick={() => handleMerchantClick(merchant)}
+                              isSponsored
+                              showDistance={!!userLocation}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* All Results Section */}
+                    <div>
+                      <h2 className="text-lg font-semibold mb-4">
+                        {sponsoredMerchants.length > 0 ? "All Results" : "Results"}
+                      </h2>
+                      <div className="space-y-4">
+                        {regularMerchants.map((merchant) => (
+                          <MerchantCard
+                            key={merchant.id}
+                            merchant={merchant}
+                            onPayClick={() => handleMerchantClick(merchant)}
+                            showDistance={!!userLocation}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </>
           )}
 
           {/* Bottom Ad Placement */}
