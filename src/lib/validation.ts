@@ -41,6 +41,11 @@ export const merchantOnboardingSchema = z.object({
     .trim()
     .min(1, { message: "Contact person is required" })
     .max(100, { message: "Contact person name must be less than 100 characters" }),
+  phone: z.string()
+    .trim()
+    .min(1, { message: "Phone number is required" })
+    .max(20, { message: "Phone number must be less than 20 characters" })
+    .regex(/^[\d\s\-\(\)\+]+$/, { message: "Invalid phone number format" }),
   businessType: z.enum(["vet", "groomer", "sitter", "pet_store", "walker", "trainer"], {
     errorMap: () => ({ message: "Invalid business type" }),
   }),
