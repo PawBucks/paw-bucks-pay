@@ -45,6 +45,8 @@ const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout }: Heade
             src={logo} 
             alt="PawBucks Logo - Return to homepage" 
             className="h-16 sm:h-20 md:h-24 w-auto object-contain"
+            width={96}
+            height={96}
             loading="eager"
           />
         </div>

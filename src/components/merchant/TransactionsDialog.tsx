@@ -1,0 +1,46 @@
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { MerchantTransactionList } from "./MerchantTransactionList";
+
+type Transaction = {
+  id: string;
+  amount: number;
+  cashback_earned: number;
+  description: string;
+  created_at: string;
+};
+
+type TransactionsDialogProps = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  transactions: Transaction[];
+};
+
+export const TransactionsDialog = ({
+  open,
+  onOpenChange,
+  transactions,
+}: TransactionsDialogProps) => {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>All Transactions</DialogTitle>
+          <DialogDescription>
+            Complete history of your business transactions
+          </DialogDescription>
+        </DialogHeader>
+        <MerchantTransactionList
+          transactions={transactions}
+          title=""
+          showCard={false}
+        />
+      </DialogContent>
+    </Dialog>
+  );
+};

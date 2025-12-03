@@ -125,6 +125,8 @@ export const EditPetProfileDialog = ({ pet, open, onOpenChange, onSuccess }: Edi
                 <img
                   src={photoPreview}
                   alt="Pet preview"
+                  width={128}
+                  height={128}
                   className="w-32 h-32 rounded-full object-cover border-4 border-primary/20"
                 />
               ) : (
