@@ -81,9 +81,11 @@ const MerchantOnboarding = () => {
       const formData = new FormData(e.currentTarget);
       const businessName = formData.get("businessName") as string;
       const contactPerson = formData.get("contactPerson") as string;
-      const address = formData.get("address") as string;
+      const streetAddress = formData.get("streetAddress") as string;
+      const city = formData.get("city") as string;
+      const state = formData.get("state") as string;
+      const zipCode = formData.get("zipCode") as string;
       const description = formData.get("description") as string;
-      const otherExplanation = formData.get("otherExplanation") as string;
 
       // Upload logo if provided
       let logoUrl: string | null = null;
@@ -111,11 +113,16 @@ const MerchantOnboarding = () => {
         businessName,
         contactPerson,
         businessType,
-        address: address || "",
+        streetAddress,
+        city,
+        state,
+        zipCode,
         description: description || "",
-        otherExplanation: otherExplanation || "",
         cashbackRate: 10.0, // Default rate, not user-configurable
       });
+
+      // Combine address fields into full address
+      const fullAddress = `${validatedData.streetAddress}, ${validatedData.city}, ${validatedData.state} ${validatedData.zipCode}`;
 
       // Update profile to merchant type if needed
       if (profile?.user_type !== "merchant") {
@@ -136,7 +143,7 @@ const MerchantOnboarding = () => {
         business_name: validatedData.businessName,
         contact_person: validatedData.contactPerson,
         business_type: validatedData.businessType,
-        address: validatedData.address || null,
+        address: fullAddress,
         description: validatedData.description || null,
         cashback_rate: validatedData.cashbackRate,
         logo_url: logoUrl,
@@ -272,14 +279,51 @@ const MerchantOnboarding = () => {
               </div>
             </div>
 
-            {/* Address */}
-            <div className="space-y-2">
-              <Label htmlFor="address">Business Address</Label>
-              <Input
-                id="address"
-                name="address"
-                placeholder="123 Pet Street, City, State 12345"
-              />
+            {/* Address Fields */}
+            <div className="space-y-4">
+              <Label className="text-base font-semibold">Business Address *</Label>
+              <div className="space-y-3">
+                <div className="space-y-2">
+                  <Label htmlFor="streetAddress">Street Address</Label>
+                  <Input
+                    id="streetAddress"
+                    name="streetAddress"
+                    placeholder="123 Pet Street"
+                    required
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="city">City</Label>
+                    <Input
+                      id="city"
+                      name="city"
+                      placeholder="Los Angeles"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="state">State</Label>
+                    <Input
+                      id="state"
+                      name="state"
+                      placeholder="CA"
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="w-1/2">
+                  <div className="space-y-2">
+                    <Label htmlFor="zipCode">ZIP Code</Label>
+                    <Input
+                      id="zipCode"
+                      name="zipCode"
+                      placeholder="90066"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Description */}
