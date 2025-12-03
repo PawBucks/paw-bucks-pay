@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,6 +29,7 @@ const Storefront = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [merchantName, setMerchantName] = useState<string>("");
+  const [merchantId, setMerchantId] = useState<string | null>(null);
   const [purchasingProductId, setPurchasingProductId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -46,12 +47,13 @@ const Storefront = () => {
       // Load merchant info
       const { data: merchantData } = await supabase
         .from("merchants")
-        .select("business_name")
+        .select("id, business_name")
         .eq("stripe_account_id", accountId)
         .single();
 
       if (merchantData) {
         setMerchantName(merchantData.business_name);
+        setMerchantId(merchantData.id);
       }
 
       // Load products
@@ -119,6 +121,14 @@ const Storefront = () => {
       {/* Header */}
       <div className="border-b bg-card">
         <div className="container py-6">
+          {merchantId && (
+            <Link to={`/merchant/${merchantId}`}>
+              <Button variant="ghost" size="sm" className="mb-4 -ml-2">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Profile
+              </Button>
+            </Link>
+          )}
           <div className="flex items-center gap-3 mb-2">
             <Store className="h-8 w-8 text-primary" />
             <h1 className="text-3xl font-bold text-foreground">
