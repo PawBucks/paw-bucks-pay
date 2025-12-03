@@ -1,3 +1,4 @@
+import { memo, useMemo } from "react";
 import { GradientCard } from "@/components/ui/gradient-card";
 import {
   BarChart,
@@ -29,10 +30,19 @@ type MerchantChartsProps = {
   cashbackDistribution: CashbackDistributionData[];
 };
 
-export const MerchantCharts = ({
+const MerchantChartsComponent = ({
   monthlySalesData,
   cashbackDistribution,
 }: MerchantChartsProps) => {
+  const tooltipStyle = useMemo(() => ({
+    backgroundColor: "hsl(var(--card))",
+    border: "1px solid hsl(var(--border))",
+    borderRadius: "8px",
+  }), []);
+
+  const barFormatter = useMemo(() => (value: number) => [`$${value.toFixed(2)}`, "Sales"], []);
+  const pieFormatter = useMemo(() => (value: number) => `$${value.toFixed(2)}`, []);
+  const yAxisFormatter = useMemo(() => (value: number) => `$${value}`, []);
   return (
     <div className="grid gap-6 md:grid-cols-2 mb-8">
       {/* Monthly Sales Chart */}
@@ -49,15 +59,11 @@ export const MerchantCharts = ({
             <YAxis
               className="text-sm"
               tick={{ fill: "hsl(var(--muted-foreground))" }}
-              tickFormatter={(value) => `$${value}`}
+              tickFormatter={yAxisFormatter}
             />
             <Tooltip
-              contentStyle={{
-                backgroundColor: "hsl(var(--card))",
-                border: "1px solid hsl(var(--border))",
-                borderRadius: "8px",
-              }}
-              formatter={(value: number) => [`$${value.toFixed(2)}`, "Sales"]}
+              contentStyle={tooltipStyle}
+              formatter={barFormatter}
             />
             <Bar dataKey="amount" fill="hsl(var(--accent))" radius={[8, 8, 0, 0]} />
           </BarChart>
@@ -84,12 +90,8 @@ export const MerchantCharts = ({
                 ))}
               </Pie>
               <Tooltip
-                formatter={(value: number) => `$${value.toFixed(2)}`}
-                contentStyle={{
-                  backgroundColor: "hsl(var(--card))",
-                  border: "1px solid hsl(var(--border))",
-                  borderRadius: "8px",
-                }}
+                formatter={pieFormatter}
+                contentStyle={tooltipStyle}
               />
               <Legend />
             </PieChart>
@@ -103,3 +105,5 @@ export const MerchantCharts = ({
     </div>
   );
 };
+
+export const MerchantCharts = memo(MerchantChartsComponent);

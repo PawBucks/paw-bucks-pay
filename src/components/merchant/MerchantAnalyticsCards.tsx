@@ -1,3 +1,4 @@
+import { memo, useMemo } from "react";
 import { GradientCard } from "@/components/ui/gradient-card";
 import {
   DollarSign,
@@ -22,7 +23,14 @@ type MerchantAnalyticsCardsProps = {
   analytics: Analytics | null;
 };
 
-export const MerchantAnalyticsCards = ({ analytics }: MerchantAnalyticsCardsProps) => {
+const MerchantAnalyticsCardsComponent = ({ analytics }: MerchantAnalyticsCardsProps) => {
+  const formattedValues = useMemo(() => ({
+    totalSales: analytics?.total_sales?.toFixed(2) || "0.00",
+    totalCashback: analytics?.total_cashback?.toFixed(2) || "0.00",
+    remainingBalance: analytics?.remaining_balance?.toFixed(2) || "0.00",
+    repaymentRate: analytics?.repayment_rate ? `${analytics.repayment_rate}%` : "N/A",
+    totalTransactions: analytics?.total_transactions || 0,
+  }), [analytics]);
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5 mb-8">
       <GradientCard gradient>
@@ -33,7 +41,7 @@ export const MerchantAnalyticsCards = ({ analytics }: MerchantAnalyticsCardsProp
           <div>
             <p className="text-sm text-muted-foreground">Total Sales</p>
             <p className="text-2xl font-bold">
-              ${analytics?.total_sales?.toFixed(2) || "0.00"}
+              ${formattedValues.totalSales}
             </p>
           </div>
         </div>
@@ -47,7 +55,7 @@ export const MerchantAnalyticsCards = ({ analytics }: MerchantAnalyticsCardsProp
           <div>
             <p className="text-sm text-muted-foreground">Total Cashback Given</p>
             <p className="text-2xl font-bold">
-              ${analytics?.total_cashback?.toFixed(2) || "0.00"}
+              ${formattedValues.totalCashback}
             </p>
           </div>
         </div>
@@ -61,7 +69,7 @@ export const MerchantAnalyticsCards = ({ analytics }: MerchantAnalyticsCardsProp
           <div>
             <p className="text-sm text-muted-foreground">Repayment Remaining</p>
             <p className="text-2xl font-bold">
-              ${analytics?.remaining_balance?.toFixed(2) || "0.00"}
+              ${formattedValues.remainingBalance}
             </p>
           </div>
         </div>
@@ -75,7 +83,7 @@ export const MerchantAnalyticsCards = ({ analytics }: MerchantAnalyticsCardsProp
           <div>
             <p className="text-sm text-muted-foreground">Repayment Rate</p>
             <p className="text-2xl font-bold">
-              {analytics?.repayment_rate ? `${analytics.repayment_rate}%` : "N/A"}
+              {formattedValues.repaymentRate}
             </p>
           </div>
         </div>
@@ -88,10 +96,12 @@ export const MerchantAnalyticsCards = ({ analytics }: MerchantAnalyticsCardsProp
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Total Transactions</p>
-            <p className="text-2xl font-bold">{analytics?.total_transactions || 0}</p>
+            <p className="text-2xl font-bold">{formattedValues.totalTransactions}</p>
           </div>
         </div>
       </GradientCard>
     </div>
   );
 };
+
+export const MerchantAnalyticsCards = memo(MerchantAnalyticsCardsComponent);
