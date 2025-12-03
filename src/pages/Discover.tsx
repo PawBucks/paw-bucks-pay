@@ -9,7 +9,8 @@ import { BottomNav } from "@/components/BottomNav";
 import { PageLoader } from "@/components/PageLoader";
 import { Header } from "@/components/Header";
 import { AdPlacement } from "@/components/AdPlacement";
-import { Search, Store, Scissors, Home, Stethoscope, Footprints, Bone, Coins, CreditCard, ChevronRight, BookOpen, Star, Sparkles, MapPin } from "lucide-react";
+import { Search, Store, Scissors, Home, Stethoscope, Footprints, Bone, Coins, CreditCard, ChevronRight, BookOpen, Star, Sparkles, MapPin, SlidersHorizontal, X } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -199,12 +200,28 @@ const MerchantCard = ({
   );
 };
 
+const ratingFilters = [
+  { label: "Any Rating", value: 0 },
+  { label: "3+ Stars", value: 3 },
+  { label: "4+ Stars", value: 4 },
+  { label: "4.5+ Stars", value: 4.5 },
+];
+
+const priceFilters = [
+  { label: "$", value: 1 },
+  { label: "$$", value: 2 },
+  { label: "$$$", value: 3 },
+  { label: "$$$$", value: 4 },
+];
+
 const Discover = () => {
   const { user, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = usePersistentState<string>('discover-search', "");
   const debouncedSearch = useDebounce(searchTerm, 300);
   const [selectedCategory, setSelectedCategory] = usePersistentState<string>('discover-category', "all");
+  const [minRating, setMinRating] = usePersistentState<number>('discover-min-rating', 0);
+  const [selectedPrices, setSelectedPrices] = usePersistentState<number[]>('discover-prices', []);
   const [selectedMerchant, setSelectedMerchant] = useState<{
     id: string;
     name: string;
@@ -255,6 +272,23 @@ const Discover = () => {
     { staleTime: QUERY_STALE_TIMES.LONG }
   );
 
+  // Toggle price filter
+  const togglePriceFilter = (price: number) => {
+    setSelectedPrices(prev => 
+      prev.includes(price) 
+        ? prev.filter(p => p !== price)
+        : [...prev, price]
+    );
+  };
+
+  // Clear all filters
+  const clearFilters = () => {
+    setMinRating(0);
+    setSelectedPrices([]);
+  };
+
+  const hasActiveFilters = minRating > 0 || selectedPrices.length > 0;
+
   // Separate sponsored and regular merchants, sorted by rating
   const { sponsoredMerchants, regularMerchants } = useMemo(() => {
     const now = new Date().toISOString();
@@ -279,6 +313,16 @@ const Discover = () => {
       );
     }
 
+    // Filter by minimum rating
+    if (minRating > 0) {
+      filtered = filtered.filter(m => m.avg_rating >= minRating);
+    }
+
+    // Filter by price range
+    if (selectedPrices.length > 0) {
+      filtered = filtered.filter(m => selectedPrices.includes(m.price_range || 2));
+    }
+
     // Separate sponsored (active) from regular
     const sponsored = filtered
       .filter(m => m.is_sponsored && m.sponsored_until && m.sponsored_until > now)
@@ -289,7 +333,7 @@ const Discover = () => {
       .sort((a, b) => b.avg_rating - a.avg_rating);
 
     return { sponsoredMerchants: sponsored, regularMerchants: regular };
-  }, [merchantsWithRatings, selectedCategory, debouncedSearch]);
+  }, [merchantsWithRatings, selectedCategory, debouncedSearch, minRating, selectedPrices]);
 
   const handleMerchantClick = (merchant: MerchantWithRating) => {
     if (!user) {
@@ -371,7 +415,7 @@ const Discover = () => {
 
         <div className="container mx-auto px-4 py-6 max-w-4xl">
           {/* Category Filters */}
-          <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
+          <div className="flex gap-2 mb-4 overflow-x-auto pb-2 scrollbar-hide">
             {businessTypes.map((type) => {
               const Icon = type.icon;
               const isSelected = selectedCategory === type.value;
@@ -388,6 +432,70 @@ const Discover = () => {
                 </Button>
               );
             })}
+          </div>
+
+          {/* Rating & Price Filters */}
+          <div className="flex flex-wrap items-center gap-2 mb-6">
+            {/* Rating Filter Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-2">
+                  <Star className="w-4 h-4" />
+                  {minRating > 0 ? `${minRating}+ Stars` : "Rating"}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                <DropdownMenuLabel>Minimum Rating</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {ratingFilters.map((filter) => (
+                  <DropdownMenuCheckboxItem
+                    key={filter.value}
+                    checked={minRating === filter.value}
+                    onCheckedChange={() => setMinRating(filter.value)}
+                  >
+                    {filter.label}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Price Filter Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-2">
+                  <SlidersHorizontal className="w-4 h-4" />
+                  {selectedPrices.length > 0 
+                    ? selectedPrices.sort().map(p => '$'.repeat(p)).join(', ')
+                    : "Price"}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                <DropdownMenuLabel>Price Range</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {priceFilters.map((filter) => (
+                  <DropdownMenuCheckboxItem
+                    key={filter.value}
+                    checked={selectedPrices.includes(filter.value)}
+                    onCheckedChange={() => togglePriceFilter(filter.value)}
+                  >
+                    {filter.label}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Clear Filters */}
+            {hasActiveFilters && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={clearFilters}
+                className="gap-1 text-muted-foreground hover:text-foreground"
+              >
+                <X className="w-3 h-3" />
+                Clear filters
+              </Button>
+            )}
           </div>
 
           {/* Results Count */}
