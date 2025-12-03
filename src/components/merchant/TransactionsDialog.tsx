@@ -5,7 +5,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { MerchantTransactionList } from "./MerchantTransactionList";
+import { VirtualTransactionList } from "./VirtualTransactionList";
 
 type Transaction = {
   id: string;
@@ -28,14 +28,14 @@ export const TransactionsDialog = ({
 }: TransactionsDialogProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-3xl max-h-[80vh]">
         <DialogHeader>
           <DialogTitle>All Transactions</DialogTitle>
           <DialogDescription>
             Complete history of your business transactions
           </DialogDescription>
         </DialogHeader>
-        <MerchantTransactionList
+        <VirtualTransactionList
           transactions={transactions}
           title=""
           showCard={false}

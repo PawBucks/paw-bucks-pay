@@ -1,6 +1,7 @@
 export { MerchantAnalyticsCards } from "./MerchantAnalyticsCards";
 export { MerchantCharts } from "./MerchantCharts";
 export { MerchantTransactionList } from "./MerchantTransactionList";
+export { VirtualTransactionList } from "./VirtualTransactionList";
 export { EditMerchantProfileDialog } from "./EditMerchantProfileDialog";
 export { FundingRequestDialog } from "./FundingRequestDialog";
 export { TransactionsDialog } from "./TransactionsDialog";
