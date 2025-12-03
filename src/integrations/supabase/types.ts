@@ -509,6 +509,7 @@ export type Database = {
           logo_url: string | null
           longitude: number | null
           owner_name: string | null
+          phone: string | null
           sponsored_until: string | null
           stripe_account_id: string | null
           stripe_account_status: string | null
@@ -532,6 +533,7 @@ export type Database = {
           logo_url?: string | null
           longitude?: number | null
           owner_name?: string | null
+          phone?: string | null
           sponsored_until?: string | null
           stripe_account_id?: string | null
           stripe_account_status?: string | null
@@ -555,6 +557,7 @@ export type Database = {
           logo_url?: string | null
           longitude?: number | null
           owner_name?: string | null
+          phone?: string | null
           sponsored_until?: string | null
           stripe_account_id?: string | null
           stripe_account_status?: string | null
