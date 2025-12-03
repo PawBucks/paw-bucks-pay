@@ -32,8 +32,14 @@ type MerchantWithRating = {
   accepts_pawbucks?: boolean;
   is_sponsored?: boolean;
   sponsored_until?: string;
+  price_range?: number;
   avg_rating: number;
   review_count: number;
+};
+
+const getPriceRange = (range?: number) => {
+  const level = range || 2;
+  return '$'.repeat(level);
 };
 
 const businessTypes = [
@@ -137,11 +143,15 @@ const MerchantCard = ({
                 <StarRating rating={merchant.avg_rating} reviewCount={merchant.review_count} />
               </div>
 
-              {/* Business Type & Cashback */}
+              {/* Business Type, Price Range & Cashback */}
               <div className="flex items-center gap-2 mb-2 flex-wrap">
                 <Badge variant="outline" className="text-xs capitalize">
                   {merchant.business_type.replace(/_/g, " ")}
                 </Badge>
+                <span className="text-sm font-medium text-muted-foreground">
+                  {getPriceRange(merchant.price_range)}
+                </span>
+                <span className="text-muted-foreground/50">•</span>
                 <Badge className="bg-green-500/10 text-green-600 border-green-500/20 text-xs">
                   {merchant.cashback_rate.toFixed(0)}% cashback
                 </Badge>
