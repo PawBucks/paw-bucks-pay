@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useOptimizedQuery } from "@/hooks/useOptimizedQuery";
@@ -9,7 +9,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { PageLoader } from "@/components/PageLoader";
 import { Header } from "@/components/Header";
 import { AdPlacement } from "@/components/AdPlacement";
-import { Search, Store, Scissors, Home, Stethoscope, Footprints, Bone, ArrowUpDown, Coins, CreditCard } from "lucide-react";
+import { Search, Store, Scissors, Home, Stethoscope, Footprints, Bone, ArrowUpDown, Coins, CreditCard, ChevronRight, BookOpen } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -168,14 +168,22 @@ const Discover = () => {
             </p>
 
             {/* Search Bar */}
-            <div className="relative max-w-2xl">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-              <Input
-                placeholder="Search for pet stores, groomers, vets..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-12 pr-4 h-12 bg-background border-border shadow-sm"
-              />
+            <div className="flex flex-col sm:flex-row gap-4 max-w-2xl">
+              <div className="relative flex-1">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                <Input
+                  placeholder="Search for pet stores, groomers, vets..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-12 pr-4 h-12 bg-background border-border shadow-sm"
+                />
+              </div>
+              <Button asChild variant="outline" className="h-12 gap-2">
+                <Link to="/directory">
+                  <BookOpen className="w-4 h-4" />
+                  Browse Directory
+                </Link>
+              </Button>
             </div>
           </div>
         </div>
@@ -233,69 +241,82 @@ const Discover = () => {
                 return (
                   <Card
                     key={merchant.id}
-                    className="group hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden border-border hover:border-primary/50"
-                    onClick={() => handleMerchantClick(merchant)}
+                    className="group hover:shadow-lg transition-all duration-300 overflow-hidden border-border hover:border-primary/50"
                   >
                     <CardContent className="p-0">
-                      {/* Logo/Icon Header */}
-                      <div className="bg-gradient-to-br from-primary/10 to-primary/5 p-6 flex items-center justify-center relative">
-                        {merchant.logo_url ? (
-                          <div className="w-32 h-32 rounded-full overflow-hidden bg-background group-hover:scale-105 transition-transform shadow-md border-2 border-border">
-                            <img
-                              src={merchant.logo_url}
-                              alt={`${merchant.business_name} logo`}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                        ) : (
-                          <div className="w-32 h-32 rounded-full bg-background flex items-center justify-center group-hover:scale-105 transition-transform border-2 border-border/50 shadow-md">
-                            <Icon className="w-16 h-16 text-primary" />
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Content */}
-                      <div className="p-6">
-                        <div className="flex items-start justify-between mb-3">
-                          <h3 className="font-semibold text-lg line-clamp-1 group-hover:text-primary transition-colors">
-                            {merchant.business_name}
-                          </h3>
-                          <Badge className="bg-primary/10 text-primary border-primary/20 flex-shrink-0">
-                            {merchant.cashback_rate.toFixed(1)}% back
-                          </Badge>
-                        </div>
-
-                        {/* Payment Methods */}
-                        <div className="flex items-center gap-2 mb-3">
-                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                            <CreditCard className="w-3 h-3" />
-                            <span>Card</span>
-                          </div>
-                          {merchant.accepts_pawbucks && (
-                            <div className="flex items-center gap-1 text-xs text-primary">
-                              <Coins className="w-3 h-3" />
-                              <span>PawBucks</span>
+                      {/* Clickable Profile Link */}
+                      <Link to={`/merchant/${merchant.id}`} className="block">
+                        {/* Logo/Icon Header */}
+                        <div className="bg-gradient-to-br from-primary/10 to-primary/5 p-6 flex items-center justify-center relative">
+                          {merchant.logo_url ? (
+                            <div className="w-32 h-32 rounded-full overflow-hidden bg-background group-hover:scale-105 transition-transform shadow-md border-2 border-border">
+                              <img
+                                src={merchant.logo_url}
+                                alt={`${merchant.business_name} logo`}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          ) : (
+                            <div className="w-32 h-32 rounded-full bg-background flex items-center justify-center group-hover:scale-105 transition-transform border-2 border-border/50 shadow-md">
+                              <Icon className="w-16 h-16 text-primary" />
                             </div>
                           )}
                         </div>
 
-                        <p className="text-sm text-muted-foreground capitalize mb-3">
-                          {merchant.business_type.replace(/_/g, " ")}
-                        </p>
+                        {/* Content */}
+                        <div className="p-6 pb-3">
+                          <div className="flex items-start justify-between mb-3">
+                            <h3 className="font-semibold text-lg line-clamp-1 group-hover:text-primary transition-colors">
+                              {merchant.business_name}
+                            </h3>
+                            <Badge className="bg-primary/10 text-primary border-primary/20 flex-shrink-0">
+                              {merchant.cashback_rate.toFixed(1)}% back
+                            </Badge>
+                          </div>
 
-                        {merchant.description && (
-                          <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
-                            {merchant.description}
+                          {/* Payment Methods */}
+                          <div className="flex items-center gap-2 mb-3">
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <CreditCard className="w-3 h-3" />
+                              <span>Card</span>
+                            </div>
+                            {merchant.accepts_pawbucks && (
+                              <div className="flex items-center gap-1 text-xs text-primary">
+                                <Coins className="w-3 h-3" />
+                                <span>PawBucks</span>
+                              </div>
+                            )}
+                          </div>
+
+                          <p className="text-sm text-muted-foreground capitalize mb-3">
+                            {merchant.business_type.replace(/_/g, " ")}
                           </p>
-                        )}
 
-                        {merchant.address && (
-                          <p className="text-xs text-muted-foreground line-clamp-1">
-                            📍 {merchant.address}
-                          </p>
-                        )}
+                          {merchant.description && (
+                            <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+                              {merchant.description}
+                            </p>
+                          )}
 
-                        <Button className="w-full mt-4 group-hover:bg-primary group-hover:text-primary-foreground">
+                          {merchant.address && (
+                            <p className="text-xs text-muted-foreground line-clamp-1 mb-3">
+                              📍 {merchant.address}
+                            </p>
+                          )}
+
+                          <div className="flex items-center text-sm text-primary font-medium">
+                            View Profile
+                            <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                          </div>
+                        </div>
+                      </Link>
+
+                      {/* Pay Button */}
+                      <div className="px-6 pb-6">
+                        <Button 
+                          className="w-full"
+                          onClick={() => handleMerchantClick(merchant)}
+                        >
                           Pay & Earn Cashback
                         </Button>
                       </div>

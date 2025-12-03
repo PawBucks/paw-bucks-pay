@@ -412,6 +412,44 @@ export type Database = {
           },
         ]
       }
+      merchant_reviews: {
+        Row: {
+          created_at: string
+          id: string
+          merchant_id: string
+          rating: number
+          review_text: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          merchant_id: string
+          rating: number
+          review_text?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          merchant_id?: string
+          rating?: number
+          review_text?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_reviews_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       merchant_search_analytics: {
         Row: {
           clicks: number | null
@@ -1202,6 +1240,35 @@ export type Database = {
             columns: ["referrer_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      review_photos: {
+        Row: {
+          created_at: string
+          id: string
+          photo_url: string
+          review_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          photo_url: string
+          review_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          photo_url?: string
+          review_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_photos_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_reviews"
             referencedColumns: ["id"]
           },
         ]
