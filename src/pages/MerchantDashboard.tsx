@@ -41,6 +41,7 @@ type Merchant = {
   id: string;
   business_name: string;
   contact_person: string;
+  phone?: string;
   business_type: string;
   address?: string;
   description?: string;
@@ -276,6 +277,7 @@ const MerchantDashboard = () => {
       const updates = {
         business_name: formData.get("businessName") as string,
         contact_person: formData.get("contactPerson") as string,
+        phone: formData.get("phone") as string || null,
         business_type: formData.get("businessType") as string,
         address: formData.get("address") as string,
         description: formData.get("description") as string,
@@ -819,6 +821,16 @@ const MerchantDashboard = () => {
                 name="contactPerson"
                 defaultValue={merchant.contact_person}
                 required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone Number</Label>
+              <Input
+                id="phone"
+                name="phone"
+                type="tel"
+                placeholder="(310) 555-1234"
+                defaultValue={merchant.phone || ""}
               />
             </div>
             <div className="space-y-2">
