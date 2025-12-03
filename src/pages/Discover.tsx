@@ -9,7 +9,8 @@ import { BottomNav } from "@/components/BottomNav";
 import { PageLoader } from "@/components/PageLoader";
 import { Header } from "@/components/Header";
 import { AdPlacement } from "@/components/AdPlacement";
-import { Search, Store, Scissors, Home, Stethoscope, Footprints, Bone, Coins, CreditCard, ChevronRight, BookOpen, Star, Sparkles, MapPin, SlidersHorizontal, X } from "lucide-react";
+import { Search, Store, Scissors, Home, Stethoscope, Footprints, Bone, Coins, CreditCard, ChevronRight, BookOpen, Star, Sparkles, MapPin, SlidersHorizontal, X, List, Map } from "lucide-react";
+import { MerchantMap } from "@/components/MerchantMap";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -229,6 +230,7 @@ const Discover = () => {
     acceptsPawbucks: boolean;
   } | null>(null);
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
+  const [viewMode, setViewMode] = usePersistentState<'list' | 'map'>('discover-view-mode', 'list');
 
   // Fetch merchants with ratings
   const { data: merchantsWithRatings = [], isLoading: loading } = useOptimizedQuery<MerchantWithRating[]>(
@@ -496,6 +498,28 @@ const Discover = () => {
                 Clear filters
               </Button>
             )}
+
+            {/* View Toggle */}
+            <div className="ml-auto flex items-center border rounded-lg overflow-hidden">
+              <Button
+                variant={viewMode === 'list' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('list')}
+                className="rounded-none gap-1.5"
+              >
+                <List className="w-4 h-4" />
+                List
+              </Button>
+              <Button
+                variant={viewMode === 'map' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('map')}
+                className="rounded-none gap-1.5"
+              >
+                <Map className="w-4 h-4" />
+                Map
+              </Button>
+            </div>
           </div>
 
           {/* Results Count */}
@@ -514,7 +538,21 @@ const Discover = () => {
                 Try adjusting your search or filters
               </p>
             </div>
+          ) : viewMode === 'map' ? (
+            /* Map View */
+            <div className="space-y-4">
+              <MerchantMap
+                merchants={[...sponsoredMerchants, ...regularMerchants]}
+                onMerchantClick={(merchantId) => {
+                  navigate(`/merchant/${merchantId}`);
+                }}
+              />
+              <p className="text-sm text-muted-foreground text-center">
+                Click on a marker to view merchant details
+              </p>
+            </div>
           ) : (
+            /* List View */
             <div className="space-y-8">
               {/* Sponsored Merchants Section */}
               {sponsoredMerchants.length > 0 && (
