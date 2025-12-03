@@ -81,6 +81,7 @@ const MerchantOnboarding = () => {
       const formData = new FormData(e.currentTarget);
       const businessName = formData.get("businessName") as string;
       const contactPerson = formData.get("contactPerson") as string;
+      const phone = formData.get("phone") as string;
       const streetAddress = formData.get("streetAddress") as string;
       const city = formData.get("city") as string;
       const state = formData.get("state") as string;
@@ -112,6 +113,7 @@ const MerchantOnboarding = () => {
       const validatedData = merchantOnboardingSchema.parse({
         businessName,
         contactPerson,
+        phone,
         businessType,
         streetAddress,
         city,
@@ -142,6 +144,7 @@ const MerchantOnboarding = () => {
         user_id: user.id,
         business_name: validatedData.businessName,
         contact_person: validatedData.contactPerson,
+        phone: validatedData.phone,
         business_type: validatedData.businessType,
         address: fullAddress,
         description: validatedData.description || null,
@@ -209,6 +212,18 @@ const MerchantOnboarding = () => {
                 id="contactPerson"
                 name="contactPerson"
                 placeholder="John Doe"
+                required
+              />
+            </div>
+
+            {/* Phone Number */}
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone Number *</Label>
+              <Input
+                id="phone"
+                name="phone"
+                type="tel"
+                placeholder="(310) 555-1234"
                 required
               />
             </div>
