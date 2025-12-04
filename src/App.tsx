@@ -1,4 +1,4 @@
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -56,7 +56,7 @@ const MerchantAnalytics = lazy(() => import("./pages/MerchantAnalytics"));
 const MerchantProfile = lazy(() => import("./pages/MerchantProfile"));
 const MerchantDirectory = lazy(() => import("./pages/MerchantDirectory"));
 
-const queryClient = new QueryClient({
+const createQueryClient = () => new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 1000 * 60 * 5, // 5 minutes
@@ -130,6 +130,8 @@ const AppContent = () => {
 };
 
 function App() {
+  const [queryClient] = useState(() => createQueryClient());
+  
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
