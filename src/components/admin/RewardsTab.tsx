@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 export function RewardsTab() {
   const [settings, setSettings] = useState({
     earnRate: 10,
-    conversionRate: 10,
+    conversionRate: 1000,
     cashbackRate: 10,
   });
   const [loading, setLoading] = useState(false);
@@ -34,7 +34,7 @@ export function RewardsTab() {
 
         setSettings({
           earnRate: (earnRate?.value as any)?.rate || 10,
-          conversionRate: (conversionRate?.value as any)?.rate || 10,
+          conversionRate: (conversionRate?.value as any)?.rate || 1000,
           cashbackRate: (cashbackRate?.value as any)?.rate || 10,
         });
       }
