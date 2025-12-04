@@ -130,6 +130,7 @@ const AppContent = () => {
 };
 
 function App() {
+  // Initialize QueryClient inside component to ensure proper React lifecycle
   const [queryClient] = useState(() => createQueryClient());
   
   return (
