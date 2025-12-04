@@ -427,7 +427,7 @@ const MerchantProfile = () => {
                       <Coins className="w-5 h-5 text-primary" />
                       <div>
                         <span>PawBucks</span>
-                        <p className="text-xs text-muted-foreground">100 PawBucks = $1.00</p>
+                        <p className="text-xs text-muted-foreground">1000 PawBucks = $1.00</p>
                       </div>
                     </div>
                     <Badge variant={merchant.accepts_pawbucks ? "default" : "secondary"}>
