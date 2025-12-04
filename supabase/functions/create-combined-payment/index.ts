@@ -16,8 +16,8 @@ const combinedPaymentSchema = z.object({
   description: z.string().max(500).optional(),
 });
 
-// PawBucks conversion for pet owners: 100 PawBucks = $1.00
-const PAWBUCKS_TO_USD = 0.01;
+// PawBucks conversion for pet owners: 1000 PawBucks = $1.00 (1 PawBuck = $0.001)
+const PAWBUCKS_TO_USD = 0.001;
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {

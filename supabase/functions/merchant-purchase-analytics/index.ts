@@ -7,8 +7,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Merchant conversion rate: 50 PawBucks = $1 for platform services
-const MERCHANT_PAWBUCKS_TO_USD = 0.02;
+// Merchant conversion rate: 200 PawBucks = $1 for platform services (1 PawBuck = $0.005)
+const MERCHANT_PAWBUCKS_TO_USD = 0.005;
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
