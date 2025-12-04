@@ -18,8 +18,8 @@ import { Loader2, CreditCard, Coins, Check } from "lucide-react";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
 
-// Pet Owner conversion rate: 100 PawBucks = $1.00
-const PAWBUCKS_TO_USD = 0.01;
+// Pet Owner conversion rate: 1000 PawBucks = $1.00 (1 PawBuck = $0.001)
+const PAWBUCKS_TO_USD = 0.001;
 
 type PaymentFormProps = {
   merchantName: string;

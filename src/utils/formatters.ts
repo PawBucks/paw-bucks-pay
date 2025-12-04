@@ -17,13 +17,13 @@ export const Formatters = {
     return new Intl.NumberFormat('en-US').format(value);
   },
 
-  // PawBucks to USD conversion (for pet owner spending: 100 PawBucks = $1)
+  // PawBucks to USD conversion (for pet owner redemption: 1000 PawBucks = $1)
   pawBucksToUSD: (pawBucks: number): string => {
     const usd = pawBucks / PAWBUCKS_CONVERSION.PET_OWNER_TO_USD;
     return Formatters.currency(usd);
   },
 
-  // USD to PawBucks value (for pet owner spending: 100 PawBucks = $1)
+  // USD to PawBucks value (for pet owner: 1000 PawBucks = $1)
   usdToPawBucks: (usd: number): number => {
     return Math.floor(usd * PAWBUCKS_CONVERSION.PET_OWNER_TO_USD);
   },
