@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useGeocoding } from "@/hooks/useGeocoding";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +16,7 @@ import { merchantOnboardingSchema } from "@/lib/validation";
 const MerchantOnboarding = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
+  const { geocodeAddress } = useGeocoding();
   const [isLoading, setIsLoading] = useState(false);
   const [businessType, setBusinessType] = useState("dog_walker");
   const [profile, setProfile] = useState<any>(null);
@@ -140,7 +142,7 @@ const MerchantOnboarding = () => {
       }
 
       // Create merchant profile
-      const { error: merchantError } = await supabase.from("merchants").insert({
+      const { data: merchantData, error: merchantError } = await supabase.from("merchants").insert({
         user_id: user.id,
         business_name: validatedData.businessName,
         contact_person: validatedData.contactPerson,
@@ -150,11 +152,24 @@ const MerchantOnboarding = () => {
         description: validatedData.description || null,
         cashback_rate: validatedData.cashbackRate,
         logo_url: logoUrl,
-      });
+      }).select('id').single();
 
       if (merchantError) {
         console.error("Error creating merchant:", merchantError);
         throw new Error("Failed to create merchant profile");
+      }
+
+      // Geocode the address and update merchant with coordinates
+      if (merchantData?.id) {
+        geocodeAddress(fullAddress, merchantData.id).then(result => {
+          if (result.latitude && result.longitude) {
+            console.log(`Merchant geocoded: lat=${result.latitude}, lng=${result.longitude}`);
+          } else {
+            console.warn("Could not geocode merchant address:", result.error);
+          }
+        }).catch(err => {
+          console.error("Geocoding error:", err);
+        });
       }
 
       toast.success("Merchant profile created successfully!");

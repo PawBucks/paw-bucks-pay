@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useGeocoding } from "@/hooks/useGeocoding";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { GradientCard } from "@/components/ui/gradient-card";
@@ -42,6 +43,8 @@ type Merchant = {
   stripe_account_status?: string;
   logo_url?: string;
   accepts_pawbucks?: boolean;
+  latitude?: number;
+  longitude?: number;
 };
 
 type Analytics = {
@@ -65,6 +68,7 @@ type Transaction = {
 
 const MerchantDashboard = () => {
   const { user, signOut, loading: authLoading } = useAuth();
+  const { geocodeAddress } = useGeocoding();
   const navigate = useNavigate();
   const [merchant, setMerchant] = useState<Merchant | null>(null);
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
@@ -238,12 +242,15 @@ const MerchantDashboard = () => {
         logoUrl = urlData.publicUrl;
       }
 
+      const newAddress = formData.get("address") as string;
+      const addressChanged = newAddress !== merchant.address;
+
       const updates = {
         business_name: formData.get("businessName") as string,
         contact_person: formData.get("contactPerson") as string,
         phone: formData.get("phone") as string || null,
         business_type: formData.get("businessType") as string,
-        address: formData.get("address") as string,
+        address: newAddress,
         description: formData.get("description") as string,
         logo_url: logoUrl,
       };
@@ -254,6 +261,19 @@ const MerchantDashboard = () => {
         .eq("id", merchant.id);
 
       if (error) throw error;
+
+      // Geocode the new address if it changed
+      if (addressChanged && newAddress) {
+        geocodeAddress(newAddress, merchant.id).then(result => {
+          if (result.latitude && result.longitude) {
+            console.log(`Merchant geocoded: lat=${result.latitude}, lng=${result.longitude}`);
+          } else {
+            console.warn("Could not geocode merchant address:", result.error);
+          }
+        }).catch(err => {
+          console.error("Geocoding error:", err);
+        });
+      }
 
       toast.success("Profile updated successfully!");
       setEditDialogOpen(false);

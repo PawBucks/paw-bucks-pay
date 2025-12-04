@@ -108,3 +108,9 @@ verify_jwt = false
 [functions.create-pet-store-payment]
 verify_jwt = true
 
+[functions.geocode-address]
+verify_jwt = false
+
+[functions.get-mapbox-token]
+verify_jwt = false
+
