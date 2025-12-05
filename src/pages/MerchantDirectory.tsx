@@ -80,9 +80,9 @@ const MerchantDirectory = () => {
   const { data: merchants = [], isLoading } = useOptimizedQuery<MerchantWithRating[]>(
     ["merchants-with-ratings"],
     async () => {
-      // Fetch merchants
+      // Fetch merchants from public view (RLS-safe)
       const { data: merchantData, error: merchantError } = await supabase
-        .from("merchants")
+        .from("merchants_public")
         .select("id, business_name, business_type, description, address, cashback_rate, logo_url, accepts_pawbucks")
         .order("business_name");
 
