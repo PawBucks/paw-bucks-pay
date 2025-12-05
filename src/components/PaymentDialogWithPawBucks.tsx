@@ -255,7 +255,7 @@ export const PaymentDialogWithPawBucks = ({
         <DialogHeader>
           <DialogTitle>Pay {merchantName}</DialogTitle>
           <DialogDescription>
-            Earn {cashbackRate}% cashback on card payments
+            Earn {cashbackRate}% cashback in PawBucks on card payments
           </DialogDescription>
         </DialogHeader>
 

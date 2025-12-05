@@ -191,7 +191,7 @@ const MerchantCard = ({
                 </span>
                 <span className="text-muted-foreground/50">•</span>
                 <Badge className="bg-green-500/10 text-green-600 border-green-500/20 text-xs">
-                  {merchant.cashback_rate.toFixed(0)}% cashback
+                  {merchant.cashback_rate.toFixed(0)}% in PawBucks
                 </Badge>
               </div>
 
