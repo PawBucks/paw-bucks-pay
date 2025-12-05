@@ -128,6 +128,13 @@ export type Database = {
             referencedRelation: "merchants"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "funding_deals_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       funding_requests: {
@@ -167,6 +174,13 @@ export type Database = {
             columns: ["merchant_id"]
             isOneToOne: false
             referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "funding_requests_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
             referencedColumns: ["id"]
           },
         ]
@@ -291,6 +305,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "merchant_analytics_purchases_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "merchant_analytics_purchases_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
@@ -345,6 +366,13 @@ export type Database = {
             columns: ["merchant_id"]
             isOneToOne: false
             referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_analytics_subscriptions_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
             referencedColumns: ["id"]
           },
           {
@@ -410,6 +438,13 @@ export type Database = {
             referencedRelation: "merchants"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "merchant_customer_analytics_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       merchant_reviews: {
@@ -446,6 +481,13 @@ export type Database = {
             columns: ["merchant_id"]
             isOneToOne: false
             referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_reviews_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
             referencedColumns: ["id"]
           },
         ]
@@ -487,6 +529,13 @@ export type Database = {
             columns: ["merchant_id"]
             isOneToOne: false
             referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_search_analytics_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
             referencedColumns: ["id"]
           },
         ]
@@ -641,6 +690,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "offer_activity_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "offer_activity_offer_id_fkey"
             columns: ["offer_id"]
             isOneToOne: false
@@ -756,6 +812,13 @@ export type Database = {
             referencedRelation: "merchants"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "partner_offers_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       partner_vets: {
@@ -837,6 +900,13 @@ export type Database = {
             columns: ["partner_id"]
             isOneToOne: false
             referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pawbucks_activity_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
             referencedColumns: ["id"]
           },
           {
@@ -1384,6 +1454,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "transactions_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "transactions_pet_owner_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -1629,7 +1706,60 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      merchants_public: {
+        Row: {
+          accepts_pawbucks: boolean | null
+          address: string | null
+          business_name: string | null
+          business_type: string | null
+          cashback_rate: number | null
+          created_at: string | null
+          description: string | null
+          id: string | null
+          is_sponsored: boolean | null
+          latitude: number | null
+          logo_url: string | null
+          longitude: number | null
+          price_range: number | null
+          sponsored_until: string | null
+          stripe_account_id: string | null
+        }
+        Insert: {
+          accepts_pawbucks?: boolean | null
+          address?: string | null
+          business_name?: string | null
+          business_type?: string | null
+          cashback_rate?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          is_sponsored?: boolean | null
+          latitude?: number | null
+          logo_url?: string | null
+          longitude?: number | null
+          price_range?: number | null
+          sponsored_until?: string | null
+          stripe_account_id?: string | null
+        }
+        Update: {
+          accepts_pawbucks?: boolean | null
+          address?: string | null
+          business_name?: string | null
+          business_type?: string | null
+          cashback_rate?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          is_sponsored?: boolean | null
+          latitude?: number | null
+          logo_url?: string | null
+          longitude?: number | null
+          price_range?: number | null
+          sponsored_until?: string | null
+          stripe_account_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       generate_redemption_code: { Args: never; Returns: string }

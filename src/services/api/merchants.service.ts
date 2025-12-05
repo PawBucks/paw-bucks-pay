@@ -8,16 +8,35 @@ type MerchantReview = Tables<"merchant_reviews">;
 type FundingRequest = Tables<"funding_requests">;
 type FundingDeal = Tables<"funding_deals">;
 
+// Public merchant type from the secure view (excludes sensitive contact info)
+type MerchantPublic = Pick<Merchant, 
+  'id' | 'business_name' | 'business_type' | 'description' | 'logo_url' | 
+  'address' | 'latitude' | 'longitude' | 'cashback_rate' | 'accepts_pawbucks' | 
+  'price_range' | 'is_sponsored' | 'sponsored_until' | 'stripe_account_id' | 'created_at'
+>;
+
 export const merchantsService = {
-  async getAll(): Promise<ServiceListResult<Merchant>> {
+  // Public queries use the secure view (no sensitive contact info)
+  async getAll(): Promise<ServiceListResult<MerchantPublic>> {
     const { data, error } = await supabase
-      .from("merchants")
+      .from("merchants_public")
       .select("*")
       .order("business_name");
     return { data: data || [], error };
   },
 
-  async getById(merchantId: string): Promise<ServiceResult<Merchant>> {
+  // Public query for single merchant (no sensitive contact info)
+  async getById(merchantId: string): Promise<ServiceResult<MerchantPublic>> {
+    const { data, error } = await supabase
+      .from("merchants_public")
+      .select("*")
+      .eq("id", merchantId)
+      .maybeSingle();
+    return { data, error };
+  },
+
+  // Full merchant data for authenticated owner only
+  async getFullById(merchantId: string): Promise<ServiceResult<Merchant>> {
     const { data, error } = await supabase
       .from("merchants")
       .select("*")
@@ -54,9 +73,9 @@ export const merchantsService = {
     return { data, error };
   },
 
-  async getSponsored(): Promise<ServiceListResult<Merchant>> {
+  async getSponsored(): Promise<ServiceListResult<MerchantPublic>> {
     const { data, error } = await supabase
-      .from("merchants")
+      .from("merchants_public")
       .select("*")
       .eq("is_sponsored", true)
       .gte("sponsored_until", new Date().toISOString());

@@ -18,8 +18,9 @@ export const FeaturedMerchants = ({ onMerchantClick }: { onMerchantClick: (merch
   const { data: merchants, isLoading } = useOptimizedQuery<Merchant[]>(
     ["featured-merchants"],
     async () => {
+      // Use public view (excludes sensitive contact info)
       const { data, error } = await supabase
-        .from("merchants")
+        .from("merchants_public")
         .select("*")
         .gte("cashback_rate", 15)
         .limit(3);
