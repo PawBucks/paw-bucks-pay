@@ -106,7 +106,7 @@ const PawBucksWallet = () => {
             <Coins className="w-10 h-10 text-yellow-500" />
             <h2 className="text-4xl font-bold">Your PawBucks Wallet</h2>
           </div>
-          <p className="text-muted-foreground text-lg">Earn up to 30% cashback in PawBucks on every purchase! 🐾</p>
+          <p className="text-muted-foreground text-lg">Free: $1 = 10 PawBucks • PawPass: $1 = 20 PawBucks • PawPass+: $1 = 30 PawBucks 🐾</p>
         </div>
 
         {/* Main Wallet Card */}
