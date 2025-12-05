@@ -158,7 +158,7 @@ const Index = () => {
               </div>
               <h3 className="text-2xl font-bold mb-3">PawBucks Rewards</h3>
               <p className="text-muted-foreground leading-relaxed">
-                Earn PawBucks with every purchase—$1 spent = 10 PawBucks earned. Redeem for discounts and exclusive offers!
+                Earn PawBucks with every purchase! Free: $1 = 10 PawBucks. PawPass: $1 = 20 PawBucks. PawPass+: $1 = 30 PawBucks!
               </p>
             </Card>
 
