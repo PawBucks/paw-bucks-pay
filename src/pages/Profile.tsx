@@ -151,6 +151,55 @@ const Profile = () => {
             <h2 className="text-2xl font-bold text-center">Choose Your Plan</h2>
             <p className="text-center text-muted-foreground mb-6">7-Day Free Trial on Both Plans</p>
             
+            {/* PawBucks Comparison Table */}
+            <GradientCard className="mb-6">
+              <h3 className="text-lg font-semibold text-center mb-4">PawBucks Earning Comparison</h3>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border">
+                      <th className="py-3 px-2 text-left font-medium text-muted-foreground">You Spend</th>
+                      <th className="py-3 px-2 text-center font-medium text-muted-foreground">
+                        <span className="block">Free</span>
+                        <span className="text-xs text-muted-foreground/70">(10%)</span>
+                      </th>
+                      <th className="py-3 px-2 text-center font-medium text-yellow-600">
+                        <span className="block">PawPass</span>
+                        <span className="text-xs text-muted-foreground/70">(20%)</span>
+                      </th>
+                      <th className="py-3 px-2 text-center font-medium text-purple-600">
+                        <span className="block">PawPass+</span>
+                        <span className="text-xs text-muted-foreground/70">(30%)</span>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="border-b border-border/50">
+                      <td className="py-3 px-2 font-medium">$10</td>
+                      <td className="py-3 px-2 text-center">100</td>
+                      <td className="py-3 px-2 text-center text-yellow-600 font-medium">200</td>
+                      <td className="py-3 px-2 text-center text-purple-600 font-semibold">300</td>
+                    </tr>
+                    <tr className="border-b border-border/50">
+                      <td className="py-3 px-2 font-medium">$100</td>
+                      <td className="py-3 px-2 text-center">1,000</td>
+                      <td className="py-3 px-2 text-center text-yellow-600 font-medium">2,000</td>
+                      <td className="py-3 px-2 text-center text-purple-600 font-semibold">3,000</td>
+                    </tr>
+                    <tr>
+                      <td className="py-3 px-2 font-medium">$1,000</td>
+                      <td className="py-3 px-2 text-center">10,000</td>
+                      <td className="py-3 px-2 text-center text-yellow-600 font-medium">20,000</td>
+                      <td className="py-3 px-2 text-center text-purple-600 font-semibold">30,000</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <p className="text-xs text-center text-muted-foreground mt-4">
+                1,000 PawBucks = $1.00 in rewards value
+              </p>
+            </GradientCard>
+            
             {/* PawPass Basic */}
             <GradientCard className="relative" gradient={false}>
               <div className="space-y-4">
@@ -170,7 +219,7 @@ const Profile = () => {
                   <p className="text-sm font-semibold mb-2">Included Benefits:</p>
                   <ul className="text-xs text-muted-foreground space-y-1">
                     <li>• 24/7 customer support</li>
-                    <li>• 20% cashback rewards on all purchases</li>
+                    <li>• <span className="font-semibold text-yellow-600">20% cashback in PawBucks</span> ($1 = 20 PawBucks)</li>
                     <li>• Priority access to new features</li>
                   </ul>
                 </div>
@@ -217,7 +266,7 @@ const Profile = () => {
                   <p className="text-sm font-semibold mb-2">Everything in PawPass, plus:</p>
                   <ul className="text-xs text-muted-foreground space-y-1">
                     <li>• <span className="font-semibold text-primary">Ad-Free experience</span></li>
-                    <li>• <span className="font-semibold text-primary">30% total cashback rewards</span> (20% + 10% bonus)</li>
+                    <li>• <span className="font-semibold text-purple-600">30% cashback in PawBucks</span> ($1 = 30 PawBucks)</li>
                     <li>• Exclusive premium partner offers</li>
                     <li>• VIP customer support with priority response</li>
                     <li>• Early access to beta features</li>
