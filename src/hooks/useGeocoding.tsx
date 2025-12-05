@@ -9,7 +9,8 @@ interface GeocodeResult {
 }
 
 /**
- * Hook for geocoding addresses using Mapbox API via edge function
+ * Hook for geocoding addresses using Mapbox API via edge function.
+ * Merchant coordinate updates are handled through authenticated Supabase client.
  */
 export const useGeocoding = () => {
   const geocodeAddress = useCallback(async (
@@ -17,8 +18,9 @@ export const useGeocoding = () => {
     merchantId?: string
   ): Promise<GeocodeResult> => {
     try {
+      // Call the public geocode endpoint (address lookup only)
       const { data, error } = await supabase.functions.invoke('geocode-address', {
-        body: { address, merchantId },
+        body: { address },
       });
 
       if (error) {
@@ -26,12 +28,33 @@ export const useGeocoding = () => {
         return { latitude: null, longitude: null, error: error.message };
       }
 
-      return {
+      const result: GeocodeResult = {
         latitude: data.latitude,
         longitude: data.longitude,
         formattedAddress: data.formattedAddress,
         error: data.error,
       };
+
+      // If merchantId provided and we got valid coordinates, update via authenticated client
+      if (merchantId && result.latitude !== null && result.longitude !== null) {
+        const { error: updateError } = await supabase
+          .from('merchants')
+          .update({ 
+            latitude: result.latitude, 
+            longitude: result.longitude 
+          })
+          .eq('id', merchantId);
+
+        if (updateError) {
+          console.error('Failed to update merchant coordinates:', updateError);
+          // Return the geocode result even if update failed
+          // The update will only succeed if the user owns the merchant (RLS)
+        } else {
+          console.log(`Updated merchant ${merchantId} with coordinates`);
+        }
+      }
+
+      return result;
     } catch (error) {
       console.error('Geocoding failed:', error);
       return { 

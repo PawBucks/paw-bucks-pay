@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -26,7 +25,7 @@ serve(async (req) => {
       );
     }
 
-    const { address, merchantId } = await req.json();
+    const { address } = await req.json();
 
     if (!address) {
       return new Response(
@@ -77,24 +76,9 @@ serve(async (req) => {
     const [longitude, latitude] = geocodeData.features[0].center;
     console.log(`Geocoded coordinates: lat=${latitude}, lng=${longitude}`);
 
-    // If merchantId is provided, update the merchant record directly
-    if (merchantId) {
-      const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-      const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-      const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-      const { error: updateError } = await supabase
-        .from("merchants")
-        .update({ latitude, longitude })
-        .eq("id", merchantId);
-
-      if (updateError) {
-        console.error("Error updating merchant coordinates:", updateError);
-        // Still return the coordinates even if update failed
-      } else {
-        console.log(`Updated merchant ${merchantId} with coordinates`);
-      }
-    }
+    // NOTE: Database updates for merchant coordinates should be handled
+    // by the frontend through authenticated Supabase client calls,
+    // not through this public geocoding endpoint.
 
     return new Response(
       JSON.stringify({ 
