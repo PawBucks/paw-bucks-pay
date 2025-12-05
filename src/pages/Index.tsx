@@ -49,8 +49,8 @@ const Index = () => {
     <div className="min-h-screen bg-[var(--gradient-hero)] overflow-hidden">
       <SEO 
         title="PawBucks - Digital Pet Payment Platform"
-        description="Connect with trusted pet stores, groomers, and trainers. Earn cashback rewards with every transaction and manage all your pet expenses in one secure digital wallet."
-        keywords={["pet payments", "pet wallet", "cashback rewards", "pet stores", "groomers", "pet services", "digital wallet", "pet expenses"]}
+        description="Connect with trusted pet stores, groomers, and trainers. Earn up to 30% cashback in PawBucks with every transaction and manage all your pet expenses in one secure digital wallet."
+        keywords={["pet payments", "pet wallet", "PawBucks rewards", "pet stores", "groomers", "pet services", "digital wallet", "pet expenses"]}
       />
       <Header menuItems={[
         { label: "Explore Pet Merchants", path: "/discover" },
@@ -82,7 +82,7 @@ const Index = () => {
             </h2>
             
             <p className="text-lg sm:text-xl lg:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              Connect with trusted pet stores, groomers, and trainers. Earn cashback rewards with every transaction
+              Connect with trusted pet stores, groomers, and trainers. Earn up to 30% cashback in PawBucks with every transaction
               and keep your pet expenses organized in one secure place.
             </p>
             
@@ -156,9 +156,9 @@ const Index = () => {
               <div className="w-20 h-20 rounded-2xl bg-accent/10 flex items-center justify-center mx-auto mb-6 shadow-md group-hover:scale-110 group-hover:bg-accent/20 transition-all" aria-hidden="true">
                 <Gift className="w-10 h-10 text-accent" />
               </div>
-              <h3 className="text-2xl font-bold mb-3">Cashback Rewards</h3>
+              <h3 className="text-2xl font-bold mb-3">PawBucks Rewards</h3>
               <p className="text-muted-foreground leading-relaxed">
-                Earn points with every purchase and get instant cashback from verified partner merchants and service providers.
+                Earn PawBucks with every purchase—$1 spent = 10 PawBucks earned. Redeem for discounts and exclusive offers!
               </p>
             </Card>
 
@@ -258,8 +258,8 @@ const Index = () => {
                     </div>
                   </div>
                   <div>
-                    <h3 className="font-bold text-lg mb-2">Rewards Program</h3>
-                    <p className="text-muted-foreground">Earn cashback and exclusive perks with every transaction</p>
+                    <h3 className="font-bold text-lg mb-2">PawBucks Rewards</h3>
+                    <p className="text-muted-foreground">Earn PawBucks with every transaction and redeem for exclusive perks</p>
                   </div>
                 </div>
               </div>
