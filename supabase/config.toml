@@ -102,8 +102,6 @@ verify_jwt = true
 [functions.create-combined-payment]
 verify_jwt = true
 
-[functions.process-pawbucks-deduction]
-verify_jwt = false
 
 [functions.create-pet-store-payment]
 verify_jwt = true
