@@ -58,27 +58,62 @@ export const MerchantMap = ({ merchants, onMerchantClick }: MerchantMapProps) =>
     const defaultCenter: [number, number] = [-98.5795, 39.8283];
     const defaultZoom = 3;
 
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/light-v11',
-      center: defaultCenter,
-      zoom: defaultZoom,
-    });
+    let timeoutId: ReturnType<typeof setTimeout>;
 
-    map.current.addControl(
-      new mapboxgl.NavigationControl({ visualizePitch: false }),
-      'top-right'
-    );
+    try {
+      map.current = new mapboxgl.Map({
+        container: mapContainer.current,
+        style: 'mapbox://styles/mapbox/light-v11',
+        center: defaultCenter,
+        zoom: defaultZoom,
+        attributionControl: false,
+      });
 
-    map.current.on('load', () => {
+      map.current.addControl(
+        new mapboxgl.NavigationControl({ visualizePitch: false }),
+        'top-right'
+      );
+
+      map.current.addControl(
+        new mapboxgl.AttributionControl({ compact: true }),
+        'bottom-right'
+      );
+
+      const handleMapReady = () => {
+        // Ensure the map resizes to fill container
+        map.current?.resize();
+        setLoading(false);
+      };
+
+      map.current.on('load', handleMapReady);
+
+      map.current.on('error', (e) => {
+        console.error('Mapbox error:', e);
+        setError('Failed to load map');
+        setLoading(false);
+      });
+
+      // Fallback timeout in case 'load' event doesn't fire
+      timeoutId = setTimeout(() => {
+        if (map.current && !map.current.loaded()) {
+          console.warn('Map load timeout - forcing ready state');
+          map.current.resize();
+          setLoading(false);
+        }
+      }, 10000);
+
+      return () => {
+        clearTimeout(timeoutId);
+        markersRef.current.forEach(marker => marker.remove());
+        markersRef.current = [];
+        map.current?.remove();
+        map.current = null;
+      };
+    } catch (err) {
+      console.error('Failed to initialize map:', err);
+      setError('Failed to initialize map');
       setLoading(false);
-    });
-
-    return () => {
-      markersRef.current.forEach(marker => marker.remove());
-      markersRef.current = [];
-      map.current?.remove();
-    };
+    }
   }, [mapboxToken]);
 
   // Add markers when merchants change
@@ -164,7 +199,11 @@ export const MerchantMap = ({ merchants, onMerchantClick }: MerchantMapProps) =>
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
       )}
-      <div ref={mapContainer} className="absolute inset-0" />
+      <div 
+        ref={mapContainer} 
+        className="absolute inset-0 w-full h-full"
+        style={{ minHeight: '500px' }}
+      />
       
       {/* Legend */}
       <div className="absolute bottom-4 left-4 bg-background/95 backdrop-blur-sm rounded-lg p-3 shadow-lg border border-border z-10">
