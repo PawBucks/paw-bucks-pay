@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useOptimizedQuery } from "@/hooks/useOptimizedQuery";
@@ -10,9 +10,9 @@ import { BottomNav } from "@/components/BottomNav";
 import { AdPlacement } from "@/components/AdPlacement";
 import { PageLoader } from "@/components/PageLoader";
 import { EmptyState } from "@/components/EmptyState";
-import { Coins, TrendingUp, Gift, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { Coins, TrendingUp, Gift, ArrowUpRight, ArrowDownRight, Sparkles, Zap, Crown } from "lucide-react";
 import { Formatters } from "@/utils/formatters";
-import { PAWBUCKS_CONVERSION, ROUTES } from "@/lib/constants";
+import { PAWBUCKS_CONVERSION, ROUTES, CASHBACK_RATES } from "@/lib/constants";
 import { Progress } from "@/components/ui/progress";
 
 type PawBucksWallet = {
@@ -28,6 +28,216 @@ type PawBucksActivity = {
   description: string;
   created_at: string;
   source: string;
+};
+
+// Animated Upgrade Prompt Component
+const UpgradePrompt = ({ totalEarned, onUpgrade }: { totalEarned: number; onUpgrade: () => void }) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const [activeTab, setActiveTab] = useState<'pawpass' | 'pawpassplus'>('pawpass');
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsVisible(true), 300);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Calculate what they would have earned with each tier
+  // Current: 10% (Free), PawPass: 20%, PawPass+: 30%
+  const basePurchaseAmount = totalEarned / (CASHBACK_RATES.FREE / 100); // Reverse calculate purchases
+  const pawPassEarnings = Math.round(basePurchaseAmount * (CASHBACK_RATES.PAWPASS / 100));
+  const pawPassPlusEarnings = Math.round(basePurchaseAmount * (CASHBACK_RATES.PAWPASS_PLUS / 100));
+  
+  const pawPassExtra = pawPassEarnings - totalEarned;
+  const pawPassPlusExtra = pawPassPlusEarnings - totalEarned;
+
+  // Example projections for $100, $500, $1000 monthly spend
+  const projections = [
+    { spend: 100, free: 100, pawpass: 200, pawpassplus: 300 },
+    { spend: 500, free: 500, pawpass: 1000, pawpassplus: 1500 },
+    { spend: 1000, free: 1000, pawpass: 2000, pawpassplus: 3000 },
+  ];
+
+  return (
+    <div 
+      className={`mb-8 transition-all duration-700 ease-out ${
+        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+      }`}
+    >
+      <GradientCard className="relative overflow-hidden border-2 border-primary/20">
+        {/* Animated background shimmer */}
+        <div 
+          className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent animate-shimmer" 
+          style={{ backgroundSize: '200% 100%' }} 
+        />
+        
+        <div className="relative z-10">
+          {/* Header with sparkle animation */}
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <Sparkles className="w-5 h-5 text-yellow-500 animate-pulse" />
+            <h3 className="text-lg font-bold text-center">Earn More PawBucks!</h3>
+            <Sparkles className="w-5 h-5 text-yellow-500 animate-pulse" />
+          </div>
+
+          {/* Tier Toggle */}
+          <div className="flex justify-center mb-6">
+            <div className="inline-flex bg-muted/50 rounded-full p-1">
+              <button
+                onClick={() => setActiveTab('pawpass')}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                  activeTab === 'pawpass' 
+                    ? 'bg-yellow-500 text-yellow-950 shadow-lg' 
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <Zap className="w-4 h-4 inline mr-1" />
+                PawPass
+              </button>
+              <button
+                onClick={() => setActiveTab('pawpassplus')}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                  activeTab === 'pawpassplus' 
+                    ? 'bg-purple-500 text-white shadow-lg' 
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <Crown className="w-4 h-4 inline mr-1" />
+                PawPass+
+              </button>
+            </div>
+          </div>
+
+          {/* Animated Content based on selected tab */}
+          <div className="transition-all duration-300">
+            {activeTab === 'pawpass' ? (
+              <div className="space-y-4 animate-fade-in">
+                {/* What you missed section */}
+                {totalEarned > 0 && pawPassExtra > 0 && (
+                  <div className="text-center p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/20">
+                    <p className="text-sm text-muted-foreground mb-1">With PawPass, you would have earned</p>
+                    <p className="text-3xl font-bold text-yellow-500">
+                      +{Formatters.number(pawPassExtra)} more
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">PawBucks from your purchases</p>
+                  </div>
+                )}
+
+                {/* Rate comparison */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="text-center p-3 rounded-lg bg-muted/30">
+                    <p className="text-xs text-muted-foreground">Free Tier</p>
+                    <p className="text-lg font-semibold">$1 = 10</p>
+                  </div>
+                  <div className="text-center p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30">
+                    <p className="text-xs text-yellow-600 font-medium">PawPass (2x)</p>
+                    <p className="text-lg font-bold text-yellow-600">$1 = 20</p>
+                  </div>
+                </div>
+
+                {/* Projection table */}
+                <div className="overflow-hidden rounded-lg border border-border/50">
+                  <table className="w-full text-sm">
+                    <thead className="bg-muted/30">
+                      <tr>
+                        <th className="py-2 px-3 text-left text-xs font-medium text-muted-foreground">Monthly Spend</th>
+                        <th className="py-2 px-3 text-center text-xs font-medium text-muted-foreground">Free</th>
+                        <th className="py-2 px-3 text-center text-xs font-medium text-yellow-600">PawPass</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {projections.map((p, i) => (
+                        <tr key={i} className="border-t border-border/30">
+                          <td className="py-2 px-3 font-medium">${p.spend}</td>
+                          <td className="py-2 px-3 text-center text-muted-foreground">{Formatters.number(p.free)}</td>
+                          <td className="py-2 px-3 text-center font-semibold text-yellow-600">{Formatters.number(p.pawpass)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                <p className="text-center text-xs text-muted-foreground">
+                  Only $9.99/month • 7-day free trial
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4 animate-fade-in">
+                {/* What you missed section */}
+                {totalEarned > 0 && pawPassPlusExtra > 0 && (
+                  <div className="text-center p-4 rounded-xl bg-purple-500/10 border border-purple-500/20">
+                    <p className="text-sm text-muted-foreground mb-1">With PawPass+, you would have earned</p>
+                    <p className="text-3xl font-bold text-purple-500">
+                      +{Formatters.number(pawPassPlusExtra)} more
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">PawBucks from your purchases</p>
+                  </div>
+                )}
+
+                {/* Rate comparison */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="text-center p-3 rounded-lg bg-muted/30">
+                    <p className="text-xs text-muted-foreground">Free Tier</p>
+                    <p className="text-lg font-semibold">$1 = 10</p>
+                  </div>
+                  <div className="text-center p-3 rounded-lg bg-purple-500/10 border border-purple-500/30">
+                    <p className="text-xs text-purple-500 font-medium">PawPass+ (3x)</p>
+                    <p className="text-lg font-bold text-purple-500">$1 = 30</p>
+                  </div>
+                </div>
+
+                {/* Projection table */}
+                <div className="overflow-hidden rounded-lg border border-border/50">
+                  <table className="w-full text-sm">
+                    <thead className="bg-muted/30">
+                      <tr>
+                        <th className="py-2 px-3 text-left text-xs font-medium text-muted-foreground">Monthly Spend</th>
+                        <th className="py-2 px-3 text-center text-xs font-medium text-muted-foreground">Free</th>
+                        <th className="py-2 px-3 text-center text-xs font-medium text-purple-500">PawPass+</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {projections.map((p, i) => (
+                        <tr key={i} className="border-t border-border/30">
+                          <td className="py-2 px-3 font-medium">${p.spend}</td>
+                          <td className="py-2 px-3 text-center text-muted-foreground">{Formatters.number(p.free)}</td>
+                          <td className="py-2 px-3 text-center font-semibold text-purple-500">{Formatters.number(p.pawpassplus)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                  <Crown className="w-4 h-4 text-purple-500" />
+                  <span>$14.99/month • 7-day free trial • <span className="text-purple-500 font-medium">Ad-Free!</span></span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* CTA Button */}
+          <Button 
+            onClick={onUpgrade}
+            className={`w-full mt-4 font-semibold transition-all duration-300 ${
+              activeTab === 'pawpass'
+                ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-yellow-950'
+                : 'bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white'
+            }`}
+          >
+            {activeTab === 'pawpass' ? (
+              <>
+                <Zap className="w-4 h-4 mr-2" />
+                Upgrade to PawPass
+              </>
+            ) : (
+              <>
+                <Crown className="w-4 h-4 mr-2" />
+                Upgrade to PawPass+
+              </>
+            )}
+          </Button>
+        </div>
+      </GradientCard>
+    </div>
+  );
 };
 
 const PawBucksWallet = () => {
@@ -162,8 +372,14 @@ const PawBucksWallet = () => {
                 </p>
               </div>
             </div>
-          </GradientCard>
+        </GradientCard>
         </div>
+
+        {/* Animated Upgrade Prompt */}
+        <UpgradePrompt 
+          totalEarned={activities.filter(a => a.type === 'earn').reduce((sum, a) => sum + a.amount, 0)} 
+          onUpgrade={() => navigate(ROUTES.PROFILE)}
+        />
 
         {/* CTA Buttons */}
         <div className="mb-8 flex justify-center">
