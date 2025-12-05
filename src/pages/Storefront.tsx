@@ -44,9 +44,9 @@ const Storefront = () => {
     try {
       setLoading(true);
 
-      // Load merchant info
+      // Load merchant info from public view
       const { data: merchantData } = await supabase
-        .from("merchants")
+        .from("merchants_public")
         .select("id, business_name")
         .eq("stripe_account_id", accountId)
         .single();

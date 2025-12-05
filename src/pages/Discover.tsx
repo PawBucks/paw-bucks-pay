@@ -337,9 +337,9 @@ const Discover = () => {
   const { data: merchantsWithRatings = [], isLoading: loading } = useOptimizedQuery<MerchantWithRating[]>(
     ['merchants-with-ratings'],
     async () => {
-      // Fetch merchants
+      // Fetch merchants from public view (excludes sensitive contact info)
       const { data: merchants, error: merchantsError } = await supabase
-        .from('merchants')
+        .from('merchants_public')
         .select('*')
         .order('business_name');
       

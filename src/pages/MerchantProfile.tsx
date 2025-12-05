@@ -72,8 +72,9 @@ const MerchantProfile = () => {
   const { data: merchant, isLoading: merchantLoading } = useOptimizedQuery(
     ["merchant", merchantId],
     async () => {
+      // Use public view (excludes sensitive contact info like owner_name, stripe_account_id)
       const { data, error } = await supabase
-        .from("merchants")
+        .from("merchants_public")
         .select("*")
         .eq("id", merchantId)
         .single();
@@ -335,7 +336,7 @@ const MerchantProfile = () => {
               {/* Contact & Location */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Contact & Location</CardTitle>
+                  <CardTitle className="text-lg">Location</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {merchant.address && (
@@ -369,42 +370,10 @@ const MerchantProfile = () => {
                       </div>
                     </>
                   )}
-                  {merchant.phone && (
-                    <div className="flex items-start gap-3">
-                      <Phone className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                      <div>
-                        <p className="font-medium">Phone</p>
-                        <a
-                          href={`tel:${merchant.phone}`}
-                          className="text-primary hover:underline"
-                        >
-                          {merchant.phone}
-                        </a>
-                      </div>
-                    </div>
-                  )}
-                  {merchant.email && (
-                    <div className="flex items-start gap-3">
-                      <Mail className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                      <div>
-                        <p className="font-medium">Email</p>
-                        <a
-                          href={`mailto:${merchant.email}`}
-                          className="text-primary hover:underline"
-                        >
-                          {merchant.email}
-                        </a>
-                      </div>
-                    </div>
-                  )}
-                  {merchant.contact_person && (
-                    <div className="flex items-start gap-3">
-                      <Globe className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                      <div>
-                        <p className="font-medium">Contact Person</p>
-                        <p className="text-muted-foreground">{merchant.contact_person}</p>
-                      </div>
-                    </div>
+                  {!merchant.address && (
+                    <p className="text-muted-foreground text-sm">
+                      No address information available.
+                    </p>
                   )}
                 </CardContent>
               </Card>

@@ -32,8 +32,9 @@ export const AdPlacement = ({ position = 'top' }: AdPlacementProps) => {
 
   useEffect(() => {
     const fetchSponsoredMerchant = async () => {
+      // Use public view (excludes sensitive contact info)
       const { data, error } = await supabase
-        .from('merchants')
+        .from('merchants_public')
         .select('id, business_name, business_type, cashback_rate, description, address')
         .eq('is_sponsored', true)
         .gte('sponsored_until', new Date().toISOString())
