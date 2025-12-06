@@ -135,7 +135,7 @@ export function MerchantsTab() {
                   <Badge variant="outline">{merchant.business_type}</Badge>
                 </TableCell>
                 <TableCell>{merchant.contact_person || 'N/A'}</TableCell>
-                <TableCell>{merchant.cashback_rate}%</TableCell>
+                <TableCell>{merchant.cashback_rate}x</TableCell>
                 <TableCell>
                   <Badge variant={merchant.stripe_account_status === 'active' ? 'default' : 'secondary'}>
                     {merchant.stripe_account_status || 'pending'}
@@ -190,7 +190,7 @@ export function MerchantsTab() {
                 />
               </div>
               <div className="space-y-2">
-                <Label>Cashback Rate (%)</Label>
+                <Label>Points Multiplier (x)</Label>
                 <Input
                   type="number"
                   step="0.1"

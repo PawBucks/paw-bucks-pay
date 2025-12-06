@@ -196,7 +196,7 @@ const MerchantProfile = () => {
     <>
       <SEO
         title={`${merchant.business_name} - PawBucks`}
-        description={merchant.description || `Visit ${merchant.business_name} and earn ${merchant.cashback_rate}% back in PawBucks!`}
+        description={merchant.description || `Visit ${merchant.business_name} and earn ${merchant.cashback_rate}x points in PawBucks!`}
         keywords={[merchant.business_name, merchant.business_type, "pet services", "PawBucks", "rewards"]}
       />
       <Header isAuthenticated={!!user} onLogout={user ? handleLogout : undefined} />
@@ -250,7 +250,7 @@ const MerchantProfile = () => {
                       </p>
                     </div>
                     <Badge className="bg-primary text-primary-foreground text-lg px-4 py-2">
-                      {merchant.cashback_rate}% in PawBucks
+                      {merchant.cashback_rate}x Points
                     </Badge>
                   </div>
 
@@ -421,7 +421,7 @@ const MerchantProfile = () => {
                   </div>
                   <div className="p-3 bg-primary/10 rounded-lg">
                     <p className="text-sm text-primary font-medium">
-                      Earn {merchant.cashback_rate}% back in PawBucks on every purchase!
+                      Earn {merchant.cashback_rate}x points in PawBucks on every purchase!
                     </p>
                   </div>
                 </CardContent>

@@ -149,7 +149,7 @@ export function RewardsTab() {
                 onChange={(e) => setSettings({ ...settings, cashbackRate: parseFloat(e.target.value) })}
               />
               <p className="text-sm text-muted-foreground">
-                Current: {settings.cashbackRate}% cashback
+                Current: {settings.cashbackRate}x points multiplier
               </p>
             </div>
           </CardContent>
