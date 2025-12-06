@@ -148,11 +148,54 @@ const Index = () => {
             {/* Earning Explainer Banner */}
             <div className="mt-12 max-w-4xl mx-auto">
               <div className="relative overflow-hidden rounded-2xl border-2 border-accent/30 bg-gradient-to-r from-accent/10 via-primary/5 to-accent/10 p-6 sm:p-8">
+                {/* Shimmer background */}
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer" style={{ backgroundSize: '200% 100%' }} />
+                
+                {/* Confetti particles */}
+                <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+                  {/* Floating sparkles */}
+                  {[...Array(12)].map((_, i) => (
+                    <div
+                      key={`sparkle-${i}`}
+                      className="absolute animate-sparkle"
+                      style={{
+                        left: `${8 + i * 8}%`,
+                        top: `${10 + (i % 3) * 30}%`,
+                        animationDelay: `${i * 0.3}s`,
+                        animationDuration: `${2 + (i % 3)}s`,
+                      }}
+                    >
+                      <Sparkles className="w-3 h-3 text-accent/60" />
+                    </div>
+                  ))}
+                  
+                  {/* Floating dots/confetti */}
+                  {[...Array(20)].map((_, i) => (
+                    <div
+                      key={`confetti-${i}`}
+                      className="absolute rounded-full animate-float"
+                      style={{
+                        width: `${4 + (i % 3) * 2}px`,
+                        height: `${4 + (i % 3) * 2}px`,
+                        left: `${5 + i * 4.5}%`,
+                        top: `${-10 + (i % 5) * 25}%`,
+                        backgroundColor: [
+                          'hsl(var(--accent) / 0.4)',
+                          'hsl(var(--primary) / 0.4)',
+                          'hsl(45 100% 60% / 0.5)',
+                          'hsl(280 80% 60% / 0.4)',
+                        ][i % 4],
+                        animationDelay: `${i * 0.15}s`,
+                        animationDuration: `${2.5 + (i % 4) * 0.5}s`,
+                      }}
+                    />
+                  ))}
+                </div>
+                
                 <div className="relative z-10">
                   <div className="flex items-center justify-center gap-2 mb-4">
                     <Sparkles className="w-5 h-5 text-accent animate-pulse" />
-                    <h3 className="text-lg sm:text-xl font-bold text-center">How You Earn PawBucks</h3>
+                    <h3 className="text-lg sm:text-xl font-bold text-center animate-bounce-in">How You Earn PawBucks</h3>
                     <Sparkles className="w-5 h-5 text-accent animate-pulse" />
                   </div>
                   
@@ -162,7 +205,7 @@ const Index = () => {
                   
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
                     {/* Free Tier */}
-                    <div className="text-center p-4 rounded-xl bg-background/50 border border-border/50">
+                    <div className="text-center p-4 rounded-xl bg-background/50 border border-border/50 animate-bounce-in" style={{ animationDelay: '0.1s' }}>
                       <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-muted/50 mb-2">
                         <Gift className="w-5 h-5 text-muted-foreground" />
                       </div>
@@ -175,7 +218,7 @@ const Index = () => {
                     </div>
                     
                     {/* PawPass Tier */}
-                    <div className="text-center p-4 rounded-xl bg-yellow-500/10 border-2 border-yellow-500/30 relative">
+                    <div className="text-center p-4 rounded-xl bg-yellow-500/10 border-2 border-yellow-500/30 relative animate-bounce-in" style={{ animationDelay: '0.2s' }}>
                       <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-yellow-500 text-yellow-950 text-xs font-bold rounded-full">
                         POPULAR
                       </div>
@@ -191,7 +234,7 @@ const Index = () => {
                     </div>
                     
                     {/* PawPass+ Tier */}
-                    <div className="text-center p-4 rounded-xl bg-purple-500/10 border-2 border-purple-500/30 relative">
+                    <div className="text-center p-4 rounded-xl bg-purple-500/10 border-2 border-purple-500/30 relative animate-bounce-in" style={{ animationDelay: '0.3s' }}>
                       <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-purple-500 text-white text-xs font-bold rounded-full">
                         BEST VALUE
                       </div>
