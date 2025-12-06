@@ -1828,6 +1828,7 @@ export type Database = {
           total_transactions: number
         }[]
       }
+      get_user_vet_ids: { Args: { check_user_id: string }; Returns: string[] }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1845,6 +1846,14 @@ export type Database = {
           _ip_address?: string
         }
         Returns: undefined
+      }
+      user_owns_vet: {
+        Args: { check_user_id: string; vet_user_id: string }
+        Returns: boolean
+      }
+      vet_can_view_pet: {
+        Args: { pet_id: string; vet_user_id: string }
+        Returns: boolean
       }
     }
     Enums: {
