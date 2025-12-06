@@ -52,13 +52,18 @@ export class DataLoader {
 
   static async loadPetProfiles(userId: string) {
     return this.retryOperation(async () => {
+      console.log('[DataLoader] Loading pet profiles for user:', userId);
       const { data, error } = await supabase
         .from('pet_profiles')
         .select('*')
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('[DataLoader] Error loading pet profiles:', error);
+        throw error;
+      }
+      console.log('[DataLoader] Loaded pet profiles:', data?.length || 0, 'pets');
       return data || [];
     });
   }
