@@ -19,7 +19,8 @@ serve(async (req) => {
   }
 
   try {
-    const supabaseClient = createClient(
+    // Create anon client for authentication verification only
+    const supabaseAuth = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? ''
     );
@@ -30,7 +31,7 @@ serve(async (req) => {
     }
 
     const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
+    const { data: { user }, error: userError } = await supabaseAuth.auth.getUser(token);
 
     if (userError || !user) {
       throw new Error('User not authenticated');
@@ -54,8 +55,14 @@ serve(async (req) => {
 
     console.log('Redeeming wallet credits:', { userId: user.id, amount });
 
+    // Create service role client for database operations (bypasses RLS)
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
     // Get current wallet balance
-    const { data: wallet, error: walletError } = await supabaseClient
+    const { data: wallet, error: walletError } = await supabaseAdmin
       .from('wallets')
       .select('*')
       .eq('user_id', user.id)
@@ -84,8 +91,8 @@ serve(async (req) => {
     const oldBalance = wallet.balance;
     const newBalance = oldBalance - amount;
 
-    // Update wallet balance
-    const { error: updateError } = await supabaseClient
+    // Update wallet balance using service role client
+    const { error: updateError } = await supabaseAdmin
       .from('wallets')
       .update({ 
         balance: newBalance,
@@ -98,8 +105,8 @@ serve(async (req) => {
       throw new Error('Failed to process redemption. Please try again.');
     }
 
-    // Log wallet activity
-    const { error: activityError } = await supabaseClient
+    // Log wallet activity using service role client
+    const { error: activityError } = await supabaseAdmin
       .from('wallet_activity')
       .insert({
         user_id: user.id,
@@ -115,6 +122,8 @@ serve(async (req) => {
       console.error('Failed to log wallet activity:', activityError);
       // Don't throw - the balance was already updated
     }
+
+    console.log(`User ${user.id} redeemed ${amount} credits. New balance: ${newBalance}`);
 
     return new Response(
       JSON.stringify({
