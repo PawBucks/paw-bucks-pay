@@ -12,28 +12,38 @@ serve(async (req) => {
   }
 
   try {
-    const supabaseClient = createClient(
+    // Create anon client for authentication verification only
+    const supabaseAuth = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
-      {
-        global: {
-          headers: { Authorization: req.headers.get("Authorization")! },
-        },
-      }
+      Deno.env.get("SUPABASE_ANON_KEY") ?? ""
     );
 
-    const authHeader = req.headers.get("Authorization")!;
-    const token = authHeader.replace("Bearer ", "");
-    const { data: { user } } = await supabaseClient.auth.getUser(token);
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      throw new Error("No authorization header");
+    }
 
-    if (!user) {
+    const token = authHeader.replace("Bearer ", "");
+    const { data: { user }, error: userError } = await supabaseAuth.auth.getUser(token);
+
+    if (userError || !user) {
       throw new Error("Unauthorized");
     }
 
     const { offer_id } = await req.json();
 
+    if (!offer_id) {
+      throw new Error("offer_id is required");
+    }
+
+    // Create service role client for database operations (bypasses RLS)
+    const supabaseAdmin = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
+
     // Get offer details
-    const { data: offer, error: offerError } = await supabaseClient
+    const { data: offer, error: offerError } = await supabaseAdmin
       .from("partner_offers")
       .select("*, merchants(business_name)")
       .eq("id", offer_id)
@@ -45,7 +55,7 @@ serve(async (req) => {
     }
 
     // Get user's wallet
-    const { data: wallet, error: walletError } = await supabaseClient
+    const { data: wallet, error: walletError } = await supabaseAdmin
       .from("pawbucks_wallet")
       .select("*")
       .eq("user_id", user.id)
@@ -73,17 +83,19 @@ serve(async (req) => {
     // Generate unique redemption code
     const redemptionCode = `PBK-${Math.random().toString(36).substring(2, 8).toUpperCase()}${Date.now().toString(36).toUpperCase()}`;
 
-    // Start transaction: deduct coins and create activity record
-    const { error: updateError } = await supabaseClient
+    // Deduct coins using service role client
+    const { error: updateError } = await supabaseAdmin
       .from("pawbucks_wallet")
       .update({ balance: wallet.balance - offer.coins_required })
       .eq("user_id", user.id);
 
     if (updateError) {
+      console.error("Failed to update wallet balance:", updateError);
       throw new Error("Failed to update wallet balance");
     }
 
-    const { error: activityError } = await supabaseClient
+    // Record activity using service role client
+    const { error: activityError } = await supabaseAdmin
       .from("pawbucks_activity")
       .insert({
         user_id: user.id,
@@ -97,8 +109,9 @@ serve(async (req) => {
       });
 
     if (activityError) {
+      console.error("Failed to record activity:", activityError);
       // Rollback wallet update
-      await supabaseClient
+      await supabaseAdmin
         .from("pawbucks_wallet")
         .update({ balance: wallet.balance })
         .eq("user_id", user.id);
