@@ -1,6 +1,7 @@
 import { memo } from "react";
 import { GradientCard } from "@/components/ui/gradient-card";
 import { Wallet, Gift, TrendingUp } from "lucide-react";
+import { PawBucksInfoTooltip } from "@/components/PawBucksInfoTooltip";
 
 type WalletStatsProps = {
   balance: number;
@@ -27,8 +28,11 @@ export const WalletStats = memo(({ balance, rewardsPoints }: WalletStatsProps) =
           <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center">
             <Gift className="w-6 h-6 text-accent" />
           </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Rewards Points</p>
+          <div className="flex-1">
+            <div className="flex items-center gap-1">
+              <p className="text-sm text-muted-foreground">Rewards Points</p>
+              <PawBucksInfoTooltip variant="earning" />
+            </div>
             <p className="text-2xl font-bold">{rewardsPoints || 0}</p>
           </div>
         </div>

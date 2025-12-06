@@ -9,6 +9,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { PageLoader } from "@/components/PageLoader";
 import { Header } from "@/components/Header";
 import { AdPlacement } from "@/components/AdPlacement";
+import { PawBucksInfoTooltip } from "@/components/PawBucksInfoTooltip";
 import { Search, Store, Scissors, Home, Stethoscope, Footprints, Bone, Coins, CreditCard, ChevronRight, BookOpen, Star, Sparkles, MapPin, SlidersHorizontal, X, List, Map, Navigation, ArrowUpDown, LayoutGrid } from "lucide-react";
 import { MerchantMap } from "@/components/MerchantMap";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem } from "@/components/ui/dropdown-menu";
@@ -190,8 +191,9 @@ const MerchantCard = ({
                   {getPriceRange(merchant.price_range)}
                 </span>
                 <span className="text-muted-foreground/50">•</span>
-                <Badge className="bg-green-500/10 text-green-600 border-green-500/20 text-xs">
+                <Badge className="bg-green-500/10 text-green-600 border-green-500/20 text-xs gap-1">
                   {merchant.cashback_rate.toFixed(0)}x points
+                  <PawBucksInfoTooltip variant="multiplier" className="ml-0.5" />
                 </Badge>
               </div>
 
