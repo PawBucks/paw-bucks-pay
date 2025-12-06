@@ -67,7 +67,7 @@ const VetLoanApply = () => {
 
   const fetchVets = async () => {
     const { data, error } = await supabase
-      .from("partner_vets")
+      .from("partner_vets_public")
       .select("id, name, location")
       .order("name");
 
