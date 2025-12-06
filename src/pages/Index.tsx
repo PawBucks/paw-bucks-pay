@@ -49,7 +49,7 @@ const Index = () => {
     <div className="min-h-screen bg-[var(--gradient-hero)] overflow-hidden">
       <SEO 
         title="PawBucks - Digital Pet Payment Platform"
-        description="Connect with trusted pet stores, groomers, and trainers. Earn up to 30% cashback in PawBucks with every transaction and manage all your pet expenses in one secure digital wallet."
+        description="Connect with trusted pet stores, groomers, and trainers. Earn up to 30x points in PawBucks with every transaction and manage all your pet expenses in one secure digital wallet."
         keywords={["pet payments", "pet wallet", "PawBucks rewards", "pet stores", "groomers", "pet services", "digital wallet", "pet expenses"]}
       />
       <Header menuItems={[
@@ -82,7 +82,7 @@ const Index = () => {
             </h2>
             
             <p className="text-lg sm:text-xl lg:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              Connect with trusted pet stores, groomers, and trainers. Earn up to 30% cashback in PawBucks with every transaction
+              Connect with trusted pet stores, groomers, and trainers. Earn up to 30x points in PawBucks with every transaction
               and keep your pet expenses organized in one secure place.
             </p>
             

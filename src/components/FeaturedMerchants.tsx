@@ -74,9 +74,9 @@ export const FeaturedMerchants = ({ onMerchantClick }: { onMerchantClick: (merch
                 </div>
                 <div className="text-right ml-2">
                   <div className="text-xl font-bold text-primary">
-                    {merchant.cashback_rate}%
+                    {merchant.cashback_rate}x
                   </div>
-                  <div className="text-xs text-muted-foreground">cashback</div>
+                  <div className="text-xs text-muted-foreground">points</div>
                 </div>
               </div>
               {merchant.description && (

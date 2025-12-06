@@ -15,7 +15,7 @@ export const PromotionalBanner = () => {
               Earn More PawBucks Today!
             </h3>
             <p className="text-sm text-muted-foreground">
-              Shop at featured partners and earn up to 30% cashback on every purchase
+              Shop at featured partners and earn up to 30x points on every purchase
             </p>
           </div>
         </div>

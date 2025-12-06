@@ -191,7 +191,7 @@ const MerchantCard = ({
                 </span>
                 <span className="text-muted-foreground/50">•</span>
                 <Badge className="bg-green-500/10 text-green-600 border-green-500/20 text-xs">
-                  {merchant.cashback_rate.toFixed(0)}% in PawBucks
+                  {merchant.cashback_rate.toFixed(0)}x points
                 </Badge>
               </div>
 
@@ -237,7 +237,7 @@ const MerchantCard = ({
         {/* Pay Button */}
         <div className="px-4 pb-4">
           <Button className="w-full" onClick={onPayClick}>
-            Pay & Earn Cashback
+            Pay & Earn Points
           </Button>
         </div>
       </CardContent>

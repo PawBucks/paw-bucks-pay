@@ -79,7 +79,7 @@ export const AdPlacement = ({ position = 'top' }: AdPlacementProps) => {
               <h3 className="text-lg font-bold text-foreground">{sponsoredMerchant.business_name}</h3>
               <Badge variant="secondary" className="text-xs">
                 <Tag className="w-3 h-3 mr-1" />
-                {sponsoredMerchant.cashback_rate}% cashback
+                {sponsoredMerchant.cashback_rate}x points
               </Badge>
             </div>
             <p className="text-sm text-muted-foreground font-medium">{sponsoredMerchant.business_type}</p>
@@ -93,7 +93,7 @@ export const AdPlacement = ({ position = 'top' }: AdPlacementProps) => {
               </div>
             )}
             <p className="text-xs text-muted-foreground italic pt-1">
-              Upgrade to PawPass+ for 30% cashback and an ad-free experience!
+              Upgrade to PawPass+ for 30x points and an ad-free experience!
             </p>
           </div>
           <div className="flex flex-col gap-2 sm:items-end">
@@ -136,7 +136,7 @@ export const AdPlacement = ({ position = 'top' }: AdPlacementProps) => {
             <h4 className="font-semibold text-foreground">Upgrade to Remove Ads</h4>
           </div>
           <p className="text-sm text-muted-foreground">
-            Get PawPass for 20% cashback or PawPass+ for 30% cashback, plus an ad-free experience!
+            Get PawPass for 20x points or PawPass+ for 30x points, plus an ad-free experience!
           </p>
         </div>
         <Button

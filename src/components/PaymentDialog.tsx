@@ -97,7 +97,7 @@ const PaymentForm = ({
             <span className="font-medium">${parseFloat(amount).toFixed(2)}</span>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Cashback ({cashbackRate}%):</span>
+            <span className="text-muted-foreground">Points Earned ({cashbackRate}x):</span>
             <span className="font-bold text-accent">+${cashbackPreview}</span>
           </div>
         </div>
@@ -244,7 +244,7 @@ export const PaymentDialog = ({
         <DialogHeader>
           <DialogTitle>Pay {merchantName}</DialogTitle>
           <DialogDescription>
-            Earn {cashbackRate}% cashback on your purchase
+            Earn {cashbackRate}x points on your purchase
           </DialogDescription>
         </DialogHeader>
         
@@ -278,7 +278,7 @@ export const PaymentDialog = ({
                   <span className="font-medium">${parseFloat(amount).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Cashback ({cashbackRate}%):</span>
+                  <span className="text-muted-foreground">Points Earned ({cashbackRate}x):</span>
                   <span className="font-bold text-accent">+${cashbackPreview}</span>
                 </div>
               </div>

@@ -244,7 +244,7 @@ const VetLoanApply = () => {
               <div className="space-y-2">
                 <p className="font-semibold">PawPass Benefits Include:</p>
                 <ul className="list-disc list-inside space-y-1 text-sm">
-                  <li>25% cashback on all purchases (vs 10% for free users)</li>
+                  <li>20x points on all purchases (vs 10x for free users)</li>
                   <li>Instant vet bill financing up to $10,000</li>
                   <li>Flexible repayment terms (3, 6, or 12 months)</li>
                   <li>Priority customer support</li>
