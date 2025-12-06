@@ -20,6 +20,8 @@ export const useOptimizedQuery = <T,>(
     gcTime: options?.cacheTime || 1000 * 60 * 30, // 30 minutes default
     retry: options?.retry ?? 2,
     enabled: options?.enabled ?? true,
+    refetchOnMount: 'always', // Always refetch on mount to get fresh data
+    refetchOnWindowFocus: true, // Refetch when tab regains focus
   });
 };
 

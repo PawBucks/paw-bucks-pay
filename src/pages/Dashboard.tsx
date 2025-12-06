@@ -44,18 +44,31 @@ const Dashboard = () => {
     async () => {
       if (!user) return null;
       
-      return await DataLoader.batchLoad({
+      console.log('[Dashboard] Fetching data for user:', user.id, user.email);
+      const result = await DataLoader.batchLoad({
         profile: () => DataLoader.loadUserProfile(user.id),
         wallet: () => DataLoader.loadWalletData(user.id),
         pets: () => DataLoader.loadPetProfiles(user.id),
       });
+      console.log('[Dashboard] Batch load result - pets:', result?.pets?.length || 0);
+      return result;
     },
-    { staleTime: 1000 * 60 * 5 }
+    { 
+      staleTime: 1000 * 60 * 2, // Reduce to 2 minutes
+      enabled: !!user // Only run when user exists
+    }
   );
 
   const profile = data?.profile;
   const wallet = data?.wallet;
   const pets = data?.pets || [];
+  
+  // Debug log
+  useEffect(() => {
+    if (user && !dataLoading) {
+      console.log('[Dashboard] Current state - User:', user.email, 'Pets loaded:', pets.length);
+    }
+  }, [user, dataLoading, pets.length]);
 
   useEffect(() => {
     const checkUserAndRedirect = async () => {
