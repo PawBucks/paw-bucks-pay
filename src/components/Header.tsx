@@ -31,10 +31,10 @@ const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout }: Heade
   ];
 
   return (
-    <header className="border-b bg-card/95 backdrop-blur-lg sticky top-0 z-50 shadow-sm safe-area-inset-top" role="banner">
-      <nav className="container mx-auto px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3.5 flex items-center justify-between gap-4" aria-label="Main navigation">
+    <header className="border-b border-border/50 bg-card/95 backdrop-blur-xl sticky top-0 z-50 shadow-[var(--shadow-soft)] safe-area-inset-top" role="banner">
+      <nav className="container mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex items-center justify-between gap-4" aria-label="Main navigation">
         <div 
-          className="flex items-center gap-3 cursor-pointer hover:opacity-90 transition-all duration-200 active:scale-95 touch-manipulation"
+          className="flex items-center gap-3 cursor-pointer hover:opacity-90 transition-all duration-200 active:scale-95 touch-manipulation group"
           onClick={() => navigate("/")}
           role="button"
           tabIndex={0}
@@ -44,9 +44,9 @@ const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout }: Heade
           <img 
             src={logo} 
             alt="PawBucks Logo - Return to homepage" 
-            className="h-16 sm:h-20 md:h-24 w-auto object-contain"
-            width={96}
-            height={96}
+            className="h-14 sm:h-16 md:h-20 w-auto object-contain transition-transform duration-200 group-hover:scale-105"
+            width={80}
+            height={80}
             loading="eager"
           />
         </div>

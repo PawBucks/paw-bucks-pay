@@ -13,9 +13,9 @@ export const GradientCard = ({ children, className, gradient = false, onClick }:
     <article
       className={cn(
         "rounded-2xl border bg-card p-6 shadow-[var(--shadow-soft)] transition-all duration-300 backdrop-blur-sm",
-        gradient && "bg-gradient-to-br from-primary/8 via-accent/6 to-secondary/8 border-primary/25",
-        "hover:shadow-[var(--shadow-medium)] hover:border-primary/35 hover:-translate-y-0.5",
-        onClick && "cursor-pointer hover:scale-[1.01]",
+        gradient && "bg-gradient-to-br from-primary/10 via-accent/8 to-secondary/10 border-primary/30",
+        "hover:shadow-[var(--shadow-medium)] hover:border-primary/40 hover:-translate-y-1",
+        onClick && "cursor-pointer active:scale-[0.99]",
         className
       )}
       onClick={onClick}

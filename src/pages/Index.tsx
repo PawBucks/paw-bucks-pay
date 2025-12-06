@@ -71,16 +71,16 @@ const Index = () => {
               <span className="text-sm font-medium text-accent">Trusted by thousands of pet lovers</span>
             </div>
             
-            <h2 
+            <h1 
               id="hero-heading"
-              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight tracking-tight text-foreground"
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-[1.1] tracking-tight text-foreground"
             >
               The Payment Platform
               <br />
-              <span className="text-accent">
+              <span className="bg-gradient-to-r from-accent via-secondary to-accent bg-clip-text text-transparent">
                 for Pet Lovers
               </span>
-            </h2>
+            </h1>
             
             <p className="text-lg sm:text-xl lg:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
               Connect with trusted pet stores, groomers, and trainers. Earn up to{" "}
@@ -112,7 +112,7 @@ const Index = () => {
               <Button 
                 size="lg" 
                 onClick={() => navigate("/auth")}
-                className="text-base sm:text-lg px-8 sm:px-10 py-6 sm:py-7 shadow-xl hover:shadow-2xl transition-all hover:scale-105 group"
+                className="text-base sm:text-lg px-8 sm:px-10 py-6 sm:py-7 shadow-xl hover:shadow-2xl transition-all group bg-gradient-to-r from-primary to-primary/80"
                 aria-label="Start using PawBucks for free"
               >
                 Start Free 
@@ -121,7 +121,7 @@ const Index = () => {
               <Button 
                 size="lg" 
                 variant="outline"
-                className="text-base sm:text-lg px-8 sm:px-10 py-6 sm:py-7 border-2 hover:bg-accent/5"
+                className="text-base sm:text-lg px-8 sm:px-10 py-6 sm:py-7 border-2 hover:bg-accent/5 backdrop-blur-sm"
                 onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
                 aria-label="Learn more about PawBucks features"
               >
@@ -268,16 +268,16 @@ const Index = () => {
           <div className="text-center mb-12 sm:mb-16 animate-fade-in">
             <h2 id="features-heading" className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4">
               Everything you need for
-              <span className="block text-accent">pet care payments</span>
+              <span className="block bg-gradient-to-r from-accent to-secondary bg-clip-text text-transparent">pet care payments</span>
             </h2>
-            <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               Streamline your pet expenses with powerful features designed for pet owners and businesses
             </p>
           </div>
 
           <div className="grid gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-3 max-w-7xl mx-auto">
-            <Card className="group p-8 text-center hover:scale-105 transition-all duration-300 hover:shadow-2xl border-2">
-              <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-6 shadow-md group-hover:scale-110 group-hover:bg-primary/20 transition-all" aria-hidden="true">
+            <Card className="group p-8 text-center hover:-translate-y-1 transition-all duration-300 hover:shadow-2xl border-2 hover:border-primary/30">
+              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mx-auto mb-6 shadow-lg group-hover:scale-110 group-hover:shadow-xl transition-all duration-300" aria-hidden="true">
                 <Wallet className="w-10 h-10 text-primary" />
               </div>
               <h3 className="text-2xl font-bold mb-3">Digital Wallet</h3>
@@ -286,8 +286,8 @@ const Index = () => {
               </p>
             </Card>
 
-            <Card className="group p-8 text-center hover:scale-105 transition-all duration-300 hover:shadow-2xl border-2">
-              <div className="w-20 h-20 rounded-2xl bg-accent/10 flex items-center justify-center mx-auto mb-6 shadow-md group-hover:scale-110 group-hover:bg-accent/20 transition-all" aria-hidden="true">
+            <Card className="group p-8 text-center hover:-translate-y-1 transition-all duration-300 hover:shadow-2xl border-2 hover:border-accent/30">
+              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center mx-auto mb-6 shadow-lg group-hover:scale-110 group-hover:shadow-xl transition-all duration-300" aria-hidden="true">
                 <Gift className="w-10 h-10 text-accent" />
               </div>
               <h3 className="text-2xl font-bold mb-3 inline-flex items-center gap-2">
@@ -312,8 +312,8 @@ const Index = () => {
               </p>
             </Card>
 
-            <Card className="group p-8 text-center hover:scale-105 transition-all duration-300 hover:shadow-2xl border-2 md:col-span-2 lg:col-span-1">
-              <div className="w-20 h-20 rounded-2xl bg-secondary/10 flex items-center justify-center mx-auto mb-6 shadow-md group-hover:scale-110 group-hover:bg-secondary/20 transition-all" aria-hidden="true">
+            <Card className="group p-8 text-center hover:-translate-y-1 transition-all duration-300 hover:shadow-2xl border-2 md:col-span-2 lg:col-span-1 hover:border-secondary/30">
+              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-secondary/20 to-secondary/5 flex items-center justify-center mx-auto mb-6 shadow-lg group-hover:scale-110 group-hover:shadow-xl transition-all duration-300" aria-hidden="true">
                 <Store className="w-10 h-10 text-secondary" />
               </div>
               <h3 className="text-2xl font-bold mb-3">Trusted Merchants</h3>
@@ -322,8 +322,8 @@ const Index = () => {
               </p>
             </Card>
 
-            <Card className="group p-8 text-center hover:scale-105 transition-all duration-300 hover:shadow-2xl border-2">
-              <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-6 shadow-md group-hover:scale-110 group-hover:bg-primary/20 transition-all" aria-hidden="true">
+            <Card className="group p-8 text-center hover:-translate-y-1 transition-all duration-300 hover:shadow-2xl border-2 hover:border-primary/30">
+              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mx-auto mb-6 shadow-lg group-hover:scale-110 group-hover:shadow-xl transition-all duration-300" aria-hidden="true">
                 <Shield className="w-10 h-10 text-primary" />
               </div>
               <h3 className="text-2xl font-bold mb-3">Secure & Safe</h3>
@@ -332,8 +332,8 @@ const Index = () => {
               </p>
             </Card>
 
-            <Card className="group p-8 text-center hover:scale-105 transition-all duration-300 hover:shadow-2xl border-2">
-              <div className="w-20 h-20 rounded-2xl bg-accent/10 flex items-center justify-center mx-auto mb-6 shadow-md group-hover:scale-110 group-hover:bg-accent/20 transition-all" aria-hidden="true">
+            <Card className="group p-8 text-center hover:-translate-y-1 transition-all duration-300 hover:shadow-2xl border-2 hover:border-accent/30">
+              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center mx-auto mb-6 shadow-lg group-hover:scale-110 group-hover:shadow-xl transition-all duration-300" aria-hidden="true">
                 <Zap className="w-10 h-10 text-accent" />
               </div>
               <h3 className="text-2xl font-bold mb-3">Instant Payments</h3>
@@ -342,8 +342,8 @@ const Index = () => {
               </p>
             </Card>
 
-            <Card className="group p-8 text-center hover:scale-105 transition-all duration-300 hover:shadow-2xl border-2">
-              <div className="w-20 h-20 rounded-2xl bg-secondary/10 flex items-center justify-center mx-auto mb-6 shadow-md group-hover:scale-110 group-hover:bg-secondary/20 transition-all" aria-hidden="true">
+            <Card className="group p-8 text-center hover:-translate-y-1 transition-all duration-300 hover:shadow-2xl border-2 hover:border-secondary/30">
+              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-secondary/20 to-secondary/5 flex items-center justify-center mx-auto mb-6 shadow-lg group-hover:scale-110 group-hover:shadow-xl transition-all duration-300" aria-hidden="true">
                 <TrendingUp className="w-10 h-10 text-secondary" />
               </div>
               <h3 className="text-2xl font-bold mb-3">Expense Tracking</h3>
@@ -355,12 +355,12 @@ const Index = () => {
         </section>
 
         {/* Benefits Section */}
-        <section className="bg-gradient-to-br from-accent/5 to-primary/5 py-16 sm:py-20 lg:py-28" aria-labelledby="benefits-heading">
+        <section className="bg-gradient-to-br from-accent/5 via-transparent to-primary/5 py-16 sm:py-20 lg:py-28" aria-labelledby="benefits-heading">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto">
               <div className="text-center mb-12">
                 <h2 id="benefits-heading" className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
-                  Why pet owners love PawBucks
+                  Why pet owners <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">love</span> PawBucks
                 </h2>
               </div>
               

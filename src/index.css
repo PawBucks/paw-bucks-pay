@@ -107,10 +107,18 @@
   
   body {
     @apply bg-background text-foreground antialiased;
-    font-feature-settings: "kern" 1, "liga" 1;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-feature-settings: "kern" 1, "liga" 1, "cv01" 1;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    letter-spacing: -0.01em;
+  }
+  
+  /* Premium typography for headings */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Poppins', 'Inter', system-ui, sans-serif;
+    letter-spacing: -0.02em;
   }
   
   /* Focus visible improvements for accessibility */

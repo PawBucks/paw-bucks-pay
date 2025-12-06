@@ -19,9 +19,14 @@ export const LoadingSpinner = ({ size = 'md', className, text }: LoadingSpinnerP
   };
 
   return (
-    <div className={cn("flex items-center justify-center gap-3", className)}>
-      <Loader2 className={cn("animate-spin text-primary", sizeClasses[size])} aria-hidden="true" />
-      {text && <p className="text-muted-foreground font-medium">{text}</p>}
+    <div className={cn("flex flex-col items-center justify-center gap-3", className)}>
+      <div className="relative">
+        <Loader2 className={cn("animate-spin text-primary", sizeClasses[size])} aria-hidden="true" />
+        <div className={cn("absolute inset-0 animate-ping opacity-20 text-primary", sizeClasses[size])}>
+          <Loader2 className="w-full h-full" />
+        </div>
+      </div>
+      {text && <p className="text-muted-foreground font-medium text-sm animate-pulse">{text}</p>}
     </div>
   );
 };
