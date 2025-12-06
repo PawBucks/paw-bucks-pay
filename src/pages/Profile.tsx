@@ -11,7 +11,8 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { BottomNav } from "@/components/BottomNav";
 import { AdPlacement } from "@/components/AdPlacement";
-import { LogOut, User, Mail, Calendar, Crown, Sparkles, Settings, Loader2 } from "lucide-react";
+import { LogOut, User, Mail, Calendar, Crown, Sparkles, Settings, Loader2, Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -153,7 +154,23 @@ const Profile = () => {
             
             {/* PawBucks Comparison Table */}
             <GradientCard className="mb-6">
-              <h3 className="text-lg font-semibold text-center mb-4">PawBucks Earning Comparison</h3>
+              <h3 className="text-lg font-semibold text-center mb-4 inline-flex items-center gap-2 justify-center w-full">
+                PawBucks Earning Comparison
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="w-4 h-4 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs p-3">
+                      <p className="font-semibold mb-1">Points Multiplier System</p>
+                      <p className="text-xs text-muted-foreground">
+                        The multiplier (10x, 20x, 30x) shows how many PawBucks you earn per dollar spent. 
+                        Higher tiers earn more rewards on every purchase!
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </h3>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>

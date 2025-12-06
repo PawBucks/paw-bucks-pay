@@ -1,7 +1,8 @@
 import { GradientCard } from "@/components/ui/gradient-card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Store, MapPin, Percent } from "lucide-react";
+import { Store, MapPin, Percent, Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 type Merchant = {
   id: string;
@@ -49,10 +50,24 @@ export const MerchantCard = ({ merchant, distance, onPayNow }: MerchantCardProps
             </Badge>
           </div>
         </div>
-        <div className="flex items-center gap-1 sm:gap-2 bg-accent/10 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full flex-shrink-0 ml-2">
-          <Percent className="w-3 h-3 sm:w-4 sm:h-4 text-accent" aria-hidden="true" />
-          <span className="font-bold text-accent text-sm sm:text-base">{merchant.cashback_rate}%</span>
-        </div>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex items-center gap-1 sm:gap-2 bg-accent/10 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full flex-shrink-0 ml-2 cursor-help">
+                <Percent className="w-3 h-3 sm:w-4 sm:h-4 text-accent" aria-hidden="true" />
+                <span className="font-bold text-accent text-sm sm:text-base">{merchant.cashback_rate}x</span>
+                <Info className="w-3 h-3 text-accent/70" />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-xs p-3">
+              <p className="font-semibold mb-1">{merchant.cashback_rate}x Points Multiplier</p>
+              <p className="text-xs text-muted-foreground">
+                Earn {merchant.cashback_rate} PawBucks for every $1 spent at this merchant.
+                Example: $100 purchase = {100 * merchant.cashback_rate} PawBucks earned!
+              </p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
 
       {merchant.description && (

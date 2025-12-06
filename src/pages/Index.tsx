@@ -7,7 +7,8 @@ import { GradientCard } from "@/components/ui/gradient-card";
 import { Card } from "@/components/ui/card";
 import { Header } from "@/components/Header";
 import { SEO } from "@/components/SEO";
-import { Wallet, Store, Gift, ArrowRight, Shield, Zap, Users, TrendingUp, CheckCircle, Sparkles } from "lucide-react";
+import { Wallet, Store, Gift, ArrowRight, Shield, Zap, Users, TrendingUp, CheckCircle, Sparkles, Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import logo from "@/assets/logo.png";
 
 const Index = () => {
@@ -82,8 +83,29 @@ const Index = () => {
             </h2>
             
             <p className="text-lg sm:text-xl lg:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              Connect with trusted pet stores, groomers, and trainers. Earn up to 30x points in PawBucks with every transaction
-              and keep your pet expenses organized in one secure place.
+              Connect with trusted pet stores, groomers, and trainers. Earn up to{" "}
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="inline-flex items-center gap-1 text-accent font-semibold cursor-help border-b border-dashed border-accent/50">
+                      30x points in PawBucks
+                      <Info className="w-4 h-4" />
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs p-3">
+                    <p className="font-semibold mb-1">Points Multiplier</p>
+                    <p className="text-xs text-muted-foreground">
+                      Every $1 you spend earns PawBucks based on your tier:
+                    </p>
+                    <ul className="text-xs mt-1 space-y-0.5">
+                      <li>• Free: $1 = 10 PawBucks (10x)</li>
+                      <li>• PawPass: $1 = 20 PawBucks (20x)</li>
+                      <li>• PawPass+: $1 = 30 PawBucks (30x)</li>
+                    </ul>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              {" "}with every transaction and keep your pet expenses organized in one secure place.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center mt-10">
@@ -156,7 +178,23 @@ const Index = () => {
               <div className="w-20 h-20 rounded-2xl bg-accent/10 flex items-center justify-center mx-auto mb-6 shadow-md group-hover:scale-110 group-hover:bg-accent/20 transition-all" aria-hidden="true">
                 <Gift className="w-10 h-10 text-accent" />
               </div>
-              <h3 className="text-2xl font-bold mb-3">PawBucks Rewards</h3>
+              <h3 className="text-2xl font-bold mb-3 inline-flex items-center gap-2">
+                PawBucks Rewards
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="w-5 h-5 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs p-3">
+                      <p className="font-semibold mb-1">How It Works</p>
+                      <p className="text-xs text-muted-foreground mb-2">
+                        Earn PawBucks on every purchase. Higher tiers = more rewards!
+                      </p>
+                      <p className="text-xs">1,000 PawBucks = $1.00 in rewards value</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </h3>
               <p className="text-muted-foreground leading-relaxed">
                 Earn PawBucks with every purchase! Free: $1 = 10 PawBucks. PawPass: $1 = 20 PawBucks. PawPass+: $1 = 30 PawBucks!
               </p>
