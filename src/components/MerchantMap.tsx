@@ -152,7 +152,7 @@ export const MerchantMap = ({ merchants, onMerchantClick }: MerchantMapProps) =>
             <span>${merchant.avg_rating.toFixed(1)}</span>
             <span class="text-muted-foreground">(${merchant.review_count})</span>
           </div>
-          <p class="text-xs text-green-600">${merchant.cashback_rate}% cashback</p>
+          <p class="text-xs text-green-600">${merchant.cashback_rate}x points</p>
           ${merchant.address ? `<p class="text-xs text-muted-foreground mt-1 line-clamp-1">${merchant.address}</p>` : ''}
         </div>
       `);

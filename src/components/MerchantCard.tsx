@@ -72,7 +72,7 @@ export const MerchantCard = ({ merchant, distance, onPayNow }: MerchantCardProps
           onClick={() => onPayNow(merchant.id, merchant.business_name, merchant.cashback_rate)}
           size="sm"
           className="w-full sm:w-auto"
-          aria-label={`Pay at ${merchant.business_name} and earn ${merchant.cashback_rate}% cashback in PawBucks`}
+          aria-label={`Pay at ${merchant.business_name} and earn ${merchant.cashback_rate}x points in PawBucks`}
         >
           Pay Now
         </Button>

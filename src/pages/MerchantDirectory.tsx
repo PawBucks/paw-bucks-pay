@@ -172,7 +172,7 @@ const MerchantDirectory = () => {
     <>
       <SEO
         title="Pet Merchant Directory - PawBucks"
-        description="Browse our complete directory of pet merchants. Find pet stores, groomers, vets, and more. Read reviews and earn cashback."
+        description="Browse our complete directory of pet merchants. Find pet stores, groomers, vets, and more. Read reviews and earn points."
         keywords={["pet directory", "pet merchants", "pet stores", "pet services", "reviews"]}
       />
       <Header isAuthenticated={!!user} onLogout={user ? handleLogout : undefined} />

@@ -8,11 +8,14 @@ export const PAWBUCKS_CONVERSION = {
   REWARD_THRESHOLD: 10000, // PawBucks needed for $10 credit (1000 * 10)
 } as const;
 
-export const CASHBACK_RATES = {
-  FREE: 10, // 10% cashback in PawBucks for free accounts
-  PAWPASS: 20, // 20% cashback in PawBucks for PawPass subscribers
-  PAWPASS_PLUS: 30, // 30% cashback in PawBucks for PawPass+ subscribers
+export const POINTS_MULTIPLIER = {
+  FREE: 10, // 10x points in PawBucks for free accounts
+  PAWPASS: 20, // 20x points in PawBucks for PawPass subscribers
+  PAWPASS_PLUS: 30, // 30x points in PawBucks for PawPass+ subscribers
 } as const;
+
+// Backwards compatibility alias
+export const CASHBACK_RATES = POINTS_MULTIPLIER;
 
 // Map Stripe product IDs to subscription tiers
 // These would be actual Stripe product IDs in production

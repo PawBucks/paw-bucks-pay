@@ -161,15 +161,15 @@ const Profile = () => {
                       <th className="py-3 px-2 text-left font-medium text-muted-foreground">You Spend</th>
                       <th className="py-3 px-2 text-center font-medium text-muted-foreground">
                         <span className="block">Free</span>
-                        <span className="text-xs text-muted-foreground/70">(10%)</span>
+                        <span className="text-xs text-muted-foreground/70">(10x)</span>
                       </th>
                       <th className="py-3 px-2 text-center font-medium text-yellow-600">
                         <span className="block">PawPass</span>
-                        <span className="text-xs text-muted-foreground/70">(20%)</span>
+                        <span className="text-xs text-muted-foreground/70">(20x)</span>
                       </th>
                       <th className="py-3 px-2 text-center font-medium text-purple-600">
                         <span className="block">PawPass+</span>
-                        <span className="text-xs text-muted-foreground/70">(30%)</span>
+                        <span className="text-xs text-muted-foreground/70">(30x)</span>
                       </th>
                     </tr>
                   </thead>
@@ -219,7 +219,7 @@ const Profile = () => {
                   <p className="text-sm font-semibold mb-2">Included Benefits:</p>
                   <ul className="text-xs text-muted-foreground space-y-1">
                     <li>• 24/7 customer support</li>
-                    <li>• <span className="font-semibold text-yellow-600">20% cashback in PawBucks</span> ($1 = 20 PawBucks)</li>
+                    <li>• <span className="font-semibold text-yellow-600">20x points in PawBucks</span> ($1 = 20 PawBucks)</li>
                     <li>• Priority access to new features</li>
                   </ul>
                 </div>
@@ -266,7 +266,7 @@ const Profile = () => {
                   <p className="text-sm font-semibold mb-2">Everything in PawPass, plus:</p>
                   <ul className="text-xs text-muted-foreground space-y-1">
                     <li>• <span className="font-semibold text-primary">Ad-Free experience</span></li>
-                    <li>• <span className="font-semibold text-purple-600">30% cashback in PawBucks</span> ($1 = 30 PawBucks)</li>
+                    <li>• <span className="font-semibold text-purple-600">30x points in PawBucks</span> ($1 = 30 PawBucks)</li>
                     <li>• Exclusive premium partner offers</li>
                     <li>• VIP customer support with priority response</li>
                     <li>• Early access to beta features</li>
