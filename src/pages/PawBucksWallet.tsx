@@ -208,7 +208,7 @@ const UpgradePrompt = ({ totalEarned, onUpgrade }: { totalEarned: number; onUpgr
 
                 <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
                   <Crown className="w-4 h-4 text-purple-500" />
-                  <span>$14.99/month • 7-day free trial • <span className="text-purple-500 font-medium">Ad-Free!</span></span>
+                  <span>$19.99/month • 7-day free trial • <span className="text-purple-500 font-medium">Ad-Free!</span></span>
                 </div>
               </div>
             )}
