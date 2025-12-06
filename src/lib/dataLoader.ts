@@ -79,10 +79,10 @@ export class DataLoader {
 
   static async loadMerchants() {
     return this.retryOperation(async () => {
-      // Use public view (excludes sensitive contact info)
+      // Use public view (excludes sensitive contact info - no stripe_account_id)
       const { data, error } = await supabase
         .from('merchants_public')
-        .select('id, business_name, business_type, description, address, latitude, longitude, cashback_rate, logo_url, accepts_pawbucks, stripe_account_id')
+        .select('id, business_name, business_type, description, address, latitude, longitude, cashback_rate, logo_url, accepts_pawbucks, price_range, is_sponsored')
         .order('business_name');
 
       if (error) throw error;

@@ -7,14 +7,15 @@ type MerchantUpdate = TablesUpdate<"merchants">;
 type MerchantReview = Tables<"merchant_reviews">;
 type FundingRequest = Tables<"funding_requests">;
 type FundingDeal = Tables<"funding_deals">;
-
 // Public merchant type from the secure view (excludes sensitive contact info)
+// Note: stripe_account_id is intentionally excluded for security
 type MerchantPublic = Pick<Merchant, 
   'id' | 'business_name' | 'business_type' | 'description' | 'logo_url' | 
   'address' | 'latitude' | 'longitude' | 'cashback_rate' | 'accepts_pawbucks' | 
-  'price_range' | 'is_sponsored' | 'sponsored_until' | 'stripe_account_id' | 'created_at'
+  'price_range' | 'is_sponsored' | 'sponsored_until' | 'created_at'
 >;
 
+export type { MerchantPublic };
 export const merchantsService = {
   // Public queries use the secure view (no sensitive contact info)
   async getAll(): Promise<ServiceListResult<MerchantPublic>> {

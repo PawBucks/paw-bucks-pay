@@ -43,11 +43,63 @@ serve(async (req) => {
       throw new Error('User not authenticated');
     }
 
-    // STEP 4: Get the Stripe account ID from request
-    const { accountId } = await req.json();
+    // STEP 4: Get the Stripe account ID from request (can come from merchantId or directly)
+    const { accountId: directAccountId, merchantId, stripeAccountId } = await req.json();
+    
+    let accountId = directAccountId || stripeAccountId;
+    let merchantName = '';
+    let resolvedMerchantId = merchantId;
+    
+    // If merchantId provided, look up the stripe_account_id
+    if (merchantId && !accountId) {
+      const supabaseAdmin = createClient(
+        Deno.env.get('SUPABASE_URL') ?? '',
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+      );
+      
+      const { data: merchant, error: merchantError } = await supabaseAdmin
+        .from('merchants')
+        .select('stripe_account_id, business_name')
+        .eq('id', merchantId)
+        .single();
+        
+      if (merchantError || !merchant) {
+        console.log('Merchant not found:', merchantId);
+        return new Response(
+          JSON.stringify({ error: 'Merchant not found' }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 404 }
+        );
+      }
+      
+      accountId = merchant.stripe_account_id;
+      merchantName = merchant.business_name;
+    }
+    
+    // If stripeAccountId provided, look up merchant info
+    if (stripeAccountId && !merchantId) {
+      const supabaseAdmin = createClient(
+        Deno.env.get('SUPABASE_URL') ?? '',
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+      );
+      
+      const { data: merchant } = await supabaseAdmin
+        .from('merchants')
+        .select('id, business_name')
+        .eq('stripe_account_id', stripeAccountId)
+        .single();
+        
+      if (merchant) {
+        merchantName = merchant.business_name;
+        resolvedMerchantId = merchant.id;
+      }
+    }
     
     if (!accountId) {
-      throw new Error('accountId is required');
+      console.log('No Stripe account ID found');
+      return new Response(
+        JSON.stringify({ accountId: null, merchantId: resolvedMerchantId, merchantName }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
+      );
     }
 
     console.log('Fetching account status for:', accountId);
@@ -101,9 +153,14 @@ serve(async (req) => {
 
     console.log('Account status retrieved successfully');
 
-    // STEP 7: Return the account status
+    // STEP 7: Return the account status with merchant info
     return new Response(
-      JSON.stringify(accountStatus),
+      JSON.stringify({
+        ...accountStatus,
+        accountId: account.id,
+        merchantId: resolvedMerchantId,
+        merchantName,
+      }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,

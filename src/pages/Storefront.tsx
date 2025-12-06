@@ -44,16 +44,14 @@ const Storefront = () => {
     try {
       setLoading(true);
 
-      // Load merchant info from public view
-      const { data: merchantData } = await supabase
-        .from("merchants_public")
-        .select("id, business_name")
-        .eq("stripe_account_id", accountId)
-        .single();
+      // Load merchant info from base table via edge function (stripe_account_id needed for products)
+      const { data: connectStatus } = await supabase.functions.invoke("get-connect-account-status", {
+        body: { stripeAccountId: accountId },
+      });
 
-      if (merchantData) {
-        setMerchantName(merchantData.business_name);
-        setMerchantId(merchantData.id);
+      if (connectStatus?.merchantName) {
+        setMerchantName(connectStatus.merchantName);
+        setMerchantId(connectStatus.merchantId);
       }
 
       // Load products
