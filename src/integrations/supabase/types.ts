@@ -1722,7 +1722,6 @@ export type Database = {
           longitude: number | null
           price_range: number | null
           sponsored_until: string | null
-          stripe_account_id: string | null
         }
         Insert: {
           accepts_pawbucks?: boolean | null
@@ -1739,7 +1738,6 @@ export type Database = {
           longitude?: number | null
           price_range?: number | null
           sponsored_until?: string | null
-          stripe_account_id?: string | null
         }
         Update: {
           accepts_pawbucks?: boolean | null
@@ -1756,7 +1754,6 @@ export type Database = {
           longitude?: number | null
           price_range?: number | null
           sponsored_until?: string | null
-          stripe_account_id?: string | null
         }
         Relationships: []
       }

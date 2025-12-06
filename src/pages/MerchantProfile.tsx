@@ -68,11 +68,10 @@ const MerchantProfile = () => {
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
 
-  // Fetch merchant data
+  // Fetch merchant data from public view (excludes sensitive contact info)
   const { data: merchant, isLoading: merchantLoading } = useOptimizedQuery(
     ["merchant", merchantId],
     async () => {
-      // Use public view (excludes sensitive contact info like owner_name, stripe_account_id)
       const { data, error } = await supabase
         .from("merchants_public")
         .select("*")
@@ -83,6 +82,23 @@ const MerchantProfile = () => {
     },
     { staleTime: 1000 * 60 * 5 }
   );
+
+  // Fetch stripe_account_id separately for storefront access (requires auth)
+  const { data: merchantStripeInfo } = useOptimizedQuery(
+    ["merchant-stripe", merchantId, user?.id],
+    async () => {
+      if (!user) return null;
+      // Use the merchants service to get stripe info via edge function
+      const { data, error } = await supabase.functions.invoke("get-connect-account-status", {
+        body: { merchantId },
+      });
+      if (error) return null;
+      return data;
+    },
+    { staleTime: 1000 * 60 * 5, enabled: !!user && !!merchantId }
+  );
+
+  const stripeAccountId = merchantStripeInfo?.accountId;
 
   // Fetch reviews with photos and user info
   const { data: reviews = [], isLoading: reviewsLoading, refetch: refetchReviews } = useOptimizedQuery<Review[]>(
@@ -312,9 +328,9 @@ const MerchantProfile = () => {
               <TabsTrigger value="reviews">
                 Reviews ({ratingStats.total})
               </TabsTrigger>
-              {merchant.stripe_account_id && (
-                <TabsTrigger value="products">Products</TabsTrigger>
-              )}
+            {stripeAccountId && (
+              <TabsTrigger value="products">Products</TabsTrigger>
+            )}
             </TabsList>
 
             {/* About Tab */}
@@ -506,26 +522,26 @@ const MerchantProfile = () => {
               )}
             </TabsContent>
 
-            {/* Products Tab */}
-            {merchant.stripe_account_id && (
-              <TabsContent value="products">
-                <Card>
-                  <CardContent className="py-8 text-center">
-                    <ShoppingBag className="w-12 h-12 mx-auto text-muted-foreground/40 mb-4" />
-                    <h3 className="font-semibold mb-2">View Products</h3>
-                    <p className="text-muted-foreground mb-4">
-                      Check out the products and services offered by this merchant.
-                    </p>
-                    <Button asChild>
-                      <Link to={`/storefront/${merchant.stripe_account_id}`}>
-                        View Storefront
-                        <ChevronRight className="w-4 h-4 ml-2" />
-                      </Link>
-                    </Button>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            )}
+          {/* Products Tab */}
+          {stripeAccountId && (
+            <TabsContent value="products">
+              <Card>
+                <CardContent className="py-8 text-center">
+                  <ShoppingBag className="w-12 h-12 mx-auto text-muted-foreground/40 mb-4" />
+                  <h3 className="font-semibold mb-2">View Products</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Check out the products and services offered by this merchant.
+                  </p>
+                  <Button asChild>
+                    <Link to={`/storefront/${stripeAccountId}`}>
+                      View Storefront
+                      <ChevronRight className="w-4 h-4 ml-2" />
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          )}
           </Tabs>
 
           {/* Bottom Ad */}

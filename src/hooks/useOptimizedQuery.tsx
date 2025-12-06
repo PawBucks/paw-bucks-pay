@@ -10,6 +10,7 @@ export const useOptimizedQuery = <T,>(
     staleTime?: number;
     cacheTime?: number;
     retry?: number;
+    enabled?: boolean;
   }
 ) => {
   return useQuery({
@@ -18,6 +19,7 @@ export const useOptimizedQuery = <T,>(
     staleTime: options?.staleTime || 1000 * 60 * 5, // 5 minutes default
     gcTime: options?.cacheTime || 1000 * 60 * 30, // 30 minutes default
     retry: options?.retry ?? 2,
+    enabled: options?.enabled ?? true,
   });
 };
 
