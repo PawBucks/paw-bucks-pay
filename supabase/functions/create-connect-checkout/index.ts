@@ -62,7 +62,7 @@ serve(async (req) => {
 
     // STEP 3: Parse request body
     const body = await req.json();
-    const { accountId, priceId, quantity, successUrl, cancelUrl } = body;
+    const { accountId, priceId, quantity, successUrl, cancelUrl, productName } = body;
 
     // Validate required fields and input types
     if (!accountId || typeof accountId !== 'string') {
@@ -93,33 +93,74 @@ serve(async (req) => {
       );
     }
 
-    console.log(`Creating checkout for connected account ${accountId}, price ${priceId}`);
+    console.log(`Creating checkout for connected account ${accountId}, price ${priceId}, user ${user.id}`);
 
-    // STEP 4: Calculate application fee (platform monetization)
-    // This is how the platform makes money from transactions
-    // Example: 10% platform fee
+    // STEP 4: Get merchant info from Supabase for rewards tracking
+    const supabaseAdmin = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
+
+    const { data: merchant } = await supabaseAdmin
+      .from('merchants')
+      .select('id, business_name, cashback_rate')
+      .eq('stripe_account_id', accountId)
+      .single();
+
+    const merchantId = merchant?.id || null;
+    const merchantName = merchant?.business_name || 'Merchant Store';
+    const cashbackRate = merchant?.cashback_rate || 10;
+
+    console.log('Merchant found:', { merchantId, merchantName, cashbackRate });
+
+    // STEP 5: Calculate application fee (platform monetization)
     const PLATFORM_FEE_PERCENTAGE = 0.10; // 10% fee
     
-    // First, get the price details to calculate the fee
+    // Get the price details to calculate the fee
     const price = await stripe.prices.retrieve(priceId, {
       stripeAccount: accountId,
     });
 
     // Calculate application fee in cents
-    // For example, on a $100 purchase, this would be $10 (1000 cents)
     let applicationFeeAmount = 0;
+    let totalAmountCents = 0;
     if (price.unit_amount) {
-      applicationFeeAmount = Math.round(price.unit_amount * quantity * PLATFORM_FEE_PERCENTAGE);
+      totalAmountCents = price.unit_amount * quantity;
+      applicationFeeAmount = Math.round(totalAmountCents * PLATFORM_FEE_PERCENTAGE);
     }
 
-    console.log(`Calculated application fee: $${(applicationFeeAmount / 100).toFixed(2)}`);
+    const totalAmountDollars = totalAmountCents / 100;
 
-    // STEP 5: Create Checkout Session using DIRECT CHARGE with application fee
-    // This charges the customer directly to the connected account
-    // and automatically transfers the application fee to the platform
+    // Calculate PawBucks rewards for display
+    // Check user's subscription tier for cashback calculation
+    let userCashbackRate = 10; // Default 10x for free accounts
+    
+    const { data: subscription } = await supabaseAdmin
+      .from('subscriptions')
+      .select('stripe_subscription_id')
+      .eq('user_id', user.id)
+      .in('status', ['active', 'trialing'])
+      .maybeSingle();
+
+    if (subscription?.stripe_subscription_id) {
+      const stripeSubscription = await stripe.subscriptions.retrieve(subscription.stripe_subscription_id);
+      const productId = stripeSubscription.items.data[0]?.price?.product;
+      
+      if (productId === 'prod_TQyZjYzt9DwoIK') {
+        userCashbackRate = 30; // PawPass+ gets 30x
+      } else if (productId === 'prod_TJVK9ZhLiJnnpm') {
+        userCashbackRate = 20; // PawPass gets 20x
+      }
+    }
+
+    // PawBucks earned = amount * (rate/100) * 10 (conversion factor)
+    const estimatedPawBucks = Math.floor(totalAmountDollars * (userCashbackRate / 100) * 10);
+
+    console.log(`Calculated: fee=$${(applicationFeeAmount / 100).toFixed(2)}, pawBucks=${estimatedPawBucks}`);
+
+    // STEP 6: Create Checkout Session using DIRECT CHARGE with application fee
     const session = await stripe.checkout.sessions.create(
       {
-        // Line items for the checkout
         line_items: [
           {
             price: priceId,
@@ -127,41 +168,38 @@ serve(async (req) => {
           },
         ],
         
-        // Payment mode
-        mode: 'payment', // One-time payment
+        mode: 'payment',
         
-        // CRITICAL: payment_intent_data contains the application fee
-        // This is how the platform earns money from the transaction
         payment_intent_data: {
-          // Application fee in cents
-          // This amount goes to the platform account
-          // The rest goes to the connected account (minus Stripe fees)
           application_fee_amount: applicationFeeAmount,
           
-          // Optional: Add metadata for tracking
+          // CRITICAL: Add metadata for PawBucks rewards processing
           metadata: {
             connected_account_id: accountId,
             platform_fee_percentage: (PLATFORM_FEE_PERCENTAGE * 100).toString(),
+            user_id: user.id,
+            merchant_id: merchantId || '',
+            source: 'merchant_storefront',
+            product_name: productName || 'Storefront Purchase',
+            description: `Purchase from ${merchantName}`,
           },
         },
         
-        // Success and cancel URLs
-        success_url: successUrl || `${req.headers.get('origin')}/checkout-success?session_id={CHECKOUT_SESSION_ID}`,
+        // Include session ID in success URL for verification
+        success_url: successUrl || `${req.headers.get('origin')}/checkout-success?session_id={CHECKOUT_SESSION_ID}&store=${accountId}`,
         cancel_url: cancelUrl || `${req.headers.get('origin')}/checkout-canceled`,
         
-        // Optional: Collect customer information
-        customer_email: undefined, // Stripe will ask for email
+        // Collect customer email for order confirmation
+        customer_email: user.email,
       },
       {
-        // IMPORTANT: Create checkout session on the connected account
-        // This makes the connected account receive the payment
         stripeAccount: accountId,
       }
     );
 
     console.log('Checkout session created:', session.id);
 
-    // STEP 6: Return the checkout session URL
+    // STEP 7: Return the checkout session URL with rewards info
     return new Response(
       JSON.stringify({
         success: true,
@@ -171,6 +209,11 @@ serve(async (req) => {
           amount: applicationFeeAmount,
           percentage: PLATFORM_FEE_PERCENTAGE * 100,
           formatted: `$${(applicationFeeAmount / 100).toFixed(2)}`,
+        },
+        rewards: {
+          cashback_rate: userCashbackRate,
+          estimated_pawbucks: estimatedPawBucks,
+          formatted: `+${estimatedPawBucks} PawBucks`,
         },
       }),
       {
