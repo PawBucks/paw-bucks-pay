@@ -144,6 +144,75 @@ const Index = () => {
                 <div className="text-sm sm:text-base text-muted-foreground">Processed</div>
               </div>
             </div>
+
+            {/* Earning Explainer Banner */}
+            <div className="mt-12 max-w-4xl mx-auto">
+              <div className="relative overflow-hidden rounded-2xl border-2 border-accent/30 bg-gradient-to-r from-accent/10 via-primary/5 to-accent/10 p-6 sm:p-8">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer" style={{ backgroundSize: '200% 100%' }} />
+                <div className="relative z-10">
+                  <div className="flex items-center justify-center gap-2 mb-4">
+                    <Sparkles className="w-5 h-5 text-accent animate-pulse" />
+                    <h3 className="text-lg sm:text-xl font-bold text-center">How You Earn PawBucks</h3>
+                    <Sparkles className="w-5 h-5 text-accent animate-pulse" />
+                  </div>
+                  
+                  <p className="text-center text-muted-foreground mb-6 max-w-2xl mx-auto">
+                    Every dollar you spend earns PawBucks rewards. The more you upgrade, the more you earn!
+                  </p>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+                    {/* Free Tier */}
+                    <div className="text-center p-4 rounded-xl bg-background/50 border border-border/50">
+                      <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-muted/50 mb-2">
+                        <Gift className="w-5 h-5 text-muted-foreground" />
+                      </div>
+                      <div className="text-sm font-medium text-muted-foreground mb-1">Free</div>
+                      <div className="text-2xl sm:text-3xl font-bold text-foreground">10x</div>
+                      <div className="text-xs text-muted-foreground mt-1">$1 = 10 PawBucks</div>
+                      <div className="mt-2 text-xs text-muted-foreground/80">
+                        $100 spend = 1,000 PawBucks
+                      </div>
+                    </div>
+                    
+                    {/* PawPass Tier */}
+                    <div className="text-center p-4 rounded-xl bg-yellow-500/10 border-2 border-yellow-500/30 relative">
+                      <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-yellow-500 text-yellow-950 text-xs font-bold rounded-full">
+                        POPULAR
+                      </div>
+                      <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-yellow-500/20 mb-2">
+                        <Zap className="w-5 h-5 text-yellow-600" />
+                      </div>
+                      <div className="text-sm font-medium text-yellow-600 mb-1">PawPass</div>
+                      <div className="text-2xl sm:text-3xl font-bold text-yellow-600">20x</div>
+                      <div className="text-xs text-yellow-600/80 mt-1">$1 = 20 PawBucks</div>
+                      <div className="mt-2 text-xs text-muted-foreground">
+                        $100 spend = 2,000 PawBucks
+                      </div>
+                    </div>
+                    
+                    {/* PawPass+ Tier */}
+                    <div className="text-center p-4 rounded-xl bg-purple-500/10 border-2 border-purple-500/30 relative">
+                      <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-purple-500 text-white text-xs font-bold rounded-full">
+                        BEST VALUE
+                      </div>
+                      <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-purple-500/20 mb-2">
+                        <TrendingUp className="w-5 h-5 text-purple-500" />
+                      </div>
+                      <div className="text-sm font-medium text-purple-500 mb-1">PawPass+</div>
+                      <div className="text-2xl sm:text-3xl font-bold text-purple-500">30x</div>
+                      <div className="text-xs text-purple-500/80 mt-1">$1 = 30 PawBucks</div>
+                      <div className="mt-2 text-xs text-muted-foreground">
+                        $100 spend = 3,000 PawBucks
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <p className="text-center text-xs text-muted-foreground mt-4">
+                    1,000 PawBucks = $1.00 in rewards value • Redeem for discounts on future purchases
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
