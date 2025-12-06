@@ -114,7 +114,7 @@ const PetStorePaymentForm = ({
           <span className="font-medium">${totalAmount.toFixed(2)}</span>
         </div>
         <div className="flex justify-between text-sm">
-          <span className="text-muted-foreground">You'll earn ({cashbackRate}%):</span>
+          <span className="text-muted-foreground">You'll earn ({cashbackRate}x):</span>
           <span className="font-bold text-accent flex items-center gap-1">
             <Coins className="h-3 w-3" />
             {pawbucksEarned} PawBucks

@@ -581,7 +581,7 @@ const AdminDashboard = () => {
                     <TableCell className="font-medium">{merchant.business_name}</TableCell>
                     <TableCell>{merchant.contact_person}</TableCell>
                     <TableCell>{merchant.business_type}</TableCell>
-                    <TableCell>{merchant.cashback_rate}%</TableCell>
+                    <TableCell>{merchant.cashback_rate}x</TableCell>
                     <TableCell>
                       <Badge variant={merchant.stripe_account_status === "complete" ? "default" : "outline"}>
                         {merchant.stripe_account_status || "pending"}
@@ -648,7 +648,7 @@ const AdminDashboard = () => {
           </DialogHeader>
           <form onSubmit={handleUpdateCashback} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="cashbackRate">Cashback Rate (%)</Label>
+              <Label htmlFor="cashbackRate">Points Multiplier (x)</Label>
               <Input
                 id="cashbackRate"
                 name="cashbackRate"
@@ -828,7 +828,7 @@ const AdminDashboard = () => {
                   <TableCell className="font-medium">{merchant.business_name}</TableCell>
                   <TableCell>{merchant.contact_person}</TableCell>
                   <TableCell>{merchant.business_type}</TableCell>
-                  <TableCell>{merchant.cashback_rate}%</TableCell>
+                  <TableCell>{merchant.cashback_rate}x</TableCell>
                   <TableCell>
                     <div className="flex gap-2">
                       <Button

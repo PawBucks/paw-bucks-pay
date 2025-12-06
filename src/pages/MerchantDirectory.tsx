@@ -304,7 +304,7 @@ const MerchantDirectory = () => {
                               {merchant.business_name}
                             </h3>
                             <Badge className="bg-primary/10 text-primary border-primary/20 flex-shrink-0 ml-2">
-                              {merchant.cashback_rate}%
+                              {merchant.cashback_rate}x
                             </Badge>
                           </div>
 

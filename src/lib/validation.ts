@@ -78,8 +78,8 @@ export const merchantOnboardingSchema = z.object({
     .optional()
     .or(z.literal("")),
   cashbackRate: z.number()
-    .min(0, { message: "Cashback rate must be at least 0%" })
-    .max(100, { message: "Cashback rate cannot exceed 100%" }),
+    .min(0, { message: "Points multiplier must be at least 0x" })
+    .max(100, { message: "Points multiplier cannot exceed 100x" }),
 });
 
 // Simplified merchant schema for profile updates
@@ -94,8 +94,8 @@ export const merchantSchema = z.object({
   address: z.string().optional(),
   description: z.string().max(500, "Description is too long").optional(),
   cashbackRate: z.number()
-    .min(0, "Cashback rate cannot be negative")
-    .max(20, "Cashback rate cannot exceed 20%"),
+    .min(0, "Points multiplier cannot be negative")
+    .max(20, "Points multiplier cannot exceed 20x"),
 });
 
 // ==========================================
