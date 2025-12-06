@@ -1,8 +1,6 @@
-import { useEffect, useCallback, memo } from "react";
+import { useEffect, useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { useOptimizedQuery } from "@/hooks/useOptimizedQuery";
-import { DataLoader } from "@/lib/dataLoader";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
@@ -35,46 +33,73 @@ type PetProfile = {
 };
 
 const Dashboard = () => {
-  const { user, signOut, loading } = useAuth();
+  const { user, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   
-  // Batch load all dashboard data in parallel
-  const { data, isLoading: dataLoading, refetch } = useOptimizedQuery(
-    ['dashboard', user?.id || ''],
-    async () => {
-      if (!user) return null;
-      
-      console.log('[Dashboard] Fetching data for user:', user.id, user.email);
-      const result = await DataLoader.batchLoad({
-        profile: () => DataLoader.loadUserProfile(user.id),
-        wallet: () => DataLoader.loadWalletData(user.id),
-        pets: () => DataLoader.loadPetProfiles(user.id),
-      });
-      console.log('[Dashboard] Batch load result - pets:', result?.pets?.length || 0);
-      return result;
-    },
-    { 
-      staleTime: 1000 * 60 * 2, // Reduce to 2 minutes
-      enabled: !!user // Only run when user exists
-    }
-  );
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [wallet, setWallet] = useState<WalletData | null>(null);
+  const [pets, setPets] = useState<PetProfile[]>([]);
+  const [dataLoading, setDataLoading] = useState(true);
 
-  const profile = data?.profile;
-  const wallet = data?.wallet;
-  const pets = data?.pets || [];
-  
-  // Debug log
-  useEffect(() => {
-    if (user && !dataLoading) {
-      console.log('[Dashboard] Current state - User:', user.email, 'Pets loaded:', pets.length);
+  // Direct fetch function - no caching that could cause stale data
+  const fetchDashboardData = useCallback(async () => {
+    if (!user) {
+      setDataLoading(false);
+      return;
     }
-  }, [user, dataLoading, pets.length]);
+
+    setDataLoading(true);
+    
+    try {
+      // Fetch all data in parallel directly from Supabase
+      const [profileResult, walletResult, petsResult] = await Promise.all([
+        supabase
+          .from('profiles')
+          .select('user_type, full_name')
+          .eq('id', user.id)
+          .single(),
+        supabase
+          .from('wallets')
+          .select('balance, rewards_points')
+          .eq('user_id', user.id)
+          .maybeSingle(),
+        supabase
+          .from('pet_profiles')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+      ]);
+
+      if (profileResult.data) {
+        setProfile(profileResult.data as Profile);
+      }
+      
+      if (walletResult.data) {
+        setWallet(walletResult.data);
+      }
+      
+      if (petsResult.data) {
+        setPets(petsResult.data as PetProfile[]);
+      }
+    } catch (error) {
+      console.error('[Dashboard] Error fetching data:', error);
+    } finally {
+      setDataLoading(false);
+    }
+  }, [user]);
+
+  // Fetch data when user changes
+  useEffect(() => {
+    if (user && !authLoading) {
+      fetchDashboardData();
+    }
+  }, [user, authLoading, fetchDashboardData]);
 
   useEffect(() => {
     const checkUserAndRedirect = async () => {
-      if (!loading && !user) {
+      if (!authLoading && !user) {
         navigate("/auth");
-      } else if (!loading && user && profile) {
+      } else if (!authLoading && user && profile) {
         // Check if user is admin
         const { data: isAdmin } = await supabase.rpc('has_role', {
           _user_id: user.id,
@@ -90,14 +115,19 @@ const Dashboard = () => {
     };
 
     checkUserAndRedirect();
-  }, [user, loading, profile, navigate]);
+  }, [user, authLoading, profile, navigate]);
 
   const handleSignOut = useCallback(async () => {
     await signOut();
     navigate("/auth");
   }, [signOut, navigate]);
 
-  if (loading || dataLoading || !profile) {
+  // Handle refetch when pets are updated
+  const handlePetsUpdate = useCallback(() => {
+    fetchDashboardData();
+  }, [fetchDashboardData]);
+
+  if (authLoading || dataLoading || !profile) {
     return (
       <div className="min-h-screen bg-background">
         <Header isAuthenticated={true} onLogout={handleSignOut} />
@@ -132,7 +162,7 @@ const Dashboard = () => {
               rewardsPoints={wallet?.rewards_points || 0}
             />
             
-            <PetProfilesSection pets={pets} onUpdate={() => refetch()} />
+            <PetProfilesSection pets={pets} onUpdate={handlePetsUpdate} />
             
             <ReferralCard />
             
