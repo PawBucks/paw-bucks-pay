@@ -15,6 +15,7 @@ import { loadStripe } from "@stripe/stripe-js";
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { toast } from "sonner";
 import { Loader2, CreditCard, Coins, Check } from "lucide-react";
+import { PawBucksInfoTooltip } from "@/components/PawBucksInfoTooltip";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
 
@@ -254,8 +255,9 @@ export const PaymentDialogWithPawBucks = ({
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Pay {merchantName}</DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="flex items-center gap-1">
             Earn {cashbackRate}x points in PawBucks on card payments
+            <PawBucksInfoTooltip variant="earning" />
           </DialogDescription>
         </DialogHeader>
 

@@ -10,6 +10,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { AdPlacement } from "@/components/AdPlacement";
 import { PageLoader } from "@/components/PageLoader";
 import { EmptyState } from "@/components/EmptyState";
+import { PawBucksInfoTooltip } from "@/components/PawBucksInfoTooltip";
 import { Coins, TrendingUp, Gift, ArrowUpRight, ArrowDownRight, Sparkles, Zap, Crown } from "lucide-react";
 import { Formatters } from "@/utils/formatters";
 import { PAWBUCKS_CONVERSION, ROUTES, CASHBACK_RATES } from "@/lib/constants";
@@ -315,6 +316,7 @@ const PawBucksWallet = () => {
           <div className="flex items-center justify-center gap-3 mb-2">
             <Coins className="w-10 h-10 text-yellow-500" />
             <h2 className="text-4xl font-bold">Your PawBucks Wallet</h2>
+            <PawBucksInfoTooltip variant="earning" className="ml-1" />
           </div>
           <p className="text-muted-foreground text-lg">Free: $1 = 10 PawBucks • PawPass: $1 = 20 PawBucks • PawPass+: $1 = 30 PawBucks 🐾</p>
         </div>
@@ -338,8 +340,9 @@ const PawBucksWallet = () => {
               <span className="font-semibold">{coinsToNextReward} PawBucks to go</span>
             </div>
             <Progress value={progressPercent} className="h-3" />
-            <p className="text-xs text-center text-muted-foreground mt-2">
+            <p className="text-xs text-center text-muted-foreground mt-2 flex items-center justify-center gap-1">
               {PAWBUCKS_CONVERSION.PET_OWNER_TO_USD} PawBucks = $1.00
+              <PawBucksInfoTooltip variant="redemption" />
             </p>
           </div>
         </GradientCard>
