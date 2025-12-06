@@ -9,11 +9,10 @@ import { MessageCircle, Send, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 
-type PartnerVet = {
+type PartnerVetPublic = {
   id: string;
   name: string;
   location: string;
-  contact_email: string;
 };
 
 type Message = {
@@ -29,7 +28,7 @@ type VetCommunicationProps = {
 };
 
 export const VetCommunication = ({ petId }: VetCommunicationProps) => {
-  const [vets, setVets] = useState<PartnerVet[]>([]);
+  const [vets, setVets] = useState<PartnerVetPublic[]>([]);
   const [selectedVetId, setSelectedVetId] = useState<string>("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
@@ -40,8 +39,8 @@ export const VetCommunication = ({ petId }: VetCommunicationProps) => {
   useEffect(() => {
     const loadVets = async () => {
       const { data, error } = await supabase
-        .from("partner_vets")
-        .select("*")
+        .from("partner_vets_public")
+        .select("id, name, location")
         .order("name");
 
       if (!error && data) {

@@ -1007,6 +1007,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "pet_medical_records_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "pet_medical_records_visit_id_fkey"
             columns: ["visit_id"]
             isOneToOne: false
@@ -1538,6 +1545,13 @@ export type Database = {
             referencedRelation: "partner_vets"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "vet_loans_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       vet_messages: {
@@ -1581,6 +1595,13 @@ export type Database = {
             columns: ["vet_id"]
             isOneToOne: false
             referencedRelation: "partner_vets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vet_messages_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets_public"
             referencedColumns: ["id"]
           },
         ]
@@ -1754,6 +1775,27 @@ export type Database = {
           longitude?: number | null
           price_range?: number | null
           sponsored_until?: string | null
+        }
+        Relationships: []
+      }
+      partner_vets_public: {
+        Row: {
+          created_at: string | null
+          id: string | null
+          location: string | null
+          name: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string | null
+          location?: string | null
+          name?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string | null
+          location?: string | null
+          name?: string | null
         }
         Relationships: []
       }
