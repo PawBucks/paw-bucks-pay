@@ -1,42 +1,30 @@
-import { motion, Transition, Variants } from "framer-motion";
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
 
 interface PageTransitionProps {
   children: ReactNode;
 }
 
-const pageVariants: Variants = {
-  initial: {
-    opacity: 0,
-    y: 8,
-  },
-  animate: {
-    opacity: 1,
-    y: 0,
-  },
-  exit: {
-    opacity: 0,
-    y: -8,
-  },
-};
-
-const pageTransition: Transition = {
-  type: "tween",
-  ease: "easeOut",
-  duration: 0.2,
-};
-
 export const PageTransition = ({ children }: PageTransitionProps) => {
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    // Trigger animation on mount
+    const timer = requestAnimationFrame(() => {
+      setIsVisible(true);
+    });
+    
+    return () => cancelAnimationFrame(timer);
+  }, []);
+
   return (
-    <motion.div
-      initial="initial"
-      animate="animate"
-      exit="exit"
-      variants={pageVariants}
-      transition={pageTransition}
-      className="min-h-screen"
+    <div
+      className={`min-h-screen transition-all duration-200 ease-out ${
+        isVisible 
+          ? 'opacity-100 translate-y-0' 
+          : 'opacity-0 translate-y-2'
+      }`}
     >
       {children}
-    </motion.div>
+    </div>
   );
 };

@@ -304,5 +304,25 @@
     padding: 0.25rem;
     font-size: 1rem;
   }
+
+  /* Confetti Animation */
+  @keyframes confetti {
+    0% {
+      transform: translateY(-10px) rotate(0deg) scale(0);
+      opacity: 1;
+    }
+    10% {
+      transform: translateY(0) rotate(30deg) scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(100vh) rotate(720deg) scale(0.5);
+      opacity: 0;
+    }
+  }
+
+  .animate-confetti {
+    animation: confetti 3s ease-out forwards;
+  }
 }
 
