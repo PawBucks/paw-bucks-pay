@@ -1744,6 +1744,7 @@ export type Database = {
           latitude: number | null
           logo_url: string | null
           longitude: number | null
+          phone: string | null
           price_range: number | null
           sponsored_until: string | null
         }
@@ -1760,6 +1761,7 @@ export type Database = {
           latitude?: number | null
           logo_url?: string | null
           longitude?: number | null
+          phone?: string | null
           price_range?: number | null
           sponsored_until?: string | null
         }
@@ -1776,6 +1778,7 @@ export type Database = {
           latitude?: number | null
           logo_url?: string | null
           longitude?: number | null
+          phone?: string | null
           price_range?: number | null
           sponsored_until?: string | null
         }
