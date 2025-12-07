@@ -101,8 +101,9 @@ const getBusinessIcon = (type: string) => {
 };
 
 const StarRating = ({ rating, reviewCount }: { rating: number; reviewCount: number }) => {
-  const fullStars = Math.floor(rating);
-  const hasHalfStar = rating % 1 >= 0.5;
+  const safeRating = rating ?? 0;
+  const fullStars = Math.floor(safeRating);
+  const hasHalfStar = safeRating % 1 >= 0.5;
   
   return (
     <div className="flex items-center gap-1.5">
@@ -120,8 +121,8 @@ const StarRating = ({ rating, reviewCount }: { rating: number; reviewCount: numb
           />
         ))}
       </div>
-      <span className="text-sm font-medium">{rating.toFixed(1)}</span>
-      <span className="text-sm text-muted-foreground">({reviewCount})</span>
+      <span className="text-sm font-medium">{safeRating.toFixed(1)}</span>
+      <span className="text-sm text-muted-foreground">({reviewCount ?? 0})</span>
     </div>
   );
 };
@@ -192,7 +193,7 @@ const MerchantCard = ({
                 </span>
                 <span className="text-muted-foreground/50">•</span>
                 <Badge className="bg-green-500/10 text-green-600 border-green-500/20 text-xs gap-1">
-                  {merchant.cashback_rate.toFixed(0)}x points
+                  {(merchant.cashback_rate ?? 0).toFixed(0)}x points
                   <PawBucksInfoTooltip variant="multiplier" className="ml-0.5" />
                 </Badge>
               </div>
