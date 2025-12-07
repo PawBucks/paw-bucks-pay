@@ -154,10 +154,10 @@ const Storefront = () => {
     }
   };
 
-  // Calculate estimated PawBucks for a product (simplified - actual calculation happens server-side)
+  // Calculate estimated PawBucks for a product
+  // Base multiplier is 10x ($1 = 10 PawBucks), users may get more with subscriptions (20x or 30x)
   const getEstimatedPawBucks = (price: number) => {
-    // Base rate is 10x, users may get more with subscriptions
-    return Math.floor(price * 0.10 * 10); // 10% * $1 = 10 PawBucks base
+    return Math.floor(price * cashbackRate);
   };
 
   if (loading || authLoading) {

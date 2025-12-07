@@ -63,7 +63,8 @@ serve(async (req) => {
     const totalAmount = item.price * quantity;
     const amountInCents = totalAmount * 100; // Convert dollars to cents
 
-    // Check if user has active subscription (25% for premium, 10% for free)
+    // Check if user has active subscription (determines multiplier)
+    // Free: 10x, PawPass: 20x, PawPass+: 30x
     const { data: subscription } = await supabaseAdmin
       .from('subscriptions')
       .select('status')
@@ -72,16 +73,17 @@ serve(async (req) => {
       .maybeSingle();
 
     const hasActiveSubscription = !!subscription;
-    const cashbackRate = hasActiveSubscription ? 25.0 : 10.0;
-    const cashbackAmount = (totalAmount * cashbackRate) / 100;
+    // Simplified: 10x for free, 20x for subscribers (actual tier check done in stripe-webhook)
+    const pawbucksMultiplier = hasActiveSubscription ? 20 : 10;
+    const pawbucksEarned = Math.round(totalAmount * pawbucksMultiplier);
 
     console.log('Creating pet store payment:', {
       itemId,
       itemName: item.name,
       quantity,
       totalAmount,
-      cashbackRate,
-      cashbackAmount,
+      pawbucksMultiplier,
+      pawbucksEarned,
     });
 
     // Create a PaymentIntent
@@ -97,8 +99,8 @@ serve(async (req) => {
         item_name: item.name,
         quantity: quantity.toString(),
         source: 'pet_store',
-        cashback_amount: cashbackAmount.toFixed(2),
-        cashback_rate: cashbackRate.toString(),
+        pawbucks_earned: pawbucksEarned.toString(),
+        pawbucks_multiplier: pawbucksMultiplier.toString(),
       },
     });
 
@@ -108,8 +110,8 @@ serve(async (req) => {
       JSON.stringify({
         clientSecret: paymentIntent.client_secret,
         paymentIntentId: paymentIntent.id,
-        cashbackAmount,
-        cashbackRate,
+        pawbucksEarned,
+        pawbucksMultiplier,
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

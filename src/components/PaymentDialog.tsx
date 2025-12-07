@@ -68,11 +68,11 @@ const PaymentForm = ({
       }
 
       const paymentAmount = parseFloat(amount);
-      const cashbackAmount = (paymentAmount * cashbackRate) / 100;
-      const rewardsEarned = Math.floor(paymentAmount);
+      const cashbackPawBucks = Math.round(paymentAmount * cashbackRate);
+      const rewardsEarned = cashbackPawBucks;
 
       toast.success(
-        `Payment successful! You earned $${cashbackAmount.toFixed(2)} cashback and ${rewardsEarned} points!`
+        `Payment successful! You earned ${cashbackPawBucks} PawBucks!`
       );
       
       onSuccess();
@@ -85,8 +85,8 @@ const PaymentForm = ({
   };
 
   const cashbackPreview = amount && !isNaN(parseFloat(amount))
-    ? ((parseFloat(amount) * cashbackRate) / 100).toFixed(2)
-    : "0.00";
+    ? Math.round(parseFloat(amount) * cashbackRate)
+    : 0;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -98,7 +98,7 @@ const PaymentForm = ({
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Points Earned ({cashbackRate}x):</span>
-            <span className="font-bold text-accent">+${cashbackPreview}</span>
+            <span className="font-bold text-accent">+{cashbackPreview} PawBucks</span>
           </div>
         </div>
       )}
@@ -235,8 +235,8 @@ export const PaymentDialog = ({
   };
 
   const cashbackPreview = amount && !isNaN(parseFloat(amount))
-    ? ((parseFloat(amount) * cashbackRate) / 100).toFixed(2)
-    : "0.00";
+    ? Math.round(parseFloat(amount) * cashbackRate)
+    : 0;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -279,7 +279,7 @@ export const PaymentDialog = ({
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Points Earned ({cashbackRate}x):</span>
-                  <span className="font-bold text-accent">+${cashbackPreview}</span>
+                  <span className="font-bold text-accent">+{cashbackPreview} PawBucks</span>
                 </div>
               </div>
             )}

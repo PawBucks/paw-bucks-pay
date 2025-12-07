@@ -83,8 +83,8 @@ const PetStorePaymentForm = ({
         throw error;
       }
 
-      const cashbackAmount = (totalAmount * cashbackRate) / 100;
-      const pawbucksEarned = Math.floor(cashbackAmount * 10);
+      // PawBucks earned = amount × multiplier (10x, 20x, or 30x based on subscription)
+      const pawbucksEarned = Math.round(totalAmount * cashbackRate);
 
       toast.success(
         `Payment successful! You earned ${pawbucksEarned} PawBucks!`
@@ -99,8 +99,8 @@ const PetStorePaymentForm = ({
     }
   };
 
-  const cashbackAmount = (totalAmount * cashbackRate) / 100;
-  const pawbucksEarned = Math.floor(cashbackAmount * 10);
+  // PawBucks earned = amount × multiplier (10x, 20x, or 30x based on subscription)
+  const pawbucksEarned = Math.round(totalAmount * cashbackRate);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -195,7 +195,7 @@ export default function PetStore() {
     enabled: !!user,
   });
 
-  const cashbackRate = subscription ? 25 : 10;
+  const cashbackRate = subscription ? 20 : 10; // 10x for free, 20x for subscribers (simplified)
 
   // Fetch active items
   const { data: items, isLoading } = useQuery({
