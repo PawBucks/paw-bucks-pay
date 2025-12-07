@@ -1,5 +1,13 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.2';
+import Stripe from 'https://esm.sh/stripe@14.21.0';
+
+// PawBucks multiplier constants matching src/lib/constants.ts
+const POINTS_MULTIPLIER = {
+  FREE: 10,
+  PAWPASS: 20,
+  PAWPASS_PLUS: 30,
+} as const;
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -102,17 +110,52 @@ serve(async (req) => {
     // Get user's subscription tier to calculate correct PawBucks multiplier
     const { data: subscription } = await supabase
       .from('subscriptions')
-      .select('status')
+      .select('status, stripe_subscription_id')
       .eq('user_id', user_id)
       .eq('status', 'active')
       .single();
 
-    // Determine multiplier based on subscription
-    let multiplier = 10; // Free tier default
-    if (subscription) {
-      // Check if PawPass+ (we'd need to check the stripe subscription, but for now assume active = PawPass+)
-      multiplier = 30; // PawPass+ tier
+    // Determine multiplier based on subscription tier
+    let multiplier: number = POINTS_MULTIPLIER.FREE; // Default to free tier
+    
+    if (subscription?.stripe_subscription_id) {
+      const stripeKey = Deno.env.get('STRIPE_SECRET_KEY');
+      if (stripeKey) {
+        try {
+          const stripe = new Stripe(stripeKey, {
+            apiVersion: '2023-10-16',
+            httpClient: Stripe.createFetchHttpClient(),
+          });
+          
+          const stripeSubscription = await stripe.subscriptions.retrieve(subscription.stripe_subscription_id);
+          const productId = stripeSubscription.items.data[0]?.price?.product as string;
+          
+          // Check product ID to determine tier (adjust these IDs to match your Stripe products)
+          // PawPass+ products typically have "plus" in the name or a specific product ID
+          if (productId) {
+            const product = await stripe.products.retrieve(productId);
+            const productName = product.name?.toLowerCase() || '';
+            
+            if (productName.includes('plus') || productName.includes('pawpass+')) {
+              multiplier = POINTS_MULTIPLIER.PAWPASS_PLUS;
+              console.log(`User ${user_id} has PawPass+ subscription, using ${multiplier}x multiplier`);
+            } else if (productName.includes('pawpass') || productName.includes('basic')) {
+              multiplier = POINTS_MULTIPLIER.PAWPASS;
+              console.log(`User ${user_id} has PawPass subscription, using ${multiplier}x multiplier`);
+            }
+          }
+        } catch (stripeError) {
+          console.error('Error fetching Stripe subscription details:', stripeError);
+          // Fall back to assuming PawPass if we have an active subscription but can't verify tier
+          multiplier = POINTS_MULTIPLIER.PAWPASS;
+        }
+      }
+    } else if (subscription) {
+      // Has subscription but no Stripe ID (legacy or manual), default to PawPass
+      multiplier = POINTS_MULTIPLIER.PAWPASS;
     }
+
+    console.log(`Final multiplier for user ${user_id}: ${multiplier}x`);
 
     // Calculate cashback and rewards
     const effectiveCashbackRate = cashback_rate ?? merchant.cashback_rate ?? 5;
