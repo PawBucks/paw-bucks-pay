@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { AddTransactionTool } from "@/components/admin/AddTransactionTool";
 import { Button } from "@/components/ui/button";
 import { GradientCard } from "@/components/ui/gradient-card";
 import { Input } from "@/components/ui/input";
@@ -501,6 +502,9 @@ const AdminDashboard = () => {
             </div>
           </GradientCard>
         </div>
+
+        {/* Add Transaction Tool */}
+        <AddTransactionTool />
 
         {/* Funding Requests */}
         <GradientCard>

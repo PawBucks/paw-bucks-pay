@@ -1,0 +1,218 @@
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.2';
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      console.error('Missing authorization header');
+      return new Response(
+        JSON.stringify({ error: 'Missing authorization header' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
+      );
+    }
+
+    // Create client with user's auth to verify admin status
+    const supabaseAuth = createClient(supabaseUrl, supabaseServiceKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const { data: { user }, error: authError } = await supabaseAuth.auth.getUser();
+    if (authError || !user) {
+      console.error('Authentication error:', authError);
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
+      );
+    }
+
+    // Verify admin role using service role client
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    
+    const { data: isAdmin } = await supabase
+      .rpc('has_role', { _user_id: user.id, _role: 'admin' });
+
+    if (!isAdmin) {
+      console.error('User is not an admin:', user.id);
+      return new Response(
+        JSON.stringify({ error: 'Admin access required' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 403 }
+      );
+    }
+
+    const { user_id, merchant_id, amount, description, cashback_rate } = await req.json();
+
+    // Validate required fields
+    if (!user_id || !merchant_id || !amount) {
+      return new Response(
+        JSON.stringify({ error: 'Missing required fields: user_id, merchant_id, amount' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      );
+    }
+
+    if (amount <= 0 || amount > 100000) {
+      return new Response(
+        JSON.stringify({ error: 'Amount must be between $0.01 and $100,000' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      );
+    }
+
+    // Verify merchant exists
+    const { data: merchant, error: merchantError } = await supabase
+      .from('merchants')
+      .select('id, business_name, cashback_rate')
+      .eq('id', merchant_id)
+      .single();
+
+    if (merchantError || !merchant) {
+      console.error('Merchant not found:', merchantError);
+      return new Response(
+        JSON.stringify({ error: 'Merchant not found' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 404 }
+      );
+    }
+
+    // Verify user exists
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('id, email')
+      .eq('id', user_id)
+      .single();
+
+    if (profileError || !profile) {
+      console.error('User not found:', profileError);
+      return new Response(
+        JSON.stringify({ error: 'User not found' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 404 }
+      );
+    }
+
+    // Get user's subscription tier to calculate correct PawBucks multiplier
+    const { data: subscription } = await supabase
+      .from('subscriptions')
+      .select('status')
+      .eq('user_id', user_id)
+      .eq('status', 'active')
+      .single();
+
+    // Determine multiplier based on subscription
+    let multiplier = 10; // Free tier default
+    if (subscription) {
+      // Check if PawPass+ (we'd need to check the stripe subscription, but for now assume active = PawPass+)
+      multiplier = 30; // PawPass+ tier
+    }
+
+    // Calculate cashback and rewards
+    const effectiveCashbackRate = cashback_rate ?? merchant.cashback_rate ?? 5;
+    const cashbackEarned = (amount * effectiveCashbackRate) / 100;
+    const pawbucksEarned = Math.floor(amount * multiplier);
+
+    console.log(`Creating transaction: user=${user_id}, merchant=${merchant_id}, amount=${amount}, cashback=${cashbackEarned}, pawbucks=${pawbucksEarned}`);
+
+    // Create the transaction
+    const { data: transaction, error: transactionError } = await supabase
+      .from('transactions')
+      .insert({
+        user_id,
+        merchant_id,
+        amount,
+        cashback_earned: cashbackEarned,
+        rewards_earned: pawbucksEarned,
+        description: description || `Manual transaction added by admin`,
+        status: 'completed',
+      })
+      .select()
+      .single();
+
+    if (transactionError) {
+      console.error('Failed to create transaction:', transactionError);
+      return new Response(
+        JSON.stringify({ error: 'Failed to create transaction', details: transactionError.message }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+      );
+    }
+
+    // Credit PawBucks to user's wallet
+    const { data: pawbucksWallet } = await supabase
+      .from('pawbucks_wallet')
+      .select('id, balance')
+      .eq('user_id', user_id)
+      .single();
+
+    if (pawbucksWallet) {
+      const newBalance = (pawbucksWallet.balance || 0) + pawbucksEarned;
+      
+      await supabase
+        .from('pawbucks_wallet')
+        .update({ balance: newBalance, last_updated: new Date().toISOString() })
+        .eq('user_id', user_id);
+
+      // Log PawBucks activity
+      await supabase
+        .from('pawbucks_activity')
+        .insert({
+          user_id,
+          amount: pawbucksEarned,
+          type: 'earn',
+          source: 'manual_transaction',
+          description: `Earned from purchase at ${merchant.business_name} (manual)`,
+          transaction_id: transaction.id,
+          partner_id: merchant_id,
+        });
+
+      console.log(`Credited ${pawbucksEarned} PawBucks to user ${user_id}`);
+    }
+
+    // Log admin action
+    await supabase.rpc('log_admin_action', {
+      _action: 'manual_transaction_created',
+      _entity_type: 'transaction',
+      _entity_id: transaction.id,
+      _changes: {
+        user_id,
+        user_email: profile.email,
+        merchant_id,
+        merchant_name: merchant.business_name,
+        amount,
+        cashback_earned: cashbackEarned,
+        pawbucks_earned: pawbucksEarned,
+      },
+    });
+
+    console.log('Transaction created successfully:', transaction.id);
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        transaction: {
+          id: transaction.id,
+          amount,
+          cashback_earned: cashbackEarned,
+          pawbucks_earned: pawbucksEarned,
+          merchant_name: merchant.business_name,
+          user_email: profile.email,
+        },
+      }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
+    );
+
+  } catch (error) {
+    console.error('Unexpected error:', error);
+    return new Response(
+      JSON.stringify({ error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+    );
+  }
+});

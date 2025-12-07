@@ -48,6 +48,9 @@ verify_jwt = true
 [functions.admin-credit-pawbucks]
 verify_jwt = true
 
+[functions.admin-add-transaction]
+verify_jwt = true
+
 [functions.apply-vet-loan]
 verify_jwt = true
 
