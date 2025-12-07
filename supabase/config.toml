@@ -45,6 +45,9 @@ verify_jwt = true
 [functions.admin-update-user-role]
 verify_jwt = true
 
+[functions.admin-credit-pawbucks]
+verify_jwt = true
+
 [functions.apply-vet-loan]
 verify_jwt = true
 
@@ -102,7 +105,6 @@ verify_jwt = true
 [functions.create-combined-payment]
 verify_jwt = true
 
-
 [functions.create-pet-store-payment]
 verify_jwt = true
 
@@ -112,3 +114,8 @@ verify_jwt = false
 [functions.get-mapbox-token]
 verify_jwt = false
 
+[functions.get-partner-offers]
+verify_jwt = false
+
+[functions.redeem-pawbucks]
+verify_jwt = true
