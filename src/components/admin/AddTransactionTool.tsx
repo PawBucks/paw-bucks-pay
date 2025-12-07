@@ -179,7 +179,7 @@ export const AddTransactionTool = () => {
             <SelectContent>
               {merchants.map((merchant) => (
                 <SelectItem key={merchant.id} value={merchant.id}>
-                  {merchant.business_name} ({merchant.cashback_rate}% cashback)
+                  {merchant.business_name} ({merchant.cashback_rate}x PawBucks)
                 </SelectItem>
               ))}
             </SelectContent>
@@ -204,8 +204,7 @@ export const AddTransactionTool = () => {
           </div>
           {amount && parseFloat(amount) > 0 && (
             <p className="text-sm text-muted-foreground">
-              User will earn approximately {Math.floor(parseFloat(amount) * 10)} - {Math.floor(parseFloat(amount) * 30)} PawBucks
-              {selectedMerchantData && ` + $${((parseFloat(amount) * selectedMerchantData.cashback_rate) / 100).toFixed(2)} cashback`}
+              User will earn {Math.floor(parseFloat(amount) * 10)} - {Math.floor(parseFloat(amount) * 30)} PawBucks (10x-30x based on subscription tier)
             </p>
           )}
         </div>
