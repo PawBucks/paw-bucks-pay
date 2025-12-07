@@ -23,6 +23,10 @@ type WalletData = {
   rewards_points: number;
 };
 
+type PawBucksWallet = {
+  balance: number;
+};
+
 type PetProfile = {
   id: string;
   name: string;
@@ -38,6 +42,7 @@ const Dashboard = () => {
   
   const [profile, setProfile] = useState<Profile | null>(null);
   const [wallet, setWallet] = useState<WalletData | null>(null);
+  const [pawbucksWallet, setPawbucksWallet] = useState<PawBucksWallet | null>(null);
   const [pets, setPets] = useState<PetProfile[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
 
@@ -52,7 +57,7 @@ const Dashboard = () => {
     
     try {
       // Fetch all data in parallel directly from Supabase
-      const [profileResult, walletResult, petsResult] = await Promise.all([
+      const [profileResult, walletResult, pawbucksResult, petsResult] = await Promise.all([
         supabase
           .from('profiles')
           .select('user_type, full_name')
@@ -61,6 +66,11 @@ const Dashboard = () => {
         supabase
           .from('wallets')
           .select('balance, rewards_points')
+          .eq('user_id', user.id)
+          .maybeSingle(),
+        supabase
+          .from('pawbucks_wallet')
+          .select('balance')
           .eq('user_id', user.id)
           .maybeSingle(),
         supabase
@@ -76,6 +86,10 @@ const Dashboard = () => {
       
       if (walletResult.data) {
         setWallet(walletResult.data);
+      }
+
+      if (pawbucksResult.data) {
+        setPawbucksWallet(pawbucksResult.data);
       }
       
       if (petsResult.data) {
@@ -159,7 +173,7 @@ const Dashboard = () => {
           <div className="grid gap-6 md:grid-cols-3">
             <WalletStats 
               balance={wallet?.balance || 0} 
-              rewardsPoints={wallet?.rewards_points || 0}
+              rewardsPoints={pawbucksWallet?.balance || 0}
             />
             
             <PetProfilesSection pets={pets} onUpdate={handlePetsUpdate} />
