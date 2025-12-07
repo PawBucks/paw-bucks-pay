@@ -122,3 +122,6 @@ verify_jwt = false
 
 [functions.redeem-pawbucks]
 verify_jwt = true
+
+[functions.admin-reset-password]
+verify_jwt = false
