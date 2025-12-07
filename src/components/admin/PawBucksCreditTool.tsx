@@ -15,6 +15,8 @@ type UserResult = {
   balance: number | null;
 };
 
+const MAX_CREDIT_AMOUNT = 100000;
+
 export function PawBucksCreditTool() {
   const [searchEmail, setSearchEmail] = useState('');
   const [searching, setSearching] = useState(false);
@@ -74,66 +76,48 @@ export function PawBucksCreditTool() {
       return;
     }
 
-    if (!reason.trim()) {
-      toast.error('Please provide a reason for the credit');
+    if (amount > MAX_CREDIT_AMOUNT) {
+      toast.error(`Maximum credit amount is ${MAX_CREDIT_AMOUNT.toLocaleString()} PawBucks`);
+      return;
+    }
+
+    if (!reason.trim() || reason.trim().length < 5) {
+      toast.error('Please provide a reason (at least 5 characters)');
+      return;
+    }
+
+    if (reason.length > 500) {
+      toast.error('Reason must be less than 500 characters');
       return;
     }
 
     setCrediting(true);
 
     try {
-      // Check if wallet exists
-      const { data: wallet } = await supabase
-        .from('pawbucks_wallet')
-        .select('id, balance')
-        .eq('user_id', foundUser.id)
-        .single();
+      // Call the secure edge function instead of direct database updates
+      const { data, error } = await supabase.functions.invoke('admin-credit-pawbucks', {
+        body: {
+          userId: foundUser.id,
+          amount,
+          reason: reason.trim()
+        }
+      });
 
-      if (wallet) {
-        // Update existing wallet
-        const { error: updateError } = await supabase
-          .from('pawbucks_wallet')
-          .update({ balance: wallet.balance + amount })
-          .eq('user_id', foundUser.id);
-
-        if (updateError) throw updateError;
-      } else {
-        // Create new wallet with balance
-        const { error: insertError } = await supabase
-          .from('pawbucks_wallet')
-          .insert({ user_id: foundUser.id, balance: amount });
-
-        if (insertError) throw insertError;
+      if (error) {
+        throw new Error(error.message || 'Failed to credit PawBucks');
       }
 
-      // Log the activity
-      const { error: activityError } = await supabase
-        .from('pawbucks_activity')
-        .insert({
-          user_id: foundUser.id,
-          type: 'earn',
-          amount: amount,
-          source: 'Admin Credit',
-          description: `Admin credit: ${reason}`,
-        });
-
-      if (activityError) throw activityError;
-
-      // Log admin action
-      await supabase.rpc('log_admin_action', {
-        _action: 'CREDIT_PAWBUCKS',
-        _entity_type: 'pawbucks_wallet',
-        _entity_id: foundUser.id,
-        _changes: { amount, reason, user_email: foundUser.email },
-      });
+      if (data?.error) {
+        throw new Error(data.error);
+      }
 
       toast.success(`Successfully credited ${amount} PawBucks to ${foundUser.email}`);
       setLastCredited({ email: foundUser.email, amount });
       
-      // Update displayed balance
+      // Update displayed balance from server response
       setFoundUser({
         ...foundUser,
-        balance: (foundUser.balance ?? 0) + amount,
+        balance: data.newBalance ?? (foundUser.balance ?? 0) + amount,
       });
       
       // Reset form
@@ -162,7 +146,7 @@ export function PawBucksCreditTool() {
           Manual PawBucks Credit
         </CardTitle>
         <CardDescription>
-          Credit PawBucks to a user's wallet for refunds, compensation, or promotions
+          Credit PawBucks to a user's wallet for refunds, compensation, or promotions (max {MAX_CREDIT_AMOUNT.toLocaleString()} per operation)
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -207,24 +191,26 @@ export function PawBucksCreditTool() {
 
             <div className="grid gap-4 pt-2">
               <div className="space-y-2">
-                <Label htmlFor="creditAmount">Amount to Credit</Label>
+                <Label htmlFor="creditAmount">Amount to Credit (max {MAX_CREDIT_AMOUNT.toLocaleString()})</Label>
                 <Input
                   id="creditAmount"
                   type="number"
                   min="1"
+                  max={MAX_CREDIT_AMOUNT}
                   placeholder="e.g., 200"
                   value={creditAmount}
                   onChange={(e) => setCreditAmount(e.target.value)}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="reason">Reason for Credit</Label>
+                <Label htmlFor="reason">Reason for Credit (required, 5-500 characters)</Label>
                 <Textarea
                   id="reason"
                   placeholder="e.g., Compensation for missed webhook transaction"
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                   rows={2}
+                  maxLength={500}
                 />
               </div>
               <Button 
