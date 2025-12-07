@@ -7,11 +7,11 @@ type MerchantUpdate = TablesUpdate<"merchants">;
 type MerchantReview = Tables<"merchant_reviews">;
 type FundingRequest = Tables<"funding_requests">;
 type FundingDeal = Tables<"funding_deals">;
-// Public merchant type from the secure view (excludes sensitive contact info)
-// Note: stripe_account_id is intentionally excluded for security
+// Public merchant type from the secure view (excludes sensitive contact info like email, owner_name, contact_person)
+// Note: stripe_account_id is intentionally excluded for security, phone is included for customer contact
 type MerchantPublic = Pick<Merchant, 
   'id' | 'business_name' | 'business_type' | 'description' | 'logo_url' | 
-  'address' | 'latitude' | 'longitude' | 'cashback_rate' | 'accepts_pawbucks' | 
+  'address' | 'phone' | 'latitude' | 'longitude' | 'cashback_rate' | 'accepts_pawbucks' | 
   'price_range' | 'is_sponsored' | 'sponsored_until' | 'created_at'
 >;
 
