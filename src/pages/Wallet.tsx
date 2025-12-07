@@ -41,13 +41,29 @@ const Wallet = () => {
     { staleTime: 1000 * 60 * 2 } // Cache for 2 minutes
   );
 
+  // Fetch PawBucks wallet balance separately
+  const { data: pawbucksWallet, isLoading: pawbucksLoading } = useOptimizedQuery<{ balance: number } | null>(
+    ['pawbucks_wallet', user?.id || ''],
+    async () => {
+      if (!user) return null;
+      const { data, error } = await supabase
+        .from('pawbucks_wallet')
+        .select('balance')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    { staleTime: 1000 * 60 * 2 }
+  );
+
   const { data: transactions = [], isLoading: transactionsLoading } = useOptimizedQuery<Transaction[]>(
     ['transactions', user?.id || ''],
     () => user ? DataLoader.loadTransactions(user.id, 10) : Promise.resolve([]),
     { staleTime: 1000 * 60 * 2 }
   );
 
-  const loading = walletLoading || transactionsLoading;
+  const loading = walletLoading || pawbucksLoading || transactionsLoading;
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -119,7 +135,7 @@ const Wallet = () => {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Points</p>
-                <p className="text-2xl font-bold">{wallet?.rewards_points || 0}</p>
+                <p className="text-2xl font-bold">{pawbucksWallet?.balance || 0}</p>
               </div>
             </div>
           </GradientCard>
