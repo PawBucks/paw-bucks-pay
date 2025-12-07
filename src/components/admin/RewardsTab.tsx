@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
+import { PawBucksCreditTool } from './PawBucksCreditTool';
 
 export function RewardsTab() {
   const [settings, setSettings] = useState({
@@ -92,6 +93,9 @@ export function RewardsTab() {
         <h2 className="text-3xl font-bold">PawBucks Rewards Management</h2>
         <p className="text-muted-foreground">Configure rewards and cashback settings</p>
       </div>
+
+      {/* Manual Credit Tool */}
+      <PawBucksCreditTool />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
