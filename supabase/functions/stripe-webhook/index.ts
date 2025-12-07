@@ -266,8 +266,10 @@ serve(async (req) => {
 
       const amount = paymentIntent.amount / 100; // Convert from cents
       
-      // Determine cashback rate based on subscription tier
-      let cashbackRate = 10; // Default 10% for free accounts
+      // Determine PawBucks multiplier based on subscription tier
+      // Free: 10x, PawPass: 20x, PawPass+: 30x
+      let pawbucksMultiplier = 10; // Default 10x for free accounts
+      let tierName = 'Free';
       
       if (user_id) {
         // Check user's subscription tier
@@ -285,26 +287,33 @@ serve(async (req) => {
           
           console.log('User subscription found:', { productId });
           
-          // Set cashback rate based on product
+          // Set multiplier based on product
           if (productId === 'prod_TQyZjYzt9DwoIK') {
-            cashbackRate = 30; // PawPass+ gets 30%
-            console.log('PawPass+ subscriber - 30% cashback');
+            pawbucksMultiplier = 30; // PawPass+ gets 30x
+            tierName = 'PawPass+';
+            console.log('PawPass+ subscriber - 30x PawBucks');
           } else if (productId === 'prod_TJVK9ZhLiJnnpm') {
-            cashbackRate = 20; // PawPass gets 20%
-            console.log('PawPass subscriber - 20% cashback');
+            pawbucksMultiplier = 20; // PawPass gets 20x
+            tierName = 'PawPass';
+            console.log('PawPass subscriber - 20x PawBucks');
           }
         } else {
-          console.log('Free account - 10% cashback');
+          console.log('Free account - 10x PawBucks');
         }
       }
 
-      const cashback = amount * (cashbackRate / 100);
+      // Calculate PawBucks earned: amount × multiplier
+      // $10 × 10 = 100 PawBucks for Free
+      // $10 × 20 = 200 PawBucks for PawPass
+      // $10 × 30 = 300 PawBucks for PawPass+
+      const pawbucksEarned = Math.floor(amount * pawbucksMultiplier);
       const rewardsEarned = Math.floor(amount); // 1 point per dollar
 
       console.log('Recording transaction:', {
         amount,
-        cashback,
-        cashbackRate: `${cashbackRate}%`,
+        pawbucksEarned,
+        pawbucksMultiplier: `${pawbucksMultiplier}x`,
+        tierName,
         rewardsEarned,
       });
 
@@ -315,7 +324,7 @@ serve(async (req) => {
           user_id: user_id,
           merchant_id: merchant_id,
           amount: amount,
-          cashback_earned: cashback,
+          cashback_earned: pawbucksEarned, // Store PawBucks earned
           rewards_earned: rewardsEarned,
           description: description || 'Stripe payment',
           status: 'completed',
@@ -475,11 +484,9 @@ serve(async (req) => {
         }
       }
 
-      // Award PawBucks coins based on cashback
-      // cashback is already calculated based on subscription tier above
-      const coinsEarned = Math.floor(cashback * 10); // Convert dollars to PawBucks (10 PawBucks = $1)
-      
-      if (coinsEarned > 0 && user_id) {
+      // Award PawBucks based on multiplier (already calculated above)
+      // Free: 10 PawBucks per $1, PawPass: 20 PawBucks per $1, PawPass+: 30 PawBucks per $1
+      if (pawbucksEarned > 0 && user_id) {
         // Get or create PawBucks wallet
         let { data: wallet } = await supabaseAdmin
           .from('pawbucks_wallet')
@@ -501,7 +508,7 @@ serve(async (req) => {
           // Update wallet balance
           await supabaseAdmin
             .from('pawbucks_wallet')
-            .update({ balance: wallet.balance + coinsEarned })
+            .update({ balance: wallet.balance + pawbucksEarned })
             .eq('user_id', user_id);
 
           // Log PawBucks activity
@@ -510,14 +517,14 @@ serve(async (req) => {
             .insert({
               user_id: user_id,
               type: 'earn',
-              amount: coinsEarned,
+              amount: pawbucksEarned,
               source: 'Transaction',
               transaction_id: transaction.id,
               partner_id: merchant_id,
-              description: `Earned ${coinsEarned} PawBucks from purchase`
+              description: `Earned ${pawbucksEarned} PawBucks (${tierName} ${pawbucksMultiplier}x) from $${amount.toFixed(2)} purchase`
             });
 
-          console.log(`Awarded ${coinsEarned} PawBucks coins to user ${user_id} for transaction ${transaction.id}`);
+          console.log(`✅ Awarded ${pawbucksEarned} PawBucks (${tierName} ${pawbucksMultiplier}x) to user ${user_id}`);
         }
       }
 
