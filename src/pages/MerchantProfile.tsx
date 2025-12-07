@@ -352,11 +352,29 @@ const MerchantProfile = () => {
               {/* Contact & Location */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Location</CardTitle>
+                  <CardTitle className="text-lg">Contact & Location</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  {/* Phone Number */}
+                  {merchant.phone && (
+                    <div className="flex items-start gap-3">
+                      <Phone className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-medium">Phone</p>
+                        <a
+                          href={`tel:${merchant.phone}`}
+                          className="text-primary hover:underline text-lg"
+                        >
+                          {merchant.phone}
+                        </a>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Address */}
                   {merchant.address && (
                     <>
+                      {merchant.phone && <Separator />}
                       <div className="flex items-start gap-3">
                         <MapPin className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
                         <div>
@@ -386,9 +404,9 @@ const MerchantProfile = () => {
                       </div>
                     </>
                   )}
-                  {!merchant.address && (
+                  {!merchant.address && !merchant.phone && (
                     <p className="text-muted-foreground text-sm">
-                      No address information available.
+                      No contact information available.
                     </p>
                   )}
                 </CardContent>
