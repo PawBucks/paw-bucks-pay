@@ -31,7 +31,7 @@ const AdminLogin = () => {
         }
 
         if (data) {
-          navigate('/admin');
+          navigate('/admin/dashboard');
         } else {
           toast.error("Access denied - Admin privileges required");
           await supabase.auth.signOut();
@@ -76,7 +76,7 @@ const AdminLogin = () => {
         }
 
         toast.success("Admin login successful!");
-        navigate("/admin");
+        navigate("/admin/dashboard");
       }
     } catch (error: any) {
       toast.error(error.message);

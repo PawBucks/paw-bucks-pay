@@ -97,8 +97,8 @@ const AppRoutes = () => {
       <Route path="/vet-loan/apply" element={<PageTransition><VetLoanApply /></PageTransition>} />
       <Route path="/pet-health/:petId" element={<PageTransition><PetHealth /></PageTransition>} />
       <Route path="/vet-dashboard" element={<PageTransition><VetDashboard /></PageTransition>} />
-      <Route path="/admin-login" element={<PageTransition><AdminLogin /></PageTransition>} />
-      <Route path="/admin" element={<PageTransition><AdminDashboard /></PageTransition>} />
+      <Route path="/admin" element={<PageTransition><AdminLogin /></PageTransition>} />
+      <Route path="/admin/dashboard" element={<PageTransition><AdminDashboard /></PageTransition>} />
       <Route path="/pawbucks/wallet" element={<PageTransition><PawBucksWallet /></PageTransition>} />
       <Route path="/pawbucks/redeem" element={<PageTransition><PawBucksRedeem /></PageTransition>} />
       <Route path="/pet-store" element={<PageTransition><PetStore /></PageTransition>} />
