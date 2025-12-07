@@ -1426,6 +1426,7 @@ export type Database = {
           rewards_earned: number
           status: string
           stripe_payment_intent_id: string | null
+          updated_at: string
           user_id: string
         }
         Insert: {
@@ -1438,6 +1439,7 @@ export type Database = {
           rewards_earned?: number
           status?: string
           stripe_payment_intent_id?: string | null
+          updated_at?: string
           user_id: string
         }
         Update: {
@@ -1450,6 +1452,7 @@ export type Database = {
           rewards_earned?: number
           status?: string
           stripe_payment_intent_id?: string | null
+          updated_at?: string
           user_id?: string
         }
         Relationships: [
