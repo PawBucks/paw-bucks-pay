@@ -63,7 +63,7 @@ const StripePaymentForm = ({
 
       if (error) throw error;
 
-      const cashbackPawBucks = Math.round(stripeAmount * cashbackRate / 100);
+      const cashbackPawBucks = Math.round(stripeAmount * cashbackRate);
       toast.success(
         `Payment successful! You earned ${cashbackPawBucks} PawBucks!`
       );
@@ -77,7 +77,7 @@ const StripePaymentForm = ({
   };
 
   // Points earned as PawBucks directly (10x of dollar amount = that many PawBucks)
-  const cashbackPawBucks = Math.round(stripeAmount * cashbackRate / 100);
+  const cashbackPawBucks = Math.round(stripeAmount * cashbackRate);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -248,7 +248,7 @@ export const PaymentDialogWithPawBucks = ({
   };
 
   // Points earned as PawBucks (10x of dollar amount = that many PawBucks)
-  const cashbackPawBucks = stripeAmount > 0 ? Math.round(stripeAmount * cashbackRate / 100) : 0;
+  const cashbackPawBucks = stripeAmount > 0 ? Math.round(stripeAmount * cashbackRate) : 0;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

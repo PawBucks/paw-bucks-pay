@@ -42,10 +42,10 @@ const UpgradePrompt = ({ totalEarned, onUpgrade }: { totalEarned: number; onUpgr
   }, []);
 
   // Calculate what they would have earned with each tier
-  // Current: 10% (Free), PawPass: 20%, PawPass+: 30%
-  const basePurchaseAmount = totalEarned / (CASHBACK_RATES.FREE / 100); // Reverse calculate purchases
-  const pawPassEarnings = Math.round(basePurchaseAmount * (CASHBACK_RATES.PAWPASS / 100));
-  const pawPassPlusEarnings = Math.round(basePurchaseAmount * (CASHBACK_RATES.PAWPASS_PLUS / 100));
+  // Current multipliers: 10x (Free), 20x (PawPass), 30x (PawPass+)
+  const basePurchaseAmount = totalEarned / CASHBACK_RATES.FREE; // Reverse calculate purchases (e.g., 100 PawBucks / 10 = $10 spent)
+  const pawPassEarnings = Math.round(basePurchaseAmount * CASHBACK_RATES.PAWPASS);
+  const pawPassPlusEarnings = Math.round(basePurchaseAmount * CASHBACK_RATES.PAWPASS_PLUS);
   
   const pawPassExtra = pawPassEarnings - totalEarned;
   const pawPassPlusExtra = pawPassPlusEarnings - totalEarned;

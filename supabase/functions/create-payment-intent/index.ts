@@ -104,7 +104,7 @@ serve(async (req) => {
       .in('status', ['active', 'trialing'])
       .maybeSingle();
 
-    let cashbackRate = 10; // Default 10% for free accounts
+    let cashbackRate = 10; // Default 10x multiplier for free accounts
     let subscriptionTier = 'Free';
 
     if (subscription?.stripe_subscription_id) {
@@ -112,28 +112,30 @@ serve(async (req) => {
       const stripeSubscription = await stripe.subscriptions.retrieve(subscription.stripe_subscription_id);
       const productId = stripeSubscription.items.data[0]?.price?.product;
       
-      // Set cashback rate based on product
+      // Set cashback rate (multiplier) based on product
       if (productId === 'prod_TQyZjYzt9DwoIK') {
-        cashbackRate = 30; // PawPass+ gets 30%
+        cashbackRate = 30; // PawPass+ gets 30x
         subscriptionTier = 'PawPass+';
       } else if (productId === 'prod_TJVK9ZhLiJnnpm') {
-        cashbackRate = 20; // PawPass gets 20%
+        cashbackRate = 20; // PawPass gets 20x
         subscriptionTier = 'PawPass';
       }
     }
     
-    console.log(`Cashback rate: ${cashbackRate}% (${subscriptionTier} user)`);
+    console.log(`Cashback rate: ${cashbackRate}x (${subscriptionTier} user)`);
 
-    // Calculate amounts with tier-based cashback rates
+    // Calculate amounts with tier-based multipliers
+    // cashbackRate is the multiplier (10x, 20x, 30x) meaning $1 = 10/20/30 PawBucks
     const amountInCents = Math.round(amount * 100);
-    const cashbackAmount = (amount * cashbackRate) / 100;
-    const platformFeeInCents = Math.round(cashbackAmount * 100); // Platform keeps the cashback amount
+    const pawbucksEarned = Math.round(amount * cashbackRate);
+    // Platform fee: 10% of transaction for platform sustainability
+    const platformFeeInCents = Math.round(amount * 0.10 * 100);
 
     console.log('Payment breakdown:', {
       totalAmount: amount,
       subscriptionTier,
-      cashbackRate: `${cashbackRate}%`,
-      cashbackAmount,
+      cashbackRate: `${cashbackRate}x`,
+      pawbucksEarned,
       platformFee: platformFeeInCents / 100,
       merchantReceives: (amountInCents - platformFeeInCents) / 100,
     });
@@ -163,7 +165,7 @@ serve(async (req) => {
       JSON.stringify({
         clientSecret: paymentIntent.client_secret,
         paymentIntentId: paymentIntent.id,
-        cashbackAmount,
+        pawbucksEarned,
         cashbackRate,
       }),
       { 

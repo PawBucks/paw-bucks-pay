@@ -196,16 +196,18 @@ serve(async (req) => {
       }
     }
 
-    // Calculate amounts - cashback only on Stripe portion
+    // Calculate amounts - PawBucks earned on Stripe portion (multiplier, not percentage)
+    // cashbackRate is the multiplier (10x, 20x, 30x) meaning $1 = 10/20/30 PawBucks
     const stripeAmountInCents = Math.round(stripeAmount * 100);
-    const cashbackAmount = (stripeAmount * cashbackRate) / 100;
-    const platformFeeInCents = Math.round(cashbackAmount * 100);
+    const pawbucksEarned = Math.round(stripeAmount * cashbackRate);
+    // Platform fee: 10% of transaction for platform sustainability
+    const platformFeeInCents = Math.round(stripeAmount * 0.10 * 100);
 
     console.log('Stripe payment:', {
       stripeAmount,
       stripeAmountInCents,
       cashbackRate,
-      cashbackAmount,
+      pawbucksEarned,
       platformFeeInCents,
       subscriptionTier,
       pawbucksToDeduct: pawbucksAmount,
@@ -237,7 +239,7 @@ serve(async (req) => {
         stripeAmount,
         pawbucksAmount,
         pawbucksUsdValue,
-        cashbackAmount,
+        pawbucksEarned,
         cashbackRate,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
