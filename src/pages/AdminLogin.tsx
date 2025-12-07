@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Shield, ArrowLeft } from "lucide-react";
+import { TwoFactorVerify } from "@/components/admin/TwoFactorVerify";
 
 const AdminLogin = () => {
   const [email, setEmail] = useState("");
@@ -15,12 +16,14 @@ const AdminLogin = () => {
   const [loading, setLoading] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
+  const [show2FA, setShow2FA] = useState(false);
+  const [mfaFactorId, setMfaFactorId] = useState<string | null>(null);
   const navigate = useNavigate();
   const { user } = useAuth();
 
   useEffect(() => {
     const checkAdminAccess = async () => {
-      if (user) {
+      if (user && !show2FA) {
         const { data, error } = await supabase.rpc('has_role', {
           _user_id: user.id,
           _role: 'admin'
@@ -33,6 +36,22 @@ const AdminLogin = () => {
         }
 
         if (data) {
+          // Check if user needs 2FA verification
+          const { data: factorsData } = await supabase.auth.mfa.listFactors();
+          const verifiedFactor = factorsData?.totp.find(f => f.status === 'verified');
+          
+          if (verifiedFactor) {
+            // Check assurance level
+            const { data: aalData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+            
+            if (aalData?.currentLevel === 'aal1' && aalData.nextLevel === 'aal2') {
+              // User has 2FA enabled but hasn't verified yet
+              setMfaFactorId(verifiedFactor.id);
+              setShow2FA(true);
+              return;
+            }
+          }
+          
           navigate('/admin/dashboard');
         } else {
           toast.error("Access denied - Admin privileges required");
@@ -43,7 +62,7 @@ const AdminLogin = () => {
     };
 
     checkAdminAccess();
-  }, [user, navigate]);
+  }, [user, navigate, show2FA]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,6 +96,22 @@ const AdminLogin = () => {
           return;
         }
 
+        // Check if user has 2FA enabled
+        const { data: factorsData } = await supabase.auth.mfa.listFactors();
+        const verifiedFactor = factorsData?.totp.find(f => f.status === 'verified');
+        
+        if (verifiedFactor) {
+          // Check assurance level
+          const { data: aalData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+          
+          if (aalData?.currentLevel === 'aal1' && aalData.nextLevel === 'aal2') {
+            // User needs to verify 2FA
+            setMfaFactorId(verifiedFactor.id);
+            setShow2FA(true);
+            return;
+          }
+        }
+
         toast.success("Admin login successful!");
         navigate("/admin/dashboard");
       }
@@ -98,7 +133,7 @@ const AdminLogin = () => {
     setResetLoading(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke("admin-reset-password", {
+      const { error } = await supabase.functions.invoke("admin-reset-password", {
         body: { email },
       });
 
@@ -113,6 +148,29 @@ const AdminLogin = () => {
       setResetLoading(false);
     }
   };
+
+  const handle2FAVerified = () => {
+    toast.success("Admin login successful!");
+    navigate("/admin/dashboard");
+  };
+
+  const handle2FACancel = async () => {
+    await supabase.auth.signOut();
+    setShow2FA(false);
+    setMfaFactorId(null);
+    setPassword("");
+  };
+
+  // Show 2FA verification screen
+  if (show2FA && mfaFactorId) {
+    return (
+      <TwoFactorVerify
+        factorId={mfaFactorId}
+        onVerified={handle2FAVerified}
+        onCancel={handle2FACancel}
+      />
+    );
+  }
 
   if (showForgotPassword) {
     return (
