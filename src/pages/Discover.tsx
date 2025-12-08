@@ -513,8 +513,8 @@ const Discover = () => {
     <>
       <SEO
         title="Discover Pet Merchants - PawBucks"
-        description="Find trusted pet stores, groomers, trainers and more. Earn cashback rewards with every purchase."
-        keywords={["pet merchants", "pet stores", "pet services", "cashback", "rewards"]}
+        description="Find trusted pet stores, groomers, trainers and more. Earn PawBucks rewards with every purchase."
+        keywords={["pet merchants", "pet stores", "pet services", "PawBucks", "rewards"]}
       />
       <Header isAuthenticated={!!user} onLogout={user ? handleLogout : undefined} />
       <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
@@ -532,7 +532,7 @@ const Discover = () => {
               Discover Pet Merchants
             </h1>
             <p className="text-muted-foreground mb-6">
-              Find trusted pet services and earn cashback on every purchase
+              Find trusted pet services and earn rewards on every purchase
             </p>
 
             {/* Search Bar */}

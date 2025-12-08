@@ -10,7 +10,7 @@ export const DiscoverServicesCard = memo(() => {
     <GradientCard className="md:col-span-3">
       <h3 className="text-xl font-semibold mb-4">Discover Pet Services</h3>
       <p className="text-muted-foreground">
-        Find nearby pet stores, groomers, and trainers to earn cashback on your purchases.
+        Find nearby pet stores, groomers, and trainers to earn rewards on your purchases.
       </p>
       <div className="mt-4 flex gap-4">
         <Button onClick={() => navigate("/discover")}>Discover Services</Button>

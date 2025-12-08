@@ -143,7 +143,7 @@ const MerchantTransactions = () => {
   };
 
   const exportToCSV = () => {
-    const headers = ["Date", "Customer", "Amount", "Cashback Given", "Repayment Deducted", "Net Payout", "Payment Method", "Status"];
+    const headers = ["Date", "Customer", "Amount", "Rewards Given", "Repayment Deducted", "Net Payout", "Payment Method", "Status"];
     const csvData = sortedTransactions.map(t => [
       format(new Date(t.date), "MM/dd/yyyy"),
       t.customer_name,
@@ -199,7 +199,7 @@ const MerchantTransactions = () => {
         {/* Header */}
         <div className="space-y-2">
           <h1 className="text-3xl font-bold text-foreground">Detailed Transactions</h1>
-          <p className="text-muted-foreground">View and manage all PawBucks sales, cashback, and repayments.</p>
+          <p className="text-muted-foreground">View and manage all PawBucks sales, rewards, and repayments.</p>
         </div>
 
         {/* Summary KPIs */}
@@ -214,7 +214,7 @@ const MerchantTransactions = () => {
           </Card>
           <Card>
             <CardHeader className="pb-3">
-              <CardDescription>Total Cashback</CardDescription>
+              <CardDescription>Total Rewards</CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-2xl font-bold text-accent">${summaryTotals.totalCashback.toFixed(2)}</p>
@@ -350,7 +350,7 @@ const MerchantTransactions = () => {
                           Amount {sortColumn === "amount" && (sortDirection === "asc" ? "↑" : "↓")}
                         </TableHead>
                         <TableHead className="cursor-pointer text-right" onClick={() => handleSort("cashback_given")}>
-                          Cashback {sortColumn === "cashback_given" && (sortDirection === "asc" ? "↑" : "↓")}
+                          Rewards {sortColumn === "cashback_given" && (sortDirection === "asc" ? "↑" : "↓")}
                         </TableHead>
                         <TableHead className="cursor-pointer text-right" onClick={() => handleSort("repayment_deducted")}>
                           Repayment {sortColumn === "repayment_deducted" && (sortDirection === "asc" ? "↑" : "↓")}

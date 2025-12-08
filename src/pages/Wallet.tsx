@@ -125,7 +125,7 @@ const Wallet = () => {
 
         <div className="mb-8">
           <h2 className="text-3xl font-bold mb-2">Wallet</h2>
-          <p className="text-muted-foreground">Track your cashback and spending</p>
+          <p className="text-muted-foreground">Track your rewards and spending</p>
         </div>
 
         {/* Wallet Overview */}

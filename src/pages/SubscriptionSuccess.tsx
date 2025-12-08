@@ -38,7 +38,7 @@ const SubscriptionSuccess = () => {
               <span className="font-semibold">Premium Benefits:</span>
             </div>
             <ul className="text-sm text-muted-foreground space-y-1">
-              <li>• Enhanced cashback rewards</li>
+              <li>• Enhanced PawBucks rewards</li>
               <li>• Exclusive merchant offers</li>
               <li>• Priority customer support</li>
               <li>• Early access to new features</li>

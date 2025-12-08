@@ -122,7 +122,7 @@ export function MerchantsTab() {
               <TableHead>Business Name</TableHead>
               <TableHead>Type</TableHead>
               <TableHead>Contact</TableHead>
-              <TableHead>Cashback Rate</TableHead>
+              <TableHead>Points Rate</TableHead>
               <TableHead>Stripe Status</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>

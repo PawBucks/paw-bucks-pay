@@ -257,7 +257,7 @@ const MerchantDirectory = () => {
                   onClick={() => setSortBy(option)}
                 >
                   {option === "rating" && "Top Rated"}
-                  {option === "cashback" && "Cashback"}
+                  {option === "cashback" && "Best Rewards"}
                   {option === "reviews" && "Most Reviews"}
                   {option === "name" && "A-Z"}
                 </Button>

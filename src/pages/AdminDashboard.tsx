@@ -250,13 +250,13 @@ const AdminDashboard = () => {
 
       if (error) throw error;
 
-      toast.success("Cashback rate updated successfully!");
+      toast.success("Points rate updated successfully!");
       setEditCashbackDialogOpen(false);
       setSelectedMerchant(null);
       loadAdminData();
     } catch (error: any) {
-      console.error("Error updating cashback rate:", error);
-      toast.error("Failed to update cashback rate");
+      console.error("Error updating points rate:", error);
+      toast.error("Failed to update points rate");
     }
   };
 
@@ -496,7 +496,7 @@ const AdminDashboard = () => {
                 <DollarSign className="w-6 h-6 text-orange-500" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Total Cashback</p>
+                <p className="text-sm text-muted-foreground">Total Rewards</p>
                 <p className="text-2xl font-bold">${totalCashback.toFixed(2)}</p>
               </div>
             </div>
@@ -574,7 +574,7 @@ const AdminDashboard = () => {
                   <TableHead>Business Name</TableHead>
                   <TableHead>Contact Person</TableHead>
                   <TableHead>Type</TableHead>
-                  <TableHead>Cashback Rate</TableHead>
+                  <TableHead>Points Rate</TableHead>
                   <TableHead>Stripe Status</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
@@ -621,7 +621,7 @@ const AdminDashboard = () => {
                   <TableHead>Merchant</TableHead>
                   <TableHead>Description</TableHead>
                   <TableHead>Amount</TableHead>
-                  <TableHead>Cashback</TableHead>
+                  <TableHead>Rewards</TableHead>
                   <TableHead>Date</TableHead>
                 </TableRow>
               </TableHeader>
@@ -641,13 +641,13 @@ const AdminDashboard = () => {
         </GradientCard>
       </main>
 
-      {/* Edit Cashback Dialog */}
+      {/* Edit Points Rate Dialog */}
       <Dialog open={editCashbackDialogOpen} onOpenChange={setEditCashbackDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Cashback Rate</DialogTitle>
+            <DialogTitle>Edit Points Rate</DialogTitle>
             <DialogDescription>
-              Update the cashback rate for {selectedMerchant?.business_name}
+              Update the points rate for {selectedMerchant?.business_name}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleUpdateCashback} className="space-y-4">
@@ -822,7 +822,7 @@ const AdminDashboard = () => {
                 <TableHead>Business Name</TableHead>
                 <TableHead>Contact</TableHead>
                 <TableHead>Type</TableHead>
-                <TableHead>Cashback Rate</TableHead>
+                <TableHead>Points Rate</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -907,11 +907,11 @@ const AdminDashboard = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Cashback Detail Dialog */}
+      {/* Rewards Detail Dialog */}
       <Dialog open={cashbackDialogOpen} onOpenChange={setCashbackDialogOpen}>
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Cashback Distribution (${totalCashback.toFixed(2)})</DialogTitle>
+            <DialogTitle>Rewards Distribution (${totalCashback.toFixed(2)})</DialogTitle>
           </DialogHeader>
           <Table>
             <TableHeader>
