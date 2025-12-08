@@ -20,7 +20,7 @@ type PartnerOffer = {
   merchants: {
     business_name: string;
     business_type: string;
-  };
+  } | null;
 };
 
 type PawBucksWallet = {
@@ -184,8 +184,8 @@ const PawBucksRedeem = () => {
                       <Store className="w-6 h-6 text-primary" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-lg">{offer.merchants.business_name}</h3>
-                      <p className="text-xs text-muted-foreground capitalize">{offer.merchants.business_type}</p>
+                      <h3 className="font-semibold text-lg">{offer.merchants?.business_name || 'Partner'}</h3>
+                      <p className="text-xs text-muted-foreground capitalize">{offer.merchants?.business_type || 'Merchant'}</p>
                     </div>
                   </div>
 
@@ -235,7 +235,7 @@ const PawBucksRedeem = () => {
             <div className="space-y-4">
               <div className="bg-muted/50 p-4 rounded-lg">
                 <p className="font-semibold text-lg mb-2">{selectedOffer.title}</p>
-                <p className="text-sm text-muted-foreground mb-2">{selectedOffer.merchants.business_name}</p>
+                <p className="text-sm text-muted-foreground mb-2">{selectedOffer.merchants?.business_name || 'Partner'}</p>
                 <div className="flex items-center gap-2 text-yellow-500">
                   <Coins className="w-5 h-5" />
                   <span className="font-bold text-xl">{selectedOffer.coins_required.toLocaleString()} PawBucks</span>
