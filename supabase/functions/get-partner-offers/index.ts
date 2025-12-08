@@ -56,29 +56,67 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_ANON_KEY") ?? ""
     );
 
-    // Fetch all active partner offers with merchant details
+    // Fetch all active partner offers with merchant details from the public view
     const { data: offers, error } = await supabaseClient
       .from("partner_offers")
       .select(`
-        *,
-        merchants(
-          id,
-          business_name,
-          business_type,
-          description
-        )
+        id,
+        title,
+        description,
+        coins_required,
+        cash_equivalent,
+        image_url,
+        start_date,
+        end_date,
+        redemption_cap,
+        redemption_count,
+        per_user_limit,
+        is_active,
+        partner_id
       `)
       .eq("is_active", true)
       .order("coins_required", { ascending: true });
 
     if (error) {
+      console.error("Error fetching offers:", error);
       throw new Error("Failed to fetch offers");
     }
 
-    console.log(`Fetched ${offers?.length || 0} active partner offers`);
+    // Fetch merchant details from public view for each offer
+    const partnerIds = [...new Set(offers?.map(o => o.partner_id) || [])];
+    
+    let merchantsMap: Record<string, { business_name: string; business_type: string; description: string | null }> = {};
+    
+    if (partnerIds.length > 0) {
+      const { data: merchants, error: merchantsError } = await supabaseClient
+        .from("merchants_public")
+        .select("id, business_name, business_type, description")
+        .in("id", partnerIds);
+      
+      if (!merchantsError && merchants) {
+        merchantsMap = merchants.reduce((acc, m) => {
+          if (m.id) {
+            acc[m.id] = {
+              business_name: m.business_name || 'Partner',
+              business_type: m.business_type || 'Merchant',
+              description: m.description
+            };
+          }
+          return acc;
+        }, {} as typeof merchantsMap);
+      }
+    }
+
+    // Combine offers with merchant data
+    const offersWithMerchants = offers?.map(offer => ({
+      ...offer,
+      merchants: merchantsMap[offer.partner_id] || { business_name: 'Partner', business_type: 'Merchant', description: null }
+    })) || [];
+
+    console.log(`Fetched ${offersWithMerchants.length} active partner offers`);
 
     return new Response(
-      JSON.stringify({ offers: offers || [] }),
+      JSON.stringify({ offers: offersWithMerchants }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
