@@ -25,8 +25,8 @@ type MerchantAnalyticsCardsProps = {
 
 const MerchantAnalyticsCardsComponent = ({ analytics }: MerchantAnalyticsCardsProps) => {
   const formattedValues = useMemo(() => {
-    // total_cashback is stored in PawBucks, convert to USD (1000 PawBucks = $1)
-    const totalRewardsUSD = (analytics?.total_cashback || 0) / 1000;
+    // Merchant "Total Rewards Given" = 1% of Total Sales (merchant pays 1% as rewards to customers)
+    const totalRewardsUSD = (analytics?.total_sales || 0) * 0.01;
     return {
       totalSales: analytics?.total_sales?.toFixed(2) || "0.00",
       totalRewards: totalRewardsUSD.toFixed(2),
