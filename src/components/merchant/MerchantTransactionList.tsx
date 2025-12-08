@@ -42,7 +42,7 @@ const MerchantTransactionListComponent = ({
                   +${transaction.amount.toFixed(2)}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Cashback: ${transaction.cashback_earned.toFixed(2)}
+                  Rewards: ${transaction.cashback_earned.toFixed(2)}
                 </p>
               </div>
             </div>

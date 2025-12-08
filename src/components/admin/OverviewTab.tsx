@@ -74,7 +74,7 @@ export function OverviewTab() {
       color: 'text-emerald-500',
     },
     {
-      title: 'Total Cashback Distributed',
+      title: 'Total Rewards Distributed',
       value: `$${stats.totalCashback.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
       icon: Award,
       color: 'text-pink-500',

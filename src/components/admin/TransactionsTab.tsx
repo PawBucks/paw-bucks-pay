@@ -77,7 +77,7 @@ export function TransactionsTab() {
           <div className="text-2xl font-bold">${totalRevenue.toFixed(2)}</div>
         </div>
         <div className="border rounded-lg p-4">
-          <div className="text-sm text-muted-foreground">Total Cashback</div>
+          <div className="text-sm text-muted-foreground">Total Rewards</div>
           <div className="text-2xl font-bold">${totalCashback.toFixed(2)}</div>
         </div>
       </div>

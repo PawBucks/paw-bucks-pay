@@ -53,7 +53,7 @@ const MerchantAnalyticsCardsComponent = ({ analytics }: MerchantAnalyticsCardsPr
             <Percent className="w-6 h-6 text-primary" />
           </div>
           <div>
-            <p className="text-sm text-muted-foreground">Total Cashback Given</p>
+            <p className="text-sm text-muted-foreground">Total Rewards Given</p>
             <p className="text-2xl font-bold">
               ${formattedValues.totalCashback}
             </p>

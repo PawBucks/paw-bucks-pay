@@ -140,12 +140,12 @@ export function RewardsTab() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Default Cashback Rate</CardTitle>
-            <CardDescription>Platform-wide cashback percentage</CardDescription>
+            <CardTitle>Default Points Rate</CardTitle>
+            <CardDescription>Platform-wide points multiplier</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              <Label>Cashback Percentage</Label>
+              <Label>Points Multiplier (x)</Label>
               <Input
                 type="number"
                 step="0.1"

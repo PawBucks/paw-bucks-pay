@@ -70,9 +70,9 @@ const MerchantChartsComponent = ({
         </ResponsiveContainer>
       </GradientCard>
 
-      {/* Cashback Distribution Chart */}
+      {/* Rewards Distribution Chart */}
       <GradientCard>
-        <h3 className="text-xl font-semibold mb-4">Cashback vs Balance Distribution</h3>
+        <h3 className="text-xl font-semibold mb-4">Rewards vs Balance Distribution</h3>
         {cashbackDistribution.length > 0 ? (
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
