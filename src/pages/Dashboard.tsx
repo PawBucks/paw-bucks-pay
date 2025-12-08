@@ -171,8 +171,9 @@ const Dashboard = () => {
 
         {profile.user_type === "pet_owner" ? (
           <div className="grid gap-6 md:grid-cols-3">
+            {/* Wallet Balance shows USD value of PawBucks (1000 PawBucks = $1) */}
             <WalletStats 
-              balance={wallet?.balance || 0} 
+              balance={(pawbucksWallet?.balance || 0) / 1000} 
               rewardsPoints={pawbucksWallet?.balance || 0}
             />
             

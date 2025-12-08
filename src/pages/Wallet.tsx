@@ -137,7 +137,8 @@ const Wallet = () => {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Balance</p>
-                <p className="text-2xl font-bold">${wallet?.balance?.toFixed(2) || "0.00"}</p>
+                {/* Show USD value of PawBucks (1000 PawBucks = $1) */}
+                <p className="text-2xl font-bold">${((pawbucksWallet?.balance || 0) / 1000).toFixed(2)}</p>
               </div>
             </div>
           </GradientCard>
@@ -190,7 +191,8 @@ const Wallet = () => {
                   </div>
                   <div className="text-right">
                     <p className="font-bold text-foreground">-${transaction.amount.toFixed(2)}</p>
-                    <p className="text-xs text-accent">+${transaction.cashback_earned.toFixed(2)}</p>
+                    {/* cashback_earned is in PawBucks, show as PawBucks earned */}
+                    <p className="text-xs text-accent">+{transaction.cashback_earned} PawBucks</p>
                   </div>
                 </div>
               ))}

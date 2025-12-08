@@ -2,7 +2,7 @@ import { memo, useMemo } from "react";
 import { GradientCard } from "@/components/ui/gradient-card";
 import {
   DollarSign,
-  Percent,
+  Gift,
   TrendingUp,
   CreditCard,
   ShoppingCart,
@@ -24,13 +24,17 @@ type MerchantAnalyticsCardsProps = {
 };
 
 const MerchantAnalyticsCardsComponent = ({ analytics }: MerchantAnalyticsCardsProps) => {
-  const formattedValues = useMemo(() => ({
-    totalSales: analytics?.total_sales?.toFixed(2) || "0.00",
-    totalCashback: analytics?.total_cashback?.toFixed(2) || "0.00",
-    remainingBalance: analytics?.remaining_balance?.toFixed(2) || "0.00",
-    repaymentRate: analytics?.repayment_rate ? `${analytics.repayment_rate}%` : "N/A",
-    totalTransactions: analytics?.total_transactions || 0,
-  }), [analytics]);
+  const formattedValues = useMemo(() => {
+    // total_cashback is stored in PawBucks, convert to USD (1000 PawBucks = $1)
+    const totalRewardsUSD = (analytics?.total_cashback || 0) / 1000;
+    return {
+      totalSales: analytics?.total_sales?.toFixed(2) || "0.00",
+      totalRewards: totalRewardsUSD.toFixed(2),
+      remainingBalance: analytics?.remaining_balance?.toFixed(2) || "0.00",
+      repaymentRate: analytics?.repayment_rate ? `${analytics.repayment_rate}x` : "N/A",
+      totalTransactions: analytics?.total_transactions || 0,
+    };
+  }, [analytics]);
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5 mb-8">
       <GradientCard gradient>
@@ -50,12 +54,12 @@ const MerchantAnalyticsCardsComponent = ({ analytics }: MerchantAnalyticsCardsPr
       <GradientCard>
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-            <Percent className="w-6 h-6 text-primary" />
+            <Gift className="w-6 h-6 text-primary" />
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Total Rewards Given</p>
             <p className="text-2xl font-bold">
-              ${formattedValues.totalCashback}
+              ${formattedValues.totalRewards}
             </p>
           </div>
         </div>

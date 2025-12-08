@@ -122,7 +122,7 @@ const MerchantTransactions = () => {
   const totalPages = Math.ceil(sortedTransactions.length / itemsPerPage);
 
   const summaryTotals = useMemo(() => {
-    return sortedTransactions.reduce(
+    const totals = sortedTransactions.reduce(
       (acc, t) => ({
         totalSales: acc.totalSales + t.amount,
         totalCashback: acc.totalCashback + t.cashback_given,
@@ -131,6 +131,11 @@ const MerchantTransactions = () => {
       }),
       { totalSales: 0, totalCashback: 0, totalRepayment: 0, totalNetPayout: 0 }
     );
+    // Convert PawBucks to USD (1000 PawBucks = $1)
+    return {
+      ...totals,
+      totalCashbackUSD: totals.totalCashback / 1000,
+    };
   }, [sortedTransactions]);
 
   const handleSort = (column: keyof Transaction) => {
@@ -148,7 +153,8 @@ const MerchantTransactions = () => {
       format(new Date(t.date), "MM/dd/yyyy"),
       t.customer_name,
       `$${t.amount.toFixed(2)}`,
-      `$${t.cashback_given.toFixed(2)}`,
+      // Convert PawBucks to USD (1000 PawBucks = $1)
+      `$${(t.cashback_given / 1000).toFixed(2)}`,
       `$${t.repayment_deducted.toFixed(2)}`,
       `$${t.net_payout.toFixed(2)}`,
       t.payment_method,
@@ -217,7 +223,8 @@ const MerchantTransactions = () => {
               <CardDescription>Total Rewards</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold text-accent">${summaryTotals.totalCashback.toFixed(2)}</p>
+              {/* Display USD value converted from PawBucks */}
+              <p className="text-2xl font-bold text-accent">${summaryTotals.totalCashbackUSD.toFixed(2)}</p>
             </CardContent>
           </Card>
           <Card>
@@ -368,7 +375,8 @@ const MerchantTransactions = () => {
                           <TableCell>{format(new Date(transaction.date), "MM/dd/yyyy")}</TableCell>
                           <TableCell className="font-medium">{transaction.customer_name}</TableCell>
                           <TableCell className="text-right font-semibold">${transaction.amount.toFixed(2)}</TableCell>
-                          <TableCell className="text-right text-accent">${transaction.cashback_given.toFixed(2)}</TableCell>
+                          {/* Convert PawBucks to USD (1000 PawBucks = $1) */}
+                          <TableCell className="text-right text-accent">${(transaction.cashback_given / 1000).toFixed(2)}</TableCell>
                           <TableCell className="text-right text-muted-foreground">${transaction.repayment_deducted.toFixed(2)}</TableCell>
                           <TableCell className="text-right font-semibold text-success">${transaction.net_payout.toFixed(2)}</TableCell>
                           <TableCell>{transaction.payment_method}</TableCell>

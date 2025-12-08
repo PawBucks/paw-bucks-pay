@@ -497,7 +497,8 @@ const AdminDashboard = () => {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Total Rewards</p>
-                <p className="text-2xl font-bold">${totalCashback.toFixed(2)}</p>
+                {/* totalCashback is in PawBucks, convert to USD (1000 PawBucks = $1) */}
+                <p className="text-2xl font-bold">${(totalCashback / 1000).toFixed(2)}</p>
               </div>
             </div>
           </GradientCard>
@@ -601,7 +602,7 @@ const AdminDashboard = () => {
                         }}
                       >
                         <Edit className="w-4 h-4 mr-2" />
-                        Edit Cashback
+                        Edit Rate
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -631,7 +632,8 @@ const AdminDashboard = () => {
                     <TableCell className="font-medium">{transaction.merchants?.business_name}</TableCell>
                     <TableCell>{transaction.description}</TableCell>
                     <TableCell>${transaction.amount.toFixed(2)}</TableCell>
-                    <TableCell className="text-accent">${transaction.cashback_earned.toFixed(2)}</TableCell>
+                    {/* cashback_earned is in PawBucks, convert to USD (1000 PawBucks = $1) */}
+                    <TableCell className="text-accent">${(transaction.cashback_earned / 1000).toFixed(2)}</TableCell>
                     <TableCell>{format(new Date(transaction.created_at), "MMM d, h:mm a")}</TableCell>
                   </TableRow>
                 ))}
@@ -911,14 +913,15 @@ const AdminDashboard = () => {
       <Dialog open={cashbackDialogOpen} onOpenChange={setCashbackDialogOpen}>
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Rewards Distribution (${totalCashback.toFixed(2)})</DialogTitle>
+            {/* totalCashback is in PawBucks, convert to USD (1000 PawBucks = $1) */}
+            <DialogTitle>Rewards Distribution (${(totalCashback / 1000).toFixed(2)})</DialogTitle>
           </DialogHeader>
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Merchant</TableHead>
                 <TableHead>Transaction Amount</TableHead>
-                <TableHead>Cashback Given</TableHead>
+                <TableHead>Rewards Given</TableHead>
                 <TableHead>Date</TableHead>
               </TableRow>
             </TableHeader>
@@ -929,7 +932,8 @@ const AdminDashboard = () => {
                   <TableRow key={transaction.id}>
                     <TableCell className="font-medium">{transaction.merchants?.business_name}</TableCell>
                     <TableCell>${transaction.amount.toFixed(2)}</TableCell>
-                    <TableCell className="text-accent font-semibold">${transaction.cashback_earned.toFixed(2)}</TableCell>
+                    {/* cashback_earned is in PawBucks, convert to USD (1000 PawBucks = $1) */}
+                    <TableCell className="text-accent font-semibold">${(transaction.cashback_earned / 1000).toFixed(2)}</TableCell>
                     <TableCell>{format(new Date(transaction.created_at), "MMM d, h:mm a")}</TableCell>
                   </TableRow>
                 ))}
