@@ -191,8 +191,8 @@ const Wallet = () => {
                   </div>
                   <div className="text-right">
                     <p className="font-bold text-foreground">-${transaction.amount.toFixed(2)}</p>
-                    {/* cashback_earned is in PawBucks, show as PawBucks earned */}
-                    <p className="text-xs text-accent">+{transaction.cashback_earned} PawBucks</p>
+                    {/* rewards_earned stores the correct PawBucks amount (amount * multiplier) */}
+                    <p className="text-xs text-accent">+{transaction.rewards_earned} PawBucks</p>
                   </div>
                 </div>
               ))}
