@@ -34,9 +34,10 @@ export function AnalyticsTab() {
     { name: 'Transactions', value: analytics?.total_transactions || 0 },
   ];
 
+  // total_cashback_distributed is in PawBucks, convert to USD (1000 PawBucks = $1)
   const revenueData = [
     { name: 'GMV', value: analytics?.total_gmv || 0 },
-    { name: 'Cashback', value: analytics?.total_cashback_distributed || 0 },
+    { name: 'Rewards', value: (analytics?.total_cashback_distributed || 0) / 1000 },
     { name: 'Platform Fee', value: (analytics?.total_gmv || 0) * 0.03 },
   ];
 

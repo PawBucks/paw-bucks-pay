@@ -354,11 +354,12 @@ const MerchantDashboard = () => {
   };
 
   const getCashbackDistribution = () => {
-    const totalCashback = analytics?.total_cashback || 0;
+    // total_cashback is stored in PawBucks, convert to USD (1000 PawBucks = $1)
+    const totalRewardsUSD = (analytics?.total_cashback || 0) / 1000;
     const remainingBalance = analytics?.remaining_balance || 0;
 
     return [
-      { name: "Cashback Given", value: totalCashback, color: "hsl(var(--accent))" },
+      { name: "Rewards Given", value: totalRewardsUSD, color: "hsl(var(--accent))" },
       { name: "Remaining Balance", value: remainingBalance, color: "hsl(var(--primary))" }
     ].filter(item => item.value > 0);
   };
@@ -410,7 +411,7 @@ const MerchantDashboard = () => {
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Merchant Dashboard</h1>
           <p className="text-muted-foreground">
-            Track your PawBucks sales, cashback, and repayments in one place.
+            Track your PawBucks sales, rewards, and repayments in one place.
           </p>
         </div>
 
