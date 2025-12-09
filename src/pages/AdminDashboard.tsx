@@ -88,6 +88,7 @@ type Transaction = {
   id: string;
   amount: number;
   cashback_earned: number;
+  rewards_earned: number;
   description: string;
   created_at: string;
   merchants?: {
@@ -497,8 +498,8 @@ const AdminDashboard = () => {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Total Rewards</p>
-                {/* totalCashback is in PawBucks, convert to USD (1000 PawBucks = $1) */}
-                <p className="text-2xl font-bold">${(totalCashback / 1000).toFixed(2)}</p>
+              {/* totalCashback is in PawBucks, convert to USD (1 PawBuck = $0.001) */}
+                <p className="text-2xl font-bold">${(totalCashback * 0.001).toFixed(2)}</p>
               </div>
             </div>
           </GradientCard>
@@ -632,8 +633,8 @@ const AdminDashboard = () => {
                     <TableCell className="font-medium">{transaction.merchants?.business_name}</TableCell>
                     <TableCell>{transaction.description}</TableCell>
                     <TableCell>${transaction.amount.toFixed(2)}</TableCell>
-                    {/* cashback_earned is in PawBucks, convert to USD (1000 PawBucks = $1) */}
-                    <TableCell className="text-accent">${(transaction.cashback_earned / 1000).toFixed(2)}</TableCell>
+                {/* Use rewards_earned (PawBucks) and convert to USD (1 PawBuck = $0.001) */}
+                    <TableCell className="text-accent">${(transaction.rewards_earned * 0.001).toFixed(2)}</TableCell>
                     <TableCell>{format(new Date(transaction.created_at), "MMM d, h:mm a")}</TableCell>
                   </TableRow>
                 ))}
