@@ -58,7 +58,8 @@ export function TransactionsTab() {
   };
 
   const totalRevenue = filteredTransactions.reduce((sum, t) => sum + (t.amount * 0.03), 0);
-  const totalCashback = filteredTransactions.reduce((sum, t) => sum + t.cashback_earned, 0);
+  // rewards_earned is in PawBucks, convert to USD (1 PawBuck = $0.001)
+  const totalRewardsUSD = filteredTransactions.reduce((sum, t) => sum + (t.rewards_earned * 0.001), 0);
 
   return (
     <div className="space-y-6">
@@ -78,7 +79,7 @@ export function TransactionsTab() {
         </div>
         <div className="border rounded-lg p-4">
           <div className="text-sm text-muted-foreground">Total Rewards</div>
-          <div className="text-2xl font-bold">${totalCashback.toFixed(2)}</div>
+          <div className="text-2xl font-bold">${totalRewardsUSD.toFixed(2)}</div>
         </div>
       </div>
 
@@ -113,7 +114,7 @@ export function TransactionsTab() {
                 </TableCell>
                 <TableCell>${transaction.amount.toFixed(2)}</TableCell>
                 <TableCell className="text-green-600">
-                  ${transaction.cashback_earned.toFixed(2)}
+                  ${(transaction.rewards_earned * 0.001).toFixed(2)}
                 </TableCell>
                 <TableCell className="text-purple-600">
                   {transaction.rewards_earned}
