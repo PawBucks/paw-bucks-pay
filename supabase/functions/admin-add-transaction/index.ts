@@ -157,12 +157,13 @@ serve(async (req) => {
 
     console.log(`Final multiplier for user ${user_id}: ${multiplier}x`);
 
-    // Calculate cashback and rewards
-    const effectiveCashbackRate = cashback_rate ?? merchant.cashback_rate ?? 5;
-    const cashbackEarned = (amount * effectiveCashbackRate) / 100;
+    // Calculate PawBucks earned: amount × multiplier
+    // $10 × 10 = 100 PawBucks for Free
+    // $10 × 20 = 200 PawBucks for PawPass  
+    // $10 × 30 = 300 PawBucks for PawPass+
     const pawbucksEarned = Math.floor(amount * multiplier);
 
-    console.log(`Creating transaction: user=${user_id}, merchant=${merchant_id}, amount=${amount}, cashback=${cashbackEarned}, pawbucks=${pawbucksEarned}`);
+    console.log(`Creating transaction: user=${user_id}, merchant=${merchant_id}, amount=${amount}, pawbucks=${pawbucksEarned}`);
 
     // Create the transaction
     const { data: transaction, error: transactionError } = await supabase
@@ -171,7 +172,7 @@ serve(async (req) => {
         user_id,
         merchant_id,
         amount,
-        cashback_earned: cashbackEarned,
+        cashback_earned: pawbucksEarned, // Store PawBucks earned (legacy field name)
         rewards_earned: pawbucksEarned,
         description: description || `Manual transaction added by admin`,
         status: 'completed',
@@ -229,7 +230,6 @@ serve(async (req) => {
         merchant_id,
         merchant_name: merchant.business_name,
         amount,
-        cashback_earned: cashbackEarned,
         pawbucks_earned: pawbucksEarned,
       },
     });
@@ -242,7 +242,6 @@ serve(async (req) => {
         transaction: {
           id: transaction.id,
           amount,
-          cashback_earned: cashbackEarned,
           pawbucks_earned: pawbucksEarned,
           merchant_name: merchant.business_name,
           user_email: profile.email,

@@ -3,6 +3,7 @@
 export const PAWBUCKS_CONVERSION = {
   // Pet Owner rates: 1 PawBuck = $0.001 USD
   PET_OWNER_TO_USD: 1000, // 1000 PawBucks = $1 USD when pet owners redeem
+  PAWBUCKS_USD_VALUE: 0.001, // Direct multiplier: PawBucks × 0.001 = USD
   // Merchant rates (for platform services like marketing/advertising): 1 PawBuck = $0.005 USD
   MERCHANT_TO_USD: 200, // 200 PawBucks = $1 USD when merchants spend on platform
   REWARD_THRESHOLD: 10000, // PawBucks needed for $10 credit (1000 * 10)

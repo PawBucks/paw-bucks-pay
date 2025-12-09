@@ -137,8 +137,8 @@ const Wallet = () => {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Balance</p>
-                {/* Show USD value of PawBucks (1000 PawBucks = $1) */}
-                <p className="text-2xl font-bold">${((pawbucksWallet?.balance || 0) / 1000).toFixed(2)}</p>
+                {/* Show USD value of PawBucks (1 PawBuck = $0.001) */}
+                <p className="text-2xl font-bold">${((pawbucksWallet?.balance || 0) * 0.001).toFixed(2)}</p>
               </div>
             </div>
           </GradientCard>

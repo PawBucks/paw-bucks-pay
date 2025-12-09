@@ -131,10 +131,10 @@ const MerchantTransactions = () => {
       }),
       { totalSales: 0, totalCashback: 0, totalRepayment: 0, totalNetPayout: 0 }
     );
-    // Convert PawBucks to USD (1000 PawBucks = $1)
+    // Convert PawBucks to USD (1 PawBuck = $0.001)
     return {
       ...totals,
-      totalCashbackUSD: totals.totalCashback / 1000,
+      totalCashbackUSD: totals.totalCashback * 0.001,
     };
   }, [sortedTransactions]);
 
@@ -153,8 +153,8 @@ const MerchantTransactions = () => {
       format(new Date(t.date), "MM/dd/yyyy"),
       t.customer_name,
       `$${t.amount.toFixed(2)}`,
-      // Convert PawBucks to USD (1000 PawBucks = $1)
-      `$${(t.cashback_given / 1000).toFixed(2)}`,
+      // Convert PawBucks to USD (1 PawBuck = $0.001)
+      `$${(t.cashback_given * 0.001).toFixed(2)}`,
       `$${t.repayment_deducted.toFixed(2)}`,
       `$${t.net_payout.toFixed(2)}`,
       t.payment_method,
@@ -375,8 +375,8 @@ const MerchantTransactions = () => {
                           <TableCell>{format(new Date(transaction.date), "MM/dd/yyyy")}</TableCell>
                           <TableCell className="font-medium">{transaction.customer_name}</TableCell>
                           <TableCell className="text-right font-semibold">${transaction.amount.toFixed(2)}</TableCell>
-                          {/* Convert PawBucks to USD (1000 PawBucks = $1) */}
-                          <TableCell className="text-right text-accent">${(transaction.cashback_given / 1000).toFixed(2)}</TableCell>
+                          {/* Convert PawBucks to USD (1 PawBuck = $0.001) */}
+                          <TableCell className="text-right text-accent">${(transaction.cashback_given * 0.001).toFixed(2)}</TableCell>
                           <TableCell className="text-right text-muted-foreground">${transaction.repayment_deducted.toFixed(2)}</TableCell>
                           <TableCell className="text-right font-semibold text-success">${transaction.net_payout.toFixed(2)}</TableCell>
                           <TableCell>{transaction.payment_method}</TableCell>
