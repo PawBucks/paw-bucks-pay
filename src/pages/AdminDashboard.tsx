@@ -886,9 +886,10 @@ const AdminDashboard = () => {
             <TableBody>
               {transactions.map((transaction) => (
                 <TableRow key={transaction.id}>
-                  <TableCell className="font-medium">{transaction.merchants?.business_name}</TableCell>
-                  <TableCell>${transaction.amount.toFixed(2)}</TableCell>
-                  <TableCell className="text-accent">${transaction.cashback_earned.toFixed(2)}</TableCell>
+                    <TableCell className="font-medium">{transaction.merchants?.business_name}</TableCell>
+                    <TableCell>${transaction.amount.toFixed(2)}</TableCell>
+                    {/* Use rewards_earned (PawBucks) and convert to USD (1 PawBuck = $0.001) */}
+                    <TableCell className="text-accent">${(transaction.rewards_earned * 0.001).toFixed(2)}</TableCell>
                   <TableCell>{format(new Date(transaction.created_at), "MMM d, h:mm a")}</TableCell>
                   <TableCell>
                     <Button
@@ -914,8 +915,8 @@ const AdminDashboard = () => {
       <Dialog open={cashbackDialogOpen} onOpenChange={setCashbackDialogOpen}>
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            {/* totalCashback is in PawBucks, convert to USD (1000 PawBucks = $1) */}
-            <DialogTitle>Rewards Distribution (${(totalCashback / 1000).toFixed(2)})</DialogTitle>
+            {/* totalCashback is in PawBucks, convert to USD (1 PawBuck = $0.001) */}
+            <DialogTitle>Rewards Distribution (${(totalCashback * 0.001).toFixed(2)})</DialogTitle>
           </DialogHeader>
           <Table>
             <TableHeader>
@@ -928,13 +929,13 @@ const AdminDashboard = () => {
             </TableHeader>
             <TableBody>
               {transactions
-                .filter(t => t.cashback_earned > 0)
+                .filter(t => t.rewards_earned > 0)
                 .map((transaction) => (
                   <TableRow key={transaction.id}>
                     <TableCell className="font-medium">{transaction.merchants?.business_name}</TableCell>
                     <TableCell>${transaction.amount.toFixed(2)}</TableCell>
-                    {/* cashback_earned is in PawBucks, convert to USD (1000 PawBucks = $1) */}
-                    <TableCell className="text-accent font-semibold">${(transaction.cashback_earned / 1000).toFixed(2)}</TableCell>
+                    {/* rewards_earned is in PawBucks, convert to USD (1 PawBuck = $0.001) */}
+                    <TableCell className="text-accent font-semibold">${(transaction.rewards_earned * 0.001).toFixed(2)}</TableCell>
                     <TableCell>{format(new Date(transaction.created_at), "MMM d, h:mm a")}</TableCell>
                   </TableRow>
                 ))}

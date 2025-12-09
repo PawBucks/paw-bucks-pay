@@ -354,8 +354,8 @@ const MerchantDashboard = () => {
   };
 
   const getCashbackDistribution = () => {
-    // total_cashback is stored in PawBucks, convert to USD (1000 PawBucks = $1)
-    const totalRewardsUSD = (analytics?.total_cashback || 0) / 1000;
+    // total_cashback is stored in PawBucks, convert to USD (1 PawBuck = $0.001)
+    const totalRewardsUSD = (analytics?.total_cashback || 0) * 0.001;
     const remainingBalance = analytics?.remaining_balance || 0;
 
     return [

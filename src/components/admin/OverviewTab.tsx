@@ -75,8 +75,8 @@ export function OverviewTab() {
     },
     {
       title: 'Total Rewards Distributed',
-      // totalCashback is in PawBucks, convert to USD (1000 PawBucks = $1)
-      value: `$${(stats.totalCashback / 1000).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+      // totalCashback is in PawBucks, convert to USD (1 PawBuck = $0.001)
+      value: `$${(stats.totalCashback * 0.001).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
       icon: Award,
       color: 'text-pink-500',
     },
