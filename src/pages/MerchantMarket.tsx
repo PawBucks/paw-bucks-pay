@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { GradientCard } from "@/components/ui/gradient-card";
 import { Badge } from "@/components/ui/badge";
@@ -8,7 +9,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { ServicePurchaseDialog } from "@/components/merchant/ServicePurchaseDialog";
 import { toast } from "sonner";
-import { useEffect } from "react";
 import {
   PawPrint,
   ArrowLeft,
@@ -37,6 +37,7 @@ import {
   Lightbulb,
   Award,
   CheckCircle2,
+  Loader2,
 } from "lucide-react";
 
 type ServiceCategory = "visibility" | "analytics" | "growth" | "premium";
@@ -365,14 +366,63 @@ const categoryInfo: Record<ServiceCategory, { name: string; description: string;
   },
 };
 
+type Merchant = {
+  id: string;
+  business_name: string;
+};
+
 const MerchantMarket = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<ServiceCategory | "all">("all");
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [showPurchaseDialog, setShowPurchaseDialog] = useState(false);
+  const [merchant, setMerchant] = useState<Merchant | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate("/auth");
+    }
+  }, [user, authLoading, navigate]);
+
+  // Load merchant data
+  useEffect(() => {
+    const loadMerchant = async () => {
+      if (!user) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from("merchants")
+          .select("id, business_name")
+          .eq("user_id", user.id)
+          .single();
+
+        if (error) {
+          if (error.code === "PGRST116") {
+            // No merchant found - redirect to onboarding
+            navigate("/merchant-onboarding");
+            return;
+          }
+          throw error;
+        }
+
+        setMerchant(data);
+      } catch (error) {
+        console.error("Error loading merchant:", error);
+        toast.error("Failed to load merchant data");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (user) {
+      loadMerchant();
+    }
+  }, [user, navigate]);
 
   // Check for successful purchase from redirect
   useEffect(() => {
@@ -424,6 +474,20 @@ const MerchantMarket = () => {
   const getCategoryIcon = (category: ServiceCategory) => {
     return categoryInfo[category].icon;
   };
+
+  // Loading state
+  if (authLoading || loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // No merchant found
+  if (!merchant) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-background">
