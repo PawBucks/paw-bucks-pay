@@ -17,6 +17,7 @@ import {
   AlertCircle,
   Package,
   Coins,
+  Store,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
@@ -586,6 +587,17 @@ const MerchantDashboard = () => {
             <div className="text-left">
               <p className="font-semibold">Partner Offers</p>
               <p className="text-xs text-muted-foreground">PawBucks redemptions</p>
+            </div>
+          </Button>
+          <Button
+            variant="outline"
+            className="h-auto py-4 justify-start border-primary/30 bg-primary/5 hover:bg-primary/10"
+            onClick={() => navigate("/merchant/market")}
+          >
+            <Store className="w-5 h-5 mr-3 text-primary" />
+            <div className="text-left">
+              <p className="font-semibold text-primary">Merchant Market</p>
+              <p className="text-xs text-muted-foreground">Grow your business</p>
             </div>
           </Button>
         </div>
