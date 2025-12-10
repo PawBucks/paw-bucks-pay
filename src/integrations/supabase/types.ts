@@ -447,6 +447,63 @@ export type Database = {
           },
         ]
       }
+      merchant_market_services: {
+        Row: {
+          billing_type: string
+          category: string
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          features: Json | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          is_new: boolean | null
+          is_popular: boolean | null
+          name: string
+          price_pawbucks: number
+          price_usd: number
+          short_description: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          billing_type?: string
+          category: string
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          features?: Json | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_new?: boolean | null
+          is_popular?: boolean | null
+          name: string
+          price_pawbucks?: number
+          price_usd?: number
+          short_description?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          billing_type?: string
+          category?: string
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          features?: Json | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_new?: boolean | null
+          is_popular?: boolean | null
+          name?: string
+          price_pawbucks?: number
+          price_usd?: number
+          short_description?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       merchant_reviews: {
         Row: {
           created_at: string
@@ -536,6 +593,67 @@ export type Database = {
             columns: ["merchant_id"]
             isOneToOne: false
             referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      merchant_service_purchases: {
+        Row: {
+          amount_paid_pawbucks: number | null
+          amount_paid_usd: number | null
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          merchant_id: string
+          service_id: string
+          status: string
+          stripe_payment_intent_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          amount_paid_pawbucks?: number | null
+          amount_paid_usd?: number | null
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          merchant_id: string
+          service_id: string
+          status?: string
+          stripe_payment_intent_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          amount_paid_pawbucks?: number | null
+          amount_paid_usd?: number | null
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          merchant_id?: string
+          service_id?: string
+          status?: string
+          stripe_payment_intent_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_service_purchases_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_service_purchases_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_service_purchases_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_market_services"
             referencedColumns: ["id"]
           },
         ]
