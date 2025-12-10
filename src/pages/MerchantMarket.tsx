@@ -1,11 +1,14 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { GradientCard } from "@/components/ui/gradient-card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
+import { ServicePurchaseDialog } from "@/components/merchant/ServicePurchaseDialog";
+import { toast } from "sonner";
+import { useEffect } from "react";
 import {
   PawPrint,
   ArrowLeft,
@@ -364,9 +367,36 @@ const categoryInfo: Record<ServiceCategory, { name: string; description: string;
 
 const MerchantMarket = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<ServiceCategory | "all">("all");
+  const [selectedService, setSelectedService] = useState<Service | null>(null);
+  const [showPurchaseDialog, setShowPurchaseDialog] = useState(false);
+
+  // Check for successful purchase from redirect
+  useEffect(() => {
+    if (searchParams.get('purchase') === 'success') {
+      toast.success('Service purchased successfully!');
+      // Clear the query param
+      navigate('/merchant/market', { replace: true });
+    }
+  }, [searchParams, navigate]);
+
+  const handlePurchase = (service: Service) => {
+    if (!user) {
+      toast.error('Please log in to purchase services');
+      return;
+    }
+    setSelectedService(service);
+    setShowPurchaseDialog(true);
+  };
+
+  const handlePurchaseSuccess = () => {
+    toast.success(`${selectedService?.name} has been activated for your account!`);
+    setSelectedService(null);
+    setShowPurchaseDialog(false);
+  };
 
   const filteredServices = services.filter((service) => {
     const matchesSearch =
@@ -550,7 +580,10 @@ const MerchantMarket = () => {
                     <span className="ml-1 capitalize">{service.category}</span>
                   </Badge>
                 </div>
-                <Button className="w-full group-hover:bg-primary group-hover:text-primary-foreground">
+                <Button 
+                  className="w-full group-hover:bg-primary group-hover:text-primary-foreground"
+                  onClick={() => handlePurchase(service)}
+                >
                   Get Started
                   <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
@@ -599,7 +632,21 @@ const MerchantMarket = () => {
                   </div>
                   <Badge variant="outline">Save $110</Badge>
                 </div>
-                <Button className="w-full">
+                <Button 
+                  className="w-full"
+                  onClick={() => handlePurchase({
+                    id: 'growth-starter-bundle',
+                    name: 'Growth Starter Bundle',
+                    description: 'Premium Analytics + Sponsored Placement + Profile Optimization',
+                    longDescription: 'Everything you need to start growing on PawBucks.',
+                    benefits: ['Premium Analytics Dashboard', 'Sponsored Merchant Placement', 'Profile Optimization'],
+                    priceUSD: 437,
+                    pricePawBucks: 437000,
+                    category: 'growth',
+                    icon: null,
+                    billingPeriod: 'one-time',
+                  })}
+                >
                   Get Bundle
                   <Gift className="w-4 h-4 ml-2" />
                 </Button>
@@ -622,7 +669,21 @@ const MerchantMarket = () => {
                   </div>
                   <Badge variant="outline">Save $257</Badge>
                 </div>
-                <Button className="w-full">
+                <Button 
+                  className="w-full"
+                  onClick={() => handlePurchase({
+                    id: 'pro-merchant-bundle',
+                    name: 'Pro Merchant Bundle',
+                    description: 'Verified Pro Badge + Premium Analytics + Strategy Consultation + Priority Support',
+                    longDescription: 'Full suite for serious merchants.',
+                    benefits: ['Verified Pro Badge', 'Premium Analytics Dashboard', 'Strategy Consultation', 'Priority Support'],
+                    priceUSD: 769,
+                    pricePawBucks: 769000,
+                    category: 'premium',
+                    icon: null,
+                    billingPeriod: 'one-time',
+                  })}
+                >
                   Get Bundle
                   <Crown className="w-4 h-4 ml-2" />
                 </Button>
@@ -676,6 +737,17 @@ const MerchantMarket = () => {
           </Button>
         </div>
       </main>
+
+      {/* Purchase Dialog */}
+      {user && (
+        <ServicePurchaseDialog
+          open={showPurchaseDialog}
+          onOpenChange={setShowPurchaseDialog}
+          service={selectedService}
+          userId={user.id}
+          onSuccess={handlePurchaseSuccess}
+        />
+      )}
     </div>
   );
 };
