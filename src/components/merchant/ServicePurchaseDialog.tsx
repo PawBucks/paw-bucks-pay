@@ -27,7 +27,7 @@ type Service = {
   benefits: string[];
   priceUSD: number;
   pricePawBucks: number;
-  billingPeriod?: "one-time" | "monthly" | "quarterly" | "annual";
+  billingPeriod?: "one_time" | "monthly" | "quarterly" | "yearly";
 };
 
 type StripePaymentFormProps = {
@@ -182,7 +182,7 @@ export const ServicePurchaseDialog = ({
     switch (period) {
       case "monthly": return "/month";
       case "quarterly": return "/quarter";
-      case "annual": return "/year";
+      case "yearly": return "/year";
       default: return " (one-time)";
     }
   };
@@ -199,7 +199,7 @@ export const ServicePurchaseDialog = ({
           priceUSD: service.priceUSD,
           pricePawBucks: service.pricePawBucks,
           pawbucksToUse,
-          billingPeriod: service.billingPeriod || 'one-time',
+          billingPeriod: service.billingPeriod || 'one_time',
         },
       });
 
