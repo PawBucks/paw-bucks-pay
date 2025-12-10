@@ -38,6 +38,7 @@ const VetLoanApply = lazy(() => import("./pages/VetLoanApply"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const AdminResetPassword = lazy(() => import("./pages/AdminResetPassword"));
+const AdminMerchantServices = lazy(() => import("./pages/AdminMerchantServices"));
 const PetHealth = lazy(() => import("./pages/PetHealth"));
 const VetDashboard = lazy(() => import("./pages/VetDashboard"));
 const PawBucksWallet = lazy(() => import("./pages/PawBucksWallet"));
@@ -102,6 +103,7 @@ const AppRoutes = () => {
       <Route path="/admin" element={<PageTransition><AdminLogin /></PageTransition>} />
       <Route path="/admin/reset-password" element={<PageTransition><AdminResetPassword /></PageTransition>} />
       <Route path="/admin/dashboard" element={<PageTransition><AdminDashboard /></PageTransition>} />
+      <Route path="/admin/merchant-services" element={<PageTransition><AdminMerchantServices /></PageTransition>} />
       <Route path="/pawbucks/wallet" element={<PageTransition><PawBucksWallet /></PageTransition>} />
       <Route path="/pawbucks/redeem" element={<PageTransition><PawBucksRedeem /></PageTransition>} />
       <Route path="/pet-store" element={<PageTransition><PetStore /></PageTransition>} />

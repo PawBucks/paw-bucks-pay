@@ -45,303 +45,43 @@ type ServiceCategory = "visibility" | "analytics" | "growth" | "premium";
 type Service = {
   id: string;
   name: string;
-  description: string;
-  longDescription: string;
+  description: string | null;
+  short_description: string | null;
   benefits: string[];
   priceUSD: number;
   pricePawBucks: number;
   category: ServiceCategory;
-  icon: React.ReactNode;
+  icon: string | null;
   popular?: boolean;
   newService?: boolean;
-  billingPeriod?: "one-time" | "monthly" | "quarterly" | "annual";
+  billingPeriod?: "one_time" | "monthly" | "quarterly" | "yearly";
 };
 
-const services: Service[] = [
-  // Visibility & Promotion
-  {
-    id: "premium-ad-placement",
-    name: "Premium Ad Placement",
-    description: "Feature your business in high-visibility ad spots across the platform",
-    longDescription: "Get your business front and center with premium advertising placements on the homepage, discover page, and throughout the pet owner journey. Your ads will be displayed to thousands of active pet owners who are ready to spend.",
-    benefits: [
-      "Homepage banner placement",
-      "Discover page featured position",
-      "Targeted audience reach",
-      "Real-time impression tracking",
-      "A/B testing for ad creatives",
-    ],
-    priceUSD: 199,
-    pricePawBucks: 199000,
-    category: "visibility",
-    icon: <Megaphone className="w-6 h-6" />,
-    popular: true,
-    billingPeriod: "monthly",
-  },
-  {
-    id: "sponsored-placement",
-    name: "Sponsored Merchant Placement",
-    description: "Appear at the top of search results and the Discover page",
-    longDescription: "Stand out from the competition by securing a sponsored spot at the top of the Discover page. Sponsored merchants get 5x more visibility and significantly higher click-through rates compared to standard listings.",
-    benefits: [
-      "Top position in Discover page",
-      "Priority in search results",
-      "Sponsored badge on profile",
-      "30-day campaign duration",
-      "Performance dashboard access",
-    ],
-    priceUSD: 149,
-    pricePawBucks: 149000,
-    category: "visibility",
-    icon: <Star className="w-6 h-6" />,
-    billingPeriod: "monthly",
-  },
-  {
-    id: "search-ranking-booster",
-    name: "Search Ranking Booster",
-    description: "Improve your visibility in platform search results",
-    longDescription: "Boost your merchant profile's visibility in search results with our proprietary ranking algorithm enhancement. Get discovered by more pet owners actively searching for services like yours.",
-    benefits: [
-      "Higher search result rankings",
-      "Enhanced profile visibility",
-      "Category-specific boosting",
-      "Competitive edge over others",
-      "Weekly ranking reports",
-    ],
-    priceUSD: 79,
-    pricePawBucks: 79000,
-    category: "visibility",
-    icon: <Rocket className="w-6 h-6" />,
-    newService: true,
-    billingPeriod: "monthly",
-  },
-
-  // Analytics & Insights
-  {
-    id: "premium-analytics",
-    name: "Premium Analytics Dashboard",
-    description: "Advanced data views with customer demographics and competitive insights",
-    longDescription: "Unlock the full power of your business data with our Premium Analytics Dashboard. Get detailed customer demographics, transaction velocity trends, and competitive benchmarking to make data-driven decisions.",
-    benefits: [
-      "Customer demographic insights",
-      "Transaction velocity analysis",
-      "Competitive benchmarking",
-      "Revenue forecasting",
-      "Custom date range reports",
-    ],
-    priceUSD: 99,
-    pricePawBucks: 99000,
-    category: "analytics",
-    icon: <BarChart3 className="w-6 h-6" />,
-    popular: true,
-    billingPeriod: "monthly",
-  },
-  {
-    id: "keyword-insights",
-    name: "Keyword Performance Insights",
-    description: "Discover which search terms drive customers to your business",
-    longDescription: "Understand exactly how pet owners find your business. See which keywords and search terms are driving traffic, optimize your profile content, and capture more of the market you deserve.",
-    benefits: [
-      "Top performing keywords",
-      "Search term trends",
-      "Conversion tracking by keyword",
-      "SEO optimization tips",
-      "Competitor keyword analysis",
-    ],
-    priceUSD: 179,
-    pricePawBucks: 179000,
-    category: "analytics",
-    icon: <Target className="w-6 h-6" />,
-    billingPeriod: "quarterly",
-  },
-  {
-    id: "demand-forecasting",
-    name: "Predictive Demand Forecasting",
-    description: "AI-powered predictions for customer demand and optimal pricing",
-    longDescription: "Leverage advanced AI algorithms to predict customer demand patterns and optimize your pricing strategy. Stay ahead of seasonal trends and maximize revenue with data-driven recommendations.",
-    benefits: [
-      "30-day demand predictions",
-      "Seasonal trend analysis",
-      "Dynamic pricing suggestions",
-      "Inventory optimization",
-      "Revenue maximization tips",
-    ],
-    priceUSD: 399,
-    pricePawBucks: 399000,
-    category: "analytics",
-    icon: <TrendingUp className="w-6 h-6" />,
-    billingPeriod: "quarterly",
-  },
-  {
-    id: "customer-cohort-analysis",
-    name: "Customer Cohort Analysis",
-    description: "Deep dive into customer retention, LTV, and purchasing patterns",
-    longDescription: "Understand your customers better than ever with comprehensive cohort analysis. Track retention rates, lifetime value, and average order value broken down by customer segments.",
-    benefits: [
-      "Customer retention metrics",
-      "Lifetime value calculation",
-      "AOV by customer segment",
-      "Churn prediction",
-      "Re-engagement opportunities",
-    ],
-    priceUSD: 249,
-    pricePawBucks: 249000,
-    category: "analytics",
-    icon: <PieChart className="w-6 h-6" />,
-    billingPeriod: "one-time",
-  },
-
-  // Growth & Optimization
-  {
-    id: "profile-optimization",
-    name: "Merchant Profile Optimization",
-    description: "Professional review and optimization of your merchant profile",
-    longDescription: "Get expert eyes on your merchant profile with our professional optimization service. Our team will review and enhance your profile content, images, and positioning to maximize conversions.",
-    benefits: [
-      "Professional copywriting",
-      "Image optimization guidance",
-      "Keyword-rich descriptions",
-      "Conversion rate improvement",
-      "Before/after comparison",
-    ],
-    priceUSD: 299,
-    pricePawBucks: 299000,
-    category: "growth",
-    icon: <Sparkles className="w-6 h-6" />,
-    billingPeriod: "one-time",
-  },
-  {
-    id: "strategy-consultation",
-    name: "Dedicated Strategy Consultation",
-    description: "One-on-one session with a platform growth expert",
-    longDescription: "Book a personalized 60-minute strategy session with one of our platform growth experts. Get tailored advice on how to grow your business, optimize your presence, and maximize your ROI on PawBucks.",
-    benefits: [
-      "60-minute strategy call",
-      "Custom growth plan",
-      "Platform best practices",
-      "Competitive analysis",
-      "Follow-up action items",
-    ],
-    priceUSD: 499,
-    pricePawBucks: 499000,
-    category: "growth",
-    icon: <Users className="w-6 h-6" />,
-    billingPeriod: "one-time",
-  },
-  {
-    id: "training-webinar",
-    name: "Exclusive Training Webinar/Course",
-    description: "Access to premium merchant success training and resources",
-    longDescription: "Gain access to our exclusive library of training webinars and courses designed specifically for PawBucks merchants. Learn from top performers and industry experts to accelerate your growth.",
-    benefits: [
-      "10+ hours of training content",
-      "Monthly live Q&A sessions",
-      "Best practices playbook",
-      "Success case studies",
-      "Private community access",
-    ],
-    priceUSD: 199,
-    pricePawBucks: 199000,
-    category: "growth",
-    icon: <Video className="w-6 h-6" />,
-    billingPeriod: "annual",
-  },
-  {
-    id: "review-booster",
-    name: "Review Generation Campaign",
-    description: "Automated system to encourage happy customers to leave reviews",
-    longDescription: "Boost your reputation with our automated review generation system. We'll help you identify happy customers and encourage them to share their positive experiences, building social proof that attracts new business.",
-    benefits: [
-      "Automated review requests",
-      "Timing optimization",
-      "Response templates",
-      "Review monitoring alerts",
-      "Reputation management tips",
-    ],
-    priceUSD: 129,
-    pricePawBucks: 129000,
-    category: "growth",
-    icon: <MessageSquare className="w-6 h-6" />,
-    newService: true,
-    billingPeriod: "monthly",
-  },
-
-  // Premium & Exclusive
-  {
-    id: "verified-pro-badge",
-    name: '"Verified Pro" Badge',
-    description: "Exclusive badge that signals trust and quality to customers",
-    longDescription: "Stand out as a verified professional with our exclusive Verified Pro badge. This badge signals to pet owners that your business has been vetted for quality, reliability, and excellent customer service.",
-    benefits: [
-      "Verified Pro badge on profile",
-      "Priority customer support",
-      "Featured in Pro directory",
-      "Trust indicator for customers",
-      "Exclusive merchant network access",
-    ],
-    priceUSD: 349,
-    pricePawBucks: 349000,
-    category: "premium",
-    icon: <BadgeCheck className="w-6 h-6" />,
-    popular: true,
-    billingPeriod: "annual",
-  },
-  {
-    id: "priority-support",
-    name: "Priority Merchant Support",
-    description: "Skip the line with dedicated priority support access",
-    longDescription: "Get the help you need when you need it with Priority Support. Enjoy faster response times, dedicated support agents, and priority resolution for any issues that arise.",
-    benefits: [
-      "4-hour response guarantee",
-      "Dedicated support agent",
-      "Priority issue resolution",
-      "Direct phone support line",
-      "After-hours availability",
-    ],
-    priceUSD: 79,
-    pricePawBucks: 79000,
-    category: "premium",
-    icon: <ShieldCheck className="w-6 h-6" />,
-    billingPeriod: "monthly",
-  },
-  {
-    id: "early-access",
-    name: "Early Access Program",
-    description: "Be the first to access new platform features and tools",
-    longDescription: "Join our exclusive Early Access Program and be among the first merchants to try new platform features before they're released to everyone. Shape the future of PawBucks with your feedback.",
-    benefits: [
-      "Beta feature access",
-      "Feature request priority",
-      "Feedback influence",
-      "Early adopter recognition",
-      "Exclusive merchant events",
-    ],
-    priceUSD: 149,
-    pricePawBucks: 149000,
-    category: "premium",
-    icon: <Zap className="w-6 h-6" />,
-    newService: true,
-    billingPeriod: "annual",
-  },
-  {
-    id: "merchant-spotlight",
-    name: "Merchant Spotlight Feature",
-    description: "Get featured in our newsletter and social media channels",
-    longDescription: "Be the star of our Merchant Spotlight program! Get featured in our email newsletter to thousands of pet owners, highlighted on our social media channels, and showcased as a success story on our blog.",
-    benefits: [
-      "Newsletter feature article",
-      "Social media spotlight",
-      "Blog success story",
-      "Press kit preparation",
-      "Professional photography tips",
-    ],
-    priceUSD: 599,
-    pricePawBucks: 599000,
-    category: "premium",
-    icon: <Crown className="w-6 h-6" />,
-    billingPeriod: "one-time",
-  },
-];
+// Icon mapping for dynamic rendering
+const iconMap: Record<string, React.ReactNode> = {
+  Megaphone: <Megaphone className="w-6 h-6" />,
+  Star: <Star className="w-6 h-6" />,
+  TrendingUp: <TrendingUp className="w-6 h-6" />,
+  BadgeCheck: <BadgeCheck className="w-6 h-6" />,
+  BarChart3: <BarChart3 className="w-6 h-6" />,
+  Users: <Users className="w-6 h-6" />,
+  Brain: <Lightbulb className="w-6 h-6" />,
+  Search: <Search className="w-6 h-6" />,
+  Sparkles: <Sparkles className="w-6 h-6" />,
+  Target: <Target className="w-6 h-6" />,
+  GraduationCap: <Award className="w-6 h-6" />,
+  Palette: <Sparkles className="w-6 h-6" />,
+  Crown: <Crown className="w-6 h-6" />,
+  Code: <Zap className="w-6 h-6" />,
+  Building2: <Building2 className="w-6 h-6" />,
+  LineChart: <LineChart className="w-6 h-6" />,
+  Rocket: <Rocket className="w-6 h-6" />,
+  Video: <Video className="w-6 h-6" />,
+  ShieldCheck: <ShieldCheck className="w-6 h-6" />,
+  Zap: <Zap className="w-6 h-6" />,
+  PieChart: <PieChart className="w-6 h-6" />,
+  MessageSquare: <MessageSquare className="w-6 h-6" />,
+};
 
 const categoryInfo: Record<ServiceCategory, { name: string; description: string; icon: React.ReactNode }> = {
   visibility: {
@@ -381,6 +121,7 @@ const MerchantMarket = () => {
   const [showPurchaseDialog, setShowPurchaseDialog] = useState(false);
   const [merchant, setMerchant] = useState<Merchant | null>(null);
   const [loading, setLoading] = useState(true);
+  const [services, setServices] = useState<Service[]>([]);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -421,8 +162,41 @@ const MerchantMarket = () => {
 
     if (user) {
       loadMerchant();
+      loadServices();
     }
   }, [user, navigate]);
+
+  // Load services from database
+  const loadServices = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('merchant_market_services')
+        .select('*')
+        .eq('is_active', true)
+        .order('display_order', { ascending: true });
+
+      if (error) throw error;
+
+      const transformed: Service[] = (data || []).map(s => ({
+        id: s.id,
+        name: s.name,
+        description: s.description,
+        short_description: s.short_description,
+        benefits: Array.isArray(s.features) ? (s.features as string[]) : [],
+        priceUSD: Number(s.price_usd),
+        pricePawBucks: s.price_pawbucks,
+        category: s.category as ServiceCategory,
+        icon: s.icon,
+        popular: s.is_popular,
+        newService: s.is_new,
+        billingPeriod: s.billing_type as Service['billingPeriod'],
+      }));
+
+      setServices(transformed);
+    } catch (error) {
+      console.error('Error loading services:', error);
+    }
+  };
 
   // Check for successful purchase from redirect
   useEffect(() => {
@@ -702,13 +476,13 @@ const MerchantMarket = () => {
                     id: 'growth-starter-bundle',
                     name: 'Growth Starter Bundle',
                     description: 'Premium Analytics + Sponsored Placement + Profile Optimization',
-                    longDescription: 'Everything you need to start growing on PawBucks.',
+                    short_description: 'Everything you need to start growing on PawBucks.',
                     benefits: ['Premium Analytics Dashboard', 'Sponsored Merchant Placement', 'Profile Optimization'],
                     priceUSD: 437,
                     pricePawBucks: 437000,
                     category: 'growth',
                     icon: null,
-                    billingPeriod: 'one-time',
+                    billingPeriod: 'one_time',
                   })}
                 >
                   Get Bundle
@@ -739,13 +513,13 @@ const MerchantMarket = () => {
                     id: 'pro-merchant-bundle',
                     name: 'Pro Merchant Bundle',
                     description: 'Verified Pro Badge + Premium Analytics + Strategy Consultation + Priority Support',
-                    longDescription: 'Full suite for serious merchants.',
+                    short_description: 'Full suite for serious merchants.',
                     benefits: ['Verified Pro Badge', 'Premium Analytics Dashboard', 'Strategy Consultation', 'Priority Support'],
                     priceUSD: 769,
                     pricePawBucks: 769000,
                     category: 'premium',
                     icon: null,
-                    billingPeriod: 'one-time',
+                    billingPeriod: 'one_time',
                   })}
                 >
                   Get Bundle

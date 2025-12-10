@@ -439,7 +439,11 @@ const AdminDashboard = () => {
           <div className="flex gap-2">
             <Button variant="ghost" size="sm" onClick={() => setNotificationDialogOpen(true)}>
               <Bell className="w-4 h-4 mr-2" />
-              Send Notification
+              Notify
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => navigate("/admin/merchant-services")}>
+              <Store className="w-4 h-4 mr-2" />
+              Services
             </Button>
             <Button variant="ghost" size="sm" onClick={() => navigate("/admin/pet-store")}>
               <Store className="w-4 h-4 mr-2" />
