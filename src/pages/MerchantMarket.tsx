@@ -363,7 +363,7 @@ const MerchantMarket = () => {
                 {/* Header */}
                 <div className="flex items-start justify-between mb-4">
                   <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                    {service.icon}
+                    {service.icon && iconMap[service.icon] ? iconMap[service.icon] : <Sparkles className="w-6 h-6" />}
                   </div>
                   <div className="flex gap-2">
                     {service.popular && (
