@@ -3,8 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { MerchantServicesTab } from "@/components/admin/MerchantServicesTab";
+import { MerchantServiceAssignments } from "@/components/admin/MerchantServiceAssignments";
 import { Button } from "@/components/ui/button";
-import { Loader2, Shield, ArrowLeft, LogOut } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Loader2, Shield, ArrowLeft, LogOut, Settings, Store } from "lucide-react";
 import { toast } from "sonner";
 
 const AdminMerchantServices = () => {
@@ -12,6 +14,7 @@ const AdminMerchantServices = () => {
   const navigate = useNavigate();
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("assignments");
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -96,7 +99,26 @@ const AdminMerchantServices = () => {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        <MerchantServicesTab />
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="mb-6">
+            <TabsTrigger value="assignments" className="gap-2">
+              <Store className="w-4 h-4" />
+              Merchant Assignments
+            </TabsTrigger>
+            <TabsTrigger value="catalog" className="gap-2">
+              <Settings className="w-4 h-4" />
+              Service Catalog
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="assignments">
+            <MerchantServiceAssignments />
+          </TabsContent>
+          
+          <TabsContent value="catalog">
+            <MerchantServicesTab />
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );
