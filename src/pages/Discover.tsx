@@ -10,7 +10,7 @@ import { PageLoader } from "@/components/PageLoader";
 import { Header } from "@/components/Header";
 import { AdPlacement } from "@/components/AdPlacement";
 import { PawBucksInfoTooltip } from "@/components/PawBucksInfoTooltip";
-import { Search, Store, Scissors, Home, Stethoscope, Footprints, Bone, Coins, CreditCard, ChevronRight, BookOpen, Star, Sparkles, MapPin, SlidersHorizontal, X, List, Map, Navigation, ArrowUpDown, LayoutGrid } from "lucide-react";
+import { Search, Store, Scissors, Home, Stethoscope, Footprints, Bone, Coins, CreditCard, ChevronRight, BookOpen, Star, Sparkles, MapPin, SlidersHorizontal, X, List, Map, Navigation, ArrowUpDown, LayoutGrid, BadgeCheck } from "lucide-react";
 import { MerchantMap } from "@/components/MerchantMap";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -22,6 +22,7 @@ import { toast } from "sonner";
 import { ROUTES, QUERY_STALE_TIMES } from "@/lib/constants";
 import { SEO } from "@/components/SEO";
 import { usePersistentState } from "@/hooks/usePersistentState";
+import { useSponsoredMerchants, useVerifiedProMerchants, SERVICE_NAMES } from "@/hooks/useMerchantServices";
 
 type MerchantWithRating = {
   id: string;
@@ -131,12 +132,14 @@ const MerchantCard = ({
   merchant, 
   onPayClick,
   isSponsored = false,
-  showDistance = false
+  showDistance = false,
+  isVerifiedPro = false
 }: { 
   merchant: MerchantWithRating; 
   onPayClick: () => void;
   isSponsored?: boolean;
   showDistance?: boolean;
+  isVerifiedPro?: boolean;
 }) => {
   const Icon = getBusinessIcon(merchant.business_type);
   
@@ -167,9 +170,17 @@ const MerchantCard = ({
             {/* Content */}
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between gap-2 mb-1">
-                <h3 className="font-semibold text-lg line-clamp-1 group-hover:text-primary transition-colors">
-                  {merchant.business_name}
-                </h3>
+                <div className="flex items-center gap-2 min-w-0">
+                  <h3 className="font-semibold text-lg line-clamp-1 group-hover:text-primary transition-colors">
+                    {merchant.business_name}
+                  </h3>
+                  {isVerifiedPro && (
+                    <Badge className="flex-shrink-0 gap-1 bg-blue-500/10 text-blue-600 border-blue-500/20 text-xs">
+                      <BadgeCheck className="w-3 h-3" />
+                      Verified
+                    </Badge>
+                  )}
+                </div>
                 {isSponsored && (
                   <Badge variant="secondary" className="flex-shrink-0 gap-1 bg-primary/10 text-primary text-xs">
                     <Sparkles className="w-3 h-3" />
@@ -291,6 +302,14 @@ const Discover = () => {
   } | null>(null);
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
   const [viewMode, setViewMode] = usePersistentState<'list' | 'map'>('discover-view-mode', 'list');
+
+  // Fetch sponsored merchants from service purchases
+  const { data: sponsoredMerchantsList = [] } = useSponsoredMerchants();
+  const sponsoredMerchantIds = useMemo(() => new Set(sponsoredMerchantsList.map(m => m.id)), [sponsoredMerchantsList]);
+
+  // Fetch verified pro merchants from service purchases
+  const { data: verifiedProMerchantIds = [] } = useVerifiedProMerchants();
+  const verifiedProSet = useMemo(() => new Set(verifiedProMerchantIds), [verifiedProMerchantIds]);
 
   // Get user's location
   const requestLocation = useCallback(() => {
@@ -466,17 +485,17 @@ const Discover = () => {
       });
     };
 
-    // Separate sponsored (active) from regular
+    // Separate sponsored (from service purchases) from regular
     const sponsored = sortMerchants(
-      filtered.filter(m => m.is_sponsored && m.sponsored_until && m.sponsored_until > now)
+      filtered.filter(m => sponsoredMerchantIds.has(m.id))
     );
     
     const regular = sortMerchants(
-      filtered.filter(m => !m.is_sponsored || !m.sponsored_until || m.sponsored_until <= now)
+      filtered.filter(m => !sponsoredMerchantIds.has(m.id))
     );
 
     return { sponsoredMerchants: sponsored, regularMerchants: regular };
-  }, [merchantsWithRatings, selectedCategory, debouncedSearch, minRating, selectedPrices, maxDistance, userLocation, sortBy]);
+  }, [merchantsWithRatings, selectedCategory, debouncedSearch, minRating, selectedPrices, maxDistance, userLocation, sortBy, sponsoredMerchantIds]);
 
   const handleMerchantClick = (merchant: MerchantWithRating) => {
     if (!user) {
@@ -773,6 +792,7 @@ const Discover = () => {
                               onPayClick={() => handleMerchantClick(merchant)}
                               isSponsored
                               showDistance={!!userLocation}
+                              isVerifiedPro={verifiedProSet.has(merchant.id)}
                             />
                           ))}
                         </div>
@@ -791,6 +811,7 @@ const Discover = () => {
                             merchant={merchant}
                             onPayClick={() => handleMerchantClick(merchant)}
                             showDistance={!!userLocation}
+                            isVerifiedPro={verifiedProSet.has(merchant.id)}
                           />
                         ))}
                       </div>
@@ -842,6 +863,7 @@ const Discover = () => {
                               onPayClick={() => handleMerchantClick(merchant)}
                               isSponsored
                               showDistance={!!userLocation}
+                              isVerifiedPro={verifiedProSet.has(merchant.id)}
                             />
                           ))}
                         </div>
@@ -860,6 +882,7 @@ const Discover = () => {
                             merchant={merchant}
                             onPayClick={() => handleMerchantClick(merchant)}
                             showDistance={!!userLocation}
+                            isVerifiedPro={verifiedProSet.has(merchant.id)}
                           />
                         ))}
                       </div>
