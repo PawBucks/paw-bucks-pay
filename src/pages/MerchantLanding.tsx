@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { PremiumMerchantsBanner } from "@/components/PremiumMerchantsBanner";
 import { PawPrint, CreditCard, TrendingUp, Users, Shield, BarChart3, Zap, CheckCircle, Sparkles, ArrowRight, DollarSign } from "lucide-react";
 import logo from "@/assets/logo.png";
 
@@ -100,6 +101,18 @@ const MerchantLanding = () => {
               </div>
             </div>
           </div>
+        </section>
+
+        {/* Premium Merchants Showcase */}
+        <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-2">See Who's Growing with PawBucks</h2>
+            <p className="text-muted-foreground">Premium merchants thriving on our platform</p>
+          </div>
+          <PremiumMerchantsBanner 
+            title="Featured Premium Merchants"
+            rotationInterval={5000}
+          />
         </section>
 
         {/* Features Section */}

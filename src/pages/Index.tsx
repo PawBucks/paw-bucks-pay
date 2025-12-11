@@ -7,6 +7,7 @@ import { GradientCard } from "@/components/ui/gradient-card";
 import { Card } from "@/components/ui/card";
 import { Header } from "@/components/Header";
 import { SEO } from "@/components/SEO";
+import { PremiumMerchantsBanner } from "@/components/PremiumMerchantsBanner";
 import { Wallet, Store, Gift, ArrowRight, Shield, Zap, Users, TrendingUp, CheckCircle, Sparkles, Info } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import logo from "@/assets/logo.png";
@@ -257,6 +258,14 @@ const Index = () => {
               </div>
             </div>
           </div>
+        </section>
+
+        {/* Premium Merchants Section */}
+        <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+          <PremiumMerchantsBanner 
+            title="Shop with Premium Merchants"
+            rotationInterval={6000}
+          />
         </section>
 
         {/* Features Section */}
