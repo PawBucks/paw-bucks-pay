@@ -18,6 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { ROUTES } from "@/lib/constants";
+import { useMerchantActiveServices, SERVICE_NAMES, merchantHasService } from "@/hooks/useMerchantServices";
 import {
   Star,
   MapPin,
@@ -38,6 +39,8 @@ import {
   MessageSquare,
   Camera,
   ChevronRight,
+  BadgeCheck,
+  Sparkles,
 } from "lucide-react";
 
 const getBusinessIcon = (type: string) => {
@@ -67,6 +70,11 @@ const MerchantProfile = () => {
   const { user, signOut } = useAuth();
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
+
+  // Fetch merchant active services
+  const { data: activeServices = [] } = useMerchantActiveServices(merchantId);
+  const hasVerifiedPro = merchantHasService(activeServices, SERVICE_NAMES.VERIFIED_PRO_BADGE);
+  const isSponsored = merchantHasService(activeServices, SERVICE_NAMES.SPONSORED_PLACEMENT);
 
   // Fetch merchant data from public view (excludes sensitive contact info)
   const { data: merchant, isLoading: merchantLoading } = useOptimizedQuery(
@@ -244,7 +252,21 @@ const MerchantProfile = () => {
                 <div className="flex-1">
                   <div className="flex items-start justify-between flex-wrap gap-4">
                     <div>
-                      <h1 className="text-3xl font-bold mb-1">{merchant.business_name}</h1>
+                      <div className="flex items-center gap-2 flex-wrap mb-1">
+                        <h1 className="text-3xl font-bold">{merchant.business_name}</h1>
+                        {hasVerifiedPro && (
+                          <Badge className="bg-blue-500/10 text-blue-600 border-blue-500/20 gap-1">
+                            <BadgeCheck className="w-4 h-4" />
+                            Verified Pro
+                          </Badge>
+                        )}
+                        {isSponsored && (
+                          <Badge variant="secondary" className="gap-1 bg-primary/10 text-primary">
+                            <Sparkles className="w-4 h-4" />
+                            Sponsored
+                          </Badge>
+                        )}
+                      </div>
                       <p className="text-muted-foreground capitalize">
                         {merchant.business_type.replace(/_/g, " ")}
                       </p>
