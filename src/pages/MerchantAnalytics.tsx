@@ -9,6 +9,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart3, TrendingUp, Users, Search, Check, CreditCard, Coins } from "lucide-react";
 import { toast } from "sonner";
 import { GradientCard } from "@/components/ui/gradient-card";
+import { PremiumAnalyticsDashboard } from "@/components/merchant/PremiumAnalyticsDashboard";
+import { CohortAnalysisReport } from "@/components/merchant/CohortAnalysisReport";
+import { KeywordPerformanceWidget } from "@/components/merchant/KeywordPerformanceWidget";
 
 export default function MerchantAnalytics() {
   const [selectedPayment, setSelectedPayment] = useState<'usd' | 'pawbucks'>('usd');
@@ -125,12 +128,27 @@ export default function MerchantAnalytics() {
           </p>
         </div>
 
-        <Tabs defaultValue="products" className="space-y-6">
-          <TabsList>
+        <Tabs defaultValue="dashboard" className="space-y-6">
+          <TabsList className="flex-wrap">
+            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+            <TabsTrigger value="cohorts">Cohort Analysis</TabsTrigger>
+            <TabsTrigger value="keywords">Keywords</TabsTrigger>
             <TabsTrigger value="products">Available Products</TabsTrigger>
             <TabsTrigger value="subscriptions">My Subscriptions</TabsTrigger>
             <TabsTrigger value="reports">My Reports</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="dashboard">
+            <PremiumAnalyticsDashboard />
+          </TabsContent>
+
+          <TabsContent value="cohorts">
+            <CohortAnalysisReport />
+          </TabsContent>
+
+          <TabsContent value="keywords">
+            <KeywordPerformanceWidget />
+          </TabsContent>
 
           <TabsContent value="products" className="space-y-6">
             <Card>

@@ -7,3 +7,6 @@ export { FundingRequestDialog } from "./FundingRequestDialog";
 export { TransactionsDialog } from "./TransactionsDialog";
 export { ReviewCard } from "./ReviewCard";
 export { WriteReviewDialog } from "./WriteReviewDialog";
+export { PremiumAnalyticsDashboard } from "./PremiumAnalyticsDashboard";
+export { CohortAnalysisReport } from "./CohortAnalysisReport";
+export { KeywordPerformanceWidget } from "./KeywordPerformanceWidget";
