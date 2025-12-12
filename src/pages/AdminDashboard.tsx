@@ -502,8 +502,8 @@ const AdminDashboard = () => {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Total Rewards</p>
-              {/* totalCashback is in PawBucks, convert to USD (1 PawBuck = $0.001) */}
-                <p className="text-2xl font-bold">${(totalCashback * 0.001).toFixed(2)}</p>
+                {/* totalCashback stores rewards_earned (PawBucks), convert to USD (1 PawBuck = $0.001) */}
+                <p className="text-2xl font-bold">${(totalCashback * 0.001).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
               </div>
             </div>
           </GradientCard>

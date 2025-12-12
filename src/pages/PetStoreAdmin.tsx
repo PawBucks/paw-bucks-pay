@@ -217,7 +217,12 @@ export default function PetStoreAdmin() {
   return (
     <div className="container mx-auto p-6 max-w-7xl">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Pet Store Management</h1>
+        <div className="flex items-center gap-4">
+          <Button variant="outline" onClick={() => navigate("/admin/dashboard")}>
+            ← Back
+          </Button>
+          <h1 className="text-3xl font-bold">Pet Store Management</h1>
+        </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={() => { setEditingItem(null); resetForm(); }}>
