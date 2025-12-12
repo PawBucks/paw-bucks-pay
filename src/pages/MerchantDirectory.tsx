@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { ROUTES, QUERY_STALE_TIMES } from "@/lib/constants";
 import { usePersistentState } from "@/hooks/usePersistentState";
 import { supabase } from "@/integrations/supabase/client";
+import { useVerifiedProMerchants, useSponsoredMerchants, isVerifiedPro, isSponsored } from "@/hooks/useMerchantServices";
 import {
   Search,
   Store,
@@ -31,6 +32,8 @@ import {
   MapPin,
   ChevronRight,
   Filter,
+  BadgeCheck,
+  Sparkles,
 } from "lucide-react";
 
 type MerchantWithRating = {
@@ -75,6 +78,10 @@ const MerchantDirectory = () => {
   const [selectedCategory, setSelectedCategory] = usePersistentState<string>("directory-category", "all");
   const [sortBy, setSortBy] = usePersistentState<string>("directory-sort", "rating");
   const [pawbucksOnly, setPawbucksOnly] = usePersistentState<boolean>("directory-pawbucks", false);
+
+  // Fetch verified and sponsored merchants for badge display
+  const { data: verifiedProIds = [] } = useVerifiedProMerchants();
+  const { data: sponsoredMerchantsList = [] } = useSponsoredMerchants();
 
   // Fetch merchants with ratings
   const { data: merchants = [], isLoading } = useOptimizedQuery<MerchantWithRating[]>(
@@ -276,12 +283,25 @@ const MerchantDirectory = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
               {filteredMerchants.map((merchant) => {
                 const Icon = getBusinessIcon(merchant.business_type);
+                const merchantIsVerified = isVerifiedPro(merchant.id, verifiedProIds);
+                const merchantIsSponsored = isSponsored(merchant.id, sponsoredMerchantsList);
+                
                 return (
                   <Link key={merchant.id} to={`/merchant/${merchant.id}`}>
-                    <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden border-border hover:border-primary/50 h-full">
+                    <Card className={`group hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden h-full ${
+                      merchantIsSponsored 
+                        ? 'border-primary/30 bg-primary/5' 
+                        : 'border-border hover:border-primary/50'
+                    }`}>
                       <CardContent className="p-0">
                         {/* Logo/Icon Header */}
                         <div className="bg-gradient-to-br from-primary/10 to-primary/5 p-6 flex items-center justify-center relative">
+                          {merchantIsSponsored && (
+                            <Badge className="absolute top-2 right-2 bg-primary/20 text-primary border-primary/30 gap-1">
+                              <Sparkles className="w-3 h-3" />
+                              Sponsored
+                            </Badge>
+                          )}
                           {merchant.logo_url ? (
                             <div className="w-24 h-24 rounded-full overflow-hidden bg-background group-hover:scale-105 transition-transform shadow-md border-2 border-border">
                               <img
@@ -299,11 +319,19 @@ const MerchantDirectory = () => {
 
                         {/* Content */}
                         <div className="p-5">
-                          <div className="flex items-start justify-between mb-2">
-                            <h3 className="font-semibold text-lg line-clamp-1 group-hover:text-primary transition-colors">
-                              {merchant.business_name}
-                            </h3>
-                            <Badge className="bg-primary/10 text-primary border-primary/20 flex-shrink-0 ml-2">
+                          <div className="flex items-start justify-between mb-2 gap-2">
+                            <div className="flex items-center gap-2 min-w-0 flex-1">
+                              <h3 className="font-semibold text-lg line-clamp-1 group-hover:text-primary transition-colors">
+                                {merchant.business_name}
+                              </h3>
+                              {merchantIsVerified && (
+                                <Badge className="flex-shrink-0 gap-1 bg-blue-500/10 text-blue-600 border-blue-500/20 text-xs">
+                                  <BadgeCheck className="w-3 h-3" />
+                                  Verified
+                                </Badge>
+                              )}
+                            </div>
+                            <Badge className="bg-primary/10 text-primary border-primary/20 flex-shrink-0">
                               {merchant.cashback_rate}x
                             </Badge>
                           </div>
