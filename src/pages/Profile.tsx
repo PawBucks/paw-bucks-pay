@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { BottomNav } from "@/components/BottomNav";
 import { AdPlacement } from "@/components/AdPlacement";
+import { PullToRefresh } from "@/components/PullToRefresh";
 import { LogOut, User, Mail, Calendar, Crown, Sparkles, Settings, Loader2, Info, Bell } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
@@ -63,10 +65,10 @@ const Profile = () => {
     }
   };
 
-  const handleSignOut = async () => {
+  const handleSignOut = useCallback(async () => {
     await signOut();
     navigate("/auth");
-  };
+  }, [signOut, navigate]);
 
   const handleSubscribe = async (tier: 'basic' | 'plus') => {
     setIsSubscribing(true);
@@ -91,6 +93,16 @@ const Profile = () => {
     }
   };
 
+  // Pull to refresh
+  const handleRefresh = useCallback(async () => {
+    setLoading(true);
+    await loadProfile();
+  }, []);
+
+  const { containerRef, isRefreshing, pullDistance, progress } = usePullToRefresh({
+    onRefresh: handleRefresh,
+  });
+
   if (loading || authLoading || !profile) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -109,19 +121,26 @@ const Profile = () => {
   return (
     <div className="min-h-[100dvh] bg-[var(--gradient-hero)] flex flex-col">
       <Header isAuthenticated={true} onLogout={handleSignOut} />
-      <div className="flex-1 container mx-auto px-4 pt-4 pb-24 md:pb-8 max-w-4xl overflow-y-auto">
-        {/* Ad Placement for Free Users */}
-        <div className="mb-4 sm:mb-6">
-          <AdPlacement />
-        </div>
+      <PullToRefresh
+        ref={containerRef}
+        isRefreshing={isRefreshing}
+        pullDistance={pullDistance}
+        progress={progress}
+        className="flex-1 overflow-auto"
+      >
+        <div className="container mx-auto px-4 pt-4 pb-24 md:pb-8 max-w-4xl">
+          {/* Ad Placement for Free Users */}
+          <div className="mb-4 sm:mb-6">
+            <AdPlacement />
+          </div>
 
-        {/* Header */}
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold">Profile</h1>
-          <Button variant="ghost" size="icon" onClick={handleSignOut} className="min-h-10 min-w-10">
-            <LogOut className="w-5 h-5" />
-          </Button>
-        </div>
+          {/* Header */}
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-2xl sm:text-3xl font-bold">Profile</h1>
+            <Button variant="ghost" size="icon" onClick={handleSignOut} className="min-h-10 min-w-10">
+              <LogOut className="w-5 h-5" />
+            </Button>
+          </div>
 
         {/* Profile Card */}
         <GradientCard gradient className="mb-6">
@@ -442,7 +461,8 @@ const Profile = () => {
             Sign Out
           </Button>
         </div>
-      </div>
+        </div>
+      </PullToRefresh>
       <BottomNav />
     </div>
   );
