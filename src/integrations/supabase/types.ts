@@ -86,6 +86,39 @@ export type Database = {
         }
         Relationships: []
       }
+      budget_settings: {
+        Row: {
+          alert_threshold: number
+          category: string
+          created_at: string
+          id: string
+          is_active: boolean
+          monthly_limit: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          alert_threshold?: number
+          category: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          monthly_limit?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          alert_threshold?: number
+          category?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          monthly_limit?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       cms_content: {
         Row: {
           content: Json
