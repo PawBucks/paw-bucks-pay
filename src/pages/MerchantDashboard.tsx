@@ -405,9 +405,8 @@ const MerchantDashboard = () => {
               <Edit className="w-4 h-4 mr-2" />
               Edit Profile
             </Button>
-            <Button variant="outline" size="sm" onClick={handleSignOut}>
-              <LogOut className="w-4 h-4 mr-2" />
-              Logout
+            <Button variant="outline" size="icon" onClick={handleSignOut} title="Logout">
+              <LogOut className="w-4 h-4" />
             </Button>
           </div>
         </div>
