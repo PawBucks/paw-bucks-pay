@@ -818,6 +818,7 @@ export type Database = {
       }
       notifications: {
         Row: {
+          category: string
           created_at: string | null
           id: string
           is_read: boolean | null
@@ -826,6 +827,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          category?: string
           created_at?: string | null
           id?: string
           is_read?: boolean | null
@@ -834,6 +836,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          category?: string
           created_at?: string | null
           id?: string
           is_read?: boolean | null
