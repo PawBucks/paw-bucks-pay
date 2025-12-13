@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, BellRing, Settings } from "lucide-react";
+import { Bell, BellRing, Settings, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -264,7 +264,7 @@ export const NotificationsDropdown = ({ userId }: { userId: string }) => {
             No notifications yet
           </div>
         ) : (
-          notifications.map((notification) => (
+          notifications.slice(0, 5).map((notification) => (
             <DropdownMenuItem
               key={notification.id}
               className={`flex flex-col items-start gap-1 p-3 cursor-pointer ${
@@ -285,6 +285,14 @@ export const NotificationsDropdown = ({ userId }: { userId: string }) => {
             </DropdownMenuItem>
           ))
         )}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          className="flex items-center justify-center gap-2 py-3 cursor-pointer"
+          onClick={() => navigate("/notifications")}
+        >
+          <History className="h-4 w-4" />
+          <span className="text-sm">View all notifications</span>
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
