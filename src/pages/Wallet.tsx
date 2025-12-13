@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useEffect, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useOptimizedQuery } from "@/hooks/useOptimizedQuery";
@@ -12,9 +12,9 @@ import { BottomNav } from "@/components/BottomNav";
 import { AdPlacement } from "@/components/AdPlacement";
 import { DashboardSkeleton } from "@/components/LoadingSkeleton";
 import { PullToRefresh } from "@/components/PullToRefresh";
-import { Wallet as WalletIcon, TrendingUp, Gift, ArrowUpRight, ArrowDownRight, Coins, Sparkles } from "lucide-react";
+import { SpendingTrendsChart } from "@/components/wallet/SpendingTrendsChart";
+import { Wallet as WalletIcon, TrendingUp, Gift, ArrowUpRight, ArrowDownRight, Coins, Sparkles, PieChart } from "lucide-react";
 import { format } from "date-fns";
-import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 
 type WalletData = {
@@ -189,6 +189,26 @@ const Wallet = () => {
               </div>
             </div>
           </GradientCard>
+        </div>
+
+        {/* Quick Action - View Detailed Breakdown */}
+        <div className="mb-6">
+          <Button 
+            onClick={() => navigate('/spending-breakdown')} 
+            variant="outline" 
+            className="w-full justify-between"
+          >
+            <span className="flex items-center gap-2">
+              <PieChart className="w-4 h-4" />
+              View Detailed Spending Breakdown
+            </span>
+            <ArrowUpRight className="w-4 h-4" />
+          </Button>
+        </div>
+
+        {/* Spending Trends Chart */}
+        <div className="mb-6">
+          <SpendingTrendsChart transactions={transactions} />
         </div>
 
         {/* Recent Transactions */}
