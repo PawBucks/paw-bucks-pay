@@ -32,8 +32,8 @@ export const PetProfilesSection = memo(({ pets, onUpdate }: PetProfilesSectionPr
       </div>
       {pets.length > 0 ? (
         <div className="grid gap-4 md:grid-cols-2">
-          {pets.map((pet) => (
-            <PetProfileCard key={pet.id} pet={pet} onUpdate={onUpdate} />
+          {pets.map((pet, index) => (
+            <PetProfileCard key={pet.id} pet={pet} onUpdate={onUpdate} index={index} />
           ))}
         </div>
       ) : (

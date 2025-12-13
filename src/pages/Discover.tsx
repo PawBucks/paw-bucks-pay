@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useOptimizedQuery } from "@/hooks/useOptimizedQuery";
@@ -136,17 +137,24 @@ const MerchantCard = ({
   onPayClick,
   isSponsored = false,
   showDistance = false,
-  isVerifiedPro = false
+  isVerifiedPro = false,
+  index = 0
 }: { 
   merchant: MerchantWithRating; 
   onPayClick: () => void;
   isSponsored?: boolean;
   showDistance?: boolean;
   isVerifiedPro?: boolean;
+  index?: number;
 }) => {
   const Icon = getBusinessIcon(merchant.business_type);
   
   return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.05, duration: 0.3, ease: "easeOut" }}
+    >
     <Card className={`group hover:shadow-lg transition-all duration-300 overflow-hidden ${isSponsored ? 'border-primary/30 bg-primary/5' : 'border-border hover:border-primary/50'}`}>
       <CardContent className="p-0">
         <Link to={`/merchant/${merchant.id}`} className="block">
@@ -259,6 +267,7 @@ const MerchantCard = ({
         </div>
       </CardContent>
     </Card>
+    </motion.div>
   );
 };
 
@@ -804,7 +813,7 @@ const Discover = () => {
                           <h2 className="text-lg font-semibold">Sponsored Results</h2>
                         </div>
                         <div className="space-y-4">
-                          {sponsoredMerchants.map((merchant) => (
+                          {sponsoredMerchants.map((merchant, index) => (
                             <MerchantCard
                               key={merchant.id}
                               merchant={merchant}
@@ -812,6 +821,7 @@ const Discover = () => {
                               isSponsored
                               showDistance={!!userLocation}
                               isVerifiedPro={verifiedProSet.has(merchant.id)}
+                              index={index}
                             />
                           ))}
                         </div>
@@ -824,13 +834,14 @@ const Discover = () => {
                         {sponsoredMerchants.length > 0 ? "All Results" : "Results"}
                       </h2>
                       <div className="space-y-4">
-                        {regularMerchants.map((merchant) => (
+                        {regularMerchants.map((merchant, index) => (
                           <MerchantCard
                             key={merchant.id}
                             merchant={merchant}
                             onPayClick={() => handleMerchantClick(merchant)}
                             showDistance={!!userLocation}
                             isVerifiedPro={verifiedProSet.has(merchant.id)}
+                            index={index}
                           />
                         ))}
                       </div>
@@ -875,7 +886,7 @@ const Discover = () => {
                           <h2 className="text-lg font-semibold">Sponsored Results</h2>
                         </div>
                         <div className="space-y-4">
-                          {sponsoredMerchants.map((merchant) => (
+                          {sponsoredMerchants.map((merchant, index) => (
                             <MerchantCard
                               key={merchant.id}
                               merchant={merchant}
@@ -883,6 +894,7 @@ const Discover = () => {
                               isSponsored
                               showDistance={!!userLocation}
                               isVerifiedPro={verifiedProSet.has(merchant.id)}
+                              index={index}
                             />
                           ))}
                         </div>
@@ -895,13 +907,14 @@ const Discover = () => {
                         {sponsoredMerchants.length > 0 ? "All Results" : "Results"}
                       </h2>
                       <div className="space-y-4">
-                        {regularMerchants.map((merchant) => (
+                        {regularMerchants.map((merchant, index) => (
                           <MerchantCard
                             key={merchant.id}
                             merchant={merchant}
                             onPayClick={() => handleMerchantClick(merchant)}
                             showDistance={!!userLocation}
                             isVerifiedPro={verifiedProSet.has(merchant.id)}
+                            index={index}
                           />
                         ))}
                       </div>

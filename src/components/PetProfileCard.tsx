@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { GradientCard } from "@/components/ui/gradient-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,9 +20,10 @@ type PetProfile = {
 type PetProfileCardProps = {
   pet: PetProfile;
   onUpdate?: () => void;
+  index?: number;
 };
 
-export const PetProfileCard = ({ pet, onUpdate }: PetProfileCardProps) => {
+export const PetProfileCard = ({ pet, onUpdate, index = 0 }: PetProfileCardProps) => {
   const navigate = useNavigate();
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const petTypeColors = {
@@ -38,6 +40,15 @@ export const PetProfileCard = ({ pet, onUpdate }: PetProfileCardProps) => {
     : null;
 
   return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ 
+        delay: index * 0.1, 
+        duration: 0.4,
+        ease: "easeOut"
+      }}
+    >
     <GradientCard gradient className="flex items-start gap-4 p-4">
       {pet.photo_url ? (
         <img
@@ -100,6 +111,7 @@ export const PetProfileCard = ({ pet, onUpdate }: PetProfileCardProps) => {
         onOpenChange={setEditDialogOpen}
         onSuccess={() => onUpdate?.()}
       />
-    </GradientCard>
+      </GradientCard>
+    </motion.div>
   );
 };

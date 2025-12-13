@@ -1,5 +1,6 @@
 import { useEffect, useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
@@ -15,6 +16,19 @@ import { BottomNav } from "@/components/BottomNav";
 import { PullToRefresh } from "@/components/PullToRefresh";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { Store, Users, TrendingUp } from "lucide-react";
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: {
+      delay: i * 0.1,
+      duration: 0.4,
+      ease: "easeOut" as const,
+    },
+  }),
+};
 type Profile = {
   user_type: "pet_owner" | "merchant";
   full_name: string;
@@ -185,17 +199,24 @@ const Dashboard = () => {
 
         {profile.user_type === "pet_owner" ? (
           <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {/* Wallet Balance shows USD value of PawBucks (1 PawBuck = $0.001) */}
-            <WalletStats 
-              balance={(pawbucksWallet?.balance || 0) * 0.001} 
-              rewardsPoints={pawbucksWallet?.balance || 0}
-            />
+            <motion.div custom={0} variants={cardVariants} initial="hidden" animate="visible">
+              <WalletStats 
+                balance={(pawbucksWallet?.balance || 0) * 0.001} 
+                rewardsPoints={pawbucksWallet?.balance || 0}
+              />
+            </motion.div>
             
-            <PetProfilesSection pets={pets} onUpdate={handlePetsUpdate} />
+            <motion.div custom={1} variants={cardVariants} initial="hidden" animate="visible">
+              <PetProfilesSection pets={pets} onUpdate={handlePetsUpdate} />
+            </motion.div>
             
-            <ReferralCard />
+            <motion.div custom={2} variants={cardVariants} initial="hidden" animate="visible">
+              <ReferralCard />
+            </motion.div>
             
-            <DiscoverServicesCard />
+            <motion.div custom={3} variants={cardVariants} initial="hidden" animate="visible">
+              <DiscoverServicesCard />
+            </motion.div>
           </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-3">
