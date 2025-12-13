@@ -12,8 +12,9 @@ import { WalletStats } from "@/components/dashboard/WalletStats";
 import { PetProfilesSection } from "@/components/dashboard/PetProfilesSection";
 import { DiscoverServicesCard } from "@/components/dashboard/DiscoverServicesCard";
 import { BottomNav } from "@/components/BottomNav";
+import { PullToRefresh } from "@/components/PullToRefresh";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { Store, Users, TrendingUp } from "lucide-react";
-
 type Profile = {
   user_type: "pet_owner" | "merchant";
   full_name: string;
@@ -142,6 +143,11 @@ const Dashboard = () => {
     fetchDashboardData();
   }, [fetchDashboardData]);
 
+  // Pull to refresh
+  const { containerRef, isRefreshing, pullDistance, progress } = usePullToRefresh({
+    onRefresh: fetchDashboardData,
+  });
+
   if (authLoading || dataLoading || !profile) {
     return (
       <div className="min-h-screen bg-background">
@@ -157,9 +163,16 @@ const Dashboard = () => {
     <div className="min-h-[100dvh] bg-background flex flex-col">
       <Header isAuthenticated={true} onLogout={handleSignOut} userId={user?.id} />
 
-      <main className="flex-1 container mx-auto px-4 pt-4 pb-24 md:pb-8 max-w-7xl">
-        {/* Ad Placement for Free Users */}
-        <div className="mb-4 sm:mb-6">
+      <PullToRefresh
+        ref={containerRef}
+        isRefreshing={isRefreshing}
+        pullDistance={pullDistance}
+        progress={progress}
+        className="flex-1 overflow-auto"
+      >
+        <main className="container mx-auto px-4 pt-4 pb-24 md:pb-8 max-w-7xl">
+          {/* Ad Placement for Free Users */}
+          <div className="mb-4 sm:mb-6">
           <AdPlacement />
         </div>
 
@@ -233,13 +246,14 @@ const Dashboard = () => {
           </div>
         )}
 
-        {/* Bottom Ad Placement */}
-        {profile.user_type === "pet_owner" && (
-          <div className="mt-6 sm:mt-8">
-            <AdPlacement position="bottom" />
-          </div>
-        )}
-      </main>
+          {/* Bottom Ad Placement */}
+          {profile.user_type === "pet_owner" && (
+            <div className="mt-6 sm:mt-8">
+              <AdPlacement position="bottom" />
+            </div>
+          )}
+        </main>
+      </PullToRefresh>
       
       <BottomNav />
     </div>

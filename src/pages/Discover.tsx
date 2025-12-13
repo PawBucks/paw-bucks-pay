@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useOptimizedQuery } from "@/hooks/useOptimizedQuery";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { supabase } from "@/integrations/supabase/client";
 import { PaymentDialogWithPawBucks } from "@/components/PaymentDialogWithPawBucks";
 import { BottomNav } from "@/components/BottomNav";
@@ -10,6 +11,7 @@ import { PageLoader } from "@/components/PageLoader";
 import { Header } from "@/components/Header";
 import { AdPlacement } from "@/components/AdPlacement";
 import { PawBucksInfoTooltip } from "@/components/PawBucksInfoTooltip";
+import { PullToRefresh } from "@/components/PullToRefresh";
 import { Search, Store, Scissors, Home, Stethoscope, Footprints, Bone, Coins, CreditCard, ChevronRight, BookOpen, Star, Sparkles, MapPin, SlidersHorizontal, X, List, Map, Navigation, ArrowUpDown, LayoutGrid, BadgeCheck } from "lucide-react";
 import { MerchantMap } from "@/components/MerchantMap";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem } from "@/components/ui/dropdown-menu";
@@ -23,6 +25,7 @@ import { ROUTES, QUERY_STALE_TIMES } from "@/lib/constants";
 import { SEO } from "@/components/SEO";
 import { usePersistentState } from "@/hooks/usePersistentState";
 import { useSponsoredMerchants, useVerifiedProMerchants, SERVICE_NAMES } from "@/hooks/useMerchantServices";
+import { useQueryClient } from "@tanstack/react-query";
 
 type MerchantWithRating = {
   id: string;
@@ -284,6 +287,7 @@ const distanceFilters = [
 const Discover = () => {
   const { user, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = usePersistentState<string>('discover-search', "");
   const debouncedSearch = useDebounce(searchTerm, 300);
   const [selectedCategory, setSelectedCategory] = usePersistentState<string>('discover-category', "all");
@@ -522,6 +526,15 @@ const Discover = () => {
     navigate(ROUTES.AUTH);
   };
 
+  // Pull to refresh - invalidate query cache to refetch merchants
+  const handleRefresh = useCallback(async () => {
+    await queryClient.invalidateQueries({ queryKey: ['merchants-with-ratings'] });
+  }, [queryClient]);
+
+  const { containerRef, isRefreshing, pullDistance, progress } = usePullToRefresh({
+    onRefresh: handleRefresh,
+  });
+
   if (authLoading || loading) {
     return <PageLoader message="Finding amazing pet merchants near you..." />;
   }
@@ -536,7 +549,13 @@ const Discover = () => {
         keywords={["pet merchants", "pet stores", "pet services", "PawBucks", "rewards"]}
       />
       <Header isAuthenticated={!!user} onLogout={user ? handleLogout : undefined} />
-      <div className="min-h-[100dvh] bg-gradient-to-b from-background to-muted/20 flex flex-col">
+      <PullToRefresh
+        ref={containerRef}
+        isRefreshing={isRefreshing}
+        pullDistance={pullDistance}
+        progress={progress}
+        className="min-h-[100dvh] bg-gradient-to-b from-background to-muted/20 flex flex-col overflow-auto"
+      >
         <div className="container mx-auto px-4 pt-3 max-w-4xl">
           {/* Top Ad Placement */}
           <div className="mb-4">
@@ -914,7 +933,7 @@ const Discover = () => {
         )}
 
         {user && <BottomNav />}
-      </div>
+      </PullToRefresh>
     </>
   );
 };
