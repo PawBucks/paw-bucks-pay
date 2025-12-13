@@ -388,24 +388,23 @@ const MerchantDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b bg-card/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm safe-area-inset-top">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
+      <header className="border-b border-border/50 bg-card/95 backdrop-blur-xl sticky top-0 z-50 shadow-[var(--shadow-soft)]" style={{ paddingTop: 'max(0.5rem, env(safe-area-inset-top))' }}>
+        <div className="container mx-auto px-4 py-2 sm:py-3 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
               <PawPrint className="w-6 h-6 text-primary-foreground" />
             </div>
-            <div>
-              <h1 className="text-xl font-bold">{merchant.business_name}</h1>
+            <div className="min-w-0">
+              <h1 className="text-lg sm:text-xl font-bold truncate">{merchant.business_name}</h1>
               <p className="text-xs text-muted-foreground">Merchant Dashboard</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
             {user && <NotificationsDropdown userId={user.id} />}
-            <Button variant="ghost" size="sm" onClick={() => setEditDialogOpen(true)}>
-              <Edit className="w-4 h-4 mr-2" />
-              Edit Profile
+            <Button variant="ghost" size="icon" onClick={() => setEditDialogOpen(true)} title="Edit Profile" className="min-h-[44px] min-w-[44px]">
+              <Edit className="w-4 h-4" />
             </Button>
-            <Button variant="outline" size="icon" onClick={handleSignOut} title="Logout">
+            <Button variant="outline" size="icon" onClick={handleSignOut} title="Logout" className="min-h-[44px] min-w-[44px]">
               <LogOut className="w-4 h-4" />
             </Button>
           </div>
