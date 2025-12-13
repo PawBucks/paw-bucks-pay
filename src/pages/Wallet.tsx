@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useOptimizedQuery } from "@/hooks/useOptimizedQuery";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { DataLoader } from "@/lib/dataLoader";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
@@ -10,9 +11,11 @@ import { GradientCard } from "@/components/ui/gradient-card";
 import { BottomNav } from "@/components/BottomNav";
 import { AdPlacement } from "@/components/AdPlacement";
 import { DashboardSkeleton } from "@/components/LoadingSkeleton";
+import { PullToRefresh } from "@/components/PullToRefresh";
 import { Wallet as WalletIcon, TrendingUp, Gift, ArrowUpRight, ArrowDownRight, Coins, Sparkles } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 type WalletData = {
   balance: number;
@@ -42,6 +45,7 @@ type PawBucksActivity = {
 const Wallet = () => {
   const { user, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   // Optimized data loading with caching
   const { data: wallet, isLoading: walletLoading } = useOptimizedQuery<WalletData | null>(
@@ -102,6 +106,18 @@ const Wallet = () => {
     navigate("/auth");
   }, [signOut, navigate]);
 
+  // Pull to refresh
+  const handleRefresh = useCallback(async () => {
+    await queryClient.invalidateQueries({ queryKey: ['wallet'] });
+    await queryClient.invalidateQueries({ queryKey: ['pawbucks_wallet'] });
+    await queryClient.invalidateQueries({ queryKey: ['transactions'] });
+    await queryClient.invalidateQueries({ queryKey: ['pawbucks_activity'] });
+  }, [queryClient]);
+
+  const { containerRef, isRefreshing, pullDistance, progress } = usePullToRefresh({
+    onRefresh: handleRefresh,
+  });
+
   if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-[var(--gradient-hero)] pb-24">
@@ -117,8 +133,15 @@ const Wallet = () => {
     <div className="min-h-[100dvh] bg-[var(--gradient-hero)] flex flex-col">
       <Header isAuthenticated={true} onLogout={handleSignOut} />
 
-      <main className="flex-1 container mx-auto px-4 pt-4 pb-24 md:pb-8 max-w-7xl overflow-y-auto">
-        {/* Ad Placement for Free Users */}
+      <PullToRefresh
+        ref={containerRef}
+        isRefreshing={isRefreshing}
+        pullDistance={pullDistance}
+        progress={progress}
+        className="flex-1 overflow-auto"
+      >
+        <main className="container mx-auto px-4 pt-4 pb-24 md:pb-8 max-w-7xl">
+          {/* Ad Placement for Free Users */}
         <div className="mb-4 sm:mb-6">
           <AdPlacement />
         </div>
@@ -273,6 +296,7 @@ const Wallet = () => {
           <AdPlacement position="bottom" />
         </div>
       </main>
+      </PullToRefresh>
 
       <BottomNav />
     </div>
