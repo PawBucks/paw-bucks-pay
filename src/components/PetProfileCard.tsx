@@ -38,55 +38,61 @@ export const PetProfileCard = ({ pet, onUpdate }: PetProfileCardProps) => {
     : null;
 
   return (
-    <GradientCard gradient className="flex items-center gap-4">
+    <GradientCard gradient className="flex items-start gap-4 p-4">
       {pet.photo_url ? (
         <img
           src={pet.photo_url}
           alt={pet.name}
           width={80}
           height={80}
-          className="w-20 h-20 rounded-full object-cover border-2 border-primary/20"
+          className="w-20 h-20 rounded-full object-cover border-2 border-primary/20 flex-shrink-0"
         />
       ) : (
-        <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center">
+        <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
           <PawPrint className="w-10 h-10 text-muted-foreground" />
         </div>
       )}
-      <div className="flex-1">
-        <h3 className="text-xl font-bold mb-1">{pet.name}</h3>
-        <div className="flex flex-wrap gap-2 items-center">
-          <Badge
-            variant="outline"
-            className={petTypeColors[pet.type]}
-          >
-            {pet.type.charAt(0).toUpperCase() + pet.type.slice(1)}
-          </Badge>
-          {pet.breed && (
-            <span className="text-sm text-muted-foreground">{pet.breed}</span>
-          )}
-          {age !== null && (
-            <span className="text-sm text-muted-foreground flex items-center gap-1">
-              <Calendar className="w-3 h-3" />
-              {age} {age === 1 ? "year" : "years"} old
-            </span>
-          )}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0 flex-1">
+            <h3 className="text-xl font-bold mb-2 truncate">{pet.name}</h3>
+            <div className="flex flex-col gap-1.5">
+              <div className="flex items-center gap-2">
+                <Badge
+                  variant="outline"
+                  className={`${petTypeColors[pet.type]} flex-shrink-0`}
+                >
+                  {pet.type.charAt(0).toUpperCase() + pet.type.slice(1)}
+                </Badge>
+                {pet.breed && (
+                  <span className="text-sm text-muted-foreground truncate">{pet.breed}</span>
+                )}
+              </div>
+              {age !== null && (
+                <span className="text-sm text-muted-foreground flex items-center gap-1">
+                  <Calendar className="w-3 h-3 flex-shrink-0" />
+                  {age} {age === 1 ? "year" : "years"} old
+                </span>
+              )}
+            </div>
+          </div>
+          <div className="flex gap-2 flex-shrink-0">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setEditDialogOpen(true)}
+            >
+              <Pencil className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate(`/pet-health/${pet.id}`)}
+            >
+              <FileHeart className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
-      </div>
-      <div className="flex gap-2 flex-shrink-0">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setEditDialogOpen(true)}
-        >
-          <Pencil className="w-4 h-4" />
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => navigate(`/pet-health/${pet.id}`)}
-        >
-          <FileHeart className="w-4 h-4" />
-        </Button>
       </div>
       <EditPetProfileDialog
         pet={pet}

@@ -192,26 +192,29 @@ const MerchantProducts = () => {
       />
 
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate("/merchant-dashboard")}
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">My Products</h1>
-            <p className="text-muted-foreground mt-1">
-              Manage your store products and pricing
-            </p>
+      <div className="flex items-start gap-3 mb-8">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => navigate("/merchant-dashboard")}
+          className="flex-shrink-0 mt-1"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">My Products</h1>
+              <p className="text-muted-foreground text-sm sm:text-base mt-1">
+                Manage your store products and pricing
+              </p>
+            </div>
+            <Button onClick={() => setCreateDialogOpen(true)} className="flex-shrink-0">
+              <Plus className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Add Product</span>
+            </Button>
           </div>
         </div>
-        <Button onClick={() => setCreateDialogOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Product
-        </Button>
       </div>
 
       {/* Storefront Link Card */}

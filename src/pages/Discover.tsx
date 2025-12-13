@@ -172,24 +172,24 @@ const MerchantCard = ({
 
             {/* Content */}
             <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between gap-2 mb-1">
-                <div className="flex items-center gap-2 min-w-0">
-                  <h3 className="font-semibold text-lg line-clamp-1 group-hover:text-primary transition-colors">
-                    {merchant.business_name}
-                  </h3>
+              <div className="mb-1">
+                <div className="flex items-center gap-2 flex-wrap mb-1">
                   {isVerifiedPro && (
-                    <Badge className="flex-shrink-0 gap-1 bg-blue-500/10 text-blue-600 border-blue-500/20 text-xs">
+                    <Badge className="gap-1 bg-blue-500/10 text-blue-600 border-blue-500/20 text-xs">
                       <BadgeCheck className="w-3 h-3" />
-                      Verified
+                      Verified Pro
+                    </Badge>
+                  )}
+                  {isSponsored && (
+                    <Badge variant="secondary" className="gap-1 bg-primary/10 text-primary text-xs">
+                      <Sparkles className="w-3 h-3" />
+                      Sponsored
                     </Badge>
                   )}
                 </div>
-                {isSponsored && (
-                  <Badge variant="secondary" className="flex-shrink-0 gap-1 bg-primary/10 text-primary text-xs">
-                    <Sparkles className="w-3 h-3" />
-                    Sponsored
-                  </Badge>
-                )}
+                <h3 className="font-semibold text-lg line-clamp-1 group-hover:text-primary transition-colors">
+                  {merchant.business_name}
+                </h3>
               </div>
 
               {/* Rating */}
