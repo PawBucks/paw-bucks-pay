@@ -144,7 +144,7 @@ const Dashboard = () => {
   if (authLoading || dataLoading || !profile) {
     return (
       <div className="min-h-screen bg-background">
-        <Header isAuthenticated={true} onLogout={handleSignOut} />
+        <Header isAuthenticated={true} onLogout={handleSignOut} userId={user?.id} />
         <main className="container mx-auto px-4 py-8">
           <DashboardSkeleton />
         </main>
@@ -154,7 +154,7 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header isAuthenticated={true} onLogout={handleSignOut} />
+      <Header isAuthenticated={true} onLogout={handleSignOut} userId={user?.id} />
 
       <main className="container mx-auto px-4 pt-6 pb-24 md:pb-12 max-w-7xl">
         {/* Ad Placement for Free Users */}
