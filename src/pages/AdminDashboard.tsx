@@ -110,6 +110,9 @@ const AdminDashboard = () => {
   const [totalCashback, setTotalCashback] = useState(0);
   
   const [notificationDialogOpen, setNotificationDialogOpen] = useState(false);
+  const [notificationRecipient, setNotificationRecipient] = useState<
+    "all" | "merchants" | "merchant_specific" | "pet_owners"
+  >("all");
   const [editCashbackDialogOpen, setEditCashbackDialogOpen] = useState(false);
   const [selectedMerchant, setSelectedMerchant] = useState<Merchant | null>(null);
   const [sendingNotification, setSendingNotification] = useState(false);
@@ -274,28 +277,46 @@ const AdminDashboard = () => {
       const formData = new FormData(e.currentTarget);
       const title = formData.get("title") as string;
       const message = formData.get("message") as string;
-      const recipient = formData.get("recipient") as string;
+      const recipient = (formData.get("recipient") as string) || "all";
+      const specificMerchantId = (formData.get("specificMerchantId") as string) || "";
 
-      // Get all user IDs or specific user based on recipient
       let userIds: string[] = [];
       if (recipient === "all") {
-        userIds = profiles.map(p => p.id);
+        userIds = profiles.map((p) => p.id);
       } else if (recipient === "merchants") {
-        userIds = merchants.map(m => m.user_id);
+        userIds = merchants.map((m) => m.user_id);
+      } else if (recipient === "merchant_specific") {
+        if (!specificMerchantId) {
+          toast.error("Please select a merchant");
+          setSendingNotification(false);
+          return;
+        }
+
+        const merchant = merchants.find((m) => m.id === specificMerchantId);
+        if (!merchant) {
+          toast.error("Selected merchant not found");
+          setSendingNotification(false);
+          return;
+        }
+
+        userIds = [merchant.user_id];
       } else if (recipient === "pet_owners") {
-        userIds = profiles.filter(p => p.user_type === "pet_owner").map(p => p.id);
+        userIds = profiles.filter((p) => p.user_type === "pet_owner").map((p) => p.id);
       }
 
-      // Insert notifications for each user
-      const notifications = userIds.map(userId => ({
+      if (userIds.length === 0) {
+        toast.error("No recipients found for this selection");
+        setSendingNotification(false);
+        return;
+      }
+
+      const notifications = userIds.map((userId) => ({
         user_id: userId,
         title,
         message,
       }));
 
-      const { error } = await supabase
-        .from("notifications")
-        .insert(notifications);
+      const { error } = await supabase.from("notifications").insert(notifications);
 
       if (error) throw error;
 
@@ -714,12 +735,37 @@ const AdminDashboard = () => {
                 name="recipient"
                 className="w-full h-10 px-3 rounded-md border bg-background"
                 required
+                value={notificationRecipient}
+                onChange={(e) =>
+                  setNotificationRecipient(
+                    e.target.value as "all" | "merchants" | "merchant_specific" | "pet_owners"
+                  )
+                }
               >
                 <option value="all">All Users</option>
                 <option value="merchants">All Merchants</option>
+                <option value="merchant_specific">Specific Merchant</option>
                 <option value="pet_owners">All Pet Owners</option>
               </select>
             </div>
+            {notificationRecipient === "merchant_specific" && (
+              <div className="space-y-2">
+                <Label htmlFor="specificMerchantId">Merchant</Label>
+                <select
+                  id="specificMerchantId"
+                  name="specificMerchantId"
+                  className="w-full h-10 px-3 rounded-md border bg-background"
+                  required
+                >
+                  <option value="">Select a merchant</option>
+                  {merchants.map((merchant) => (
+                    <option key={merchant.id} value={merchant.id}>
+                      {merchant.business_name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="title">Title</Label>
               <Input

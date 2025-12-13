@@ -67,6 +67,26 @@ export const NotificationsDropdown = ({ userId }: { userId: string }) => {
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
 
   const enableNotifications = useCallback(async () => {
+    // Browser notifications only work when the app runs in a top-level, secure context
+    if (typeof window !== "undefined") {
+      if (window.self !== window.top) {
+        toast.error("Notifications unavailable in preview", {
+          description:
+            "Open the PawBucks app directly in its own tab or installed PWA to enable browser notifications.",
+          duration: 8000,
+        });
+        return;
+      }
+
+      if (!("Notification" in window)) {
+        toast.error("Browser does not support notifications", {
+          description: "Use a modern browser over HTTPS to enable notifications.",
+          duration: 8000,
+        });
+        return;
+      }
+    }
+
     const result = await requestNotificationPermission();
     setNotificationsEnabled(result.granted);
     
@@ -74,7 +94,8 @@ export const NotificationsDropdown = ({ userId }: { userId: string }) => {
       toast.success("Browser notifications enabled!");
     } else if (result.alreadyDenied) {
       toast.error("Notifications blocked by browser", {
-        description: "To enable notifications, click the lock/info icon in your browser's address bar and allow notifications for this site, then refresh the page.",
+        description:
+          "To enable notifications, click the lock/info icon in your browser's address bar and allow notifications for this site, then refresh the page.",
         duration: 8000,
       });
     } else {
