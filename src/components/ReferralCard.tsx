@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, memo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { GradientCard } from "@/components/ui/gradient-card";
 import { Button } from "@/components/ui/button";
@@ -16,55 +16,51 @@ type Referral = {
   };
 };
 
-export const ReferralCard = () => {
+const ReferralCardComponent = () => {
   const [referralCode, setReferralCode] = useState<string>("");
   const [referrals, setReferrals] = useState<Referral[]>([]);
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadReferralData();
-  }, []);
-
-  const loadReferralData = async () => {
+  const loadReferralData = useCallback(async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Get user's referral code
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("referral_code")
-        .eq("id", user.id)
-        .single();
+      // Get user's referral code and referrals in parallel
+      const [profileResult, referralsResult] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("referral_code")
+          .eq("id", user.id)
+          .single(),
+        supabase
+          .from("referrals")
+          .select("id, referee_id, referrer_bonus_awarded, created_at")
+          .eq("referrer_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(10) // Limit for performance
+      ]);
 
-      if (profile) {
-        setReferralCode(profile.referral_code || "");
+      if (profileResult.data) {
+        setReferralCode(profileResult.data.referral_code || "");
       }
 
-      // Get referrals made by this user
-      const { data: referralsData } = await supabase
-        .from("referrals")
-        .select("id, referee_id, referrer_bonus_awarded, created_at")
-        .eq("referrer_id", user.id)
-        .order("created_at", { ascending: false });
+      if (referralsResult.data && referralsResult.data.length > 0) {
+        // Batch fetch profile names
+        const refereeIds = referralsResult.data.map(r => r.referee_id);
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, full_name")
+          .in("id", refereeIds);
 
-      if (referralsData) {
-        // Fetch profile names separately
-        const enrichedReferrals = await Promise.all(
-          referralsData.map(async (ref) => {
-            const { data: profile } = await supabase
-              .from("profiles")
-              .select("full_name")
-              .eq("id", ref.referee_id)
-              .single();
-            
-            return {
-              ...ref,
-              profiles: profile,
-            };
-          })
-        );
+        const profileMap = new Map(profiles?.map(p => [p.id, p.full_name]) || []);
+        
+        const enrichedReferrals = referralsResult.data.map(ref => ({
+          ...ref,
+          profiles: { full_name: profileMap.get(ref.referee_id) || "User" },
+        }));
+        
         setReferrals(enrichedReferrals);
       }
     } catch (error) {
@@ -72,9 +68,13 @@ export const ReferralCard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const handleCopyCode = async () => {
+  useEffect(() => {
+    loadReferralData();
+  }, [loadReferralData]);
+
+  const handleCopyCode = useCallback(async () => {
     if (!referralCode) return;
     
     try {
@@ -85,11 +85,11 @@ export const ReferralCard = () => {
     } catch (error) {
       toast.error("Failed to copy code");
     }
-  };
+  }, [referralCode]);
 
   const shareUrl = `${window.location.origin}/auth?ref=${referralCode}`;
 
-  const handleShare = async () => {
+  const handleShare = useCallback(async () => {
     if (navigator.share) {
       try {
         await navigator.share({
@@ -103,7 +103,7 @@ export const ReferralCard = () => {
     } else {
       handleCopyCode();
     }
-  };
+  }, [referralCode, shareUrl, handleCopyCode]);
 
   if (loading) {
     return null;
@@ -177,3 +177,5 @@ export const ReferralCard = () => {
     </GradientCard>
   );
 };
+
+export const ReferralCard = memo(ReferralCardComponent);

@@ -3,6 +3,26 @@ import { supabase } from '@/integrations/supabase/client';
 // Centralized data loading utilities with error handling and retries
 
 export class DataLoader {
+  private static cache = new Map<string, { data: any; timestamp: number }>();
+  private static CACHE_TTL = 1000 * 60 * 2; // 2 minutes cache TTL
+
+  private static getCached<T>(key: string): T | null {
+    const cached = this.cache.get(key);
+    if (cached && Date.now() - cached.timestamp < this.CACHE_TTL) {
+      return cached.data as T;
+    }
+    this.cache.delete(key);
+    return null;
+  }
+
+  private static setCache(key: string, data: any): void {
+    this.cache.set(key, { data, timestamp: Date.now() });
+  }
+
+  static clearCache(): void {
+    this.cache.clear();
+  }
+
   private static async retryOperation<T>(
     operation: () => Promise<T>,
     maxRetries: number = 2,

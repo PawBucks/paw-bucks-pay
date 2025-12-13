@@ -1,10 +1,9 @@
-import { useState } from "react";
+import { useState, useCallback, useMemo, memo } from "react";
 import { motion } from "framer-motion";
 import { GradientCard } from "@/components/ui/gradient-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, PawPrint, FileHeart, Pencil } from "lucide-react";
-import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import { EditPetProfileDialog } from "./EditPetProfileDialog";
 
@@ -23,21 +22,36 @@ type PetProfileCardProps = {
   index?: number;
 };
 
-export const PetProfileCard = ({ pet, onUpdate, index = 0 }: PetProfileCardProps) => {
+const petTypeColors = {
+  dog: "bg-blue-500/10 text-blue-700 border-blue-500/20",
+  cat: "bg-purple-500/10 text-purple-700 border-purple-500/20",
+  other: "bg-gray-500/10 text-gray-700 border-gray-500/20",
+} as const;
+
+const PetProfileCardComponent = ({ pet, onUpdate, index = 0 }: PetProfileCardProps) => {
   const navigate = useNavigate();
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const petTypeColors = {
-    dog: "bg-blue-500/10 text-blue-700 border-blue-500/20",
-    cat: "bg-purple-500/10 text-purple-700 border-purple-500/20",
-    other: "bg-gray-500/10 text-gray-700 border-gray-500/20",
-  };
 
-  const age = pet.birthday
-    ? Math.floor(
-        (new Date().getTime() - new Date(pet.birthday).getTime()) /
-          (365.25 * 24 * 60 * 60 * 1000)
-      )
-    : null;
+  // Memoize age calculation
+  const age = useMemo(() => {
+    if (!pet.birthday) return null;
+    return Math.floor(
+      (new Date().getTime() - new Date(pet.birthday).getTime()) /
+        (365.25 * 24 * 60 * 60 * 1000)
+    );
+  }, [pet.birthday]);
+
+  // Memoize pet type label
+  const petTypeLabel = useMemo(() => 
+    pet.type.charAt(0).toUpperCase() + pet.type.slice(1), 
+    [pet.type]
+  );
+
+  // Memoize handlers
+  const handleEditClick = useCallback(() => setEditDialogOpen(true), []);
+  const handleHealthClick = useCallback(() => navigate(`/pet-health/${pet.id}`), [navigate, pet.id]);
+  const handleEditSuccess = useCallback(() => onUpdate?.(), [onUpdate]);
+  const handleDialogChange = useCallback((open: boolean) => setEditDialogOpen(open), []);
 
   return (
     <motion.div
@@ -57,6 +71,7 @@ export const PetProfileCard = ({ pet, onUpdate, index = 0 }: PetProfileCardProps
           width={80}
           height={80}
           className="w-20 h-20 rounded-full object-cover border-2 border-primary/20 flex-shrink-0"
+          loading="lazy"
         />
       ) : (
         <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
@@ -73,7 +88,7 @@ export const PetProfileCard = ({ pet, onUpdate, index = 0 }: PetProfileCardProps
                   variant="outline"
                   className={`${petTypeColors[pet.type]} flex-shrink-0`}
                 >
-                  {pet.type.charAt(0).toUpperCase() + pet.type.slice(1)}
+                  {petTypeLabel}
                 </Badge>
                 {pet.breed && (
                   <span className="text-sm text-muted-foreground truncate">{pet.breed}</span>
@@ -91,14 +106,14 @@ export const PetProfileCard = ({ pet, onUpdate, index = 0 }: PetProfileCardProps
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setEditDialogOpen(true)}
+              onClick={handleEditClick}
             >
               <Pencil className="w-4 h-4" />
             </Button>
             <Button
               variant="outline"
               size="sm"
-              onClick={() => navigate(`/pet-health/${pet.id}`)}
+              onClick={handleHealthClick}
             >
               <FileHeart className="w-4 h-4" />
             </Button>
@@ -108,10 +123,12 @@ export const PetProfileCard = ({ pet, onUpdate, index = 0 }: PetProfileCardProps
       <EditPetProfileDialog
         pet={pet}
         open={editDialogOpen}
-        onOpenChange={setEditDialogOpen}
-        onSuccess={() => onUpdate?.()}
+        onOpenChange={handleDialogChange}
+        onSuccess={handleEditSuccess}
       />
       </GradientCard>
     </motion.div>
   );
 };
+
+export const PetProfileCard = memo(PetProfileCardComponent);
