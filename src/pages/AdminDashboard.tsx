@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { AddTransactionTool } from "@/components/admin/AddTransactionTool";
+import { SecurityMonitoringTab } from "@/components/admin/SecurityMonitoringTab";
 import { Button } from "@/components/ui/button";
 import { GradientCard } from "@/components/ui/gradient-card";
 import { Input } from "@/components/ui/input";
@@ -39,6 +40,7 @@ import {
   Trash2,
   UserPlus,
   RefreshCw,
+  ShieldAlert,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -132,6 +134,9 @@ const AdminDashboard = () => {
   const [refundDialogOpen, setRefundDialogOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [issuingRefund, setIssuingRefund] = useState(false);
+  
+  // Security monitoring dialog
+  const [securityDialogOpen, setSecurityDialogOpen] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -437,6 +442,10 @@ const AdminDashboard = () => {
             </div>
           </div>
           <div className="flex gap-2">
+            <Button variant="ghost" size="sm" onClick={() => setSecurityDialogOpen(true)}>
+              <ShieldAlert className="w-4 h-4 mr-2" />
+              Security
+            </Button>
             <Button variant="ghost" size="sm" onClick={() => setNotificationDialogOpen(true)}>
               <Bell className="w-4 h-4 mr-2" />
               Notify
@@ -1097,6 +1106,22 @@ const AdminDashboard = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Security Monitoring Dialog */}
+      <Dialog open={securityDialogOpen} onOpenChange={setSecurityDialogOpen}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ShieldAlert className="w-5 h-5" />
+              Security Monitoring
+            </DialogTitle>
+            <DialogDescription>
+              Monitor authentication events, failed login attempts, and security alerts
+            </DialogDescription>
+          </DialogHeader>
+          <SecurityMonitoringTab />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

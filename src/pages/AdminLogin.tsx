@@ -74,7 +74,19 @@ const AdminLogin = () => {
         password,
       });
 
-      if (error) throw error;
+      if (error) {
+        // Log failed login attempt
+        await supabase.functions.invoke("log-auth-event", {
+          body: {
+            event_type: "login",
+            email,
+            success: false,
+            failure_reason: error.message,
+            metadata: { is_admin_login: true },
+          },
+        });
+        throw error;
+      }
 
       if (data.user) {
         // Check if user has admin role
@@ -91,6 +103,17 @@ const AdminLogin = () => {
         }
 
         if (!isAdmin) {
+          // Log unauthorized admin access attempt
+          await supabase.functions.invoke("log-auth-event", {
+            body: {
+              event_type: "login",
+              email,
+              user_id: data.user.id,
+              success: false,
+              failure_reason: "Access denied - not an admin",
+              metadata: { is_admin_login: true, unauthorized_access: true },
+            },
+          });
           await supabase.auth.signOut();
           toast.error("Access denied - Admin privileges required");
           return;
@@ -111,6 +134,17 @@ const AdminLogin = () => {
             return;
           }
         }
+
+        // Log successful admin login
+        await supabase.functions.invoke("log-auth-event", {
+          body: {
+            event_type: "login",
+            email,
+            user_id: data.user.id,
+            success: true,
+            metadata: { is_admin_login: true },
+          },
+        });
 
         toast.success("Admin login successful!");
         navigate("/admin/dashboard");
