@@ -48,7 +48,7 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--gradient-hero)] overflow-hidden">
+    <div className="min-h-[100dvh] bg-[var(--gradient-hero)] overflow-x-hidden">
       <SEO 
         title="PawBucks - Digital Pet Payment Platform"
         description="Connect with trusted pet stores, groomers, and trainers. Earn up to 30x points in PawBucks with every transaction and manage all your pet expenses in one secure digital wallet."
@@ -61,7 +61,7 @@ const Index = () => {
 
       {/* Hero Section */}
       <main role="main">
-        <section className="relative container mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 lg:py-32" aria-labelledby="hero-heading">
+        <section className="relative container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-24" aria-labelledby="hero-heading">
           {/* Decorative Elements */}
           <div className="absolute top-20 right-10 w-72 h-72 bg-accent/20 rounded-full blur-3xl animate-pulse" aria-hidden="true"></div>
           <div className="absolute bottom-20 left-10 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse delay-700" aria-hidden="true"></div>
@@ -74,7 +74,7 @@ const Index = () => {
             
             <h1 
               id="hero-heading"
-              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-[1.1] tracking-tight text-foreground"
+              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold leading-[1.1] tracking-tight text-foreground"
             >
               The Payment Platform
               <br />
@@ -83,7 +83,7 @@ const Index = () => {
               </span>
             </h1>
             
-            <p className="text-lg sm:text-xl lg:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+            <p className="text-base sm:text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
               Connect with trusted pet stores, groomers, and trainers. Earn up to{" "}
               <TooltipProvider>
                 <Tooltip>

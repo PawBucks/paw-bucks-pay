@@ -536,21 +536,21 @@ const Discover = () => {
         keywords={["pet merchants", "pet stores", "pet services", "PawBucks", "rewards"]}
       />
       <Header isAuthenticated={!!user} onLogout={user ? handleLogout : undefined} />
-      <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
-        <div className="container mx-auto px-4 pt-4 max-w-4xl">
+      <div className="min-h-[100dvh] bg-gradient-to-b from-background to-muted/20 flex flex-col">
+        <div className="container mx-auto px-4 pt-3 max-w-4xl">
           {/* Top Ad Placement */}
-          <div className="mb-6">
+          <div className="mb-4">
             <AdPlacement position="top" />
           </div>
         </div>
 
         {/* Hero Section */}
         <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-background border-b">
-          <div className="container mx-auto px-4 py-8 max-w-4xl">
-            <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+          <div className="container mx-auto px-4 py-4 sm:py-6 max-w-4xl">
+            <h1 className="text-2xl sm:text-3xl font-bold mb-1 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
               Discover Pet Merchants
             </h1>
-            <p className="text-muted-foreground mb-6">
+            <p className="text-sm text-muted-foreground mb-4">
               Find trusted pet services and earn rewards on every purchase
             </p>
 

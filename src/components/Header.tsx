@@ -33,8 +33,14 @@ const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout, userId 
   ];
 
   return (
-    <header className="border-b border-border/50 bg-card/95 backdrop-blur-xl sticky top-0 z-50 shadow-[var(--shadow-soft)] safe-area-inset-top" role="banner">
-      <nav className="container mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex items-center justify-between gap-4" aria-label="Main navigation">
+    <header 
+      className="border-b border-border/50 bg-card/95 backdrop-blur-xl sticky top-0 z-50 shadow-[var(--shadow-soft)]" 
+      role="banner"
+      style={{
+        paddingTop: 'max(0.5rem, env(safe-area-inset-top))',
+      }}
+    >
+      <nav className="container mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-3 flex items-center justify-between gap-3" aria-label="Main navigation">
         <div 
           className="flex items-center gap-3 cursor-pointer hover:opacity-90 transition-all duration-200 active:scale-95 touch-manipulation group"
           onClick={() => navigate("/")}
@@ -46,9 +52,9 @@ const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout, userId 
           <img 
             src={logo} 
             alt="PawBucks Logo - Return to homepage" 
-            className="h-14 sm:h-16 md:h-20 w-auto object-contain transition-transform duration-200 group-hover:scale-105"
-            width={80}
-            height={80}
+            className="h-10 sm:h-12 md:h-14 w-auto object-contain transition-transform duration-200 group-hover:scale-105"
+            width={56}
+            height={56}
             loading="eager"
           />
         </div>

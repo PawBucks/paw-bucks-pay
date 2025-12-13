@@ -107,18 +107,18 @@ const Profile = () => {
     .slice(0, 2);
 
   return (
-    <div className="min-h-screen bg-[var(--gradient-hero)]">
+    <div className="min-h-[100dvh] bg-[var(--gradient-hero)] flex flex-col">
       <Header isAuthenticated={true} onLogout={handleSignOut} />
-      <div className="container mx-auto px-4 pt-6 pb-24 md:pb-12 max-w-4xl">
+      <div className="flex-1 container mx-auto px-4 pt-4 pb-24 md:pb-8 max-w-4xl overflow-y-auto">
         {/* Ad Placement for Free Users */}
-        <div className="mb-6">
+        <div className="mb-4 sm:mb-6">
           <AdPlacement />
         </div>
 
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">Profile</h1>
-          <Button variant="ghost" size="icon" onClick={handleSignOut}>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold">Profile</h1>
+          <Button variant="ghost" size="icon" onClick={handleSignOut} className="min-h-10 min-w-10">
             <LogOut className="w-5 h-5" />
           </Button>
         </div>

@@ -369,27 +369,27 @@ export default function PetStore() {
         description="Browse our selection of pet supplies including food, treats, toys, and more. Earn PawBucks rewards on every purchase."
         keywords={["pet store", "pet supplies", "pet food", "pet toys", "pet treats", "earn rewards"]}
       />
-      <div className="min-h-screen bg-background">
+      <div className="min-h-[100dvh] bg-background flex flex-col">
         <Header isAuthenticated={!!user} onLogout={handleSignOut} />
         
-        <main className="container mx-auto px-4 pt-6 pb-24 md:pb-12 max-w-7xl">
-      {/* Ad Placement for Free Users */}
-      <div className="mb-6">
-        <AdPlacement />
-      </div>
+        <main className="flex-1 container mx-auto px-4 pt-4 pb-24 md:pb-8 max-w-7xl overflow-y-auto">
+          {/* Ad Placement for Free Users */}
+          <div className="mb-4 sm:mb-6">
+            <AdPlacement />
+          </div>
 
-      <div className="mb-8">
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-4xl font-bold">Pet Store</h1>
-          {user && wallet && (
-            <div className="flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-lg">
-              <Coins className="h-5 w-5 text-primary" />
-              <span className="font-semibold">{wallet.balance} PawBucks</span>
+          <div className="mb-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-3">
+              <h1 className="text-2xl sm:text-3xl font-bold">Pet Store</h1>
+              {user && wallet && (
+                <div className="flex items-center gap-2 bg-primary/10 px-3 py-1.5 rounded-lg">
+                  <Coins className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-semibold">{wallet.balance} PawBucks</span>
+                </div>
+              )}
             </div>
-          )}
-        </div>
-        <p className="text-muted-foreground">Shop for your furry friends with PawBucks!</p>
-      </div>
+            <p className="text-sm text-muted-foreground">Shop for your furry friends with PawBucks!</p>
+          </div>
 
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <Input
@@ -417,8 +417,8 @@ export default function PetStore() {
           No items found. Try adjusting your filters.
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredItems?.map((item) => (
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+            {filteredItems?.map((item) => (
             <Card key={item.id} className="flex flex-col">
               <CardHeader className="p-0">
                 {item.image_url ? (

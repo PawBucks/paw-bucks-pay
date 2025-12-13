@@ -11,6 +11,7 @@ import { DashboardSkeleton } from "@/components/LoadingSkeleton";
 import { WalletStats } from "@/components/dashboard/WalletStats";
 import { PetProfilesSection } from "@/components/dashboard/PetProfilesSection";
 import { DiscoverServicesCard } from "@/components/dashboard/DiscoverServicesCard";
+import { BottomNav } from "@/components/BottomNav";
 import { Store, Users, TrendingUp } from "lucide-react";
 
 type Profile = {
@@ -153,24 +154,24 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-[100dvh] bg-background flex flex-col">
       <Header isAuthenticated={true} onLogout={handleSignOut} userId={user?.id} />
 
-      <main className="container mx-auto px-4 pt-6 pb-24 md:pb-12 max-w-7xl">
+      <main className="flex-1 container mx-auto px-4 pt-4 pb-24 md:pb-8 max-w-7xl">
         {/* Ad Placement for Free Users */}
-        <div className="mb-6">
+        <div className="mb-4 sm:mb-6">
           <AdPlacement />
         </div>
 
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold mb-2">Welcome back, {profile.full_name}!</h2>
-          <p className="text-muted-foreground">
+        <div className="mb-6">
+          <h2 className="text-2xl sm:text-3xl font-bold mb-1">Welcome back, {profile.full_name}!</h2>
+          <p className="text-sm sm:text-base text-muted-foreground">
             {profile.user_type === "pet_owner" ? "Manage your pet expenses and rewards" : "Manage your business transactions"}
           </p>
         </div>
 
         {profile.user_type === "pet_owner" ? (
-          <div className="grid gap-6 md:grid-cols-3">
+          <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
             {/* Wallet Balance shows USD value of PawBucks (1 PawBuck = $0.001) */}
             <WalletStats 
               balance={(pawbucksWallet?.balance || 0) * 0.001} 
@@ -234,11 +235,13 @@ const Dashboard = () => {
 
         {/* Bottom Ad Placement */}
         {profile.user_type === "pet_owner" && (
-          <div className="mt-8 mb-6 pb-24">
+          <div className="mt-6 sm:mt-8">
             <AdPlacement position="bottom" />
           </div>
         )}
       </main>
+      
+      <BottomNav />
     </div>
   );
 };
