@@ -59,6 +59,7 @@ const MerchantAnalytics = lazy(() => import("./pages/MerchantAnalytics"));
 const MerchantProfile = lazy(() => import("./pages/MerchantProfile"));
 const MerchantDirectory = lazy(() => import("./pages/MerchantDirectory"));
 const MerchantMarket = lazy(() => import("./pages/MerchantMarket"));
+const NotificationPreferences = lazy(() => import("./pages/NotificationPreferences"));
 
 const createQueryClient = () => new QueryClient({
   defaultOptions: {
@@ -123,6 +124,7 @@ const AppRoutes = () => {
       <Route path="/store/:accountId" element={<PageTransition><Storefront /></PageTransition>} />
       <Route path="/checkout-success" element={<PageTransition><CheckoutSuccess /></PageTransition>} />
       <Route path="/install" element={<PageTransition><Install /></PageTransition>} />
+      <Route path="/notification-preferences" element={<PageTransition><NotificationPreferences /></PageTransition>} />
       <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
     </Routes>
   );
