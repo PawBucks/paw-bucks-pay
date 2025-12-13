@@ -131,29 +131,50 @@ export const MerchantMap = ({ merchants, onMerchantClick }: MerchantMapProps) =>
 
     if (merchantsWithCoords.length === 0) return;
 
+    // Helper function to escape HTML to prevent XSS
+    const escapeHtml = (text: string): string => {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    };
+
     // Add markers
     merchantsWithCoords.forEach(merchant => {
+      // Create marker element using safe DOM methods
       const el = document.createElement('div');
       el.className = 'merchant-marker';
-      el.innerHTML = `
-        <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center shadow-lg cursor-pointer hover:scale-110 transition-transform border-2 border-background">
-          <svg class="w-4 h-4 text-primary-foreground" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-          </svg>
-        </div>
-      `;
+      
+      const markerWrapper = document.createElement('div');
+      markerWrapper.className = 'w-8 h-8 bg-primary rounded-full flex items-center justify-center shadow-lg cursor-pointer hover:scale-110 transition-transform border-2 border-background';
+      
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('class', 'w-4 h-4 text-primary-foreground');
+      svg.setAttribute('fill', 'currentColor');
+      svg.setAttribute('viewBox', '0 0 24 24');
+      
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', 'M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z');
+      
+      svg.appendChild(path);
+      markerWrapper.appendChild(svg);
+      el.appendChild(markerWrapper);
+
+      // Sanitize merchant data before inserting into popup HTML
+      const safeName = escapeHtml(merchant.business_name);
+      const safeType = escapeHtml(merchant.business_type.replace(/_/g, ' '));
+      const safeAddress = merchant.address ? escapeHtml(merchant.address) : '';
 
       const popup = new mapboxgl.Popup({ offset: 25, closeButton: false }).setHTML(`
         <div class="p-2 min-w-[180px]">
-          <h3 class="font-semibold text-sm mb-1">${merchant.business_name}</h3>
-          <p class="text-xs text-muted-foreground capitalize mb-1">${merchant.business_type.replace(/_/g, ' ')}</p>
+          <h3 class="font-semibold text-sm mb-1">${safeName}</h3>
+          <p class="text-xs text-muted-foreground capitalize mb-1">${safeType}</p>
           <div class="flex items-center gap-1 text-xs mb-1">
             <span class="text-yellow-500">★</span>
             <span>${merchant.avg_rating.toFixed(1)}</span>
             <span class="text-muted-foreground">(${merchant.review_count})</span>
           </div>
           <p class="text-xs text-green-600">${merchant.cashback_rate}x points</p>
-          ${merchant.address ? `<p class="text-xs text-muted-foreground mt-1 line-clamp-1">${merchant.address}</p>` : ''}
+          ${safeAddress ? `<p class="text-xs text-muted-foreground mt-1 line-clamp-1">${safeAddress}</p>` : ''}
         </div>
       `);
 
