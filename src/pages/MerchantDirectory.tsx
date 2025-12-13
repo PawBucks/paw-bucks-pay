@@ -1,14 +1,16 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useOptimizedQuery } from "@/hooks/useOptimizedQuery";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { DataLoader } from "@/lib/dataLoader";
 import { Header } from "@/components/Header";
 import { BottomNav } from "@/components/BottomNav";
 import { PageLoader } from "@/components/PageLoader";
 import { AdPlacement } from "@/components/AdPlacement";
 import { SEO } from "@/components/SEO";
+import { PullToRefresh } from "@/components/PullToRefresh";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,6 +19,7 @@ import { ROUTES, QUERY_STALE_TIMES } from "@/lib/constants";
 import { usePersistentState } from "@/hooks/usePersistentState";
 import { supabase } from "@/integrations/supabase/client";
 import { useVerifiedProMerchants, useSponsoredMerchants, isVerifiedPro, isSponsored } from "@/hooks/useMerchantServices";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Search,
   Store,
@@ -73,6 +76,7 @@ const getBusinessIcon = (type: string) => {
 const MerchantDirectory = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = usePersistentState<string>("directory-search", "");
   const debouncedSearch = useDebounce(searchTerm, 300);
   const [selectedCategory, setSelectedCategory] = usePersistentState<string>("directory-category", "all");
@@ -171,6 +175,15 @@ const MerchantDirectory = () => {
     navigate(ROUTES.AUTH);
   };
 
+  // Pull to refresh
+  const handleRefresh = useCallback(async () => {
+    await queryClient.invalidateQueries({ queryKey: ["merchants-with-ratings"] });
+  }, [queryClient]);
+
+  const { containerRef, isRefreshing, pullDistance, progress } = usePullToRefresh({
+    onRefresh: handleRefresh,
+  });
+
   if (isLoading) {
     return <PageLoader message="Loading merchant directory..." />;
   }
@@ -184,7 +197,13 @@ const MerchantDirectory = () => {
       />
       <Header isAuthenticated={!!user} onLogout={user ? handleLogout : undefined} />
 
-      <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 pb-24 md:pb-12">
+      <PullToRefresh
+        ref={containerRef}
+        isRefreshing={isRefreshing}
+        pullDistance={pullDistance}
+        progress={progress}
+        className="min-h-screen bg-gradient-to-b from-background to-muted/20 pb-24 md:pb-12 overflow-auto"
+      >
         {/* Top Ad */}
         <div className="container mx-auto px-4 pt-4 max-w-7xl">
           <AdPlacement position="top" />
@@ -406,7 +425,7 @@ const MerchantDirectory = () => {
         </div>
 
         {user && <BottomNav />}
-      </div>
+      </PullToRefresh>
     </>
   );
 };
