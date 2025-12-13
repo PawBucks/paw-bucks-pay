@@ -11,6 +11,7 @@ type Transaction = {
   id: string;
   amount: number;
   cashback_earned: number;
+  rewards_earned?: number;
   description: string;
   created_at: string;
 };
