@@ -5,6 +5,7 @@ import { useGeocoding } from "@/hooks/useGeocoding";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { GradientCard } from "@/components/ui/gradient-card";
+import { NotificationsDropdown } from "@/components/NotificationsDropdown";
 import {
   LogOut,
   PawPrint,
@@ -395,7 +396,8 @@ const MerchantDashboard = () => {
               <p className="text-xs text-muted-foreground">Merchant Dashboard</p>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
+            {user && <NotificationsDropdown userId={user.id} />}
             <Button variant="ghost" size="sm" onClick={() => setEditDialogOpen(true)}>
               <Edit className="w-4 h-4 mr-2" />
               Edit Profile
