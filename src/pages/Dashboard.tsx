@@ -37,6 +37,7 @@ type Profile = {
 type WalletData = {
   balance: number;
   rewards_points: number;
+  total_spent: number;
 };
 
 type PawBucksWallet = {
@@ -81,7 +82,7 @@ const Dashboard = () => {
           .single(),
         supabase
           .from('wallets')
-          .select('balance, rewards_points')
+          .select('balance, rewards_points, total_spent')
           .eq('user_id', user.id)
           .maybeSingle(),
         supabase
@@ -199,10 +200,12 @@ const Dashboard = () => {
 
         {profile.user_type === "pet_owner" ? (
           <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <motion.div custom={0} variants={cardVariants} initial="hidden" animate="visible">
+            <motion.div custom={0} variants={cardVariants} initial="hidden" animate="visible" className="md:col-span-2 lg:col-span-2">
               <WalletStats 
                 balance={(pawbucksWallet?.balance || 0) * 0.001} 
                 rewardsPoints={pawbucksWallet?.balance || 0}
+                totalSaved={(pawbucksWallet?.balance || 0) * 0.001}
+                totalSpent={wallet?.total_spent || 0}
               />
             </motion.div>
             
