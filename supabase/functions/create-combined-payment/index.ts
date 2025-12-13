@@ -106,18 +106,7 @@ serve(async (req) => {
 
     // CASE 1: Full PawBucks payment (no Stripe needed)
     if (stripeAmount <= 0) {
-      // Deduct PawBucks
-      const { error: deductError } = await supabaseAdmin
-        .from('pawbucks_wallet')
-        .update({ balance: supabaseAdmin.rpc('balance - ' + pawbucksAmount) })
-        .eq('user_id', user.id);
-
-      // Use raw SQL for atomic deduction
-      const { error: updateError } = await supabaseAdmin.rpc('raw_sql', {
-        query: `UPDATE pawbucks_wallet SET balance = balance - ${pawbucksAmount} WHERE user_id = '${user.id}'`
-      });
-
-      // Actually, let's do it properly with a select then update
+      // Get current balance and deduct PawBucks safely
       const { data: currentWallet } = await supabaseAdmin
         .from('pawbucks_wallet')
         .select('balance')
