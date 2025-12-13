@@ -116,10 +116,16 @@ serve(async (req) => {
     // STEP 5: Calculate application fee (platform monetization)
     const PLATFORM_FEE_PERCENTAGE = 0.10; // 10% fee
     
-    // Get the price details to calculate the fee
+    // Get the price details to calculate the fee and determine checkout mode
     const price = await stripe.prices.retrieve(priceId, {
       stripeAccount: accountId,
     });
+
+    // Determine if this is a recurring price (subscription) or one-time payment
+    const isRecurringPrice = price.type === 'recurring';
+    const checkoutMode = isRecurringPrice ? 'subscription' : 'payment';
+
+    console.log(`Price type: ${price.type}, using checkout mode: ${checkoutMode}`);
 
     // Calculate application fee in cents
     let applicationFeeAmount = 0;
@@ -158,40 +164,53 @@ serve(async (req) => {
 
     console.log(`Calculated: fee=$${(applicationFeeAmount / 100).toFixed(2)}, pawBucks=${estimatedPawBucks}`);
 
-    // STEP 6: Create Checkout Session using DIRECT CHARGE with application fee
-    const session = await stripe.checkout.sessions.create(
-      {
-        line_items: [
-          {
-            price: priceId,
-            quantity: quantity,
-          },
-        ],
-        
-        mode: 'payment',
-        
-        payment_intent_data: {
-          application_fee_amount: applicationFeeAmount,
-          
-          // CRITICAL: Add metadata for PawBucks rewards processing
-          metadata: {
-            connected_account_id: accountId,
-            platform_fee_percentage: (PLATFORM_FEE_PERCENTAGE * 100).toString(),
-            user_id: user.id,
-            merchant_id: merchantId || '',
-            source: 'merchant_storefront',
-            product_name: productName || 'Storefront Purchase',
-            description: `Purchase from ${merchantName}`,
-          },
+    // STEP 6: Create Checkout Session - handle both one-time and recurring prices
+    // Build session configuration based on price type
+    const sessionConfig: Stripe.Checkout.SessionCreateParams = {
+      line_items: [
+        {
+          price: priceId,
+          quantity: quantity,
         },
-        
-        // Include session ID in success URL for verification
-        success_url: successUrl || `${req.headers.get('origin')}/checkout-success?session_id={CHECKOUT_SESSION_ID}&store=${accountId}`,
-        cancel_url: cancelUrl || `${req.headers.get('origin')}/checkout-canceled`,
-        
-        // Collect customer email for order confirmation
-        customer_email: user.email,
-      },
+      ],
+      mode: checkoutMode,
+      success_url: successUrl || `${req.headers.get('origin')}/checkout-success?session_id={CHECKOUT_SESSION_ID}&store=${accountId}`,
+      cancel_url: cancelUrl || `${req.headers.get('origin')}/checkout-canceled`,
+      customer_email: user.email,
+    };
+
+    // Add payment_intent_data for one-time payments (not available for subscriptions)
+    if (!isRecurringPrice) {
+      sessionConfig.payment_intent_data = {
+        application_fee_amount: applicationFeeAmount,
+        metadata: {
+          connected_account_id: accountId,
+          platform_fee_percentage: (PLATFORM_FEE_PERCENTAGE * 100).toString(),
+          user_id: user.id,
+          merchant_id: merchantId || '',
+          source: 'merchant_storefront',
+          product_name: productName || 'Storefront Purchase',
+          description: `Purchase from ${merchantName}`,
+        },
+      };
+    } else {
+      // For subscriptions, use subscription_data with application_fee_percent
+      sessionConfig.subscription_data = {
+        application_fee_percent: PLATFORM_FEE_PERCENTAGE * 100,
+        metadata: {
+          connected_account_id: accountId,
+          platform_fee_percentage: (PLATFORM_FEE_PERCENTAGE * 100).toString(),
+          user_id: user.id,
+          merchant_id: merchantId || '',
+          source: 'merchant_storefront',
+          product_name: productName || 'Storefront Purchase',
+          description: `Subscription from ${merchantName}`,
+        },
+      };
+    }
+
+    const session = await stripe.checkout.sessions.create(
+      sessionConfig,
       {
         stripeAccount: accountId,
       }
