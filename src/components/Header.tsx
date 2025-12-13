@@ -8,6 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { NotificationsDropdown } from "@/components/NotificationsDropdown";
 import logo from "@/assets/logo.png";
 
 interface MenuItem {
@@ -19,9 +20,10 @@ interface HeaderProps {
   menuItems?: MenuItem[];
   isAuthenticated?: boolean;
   onLogout?: () => void;
+  userId?: string;
 }
 
-const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout }: HeaderProps) => {
+const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout, userId }: HeaderProps) => {
   const navigate = useNavigate();
   
   const defaultMenuItems: MenuItem[] = [
@@ -67,15 +69,18 @@ const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout }: Heade
           </div>
 
           {isAuthenticated && onLogout ? (
-            <Button 
-              onClick={onLogout}
-              variant="outline"
-              className="gap-2 min-h-[44px] touch-manipulation"
-              aria-label="Logout"
-            >
-              <LogOut className="h-4 w-4" />
-              <span className="hidden sm:inline">Logout</span>
-            </Button>
+            <>
+              {userId && <NotificationsDropdown userId={userId} />}
+              <Button 
+                onClick={onLogout}
+                variant="outline"
+                className="gap-2 min-h-[44px] touch-manipulation"
+                aria-label="Logout"
+              >
+                <LogOut className="h-4 w-4" />
+                <span className="hidden sm:inline">Logout</span>
+              </Button>
+            </>
           ) : (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
