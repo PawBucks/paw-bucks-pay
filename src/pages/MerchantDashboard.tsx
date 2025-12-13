@@ -64,6 +64,7 @@ type Transaction = {
   id: string;
   amount: number;
   cashback_earned: number;
+  rewards_earned: number;
   description: string;
   created_at: string;
 };
@@ -356,8 +357,10 @@ const MerchantDashboard = () => {
   };
 
   const getCashbackDistribution = () => {
-    // total_cashback is stored in PawBucks, convert to USD (1 PawBuck = $0.001)
-    const totalRewardsUSD = (analytics?.total_cashback || 0) * 0.001;
+    // Calculate total rewards from allTransactions using rewards_earned field
+    // rewards_earned is in PawBucks, convert to USD (1 PawBuck = $0.001)
+    const totalRewardsPawBucks = allTransactions.reduce((sum, t) => sum + (t.rewards_earned || 0), 0);
+    const totalRewardsUSD = totalRewardsPawBucks * 0.001;
     const remainingBalance = analytics?.remaining_balance || 0;
 
     return [

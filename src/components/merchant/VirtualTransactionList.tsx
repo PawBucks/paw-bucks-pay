@@ -7,6 +7,7 @@ type Transaction = {
   id: string;
   amount: number;
   cashback_earned: number;
+  rewards_earned?: number;
   description: string;
   created_at: string;
 };
@@ -31,7 +32,8 @@ const TransactionItem = ({ transaction }: { transaction: Transaction }) => (
         +${transaction.amount.toFixed(2)}
       </p>
       <p className="text-sm text-muted-foreground">
-        Rewards: ${transaction.cashback_earned.toFixed(2)}
+        {/* Convert PawBucks to USD (1 PawBuck = $0.001) */}
+        Rewards: ${((transaction.rewards_earned ?? 0) * 0.001).toFixed(2)}
       </p>
     </div>
   </div>
