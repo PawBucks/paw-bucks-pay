@@ -13,6 +13,8 @@ import { AdPlacement } from "@/components/AdPlacement";
 import { DashboardSkeleton } from "@/components/LoadingSkeleton";
 import { PullToRefresh } from "@/components/PullToRefresh";
 import { SpendingTrendsChart } from "@/components/wallet/SpendingTrendsChart";
+import { MonthlyComparison } from "@/components/wallet/MonthlyComparison";
+import { BudgetSettings } from "@/components/wallet/BudgetSettings";
 import { Wallet as WalletIcon, TrendingUp, Gift, ArrowUpRight, ArrowDownRight, Coins, Sparkles, PieChart } from "lucide-react";
 import { format } from "date-fns";
 import { useQueryClient } from "@tanstack/react-query";
@@ -204,6 +206,12 @@ const Wallet = () => {
             </span>
             <ArrowUpRight className="w-4 h-4" />
           </Button>
+        </div>
+
+        {/* Month-over-Month Comparison and Budget Settings */}
+        <div className="grid gap-6 md:grid-cols-2 mb-6">
+          <MonthlyComparison transactions={transactions} />
+          <BudgetSettings transactions={transactions} />
         </div>
 
         {/* Spending Trends Chart */}
