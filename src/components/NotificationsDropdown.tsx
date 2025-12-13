@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
-import { Bell, BellRing } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Bell, BellRing, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -19,6 +20,10 @@ interface Notification {
   message: string;
   is_read: boolean;
   created_at: string;
+}
+
+interface NotificationPrefs {
+  delivery_method: "in_app" | "browser";
 }
 
 const requestNotificationPermission = async (): Promise<{ granted: boolean; alreadyDenied: boolean }> => {
@@ -62,9 +67,11 @@ const showBrowserNotification = (title: string, message: string) => {
 };
 
 export const NotificationsDropdown = ({ userId }: { userId: string }) => {
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [userPrefersBrowser, setUserPrefersBrowser] = useState(false);
 
   const enableNotifications = useCallback(async () => {
     // Browser notifications only work when the app runs in a top-level, secure context
@@ -110,7 +117,23 @@ export const NotificationsDropdown = ({ userId }: { userId: string }) => {
     if ("Notification" in window && Notification.permission === "granted") {
       setNotificationsEnabled(true);
     }
-  }, []);
+    
+    // Fetch user's notification preferences
+    const fetchPreferences = async () => {
+      if (!userId) return;
+      const { data } = await supabase
+        .from("notification_preferences")
+        .select("delivery_method")
+        .eq("user_id", userId)
+        .maybeSingle();
+      
+      if (data) {
+        setUserPrefersBrowser((data as NotificationPrefs).delivery_method === "browser");
+      }
+    };
+    
+    fetchPreferences();
+  }, [userId]);
 
   useEffect(() => {
     if (!userId) return;
@@ -147,8 +170,8 @@ export const NotificationsDropdown = ({ userId }: { userId: string }) => {
           setNotifications((prev) => [newNotification, ...prev].slice(0, 10));
           setUnreadCount((prev) => prev + 1);
 
-          // Show browser notification if enabled
-          if (notificationsEnabled) {
+          // Show browser notification if enabled AND user prefers browser notifications
+          if (notificationsEnabled && userPrefersBrowser) {
             showBrowserNotification(newNotification.title, newNotification.message);
           }
 
@@ -163,7 +186,7 @@ export const NotificationsDropdown = ({ userId }: { userId: string }) => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [userId, notificationsEnabled]);
+  }, [userId, notificationsEnabled, userPrefersBrowser]);
 
   const markAsRead = async (notificationId: string) => {
     await supabase
@@ -207,7 +230,16 @@ export const NotificationsDropdown = ({ userId }: { userId: string }) => {
         <div className="flex items-center justify-between px-3 py-2">
           <span className="font-semibold">Notifications</span>
           <div className="flex items-center gap-1">
-            {!notificationsEnabled && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate("/notification-preferences")}
+              className="text-xs h-7 gap-1"
+              title="Notification preferences"
+            >
+              <Settings className="h-3 w-3" />
+            </Button>
+            {!notificationsEnabled && userPrefersBrowser && (
               <Button
                 variant="ghost"
                 size="sm"

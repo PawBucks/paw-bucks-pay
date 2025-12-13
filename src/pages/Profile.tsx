@@ -11,7 +11,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { BottomNav } from "@/components/BottomNav";
 import { AdPlacement } from "@/components/AdPlacement";
-import { LogOut, User, Mail, Calendar, Crown, Sparkles, Settings, Loader2, Info } from "lucide-react";
+import { LogOut, User, Mail, Calendar, Crown, Sparkles, Settings, Loader2, Info, Bell } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -418,6 +418,14 @@ const Profile = () => {
 
         {/* Action Buttons */}
         <div className="mt-8 space-y-3 mb-6">
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={() => navigate("/notification-preferences")}
+          >
+            <Bell className="w-4 h-4 mr-2" />
+            Notification Preferences
+          </Button>
           <Button
             variant="outline"
             className="w-full"
