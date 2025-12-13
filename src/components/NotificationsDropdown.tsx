@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Bell } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { Bell, BellRing } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -11,6 +11,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDistanceToNow } from "date-fns";
+import { toast } from "sonner";
 
 interface Notification {
   id: string;
@@ -20,9 +21,65 @@ interface Notification {
   created_at: string;
 }
 
+const requestNotificationPermission = async (): Promise<boolean> => {
+  if (!("Notification" in window)) {
+    console.log("This browser does not support notifications");
+    return false;
+  }
+
+  if (Notification.permission === "granted") {
+    return true;
+  }
+
+  if (Notification.permission !== "denied") {
+    const permission = await Notification.requestPermission();
+    return permission === "granted";
+  }
+
+  return false;
+};
+
+const showBrowserNotification = (title: string, message: string) => {
+  if (Notification.permission === "granted") {
+    const notification = new Notification(title, {
+      body: message,
+      icon: "/logo.png",
+      badge: "/logo.png",
+      tag: "pawbucks-notification",
+      requireInteraction: false,
+    });
+
+    notification.onclick = () => {
+      window.focus();
+      notification.close();
+    };
+
+    // Auto-close after 5 seconds
+    setTimeout(() => notification.close(), 5000);
+  }
+};
+
 export const NotificationsDropdown = ({ userId }: { userId: string }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+
+  const enableNotifications = useCallback(async () => {
+    const granted = await requestNotificationPermission();
+    setNotificationsEnabled(granted);
+    if (granted) {
+      toast.success("Browser notifications enabled!");
+    } else {
+      toast.error("Notifications permission denied");
+    }
+  }, []);
+
+  useEffect(() => {
+    // Check existing permission on mount
+    if ("Notification" in window && Notification.permission === "granted") {
+      setNotificationsEnabled(true);
+    }
+  }, []);
 
   useEffect(() => {
     if (!userId) return;
@@ -55,8 +112,19 @@ export const NotificationsDropdown = ({ userId }: { userId: string }) => {
           filter: `user_id=eq.${userId}`,
         },
         (payload) => {
-          setNotifications((prev) => [payload.new as Notification, ...prev].slice(0, 10));
+          const newNotification = payload.new as Notification;
+          setNotifications((prev) => [newNotification, ...prev].slice(0, 10));
           setUnreadCount((prev) => prev + 1);
+
+          // Show browser notification if enabled
+          if (notificationsEnabled) {
+            showBrowserNotification(newNotification.title, newNotification.message);
+          }
+
+          // Also show in-app toast
+          toast.info(newNotification.title, {
+            description: newNotification.message,
+          });
         }
       )
       .subscribe();
@@ -64,7 +132,7 @@ export const NotificationsDropdown = ({ userId }: { userId: string }) => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [userId]);
+  }, [userId, notificationsEnabled]);
 
   const markAsRead = async (notificationId: string) => {
     await supabase
@@ -107,11 +175,25 @@ export const NotificationsDropdown = ({ userId }: { userId: string }) => {
       <DropdownMenuContent align="end" className="w-80 max-h-96 overflow-y-auto">
         <div className="flex items-center justify-between px-3 py-2">
           <span className="font-semibold">Notifications</span>
-          {unreadCount > 0 && (
-            <Button variant="ghost" size="sm" onClick={markAllAsRead} className="text-xs h-7">
-              Mark all read
-            </Button>
-          )}
+          <div className="flex items-center gap-1">
+            {!notificationsEnabled && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={enableNotifications}
+                className="text-xs h-7 gap-1"
+                title="Enable browser notifications"
+              >
+                <BellRing className="h-3 w-3" />
+                Enable
+              </Button>
+            )}
+            {unreadCount > 0 && (
+              <Button variant="ghost" size="sm" onClick={markAllAsRead} className="text-xs h-7">
+                Mark all read
+              </Button>
+            )}
+          </div>
         </div>
         <DropdownMenuSeparator />
         {notifications.length === 0 ? (
