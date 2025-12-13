@@ -141,12 +141,14 @@ serve(async (req) => {
     });
 
     // Create a PaymentIntent with Stripe Connect
+    // Using on_behalf_of ensures merchant's business info appears on customer statements
     const paymentIntent = await stripe.paymentIntents.create({
       amount: amountInCents,
       currency,
       automatic_payment_methods: {
         enabled: true,
       },
+      on_behalf_of: merchant.stripe_account_id, // Shows merchant's business on customer statement
       application_fee_amount: platformFeeInCents, // Platform fee (used for cashback)
       transfer_data: {
         destination: merchant.stripe_account_id, // Send to merchant's Connect account
