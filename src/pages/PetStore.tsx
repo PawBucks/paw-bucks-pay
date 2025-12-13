@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,6 +32,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { AdPlacement } from "@/components/AdPlacement";
 import { Header } from "@/components/Header";
 import { SEO } from "@/components/SEO";
+import { PullToRefresh } from "@/components/PullToRefresh";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
 
@@ -355,6 +357,16 @@ export default function PetStore() {
     navigate("/auth");
   };
 
+  // Pull to refresh
+  const handleRefresh = useCallback(async () => {
+    await queryClient.invalidateQueries({ queryKey: ["pet-store-items"] });
+    await queryClient.invalidateQueries({ queryKey: ["pawbucks-wallet"] });
+  }, [queryClient]);
+
+  const { containerRef, isRefreshing, pullDistance, progress } = usePullToRefresh({
+    onRefresh: handleRefresh,
+  });
+
   const filteredItems = items?.filter(item => {
     const matchesCategory = selectedCategory === "All" || item.category === selectedCategory;
     const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -372,10 +384,17 @@ export default function PetStore() {
       <div className="min-h-[100dvh] bg-background flex flex-col">
         <Header isAuthenticated={!!user} onLogout={handleSignOut} />
         
-        <main className="flex-1 container mx-auto px-4 pt-4 pb-24 md:pb-8 max-w-7xl overflow-y-auto">
-          {/* Ad Placement for Free Users */}
-          <div className="mb-4 sm:mb-6">
-            <AdPlacement />
+        <PullToRefresh
+          ref={containerRef}
+          isRefreshing={isRefreshing}
+          pullDistance={pullDistance}
+          progress={progress}
+          className="flex-1 overflow-auto"
+        >
+          <main className="container mx-auto px-4 pt-4 pb-24 md:pb-8 max-w-7xl">
+            {/* Ad Placement for Free Users */}
+            <div className="mb-4 sm:mb-6">
+              <AdPlacement />
           </div>
 
           <div className="mb-6">
@@ -507,6 +526,7 @@ export default function PetStore() {
         <AdPlacement position="bottom" />
       </div>
         </main>
+        </PullToRefresh>
       </div>
       {user && <BottomNav />}
     </>
