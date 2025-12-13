@@ -47,7 +47,12 @@ export const PWAInstallBanner = () => {
   if (!isVisible || isDismissed) return null;
 
   return (
-    <div className="fixed bottom-20 left-4 right-4 z-50 animate-fade-in md:bottom-4 md:left-auto md:right-4 md:max-w-sm">
+    <div 
+      className="fixed z-50 animate-fade-in md:bottom-4 md:left-auto md:right-4 md:max-w-sm left-3 right-3"
+      style={{
+        bottom: 'calc(4.5rem + max(0.5rem, env(safe-area-inset-bottom)))',
+      }}
+    >
       <Card className="shadow-[var(--shadow-large)] border-2 border-primary/20 bg-gradient-to-br from-card via-primary/5 to-accent/5 backdrop-blur-sm">
         <div className="p-4">
           <button

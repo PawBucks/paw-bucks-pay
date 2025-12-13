@@ -54,6 +54,10 @@
     --transition-base: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-slow: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Mobile Layout Variables */
+    --bottom-nav-height: 4rem;
+    --header-height: 4rem;
   }
 
   .dark {
@@ -105,6 +109,13 @@
     @apply border-border;
   }
   
+  html {
+    scroll-behavior: smooth;
+    /* Use dvh for proper mobile viewport handling */
+    height: 100%;
+    height: 100dvh;
+  }
+  
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'Inter', system-ui, sans-serif;
@@ -113,6 +124,12 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     letter-spacing: -0.01em;
+    /* Prevent iOS bounce scrolling */
+    overscroll-behavior-y: none;
+    -webkit-overflow-scrolling: touch;
+    /* Proper height handling */
+    min-height: 100%;
+    min-height: 100dvh;
   }
   
   /* Premium typography for headings */
@@ -126,11 +143,6 @@
     @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
   }
   
-  /* Smooth scrolling */
-  html {
-    scroll-behavior: smooth;
-  }
-  
   /* Improve button and interactive element transitions */
   button, a, [role="button"] {
     transition: var(--transition-base);
@@ -141,41 +153,39 @@
     touch-action: manipulation;
   }
 
-  /* Prevent iOS bounce scrolling */
-  body {
-    overscroll-behavior-y: none;
-    -webkit-overflow-scrolling: touch;
-  }
-
   /* Improve tap highlight for mobile */
   * {
     -webkit-tap-highlight-color: hsl(var(--primary) / 0.1);
     -webkit-touch-callout: none;
   }
 
-  /* Better button touch targets on mobile */
-  button, a[role="button"] {
-    min-height: 44px;
-    min-width: 44px;
-  }
-
-  /* Safe area insets for mobile notches - Enhanced */
+  /* Safe area insets for mobile notches - Comprehensive */
   .safe-area-inset-bottom {
-    /* Ensure nav/content stays above iOS home indicator */
-    padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
   }
 
   .safe-area-inset-top {
-    /* Use full top safe-area so content never sits under the system status bar */
-    padding-top: max(1.5rem, env(safe-area-inset-top));
+    padding-top: max(0.75rem, env(safe-area-inset-top));
   }
 
   .pb-safe {
-    padding-bottom: max(1.5rem, calc(env(safe-area-inset-bottom) + 1rem));
+    padding-bottom: max(1rem, calc(env(safe-area-inset-bottom) + 0.5rem));
   }
 
   .pt-safe {
-    padding-top: max(1rem, env(safe-area-inset-top));
+    padding-top: max(0.75rem, env(safe-area-inset-top));
+  }
+
+  /* Mobile page container - ensures content doesn't get hidden behind nav */
+  .mobile-page {
+    min-height: 100dvh;
+    padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px) + 1rem);
+  }
+
+  @media (min-width: 768px) {
+    .mobile-page {
+      padding-bottom: 2rem;
+    }
   }
 
   /* Performance optimizations */
@@ -185,20 +195,31 @@
 
   /* Better scrollbar styling */
   ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-muted/20 rounded-full;
+    @apply bg-transparent;
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-muted-foreground/30 rounded-full;
+    @apply bg-muted-foreground/20 rounded-full;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-muted-foreground/50;
+    @apply bg-muted-foreground/40;
+  }
+
+  /* Hide scrollbars on mobile for cleaner look */
+  @media (max-width: 768px) {
+    ::-webkit-scrollbar {
+      display: none;
+    }
+    
+    * {
+      scrollbar-width: none;
+    }
   }
 
   /* Respect user preferences for reduced motion */
@@ -213,12 +234,10 @@
     }
   }
 
-  /* Improve tap targets for mobile - Enhanced */
+  /* Touch targets - minimum 44px for accessibility */
   @media (pointer: coarse) {
-    button, a, [role="button"], [role="link"], input, select, textarea {
+    button, a, [role="button"], [role="link"] {
       min-height: 44px;
-      min-width: 44px;
-      padding: 0.75rem;
     }
 
     /* Larger touch targets for icons */
@@ -226,33 +245,53 @@
       width: 24px;
       height: 24px;
     }
-    
-    /* Better spacing for cards and interactive elements */
-    .card, [role="article"] {
-      padding: 1rem;
-    }
   }
 
   /* Mobile-specific optimizations */
   @media (max-width: 768px) {
-    /* Larger fonts for better readability */
-    body {
-      font-size: 16px;
-    }
-
-    /* Prevent zoom on input focus (iOS) */
+    /* Proper font sizing to prevent zoom on iOS */
     input, select, textarea {
-      font-size: 16px;
+      font-size: 16px !important;
     }
 
-    /* Better spacing for mobile */
+    /* Better container padding */
     .container {
       padding-left: 1rem;
       padding-right: 1rem;
     }
+
+    /* Smaller border radius on mobile */
+    .card, [data-radix-dialog-content], [data-radix-popover-content] {
+      border-radius: 1rem;
+    }
+
+    /* Reduce visual noise on mobile */
+    .shadow-lg, .shadow-xl, .shadow-2xl {
+      box-shadow: var(--shadow-soft);
+    }
   }
 
-  /* Mapbox GL JS overrides - ensure map renders properly */
+  /* Small phone optimizations (iPhone SE, etc.) */
+  @media (max-width: 375px) {
+    html {
+      font-size: 14px;
+    }
+
+    .container {
+      padding-left: 0.75rem;
+      padding-right: 0.75rem;
+    }
+
+    h1 {
+      font-size: 1.75rem !important;
+    }
+
+    h2 {
+      font-size: 1.5rem !important;
+    }
+  }
+
+  /* Mapbox GL JS overrides */
   .mapboxgl-map {
     font: inherit;
   }
@@ -273,7 +312,6 @@
     height: 100%;
   }
 
-  /* Ensure Mapbox controls have proper sizing */
   .mapboxgl-ctrl button {
     min-height: auto;
     min-width: auto;
@@ -281,10 +319,10 @@
   }
 
   .mapboxgl-ctrl-group button {
-    width: 29px;
-    height: 29px;
-    min-height: 29px;
-    min-width: 29px;
+    width: 36px;
+    height: 36px;
+    min-height: 36px;
+    min-width: 36px;
     padding: 0;
   }
 
@@ -294,15 +332,15 @@
 
   .mapboxgl-popup-content {
     padding: 0;
-    border-radius: 0.5rem;
+    border-radius: 0.75rem;
     box-shadow: var(--shadow-medium);
   }
 
   .mapboxgl-popup-close-button {
     min-height: auto;
     min-width: auto;
-    padding: 0.25rem;
-    font-size: 1rem;
+    padding: 0.5rem;
+    font-size: 1.25rem;
   }
 
   /* Confetti Animation */

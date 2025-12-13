@@ -114,22 +114,22 @@ const Wallet = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--gradient-hero)]">
+    <div className="min-h-[100dvh] bg-[var(--gradient-hero)] flex flex-col">
       <Header isAuthenticated={true} onLogout={handleSignOut} />
 
-      <main className="container mx-auto px-4 pt-6 pb-24 md:pb-12 max-w-7xl">
+      <main className="flex-1 container mx-auto px-4 pt-4 pb-24 md:pb-8 max-w-7xl overflow-y-auto">
         {/* Ad Placement for Free Users */}
-        <div className="mb-6">
+        <div className="mb-4 sm:mb-6">
           <AdPlacement />
         </div>
 
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold mb-2">Wallet</h2>
-          <p className="text-muted-foreground">Track your rewards and spending</p>
+        <div className="mb-6">
+          <h2 className="text-2xl sm:text-3xl font-bold mb-1">Wallet</h2>
+          <p className="text-sm sm:text-base text-muted-foreground">Track your rewards and spending</p>
         </div>
 
         {/* Wallet Overview */}
-        <div className="grid gap-4 md:grid-cols-3 mb-8">
+        <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-3 mb-6">
           <GradientCard gradient>
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
@@ -269,7 +269,7 @@ const Wallet = () => {
         </GradientCard>
 
         {/* Bottom Ad Placement */}
-        <div className="mt-8 mb-6">
+        <div className="mt-6 sm:mt-8">
           <AdPlacement position="bottom" />
         </div>
       </main>
