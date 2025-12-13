@@ -1,4 +1,5 @@
 import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { Resend } from "https://esm.sh/resend@2.0.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -10,6 +11,15 @@ const FAILED_LOGIN_THRESHOLD = 5;
 const FAILED_LOGIN_WINDOW_MINUTES = 15;
 const RAPID_REQUEST_THRESHOLD = 20;
 const RAPID_REQUEST_WINDOW_MINUTES = 5;
+
+// Critical events that trigger email notifications
+const CRITICAL_SECURITY_EVENTS = [
+  "failed_login",
+  "password_change",
+  "password_reset_request",
+  "multiple_failed_logins",
+  "account_locked",
+];
 
 interface AuthEventPayload {
   event_type: string;
@@ -67,6 +77,11 @@ Deno.serve(async (req) => {
     // Check for rapid requests from same IP
     await checkForRapidRequests(supabaseAdmin, ip_address);
 
+    // Send email notification for critical security events
+    if (payload.email && shouldSendEmailAlert(payload)) {
+      await sendSecurityEmailAlert(payload, ip_address, user_agent);
+    }
+
     return new Response(
       JSON.stringify({ success: true }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -80,6 +95,144 @@ Deno.serve(async (req) => {
     );
   }
 });
+
+function shouldSendEmailAlert(payload: AuthEventPayload): boolean {
+  // Failed login attempts
+  if (payload.event_type === "login" && !payload.success) {
+    return true;
+  }
+  // Password changes and resets
+  if (payload.event_type === "password_change" || payload.event_type === "password_reset") {
+    return true;
+  }
+  // Any explicitly critical event
+  if (CRITICAL_SECURITY_EVENTS.includes(payload.event_type)) {
+    return true;
+  }
+  return false;
+}
+
+async function sendSecurityEmailAlert(
+  payload: AuthEventPayload,
+  ip_address: string,
+  user_agent: string
+): Promise<void> {
+  const resendApiKey = Deno.env.get("RESEND_API_KEY");
+  if (!resendApiKey || !payload.email) {
+    console.log("Skipping email alert: RESEND_API_KEY not configured or no email provided");
+    return;
+  }
+
+  try {
+    const resend = new Resend(resendApiKey);
+    const timestamp = new Date().toLocaleString("en-US", {
+      timeZone: "UTC",
+      dateStyle: "full",
+      timeStyle: "long",
+    });
+
+    let subject = "";
+    let messageHtml = "";
+
+    if (payload.event_type === "login" && !payload.success) {
+      subject = "🔒 Security Alert: Failed Login Attempt";
+      messageHtml = `
+        <h2>Failed Login Attempt Detected</h2>
+        <p>We detected a failed login attempt on your PawBucks account.</p>
+        <div style="background: #f5f5f5; padding: 16px; border-radius: 8px; margin: 16px 0;">
+          <p><strong>Time:</strong> ${timestamp}</p>
+          <p><strong>IP Address:</strong> ${ip_address}</p>
+          <p><strong>Device:</strong> ${user_agent}</p>
+          ${payload.failure_reason ? `<p><strong>Reason:</strong> ${payload.failure_reason}</p>` : ""}
+        </div>
+        <p>If this was you, no action is needed. If you didn't attempt to log in, we recommend:</p>
+        <ul>
+          <li>Changing your password immediately</li>
+          <li>Enabling two-factor authentication</li>
+          <li>Reviewing your recent account activity</li>
+        </ul>
+      `;
+    } else if (payload.event_type === "password_change") {
+      subject = "🔐 Your Password Was Changed";
+      messageHtml = `
+        <h2>Password Changed Successfully</h2>
+        <p>Your PawBucks account password was just changed.</p>
+        <div style="background: #f5f5f5; padding: 16px; border-radius: 8px; margin: 16px 0;">
+          <p><strong>Time:</strong> ${timestamp}</p>
+          <p><strong>IP Address:</strong> ${ip_address}</p>
+          <p><strong>Device:</strong> ${user_agent}</p>
+        </div>
+        <p>If you made this change, no action is needed.</p>
+        <p><strong>If you didn't change your password, your account may be compromised.</strong> Please contact support immediately.</p>
+      `;
+    } else if (payload.event_type === "password_reset") {
+      subject = "🔑 Password Reset Requested";
+      messageHtml = `
+        <h2>Password Reset Request</h2>
+        <p>A password reset was requested for your PawBucks account.</p>
+        <div style="background: #f5f5f5; padding: 16px; border-radius: 8px; margin: 16px 0;">
+          <p><strong>Time:</strong> ${timestamp}</p>
+          <p><strong>IP Address:</strong> ${ip_address}</p>
+          <p><strong>Device:</strong> ${user_agent}</p>
+        </div>
+        <p>If you requested this reset, please check your email for the reset link.</p>
+        <p>If you didn't request this, you can safely ignore this email. Your password has not been changed.</p>
+      `;
+    } else {
+      subject = "🚨 Security Alert on Your Account";
+      messageHtml = `
+        <h2>Security Event Detected</h2>
+        <p>We detected a security event on your PawBucks account.</p>
+        <div style="background: #f5f5f5; padding: 16px; border-radius: 8px; margin: 16px 0;">
+          <p><strong>Event:</strong> ${payload.event_type}</p>
+          <p><strong>Time:</strong> ${timestamp}</p>
+          <p><strong>IP Address:</strong> ${ip_address}</p>
+          <p><strong>Device:</strong> ${user_agent}</p>
+        </div>
+        <p>If you recognize this activity, no action is needed. Otherwise, please review your account security settings.</p>
+      `;
+    }
+
+    await resend.emails.send({
+      from: "PawBucks Security <security@resend.dev>",
+      to: [payload.email],
+      subject,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { text-align: center; padding: 20px 0; border-bottom: 1px solid #eee; }
+            .content { padding: 20px 0; }
+            .footer { text-align: center; padding: 20px 0; border-top: 1px solid #eee; color: #666; font-size: 12px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1 style="color: #4F46E5;">PawBucks</h1>
+            </div>
+            <div class="content">
+              ${messageHtml}
+            </div>
+            <div class="footer">
+              <p>This is an automated security notification from PawBucks.</p>
+              <p>If you have questions, please contact our support team.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
+    });
+
+    console.log(`[Security Email] Sent ${payload.event_type} alert to ${payload.email}`);
+  } catch (error) {
+    console.error("Failed to send security email alert:", error);
+    // Don't throw - email failure shouldn't break the auth event logging
+  }
+}
 
 async function checkForSuspiciousActivity(
   supabase: SupabaseClient,
