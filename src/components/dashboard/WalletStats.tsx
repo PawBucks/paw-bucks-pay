@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useMemo } from "react";
 import { GradientCard } from "@/components/ui/gradient-card";
 import { Wallet, Gift, TrendingUp } from "lucide-react";
 import { PawBucksInfoTooltip } from "@/components/PawBucksInfoTooltip";
@@ -6,9 +6,15 @@ import { PawBucksInfoTooltip } from "@/components/PawBucksInfoTooltip";
 type WalletStatsProps = {
   balance: number;
   rewardsPoints: number;
+  totalSaved?: number;
 };
 
-export const WalletStats = memo(({ balance, rewardsPoints }: WalletStatsProps) => {
+export const WalletStats = memo(({ balance, rewardsPoints, totalSaved = 0 }: WalletStatsProps) => {
+  // Memoize formatted values to prevent recalculation on re-renders
+  const formattedBalance = useMemo(() => `$${(balance ?? 0).toFixed(2)}`, [balance]);
+  const formattedRewards = useMemo(() => rewardsPoints ?? 0, [rewardsPoints]);
+  const formattedSaved = useMemo(() => `$${(totalSaved ?? 0).toFixed(2)}`, [totalSaved]);
+
   return (
     <>
       <GradientCard gradient>
@@ -18,7 +24,7 @@ export const WalletStats = memo(({ balance, rewardsPoints }: WalletStatsProps) =
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Wallet Balance</p>
-            <p className="text-2xl font-bold">${balance?.toFixed(2) || "0.00"}</p>
+            <p className="text-2xl font-bold">{formattedBalance}</p>
           </div>
         </div>
       </GradientCard>
@@ -33,7 +39,7 @@ export const WalletStats = memo(({ balance, rewardsPoints }: WalletStatsProps) =
               <p className="text-sm text-muted-foreground">Rewards Points</p>
               <PawBucksInfoTooltip variant="earning" />
             </div>
-            <p className="text-2xl font-bold">{rewardsPoints || 0}</p>
+            <p className="text-2xl font-bold">{formattedRewards}</p>
           </div>
         </div>
       </GradientCard>
@@ -45,7 +51,7 @@ export const WalletStats = memo(({ balance, rewardsPoints }: WalletStatsProps) =
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Total Saved</p>
-            <p className="text-2xl font-bold">$0.00</p>
+            <p className="text-2xl font-bold">{formattedSaved}</p>
           </div>
         </div>
       </GradientCard>

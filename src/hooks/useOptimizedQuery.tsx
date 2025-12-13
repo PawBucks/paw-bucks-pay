@@ -1,5 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { useQuery, useMutation, useQueryClient, UseQueryOptions } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 // Optimized data fetching hook with caching and error handling
@@ -11,17 +10,23 @@ export const useOptimizedQuery = <T,>(
     cacheTime?: number;
     retry?: number;
     enabled?: boolean;
+    refetchOnMount?: boolean | 'always';
+    refetchOnWindowFocus?: boolean;
   }
 ) => {
   return useQuery({
     queryKey: key,
     queryFn,
-    staleTime: options?.staleTime || 1000 * 60 * 5, // 5 minutes default
-    gcTime: options?.cacheTime || 1000 * 60 * 30, // 30 minutes default
+    staleTime: options?.staleTime ?? 1000 * 60 * 5, // 5 minutes default
+    gcTime: options?.cacheTime ?? 1000 * 60 * 30, // 30 minutes default
     retry: options?.retry ?? 2,
     enabled: options?.enabled ?? true,
-    refetchOnMount: 'always', // Always refetch on mount to get fresh data
-    refetchOnWindowFocus: true, // Refetch when tab regains focus
+    refetchOnMount: options?.refetchOnMount ?? 'always',
+    refetchOnWindowFocus: options?.refetchOnWindowFocus ?? false,
+    // Optimize network requests
+    networkMode: 'offlineFirst',
+    // Structural sharing for better re-render optimization
+    structuralSharing: true,
   });
 };
 

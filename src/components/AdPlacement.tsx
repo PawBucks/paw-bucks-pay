@@ -1,8 +1,8 @@
+import { memo, useCallback, useMemo, useState, useEffect } from "react";
 import { useSubscription } from "@/hooks/useSubscription";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Crown, X, MapPin, Tag, BadgeCheck } from "lucide-react";
-import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { getSubscriptionTier } from "@/lib/constants";
@@ -12,17 +12,20 @@ type AdPlacementProps = {
   position?: 'top' | 'bottom';
 };
 
-export const AdPlacement = ({ position = 'top' }: AdPlacementProps) => {
+const AdPlacementComponent = ({ position = 'top' }: AdPlacementProps) => {
   const { subscription } = useSubscription();
   const [dismissed, setDismissed] = useState(false);
   const [currentAdIndex, setCurrentAdIndex] = useState(0);
   const navigate = useNavigate();
   
-  // Determine subscription tier
-  const tier = getSubscriptionTier(subscription.product_id);
-
   // Fetch merchants with Premium Ad Placement service
-  const { data: adMerchants = [], isLoading } = useAdMerchants();
+  const { data: adMerchants = [] } = useAdMerchants();
+  
+  // Memoize tier calculation
+  const tier = useMemo(() => getSubscriptionTier(subscription.product_id), [subscription.product_id]);
+
+  // Get current merchant to display
+  const currentMerchant = adMerchants[currentAdIndex];
 
   // Rotate ads every 30 seconds if multiple merchants
   useEffect(() => {
@@ -35,16 +38,25 @@ export const AdPlacement = ({ position = 'top' }: AdPlacementProps) => {
     return () => clearInterval(interval);
   }, [adMerchants.length]);
 
+  // Memoize handlers
+  const handleDismiss = useCallback(() => setDismissed(true), []);
+  const handleNavigateToMerchant = useCallback(() => {
+    if (currentMerchant) navigate(`/merchant/${currentMerchant.id}`);
+  }, [currentMerchant, navigate]);
+  const handleNavigateToProfile = useCallback(() => navigate("/profile"), [navigate]);
+
+  // Memoize verified badge check
+  const hasVerifiedBadge = useMemo(() => 
+    currentMerchant 
+      ? merchantHasService(currentMerchant.active_services, SERVICE_NAMES.VERIFIED_PRO_BADGE)
+      : false,
+    [currentMerchant]
+  );
+
   // Don't show ads for PawPass+ subscribers or if dismissed
   if (tier === 'pawpass_plus' || dismissed) {
     return null;
   }
-
-  // Get current merchant to display
-  const currentMerchant = adMerchants[currentAdIndex];
-  const hasVerifiedBadge = currentMerchant 
-    ? merchantHasService(currentMerchant.active_services, SERVICE_NAMES.VERIFIED_PRO_BADGE)
-    : false;
 
   // Show sponsored merchant ad if available
   if (currentMerchant) {
@@ -54,7 +66,7 @@ export const AdPlacement = ({ position = 'top' }: AdPlacementProps) => {
           Sponsored
         </Badge>
         <button
-          onClick={() => setDismissed(true)}
+          onClick={handleDismiss}
           className="absolute top-2 right-2 p-1 rounded-full hover:bg-background/50 transition-colors"
           aria-label="Dismiss ad"
         >
@@ -92,13 +104,13 @@ export const AdPlacement = ({ position = 'top' }: AdPlacementProps) => {
           </div>
           <div className="flex flex-col gap-2 sm:items-end">
             <Button
-              onClick={() => navigate(`/merchant/${currentMerchant.id}`)}
+              onClick={handleNavigateToMerchant}
               className="bg-primary hover:bg-primary/90 whitespace-nowrap"
             >
               Shop Now
             </Button>
             <Button
-              onClick={() => navigate("/profile")}
+              onClick={handleNavigateToProfile}
               variant="outline"
               size="sm"
               className="whitespace-nowrap"
@@ -132,7 +144,7 @@ export const AdPlacement = ({ position = 'top' }: AdPlacementProps) => {
   return (
     <Card className={`relative p-4 sm:p-6 bg-gradient-to-r from-primary/10 to-accent/10 border-primary/30 ${position === 'bottom' ? 'mt-8' : 'mb-8'}`}>
       <button
-        onClick={() => setDismissed(true)}
+        onClick={handleDismiss}
         className="absolute top-2 right-2 p-1 rounded-full hover:bg-background/50 transition-colors"
         aria-label="Dismiss ad"
       >
@@ -150,7 +162,7 @@ export const AdPlacement = ({ position = 'top' }: AdPlacementProps) => {
           </p>
         </div>
         <Button
-          onClick={() => navigate("/profile")}
+          onClick={handleNavigateToProfile}
           className="bg-primary hover:bg-primary/90 whitespace-nowrap"
         >
           <Crown className="w-4 h-4 mr-2" />
@@ -160,3 +172,5 @@ export const AdPlacement = ({ position = 'top' }: AdPlacementProps) => {
     </Card>
   );
 };
+
+export const AdPlacement = memo(AdPlacementComponent);
