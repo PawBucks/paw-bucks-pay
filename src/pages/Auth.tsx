@@ -155,7 +155,27 @@ const Auth = () => {
         password: validatedData.password,
       });
 
-      if (error) throw error;
+      if (error) {
+        // Log failed login attempt
+        await supabase.functions.invoke("log-auth-event", {
+          body: {
+            event_type: "login",
+            email: validatedData.email,
+            success: false,
+            failure_reason: error.message,
+          },
+        });
+        throw error;
+      }
+
+      // Log successful login
+      await supabase.functions.invoke("log-auth-event", {
+        body: {
+          event_type: "login",
+          email: validatedData.email,
+          success: true,
+        },
+      });
 
       toast.success("Signed in successfully!");
       navigate("/");
