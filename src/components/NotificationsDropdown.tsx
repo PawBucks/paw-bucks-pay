@@ -21,22 +21,24 @@ interface Notification {
   created_at: string;
 }
 
-const requestNotificationPermission = async (): Promise<boolean> => {
+const requestNotificationPermission = async (): Promise<{ granted: boolean; alreadyDenied: boolean }> => {
   if (!("Notification" in window)) {
     console.log("This browser does not support notifications");
-    return false;
+    return { granted: false, alreadyDenied: false };
   }
 
   if (Notification.permission === "granted") {
-    return true;
+    return { granted: true, alreadyDenied: false };
   }
 
-  if (Notification.permission !== "denied") {
-    const permission = await Notification.requestPermission();
-    return permission === "granted";
+  if (Notification.permission === "denied") {
+    // Permission was previously denied - user needs to manually enable in browser settings
+    return { granted: false, alreadyDenied: true };
   }
 
-  return false;
+  // Permission is "default" - we can request it
+  const permission = await Notification.requestPermission();
+  return { granted: permission === "granted", alreadyDenied: false };
 };
 
 const showBrowserNotification = (title: string, message: string) => {
@@ -65,12 +67,20 @@ export const NotificationsDropdown = ({ userId }: { userId: string }) => {
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
 
   const enableNotifications = useCallback(async () => {
-    const granted = await requestNotificationPermission();
-    setNotificationsEnabled(granted);
-    if (granted) {
+    const result = await requestNotificationPermission();
+    setNotificationsEnabled(result.granted);
+    
+    if (result.granted) {
       toast.success("Browser notifications enabled!");
+    } else if (result.alreadyDenied) {
+      toast.error("Notifications blocked by browser", {
+        description: "To enable notifications, click the lock/info icon in your browser's address bar and allow notifications for this site, then refresh the page.",
+        duration: 8000,
+      });
     } else {
-      toast.error("Notifications permission denied");
+      toast.error("Notifications not enabled", {
+        description: "You can enable notifications later by clicking the bell icon.",
+      });
     }
   }, []);
 
