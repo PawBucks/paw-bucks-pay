@@ -40,6 +40,14 @@ type TransactionWithMerchant = {
   } | null;
 };
 
+type MedicalRecord = {
+  id: string;
+  title: string;
+  price: number;
+  record_date: string;
+  record_type: string;
+};
+
 const CATEGORY_CONFIG: Record<string, { icon: React.ComponentType<any>; color: string; label: string }> = {
   veterinary: { icon: Stethoscope, color: "hsl(var(--chart-1))", label: "Veterinary" },
   grooming: { icon: Scissors, color: "hsl(var(--chart-2))", label: "Grooming" },
@@ -56,8 +64,8 @@ const SpendingBreakdown = () => {
   const queryClient = useQueryClient();
 
   // Fetch all transactions with merchant info
-  const { data: transactions = [], isLoading } = useOptimizedQuery<TransactionWithMerchant[]>(
-    ['spending-breakdown', user?.id || ''],
+  const { data: transactions = [], isLoading: transactionsLoading } = useOptimizedQuery<TransactionWithMerchant[]>(
+    ['spending-breakdown-transactions', user?.id || ''],
     async () => {
       if (!user) return [];
       const { data, error } = await supabase
@@ -71,10 +79,30 @@ const SpendingBreakdown = () => {
     { staleTime: 1000 * 60 * 5 }
   );
 
-  // Calculate spending by category
+  // Fetch medical records with prices (vet spending)
+  const { data: medicalRecords = [], isLoading: medicalLoading } = useOptimizedQuery<MedicalRecord[]>(
+    ['spending-breakdown-medical', user?.id || ''],
+    async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from('pet_medical_records')
+        .select('id, title, price, record_date, record_type')
+        .eq('user_id', user.id)
+        .not('price', 'is', null)
+        .order('record_date', { ascending: false });
+      if (error) throw error;
+      return (data || []) as MedicalRecord[];
+    },
+    { staleTime: 1000 * 60 * 5 }
+  );
+
+  const isLoading = transactionsLoading || medicalLoading;
+
+  // Calculate spending by category (including medical records as veterinary)
   const categoryBreakdown = useMemo(() => {
     const breakdown: Record<string, number> = {};
     
+    // Add transactions
     transactions.forEach(tx => {
       const category = tx.merchants?.business_type?.toLowerCase() || 'other';
       const normalizedCategory = Object.keys(CATEGORY_CONFIG).find(c => 
@@ -84,6 +112,12 @@ const SpendingBreakdown = () => {
       breakdown[normalizedCategory] = (breakdown[normalizedCategory] || 0) + tx.amount;
     });
 
+    // Add medical records to veterinary category
+    const medicalTotal = medicalRecords.reduce((sum, record) => sum + (record.price || 0), 0);
+    if (medicalTotal > 0) {
+      breakdown['veterinary'] = (breakdown['veterinary'] || 0) + medicalTotal;
+    }
+
     return Object.entries(breakdown)
       .map(([category, amount]) => ({
         name: CATEGORY_CONFIG[category]?.label || 'Other',
@@ -92,9 +126,9 @@ const SpendingBreakdown = () => {
         category,
       }))
       .sort((a, b) => b.value - a.value);
-  }, [transactions]);
+  }, [transactions, medicalRecords]);
 
-  // Calculate monthly spending trends (last 6 months)
+  // Calculate monthly spending trends (last 6 months) - including medical records
   const monthlyTrends = useMemo(() => {
     const trends: { month: string; amount: number }[] = [];
     const now = new Date();
@@ -104,27 +138,37 @@ const SpendingBreakdown = () => {
       const monthStart = startOfMonth(monthDate);
       const monthEnd = endOfMonth(monthDate);
 
-      const monthTotal = transactions
+      // Transaction spending for the month
+      const txTotal = transactions
         .filter(tx => {
           const txDate = new Date(tx.created_at);
           return txDate >= monthStart && txDate <= monthEnd;
         })
         .reduce((sum, tx) => sum + tx.amount, 0);
 
+      // Medical records spending for the month
+      const medicalTotal = medicalRecords
+        .filter(record => {
+          const recordDate = new Date(record.record_date);
+          return recordDate >= monthStart && recordDate <= monthEnd;
+        })
+        .reduce((sum, record) => sum + (record.price || 0), 0);
+
       trends.push({
         month: format(monthDate, 'MMM'),
-        amount: monthTotal,
+        amount: txTotal + medicalTotal,
       });
     }
 
     return trends;
-  }, [transactions]);
+  }, [transactions, medicalRecords]);
 
-  // Calculate totals
-  const totalSpending = useMemo(() => 
-    transactions.reduce((sum, tx) => sum + tx.amount, 0), 
-    [transactions]
-  );
+  // Calculate totals (transactions + medical records)
+  const totalSpending = useMemo(() => {
+    const txTotal = transactions.reduce((sum, tx) => sum + tx.amount, 0);
+    const medicalTotal = medicalRecords.reduce((sum, record) => sum + (record.price || 0), 0);
+    return txTotal + medicalTotal;
+  }, [transactions, medicalRecords]);
 
   const totalRewards = useMemo(() => 
     transactions.reduce((sum, tx) => sum + tx.rewards_earned, 0), 
@@ -137,7 +181,10 @@ const SpendingBreakdown = () => {
   }, [signOut, navigate]);
 
   const handleRefresh = useCallback(async () => {
-    await queryClient.invalidateQueries({ queryKey: ['spending-breakdown'] });
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['spending-breakdown-transactions'] }),
+      queryClient.invalidateQueries({ queryKey: ['spending-breakdown-medical'] }),
+    ]);
   }, [queryClient]);
 
   const { containerRef, isRefreshing, pullDistance, progress } = usePullToRefresh({
@@ -308,52 +355,77 @@ const SpendingBreakdown = () => {
             )}
           </GradientCard>
 
-          {/* Recent Transactions */}
+          {/* Spending History */}
           <GradientCard>
-            <h3 className="text-xl font-semibold mb-4">Transaction History</h3>
-            {transactions.length > 0 ? (
+            <h3 className="text-xl font-semibold mb-4">Spending History</h3>
+            {(transactions.length > 0 || medicalRecords.length > 0) ? (
               <div className="space-y-3">
-                {transactions.slice(0, 20).map((tx) => {
-                  const category = tx.merchants?.business_type?.toLowerCase() || 'other';
-                  const normalizedCategory = Object.keys(CATEGORY_CONFIG).find(c => 
-                    category.includes(c) || c.includes(category)
-                  ) || 'other';
-                  const config = CATEGORY_CONFIG[normalizedCategory] || CATEGORY_CONFIG.other;
-                  const Icon = config.icon;
+                {/* Combine and sort all spending items by date */}
+                {[
+                  ...transactions.map(tx => ({
+                    id: tx.id,
+                    type: 'transaction' as const,
+                    amount: tx.amount,
+                    date: tx.created_at,
+                    title: tx.merchants?.business_name || tx.description || 'Transaction',
+                    category: tx.merchants?.business_type?.toLowerCase() || 'other',
+                    rewards: tx.rewards_earned,
+                  })),
+                  ...medicalRecords.map(record => ({
+                    id: record.id,
+                    type: 'medical' as const,
+                    amount: record.price,
+                    date: record.record_date,
+                    title: record.title,
+                    category: 'veterinary',
+                    rewards: 0,
+                  })),
+                ]
+                  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                  .slice(0, 30)
+                  .map((item) => {
+                    const normalizedCategory = Object.keys(CATEGORY_CONFIG).find(c => 
+                      item.category.includes(c) || c.includes(item.category)
+                    ) || 'other';
+                    const config = CATEGORY_CONFIG[normalizedCategory] || CATEGORY_CONFIG.other;
+                    const Icon = config.icon;
 
-                  return (
-                    <div
-                      key={tx.id}
-                      className="flex items-center justify-between p-4 rounded-xl bg-muted/30 border border-border/50 hover:bg-muted/50 transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div 
-                          className="w-10 h-10 rounded-full flex items-center justify-center"
-                          style={{ backgroundColor: `${config.color}20` }}
-                        >
-                          <Icon className="w-5 h-5" style={{ color: config.color }} />
+                    return (
+                      <div
+                        key={item.id}
+                        className="flex items-center justify-between p-4 rounded-xl bg-muted/30 border border-border/50 hover:bg-muted/50 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div 
+                            className="w-10 h-10 rounded-full flex items-center justify-center"
+                            style={{ backgroundColor: `${config.color}20` }}
+                          >
+                            <Icon className="w-5 h-5" style={{ color: config.color }} />
+                          </div>
+                          <div>
+                            <p className="font-medium">{item.title}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {format(new Date(item.date), "MMM d, yyyy")} • {config.label}
+                              {item.type === 'medical' && ' (Vet Record)'}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-medium">{tx.merchants?.business_name || tx.description || 'Transaction'}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {format(new Date(tx.created_at), "MMM d, yyyy")} • {config.label}
-                          </p>
+                        <div className="text-right">
+                          <p className="font-bold">-${item.amount.toFixed(2)}</p>
+                          {item.rewards > 0 && (
+                            <p className="text-xs text-accent">+{item.rewards} PawBucks</p>
+                          )}
                         </div>
                       </div>
-                      <div className="text-right">
-                        <p className="font-bold">-${tx.amount.toFixed(2)}</p>
-                        <p className="text-xs text-accent">+{tx.rewards_earned} PawBucks</p>
-                      </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
               </div>
             ) : (
               <div className="text-center py-12">
                 <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-3">
                   <ShoppingBag className="w-8 h-8 text-muted-foreground" />
                 </div>
-                <p className="text-muted-foreground mb-4">No transactions yet</p>
+                <p className="text-muted-foreground mb-4">No spending recorded yet</p>
                 <Button onClick={() => navigate("/discover")}>
                   Start Shopping
                 </Button>

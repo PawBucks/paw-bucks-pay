@@ -40,6 +40,10 @@ type WalletData = {
   total_spent: number;
 };
 
+type MedicalRecordSpending = {
+  total: number;
+};
+
 type PawBucksWallet = {
   balance: number;
 };
@@ -61,6 +65,7 @@ const Dashboard = () => {
   const [wallet, setWallet] = useState<WalletData | null>(null);
   const [pawbucksWallet, setPawbucksWallet] = useState<PawBucksWallet | null>(null);
   const [pets, setPets] = useState<PetProfile[]>([]);
+  const [medicalSpending, setMedicalSpending] = useState<number>(0);
   const [dataLoading, setDataLoading] = useState(true);
 
   // Direct fetch function - no caching that could cause stale data
@@ -74,7 +79,7 @@ const Dashboard = () => {
     
     try {
       // Fetch all data in parallel directly from Supabase
-      const [profileResult, walletResult, pawbucksResult, petsResult] = await Promise.all([
+      const [profileResult, walletResult, pawbucksResult, petsResult, medicalResult] = await Promise.all([
         supabase
           .from('profiles')
           .select('user_type, full_name')
@@ -94,7 +99,13 @@ const Dashboard = () => {
           .from('pet_profiles')
           .select('*')
           .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
+          .order('created_at', { ascending: false }),
+        // Fetch medical records spending
+        supabase
+          .from('pet_medical_records')
+          .select('price')
+          .eq('user_id', user.id)
+          .not('price', 'is', null)
       ]);
 
       if (profileResult.data) {
@@ -111,6 +122,14 @@ const Dashboard = () => {
       
       if (petsResult.data) {
         setPets(petsResult.data as PetProfile[]);
+      }
+
+      // Calculate total medical spending from records with prices
+      if (medicalResult.data) {
+        const totalMedical = medicalResult.data.reduce((sum, record) => {
+          return sum + (record.price || 0);
+        }, 0);
+        setMedicalSpending(totalMedical);
       }
     } catch (error) {
       console.error('[Dashboard] Error fetching data:', error);
@@ -205,7 +224,7 @@ const Dashboard = () => {
                 balance={(pawbucksWallet?.balance || 0) * 0.001} 
                 rewardsPoints={pawbucksWallet?.balance || 0}
                 totalSaved={(pawbucksWallet?.balance || 0) * 0.001}
-                totalSpent={wallet?.total_spent || 0}
+                totalSpent={(wallet?.total_spent || 0) + medicalSpending}
               />
             </motion.div>
             
