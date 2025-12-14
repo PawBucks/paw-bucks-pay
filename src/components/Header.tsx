@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { NotificationsDropdown } from "@/components/NotificationsDropdown";
-import logoSmall from "@/assets/logo-small.webp";
+import logo from "@/assets/logo.png";
 
 interface MenuItem {
   label: string;
@@ -50,14 +50,12 @@ const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout, userId 
           aria-label="Go to home page"
         >
           <img 
-            src={logoSmall} 
+            src={logo} 
             alt="PawBucks Logo - Return to homepage" 
             className="h-10 sm:h-12 md:h-14 w-auto object-contain transition-transform duration-200 group-hover:scale-105"
             width={56}
             height={56}
             loading="eager"
-            fetchPriority="high"
-            decoding="async"
           />
         </div>
         
