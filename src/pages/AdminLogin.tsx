@@ -24,13 +24,20 @@ const AdminLogin = () => {
   useEffect(() => {
     const checkAdminAccess = async () => {
       if (user && !show2FA) {
-        const { data, error } = await supabase.rpc('has_role', {
+        // Check for admin OR superadmin role
+        const { data: adminData, error: adminError } = await supabase.rpc('has_role', {
           _user_id: user.id,
           _role: 'admin'
         });
+        const { data: superadminData, error: superadminError } = await supabase.rpc('has_role', {
+          _user_id: user.id,
+          _role: 'superadmin'
+        });
+        
+        const data = adminData || superadminData;
 
-        if (error) {
-          console.error('Error checking admin access:', error);
+        if (adminError || superadminError) {
+          console.error('Error checking admin access:', adminError || superadminError);
           navigate('/');
           return;
         }
@@ -90,10 +97,17 @@ const AdminLogin = () => {
 
       if (data.user) {
         // Check if user has admin role
-        const { data: isAdmin, error: roleError } = await supabase.rpc('has_role', {
+        // Check for admin OR superadmin role
+        const { data: isAdminRole, error: roleError } = await supabase.rpc('has_role', {
           _user_id: data.user.id,
           _role: 'admin'
         });
+        const { data: isSuperAdminRole } = await supabase.rpc('has_role', {
+          _user_id: data.user.id,
+          _role: 'superadmin'
+        });
+        
+        const isAdmin = isAdminRole || isSuperAdminRole;
 
         if (roleError) {
           console.error('Error checking admin role:', roleError);
