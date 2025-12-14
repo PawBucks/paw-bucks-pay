@@ -480,6 +480,9 @@ const Index = () => {
                 src={logo}
                 alt="PawBucks Logo"
                 className="h-24 sm:h-32 w-auto object-contain"
+                width={96}
+                height={96}
+                loading="lazy"
               />
             </div>
             <p className="text-sm sm:text-base text-muted-foreground text-center max-w-md">

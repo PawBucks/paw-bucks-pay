@@ -47,8 +47,9 @@
     <link rel="dns-prefetch" href="https://yxpnkipcoxksmnsvpvwi.supabase.co" />
     <link rel="preconnect" href="https://yxpnkipcoxksmnsvpvwi.supabase.co" crossorigin />
     
-    <!-- Premium Typography -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <!-- Premium Typography - using media=print with onload for non-blocking -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet" /></noscript>
     
     <!-- Critical Resource Hints -->
     <link rel="modulepreload" href="/src/main.tsx" />
