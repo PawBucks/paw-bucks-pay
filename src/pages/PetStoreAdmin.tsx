@@ -51,7 +51,7 @@ export default function PetStoreAdmin() {
     is_active: true,
   });
 
-  // Check if user is admin
+  // Check if user is admin or superadmin
   const { data: isAdmin, isLoading: checkingRole } = useQuery({
     queryKey: ["user-role", user?.id],
     queryFn: async () => {
@@ -60,11 +60,10 @@ export default function PetStoreAdmin() {
         .from("user_roles")
         .select("role")
         .eq("user_id", user.id)
-        .eq("role", "admin")
-        .maybeSingle();
+        .in("role", ["admin", "superadmin"]);
       
       if (error) throw error;
-      return !!data;
+      return data && data.length > 0;
     },
     enabled: !!user,
   });
