@@ -71,6 +71,7 @@ type Profile = {
   email: string;
   user_type: string;
   created_at: string;
+  role?: string;
 };
 
 type FundingRequest = {
@@ -204,12 +205,26 @@ const AdminDashboard = () => {
         .order("created_at", { ascending: false });
       setMerchants(merchantsData || []);
 
-      // Load profiles
+      // Load profiles with their roles
       const { data: profilesData } = await supabase
         .from("profiles")
         .select("*")
         .order("created_at", { ascending: false });
-      setProfiles(profilesData || []);
+
+      // Fetch roles for all profiles
+      const { data: rolesData } = await supabase
+        .from("user_roles")
+        .select("user_id, role");
+
+      // Merge roles into profiles
+      const profilesWithRoles = (profilesData || []).map(profile => {
+        const userRole = rolesData?.find(r => r.user_id === profile.id);
+        return {
+          ...profile,
+          role: userRole?.role || 'user'
+        };
+      });
+      setProfiles(profilesWithRoles);
 
       // Load funding requests with merchant names
       const { data: fundingData } = await supabase
@@ -343,8 +358,12 @@ const AdminDashboard = () => {
     if (!deleteTarget || deleteTarget.type !== 'user') return;
 
     try {
-      const { error } = await supabase.auth.admin.deleteUser(deleteTarget.id);
+      const { data, error } = await supabase.functions.invoke('admin-delete-user', {
+        body: { user_id: deleteTarget.id },
+      });
+
       if (error) throw error;
+      if (data?.error) throw new Error(data.error);
 
       toast.success("User deleted successfully");
       setDeleteDialogOpen(false);
@@ -352,7 +371,7 @@ const AdminDashboard = () => {
       loadAdminData();
     } catch (error: any) {
       console.error("Error deleting user:", error);
-      toast.error("Failed to delete user");
+      toast.error(error.message || "Failed to delete user");
     }
   };
 
@@ -419,7 +438,14 @@ const AdminDashboard = () => {
       const userType = formData.get("userType") as string;
       const role = formData.get("role") as string;
 
-      const { error } = await supabase.functions.invoke('admin-update-user-role', {
+      // Prevent non-superadmins from assigning admin/superadmin roles
+      if (role && (role === 'admin' || role === 'superadmin') && !isSuperAdmin) {
+        toast.error("Only SuperAdmins can assign Admin or SuperAdmin roles");
+        setUpdatingUser(false);
+        return;
+      }
+
+      const { data, error } = await supabase.functions.invoke('admin-update-user-role', {
         body: { 
           user_id: selectedUser.id,
           user_type: userType || undefined,
@@ -428,6 +454,7 @@ const AdminDashboard = () => {
       });
 
       if (error) throw error;
+      if (data?.error) throw new Error(data.error);
 
       toast.success("User updated successfully!");
       setEditUserDialogOpen(false);
@@ -435,7 +462,7 @@ const AdminDashboard = () => {
       loadAdminData();
     } catch (error: any) {
       console.error("Error updating user:", error);
-      toast.error("Failed to update user");
+      toast.error(error.message || "Failed to update user");
     } finally {
       setUpdatingUser(false);
     }
@@ -837,6 +864,7 @@ const AdminDashboard = () => {
                 <TableHead>Name</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Type</TableHead>
+                <TableHead>Role</TableHead>
                 <TableHead>Created</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
@@ -848,6 +876,13 @@ const AdminDashboard = () => {
                   <TableCell>{profile.email}</TableCell>
                   <TableCell>
                     <Badge variant="outline">{profile.user_type}</Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge 
+                      variant={profile.role === 'superadmin' ? 'default' : profile.role === 'admin' ? 'secondary' : 'outline'}
+                    >
+                      {profile.role || 'user'}
+                    </Badge>
                   </TableCell>
                   <TableCell>{format(new Date(profile.created_at), "MMM d, yyyy")}</TableCell>
                   <TableCell>
@@ -1091,12 +1126,15 @@ const AdminDashboard = () => {
                 id="userType"
                 name="userType"
                 className="w-full h-10 px-3 rounded-md border bg-background"
-                defaultValue={selectedUser?.user_type}
+                defaultValue=""
               >
                 <option value="">Keep Current</option>
                 <option value="pet_owner">Pet Owner</option>
                 <option value="merchant">Merchant</option>
               </select>
+              <p className="text-xs text-muted-foreground">
+                Note: Admin access is controlled via User Role below, not Account Type.
+              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="role">User Role</Label>
@@ -1106,18 +1144,20 @@ const AdminDashboard = () => {
                 className="w-full h-10 px-3 rounded-md border bg-background"
               >
                 <option value="">Keep Current</option>
-                <option value="user">User</option>
-                {isSuperAdmin && (
-                  <>
-                    <option value="admin">Admin</option>
-                    <option value="superadmin">SuperAdmin</option>
-                  </>
-                )}
+                <option value="user">Regular User</option>
+                <option value="admin">Admin</option>
+                <option value="superadmin">SuperAdmin</option>
               </select>
+              {!isSuperAdmin && (
+                <p className="text-xs text-destructive">
+                  Only SuperAdmins can assign Admin or SuperAdmin roles.
+                </p>
+              )}
             </div>
             <div className="bg-muted p-3 rounded-md text-sm">
               <p className="font-semibold mb-1">Current Information:</p>
               <p>Account Type: <Badge variant="outline">{selectedUser?.user_type}</Badge></p>
+              <p className="mt-1">Role: <Badge variant={selectedUser?.role === 'superadmin' ? 'default' : selectedUser?.role === 'admin' ? 'secondary' : 'outline'}>{selectedUser?.role || 'user'}</Badge></p>
               <p className="mt-1 text-muted-foreground">Leave fields as "Keep Current" to maintain existing values.</p>
             </div>
             <div className="flex gap-3">
@@ -1267,20 +1307,24 @@ const AdminDashboard = () => {
                 <option value="merchant">Merchant</option>
               </select>
             </div>
-            {isSuperAdmin && (
-              <div className="space-y-2">
-                <Label htmlFor="assignRole">Assign Role (Optional)</Label>
-                <select
-                  id="assignRole"
-                  name="assignRole"
-                  className="w-full h-10 px-3 rounded-md border bg-background"
-                >
-                  <option value="">No special role</option>
-                  <option value="admin">Admin</option>
-                  <option value="superadmin">SuperAdmin</option>
-                </select>
-              </div>
-            )}
+            <div className="space-y-2">
+              <Label htmlFor="assignRole">Assign Role (Optional)</Label>
+              <select
+                id="assignRole"
+                name="assignRole"
+                className="w-full h-10 px-3 rounded-md border bg-background"
+                disabled={!isSuperAdmin}
+              >
+                <option value="">No special role</option>
+                <option value="admin">Admin</option>
+                <option value="superadmin">SuperAdmin</option>
+              </select>
+              {!isSuperAdmin && (
+                <p className="text-xs text-destructive">
+                  Only SuperAdmins can assign Admin or SuperAdmin roles.
+                </p>
+              )}
+            </div>
             <div className="flex gap-3">
               <Button
                 type="button"
