@@ -102,6 +102,7 @@ const AdminDashboard = () => {
   const { user, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [merchants, setMerchants] = useState<Merchant[]>([]);
   const [profiles, setProfiles] = useState<Profile[]>([]);
@@ -157,20 +158,23 @@ const AdminDashboard = () => {
     if (!user) return;
 
     try {
+      // Check for admin or superadmin role
       const { data, error } = await supabase
         .from("user_roles")
         .select("role")
         .eq("user_id", user.id)
-        .eq("role", "admin")
-        .single();
+        .in("role", ["admin", "superadmin"]);
 
-      if (error || !data) {
+      if (error || !data || data.length === 0) {
         toast.error("Access denied. Admin privileges required.");
         await supabase.auth.signOut();
         navigate("/admin");
         return;
       }
 
+      // Check if user is superadmin
+      const hasSuperAdmin = data.some(r => r.role === "superadmin");
+      setIsSuperAdmin(hasSuperAdmin);
       setIsAdmin(true);
       loadAdminData();
     } catch (error) {
@@ -1103,8 +1107,12 @@ const AdminDashboard = () => {
               >
                 <option value="">Keep Current</option>
                 <option value="user">User</option>
-                <option value="moderator">Moderator</option>
-                <option value="admin">Admin</option>
+                {isSuperAdmin && (
+                  <>
+                    <option value="admin">Admin</option>
+                    <option value="superadmin">SuperAdmin</option>
+                  </>
+                )}
               </select>
             </div>
             <div className="bg-muted p-3 rounded-md text-sm">
@@ -1173,6 +1181,7 @@ const AdminDashboard = () => {
             const email = formData.get('email') as string;
             const fullName = formData.get('fullName') as string;
             const userType = formData.get('userType') as string;
+            const assignRole = formData.get('assignRole') as string;
             
             if (!email || !fullName || !userType) {
               toast.error('Please fill in all fields');
@@ -1197,13 +1206,25 @@ const AdminDashboard = () => {
 
               if (authError) throw authError;
 
+              // If a role was assigned and user was created successfully, assign the role
+              if (authData.user && assignRole && isSuperAdmin) {
+                const { error: roleError } = await supabase
+                  .from('user_roles')
+                  .insert({ user_id: authData.user.id, role: assignRole as any });
+                
+                if (roleError) {
+                  console.error('Error assigning role:', roleError);
+                  toast.error('User created but failed to assign role');
+                }
+              }
+
               // Log admin action
               if (authData.user) {
                 await supabase.rpc('log_admin_action', {
                   _action: 'CREATE_USER',
                   _entity_type: 'user',
                   _entity_id: authData.user.id,
-                  _changes: { email, full_name: fullName, user_type: userType },
+                  _changes: { email, full_name: fullName, user_type: userType, role: assignRole || 'none' },
                 });
               }
 
@@ -1246,6 +1267,20 @@ const AdminDashboard = () => {
                 <option value="merchant">Merchant</option>
               </select>
             </div>
+            {isSuperAdmin && (
+              <div className="space-y-2">
+                <Label htmlFor="assignRole">Assign Role (Optional)</Label>
+                <select
+                  id="assignRole"
+                  name="assignRole"
+                  className="w-full h-10 px-3 rounded-md border bg-background"
+                >
+                  <option value="">No special role</option>
+                  <option value="admin">Admin</option>
+                  <option value="superadmin">SuperAdmin</option>
+                </select>
+              </div>
+            )}
             <div className="flex gap-3">
               <Button
                 type="button"

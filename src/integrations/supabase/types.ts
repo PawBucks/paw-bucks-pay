@@ -2111,6 +2111,7 @@ export type Database = {
         Returns: boolean
       }
       is_offer_valid: { Args: { offer_uuid: string }; Returns: boolean }
+      is_superadmin: { Args: { _user_id: string }; Returns: boolean }
       log_admin_action: {
         Args: {
           _action: string
@@ -2135,7 +2136,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "user"
+      app_role: "admin" | "user" | "superadmin"
       medical_record_type:
         | "vaccination"
         | "checkup"
@@ -2275,7 +2276,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user"],
+      app_role: ["admin", "user", "superadmin"],
       medical_record_type: [
         "vaccination",
         "checkup",

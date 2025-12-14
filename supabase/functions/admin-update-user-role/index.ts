@@ -10,7 +10,7 @@ const corsHeaders = {
 const requestSchema = z.object({
   user_id: z.string().uuid(),
   user_type: z.enum(['pet_owner', 'merchant']).optional(),
-  role: z.enum(['admin', 'moderator', 'user']).optional(),
+  role: z.enum(['admin', 'superadmin', 'user']).optional(),
 });
 
 serve(async (req) => {
@@ -37,15 +37,18 @@ serve(async (req) => {
       throw new Error('Unauthorized');
     }
 
-    // Verify admin role
+    // Verify admin or superadmin role
     const { data: roles, error: roleError } = await supabase
       .from('user_roles')
       .select('role')
       .eq('user_id', user.id);
 
-    if (roleError || !roles || !roles.some(r => r.role === 'admin')) {
+    if (roleError || !roles || !roles.some(r => r.role === 'admin' || r.role === 'superadmin')) {
       throw new Error('Unauthorized: Admin access required');
     }
+
+    // Check if user is superadmin (required to assign admin/superadmin roles)
+    const isSuperAdmin = roles.some(r => r.role === 'superadmin');
 
     console.log('Admin user verified:', user.id);
 
@@ -72,6 +75,11 @@ serve(async (req) => {
 
     // Update role in user_roles if provided
     if (validatedData.role) {
+      // Only superadmins can assign admin or superadmin roles
+      if ((validatedData.role === 'admin' || validatedData.role === 'superadmin') && !isSuperAdmin) {
+        throw new Error('Unauthorized: Only SuperAdmins can assign admin roles');
+      }
+
       // First, check if user has any role
       const { data: existingRoles } = await supabase
         .from('user_roles')
