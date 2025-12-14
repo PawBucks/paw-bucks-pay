@@ -1158,6 +1158,112 @@ const AdminDashboard = () => {
         </AlertDialogContent>
       </AlertDialog>
 
+      {/* Add User Dialog */}
+      <Dialog open={addUserDialogOpen} onOpenChange={setAddUserDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add New User</DialogTitle>
+            <DialogDescription>
+              Create a new user account. They will receive an email to set their password.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.currentTarget);
+            const email = formData.get('email') as string;
+            const fullName = formData.get('fullName') as string;
+            const userType = formData.get('userType') as string;
+            
+            if (!email || !fullName || !userType) {
+              toast.error('Please fill in all fields');
+              return;
+            }
+
+            try {
+              // Generate a temporary password
+              const tempPassword = crypto.randomUUID().slice(0, 16);
+              
+              // Create user via Supabase Auth
+              const { data: authData, error: authError } = await supabase.auth.signUp({
+                email,
+                password: tempPassword,
+                options: {
+                  data: {
+                    full_name: fullName,
+                    user_type: userType,
+                  }
+                }
+              });
+
+              if (authError) throw authError;
+
+              // Log admin action
+              if (authData.user) {
+                await supabase.rpc('log_admin_action', {
+                  _action: 'CREATE_USER',
+                  _entity_type: 'user',
+                  _entity_id: authData.user.id,
+                  _changes: { email, full_name: fullName, user_type: userType },
+                });
+              }
+
+              toast.success('User created successfully. They can use "Forgot Password" to set their password.');
+              setAddUserDialogOpen(false);
+              loadAdminData();
+            } catch (error: any) {
+              console.error('Error creating user:', error);
+              toast.error(error.message || 'Failed to create user');
+            }
+          }} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="fullName">Full Name</Label>
+              <Input
+                id="fullName"
+                name="fullName"
+                placeholder="John Doe"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="user@example.com"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="userType">Account Type</Label>
+              <select
+                id="userType"
+                name="userType"
+                className="w-full h-10 px-3 rounded-md border bg-background"
+                required
+              >
+                <option value="pet_owner">Pet Owner</option>
+                <option value="merchant">Merchant</option>
+              </select>
+            </div>
+            <div className="flex gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setAddUserDialogOpen(false)}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button type="submit" className="flex-1">
+                <UserPlus className="w-4 h-4 mr-2" />
+                Create User
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
       {/* Security Monitoring Dialog */}
       <Dialog open={securityDialogOpen} onOpenChange={setSecurityDialogOpen}>
         <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
