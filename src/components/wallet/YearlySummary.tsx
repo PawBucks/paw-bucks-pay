@@ -28,7 +28,8 @@ export function YearlySummary() {
       const startDate = new Date(parseInt(selectedYear), 0, 1);
       const endDate = new Date(parseInt(selectedYear), 11, 31, 23, 59, 59);
 
-      const { data: transactions, error } = await supabase
+      // Fetch transactions
+      const { data: transactions, error: txError } = await supabase
         .from('transactions')
         .select('amount, created_at, merchants!inner(business_name, business_type)')
         .eq('user_id', user.id)
@@ -37,13 +38,25 @@ export function YearlySummary() {
         .lte('created_at', endDate.toISOString())
         .order('created_at', { ascending: true });
 
-      if (error) throw error;
+      if (txError) throw txError;
+
+      // Fetch medical records for the year
+      const { data: medicalRecords, error: medError } = await supabase
+        .from('pet_medical_records')
+        .select('price, record_date, title')
+        .eq('user_id', user.id)
+        .gte('record_date', startDate.toISOString().split('T')[0])
+        .lte('record_date', endDate.toISOString().split('T')[0])
+        .order('record_date', { ascending: true });
+
+      if (medError) throw medError;
 
       // Process monthly totals
       const monthlyTotals = Array(12).fill(0);
       const categoryTotals: Record<string, number> = {};
       const merchantTotals: Record<string, { name: string; total: number }> = {};
 
+      // Process transactions
       transactions?.forEach((tx: any) => {
         const month = new Date(tx.created_at).getMonth();
         const amount = parseFloat(tx.amount);
@@ -59,11 +72,29 @@ export function YearlySummary() {
         merchantTotals[merchantName].total += amount;
       });
 
+      // Process medical records
+      medicalRecords?.forEach((record: any) => {
+        const month = new Date(record.record_date).getMonth();
+        const amount = parseFloat(record.price) || 0;
+        monthlyTotals[month] += amount;
+
+        // Add to veterinary category
+        categoryTotals['Veterinary'] = (categoryTotals['Veterinary'] || 0) + amount;
+
+        // Add to "Vet Visits" as a merchant
+        if (!merchantTotals['Vet Visits']) {
+          merchantTotals['Vet Visits'] = { name: 'Vet Visits', total: 0 };
+        }
+        merchantTotals['Vet Visits'].total += amount;
+      });
+
       const totalSpent = monthlyTotals.reduce((a, b) => a + b, 0);
       const avgMonthly = totalSpent / 12;
+      const totalTransactionCount = (transactions?.length || 0) + (medicalRecords?.length || 0);
 
       return {
         transactions: transactions || [],
+        medicalRecords: medicalRecords || [],
         monthlyData: MONTHS.map((month, idx) => ({
           month: month.substring(0, 3),
           amount: monthlyTotals[idx],
@@ -77,7 +108,7 @@ export function YearlySummary() {
           .slice(0, 5),
         totalSpent,
         avgMonthly,
-        transactionCount: transactions?.length || 0,
+        transactionCount: totalTransactionCount,
       };
     },
   });
