@@ -524,7 +524,47 @@ serve(async (req) => {
               description: `Earned ${pawbucksEarned} PawBucks (${tierName} ${pawbucksMultiplier}x) from $${amount.toFixed(2)} purchase`
             });
 
-          console.log(`✅ Awarded ${pawbucksEarned} PawBucks (${tierName} ${pawbucksMultiplier}x) to user ${user_id}`);
+        console.log(`✅ Awarded ${pawbucksEarned} PawBucks (${tierName} ${pawbucksMultiplier}x) to user ${user_id}`);
+        }
+      }
+
+      // Check budget thresholds and send notifications
+      if (user_id && merchant_id) {
+        try {
+          // Get merchant category
+          const { data: merchantData } = await supabaseAdmin
+            .from('merchants')
+            .select('business_type')
+            .eq('id', merchant_id)
+            .single();
+
+          const budgetCheckPayload = {
+            user_id,
+            amount,
+            merchant_category: merchantData?.business_type || 'other',
+          };
+
+          // Call budget check function
+          const budgetCheckResponse = await fetch(
+            `${Deno.env.get('SUPABASE_URL')}/functions/v1/check-budget-notify`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+              },
+              body: JSON.stringify(budgetCheckPayload),
+            }
+          );
+
+          if (budgetCheckResponse.ok) {
+            const budgetResult = await budgetCheckResponse.json();
+            console.log('Budget check result:', budgetResult);
+          } else {
+            console.error('Budget check failed:', await budgetCheckResponse.text());
+          }
+        } catch (budgetError) {
+          console.error('Error checking budget:', budgetError);
         }
       }
 

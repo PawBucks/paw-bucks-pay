@@ -15,7 +15,8 @@ import { PullToRefresh } from "@/components/PullToRefresh";
 import { SpendingTrendsChart } from "@/components/wallet/SpendingTrendsChart";
 import { MonthlyComparison } from "@/components/wallet/MonthlyComparison";
 import { BudgetSettings } from "@/components/wallet/BudgetSettings";
-import { Wallet as WalletIcon, TrendingUp, Gift, ArrowUpRight, ArrowDownRight, Coins, Sparkles, PieChart } from "lucide-react";
+import { YearlySummary } from "@/components/wallet/YearlySummary";
+import { Wallet as WalletIcon, TrendingUp, Gift, ArrowUpRight, ArrowDownRight, Coins, Sparkles, PieChart, Calendar } from "lucide-react";
 import { format } from "date-fns";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -217,6 +218,11 @@ const Wallet = () => {
         {/* Spending Trends Chart */}
         <div className="mb-6">
           <SpendingTrendsChart transactions={transactions} />
+        </div>
+
+        {/* Yearly Summary with PDF Download */}
+        <div className="mb-6">
+          <YearlySummary />
         </div>
 
         {/* Recent Transactions */}

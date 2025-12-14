@@ -128,3 +128,9 @@ verify_jwt = false
 
 [functions.log-auth-event]
 verify_jwt = false
+
+[functions.check-budget-notify]
+verify_jwt = false
+
+[functions.purchase-market-service]
+verify_jwt = true
