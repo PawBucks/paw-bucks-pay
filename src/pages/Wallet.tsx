@@ -45,6 +45,13 @@ type PawBucksActivity = {
   created_at: string;
 };
 
+type MedicalRecord = {
+  id: string;
+  price: number | null;
+  record_date: string;
+  title: string;
+};
+
 const Wallet = () => {
   const { user, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -79,6 +86,22 @@ const Wallet = () => {
     { staleTime: 1000 * 60 * 2 }
   );
 
+  // Fetch medical records to include in spending calculations
+  const { data: medicalRecords = [], isLoading: medicalLoading } = useOptimizedQuery<MedicalRecord[]>(
+    ['wallet-medical-records', user?.id || ''],
+    async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from('pet_medical_records')
+        .select('id, price, record_date, title')
+        .eq('user_id', user.id)
+        .order('record_date', { ascending: false });
+      if (error) throw error;
+      return data || [];
+    },
+    { staleTime: 1000 * 60 * 2 }
+  );
+
   // Fetch PawBucks activity history
   const { data: pawbucksActivity = [], isLoading: activityLoading } = useOptimizedQuery<PawBucksActivity[]>(
     ['pawbucks_activity', user?.id || ''],
@@ -96,7 +119,14 @@ const Wallet = () => {
     { staleTime: 1000 * 60 * 2 }
   );
 
-  const loading = walletLoading || pawbucksLoading || transactionsLoading || activityLoading;
+  const loading = walletLoading || pawbucksLoading || transactionsLoading || activityLoading || medicalLoading;
+
+  // Calculate true total spent including medical records
+  const totalSpent = useMemo(() => {
+    const transactionTotal = wallet?.total_spent || 0;
+    const medicalTotal = medicalRecords.reduce((sum, record) => sum + (record.price || 0), 0);
+    return transactionTotal + medicalTotal;
+  }, [wallet?.total_spent, medicalRecords]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -115,6 +145,7 @@ const Wallet = () => {
     await queryClient.invalidateQueries({ queryKey: ['pawbucks_wallet'] });
     await queryClient.invalidateQueries({ queryKey: ['transactions'] });
     await queryClient.invalidateQueries({ queryKey: ['pawbucks_activity'] });
+    await queryClient.invalidateQueries({ queryKey: ['wallet-medical-records'] });
   }, [queryClient]);
 
   const { containerRef, isRefreshing, pullDistance, progress } = usePullToRefresh({
@@ -176,7 +207,7 @@ const Wallet = () => {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Total Spent</p>
-                <p className="text-2xl font-bold">${wallet?.total_spent?.toFixed(2) || "0.00"}</p>
+                <p className="text-2xl font-bold">${totalSpent.toFixed(2)}</p>
               </div>
             </div>
           </GradientCard>
@@ -211,13 +242,13 @@ const Wallet = () => {
 
         {/* Month-over-Month Comparison and Budget Settings */}
         <div className="grid gap-6 md:grid-cols-2 mb-6">
-          <MonthlyComparison transactions={transactions} />
+          <MonthlyComparison transactions={transactions} medicalRecords={medicalRecords} />
           <BudgetSettings transactions={transactions} />
         </div>
 
         {/* Spending Trends Chart */}
         <div className="mb-6">
-          <SpendingTrendsChart transactions={transactions} />
+          <SpendingTrendsChart transactions={transactions} medicalRecords={medicalRecords} />
         </div>
 
         {/* Yearly Summary with PDF Download */}

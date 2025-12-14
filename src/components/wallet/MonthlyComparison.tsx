@@ -9,11 +9,18 @@ type Transaction = {
   created_at: string;
 };
 
-type MonthlyComparisonProps = {
-  transactions: Transaction[];
+type MedicalRecord = {
+  id: string;
+  price: number | null;
+  record_date: string;
 };
 
-export const MonthlyComparison = memo(({ transactions }: MonthlyComparisonProps) => {
+type MonthlyComparisonProps = {
+  transactions: Transaction[];
+  medicalRecords?: MedicalRecord[];
+};
+
+export const MonthlyComparison = memo(({ transactions, medicalRecords = [] }: MonthlyComparisonProps) => {
   const comparison = useMemo(() => {
     const now = new Date();
     const thisMonthStart = startOfMonth(now);
@@ -21,19 +28,39 @@ export const MonthlyComparison = memo(({ transactions }: MonthlyComparisonProps)
     const lastMonthStart = startOfMonth(subMonths(now, 1));
     const lastMonthEnd = endOfMonth(subMonths(now, 1));
 
-    const thisMonthTotal = transactions
+    // Calculate transaction totals
+    const thisMonthTransactions = transactions
       .filter(tx => {
         const txDate = new Date(tx.created_at);
         return txDate >= thisMonthStart && txDate <= thisMonthEnd;
       })
       .reduce((sum, tx) => sum + tx.amount, 0);
 
-    const lastMonthTotal = transactions
+    const lastMonthTransactions = transactions
       .filter(tx => {
         const txDate = new Date(tx.created_at);
         return txDate >= lastMonthStart && txDate <= lastMonthEnd;
       })
       .reduce((sum, tx) => sum + tx.amount, 0);
+
+    // Calculate medical record totals
+    const thisMonthMedical = medicalRecords
+      .filter(record => {
+        const recordDate = new Date(record.record_date);
+        return recordDate >= thisMonthStart && recordDate <= thisMonthEnd;
+      })
+      .reduce((sum, record) => sum + (record.price || 0), 0);
+
+    const lastMonthMedical = medicalRecords
+      .filter(record => {
+        const recordDate = new Date(record.record_date);
+        return recordDate >= lastMonthStart && recordDate <= lastMonthEnd;
+      })
+      .reduce((sum, record) => sum + (record.price || 0), 0);
+
+    // Combine totals
+    const thisMonthTotal = thisMonthTransactions + thisMonthMedical;
+    const lastMonthTotal = lastMonthTransactions + lastMonthMedical;
 
     const difference = thisMonthTotal - lastMonthTotal;
     const percentageChange = lastMonthTotal > 0 
@@ -46,7 +73,7 @@ export const MonthlyComparison = memo(({ transactions }: MonthlyComparisonProps)
       difference,
       percentageChange,
     };
-  }, [transactions]);
+  }, [transactions, medicalRecords]);
 
   const getTrendIcon = () => {
     if (comparison.percentageChange > 5) {

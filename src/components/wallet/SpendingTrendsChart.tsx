@@ -10,11 +10,18 @@ type Transaction = {
   created_at: string;
 };
 
-type SpendingTrendsChartProps = {
-  transactions: Transaction[];
+type MedicalRecord = {
+  id: string;
+  price: number | null;
+  record_date: string;
 };
 
-export const SpendingTrendsChart = memo(({ transactions }: SpendingTrendsChartProps) => {
+type SpendingTrendsChartProps = {
+  transactions: Transaction[];
+  medicalRecords?: MedicalRecord[];
+};
+
+export const SpendingTrendsChart = memo(({ transactions, medicalRecords = [] }: SpendingTrendsChartProps) => {
   // Calculate daily spending (last 7 days)
   const dailyData = useMemo(() => {
     const data: { day: string; amount: number }[] = [];
@@ -25,21 +32,30 @@ export const SpendingTrendsChart = memo(({ transactions }: SpendingTrendsChartPr
       const dayStart = startOfDay(date);
       const dayEnd = endOfDay(date);
 
-      const dayTotal = transactions
+      // Transaction totals
+      const dayTransactions = transactions
         .filter(tx => {
           const txDate = new Date(tx.created_at);
           return txDate >= dayStart && txDate <= dayEnd;
         })
         .reduce((sum, tx) => sum + tx.amount, 0);
 
+      // Medical record totals
+      const dayMedical = medicalRecords
+        .filter(record => {
+          const recordDate = new Date(record.record_date);
+          return recordDate >= dayStart && recordDate <= dayEnd;
+        })
+        .reduce((sum, record) => sum + (record.price || 0), 0);
+
       data.push({
         day: format(date, 'EEE'),
-        amount: dayTotal,
+        amount: dayTransactions + dayMedical,
       });
     }
 
     return data;
-  }, [transactions]);
+  }, [transactions, medicalRecords]);
 
   // Calculate weekly spending (last 4 weeks)
   const weeklyData = useMemo(() => {
@@ -51,21 +67,30 @@ export const SpendingTrendsChart = memo(({ transactions }: SpendingTrendsChartPr
       const weekStart = startOfWeek(weekDate);
       const weekEnd = endOfWeek(weekDate);
 
-      const weekTotal = transactions
+      // Transaction totals
+      const weekTransactions = transactions
         .filter(tx => {
           const txDate = new Date(tx.created_at);
           return txDate >= weekStart && txDate <= weekEnd;
         })
         .reduce((sum, tx) => sum + tx.amount, 0);
 
+      // Medical record totals
+      const weekMedical = medicalRecords
+        .filter(record => {
+          const recordDate = new Date(record.record_date);
+          return recordDate >= weekStart && recordDate <= weekEnd;
+        })
+        .reduce((sum, record) => sum + (record.price || 0), 0);
+
       data.push({
         week: `Week ${4 - i}`,
-        amount: weekTotal,
+        amount: weekTransactions + weekMedical,
       });
     }
 
     return data;
-  }, [transactions]);
+  }, [transactions, medicalRecords]);
 
   const tooltipStyle = {
     backgroundColor: 'hsl(var(--card))',
@@ -74,7 +99,7 @@ export const SpendingTrendsChart = memo(({ transactions }: SpendingTrendsChartPr
     padding: '8px 12px',
   };
 
-  const hasData = transactions.length > 0;
+  const hasData = transactions.length > 0 || medicalRecords.length > 0;
 
   return (
     <GradientCard>
