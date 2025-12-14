@@ -31,7 +31,7 @@ export function YearlySummary() {
       // Fetch transactions
       const { data: transactions, error: txError } = await supabase
         .from('transactions')
-        .select('amount, created_at, merchants!inner(business_name, business_type)')
+        .select('amount, created_at, merchants(business_name, business_type)')
         .eq('user_id', user.id)
         .eq('status', 'completed')
         .gte('created_at', startDate.toISOString())
