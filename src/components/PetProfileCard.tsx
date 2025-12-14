@@ -63,70 +63,72 @@ const PetProfileCardComponent = ({ pet, onUpdate, index = 0 }: PetProfileCardPro
         ease: "easeOut"
       }}
     >
-    <GradientCard gradient className="flex items-start gap-4 p-4">
-      {pet.photo_url ? (
-        <img
-          src={pet.photo_url}
-          alt={pet.name}
-          width={80}
-          height={80}
-          className="w-20 h-20 rounded-full object-cover border-2 border-primary/20 flex-shrink-0"
-          loading="lazy"
-        />
-      ) : (
-        <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-          <PawPrint className="w-10 h-10 text-muted-foreground" />
-        </div>
-      )}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0 flex-1">
-            <h3 className="text-xl font-bold mb-2 truncate">{pet.name}</h3>
-            <div className="flex flex-col gap-1.5">
-              <div className="flex items-center gap-2">
-                <Badge
-                  variant="outline"
-                  className={`${petTypeColors[pet.type]} flex-shrink-0`}
-                >
-                  {petTypeLabel}
-                </Badge>
-                {pet.breed && (
-                  <span className="text-sm text-muted-foreground truncate">{pet.breed}</span>
-                )}
-              </div>
-              {age !== null && (
-                <span className="text-sm text-muted-foreground flex items-center gap-1">
-                  <Calendar className="w-3 h-3 flex-shrink-0" />
-                  {age} {age === 1 ? "year" : "years"} old
-                </span>
-              )}
+      <GradientCard gradient className="p-4">
+        <div className="flex items-center gap-4">
+          {/* Pet Photo */}
+          {pet.photo_url ? (
+            <img
+              src={pet.photo_url}
+              alt={pet.name}
+              width={64}
+              height={64}
+              className="w-16 h-16 rounded-full object-cover border-2 border-primary/20 flex-shrink-0"
+              loading="lazy"
+            />
+          ) : (
+            <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+              <PawPrint className="w-8 h-8 text-muted-foreground" />
             </div>
+          )}
+
+          {/* Pet Info - Stacked Vertically */}
+          <div className="flex-1 min-w-0 space-y-1">
+            <Badge
+              variant="outline"
+              className={`${petTypeColors[pet.type]} text-xs`}
+            >
+              {petTypeLabel}
+            </Badge>
+            <h3 className="text-lg font-bold leading-tight">{pet.name}</h3>
+            {pet.breed && (
+              <p className="text-sm text-muted-foreground">{pet.breed}</p>
+            )}
+            {age !== null && (
+              <p className="text-sm text-muted-foreground flex items-center gap-1">
+                <Calendar className="w-3 h-3" />
+                {age} {age === 1 ? "year" : "years"} old
+              </p>
+            )}
           </div>
-          <div className="flex gap-2 flex-shrink-0">
+
+          {/* Action Buttons */}
+          <div className="flex flex-col gap-2 flex-shrink-0">
             <Button
               variant="outline"
-              size="sm"
+              size="icon"
+              className="h-9 w-9"
               onClick={handleEditClick}
             >
               <Pencil className="w-4 h-4" />
             </Button>
             <Button
               variant="outline"
-              size="sm"
+              size="icon"
+              className="h-9 w-9"
               onClick={handleHealthClick}
             >
               <FileHeart className="w-4 h-4" />
             </Button>
           </div>
         </div>
-      </div>
+      </GradientCard>
+      
       <EditPetProfileDialog
         pet={pet}
         open={editDialogOpen}
         onOpenChange={handleDialogChange}
         onSuccess={handleEditSuccess}
       />
-      </GradientCard>
     </motion.div>
   );
 };

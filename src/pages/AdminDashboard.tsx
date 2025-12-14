@@ -452,43 +452,48 @@ const AdminDashboard = () => {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b bg-card sticky top-0 z-10 safe-area-inset-top">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
-              <Shield className="w-6 h-6 text-primary-foreground" />
+        <div className="container mx-auto px-4 py-3">
+          {/* Top Row: Logo + Sign Out */}
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+                <Shield className="w-4 h-4 text-primary-foreground" />
+              </div>
+              <div className="min-w-0">
+                <h1 className="text-lg font-bold leading-tight">Admin Dashboard</h1>
+                <p className="text-xs text-muted-foreground">PawBucks Management</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-xl font-bold">Admin Dashboard</h1>
-              <p className="text-xs text-muted-foreground">PawBucks Management</p>
-            </div>
+            <Button variant="ghost" size="icon" onClick={handleSignOut} className="flex-shrink-0">
+              <LogOut className="w-4 h-4" />
+            </Button>
           </div>
-          <div className="flex gap-2">
-            <Button variant="ghost" size="sm" onClick={() => setSecurityDialogOpen(true)}>
-              <ShieldAlert className="w-4 h-4 mr-2" />
+          
+          {/* Navigation Row: Scrollable on mobile */}
+          <div className="flex gap-1 overflow-x-auto pb-1 -mx-4 px-4 scrollbar-hide">
+            <Button variant="ghost" size="sm" className="flex-shrink-0 h-8 px-3 text-xs" onClick={() => setSecurityDialogOpen(true)}>
+              <ShieldAlert className="w-3.5 h-3.5 mr-1.5" />
               Security
             </Button>
-            <Button variant="ghost" size="sm" onClick={() => setNotificationDialogOpen(true)}>
-              <Bell className="w-4 h-4 mr-2" />
+            <Button variant="ghost" size="sm" className="flex-shrink-0 h-8 px-3 text-xs" onClick={() => setNotificationDialogOpen(true)}>
+              <Bell className="w-3.5 h-3.5 mr-1.5" />
               Notify
             </Button>
-            <Button variant="ghost" size="sm" onClick={() => navigate("/admin/merchant-services")}>
-              <Store className="w-4 h-4 mr-2" />
+            <Button variant="ghost" size="sm" className="flex-shrink-0 h-8 px-3 text-xs" onClick={() => navigate("/admin/merchant-services")}>
+              <Store className="w-3.5 h-3.5 mr-1.5" />
               Services
             </Button>
-            <Button variant="ghost" size="sm" onClick={() => navigate("/admin/pet-store")}>
-              <Store className="w-4 h-4 mr-2" />
+            <Button variant="ghost" size="sm" className="flex-shrink-0 h-8 px-3 text-xs" onClick={() => navigate("/admin/pet-store")}>
+              <Store className="w-3.5 h-3.5 mr-1.5" />
               Pet Store
-            </Button>
-            <Button variant="ghost" size="sm" onClick={handleSignOut}>
-              <LogOut className="w-4 h-4" />
             </Button>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8 space-y-8">
+      <main className="container mx-auto px-4 py-6 space-y-6">
         {/* Stats Overview - Clickable Cards */}
-        <div className="grid gap-6 md:grid-cols-4">
+        <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
           <GradientCard gradient className="cursor-pointer hover:opacity-90 transition-opacity" onClick={() => setUsersDialogOpen(true)}>
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
