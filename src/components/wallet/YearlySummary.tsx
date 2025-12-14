@@ -28,10 +28,10 @@ export function YearlySummary() {
       const startDate = new Date(parseInt(selectedYear), 0, 1);
       const endDate = new Date(parseInt(selectedYear), 11, 31, 23, 59, 59);
 
-      // Fetch transactions
+      // Fetch transactions with merchant_id
       const { data: transactions, error: txError } = await supabase
         .from('transactions')
-        .select('amount, created_at, merchants(business_name, business_type)')
+        .select('amount, created_at, merchant_id')
         .eq('user_id', user.id)
         .eq('status', 'completed')
         .gte('created_at', startDate.toISOString())
@@ -39,6 +39,21 @@ export function YearlySummary() {
         .order('created_at', { ascending: true });
 
       if (txError) throw txError;
+
+      // Fetch merchants from public view to get names
+      const merchantIds = [...new Set(transactions?.map(t => t.merchant_id).filter(Boolean) || [])];
+      let merchantMap: Record<string, { business_name: string; business_type: string }> = {};
+      
+      if (merchantIds.length > 0) {
+        const { data: merchants } = await supabase
+          .from('merchants_public')
+          .select('id, business_name, business_type')
+          .in('id', merchantIds);
+        
+        merchants?.forEach((m: any) => {
+          merchantMap[m.id] = { business_name: m.business_name, business_type: m.business_type };
+        });
+      }
 
       // Fetch medical records for the year
       const { data: medicalRecords, error: medError } = await supabase
@@ -62,10 +77,11 @@ export function YearlySummary() {
         const amount = parseFloat(tx.amount);
         monthlyTotals[month] += amount;
 
-        const category = tx.merchants?.business_type || 'Other';
+        const merchant = merchantMap[tx.merchant_id];
+        const category = merchant?.business_type || 'Other';
         categoryTotals[category] = (categoryTotals[category] || 0) + amount;
 
-        const merchantName = tx.merchants?.business_name || 'Unknown';
+        const merchantName = merchant?.business_name || 'Unknown Merchant';
         if (!merchantTotals[merchantName]) {
           merchantTotals[merchantName] = { name: merchantName, total: 0 };
         }
