@@ -32,14 +32,14 @@ const AdminMerchantServices = () => {
     if (!user) return;
 
     try {
+      // Check for admin OR superadmin role
       const { data, error } = await supabase
         .from("user_roles")
         .select("role")
         .eq("user_id", user.id)
-        .eq("role", "admin")
-        .single();
+        .in("role", ["admin", "superadmin"]);
 
-      if (error || !data) {
+      if (error || !data || data.length === 0) {
         toast.error("Access denied. Admin privileges required.");
         await supabase.auth.signOut();
         navigate("/admin");
