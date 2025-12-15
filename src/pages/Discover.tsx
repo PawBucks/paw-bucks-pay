@@ -25,7 +25,7 @@ import { toast } from "sonner";
 import { ROUTES, QUERY_STALE_TIMES } from "@/lib/constants";
 import { SEO } from "@/components/SEO";
 import { usePersistentState } from "@/hooks/usePersistentState";
-import { useSponsoredMerchants, useVerifiedProMerchants, SERVICE_NAMES } from "@/hooks/useMerchantServices";
+import { useSponsoredMerchants, useVerifiedProMerchants, useSearchBoostedMerchantSet, SERVICE_NAMES } from "@/hooks/useMerchantServices";
 import { useQueryClient } from "@tanstack/react-query";
 
 type MerchantWithRating = {
@@ -324,6 +324,9 @@ const Discover = () => {
   const { data: verifiedProMerchantIds = [] } = useVerifiedProMerchants();
   const verifiedProSet = useMemo(() => new Set(verifiedProMerchantIds), [verifiedProMerchantIds]);
 
+  // Fetch search boosted merchants (merchants with Search Ranking Booster service)
+  const { data: searchBoostedIds = new Set<string>() } = useSearchBoostedMerchantSet();
+
   // Get user's location
   const requestLocation = useCallback(() => {
     if (!navigator.geolocation) {
@@ -479,9 +482,18 @@ const Discover = () => {
       filtered = filtered.filter(m => m.distance !== undefined && m.distance <= maxDistance);
     }
 
-    // Sort function based on sortBy
+    // Sort function based on sortBy, with search boost priority
     const sortMerchants = (merchants: typeof filtered) => {
       return [...merchants].sort((a, b) => {
+        // Search boosted merchants get priority (appear higher in results)
+        const aIsBoosted = searchBoostedIds.has(a.id);
+        const bIsBoosted = searchBoostedIds.has(b.id);
+        
+        // If only one is boosted, prioritize the boosted one
+        if (aIsBoosted && !bIsBoosted) return -1;
+        if (!aIsBoosted && bIsBoosted) return 1;
+        
+        // If both boosted or neither boosted, sort by the selected criterion
         switch (sortBy) {
           case 'distance':
             // Merchants without distance go to the end
@@ -508,7 +520,7 @@ const Discover = () => {
     );
 
     return { sponsoredMerchants: sponsored, regularMerchants: regular };
-  }, [merchantsWithRatings, selectedCategory, debouncedSearch, minRating, selectedPrices, maxDistance, userLocation, sortBy, sponsoredMerchantIds]);
+  }, [merchantsWithRatings, selectedCategory, debouncedSearch, minRating, selectedPrices, maxDistance, userLocation, sortBy, sponsoredMerchantIds, searchBoostedIds]);
 
   const handleMerchantClick = (merchant: MerchantWithRating) => {
     if (!user) {
