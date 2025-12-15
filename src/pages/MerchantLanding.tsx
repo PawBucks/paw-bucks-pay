@@ -85,21 +85,6 @@ const MerchantLanding = () => {
               </Button>
             </div>
 
-            {/* Stats Section */}
-            <div className="grid grid-cols-3 gap-4 sm:gap-8 max-w-3xl mx-auto pt-16 sm:pt-20">
-              <div className="text-center">
-                <div className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-1">500+</div>
-                <div className="text-sm sm:text-base text-muted-foreground">Active Merchants</div>
-              </div>
-              <div className="text-center border-x border-border/50">
-                <div className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-1">$2M+</div>
-                <div className="text-sm sm:text-base text-muted-foreground">Monthly Volume</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-1">10K+</div>
-                <div className="text-sm sm:text-base text-muted-foreground">Customers</div>
-              </div>
-            </div>
           </div>
         </section>
 
