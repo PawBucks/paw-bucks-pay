@@ -7,9 +7,26 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { FileDown, Calendar, TrendingUp, DollarSign, Store, Loader2 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import jsPDF from "jspdf";
-import { getCategoryLabel, getCategoryColor, CATEGORY_CONFIG } from "@/lib/categoryMapping";
+import { getCategoryLabel, getNormalizedCategory, CATEGORY_CONFIG } from "@/lib/categoryMapping";
 
-const COLORS = Object.values(CATEGORY_CONFIG).map(c => c.color);
+// Fixed colors for pie chart (actual HSL values, not CSS variables)
+const CATEGORY_COLORS: Record<string, string> = {
+  veterinary: "hsl(340, 75%, 55%)",
+  grooming: "hsl(280, 65%, 55%)",
+  pet_store: "hsl(200, 70%, 50%)",
+  food: "hsl(35, 80%, 50%)",
+  boarding: "hsl(160, 60%, 45%)",
+  training: "hsl(270, 70%, 60%)",
+  walker: "hsl(210, 80%, 55%)",
+  daycare: "hsl(45, 90%, 50%)",
+  pet_sitting: "hsl(340, 80%, 55%)",
+  spa: "hsl(180, 70%, 45%)",
+  photography: "hsl(270, 60%, 55%)",
+  insurance: "hsl(220, 60%, 50%)",
+  pharmacy: "hsl(150, 60%, 45%)",
+  delivery: "hsl(30, 70%, 50%)",
+  other: "hsl(220, 10%, 50%)",
+};
 
 const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -79,8 +96,8 @@ export function YearlySummary() {
         monthlyTotals[month] += amount;
 
         const merchant = merchantMap[tx.merchant_id];
-        const categoryLabel = getCategoryLabel(merchant?.business_type);
-        categoryTotals[categoryLabel] = (categoryTotals[categoryLabel] || 0) + amount;
+        const normalizedCategory = getNormalizedCategory(merchant?.business_type);
+        categoryTotals[normalizedCategory] = (categoryTotals[normalizedCategory] || 0) + amount;
 
         const merchantName = merchant?.business_name || 'Unknown Merchant';
         if (!merchantTotals[merchantName]) {
@@ -95,8 +112,8 @@ export function YearlySummary() {
         const amount = parseFloat(record.price) || 0;
         monthlyTotals[month] += amount;
 
-        // Add to veterinary category
-        categoryTotals['Veterinary'] = (categoryTotals['Veterinary'] || 0) + amount;
+        // Add to veterinary category (using normalized key)
+        categoryTotals['veterinary'] = (categoryTotals['veterinary'] || 0) + amount;
 
         // Add to "Vet Visits" as a merchant
         if (!merchantTotals['Vet Visits']) {
@@ -116,9 +133,11 @@ export function YearlySummary() {
           month: month.substring(0, 3),
           amount: monthlyTotals[idx],
         })),
-        categoryData: Object.entries(categoryTotals).map(([name, value]) => ({
-          name: name.charAt(0).toUpperCase() + name.slice(1),
+        categoryData: Object.entries(categoryTotals).map(([categoryKey, value]) => ({
+          name: CATEGORY_CONFIG[categoryKey]?.label || categoryKey.charAt(0).toUpperCase() + categoryKey.slice(1),
           value,
+          categoryKey, // Keep the normalized key for color lookup
+          color: CATEGORY_COLORS[categoryKey] || CATEGORY_COLORS.other,
         })),
         topMerchants: Object.values(merchantTotals)
           .sort((a, b) => b.total - a.total)
@@ -321,8 +340,8 @@ export function YearlySummary() {
                     label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                     labelLine={false}
                   >
-                    {yearlyData?.categoryData.map((_, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    {yearlyData?.categoryData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
                   <Tooltip formatter={(value: number) => `$${value.toFixed(2)}`} />

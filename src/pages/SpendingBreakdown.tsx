@@ -49,13 +49,36 @@ const SpendingBreakdown = () => {
     ['spending-breakdown-transactions', user?.id || ''],
     async () => {
       if (!user) return [];
-      const { data, error } = await supabase
+      
+      // First get transactions
+      const { data: txData, error: txError } = await supabase
         .from('transactions')
-        .select('id, amount, rewards_earned, description, created_at, merchant_id, merchants(business_name, business_type, logo_url)')
+        .select('id, amount, rewards_earned, description, created_at, merchant_id')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
-      if (error) throw error;
-      return (data || []) as TransactionWithMerchant[];
+      if (txError) throw txError;
+      
+      // Get unique merchant IDs
+      const merchantIds = [...new Set((txData || []).map(t => t.merchant_id).filter(Boolean))];
+      
+      // Fetch merchants from public view
+      let merchantMap: Record<string, { business_name: string; business_type: string; logo_url: string | null }> = {};
+      if (merchantIds.length > 0) {
+        const { data: merchants } = await supabase
+          .from('merchants_public')
+          .select('id, business_name, business_type, logo_url')
+          .in('id', merchantIds);
+        
+        merchants?.forEach((m: any) => {
+          merchantMap[m.id] = { business_name: m.business_name, business_type: m.business_type, logo_url: m.logo_url };
+        });
+      }
+      
+      // Combine data
+      return (txData || []).map(tx => ({
+        ...tx,
+        merchants: merchantMap[tx.merchant_id] || null
+      })) as TransactionWithMerchant[];
     },
     { staleTime: 1000 * 60 * 5 }
   );
@@ -361,9 +384,7 @@ const SpendingBreakdown = () => {
                   .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
                   .slice(0, 30)
                   .map((item) => {
-                    const normalizedCategory = Object.keys(CATEGORY_CONFIG).find(c => 
-                      item.category.includes(c) || c.includes(item.category)
-                    ) || 'other';
+                    const normalizedCategory = getNormalizedCategory(item.category);
                     const config = CATEGORY_CONFIG[normalizedCategory] || CATEGORY_CONFIG.other;
                     const Icon = config.icon;
 
