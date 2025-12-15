@@ -7,13 +7,10 @@ import {
   Sparkles,
   MoreHorizontal,
   Dog,
-  Heart,
   Sun,
   Truck,
   Camera,
   Shield,
-  Pill,
-  Bath,
   LucideIcon
 } from "lucide-react";
 
@@ -33,11 +30,8 @@ export const CATEGORY_CONFIG: Record<string, CategoryConfig> = {
   training: { icon: Sparkles, color: "hsl(var(--primary))", label: "Training" },
   walker: { icon: Dog, color: "hsl(210, 80%, 55%)", label: "Walker" },
   daycare: { icon: Sun, color: "hsl(45, 90%, 50%)", label: "Daycare" },
-  pet_sitting: { icon: Heart, color: "hsl(340, 80%, 55%)", label: "Pet Sitting" },
-  spa: { icon: Bath, color: "hsl(180, 70%, 45%)", label: "Spa" },
   photography: { icon: Camera, color: "hsl(270, 60%, 55%)", label: "Photography" },
   insurance: { icon: Shield, color: "hsl(220, 60%, 50%)", label: "Insurance" },
-  pharmacy: { icon: Pill, color: "hsl(150, 60%, 45%)", label: "Pharmacy" },
   delivery: { icon: Truck, color: "hsl(30, 70%, 50%)", label: "Delivery" },
   other: { icon: MoreHorizontal, color: "hsl(var(--muted-foreground))", label: "Other" },
 };
@@ -80,18 +74,18 @@ export const BUSINESS_TYPE_MAP: Record<string, string> = {
   walking: 'walker',
   'dog walker': 'walker',
   'pet walker': 'walker',
-  // Daycare
+  // Daycare (includes pet sitting)
   daycare: 'daycare',
   'pet daycare': 'daycare',
   'dog daycare': 'daycare',
-  // Pet Sitting
-  pet_sitting: 'pet_sitting',
-  'pet sitting': 'pet_sitting',
-  sitter: 'pet_sitting',
-  'pet sitter': 'pet_sitting',
-  // Spa
-  spa: 'spa',
-  'pet spa': 'spa',
+  // Pet Sitting → merged into Daycare
+  pet_sitting: 'daycare',
+  'pet sitting': 'daycare',
+  sitter: 'daycare',
+  'pet sitter': 'daycare',
+  // Spa → merged into Grooming
+  spa: 'grooming',
+  'pet spa': 'grooming',
   // Photography
   photography: 'photography',
   photographer: 'photography',
@@ -99,10 +93,10 @@ export const BUSINESS_TYPE_MAP: Record<string, string> = {
   // Insurance
   insurance: 'insurance',
   'pet insurance': 'insurance',
-  // Pharmacy
-  pharmacy: 'pharmacy',
-  'pet pharmacy': 'pharmacy',
-  medication: 'pharmacy',
+  // Pharmacy → merged into Veterinary
+  pharmacy: 'veterinary',
+  'pet pharmacy': 'veterinary',
+  medication: 'veterinary',
   // Delivery
   delivery: 'delivery',
   'pet delivery': 'delivery',
