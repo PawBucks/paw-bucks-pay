@@ -9,21 +9,11 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { 
-  Settings, 
-  AlertTriangle, 
-  Check, 
-  Stethoscope, 
-  Scissors, 
-  ShoppingBag, 
-  Bone, 
-  Home,
-  Sparkles,
-  Plus
-} from "lucide-react";
+import { Settings, AlertTriangle, Check, Plus, ShoppingBag } from "lucide-react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { startOfMonth, endOfMonth } from "date-fns";
+import { CATEGORY_CONFIG, getNormalizedCategory, getCategoryIcon } from "@/lib/categoryMapping";
 
 type Transaction = {
   id: string;
@@ -46,14 +36,15 @@ type BudgetSettingsProps = {
   transactions: Transaction[];
 };
 
-const CATEGORIES = [
-  { id: 'veterinary', label: 'Veterinary', icon: Stethoscope, color: 'hsl(var(--chart-1))' },
-  { id: 'grooming', label: 'Grooming', icon: Scissors, color: 'hsl(var(--chart-2))' },
-  { id: 'pet_store', label: 'Pet Store', icon: ShoppingBag, color: 'hsl(var(--chart-3))' },
-  { id: 'food', label: 'Food & Treats', icon: Bone, color: 'hsl(var(--chart-4))' },
-  { id: 'boarding', label: 'Boarding', icon: Home, color: 'hsl(var(--chart-5))' },
-  { id: 'training', label: 'Training', icon: Sparkles, color: 'hsl(var(--primary))' },
-];
+// Categories available for budget tracking
+const BUDGET_CATEGORIES = Object.entries(CATEGORY_CONFIG)
+  .filter(([id]) => id !== 'other')
+  .map(([id, config]) => ({
+    id,
+    label: config.label,
+    icon: config.icon,
+    color: config.color,
+  }));
 
 export const BudgetSettings = memo(({ transactions }: BudgetSettingsProps) => {
   const { user } = useAuth();
@@ -93,11 +84,7 @@ export const BudgetSettings = memo(({ transactions }: BudgetSettingsProps) => {
         return txDate >= monthStart && txDate <= monthEnd;
       })
       .forEach(tx => {
-        const category = tx.merchants?.business_type?.toLowerCase() || 'other';
-        const normalizedCategory = CATEGORIES.find(c => 
-          category.includes(c.id) || c.id.includes(category)
-        )?.id || 'other';
-        
+        const normalizedCategory = getNormalizedCategory(tx.merchants?.business_type);
         spending[normalizedCategory] = (spending[normalizedCategory] || 0) + tx.amount;
       });
 
@@ -192,7 +179,7 @@ export const BudgetSettings = memo(({ transactions }: BudgetSettingsProps) => {
           {budgetAlerts.map(alert => {
             const spent = categorySpending[alert.category] || 0;
             const percentage = Math.min((spent / alert.monthly_limit) * 100, 100);
-            const category = CATEGORIES.find(c => c.id === alert.category);
+            const category = BUDGET_CATEGORIES.find(c => c.id === alert.category);
             const Icon = category?.icon || ShoppingBag;
 
             return (
@@ -216,7 +203,7 @@ export const BudgetSettings = memo(({ transactions }: BudgetSettingsProps) => {
 
       {/* Category Budgets List */}
       <div className="space-y-3">
-        {CATEGORIES.map(category => {
+        {BUDGET_CATEGORIES.map(category => {
           const budget = budgets.find(b => b.category === category.id);
           const spent = categorySpending[category.id] || 0;
           const percentage = budget ? Math.min((spent / budget.monthly_limit) * 100, 100) : 0;
@@ -276,7 +263,7 @@ export const BudgetSettings = memo(({ transactions }: BudgetSettingsProps) => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {editingCategory ? `Set ${CATEGORIES.find(c => c.id === editingCategory)?.label || 'Category'} Budget` : 'Set Budget'}
+              {editingCategory ? `Set ${BUDGET_CATEGORIES.find(c => c.id === editingCategory)?.label || 'Category'} Budget` : 'Set Budget'}
             </DialogTitle>
           </DialogHeader>
           
