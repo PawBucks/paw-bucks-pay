@@ -11,20 +11,11 @@ import { BottomNav } from "@/components/BottomNav";
 import { AdPlacement } from "@/components/AdPlacement";
 import { DashboardSkeleton } from "@/components/LoadingSkeleton";
 import { PullToRefresh } from "@/components/PullToRefresh";
-import { 
-  ArrowLeft, 
-  Stethoscope, 
-  Scissors, 
-  ShoppingBag, 
-  Bone, 
-  Home,
-  Sparkles,
-  MoreHorizontal,
-  ArrowUpRight
-} from "lucide-react";
+import { ArrowLeft, ArrowUpRight, ShoppingBag } from "lucide-react";
 import { format, subMonths, startOfMonth, endOfMonth } from "date-fns";
 import { useQueryClient } from "@tanstack/react-query";
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from "recharts";
+import { CATEGORY_CONFIG, getNormalizedCategory } from "@/lib/categoryMapping";
 
 type TransactionWithMerchant = {
   id: string;
@@ -46,16 +37,6 @@ type MedicalRecord = {
   price: number;
   record_date: string;
   record_type: string;
-};
-
-const CATEGORY_CONFIG: Record<string, { icon: React.ComponentType<any>; color: string; label: string }> = {
-  veterinary: { icon: Stethoscope, color: "hsl(var(--chart-1))", label: "Veterinary" },
-  grooming: { icon: Scissors, color: "hsl(var(--chart-2))", label: "Grooming" },
-  pet_store: { icon: ShoppingBag, color: "hsl(var(--chart-3))", label: "Pet Store" },
-  food: { icon: Bone, color: "hsl(var(--chart-4))", label: "Food & Treats" },
-  boarding: { icon: Home, color: "hsl(var(--chart-5))", label: "Boarding" },
-  training: { icon: Sparkles, color: "hsl(var(--primary))", label: "Training" },
-  other: { icon: MoreHorizontal, color: "hsl(var(--muted-foreground))", label: "Other" },
 };
 
 const SpendingBreakdown = () => {
@@ -102,13 +83,9 @@ const SpendingBreakdown = () => {
   const categoryBreakdown = useMemo(() => {
     const breakdown: Record<string, number> = {};
     
-    // Add transactions
+    // Add transactions using the normalized category mapping
     transactions.forEach(tx => {
-      const category = tx.merchants?.business_type?.toLowerCase() || 'other';
-      const normalizedCategory = Object.keys(CATEGORY_CONFIG).find(c => 
-        category.includes(c) || c.includes(category)
-      ) || 'other';
-      
+      const normalizedCategory = getNormalizedCategory(tx.merchants?.business_type);
       breakdown[normalizedCategory] = (breakdown[normalizedCategory] || 0) + tx.amount;
     });
 
@@ -120,7 +97,7 @@ const SpendingBreakdown = () => {
 
     return Object.entries(breakdown)
       .map(([category, amount]) => ({
-        name: CATEGORY_CONFIG[category]?.label || 'Other',
+        name: CATEGORY_CONFIG[category]?.label || category.charAt(0).toUpperCase() + category.slice(1),
         value: amount,
         color: CATEGORY_CONFIG[category]?.color || CATEGORY_CONFIG.other.color,
         category,

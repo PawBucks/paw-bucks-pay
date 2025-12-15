@@ -7,8 +7,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { FileDown, Calendar, TrendingUp, DollarSign, Store, Loader2 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import jsPDF from "jspdf";
+import { getCategoryLabel, getCategoryColor, CATEGORY_CONFIG } from "@/lib/categoryMapping";
 
-const COLORS = ['#8B5CF6', '#06B6D4', '#10B981', '#F59E0B', '#EF4444', '#EC4899', '#6366F1', '#14B8A6'];
+const COLORS = Object.values(CATEGORY_CONFIG).map(c => c.color);
 
 const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -78,8 +79,8 @@ export function YearlySummary() {
         monthlyTotals[month] += amount;
 
         const merchant = merchantMap[tx.merchant_id];
-        const category = merchant?.business_type || 'Other';
-        categoryTotals[category] = (categoryTotals[category] || 0) + amount;
+        const categoryLabel = getCategoryLabel(merchant?.business_type);
+        categoryTotals[categoryLabel] = (categoryTotals[categoryLabel] || 0) + amount;
 
         const merchantName = merchant?.business_name || 'Unknown Merchant';
         if (!merchantTotals[merchantName]) {
