@@ -71,6 +71,17 @@ export function useSearchBoostedMerchants() {
 }
 
 /**
+ * Hook to get set of search boosted merchant IDs (optimized for lookup)
+ */
+export function useSearchBoostedMerchantSet() {
+  const { data: boostedIds = [], ...rest } = useSearchBoostedMerchants();
+  return {
+    ...rest,
+    data: new Set(boostedIds),
+  };
+}
+
+/**
  * Hook to batch fetch multiple service types at once (more efficient)
  * Use this when you need to check multiple service types on a page
  */
