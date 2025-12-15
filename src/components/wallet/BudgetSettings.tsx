@@ -215,11 +215,12 @@ export const BudgetSettings = memo(({ transactions }: BudgetSettingsProps) => {
               className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border/50 hover:bg-muted/50 transition-colors"
             >
               <div className="flex items-center gap-3">
-                <div 
-                  className="w-8 h-8 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: `${category.color}20` }}
-                >
-                  <Icon className="w-4 h-4" style={{ color: category.color }} />
+                <div className="relative w-8 h-8 rounded-full flex items-center justify-center">
+                  <div 
+                    className="absolute inset-0 rounded-full opacity-20"
+                    style={{ backgroundColor: category.color }}
+                  />
+                  <Icon size={16} color={category.color} strokeWidth={2} className="relative z-10" />
                 </div>
                 <div>
                   <p className="text-sm font-medium">{category.label}</p>
