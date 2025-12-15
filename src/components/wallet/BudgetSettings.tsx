@@ -220,7 +220,7 @@ export const BudgetSettings = memo(({ transactions }: BudgetSettingsProps) => {
                     className="absolute inset-0 rounded-full opacity-20"
                     style={{ backgroundColor: category.color }}
                   />
-                  <Icon size={16} color={category.color} strokeWidth={2} className="relative z-10" />
+                  <Icon size={16} strokeWidth={2} className="relative z-10" style={{ color: category.color }} />
                 </div>
                 <div>
                   <p className="text-sm font-medium">{category.label}</p>
