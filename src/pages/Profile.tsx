@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { BottomNav } from "@/components/BottomNav";
 import { AdPlacement } from "@/components/AdPlacement";
 import { PullToRefresh } from "@/components/PullToRefresh";
+import { AutoRedeemToggle } from "@/components/AutoRedeemToggle";
 import { LogOut, User, Mail, Calendar, Crown, Sparkles, Settings, Loader2, Info, Bell } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
@@ -433,6 +434,11 @@ const Profile = () => {
               </div>
             </div>
           </GradientCard>
+
+          {/* Auto-Redeem PawBucks Toggle (Pet Owners Only) */}
+          {profile.user_type === "pet_owner" && user && (
+            <AutoRedeemToggle userId={user.id} />
+          )}
         </div>
 
         {/* Action Buttons */}

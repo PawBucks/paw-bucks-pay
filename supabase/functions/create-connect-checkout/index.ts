@@ -7,6 +7,9 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// PawBucks to USD conversion: 1000 PawBucks = $1 USD
+const PAWBUCKS_TO_USD = 1000;
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -103,15 +106,16 @@ serve(async (req) => {
 
     const { data: merchant } = await supabaseAdmin
       .from('merchants')
-      .select('id, business_name, cashback_rate')
+      .select('id, business_name, cashback_rate, accepts_pawbucks')
       .eq('stripe_account_id', accountId)
       .single();
 
     const merchantId = merchant?.id || null;
     const merchantName = merchant?.business_name || 'Merchant Store';
     const cashbackRate = merchant?.cashback_rate || 10;
+    const merchantAcceptsPawBucks = merchant?.accepts_pawbucks || false;
 
-    console.log('Merchant found:', { merchantId, merchantName, cashbackRate });
+    console.log('Merchant found:', { merchantId, merchantName, cashbackRate, merchantAcceptsPawBucks });
 
     // STEP 5: Calculate application fee (platform monetization)
     const PLATFORM_FEE_PERCENTAGE = 0.10; // 10% fee
@@ -127,17 +131,93 @@ serve(async (req) => {
 
     console.log(`Price type: ${price.type}, using checkout mode: ${checkoutMode}`);
 
-    // Calculate application fee in cents
-    let applicationFeeAmount = 0;
+    // Calculate total amount in cents
     let totalAmountCents = 0;
     if (price.unit_amount) {
       totalAmountCents = price.unit_amount * quantity;
-      applicationFeeAmount = Math.round(totalAmountCents * PLATFORM_FEE_PERCENTAGE);
     }
 
     const totalAmountDollars = totalAmountCents / 100;
 
-    // Calculate PawBucks rewards for display
+    // STEP 6: Check for auto PawBucks redemption for recurring subscriptions
+    let pawbucksUsed = 0;
+    let pawbucksUsdValue = 0;
+    let finalStripeAmountCents = totalAmountCents;
+
+    if (isRecurringPrice && merchantAcceptsPawBucks) {
+      // Get user's profile to check auto_redeem_pawbucks preference
+      const { data: userProfile } = await supabaseAdmin
+        .from('profiles')
+        .select('auto_redeem_pawbucks')
+        .eq('id', user.id)
+        .single();
+
+      if (userProfile?.auto_redeem_pawbucks) {
+        console.log('Auto PawBucks redemption enabled for user');
+
+        // Get user's PawBucks balance
+        const { data: pawbucksWallet } = await supabaseAdmin
+          .from('pawbucks_wallet')
+          .select('balance')
+          .eq('user_id', user.id)
+          .single();
+
+        const availablePawBucks = pawbucksWallet?.balance || 0;
+
+        if (availablePawBucks > 0) {
+          // Calculate max PawBucks that can be used (in USD)
+          const maxPawBucksUsd = availablePawBucks / PAWBUCKS_TO_USD;
+          
+          // Calculate how much to use (up to the total amount)
+          pawbucksUsdValue = Math.min(maxPawBucksUsd, totalAmountDollars);
+          pawbucksUsed = Math.floor(pawbucksUsdValue * PAWBUCKS_TO_USD);
+
+          // Calculate remaining Stripe amount
+          const remainingUsd = totalAmountDollars - pawbucksUsdValue;
+          finalStripeAmountCents = Math.round(remainingUsd * 100);
+
+          console.log('PawBucks calculation:', {
+            availablePawBucks,
+            pawbucksUsed,
+            pawbucksUsdValue: `$${pawbucksUsdValue.toFixed(2)}`,
+            remainingStripeAmount: `$${(finalStripeAmountCents / 100).toFixed(2)}`,
+          });
+
+          // Deduct PawBucks from user's wallet
+          if (pawbucksUsed > 0) {
+            const newBalance = availablePawBucks - pawbucksUsed;
+            
+            await supabaseAdmin
+              .from('pawbucks_wallet')
+              .update({ balance: newBalance })
+              .eq('user_id', user.id);
+
+            // Log PawBucks activity
+            await supabaseAdmin
+              .from('pawbucks_activity')
+              .insert({
+                user_id: user.id,
+                type: 'redeem',
+                amount: -pawbucksUsed,
+                source: 'Auto-Redemption',
+                partner_id: merchantId,
+                description: `Auto-redeemed ${pawbucksUsed} PawBucks ($${pawbucksUsdValue.toFixed(2)}) for subscription at ${merchantName}`,
+              });
+
+            console.log(`✅ Deducted ${pawbucksUsed} PawBucks from user wallet`);
+          }
+        }
+      }
+    }
+
+    // Calculate application fee based on final Stripe amount
+    let applicationFeeAmount = 0;
+    if (finalStripeAmountCents > 0) {
+      applicationFeeAmount = Math.round(finalStripeAmountCents * PLATFORM_FEE_PERCENTAGE);
+    }
+
+    const finalAmountDollars = finalStripeAmountCents / 100;
+
     // Check user's subscription tier for cashback calculation
     let userCashbackRate = 10; // Default 10x for free accounts
     
@@ -159,18 +239,65 @@ serve(async (req) => {
       }
     }
 
-    // PawBucks earned = amount * (rate/100) * 10 (conversion factor)
-    const estimatedPawBucks = Math.floor(totalAmountDollars * (userCashbackRate / 100) * 10);
+    // PawBucks earned based on remaining Stripe amount only
+    const estimatedPawBucks = Math.floor(finalAmountDollars * (userCashbackRate / 100) * 10);
 
     console.log(`Calculated: fee=$${(applicationFeeAmount / 100).toFixed(2)}, pawBucks=${estimatedPawBucks}`);
 
-    // STEP 6: Create Checkout Session - handle both one-time and recurring prices
-    // Build session configuration based on price type
+    // STEP 7: Handle case where PawBucks covers the full amount
+    if (finalStripeAmountCents <= 0) {
+      console.log('Full amount covered by PawBucks - no Stripe checkout needed');
+      
+      // Create a transaction record for this subscription (handled as a PawBucks-only payment)
+      if (merchantId) {
+        await supabaseAdmin
+          .from('transactions')
+          .insert({
+            user_id: user.id,
+            merchant_id: merchantId,
+            amount: totalAmountDollars,
+            cashback_earned: 0, // No cashback on PawBucks portion
+            rewards_earned: 0,
+            description: `Subscription at ${merchantName} (paid with PawBucks)`,
+            status: 'completed',
+          });
+      }
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          paid_with_pawbucks: true,
+          pawbucks_used: pawbucksUsed,
+          pawbucks_usd_value: pawbucksUsdValue,
+          message: `Subscription paid with ${pawbucksUsed} PawBucks ($${pawbucksUsdValue.toFixed(2)})`,
+          redirect_url: successUrl || `${req.headers.get('origin')}/checkout-success`,
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
+        }
+      );
+    }
+
+    // STEP 8: Create Checkout Session for remaining amount
     const sessionConfig: Stripe.Checkout.SessionCreateParams = {
       line_items: [
         {
-          price: priceId,
-          quantity: quantity,
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: productName || 'Subscription',
+              description: pawbucksUsed > 0 
+                ? `Original: $${totalAmountDollars.toFixed(2)} - PawBucks: $${pawbucksUsdValue.toFixed(2)}`
+                : undefined,
+            },
+            unit_amount: finalStripeAmountCents,
+            recurring: isRecurringPrice ? {
+              interval: price.recurring?.interval || 'month',
+              interval_count: price.recurring?.interval_count || 1,
+            } : undefined,
+          },
+          quantity: 1,
         },
       ],
       mode: checkoutMode,
@@ -179,33 +306,31 @@ serve(async (req) => {
       customer_email: user.email,
     };
 
-    // Add payment_intent_data for one-time payments (not available for subscriptions)
+    // Add metadata for tracking
+    const metadata = {
+      connected_account_id: accountId,
+      platform_fee_percentage: (PLATFORM_FEE_PERCENTAGE * 100).toString(),
+      user_id: user.id,
+      merchant_id: merchantId || '',
+      source: 'merchant_storefront',
+      product_name: productName || 'Storefront Purchase',
+      description: `${isRecurringPrice ? 'Subscription' : 'Purchase'} from ${merchantName}`,
+      original_amount_cents: totalAmountCents.toString(),
+      pawbucks_used: pawbucksUsed.toString(),
+      pawbucks_usd_value: pawbucksUsdValue.toFixed(2),
+    };
+
+    // Add payment_intent_data for one-time payments
     if (!isRecurringPrice) {
       sessionConfig.payment_intent_data = {
         application_fee_amount: applicationFeeAmount,
-        metadata: {
-          connected_account_id: accountId,
-          platform_fee_percentage: (PLATFORM_FEE_PERCENTAGE * 100).toString(),
-          user_id: user.id,
-          merchant_id: merchantId || '',
-          source: 'merchant_storefront',
-          product_name: productName || 'Storefront Purchase',
-          description: `Purchase from ${merchantName}`,
-        },
+        metadata,
       };
     } else {
-      // For subscriptions, use subscription_data with application_fee_percent
+      // For subscriptions, use subscription_data
       sessionConfig.subscription_data = {
         application_fee_percent: PLATFORM_FEE_PERCENTAGE * 100,
-        metadata: {
-          connected_account_id: accountId,
-          platform_fee_percentage: (PLATFORM_FEE_PERCENTAGE * 100).toString(),
-          user_id: user.id,
-          merchant_id: merchantId || '',
-          source: 'merchant_storefront',
-          product_name: productName || 'Storefront Purchase',
-          description: `Subscription from ${merchantName}`,
-        },
+        metadata,
       };
     }
 
@@ -218,7 +343,7 @@ serve(async (req) => {
 
     console.log('Checkout session created:', session.id);
 
-    // STEP 7: Return the checkout session URL with rewards info
+    // STEP 9: Return the checkout session URL with rewards info
     return new Response(
       JSON.stringify({
         success: true,
@@ -234,6 +359,13 @@ serve(async (req) => {
           estimated_pawbucks: estimatedPawBucks,
           formatted: `+${estimatedPawBucks} PawBucks`,
         },
+        pawbucks_applied: pawbucksUsed > 0 ? {
+          pawbucks_used: pawbucksUsed,
+          usd_value: pawbucksUsdValue,
+          formatted: `${pawbucksUsed} PawBucks ($${pawbucksUsdValue.toFixed(2)})`,
+        } : null,
+        original_amount: totalAmountDollars,
+        final_stripe_amount: finalAmountDollars,
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
