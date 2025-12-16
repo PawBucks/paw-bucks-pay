@@ -67,10 +67,6 @@ const Index = () => {
           <div className="absolute bottom-20 left-10 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse delay-700" aria-hidden="true"></div>
           
           <div className="relative max-w-5xl mx-auto text-center space-y-8 animate-fade-in">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 border border-accent/20 backdrop-blur-sm mb-4">
-              <Sparkles className="w-4 h-4 text-accent" />
-              <span className="text-sm font-medium text-accent">Trusted by thousands of pet lovers</span>
-            </div>
             
             <h1 
               id="hero-heading"
@@ -418,17 +414,13 @@ const Index = () => {
           
           <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <div className="max-w-4xl mx-auto space-y-6">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 backdrop-blur-sm mb-2">
-                <Users className="w-4 h-4 text-white" />
-                <span className="text-sm font-medium text-white">Join 10,000+ happy users</span>
-              </div>
               
               <h2 id="cta-heading" className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white mb-6">
                 Ready to get started?
               </h2>
               
               <p className="text-lg sm:text-xl lg:text-2xl text-white/90 mb-10 max-w-3xl mx-auto leading-relaxed">
-                Join thousands of pet owners and businesses already using PawBucks to simplify pet care payments.
+                Start using PawBucks today to simplify pet care payments and earn rewards.
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
