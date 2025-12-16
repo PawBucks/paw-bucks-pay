@@ -56,6 +56,7 @@ const Auth = () => {
     const password = formData.get("password") as string;
     const confirmPassword = formData.get("confirmPassword") as string;
     const fullName = formData.get("fullName") as string;
+    const phone = formData.get("phone") as string;
 
     try {
       // Check if passwords match
@@ -96,6 +97,7 @@ const Auth = () => {
           user_type: userType,
           full_name: validatedData.fullName,
           email: validatedData.email,
+          phone: phone || null,
         });
 
         if (profileError) throw profileError;
@@ -374,6 +376,16 @@ const Auth = () => {
                     placeholder="your@email.com"
                     autoComplete="email"
                     required 
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Phone Number</Label>
+                  <Input 
+                    id="phone" 
+                    name="phone" 
+                    type="tel" 
+                    placeholder="(555) 123-4567"
+                    autoComplete="tel"
                   />
                 </div>
                 <div className="space-y-2">
