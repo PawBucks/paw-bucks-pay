@@ -22,11 +22,11 @@ export type CategoryConfig = {
 
 // Comprehensive category configuration with icons, colors, and labels
 export const CATEGORY_CONFIG: Record<string, CategoryConfig> = {
-  veterinary: { icon: Stethoscope, color: "hsl(var(--chart-1))", label: "Veterinary" },
-  grooming: { icon: Scissors, color: "hsl(var(--chart-2))", label: "Grooming" },
-  pet_store: { icon: ShoppingBag, color: "hsl(var(--chart-3))", label: "Pet Store" },
-  food: { icon: Bone, color: "hsl(var(--chart-4))", label: "Food & Treats" },
-  boarding: { icon: Home, color: "hsl(var(--chart-5))", label: "Boarding" },
+  veterinary: { icon: Stethoscope, color: "hsl(0, 70%, 55%)", label: "Veterinary" },
+  grooming: { icon: Scissors, color: "hsl(320, 70%, 55%)", label: "Grooming" },
+  pet_store: { icon: ShoppingBag, color: "hsl(150, 70%, 45%)", label: "Pet Store" },
+  food: { icon: Bone, color: "hsl(25, 80%, 55%)", label: "Food & Treats" },
+  boarding: { icon: Home, color: "hsl(180, 60%, 45%)", label: "Boarding" },
   training: { icon: Sparkles, color: "hsl(var(--primary))", label: "Training" },
   walker: { icon: Dog, color: "hsl(210, 80%, 55%)", label: "Walker" },
   daycare: { icon: Sun, color: "hsl(45, 90%, 50%)", label: "Daycare" },
