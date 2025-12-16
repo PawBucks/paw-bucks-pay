@@ -52,9 +52,9 @@ const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout, userId 
           <img 
             src={logo} 
             alt="PawBucks Logo - Return to homepage" 
-            className="h-10 sm:h-12 md:h-14 w-auto object-contain transition-transform duration-200 group-hover:scale-105"
-            width={56}
-            height={56}
+            className="h-24 sm:h-32 w-auto object-contain transition-transform duration-200 group-hover:scale-105"
+            width={128}
+            height={128}
             loading="eager"
           />
         </div>
