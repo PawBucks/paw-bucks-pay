@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,9 +16,12 @@ type UserResult = {
   balance: number | null;
 };
 
-const MAX_CREDIT_AMOUNT = 100000;
+const MAX_CREDIT_AMOUNT_ADMIN = 250000;
+const MAX_CREDIT_AMOUNT_SUPERADMIN = 500000;
 
 export function PawBucksCreditTool() {
+  const { user } = useAuth();
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [searchEmail, setSearchEmail] = useState('');
   const [searching, setSearching] = useState(false);
   const [foundUser, setFoundUser] = useState<UserResult | null>(null);
@@ -25,6 +29,22 @@ export function PawBucksCreditTool() {
   const [reason, setReason] = useState('');
   const [crediting, setCrediting] = useState(false);
   const [lastCredited, setLastCredited] = useState<{ email: string; amount: number } | null>(null);
+
+  const maxCreditAmount = isSuperAdmin ? MAX_CREDIT_AMOUNT_SUPERADMIN : MAX_CREDIT_AMOUNT_ADMIN;
+
+  useEffect(() => {
+    const checkSuperAdminRole = async () => {
+      if (!user) return;
+      const { data } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .eq('role', 'superadmin')
+        .maybeSingle();
+      setIsSuperAdmin(!!data);
+    };
+    checkSuperAdminRole();
+  }, [user]);
 
   const handleSearch = async () => {
     if (!searchEmail.trim()) {
@@ -76,8 +96,8 @@ export function PawBucksCreditTool() {
       return;
     }
 
-    if (amount > MAX_CREDIT_AMOUNT) {
-      toast.error(`Maximum credit amount is ${MAX_CREDIT_AMOUNT.toLocaleString()} PawBucks`);
+    if (amount > maxCreditAmount) {
+      toast.error(`Maximum credit amount is ${maxCreditAmount.toLocaleString()} PawBucks`);
       return;
     }
 
@@ -146,7 +166,7 @@ export function PawBucksCreditTool() {
           Manual PawBucks Credit
         </CardTitle>
         <CardDescription>
-          Credit PawBucks to a user's wallet for refunds, compensation, or promotions (max {MAX_CREDIT_AMOUNT.toLocaleString()} per operation)
+          Credit PawBucks to a user's wallet for refunds, compensation, or promotions (max {maxCreditAmount.toLocaleString()} per operation)
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -191,12 +211,12 @@ export function PawBucksCreditTool() {
 
             <div className="grid gap-4 pt-2">
               <div className="space-y-2">
-                <Label htmlFor="creditAmount">Amount to Credit (max {MAX_CREDIT_AMOUNT.toLocaleString()})</Label>
+                <Label htmlFor="creditAmount">Amount to Credit (max {maxCreditAmount.toLocaleString()})</Label>
                 <Input
                   id="creditAmount"
                   type="number"
                   min="1"
-                  max={MAX_CREDIT_AMOUNT}
+                  max={maxCreditAmount}
                   placeholder="e.g., 200"
                   value={creditAmount}
                   onChange={(e) => setCreditAmount(e.target.value)}
