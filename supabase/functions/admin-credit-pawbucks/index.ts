@@ -31,12 +31,13 @@ serve(async (req) => {
       );
     }
 
-    // Verify the user is authenticated
-    const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey, {
-      global: { headers: { Authorization: authHeader } }
-    });
+    // Extract JWT token from Bearer header
+    const token = authHeader.replace('Bearer ', '');
     
-    const { data: { user }, error: userError } = await supabaseAuth.auth.getUser();
+    // Use service role client to verify the user from the token
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+    
+    const { data: { user }, error: userError } = await supabaseAdmin.auth.getUser(token);
     
     if (userError || !user) {
       console.error('Auth error:', userError);
@@ -45,9 +46,6 @@ serve(async (req) => {
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
-
-    // Use service role client for admin checks and database operations
-    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
     // Verify user has admin or superadmin role and get the role type
     const { data: userRoles, error: roleError } = await supabaseAdmin
