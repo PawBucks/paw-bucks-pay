@@ -317,7 +317,6 @@ serve(async (req) => {
             }
 
             const pawbucksEarned = Math.floor(amount * pawbucksMultiplier);
-            const rewardsEarned = Math.floor(amount);
 
             console.log('Recording recurring payment transaction:', {
               userId,
@@ -336,7 +335,7 @@ serve(async (req) => {
                 merchant_id: merchantId,
                 amount: amount,
                 cashback_earned: pawbucksEarned,
-                rewards_earned: rewardsEarned,
+                rewards_earned: pawbucksEarned,
                 description: `Recurring subscription payment`,
                 status: 'completed',
                 stripe_payment_intent_id: invoice.payment_intent as string || `invoice_${invoice.id}`,
@@ -488,14 +487,12 @@ serve(async (req) => {
       // $10 × 20 = 200 PawBucks for PawPass
       // $10 × 30 = 300 PawBucks for PawPass+
       const pawbucksEarned = Math.floor(amount * pawbucksMultiplier);
-      const rewardsEarned = Math.floor(amount); // 1 point per dollar
 
       console.log('Recording transaction:', {
         amount,
         pawbucksEarned,
         pawbucksMultiplier: `${pawbucksMultiplier}x`,
         tierName,
-        rewardsEarned,
       });
 
       // Create transaction record (this will trigger wallet updates via database trigger)
@@ -506,7 +503,7 @@ serve(async (req) => {
           merchant_id: merchant_id,
           amount: amount,
           cashback_earned: pawbucksEarned, // Store PawBucks earned
-          rewards_earned: rewardsEarned,
+          rewards_earned: pawbucksEarned,
           description: description || 'Stripe payment',
           status: 'completed',
           stripe_payment_intent_id: paymentIntent.id,
