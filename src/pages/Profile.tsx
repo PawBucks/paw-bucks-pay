@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -46,7 +46,7 @@ const Profile = () => {
     }
   }, [user]);
 
-  const loadProfile = async () => {
+  const loadProfile = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -64,7 +64,7 @@ const Profile = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   const handleSignOut = useCallback(async () => {
     await signOut();
@@ -98,7 +98,7 @@ const Profile = () => {
   const handleRefresh = useCallback(async () => {
     setLoading(true);
     await loadProfile();
-  }, []);
+  }, [loadProfile]);
 
   const { containerRef, isRefreshing, pullDistance, progress } = usePullToRefresh({
     onRefresh: handleRefresh,

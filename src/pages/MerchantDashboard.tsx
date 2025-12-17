@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useGeocoding } from "@/hooks/useGeocoding";
@@ -91,13 +91,7 @@ const MerchantDashboard = () => {
     }
   }, [user, authLoading, navigate]);
 
-  useEffect(() => {
-    if (user) {
-      loadMerchantData();
-    }
-  }, [user]);
-
-  const loadMerchantData = async () => {
+  const loadMerchantData = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -147,7 +141,13 @@ const MerchantDashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, navigate]);
+
+  useEffect(() => {
+    if (user) {
+      loadMerchantData();
+    }
+  }, [user, loadMerchantData]);
 
   const handleConnectStripe = async () => {
     if (!merchant) return;
