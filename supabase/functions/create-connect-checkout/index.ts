@@ -286,9 +286,17 @@ serve(async (req) => {
       success_url: successUrl || `${req.headers.get('origin')}/checkout-success?session_id={CHECKOUT_SESSION_ID}&store=${accountId}`,
       cancel_url: cancelUrl || `${req.headers.get('origin')}/checkout-canceled`,
       customer_email: user.email,
+      // Session-level metadata for checkout.session.completed webhook
+      metadata: {
+        user_id: user.id,
+        merchant_id: merchantId || '',
+        product_name: productName || 'Storefront Purchase',
+        pawbucks_used: pawbucksUsed.toString(),
+        pawbucks_usd_value: pawbucksUsdValue.toFixed(2),
+      },
     };
 
-    // Add metadata for tracking
+    // Add metadata for tracking on subscription/payment objects
     const metadata = {
       connected_account_id: accountId,
       platform_fee_percentage: (PLATFORM_FEE_PERCENTAGE * 100).toString(),
@@ -309,7 +317,7 @@ serve(async (req) => {
         metadata,
       };
     } else {
-      // For subscriptions, use subscription_data
+      // For subscriptions, use subscription_data with metadata for recurring payment tracking
       sessionConfig.subscription_data = {
         application_fee_percent: PLATFORM_FEE_PERCENTAGE * 100,
         metadata,
