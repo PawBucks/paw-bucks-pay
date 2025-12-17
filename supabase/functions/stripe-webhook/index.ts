@@ -347,6 +347,56 @@ serve(async (req) => {
               console.error('Error creating recurring payment transaction:', transactionError);
             } else {
               console.log('✅ Recurring payment transaction recorded:', transaction.id);
+              
+              // Credit PawBucks to user's wallet
+              let { data: wallet } = await supabaseAdmin
+                .from('pawbucks_wallet')
+                .select('*')
+                .eq('user_id', userId)
+                .single();
+
+              if (!wallet) {
+                // Create wallet if it doesn't exist
+                const { data: newWallet } = await supabaseAdmin
+                  .from('pawbucks_wallet')
+                  .insert({ user_id: userId, balance: 0 })
+                  .select()
+                  .single();
+                wallet = newWallet;
+              }
+
+              if (wallet) {
+                // Update wallet balance
+                const { error: walletUpdateError } = await supabaseAdmin
+                  .from('pawbucks_wallet')
+                  .update({ balance: wallet.balance + pawbucksEarned })
+                  .eq('user_id', userId);
+
+                if (walletUpdateError) {
+                  console.error('Error updating PawBucks wallet:', walletUpdateError);
+                } else {
+                  console.log(`✅ PawBucks wallet updated: +${pawbucksEarned} PawBucks`);
+                }
+
+                // Log PawBucks activity
+                const { error: activityError } = await supabaseAdmin
+                  .from('pawbucks_activity')
+                  .insert({
+                    user_id: userId,
+                    type: 'earn',
+                    amount: pawbucksEarned,
+                    source: 'Recurring Subscription',
+                    transaction_id: transaction.id,
+                    description: `Earned ${pawbucksEarned} PawBucks from recurring subscription payment (${tierName} tier - ${pawbucksMultiplier}x)`,
+                  });
+
+                if (activityError) {
+                  console.error('Error logging PawBucks activity:', activityError);
+                } else {
+                  console.log('✅ PawBucks activity logged');
+                }
+              }
+
               console.log(`✅ User earned ${pawbucksEarned} PawBucks (${tierName} tier)`);
             }
           } else {
