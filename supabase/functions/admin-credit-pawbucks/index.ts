@@ -7,7 +7,8 @@ const corsHeaders = {
 };
 
 // Constants for validation
-const MAX_CREDIT_AMOUNT = 100000; // Maximum 100,000 PawBucks per operation
+const MAX_CREDIT_AMOUNT_ADMIN = 250000; // Maximum 250,000 PawBucks for Admin
+const MAX_CREDIT_AMOUNT_SUPERADMIN = 500000; // Maximum 500,000 PawBucks for SuperAdmin
 const MIN_CREDIT_AMOUNT = 1;
 
 serve(async (req) => {
@@ -48,21 +49,24 @@ serve(async (req) => {
     // Use service role client for admin checks and database operations
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Verify user has admin role
-    const { data: adminRole, error: roleError } = await supabaseAdmin
+    // Verify user has admin or superadmin role and get the role type
+    const { data: userRoles, error: roleError } = await supabaseAdmin
       .from('user_roles')
       .select('role')
       .eq('user_id', user.id)
-      .eq('role', 'admin')
-      .single();
+      .in('role', ['admin', 'superadmin']);
 
-    if (roleError || !adminRole) {
+    if (roleError || !userRoles || userRoles.length === 0) {
       console.error('Admin role check failed:', roleError);
       return new Response(
         JSON.stringify({ error: 'Admin privileges required' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
+    // Check if user is superadmin (has higher limit)
+    const isSuperAdmin = userRoles.some(r => r.role === 'superadmin');
+    const maxCreditAmount = isSuperAdmin ? MAX_CREDIT_AMOUNT_SUPERADMIN : MAX_CREDIT_AMOUNT_ADMIN;
 
     // Parse and validate request body
     const { userId, amount, reason } = await req.json();
@@ -92,9 +96,9 @@ serve(async (req) => {
       );
     }
 
-    if (amount < MIN_CREDIT_AMOUNT || amount > MAX_CREDIT_AMOUNT) {
+    if (amount < MIN_CREDIT_AMOUNT || amount > maxCreditAmount) {
       return new Response(
-        JSON.stringify({ error: `Amount must be between ${MIN_CREDIT_AMOUNT} and ${MAX_CREDIT_AMOUNT} PawBucks` }),
+        JSON.stringify({ error: `Amount must be between ${MIN_CREDIT_AMOUNT} and ${maxCreditAmount.toLocaleString()} PawBucks` }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
