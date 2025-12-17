@@ -202,13 +202,18 @@ serve(async (req) => {
       pawbucksToDeduct: pawbucksAmount,
     });
 
-    // Create PaymentIntent
+    // Create PaymentIntent with merchant branding
+    // Truncate business name to 22 chars max for statement descriptor
+    const statementDescriptor = merchant.business_name.substring(0, 22).replace(/[<>"'\\]/g, '');
+    
     const paymentIntent = await stripe.paymentIntents.create({
       amount: stripeAmountInCents,
       currency: 'usd',
       automatic_payment_methods: { enabled: true },
       application_fee_amount: platformFeeInCents,
       transfer_data: { destination: merchant.stripe_account_id },
+      on_behalf_of: merchant.stripe_account_id, // Shows merchant name on card statement
+      statement_descriptor_suffix: statementDescriptor, // Merchant name on statement
       metadata: {
         merchant_id: merchantId,
         user_id: user.id,
