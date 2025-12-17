@@ -63,61 +63,89 @@ const PetProfileCardComponent = ({ pet, onUpdate, index = 0 }: PetProfileCardPro
         ease: "easeOut"
       }}
     >
-      <GradientCard gradient className="p-4">
-        <div className="flex items-center gap-4">
-          {/* Pet Photo */}
-          {pet.photo_url ? (
-            <img
-              src={pet.photo_url}
-              alt={pet.name}
-              width={64}
-              height={64}
-              className="w-16 h-16 rounded-full object-cover border-2 border-primary/20 flex-shrink-0"
-              loading="lazy"
-            />
-          ) : (
-            <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-              <PawPrint className="w-8 h-8 text-muted-foreground" />
-            </div>
-          )}
-
-          {/* Pet Info - Stacked Vertically */}
-          <div className="flex-1 min-w-0 space-y-1">
-            <Badge
-              variant="outline"
-              className={`${petTypeColors[pet.type]} text-xs`}
-            >
-              {petTypeLabel}
-            </Badge>
-            <h3 className="text-lg font-bold leading-tight">{pet.name}</h3>
-            {pet.breed && (
-              <p className="text-sm text-muted-foreground">{pet.breed}</p>
+      <GradientCard gradient className="p-5 md:p-6">
+        <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6">
+          {/* Pet Photo - Larger on desktop */}
+          <div className="flex items-center gap-4 md:gap-0">
+            {pet.photo_url ? (
+              <img
+                src={pet.photo_url}
+                alt={pet.name}
+                width={96}
+                height={96}
+                className="w-20 h-20 md:w-24 md:h-24 rounded-2xl object-cover border-2 border-primary/20 flex-shrink-0 shadow-md"
+                loading="lazy"
+              />
+            ) : (
+              <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-muted flex items-center justify-center flex-shrink-0 shadow-md">
+                <PawPrint className="w-10 h-10 md:w-12 md:h-12 text-muted-foreground" />
+              </div>
             )}
-            {age !== null && (
-              <p className="text-sm text-muted-foreground flex items-center gap-1">
-                <Calendar className="w-3 h-3" />
-                {age} {age === 1 ? "year" : "years"} old
-              </p>
+            
+            {/* Mobile: Info next to photo */}
+            <div className="flex-1 min-w-0 md:hidden">
+              <Badge
+                variant="outline"
+                className={`${petTypeColors[pet.type]} text-xs mb-1`}
+              >
+                {petTypeLabel}
+              </Badge>
+              <h3 className="text-lg font-bold leading-tight truncate">{pet.name}</h3>
+              {pet.breed && (
+                <p className="text-sm text-muted-foreground truncate">{pet.breed}</p>
+              )}
+            </div>
+          </div>
+
+          {/* Desktop: Pet Info - More spacious */}
+          <div className="hidden md:flex flex-1 min-w-0 flex-col gap-2">
+            <div className="flex items-center gap-3">
+              <Badge
+                variant="outline"
+                className={`${petTypeColors[pet.type]} text-sm px-3 py-1`}
+              >
+                {petTypeLabel}
+              </Badge>
+              {age !== null && (
+                <span className="text-sm text-muted-foreground flex items-center gap-1.5">
+                  <Calendar className="w-4 h-4" />
+                  {age} {age === 1 ? "year" : "years"} old
+                </span>
+              )}
+            </div>
+            <h3 className="text-xl font-bold leading-tight">{pet.name}</h3>
+            {pet.breed && (
+              <p className="text-base text-muted-foreground">{pet.breed}</p>
             )}
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex flex-col gap-2 flex-shrink-0">
+          {/* Mobile: Age below */}
+          {age !== null && (
+            <p className="text-sm text-muted-foreground flex items-center gap-1.5 md:hidden -mt-2">
+              <Calendar className="w-4 h-4" />
+              {age} {age === 1 ? "year" : "years"} old
+            </p>
+          )}
+
+          {/* Action Buttons - Horizontal on desktop */}
+          <div className="flex gap-2 md:flex-col md:gap-3 flex-shrink-0">
             <Button
               variant="outline"
-              size="icon"
-              className="h-9 w-9"
+              size="sm"
+              className="flex-1 md:flex-none md:w-auto gap-2"
               onClick={handleEditClick}
             >
               <Pencil className="w-4 h-4" />
+              <span className="md:inline">Edit</span>
             </Button>
             <Button
               variant="outline"
-              size="icon"
-              className="h-9 w-9"
+              size="sm"
+              className="flex-1 md:flex-none md:w-auto gap-2"
               onClick={handleHealthClick}
             >
               <FileHeart className="w-4 h-4" />
+              <span className="md:inline">Health</span>
             </Button>
           </div>
         </div>
