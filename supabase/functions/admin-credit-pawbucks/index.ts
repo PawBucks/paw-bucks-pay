@@ -150,13 +150,13 @@ serve(async (req) => {
       );
     }
 
-    // Log the activity
+    // Log the activity (use 'earn' type which is valid per check constraint)
     const { error: activityError } = await supabaseAdmin
       .from('pawbucks_activity')
       .insert({
         user_id: userId,
         amount: amount,
-        type: 'credit',
+        type: 'earn',
         source: 'admin_credit',
         description: reason.trim()
       });
@@ -166,18 +166,21 @@ serve(async (req) => {
       // Don't fail the operation, just log the error
     }
 
-    // Log admin action for audit trail
-    const { error: auditError } = await supabaseAdmin.rpc('log_admin_action', {
-      _action: 'credit_pawbucks',
-      _entity_type: 'pawbucks_wallet',
-      _entity_id: userId,
-      _changes: {
-        amount,
-        reason: reason.trim(),
-        old_balance: oldBalance,
-        new_balance: newBalance
-      }
-    });
+    // Log admin action for audit trail (insert directly since RPC uses auth.uid() which is null for service role)
+    const { error: auditError } = await supabaseAdmin
+      .from('audit_logs')
+      .insert({
+        admin_id: user.id,
+        action: 'credit_pawbucks',
+        entity_type: 'pawbucks_wallet',
+        entity_id: userId,
+        changes: {
+          amount,
+          reason: reason.trim(),
+          old_balance: oldBalance,
+          new_balance: newBalance
+        }
+      });
 
     if (auditError) {
       console.error('Failed to log audit:', auditError);
