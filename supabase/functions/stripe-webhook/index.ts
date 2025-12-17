@@ -25,11 +25,12 @@ serve(async (req) => {
     const signature = req.headers.get('stripe-signature');
     const body = await req.text();
 
-    // SECURITY: Verify webhook signature - MANDATORY
-    const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
+    // SECURITY: Verify webhook signature - try both platform and connected account secrets
+    const connectedWebhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
+    const platformWebhookSecret = Deno.env.get('STRIPE_PLATFORM_WEBHOOK_SECRET');
     
-    if (!webhookSecret) {
-      console.error('STRIPE_WEBHOOK_SECRET not configured');
+    if (!connectedWebhookSecret && !platformWebhookSecret) {
+      console.error('No webhook secrets configured');
       return new Response(
         JSON.stringify({ error: 'Webhook configuration error' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
@@ -37,11 +38,32 @@ serve(async (req) => {
     }
 
     let event;
-    try {
-      event = await stripe.webhooks.constructEventAsync(body, signature!, webhookSecret);
-    } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-      console.error('Webhook signature verification failed:', errorMessage);
+    let verificationSucceeded = false;
+    
+    // Try platform webhook secret first (for payment_intent.succeeded, checkout.session.completed, etc.)
+    if (platformWebhookSecret) {
+      try {
+        event = await stripe.webhooks.constructEventAsync(body, signature!, platformWebhookSecret);
+        verificationSucceeded = true;
+        console.log('[STRIPE-WEBHOOK] Verified with platform webhook secret');
+      } catch (err) {
+        console.log('[STRIPE-WEBHOOK] Platform secret verification failed, trying connected account secret...');
+      }
+    }
+    
+    // Try connected accounts webhook secret (for payout.paid, account.updated, etc.)
+    if (!verificationSucceeded && connectedWebhookSecret) {
+      try {
+        event = await stripe.webhooks.constructEventAsync(body, signature!, connectedWebhookSecret);
+        verificationSucceeded = true;
+        console.log('[STRIPE-WEBHOOK] Verified with connected accounts webhook secret');
+      } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+        console.error('Webhook signature verification failed with both secrets:', errorMessage);
+      }
+    }
+    
+    if (!verificationSucceeded || !event) {
       return new Response(
         JSON.stringify({ error: 'Webhook signature verification failed' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
