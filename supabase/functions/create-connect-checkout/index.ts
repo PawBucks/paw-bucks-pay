@@ -140,6 +140,8 @@ serve(async (req) => {
     const totalAmountDollars = totalAmountCents / 100;
 
     // STEP 6: Check for auto PawBucks redemption for recurring subscriptions
+    // IMPORTANT: We only CALCULATE the PawBucks to be used here, NOT deduct them
+    // Actual deduction happens in stripe-webhook AFTER payment completes
     let pawbucksUsed = 0;
     let pawbucksUsdValue = 0;
     let finalStripeAmountCents = totalAmountCents;
@@ -176,36 +178,16 @@ serve(async (req) => {
           const remainingUsd = totalAmountDollars - pawbucksUsdValue;
           finalStripeAmountCents = Math.round(remainingUsd * 100);
 
-          console.log('PawBucks calculation:', {
+          console.log('PawBucks calculation (pending deduction on payment completion):', {
             availablePawBucks,
             pawbucksUsed,
             pawbucksUsdValue: `$${pawbucksUsdValue.toFixed(2)}`,
             remainingStripeAmount: `$${(finalStripeAmountCents / 100).toFixed(2)}`,
           });
 
-          // Deduct PawBucks from user's wallet
-          if (pawbucksUsed > 0) {
-            const newBalance = availablePawBucks - pawbucksUsed;
-            
-            await supabaseAdmin
-              .from('pawbucks_wallet')
-              .update({ balance: newBalance })
-              .eq('user_id', user.id);
-
-            // Log PawBucks activity
-            await supabaseAdmin
-              .from('pawbucks_activity')
-              .insert({
-                user_id: user.id,
-                type: 'redeem',
-                amount: -pawbucksUsed,
-                source: 'Auto-Redemption',
-                partner_id: merchantId,
-                description: `Auto-redeemed ${pawbucksUsed} PawBucks ($${pawbucksUsdValue.toFixed(2)}) for subscription at ${merchantName}`,
-              });
-
-            console.log(`✅ Deducted ${pawbucksUsed} PawBucks from user wallet`);
-          }
+          // NOTE: PawBucks are NOT deducted here anymore!
+          // They will be deducted in stripe-webhook when checkout.session.completed fires
+          console.log(`⏳ PawBucks deduction (${pawbucksUsed}) will occur after payment completes`);
         }
       }
     }
