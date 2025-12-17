@@ -88,8 +88,71 @@ serve(async (req) => {
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object as Stripe.Checkout.Session;
       
+      // Get metadata - could be from session or subscription_data
+      const metadata = session.metadata || {};
+      
+      // Handle PawBucks auto-redemption deduction (only NOW after payment completes)
+      const pawbucksUsed = parseInt(metadata.pawbucks_used || '0');
+      const pawbucksUsdValue = parseFloat(metadata.pawbucks_usd_value || '0');
+      const userId = metadata.user_id;
+      const merchantId = metadata.merchant_id;
+      const merchantName = metadata.product_name || 'Merchant';
+
+      if (pawbucksUsed > 0 && userId) {
+        console.log('Processing PawBucks auto-redemption after payment completion:', {
+          pawbucksUsed,
+          pawbucksUsdValue,
+          userId,
+        });
+
+        // Get current PawBucks balance
+        const { data: pawbucksWallet, error: walletError } = await supabaseAdmin
+          .from('pawbucks_wallet')
+          .select('balance')
+          .eq('user_id', userId)
+          .single();
+
+        if (!walletError && pawbucksWallet) {
+          const currentBalance = pawbucksWallet.balance || 0;
+          
+          // Verify user still has enough PawBucks (they may have spent them elsewhere)
+          const actualDeduction = Math.min(pawbucksUsed, currentBalance);
+          
+          if (actualDeduction > 0) {
+            const newBalance = currentBalance - actualDeduction;
+            
+            // Deduct PawBucks
+            const { error: updateError } = await supabaseAdmin
+              .from('pawbucks_wallet')
+              .update({ balance: newBalance })
+              .eq('user_id', userId);
+
+            if (!updateError) {
+              // Log PawBucks activity
+              await supabaseAdmin
+                .from('pawbucks_activity')
+                .insert({
+                  user_id: userId,
+                  type: 'redeem',
+                  amount: -actualDeduction,
+                  source: 'Auto-Redemption',
+                  partner_id: merchantId || null,
+                  description: `Auto-redeemed ${actualDeduction} PawBucks ($${(actualDeduction / 1000).toFixed(2)}) for subscription at ${merchantName}`,
+                });
+
+              console.log(`✅ Deducted ${actualDeduction} PawBucks from user wallet after payment completion`);
+            } else {
+              console.error('Error deducting PawBucks:', updateError);
+            }
+          } else {
+            console.log('User no longer has enough PawBucks for deduction, skipping');
+          }
+        } else {
+          console.error('Could not find PawBucks wallet for user:', walletError);
+        }
+      }
+      
       if (session.mode === 'subscription') {
-        const userId = session.metadata?.user_id;
         const subscriptionId = session.subscription as string;
         
         console.log('Checkout session completed:', {
