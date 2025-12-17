@@ -60,7 +60,7 @@ serve(async (req) => {
 
     // STEP 2: Initialize Stripe
     const stripe = new Stripe(stripeKey, {
-      apiVersion: '2025-10-29.clover',
+      apiVersion: '2025-08-27.basil',
     });
 
     // STEP 3: Parse request body
@@ -120,21 +120,21 @@ serve(async (req) => {
     // STEP 5: Calculate application fee (platform monetization)
     const PLATFORM_FEE_PERCENTAGE = 0.10; // 10% fee
     
-    // Get the price details to calculate the fee and determine checkout mode
-    const price = await stripe.prices.retrieve(priceId, {
+    // Get the price details from connected account to calculate the fee and determine checkout mode
+    const connectedPrice = await stripe.prices.retrieve(priceId, {
       stripeAccount: accountId,
     });
 
     // Determine if this is a recurring price (subscription) or one-time payment
-    const isRecurringPrice = price.type === 'recurring';
+    const isRecurringPrice = connectedPrice.type === 'recurring';
     const checkoutMode = isRecurringPrice ? 'subscription' : 'payment';
 
-    console.log(`Price type: ${price.type}, using checkout mode: ${checkoutMode}`);
+    console.log(`Price type: ${connectedPrice.type}, using checkout mode: ${checkoutMode}`);
 
     // Calculate total amount in cents
     let totalAmountCents = 0;
-    if (price.unit_amount) {
-      totalAmountCents = price.unit_amount * quantity;
+    if (connectedPrice.unit_amount) {
+      totalAmountCents = connectedPrice.unit_amount * quantity;
     }
 
     const totalAmountDollars = totalAmountCents / 100;
@@ -222,7 +222,7 @@ serve(async (req) => {
     }
 
     // PawBucks earned based on remaining Stripe amount only
-    const estimatedPawBucks = Math.floor(finalAmountDollars * (userCashbackRate / 100) * 10);
+    const estimatedPawBucks = Math.floor(finalAmountDollars * userCashbackRate);
 
     console.log(`Calculated: fee=$${(applicationFeeAmount / 100).toFixed(2)}, pawBucks=${estimatedPawBucks}`);
 
@@ -261,79 +261,127 @@ serve(async (req) => {
       );
     }
 
-    // STEP 8: Create Checkout Session for remaining amount
-    const sessionConfig: Stripe.Checkout.SessionCreateParams = {
-      line_items: [
-        {
-          price_data: {
-            currency: 'usd',
-            product_data: {
-              name: productName || 'Subscription',
-              description: pawbucksUsed > 0 
-                ? `Original: $${totalAmountDollars.toFixed(2)} - PawBucks: $${pawbucksUsdValue.toFixed(2)}`
-                : undefined,
-            },
-            unit_amount: finalStripeAmountCents,
-            recurring: isRecurringPrice ? {
-              interval: price.recurring?.interval || 'month',
-              interval_count: price.recurring?.interval_count || 1,
-            } : undefined,
-          },
-          quantity: 1,
-        },
-      ],
-      mode: checkoutMode,
-      success_url: successUrl || `${req.headers.get('origin')}/checkout-success?session_id={CHECKOUT_SESSION_ID}&store=${accountId}`,
-      cancel_url: cancelUrl || `${req.headers.get('origin')}/checkout-canceled`,
-      customer_email: user.email,
-      // Session-level metadata for checkout.session.completed webhook
-      metadata: {
-        user_id: user.id,
-        merchant_id: merchantId || '',
-        product_name: productName || 'Storefront Purchase',
-        pawbucks_used: pawbucksUsed.toString(),
-        pawbucks_usd_value: pawbucksUsdValue.toFixed(2),
-      },
-    };
-
-    // Add metadata for tracking on subscription/payment objects
+    // STEP 8: Create Checkout Session using DESTINATION CHARGES pattern
+    // This creates the payment on the PLATFORM, then transfers to connected account
+    // Benefits: Webhooks come to platform, statement descriptor can be controlled
+    
     const metadata = {
       connected_account_id: accountId,
       platform_fee_percentage: (PLATFORM_FEE_PERCENTAGE * 100).toString(),
       user_id: user.id,
       merchant_id: merchantId || '',
       source: 'merchant_storefront',
-      product_name: productName || 'Storefront Purchase',
+      product_name: productName || merchantName,
       description: `${isRecurringPrice ? 'Subscription' : 'Purchase'} from ${merchantName}`,
       original_amount_cents: totalAmountCents.toString(),
       pawbucks_used: pawbucksUsed.toString(),
       pawbucks_usd_value: pawbucksUsdValue.toFixed(2),
     };
 
-    // Add payment_intent_data for one-time payments
+    // For one-time payments, use destination charges
     if (!isRecurringPrice) {
-      sessionConfig.payment_intent_data = {
-        application_fee_amount: applicationFeeAmount,
+      const session = await stripe.checkout.sessions.create({
+        line_items: [
+          {
+            price_data: {
+              currency: 'usd',
+              product_data: {
+                name: productName || `Purchase from ${merchantName}`,
+                description: pawbucksUsed > 0 
+                  ? `Original: $${totalAmountDollars.toFixed(2)} - PawBucks: $${pawbucksUsdValue.toFixed(2)}`
+                  : undefined,
+              },
+              unit_amount: finalStripeAmountCents,
+            },
+            quantity: 1,
+          },
+        ],
+        mode: 'payment',
+        success_url: successUrl || `${req.headers.get('origin')}/checkout-success?session_id={CHECKOUT_SESSION_ID}&store=${accountId}`,
+        cancel_url: cancelUrl || `${req.headers.get('origin')}/checkout-canceled`,
+        customer_email: user.email,
         metadata,
-      };
-    } else {
-      // For subscriptions, use subscription_data with metadata for recurring payment tracking
-      sessionConfig.subscription_data = {
-        application_fee_percent: PLATFORM_FEE_PERCENTAGE * 100,
-        metadata,
-      };
+        payment_intent_data: {
+          application_fee_amount: applicationFeeAmount,
+          transfer_data: {
+            destination: accountId,
+          },
+          // Statement descriptor shows merchant name on customer's card statement
+          statement_descriptor_suffix: merchantName.substring(0, 22).replace(/[<>"']/g, ''),
+          metadata,
+        },
+      });
+
+      console.log('Checkout session created (destination charge):', session.id);
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          checkout_url: session.url,
+          session_id: session.id,
+          application_fee: {
+            amount: applicationFeeAmount,
+            percentage: PLATFORM_FEE_PERCENTAGE * 100,
+            formatted: `$${(applicationFeeAmount / 100).toFixed(2)}`,
+          },
+          rewards: {
+            cashback_rate: userCashbackRate,
+            estimated_pawbucks: estimatedPawBucks,
+            formatted: `+${estimatedPawBucks} PawBucks`,
+          },
+          pawbucks_applied: pawbucksUsed > 0 ? {
+            pawbucks_used: pawbucksUsed,
+            usd_value: pawbucksUsdValue,
+            formatted: `${pawbucksUsed} PawBucks ($${pawbucksUsdValue.toFixed(2)})`,
+          } : null,
+          original_amount: totalAmountDollars,
+          final_stripe_amount: finalAmountDollars,
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
+        }
+      );
     }
 
-    const session = await stripe.checkout.sessions.create(
-      sessionConfig,
-      {
-        stripeAccount: accountId,
-      }
-    );
+    // For subscriptions, we need to use a different approach
+    // Create subscription on platform with transfers to connected account
+    const session = await stripe.checkout.sessions.create({
+      line_items: [
+        {
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: productName || `Subscription from ${merchantName}`,
+              description: pawbucksUsed > 0 
+                ? `Original: $${totalAmountDollars.toFixed(2)} - PawBucks: $${pawbucksUsdValue.toFixed(2)}`
+                : undefined,
+            },
+            unit_amount: finalStripeAmountCents,
+            recurring: {
+              interval: connectedPrice.recurring?.interval || 'month',
+              interval_count: connectedPrice.recurring?.interval_count || 1,
+            },
+          },
+          quantity: 1,
+        },
+      ],
+      mode: 'subscription',
+      success_url: successUrl || `${req.headers.get('origin')}/checkout-success?session_id={CHECKOUT_SESSION_ID}&store=${accountId}`,
+      cancel_url: cancelUrl || `${req.headers.get('origin')}/checkout-canceled`,
+      customer_email: user.email,
+      metadata,
+      subscription_data: {
+        application_fee_percent: PLATFORM_FEE_PERCENTAGE * 100,
+        transfer_data: {
+          destination: accountId,
+        },
+        metadata,
+      },
+    });
 
-    console.log('Checkout session created:', session.id);
+    console.log('Subscription checkout session created (with transfer):', session.id);
 
-    // STEP 9: Return the checkout session URL with rewards info
     return new Response(
       JSON.stringify({
         success: true,
