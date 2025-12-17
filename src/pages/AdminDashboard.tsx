@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { AddTransactionTool } from "@/components/admin/AddTransactionTool";
+import { PawBucksCreditTool } from "@/components/admin/PawBucksCreditTool";
 import { SecurityMonitoringTab } from "@/components/admin/SecurityMonitoringTab";
 import { Button } from "@/components/ui/button";
 import { GradientCard } from "@/components/ui/gradient-card";
@@ -577,6 +578,9 @@ const AdminDashboard = () => {
 
         {/* Add Transaction Tool */}
         <AddTransactionTool />
+
+        {/* Manual PawBucks Credit Tool */}
+        <PawBucksCreditTool />
 
         {/* Funding Requests */}
         <GradientCard>
