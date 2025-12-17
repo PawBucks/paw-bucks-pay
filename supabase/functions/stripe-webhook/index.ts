@@ -8,11 +8,16 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  console.log('[STRIPE-WEBHOOK] Function invoked, method:', req.method);
+  
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    console.log('[STRIPE-WEBHOOK] Processing webhook request');
+    console.log('[STRIPE-WEBHOOK] Headers:', JSON.stringify(Object.fromEntries(req.headers.entries())));
+    
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
       apiVersion: '2025-08-27.basil',
     });
