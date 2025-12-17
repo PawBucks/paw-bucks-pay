@@ -201,19 +201,25 @@ serve(async (req) => {
       }
     }
 
-    // Handle successful invoice payment (renewal)
+    // Handle successful invoice payment (renewal) - Award PawBucks for recurring payments
     if (event.type === 'invoice.payment_succeeded') {
       const invoice = event.data.object as Stripe.Invoice;
       const subscriptionId = invoice.subscription as string;
+      const amount = invoice.amount_paid / 100; // Convert from cents
 
       console.log('Invoice payment succeeded:', {
         invoiceId: invoice.id,
         subscriptionId,
-        amount: invoice.amount_paid / 100,
+        amount,
+        billingReason: invoice.billing_reason,
       });
 
-      if (subscriptionId) {
-        // Fetch subscription to get current period end
+      // Only process subscription renewals (not initial subscription creation)
+      // Initial subscription is handled by checkout.session.completed + payment_intent.succeeded
+      const isRenewal = invoice.billing_reason === 'subscription_cycle' || 
+                        invoice.billing_reason === 'subscription_update';
+
+      if (subscriptionId && amount > 0) {
         const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
           apiVersion: '2025-08-27.basil',
         });
@@ -242,6 +248,118 @@ serve(async (req) => {
             subscription_id: subscriptionId,
             event_type: 'invoice.payment_succeeded',
           });
+
+        // Award PawBucks for recurring payments
+        if (isRenewal) {
+          console.log('Processing PawBucks for recurring subscription payment');
+          
+          // Get customer email from Stripe
+          const customerId = invoice.customer as string;
+          let customerEmail: string | null = null;
+          let userId: string | null = null;
+          let merchantId: string | null = null;
+
+          try {
+            const customer = await stripe.customers.retrieve(customerId);
+            if (customer && !customer.deleted) {
+              customerEmail = customer.email;
+            }
+          } catch (e) {
+            console.error('Error fetching customer:', e);
+          }
+
+          // Look up user by email
+          if (customerEmail) {
+            const { data: profile } = await supabaseAdmin
+              .from('profiles')
+              .select('id')
+              .eq('email', customerEmail)
+              .maybeSingle();
+
+            if (profile) {
+              userId = profile.id;
+            }
+          }
+
+          // Try to get merchant_id from subscription metadata
+          if (subscription.metadata?.merchant_id) {
+            merchantId = subscription.metadata.merchant_id;
+          }
+
+          if (userId && merchantId) {
+            // Determine PawBucks multiplier based on subscription tier
+            let pawbucksMultiplier = 10; // Default 10x for free accounts
+            let tierName = 'Free';
+
+            // Check user's platform subscription tier (PawPass/PawPass+)
+            const { data: platformSub } = await supabaseAdmin
+              .from('subscriptions')
+              .select('stripe_subscription_id')
+              .eq('user_id', userId)
+              .in('status', ['active', 'trialing'])
+              .maybeSingle();
+
+            if (platformSub?.stripe_subscription_id) {
+              try {
+                const platformSubscription = await stripe.subscriptions.retrieve(platformSub.stripe_subscription_id);
+                const productId = platformSubscription.items.data[0]?.price?.product;
+                
+                if (productId === 'prod_TQyZjYzt9DwoIK') {
+                  pawbucksMultiplier = 30; // PawPass+
+                  tierName = 'PawPass+';
+                } else if (productId === 'prod_TJVK9ZhLiJnnpm') {
+                  pawbucksMultiplier = 20; // PawPass
+                  tierName = 'PawPass';
+                }
+              } catch (e) {
+                console.error('Error fetching platform subscription:', e);
+              }
+            }
+
+            const pawbucksEarned = Math.floor(amount * pawbucksMultiplier);
+            const rewardsEarned = Math.floor(amount);
+
+            console.log('Recording recurring payment transaction:', {
+              userId,
+              merchantId,
+              amount,
+              pawbucksEarned,
+              pawbucksMultiplier: `${pawbucksMultiplier}x`,
+              tierName,
+            });
+
+            // Create transaction record for recurring payment
+            const { data: transaction, error: transactionError } = await supabaseAdmin
+              .from('transactions')
+              .insert({
+                user_id: userId,
+                merchant_id: merchantId,
+                amount: amount,
+                cashback_earned: pawbucksEarned,
+                rewards_earned: rewardsEarned,
+                description: `Recurring subscription payment`,
+                status: 'completed',
+                stripe_payment_intent_id: invoice.payment_intent as string || `invoice_${invoice.id}`,
+              })
+              .select()
+              .single();
+
+            if (transactionError) {
+              console.error('Error creating recurring payment transaction:', transactionError);
+            } else {
+              console.log('✅ Recurring payment transaction recorded:', transaction.id);
+              console.log(`✅ User earned ${pawbucksEarned} PawBucks (${tierName} tier)`);
+            }
+          } else {
+            console.log('Could not process PawBucks for recurring payment - missing user_id or merchant_id', {
+              userId,
+              merchantId,
+              customerEmail,
+            });
+          }
+        } else {
+          console.log('Skipping PawBucks for initial subscription payment (handled by payment_intent.succeeded)');
+        }
       }
     }
 
