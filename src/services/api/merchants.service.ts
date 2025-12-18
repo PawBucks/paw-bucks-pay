@@ -13,7 +13,7 @@ type MerchantPublic = Pick<Merchant,
   'id' | 'business_name' | 'business_type' | 'description' | 'logo_url' | 
   'address' | 'phone' | 'latitude' | 'longitude' | 'cashback_rate' | 'accepts_pawbucks' | 
   'price_range' | 'is_sponsored' | 'sponsored_until' | 'created_at'
->;
+> & { storefront_slug: string | null };
 
 export type { MerchantPublic };
 export const merchantsService = {

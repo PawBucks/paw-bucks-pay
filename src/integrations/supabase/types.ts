@@ -751,6 +751,7 @@ export type Database = {
           phone: string | null
           price_range: number | null
           sponsored_until: string | null
+          storefront_slug: string
           stripe_account_id: string | null
           stripe_account_status: string | null
           updated_at: string
@@ -776,6 +777,7 @@ export type Database = {
           phone?: string | null
           price_range?: number | null
           sponsored_until?: string | null
+          storefront_slug: string
           stripe_account_id?: string | null
           stripe_account_status?: string | null
           updated_at?: string
@@ -801,6 +803,7 @@ export type Database = {
           phone?: string | null
           price_range?: number | null
           sponsored_until?: string | null
+          storefront_slug?: string
           stripe_account_id?: string | null
           stripe_account_status?: string | null
           updated_at?: string
@@ -2018,6 +2021,7 @@ export type Database = {
           phone: string | null
           price_range: number | null
           sponsored_until: string | null
+          storefront_slug: string | null
         }
         Insert: {
           accepts_pawbucks?: boolean | null
@@ -2035,6 +2039,7 @@ export type Database = {
           phone?: string | null
           price_range?: number | null
           sponsored_until?: string | null
+          storefront_slug?: string | null
         }
         Update: {
           accepts_pawbucks?: boolean | null
@@ -2052,6 +2057,7 @@ export type Database = {
           phone?: string | null
           price_range?: number | null
           sponsored_until?: string | null
+          storefront_slug?: string | null
         }
         Relationships: []
       }
@@ -2080,6 +2086,10 @@ export type Database = {
     Functions: {
       generate_redemption_code: { Args: never; Returns: string }
       generate_referral_code: { Args: never; Returns: string }
+      generate_storefront_slug: {
+        Args: { business_name: string }
+        Returns: string
+      }
       get_admin_analytics: {
         Args: never
         Returns: {

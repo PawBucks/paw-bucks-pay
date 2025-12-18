@@ -141,6 +141,11 @@ const MerchantOnboarding = () => {
         }
       }
 
+      // Generate storefront slug from business name
+      const storefrontSlug = validatedData.businessName
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '');
+
       // Create merchant profile
       const { data: merchantData, error: merchantError } = await supabase.from("merchants").insert({
         user_id: user.id,
@@ -152,6 +157,7 @@ const MerchantOnboarding = () => {
         description: validatedData.description || null,
         cashback_rate: validatedData.cashbackRate,
         logo_url: logoUrl,
+        storefront_slug: storefrontSlug,
       }).select('id').single();
 
       if (merchantError) {

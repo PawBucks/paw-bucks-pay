@@ -573,7 +573,7 @@ const MerchantProfile = () => {
                     Check out the products and services offered by this merchant.
                   </p>
                   <Button asChild>
-                    <Link to={`/storefront/${stripeAccountId}`}>
+                    <Link to={`/storefront/${merchant?.storefront_slug || stripeAccountId}`}>
                       View Storefront
                       <ChevronRight className="w-4 h-4 ml-2" />
                     </Link>

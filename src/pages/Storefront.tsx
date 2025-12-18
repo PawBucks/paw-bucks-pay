@@ -49,6 +49,7 @@ const Storefront = () => {
   const [merchantDescription, setMerchantDescription] = useState<string>("");
   const [cashbackRate, setCashbackRate] = useState<number>(10);
   const [purchasingProductId, setPurchasingProductId] = useState<string | null>(null);
+  const [stripeAccountId, setStripeAccountId] = useState<string | null>(null);
 
   useEffect(() => {
     if (accountId) {
@@ -62,38 +63,71 @@ const Storefront = () => {
     try {
       setLoading(true);
 
-      // Load merchant info from base table via edge function
-      const { data: connectStatus } = await supabase.functions.invoke("get-connect-account-status", {
-        body: { stripeAccountId: accountId },
-      });
+      // First, try to find merchant by storefront_slug
+      const { data: merchantBySlug } = await supabase
+        .from('merchants_public')
+        .select('id, business_name, description, cashback_rate, storefront_slug')
+        .eq('storefront_slug', accountId)
+        .maybeSingle();
 
-      if (connectStatus?.merchantName) {
-        setMerchantName(connectStatus.merchantName);
-        setMerchantId(connectStatus.merchantId);
-      }
+      let resolvedMerchantId: string | null = null;
+      let resolvedStripeAccountId: string | null = accountId;
 
-      // Get additional merchant info
-      if (connectStatus?.merchantId) {
-        const { data: merchantData } = await supabase
-          .from('merchants_public')
-          .select('description, cashback_rate')
-          .eq('id', connectStatus.merchantId)
-          .single();
+      if (merchantBySlug) {
+        // Found by slug - need to get stripe_account_id from edge function
+        setMerchantName(merchantBySlug.business_name || "");
+        setMerchantId(merchantBySlug.id);
+        setMerchantDescription(merchantBySlug.description || "");
+        setCashbackRate(merchantBySlug.cashback_rate || 10);
+        resolvedMerchantId = merchantBySlug.id;
 
-        if (merchantData) {
-          setMerchantDescription(merchantData.description || "");
-          setCashbackRate(merchantData.cashback_rate || 10);
+        // Get stripe account ID via edge function
+        const { data: connectStatus } = await supabase.functions.invoke("get-connect-account-status", {
+          body: { merchantId: merchantBySlug.id },
+        });
+        
+        if (connectStatus?.accountId) {
+          resolvedStripeAccountId = connectStatus.accountId;
+          setStripeAccountId(connectStatus.accountId);
+        }
+      } else {
+        // Fall back to looking up by stripe_account_id (for backward compatibility)
+        const { data: connectStatus } = await supabase.functions.invoke("get-connect-account-status", {
+          body: { stripeAccountId: accountId },
+        });
+
+        if (connectStatus?.merchantName) {
+          setMerchantName(connectStatus.merchantName);
+          setMerchantId(connectStatus.merchantId);
+          resolvedMerchantId = connectStatus.merchantId;
+          resolvedStripeAccountId = accountId;
+          setStripeAccountId(accountId);
+        }
+
+        // Get additional merchant info
+        if (connectStatus?.merchantId) {
+          const { data: merchantData } = await supabase
+            .from('merchants_public')
+            .select('description, cashback_rate')
+            .eq('id', connectStatus.merchantId)
+            .single();
+
+          if (merchantData) {
+            setMerchantDescription(merchantData.description || "");
+            setCashbackRate(merchantData.cashback_rate || 10);
+          }
         }
       }
 
-      // Load products
-      const { data, error } = await supabase.functions.invoke("list-connect-products", {
-        body: { accountId },
-      });
+      // Load products using the resolved stripe account ID
+      if (resolvedStripeAccountId) {
+        const { data, error } = await supabase.functions.invoke("list-connect-products", {
+          body: { accountId: resolvedStripeAccountId },
+        });
 
-      if (error) throw error;
-
-      setProducts(data.products || []);
+        if (error) throw error;
+        setProducts(data.products || []);
+      }
     } catch (error) {
       console.error("Error loading storefront:", error);
       toast.error("Failed to load storefront");
@@ -103,7 +137,8 @@ const Storefront = () => {
   };
 
   const handlePurchase = async (product: Product) => {
-    if (!product.price?.id || !accountId) return;
+    const effectiveAccountId = stripeAccountId || accountId;
+    if (!product.price?.id || !effectiveAccountId) return;
 
     // Check if user is authenticated
     if (!user) {
@@ -121,7 +156,7 @@ const Storefront = () => {
 
       const { data, error } = await supabase.functions.invoke("create-connect-checkout", {
         body: {
-          accountId,
+          accountId: effectiveAccountId,
           priceId: product.price.id,
           quantity: 1,
           productName: product.name,

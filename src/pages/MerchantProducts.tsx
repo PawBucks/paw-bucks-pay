@@ -36,6 +36,7 @@ type Merchant = {
   id: string;
   business_name: string;
   stripe_account_id: string | null;
+  storefront_slug: string | null;
 };
 
 const MerchantProducts = () => {
@@ -73,7 +74,7 @@ const MerchantProducts = () => {
       // Load merchant data
       const { data: merchantData, error: merchantError } = await supabase
         .from("merchants")
-        .select("id, business_name, stripe_account_id")
+        .select("id, business_name, stripe_account_id, storefront_slug")
         .eq("user_id", user.id)
         .single();
 
@@ -172,8 +173,8 @@ const MerchantProducts = () => {
   };
 
   const getStorefrontUrl = () => {
-    if (!merchant?.stripe_account_id) return "";
-    return `${window.location.origin}/storefront/${merchant.stripe_account_id}`;
+    if (!merchant?.storefront_slug) return "";
+    return `${window.location.origin}/storefront/${merchant.storefront_slug}`;
   };
 
   if (authLoading || loading) {
@@ -218,7 +219,7 @@ const MerchantProducts = () => {
       </div>
 
       {/* Storefront Link Card */}
-      {merchant?.stripe_account_id && (
+      {merchant?.storefront_slug && (
         <Card className="mb-8 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -229,7 +230,7 @@ const MerchantProducts = () => {
               Share this link with your customers to let them browse and purchase your products
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
             <div className="flex items-center gap-2">
               <Input
                 value={getStorefrontUrl()}
@@ -252,6 +253,9 @@ const MerchantProducts = () => {
                 Visit
               </Button>
             </div>
+            <p className="text-xs text-muted-foreground">
+              Your storefront URL is: <span className="font-mono text-foreground">/storefront/{merchant.storefront_slug}</span>
+            </p>
           </CardContent>
         </Card>
       )}
