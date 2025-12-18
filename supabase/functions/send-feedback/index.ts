@@ -38,7 +38,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     const emailResponse = await resend.emails.send({
       from: "PawBucks Feedback <noreply@pawbucks.app>",
-      to: ["jfields@pawbucks.app"],
+      to: ["admin@pawbucks.app"],
       subject: "New PawBucks User Feedback",
       html: `
         <h2>New Feedback Received</h2>
