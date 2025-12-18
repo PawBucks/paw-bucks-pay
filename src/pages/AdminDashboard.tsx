@@ -1245,40 +1245,29 @@ const AdminDashboard = () => {
               // Generate a temporary password
               const tempPassword = crypto.randomUUID().slice(0, 16);
               
-              // Create user via Supabase Auth
-              const { data: authData, error: authError } = await supabase.auth.signUp({
-                email,
-                password: tempPassword,
-                options: {
-                  data: {
-                    full_name: fullName,
-                    user_type: userType,
-                  }
+              // Create user via edge function to avoid logging out current admin
+              const { data, error } = await supabase.functions.invoke('admin-create-user', {
+                body: {
+                  email,
+                  password: tempPassword,
+                  full_name: fullName,
+                  user_type: userType,
                 }
               });
 
-              if (authError) throw authError;
+              if (error) throw error;
+              if (data?.error) throw new Error(data.error);
 
               // If a role was assigned and user was created successfully, assign the role
-              if (authData.user && assignRole && isSuperAdmin) {
+              if (data?.user && assignRole && isSuperAdmin) {
                 const { error: roleError } = await supabase
                   .from('user_roles')
-                  .insert({ user_id: authData.user.id, role: assignRole as any });
+                  .insert({ user_id: data.user.id, role: assignRole as any });
                 
                 if (roleError) {
                   console.error('Error assigning role:', roleError);
                   toast.error('User created but failed to assign role');
                 }
-              }
-
-              // Log admin action
-              if (authData.user) {
-                await supabase.rpc('log_admin_action', {
-                  _action: 'CREATE_USER',
-                  _entity_type: 'user',
-                  _entity_id: authData.user.id,
-                  _changes: { email, full_name: fullName, user_type: userType, role: assignRole || 'none' },
-                });
               }
 
               toast.success('User created successfully. They can use "Forgot Password" to set their password.');
