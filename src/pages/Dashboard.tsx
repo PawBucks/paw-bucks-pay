@@ -218,8 +218,9 @@ const Dashboard = () => {
         </div>
 
         {profile.user_type === "pet_owner" ? (
-          <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <motion.div custom={0} variants={cardVariants} initial="hidden" animate="visible" className="md:col-span-2 lg:col-span-2">
+          <div className="flex flex-col gap-4 sm:gap-6">
+            {/* Row 1: Wallet Stats (Total Saved & Total Spending) */}
+            <motion.div custom={0} variants={cardVariants} initial="hidden" animate="visible">
               <WalletStats 
                 balance={(pawbucksWallet?.balance || 0) * 0.001} 
                 rewardsPoints={pawbucksWallet?.balance || 0}
@@ -228,17 +229,21 @@ const Dashboard = () => {
               />
             </motion.div>
             
+            {/* Row 2: My Pets - Full Width */}
             <motion.div custom={1} variants={cardVariants} initial="hidden" animate="visible">
               <PetProfilesSection pets={pets} onUpdate={handlePetsUpdate} />
             </motion.div>
             
-            <motion.div custom={2} variants={cardVariants} initial="hidden" animate="visible">
-              <ReferralCard />
-            </motion.div>
-            
-            <motion.div custom={3} variants={cardVariants} initial="hidden" animate="visible">
-              <DiscoverServicesCard />
-            </motion.div>
+            {/* Row 3: Referral Program & Discover Pet Services - Side by Side on larger screens */}
+            <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
+              <motion.div custom={2} variants={cardVariants} initial="hidden" animate="visible">
+                <ReferralCard />
+              </motion.div>
+              
+              <motion.div custom={3} variants={cardVariants} initial="hidden" animate="visible">
+                <DiscoverServicesCard />
+              </motion.div>
+            </div>
           </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-3">
