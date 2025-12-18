@@ -158,6 +158,57 @@ export type Database = {
         }
         Relationships: []
       }
+      consultation_bookings: {
+        Row: {
+          booking_date: string
+          created_at: string
+          id: string
+          merchant_id: string | null
+          notes: string | null
+          status: string
+          time_slot: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          booking_date: string
+          created_at?: string
+          id?: string
+          merchant_id?: string | null
+          notes?: string | null
+          status?: string
+          time_slot: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          booking_date?: string
+          created_at?: string
+          id?: string
+          merchant_id?: string | null
+          notes?: string | null
+          status?: string
+          time_slot?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultation_bookings_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultation_bookings_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       funding_deals: {
         Row: {
           amount_funded: number
