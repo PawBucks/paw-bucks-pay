@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AddTransactionTool } from "@/components/admin/AddTransactionTool";
 import { PawBucksCreditTool } from "@/components/admin/PawBucksCreditTool";
 import { SecurityMonitoringTab } from "@/components/admin/SecurityMonitoringTab";
+import { ConsultationBookingsTab } from "@/components/admin/ConsultationBookingsTab";
 import { Button } from "@/components/ui/button";
 import { GradientCard } from "@/components/ui/gradient-card";
 import { Input } from "@/components/ui/input";
@@ -42,6 +43,7 @@ import {
   UserPlus,
   RefreshCw,
   ShieldAlert,
+  CalendarDays,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -143,6 +145,9 @@ const AdminDashboard = () => {
   
   // Security monitoring dialog
   const [securityDialogOpen, setSecurityDialogOpen] = useState(false);
+  
+  // Consultation bookings dialog
+  const [consultationsDialogOpen, setConsultationsDialogOpen] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -518,6 +523,10 @@ const AdminDashboard = () => {
             <Button variant="ghost" size="sm" className="flex-shrink-0 h-8 px-3 text-xs" onClick={() => navigate("/admin/pet-store")}>
               <Store className="w-3.5 h-3.5 mr-1.5" />
               Pet Store
+            </Button>
+            <Button variant="ghost" size="sm" className="flex-shrink-0 h-8 px-3 text-xs" onClick={() => setConsultationsDialogOpen(true)}>
+              <CalendarDays className="w-3.5 h-3.5 mr-1.5" />
+              Consults
             </Button>
           </div>
         </div>
@@ -1362,6 +1371,11 @@ const AdminDashboard = () => {
           <SecurityMonitoringTab />
         </DialogContent>
       </Dialog>
+      {/* Consultation Bookings Tab */}
+      <ConsultationBookingsTab 
+        open={consultationsDialogOpen} 
+        onOpenChange={setConsultationsDialogOpen} 
+      />
     </div>
   );
 };
