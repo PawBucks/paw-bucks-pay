@@ -155,23 +155,24 @@ export function ConsultationBookingsTab({ open, onOpenChange }: ConsultationBook
 
       if (error) throw error;
 
-      // Send confirmation email when confirming
-      if (newStatus === "confirmed" && booking) {
+      // Send email notification
+      if (booking) {
         try {
           const formattedDate = format(new Date(booking.booking_date + "T00:00:00"), "EEEE, MMMM d, yyyy");
           
           await supabase.functions.invoke("send-consultation-confirmation", {
             body: {
+              type: newStatus,
               recipientEmail: booking.user_email,
               bookingDate: formattedDate,
               timeSlot: booking.time_slot,
               notes: booking.notes,
             },
           });
-          toast.success("Booking confirmed and confirmation email sent!");
+          toast.success(`Booking ${newStatus} and notification email sent!`);
         } catch (emailError) {
-          console.error("Failed to send confirmation email:", emailError);
-          toast.success("Booking confirmed! (Email notification failed)");
+          console.error("Failed to send notification email:", emailError);
+          toast.success(`Booking ${newStatus}! (Email notification failed)`);
         }
       } else {
         toast.success(`Booking ${newStatus}!`);
@@ -191,6 +192,9 @@ export function ConsultationBookingsTab({ open, onOpenChange }: ConsultationBook
       toast.error("Please select a new date and time");
       return;
     }
+
+    const previousDate = format(new Date(rescheduleBooking.booking_date + "T00:00:00"), "EEEE, MMMM d, yyyy");
+    const previousTimeSlot = rescheduleBooking.time_slot;
 
     setUpdating(rescheduleBooking.id);
     try {
@@ -212,7 +216,27 @@ export function ConsultationBookingsTab({ open, onOpenChange }: ConsultationBook
         throw error;
       }
 
-      toast.success("Booking rescheduled!");
+      // Send reschedule email
+      try {
+        const newFormattedDate = format(newDate, "EEEE, MMMM d, yyyy");
+        
+        await supabase.functions.invoke("send-consultation-confirmation", {
+          body: {
+            type: "rescheduled",
+            recipientEmail: rescheduleBooking.user_email,
+            bookingDate: newFormattedDate,
+            timeSlot: newTimeSlot,
+            notes: rescheduleBooking.notes,
+            previousDate,
+            previousTimeSlot,
+          },
+        });
+        toast.success("Booking rescheduled and notification email sent!");
+      } catch (emailError) {
+        console.error("Failed to send reschedule email:", emailError);
+        toast.success("Booking rescheduled! (Email notification failed)");
+      }
+
       setRescheduleBooking(null);
       setNewDate(undefined);
       setNewTimeSlot("");
