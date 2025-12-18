@@ -135,26 +135,31 @@ export function ConsultationScheduleDialog({
         throw bookingError;
       }
 
-      // Send email notification to jfields@pawbucks.app
-      await supabase.functions.invoke("send-feedback", {
-        body: {
-          type: "consultation_request",
-          email: "jfields@pawbucks.app",
-          subject: `Consultation Request: ${format(selectedDate, "EEEE, MMMM d")} at ${selectedTimeLabel}`,
-          message: `
-New consultation request received:
+      // Create in-app notification for admin
+      try {
+        await supabase.from("notifications").insert({
+          user_id: null, // Admin notification (null = broadcast to admins)
+          title: "New Consultation Request",
+          message: `${user?.email || "A user"} requested a consultation for ${format(selectedDate, "EEEE, MMMM d")} at ${selectedTimeLabel} PT.${merchantName ? ` Business: ${merchantName}` : ""}`,
+          category: "consultation",
+          is_read: false,
+        });
+      } catch (notifError) {
+        console.error("Failed to create admin notification:", notifError);
+      }
 
-Date: ${format(selectedDate, "EEEE, MMMM d, yyyy")}
-Time: ${selectedTimeLabel} Pacific Time
-Duration: 15 minutes
-
-Requester: ${user?.email || "Unknown"}
-${merchantName ? `Business: ${merchantName}` : ""}
-
-Please confirm this appointment and send a calendar invite with video call link.
-          `.trim(),
-        },
-      });
+      // Send email notification to admin
+      try {
+        await supabase.functions.invoke("send-feedback", {
+          body: {
+            feedback: `New consultation request received:\n\nDate: ${format(selectedDate, "EEEE, MMMM d, yyyy")}\nTime: ${selectedTimeLabel} Pacific Time\nDuration: 15 minutes\n\nRequester: ${user?.email || "Unknown"}${merchantName ? `\nBusiness: ${merchantName}` : ""}\n\nPlease confirm this appointment in the Admin Dashboard.`,
+            userEmail: user?.email,
+            userName: merchantName || user?.email,
+          },
+        });
+      } catch (emailError) {
+        console.error("Failed to send admin email notification:", emailError);
+      }
 
       setIsConfirmed(true);
       toast.success("Consultation booked!", {
