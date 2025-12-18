@@ -37,8 +37,8 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Sending feedback email:", { feedback, userEmail, userName });
 
     const emailResponse = await resend.emails.send({
-      from: "PawBucks Feedback <onboarding@resend.dev>",
-      to: ["admin@pawbucks.app"],
+      from: "PawBucks Feedback <noreply@pawbucks.app>",
+      to: ["jfields@pawbucks.app"],
       subject: "New PawBucks User Feedback",
       html: `
         <h2>New Feedback Received</h2>

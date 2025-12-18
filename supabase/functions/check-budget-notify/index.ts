@@ -155,7 +155,7 @@ serve(async (req) => {
 
           try {
             await resend.emails.send({
-              from: 'PawBucks <onboarding@resend.dev>',
+              from: 'PawBucks <noreply@pawbucks.app>',
               to: [profile.email],
               subject: '⚠️ Budget Alert - You\'ve exceeded your spending limit',
               html: `
