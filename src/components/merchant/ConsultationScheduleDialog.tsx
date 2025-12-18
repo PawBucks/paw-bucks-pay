@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { format, addDays, startOfDay, getDay } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
@@ -47,6 +47,8 @@ export function ConsultationScheduleDialog({
   const [selectedTimeLabel, setSelectedTimeLabel] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
+  const [bookedSlots, setBookedSlots] = useState<string[]>([]);
+  const [isLoadingSlots, setIsLoadingSlots] = useState(false);
 
   // Only allow Monday (1), Wednesday (3), and Friday (5)
   const isAllowedDay = (date: Date) => {
@@ -55,35 +57,47 @@ export function ConsultationScheduleDialog({
   };
 
   // Disable days that are not Mon/Wed/Fri, past days, and beyond 30 days
-  const disabledDays = useMemo(() => {
-    return (date: Date) => {
-      const today = startOfDay(new Date());
-      const maxDate = addDays(today, 30);
-      
-      // Disable if before tomorrow
-      if (date <= today) return true;
-      
-      // Disable if beyond 30 days
-      if (date > maxDate) return true;
-      
-      // Disable if not Mon/Wed/Fri
-      return !isAllowedDay(date);
-    };
-  }, []);
+  const disabledDays = (date: Date) => {
+    const today = startOfDay(new Date());
+    const maxDate = addDays(today, 30);
+    
+    if (date <= today) return true;
+    if (date > maxDate) return true;
+    return !isAllowedDay(date);
+  };
 
-  // Simulate some booked slots for realism
-  const bookedSlots = useMemo(() => {
-    if (!selectedDate) return [];
-    const seed = selectedDate.getDate();
-    const booked: string[] = [];
-    if (seed % 3 === 0) booked.push("10:00 AM");
-    if (seed % 4 === 0) booked.push("1:00 PM");
-    if (seed % 5 === 0) booked.push("11:00 AM", "12:30 PM");
-    return booked;
+  // Fetch booked slots when date changes
+  useEffect(() => {
+    if (!selectedDate) {
+      setBookedSlots([]);
+      return;
+    }
+
+    const fetchBookedSlots = async () => {
+      setIsLoadingSlots(true);
+      try {
+        const dateStr = format(selectedDate, "yyyy-MM-dd");
+        const { data, error } = await supabase
+          .from("consultation_bookings")
+          .select("time_slot")
+          .eq("booking_date", dateStr)
+          .in("status", ["pending", "confirmed"]);
+
+        if (error) throw error;
+        setBookedSlots(data?.map((b) => b.time_slot) || []);
+      } catch (error) {
+        console.error("Failed to fetch booked slots:", error);
+        setBookedSlots([]);
+      } finally {
+        setIsLoadingSlots(false);
+      }
+    };
+
+    fetchBookedSlots();
   }, [selectedDate]);
 
   const handleSchedule = async () => {
-    if (!selectedDate || !selectedTime) {
+    if (!selectedDate || !selectedTime || !user) {
       toast.error("Please select both a date and time");
       return;
     }
@@ -91,8 +105,38 @@ export function ConsultationScheduleDialog({
     setIsSubmitting(true);
     
     try {
+      const dateStr = format(selectedDate, "yyyy-MM-dd");
+
+      // Insert booking into database
+      const { error: bookingError } = await supabase
+        .from("consultation_bookings")
+        .insert({
+          user_id: user.id,
+          booking_date: dateStr,
+          time_slot: selectedTime,
+          status: "pending",
+          notes: merchantName ? `Business: ${merchantName}` : null,
+        });
+
+      if (bookingError) {
+        if (bookingError.code === "23505") {
+          toast.error("This time slot was just booked. Please select another.");
+          // Refresh booked slots
+          const { data } = await supabase
+            .from("consultation_bookings")
+            .select("time_slot")
+            .eq("booking_date", dateStr)
+            .in("status", ["pending", "confirmed"]);
+          setBookedSlots(data?.map((b) => b.time_slot) || []);
+          setSelectedTime(null);
+          setSelectedTimeLabel(null);
+          return;
+        }
+        throw bookingError;
+      }
+
       // Send email notification to jfields@pawbucks.app
-      const { error } = await supabase.functions.invoke("send-feedback", {
+      await supabase.functions.invoke("send-feedback", {
         body: {
           type: "consultation_request",
           email: "jfields@pawbucks.app",
@@ -112,15 +156,13 @@ Please confirm this appointment and send a calendar invite with video call link.
         },
       });
 
-      if (error) throw error;
-
       setIsConfirmed(true);
-      toast.success("Consultation request sent!", {
+      toast.success("Consultation booked!", {
         description: `${format(selectedDate, "EEEE, MMMM d")} at ${selectedTimeLabel} PT`,
       });
     } catch (error) {
       console.error("Failed to schedule consultation:", error);
-      toast.error("Failed to send request. Please try again.");
+      toast.error("Failed to book. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -132,7 +174,9 @@ Please confirm this appointment and send a calendar invite with video call link.
     setTimeout(() => {
       setSelectedDate(undefined);
       setSelectedTime(null);
+      setSelectedTimeLabel(null);
       setIsConfirmed(false);
+      setBookedSlots([]);
     }, 200);
   };
 
