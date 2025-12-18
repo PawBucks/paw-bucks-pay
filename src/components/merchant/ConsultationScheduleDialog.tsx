@@ -148,12 +148,12 @@ export function ConsultationScheduleDialog({
         console.error("Failed to create admin notification:", notifError);
       }
 
-      // Send email notification to admin (support@pawbucks.app)
+      // Send email notification to admin (admin@pawbucks.app)
       try {
         await supabase.functions.invoke("send-consultation-confirmation", {
           body: {
             type: "request",
-            recipientEmail: "support@pawbucks.app",
+            recipientEmail: "admin@pawbucks.app",
             bookingDate: format(selectedDate, "EEEE, MMMM d, yyyy"),
             bookingDateRaw: dateStr,
             timeSlot: selectedTime,

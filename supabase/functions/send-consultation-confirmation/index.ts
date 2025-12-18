@@ -83,7 +83,7 @@ DTEND:${endTime}
 SUMMARY:PawBucks Consultation
 DESCRIPTION:Your consultation with the PawBucks merchant success team.
 LOCATION:Video Call (link will be provided)
-ORGANIZER:mailto:support@pawbucks.app
+ORGANIZER:mailto:admin@pawbucks.app
 ATTENDEE:mailto:${recipientEmail}
 STATUS:CONFIRMED
 BEGIN:VALARM
