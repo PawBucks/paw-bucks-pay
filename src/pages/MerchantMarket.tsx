@@ -122,6 +122,7 @@ const MerchantMarket = () => {
   const [merchant, setMerchant] = useState<Merchant | null>(null);
   const [loading, setLoading] = useState(true);
   const [services, setServices] = useState<Service[]>([]);
+  const [expandedBenefits, setExpandedBenefits] = useState<Set<string>>(new Set());
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -385,16 +386,31 @@ const MerchantMarket = () => {
 
                 {/* Benefits */}
                 <div className="space-y-2 mb-4">
-                  {service.benefits.slice(0, 3).map((benefit, i) => (
+                  {(expandedBenefits.has(service.id) ? service.benefits : service.benefits.slice(0, 3)).map((benefit, i) => (
                     <div key={i} className="flex items-center gap-2 text-sm">
                       <CheckCircle2 className="w-4 h-4 text-accent flex-shrink-0" />
                       <span className="text-muted-foreground">{benefit}</span>
                     </div>
                   ))}
                   {service.benefits.length > 3 && (
-                    <p className="text-xs text-muted-foreground pl-6">
-                      +{service.benefits.length - 3} more benefits
-                    </p>
+                    <button
+                      onClick={() => {
+                        setExpandedBenefits(prev => {
+                          const newSet = new Set(prev);
+                          if (newSet.has(service.id)) {
+                            newSet.delete(service.id);
+                          } else {
+                            newSet.add(service.id);
+                          }
+                          return newSet;
+                        });
+                      }}
+                      className="text-xs text-primary hover:text-primary/80 pl-6 cursor-pointer transition-colors"
+                    >
+                      {expandedBenefits.has(service.id) 
+                        ? "Show less" 
+                        : `+${service.benefits.length - 3} more benefits`}
+                    </button>
                   )}
                 </div>
               </div>
