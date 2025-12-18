@@ -160,7 +160,7 @@ export function ConsultationBookingsTab({ open, onOpenChange }: ConsultationBook
         try {
           const formattedDate = format(new Date(booking.booking_date + "T00:00:00"), "EEEE, MMMM d, yyyy");
           
-          await supabase.functions.invoke("send-consultation-confirmation", {
+          const { data: emailResult, error: emailInvokeError } = await supabase.functions.invoke("send-consultation-confirmation", {
             body: {
               type: newStatus,
               recipientEmail: booking.user_email,
@@ -170,7 +170,16 @@ export function ConsultationBookingsTab({ open, onOpenChange }: ConsultationBook
               notes: booking.notes,
             },
           });
-          toast.success(`Booking ${newStatus} and notification email sent!`);
+          
+          if (emailInvokeError || (emailResult && !emailResult.success)) {
+            const hint = emailResult?.hint || "Check Resend domain configuration";
+            console.error("Email failed:", emailResult?.error || emailInvokeError);
+            toast.success(`Booking ${newStatus}!`, {
+              description: `Email notification failed: ${hint}`,
+            });
+          } else {
+            toast.success(`Booking ${newStatus} and notification email sent!`);
+          }
         } catch (emailError) {
           console.error("Failed to send notification email:", emailError);
           toast.success(`Booking ${newStatus}! (Email notification failed)`);
