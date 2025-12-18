@@ -75,6 +75,18 @@ serve(async (req) => {
 
     // Update role in user_roles if provided
     if (validatedData.role) {
+      // Check if target user is a superadmin - only superadmins can modify superadmins
+      const { data: targetRoles } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', validatedData.user_id);
+
+      const targetIsSuperAdmin = targetRoles?.some(r => r.role === 'superadmin');
+      
+      if (targetIsSuperAdmin && !isSuperAdmin) {
+        throw new Error('Unauthorized: Only SuperAdmins can modify SuperAdmin accounts');
+      }
+
       // Only superadmins can assign admin or superadmin roles
       if ((validatedData.role === 'admin' || validatedData.role === 'superadmin') && !isSuperAdmin) {
         throw new Error('Unauthorized: Only SuperAdmins can assign admin roles');
