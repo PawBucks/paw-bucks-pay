@@ -60,19 +60,62 @@ const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout, userId 
         </div>
         
         <div className="flex items-center gap-3">
-          {/* Desktop Navigation Links */}
-          <div className="hidden md:flex items-center gap-2">
-            {!isAuthenticated && (menuItems || defaultMenuItems).map((item, index) => (
+          {/* Desktop Navigation Links for Authenticated Users */}
+          {isAuthenticated && (
+            <div className="hidden md:flex items-center gap-1">
               <Button
-                key={index}
                 variant="ghost"
-                onClick={() => navigate(item.path)}
+                onClick={() => navigate("/dashboard")}
                 className="text-sm font-medium hover:text-accent"
               >
-                {item.label}
+                Home
               </Button>
-            ))}
-          </div>
+              <Button
+                variant="ghost"
+                onClick={() => navigate("/discover")}
+                className="text-sm font-medium hover:text-accent"
+              >
+                Discover
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => navigate("/pet-store")}
+                className="text-sm font-medium hover:text-accent"
+              >
+                Store
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => navigate("/pawbucks/wallet")}
+                className="text-sm font-medium hover:text-accent"
+              >
+                PawBucks Wallet
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => navigate("/profile")}
+                className="text-sm font-medium hover:text-accent"
+              >
+                Profile
+              </Button>
+            </div>
+          )}
+
+          {/* Desktop Navigation Links for Unauthenticated Users */}
+          {!isAuthenticated && (
+            <div className="hidden md:flex items-center gap-2">
+              {(menuItems || defaultMenuItems).map((item, index) => (
+                <Button
+                  key={index}
+                  variant="ghost"
+                  onClick={() => navigate(item.path)}
+                  className="text-sm font-medium hover:text-accent"
+                >
+                  {item.label}
+                </Button>
+              ))}
+            </div>
+          )}
 
           {isAuthenticated && onLogout ? (
             <>
