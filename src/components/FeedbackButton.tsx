@@ -25,11 +25,14 @@ export const FeedbackButton = () => {
   const [userEmail, setUserEmail] = useState<string | undefined>();
   const [userName, setUserName] = useState<string | undefined>();
 
+  const [userId, setUserId] = useState<string | undefined>();
+
   // Fetch user data when dialog opens to ensure we have the latest info
   useEffect(() => {
     const fetchUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
+        setUserId(user.id);
         setUserEmail(user.email);
         
         // Fetch profile info
@@ -73,7 +76,7 @@ export const FeedbackButton = () => {
     
     try {
       const { error } = await supabase.functions.invoke('send-feedback', {
-        body: { feedback, userEmail, userName }
+        body: { feedback, userEmail, userName, userId }
       });
 
       if (error) throw error;

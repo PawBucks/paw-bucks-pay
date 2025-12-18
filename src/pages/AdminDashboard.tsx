@@ -6,6 +6,7 @@ import { AddTransactionTool } from "@/components/admin/AddTransactionTool";
 import { PawBucksCreditTool } from "@/components/admin/PawBucksCreditTool";
 import { SecurityMonitoringTab } from "@/components/admin/SecurityMonitoringTab";
 import { ConsultationBookingsTab } from "@/components/admin/ConsultationBookingsTab";
+import FeedbackTab from "@/components/admin/FeedbackTab";
 import { Button } from "@/components/ui/button";
 import { GradientCard } from "@/components/ui/gradient-card";
 import { Input } from "@/components/ui/input";
@@ -44,6 +45,7 @@ import {
   RefreshCw,
   ShieldAlert,
   CalendarDays,
+  MessageSquare,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -148,6 +150,9 @@ const AdminDashboard = () => {
   
   // Consultation bookings dialog
   const [consultationsDialogOpen, setConsultationsDialogOpen] = useState(false);
+  
+  // Feedback dialog
+  const [feedbackDialogOpen, setFeedbackDialogOpen] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -527,6 +532,10 @@ const AdminDashboard = () => {
             <Button variant="ghost" size="sm" className="flex-shrink-0 h-8 px-3 text-xs" onClick={() => setConsultationsDialogOpen(true)}>
               <CalendarDays className="w-3.5 h-3.5 mr-1.5" />
               Consults
+            </Button>
+            <Button variant="ghost" size="sm" className="flex-shrink-0 h-8 px-3 text-xs" onClick={() => setFeedbackDialogOpen(true)}>
+              <MessageSquare className="w-3.5 h-3.5 mr-1.5" />
+              Feedback
             </Button>
           </div>
         </div>
@@ -1365,6 +1374,22 @@ const AdminDashboard = () => {
         open={consultationsDialogOpen} 
         onOpenChange={setConsultationsDialogOpen} 
       />
+
+      {/* Feedback Management Dialog */}
+      <Dialog open={feedbackDialogOpen} onOpenChange={setFeedbackDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MessageSquare className="w-5 h-5" />
+              User Feedback
+            </DialogTitle>
+            <DialogDescription>
+              View and manage feedback submitted by users
+            </DialogDescription>
+          </DialogHeader>
+          <FeedbackTab />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
