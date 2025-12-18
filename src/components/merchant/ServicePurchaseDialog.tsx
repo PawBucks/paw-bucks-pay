@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
+import { format, addDays, startOfDay, getDay } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { Calendar } from "@/components/ui/calendar";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -12,13 +15,26 @@ import { supabase } from "@/integrations/supabase/client";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { toast } from "sonner";
-import { Loader2, CreditCard, Coins, Check, CheckCircle2 } from "lucide-react";
+import { Loader2, CreditCard, Coins, Check, CheckCircle2, Clock, CalendarDays } from "lucide-react";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/useAuth";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
 
 // Merchant PawBucks conversion: 1000 PawBucks = $1.00
 const PAWBUCKS_TO_USD = 0.001;
+
+// Time slots for 60-minute Strategy Consultation (Pacific Time)
+const STRATEGY_TIME_SLOTS = [
+  { label: "9:00 - 10:00 AM", value: "9:00 AM" },
+  { label: "10:15 - 11:15 AM", value: "10:15 AM" },
+  { label: "11:30 AM - 12:30 PM", value: "11:30 AM" },
+  { label: "12:45 - 1:45 PM", value: "12:45 PM" },
+  { label: "2:00 - 3:00 PM", value: "2:00 PM" },
+  { label: "3:15 - 4:15 PM", value: "3:15 PM" },
+  { label: "4:30 - 5:30 PM", value: "4:30 PM" },
+];
 
 type Service = {
   id: string;
@@ -143,12 +159,23 @@ export const ServicePurchaseDialog = ({
   userId,
   onSuccess,
 }: ServicePurchaseDialogProps) => {
+  const { user } = useAuth();
   const [pawbucksToUse, setPawbucksToUse] = useState(0);
   const [pawbucksBalance, setPawbucksBalance] = useState(0);
   const [clientSecret, setClientSecret] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [paymentData, setPaymentData] = useState<any>(null);
+
+  // Calendar state for Strategy Consultation
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [selectedTimeLabel, setSelectedTimeLabel] = useState<string | null>(null);
+  const [bookedSlots, setBookedSlots] = useState<string[]>([]);
+  const [isLoadingSlots, setIsLoadingSlots] = useState(false);
+
+  // Check if this is a Strategy Consultation service
+  const isStrategyConsultation = service?.name?.toLowerCase().includes("strategy consultation");
 
   // Load PawBucks balance
   useEffect(() => {
@@ -159,8 +186,42 @@ export const ServicePurchaseDialog = ({
       setClientSecret("");
       setShowPaymentForm(false);
       setPaymentData(null);
+      setSelectedDate(undefined);
+      setSelectedTime(null);
+      setSelectedTimeLabel(null);
+      setBookedSlots([]);
     }
   }, [open, userId]);
+
+  // Fetch booked slots when date changes (for Strategy Consultation)
+  useEffect(() => {
+    if (!selectedDate || !isStrategyConsultation) {
+      setBookedSlots([]);
+      return;
+    }
+
+    const fetchBookedSlots = async () => {
+      setIsLoadingSlots(true);
+      try {
+        const dateStr = format(selectedDate, "yyyy-MM-dd");
+        const { data, error } = await supabase
+          .from("consultation_bookings")
+          .select("time_slot")
+          .eq("booking_date", dateStr)
+          .in("status", ["pending", "confirmed"]);
+
+        if (error) throw error;
+        setBookedSlots(data?.map((b) => b.time_slot) || []);
+      } catch (error) {
+        console.error("Failed to fetch booked slots:", error);
+        setBookedSlots([]);
+      } finally {
+        setIsLoadingSlots(false);
+      }
+    };
+
+    fetchBookedSlots();
+  }, [selectedDate, isStrategyConsultation]);
 
   const loadPawbucksBalance = async () => {
     const { data } = await supabase
@@ -170,6 +231,22 @@ export const ServicePurchaseDialog = ({
       .single();
     
     setPawbucksBalance(data?.balance || 0);
+  };
+
+  // Only allow Monday (1), Wednesday (3), and Friday (5)
+  const isAllowedDay = (date: Date) => {
+    const day = getDay(date);
+    return day === 1 || day === 3 || day === 5;
+  };
+
+  // Disable days that are not Mon/Wed/Fri, past days, and beyond 30 days
+  const disabledDays = (date: Date) => {
+    const today = startOfDay(new Date());
+    const maxDate = addDays(today, 30);
+    
+    if (date <= today) return true;
+    if (date > maxDate) return true;
+    return !isAllowedDay(date);
   };
 
   if (!service) return null;
@@ -187,8 +264,65 @@ export const ServicePurchaseDialog = ({
     }
   };
 
+  // Check if strategy consultation can proceed
+  const canProceedWithStrategy = !isStrategyConsultation || (selectedDate && selectedTime);
+
+  const sendStrategyConsultationNotification = async () => {
+    if (!selectedDate || !selectedTime || !user) return;
+
+    try {
+      const dateStr = format(selectedDate, "yyyy-MM-dd");
+
+      // Insert booking into database
+      const { error: bookingError } = await supabase
+        .from("consultation_bookings")
+        .insert({
+          user_id: user.id,
+          booking_date: dateStr,
+          time_slot: selectedTime,
+          status: "confirmed",
+          notes: `Strategy Consultation (60 min) - Paid`,
+        });
+
+      if (bookingError) {
+        console.error("Failed to create booking:", bookingError);
+      }
+
+      // Create in-app notification for admin
+      await supabase.from("notifications").insert({
+        user_id: null,
+        title: "Strategy Consultation Purchased",
+        message: `${user?.email || "A merchant"} purchased a Dedicated Strategy Consultation for ${format(selectedDate, "EEEE, MMMM d")} at ${selectedTimeLabel} PT.`,
+        category: "consultation",
+        is_read: false,
+      });
+
+      // Send email notification to admin
+      await supabase.functions.invoke("send-consultation-confirmation", {
+        body: {
+          type: "confirmed",
+          recipientEmail: "admin@pawbucks.app",
+          bookingDate: format(selectedDate, "EEEE, MMMM d, yyyy"),
+          bookingDateRaw: dateStr,
+          timeSlot: selectedTime,
+          requesterEmail: user?.email,
+          merchantName: "Strategy Consultation (60 min)",
+        },
+      });
+    } catch (error) {
+      console.error("Failed to send strategy consultation notification:", error);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate strategy consultation selection
+    if (isStrategyConsultation && (!selectedDate || !selectedTime)) {
+      toast.error("Please select a date and time for your consultation");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -210,6 +344,10 @@ export const ServicePurchaseDialog = ({
 
       // Full PawBucks payment - no Stripe needed
       if (data.paymentMethod === 'pawbucks_only') {
+        // Send notification for strategy consultation
+        if (isStrategyConsultation) {
+          await sendStrategyConsultationNotification();
+        }
         toast.success(`Successfully purchased ${service.name} using PawBucks!`);
         handleSuccess();
         return;
@@ -226,11 +364,19 @@ export const ServicePurchaseDialog = ({
     }
   };
 
-  const handleSuccess = () => {
+  const handleSuccess = async () => {
+    // Send notification for strategy consultation after Stripe payment
+    if (isStrategyConsultation && !paymentData?.paymentMethod) {
+      await sendStrategyConsultationNotification();
+    }
+    
     setPawbucksToUse(0);
     setClientSecret("");
     setShowPaymentForm(false);
     setPaymentData(null);
+    setSelectedDate(undefined);
+    setSelectedTime(null);
+    setSelectedTimeLabel(null);
     onOpenChange(false);
     onSuccess();
   };
@@ -240,16 +386,26 @@ export const ServicePurchaseDialog = ({
     setClientSecret("");
     setShowPaymentForm(false);
     setPaymentData(null);
+    setSelectedDate(undefined);
+    setSelectedTime(null);
+    setSelectedTimeLabel(null);
     onOpenChange(false);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+      <DialogContent className={cn(
+        "max-h-[90vh] overflow-y-auto",
+        isStrategyConsultation ? "max-w-lg" : "max-w-md"
+      )}>
         <DialogHeader>
-          <DialogTitle>Purchase {service.name}</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            {isStrategyConsultation && <CalendarDays className="w-5 h-5 text-primary" />}
+            Purchase {service.name}
+          </DialogTitle>
           <DialogDescription>
             ${service.priceUSD}{formatBillingPeriod(service.billingPeriod)}
+            {isStrategyConsultation && " • 60-minute session"}
           </DialogDescription>
         </DialogHeader>
 
@@ -267,6 +423,95 @@ export const ServicePurchaseDialog = ({
                 ))}
               </div>
             </div>
+
+            {/* Calendar for Strategy Consultation */}
+            {isStrategyConsultation && (
+              <div className="space-y-4 border rounded-lg p-4 bg-primary/5">
+                <div>
+                  <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
+                    <CalendarDays className="w-4 h-4" />
+                    Select Your Consultation Date
+                  </h4>
+                  <p className="text-xs text-muted-foreground mb-3">
+                    Available Monday, Wednesday & Friday (Pacific Time)
+                  </p>
+                  <div className="flex justify-center">
+                    <Calendar
+                      mode="single"
+                      selected={selectedDate}
+                      onSelect={(date) => {
+                        setSelectedDate(date);
+                        setSelectedTime(null);
+                        setSelectedTimeLabel(null);
+                      }}
+                      disabled={disabledDays}
+                      fromDate={addDays(new Date(), 1)}
+                      toDate={addDays(new Date(), 30)}
+                      className="rounded-md border bg-background pointer-events-auto"
+                    />
+                  </div>
+                </div>
+
+                {/* Time Slots */}
+                {selectedDate && (
+                  <div>
+                    <h4 className="text-sm font-medium mb-3">
+                      Available Times for {format(selectedDate, "MMMM d")} (Pacific Time)
+                    </h4>
+                    <div className="grid grid-cols-2 gap-2">
+                      {STRATEGY_TIME_SLOTS.map((slot) => {
+                        const isBooked = bookedSlots.includes(slot.value);
+                        const isSelected = selectedTime === slot.value;
+                        
+                        return (
+                          <Button
+                            key={slot.value}
+                            type="button"
+                            variant={isSelected ? "default" : "outline"}
+                            size="sm"
+                            disabled={isBooked}
+                            onClick={() => {
+                              setSelectedTime(slot.value);
+                              setSelectedTimeLabel(slot.label);
+                            }}
+                            className={cn(
+                              "text-xs",
+                              isBooked && "opacity-50 line-through",
+                              isSelected && "ring-2 ring-primary ring-offset-2"
+                            )}
+                          >
+                            {slot.label}
+                          </Button>
+                        );
+                      })}
+                    </div>
+                    {bookedSlots.length > 0 && (
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Some slots are unavailable (shown with strikethrough)
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* Selected Summary */}
+                {selectedDate && selectedTime && (
+                  <div className="p-3 rounded-lg bg-accent/10 border border-accent/20">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-sm">
+                          {format(selectedDate, "EEEE, MMMM d")}
+                        </p>
+                        <p className="text-xs text-muted-foreground">at {selectedTimeLabel} PT</p>
+                      </div>
+                      <Badge variant="secondary">
+                        <Clock className="w-3 h-3 mr-1" />
+                        60 min
+                      </Badge>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* PawBucks Section */}
             {pawbucksBalance > 0 && (
@@ -339,7 +584,11 @@ export const ServicePurchaseDialog = ({
               <Button type="button" variant="outline" onClick={handleCancel} className="flex-1" disabled={isLoading}>
                 Cancel
               </Button>
-              <Button type="submit" className="flex-1" disabled={isLoading}>
+              <Button 
+                type="submit" 
+                className="flex-1" 
+                disabled={isLoading || !canProceedWithStrategy}
+              >
                 {isLoading ? (
                   <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Loading...</>
                 ) : stripeAmount <= 0 && pawbucksToUse > 0 ? (
