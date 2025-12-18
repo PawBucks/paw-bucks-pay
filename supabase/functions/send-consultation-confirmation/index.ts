@@ -13,11 +13,93 @@ interface NotificationRequest {
   type: "confirmed" | "cancelled" | "rescheduled";
   recipientEmail: string;
   recipientName?: string;
-  bookingDate: string;
+  bookingDate: string; // Formatted date for display
+  bookingDateRaw: string; // yyyy-MM-dd format for ICS
   timeSlot: string;
   notes?: string;
   previousDate?: string;
   previousTimeSlot?: string;
+}
+
+// Parse time slot like "9:00 AM" or "1:30 PM" to hours and minutes
+function parseTimeSlot(timeSlot: string): { hours: number; minutes: number } {
+  const match = timeSlot.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+  if (!match) {
+    return { hours: 9, minutes: 0 }; // Default fallback
+  }
+  
+  let hours = parseInt(match[1], 10);
+  const minutes = parseInt(match[2], 10);
+  const period = match[3].toUpperCase();
+  
+  if (period === "PM" && hours !== 12) {
+    hours += 12;
+  } else if (period === "AM" && hours === 12) {
+    hours = 0;
+  }
+  
+  return { hours, minutes };
+}
+
+// Format date for ICS (YYYYMMDDTHHMMSS format)
+function formatICSDate(date: Date): string {
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(date.getUTCDate()).padStart(2, "0");
+  const hours = String(date.getUTCHours()).padStart(2, "0");
+  const minutes = String(date.getUTCMinutes()).padStart(2, "0");
+  const seconds = String(date.getUTCSeconds()).padStart(2, "0");
+  return `${year}${month}${day}T${hours}${minutes}${seconds}Z`;
+}
+
+// Generate ICS calendar content
+function generateICSContent(data: NotificationRequest): string {
+  const { hours, minutes } = parseTimeSlot(data.timeSlot);
+  
+  // Parse the raw date (yyyy-MM-dd)
+  const [year, month, day] = data.bookingDateRaw.split("-").map(Number);
+  
+  // Create date in Pacific Time (PT is UTC-8 or UTC-7 depending on DST)
+  // For simplicity, we'll use a fixed offset approach
+  // Pacific Time: Add 8 hours to convert to UTC (or 7 during DST)
+  const startDate = new Date(Date.UTC(year, month - 1, day, hours + 8, minutes, 0));
+  const endDate = new Date(startDate.getTime() + 15 * 60 * 1000); // 15 minutes later
+  
+  const now = new Date();
+  const uid = `pawbucks-consultation-${data.bookingDateRaw}-${Date.now()}@pawbucks.app`;
+  
+  const icsContent = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//PawBucks//Consultation Booking//EN",
+    "CALSCALE:GREGORIAN",
+    "METHOD:REQUEST",
+    "BEGIN:VEVENT",
+    `UID:${uid}`,
+    `DTSTAMP:${formatICSDate(now)}`,
+    `DTSTART:${formatICSDate(startDate)}`,
+    `DTEND:${formatICSDate(endDate)}`,
+    "SUMMARY:PawBucks Free Consultation",
+    `DESCRIPTION:Your free 15-minute consultation with PawBucks.${data.notes ? `\\n\\nYour notes: ${data.notes.replace(/\n/g, "\\n")}` : ""}\\n\\nContact: jfields@pawbucks.app`,
+    "LOCATION:Video Call (link will be sent separately)",
+    "STATUS:CONFIRMED",
+    `ORGANIZER;CN=PawBucks:mailto:jfields@pawbucks.app`,
+    `ATTENDEE;CN=${data.recipientName || "Guest"};RSVP=TRUE:mailto:${data.recipientEmail}`,
+    "BEGIN:VALARM",
+    "TRIGGER:-PT30M",
+    "ACTION:DISPLAY",
+    "DESCRIPTION:PawBucks Consultation in 30 minutes",
+    "END:VALARM",
+    "BEGIN:VALARM",
+    "TRIGGER:-PT10M",
+    "ACTION:DISPLAY",
+    "DESCRIPTION:PawBucks Consultation in 10 minutes",
+    "END:VALARM",
+    "END:VEVENT",
+    "END:VCALENDAR",
+  ].join("\r\n");
+  
+  return icsContent;
 }
 
 const getConfirmedEmailHtml = (data: NotificationRequest) => `
@@ -61,6 +143,12 @@ const getConfirmedEmailHtml = (data: NotificationRequest) => `
           <td style="padding: 8px 0;">Video Call (link will be sent separately)</td>
         </tr>
       </table>
+    </div>
+    
+    <div style="background: #dbeafe; border-radius: 8px; padding: 15px; margin: 20px 0;">
+      <p style="margin: 0; font-size: 14px; color: #1e40af;">
+        📎 <strong>Calendar invite attached!</strong> Open the .ics file to add this event to your calendar.
+      </p>
     </div>
     
     ${data.notes ? `
@@ -213,6 +301,12 @@ const getRescheduledEmailHtml = (data: NotificationRequest) => `
       </table>
     </div>
     
+    <div style="background: #dbeafe; border-radius: 8px; padding: 15px; margin: 20px 0;">
+      <p style="margin: 0; font-size: 14px; color: #1e40af;">
+        📎 <strong>Updated calendar invite attached!</strong> Open the .ics file to update your calendar.
+      </p>
+    </div>
+    
     ${data.notes ? `
     <div style="background: #fef3c7; border-radius: 8px; padding: 15px; margin: 20px 0;">
       <p style="margin: 0; font-size: 14px;"><strong>Your Notes:</strong> ${data.notes}</p>
@@ -262,11 +356,19 @@ const handler = async (req: Request): Promise<Response> => {
 
     let subject: string;
     let html: string;
+    let attachments: { filename: string; content: string }[] | undefined;
 
     switch (data.type) {
       case "confirmed":
         subject = "Your PawBucks Consultation is Confirmed!";
         html = getConfirmedEmailHtml(data);
+        if (data.bookingDateRaw) {
+          const icsContent = generateICSContent(data);
+          attachments = [{
+            filename: "pawbucks-consultation.ics",
+            content: btoa(icsContent),
+          }];
+        }
         break;
       case "cancelled":
         subject = "Your PawBucks Consultation Has Been Cancelled";
@@ -275,6 +377,13 @@ const handler = async (req: Request): Promise<Response> => {
       case "rescheduled":
         subject = "Your PawBucks Consultation Has Been Rescheduled";
         html = getRescheduledEmailHtml(data);
+        if (data.bookingDateRaw) {
+          const icsContent = generateICSContent(data);
+          attachments = [{
+            filename: "pawbucks-consultation-updated.ics",
+            content: btoa(icsContent),
+          }];
+        }
         break;
       default:
         return new Response(
@@ -291,6 +400,7 @@ const handler = async (req: Request): Promise<Response> => {
       to: [data.recipientEmail],
       subject,
       html,
+      attachments,
     });
 
     console.log(`${data.type} email sent successfully:`, emailResponse);
