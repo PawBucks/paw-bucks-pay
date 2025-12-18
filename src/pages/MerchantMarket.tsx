@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { ServicePurchaseDialog } from "@/components/merchant/ServicePurchaseDialog";
+import { ConsultationScheduleDialog } from "@/components/merchant/ConsultationScheduleDialog";
 import { toast } from "sonner";
 import {
   PawPrint,
@@ -119,6 +120,7 @@ const MerchantMarket = () => {
   const [selectedCategory, setSelectedCategory] = useState<ServiceCategory | "all">("all");
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [showPurchaseDialog, setShowPurchaseDialog] = useState(false);
+  const [showConsultationDialog, setShowConsultationDialog] = useState(false);
   const [merchant, setMerchant] = useState<Merchant | null>(null);
   const [loading, setLoading] = useState(true);
   const [services, setServices] = useState<Service[]>([]);
@@ -585,11 +587,18 @@ const MerchantMarket = () => {
           <p className="text-muted-foreground mb-6 max-w-lg mx-auto">
             Book a free 15-minute consultation with our merchant success team to find the perfect services for your business goals.
           </p>
-          <Button size="lg">
+          <Button size="lg" onClick={() => setShowConsultationDialog(true)}>
             Schedule Free Consultation
             <ChevronRight className="w-5 h-5 ml-2" />
           </Button>
         </div>
+
+        {/* Consultation Dialog */}
+        <ConsultationScheduleDialog
+          open={showConsultationDialog}
+          onOpenChange={setShowConsultationDialog}
+          merchantName={merchant?.business_name}
+        />
       </main>
 
       {/* Purchase Dialog */}
