@@ -34,19 +34,11 @@ export const useAutoLogout = (isAuthenticated: boolean) => {
     // Start initial timer
     resetTimer();
 
-    // Logout when navigating away or closing tab
-    const handleBeforeUnload = () => {
-      logout();
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-
     return () => {
       // Clean up event listeners
       events.forEach(event => {
         document.removeEventListener(event, resetTimer);
       });
-      window.removeEventListener('beforeunload', handleBeforeUnload);
       
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
