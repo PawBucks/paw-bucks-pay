@@ -10,7 +10,7 @@ const corsHeaders = {
 };
 
 interface NotificationRequest {
-  type: "confirmed" | "cancelled" | "rescheduled";
+  type: "confirmed" | "cancelled" | "rescheduled" | "request";
   recipientEmail: string;
   bookingDate: string;
   bookingDateRaw?: string;
@@ -18,6 +18,8 @@ interface NotificationRequest {
   notes?: string;
   previousDate?: string;
   previousTimeSlot?: string;
+  requesterEmail?: string;
+  merchantName?: string;
 }
 
 // Helper function to parse time slot to hour and minute
@@ -104,7 +106,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { type, recipientEmail, bookingDate, bookingDateRaw, timeSlot, notes, previousDate, previousTimeSlot }: NotificationRequest = await req.json();
+    const { type, recipientEmail, bookingDate, bookingDateRaw, timeSlot, notes, previousDate, previousTimeSlot, requesterEmail, merchantName }: NotificationRequest = await req.json();
 
     if (!recipientEmail || !bookingDate || !timeSlot) {
       return new Response(
@@ -213,6 +215,31 @@ const handler = async (req: Request): Promise<Response> => {
           content: btoa(icsContent),
         });
       }
+    } else if (type === "request") {
+      subject = "New Consultation Request";
+      html = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #8B5CF6; margin: 0;">New Consultation Request</h1>
+          </div>
+          
+          <p>A new consultation request has been submitted.</p>
+          
+          <div style="background: #F3F4F6; border-radius: 12px; padding: 20px; margin: 20px 0;">
+            <h3 style="margin: 0 0 15px 0; color: #374151;">📅 Requested Appointment</h3>
+            <p style="margin: 5px 0;"><strong>Date:</strong> ${bookingDate}</p>
+            <p style="margin: 5px 0;"><strong>Time:</strong> ${timeSlot} Pacific Time</p>
+            <p style="margin: 5px 0;"><strong>Duration:</strong> 15 minutes</p>
+            <p style="margin: 5px 0;"><strong>Requester:</strong> ${requesterEmail || "Unknown"}</p>
+            ${merchantName ? `<p style="margin: 5px 0;"><strong>Business:</strong> ${merchantName}</p>` : ""}
+          </div>
+          
+          <p>Please confirm this appointment in the Admin Dashboard.</p>
+          
+          <hr style="border: none; border-top: 1px solid #E5E7EB; margin: 30px 0;" />
+          <p style="color: #9CA3AF; font-size: 12px; text-align: center;">PawBucks - Rewards for Pet Parents</p>
+        </div>
+      `;
     }
 
     const emailPayload: any = {

@@ -148,13 +148,17 @@ export function ConsultationScheduleDialog({
         console.error("Failed to create admin notification:", notifError);
       }
 
-      // Send email notification to admin
+      // Send email notification to admin (jfields@pawbucks.app)
       try {
-        await supabase.functions.invoke("send-feedback", {
+        await supabase.functions.invoke("send-consultation-confirmation", {
           body: {
-            feedback: `New consultation request received:\n\nDate: ${format(selectedDate, "EEEE, MMMM d, yyyy")}\nTime: ${selectedTimeLabel} Pacific Time\nDuration: 15 minutes\n\nRequester: ${user?.email || "Unknown"}${merchantName ? `\nBusiness: ${merchantName}` : ""}\n\nPlease confirm this appointment in the Admin Dashboard.`,
-            userEmail: user?.email,
-            userName: merchantName || user?.email,
+            type: "request",
+            recipientEmail: "jfields@pawbucks.app",
+            bookingDate: format(selectedDate, "EEEE, MMMM d, yyyy"),
+            bookingDateRaw: dateStr,
+            timeSlot: selectedTime,
+            requesterEmail: user?.email,
+            merchantName: merchantName,
           },
         });
       } catch (emailError) {
