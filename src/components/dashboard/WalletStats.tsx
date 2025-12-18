@@ -42,7 +42,7 @@ export const WalletStats = memo(({ balance, rewardsPoints, totalSaved = 0, total
       {/* Rewards Points */}
       <GradientCard 
         className="cursor-pointer"
-        onClick={() => navigate('/pawbucks')}
+        onClick={() => navigate('/pawbucks/wallet')}
       >
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center">
