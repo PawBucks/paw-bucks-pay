@@ -25,23 +25,41 @@ export const FeedbackButton = () => {
   const [userEmail, setUserEmail] = useState<string | undefined>();
   const [userName, setUserName] = useState<string | undefined>();
 
+  // Fetch user data when dialog opens to ensure we have the latest info
   useEffect(() => {
     const fetchUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         setUserEmail(user.email);
+        
+        // Fetch profile info
         const { data: profile } = await supabase
           .from('profiles')
           .select('full_name')
           .eq('id', user.id)
           .single();
-        if (profile) {
+        
+        // Also check if user is a merchant and get business name
+        const { data: merchant } = await supabase
+          .from('merchants')
+          .select('business_name')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        
+        // Use business name if available, otherwise use full name
+        if (merchant?.business_name) {
+          setUserName(`${profile?.full_name || 'User'} (${merchant.business_name})`);
+        } else if (profile?.full_name) {
           setUserName(profile.full_name);
         }
       }
     };
-    fetchUser();
-  }, []);
+    
+    // Fetch when dialog opens
+    if (open) {
+      fetchUser();
+    }
+  }, [open]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
