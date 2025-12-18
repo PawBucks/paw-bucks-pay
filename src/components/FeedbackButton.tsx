@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -22,6 +22,26 @@ export const FeedbackButton = () => {
   const [open, setOpen] = useState(false);
   const [feedback, setFeedback] = useState('');
   const [loading, setLoading] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | undefined>();
+  const [userName, setUserName] = useState<string | undefined>();
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserEmail(user.email);
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('full_name')
+          .eq('id', user.id)
+          .single();
+        if (profile) {
+          setUserName(profile.full_name);
+        }
+      }
+    };
+    fetchUser();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,11 +54,11 @@ export const FeedbackButton = () => {
     setLoading(true);
     
     try {
-      // TODO: Store feedback in database or send to support system
-      console.log('Feedback submitted:', feedback);
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const { error } = await supabase.functions.invoke('send-feedback', {
+        body: { feedback, userEmail, userName }
+      });
+
+      if (error) throw error;
       
       toast.success('Thank you for your feedback!');
       setFeedback('');
