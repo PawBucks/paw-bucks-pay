@@ -17,6 +17,14 @@ interface FeedbackRequest {
   userId?: string;
 }
 
+// Priority keywords that trigger urgent admin notification
+const PRIORITY_KEYWORDS = ['bug', 'urgent', 'broken', 'error', 'crash', 'not working', 'issue', 'problem', 'help', 'emergency'];
+
+const checkForPriorityKeywords = (text: string): string[] => {
+  const lowerText = text.toLowerCase();
+  return PRIORITY_KEYWORDS.filter(keyword => lowerText.includes(keyword));
+};
+
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -36,7 +44,18 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    console.log("Processing feedback submission:", { feedback, userEmail, userName, userId });
+    // Check for priority keywords
+    const matchedKeywords = checkForPriorityKeywords(feedback);
+    const isPriority = matchedKeywords.length > 0;
+
+    console.log("Processing feedback submission:", { 
+      feedback, 
+      userEmail, 
+      userName, 
+      userId,
+      isPriority,
+      matchedKeywords 
+    });
 
     // Initialize Supabase client with service role
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -51,19 +70,64 @@ const handler = async (req: Request): Promise<Response> => {
         user_email: userEmail || null,
         user_name: userName || null,
         feedback: feedback.trim(),
-        status: "new",
+        status: isPriority ? "new" : "new", // Could set to 'urgent' if desired
       })
       .select()
       .single();
 
     if (dbError) {
       console.error("Error saving feedback to database:", dbError);
-      // Continue to send email even if db save fails
     } else {
       console.log("Feedback saved to database:", feedbackRecord?.id);
     }
 
-    // Send notification email to support team
+    // Send priority alert if keywords detected
+    if (isPriority) {
+      try {
+        const priorityEmailResponse = await resend.emails.send({
+          from: "PawBucks URGENT <noreply@pawbucks.app>",
+          to: ["support@pawbucks.app"],
+          subject: `🚨 PRIORITY FEEDBACK: ${matchedKeywords.slice(0, 3).join(', ')} detected`,
+          html: `
+            <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+              <div style="background-color: #dc2626; color: white; padding: 15px; border-radius: 8px 8px 0 0; text-align: center;">
+                <h1 style="margin: 0; font-size: 20px;">🚨 PRIORITY FEEDBACK ALERT</h1>
+              </div>
+              
+              <div style="border: 2px solid #dc2626; border-top: none; padding: 20px; border-radius: 0 0 8px 8px;">
+                <div style="background-color: #fef2f2; border-left: 4px solid #dc2626; padding: 10px 15px; margin-bottom: 20px;">
+                  <p style="margin: 0; color: #991b1b; font-weight: bold;">
+                    Keywords detected: ${matchedKeywords.join(', ')}
+                  </p>
+                </div>
+                
+                <p><strong>From:</strong> ${userName || "Anonymous"} ${userEmail ? `(${userEmail})` : ""}</p>
+                ${userId ? `<p><strong>User ID:</strong> ${userId}</p>` : ""}
+                
+                <div style="background-color: #f9fafb; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                  <p style="margin: 0 0 10px 0; font-weight: bold; color: #374151;">Feedback Message:</p>
+                  <p style="white-space: pre-wrap; margin: 0; color: #1f2937;">${feedback}</p>
+                </div>
+                
+                <p style="margin-top: 20px; padding: 10px; background-color: #fef3c7; border-radius: 4px; color: #92400e; font-size: 14px;">
+                  ⚠️ This feedback requires immediate attention. Please review and respond promptly.
+                </p>
+              </div>
+              
+              <p style="color: #888; font-size: 12px; text-align: center; margin-top: 20px;">
+                This is an automated priority alert from the PawBucks feedback system.
+              </p>
+            </div>
+          `,
+        });
+
+        console.log("Priority alert email sent:", priorityEmailResponse);
+      } catch (priorityError) {
+        console.error("Error sending priority alert email:", priorityError);
+      }
+    }
+
+    // Send regular notification email to support team
     const supportEmailResponse = await resend.emails.send({
       from: "PawBucks Feedback <noreply@pawbucks.app>",
       to: ["support@pawbucks.app"],
