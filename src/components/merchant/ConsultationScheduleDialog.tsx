@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { format, addDays, isSameDay, isWeekend, startOfDay } from "date-fns";
+import { format, addDays, startOfDay, getDay } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +13,8 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Clock, CalendarDays, CheckCircle2, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 interface ConsultationScheduleDialogProps {
   open: boolean;
@@ -20,22 +22,18 @@ interface ConsultationScheduleDialogProps {
   merchantName?: string;
 }
 
-// Available time slots for consultations (15-minute slots)
+// Available time slots for 15-minute consultations (Pacific Time)
 const TIME_SLOTS = [
-  "9:00 AM",
-  "9:30 AM",
-  "10:00 AM",
-  "10:30 AM",
-  "11:00 AM",
-  "11:30 AM",
-  "1:00 PM",
-  "1:30 PM",
-  "2:00 PM",
-  "2:30 PM",
-  "3:00 PM",
-  "3:30 PM",
-  "4:00 PM",
-  "4:30 PM",
+  { label: "9:00 - 9:15 AM", value: "9:00 AM" },
+  { label: "9:30 - 9:45 AM", value: "9:30 AM" },
+  { label: "10:00 - 10:15 AM", value: "10:00 AM" },
+  { label: "10:30 - 10:45 AM", value: "10:30 AM" },
+  { label: "11:00 - 11:15 AM", value: "11:00 AM" },
+  { label: "11:30 - 11:45 AM", value: "11:30 AM" },
+  { label: "12:00 - 12:15 PM", value: "12:00 PM" },
+  { label: "12:30 - 12:45 PM", value: "12:30 PM" },
+  { label: "1:00 - 1:15 PM", value: "1:00 PM" },
+  { label: "1:30 - 1:45 PM", value: "1:30 PM" },
 ];
 
 export function ConsultationScheduleDialog({
@@ -43,34 +41,46 @@ export function ConsultationScheduleDialog({
   onOpenChange,
   merchantName,
 }: ConsultationScheduleDialogProps) {
+  const { user } = useAuth();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [selectedTimeLabel, setSelectedTimeLabel] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
 
-  // Calculate available dates (next 14 business days, excluding weekends)
+  // Only allow Monday (1), Wednesday (3), and Friday (5)
+  const isAllowedDay = (date: Date) => {
+    const day = getDay(date);
+    return day === 1 || day === 3 || day === 5;
+  };
+
+  // Disable days that are not Mon/Wed/Fri, past days, and beyond 30 days
   const disabledDays = useMemo(() => {
-    return [
-      { before: startOfDay(addDays(new Date(), 1)) }, // Can't book today or past
-      { dayOfWeek: [0, 6] }, // Disable weekends
-    ];
+    return (date: Date) => {
+      const today = startOfDay(new Date());
+      const maxDate = addDays(today, 30);
+      
+      // Disable if before tomorrow
+      if (date <= today) return true;
+      
+      // Disable if beyond 30 days
+      if (date > maxDate) return true;
+      
+      // Disable if not Mon/Wed/Fri
+      return !isAllowedDay(date);
+    };
   }, []);
 
   // Simulate some booked slots for realism
   const bookedSlots = useMemo(() => {
     if (!selectedDate) return [];
-    // Generate some random "booked" slots based on the date
     const seed = selectedDate.getDate();
     const booked: string[] = [];
     if (seed % 3 === 0) booked.push("10:00 AM");
-    if (seed % 4 === 0) booked.push("2:00 PM");
-    if (seed % 5 === 0) booked.push("11:00 AM", "3:30 PM");
+    if (seed % 4 === 0) booked.push("1:00 PM");
+    if (seed % 5 === 0) booked.push("11:00 AM", "12:30 PM");
     return booked;
   }, [selectedDate]);
-
-  const availableSlots = useMemo(() => {
-    return TIME_SLOTS.filter((slot) => !bookedSlots.includes(slot));
-  }, [bookedSlots]);
 
   const handleSchedule = async () => {
     if (!selectedDate || !selectedTime) {
@@ -80,15 +90,40 @@ export function ConsultationScheduleDialog({
 
     setIsSubmitting(true);
     
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    
-    setIsSubmitting(false);
-    setIsConfirmed(true);
-    
-    toast.success("Consultation scheduled successfully!", {
-      description: `${format(selectedDate, "EEEE, MMMM d")} at ${selectedTime}`,
-    });
+    try {
+      // Send email notification to jfields@pawbucks.app
+      const { error } = await supabase.functions.invoke("send-feedback", {
+        body: {
+          type: "consultation_request",
+          email: "jfields@pawbucks.app",
+          subject: `Consultation Request: ${format(selectedDate, "EEEE, MMMM d")} at ${selectedTimeLabel}`,
+          message: `
+New consultation request received:
+
+Date: ${format(selectedDate, "EEEE, MMMM d, yyyy")}
+Time: ${selectedTimeLabel} Pacific Time
+Duration: 15 minutes
+
+Requester: ${user?.email || "Unknown"}
+${merchantName ? `Business: ${merchantName}` : ""}
+
+Please confirm this appointment and send a calendar invite with video call link.
+          `.trim(),
+        },
+      });
+
+      if (error) throw error;
+
+      setIsConfirmed(true);
+      toast.success("Consultation request sent!", {
+        description: `${format(selectedDate, "EEEE, MMMM d")} at ${selectedTimeLabel} PT`,
+      });
+    } catch (error) {
+      console.error("Failed to schedule consultation:", error);
+      toast.error("Failed to send request. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleClose = () => {
@@ -162,30 +197,33 @@ export function ConsultationScheduleDialog({
             </div>
 
             {/* Time Slots */}
-            {selectedDate && (
+{selectedDate && (
               <div>
                 <h4 className="text-sm font-medium mb-3">
-                  Available Times for {format(selectedDate, "MMMM d")}
+                  Available Times for {format(selectedDate, "MMMM d")} (Pacific Time)
                 </h4>
-                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {TIME_SLOTS.map((slot) => {
-                    const isBooked = bookedSlots.includes(slot);
-                    const isSelected = selectedTime === slot;
+                    const isBooked = bookedSlots.includes(slot.value);
+                    const isSelected = selectedTime === slot.value;
                     
                     return (
                       <Button
-                        key={slot}
+                        key={slot.value}
                         variant={isSelected ? "default" : "outline"}
                         size="sm"
                         disabled={isBooked}
-                        onClick={() => setSelectedTime(slot)}
+                        onClick={() => {
+                          setSelectedTime(slot.value);
+                          setSelectedTimeLabel(slot.label);
+                        }}
                         className={cn(
                           "text-xs",
                           isBooked && "opacity-50 line-through",
                           isSelected && "ring-2 ring-primary ring-offset-2"
                         )}
                       >
-                        {slot}
+                        {slot.label}
                       </Button>
                     );
                   })}
@@ -207,7 +245,7 @@ export function ConsultationScheduleDialog({
                     <p className="font-medium">
                       {format(selectedDate, "EEEE, MMMM d")}
                     </p>
-                    <p className="text-sm text-muted-foreground">at {selectedTime}</p>
+                    <p className="text-sm text-muted-foreground">at {selectedTimeLabel} PT</p>
                   </div>
                   <Badge>
                     <Clock className="w-3 h-3 mr-1" />
