@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
@@ -10,56 +10,60 @@ type SubscriptionStatus = {
   trial_end: string | null;
 };
 
+const defaultSubscription: SubscriptionStatus = {
+  subscribed: false,
+  product_id: null,
+  subscription_end: null,
+  status: null,
+  trial_end: null,
+};
+
 export const useSubscription = () => {
-  const { user } = useAuth();
-  const [subscription, setSubscription] = useState<SubscriptionStatus>({
-    subscribed: false,
-    product_id: null,
-    subscription_end: null,
-    status: null,
-    trial_end: null,
-  });
+  const { user, session } = useAuth();
+  const [subscription, setSubscription] = useState<SubscriptionStatus>(defaultSubscription);
   const [loading, setLoading] = useState(true);
 
-  const checkSubscription = async () => {
-    if (!user) {
-      setSubscription({
-        subscribed: false,
-        product_id: null,
-        subscription_end: null,
-        status: null,
-        trial_end: null,
-      });
+  const checkSubscription = useCallback(async () => {
+    // Only check if we have both a user and a valid session
+    if (!user || !session?.access_token) {
+      setSubscription(defaultSubscription);
       setLoading(false);
       return;
     }
 
     try {
-      console.log('[useSubscription] Checking subscription status');
       const { data, error } = await supabase.functions.invoke('check-subscription');
 
       if (error) {
-        console.error('[useSubscription] Error:', error);
-        throw error;
+        // Don't throw on auth errors, just reset to default
+        if (error.message?.includes('Auth') || error.message?.includes('session')) {
+          console.warn('[useSubscription] Auth issue, resetting subscription state');
+          setSubscription(defaultSubscription);
+        } else {
+          console.error('[useSubscription] Error:', error);
+        }
+        return;
       }
 
-      console.log('[useSubscription] Subscription status:', data);
-      setSubscription(data);
+      if (data) {
+        setSubscription(data);
+      }
     } catch (error) {
       console.error('[useSubscription] Failed to check subscription:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, session?.access_token]);
 
   useEffect(() => {
     checkSubscription();
 
-    // Refresh subscription status every 30 seconds
-    const interval = setInterval(checkSubscription, 30000);
-
-    return () => clearInterval(interval);
-  }, [user]);
+    // Only set up interval if user is authenticated
+    if (user && session?.access_token) {
+      const interval = setInterval(checkSubscription, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [user, session?.access_token, checkSubscription]);
 
   const createCheckout = async (tier: 'basic' | 'plus' = 'basic') => {
     try {
