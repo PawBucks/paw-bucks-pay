@@ -146,6 +146,8 @@ export function ConsultationBookingsTab({ open, onOpenChange }: ConsultationBook
   const handleUpdateStatus = async (bookingId: string, newStatus: "confirmed" | "cancelled") => {
     setUpdating(bookingId);
     try {
+      const booking = bookings.find((b) => b.id === bookingId);
+      
       const { error } = await supabase
         .from("consultation_bookings")
         .update({ status: newStatus })
@@ -153,7 +155,28 @@ export function ConsultationBookingsTab({ open, onOpenChange }: ConsultationBook
 
       if (error) throw error;
 
-      toast.success(`Booking ${newStatus}!`);
+      // Send confirmation email when confirming
+      if (newStatus === "confirmed" && booking) {
+        try {
+          const formattedDate = format(new Date(booking.booking_date + "T00:00:00"), "EEEE, MMMM d, yyyy");
+          
+          await supabase.functions.invoke("send-consultation-confirmation", {
+            body: {
+              recipientEmail: booking.user_email,
+              bookingDate: formattedDate,
+              timeSlot: booking.time_slot,
+              notes: booking.notes,
+            },
+          });
+          toast.success("Booking confirmed and confirmation email sent!");
+        } catch (emailError) {
+          console.error("Failed to send confirmation email:", emailError);
+          toast.success("Booking confirmed! (Email notification failed)");
+        }
+      } else {
+        toast.success(`Booking ${newStatus}!`);
+      }
+      
       loadBookings();
     } catch (error) {
       console.error("Failed to update booking:", error);
