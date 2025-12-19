@@ -18,9 +18,8 @@ export const SERVICE_NAMES = {
   PROFILE_OPTIMIZATION: 'Merchant Profile Optimization',
   STRATEGY_CONSULTATION: 'Dedicated Strategy Consultation',
   TRAINING_COURSE: 'Exclusive Training Course',
-  PRIORITY_SUPPORT: 'Priority Merchant Support ',
+  PRIORITY_SUPPORT: 'Priority Merchant Support',
   REVIEW_CAMPAIGN: 'Review Generation Campaign',
-  MERCHANT_SPOTLIGHT: 'Merchant Spotlight Feature',
 } as const;
 
 export type ServiceName = typeof SERVICE_NAMES[keyof typeof SERVICE_NAMES];
