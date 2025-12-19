@@ -12,6 +12,7 @@ import { GradientCard } from "@/components/ui/gradient-card";
 import { PremiumAnalyticsDashboard } from "@/components/merchant/PremiumAnalyticsDashboard";
 import { CohortAnalysisReport } from "@/components/merchant/CohortAnalysisReport";
 import { KeywordPerformanceWidget } from "@/components/merchant/KeywordPerformanceWidget";
+import { DemandForecastingReport } from "@/components/merchant/DemandForecastingReport";
 
 export default function MerchantAnalytics() {
   const [selectedPayment, setSelectedPayment] = useState<'usd' | 'pawbucks'>('usd');
@@ -131,6 +132,7 @@ export default function MerchantAnalytics() {
         <Tabs defaultValue="dashboard" className="space-y-6">
           <TabsList className="flex-wrap">
             <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+            <TabsTrigger value="forecasting">Forecasting</TabsTrigger>
             <TabsTrigger value="cohorts">Cohort Analysis</TabsTrigger>
             <TabsTrigger value="keywords">Keywords</TabsTrigger>
             <TabsTrigger value="products">Available Products</TabsTrigger>
@@ -140,6 +142,10 @@ export default function MerchantAnalytics() {
 
           <TabsContent value="dashboard">
             <PremiumAnalyticsDashboard />
+          </TabsContent>
+
+          <TabsContent value="forecasting">
+            <DemandForecastingReport />
           </TabsContent>
 
           <TabsContent value="cohorts">
