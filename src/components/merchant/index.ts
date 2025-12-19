@@ -15,3 +15,5 @@ export { SponsoredPlacementDashboard } from "./SponsoredPlacementDashboard";
 export { ProfileOptimizationWidget } from "./ProfileOptimizationWidget";
 export { FeaturedPartnerWidget } from "./FeaturedPartnerWidget";
 export { ReviewCampaignWidget } from "./ReviewCampaignWidget";
+export { PrioritySupportWidget } from "./PrioritySupportWidget";
+export { MerchantSpotlightWidget } from "./MerchantSpotlightWidget";

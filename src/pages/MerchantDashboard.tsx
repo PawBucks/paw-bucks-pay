@@ -39,6 +39,8 @@ import { FeaturedPartnerWidget } from "@/components/merchant/FeaturedPartnerWidg
 import { SearchRankingBoosterWidget } from "@/components/merchant/SearchRankingBoosterWidget";
 import { ProfileOptimizationWidget } from "@/components/merchant/ProfileOptimizationWidget";
 import { ReviewCampaignWidget } from "@/components/merchant/ReviewCampaignWidget";
+import { PrioritySupportWidget } from "@/components/merchant/PrioritySupportWidget";
+import { MerchantSpotlightWidget } from "@/components/merchant/MerchantSpotlightWidget";
 
 type Merchant = {
   id: string;
@@ -103,8 +105,10 @@ const MerchantDashboard = () => {
   const hasSearchBooster = activeServices.includes(SERVICE_NAMES.SEARCH_RANKING_BOOSTER);
   const hasProfileOptimization = activeServices.includes(SERVICE_NAMES.PROFILE_OPTIMIZATION);
   const hasReviewCampaign = activeServices.includes(SERVICE_NAMES.REVIEW_CAMPAIGN);
+  const hasPrioritySupport = activeServices.includes(SERVICE_NAMES.PRIORITY_SUPPORT);
+  const hasSpotlight = activeServices.includes(SERVICE_NAMES.MERCHANT_SPOTLIGHT);
   
-  const hasPremiumServices = hasSponsored || hasPremiumAd || hasFeaturedPartner || hasSearchBooster || hasProfileOptimization || hasReviewCampaign;
+  const hasPremiumServices = hasSponsored || hasPremiumAd || hasFeaturedPartner || hasSearchBooster || hasProfileOptimization || hasReviewCampaign || hasPrioritySupport || hasSpotlight;
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -561,7 +565,7 @@ const MerchantDashboard = () => {
               <Sparkles className="w-5 h-5 text-primary" />
               <h2 className="text-xl font-bold">Premium Services</h2>
             </div>
-            <Tabs defaultValue={hasSponsored ? "sponsored" : hasPremiumAd ? "premium-ad" : hasFeaturedPartner ? "featured" : hasSearchBooster ? "search" : hasProfileOptimization ? "profile" : "reviews"} className="w-full">
+            <Tabs defaultValue={hasSponsored ? "sponsored" : hasPremiumAd ? "premium-ad" : hasFeaturedPartner ? "featured" : hasSearchBooster ? "search" : hasProfileOptimization ? "profile" : hasReviewCampaign ? "reviews" : hasPrioritySupport ? "support" : "spotlight"} className="w-full">
               <TabsList className="mb-4 flex-wrap h-auto gap-1">
                 {hasSponsored && (
                   <TabsTrigger value="sponsored">Sponsored Placement</TabsTrigger>
@@ -580,6 +584,12 @@ const MerchantDashboard = () => {
                 )}
                 {hasReviewCampaign && (
                   <TabsTrigger value="reviews">Review Campaign</TabsTrigger>
+                )}
+                {hasPrioritySupport && (
+                  <TabsTrigger value="support">Priority Support</TabsTrigger>
+                )}
+                {hasSpotlight && (
+                  <TabsTrigger value="spotlight">Spotlight</TabsTrigger>
                 )}
               </TabsList>
               
@@ -616,6 +626,18 @@ const MerchantDashboard = () => {
               {hasReviewCampaign && (
                 <TabsContent value="reviews">
                   <ReviewCampaignWidget />
+                </TabsContent>
+              )}
+              
+              {hasPrioritySupport && (
+                <TabsContent value="support">
+                  <PrioritySupportWidget />
+                </TabsContent>
+              )}
+              
+              {hasSpotlight && (
+                <TabsContent value="spotlight">
+                  <MerchantSpotlightWidget />
                 </TabsContent>
               )}
             </Tabs>
