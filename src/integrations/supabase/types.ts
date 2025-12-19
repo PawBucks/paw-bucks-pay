@@ -1604,6 +1604,54 @@ export type Database = {
         }
         Relationships: []
       }
+      receipt_submissions: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          id: string
+          merchant_name: string
+          pawbucks_awarded: number | null
+          purchase_amount: number
+          receipt_date: string
+          receipt_image_url: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          id?: string
+          merchant_name: string
+          pawbucks_awarded?: number | null
+          purchase_amount: number
+          receipt_date: string
+          receipt_image_url: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          id?: string
+          merchant_name?: string
+          pawbucks_awarded?: number | null
+          purchase_amount?: number
+          receipt_date?: string
+          receipt_image_url?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       referrals: {
         Row: {
           created_at: string | null
