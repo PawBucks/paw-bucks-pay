@@ -15,6 +15,7 @@ type Product = {
   name: string;
   description?: string;
   price: number;
+  price_pawbucks: number;
   category: string;
   stock_quantity: number;
   is_active: boolean;
@@ -75,6 +76,7 @@ export function ProductsTab() {
             name: selectedProduct.name,
             description: selectedProduct.description,
             price: selectedProduct.price,
+            price_pawbucks: selectedProduct.price_pawbucks,
             category: selectedProduct.category,
             stock_quantity: selectedProduct.stock_quantity,
             is_active: selectedProduct.is_active,
@@ -97,6 +99,7 @@ export function ProductsTab() {
             name: selectedProduct.name,
             description: selectedProduct.description,
             price: selectedProduct.price,
+            price_pawbucks: selectedProduct.price_pawbucks,
             category: selectedProduct.category,
             stock_quantity: selectedProduct.stock_quantity,
             is_active: selectedProduct.is_active,
@@ -153,6 +156,7 @@ export function ProductsTab() {
       name: '',
       description: '',
       price: 0,
+      price_pawbucks: 0,
       category: 'food',
       stock_quantity: 0,
       is_active: true,
@@ -190,7 +194,8 @@ export function ProductsTab() {
             <TableRow>
               <TableHead>Product Name</TableHead>
               <TableHead>Category</TableHead>
-              <TableHead>Price</TableHead>
+              <TableHead>USD Price</TableHead>
+              <TableHead>PawBucks Price</TableHead>
               <TableHead>Stock</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -204,6 +209,7 @@ export function ProductsTab() {
                   <Badge variant="outline">{product.category}</Badge>
                 </TableCell>
                 <TableCell>${product.price.toLocaleString()}</TableCell>
+                <TableCell>{product.price_pawbucks?.toLocaleString() || 0} PB</TableCell>
                 <TableCell>{product.stock_quantity}</TableCell>
                 <TableCell>
                   <Badge variant={product.is_active ? 'default' : 'secondary'}>
@@ -263,12 +269,21 @@ export function ProductsTab() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Price ($)</Label>
+                  <Label>USD Price ($)</Label>
                   <Input
                     type="number"
                     step="0.01"
                     value={selectedProduct.price}
                     onChange={(e) => setSelectedProduct({ ...selectedProduct, price: parseFloat(e.target.value) })}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>PawBucks Price</Label>
+                  <Input
+                    type="number"
+                    value={selectedProduct.price_pawbucks}
+                    onChange={(e) => setSelectedProduct({ ...selectedProduct, price_pawbucks: parseInt(e.target.value) })}
                     required
                   />
                 </div>
