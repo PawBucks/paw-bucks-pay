@@ -2148,6 +2148,14 @@ export type Database = {
       }
     }
     Views: {
+      consultation_slot_availability: {
+        Row: {
+          booking_date: string | null
+          bookings_count: number | null
+          time_slot: string | null
+        }
+        Relationships: []
+      }
       merchants_public: {
         Row: {
           accepts_pawbucks: boolean | null
