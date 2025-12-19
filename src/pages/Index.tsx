@@ -90,7 +90,7 @@ const Index = () => {
                 className="text-base sm:text-lg px-8 sm:px-10 py-6 sm:py-7 shadow-xl hover:shadow-2xl transition-all group bg-gradient-to-r from-primary to-primary/80"
                 aria-label="Start using PawBucks for free"
               >
-                Start Free 
+                Start Earning PawBucks 
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
               <Button 
