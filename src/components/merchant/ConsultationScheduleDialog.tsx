@@ -77,11 +77,11 @@ export function ConsultationScheduleDialog({
       setIsLoadingSlots(true);
       try {
         const dateStr = format(selectedDate, "yyyy-MM-dd");
+        // Use secure view that only exposes aggregated slot data (no user info)
         const { data, error } = await supabase
-          .from("consultation_bookings")
+          .from("consultation_slot_availability")
           .select("time_slot")
-          .eq("booking_date", dateStr)
-          .in("status", ["pending", "confirmed"]);
+          .eq("booking_date", dateStr);
 
         if (error) throw error;
         setBookedSlots(data?.map((b) => b.time_slot) || []);
