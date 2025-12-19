@@ -2,6 +2,7 @@ import { useEffect, useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
+import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
@@ -15,7 +16,8 @@ import { DiscoverServicesCard } from "@/components/dashboard/DiscoverServicesCar
 import { BottomNav } from "@/components/BottomNav";
 import { PullToRefresh } from "@/components/PullToRefresh";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
-import { Store, Users, TrendingUp } from "lucide-react";
+import { ReceiptUploadDialog } from "@/components/ReceiptUploadDialog";
+import { Store, Users, TrendingUp, Receipt } from "lucide-react";
 
 const cardVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -59,6 +61,7 @@ type PetProfile = {
 
 const Dashboard = () => {
   const { user, signOut, loading: authLoading } = useAuth();
+  const { subscription } = useSubscription();
   const navigate = useNavigate();
   
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -67,6 +70,9 @@ const Dashboard = () => {
   const [pets, setPets] = useState<PetProfile[]>([]);
   const [medicalSpending, setMedicalSpending] = useState<number>(0);
   const [dataLoading, setDataLoading] = useState(true);
+  const [receiptDialogOpen, setReceiptDialogOpen] = useState(false);
+  
+  const isPawPassSubscriber = subscription.subscribed;
 
   // Direct fetch function - no caching that could cause stale data
   const fetchDashboardData = useCallback(async () => {
@@ -229,18 +235,42 @@ const Dashboard = () => {
               />
             </motion.div>
             
+            {/* PawPass+ Receipt Upload Card */}
+            {isPawPassSubscriber && (
+              <motion.div custom={1} variants={cardVariants} initial="hidden" animate="visible">
+                <GradientCard className="bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                        <Receipt className="w-6 h-6 text-primary" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold">Earn PawBucks on Any Purchase</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Upload receipts from pet merchants not on our platform
+                        </p>
+                      </div>
+                    </div>
+                    <Button onClick={() => setReceiptDialogOpen(true)}>
+                      Upload Receipt
+                    </Button>
+                  </div>
+                </GradientCard>
+              </motion.div>
+            )}
+            
             {/* Row 2: My Pets - Full Width */}
-            <motion.div custom={1} variants={cardVariants} initial="hidden" animate="visible">
+            <motion.div custom={isPawPassSubscriber ? 2 : 1} variants={cardVariants} initial="hidden" animate="visible">
               <PetProfilesSection pets={pets} onUpdate={handlePetsUpdate} />
             </motion.div>
             
             {/* Row 3: Referral Program & Discover Pet Services - Side by Side on larger screens */}
             <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
-              <motion.div custom={2} variants={cardVariants} initial="hidden" animate="visible">
+              <motion.div custom={isPawPassSubscriber ? 3 : 2} variants={cardVariants} initial="hidden" animate="visible">
                 <ReferralCard />
               </motion.div>
               
-              <motion.div custom={3} variants={cardVariants} initial="hidden" animate="visible">
+              <motion.div custom={isPawPassSubscriber ? 4 : 3} variants={cardVariants} initial="hidden" animate="visible">
                 <DiscoverServicesCard />
               </motion.div>
             </div>
@@ -304,6 +334,15 @@ const Dashboard = () => {
       </PullToRefresh>
       
       <BottomNav />
+      
+      {/* Receipt Upload Dialog for PawPass+ subscribers */}
+      {user && (
+        <ReceiptUploadDialog
+          open={receiptDialogOpen}
+          onOpenChange={setReceiptDialogOpen}
+          userId={user.id}
+        />
+      )}
     </div>
   );
 };
