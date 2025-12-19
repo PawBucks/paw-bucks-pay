@@ -559,10 +559,13 @@ const MerchantDashboard = () => {
               <Sparkles className="w-5 h-5 text-primary" />
               <h2 className="text-xl font-bold">Premium Services</h2>
             </div>
-            <Tabs defaultValue={hasSponsored || hasPremiumAd ? "sponsored" : hasFeaturedPartner ? "featured" : hasSearchBooster ? "search" : "profile"} className="w-full">
+            <Tabs defaultValue={hasSponsored ? "sponsored" : hasPremiumAd ? "premium-ad" : hasFeaturedPartner ? "featured" : hasSearchBooster ? "search" : "profile"} className="w-full">
               <TabsList className="mb-4 flex-wrap h-auto gap-1">
-                {(hasSponsored || hasPremiumAd) && (
+                {hasSponsored && (
                   <TabsTrigger value="sponsored">Sponsored Placement</TabsTrigger>
+                )}
+                {hasPremiumAd && (
+                  <TabsTrigger value="premium-ad">Premium Ad Placement</TabsTrigger>
                 )}
                 {hasFeaturedPartner && (
                   <TabsTrigger value="featured">Featured Partner</TabsTrigger>
@@ -575,9 +578,15 @@ const MerchantDashboard = () => {
                 )}
               </TabsList>
               
-              {(hasSponsored || hasPremiumAd) && (
+              {hasSponsored && (
                 <TabsContent value="sponsored">
-                  <SponsoredPlacementDashboard merchantId={merchant.id} />
+                  <SponsoredPlacementDashboard merchantId={merchant.id} serviceType="sponsored" />
+                </TabsContent>
+              )}
+              
+              {hasPremiumAd && (
+                <TabsContent value="premium-ad">
+                  <SponsoredPlacementDashboard merchantId={merchant.id} serviceType="premium-ad" />
                 </TabsContent>
               )}
               

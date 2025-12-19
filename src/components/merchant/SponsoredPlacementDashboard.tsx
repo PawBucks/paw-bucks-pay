@@ -59,6 +59,7 @@ import { toast } from "sonner";
 
 interface SponsoredPlacementDashboardProps {
   merchantId: string;
+  serviceType?: 'sponsored' | 'premium-ad';
 }
 
 const COLORS = ["hsl(var(--primary))", "hsl(var(--chart-2))", "hsl(var(--chart-3))", "hsl(var(--chart-4))"];
@@ -69,7 +70,8 @@ const datePresets = [
   { label: "90 days", days: 90 },
 ];
 
-export function SponsoredPlacementDashboard({ merchantId }: SponsoredPlacementDashboardProps) {
+export function SponsoredPlacementDashboard({ merchantId, serviceType = 'sponsored' }: SponsoredPlacementDashboardProps) {
+  const dashboardTitle = serviceType === 'premium-ad' ? 'Premium Ad Placement Performance' : 'Sponsored Placement Performance';
   const [dateRange, setDateRange] = useState({ days: 30 });
 
   const startDate = subDays(new Date(), dateRange.days).toISOString();
@@ -228,7 +230,7 @@ export function SponsoredPlacementDashboard({ merchantId }: SponsoredPlacementDa
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2">
             <Sparkles className="w-6 h-6 text-primary" />
-            Sponsored Placement Performance
+            {dashboardTitle}
           </h2>
           <p className="text-muted-foreground">
             Track your visibility, engagement, and ROI across all discovery channels
