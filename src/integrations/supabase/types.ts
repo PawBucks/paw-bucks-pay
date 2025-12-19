@@ -1732,6 +1732,135 @@ export type Database = {
           },
         ]
       }
+      search_ranking_analytics: {
+        Row: {
+          category_match: boolean | null
+          created_at: string
+          device_type: string | null
+          event_type: string
+          id: string
+          is_boosted: boolean | null
+          local_match: boolean | null
+          merchant_id: string
+          position: number | null
+          search_term: string | null
+          session_id: string | null
+          source_page: string
+          user_id: string | null
+        }
+        Insert: {
+          category_match?: boolean | null
+          created_at?: string
+          device_type?: string | null
+          event_type: string
+          id?: string
+          is_boosted?: boolean | null
+          local_match?: boolean | null
+          merchant_id: string
+          position?: number | null
+          search_term?: string | null
+          session_id?: string | null
+          source_page: string
+          user_id?: string | null
+        }
+        Update: {
+          category_match?: boolean | null
+          created_at?: string
+          device_type?: string | null
+          event_type?: string
+          id?: string
+          is_boosted?: boolean | null
+          local_match?: boolean | null
+          merchant_id?: string
+          position?: number | null
+          search_term?: string | null
+          session_id?: string | null
+          source_page?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "search_ranking_analytics_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "search_ranking_analytics_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      search_ranking_daily_stats: {
+        Row: {
+          avg_position: number | null
+          best_position: number | null
+          category_impressions: number
+          clicks: number
+          conversions: number
+          created_at: string
+          date: string
+          id: string
+          impressions: number
+          local_impressions: number
+          merchant_id: string
+          top_search_terms: Json | null
+          unique_searchers: number
+          updated_at: string
+        }
+        Insert: {
+          avg_position?: number | null
+          best_position?: number | null
+          category_impressions?: number
+          clicks?: number
+          conversions?: number
+          created_at?: string
+          date: string
+          id?: string
+          impressions?: number
+          local_impressions?: number
+          merchant_id: string
+          top_search_terms?: Json | null
+          unique_searchers?: number
+          updated_at?: string
+        }
+        Update: {
+          avg_position?: number | null
+          best_position?: number | null
+          category_impressions?: number
+          clicks?: number
+          conversions?: number
+          created_at?: string
+          date?: string
+          id?: string
+          impressions?: number
+          local_impressions?: number
+          merchant_id?: string
+          top_search_terms?: Json | null
+          unique_searchers?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "search_ranking_daily_stats_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "search_ranking_daily_stats_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       security_alerts: {
         Row: {
           alert_type: string
@@ -2347,6 +2476,10 @@ export type Database = {
       }
     }
     Functions: {
+      aggregate_search_ranking_stats: {
+        Args: { target_date?: string }
+        Returns: undefined
+      }
       aggregate_sponsored_stats: {
         Args: { target_date?: string }
         Returns: undefined

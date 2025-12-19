@@ -149,3 +149,6 @@ verify_jwt = true
 
 [functions.sponsored-placement-analytics]
 verify_jwt = true
+
+[functions.search-ranking-analytics]
+verify_jwt = true
