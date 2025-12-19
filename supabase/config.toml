@@ -152,3 +152,6 @@ verify_jwt = true
 
 [functions.search-ranking-analytics]
 verify_jwt = true
+
+[functions.merchant-profile-optimization]
+verify_jwt = true
