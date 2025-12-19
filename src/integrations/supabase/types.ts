@@ -1774,6 +1774,117 @@ export type Database = {
         }
         Relationships: []
       }
+      sponsored_placement_analytics: {
+        Row: {
+          created_at: string
+          device_type: string | null
+          event_type: string
+          id: string
+          merchant_id: string
+          position: number | null
+          search_query: string | null
+          session_id: string | null
+          source_page: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          device_type?: string | null
+          event_type: string
+          id?: string
+          merchant_id: string
+          position?: number | null
+          search_query?: string | null
+          session_id?: string | null
+          source_page: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          device_type?: string | null
+          event_type?: string
+          id?: string
+          merchant_id?: string
+          position?: number | null
+          search_query?: string | null
+          session_id?: string | null
+          source_page?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sponsored_placement_analytics_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sponsored_placement_analytics_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sponsored_placement_daily_stats: {
+        Row: {
+          avg_position: number | null
+          clicks: number
+          conversions: number
+          created_at: string
+          date: string
+          id: string
+          impressions: number
+          merchant_id: string
+          source_page: string
+          unique_viewers: number
+          updated_at: string
+        }
+        Insert: {
+          avg_position?: number | null
+          clicks?: number
+          conversions?: number
+          created_at?: string
+          date: string
+          id?: string
+          impressions?: number
+          merchant_id: string
+          source_page: string
+          unique_viewers?: number
+          updated_at?: string
+        }
+        Update: {
+          avg_position?: number | null
+          clicks?: number
+          conversions?: number
+          created_at?: string
+          date?: string
+          id?: string
+          impressions?: number
+          merchant_id?: string
+          source_page?: string
+          unique_viewers?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sponsored_placement_daily_stats_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sponsored_placement_daily_stats_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscription_events: {
         Row: {
           event_type: string
@@ -2236,6 +2347,10 @@ export type Database = {
       }
     }
     Functions: {
+      aggregate_sponsored_stats: {
+        Args: { target_date?: string }
+        Returns: undefined
+      }
       generate_redemption_code: { Args: never; Returns: string }
       generate_referral_code: { Args: never; Returns: string }
       generate_storefront_slug: {
