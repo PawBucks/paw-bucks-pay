@@ -17,6 +17,18 @@ serve(async (req) => {
       throw new Error("Missing authorization header");
     }
 
+    // Parse request body for date range
+    let startDate: Date | null = null;
+    let endDate: Date | null = null;
+    
+    try {
+      const body = await req.json();
+      if (body.startDate) startDate = new Date(body.startDate);
+      if (body.endDate) endDate = new Date(body.endDate);
+    } catch {
+      // No body or invalid JSON - use defaults
+    }
+
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_ANON_KEY") ?? "",
@@ -36,7 +48,7 @@ serve(async (req) => {
     // Get merchant
     const { data: merchant, error: merchantError } = await supabaseClient
       .from('merchants')
-      .select('id, business_name, cashback_rate, created_at')
+      .select('id, business_name, cashback_rate, created_at, business_type')
       .eq('user_id', user.id)
       .single();
 
@@ -90,17 +102,24 @@ serve(async (req) => {
     const transactions = allTransactions || [];
     
     // Time periods
-    const now = new Date();
-    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-    const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
+    const now = endDate || new Date();
+    const thirtyDaysAgo = startDate || new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const sixtyDaysAgo = new Date(thirtyDaysAgo.getTime() - 30 * 24 * 60 * 60 * 1000);
     const ninetyDaysAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
     const oneYearAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
 
+    // Filter by custom date range
+    const customRangeTransactions = transactions.filter(t => {
+      const date = new Date(t.created_at);
+      return date >= thirtyDaysAgo && date <= now;
+    });
+
     // Filter by time periods
-    const last30Days = transactions.filter(t => new Date(t.created_at) > thirtyDaysAgo);
-    const prev30Days = transactions.filter(t => 
-      new Date(t.created_at) > sixtyDaysAgo && new Date(t.created_at) <= thirtyDaysAgo
-    );
+    const last30Days = customRangeTransactions;
+    const prev30Days = transactions.filter(t => {
+      const date = new Date(t.created_at);
+      return date > sixtyDaysAgo && date <= thirtyDaysAgo;
+    });
     const last90Days = transactions.filter(t => new Date(t.created_at) > ninetyDaysAgo);
     const lastYear = transactions.filter(t => new Date(t.created_at) > oneYearAgo);
 
@@ -111,30 +130,44 @@ serve(async (req) => {
     const uniqueCustomers = new Set(transactions.map(t => t.user_id)).size;
     const avgTransactionValue = totalTransactions > 0 ? totalRevenue / totalTransactions : 0;
 
-    // Last 30 days metrics
-    const revenue30Days = last30Days.reduce((sum, t) => sum + Number(t.amount), 0);
-    const transactions30Days = last30Days.length;
-    const customers30Days = new Set(last30Days.map(t => t.user_id)).size;
+    // Custom range metrics
+    const revenueCustomRange = last30Days.reduce((sum, t) => sum + Number(t.amount), 0);
+    const transactionsCustomRange = last30Days.length;
+    const customersCustomRange = new Set(last30Days.map(t => t.user_id)).size;
 
-    // Previous 30 days for comparison
-    const revenuePrev30Days = prev30Days.reduce((sum, t) => sum + Number(t.amount), 0);
-    const transactionsPrev30Days = prev30Days.length;
-    const customersPrev30Days = new Set(prev30Days.map(t => t.user_id)).size;
+    // Previous period for comparison
+    const revenuePrevPeriod = prev30Days.reduce((sum, t) => sum + Number(t.amount), 0);
+    const transactionsPrevPeriod = prev30Days.length;
+    const customersPrevPeriod = new Set(prev30Days.map(t => t.user_id)).size;
 
     // Growth rates
-    const revenueGrowth = revenuePrev30Days > 0 
-      ? ((revenue30Days - revenuePrev30Days) / revenuePrev30Days) * 100 
+    const revenueGrowth = revenuePrevPeriod > 0 
+      ? ((revenueCustomRange - revenuePrevPeriod) / revenuePrevPeriod) * 100 
       : 0;
-    const transactionGrowth = transactionsPrev30Days > 0 
-      ? ((transactions30Days - transactionsPrev30Days) / transactionsPrev30Days) * 100 
+    const transactionGrowth = transactionsPrevPeriod > 0 
+      ? ((transactionsCustomRange - transactionsPrevPeriod) / transactionsPrevPeriod) * 100 
       : 0;
-    const customerGrowth = customersPrev30Days > 0 
-      ? ((customers30Days - customersPrev30Days) / customersPrev30Days) * 100 
+    const customerGrowth = customersPrevPeriod > 0 
+      ? ((customersCustomRange - customersPrevPeriod) / customersPrevPeriod) * 100 
       : 0;
 
-    // ======= REVENUE TRENDS (Daily for last 30 days) =======
+    // ======= TRANSACTION VELOCITY =======
+    const daysDiff = Math.max(1, Math.ceil((now.getTime() - thirtyDaysAgo.getTime()) / (24 * 60 * 60 * 1000)));
+    const dailyTransactionVelocity = transactionsCustomRange / daysDiff;
+    const dailyRevenueVelocity = revenueCustomRange / daysDiff;
+    const weeklyTransactionVelocity = dailyTransactionVelocity * 7;
+    const weeklyRevenueVelocity = dailyRevenueVelocity * 7;
+
+    // Calculate velocity trends (compare to previous period)
+    const prevDailyVelocity = transactionsPrevPeriod / daysDiff;
+    const velocityGrowth = prevDailyVelocity > 0 
+      ? ((dailyTransactionVelocity - prevDailyVelocity) / prevDailyVelocity) * 100 
+      : 0;
+
+    // ======= REVENUE TRENDS (Daily for selected period) =======
     const revenueByDay: Record<string, { revenue: number; transactions: number; date: string }> = {};
-    for (let i = 29; i >= 0; i--) {
+    const numDays = Math.min(daysDiff, 60); // Cap at 60 days for visualization
+    for (let i = numDays - 1; i >= 0; i--) {
       const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
       const dateKey = date.toISOString().split('T')[0];
       revenueByDay[dateKey] = { revenue: 0, transactions: 0, date: dateKey };
@@ -165,17 +198,24 @@ serve(async (req) => {
     });
 
     // ======= CUSTOMER BEHAVIOR =======
-    const customerPurchases: Record<string, { count: number; total: number; firstPurchase: Date; lastPurchase: Date }> = {};
+    const customerPurchases: Record<string, { 
+      count: number; 
+      total: number; 
+      firstPurchase: Date; 
+      lastPurchase: Date;
+      amounts: number[];
+    }> = {};
     transactions.forEach(t => {
       const userId = t.user_id;
       const amount = Number(t.amount);
       const date = new Date(t.created_at);
       
       if (!customerPurchases[userId]) {
-        customerPurchases[userId] = { count: 0, total: 0, firstPurchase: date, lastPurchase: date };
+        customerPurchases[userId] = { count: 0, total: 0, firstPurchase: date, lastPurchase: date, amounts: [] };
       }
       customerPurchases[userId].count += 1;
       customerPurchases[userId].total += amount;
+      customerPurchases[userId].amounts.push(amount);
       if (date < customerPurchases[userId].firstPurchase) {
         customerPurchases[userId].firstPurchase = date;
       }
@@ -199,6 +239,57 @@ serve(async (req) => {
     const repeatPurchaseRate = uniqueCustomers > 0 
       ? (repeatBuyers / uniqueCustomers) * 100 
       : 0;
+
+    // ======= CUSTOMER DEMOGRAPHICS / BEHAVIOR ANALYSIS =======
+    // New vs returning in selected period
+    const newCustomersInPeriod = new Set(
+      last30Days
+        .filter(t => {
+          const customerId = t.user_id;
+          const customerData = customerPurchases[customerId];
+          return customerData && customerData.firstPurchase >= thirtyDaysAgo;
+        })
+        .map(t => t.user_id)
+    ).size;
+
+    const returningCustomersInPeriod = customersCustomRange - newCustomersInPeriod;
+
+    // Customer acquisition trend (monthly)
+    const customerAcquisitionByMonth: Record<string, number> = {};
+    for (let i = 11; i >= 0; i--) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthKey = date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+      customerAcquisitionByMonth[monthKey] = 0;
+    }
+    Object.values(customerPurchases).forEach(customer => {
+      const monthKey = customer.firstPurchase.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+      if (customerAcquisitionByMonth[monthKey] !== undefined) {
+        customerAcquisitionByMonth[monthKey] += 1;
+      }
+    });
+
+    // Spending tier distribution
+    const spendingTiers = {
+      budget: Object.values(customerPurchases).filter(c => c.total < 50).length,
+      mid_range: Object.values(customerPurchases).filter(c => c.total >= 50 && c.total < 200).length,
+      premium: Object.values(customerPurchases).filter(c => c.total >= 200 && c.total < 500).length,
+      high_value: Object.values(customerPurchases).filter(c => c.total >= 500).length,
+    };
+
+    // Purchase frequency distribution
+    const frequencyDistribution = {
+      single: Object.values(customerPurchases).filter(c => c.count === 1).length,
+      occasional: Object.values(customerPurchases).filter(c => c.count >= 2 && c.count <= 4).length,
+      regular: Object.values(customerPurchases).filter(c => c.count >= 5 && c.count <= 10).length,
+      frequent: Object.values(customerPurchases).filter(c => c.count > 10).length,
+    };
+
+    // Customer churn risk (haven't purchased in 60+ days but purchased before)
+    const churnRiskCustomers = Object.entries(customerPurchases)
+      .filter(([_, data]) => {
+        const daysSinceLastPurchase = Math.floor((now.getTime() - data.lastPurchase.getTime()) / (24 * 60 * 60 * 1000));
+        return daysSinceLastPurchase > 60 && data.count > 1;
+      }).length;
 
     // ======= TOP CUSTOMERS =======
     const topCustomers = Object.entries(customerPurchases)
@@ -246,6 +337,114 @@ serve(async (req) => {
     const peakDay = Object.entries(dayOfWeekCounts)
       .sort((a, b) => b[1].transactions - a[1].transactions)[0];
 
+    // ======= AI-POWERED INSIGHTS =======
+    const aiInsights = [];
+    
+    // Revenue prediction based on trends
+    const monthlyRevenueValues = Object.values(monthlyRevenue).map(m => m.revenue);
+    const recentMonths = monthlyRevenueValues.slice(-3);
+    const avgRecentRevenue = recentMonths.reduce((a, b) => a + b, 0) / recentMonths.length;
+    const projectedNextMonth = avgRecentRevenue * (1 + (revenueGrowth / 100 / 3));
+    
+    aiInsights.push({
+      type: 'prediction',
+      title: 'Revenue Projection',
+      description: `Based on your current trends, projected revenue for next month: $${projectedNextMonth.toFixed(2)}`,
+      confidence: recentMonths.length >= 3 ? 'high' : 'medium',
+      icon: 'trending'
+    });
+
+    // Customer behavior insight
+    if (repeatPurchaseRate > 30) {
+      aiInsights.push({
+        type: 'positive',
+        title: 'Strong Customer Loyalty',
+        description: `Your ${repeatPurchaseRate.toFixed(1)}% repeat purchase rate indicates excellent customer retention. Consider launching a loyalty program to reward these customers.`,
+        confidence: 'high',
+        icon: 'heart'
+      });
+    } else if (repeatPurchaseRate < 15 && uniqueCustomers > 10) {
+      aiInsights.push({
+        type: 'warning',
+        title: 'Customer Retention Opportunity',
+        description: `Only ${repeatPurchaseRate.toFixed(1)}% of customers make repeat purchases. Implement follow-up campaigns and loyalty incentives to boost retention.`,
+        confidence: 'high',
+        icon: 'alert'
+      });
+    }
+
+    // Transaction velocity insight
+    if (velocityGrowth > 20) {
+      aiInsights.push({
+        type: 'positive',
+        title: 'Accelerating Sales',
+        description: `Transaction velocity is up ${velocityGrowth.toFixed(1)}%. Your business momentum is strong - maintain current strategies.`,
+        confidence: 'high',
+        icon: 'rocket'
+      });
+    } else if (velocityGrowth < -20) {
+      aiInsights.push({
+        type: 'warning',
+        title: 'Declining Sales Velocity',
+        description: `Transaction velocity has decreased by ${Math.abs(velocityGrowth).toFixed(1)}%. Consider promotional campaigns to stimulate demand.`,
+        confidence: 'high',
+        icon: 'alert'
+      });
+    }
+
+    // Peak timing insight
+    if (peakDay && peakHour) {
+      aiInsights.push({
+        type: 'insight',
+        title: 'Optimal Business Hours',
+        description: `Your peak sales occur on ${peakDay[0]}s around ${peakHour[0]}:00. Schedule promotions and ensure adequate staffing during these times.`,
+        confidence: 'high',
+        icon: 'clock'
+      });
+    }
+
+    // Churn risk insight
+    if (churnRiskCustomers > 0) {
+      aiInsights.push({
+        type: 'warning',
+        title: 'Churn Risk Alert',
+        description: `${churnRiskCustomers} repeat customers haven't purchased in 60+ days. Launch a win-back campaign with personalized offers.`,
+        confidence: 'high',
+        icon: 'alert'
+      });
+    }
+
+    // AOV optimization
+    if (avgTransactionValue < 75 && totalTransactions > 20) {
+      aiInsights.push({
+        type: 'opportunity',
+        title: 'Average Order Value Opportunity',
+        description: `Your average order of $${avgTransactionValue.toFixed(2)} is below industry average ($75). Consider bundling, upsells, or minimum order incentives.`,
+        confidence: 'medium',
+        icon: 'dollar'
+      });
+    }
+
+    // Seasonal pattern detection
+    const monthNames = Object.keys(monthlyRevenue);
+    const monthValues = Object.values(monthlyRevenue);
+    let maxMonthIdx = 0;
+    let minMonthIdx = 0;
+    monthValues.forEach((m, idx) => {
+      if (m.revenue > monthValues[maxMonthIdx].revenue) maxMonthIdx = idx;
+      if (m.revenue < monthValues[minMonthIdx].revenue) minMonthIdx = idx;
+    });
+    
+    if (monthValues[maxMonthIdx].revenue > monthValues[minMonthIdx].revenue * 2) {
+      aiInsights.push({
+        type: 'insight',
+        title: 'Seasonal Pattern Detected',
+        description: `Your strongest month is ${monthValues[maxMonthIdx].month}. Plan inventory and marketing campaigns to capitalize on this seasonal trend.`,
+        confidence: 'medium',
+        icon: 'calendar'
+      });
+    }
+
     // ======= GROWTH OPPORTUNITIES =======
     const growthOpportunities = [];
 
@@ -262,7 +461,8 @@ serve(async (req) => {
         title: 'Reactivate Dormant Customers',
         description: `${inactiveCustomers} repeat customers haven't purchased in 30+ days`,
         impact: 'high',
-        action: 'Consider a targeted re-engagement campaign'
+        action: 'Consider a targeted re-engagement campaign',
+        potential_revenue: inactiveCustomers * avgTransactionValue
       });
     }
 
@@ -273,7 +473,8 @@ serve(async (req) => {
         title: 'Improve Customer Retention',
         description: `Only ${repeatPurchaseRate.toFixed(1)}% of customers make repeat purchases`,
         impact: 'high',
-        action: 'Implement loyalty rewards or follow-up communications'
+        action: 'Implement loyalty rewards or follow-up communications',
+        potential_revenue: oneTimeBuyers * avgTransactionValue * 0.3
       });
     }
 
@@ -282,17 +483,19 @@ serve(async (req) => {
       growthOpportunities.push({
         type: 'revenue',
         title: 'Revenue Declining',
-        description: `Revenue is down ${Math.abs(revenueGrowth).toFixed(1)}% vs previous 30 days`,
+        description: `Revenue is down ${Math.abs(revenueGrowth).toFixed(1)}% vs previous period`,
         impact: 'critical',
-        action: 'Review pricing, promotions, or customer feedback'
+        action: 'Review pricing, promotions, or customer feedback',
+        potential_revenue: Math.abs(revenueCustomRange * revenueGrowth / 100)
       });
     } else if (revenueGrowth > 20) {
       growthOpportunities.push({
         type: 'momentum',
         title: 'Strong Growth Momentum',
-        description: `Revenue is up ${revenueGrowth.toFixed(1)}% vs previous 30 days`,
+        description: `Revenue is up ${revenueGrowth.toFixed(1)}% vs previous period`,
         impact: 'positive',
-        action: 'Double down on current strategies'
+        action: 'Double down on current strategies',
+        potential_revenue: 0
       });
     }
 
@@ -303,14 +506,17 @@ serve(async (req) => {
         title: 'Increase Average Order Value',
         description: `Average order is $${avgTransactionValue.toFixed(2)}`,
         impact: 'medium',
-        action: 'Consider bundles, upsells, or minimum order incentives'
+        action: 'Consider bundles, upsells, or minimum order incentives',
+        potential_revenue: totalTransactions * 10
       });
     }
 
     // ======= COMPETITIVE BENCHMARKING (industry averages) =======
-    const industryAvgAOV = 75; // Typical pet services
+    const industryAvgAOV = 75;
     const industryAvgRepeatRate = 35;
     const industryAvgLTV = 250;
+    const industryAvgMonthlyGrowth = 5;
+    const industryAvgCustomerRetention = 40;
 
     const benchmarking = {
       your_avg_transaction: avgTransactionValue,
@@ -319,15 +525,31 @@ serve(async (req) => {
       industry_avg_repeat_rate: industryAvgRepeatRate,
       your_ltv: avgLifetimeValue,
       industry_avg_ltv: industryAvgLTV,
+      your_monthly_growth: revenueGrowth / 3,
+      industry_avg_monthly_growth: industryAvgMonthlyGrowth,
+      your_customer_retention: uniqueCustomers > 0 ? (returningCustomersInPeriod / customersCustomRange * 100) : 0,
+      industry_avg_customer_retention: industryAvgCustomerRetention,
       transaction_value_vs_industry: ((avgTransactionValue / industryAvgAOV) * 100) - 100,
       repeat_rate_vs_industry: repeatPurchaseRate - industryAvgRepeatRate,
-      ltv_vs_industry: ((avgLifetimeValue / industryAvgLTV) * 100) - 100
+      ltv_vs_industry: ((avgLifetimeValue / industryAvgLTV) * 100) - 100,
+      overall_performance_score: Math.min(100, Math.round(
+        (Math.min(avgTransactionValue / industryAvgAOV, 1.5) * 25) +
+        (Math.min(repeatPurchaseRate / industryAvgRepeatRate, 1.5) * 25) +
+        (Math.min(avgLifetimeValue / industryAvgLTV, 1.5) * 25) +
+        (revenueGrowth > 0 ? 25 : Math.max(0, 25 + revenueGrowth))
+      ))
     };
 
     // ======= RETURN COMPREHENSIVE ANALYTICS =======
     return new Response(
       JSON.stringify({
         has_access: true,
+        generated_at: new Date().toISOString(),
+        date_range: {
+          start: thirtyDaysAgo.toISOString(),
+          end: now.toISOString(),
+          days: daysDiff
+        },
         analytics: {
           overview: {
             total_revenue: Number(totalRevenue.toFixed(2)),
@@ -335,24 +557,34 @@ serve(async (req) => {
             unique_customers: uniqueCustomers,
             avg_transaction_value: Number(avgTransactionValue.toFixed(2)),
             total_rewards_given: totalRewards,
-            merchant_since: merchant.created_at
+            merchant_since: merchant.created_at,
+            business_type: merchant.business_type
           },
           period_comparison: {
             current_period: {
-              revenue: Number(revenue30Days.toFixed(2)),
-              transactions: transactions30Days,
-              customers: customers30Days
+              revenue: Number(revenueCustomRange.toFixed(2)),
+              transactions: transactionsCustomRange,
+              customers: customersCustomRange
             },
             previous_period: {
-              revenue: Number(revenuePrev30Days.toFixed(2)),
-              transactions: transactionsPrev30Days,
-              customers: customersPrev30Days
+              revenue: Number(revenuePrevPeriod.toFixed(2)),
+              transactions: transactionsPrevPeriod,
+              customers: customersPrevPeriod
             },
             growth: {
               revenue: Number(revenueGrowth.toFixed(2)),
               transactions: Number(transactionGrowth.toFixed(2)),
               customers: Number(customerGrowth.toFixed(2))
             }
+          },
+          transaction_velocity: {
+            daily_transactions: Number(dailyTransactionVelocity.toFixed(2)),
+            daily_revenue: Number(dailyRevenueVelocity.toFixed(2)),
+            weekly_transactions: Number(weeklyTransactionVelocity.toFixed(2)),
+            weekly_revenue: Number(weeklyRevenueVelocity.toFixed(2)),
+            velocity_growth: Number(velocityGrowth.toFixed(2)),
+            projected_monthly_revenue: Number((dailyRevenueVelocity * 30).toFixed(2)),
+            projected_monthly_transactions: Math.round(dailyTransactionVelocity * 30)
           },
           revenue_trends: {
             daily: Object.values(revenueByDay),
@@ -370,6 +602,17 @@ serve(async (req) => {
               repeat_purchase_rate: Number(repeatPurchaseRate.toFixed(2)),
               avg_purchases_per_customer: uniqueCustomers > 0 ? Number((totalTransactions / uniqueCustomers).toFixed(2)) : 0
             },
+            demographics: {
+              new_customers: newCustomersInPeriod,
+              returning_customers: returningCustomersInPeriod,
+              churn_risk_customers: churnRiskCustomers,
+              spending_tiers: spendingTiers,
+              frequency_distribution: frequencyDistribution,
+              acquisition_trend: Object.entries(customerAcquisitionByMonth).map(([month, count]) => ({
+                month,
+                new_customers: count
+              }))
+            },
             top_customers: topCustomers
           },
           transaction_patterns: {
@@ -385,6 +628,7 @@ serve(async (req) => {
             peak_day: peakDay ? peakDay[0] : 'N/A',
             peak_hour: peakHour ? `${peakHour[0]}:00` : 'N/A'
           },
+          ai_insights: aiInsights,
           growth_opportunities: growthOpportunities,
           competitive_benchmarking: benchmarking
         }
