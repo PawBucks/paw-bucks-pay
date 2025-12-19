@@ -38,6 +38,7 @@ import { SponsoredPlacementDashboard } from "@/components/merchant/SponsoredPlac
 import { FeaturedPartnerWidget } from "@/components/merchant/FeaturedPartnerWidget";
 import { SearchRankingBoosterWidget } from "@/components/merchant/SearchRankingBoosterWidget";
 import { ProfileOptimizationWidget } from "@/components/merchant/ProfileOptimizationWidget";
+import { ReviewCampaignWidget } from "@/components/merchant/ReviewCampaignWidget";
 
 type Merchant = {
   id: string;
@@ -101,8 +102,9 @@ const MerchantDashboard = () => {
   const hasFeaturedPartner = activeServices.includes(SERVICE_NAMES.FEATURED_PARTNER);
   const hasSearchBooster = activeServices.includes(SERVICE_NAMES.SEARCH_RANKING_BOOSTER);
   const hasProfileOptimization = activeServices.includes(SERVICE_NAMES.PROFILE_OPTIMIZATION);
+  const hasReviewCampaign = activeServices.includes(SERVICE_NAMES.REVIEW_CAMPAIGN);
   
-  const hasPremiumServices = hasSponsored || hasPremiumAd || hasFeaturedPartner || hasSearchBooster || hasProfileOptimization;
+  const hasPremiumServices = hasSponsored || hasPremiumAd || hasFeaturedPartner || hasSearchBooster || hasProfileOptimization || hasReviewCampaign;
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -559,7 +561,7 @@ const MerchantDashboard = () => {
               <Sparkles className="w-5 h-5 text-primary" />
               <h2 className="text-xl font-bold">Premium Services</h2>
             </div>
-            <Tabs defaultValue={hasSponsored ? "sponsored" : hasPremiumAd ? "premium-ad" : hasFeaturedPartner ? "featured" : hasSearchBooster ? "search" : "profile"} className="w-full">
+            <Tabs defaultValue={hasSponsored ? "sponsored" : hasPremiumAd ? "premium-ad" : hasFeaturedPartner ? "featured" : hasSearchBooster ? "search" : hasProfileOptimization ? "profile" : "reviews"} className="w-full">
               <TabsList className="mb-4 flex-wrap h-auto gap-1">
                 {hasSponsored && (
                   <TabsTrigger value="sponsored">Sponsored Placement</TabsTrigger>
@@ -575,6 +577,9 @@ const MerchantDashboard = () => {
                 )}
                 {hasProfileOptimization && (
                   <TabsTrigger value="profile">Profile Optimization</TabsTrigger>
+                )}
+                {hasReviewCampaign && (
+                  <TabsTrigger value="reviews">Review Campaign</TabsTrigger>
                 )}
               </TabsList>
               
@@ -605,6 +610,12 @@ const MerchantDashboard = () => {
               {hasProfileOptimization && (
                 <TabsContent value="profile">
                   <ProfileOptimizationWidget />
+                </TabsContent>
+              )}
+              
+              {hasReviewCampaign && (
+                <TabsContent value="reviews">
+                  <ReviewCampaignWidget />
                 </TabsContent>
               )}
             </Tabs>
