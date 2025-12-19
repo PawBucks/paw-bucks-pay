@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CreditCard, TrendingUp, Shield, BarChart3, CheckCircle, ArrowRight, DollarSign, Sparkles, UserPlus, Settings, Percent } from "lucide-react";
 import logo from "@/assets/logo.png";
+import { PremiumMerchantsBanner } from "@/components/PremiumMerchantsBanner";
 
 const MerchantLanding = () => {
   const navigate = useNavigate();
@@ -72,6 +73,15 @@ const MerchantLanding = () => {
               </Button>
             </div>
           </div>
+        </section>
+
+        {/* Premium Merchants Carousel */}
+        <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+          <PremiumMerchantsBanner 
+            title="See Who's Already Growing with PawBucks"
+            rotationInterval={5000}
+            showMultiple={true}
+          />
         </section>
 
         {/* How PawBucks Works Section */}
