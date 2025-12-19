@@ -146,3 +146,6 @@ verify_jwt = false
 
 [functions.merchant-generate-keyword-insights]
 verify_jwt = true
+
+[functions.sponsored-placement-analytics]
+verify_jwt = true
