@@ -18,9 +18,10 @@ import { Badge } from "@/components/ui/badge";
 import { ROUTES, QUERY_STALE_TIMES } from "@/lib/constants";
 import { usePersistentState } from "@/hooks/usePersistentState";
 import { supabase } from "@/integrations/supabase/client";
-import { useVerifiedProMerchants, useSponsoredMerchants, isVerifiedPro, isSponsored } from "@/hooks/useMerchantServices";
+import { useVerifiedProMerchants, useSponsoredMerchants, useSearchBoostedMerchantSet, isVerifiedPro, isSponsored } from "@/hooks/useMerchantServices";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSponsoredTracking } from "@/hooks/useSponsoredTracking";
+import { useSearchRankingTracking } from "@/hooks/useSearchRankingTracking";
 import {
   Search,
   Store,
@@ -87,9 +88,13 @@ const MerchantDirectory = () => {
   // Fetch verified and sponsored merchants for badge display
   const { data: verifiedProIds = [] } = useVerifiedProMerchants();
   const { data: sponsoredMerchantsList = [] } = useSponsoredMerchants();
+  const { data: searchBoostedIds = new Set<string>() } = useSearchBoostedMerchantSet();
 
   // Sponsored placement tracking
   const { trackImpression, trackClick } = useSponsoredTracking("directory");
+
+  // Search ranking tracking for boosted merchants
+  const { trackBatchImpressions, trackSearchClick } = useSearchRankingTracking();
 
   // Track impressions for sponsored merchants when they're displayed
   useEffect(() => {
@@ -165,8 +170,17 @@ const MerchantDirectory = () => {
       );
     }
 
-    // Sort
+    // Sort with boosted merchants getting priority
     const sorted = [...filtered].sort((a, b) => {
+      // Search boosted merchants get priority (appear higher in results)
+      const aIsBoosted = searchBoostedIds.has(a.id);
+      const bIsBoosted = searchBoostedIds.has(b.id);
+      
+      // If only one is boosted, prioritize the boosted one
+      if (aIsBoosted && !bIsBoosted) return -1;
+      if (!aIsBoosted && bIsBoosted) return 1;
+      
+      // If both boosted or neither boosted, sort by the selected criterion
       switch (sortBy) {
         case "rating":
           return b.average_rating - a.average_rating;
@@ -181,7 +195,26 @@ const MerchantDirectory = () => {
     });
 
     return sorted;
-  }, [merchants, selectedCategory, debouncedSearch, sortBy, pawbucksOnly]);
+  }, [merchants, selectedCategory, debouncedSearch, sortBy, pawbucksOnly, searchBoostedIds]);
+
+  // Track search ranking impressions for boosted merchants
+  useEffect(() => {
+    if (filteredMerchants.length > 0 && searchBoostedIds.size > 0) {
+      const boostedMerchants = filteredMerchants
+        .filter(m => searchBoostedIds.has(m.id))
+        .map((m, index) => ({
+          id: m.id,
+          position: index + 1,
+          isBoosted: true,
+          categoryMatch: selectedCategory !== 'all' && m.business_type.toLowerCase().includes(selectedCategory.toLowerCase()),
+          localMatch: false,
+        }));
+
+      if (boostedMerchants.length > 0) {
+        trackBatchImpressions(boostedMerchants, 'directory', debouncedSearch || undefined);
+      }
+    }
+  }, [filteredMerchants, searchBoostedIds, trackBatchImpressions, debouncedSearch, selectedCategory]);
 
   const handleLogout = async () => {
     await signOut();
@@ -317,10 +350,19 @@ const MerchantDirectory = () => {
                 const Icon = getBusinessIcon(merchant.business_type);
                 const merchantIsVerified = isVerifiedPro(merchant.id, verifiedProIds);
                 const merchantIsSponsored = isSponsored(merchant.id, sponsoredMerchantsList);
+                const merchantIsBoosted = searchBoostedIds.has(merchant.id);
                 
                 const handleCardClick = () => {
+                  // Track sponsored click
                   if (merchantIsSponsored) {
                     trackClick(merchant.id, index + 1, debouncedSearch || undefined);
+                  }
+                  // Track search ranking click for boosted merchants
+                  if (merchantIsBoosted) {
+                    trackSearchClick(merchant.id, index + 1, 'directory', {
+                      searchTerm: debouncedSearch || undefined,
+                      isBoosted: true,
+                    });
                   }
                 };
                 

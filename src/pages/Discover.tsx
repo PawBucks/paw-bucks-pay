@@ -28,6 +28,7 @@ import { usePersistentState } from "@/hooks/usePersistentState";
 import { useSponsoredMerchants, useVerifiedProMerchants, useSearchBoostedMerchantSet, SERVICE_NAMES } from "@/hooks/useMerchantServices";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSponsoredTracking } from "@/hooks/useSponsoredTracking";
+import { useSearchRankingTracking } from "@/hooks/useSearchRankingTracking";
 
 type MerchantWithRating = {
   id: string;
@@ -136,6 +137,7 @@ const StarRating = ({ rating, reviewCount }: { rating: number; reviewCount: numb
 const MerchantCard = ({ 
   merchant, 
   onPayClick,
+  onCardClick,
   isSponsored = false,
   showDistance = false,
   isVerifiedPro = false,
@@ -143,6 +145,7 @@ const MerchantCard = ({
 }: { 
   merchant: MerchantWithRating; 
   onPayClick: () => void;
+  onCardClick?: () => void;
   isSponsored?: boolean;
   showDistance?: boolean;
   isVerifiedPro?: boolean;
@@ -158,7 +161,7 @@ const MerchantCard = ({
     >
     <Card className={`group hover:shadow-lg transition-all duration-300 overflow-hidden ${isSponsored ? 'border-primary/30 bg-primary/5' : 'border-border hover:border-primary/50'}`}>
       <CardContent className="p-0">
-        <Link to={`/merchant/${merchant.id}`} className="block">
+        <Link to={`/merchant/${merchant.id}`} className="block" onClick={onCardClick}>
           <div className="flex gap-4 p-4">
             {/* Logo */}
             <div className="flex-shrink-0">
@@ -330,6 +333,9 @@ const Discover = () => {
 
   // Sponsored placement tracking
   const { trackImpression, trackClick, trackSponsoredImpressions } = useSponsoredTracking("discover");
+
+  // Search ranking tracking for boosted merchants
+  const { trackBatchImpressions, trackSearchClick, trackSearchConversion } = useSearchRankingTracking();
 
   // Get user's location
   const requestLocation = useCallback(() => {
@@ -536,9 +542,36 @@ const Discover = () => {
     }
   }, [sponsoredMerchants, trackSponsoredImpressions, debouncedSearch]);
 
+  // Track search ranking impressions for boosted merchants
+  useEffect(() => {
+    const allMerchants = [...sponsoredMerchants, ...regularMerchants];
+    const boostedMerchants = allMerchants
+      .filter(m => searchBoostedIds.has(m.id))
+      .map((m, index) => ({
+        id: m.id,
+        position: index + 1,
+        isBoosted: true,
+        categoryMatch: selectedCategory !== 'all' && m.business_type.toLowerCase().includes(selectedCategory.toLowerCase()),
+        localMatch: !!m.distance && m.distance <= 10,
+      }));
+
+    if (boostedMerchants.length > 0) {
+      trackBatchImpressions(boostedMerchants, 'discover', debouncedSearch || undefined);
+    }
+  }, [sponsoredMerchants, regularMerchants, searchBoostedIds, trackBatchImpressions, debouncedSearch, selectedCategory]);
+
   const handleSponsoredMerchantClick = (merchant: MerchantWithRating, position: number) => {
-    // Track the click
+    // Track the sponsored click
     trackClick(merchant.id, position, debouncedSearch || undefined);
+    
+    // Also track search ranking click if boosted
+    if (searchBoostedIds.has(merchant.id)) {
+      trackSearchClick(merchant.id, position, 'discover', {
+        searchTerm: debouncedSearch || undefined,
+        isBoosted: true,
+      });
+    }
+    
     // Then handle the payment flow
     handleMerchantClick(merchant);
   };
@@ -556,6 +589,16 @@ const Discover = () => {
       acceptsPawbucks: merchant.accepts_pawbucks ?? false,
     });
     setPaymentDialogOpen(true);
+  };
+
+  // Handle card click for search ranking tracking
+  const handleCardClickTracking = (merchantId: string, position: number) => {
+    if (searchBoostedIds.has(merchantId)) {
+      trackSearchClick(merchantId, position, 'discover', {
+        searchTerm: debouncedSearch || undefined,
+        isBoosted: true,
+      });
+    }
   };
 
   const handlePaymentSuccess = () => {
@@ -851,6 +894,7 @@ const Discover = () => {
                               key={merchant.id}
                               merchant={merchant}
                               onPayClick={() => handleSponsoredMerchantClick(merchant, index + 1)}
+                              onCardClick={() => handleCardClickTracking(merchant.id, index + 1)}
                               isSponsored
                               showDistance={!!userLocation}
                               isVerifiedPro={verifiedProSet.has(merchant.id)}
@@ -872,6 +916,7 @@ const Discover = () => {
                             key={merchant.id}
                             merchant={merchant}
                             onPayClick={() => handleMerchantClick(merchant)}
+                            onCardClick={() => handleCardClickTracking(merchant.id, sponsoredMerchants.length + index + 1)}
                             showDistance={!!userLocation}
                             isVerifiedPro={verifiedProSet.has(merchant.id)}
                             index={index}
@@ -887,6 +932,13 @@ const Discover = () => {
                   <MerchantMap
                     merchants={[...sponsoredMerchants, ...regularMerchants]}
                     onMerchantClick={(merchantId) => {
+                      // Track search ranking click from map
+                      if (searchBoostedIds.has(merchantId)) {
+                        trackSearchClick(merchantId, undefined, 'map', {
+                          searchTerm: debouncedSearch || undefined,
+                          isBoosted: true,
+                        });
+                      }
                       navigate(`/merchant/${merchantId}`);
                     }}
                   />
@@ -901,6 +953,13 @@ const Discover = () => {
                     <MerchantMap
                       merchants={[...sponsoredMerchants, ...regularMerchants]}
                       onMerchantClick={(merchantId) => {
+                        // Track search ranking click from map
+                        if (searchBoostedIds.has(merchantId)) {
+                          trackSearchClick(merchantId, undefined, 'map', {
+                            searchTerm: debouncedSearch || undefined,
+                            isBoosted: true,
+                          });
+                        }
                         navigate(`/merchant/${merchantId}`);
                       }}
                     />
@@ -924,6 +983,7 @@ const Discover = () => {
                               key={merchant.id}
                               merchant={merchant}
                               onPayClick={() => handleSponsoredMerchantClick(merchant, index + 1)}
+                              onCardClick={() => handleCardClickTracking(merchant.id, index + 1)}
                               isSponsored
                               showDistance={!!userLocation}
                               isVerifiedPro={verifiedProSet.has(merchant.id)}
@@ -945,6 +1005,7 @@ const Discover = () => {
                             key={merchant.id}
                             merchant={merchant}
                             onPayClick={() => handleMerchantClick(merchant)}
+                            onCardClick={() => handleCardClickTracking(merchant.id, sponsoredMerchants.length + index + 1)}
                             showDistance={!!userLocation}
                             isVerifiedPro={verifiedProSet.has(merchant.id)}
                             index={index}
