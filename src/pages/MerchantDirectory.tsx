@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -20,6 +20,7 @@ import { usePersistentState } from "@/hooks/usePersistentState";
 import { supabase } from "@/integrations/supabase/client";
 import { useVerifiedProMerchants, useSponsoredMerchants, isVerifiedPro, isSponsored } from "@/hooks/useMerchantServices";
 import { useQueryClient } from "@tanstack/react-query";
+import { useSponsoredTracking } from "@/hooks/useSponsoredTracking";
 import {
   Search,
   Store,
@@ -86,6 +87,18 @@ const MerchantDirectory = () => {
   // Fetch verified and sponsored merchants for badge display
   const { data: verifiedProIds = [] } = useVerifiedProMerchants();
   const { data: sponsoredMerchantsList = [] } = useSponsoredMerchants();
+
+  // Sponsored placement tracking
+  const { trackImpression, trackClick } = useSponsoredTracking("directory");
+
+  // Track impressions for sponsored merchants when they're displayed
+  useEffect(() => {
+    if (sponsoredMerchantsList.length > 0) {
+      sponsoredMerchantsList.forEach((merchant, index) => {
+        trackImpression(merchant.id, index + 1, debouncedSearch || undefined);
+      });
+    }
+  }, [sponsoredMerchantsList, trackImpression, debouncedSearch]);
 
   // Fetch merchants with ratings
   const { data: merchants = [], isLoading } = useOptimizedQuery<MerchantWithRating[]>(
@@ -300,13 +313,19 @@ const MerchantDirectory = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-              {filteredMerchants.map((merchant) => {
+              {filteredMerchants.map((merchant, index) => {
                 const Icon = getBusinessIcon(merchant.business_type);
                 const merchantIsVerified = isVerifiedPro(merchant.id, verifiedProIds);
                 const merchantIsSponsored = isSponsored(merchant.id, sponsoredMerchantsList);
                 
+                const handleCardClick = () => {
+                  if (merchantIsSponsored) {
+                    trackClick(merchant.id, index + 1, debouncedSearch || undefined);
+                  }
+                };
+                
                 return (
-                  <Link key={merchant.id} to={`/merchant/${merchant.id}`}>
+                  <Link key={merchant.id} to={`/merchant/${merchant.id}`} onClick={handleCardClick}>
                     <Card className={`group hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden h-full ${
                       merchantIsSponsored 
                         ? 'border-primary/30 bg-primary/5' 
