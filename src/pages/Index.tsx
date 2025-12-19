@@ -72,37 +72,15 @@ const Index = () => {
               id="hero-heading"
               className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold leading-[1.1] tracking-tight text-foreground"
             >
-              The Payment Platform
+              Get Rewards Every Time
               <br />
               <span className="bg-gradient-to-r from-accent via-secondary to-accent bg-clip-text text-transparent">
-                for Pet Lovers
+                You Spend on Your Pet.
               </span>
             </h1>
             
             <p className="text-base sm:text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              Connect with trusted pet stores, groomers, and trainers. Earn up to{" "}
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span className="inline-flex items-center gap-1 text-accent font-semibold cursor-help border-b border-dashed border-accent/50">
-                      30x points in PawBucks
-                      <Info className="w-4 h-4" />
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipContent className="max-w-xs p-3">
-                    <p className="font-semibold mb-1">Points Multiplier</p>
-                    <p className="text-xs text-muted-foreground">
-                      Every $1 you spend earns PawBucks based on your tier:
-                    </p>
-                    <ul className="text-xs mt-1 space-y-0.5">
-                      <li>• Free: $1 = 10 PawBucks (10x)</li>
-                      <li>• PawPass: $1 = 20 PawBucks (20x)</li>
-                      <li>• PawPass+: $1 = 30 PawBucks (30x)</li>
-                    </ul>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-              {" "}with every transaction and keep your pet expenses organized in one secure place.
+              Connect with pet stores, groomers, and trainers to earn points and manage your pet's expenses.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center mt-10">
