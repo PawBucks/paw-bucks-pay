@@ -12,3 +12,4 @@ export { CohortAnalysisReport } from "./CohortAnalysisReport";
 export { KeywordPerformanceWidget } from "./KeywordPerformanceWidget";
 export { SearchRankingBoosterWidget } from "./SearchRankingBoosterWidget";
 export { SponsoredPlacementDashboard } from "./SponsoredPlacementDashboard";
+export { ProfileOptimizationWidget } from "./ProfileOptimizationWidget";
