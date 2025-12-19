@@ -143,3 +143,6 @@ verify_jwt = true
 
 [functions.send-feedback]
 verify_jwt = false
+
+[functions.merchant-generate-keyword-insights]
+verify_jwt = true
