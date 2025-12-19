@@ -222,7 +222,7 @@ export default function PetStore() {
       const item = items?.find(i => i.id === itemId);
       if (!item) throw new Error("Item not found");
 
-      const totalCost = item.price * quantity;
+      const totalCost = item.price_pawbucks * quantity;
 
       // Check balance
       if (!wallet || wallet.balance < totalCost) {
@@ -254,7 +254,7 @@ export default function PetStore() {
           order_id: order.id,
           item_id: itemId,
           quantity: quantity,
-          price_per_item: item.price,
+          price_per_item: item.price_pawbucks,
         }]);
 
       if (orderItemError) throw orderItemError;
@@ -463,20 +463,19 @@ export default function PetStore() {
                     {item.description}
                   </CardDescription>
                 )}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1 text-lg font-bold text-primary">
-                      <Coins className="h-4 w-4" />
-                      {Formatters.number(item.price)} PawBucks
-                    </div>
+                <div className="space-y-2 mb-3">
+                  <div className="flex items-center gap-2">
+                    <CreditCard className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-lg font-bold">${(item.price / 100).toFixed(2)}</span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm font-medium text-muted-foreground">
-                      or {Formatters.pawBucksToUSD(item.price)} USD
-                    </div>
-                    <span className="text-xs text-muted-foreground">
-                      {item.stock_quantity} in stock
+                  <div className="flex items-center gap-2">
+                    <Coins className="h-4 w-4 text-primary" />
+                    <span className="text-lg font-bold text-primary">
+                      {Formatters.number(item.price_pawbucks)} PawBucks
                     </span>
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {item.stock_quantity} in stock
                   </div>
                 </div>
               </CardContent>
@@ -487,16 +486,16 @@ export default function PetStore() {
                   disabled={!user || item.stock_quantity === 0}
                 >
                   <CreditCard className="mr-2 h-4 w-4" />
-                  {item.stock_quantity === 0 ? "Out of Stock" : "Pay with Card"}
+                  {item.stock_quantity === 0 ? "Out of Stock" : `Pay $${(item.price / 100).toFixed(2)}`}
                 </Button>
                 <Button
                   variant="outline"
                   className="w-full"
                   onClick={() => handlePurchaseWithPawBucks(item.id)}
-                  disabled={!user || item.stock_quantity === 0 || purchaseMutation.isPending}
+                  disabled={!user || item.stock_quantity === 0 || purchaseMutation.isPending || (wallet?.balance || 0) < item.price_pawbucks}
                 >
                   <Coins className="mr-2 h-4 w-4" />
-                  Pay with PawBucks
+                  {item.stock_quantity === 0 ? "Out of Stock" : `Pay ${Formatters.number(item.price_pawbucks)} PawBucks`}
                 </Button>
               </CardFooter>
             </Card>
