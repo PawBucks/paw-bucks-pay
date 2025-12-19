@@ -3,6 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { supabase } from "@/integrations/supabase/client";
+import { Formatters } from "@/utils/formatters";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -462,14 +463,21 @@ export default function PetStore() {
                     {item.description}
                   </CardDescription>
                 )}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1 text-lg font-bold text-primary">
-                    <Coins className="h-4 w-4" />
-                    {item.price}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1 text-lg font-bold text-primary">
+                      <Coins className="h-4 w-4" />
+                      {Formatters.number(item.price)} PawBucks
+                    </div>
                   </div>
-                  <span className="text-sm text-muted-foreground">
-                    {item.stock_quantity} in stock
-                  </span>
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm font-medium text-muted-foreground">
+                      or {Formatters.pawBucksToUSD(item.price)} USD
+                    </div>
+                    <span className="text-xs text-muted-foreground">
+                      {item.stock_quantity} in stock
+                    </span>
+                  </div>
                 </div>
               </CardContent>
               <CardFooter className="flex-col gap-2">
