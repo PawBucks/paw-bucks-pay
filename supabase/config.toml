@@ -105,6 +105,9 @@ verify_jwt = true
 [functions.merchant-generate-cohort-report]
 verify_jwt = true
 
+[functions.merchant-generate-demand-forecast]
+verify_jwt = true
+
 [functions.create-combined-payment]
 verify_jwt = true
 
