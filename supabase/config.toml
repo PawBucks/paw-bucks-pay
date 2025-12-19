@@ -161,3 +161,9 @@ verify_jwt = true
 
 [functions.review-campaign-dashboard]
 verify_jwt = true
+
+[functions.priority-support-dashboard]
+verify_jwt = true
+
+[functions.merchant-spotlight-dashboard]
+verify_jwt = true
