@@ -27,6 +27,7 @@ import { SEO } from "@/components/SEO";
 import { usePersistentState } from "@/hooks/usePersistentState";
 import { useSponsoredMerchants, useVerifiedProMerchants, useSearchBoostedMerchantSet, SERVICE_NAMES } from "@/hooks/useMerchantServices";
 import { useQueryClient } from "@tanstack/react-query";
+import { useSponsoredTracking } from "@/hooks/useSponsoredTracking";
 
 type MerchantWithRating = {
   id: string;
@@ -327,6 +328,9 @@ const Discover = () => {
   // Fetch search boosted merchants (merchants with Search Ranking Booster service)
   const { data: searchBoostedIds = new Set<string>() } = useSearchBoostedMerchantSet();
 
+  // Sponsored placement tracking
+  const { trackImpression, trackClick, trackSponsoredImpressions } = useSponsoredTracking("discover");
+
   // Get user's location
   const requestLocation = useCallback(() => {
     if (!navigator.geolocation) {
@@ -521,6 +525,23 @@ const Discover = () => {
 
     return { sponsoredMerchants: sponsored, regularMerchants: regular };
   }, [merchantsWithRatings, selectedCategory, debouncedSearch, minRating, selectedPrices, maxDistance, userLocation, sortBy, sponsoredMerchantIds, searchBoostedIds]);
+
+  // Track sponsored impressions when they change
+  useEffect(() => {
+    if (sponsoredMerchants.length > 0) {
+      trackSponsoredImpressions(
+        sponsoredMerchants.map(m => m.id),
+        debouncedSearch || undefined
+      );
+    }
+  }, [sponsoredMerchants, trackSponsoredImpressions, debouncedSearch]);
+
+  const handleSponsoredMerchantClick = (merchant: MerchantWithRating, position: number) => {
+    // Track the click
+    trackClick(merchant.id, position, debouncedSearch || undefined);
+    // Then handle the payment flow
+    handleMerchantClick(merchant);
+  };
 
   const handleMerchantClick = (merchant: MerchantWithRating) => {
     if (!user) {
@@ -829,7 +850,7 @@ const Discover = () => {
                             <MerchantCard
                               key={merchant.id}
                               merchant={merchant}
-                              onPayClick={() => handleMerchantClick(merchant)}
+                              onPayClick={() => handleSponsoredMerchantClick(merchant, index + 1)}
                               isSponsored
                               showDistance={!!userLocation}
                               isVerifiedPro={verifiedProSet.has(merchant.id)}
@@ -902,7 +923,7 @@ const Discover = () => {
                             <MerchantCard
                               key={merchant.id}
                               merchant={merchant}
-                              onPayClick={() => handleMerchantClick(merchant)}
+                              onPayClick={() => handleSponsoredMerchantClick(merchant, index + 1)}
                               isSponsored
                               showDistance={!!userLocation}
                               isVerifiedPro={verifiedProSet.has(merchant.id)}
