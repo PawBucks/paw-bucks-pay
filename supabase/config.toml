@@ -155,3 +155,6 @@ verify_jwt = true
 
 [functions.merchant-profile-optimization]
 verify_jwt = true
+
+[functions.featured-partner-dashboard]
+verify_jwt = true
