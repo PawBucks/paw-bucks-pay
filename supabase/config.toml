@@ -158,3 +158,6 @@ verify_jwt = true
 
 [functions.featured-partner-dashboard]
 verify_jwt = true
+
+[functions.review-campaign-dashboard]
+verify_jwt = true
