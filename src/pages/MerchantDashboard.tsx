@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useGeocoding } from "@/hooks/useGeocoding";
+import { useMerchantActiveServices, SERVICE_NAMES } from "@/hooks/useMerchantServices";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { GradientCard } from "@/components/ui/gradient-card";
@@ -19,8 +20,10 @@ import {
   Package,
   Coins,
   Store,
+  Sparkles,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { format, startOfMonth, parseISO } from "date-fns";
 
@@ -31,6 +34,10 @@ import { MerchantTransactionList } from "@/components/merchant/MerchantTransacti
 import { EditMerchantProfileDialog } from "@/components/merchant/EditMerchantProfileDialog";
 import { FundingRequestDialog } from "@/components/merchant/FundingRequestDialog";
 import { TransactionsDialog } from "@/components/merchant/TransactionsDialog";
+import { SponsoredPlacementDashboard } from "@/components/merchant/SponsoredPlacementDashboard";
+import { FeaturedPartnerWidget } from "@/components/merchant/FeaturedPartnerWidget";
+import { SearchRankingBoosterWidget } from "@/components/merchant/SearchRankingBoosterWidget";
+import { ProfileOptimizationWidget } from "@/components/merchant/ProfileOptimizationWidget";
 
 type Merchant = {
   id: string;
@@ -84,6 +91,18 @@ const MerchantDashboard = () => {
   const [connectingStripe, setConnectingStripe] = useState(false);
   const [requestingFunding, setRequestingFunding] = useState(false);
   const [togglingPawbucks, setTogglingPawbucks] = useState(false);
+  
+  // Fetch active services for this merchant
+  const { data: activeServices = [] } = useMerchantActiveServices(merchant?.id);
+  
+  // Check which premium services are active
+  const hasSponsored = activeServices.includes(SERVICE_NAMES.SPONSORED_PLACEMENT);
+  const hasPremiumAd = activeServices.includes(SERVICE_NAMES.PREMIUM_AD);
+  const hasFeaturedPartner = activeServices.includes(SERVICE_NAMES.FEATURED_PARTNER);
+  const hasSearchBooster = activeServices.includes(SERVICE_NAMES.SEARCH_RANKING_BOOSTER);
+  const hasProfileOptimization = activeServices.includes(SERVICE_NAMES.PROFILE_OPTIMIZATION);
+  
+  const hasPremiumServices = hasSponsored || hasPremiumAd || hasFeaturedPartner || hasSearchBooster || hasProfileOptimization;
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -532,6 +551,56 @@ const MerchantDashboard = () => {
           monthlySalesData={getMonthlySalesData()}
           cashbackDistribution={getCashbackDistribution()}
         />
+
+        {/* Premium Services Dashboards */}
+        {hasPremiumServices && merchant && (
+          <div className="mb-8">
+            <div className="flex items-center gap-2 mb-4">
+              <Sparkles className="w-5 h-5 text-primary" />
+              <h2 className="text-xl font-bold">Premium Services</h2>
+            </div>
+            <Tabs defaultValue={hasSponsored || hasPremiumAd ? "sponsored" : hasFeaturedPartner ? "featured" : hasSearchBooster ? "search" : "profile"} className="w-full">
+              <TabsList className="mb-4 flex-wrap h-auto gap-1">
+                {(hasSponsored || hasPremiumAd) && (
+                  <TabsTrigger value="sponsored">Sponsored Placement</TabsTrigger>
+                )}
+                {hasFeaturedPartner && (
+                  <TabsTrigger value="featured">Featured Partner</TabsTrigger>
+                )}
+                {hasSearchBooster && (
+                  <TabsTrigger value="search">Search Booster</TabsTrigger>
+                )}
+                {hasProfileOptimization && (
+                  <TabsTrigger value="profile">Profile Optimization</TabsTrigger>
+                )}
+              </TabsList>
+              
+              {(hasSponsored || hasPremiumAd) && (
+                <TabsContent value="sponsored">
+                  <SponsoredPlacementDashboard merchantId={merchant.id} />
+                </TabsContent>
+              )}
+              
+              {hasFeaturedPartner && (
+                <TabsContent value="featured">
+                  <FeaturedPartnerWidget />
+                </TabsContent>
+              )}
+              
+              {hasSearchBooster && (
+                <TabsContent value="search">
+                  <SearchRankingBoosterWidget />
+                </TabsContent>
+              )}
+              
+              {hasProfileOptimization && (
+                <TabsContent value="profile">
+                  <ProfileOptimizationWidget />
+                </TabsContent>
+              )}
+            </Tabs>
+          </div>
+        )}
 
         {/* Quick Actions */}
         <div className="grid gap-4 md:grid-cols-4 mb-8">
