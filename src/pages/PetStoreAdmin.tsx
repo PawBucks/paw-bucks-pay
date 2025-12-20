@@ -46,6 +46,7 @@ export default function PetStoreAdmin() {
     description: "",
     category: "",
     price: "",
+    price_pawbucks: "",
     stock_quantity: "",
     image_url: "",
     is_active: true,
@@ -147,6 +148,7 @@ export default function PetStoreAdmin() {
       description: "",
       category: "",
       price: "",
+      price_pawbucks: "",
       stock_quantity: "",
       image_url: "",
       is_active: true,
@@ -160,7 +162,8 @@ export default function PetStoreAdmin() {
       name: formData.name,
       description: formData.description,
       category: formData.category,
-      price: parseInt(formData.price),
+      price: parseFloat(formData.price) * 100, // Convert dollars to cents
+      price_pawbucks: parseInt(formData.price_pawbucks),
       stock_quantity: parseInt(formData.stock_quantity),
       image_url: formData.image_url || null,
       is_active: formData.is_active,
@@ -179,7 +182,8 @@ export default function PetStoreAdmin() {
       name: item.name,
       description: item.description || "",
       category: item.category,
-      price: item.price.toString(),
+      price: (item.price / 100).toFixed(2), // Convert cents to dollars for display
+      price_pawbucks: item.price_pawbucks.toString(),
       stock_quantity: item.stock_quantity.toString(),
       image_url: item.image_url || "",
       is_active: item.is_active,
@@ -274,27 +278,42 @@ export default function PetStoreAdmin() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="price">Price (PawBucks)</Label>
+                      <Label htmlFor="price">Price (USD)</Label>
                       <Input
                         id="price"
                         type="number"
                         required
-                        min="1"
+                        min="0.01"
+                        step="0.01"
+                        placeholder="9.99"
                         value={formData.price}
                         onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                       />
                     </div>
                     <div>
-                      <Label htmlFor="stock">Stock Quantity</Label>
+                      <Label htmlFor="price_pawbucks">Price (PawBucks)</Label>
                       <Input
-                        id="stock"
+                        id="price_pawbucks"
                         type="number"
                         required
-                        min="0"
-                        value={formData.stock_quantity}
-                        onChange={(e) => setFormData({ ...formData, stock_quantity: e.target.value })}
+                        min="1"
+                        placeholder="100"
+                        value={formData.price_pawbucks}
+                        onChange={(e) => setFormData({ ...formData, price_pawbucks: e.target.value })}
                       />
                     </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="stock">Stock Quantity</Label>
+                    <Input
+                      id="stock"
+                      type="number"
+                      required
+                      min="0"
+                      value={formData.stock_quantity}
+                      onChange={(e) => setFormData({ ...formData, stock_quantity: e.target.value })}
+                    />
                   </div>
 
                   <div>
@@ -371,7 +390,8 @@ export default function PetStoreAdmin() {
                         </div>
                         <div className="flex items-center justify-between">
                           <div className="flex gap-4 text-sm">
-                            <span><strong>{item.price}</strong> PB</span>
+                            <span><strong>${(item.price / 100).toFixed(2)}</strong></span>
+                            <span><strong>{item.price_pawbucks}</strong> PB</span>
                             <span>Stock: <strong>{item.stock_quantity}</strong></span>
                           </div>
                           <div className="flex gap-2">
@@ -396,7 +416,8 @@ export default function PetStoreAdmin() {
                     <TableHead className="w-16">Image</TableHead>
                     <TableHead>Name</TableHead>
                     <TableHead>Category</TableHead>
-                    <TableHead>Price</TableHead>
+                    <TableHead>Price (USD)</TableHead>
+                    <TableHead>Price (PB)</TableHead>
                     <TableHead>Stock</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
@@ -405,7 +426,7 @@ export default function PetStoreAdmin() {
                 <TableBody>
                   {items?.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                      <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                         No items yet. Add your first item to get started!
                       </TableCell>
                     </TableRow>
@@ -423,7 +444,9 @@ export default function PetStoreAdmin() {
                         </TableCell>
                         <TableCell className="font-medium">{item.name}</TableCell>
                         <TableCell>{item.category}</TableCell>
-                        <TableCell>{item.price} PB</TableCell>
+                        <TableCell>${(item.price / 100).toFixed(2)}</TableCell>
+                        <TableCell>{item.price_pawbucks} PB</TableCell>
+                        <TableCell>{item.stock_quantity}</TableCell>
                         <TableCell>{item.stock_quantity}</TableCell>
                         <TableCell>
                           <span className={`px-2 py-1 rounded-full text-xs ${
