@@ -80,7 +80,7 @@ const Index = () => {
             </h1>
             
             <p className="text-base sm:text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              Connect with pet stores, groomers, and trainers to earn points and manage your pet's expenses.
+              Connect with pet stores, groomers, trainers, and more to earn points and manage your pet's expenses.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center mt-10">
