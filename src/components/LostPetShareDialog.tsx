@@ -97,7 +97,22 @@ Please share to help bring ${post.pet_name} home! 🙏`;
   };
 
   const handleSMSShare = () => {
-    const smsBody = encodeURIComponent(`${shortShareText} ${shareUrl}`);
+    // Build detailed SMS message format
+    const smsText = `🚨 LOST ${post.pet_type.toUpperCase()}: ${post.pet_name}
+
+📍 Last seen: ${post.last_seen_location}
+📅 Date: ${new Date(post.last_seen_date).toLocaleDateString()}
+🐾 Description: ${post.breed ? `${post.breed}, ` : ''}${post.color_markings}${post.reward_amount ? `
+💰 Reward: $${post.reward_amount}` : ''}
+
+📞 Contact: ${post.contact_phone}${post.contact_email ? `
+📧 Email: ${post.contact_email}` : ''}
+
+Please share to help bring ${post.pet_name} home! 🙏
+
+${shareUrl}`;
+    
+    const smsBody = encodeURIComponent(smsText);
     // Use different SMS URI schemes for different devices
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
     const smsUrl = isIOS ? `sms:&body=${smsBody}` : `sms:?body=${smsBody}`;
