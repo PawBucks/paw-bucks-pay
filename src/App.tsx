@@ -63,6 +63,7 @@ const NotificationPreferences = lazy(() => import("./pages/NotificationPreferenc
 const NotificationHistory = lazy(() => import("./pages/NotificationHistory"));
 const SpendingBreakdown = lazy(() => import("./pages/SpendingBreakdown"));
 const LostPets = lazy(() => import("./pages/LostPets"));
+const LostPetDetail = lazy(() => import("./pages/LostPetDetail"));
 
 const createQueryClient = () => new QueryClient({
   defaultOptions: {
@@ -131,6 +132,7 @@ const AppRoutes = () => {
       <Route path="/notifications" element={<PageTransition><NotificationHistory /></PageTransition>} />
       <Route path="/spending-breakdown" element={<PageTransition><SpendingBreakdown /></PageTransition>} />
       <Route path="/lost-pets" element={<PageTransition><LostPets /></PageTransition>} />
+      <Route path="/lost-pets/:id" element={<PageTransition><LostPetDetail /></PageTransition>} />
       <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
     </Routes>
   );

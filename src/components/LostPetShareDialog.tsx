@@ -47,8 +47,8 @@ export const LostPetShareDialog = ({ post, children }: LostPetShareDialogProps) 
   const [copied, setCopied] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
-  // Generate share content
-  const shareUrl = `${window.location.origin}/lost-pets?pet=${post.id}`;
+  // Generate share content - link to the dedicated pet detail page
+  const shareUrl = `${window.location.origin}/lost-pets/${post.id}`;
   
   const shareTitle = `🚨 LOST ${post.pet_type.toUpperCase()}: ${post.pet_name}`;
   
