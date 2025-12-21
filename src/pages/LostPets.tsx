@@ -43,8 +43,10 @@ import {
   Upload,
   AlertTriangle,
   CheckCircle2,
-  Clock
+  Clock,
+  Share2
 } from "lucide-react";
+import { LostPetShareDialog } from "@/components/LostPetShareDialog";
 import { format } from "date-fns";
 
 interface LostPetPost {
@@ -758,10 +760,18 @@ const LostPets = () => {
                       )}
                     </div>
                     
-                    {/* Posted Date */}
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground pt-2">
-                      <Calendar className="w-3 h-3" />
-                      Posted {format(new Date(post.created_at), "MMM d, yyyy")}
+                    {/* Actions: Share & Posted Date */}
+                    <div className="flex items-center justify-between pt-2 border-t">
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <Calendar className="w-3 h-3" />
+                        Posted {format(new Date(post.created_at), "MMM d, yyyy")}
+                      </div>
+                      <LostPetShareDialog post={post}>
+                        <Button variant="outline" size="sm" className="gap-1.5 h-8">
+                          <Share2 className="w-3.5 h-3.5" />
+                          Share
+                        </Button>
+                      </LostPetShareDialog>
                     </div>
                   </CardContent>
                 </Card>
