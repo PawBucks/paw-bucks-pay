@@ -48,70 +48,30 @@ export type MerchantWithActiveServices = {
   active_services: string[];
 };
 
-/**
- * Cache for service IDs to avoid repeated lookups
- */
-const serviceIdCache: Map<string, string> = new Map();
-
-/**
- * Get service ID from name with caching
- */
-async function getServiceId(serviceName: string): Promise<string | null> {
-  // Check cache first
-  if (serviceIdCache.has(serviceName)) {
-    return serviceIdCache.get(serviceName)!;
-  }
-
-  const { data: service, error } = await supabase
-    .from('merchant_market_services')
-    .select('id')
-    .eq('name', serviceName)
-    .maybeSingle();
-
-  if (error || !service) {
-    console.error(`Service not found: ${serviceName}`, error);
-    return null;
-  }
-
-  // Cache the result
-  serviceIdCache.set(serviceName, service.id);
-  return service.id;
-}
-
-/**
- * Get current timestamp for expiry checks
- */
-function getNow(): string {
-  return new Date().toISOString();
-}
+// Note: The getServiceId and getNow functions are no longer needed since we
+// now use the merchant_active_services_public view which handles filtering
 
 /**
  * Get all merchants with a specific active service
+ * Uses the secure public view that doesn't expose payment amounts
  */
 export async function getMerchantsWithActiveService(serviceName: ServiceName): Promise<MerchantWithActiveServices[]> {
-  const serviceId = await getServiceId(serviceName);
-  if (!serviceId) return [];
+  // Get active services from the secure public view
+  const { data: activeServices, error: servicesError } = await supabase
+    .from('merchant_active_services_public')
+    .select('merchant_id, service_name')
+    .eq('service_name', serviceName);
 
-  const now = getNow();
-  
-  // Get active purchases for this service
-  const { data: purchases, error: purchasesError } = await supabase
-    .from('merchant_service_purchases')
-    .select('merchant_id')
-    .eq('service_id', serviceId)
-    .eq('status', 'active')
-    .or(`expires_at.is.null,expires_at.gt.${now}`);
-
-  if (purchasesError) {
-    console.error('Error fetching purchases:', purchasesError);
+  if (servicesError) {
+    console.error('Error fetching active services:', servicesError);
     return [];
   }
   
-  if (!purchases || purchases.length === 0) {
+  if (!activeServices || activeServices.length === 0) {
     return [];
   }
 
-  const merchantIds = purchases.map(p => p.merchant_id);
+  const merchantIds = [...new Set(activeServices.map(s => s.merchant_id))];
 
   // Batch fetch: merchant details and all their active services in parallel
   const [merchantsResult, allServicesResult] = await Promise.all([
@@ -120,14 +80,9 @@ export async function getMerchantsWithActiveService(serviceName: ServiceName): P
       .select('*')
       .in('id', merchantIds),
     supabase
-      .from('merchant_service_purchases')
-      .select(`
-        merchant_id,
-        merchant_market_services!inner(name)
-      `)
+      .from('merchant_active_services_public')
+      .select('merchant_id, service_name')
       .in('merchant_id', merchantIds)
-      .eq('status', 'active')
-      .or(`expires_at.is.null,expires_at.gt.${now}`)
   ]);
 
   if (merchantsResult.error || !merchantsResult.data) {
@@ -140,7 +95,7 @@ export async function getMerchantsWithActiveService(serviceName: ServiceName): P
   if (allServicesResult.data) {
     for (const svc of allServicesResult.data) {
       const merchantId = svc.merchant_id;
-      const svcName = (svc.merchant_market_services as any)?.name;
+      const svcName = svc.service_name;
       if (svcName) {
         if (!servicesMap[merchantId]) {
           servicesMap[merchantId] = [];
@@ -171,78 +126,58 @@ export async function getMerchantsWithActiveService(serviceName: ServiceName): P
 
 /**
  * Check if a specific merchant has an active service
+ * Uses the secure public view that doesn't expose payment amounts
  */
 export async function merchantHasActiveService(merchantId: string, serviceName: ServiceName): Promise<boolean> {
-  const serviceId = await getServiceId(serviceName);
-  if (!serviceId) return false;
-
-  const now = getNow();
-  const { data: purchase } = await supabase
-    .from('merchant_service_purchases')
-    .select('id')
+  const { data: activeService } = await supabase
+    .from('merchant_active_services_public')
+    .select('merchant_id')
     .eq('merchant_id', merchantId)
-    .eq('service_id', serviceId)
-    .eq('status', 'active')
-    .or(`expires_at.is.null,expires_at.gt.${now}`)
+    .eq('service_name', serviceName)
     .limit(1)
     .maybeSingle();
 
-  return !!purchase;
+  return !!activeService;
 }
 
 /**
  * Get all active services for a merchant
+ * Uses the secure public view that doesn't expose payment amounts
  */
 export async function getMerchantActiveServices(merchantId: string): Promise<string[]> {
-  const now = getNow();
   const { data, error } = await supabase
-    .from('merchant_service_purchases')
-    .select(`
-      merchant_market_services!inner(name)
-    `)
-    .eq('merchant_id', merchantId)
-    .eq('status', 'active')
-    .or(`expires_at.is.null,expires_at.gt.${now}`);
+    .from('merchant_active_services_public')
+    .select('service_name')
+    .eq('merchant_id', merchantId);
 
   if (error || !data) {
     console.error('Error fetching merchant services:', error);
     return [];
   }
 
-  return data.map(d => (d.merchant_market_services as any)?.name).filter(Boolean);
+  return data.map(d => d.service_name).filter(Boolean);
 }
 
 /**
  * Batch fetch: get all merchants with ANY of the specified services
  * More efficient when checking multiple services
+ * Uses the secure public view that doesn't expose payment amounts
  */
 export async function getMerchantsWithAnyService(serviceNames: ServiceName[]): Promise<Record<string, MerchantWithActiveServices[]>> {
-  // Get all service IDs
-  const serviceIds = await Promise.all(serviceNames.map(name => getServiceId(name)));
-  const validServiceIds = serviceIds.filter((id): id is string => id !== null);
-  
-  if (validServiceIds.length === 0) return {};
+  if (serviceNames.length === 0) return {};
 
-  const now = getNow();
-  
-  // Get all active purchases for these services
-  const { data: purchases, error } = await supabase
-    .from('merchant_service_purchases')
-    .select(`
-      merchant_id,
-      service_id,
-      merchant_market_services!inner(name)
-    `)
-    .in('service_id', validServiceIds)
-    .eq('status', 'active')
-    .or(`expires_at.is.null,expires_at.gt.${now}`);
+  // Get all active services for the requested service names from secure view
+  const { data: activeServices, error } = await supabase
+    .from('merchant_active_services_public')
+    .select('merchant_id, service_name')
+    .in('service_name', serviceNames);
 
-  if (error || !purchases || purchases.length === 0) {
+  if (error || !activeServices || activeServices.length === 0) {
     return {};
   }
 
   // Get unique merchant IDs
-  const merchantIds = [...new Set(purchases.map(p => p.merchant_id))];
+  const merchantIds = [...new Set(activeServices.map(s => s.merchant_id))];
 
   // Fetch all merchant details
   const { data: merchants, error: merchantsError } = await supabase
@@ -261,25 +196,25 @@ export async function getMerchantsWithAnyService(serviceNames: ServiceName[]): P
     result[serviceName] = [];
   }
 
-  // Map purchases to services and merchants
+  // Map services and merchants
   const merchantMap = new Map(merchants.map(m => [m.id, m]));
   const merchantServicesMap: Record<string, string[]> = {};
   
   // Build services map for each merchant
-  for (const purchase of purchases) {
-    const svcName = (purchase.merchant_market_services as any)?.name;
-    if (!merchantServicesMap[purchase.merchant_id]) {
-      merchantServicesMap[purchase.merchant_id] = [];
+  for (const svc of activeServices) {
+    const svcName = svc.service_name;
+    if (!merchantServicesMap[svc.merchant_id]) {
+      merchantServicesMap[svc.merchant_id] = [];
     }
-    if (svcName && !merchantServicesMap[purchase.merchant_id].includes(svcName)) {
-      merchantServicesMap[purchase.merchant_id].push(svcName);
+    if (svcName && !merchantServicesMap[svc.merchant_id].includes(svcName)) {
+      merchantServicesMap[svc.merchant_id].push(svcName);
     }
   }
 
   // Group merchants by service
-  for (const purchase of purchases) {
-    const svcName = (purchase.merchant_market_services as any)?.name as ServiceName;
-    const merchant = merchantMap.get(purchase.merchant_id);
+  for (const svc of activeServices) {
+    const svcName = svc.service_name as ServiceName;
+    const merchant = merchantMap.get(svc.merchant_id);
     
     if (merchant && svcName && result[svcName]) {
       // Check if we already added this merchant to this service
@@ -310,19 +245,13 @@ export async function getMerchantsWithAnyService(serviceNames: ServiceName[]): P
 /**
  * Get all merchant IDs that have a specific service active
  * Optimized version that only returns IDs
+ * Uses the secure public view that doesn't expose payment amounts
  */
 export async function getMerchantIdsWithService(serviceName: ServiceName): Promise<string[]> {
-  const serviceId = await getServiceId(serviceName);
-  if (!serviceId) return [];
-
-  const now = getNow();
-  
   const { data, error } = await supabase
-    .from('merchant_service_purchases')
+    .from('merchant_active_services_public')
     .select('merchant_id')
-    .eq('service_id', serviceId)
-    .eq('status', 'active')
-    .or(`expires_at.is.null,expires_at.gt.${now}`);
+    .eq('service_name', serviceName);
 
   if (error || !data) {
     return [];

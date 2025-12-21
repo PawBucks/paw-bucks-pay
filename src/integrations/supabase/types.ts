@@ -2396,6 +2396,38 @@ export type Database = {
         }
         Relationships: []
       }
+      merchant_active_services_public: {
+        Row: {
+          expires_at: string | null
+          merchant_id: string | null
+          service_id: string | null
+          service_name: string | null
+          status: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_service_purchases_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_service_purchases_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_service_purchases_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_market_services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       merchants_public: {
         Row: {
           accepts_pawbucks: boolean | null
