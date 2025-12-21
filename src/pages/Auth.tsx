@@ -115,16 +115,20 @@ const Auth = () => {
       if (error) throw error;
 
       if (data.user) {
-        // Create profile
-        const { error: profileError } = await supabase.from("profiles").insert({
+        // Update the profile created by the trigger with additional info
+        // The handle_new_user trigger already creates a basic profile, so we upsert
+        const { error: profileError } = await supabase.from("profiles").upsert({
           id: data.user.id,
           user_type: userType,
           full_name: validatedData.fullName,
           email: validatedData.email,
           phone: phone || null,
-        });
+        }, { onConflict: 'id' });
 
-        if (profileError) throw profileError;
+        // Don't throw on profile error - account was already created successfully
+        if (profileError) {
+          console.warn("Profile update warning:", profileError);
+        }
 
         // Handle referral code if provided
         if (validatedData.referralCode && userType === "pet_owner") {
