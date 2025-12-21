@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.2';
 import Stripe from 'https://esm.sh/stripe@14.21.0';
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 // PawBucks multiplier constants matching src/lib/constants.ts
 const POINTS_MULTIPLIER = {
@@ -13,6 +14,25 @@ const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Input validation schema
+const transactionSchema = z.object({
+  user_id: z.string().uuid({ message: "Invalid user ID format" }),
+  merchant_id: z.string().uuid({ message: "Invalid merchant ID format" }),
+  amount: z.number().positive().max(100000, { message: "Amount cannot exceed $100,000" }),
+  description: z.string().max(500).optional(),
+  cashback_rate: z.number().min(0).max(100).optional(),
+});
+
+// Sanitize text input to prevent XSS
+function sanitizeText(input: string): string {
+  return input
+    .replace(/[<>]/g, '') // Remove angle brackets
+    .replace(/javascript:/gi, '') // Remove javascript: protocol
+    .replace(/on\w+=/gi, '') // Remove event handlers
+    .trim()
+    .slice(0, 500); // Limit length
+}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -27,7 +47,7 @@ serve(async (req) => {
     if (!authHeader) {
       console.error('Missing authorization header');
       return new Response(
-        JSON.stringify({ error: 'Missing authorization header' }),
+        JSON.stringify({ error: 'Authentication required' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
       );
     }
@@ -41,7 +61,7 @@ serve(async (req) => {
     if (authError || !user) {
       console.error('Authentication error:', authError);
       return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
+        JSON.stringify({ error: 'Authentication failed' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
       );
     }
@@ -55,27 +75,24 @@ serve(async (req) => {
     if (!isAdmin) {
       console.error('User is not an admin:', user.id);
       return new Response(
-        JSON.stringify({ error: 'Admin access required' }),
+        JSON.stringify({ error: 'Insufficient permissions' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 403 }
       );
     }
 
-    const { user_id, merchant_id, amount, description, cashback_rate } = await req.json();
-
-    // Validate required fields
-    if (!user_id || !merchant_id || !amount) {
+    // Parse and validate input
+    const rawBody = await req.json();
+    const validationResult = transactionSchema.safeParse(rawBody);
+    
+    if (!validationResult.success) {
+      console.error('Validation failed:', validationResult.error.errors);
       return new Response(
-        JSON.stringify({ error: 'Missing required fields: user_id, merchant_id, amount' }),
+        JSON.stringify({ error: 'Invalid input data' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
       );
     }
 
-    if (amount <= 0 || amount > 100000) {
-      return new Response(
-        JSON.stringify({ error: 'Amount must be between $0.01 and $100,000' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
-      );
-    }
+    const { user_id, merchant_id, amount, description } = validationResult.data;
 
     // Verify merchant exists
     const { data: merchant, error: merchantError } = await supabase
@@ -130,8 +147,6 @@ serve(async (req) => {
           const stripeSubscription = await stripe.subscriptions.retrieve(subscription.stripe_subscription_id);
           const productId = stripeSubscription.items.data[0]?.price?.product as string;
           
-          // Check product ID to determine tier (adjust these IDs to match your Stripe products)
-          // PawPass+ products typically have "plus" in the name or a specific product ID
           if (productId) {
             const product = await stripe.products.retrieve(productId);
             const productName = product.name?.toLowerCase() || '';
@@ -146,24 +161,24 @@ serve(async (req) => {
           }
         } catch (stripeError) {
           console.error('Error fetching Stripe subscription details:', stripeError);
-          // Fall back to assuming PawPass if we have an active subscription but can't verify tier
           multiplier = POINTS_MULTIPLIER.PAWPASS;
         }
       }
     } else if (subscription) {
-      // Has subscription but no Stripe ID (legacy or manual), default to PawPass
       multiplier = POINTS_MULTIPLIER.PAWPASS;
     }
 
     console.log(`Final multiplier for user ${user_id}: ${multiplier}x`);
 
-    // Calculate PawBucks earned: amount × multiplier
-    // $10 × 10 = 100 PawBucks for Free
-    // $10 × 20 = 200 PawBucks for PawPass  
-    // $10 × 30 = 300 PawBucks for PawPass+
+    // Calculate PawBucks earned
     const pawbucksEarned = Math.floor(amount * multiplier);
 
     console.log(`Creating transaction: user=${user_id}, merchant=${merchant_id}, amount=${amount}, pawbucks=${pawbucksEarned}`);
+
+    // Sanitize description if provided
+    const sanitizedDescription = description 
+      ? sanitizeText(description)
+      : `Manual transaction added by admin`;
 
     // Create the transaction
     const { data: transaction, error: transactionError } = await supabase
@@ -172,9 +187,9 @@ serve(async (req) => {
         user_id,
         merchant_id,
         amount,
-        cashback_earned: pawbucksEarned, // Store PawBucks earned (legacy field name)
+        cashback_earned: pawbucksEarned,
         rewards_earned: pawbucksEarned,
-        description: description || `Manual transaction added by admin`,
+        description: sanitizedDescription,
         status: 'completed',
       })
       .select()
@@ -183,7 +198,7 @@ serve(async (req) => {
     if (transactionError) {
       console.error('Failed to create transaction:', transactionError);
       return new Response(
-        JSON.stringify({ error: 'Failed to create transaction', details: transactionError.message }),
+        JSON.stringify({ error: 'Unable to create transaction. Please try again.' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
       );
     }
@@ -253,7 +268,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Unexpected error:', error);
     return new Response(
-      JSON.stringify({ error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' }),
+      JSON.stringify({ error: 'An unexpected error occurred. Please try again.' }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
     );
   }

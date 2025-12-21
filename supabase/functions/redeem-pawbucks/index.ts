@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
-import { z } from "https://esm.sh/zod@3.22.4";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -9,7 +9,7 @@ const corsHeaders = {
 
 // Input validation schema
 const redeemSchema = z.object({
-  offer_id: z.string().uuid({ message: "Invalid offer ID format" }),
+  offer_id: z.string().uuid({ message: "Invalid offer ID" }),
 });
 
 serve(async (req) => {
@@ -26,14 +26,21 @@ serve(async (req) => {
 
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
-      throw new Error("No authorization header");
+      return new Response(
+        JSON.stringify({ error: "Authentication required" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 401 }
+      );
     }
 
     const token = authHeader.replace("Bearer ", "");
     const { data: { user }, error: userError } = await supabaseAuth.auth.getUser(token);
 
     if (userError || !user) {
-      throw new Error("Unauthorized");
+      console.error("Auth error:", userError);
+      return new Response(
+        JSON.stringify({ error: "Authentication failed" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 401 }
+      );
     }
 
     // Validate input
@@ -41,12 +48,10 @@ serve(async (req) => {
     const validationResult = redeemSchema.safeParse(requestBody);
     
     if (!validationResult.success) {
+      console.error("Validation failed:", validationResult.error.errors);
       return new Response(
-        JSON.stringify({ error: validationResult.error.errors[0]?.message || "Invalid input" }),
-        {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 400,
-        }
+        JSON.stringify({ error: "Invalid redemption request" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
       );
     }
 
@@ -67,7 +72,11 @@ serve(async (req) => {
       .single();
 
     if (offerError || !offer) {
-      throw new Error("Offer not found or inactive");
+      console.error("Offer not found:", offerError);
+      return new Response(
+        JSON.stringify({ error: "Offer not found or no longer available" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 404 }
+      );
     }
 
     // Get user's wallet
@@ -78,21 +87,22 @@ serve(async (req) => {
       .single();
 
     if (walletError || !wallet) {
-      throw new Error("Wallet not found");
+      console.error("Wallet not found for user:", user.id);
+      return new Response(
+        JSON.stringify({ error: "Wallet not found" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 404 }
+      );
     }
 
     // Check if user has enough coins
     if (wallet.balance < offer.coins_required) {
       return new Response(
         JSON.stringify({ 
-          error: "Insufficient PawBucks coins",
+          error: "Insufficient PawBucks",
           required: offer.coins_required,
           available: wallet.balance
         }),
-        {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 400,
-        }
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
       );
     }
 
@@ -107,7 +117,10 @@ serve(async (req) => {
 
     if (updateError) {
       console.error("Failed to update wallet balance:", updateError);
-      throw new Error("Failed to update wallet balance");
+      return new Response(
+        JSON.stringify({ error: "Unable to process redemption. Please try again." }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
+      );
     }
 
     // Record activity using service role client
@@ -132,10 +145,13 @@ serve(async (req) => {
         .update({ balance: wallet.balance })
         .eq("user_id", user.id);
       
-      throw new Error("Failed to record redemption activity");
+      return new Response(
+        JSON.stringify({ error: "Unable to complete redemption. Please try again." }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
+      );
     }
 
-    console.log(`User ${user.id} redeemed ${offer.coins_required} coins for ${offer.title}`);
+    console.log(`User ${user.id} redeemed ${offer.coins_required} coins for offer ${offer_id}`);
 
     return new Response(
       JSON.stringify({
@@ -153,13 +169,12 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error("Redemption error:", errorMessage);
+    console.error("Redemption error:", error);
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ error: "An unexpected error occurred. Please try again." }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 400,
+        status: 500,
       }
     );
   }

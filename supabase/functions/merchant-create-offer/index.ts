@@ -1,10 +1,35 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+// Input validation schema
+const createOfferSchema = z.object({
+  title: z.string().min(1).max(200).transform(val => val.trim()),
+  description: z.string().min(1).max(2000).transform(val => val.trim()),
+  coins_required: z.number().int().positive().max(1000000),
+  cash_equivalent: z.number().positive().max(100000).optional().nullable(),
+  product_id: z.string().max(255).optional().nullable(),
+  start_date: z.string().optional().nullable(),
+  end_date: z.string().optional().nullable(),
+  redemption_cap: z.number().int().min(0).max(1000000).optional().nullable(),
+  per_user_limit: z.number().int().min(1).max(1000).optional().default(1),
+  image_url: z.string().url().max(2000).optional().nullable(),
+  require_approval: z.boolean().optional().default(false),
+});
+
+// Sanitize text to prevent XSS
+function sanitizeText(input: string): string {
+  return input
+    .replace(/[<>]/g, '')
+    .replace(/javascript:/gi, '')
+    .replace(/on\w+=/gi, '')
+    .trim();
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -17,12 +42,23 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    const authHeader = req.headers.get("Authorization")!;
-    const token = authHeader.replace("Bearer ", "");
-    const { data: { user } } = await supabaseClient.auth.getUser(token);
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: "Authentication required" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 401 }
+      );
+    }
 
-    if (!user) {
-      throw new Error("Unauthorized");
+    const token = authHeader.replace("Bearer ", "");
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token);
+
+    if (authError || !user) {
+      console.error("Auth error:", authError);
+      return new Response(
+        JSON.stringify({ error: "Authentication failed" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 401 }
+      );
     }
 
     // Get merchant for this user
@@ -33,10 +69,25 @@ serve(async (req) => {
       .single();
 
     if (merchantError || !merchant) {
-      throw new Error("Merchant not found");
+      console.error("Merchant not found for user:", user.id);
+      return new Response(
+        JSON.stringify({ error: "Merchant account not found" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 404 }
+      );
     }
 
-    const body = await req.json();
+    // Parse and validate input
+    const rawBody = await req.json();
+    const validationResult = createOfferSchema.safeParse(rawBody);
+    
+    if (!validationResult.success) {
+      console.error("Validation failed:", validationResult.error.errors);
+      return new Response(
+        JSON.stringify({ error: "Invalid offer data. Please check your entries." }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
+      );
+    }
+
     const {
       title,
       description,
@@ -49,23 +100,18 @@ serve(async (req) => {
       per_user_limit,
       image_url,
       require_approval
-    } = body;
+    } = validationResult.data;
 
-    // Validations
-    if (!title || !description || !coins_required) {
-      throw new Error("Missing required fields");
-    }
+    // Sanitize text fields
+    const sanitizedTitle = sanitizeText(title);
+    const sanitizedDescription = sanitizeText(description);
 
-    if (coins_required <= 0) {
-      throw new Error("Coins required must be greater than 0");
-    }
-
+    // Additional date validation
     if (start_date && end_date && new Date(start_date) >= new Date(end_date)) {
-      throw new Error("Start date must be before end date");
-    }
-
-    if (redemption_cap !== null && redemption_cap < 0) {
-      throw new Error("Redemption cap must be >= 0");
+      return new Response(
+        JSON.stringify({ error: "Start date must be before end date" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
+      );
     }
 
     // Determine initial status
@@ -82,20 +128,20 @@ serve(async (req) => {
       is_active = true;
     }
 
-    // Create offer - convert empty strings to null for optional fields
+    // Create offer
     const { data: offer, error: offerError } = await supabaseClient
       .from("partner_offers")
       .insert({
         partner_id: merchant.id,
-        title,
-        description,
+        title: sanitizedTitle,
+        description: sanitizedDescription,
         coins_required,
         cash_equivalent: cash_equivalent || null,
         product_id: product_id || null,
         image_url: image_url || null,
         start_date: start_date || null,
         end_date: end_date || null,
-        redemption_cap: redemption_cap || null,
+        redemption_cap: redemption_cap ?? null,
         per_user_limit: per_user_limit || 1,
         is_active,
         status,
@@ -105,7 +151,11 @@ serve(async (req) => {
       .single();
 
     if (offerError) {
-      throw offerError;
+      console.error("Failed to create offer:", offerError);
+      return new Response(
+        JSON.stringify({ error: "Unable to create offer. Please try again." }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
+      );
     }
 
     // Log activity
@@ -114,7 +164,7 @@ serve(async (req) => {
       merchant_id: merchant.id,
       action: "created",
       actor_id: user.id,
-      details: { title, coins_required, status }
+      details: { title: sanitizedTitle, coins_required, status }
     });
 
     console.log(`Created offer ${offer.id} for merchant ${merchant.id}`);
@@ -137,12 +187,11 @@ serve(async (req) => {
     );
   } catch (error) {
     console.error("Error creating offer:", error);
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ error: "An unexpected error occurred. Please try again." }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 400,
+        status: 500,
       }
     );
   }

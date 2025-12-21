@@ -1,10 +1,30 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Input validation schema
+const createUserSchema = z.object({
+  email: z.string().email({ message: "Invalid email address" }).max(255),
+  password: z.string().min(8, { message: "Password must be at least 8 characters" }).max(128),
+  full_name: z.string().min(1).max(100).transform(val => val.trim()),
+  user_type: z.enum(['pet_owner', 'merchant', 'vet'], { 
+    errorMap: () => ({ message: "Invalid user type" })
+  }),
+});
+
+// Sanitize text input
+function sanitizeText(input: string): string {
+  return input
+    .replace(/[<>]/g, '')
+    .replace(/javascript:/gi, '')
+    .replace(/on\w+=/gi, '')
+    .trim();
+}
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -20,7 +40,10 @@ serve(async (req) => {
     // Create client with user's token to verify admin status
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
-      throw new Error('No authorization header');
+      return new Response(
+        JSON.stringify({ error: 'Authentication required' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
+      );
     }
 
     const userClient = createClient(supabaseUrl, supabaseAnonKey, {
@@ -30,7 +53,11 @@ serve(async (req) => {
     // Verify the requesting user is authenticated and is an admin
     const { data: { user: requestingUser }, error: userError } = await userClient.auth.getUser();
     if (userError || !requestingUser) {
-      throw new Error('Unauthorized: Invalid user session');
+      console.error('Authentication failed:', userError);
+      return new Response(
+        JSON.stringify({ error: 'Authentication failed' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
+      );
     }
 
     // Check if user is admin or superadmin
@@ -41,15 +68,29 @@ serve(async (req) => {
 
     const isAdmin = roles?.some(r => r.role === 'admin' || r.role === 'superadmin');
     if (!isAdmin) {
-      throw new Error('Unauthorized: Admin access required');
+      console.error('User lacks admin privileges:', requestingUser.id);
+      return new Response(
+        JSON.stringify({ error: 'Insufficient permissions' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 403 }
+      );
     }
 
-    // Parse request body
-    const { email, password, full_name, user_type } = await req.json();
-
-    if (!email || !password || !full_name || !user_type) {
-      throw new Error('Missing required fields: email, password, full_name, user_type');
+    // Parse and validate request body
+    const rawBody = await req.json();
+    const validationResult = createUserSchema.safeParse(rawBody);
+    
+    if (!validationResult.success) {
+      console.error('Validation failed:', validationResult.error.errors);
+      return new Response(
+        JSON.stringify({ error: 'Invalid input data. Please check your entries.' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      );
     }
+
+    const { email, password, full_name, user_type } = validationResult.data;
+    
+    // Sanitize the full name
+    const sanitizedFullName = sanitizeText(full_name);
 
     // Create service role client to create user without affecting admin session
     const serviceClient = createClient(supabaseUrl, supabaseServiceKey, {
@@ -65,14 +106,18 @@ serve(async (req) => {
       password,
       email_confirm: true, // Auto-confirm the email
       user_metadata: {
-        full_name,
+        full_name: sanitizedFullName,
         user_type
       }
     });
 
     if (createError) {
       console.error('Error creating user:', createError);
-      throw new Error(createError.message);
+      // Return generic error without exposing internal details
+      return new Response(
+        JSON.stringify({ error: 'Unable to create user. The email may already be in use.' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      );
     }
 
     console.log(`[Admin Create User] User ${email} created by admin ${requestingUser.email}`);
@@ -85,7 +130,7 @@ serve(async (req) => {
         action: 'create_user',
         entity_type: 'user',
         entity_id: newUser.user?.id,
-        changes: { email, full_name, user_type }
+        changes: { email, full_name: sanitizedFullName, user_type }
       });
 
     return new Response(
@@ -102,12 +147,11 @@ serve(async (req) => {
 
   } catch (error: unknown) {
     console.error('Admin create user error:', error);
-    const errorMessage = error instanceof Error ? error.message : 'An error occurred while creating the user';
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ error: 'An unexpected error occurred. Please try again.' }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400 
+        status: 500 
       }
     );
   }
