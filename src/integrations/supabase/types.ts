@@ -385,6 +385,93 @@ export type Database = {
           },
         ]
       }
+      lost_pet_posts: {
+        Row: {
+          additional_notes: string | null
+          age_estimate: string | null
+          breed: string | null
+          collar_description: string | null
+          color_markings: string
+          contact_email: string | null
+          contact_name: string
+          contact_phone: string
+          created_at: string
+          gender: string | null
+          id: string
+          identifying_features: string | null
+          is_active: boolean
+          last_seen_area_description: string | null
+          last_seen_date: string
+          last_seen_location: string
+          last_seen_time: string | null
+          microchip_number: string | null
+          pet_name: string
+          pet_type: string
+          photo_url: string | null
+          reward_amount: number | null
+          size: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          additional_notes?: string | null
+          age_estimate?: string | null
+          breed?: string | null
+          collar_description?: string | null
+          color_markings: string
+          contact_email?: string | null
+          contact_name: string
+          contact_phone: string
+          created_at?: string
+          gender?: string | null
+          id?: string
+          identifying_features?: string | null
+          is_active?: boolean
+          last_seen_area_description?: string | null
+          last_seen_date: string
+          last_seen_location: string
+          last_seen_time?: string | null
+          microchip_number?: string | null
+          pet_name: string
+          pet_type: string
+          photo_url?: string | null
+          reward_amount?: number | null
+          size?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          additional_notes?: string | null
+          age_estimate?: string | null
+          breed?: string | null
+          collar_description?: string | null
+          color_markings?: string
+          contact_email?: string | null
+          contact_name?: string
+          contact_phone?: string
+          created_at?: string
+          gender?: string | null
+          id?: string
+          identifying_features?: string | null
+          is_active?: boolean
+          last_seen_area_description?: string | null
+          last_seen_date?: string
+          last_seen_location?: string
+          last_seen_time?: string | null
+          microchip_number?: string | null
+          pet_name?: string
+          pet_type?: string
+          photo_url?: string | null
+          reward_amount?: number | null
+          size?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       merchant_analytics_products: {
         Row: {
           billing_period: string | null

@@ -29,6 +29,7 @@ const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout, userId 
   const defaultMenuItems: MenuItem[] = [
     { label: "For Pet Lovers", path: "/" },
     { label: "Pet Store", path: "/pet-store" },
+    { label: "Lost Pets", path: "/lost-pets" },
     { label: "For Pet Merchants", path: "/merchants" }
   ];
 
@@ -83,6 +84,13 @@ const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout, userId 
                 className="text-sm font-medium hover:text-accent"
               >
                 Store
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => navigate("/lost-pets")}
+                className="text-sm font-medium hover:text-accent"
+              >
+                Lost Pets
               </Button>
               <Button
                 variant="ghost"
