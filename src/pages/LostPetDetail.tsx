@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,6 +23,7 @@ import { useToast } from "@/hooks/use-toast";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { SEO } from "@/components/SEO";
 import { LostPetShareDialog } from "@/components/LostPetShareDialog";
+import { PhotoLightbox, PhotoThumbnail } from "@/components/PhotoLightbox";
 import { format } from "date-fns";
 import {
   ArrowLeft,
@@ -39,6 +41,7 @@ import {
   Clock,
   Share2,
   PartyPopper,
+  Images,
 } from "lucide-react";
 
 interface LostPetPost {
@@ -55,6 +58,7 @@ interface LostPetPost {
   collar_description: string | null;
   identifying_features: string | null;
   photo_url: string | null;
+  photo_urls: string[] | null;
   last_seen_location: string;
   last_seen_date: string;
   last_seen_time: string | null;
@@ -94,6 +98,8 @@ const LostPetDetail = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   const { data: post, isLoading, error } = useQuery({
     queryKey: ["lost-pet-post", id],
@@ -110,6 +116,18 @@ const LostPetDetail = () => {
     },
     enabled: !!id,
   });
+
+  // Get all photos (combine photo_urls with legacy photo_url)
+  const allPhotos = post ? [
+    ...(post.photo_urls?.filter(Boolean) || []),
+    // Include legacy photo_url if not already in photo_urls
+    ...(post.photo_url && !post.photo_urls?.includes(post.photo_url) ? [post.photo_url] : [])
+  ].filter(Boolean) : [];
+
+  const openLightbox = (index: number) => {
+    setLightboxIndex(index);
+    setLightboxOpen(true);
+  };
 
   const updateStatusMutation = useMutation({
     mutationFn: async (newStatus: string) => {
@@ -196,14 +214,45 @@ const LostPetDetail = () => {
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-6">
               {/* Photo & Status */}
-              <Card className="overflow-hidden">
+<Card className="overflow-hidden">
                 <div className="relative">
-                  {post.photo_url ? (
-                    <img
-                      src={post.photo_url}
-                      alt={post.pet_name}
-                      className="w-full h-64 md:h-96 object-cover"
-                    />
+                  {/* Photo Gallery */}
+                  {allPhotos.length > 0 ? (
+                    <div className="relative">
+                      {/* Main Photo */}
+                      <PhotoThumbnail
+                        src={allPhotos[0]}
+                        alt={post.pet_name}
+                        className="w-full h-64 md:h-96"
+                        onClick={() => openLightbox(0)}
+                      />
+                      
+                      {/* Photo count badge */}
+                      {allPhotos.length > 1 && (
+                        <button
+                          onClick={() => openLightbox(0)}
+                          className="absolute bottom-4 right-4 bg-black/70 text-white px-3 py-1.5 rounded-full text-sm flex items-center gap-1.5 hover:bg-black/80 transition-colors"
+                        >
+                          <Images className="w-4 h-4" />
+                          {allPhotos.length} photos
+                        </button>
+                      )}
+                      
+                      {/* Thumbnail strip for multiple photos */}
+                      {allPhotos.length > 1 && (
+                        <div className="flex gap-2 p-3 bg-muted/50 overflow-x-auto">
+                          {allPhotos.map((photo, index) => (
+                            <PhotoThumbnail
+                              key={index}
+                              src={photo}
+                              alt={`${post.pet_name} photo ${index + 1}`}
+                              className="w-16 h-16 shrink-0 border-2 border-transparent hover:border-primary"
+                              onClick={() => openLightbox(index)}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   ) : (
                     <div className="w-full h-64 md:h-96 bg-muted flex items-center justify-center">
                       {petTypeIcons[post.pet_type] || (
@@ -211,6 +260,8 @@ const LostPetDetail = () => {
                       )}
                     </div>
                   )}
+                  
+                  {/* Status badge */}
                   <Badge
                     className={`absolute top-4 left-4 gap-1 text-base px-3 py-1 ${statusColors[post.status]}`}
                   >
@@ -224,6 +275,14 @@ const LostPetDetail = () => {
                     </Badge>
                   )}
                 </div>
+
+                {/* Photo Lightbox */}
+                <PhotoLightbox
+                  photos={allPhotos}
+                  initialIndex={lightboxIndex}
+                  open={lightboxOpen}
+                  onOpenChange={setLightboxOpen}
+                />
 
                 <CardHeader>
                   <CardTitle className="flex items-center gap-3 text-2xl md:text-3xl">

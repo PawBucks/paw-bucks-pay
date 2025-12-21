@@ -366,7 +366,7 @@ Please share to help bring ${post.pet_name} home! 🙏`;
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="max-w-md w-[calc(100vw-2rem)] max-h-[90vh] overflow-y-auto">
+<DialogContent className="max-w-md w-[calc(100vw-2rem)] lg:max-w-4xl lg:w-auto max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Share2 className="w-5 h-5 text-primary" />
@@ -374,53 +374,83 @@ Please share to help bring ${post.pet_name} home! 🙏`;
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-3">
-          {/* Quick Native Share for Mobile */}
-          {canNativeShare && (
-            <Button 
-              onClick={handleNativeShare} 
-              className="w-full gap-2"
-              size="lg"
-            >
-              <Smartphone className="w-5 h-5" />
-              Share via Phone
-            </Button>
-          )}
+        {/* Desktop: Horizontal layout, Mobile: Vertical layout */}
+        <div className="flex flex-col lg:flex-row lg:gap-6">
+          {/* Left side: Pet preview (desktop only) */}
+          <div className="hidden lg:block lg:w-64 shrink-0">
+            <div className="rounded-lg overflow-hidden border bg-muted">
+              {post.photo_url ? (
+                <img 
+                  src={post.photo_url} 
+                  alt={post.pet_name} 
+                  className="w-full h-48 object-cover"
+                />
+              ) : (
+                <div className="w-full h-48 flex items-center justify-center text-muted-foreground">
+                  No Photo
+                </div>
+              )}
+              <div className="p-3">
+                <p className="font-semibold text-sm">{post.pet_name}</p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {post.breed && `${post.breed} • `}{post.color_markings}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1 truncate">
+                  📍 {post.last_seen_location}
+                </p>
+              </div>
+            </div>
+          </div>
 
-          {/* Share Options Grid - Single column on mobile, 2 columns on larger screens */}
-          <div className="grid grid-cols-2 sm:grid-cols-2 gap-2">
-            {shareOptions.map((option) => (
-              <button
-                key={option.name}
-                onClick={option.onClick}
-                className={`flex flex-col items-center justify-center gap-1.5 p-3 rounded-lg transition-colors ${option.bg}`}
+          {/* Right side: Share options */}
+          <div className="flex-1 space-y-3">
+            {/* Quick Native Share for Mobile */}
+            {canNativeShare && (
+              <Button 
+                onClick={handleNativeShare} 
+                className="w-full gap-2"
+                size="lg"
               >
-                <option.icon className={`w-5 h-5 ${option.color}`} />
-                <span className="text-xs font-medium text-foreground text-center leading-tight">{option.name}</span>
-              </button>
-            ))}
-          </div>
+                <Smartphone className="w-5 h-5" />
+                Share via Phone
+              </Button>
+            )}
 
-          {/* Share Preview */}
-          <div className="p-3 bg-muted rounded-lg">
-            <p className="text-xs text-muted-foreground mb-1.5 font-medium">Preview:</p>
-            <p className="text-xs sm:text-sm line-clamp-3">{shortShareText}</p>
-          </div>
+            {/* Share Options Grid - 2 cols mobile, 4 cols desktop */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+              {shareOptions.map((option) => (
+                <button
+                  key={option.name}
+                  onClick={option.onClick}
+                  className={`flex flex-col items-center justify-center gap-1.5 p-3 rounded-lg transition-colors ${option.bg}`}
+                >
+                  <option.icon className={`w-5 h-5 ${option.color}`} />
+                  <span className="text-xs font-medium text-foreground text-center leading-tight">{option.name}</span>
+                </button>
+              ))}
+            </div>
 
-          {/* Direct Link */}
-          <div className="flex items-center gap-2 p-2 bg-muted rounded-lg">
-            <Link2 className="w-4 h-4 text-muted-foreground shrink-0" />
-            <span className="text-xs text-muted-foreground truncate flex-1">
-              {shareUrl}
-            </span>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={handleCopyLink}
-              className="shrink-0 h-8 w-8 p-0"
-            >
-              {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-            </Button>
+            {/* Share Preview */}
+            <div className="p-3 bg-muted rounded-lg">
+              <p className="text-xs text-muted-foreground mb-1.5 font-medium">Preview:</p>
+              <p className="text-xs sm:text-sm line-clamp-3">{shortShareText}</p>
+            </div>
+
+            {/* Direct Link */}
+            <div className="flex items-center gap-2 p-2 bg-muted rounded-lg">
+              <Link2 className="w-4 h-4 text-muted-foreground shrink-0" />
+              <span className="text-xs text-muted-foreground truncate flex-1">
+                {shareUrl}
+              </span>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={handleCopyLink}
+                className="shrink-0 h-8 w-8 p-0"
+              >
+                {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+              </Button>
+            </div>
           </div>
         </div>
       </DialogContent>
