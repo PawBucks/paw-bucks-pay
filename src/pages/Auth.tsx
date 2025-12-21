@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -11,8 +11,8 @@ import { toast } from "sonner";
 import { Eye, EyeOff, Home, KeyRound } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { useAuth } from "@/hooks/useAuth";
-import { useEffect } from "react";
 import { signUpSchema, signInSchema } from "@/lib/validation";
+import { ROUTES } from "@/lib/constants";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -27,25 +27,49 @@ const Auth = () => {
   const [resetEmail, setResetEmail] = useState("");
   const [isResetting, setIsResetting] = useState(false);
 
-  useEffect(() => {
-    const checkUserAndRedirect = async () => {
-      if (user) {
-        // Check if user is admin
-        const { data: isAdmin } = await supabase.rpc('has_role', {
-          _user_id: user.id,
-          _role: 'admin'
-        });
+  // Helper function to redirect user based on their role/type
+  const redirectBasedOnRole = useCallback(async (userId: string, userTypeOverride?: "pet_owner" | "merchant") => {
+    // Check if user is admin first
+    const { data: isAdmin } = await supabase.rpc('has_role', {
+      _user_id: userId,
+      _role: 'admin'
+    });
 
-        if (isAdmin) {
-          navigate("/admin");
-        } else {
-          navigate("/");
-        }
+    if (isAdmin) {
+      navigate(ROUTES.ADMIN);
+      return;
+    }
+
+    // If we have a user type override (from signup), use it
+    if (userTypeOverride) {
+      if (userTypeOverride === "merchant") {
+        navigate(ROUTES.MERCHANT_DASHBOARD);
+      } else {
+        navigate(ROUTES.DASHBOARD);
       }
-    };
+      return;
+    }
 
-    checkUserAndRedirect();
-  }, [user, navigate]);
+    // Otherwise, fetch the user's profile to determine their type
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("user_type")
+      .eq("id", userId)
+      .single();
+
+    if (profile?.user_type === "merchant") {
+      navigate(ROUTES.MERCHANT_DASHBOARD);
+    } else {
+      navigate(ROUTES.DASHBOARD);
+    }
+  }, [navigate]);
+
+  // Redirect already-logged-in users
+  useEffect(() => {
+    if (user) {
+      redirectBasedOnRole(user.id);
+    }
+  }, [user, redirectBasedOnRole]);
 
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -122,7 +146,7 @@ const Auth = () => {
         }
 
         toast.success("Account created successfully!");
-        navigate("/");
+        await redirectBasedOnRole(data.user.id, userType);
       }
     } catch (error: any) {
       if (error.errors) {
@@ -179,8 +203,17 @@ const Auth = () => {
         },
       });
 
+      // Get the user from the current session for redirect
+      const { data: sessionData } = await supabase.auth.getSession();
+      const loggedInUser = sessionData?.session?.user;
+
       toast.success("Signed in successfully!");
-      navigate("/");
+      
+      if (loggedInUser) {
+        await redirectBasedOnRole(loggedInUser.id);
+      } else {
+        navigate(ROUTES.DASHBOARD);
+      }
     } catch (error: any) {
       if (error.errors) {
         // Zod validation error
