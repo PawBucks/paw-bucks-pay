@@ -112,52 +112,89 @@ const Auth = () => {
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        // Handle specific Supabase auth errors with user-friendly messages
+        if (error.message.includes("already registered")) {
+          toast.error("An account with this email already exists. Please sign in instead.");
+        } else if (error.message.includes("rate limit") || error.message.includes("too many")) {
+          toast.error("Too many attempts. Please wait a few minutes and try again.");
+        } else if (error.message.includes("network") || error.message.includes("fetch")) {
+          toast.error("Network error. Please check your internet connection and try again.");
+        } else if (error.message.includes("Invalid email")) {
+          toast.error("Please enter a valid email address.");
+        } else if (error.message.includes("Password")) {
+          toast.error(error.message);
+        } else {
+          // Show the actual error for debugging, but with a friendly prefix
+          toast.error(`Sign up failed: ${error.message}`);
+        }
+        console.error("Sign up auth error:", error);
+        return;
+      }
 
       if (data.user) {
+        // Account was created successfully - everything else is non-critical
         // Update the profile created by the trigger with additional info
-        // The handle_new_user trigger already creates a basic profile, so we upsert
-        const { error: profileError } = await supabase.from("profiles").upsert({
-          id: data.user.id,
-          user_type: userType,
-          full_name: validatedData.fullName,
-          email: validatedData.email,
-          phone: phone || null,
-        }, { onConflict: 'id' });
+        try {
+          const { error: profileError } = await supabase.from("profiles").upsert({
+            id: data.user.id,
+            user_type: userType,
+            full_name: validatedData.fullName,
+            email: validatedData.email,
+            phone: phone || null,
+          }, { onConflict: 'id' });
 
-        // Don't throw on profile error - account was already created successfully
-        if (profileError) {
-          console.warn("Profile update warning:", profileError);
+          if (profileError) {
+            console.warn("Profile update warning (non-critical):", profileError);
+          }
+        } catch (profileErr) {
+          console.warn("Profile update failed (non-critical):", profileErr);
         }
 
-        // Handle referral code if provided
+        // Handle referral code if provided - non-critical
         if (validatedData.referralCode && userType === "pet_owner") {
-          // Find the referrer by code
-          const { data: referrer, error: referrerError } = await supabase
-            .from("profiles")
-            .select("id")
-            .eq("referral_code", validatedData.referralCode)
-            .single();
+          try {
+            const { data: referrer, error: referrerError } = await supabase
+              .from("profiles")
+              .select("id")
+              .eq("referral_code", validatedData.referralCode)
+              .single();
 
-          if (!referrerError && referrer) {
-            // Create referral record
-            await supabase.from("referrals").insert({
-              referrer_id: referrer.id,
-              referee_id: data.user.id,
-              referral_code: validatedData.referralCode,
-            });
+            if (!referrerError && referrer) {
+              await supabase.from("referrals").insert({
+                referrer_id: referrer.id,
+                referee_id: data.user.id,
+                referral_code: validatedData.referralCode,
+              });
+            }
+          } catch (referralErr) {
+            console.warn("Referral processing failed (non-critical):", referralErr);
           }
         }
 
         toast.success("Account created successfully!");
-        await redirectBasedOnRole(data.user.id, userType);
+        
+        // Redirect - wrapped in try/catch to ensure we don't show false errors
+        try {
+          await redirectBasedOnRole(data.user.id, userType);
+        } catch (redirectErr) {
+          console.warn("Redirect warning:", redirectErr);
+          // Fallback redirect
+          navigate(userType === "merchant" ? ROUTES.MERCHANT_DASHBOARD : ROUTES.DASHBOARD);
+        }
+      } else {
+        // User is null but no error - might need email confirmation
+        toast.success("Account created! Please check your email to confirm your account.");
       }
     } catch (error: any) {
       if (error.errors) {
         // Zod validation error
         toast.error(error.errors[0]?.message || "Invalid input");
+      } else if (error.message) {
+        // Supabase or other error with message
+        toast.error(`Error: ${error.message}`);
       } else {
-        toast.error("Failed to create account. Please try again.");
+        toast.error("An unexpected error occurred. Please try again.");
       }
       console.error("Sign up error:", error);
     } finally {
