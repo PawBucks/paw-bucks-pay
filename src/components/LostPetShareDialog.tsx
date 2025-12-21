@@ -366,7 +366,7 @@ Please share to help bring ${post.pet_name} home! 🙏`;
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md w-[calc(100vw-2rem)] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Share2 className="w-5 h-5 text-primary" />
@@ -374,7 +374,7 @@ Please share to help bring ${post.pet_name} home! 🙏`;
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-3">
           {/* Quick Native Share for Mobile */}
           {canNativeShare && (
             <Button 
@@ -387,24 +387,24 @@ Please share to help bring ${post.pet_name} home! 🙏`;
             </Button>
           )}
 
-          {/* Share Options Grid */}
-          <div className="grid grid-cols-2 gap-3">
+          {/* Share Options Grid - Single column on mobile, 2 columns on larger screens */}
+          <div className="grid grid-cols-2 sm:grid-cols-2 gap-2">
             {shareOptions.map((option) => (
               <button
                 key={option.name}
                 onClick={option.onClick}
-                className={`flex flex-col items-center justify-center gap-2 p-4 rounded-lg transition-colors ${option.bg}`}
+                className={`flex flex-col items-center justify-center gap-1.5 p-3 rounded-lg transition-colors ${option.bg}`}
               >
-                <option.icon className={`w-6 h-6 ${option.color}`} />
-                <span className="text-sm font-medium text-foreground">{option.name}</span>
+                <option.icon className={`w-5 h-5 ${option.color}`} />
+                <span className="text-xs font-medium text-foreground text-center leading-tight">{option.name}</span>
               </button>
             ))}
           </div>
 
           {/* Share Preview */}
-          <div className="mt-4 p-3 bg-muted rounded-lg">
-            <p className="text-xs text-muted-foreground mb-2 font-medium">Preview:</p>
-            <p className="text-sm line-clamp-3">{shortShareText}</p>
+          <div className="p-3 bg-muted rounded-lg">
+            <p className="text-xs text-muted-foreground mb-1.5 font-medium">Preview:</p>
+            <p className="text-xs sm:text-sm line-clamp-3">{shortShareText}</p>
           </div>
 
           {/* Direct Link */}
@@ -417,7 +417,7 @@ Please share to help bring ${post.pet_name} home! 🙏`;
               variant="ghost" 
               size="sm" 
               onClick={handleCopyLink}
-              className="shrink-0"
+              className="shrink-0 h-8 w-8 p-0"
             >
               {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
             </Button>
