@@ -416,16 +416,16 @@ Please share to help bring ${post.pet_name} home! 🙏`;
               </Button>
             )}
 
-            {/* Share Options Grid - 2 cols mobile, 4 cols desktop */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+            {/* Share Options - Vertical list on mobile, 4 cols on desktop */}
+            <div className="flex flex-col gap-2 lg:grid lg:grid-cols-4">
               {shareOptions.map((option) => (
                 <button
                   key={option.name}
                   onClick={option.onClick}
-                  className={`flex flex-col items-center justify-center gap-1.5 p-3 rounded-lg transition-colors ${option.bg}`}
+                  className={`flex items-center gap-3 p-3 rounded-lg transition-colors lg:flex-col lg:justify-center lg:gap-1.5 ${option.bg}`}
                 >
-                  <option.icon className={`w-5 h-5 ${option.color}`} />
-                  <span className="text-xs font-medium text-foreground text-center leading-tight">{option.name}</span>
+                  <option.icon className={`w-5 h-5 shrink-0 ${option.color}`} />
+                  <span className="text-sm font-medium text-foreground lg:text-xs lg:text-center lg:leading-tight">{option.name}</span>
                 </button>
               ))}
             </div>
