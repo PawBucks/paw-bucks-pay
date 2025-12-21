@@ -408,6 +408,7 @@ export type Database = {
           pet_name: string
           pet_type: string
           photo_url: string | null
+          photo_urls: string[] | null
           reward_amount: number | null
           size: string | null
           status: string
@@ -436,6 +437,7 @@ export type Database = {
           pet_name: string
           pet_type: string
           photo_url?: string | null
+          photo_urls?: string[] | null
           reward_amount?: number | null
           size?: string | null
           status?: string
@@ -464,6 +466,7 @@ export type Database = {
           pet_name?: string
           pet_type?: string
           photo_url?: string | null
+          photo_urls?: string[] | null
           reward_amount?: number | null
           size?: string | null
           status?: string

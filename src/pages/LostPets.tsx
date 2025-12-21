@@ -58,6 +58,8 @@ import {
   Share2,
   PartyPopper,
   Eye,
+  X,
+  Images,
 } from "lucide-react";
 import { LostPetShareDialog } from "@/components/LostPetShareDialog";
 import { format } from "date-fns";
@@ -76,6 +78,7 @@ interface LostPetPost {
   collar_description: string | null;
   identifying_features: string | null;
   photo_url: string | null;
+  photo_urls: string[] | null;
   last_seen_location: string;
   last_seen_date: string;
   last_seen_time: string | null;
@@ -132,6 +135,7 @@ const LostPets = () => {
     collar_description: "",
     identifying_features: "",
     photo_url: "",
+    photo_urls: [] as string[],
     last_seen_location: "",
     last_seen_date: format(new Date(), "yyyy-MM-dd"),
     last_seen_time: "",
@@ -143,6 +147,7 @@ const LostPets = () => {
     additional_notes: "",
   });
 
+  const MAX_PHOTOS = 5;
   // Fetch all active lost pet posts
   const { data: posts, isLoading } = useQuery({
     queryKey: ["lost-pet-posts", statusFilter],
@@ -180,7 +185,8 @@ const LostPets = () => {
         microchip_number: data.microchip_number || null,
         collar_description: data.collar_description || null,
         identifying_features: data.identifying_features || null,
-        photo_url: data.photo_url || null,
+        photo_url: data.photo_urls[0] || data.photo_url || null,
+        photo_urls: data.photo_urls.length > 0 ? data.photo_urls : null,
         last_seen_location: data.last_seen_location,
         last_seen_date: data.last_seen_date,
         last_seen_time: data.last_seen_time || null,
@@ -248,6 +254,7 @@ const LostPets = () => {
       collar_description: "",
       identifying_features: "",
       photo_url: "",
+      photo_urls: [],
       last_seen_location: "",
       last_seen_date: format(new Date(), "yyyy-MM-dd"),
       last_seen_time: "",
@@ -261,36 +268,71 @@ const LostPets = () => {
   };
 
   const handlePhotoUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !user) return;
+    const files = e.target.files;
+    if (!files || files.length === 0 || !user) return;
 
+    const currentCount = formData.photo_urls.length;
+    const remainingSlots = MAX_PHOTOS - currentCount;
+    
+    if (remainingSlots <= 0) {
+      toast({ 
+        title: `Maximum ${MAX_PHOTOS} photos allowed`, 
+        variant: "destructive" 
+      });
+      return;
+    }
+
+    const filesToUpload = Array.from(files).slice(0, remainingSlots);
     setIsUploading(true);
+    
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      const uploadPromises = filesToUpload.map(async (file) => {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${user.id}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('lost-pet-photos')
+          .upload(fileName, file);
+        
+        if (uploadError) throw uploadError;
+        
+        const { data: { publicUrl } } = supabase.storage
+          .from('lost-pet-photos')
+          .getPublicUrl(fileName);
+        
+        return publicUrl;
+      });
+
+      const uploadedUrls = await Promise.all(uploadPromises);
       
-      const { error: uploadError } = await supabase.storage
-        .from('lost-pet-photos')
-        .upload(fileName, file);
-      
-      if (uploadError) throw uploadError;
-      
-      const { data: { publicUrl } } = supabase.storage
-        .from('lost-pet-photos')
-        .getPublicUrl(fileName);
-      
-      setFormData(prev => ({ ...prev, photo_url: publicUrl }));
-      toast({ title: "Photo uploaded successfully!" });
+      setFormData(prev => ({ 
+        ...prev, 
+        photo_urls: [...prev.photo_urls, ...uploadedUrls],
+        photo_url: prev.photo_urls.length === 0 ? uploadedUrls[0] : prev.photo_url
+      }));
+      toast({ title: `${uploadedUrls.length} photo(s) uploaded successfully!` });
     } catch (error: any) {
       toast({ 
-        title: "Failed to upload photo", 
+        title: "Failed to upload photo(s)", 
         description: error.message,
         variant: "destructive" 
       });
     } finally {
       setIsUploading(false);
+      // Reset input so same file can be selected again
+      e.target.value = '';
     }
-  }, [user, toast]);
+  }, [user, toast, formData.photo_urls.length]);
+
+  const handleRemovePhoto = (indexToRemove: number) => {
+    setFormData(prev => ({
+      ...prev,
+      photo_urls: prev.photo_urls.filter((_, index) => index !== indexToRemove),
+      photo_url: indexToRemove === 0 && prev.photo_urls.length > 1 
+        ? prev.photo_urls[1] 
+        : prev.photo_url
+    }));
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -524,45 +566,70 @@ const LostPets = () => {
 
                     {/* Photo Upload */}
                     <div className="space-y-4">
-                      <h3 className="font-semibold text-lg border-b pb-2">Photo</h3>
+                      <h3 className="font-semibold text-lg border-b pb-2 flex items-center gap-2">
+                        <Images className="w-5 h-5" />
+                        Photos (up to {MAX_PHOTOS})
+                      </h3>
                       
-                      <div className="space-y-2">
-                        <Label>Pet Photo (Highly Recommended)</Label>
-                        <div className="flex items-center gap-4">
-                          {formData.photo_url ? (
-                            <img 
-                              src={formData.photo_url} 
-                              alt="Pet" 
-                              className="w-24 h-24 object-cover rounded-lg"
-                            />
-                          ) : (
-                            <div className="w-24 h-24 bg-muted rounded-lg flex items-center justify-center">
-                              <Dog className="w-8 h-8 text-muted-foreground" />
-                            </div>
-                          )}
-                          <div>
-                            <Input
-                              type="file"
-                              accept="image/*"
-                              onChange={handlePhotoUpload}
-                              disabled={isUploading}
-                              className="hidden"
-                              id="photo-upload"
-                            />
-                            <Label htmlFor="photo-upload" className="cursor-pointer">
-                              <Button type="button" variant="outline" disabled={isUploading} asChild>
-                                <span className="gap-2">
-                                  {isUploading ? (
-                                    <LoadingSpinner />
-                                  ) : (
-                                    <Upload className="w-4 h-4" />
-                                  )}
-                                  {formData.photo_url ? "Change Photo" : "Upload Photo"}
+                      <div className="space-y-3">
+                        <Label>Pet Photos (Highly Recommended)</Label>
+                        
+                        {/* Photo Grid */}
+                        <div className="grid grid-cols-5 gap-2">
+                          {formData.photo_urls.map((url, index) => (
+                            <div key={index} className="relative group">
+                              <img 
+                                src={url} 
+                                alt={`Pet photo ${index + 1}`} 
+                                className="w-full aspect-square object-cover rounded-lg border"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => handleRemovePhoto(index)}
+                                className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                              {index === 0 && (
+                                <span className="absolute bottom-1 left-1 text-[10px] bg-primary text-primary-foreground px-1 rounded">
+                                  Main
                                 </span>
-                              </Button>
+                              )}
+                            </div>
+                          ))}
+                          
+                          {/* Add Photo Button */}
+                          {formData.photo_urls.length < MAX_PHOTOS && (
+                            <Label 
+                              htmlFor="photo-upload" 
+                              className="w-full aspect-square bg-muted rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-muted/80 transition-colors border-2 border-dashed border-muted-foreground/30"
+                            >
+                              {isUploading ? (
+                                <LoadingSpinner />
+                              ) : (
+                                <>
+                                  <Upload className="w-6 h-6 text-muted-foreground" />
+                                  <span className="text-xs text-muted-foreground mt-1">Add</span>
+                                </>
+                              )}
                             </Label>
-                          </div>
+                          )}
                         </div>
+                        
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          onChange={handlePhotoUpload}
+                          disabled={isUploading || formData.photo_urls.length >= MAX_PHOTOS}
+                          className="hidden"
+                          id="photo-upload"
+                        />
+                        
+                        <p className="text-xs text-muted-foreground">
+                          {formData.photo_urls.length}/{MAX_PHOTOS} photos added. 
+                          The first photo will be used as the main image.
+                        </p>
                       </div>
                     </div>
 
@@ -723,12 +790,21 @@ const LostPets = () => {
                 <Card key={post.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                   {/* Photo */}
                   <div className="relative h-48 bg-muted">
-                    {post.photo_url ? (
-                      <img 
-                        src={post.photo_url} 
-                        alt={post.pet_name}
-                        className="w-full h-full object-cover"
-                      />
+                    {(post.photo_urls?.length > 0 || post.photo_url) ? (
+                      <>
+                        <img 
+                          src={post.photo_urls?.[0] || post.photo_url!} 
+                          alt={post.pet_name}
+                          className="w-full h-full object-cover"
+                        />
+                        {/* Photo count indicator */}
+                        {post.photo_urls && post.photo_urls.length > 1 && (
+                          <div className="absolute bottom-2 right-2 bg-black/60 text-white px-2 py-0.5 rounded-full text-xs flex items-center gap-1">
+                            <Images className="w-3 h-3" />
+                            {post.photo_urls.length}
+                          </div>
+                        )}
+                      </>
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         {petTypeIcons[post.pet_type] || <Dog className="w-16 h-16 text-muted-foreground" />}
