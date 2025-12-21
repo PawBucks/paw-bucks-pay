@@ -56,6 +56,7 @@ const Index = () => {
       />
       <Header menuItems={[
         { label: "Explore Pet Merchants", path: "/discover" },
+        { label: "Lost Pets", path: "/lost-pets" },
         { label: "For Pet Merchants", path: "/merchants" }
       ]} />
 
