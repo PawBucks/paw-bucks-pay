@@ -296,12 +296,12 @@ export function SponsoredPlacementDashboard({ merchantId, serviceType = 'sponsor
       )}
 
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid grid-cols-5 w-full max-w-2xl">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="sources">Traffic Sources</TabsTrigger>
-          <TabsTrigger value="roi">ROI & Revenue</TabsTrigger>
-          <TabsTrigger value="benchmark">Benchmark</TabsTrigger>
-          <TabsTrigger value="recommendations">AI Insights</TabsTrigger>
+        <TabsList className="flex w-full overflow-x-auto no-scrollbar gap-1 h-auto flex-wrap sm:flex-nowrap sm:grid sm:grid-cols-5 sm:max-w-2xl">
+          <TabsTrigger value="overview" className="flex-shrink-0 text-xs sm:text-sm px-3 py-2">Overview</TabsTrigger>
+          <TabsTrigger value="sources" className="flex-shrink-0 text-xs sm:text-sm px-3 py-2">Traffic Sources</TabsTrigger>
+          <TabsTrigger value="roi" className="flex-shrink-0 text-xs sm:text-sm px-3 py-2">ROI & Revenue</TabsTrigger>
+          <TabsTrigger value="benchmark" className="flex-shrink-0 text-xs sm:text-sm px-3 py-2">Benchmark</TabsTrigger>
+          <TabsTrigger value="recommendations" className="flex-shrink-0 text-xs sm:text-sm px-3 py-2">AI Insights</TabsTrigger>
         </TabsList>
 
         {/* Overview Tab */}
