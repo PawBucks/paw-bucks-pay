@@ -19,6 +19,17 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -44,7 +55,9 @@ import {
   AlertTriangle,
   CheckCircle2,
   Clock,
-  Share2
+  Share2,
+  PartyPopper,
+  Eye,
 } from "lucide-react";
 import { LostPetShareDialog } from "@/components/LostPetShareDialog";
 import { format } from "date-fns";
@@ -100,6 +113,7 @@ const LostPets = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -191,6 +205,32 @@ const LostPets = () => {
         title: "Failed to create flyer", 
         description: error.message,
         variant: "destructive" 
+      });
+    },
+  });
+
+  // Update status mutation
+  const updateStatusMutation = useMutation({
+    mutationFn: async ({ postId, newStatus }: { postId: string; newStatus: string }) => {
+      const { error } = await supabase
+        .from("lost_pet_posts")
+        .update({ status: newStatus })
+        .eq("id", postId);
+      if (error) throw error;
+    },
+    onSuccess: (_, { newStatus }) => {
+      toast({ 
+        title: newStatus === "reunited" 
+          ? "Great news! Pet marked as reunited!" 
+          : `Status updated to ${newStatus}` 
+      });
+      queryClient.invalidateQueries({ queryKey: ["lost-pet-posts"] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Failed to update status",
+        description: error.message,
+        variant: "destructive",
       });
     },
   });
@@ -760,18 +800,76 @@ const LostPets = () => {
                       )}
                     </div>
                     
-                    {/* Actions: Share & Posted Date */}
-                    <div className="flex items-center justify-between pt-2 border-t">
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <Calendar className="w-3 h-3" />
-                        Posted {format(new Date(post.created_at), "MMM d, yyyy")}
+                    {/* Actions */}
+                    <div className="flex flex-col gap-2 pt-2 border-t">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <Calendar className="w-3 h-3" />
+                          Posted {format(new Date(post.created_at), "MMM d, yyyy")}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="gap-1.5 h-8"
+                            onClick={() => navigate(`/lost-pets/${post.id}`)}
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                            View
+                          </Button>
+                          <LostPetShareDialog post={post}>
+                            <Button variant="outline" size="sm" className="gap-1.5 h-8">
+                              <Share2 className="w-3.5 h-3.5" />
+                              Share
+                            </Button>
+                          </LostPetShareDialog>
+                        </div>
                       </div>
-                      <LostPetShareDialog post={post}>
-                        <Button variant="outline" size="sm" className="gap-1.5 h-8">
-                          <Share2 className="w-3.5 h-3.5" />
-                          Share
-                        </Button>
-                      </LostPetShareDialog>
+                      
+                      {/* Owner: Mark as Found button */}
+                      {user?.id === post.user_id && post.status === "lost" && (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="w-full gap-1.5 border-green-500 text-green-600 hover:bg-green-50 hover:text-green-700"
+                            >
+                              <PartyPopper className="w-3.5 h-3.5" />
+                              Mark as Found / Reunited
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle className="flex items-center gap-2">
+                                <PartyPopper className="w-5 h-5 text-green-500" />
+                                Great News!
+                              </AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Has {post.pet_name} been found and reunited with you? This will update
+                                the flyer status to show that {post.pet_name} is no longer missing.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => updateStatusMutation.mutate({ postId: post.id, newStatus: "reunited" })}
+                                className="bg-green-600 hover:bg-green-700"
+                              >
+                                Yes, {post.pet_name} is home!
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      )}
+                      
+                      {/* Show reunited badge for owner */}
+                      {user?.id === post.user_id && post.status === "reunited" && (
+                        <div className="flex items-center justify-center gap-1.5 p-2 bg-green-50 dark:bg-green-950 rounded text-xs text-green-600 dark:text-green-400">
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          {post.pet_name} has been reunited!
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
