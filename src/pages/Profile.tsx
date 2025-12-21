@@ -303,7 +303,8 @@ const Profile = () => {
                   <p className="text-sm font-semibold mb-2">Everything in PawPass, plus:</p>
                   <ul className="text-xs text-muted-foreground space-y-1">
                     <li>• <span className="font-semibold text-primary">Ad-Free experience</span></li>
-                    <li>• <span className="font-semibold text-purple-600">30x points in PawBucks</span> ($1 = 30 PawBucks)</li>
+                    <li>• <span className="font-semibold text-purple-600">30x points in PawBucks</span> ($1 = 30 PawBucks) at PawBucks Partners</li>
+                    <li>• <span className="font-semibold text-purple-600">5x points in PawBucks</span> ($1 = 5 PawBucks) at non-partner merchants</li>
                     <li>• Exclusive premium partner offers</li>
                     <li>• VIP customer support with priority response</li>
                     <li>• Early access to beta features</li>
