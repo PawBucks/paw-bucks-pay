@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "https://esm.sh/resend@2.0.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -10,15 +11,27 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-interface FeedbackRequest {
-  feedback: string;
-  userEmail?: string;
-  userName?: string;
-  userId?: string;
-}
+// Input validation schema
+const feedbackSchema = z.object({
+  feedback: z.string().min(1).max(5000).transform(val => val.trim()),
+  userEmail: z.string().email().max(255).optional().nullable(),
+  userName: z.string().max(100).optional().nullable(),
+  userId: z.string().uuid().optional().nullable(),
+});
 
 // Priority keywords that trigger urgent admin notification
 const PRIORITY_KEYWORDS = ['bug', 'urgent', 'broken', 'error', 'crash', 'not working', 'issue', 'problem', 'help', 'emergency'];
+
+// Sanitize text for safe display in emails (prevent XSS)
+function sanitizeForHtml(input: string): string {
+  return input
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')
+    .trim();
+}
 
 const checkForPriorityKeywords = (text: string): string[] => {
   const lowerText = text.toLowerCase();
@@ -32,9 +45,24 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { feedback, userEmail, userName, userId }: FeedbackRequest = await req.json();
+    // Parse and validate input
+    const rawBody = await req.json();
+    const validationResult = feedbackSchema.safeParse(rawBody);
+    
+    if (!validationResult.success) {
+      console.error('Validation failed:', validationResult.error.errors);
+      return new Response(
+        JSON.stringify({ error: "Invalid feedback submission" }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
 
-    if (!feedback || feedback.trim().length === 0) {
+    const { feedback, userEmail, userName, userId } = validationResult.data;
+
+    if (feedback.length === 0) {
       return new Response(
         JSON.stringify({ error: "Feedback message is required" }),
         {
@@ -44,15 +72,20 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
+    // Sanitize inputs for HTML display
+    const safeFeedback = sanitizeForHtml(feedback);
+    const safeName = userName ? sanitizeForHtml(userName) : null;
+    const safeEmail = userEmail ? sanitizeForHtml(userEmail) : null;
+
     // Check for priority keywords
     const matchedKeywords = checkForPriorityKeywords(feedback);
     const isPriority = matchedKeywords.length > 0;
 
     console.log("Processing feedback submission:", { 
-      feedback, 
-      userEmail, 
-      userName, 
-      userId,
+      feedbackLength: feedback.length,
+      hasEmail: !!userEmail, 
+      hasName: !!userName, 
+      hasUserId: !!userId,
       isPriority,
       matchedKeywords 
     });
@@ -69,8 +102,8 @@ const handler = async (req: Request): Promise<Response> => {
         user_id: userId || null,
         user_email: userEmail || null,
         user_name: userName || null,
-        feedback: feedback.trim(),
-        status: isPriority ? "new" : "new", // Could set to 'urgent' if desired
+        feedback: feedback,
+        status: "new",
       })
       .select()
       .single();
@@ -101,12 +134,12 @@ const handler = async (req: Request): Promise<Response> => {
                   </p>
                 </div>
                 
-                <p><strong>From:</strong> ${userName || "Anonymous"} ${userEmail ? `(${userEmail})` : ""}</p>
+                <p><strong>From:</strong> ${safeName || "Anonymous"} ${safeEmail ? `(${safeEmail})` : ""}</p>
                 ${userId ? `<p><strong>User ID:</strong> ${userId}</p>` : ""}
                 
                 <div style="background-color: #f9fafb; padding: 15px; border-radius: 8px; margin-top: 15px;">
                   <p style="margin: 0 0 10px 0; font-weight: bold; color: #374151;">Feedback Message:</p>
-                  <p style="white-space: pre-wrap; margin: 0; color: #1f2937;">${feedback}</p>
+                  <p style="white-space: pre-wrap; margin: 0; color: #1f2937;">${safeFeedback}</p>
                 </div>
                 
                 <p style="margin-top: 20px; padding: 10px; background-color: #fef3c7; border-radius: 4px; color: #92400e; font-size: 14px;">
@@ -134,11 +167,11 @@ const handler = async (req: Request): Promise<Response> => {
       subject: "New PawBucks User Feedback",
       html: `
         <h2>New Feedback Received</h2>
-        <p><strong>From:</strong> ${userName || "Anonymous"} ${userEmail ? `(${userEmail})` : ""}</p>
+        <p><strong>From:</strong> ${safeName || "Anonymous"} ${safeEmail ? `(${safeEmail})` : ""}</p>
         ${userId ? `<p><strong>User ID:</strong> ${userId}</p>` : ""}
         <hr />
         <p><strong>Message:</strong></p>
-        <p style="white-space: pre-wrap;">${feedback}</p>
+        <p style="white-space: pre-wrap;">${safeFeedback}</p>
         <hr />
         <p style="color: #888; font-size: 12px;">This feedback was submitted through the PawBucks platform.</p>
       `,
@@ -147,8 +180,12 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Support notification email sent:", supportEmailResponse);
 
     // Send confirmation email to user if they have an email
-    if (userEmail) {
+    if (userEmail && safeEmail) {
       try {
+        const truncatedFeedback = safeFeedback.length > 200 
+          ? safeFeedback.substring(0, 200) + '...' 
+          : safeFeedback;
+        
         const confirmationEmailResponse = await resend.emails.send({
           from: "PawBucks <noreply@pawbucks.app>",
           to: [userEmail],
@@ -159,7 +196,7 @@ const handler = async (req: Request): Promise<Response> => {
                 <h1 style="color: #f59e0b; margin: 0;">🐾 PawBucks</h1>
               </div>
               
-              <h2 style="color: #333;">Thank you for your feedback${userName ? `, ${userName.split(' ')[0]}` : ''}!</h2>
+              <h2 style="color: #333;">Thank you for your feedback${safeName ? `, ${sanitizeForHtml(safeName.split(' ')[0])}` : ''}!</h2>
               
               <p style="color: #555; line-height: 1.6;">
                 We've received your message and truly appreciate you taking the time to share your thoughts with us. 
@@ -167,7 +204,7 @@ const handler = async (req: Request): Promise<Response> => {
               </p>
               
               <div style="background-color: #f9fafb; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
-                <p style="margin: 0; color: #666; font-style: italic;">"${feedback.length > 200 ? feedback.substring(0, 200) + '...' : feedback}"</p>
+                <p style="margin: 0; color: #666; font-style: italic;">"${truncatedFeedback}"</p>
               </div>
               
               <p style="color: #555; line-height: 1.6;">
@@ -203,10 +240,10 @@ const handler = async (req: Request): Promise<Response> => {
       status: 200,
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error processing feedback:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: "Unable to submit feedback. Please try again." }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },
