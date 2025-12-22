@@ -256,7 +256,7 @@ const Profile = () => {
                   <p className="text-sm font-semibold mb-2">Included Benefits:</p>
                   <ul className="text-xs text-muted-foreground space-y-1">
                     <li>• 24/7 customer support</li>
-                    <li>• <span className="font-semibold text-yellow-600">20x points in PawBucks</span> ($1 = 20 PawBucks)</li>
+                    <li>• <span className="font-semibold text-yellow-600">20x points in PawBucks</span> ($1 = 20 PawBucks) at PawBucks Partners</li>
                     <li>• Priority access to new features</li>
                   </ul>
                 </div>
