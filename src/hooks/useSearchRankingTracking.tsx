@@ -50,20 +50,22 @@ export function useSearchRankingTracking() {
     trackedImpressions.current.add(impressionKey);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      await supabase.from('search_ranking_analytics').insert({
-        merchant_id: merchantId,
-        event_type: 'impression',
-        search_term: options.searchTerm || null,
-        position,
-        source_page: sourcePage,
-        user_id: user?.id || null,
-        session_id: sessionId.current,
-        device_type: getDeviceType(),
-        is_boosted: options.isBoosted || false,
-        category_match: options.categoryMatch || false,
-        local_match: options.localMatch || false,
+      await supabase.functions.invoke('track-analytics', {
+        body: {
+          type: 'search_ranking',
+          events: [{
+            merchant_id: merchantId,
+            event_type: 'impression',
+            search_term: options.searchTerm || null,
+            position,
+            source_page: sourcePage,
+            session_id: sessionId.current,
+            device_type: getDeviceType(),
+            is_boosted: options.isBoosted || false,
+            category_match: options.categoryMatch || false,
+            local_match: options.localMatch || false,
+          }]
+        }
       });
     } catch (error) {
       console.error('Error tracking search impression:', error);
@@ -80,18 +82,20 @@ export function useSearchRankingTracking() {
     } = {}
   ) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      await supabase.from('search_ranking_analytics').insert({
-        merchant_id: merchantId,
-        event_type: 'click',
-        search_term: options.searchTerm || null,
-        position: position || null,
-        source_page: sourcePage,
-        user_id: user?.id || null,
-        session_id: sessionId.current,
-        device_type: getDeviceType(),
-        is_boosted: options.isBoosted || false,
+      await supabase.functions.invoke('track-analytics', {
+        body: {
+          type: 'search_ranking',
+          events: [{
+            merchant_id: merchantId,
+            event_type: 'click',
+            search_term: options.searchTerm || null,
+            position: position || null,
+            source_page: sourcePage,
+            session_id: sessionId.current,
+            device_type: getDeviceType(),
+            is_boosted: options.isBoosted || false,
+          }]
+        }
       });
     } catch (error) {
       console.error('Error tracking search click:', error);
@@ -106,16 +110,18 @@ export function useSearchRankingTracking() {
     } = {}
   ) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      await supabase.from('search_ranking_analytics').insert({
-        merchant_id: merchantId,
-        event_type: 'conversion',
-        search_term: options.searchTerm || null,
-        source_page: sourcePage,
-        user_id: user?.id || null,
-        session_id: sessionId.current,
-        device_type: getDeviceType(),
+      await supabase.functions.invoke('track-analytics', {
+        body: {
+          type: 'search_ranking',
+          events: [{
+            merchant_id: merchantId,
+            event_type: 'conversion',
+            search_term: options.searchTerm || null,
+            source_page: sourcePage,
+            session_id: sessionId.current,
+            device_type: getDeviceType(),
+          }]
+        }
       });
     } catch (error) {
       console.error('Error tracking search conversion:', error);
@@ -143,16 +149,14 @@ export function useSearchRankingTracking() {
     if (newImpressions.length === 0) return;
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
       const deviceType = getDeviceType();
       
-      const records = newImpressions.map(m => ({
+      const events = newImpressions.map(m => ({
         merchant_id: m.id,
         event_type: 'impression',
         search_term: searchTerm || null,
         position: m.position,
         source_page: sourcePage,
-        user_id: user?.id || null,
         session_id: sessionId.current,
         device_type: deviceType,
         is_boosted: m.isBoosted || false,
@@ -160,7 +164,12 @@ export function useSearchRankingTracking() {
         local_match: m.localMatch || false,
       }));
 
-      await supabase.from('search_ranking_analytics').insert(records);
+      await supabase.functions.invoke('track-analytics', {
+        body: {
+          type: 'search_ranking',
+          events
+        }
+      });
     } catch (error) {
       console.error('Error tracking batch impressions:', error);
     }
