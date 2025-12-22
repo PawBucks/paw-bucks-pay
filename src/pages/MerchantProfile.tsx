@@ -128,9 +128,9 @@ const MerchantProfile = () => {
             .select("id, photo_url")
             .eq("review_id", review.id);
 
-          // Get user profile for display name
+          // Get user profile for display name using the public reviewer_profiles view
           const { data: profile } = await supabase
-            .from("profiles")
+            .from("reviewer_profiles")
             .select("full_name")
             .eq("id", review.user_id)
             .single();

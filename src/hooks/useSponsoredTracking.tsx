@@ -1,6 +1,5 @@
 import { useCallback, useRef, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
 
 type SourcePage = "discover" | "directory" | "map" | "search";
 type EventType = "impression" | "click" | "conversion";
@@ -32,7 +31,6 @@ const getDeviceType = (): string => {
 };
 
 export function useSponsoredTracking(source: SourcePage) {
-  const { user } = useAuth();
   const trackedImpressions = useRef<Set<string>>(new Set());
   const sessionId = useRef<string>(getSessionId());
 
@@ -44,25 +42,25 @@ export function useSponsoredTracking(source: SourcePage) {
   const trackEvent = useCallback(
     async (event: Omit<TrackingEvent, "source">) => {
       try {
-        const { error } = await supabase.from("sponsored_placement_analytics").insert({
-          merchant_id: event.merchantId,
-          event_type: event.type,
-          source_page: source,
-          user_id: user?.id || null,
-          session_id: sessionId.current,
-          search_query: event.searchQuery || null,
-          position: event.position || null,
-          device_type: getDeviceType(),
+        await supabase.functions.invoke('track-analytics', {
+          body: {
+            type: 'sponsored',
+            events: [{
+              merchant_id: event.merchantId,
+              event_type: event.type,
+              source_page: source,
+              session_id: sessionId.current,
+              search_query: event.searchQuery || null,
+              position: event.position || null,
+              device_type: getDeviceType(),
+            }]
+          }
         });
-
-        if (error) {
-          console.error("Failed to track sponsored event:", error);
-        }
       } catch (err) {
         console.error("Error tracking sponsored event:", err);
       }
     },
-    [source, user?.id]
+    [source]
   );
 
   const trackImpression = useCallback(
