@@ -1280,12 +1280,15 @@ export type Database = {
           description: string | null
           id: string
           partner_id: string | null
+          pawbucks_status: string | null
+          receipt_id: string | null
           redemption_code: string | null
           redemption_used: boolean | null
           source: string
           transaction_id: string | null
           type: string
           user_id: string
+          vest_date: string | null
         }
         Insert: {
           amount: number
@@ -1293,12 +1296,15 @@ export type Database = {
           description?: string | null
           id?: string
           partner_id?: string | null
+          pawbucks_status?: string | null
+          receipt_id?: string | null
           redemption_code?: string | null
           redemption_used?: boolean | null
           source: string
           transaction_id?: string | null
           type: string
           user_id: string
+          vest_date?: string | null
         }
         Update: {
           amount?: number
@@ -1306,12 +1312,15 @@ export type Database = {
           description?: string | null
           id?: string
           partner_id?: string | null
+          pawbucks_status?: string | null
+          receipt_id?: string | null
           redemption_code?: string | null
           redemption_used?: boolean | null
           source?: string
           transaction_id?: string | null
           type?: string
           user_id?: string
+          vest_date?: string | null
         }
         Relationships: [
           {
@@ -1712,6 +1721,7 @@ export type Database = {
         Row: {
           admin_notes: string | null
           created_at: string
+          decision_reason: string | null
           id: string
           merchant_name: string
           pawbucks_awarded: number | null
@@ -1727,6 +1737,7 @@ export type Database = {
         Insert: {
           admin_notes?: string | null
           created_at?: string
+          decision_reason?: string | null
           id?: string
           merchant_name: string
           pawbucks_awarded?: number | null
@@ -1742,6 +1753,7 @@ export type Database = {
         Update: {
           admin_notes?: string | null
           created_at?: string
+          decision_reason?: string | null
           id?: string
           merchant_name?: string
           pawbucks_awarded?: number | null
@@ -2694,6 +2706,18 @@ export type Database = {
           total_transactions: number
         }[]
       }
+      get_monthly_non_partner_pawbucks: {
+        Args: { p_user_id: string }
+        Returns: number
+      }
+      get_pawbucks_breakdown: {
+        Args: { p_user_id: string }
+        Returns: {
+          available_balance: number
+          pending_balance: number
+          total_balance: number
+        }[]
+      }
       get_user_vet_ids: { Args: { check_user_id: string }; Returns: string[] }
       has_role: {
         Args: {
@@ -2722,6 +2746,7 @@ export type Database = {
         Args: { check_user_id: string; vet_user_id: string }
         Returns: boolean
       }
+      vest_pending_pawbucks: { Args: never; Returns: number }
       vet_can_view_pet: {
         Args: { pet_id: string; vet_user_id: string }
         Returns: boolean
