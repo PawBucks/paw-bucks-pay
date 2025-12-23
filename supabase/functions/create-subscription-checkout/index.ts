@@ -9,8 +9,8 @@ const corsHeaders = {
 
 // PawPass subscription price IDs
 const PRICE_IDS = {
-  basic: 'price_1SMsJSK2QqG8Wa5zn0mk0wxw', // PawPass $10/month
-  plus: 'price_1SU6c5K2QqG8Wa5zU5yzCcEP',  // PawPass+ $20/month
+  basic: 'price_1ShaUIK2QqG8Wa5ziudsOxwM', // PawPass $10/month
+  plus: 'price_1ShaTRK2QqG8Wa5zaZHkZOW8',  // PawPass+ $20/month
 };
 
 serve(async (req) => {
