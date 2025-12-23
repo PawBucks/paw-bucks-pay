@@ -117,8 +117,8 @@ serve(async (req) => {
 
     console.log('Merchant found:', { merchantId, merchantName, cashbackRate, merchantAcceptsPawBucks });
 
-    // STEP 5: Calculate application fee (platform monetization)
-    const PLATFORM_FEE_PERCENTAGE = 0.10; // 10% fee
+    // STEP 5: Calculate application fee (3% platform fee for Connect payments)
+    const PLATFORM_FEE_PERCENTAGE = 0.03; // 3% fee
     
     // Get the price details from connected account to calculate the fee and determine checkout mode
     const connectedPrice = await stripe.prices.retrieve(priceId, {
