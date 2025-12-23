@@ -174,15 +174,12 @@ serve(async (req) => {
     });
 
     const stripeAmountInCents = Math.round(stripeAmount * 100);
-    // Platform fee: 3% of transaction for PawBucks platform
-    const platformFeeInCents = Math.round(stripeAmount * 0.03 * 100);
 
-    // Create PaymentIntent
+    // Create PaymentIntent (no platform fee - direct platform purchases)
     const paymentIntent = await stripe.paymentIntents.create({
       amount: stripeAmountInCents,
       currency: 'usd',
       automatic_payment_methods: { enabled: true },
-      application_fee_amount: platformFeeInCents,
       metadata: {
         service_id: serviceId,
         service_name: serviceName,
