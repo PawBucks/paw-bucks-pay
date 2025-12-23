@@ -128,8 +128,8 @@ serve(async (req) => {
     // cashbackRate is the multiplier (10x, 20x, 30x) meaning $1 = 10/20/30 PawBucks
     const amountInCents = Math.round(amount * 100);
     const pawbucksEarned = Math.round(amount * cashbackRate);
-    // Platform fee: 10% of transaction for platform sustainability
-    const platformFeeInCents = Math.round(amount * 0.10 * 100);
+    // Platform fee: 3% of transaction for PawBucks platform
+    const platformFeeInCents = Math.round(amount * 0.03 * 100);
 
     console.log('Payment breakdown:', {
       totalAmount: amount,
