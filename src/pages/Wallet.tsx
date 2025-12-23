@@ -16,6 +16,7 @@ import { SpendingTrendsChart } from "@/components/wallet/SpendingTrendsChart";
 import { MonthlyComparison } from "@/components/wallet/MonthlyComparison";
 import { BudgetSettings } from "@/components/wallet/BudgetSettings";
 import { YearlySummary } from "@/components/wallet/YearlySummary";
+import { PawBucksBreakdown } from "@/components/wallet/PawBucksBreakdown";
 import { Wallet as WalletIcon, TrendingUp, Gift, ArrowUpRight, ArrowDownRight, Coins, Sparkles, PieChart, Calendar } from "lucide-react";
 import { format } from "date-fns";
 import { useQueryClient } from "@tanstack/react-query";
@@ -224,6 +225,13 @@ const Wallet = () => {
             </div>
           </GradientCard>
         </div>
+
+        {/* PawBucks Available vs Pending Breakdown */}
+        {user && (
+          <div className="mb-6">
+            <PawBucksBreakdown userId={user.id} />
+          </div>
+        )}
 
         {/* Quick Action - View Detailed Breakdown */}
         <div className="mb-6">
