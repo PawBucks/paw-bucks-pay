@@ -7,7 +7,7 @@ import { PawBucksCreditTool } from "@/components/admin/PawBucksCreditTool";
 import { SecurityMonitoringTab } from "@/components/admin/SecurityMonitoringTab";
 import { ConsultationBookingsTab } from "@/components/admin/ConsultationBookingsTab";
 import FeedbackTab from "@/components/admin/FeedbackTab";
-import { ReceiptsTab } from "@/components/admin/ReceiptsTab";
+import { NonPartnerReceiptVerificationTab } from "@/components/admin/NonPartnerReceiptVerificationTab";
 import { Button } from "@/components/ui/button";
 import { GradientCard } from "@/components/ui/gradient-card";
 import { Input } from "@/components/ui/input";
@@ -544,7 +544,7 @@ const AdminDashboard = () => {
             </Button>
             <Button variant="ghost" size="sm" className="flex-shrink-0 h-8 px-3 text-xs" onClick={() => setReceiptsDialogOpen(true)}>
               <Receipt className="w-3.5 h-3.5 mr-1.5" />
-              Receipts
+              Non-Partner Verification
             </Button>
           </div>
         </div>
@@ -1406,13 +1406,13 @@ const AdminDashboard = () => {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Receipt className="w-5 h-5" />
-              Receipt Submissions
+              Non-Partner Receipt Verification
             </DialogTitle>
             <DialogDescription>
-              Review and manage PawPass+ receipt submissions
+              Review and manage non-partner receipt submissions
             </DialogDescription>
           </DialogHeader>
-          <ReceiptsTab />
+          <NonPartnerReceiptVerificationTab />
         </DialogContent>
       </Dialog>
     </div>

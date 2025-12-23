@@ -145,12 +145,19 @@ export const ReceiptUploadDialog = ({ open, onOpenChange, userId }: ReceiptUploa
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Receipt className="h-5 w-5 text-primary" />
-            Upload Receipt
+            Upload Non-Partner Receipt
           </DialogTitle>
           <DialogDescription>
             Upload a receipt from any pet merchant to earn PawBucks rewards. We'll review and credit your balance within 24-72 hours.
           </DialogDescription>
         </DialogHeader>
+        
+        {/* Disclaimer Banner */}
+        <div className="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+          <p className="text-xs text-yellow-700">
+            <strong>Note:</strong> Non-partner PawBucks vest after 30 days and are subject to a 20,000 PawBucks monthly cap.
+          </p>
+        </div>
 
         <div className="space-y-4 py-4">
           {/* Receipt Image Upload */}

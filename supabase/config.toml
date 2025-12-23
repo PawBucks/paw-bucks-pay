@@ -170,3 +170,6 @@ verify_jwt = true
 
 [functions.track-analytics]
 verify_jwt = false
+
+[functions.vest-pending-pawbucks]
+verify_jwt = false
