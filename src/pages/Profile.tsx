@@ -247,7 +247,7 @@ const Profile = () => {
                     </div>
                     <div>
                       <h3 className="font-semibold text-lg">PawPass</h3>
-                      <p className="text-sm text-muted-foreground">$9.99/month</p>
+                      <p className="text-sm text-muted-foreground">$10/month</p>
                     </div>
                   </div>
                 </div>
@@ -294,7 +294,7 @@ const Profile = () => {
                     </div>
                     <div>
                       <h3 className="font-semibold text-lg">PawPass+</h3>
-                      <p className="text-sm text-muted-foreground">$19.99/month</p>
+                      <p className="text-sm text-muted-foreground">$20/month</p>
                     </div>
                   </div>
                 </div>
