@@ -106,12 +106,22 @@ export const EditMerchantProfileDialog = ({
                 className="w-full p-3 rounded-lg border bg-background"
                 required
               >
-                <option value="vet">Vet</option>
-                <option value="groomer">Groomer</option>
-                <option value="sitter">Sitter</option>
+                <option value="veterinary">Veterinary</option>
+                <option value="grooming">Grooming</option>
                 <option value="pet_store">Pet Store</option>
+                <option value="food">Food & Treats</option>
+                <option value="boarding">Boarding</option>
+                <option value="training">Training</option>
                 <option value="walker">Walker</option>
-                <option value="trainer">Trainer</option>
+                <option value="daycare">Daycare</option>
+                <option value="photography">Photography</option>
+                <option value="insurance">Insurance</option>
+                <option value="delivery">Delivery</option>
+                <option value="hiker">Hiker</option>
+                <option value="runner">Runner</option>
+                <option value="masseuse">Masseuse</option>
+                <option value="behaviorist">Behaviorist</option>
+                <option value="other">Other</option>
               </select>
             </div>
             <div className="space-y-2">
