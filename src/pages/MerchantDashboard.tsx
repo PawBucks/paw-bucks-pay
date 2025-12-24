@@ -21,6 +21,7 @@ import {
   Coins,
   Store,
   Sparkles,
+  PlugZap,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -712,6 +713,17 @@ const MerchantDashboard = () => {
             <div className="text-left">
               <p className="font-semibold text-primary">Merchant Market</p>
               <p className="text-xs text-muted-foreground">Grow your business</p>
+            </div>
+          </Button>
+          <Button
+            variant="outline"
+            className="h-auto py-4 justify-start"
+            onClick={() => navigate("/merchant/pos-integration")}
+          >
+            <PlugZap className="w-5 h-5 mr-3" />
+            <div className="text-left">
+              <p className="font-semibold">POS Integration</p>
+              <p className="text-xs text-muted-foreground">Connect your POS system</p>
             </div>
           </Button>
         </div>

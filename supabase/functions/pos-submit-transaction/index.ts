@@ -1,0 +1,248 @@
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.2';
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-api-key',
+};
+
+// Hash the API key to compare with stored hash
+async function hashApiKey(key: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(key);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    // Get API key from header
+    const apiKey = req.headers.get('x-api-key');
+    if (!apiKey) {
+      throw new Error('API key required. Include x-api-key header.');
+    }
+
+    if (!apiKey.startsWith('pk_live_')) {
+      throw new Error('Invalid API key format');
+    }
+
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
+    // Hash the provided key and look up the integration
+    const apiKeyHash = await hashApiKey(apiKey);
+    
+    const { data: integration, error: integrationError } = await supabaseAdmin
+      .from('merchant_pos_integrations')
+      .select('id, merchant_id, is_active')
+      .eq('api_key_hash', apiKeyHash)
+      .single();
+
+    if (integrationError || !integration) {
+      console.error('API key lookup failed:', integrationError);
+      throw new Error('Invalid API key');
+    }
+
+    if (!integration.is_active) {
+      throw new Error('API key is deactivated');
+    }
+
+    // Update last_used_at
+    await supabaseAdmin
+      .from('merchant_pos_integrations')
+      .update({ last_used_at: new Date().toISOString() })
+      .eq('id', integration.id);
+
+    // Parse transaction data
+    const body = await req.json();
+    const {
+      transaction_id,
+      customer_email,
+      customer_phone,
+      amount,
+      currency = 'USD',
+      items,
+      timestamp,
+    } = body;
+
+    // Validate required fields
+    if (!amount || amount <= 0) {
+      throw new Error('Valid amount is required');
+    }
+
+    if (!customer_email && !customer_phone) {
+      throw new Error('Either customer_email or customer_phone is required to match rewards');
+    }
+
+    // Check for duplicate transaction
+    if (transaction_id) {
+      const { data: existing } = await supabaseAdmin
+        .from('pos_transactions')
+        .select('id')
+        .eq('integration_id', integration.id)
+        .eq('external_transaction_id', transaction_id)
+        .single();
+
+      if (existing) {
+        return new Response(
+          JSON.stringify({
+            success: true,
+            message: 'Transaction already processed',
+            transaction_id: existing.id,
+            duplicate: true,
+          }),
+          {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 200,
+          }
+        );
+      }
+    }
+
+    // Create the POS transaction record
+    const { data: posTransaction, error: insertError } = await supabaseAdmin
+      .from('pos_transactions')
+      .insert({
+        integration_id: integration.id,
+        merchant_id: integration.merchant_id,
+        external_transaction_id: transaction_id || null,
+        customer_email: customer_email?.toLowerCase().trim() || null,
+        customer_phone: customer_phone?.replace(/\D/g, '') || null,
+        amount: amount,
+        currency: currency.toUpperCase(),
+        items: items || null,
+        pos_timestamp: timestamp ? new Date(timestamp).toISOString() : null,
+        status: 'pending',
+      })
+      .select()
+      .single();
+
+    if (insertError) {
+      console.error('Failed to create POS transaction:', insertError);
+      throw new Error('Failed to record transaction');
+    }
+
+    // Try to match the customer to a PawBucks user
+    let matchedUser = null;
+    let pawbucksAwarded = 0;
+
+    // Search by email first
+    if (customer_email) {
+      const { data: userByEmail } = await supabaseAdmin
+        .from('profiles')
+        .select('id, email, full_name')
+        .eq('email', customer_email.toLowerCase().trim())
+        .single();
+      
+      if (userByEmail) {
+        matchedUser = userByEmail;
+      }
+    }
+
+    // If no match by email, try phone
+    if (!matchedUser && customer_phone) {
+      const cleanPhone = customer_phone.replace(/\D/g, '');
+      const { data: userByPhone } = await supabaseAdmin
+        .from('profiles')
+        .select('id, email, full_name, phone')
+        .eq('phone', cleanPhone)
+        .single();
+      
+      if (userByPhone) {
+        matchedUser = userByPhone;
+      }
+    }
+
+    if (matchedUser) {
+      // Get merchant details for cashback calculation
+      const { data: merchantData } = await supabaseAdmin
+        .from('merchants')
+        .select('cashback_rate, business_name')
+        .eq('id', integration.merchant_id)
+        .single();
+
+      const cashbackRate = merchantData?.cashback_rate || 5;
+      pawbucksAwarded = Math.floor(amount * (cashbackRate / 100));
+
+      if (pawbucksAwarded > 0) {
+        // Create PawBucks activity record
+        const { error: pawbucksError } = await supabaseAdmin
+          .from('pawbucks_activity')
+          .insert({
+            user_id: matchedUser.id,
+            amount: pawbucksAwarded,
+            type: 'credit',
+            source: 'pos_transaction',
+            description: `Purchase at ${merchantData?.business_name || 'Partner Store'}`,
+            partner_id: integration.merchant_id,
+            pawbucks_status: 'available',
+          });
+
+        if (pawbucksError) {
+          console.error('Failed to award PawBucks:', pawbucksError);
+          // Don't fail the whole transaction, just log the error
+          pawbucksAwarded = 0;
+        }
+      }
+
+      // Update the POS transaction with matched info
+      await supabaseAdmin
+        .from('pos_transactions')
+        .update({
+          status: pawbucksAwarded > 0 ? 'rewarded' : 'matched',
+          matched_user_id: matchedUser.id,
+          pawbucks_awarded: pawbucksAwarded,
+          processed_at: new Date().toISOString(),
+        })
+        .eq('id', posTransaction.id);
+
+      console.log(`POS transaction ${posTransaction.id}: Awarded ${pawbucksAwarded} PawBucks to user ${matchedUser.id}`);
+    } else {
+      // No matching user found
+      await supabaseAdmin
+        .from('pos_transactions')
+        .update({
+          status: 'pending',
+          error_message: 'No matching PawBucks user found',
+        })
+        .eq('id', posTransaction.id);
+
+      console.log(`POS transaction ${posTransaction.id}: No matching user found`);
+    }
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        transaction_id: posTransaction.id,
+        status: matchedUser ? (pawbucksAwarded > 0 ? 'rewarded' : 'matched') : 'pending',
+        matched_user: matchedUser ? true : false,
+        pawbucks_awarded: pawbucksAwarded,
+        message: matchedUser 
+          ? `Transaction processed. ${pawbucksAwarded} PawBucks awarded.`
+          : 'Transaction recorded. Customer not found in PawBucks system.',
+      }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      }
+    );
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('POS transaction error:', errorMessage);
+    
+    return new Response(
+      JSON.stringify({ error: errorMessage, success: false }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 400,
+      }
+    );
+  }
+});

@@ -759,6 +759,57 @@ export type Database = {
         }
         Relationships: []
       }
+      merchant_pos_integrations: {
+        Row: {
+          api_key_hash: string
+          api_key_prefix: string
+          created_at: string
+          id: string
+          is_active: boolean
+          last_used_at: string | null
+          merchant_id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          api_key_hash: string
+          api_key_prefix: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          last_used_at?: string | null
+          merchant_id: string
+          name?: string
+          updated_at?: string
+        }
+        Update: {
+          api_key_hash?: string
+          api_key_prefix?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          last_used_at?: string | null
+          merchant_id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_pos_integrations_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_pos_integrations_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       merchant_reviews: {
         Row: {
           created_at: string
@@ -1674,6 +1725,85 @@ export type Database = {
           value?: Json
         }
         Relationships: []
+      }
+      pos_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          customer_email: string | null
+          customer_phone: string | null
+          error_message: string | null
+          external_transaction_id: string | null
+          id: string
+          integration_id: string
+          items: Json | null
+          matched_user_id: string | null
+          merchant_id: string
+          pawbucks_awarded: number | null
+          pos_timestamp: string | null
+          processed_at: string | null
+          status: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string
+          customer_email?: string | null
+          customer_phone?: string | null
+          error_message?: string | null
+          external_transaction_id?: string | null
+          id?: string
+          integration_id: string
+          items?: Json | null
+          matched_user_id?: string | null
+          merchant_id: string
+          pawbucks_awarded?: number | null
+          pos_timestamp?: string | null
+          processed_at?: string | null
+          status?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          customer_email?: string | null
+          customer_phone?: string | null
+          error_message?: string | null
+          external_transaction_id?: string | null
+          id?: string
+          integration_id?: string
+          items?: Json | null
+          matched_user_id?: string | null
+          merchant_id?: string
+          pawbucks_awarded?: number | null
+          pos_timestamp?: string | null
+          processed_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pos_transactions_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_pos_integrations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pos_transactions_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pos_transactions_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
