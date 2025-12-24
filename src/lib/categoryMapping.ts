@@ -11,6 +11,10 @@ import {
   Truck,
   Camera,
   Shield,
+  Mountain,
+  Zap,
+  Hand,
+  Brain,
   LucideIcon
 } from "lucide-react";
 
@@ -33,6 +37,10 @@ export const CATEGORY_CONFIG: Record<string, CategoryConfig> = {
   photography: { icon: Camera, color: "hsl(270, 60%, 55%)", label: "Photography" },
   insurance: { icon: Shield, color: "hsl(220, 60%, 50%)", label: "Insurance" },
   delivery: { icon: Truck, color: "hsl(30, 70%, 50%)", label: "Delivery" },
+  hiker: { icon: Mountain, color: "hsl(140, 60%, 45%)", label: "Hiker" },
+  runner: { icon: Zap, color: "hsl(50, 85%, 50%)", label: "Runner" },
+  masseuse: { icon: Hand, color: "hsl(340, 65%, 55%)", label: "Masseuse" },
+  behaviorist: { icon: Brain, color: "hsl(280, 60%, 50%)", label: "Behaviorist" },
   other: { icon: MoreHorizontal, color: "hsl(var(--muted-foreground))", label: "Other" },
 };
 
@@ -100,6 +108,35 @@ export const BUSINESS_TYPE_MAP: Record<string, string> = {
   // Delivery
   delivery: 'delivery',
   'pet delivery': 'delivery',
+  // Hiker
+  hiker: 'hiker',
+  'pet hiker': 'hiker',
+  'dog hiker': 'hiker',
+  hiking: 'hiker',
+  'pet hiking': 'hiker',
+  // Runner
+  runner: 'runner',
+  'pet runner': 'runner',
+  'dog runner': 'runner',
+  running: 'runner',
+  'pet running': 'runner',
+  jogger: 'runner',
+  'dog jogger': 'runner',
+  // Masseuse
+  masseuse: 'masseuse',
+  'pet masseuse': 'masseuse',
+  'dog masseuse': 'masseuse',
+  massage: 'masseuse',
+  'pet massage': 'masseuse',
+  'animal massage': 'masseuse',
+  'pet massage therapist': 'masseuse',
+  // Behaviorist
+  behaviorist: 'behaviorist',
+  'pet behaviorist': 'behaviorist',
+  'dog behaviorist': 'behaviorist',
+  'animal behaviorist': 'behaviorist',
+  'behavior specialist': 'behaviorist',
+  'pet behavior': 'behaviorist',
 };
 
 // Get normalized category key from business_type

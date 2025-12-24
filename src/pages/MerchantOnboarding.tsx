@@ -18,7 +18,7 @@ const MerchantOnboarding = () => {
   const { user, loading: authLoading } = useAuth();
   const { geocodeAddress } = useGeocoding();
   const [isLoading, setIsLoading] = useState(false);
-  const [businessType, setBusinessType] = useState("dog_walker");
+  const [businessType, setBusinessType] = useState("veterinary");
   const [profile, setProfile] = useState<any>(null);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
@@ -252,17 +252,27 @@ const MerchantOnboarding = () => {
             {/* Business Type */}
             <div className="space-y-2">
               <Label htmlFor="businessType">Type of Business *</Label>
-              <Select value={businessType} onValueChange={setBusinessType}>
+            <Select value={businessType} onValueChange={setBusinessType}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select business type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="vet">Vet</SelectItem>
-                  <SelectItem value="groomer">Groomer</SelectItem>
-                  <SelectItem value="sitter">Sitter</SelectItem>
+                  <SelectItem value="veterinary">Veterinary</SelectItem>
+                  <SelectItem value="grooming">Grooming</SelectItem>
                   <SelectItem value="pet_store">Pet Store</SelectItem>
+                  <SelectItem value="food">Food & Treats</SelectItem>
+                  <SelectItem value="boarding">Boarding</SelectItem>
+                  <SelectItem value="training">Training</SelectItem>
                   <SelectItem value="walker">Walker</SelectItem>
-                  <SelectItem value="trainer">Trainer</SelectItem>
+                  <SelectItem value="daycare">Daycare</SelectItem>
+                  <SelectItem value="photography">Photography</SelectItem>
+                  <SelectItem value="insurance">Insurance</SelectItem>
+                  <SelectItem value="delivery">Delivery</SelectItem>
+                  <SelectItem value="hiker">Hiker</SelectItem>
+                  <SelectItem value="runner">Runner</SelectItem>
+                  <SelectItem value="masseuse">Masseuse</SelectItem>
+                  <SelectItem value="behaviorist">Behaviorist</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
                 </SelectContent>
               </Select>
             </div>
