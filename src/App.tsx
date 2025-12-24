@@ -155,7 +155,7 @@ const AppContent = () => {
   );
 };
 
-function App() {
+const App = () => {
   // Initialize QueryClient inside component to ensure proper React lifecycle
   const [queryClient] = useState(() => createQueryClient());
   
