@@ -153,6 +153,14 @@ ${shareUrl}`;
     });
   };
 
+  // HTML escape function to prevent XSS
+  const escapeHtml = (text: string | null | undefined): string => {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  };
+
   const handlePrint = () => {
     // Create a printable version of the flyer
     const printWindow = window.open('', '_blank');
@@ -161,11 +169,21 @@ ${shareUrl}`;
       return;
     }
 
+    // Escape all user-supplied data to prevent XSS
+    const safePetName = escapeHtml(post.pet_name);
+    const safePetType = escapeHtml(post.pet_type);
+    const safeLastSeenLocation = escapeHtml(post.last_seen_location);
+    const safeBreed = escapeHtml(post.breed);
+    const safeColorMarkings = escapeHtml(post.color_markings);
+    const safeContactPhone = escapeHtml(post.contact_phone);
+    const safeContactEmail = escapeHtml(post.contact_email);
+    const safePhotoUrl = escapeHtml(post.photo_url);
+
     printWindow.document.write(`
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Lost Pet Flyer - ${post.pet_name}</title>
+          <title>Lost Pet Flyer - ${safePetName}</title>
           <style>
             @media print {
               body { margin: 0; padding: 20px; }
@@ -262,22 +280,22 @@ ${shareUrl}`;
         </head>
         <body>
           <div class="header">
-            <h1>🚨 LOST ${post.pet_type.toUpperCase()} 🚨</h1>
-            <div class="pet-name">${post.pet_name}</div>
+            <h1>🚨 LOST ${safePetType.toUpperCase()} 🚨</h1>
+            <div class="pet-name">${safePetName}</div>
           </div>
           
           <div class="photo">
-            ${post.photo_url 
-              ? `<img src="${post.photo_url}" alt="${post.pet_name}" />` 
+            ${safePhotoUrl 
+              ? `<img src="${safePhotoUrl}" alt="${safePetName}" />` 
               : `<div class="no-photo">No Photo Available</div>`
             }
           </div>
           
           <div class="details">
-            <p><strong>📍 Last Seen:</strong> ${post.last_seen_location}</p>
+            <p><strong>📍 Last Seen:</strong> ${safeLastSeenLocation}</p>
             <p><strong>📅 Date:</strong> ${new Date(post.last_seen_date).toLocaleDateString()}</p>
-            ${post.breed ? `<p><strong>🐾 Breed:</strong> ${post.breed}</p>` : ''}
-            <p><strong>🎨 Color/Markings:</strong> ${post.color_markings}</p>
+            ${safeBreed ? `<p><strong>🐾 Breed:</strong> ${safeBreed}</p>` : ''}
+            <p><strong>🎨 Color/Markings:</strong> ${safeColorMarkings}</p>
           </div>
           
           ${post.reward_amount ? `
@@ -288,20 +306,20 @@ ${shareUrl}`;
           
           <div class="contact">
             <strong>PLEASE CONTACT:</strong><br/>
-            📞 ${post.contact_phone}
-            ${post.contact_email ? `<br/>📧 ${post.contact_email}` : ''}
+            📞 ${safeContactPhone}
+            ${safeContactEmail ? `<br/>📧 ${safeContactEmail}` : ''}
           </div>
           
           <div class="footer">
-            <p>Please help bring ${post.pet_name} home! Share this flyer with friends and neighbors.</p>
+            <p>Please help bring ${safePetName} home! Share this flyer with friends and neighbors.</p>
             <p>View online: ${shareUrl}</p>
           </div>
           
           <div class="tear-off">
             ${Array(5).fill(null).map(() => `
               <div class="tear-strip">
-                LOST: ${post.pet_name}<br/>
-                📞 ${post.contact_phone}
+                LOST: ${safePetName}<br/>
+                📞 ${safeContactPhone}
               </div>
             `).join('')}
           </div>
