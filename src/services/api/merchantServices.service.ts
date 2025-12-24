@@ -20,6 +20,7 @@ export const SERVICE_NAMES = {
   TRAINING_COURSE: 'Exclusive Training Course',
   PRIORITY_SUPPORT: 'Priority Merchant Support',
   REVIEW_CAMPAIGN: 'Review Generation Campaign',
+  POS_API_INTEGRATION: 'POS & API Integration',
 } as const;
 
 export type ServiceName = typeof SERVICE_NAMES[keyof typeof SERVICE_NAMES];
