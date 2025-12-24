@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.2';
+import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.57.2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -13,6 +13,106 @@ async function hashApiKey(key: string): Promise<string> {
   const hashBuffer = await crypto.subtle.digest('SHA-256', data);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// Generate HMAC signature for webhook
+async function generateHmacSignature(payload: string, secret: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+  const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(payload));
+  return Array.from(new Uint8Array(signature)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// Trigger webhooks for an event
+async function triggerWebhooks(
+  supabaseAdmin: SupabaseClient,
+  merchantId: string,
+  eventType: string,
+  data: Record<string, unknown>
+): Promise<void> {
+  try {
+    // Get active webhooks for this merchant that subscribe to this event
+    const { data: webhooks, error } = await supabaseAdmin
+      .from('merchant_webhooks')
+      .select('*')
+      .eq('merchant_id', merchantId)
+      .eq('is_active', true)
+      .contains('events', [eventType]);
+
+    if (error || !webhooks || webhooks.length === 0) {
+      return;
+    }
+
+    const payload = JSON.stringify({
+      event: eventType,
+      timestamp: new Date().toISOString(),
+      data: data,
+    });
+
+    for (const webhook of webhooks) {
+      const startTime = Date.now();
+      let success = false;
+      let responseStatus: number | null = null;
+      let responseBody: string | null = null;
+
+      try {
+        const signature = await generateHmacSignature(payload, webhook.secret);
+        
+        const response = await fetch(webhook.url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Webhook-Signature': signature,
+            'X-Webhook-Event': eventType,
+          },
+          body: payload,
+        });
+
+        responseStatus = response.status;
+        responseBody = await response.text().catch(() => null);
+        success = response.ok;
+
+        // Update webhook last triggered and failure count
+        await supabaseAdmin
+          .from('merchant_webhooks')
+          .update({
+            last_triggered_at: new Date().toISOString(),
+            failure_count: success ? 0 : webhook.failure_count + 1,
+          })
+          .eq('id', webhook.id);
+      } catch (err) {
+        console.error(`Webhook delivery failed for ${webhook.url}:`, err);
+        responseBody = err instanceof Error ? err.message : 'Unknown error';
+        
+        // Increment failure count
+        await supabaseAdmin
+          .from('merchant_webhooks')
+          .update({ failure_count: webhook.failure_count + 1 })
+          .eq('id', webhook.id);
+      }
+
+      // Log the delivery attempt
+      await supabaseAdmin
+        .from('webhook_delivery_logs')
+        .insert({
+          webhook_id: webhook.id,
+          event_type: eventType,
+          payload: data,
+          response_status: responseStatus,
+          response_body: responseBody?.substring(0, 1000),
+          success: success,
+          duration_ms: Date.now() - startTime,
+        });
+    }
+  } catch (err) {
+    console.error('Error triggering webhooks:', err);
+  }
 }
 
 serve(async (req) => {
@@ -204,6 +304,15 @@ serve(async (req) => {
         .eq('id', posTransaction.id);
 
       console.log(`POS transaction ${posTransaction.id}: Awarded ${pawbucksAwarded} PawBucks to user ${matchedUser.id}`);
+      
+      // Trigger webhooks for reward.awarded event
+      await triggerWebhooks(supabaseAdmin, integration.merchant_id, 'reward.awarded', {
+        transaction_id: posTransaction.id,
+        external_transaction_id: transaction_id,
+        customer_email: customer_email,
+        amount: amount,
+        pawbucks_awarded: pawbucksAwarded,
+      });
     } else {
       // No matching user found
       await supabaseAdmin
@@ -215,6 +324,15 @@ serve(async (req) => {
         .eq('id', posTransaction.id);
 
       console.log(`POS transaction ${posTransaction.id}: No matching user found`);
+      
+      // Trigger webhooks for customer.not_found event
+      await triggerWebhooks(supabaseAdmin, integration.merchant_id, 'customer.not_found', {
+        transaction_id: posTransaction.id,
+        external_transaction_id: transaction_id,
+        customer_email: customer_email,
+        customer_phone: customer_phone,
+        amount: amount,
+      });
     }
 
     return new Response(
@@ -224,7 +342,7 @@ serve(async (req) => {
         status: matchedUser ? (pawbucksAwarded > 0 ? 'rewarded' : 'matched') : 'pending',
         matched_user: matchedUser ? true : false,
         pawbucks_awarded: pawbucksAwarded,
-        message: matchedUser 
+        message: matchedUser
           ? `Transaction processed. ${pawbucksAwarded} PawBucks awarded.`
           : 'Transaction recorded. Customer not found in PawBucks system.',
       }),
