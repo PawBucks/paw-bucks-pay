@@ -27,10 +27,10 @@ const MerchantLanding = () => {
             />
           </div>
           <Button 
-            onClick={() => navigate("/merchant-onboarding")}
+            onClick={() => navigate("/auth")}
             className="shadow-xl hover:shadow-2xl transition-all hover:scale-105"
           >
-            Get Started
+            Sign In
           </Button>
         </nav>
       </header>
