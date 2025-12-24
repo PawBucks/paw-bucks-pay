@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CreditCard, TrendingUp, Shield, BarChart3, CheckCircle, ArrowRight, DollarSign, Sparkles, UserPlus, Settings, Percent } from "lucide-react";
+import { SocialFollowLinks } from "@/components/SocialFollowLinks";
 import logo from "@/assets/logo.png";
 import { PremiumMerchantsBanner } from "@/components/PremiumMerchantsBanner";
 
@@ -407,6 +408,7 @@ const MerchantLanding = () => {
             <p className="text-sm sm:text-base text-muted-foreground text-center max-w-md">
               The pet-focused payments and rewards platform for growing businesses.
             </p>
+            <SocialFollowLinks />
             <p className="text-sm text-muted-foreground">
               &copy; {new Date().getFullYear()} PawBucks. All rights reserved.
             </p>

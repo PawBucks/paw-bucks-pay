@@ -9,6 +9,7 @@ import { Header } from "@/components/Header";
 import { SEO } from "@/components/SEO";
 import { PremiumMerchantsBanner } from "@/components/PremiumMerchantsBanner";
 import { Wallet, Store, Gift, ArrowRight, Shield, Zap, Users, TrendingUp, CheckCircle, Sparkles, Info } from "lucide-react";
+import { SocialFollowLinks } from "@/components/SocialFollowLinks";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import logo from "@/assets/logo.png";
 
@@ -432,7 +433,7 @@ const Index = () => {
       <footer className="border-t py-12 sm:py-16 bg-card/80 backdrop-blur-sm" role="contentinfo">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center gap-6">
-          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3">
               <img
                 src={logo}
                 alt="PawBucks Logo"
@@ -445,6 +446,7 @@ const Index = () => {
             <p className="text-sm sm:text-base text-muted-foreground text-center max-w-md">
               Making pet care payments simple, secure, and rewarding for everyone who loves pets.
             </p>
+            <SocialFollowLinks />
             <p className="text-sm text-muted-foreground">
               &copy; {new Date().getFullYear()} PawBucks. All rights reserved.
             </p>
