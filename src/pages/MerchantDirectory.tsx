@@ -39,6 +39,11 @@ import {
   Filter,
   BadgeCheck,
   Sparkles,
+  Mountain,
+  Zap,
+  Hand,
+  Brain,
+  MoreHorizontal,
 } from "lucide-react";
 
 type MerchantWithRating = {
@@ -62,6 +67,11 @@ const businessTypes = [
   { label: "Vets", value: "vet", icon: Stethoscope },
   { label: "Walkers", value: "walker", icon: Footprints },
   { label: "Trainers", value: "trainer", icon: Bone },
+  { label: "Hikers", value: "hiker", icon: Mountain },
+  { label: "Runners", value: "runner", icon: Zap },
+  { label: "Masseuses", value: "masseuse", icon: Hand },
+  { label: "Behaviorists", value: "behaviorist", icon: Brain },
+  { label: "Other", value: "other", icon: MoreHorizontal },
 ];
 
 const getBusinessIcon = (type: string) => {
@@ -72,6 +82,11 @@ const getBusinessIcon = (type: string) => {
   if (lowerType.includes("vet") || lowerType.includes("clinic")) return Stethoscope;
   if (lowerType.includes("walker") || lowerType.includes("walking")) return Footprints;
   if (lowerType.includes("trainer") || lowerType.includes("training")) return Bone;
+  if (lowerType.includes("hiker") || lowerType.includes("hiking")) return Mountain;
+  if (lowerType.includes("runner") || lowerType.includes("running") || lowerType.includes("jogger")) return Zap;
+  if (lowerType.includes("masseuse") || lowerType.includes("massage")) return Hand;
+  if (lowerType.includes("behaviorist") || lowerType.includes("behavior")) return Brain;
+  if (lowerType.includes("other")) return MoreHorizontal;
   return Store;
 };
 
