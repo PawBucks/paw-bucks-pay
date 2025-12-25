@@ -11,13 +11,27 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, format } from "date-fns";
 import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 interface Notification {
   id: string;
   title: string;
   message: string;
+  category?: string;
   is_read: boolean;
   created_at: string;
 }
@@ -72,6 +86,9 @@ export const NotificationsDropdown = ({ userId }: { userId: string }) => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [userPrefersBrowser, setUserPrefersBrowser] = useState(false);
+  const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const isDesktop = useMediaQuery("(min-width: 768px)");
 
   const enableNotifications = useCallback(async () => {
     // Browser notifications only work when the app runs in a top-level, secure context
@@ -211,21 +228,60 @@ export const NotificationsDropdown = ({ userId }: { userId: string }) => {
     setUnreadCount(0);
   };
 
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative min-h-[44px] min-w-[44px]">
-          <Bell className="h-5 w-5" />
-          {unreadCount > 0 && (
-            <Badge
-              variant="destructive"
-              className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
-            >
-              {unreadCount > 9 ? "9+" : unreadCount}
+  const handleNotificationClick = async (notification: Notification, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!notification.is_read) {
+      await markAsRead(notification.id);
+    }
+    setDropdownOpen(false);
+    setSelectedNotification(notification);
+  };
+
+  const NotificationDetailContent = () => {
+    if (!selectedNotification) return null;
+    
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 flex-wrap">
+          {selectedNotification.category && (
+            <Badge variant="outline" className="text-xs capitalize">
+              {selectedNotification.category}
             </Badge>
           )}
-        </Button>
-      </DropdownMenuTrigger>
+          <span className="text-xs text-muted-foreground">
+            {format(
+              new Date(selectedNotification.created_at),
+              "MMM d, yyyy 'at' h:mm a"
+            )}
+          </span>
+        </div>
+        <div className="prose prose-sm dark:prose-invert max-w-none">
+          <p className="text-foreground whitespace-pre-wrap leading-relaxed">
+            {selectedNotification.message}
+          </p>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <>
+      <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon" className="relative min-h-[44px] min-w-[44px]">
+            <Bell className="h-5 w-5" />
+            {unreadCount > 0 && (
+              <Badge
+                variant="destructive"
+                className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+              >
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </Badge>
+            )}
+          </Button>
+        </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-80 max-h-96 overflow-y-auto">
         <div className="flex items-center justify-between px-3 py-2">
           <span className="font-semibold">Notifications</span>
@@ -270,7 +326,7 @@ export const NotificationsDropdown = ({ userId }: { userId: string }) => {
               className={`flex flex-col items-start gap-1 p-3 cursor-pointer ${
                 !notification.is_read ? "bg-accent/50" : ""
               }`}
-              onClick={() => !notification.is_read && markAsRead(notification.id)}
+              onClick={(e) => handleNotificationClick(notification, e)}
             >
               <div className="flex items-start justify-between w-full gap-2">
                 <span className="font-medium text-sm">{notification.title}</span>
@@ -295,5 +351,29 @@ export const NotificationsDropdown = ({ userId }: { userId: string }) => {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+
+    {/* Notification Detail Dialog/Drawer */}
+    {isDesktop ? (
+      <Dialog open={!!selectedNotification} onOpenChange={(open) => !open && setSelectedNotification(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{selectedNotification?.title}</DialogTitle>
+          </DialogHeader>
+          <NotificationDetailContent />
+        </DialogContent>
+      </Dialog>
+    ) : (
+      <Drawer open={!!selectedNotification} onOpenChange={(open) => !open && setSelectedNotification(null)}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>{selectedNotification?.title}</DrawerTitle>
+          </DrawerHeader>
+          <div className="px-4 pb-6">
+            <NotificationDetailContent />
+          </div>
+        </DrawerContent>
+      </Drawer>
+    )}
+  </>
   );
 };

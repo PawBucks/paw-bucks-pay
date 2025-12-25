@@ -10,11 +10,32 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ArrowLeft, Bell, Calendar as CalendarIcon, Filter, Check, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { format, subDays, isAfter, isBefore, startOfDay, endOfDay } from "date-fns";
+import { format, subDays, startOfDay, endOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
+interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  category: string;
+  is_read: boolean;
+  created_at: string;
+}
 const CATEGORIES = [
   { value: "all", label: "All Categories" },
   { value: "general", label: "General" },
@@ -37,6 +58,8 @@ export default function NotificationHistory() {
   const [category, setCategory] = useState("all");
   const [datePreset, setDatePreset] = useState("all");
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
+  const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
+  const isDesktop = useMediaQuery("(min-width: 768px)");
 
   const { data: notifications, isLoading, refetch } = useQuery({
     queryKey: ["notification-history", user?.id, category, datePreset, dateRange],
@@ -126,6 +149,44 @@ export default function NotificationHistory() {
       default:
         return "bg-muted text-muted-foreground border-border";
     }
+  };
+
+  const handleNotificationClick = async (notification: Notification) => {
+    setSelectedNotification(notification);
+    if (!notification.is_read) {
+      await handleMarkAsRead(notification.id);
+    }
+  };
+
+  const NotificationDetailContent = () => {
+    if (!selectedNotification) return null;
+    
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 flex-wrap">
+          <Badge
+            variant="outline"
+            className={cn(
+              "text-xs capitalize",
+              getCategoryBadgeColor(selectedNotification.category)
+            )}
+          >
+            {selectedNotification.category}
+          </Badge>
+          <span className="text-xs text-muted-foreground">
+            {format(
+              new Date(selectedNotification.created_at),
+              "MMM d, yyyy 'at' h:mm a"
+            )}
+          </span>
+        </div>
+        <div className="prose prose-sm dark:prose-invert max-w-none">
+          <p className="text-foreground whitespace-pre-wrap leading-relaxed">
+            {selectedNotification.message}
+          </p>
+        </div>
+      </div>
+    );
   };
 
   const unreadCount = notifications?.filter((n) => !n.is_read).length || 0;
@@ -264,10 +325,11 @@ export default function NotificationHistory() {
               <ScrollArea className="h-[500px] pr-4">
                 <div className="space-y-3">
                   {notifications.map((notification) => (
-                    <div
+                    <button
                       key={notification.id}
+                      onClick={() => handleNotificationClick(notification)}
                       className={cn(
-                        "p-4 rounded-lg border transition-colors",
+                        "w-full text-left p-4 rounded-lg border transition-colors hover:bg-accent/30 cursor-pointer",
                         notification.is_read
                           ? "bg-background border-border"
                           : "bg-accent/50 border-accent"
@@ -305,16 +367,10 @@ export default function NotificationHistory() {
                           </p>
                         </div>
                         {!notification.is_read && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleMarkAsRead(notification.id)}
-                          >
-                            <Check className="h-4 w-4" />
-                          </Button>
+                          <span className="h-2 w-2 rounded-full bg-primary flex-shrink-0 mt-2" />
                         )}
                       </div>
-                    </div>
+                    </button>
                   ))}
                 </div>
               </ScrollArea>
@@ -332,6 +388,29 @@ export default function NotificationHistory() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Notification Detail Dialog/Drawer */}
+      {isDesktop ? (
+        <Dialog open={!!selectedNotification} onOpenChange={(open) => !open && setSelectedNotification(null)}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>{selectedNotification?.title}</DialogTitle>
+            </DialogHeader>
+            <NotificationDetailContent />
+          </DialogContent>
+        </Dialog>
+      ) : (
+        <Drawer open={!!selectedNotification} onOpenChange={(open) => !open && setSelectedNotification(null)}>
+          <DrawerContent>
+            <DrawerHeader>
+              <DrawerTitle>{selectedNotification?.title}</DrawerTitle>
+            </DrawerHeader>
+            <div className="px-4 pb-6">
+              <NotificationDetailContent />
+            </div>
+          </DrawerContent>
+        </Drawer>
+      )}
     </div>
   );
 }
