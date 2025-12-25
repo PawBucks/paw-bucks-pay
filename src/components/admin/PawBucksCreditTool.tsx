@@ -17,7 +17,7 @@ type UserResult = {
 };
 
 const MAX_CREDIT_AMOUNT_ADMIN = 250000;
-const MAX_CREDIT_AMOUNT_SUPERADMIN = 500000;
+const MAX_CREDIT_AMOUNT_SUPERADMIN = 750000;
 
 export function PawBucksCreditTool() {
   const { user } = useAuth();
