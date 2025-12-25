@@ -370,7 +370,14 @@ const LostPets = () => {
         description="View and create digital flyers for lost pets. Help reunite pets with their families."
       />
       <div className="min-h-screen bg-background">
-        <Header />
+        <Header 
+          isAuthenticated={!!user} 
+          onLogout={async () => {
+            await supabase.auth.signOut();
+            navigate("/");
+          }}
+          userId={user?.id}
+        />
         
         <main className="container mx-auto px-4 py-6 pb-24 md:pb-6">
           {/* Hero Section */}
