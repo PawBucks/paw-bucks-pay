@@ -8,7 +8,7 @@ const corsHeaders = {
 
 // Constants for validation
 const MAX_CREDIT_AMOUNT_ADMIN = 250000; // Maximum 250,000 PawBucks for Admin
-const MAX_CREDIT_AMOUNT_SUPERADMIN = 500000; // Maximum 500,000 PawBucks for SuperAdmin
+const MAX_CREDIT_AMOUNT_SUPERADMIN = 750000; // Maximum 750,000 PawBucks for SuperAdmin
 const MIN_CREDIT_AMOUNT = 1;
 
 serve(async (req) => {
