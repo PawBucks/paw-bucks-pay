@@ -402,8 +402,8 @@ export default function MerchantPOSIntegration() {
               </div>
 
               <div className="text-center pt-4">
-                <p className="text-3xl font-bold mb-2">$49<span className="text-lg font-normal text-muted-foreground">/month</span></p>
-                <p className="text-sm text-muted-foreground mb-4">or 49,000 PawBucks</p>
+                <p className="text-3xl font-bold mb-2">$149<span className="text-lg font-normal text-muted-foreground">/month</span></p>
+                <p className="text-sm text-muted-foreground mb-4">or 111,750 PawBucks</p>
                 <Button size="lg" onClick={() => navigate("/merchant/market")}>
                   Get Started in Merchant Market
                   <ExternalLink className="w-4 h-4 ml-2" />
