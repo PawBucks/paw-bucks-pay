@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { AddTransactionTool } from "@/components/admin/AddTransactionTool";
 import { PawBucksCreditTool } from "@/components/admin/PawBucksCreditTool";
+import { PawBucksCreditLogsTab } from "@/components/admin/PawBucksCreditLogsTab";
 import { SecurityMonitoringTab } from "@/components/admin/SecurityMonitoringTab";
 import { ConsultationBookingsTab } from "@/components/admin/ConsultationBookingsTab";
 import FeedbackTab from "@/components/admin/FeedbackTab";
@@ -608,6 +609,9 @@ const AdminDashboard = () => {
 
         {/* Manual PawBucks Credit Tool */}
         <PawBucksCreditTool />
+
+        {/* Manual PawBucks Credit Logs */}
+        <PawBucksCreditLogsTab />
 
         {/* Funding Requests */}
         <GradientCard>
