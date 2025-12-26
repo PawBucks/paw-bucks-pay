@@ -639,6 +639,108 @@ export type Database = {
           },
         ]
       }
+      merchant_availability: {
+        Row: {
+          created_at: string
+          day_of_week: number
+          end_time: string
+          id: string
+          is_active: boolean
+          merchant_id: string
+          slot_duration_minutes: number
+          start_time: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          day_of_week: number
+          end_time: string
+          id?: string
+          is_active?: boolean
+          merchant_id: string
+          slot_duration_minutes?: number
+          start_time: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          day_of_week?: number
+          end_time?: string
+          id?: string
+          is_active?: boolean
+          merchant_id?: string
+          slot_duration_minutes?: number
+          start_time?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_availability_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_availability_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      merchant_availability_overrides: {
+        Row: {
+          created_at: string
+          end_time: string | null
+          id: string
+          is_available: boolean
+          merchant_id: string
+          override_date: string
+          reason: string | null
+          start_time: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          end_time?: string | null
+          id?: string
+          is_available?: boolean
+          merchant_id: string
+          override_date: string
+          reason?: string | null
+          start_time?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          end_time?: string | null
+          id?: string
+          is_available?: boolean
+          merchant_id?: string
+          override_date?: string
+          reason?: string | null
+          start_time?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_availability_overrides_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_availability_overrides_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       merchant_customer_analytics: {
         Row: {
           average_order_value: number | null
@@ -960,6 +1062,69 @@ export type Database = {
             columns: ["service_id"]
             isOneToOne: false
             referencedRelation: "merchant_market_services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      merchant_services: {
+        Row: {
+          category: Database["public"]["Enums"]["service_category"]
+          created_at: string
+          description: string | null
+          duration_minutes: number
+          id: string
+          is_active: boolean
+          max_capacity: number
+          merchant_id: string
+          name: string
+          payment_type: Database["public"]["Enums"]["payment_type"]
+          price: number
+          requires_pet: boolean
+          updated_at: string
+        }
+        Insert: {
+          category?: Database["public"]["Enums"]["service_category"]
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number
+          id?: string
+          is_active?: boolean
+          max_capacity?: number
+          merchant_id: string
+          name: string
+          payment_type?: Database["public"]["Enums"]["payment_type"]
+          price?: number
+          requires_pet?: boolean
+          updated_at?: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["service_category"]
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number
+          id?: string
+          is_active?: boolean
+          max_capacity?: number
+          merchant_id?: string
+          name?: string
+          payment_type?: Database["public"]["Enums"]["payment_type"]
+          price?: number
+          requires_pet?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_services_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_services_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
             referencedColumns: ["id"]
           },
         ]
@@ -2220,6 +2385,98 @@ export type Database = {
         }
         Relationships: []
       }
+      service_bookings: {
+        Row: {
+          booking_date: string
+          created_at: string
+          customer_email: string | null
+          customer_name: string | null
+          customer_phone: string | null
+          end_time: string
+          id: string
+          merchant_id: string
+          notes: string | null
+          payment_status: string
+          pet_id: string | null
+          service_id: string
+          start_time: string
+          status: Database["public"]["Enums"]["booking_status"]
+          stripe_payment_intent_id: string | null
+          total_price: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          booking_date: string
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          end_time: string
+          id?: string
+          merchant_id: string
+          notes?: string | null
+          payment_status?: string
+          pet_id?: string | null
+          service_id: string
+          start_time: string
+          status?: Database["public"]["Enums"]["booking_status"]
+          stripe_payment_intent_id?: string | null
+          total_price?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          booking_date?: string
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          end_time?: string
+          id?: string
+          merchant_id?: string
+          notes?: string | null
+          payment_status?: string
+          pet_id?: string | null
+          service_id?: string
+          start_time?: string
+          status?: Database["public"]["Enums"]["booking_status"]
+          stripe_payment_intent_id?: string | null
+          total_price?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_bookings_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_bookings_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_bookings_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "pet_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_bookings_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sponsored_placement_analytics: {
         Row: {
           created_at: string
@@ -2985,6 +3242,12 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user" | "superadmin"
+      booking_status:
+        | "pending"
+        | "confirmed"
+        | "cancelled"
+        | "completed"
+        | "no_show"
       medical_record_type:
         | "vaccination"
         | "checkup"
@@ -2995,7 +3258,17 @@ export type Database = {
         | "emergency"
         | "other"
       message_sender_type: "owner" | "vet"
+      payment_type: "pay_at_booking" | "pay_at_service" | "both"
       pet_type: "dog" | "cat" | "other"
+      service_category:
+        | "daycare"
+        | "boarding"
+        | "grooming"
+        | "walking"
+        | "training"
+        | "veterinary"
+        | "pet_sitting"
+        | "other"
       user_type: "pet_owner" | "merchant"
     }
     CompositeTypes: {
@@ -3125,6 +3398,13 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user", "superadmin"],
+      booking_status: [
+        "pending",
+        "confirmed",
+        "cancelled",
+        "completed",
+        "no_show",
+      ],
       medical_record_type: [
         "vaccination",
         "checkup",
@@ -3136,7 +3416,18 @@ export const Constants = {
         "other",
       ],
       message_sender_type: ["owner", "vet"],
+      payment_type: ["pay_at_booking", "pay_at_service", "both"],
       pet_type: ["dog", "cat", "other"],
+      service_category: [
+        "daycare",
+        "boarding",
+        "grooming",
+        "walking",
+        "training",
+        "veterinary",
+        "pet_sitting",
+        "other",
+      ],
       user_type: ["pet_owner", "merchant"],
     },
   },
