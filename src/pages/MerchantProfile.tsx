@@ -11,6 +11,7 @@ import { SEO } from "@/components/SEO";
 import { PaymentDialogWithPawBucks } from "@/components/PaymentDialogWithPawBucks";
 import { WriteReviewDialog } from "@/components/merchant/WriteReviewDialog";
 import { ReviewCard } from "@/components/merchant/ReviewCard";
+import { BookingWidget } from "@/components/scheduling/BookingWidget";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,6 +20,8 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { ROUTES } from "@/lib/constants";
 import { useMerchantActiveServices, SERVICE_NAMES, merchantHasService } from "@/hooks/useMerchantServices";
+import { schedulingService } from "@/services/api/scheduling.service";
+import { useQuery } from "@tanstack/react-query";
 import {
   Star,
   MapPin,
@@ -41,6 +44,7 @@ import {
   ChevronRight,
   BadgeCheck,
   Sparkles,
+  CalendarDays,
 } from "lucide-react";
 
 const getBusinessIcon = (type: string) => {
@@ -75,6 +79,15 @@ const MerchantProfile = () => {
   const { data: activeServices = [] } = useMerchantActiveServices(merchantId);
   const hasVerifiedPro = merchantHasService(activeServices, SERVICE_NAMES.VERIFIED_PRO_BADGE);
   const isSponsored = merchantHasService(activeServices, SERVICE_NAMES.SPONSORED_PLACEMENT);
+
+  // Fetch merchant services for scheduling
+  const { data: merchantServices = [] } = useQuery({
+    queryKey: ["merchant-services-public", merchantId],
+    queryFn: () => schedulingService.getActiveServices(merchantId!),
+    enabled: !!merchantId,
+  });
+
+  const hasBookableServices = merchantServices.length > 0;
 
   // Fetch merchant data from public view (excludes sensitive contact info)
   const { data: merchant, isLoading: merchantLoading } = useOptimizedQuery(
@@ -344,16 +357,33 @@ const MerchantProfile = () => {
           </Card>
 
           {/* Tabs Content */}
-          <Tabs defaultValue="about" className="mb-6">
-            <TabsList className="w-full justify-start mb-4">
+          <Tabs defaultValue={hasBookableServices ? "services" : "about"} className="mb-6">
+            <TabsList className="w-full justify-start mb-4 flex-wrap h-auto gap-1">
+              {hasBookableServices && (
+                <TabsTrigger value="services" className="gap-1">
+                  <CalendarDays className="w-4 h-4" />
+                  Book
+                </TabsTrigger>
+              )}
               <TabsTrigger value="about">About</TabsTrigger>
               <TabsTrigger value="reviews">
                 Reviews ({ratingStats.total})
               </TabsTrigger>
-            {stripeAccountId && (
-              <TabsTrigger value="products">Products</TabsTrigger>
-            )}
+              {stripeAccountId && (
+                <TabsTrigger value="products">Products</TabsTrigger>
+              )}
             </TabsList>
+
+            {/* Services/Booking Tab */}
+            {hasBookableServices && (
+              <TabsContent value="services">
+                <BookingWidget
+                  merchantId={merchant.id}
+                  merchantName={merchant.business_name}
+                  cashbackRate={merchant.cashback_rate}
+                />
+              </TabsContent>
+            )}
 
             {/* About Tab */}
             <TabsContent value="about" className="space-y-6">
