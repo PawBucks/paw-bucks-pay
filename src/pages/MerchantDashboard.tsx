@@ -22,6 +22,7 @@ import {
   Store,
   Sparkles,
   PlugZap,
+  CalendarDays,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -724,6 +725,17 @@ const MerchantDashboard = () => {
             <div className="text-left">
               <p className="font-semibold">POS Integration</p>
               <p className="text-xs text-muted-foreground">Connect your POS system</p>
+            </div>
+          </Button>
+          <Button
+            variant="outline"
+            className="h-auto py-4 justify-start border-accent/30 bg-accent/5 hover:bg-accent/10"
+            onClick={() => navigate("/merchant/scheduling")}
+          >
+            <CalendarDays className="w-5 h-5 mr-3 text-accent" />
+            <div className="text-left">
+              <p className="font-semibold text-accent">Scheduling</p>
+              <p className="text-xs text-muted-foreground">Manage bookings & services</p>
             </div>
           </Button>
         </div>
