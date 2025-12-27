@@ -200,6 +200,26 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
     return `${displayHours}:${minutes.toString().padStart(2, "0")} ${period}`;
   };
 
+  // Helper function to format duration based on category
+  const formatDuration = (minutes: number, category: string): string => {
+    if (category === 'boarding') {
+      const nights = Math.round(minutes / 1440);
+      return nights === 1 ? '1 night' : `${nights} nights`;
+    }
+    if (category === 'daycare') {
+      if (minutes <= 360) return 'Half Day (up to 6 hours)';
+      if (minutes <= 720) return 'Full Day (up to 12 hours)';
+      return `${Math.round(minutes / 60)} hours`;
+    }
+    // Standard format for other categories
+    if (minutes >= 60) {
+      const hours = Math.floor(minutes / 60);
+      const remainingMins = minutes % 60;
+      return remainingMins > 0 ? `${hours}h ${remainingMins}m` : `${hours} hour${hours > 1 ? 's' : ''}`;
+    }
+    return `${minutes} minutes`;
+  };
+
   if (servicesLoading) {
     return (
       <Card>
@@ -296,7 +316,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
                     <div className="flex items-center gap-4 mt-2 text-sm">
                       <span className="flex items-center gap-1 text-muted-foreground">
                         <Timer className="w-3.5 h-3.5" />
-                        {service.duration_minutes} min
+                        {formatDuration(service.duration_minutes, service.category)}
                       </span>
                       {service.max_capacity > 1 && (
                         <span className="flex items-center gap-1 text-muted-foreground">
@@ -419,7 +439,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Duration</span>
-                <span className="font-medium">{selectedServiceData.duration_minutes} minutes</span>
+                <span className="font-medium">{formatDuration(selectedServiceData.duration_minutes, selectedServiceData.category)}</span>
               </div>
               <div className="border-t pt-3 flex items-center justify-between">
                 <span className="font-medium">Total</span>

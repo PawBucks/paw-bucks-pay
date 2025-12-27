@@ -40,6 +40,26 @@ const CATEGORY_COLORS: Record<string, string> = {
   other: 'bg-muted text-muted-foreground border-border',
 };
 
+// Helper function to format duration based on category
+const formatDuration = (minutes: number, category: string): string => {
+  if (category === 'boarding') {
+    const nights = Math.round(minutes / 1440);
+    return nights === 1 ? '1 night' : `${nights} nights`;
+  }
+  if (category === 'daycare') {
+    if (minutes <= 360) return 'Half Day';
+    if (minutes <= 720) return 'Full Day';
+    return `${Math.round(minutes / 60)}h`;
+  }
+  // Standard format for other categories
+  if (minutes >= 60) {
+    const hours = Math.floor(minutes / 60);
+    const remainingMins = minutes % 60;
+    return remainingMins > 0 ? `${hours}h ${remainingMins}m` : `${hours}h`;
+  }
+  return `${minutes} min`;
+};
+
 export function ServicesList({ services, onEdit, onDelete, onToggleActive }: ServicesListProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [serviceToDelete, setServiceToDelete] = useState<string | null>(null);
@@ -124,7 +144,7 @@ export function ServicesList({ services, onEdit, onDelete, onToggleActive }: Ser
             <div className="flex flex-wrap gap-3 text-sm text-muted-foreground mb-4">
               <div className="flex items-center gap-1">
                 <Clock className="w-4 h-4" />
-                <span>{service.duration_minutes} min</span>
+                <span>{formatDuration(service.duration_minutes, service.category)}</span>
               </div>
               <div className="flex items-center gap-1">
                 <DollarSign className="w-4 h-4" />

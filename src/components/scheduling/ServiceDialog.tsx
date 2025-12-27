@@ -39,7 +39,7 @@ const serviceSchema = z.object({
   name: z.string().min(1, "Name is required").max(100),
   description: z.string().max(500).optional(),
   category: z.enum(['daycare', 'boarding', 'grooming', 'walking', 'training', 'veterinary', 'pet_sitting', 'other']),
-  duration_minutes: z.coerce.number().min(15, "Minimum 15 minutes").max(480, "Maximum 8 hours"),
+  duration_minutes: z.coerce.number().min(30, "Minimum 30 minutes").max(20160, "Maximum 14 nights"),
   price: z.coerce.number().min(0, "Price must be positive"),
   payment_type: z.enum(['pay_at_booking', 'pay_at_service', 'both']),
   max_capacity: z.coerce.number().min(1).max(100),
@@ -62,7 +62,25 @@ const PAYMENT_TYPE_LABELS: Record<PaymentType, string> = {
   both: 'Either option',
 };
 
-const DURATION_PRESETS = [15, 30, 45, 60, 90, 120, 180, 240];
+// Standard duration options (in minutes): 30min, 1h, 2h, 3h, 4h
+const STANDARD_DURATION_PRESETS = [30, 60, 120, 180, 240];
+
+// Daycare duration options: Half Day (6h), Full Day (12h)
+const DAYCARE_DURATION_PRESETS = [
+  { value: 360, label: 'Half Day (up to 6 hours)' },
+  { value: 720, label: 'Full Day (up to 12 hours)' },
+];
+
+// Boarding duration options (in nights - stored as minutes: 1440 min = 1 day/night)
+const BOARDING_DURATION_PRESETS = [
+  { value: 1440, label: '1 Night' },
+  { value: 2880, label: '2 Nights' },
+  { value: 4320, label: '3 Nights' },
+  { value: 5760, label: '4 Nights' },
+  { value: 7200, label: '5 Nights' },
+  { value: 10080, label: '7 Nights (1 Week)' },
+  { value: 20160, label: '14 Nights (2 Weeks)' },
+];
 
 export function ServiceDialog({ open, onOpenChange, service, onSubmit }: ServiceDialogProps) {
   const form = useForm<ServiceFormData>({
@@ -181,30 +199,60 @@ export function ServiceDialog({ open, onOpenChange, service, onSubmit }: Service
               <FormField
                 control={form.control}
                 name="duration_minutes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Duration</FormLabel>
-                    <Select 
-                      onValueChange={(v) => field.onChange(parseInt(v))} 
-                      value={field.value.toString()}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {DURATION_PRESETS.map((mins) => (
-                          <SelectItem key={mins} value={mins.toString()}>
-                            {mins >= 60 ? `${mins / 60}h` : `${mins}m`}
-                            {mins >= 60 && mins % 60 > 0 && ` ${mins % 60}m`}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                render={({ field }) => {
+                  const category = form.watch('category');
+                  const isBoarding = category === 'boarding';
+                  const isDaycare = category === 'daycare';
+                  
+                  const formatStandardDuration = (mins: number) => {
+                    if (mins >= 60) {
+                      const hours = Math.floor(mins / 60);
+                      const remainingMins = mins % 60;
+                      return remainingMins > 0 ? `${hours}h ${remainingMins}m` : `${hours}h`;
+                    }
+                    return `${mins}m`;
+                  };
+
+                  return (
+                    <FormItem>
+                      <FormLabel>
+                        {isBoarding ? 'Duration (Nights)' : isDaycare ? 'Duration' : 'Duration'}
+                      </FormLabel>
+                      <Select 
+                        onValueChange={(v) => field.onChange(parseInt(v))} 
+                        value={field.value.toString()}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {isBoarding ? (
+                            BOARDING_DURATION_PRESETS.map((preset) => (
+                              <SelectItem key={preset.value} value={preset.value.toString()}>
+                                {preset.label}
+                              </SelectItem>
+                            ))
+                          ) : isDaycare ? (
+                            DAYCARE_DURATION_PRESETS.map((preset) => (
+                              <SelectItem key={preset.value} value={preset.value.toString()}>
+                                {preset.label}
+                              </SelectItem>
+                            ))
+                          ) : (
+                            STANDARD_DURATION_PRESETS.map((mins) => (
+                              <SelectItem key={mins} value={mins.toString()}>
+                                {formatStandardDuration(mins)}
+                              </SelectItem>
+                            ))
+                          )}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
               />
 
               <FormField
