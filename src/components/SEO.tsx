@@ -11,7 +11,7 @@ interface SEOProps {
 // SEO component for better search engine optimization
 export const SEO = ({ 
   title, 
-  description = "PawBucks - The payment platform for pet lovers. Earn PawBucks rewards with every transaction.",
+  description = "PawBucks - The payment platform for pet owners. Earn PawBucks rewards with every transaction.",
   keywords = ["pet", "payments", "PawBucks", "rewards", "pets", "animals"],
   ogImage = "/logo.png",
   canonical
