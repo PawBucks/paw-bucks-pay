@@ -65,8 +65,9 @@ const PAYMENT_TYPE_LABELS: Record<PaymentType, string> = {
 // Standard duration options (in minutes): 30min, 1h, 2h, 3h, 4h
 const STANDARD_DURATION_PRESETS = [30, 60, 120, 180, 240];
 
-// Daycare duration options: Half Day (6h), Full Day (12h)
+// Daycare duration options: 1h, Half Day (6h), Full Day (12h)
 const DAYCARE_DURATION_PRESETS = [
+  { value: 60, label: '1 Hour' },
   { value: 360, label: 'Half Day (up to 6 hours)' },
   { value: 720, label: 'Full Day (up to 12 hours)' },
 ];
