@@ -1,12 +1,80 @@
+# PawBucks Robots.txt
+# https://42786380-3966-427e-b3d0-08c5bc7581ed.lovableproject.com
+
+# Allow all crawlers
 User-agent: *
 Allow: /
+
+# Sitemap location
 Sitemap: https://42786380-3966-427e-b3d0-08c5bc7581ed.lovableproject.com/sitemap.xml
 
-# Disallow admin pages
-User-agent: *
+# Disallow admin and sensitive pages
+Disallow: /admin
 Disallow: /admin/
-Disallow: /admin-login/
+Disallow: /admin-login
+Disallow: /admin-reset-password
 
-# Disallow auth pages from indexing
-User-agent: *
-Disallow: /auth
+# Disallow user-specific authenticated pages
+Disallow: /dashboard
+Disallow: /profile
+Disallow: /wallet
+Disallow: /spending-breakdown
+Disallow: /notification-preferences
+Disallow: /notification-history
+
+# Disallow merchant dashboard (requires auth)
+Disallow: /merchant/dashboard
+Disallow: /merchant/analytics
+Disallow: /merchant/transactions
+Disallow: /merchant/products
+Disallow: /merchant/scheduling
+Disallow: /merchant/offers
+Disallow: /merchant/pos
+
+# Disallow vet dashboard (requires auth)
+Disallow: /vet/
+Disallow: /vet-loan-apply
+
+# Disallow checkout/payment pages
+Disallow: /checkout-success
+Disallow: /subscription-success
+
+# Disallow API endpoints
+Disallow: /api/
+
+# Allow important public pages
+Allow: /
+Allow: /merchants
+Allow: /discover
+Allow: /directory
+Allow: /pet-store
+Allow: /lost-pets
+Allow: /auth
+Allow: /install
+Allow: /storefront/
+
+# Crawl-delay for respectful crawling
+Crawl-delay: 1
+
+# Google specific
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+# Bing specific
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+# Allow social media crawlers for rich previews
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: LinkedInBot
+Allow: /
+
+User-agent: Pinterest
+Allow: /
