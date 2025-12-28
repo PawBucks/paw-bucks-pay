@@ -39,9 +39,9 @@ const Index = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[var(--gradient-hero)] flex items-center justify-center">
+      <div className="min-h-screen bg-[var(--gradient-hero)] flex items-center justify-center" role="status" aria-label="Loading">
         <div className="text-center space-y-4">
-          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" aria-hidden="true" />
           <p className="text-muted-foreground text-lg">Loading your experience...</p>
         </div>
       </div>

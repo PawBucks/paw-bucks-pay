@@ -171,6 +171,11 @@ export default {
         "bounce-in": "bounce-in 0.6s ease-out forwards",
         "pulse-slow": "pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite",
         "slide-up": "fade-in 0.4s ease-out",
+        "spin-slow": "spin 3s linear infinite",
+      },
+      spacing: {
+        'safe-bottom': 'env(safe-area-inset-bottom)',
+        'safe-top': 'env(safe-area-inset-top)',
       },
     },
   },
