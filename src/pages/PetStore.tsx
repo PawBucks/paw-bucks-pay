@@ -23,7 +23,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { ShoppingCart, Coins, CreditCard } from "lucide-react";
+import { ShoppingCart, Coins, CreditCard, Store } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { loadStripe } from "@stripe/stripe-js";
@@ -431,10 +431,28 @@ export default function PetStore() {
       </div>
 
       {isLoading ? (
-        <div className="text-center py-12">Loading items...</div>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4" role="status" aria-label="Loading products">
+          {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+            <Card key={i} className="flex flex-col">
+              <div className="w-full h-48 bg-muted rounded-t-lg skeleton-pulse" />
+              <CardContent className="pt-4 space-y-2">
+                <div className="h-5 w-3/4 bg-muted rounded skeleton-pulse" />
+                <div className="h-4 w-full bg-muted rounded skeleton-pulse" />
+                <div className="h-4 w-1/2 bg-muted rounded skeleton-pulse" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       ) : filteredItems?.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground">
-          No items found. Try adjusting your filters.
+        <div className="text-center py-16 px-4">
+          <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4">
+            <Store className="w-8 h-8 text-muted-foreground" />
+          </div>
+          <h3 className="text-xl font-semibold mb-2">No items found</h3>
+          <p className="text-muted-foreground mb-4">Try adjusting your search or filters.</p>
+          <Button variant="outline" onClick={() => { setSearchQuery(""); setSelectedCategory("All"); }}>
+            Clear Filters
+          </Button>
         </div>
       ) : (
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
