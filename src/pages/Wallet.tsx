@@ -12,11 +12,15 @@ import { BottomNav } from "@/components/BottomNav";
 import { AdPlacement } from "@/components/AdPlacement";
 import { DashboardSkeleton } from "@/components/LoadingSkeleton";
 import { PullToRefresh } from "@/components/PullToRefresh";
-import { SpendingTrendsChart } from "@/components/wallet/SpendingTrendsChart";
+import { EnhancedSpendingChart } from "@/components/wallet/EnhancedSpendingChart";
 import { MonthlyComparison } from "@/components/wallet/MonthlyComparison";
 import { BudgetSettings } from "@/components/wallet/BudgetSettings";
 import { YearlySummary } from "@/components/wallet/YearlySummary";
 import { PawBucksBreakdown } from "@/components/wallet/PawBucksBreakdown";
+import { SpendingInsights } from "@/components/wallet/SpendingInsights";
+import { RecurringExpenses } from "@/components/wallet/RecurringExpenses";
+import { SpendingGoals } from "@/components/wallet/SpendingGoals";
+import { CategoryComparison } from "@/components/wallet/CategoryComparison";
 import { Wallet as WalletIcon, TrendingUp, Gift, ArrowUpRight, ArrowDownRight, Coins, Sparkles, PieChart, Calendar } from "lucide-react";
 import { format } from "date-fns";
 import { useQueryClient } from "@tanstack/react-query";
@@ -248,15 +252,31 @@ const Wallet = () => {
           </Button>
         </div>
 
-        {/* Month-over-Month Comparison and Budget Settings */}
-        <div className="grid gap-6 md:grid-cols-2 mb-6">
-          <MonthlyComparison transactions={transactions} medicalRecords={medicalRecords} />
-          <BudgetSettings transactions={transactions} />
+        {/* Smart Insights */}
+        <div className="mb-6">
+          <SpendingInsights transactions={transactions} medicalRecords={medicalRecords} />
         </div>
 
-        {/* Spending Trends Chart */}
+        {/* Spending Goals & Month Comparison */}
+        <div className="grid gap-6 md:grid-cols-2 mb-6">
+          <SpendingGoals transactions={transactions} medicalRecords={medicalRecords} />
+          <MonthlyComparison transactions={transactions} medicalRecords={medicalRecords} />
+        </div>
+
+        {/* Enhanced Spending Chart */}
         <div className="mb-6">
-          <SpendingTrendsChart transactions={transactions} medicalRecords={medicalRecords} />
+          <EnhancedSpendingChart transactions={transactions} medicalRecords={medicalRecords} />
+        </div>
+
+        {/* Category Comparison & Recurring Expenses */}
+        <div className="grid gap-6 md:grid-cols-2 mb-6">
+          <CategoryComparison transactions={transactions} medicalRecords={medicalRecords} />
+          <RecurringExpenses transactions={transactions} />
+        </div>
+
+        {/* Budget Settings */}
+        <div className="mb-6">
+          <BudgetSettings transactions={transactions} />
         </div>
 
         {/* Yearly Summary with PDF Download */}
