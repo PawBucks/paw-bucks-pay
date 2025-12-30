@@ -60,9 +60,15 @@ import {
   Eye,
   X,
   Images,
+  Sparkles,
+  ArrowLeft,
 } from "lucide-react";
 import { LostPetShareDialog } from "@/components/LostPetShareDialog";
+import { PetProfileSelector } from "@/components/PetProfileSelector";
 import { format } from "date-fns";
+import { Tables } from "@/integrations/supabase/types";
+
+type PetProfile = Tables<"pet_profiles">;
 
 interface LostPetPost {
   id: string;
@@ -119,6 +125,8 @@ const LostPets = () => {
   const navigate = useNavigate();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [showPetSelector, setShowPetSelector] = useState(true);
+  const [selectedPetProfile, setSelectedPetProfile] = useState<PetProfile | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isUploading, setIsUploading] = useState(false);
 
@@ -265,6 +273,36 @@ const LostPets = () => {
       reward_amount: "",
       additional_notes: "",
     });
+    setSelectedPetProfile(null);
+    setShowPetSelector(true);
+  };
+
+  const handlePetProfileSelect = (pet: PetProfile) => {
+    // Auto-fill form with pet profile data
+    setFormData(prev => ({
+      ...prev,
+      pet_name: pet.name,
+      pet_type: pet.type,
+      breed: pet.breed || "",
+      // If the pet has a photo, add it to photo_urls
+      photo_urls: pet.photo_url ? [pet.photo_url] : [],
+      photo_url: pet.photo_url || "",
+    }));
+    setSelectedPetProfile(pet);
+    setShowPetSelector(false);
+    toast({ 
+      title: `${pet.name}'s details loaded!`,
+      description: "Fill in the remaining details about where they were last seen."
+    });
+  };
+
+  const handleSkipPetSelector = () => {
+    setShowPetSelector(false);
+  };
+
+  const handleBackToPetSelector = () => {
+    setShowPetSelector(true);
+    setSelectedPetProfile(null);
   };
 
   const handlePhotoUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -415,7 +453,12 @@ const LostPets = () => {
             </Select>
 
             {user && (
-              <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+              <Dialog open={isCreateDialogOpen} onOpenChange={(open) => {
+                setIsCreateDialogOpen(open);
+                if (!open) {
+                  resetForm();
+                }
+              }}>
                 <DialogTrigger asChild>
                   <Button className="gap-2">
                     <PlusCircle className="w-4 h-4" />
@@ -425,12 +468,44 @@ const LostPets = () => {
                 <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
-                      <AlertTriangle className="w-5 h-5 text-destructive" />
-                      Report Lost Pet
+                      {showPetSelector ? (
+                        <>
+                          <Sparkles className="w-5 h-5 text-primary" />
+                          Quick Create Lost Pet Flyer
+                        </>
+                      ) : (
+                        <>
+                          {selectedPetProfile && (
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={handleBackToPetSelector}
+                              className="mr-2 h-8 w-8 p-0"
+                            >
+                              <ArrowLeft className="w-4 h-4" />
+                            </Button>
+                          )}
+                          <AlertTriangle className="w-5 h-5 text-destructive" />
+                          Report Lost Pet
+                          {selectedPetProfile && (
+                            <Badge variant="secondary" className="ml-2">
+                              {selectedPetProfile.name}
+                            </Badge>
+                          )}
+                        </>
+                      )}
                     </DialogTitle>
                   </DialogHeader>
                   
-                  <form onSubmit={handleSubmit} className="space-y-6">
+                  {/* Pet Profile Selector Step */}
+                  {showPetSelector && user ? (
+                    <PetProfileSelector 
+                      userId={user.id}
+                      onSelect={handlePetProfileSelect}
+                      onSkip={handleSkipPetSelector}
+                    />
+                  ) : (
+                    <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Pet Information */}
                     <div className="space-y-4">
                       <h3 className="font-semibold text-lg border-b pb-2">Pet Information</h3>
@@ -763,11 +838,11 @@ const LostPets = () => {
                     >
                       {createPostMutation.isPending ? "Creating..." : "Create Lost Pet Flyer"}
                     </Button>
-                  </form>
+                    </form>
+                  )}
                 </DialogContent>
               </Dialog>
             )}
-            
             {!user && (
               <Button onClick={() => window.location.href = "/auth"} variant="outline">
                 Sign in to create a flyer
