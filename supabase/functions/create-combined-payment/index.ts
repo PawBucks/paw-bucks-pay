@@ -206,10 +206,11 @@ serve(async (req) => {
     // Truncate business name to 22 chars max for statement descriptor
     const statementDescriptor = merchant.business_name.substring(0, 22).replace(/[<>"'\\]/g, '');
     
+    // Using explicit payment_method_types for better international support
     const paymentIntent = await stripe.paymentIntents.create({
       amount: stripeAmountInCents,
       currency: 'usd',
-      automatic_payment_methods: { enabled: true },
+      payment_method_types: ['card'], // Explicit card method for global compatibility
       application_fee_amount: platformFeeInCents,
       transfer_data: { destination: merchant.stripe_account_id },
       on_behalf_of: merchant.stripe_account_id, // Shows merchant name on card statement
@@ -240,10 +241,24 @@ serve(async (req) => {
     );
 
   } catch (error: unknown) {
-    console.error('Combined payment error:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Payment processing failed';
+    // Log full error details for debugging
+    console.error('Combined payment error:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      type: error instanceof Error ? error.constructor.name : typeof error,
+      raw: JSON.stringify(error, Object.getOwnPropertyNames(error as object)),
+    });
+    
+    // Return helpful error message
+    let userMessage = 'Payment processing failed. Please try again.';
+    if (error instanceof Error) {
+      if (error.message.includes('country') || error.message.includes('location')) {
+        userMessage = 'Payment is not available from your current location. Please try again later.';
+      }
+    }
+    
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ error: userMessage }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
     );
   }

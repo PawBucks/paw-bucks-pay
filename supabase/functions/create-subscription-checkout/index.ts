@@ -69,6 +69,7 @@ serve(async (req) => {
     }
 
     // Create Checkout session with 7-day trial
+    // Using explicit payment methods for better international support
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
@@ -79,6 +80,10 @@ serve(async (req) => {
         },
       ],
       mode: 'subscription',
+      // Explicitly specify payment methods that work globally
+      payment_method_types: ['card'],
+      // Collect billing address for international tax compliance
+      billing_address_collection: 'auto',
       subscription_data: {
         trial_period_days: 7,
         metadata: {
@@ -104,10 +109,27 @@ serve(async (req) => {
       }
     );
   } catch (error: unknown) {
-    console.error('Error creating subscription checkout:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    // Log full error details for debugging
+    console.error('Error creating subscription checkout:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      type: error instanceof Error ? error.constructor.name : typeof error,
+      raw: JSON.stringify(error, Object.getOwnPropertyNames(error as object)),
+    });
+    
+    // Return a more helpful error message
+    let userMessage = 'Failed to create checkout session. Please try again.';
+    if (error instanceof Error) {
+      // Check for common Stripe errors
+      if (error.message.includes('country') || error.message.includes('location')) {
+        userMessage = 'Payment processing is currently not available in your location. Please try again or contact support.';
+      } else if (error.message.includes('currency')) {
+        userMessage = 'Currency not supported. Please contact support.';
+      }
+    }
+    
     return new Response(
-      JSON.stringify({ error: 'Failed to create checkout session. Please try again.' }),
+      JSON.stringify({ error: userMessage }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 400,
