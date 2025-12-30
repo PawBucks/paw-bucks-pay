@@ -142,12 +142,11 @@ serve(async (req) => {
 
     // Create a PaymentIntent with Stripe Connect
     // Using on_behalf_of ensures merchant's business info appears on customer statements
+    // Explicitly specify card payment method for better international support
     const paymentIntent = await stripe.paymentIntents.create({
       amount: amountInCents,
       currency,
-      automatic_payment_methods: {
-        enabled: true,
-      },
+      payment_method_types: ['card'], // Explicit card method for global compatibility
       on_behalf_of: merchant.stripe_account_id, // Shows merchant's business on customer statement
       application_fee_amount: platformFeeInCents, // Platform fee (used for cashback)
       transfer_data: {
@@ -176,11 +175,24 @@ serve(async (req) => {
       }
     );
   } catch (error: unknown) {
-    console.error('Error creating payment intent:', error);
-    // Return generic error to client, log details server-side
-    const errorMessage = error instanceof Error ? error.message : 'Payment processing failed. Please try again.';
+    // Log full error details for debugging
+    console.error('Error creating payment intent:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      type: error instanceof Error ? error.constructor.name : typeof error,
+      raw: JSON.stringify(error, Object.getOwnPropertyNames(error as object)),
+    });
+    
+    // Return helpful error message
+    let userMessage = 'Payment processing failed. Please try again.';
+    if (error instanceof Error) {
+      if (error.message.includes('country') || error.message.includes('location')) {
+        userMessage = 'Payment processing is not available in your current location. Please try again later.';
+      }
+    }
+    
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ error: userMessage }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 400,
