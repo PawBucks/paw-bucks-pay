@@ -22,6 +22,7 @@ import {
   MessageCircle,
   Users,
 } from "lucide-react";
+import { generateHighReadabilityFlyer } from "@/components/HighReadabilityFlyer";
 
 interface LostPetPost {
   id: string;
@@ -29,6 +30,9 @@ interface LostPetPost {
   pet_type: string;
   breed: string | null;
   color_markings: string;
+  size?: string | null;
+  gender?: string | null;
+  identifying_features?: string | null;
   last_seen_location: string;
   last_seen_date: string;
   contact_phone: string;
@@ -153,179 +157,31 @@ ${shareUrl}`;
     });
   };
 
-  // HTML escape function to prevent XSS
-  const escapeHtml = (text: string | null | undefined): string => {
-    if (!text) return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-  };
-
   const handlePrint = () => {
-    // Create a printable version of the flyer
+    // Use the high-readability flyer design
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
       toast({ title: "Please allow popups to print", variant: "destructive" });
       return;
     }
 
-    // Escape all user-supplied data to prevent XSS
-    const safePetName = escapeHtml(post.pet_name);
-    const safePetType = escapeHtml(post.pet_type);
-    const safeLastSeenLocation = escapeHtml(post.last_seen_location);
-    const safeBreed = escapeHtml(post.breed);
-    const safeColorMarkings = escapeHtml(post.color_markings);
-    const safeContactPhone = escapeHtml(post.contact_phone);
-    const safeContactEmail = escapeHtml(post.contact_email);
-    const safePhotoUrl = escapeHtml(post.photo_url);
+    const flyerHtml = generateHighReadabilityFlyer({
+      pet_name: post.pet_name,
+      pet_type: post.pet_type,
+      breed: post.breed,
+      color_markings: post.color_markings,
+      size: post.size,
+      gender: post.gender,
+      identifying_features: post.identifying_features,
+      last_seen_location: post.last_seen_location,
+      last_seen_date: post.last_seen_date,
+      contact_phone: post.contact_phone,
+      contact_email: post.contact_email,
+      reward_amount: post.reward_amount,
+      photo_url: post.photo_url,
+    }, shareUrl);
 
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Lost Pet Flyer - ${safePetName}</title>
-          <style>
-            @media print {
-              body { margin: 0; padding: 20px; }
-            }
-            body {
-              font-family: Arial, sans-serif;
-              max-width: 800px;
-              margin: 0 auto;
-              padding: 20px;
-            }
-            .header {
-              text-align: center;
-              border: 4px solid #ef4444;
-              padding: 20px;
-              margin-bottom: 20px;
-              background: #fef2f2;
-            }
-            .header h1 {
-              color: #ef4444;
-              font-size: 48px;
-              margin: 0 0 10px 0;
-              text-transform: uppercase;
-            }
-            .pet-name {
-              font-size: 36px;
-              font-weight: bold;
-              margin: 10px 0;
-            }
-            .photo {
-              text-align: center;
-              margin: 20px 0;
-            }
-            .photo img {
-              max-width: 400px;
-              max-height: 400px;
-              border: 2px solid #ccc;
-            }
-            .no-photo {
-              width: 300px;
-              height: 200px;
-              background: #f0f0f0;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              margin: 0 auto;
-              border: 2px dashed #ccc;
-              color: #666;
-            }
-            .details {
-              font-size: 18px;
-              line-height: 1.8;
-            }
-            .details strong {
-              color: #333;
-            }
-            .contact {
-              text-align: center;
-              background: #fef3c7;
-              padding: 20px;
-              margin: 20px 0;
-              border: 2px solid #f59e0b;
-              font-size: 24px;
-            }
-            .reward {
-              text-align: center;
-              background: #d1fae5;
-              padding: 15px;
-              border: 2px solid #10b981;
-              font-size: 28px;
-              font-weight: bold;
-              color: #065f46;
-            }
-            .footer {
-              text-align: center;
-              margin-top: 20px;
-              font-size: 14px;
-              color: #666;
-            }
-            .tear-off {
-              display: flex;
-              justify-content: space-between;
-              border-top: 2px dashed #ccc;
-              padding-top: 10px;
-              margin-top: 20px;
-            }
-            .tear-strip {
-              writing-mode: vertical-rl;
-              text-orientation: mixed;
-              border: 1px solid #ccc;
-              padding: 5px;
-              font-size: 12px;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <h1>🚨 LOST ${safePetType.toUpperCase()} 🚨</h1>
-            <div class="pet-name">${safePetName}</div>
-          </div>
-          
-          <div class="photo">
-            ${safePhotoUrl 
-              ? `<img src="${safePhotoUrl}" alt="${safePetName}" />` 
-              : `<div class="no-photo">No Photo Available</div>`
-            }
-          </div>
-          
-          <div class="details">
-            <p><strong>📍 Last Seen:</strong> ${safeLastSeenLocation}</p>
-            <p><strong>📅 Date:</strong> ${new Date(post.last_seen_date).toLocaleDateString()}</p>
-            ${safeBreed ? `<p><strong>🐾 Breed:</strong> ${safeBreed}</p>` : ''}
-            <p><strong>🎨 Color/Markings:</strong> ${safeColorMarkings}</p>
-          </div>
-          
-          ${post.reward_amount ? `
-            <div class="reward">
-              💰 REWARD: $${post.reward_amount}
-            </div>
-          ` : ''}
-          
-          <div class="contact">
-            <strong>PLEASE CONTACT:</strong><br/>
-            📞 ${safeContactPhone}
-            ${safeContactEmail ? `<br/>📧 ${safeContactEmail}` : ''}
-          </div>
-          
-          <div class="footer">
-            <p>Please help bring ${safePetName} home! Share this flyer with friends and neighbors.</p>
-            <p>View online: ${shareUrl}</p>
-          </div>
-          
-          <div class="tear-off">
-            ${Array(5).fill(null).map(() => `
-              <div class="tear-strip">
-                LOST: ${safePetName}<br/>
-                📞 ${safeContactPhone}
-              </div>
-            `).join('')}
-          </div>
-        </body>
-      </html>
-    `);
+    printWindow.document.write(flyerHtml);
     printWindow.document.close();
     printWindow.print();
   };
