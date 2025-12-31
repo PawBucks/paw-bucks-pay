@@ -278,12 +278,19 @@ const LostPets = () => {
   };
 
   const handlePetProfileSelect = (pet: PetProfile) => {
-    // Auto-fill form with pet profile data
+    // Auto-fill form with pet profile data including new identification fields
     setFormData(prev => ({
       ...prev,
       pet_name: pet.name,
       pet_type: pet.type,
       breed: pet.breed || "",
+      color_markings: pet.color_markings || "",
+      size: pet.size || "",
+      gender: pet.gender || "",
+      age_estimate: pet.age_estimate || "",
+      microchip_number: pet.microchip_number || "",
+      collar_description: pet.collar_description || "",
+      identifying_features: pet.identifying_features || "",
       // If the pet has a photo, add it to photo_urls
       photo_urls: pet.photo_url ? [pet.photo_url] : [],
       photo_url: pet.photo_url || "",

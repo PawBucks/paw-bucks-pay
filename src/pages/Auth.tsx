@@ -45,7 +45,8 @@ const Auth = () => {
       if (userTypeOverride === "merchant") {
         navigate(ROUTES.MERCHANT_DASHBOARD);
       } else {
-        navigate(ROUTES.DASHBOARD);
+        // Pet owners go to create pet profile as first onboarding step
+        navigate("/create-pet-profile");
       }
       return;
     }
