@@ -7,11 +7,11 @@ import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Upload, PawPrint, Loader2 } from "lucide-react";
-import { GradientCard } from "@/components/ui/gradient-card";
+import { Upload, PawPrint, Loader2, Sparkles } from "lucide-react";
 
 const CreatePetProfile = () => {
   const navigate = useNavigate();
@@ -19,7 +19,21 @@ const CreatePetProfile = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string>("");
-  const [petType, setPetType] = useState<string>("dog");
+  
+  // Form state
+  const [formData, setFormData] = useState({
+    name: "",
+    type: "dog" as "dog" | "cat" | "other",
+    breed: "",
+    birthday: "",
+    color_markings: "",
+    size: "",
+    gender: "",
+    age_estimate: "",
+    microchip_number: "",
+    collar_description: "",
+    identifying_features: "",
+  });
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -43,14 +57,14 @@ const CreatePetProfile = () => {
     e.preventDefault();
     if (!user) return;
     
+    if (!formData.name.trim()) {
+      toast.error("Please enter your pet's name");
+      return;
+    }
+    
     setIsLoading(true);
 
     try {
-      const formData = new FormData(e.currentTarget);
-      const petName = formData.get("petName") as string;
-      const breed = formData.get("breed") as string;
-      const birthday = formData.get("birthday") as string;
-
       let photoUrl = "";
 
       // Upload photo if provided
@@ -71,19 +85,26 @@ const CreatePetProfile = () => {
         photoUrl = publicUrl;
       }
 
-      // Create pet profile
+      // Create pet profile with all fields
       const { error: profileError } = await supabase.from("pet_profiles").insert({
         user_id: user.id,
-        name: petName,
-        type: petType as Database["public"]["Enums"]["pet_type"],
-        breed: breed || null,
-        birthday: birthday || null,
+        name: formData.name.trim(),
+        type: formData.type as Database["public"]["Enums"]["pet_type"],
+        breed: formData.breed || null,
+        birthday: formData.birthday || null,
         photo_url: photoUrl || null,
+        color_markings: formData.color_markings || null,
+        size: formData.size || null,
+        gender: formData.gender || null,
+        age_estimate: formData.age_estimate || null,
+        microchip_number: formData.microchip_number || null,
+        collar_description: formData.collar_description || null,
+        identifying_features: formData.identifying_features || null,
       });
 
       if (profileError) throw profileError;
 
-      toast.success("Pet profile created successfully!");
+      toast.success(`${formData.name}'s profile created successfully!`);
       navigate("/dashboard");
     } catch (error: any) {
       console.error("Error creating pet profile:", error);
@@ -105,113 +126,219 @@ const CreatePetProfile = () => {
     <div className="min-h-screen bg-[var(--gradient-hero)]">
       <Header />
       <div className="flex items-center justify-center p-4 py-8">
-      <Card className="w-full max-w-lg">
-        <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center">
-              <PawPrint className="w-8 h-8 text-primary-foreground" />
-            </div>
-          </div>
-          <CardTitle className="text-3xl font-bold">Create Pet Profile</CardTitle>
-          <CardDescription>Tell us about your furry friend</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Photo Upload */}
-            <div className="space-y-2">
-              <Label>Pet Photo</Label>
-              <div className="flex flex-col items-center gap-4">
-                {photoPreview ? (
-                  <img
-                    src={photoPreview}
-                    alt="Pet preview"
-                    className="w-32 h-32 rounded-full object-cover border-4 border-primary/20"
-                  />
-                ) : (
-                  <div className="w-32 h-32 rounded-full bg-muted flex items-center justify-center border-2 border-dashed border-border">
-                    <Upload className="w-8 h-8 text-muted-foreground" />
-                  </div>
-                )}
-                <Input
-                  type="file"
-                  accept="image/*"
-                  onChange={handlePhotoChange}
-                  className="cursor-pointer"
-                />
+        <Card className="w-full max-w-2xl">
+          <CardHeader className="text-center">
+            <div className="flex justify-center mb-4">
+              <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center">
+                <PawPrint className="w-8 h-8 text-primary-foreground" />
               </div>
             </div>
+            <CardTitle className="text-3xl font-bold flex items-center justify-center gap-2">
+              <Sparkles className="w-6 h-6 text-primary" />
+              Add Your Pet
+            </CardTitle>
+            <CardDescription>
+              Tell us about your furry friend! This info can be used to quickly create lost pet flyers if needed.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Photo Upload */}
+              <div className="space-y-2">
+                <Label>Pet Photo</Label>
+                <div className="flex flex-col items-center gap-4">
+                  {photoPreview ? (
+                    <img
+                      src={photoPreview}
+                      alt="Pet preview"
+                      className="w-32 h-32 rounded-full object-cover border-4 border-primary/20"
+                    />
+                  ) : (
+                    <div className="w-32 h-32 rounded-full bg-muted flex items-center justify-center border-2 border-dashed border-border">
+                      <Upload className="w-8 h-8 text-muted-foreground" />
+                    </div>
+                  )}
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handlePhotoChange}
+                    className="cursor-pointer max-w-xs"
+                  />
+                </div>
+              </div>
 
-            {/* Pet Name */}
-            <div className="space-y-2">
-              <Label htmlFor="petName">Pet Name *</Label>
-              <Input
-                id="petName"
-                name="petName"
-                placeholder="Max, Bella, Luna..."
-                required
-              />
-            </div>
+              {/* Pet Information Section */}
+              <div className="space-y-4">
+                <h3 className="font-semibold text-lg border-b pb-2">Pet Information</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Pet Name *</Label>
+                    <Input
+                      id="name"
+                      value={formData.name}
+                      onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                      placeholder="e.g., Max, Bella, Luna"
+                      required
+                    />
+                  </div>
 
-            {/* Pet Type */}
-            <div className="space-y-2">
-              <Label htmlFor="petType">Pet Type *</Label>
-              <Select value={petType} onValueChange={setPetType}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select pet type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="dog">Dog</SelectItem>
-                  <SelectItem value="cat">Cat</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="type">Pet Type *</Label>
+                    <Select 
+                      value={formData.type} 
+                      onValueChange={(value: "dog" | "cat" | "other") => setFormData(prev => ({ ...prev, type: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select pet type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="dog">Dog</SelectItem>
+                        <SelectItem value="cat">Cat</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-            {/* Breed */}
-            <div className="space-y-2">
-              <Label htmlFor="breed">Breed</Label>
-              <Input
-                id="breed"
-                name="breed"
-                placeholder="Golden Retriever, Persian, etc."
-              />
-            </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="breed">Breed</Label>
+                    <Input
+                      id="breed"
+                      value={formData.breed}
+                      onChange={(e) => setFormData(prev => ({ ...prev, breed: e.target.value }))}
+                      placeholder="e.g., Golden Retriever, Persian"
+                    />
+                  </div>
 
-            {/* Birthday */}
-            <div className="space-y-2">
-              <Label htmlFor="birthday">Birthday</Label>
-              <Input
-                id="birthday"
-                name="birthday"
-                type="date"
-                max={new Date().toISOString().split("T")[0]}
-              />
-            </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="color_markings">Color/Markings</Label>
+                    <Input
+                      id="color_markings"
+                      value={formData.color_markings}
+                      onChange={(e) => setFormData(prev => ({ ...prev, color_markings: e.target.value }))}
+                      placeholder="e.g., Golden with white chest"
+                    />
+                  </div>
 
-            <div className="flex gap-3 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => navigate("/dashboard")}
-                className="flex-1"
-                disabled={isLoading}
-              >
-                Skip for Now
-              </Button>
-              <Button type="submit" className="flex-1" disabled={isLoading}>
-                {isLoading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Creating...
-                  </>
-                ) : (
-                  "Create Profile"
-                )}
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+                  <div className="space-y-2">
+                    <Label htmlFor="size">Size</Label>
+                    <Select 
+                      value={formData.size} 
+                      onValueChange={(value) => setFormData(prev => ({ ...prev, size: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select size" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="small">Small</SelectItem>
+                        <SelectItem value="medium">Medium</SelectItem>
+                        <SelectItem value="large">Large</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="gender">Gender</Label>
+                    <Select 
+                      value={formData.gender} 
+                      onValueChange={(value) => setFormData(prev => ({ ...prev, gender: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select gender" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="male">Male</SelectItem>
+                        <SelectItem value="female">Female</SelectItem>
+                        <SelectItem value="unknown">Unknown</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="birthday">Birthday</Label>
+                    <Input
+                      id="birthday"
+                      type="date"
+                      value={formData.birthday}
+                      onChange={(e) => setFormData(prev => ({ ...prev, birthday: e.target.value }))}
+                      max={new Date().toISOString().split("T")[0]}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="age_estimate">Age Estimate</Label>
+                    <Input
+                      id="age_estimate"
+                      value={formData.age_estimate}
+                      onChange={(e) => setFormData(prev => ({ ...prev, age_estimate: e.target.value }))}
+                      placeholder="e.g., 3 years old, puppy"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Identification Section */}
+              <div className="space-y-4">
+                <h3 className="font-semibold text-lg border-b pb-2">Identification</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="microchip_number">Microchip Number</Label>
+                    <Input
+                      id="microchip_number"
+                      value={formData.microchip_number}
+                      onChange={(e) => setFormData(prev => ({ ...prev, microchip_number: e.target.value }))}
+                      placeholder="If registered"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="collar_description">Collar Description</Label>
+                    <Input
+                      id="collar_description"
+                      value={formData.collar_description}
+                      onChange={(e) => setFormData(prev => ({ ...prev, collar_description: e.target.value }))}
+                      placeholder="e.g., Red collar with bone tag"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="identifying_features">Unique Identifying Features</Label>
+                  <Textarea
+                    id="identifying_features"
+                    value={formData.identifying_features}
+                    onChange={(e) => setFormData(prev => ({ ...prev, identifying_features: e.target.value }))}
+                    placeholder="e.g., Scar on left ear, limps slightly, distinctive markings"
+                    rows={2}
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => navigate("/dashboard")}
+                  className="flex-1"
+                  disabled={isLoading}
+                >
+                  Skip for Now
+                </Button>
+                <Button type="submit" className="flex-1" disabled={isLoading}>
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Creating...
+                    </>
+                  ) : (
+                    "Create Profile"
+                  )}
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

@@ -12,6 +12,13 @@ type Pet = {
   breed?: string;
   birthday?: string;
   photo_url?: string;
+  color_markings?: string;
+  size?: string;
+  gender?: string;
+  age_estimate?: string;
+  microchip_number?: string;
+  collar_description?: string;
+  identifying_features?: string;
 };
 
 type PetProfilesSectionProps = {

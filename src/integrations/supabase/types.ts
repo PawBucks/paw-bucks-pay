@@ -1764,34 +1764,55 @@ export type Database = {
       }
       pet_profiles: {
         Row: {
+          age_estimate: string | null
           birthday: string | null
           breed: string | null
+          collar_description: string | null
+          color_markings: string | null
           created_at: string
+          gender: string | null
           id: string
+          identifying_features: string | null
+          microchip_number: string | null
           name: string
           photo_url: string | null
+          size: string | null
           type: Database["public"]["Enums"]["pet_type"]
           updated_at: string
           user_id: string
         }
         Insert: {
+          age_estimate?: string | null
           birthday?: string | null
           breed?: string | null
+          collar_description?: string | null
+          color_markings?: string | null
           created_at?: string
+          gender?: string | null
           id?: string
+          identifying_features?: string | null
+          microchip_number?: string | null
           name: string
           photo_url?: string | null
+          size?: string | null
           type: Database["public"]["Enums"]["pet_type"]
           updated_at?: string
           user_id: string
         }
         Update: {
+          age_estimate?: string | null
           birthday?: string | null
           breed?: string | null
+          collar_description?: string | null
+          color_markings?: string | null
           created_at?: string
+          gender?: string | null
           id?: string
+          identifying_features?: string | null
+          microchip_number?: string | null
           name?: string
           photo_url?: string | null
+          size?: string | null
           type?: Database["public"]["Enums"]["pet_type"]
           updated_at?: string
           user_id?: string
