@@ -92,10 +92,30 @@ export class DataLoader {
     return this.retryOperation(async () => {
       const { data, error } = await supabase
         .from('transactions')
-        .select('*')
+        .select('*, merchants(business_type, business_name)')
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
         .limit(limit);
+
+      if (error) throw error;
+      return data || [];
+    });
+  }
+
+  static async loadTransactionsForBudget(userId: string) {
+    return this.retryOperation(async () => {
+      // Fetch current month's transactions with merchant info for budget tracking
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString();
+      
+      const { data, error } = await supabase
+        .from('transactions')
+        .select('id, amount, created_at, merchants(business_type)')
+        .eq('user_id', userId)
+        .gte('created_at', startOfMonth)
+        .lte('created_at', endOfMonth)
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
       return data || [];

@@ -39,6 +39,19 @@ type Transaction = {
   description: string;
   created_at: string;
   merchant_id: string;
+  merchants?: {
+    business_type: string;
+    business_name: string;
+  } | null;
+};
+
+type BudgetTransaction = {
+  id: string;
+  amount: number;
+  created_at: string;
+  merchants?: {
+    business_type: string;
+  } | null;
 };
 
 type PawBucksActivity = {
@@ -91,6 +104,13 @@ const Wallet = () => {
     { staleTime: 1000 * 60 * 2 }
   );
 
+  // Fetch all transactions for current month for budget tracking
+  const { data: budgetTransactions = [], isLoading: budgetTransactionsLoading } = useOptimizedQuery<BudgetTransaction[]>(
+    ['budget-transactions', user?.id || ''],
+    () => user ? DataLoader.loadTransactionsForBudget(user.id) : Promise.resolve([]),
+    { staleTime: 1000 * 60 * 2 }
+  );
+
   // Fetch medical records to include in spending calculations
   const { data: medicalRecords = [], isLoading: medicalLoading } = useOptimizedQuery<MedicalRecord[]>(
     ['wallet-medical-records', user?.id || ''],
@@ -124,7 +144,7 @@ const Wallet = () => {
     { staleTime: 1000 * 60 * 2 }
   );
 
-  const loading = walletLoading || pawbucksLoading || transactionsLoading || activityLoading || medicalLoading;
+  const loading = walletLoading || pawbucksLoading || transactionsLoading || budgetTransactionsLoading || activityLoading || medicalLoading;
 
   // Calculate true total spent including medical records
   const totalSpent = useMemo(() => {
@@ -149,6 +169,8 @@ const Wallet = () => {
     await queryClient.invalidateQueries({ queryKey: ['wallet'] });
     await queryClient.invalidateQueries({ queryKey: ['pawbucks_wallet'] });
     await queryClient.invalidateQueries({ queryKey: ['transactions'] });
+    await queryClient.invalidateQueries({ queryKey: ['budget-transactions'] });
+    await queryClient.invalidateQueries({ queryKey: ['budget-settings'] });
     await queryClient.invalidateQueries({ queryKey: ['pawbucks_activity'] });
     await queryClient.invalidateQueries({ queryKey: ['wallet-medical-records'] });
   }, [queryClient]);
@@ -276,7 +298,7 @@ const Wallet = () => {
 
         {/* Budget Settings */}
         <div className="mb-6">
-          <BudgetSettings transactions={transactions} />
+          <BudgetSettings transactions={budgetTransactions} />
         </div>
 
         {/* Yearly Summary with PDF Download */}
