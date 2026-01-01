@@ -15,7 +15,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Package, Plus, ExternalLink, Loader2, ArrowLeft, DollarSign } from "lucide-react";
+import { Package, Plus, ExternalLink, Loader2, ArrowLeft, DollarSign, Store, Coins } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { SEO } from "@/components/SEO";
 
 type Product = {
@@ -52,6 +53,8 @@ const MerchantProducts = () => {
   const [productName, setProductName] = useState("");
   const [productDescription, setProductDescription] = useState("");
   const [productPrice, setProductPrice] = useState("");
+  const [listInPetStore, setListInPetStore] = useState(false);
+  const [pawbucksPrice, setPawbucksPrice] = useState("");
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -139,9 +142,19 @@ const MerchantProducts = () => {
       return;
     }
 
+    // Validate PawBucks price if listing in Pet Store
+    if (listInPetStore) {
+      const pawbucksPriceNum = parseInt(pawbucksPrice);
+      if (isNaN(pawbucksPriceNum) || pawbucksPriceNum < 1) {
+        toast.error("PawBucks price must be at least 1");
+        return;
+      }
+    }
+
     try {
       setCreating(true);
 
+      // Create the Stripe Connect product
       const { data, error } = await supabase.functions.invoke("create-connect-product", {
         body: {
           accountId: merchant.stripe_account_id,
@@ -155,11 +168,37 @@ const MerchantProducts = () => {
       if (error) throw error;
 
       if (data.success) {
-        toast.success("Product created successfully!");
+        // If listing in Pet Store, also create a pet_store_items entry
+        if (listInPetStore) {
+          const { error: petStoreError } = await supabase
+            .from("pet_store_items")
+            .insert({
+              name: productName,
+              description: productDescription || null,
+              category: "Merchant Products",
+              price: priceInCents, // Store in cents
+              price_pawbucks: parseInt(pawbucksPrice),
+              merchant_id: merchant.id,
+              is_active: true,
+              stock_quantity: 999, // Default to high stock for merchant products
+            });
+
+          if (petStoreError) {
+            console.error("Error listing in Pet Store:", petStoreError);
+            toast.error("Product created but failed to list in Pet Store");
+          } else {
+            toast.success("Product created and listed in Pet Store!");
+          }
+        } else {
+          toast.success("Product created successfully!");
+        }
+
         setCreateDialogOpen(false);
         setProductName("");
         setProductDescription("");
         setProductPrice("");
+        setListInPetStore(false);
+        setPawbucksPrice("");
         await loadProducts(merchant.stripe_account_id);
       } else {
         throw new Error(data.error || "Failed to create product");
@@ -351,6 +390,52 @@ const MerchantProducts = () => {
                 Minimum $0.50
               </p>
             </div>
+
+            {/* Pet Store Listing Toggle */}
+            <div className="border rounded-lg p-4 space-y-4 bg-muted/30">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Store className="h-5 w-5 text-primary" />
+                  <div>
+                    <Label htmlFor="pet-store-toggle" className="font-medium">
+                      List in Pet Store
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      Make this product available in the platform's Pet Store
+                    </p>
+                  </div>
+                </div>
+                <Switch
+                  id="pet-store-toggle"
+                  checked={listInPetStore}
+                  onCheckedChange={setListInPetStore}
+                />
+              </div>
+
+              {listInPetStore && (
+                <div className="pt-2 border-t space-y-3">
+                  <div className="flex items-center gap-2 text-sm text-amber-600 dark:text-amber-400">
+                    <Coins className="h-4 w-4" />
+                    <span>Products in Pet Store must accept both USD and PawBucks</span>
+                  </div>
+                  <div>
+                    <Label htmlFor="pawbucks-price">PawBucks Price *</Label>
+                    <Input
+                      id="pawbucks-price"
+                      type="number"
+                      min="1"
+                      value={pawbucksPrice}
+                      onChange={(e) => setPawbucksPrice(e.target.value)}
+                      placeholder="10000"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      1,000 PawBucks = $1 value. Suggested: {productPrice ? Math.round(parseFloat(productPrice) * 1000) : "—"} PawBucks
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
             <div className="flex justify-end gap-2 mt-6">
               <Button
                 variant="outline"

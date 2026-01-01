@@ -1842,6 +1842,7 @@ export type Database = {
           id: string
           image_url: string | null
           is_active: boolean
+          merchant_id: string | null
           name: string
           price: number
           price_pawbucks: number
@@ -1855,6 +1856,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_active?: boolean
+          merchant_id?: string | null
           name: string
           price: number
           price_pawbucks?: number
@@ -1868,13 +1870,29 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_active?: boolean
+          merchant_id?: string | null
           name?: string
           price?: number
           price_pawbucks?: number
           stock_quantity?: number
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "pet_store_items_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_store_items_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       pet_store_order_items: {
         Row: {
