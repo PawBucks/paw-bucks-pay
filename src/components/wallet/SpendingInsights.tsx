@@ -128,13 +128,14 @@ export const SpendingInsights = memo(({
     const projectedSpending = (thisMonthSpending / daysElapsed) * totalDaysInMonth;
 
     // 1. Projected overspend warning
-    if (projectedSpending > lastMonthSpending * 1.2 && daysElapsed >= 7) {
+    if (projectedSpending > lastMonthSpending * 1.2 && daysElapsed >= 7 && lastMonthSpending > 0) {
+      const percentageIncrease = ((projectedSpending / lastMonthSpending - 1) * 100);
       allInsights.push({
         id: 'projected-overspend',
         type: 'warning',
         icon: AlertTriangle,
         title: 'Spending Pace Alert',
-        description: `At this rate, you'll spend $${projectedSpending.toFixed(0)} this month — ${((projectedSpending / lastMonthSpending - 1) * 100).toFixed(0)}% more than last month.`,
+        description: `At this rate, you'll spend $${projectedSpending.toFixed(0)} this month — ${percentageIncrease.toFixed(0)}% more than last month.`,
         priority: 10
       });
     }
