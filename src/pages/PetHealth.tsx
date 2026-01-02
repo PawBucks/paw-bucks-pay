@@ -8,6 +8,7 @@ import { MedicalRecordUpload } from "@/components/MedicalRecordUpload";
 import { MedicalRecordsList } from "@/components/MedicalRecordsList";
 import { VetCommunication } from "@/components/VetCommunication";
 import { PetProfileCard } from "@/components/PetProfileCard";
+import { ShareHealthRecordsDialog } from "@/components/ShareHealthRecordsDialog";
 import { ArrowLeft, FileHeart, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -104,7 +105,12 @@ export default function PetHealth() {
           </p>
         </div>
 
-        <PetProfileCard pet={pet} onUpdate={loadPet} />
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex-1 w-full">
+            <PetProfileCard pet={pet} onUpdate={loadPet} />
+          </div>
+          <ShareHealthRecordsDialog petId={pet.id} petName={pet.name} />
+        </div>
 
         <Tabs defaultValue="records" className="space-y-4">
           <TabsList className="grid w-full grid-cols-2">

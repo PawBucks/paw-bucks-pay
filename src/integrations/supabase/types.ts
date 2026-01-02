@@ -1643,6 +1643,56 @@ export type Database = {
         }
         Relationships: []
       }
+      pet_health_access_codes: {
+        Row: {
+          access_code: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          last_accessed_at: string | null
+          owner_id: string
+          pet_id: string
+          vet_clinic: string | null
+          vet_email: string | null
+          vet_name: string
+        }
+        Insert: {
+          access_code: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          last_accessed_at?: string | null
+          owner_id: string
+          pet_id: string
+          vet_clinic?: string | null
+          vet_email?: string | null
+          vet_name: string
+        }
+        Update: {
+          access_code?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          last_accessed_at?: string | null
+          owner_id?: string
+          pet_id?: string
+          vet_clinic?: string | null
+          vet_email?: string | null
+          vet_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pet_health_access_codes_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "pet_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pet_medical_records: {
         Row: {
           created_at: string
