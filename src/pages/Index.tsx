@@ -13,10 +13,6 @@ import {
 } from "lucide-react";
 import { SocialFollowLinks } from "@/components/SocialFollowLinks";
 import logo from "@/assets/logo.png";
-import petCat from "@/assets/pet-cat-1.png";
-import petDogSmall from "@/assets/pet-dog-small.png";
-import petDogTongue from "@/assets/pet-dog-tongue.png";
-import petDogRunning from "@/assets/pet-dog-running.png";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -72,20 +68,6 @@ const Index = () => {
           <div className="absolute top-20 right-10 w-72 h-72 bg-accent/20 rounded-full blur-3xl animate-pulse" aria-hidden="true"></div>
           <div className="absolute bottom-20 left-10 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse delay-700" aria-hidden="true"></div>
           
-          {/* Decorative pet images */}
-          <img 
-            src={petDogRunning} 
-            alt="" 
-            aria-hidden="true"
-            className="absolute -left-8 bottom-10 w-32 sm:w-48 lg:w-64 opacity-90 hidden md:block pointer-events-none"
-          />
-          <img 
-            src={petCat} 
-            alt="" 
-            aria-hidden="true"
-            className="absolute -right-4 top-20 w-28 sm:w-36 lg:w-48 opacity-90 hidden lg:block pointer-events-none"
-          />
-          
           <div className="relative max-w-4xl mx-auto text-center space-y-6 animate-fade-in">
             <h1 
               id="hero-heading"
@@ -126,12 +108,6 @@ const Index = () => {
 
         {/* Why PawBucks Section */}
         <section className="relative bg-gradient-to-br from-accent/5 via-transparent to-primary/5 py-16 sm:py-20" aria-labelledby="why-heading">
-          <img 
-            src={petDogSmall} 
-            alt="" 
-            aria-hidden="true"
-            className="absolute right-4 sm:right-12 -top-8 w-20 sm:w-28 opacity-90 pointer-events-none"
-          />
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-3xl mx-auto text-center space-y-6">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 border border-accent/20">
@@ -307,12 +283,6 @@ const Index = () => {
 
         {/* Subscription Tiers */}
         <section className="relative bg-gradient-to-br from-primary/5 via-transparent to-accent/5 py-16 sm:py-20" aria-labelledby="subscriptions-heading">
-          <img 
-            src={petDogTongue} 
-            alt="" 
-            aria-hidden="true"
-            className="absolute left-4 sm:left-12 -bottom-12 w-24 sm:w-36 lg:w-44 opacity-90 hidden sm:block pointer-events-none z-10"
-          />
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h2 id="subscriptions-heading" className="text-3xl sm:text-4xl font-bold mb-4">
