@@ -21,6 +21,7 @@ import {
   Coins,
   Store,
   Sparkles,
+  Vault,
   PlugZap,
   CalendarDays,
 } from "lucide-react";
@@ -736,6 +737,17 @@ const MerchantDashboard = () => {
             <div className="text-left">
               <p className="font-semibold text-accent">Scheduling</p>
               <p className="text-xs text-muted-foreground">Manage bookings & services</p>
+            </div>
+          </Button>
+          <Button
+            variant="outline"
+            className="h-auto py-4 justify-start border-green-500/30 bg-green-500/5 hover:bg-green-500/10"
+            onClick={() => navigate("/merchant/tax-vault")}
+          >
+            <Vault className="w-5 h-5 mr-3 text-green-600" />
+            <div className="text-left">
+              <p className="font-semibold text-green-600">Tax Vault</p>
+              <p className="text-xs text-muted-foreground">Track business expenses</p>
             </div>
           </Button>
         </div>
