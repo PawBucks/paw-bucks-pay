@@ -5,10 +5,6 @@ import { CreditCard, TrendingUp, Shield, BarChart3, CheckCircle, ArrowRight, Dol
 import { SocialFollowLinks } from "@/components/SocialFollowLinks";
 import logo from "@/assets/logo.png";
 import { PremiumMerchantsBanner } from "@/components/PremiumMerchantsBanner";
-import petCat from "@/assets/pet-cat-1.png";
-import petDogSmall from "@/assets/pet-dog-small.png";
-import petDogTongue from "@/assets/pet-dog-tongue.png";
-import petDogRunning from "@/assets/pet-dog-running.png";
 
 const MerchantLanding = () => {
   const navigate = useNavigate();
@@ -45,20 +41,6 @@ const MerchantLanding = () => {
         <section className="relative container mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 lg:py-32" aria-labelledby="hero-heading">
           <div className="absolute top-20 right-10 w-72 h-72 bg-accent/20 rounded-full blur-3xl animate-pulse" aria-hidden="true"></div>
           <div className="absolute bottom-20 left-10 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse delay-700" aria-hidden="true"></div>
-          
-          {/* Decorative pet images */}
-          <img 
-            src={petCat} 
-            alt="" 
-            aria-hidden="true"
-            className="absolute -left-4 bottom-16 w-28 sm:w-40 lg:w-52 opacity-90 hidden md:block pointer-events-none"
-          />
-          <img 
-            src={petDogSmall} 
-            alt="" 
-            aria-hidden="true"
-            className="absolute -right-4 top-28 w-24 sm:w-32 lg:w-40 opacity-90 hidden lg:block pointer-events-none"
-          />
           
           <div className="relative max-w-5xl mx-auto text-center space-y-8 animate-fade-in">
             <h1 
@@ -192,12 +174,6 @@ const MerchantLanding = () => {
 
         {/* Rewards Section */}
         <section className="relative bg-gradient-to-br from-accent/5 to-primary/5 py-16 sm:py-20 lg:py-28" aria-labelledby="rewards-heading">
-          <img 
-            src={petDogRunning} 
-            alt="" 
-            aria-hidden="true"
-            className="absolute right-4 sm:right-12 -top-10 w-24 sm:w-36 lg:w-44 opacity-90 hidden sm:block pointer-events-none"
-          />
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto">
               <div className="text-center mb-12">
@@ -316,12 +292,6 @@ const MerchantLanding = () => {
 
         {/* Transparent Pricing Section */}
         <section className="relative bg-gradient-to-br from-primary/5 to-accent/5 py-16 sm:py-20 lg:py-28" aria-labelledby="pricing-heading">
-          <img 
-            src={petDogTongue} 
-            alt="" 
-            aria-hidden="true"
-            className="absolute left-4 sm:left-12 -bottom-12 w-24 sm:w-36 lg:w-48 opacity-90 hidden sm:block pointer-events-none z-10"
-          />
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto">
               <div className="text-center mb-12">
