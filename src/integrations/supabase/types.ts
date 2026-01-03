@@ -1129,6 +1129,63 @@ export type Database = {
           },
         ]
       }
+      merchant_tax_expenses: {
+        Row: {
+          amount: number
+          category: Database["public"]["Enums"]["tax_expense_category"]
+          created_at: string
+          description: string | null
+          expense_date: string
+          id: string
+          merchant_id: string
+          receipt_url: string | null
+          tax_year: number
+          updated_at: string
+          vendor_name: string | null
+        }
+        Insert: {
+          amount: number
+          category: Database["public"]["Enums"]["tax_expense_category"]
+          created_at?: string
+          description?: string | null
+          expense_date: string
+          id?: string
+          merchant_id: string
+          receipt_url?: string | null
+          tax_year: number
+          updated_at?: string
+          vendor_name?: string | null
+        }
+        Update: {
+          amount?: number
+          category?: Database["public"]["Enums"]["tax_expense_category"]
+          created_at?: string
+          description?: string | null
+          expense_date?: string
+          id?: string
+          merchant_id?: string
+          receipt_url?: string | null
+          tax_year?: number
+          updated_at?: string
+          vendor_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_tax_expenses_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_tax_expenses_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       merchant_webhooks: {
         Row: {
           created_at: string
@@ -3358,6 +3415,17 @@ export type Database = {
         | "veterinary"
         | "pet_sitting"
         | "other"
+      tax_expense_category:
+        | "gas_mileage"
+        | "pet_supplies_treats"
+        | "equipment"
+        | "insurance"
+        | "marketing_advertising"
+        | "professional_services"
+        | "office_supplies"
+        | "software_subscriptions"
+        | "training_education"
+        | "other"
       user_type: "pet_owner" | "merchant"
     }
     CompositeTypes: {
@@ -3515,6 +3583,18 @@ export const Constants = {
         "training",
         "veterinary",
         "pet_sitting",
+        "other",
+      ],
+      tax_expense_category: [
+        "gas_mileage",
+        "pet_supplies_treats",
+        "equipment",
+        "insurance",
+        "marketing_advertising",
+        "professional_services",
+        "office_supplies",
+        "software_subscriptions",
+        "training_education",
         "other",
       ],
       user_type: ["pet_owner", "merchant"],
