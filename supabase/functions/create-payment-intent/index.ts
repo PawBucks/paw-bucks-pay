@@ -143,6 +143,9 @@ serve(async (req) => {
     // Create a PaymentIntent with Stripe Connect
     // Using on_behalf_of ensures merchant's business info appears on customer statements
     // Explicitly specify card payment method for better international support
+    // Statement descriptor suffix shows merchant name on card statement (max 22 chars)
+    const statementDescriptor = merchant.business_name.substring(0, 22).replace(/[<>"'\\]/g, '');
+    
     const paymentIntent = await stripe.paymentIntents.create({
       amount: amountInCents,
       currency,
@@ -152,6 +155,7 @@ serve(async (req) => {
       transfer_data: {
         destination: merchant.stripe_account_id, // Send to merchant's Connect account
       },
+      statement_descriptor_suffix: statementDescriptor, // Merchant name on card statement
       metadata: {
         merchant_id: merchantId,
         user_id: user.id,
