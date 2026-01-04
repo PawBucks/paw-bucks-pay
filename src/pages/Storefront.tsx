@@ -192,9 +192,13 @@ const Storefront = () => {
       } else {
         throw new Error("No checkout URL returned");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating checkout:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to start checkout");
+      // Extract error message from various possible error structures
+      const errorMessage = error?.message || 
+                          error?.error || 
+                          (typeof error === 'string' ? error : 'Failed to start checkout');
+      toast.error(errorMessage);
       setPurchasingProductId(null);
     }
   };
