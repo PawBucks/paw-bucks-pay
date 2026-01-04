@@ -346,6 +346,9 @@ serve(async (req) => {
 
     // For subscriptions, we need to use a different approach
     // Create subscription on platform with transfers to connected account
+    // Statement descriptor shows merchant name on card statement (max 22 chars)
+    const statementDescriptor = merchantName.substring(0, 22).replace(/[<>"'\\]/g, '');
+    
     const session = await stripe.checkout.sessions.create({
       line_items: [
         {
@@ -377,6 +380,12 @@ serve(async (req) => {
           destination: accountId,
         },
         metadata,
+        // For subscriptions, set invoice settings for recurring statement descriptors
+        description: `${merchantName} subscription`,
+      },
+      // Set payment intent data for the initial subscription payment
+      payment_intent_data: {
+        statement_descriptor_suffix: statementDescriptor,
       },
     });
 
