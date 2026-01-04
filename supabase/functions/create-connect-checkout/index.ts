@@ -412,12 +412,55 @@ serve(async (req) => {
     );
 
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error('Error creating checkout session:', errorMessage);
+    // Extract detailed error information for better debugging
+    let errorMessage = 'An unexpected error occurred';
+    let errorCode = 'unknown_error';
+    let errorType = 'unknown';
+    
+    if (error instanceof Error) {
+      errorMessage = error.message;
+      
+      // Check if it's a Stripe error with additional details
+      const stripeError = error as any;
+      if (stripeError.type) {
+        errorType = stripeError.type;
+      }
+      if (stripeError.code) {
+        errorCode = stripeError.code;
+      }
+      if (stripeError.raw?.message) {
+        errorMessage = stripeError.raw.message;
+      }
+      
+      // Log full error details server-side
+      console.error('Error creating checkout session:', {
+        message: errorMessage,
+        type: errorType,
+        code: errorCode,
+        stack: error.stack,
+        raw: stripeError.raw || null,
+      });
+    } else {
+      console.error('Non-Error exception:', error);
+    }
+    
+    // Provide user-friendly error messages based on error type
+    let userMessage = errorMessage;
+    if (errorCode === 'resource_missing' || errorMessage.includes('No such price')) {
+      userMessage = 'This product is no longer available. Please contact the merchant.';
+    } else if (errorCode === 'account_invalid' || errorMessage.includes('account')) {
+      userMessage = 'The merchant\'s payment setup is incomplete. Please try again later.';
+    } else if (errorMessage.includes('authentication') || errorMessage.includes('API key')) {
+      userMessage = 'Payment service configuration error. Please contact support.';
+    } else if (errorMessage.includes('currency') || errorMessage.includes('amount')) {
+      userMessage = 'Invalid payment amount. Please try again.';
+    }
     
     return new Response(
       JSON.stringify({ 
-        error: errorMessage,
+        error: userMessage,
+        error_code: errorCode,
+        error_type: errorType,
         success: false,
       }),
       {
