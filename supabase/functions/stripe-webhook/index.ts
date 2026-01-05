@@ -130,6 +130,7 @@ serve(async (req) => {
           pawbucksUsed,
           pawbucksUsdValue,
           userId,
+          merchantId,
         });
 
         // Get current PawBucks balance
@@ -148,14 +149,14 @@ serve(async (req) => {
           if (actualDeduction > 0) {
             const newBalance = currentBalance - actualDeduction;
             
-            // Deduct PawBucks
+            // Deduct PawBucks from user
             const { error: updateError } = await supabaseAdmin
               .from('pawbucks_wallet')
               .update({ balance: newBalance })
               .eq('user_id', userId);
 
             if (!updateError) {
-              // Log PawBucks activity
+              // Log PawBucks activity for user (deduction)
               await supabaseAdmin
                 .from('pawbucks_activity')
                 .insert({
@@ -168,6 +169,52 @@ serve(async (req) => {
                 });
 
               console.log(`✅ Deducted ${actualDeduction} PawBucks from user wallet after payment completion`);
+              
+              // Credit merchant's PawBucks wallet
+              if (merchantId) {
+                // Get or create merchant wallet
+                let { data: merchantWallet } = await supabaseAdmin
+                  .from('merchant_pawbucks_wallet')
+                  .select('balance')
+                  .eq('merchant_id', merchantId)
+                  .single();
+                
+                if (!merchantWallet) {
+                  // Create wallet if doesn't exist
+                  const { data: newWallet } = await supabaseAdmin
+                    .from('merchant_pawbucks_wallet')
+                    .insert({ merchant_id: merchantId, balance: 0 })
+                    .select('balance')
+                    .single();
+                  merchantWallet = newWallet;
+                }
+                
+                if (merchantWallet) {
+                  // Credit merchant
+                  const { error: merchantUpdateError } = await supabaseAdmin
+                    .from('merchant_pawbucks_wallet')
+                    .update({ balance: merchantWallet.balance + actualDeduction })
+                    .eq('merchant_id', merchantId);
+                  
+                  if (!merchantUpdateError) {
+                    // Log merchant's PawBucks activity (credit)
+                    await supabaseAdmin
+                      .from('merchant_pawbucks_activity')
+                      .insert({
+                        merchant_id: merchantId,
+                        type: 'earn',
+                        amount: actualDeduction,
+                        source: 'Customer Payment',
+                        customer_user_id: userId,
+                        description: `Received ${actualDeduction} PawBucks ($${(actualDeduction / 1000).toFixed(2)}) from customer subscription payment`,
+                      });
+                    
+                    console.log(`✅ Credited ${actualDeduction} PawBucks to merchant wallet`);
+                  } else {
+                    console.error('Error crediting merchant PawBucks wallet:', merchantUpdateError);
+                  }
+                }
+              }
             } else {
               console.error('Error deducting PawBucks:', updateError);
             }

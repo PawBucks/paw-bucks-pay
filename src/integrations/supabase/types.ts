@@ -861,6 +861,96 @@ export type Database = {
         }
         Relationships: []
       }
+      merchant_pawbucks_activity: {
+        Row: {
+          amount: number
+          created_at: string
+          customer_user_id: string | null
+          description: string | null
+          id: string
+          merchant_id: string
+          source: string
+          transaction_id: string | null
+          type: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          customer_user_id?: string | null
+          description?: string | null
+          id?: string
+          merchant_id: string
+          source: string
+          transaction_id?: string | null
+          type: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          customer_user_id?: string | null
+          description?: string | null
+          id?: string
+          merchant_id?: string
+          source?: string
+          transaction_id?: string | null
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_pawbucks_activity_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_pawbucks_activity_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      merchant_pawbucks_wallet: {
+        Row: {
+          balance: number
+          created_at: string
+          id: string
+          last_updated: string
+          merchant_id: string
+        }
+        Insert: {
+          balance?: number
+          created_at?: string
+          id?: string
+          last_updated?: string
+          merchant_id: string
+        }
+        Update: {
+          balance?: number
+          created_at?: string
+          id?: string
+          last_updated?: string
+          merchant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_pawbucks_wallet_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: true
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_pawbucks_wallet_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: true
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       merchant_pos_integrations: {
         Row: {
           api_key_hash: string
