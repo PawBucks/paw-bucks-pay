@@ -344,48 +344,44 @@ serve(async (req) => {
       );
     }
 
-    // For subscriptions, we need to use a different approach
-    // Create subscription on platform with transfers to connected account
-    // NOTE: payment_intent_data is NOT supported for subscription mode in Stripe Checkout
-    // Statement descriptors for subscriptions are controlled via the connected account's settings
-    // or via invoice settings after the subscription is created
+    // For subscriptions with connected accounts, use DIRECT CHARGES on the connected account
+    // This approach creates the checkout session directly on the connected account
+    // Benefits: Works with recurring prices, merchant branding, simpler webhook handling
+    // The platform fee is collected via application_fee_percent
     
-    const session = await stripe.checkout.sessions.create({
-      line_items: [
-        {
-          price_data: {
-            currency: 'usd',
-            product_data: {
-              name: productName || `Subscription from ${merchantName}`,
-              description: pawbucksUsed > 0 
-                ? `Original: $${totalAmountDollars.toFixed(2)} - PawBucks: $${pawbucksUsdValue.toFixed(2)}`
-                : undefined,
-            },
-            unit_amount: finalStripeAmountCents,
-            recurring: {
-              interval: connectedPrice.recurring?.interval || 'month',
-              interval_count: connectedPrice.recurring?.interval_count || 1,
-            },
+    console.log('Creating subscription checkout on connected account:', accountId);
+    
+    const session = await stripe.checkout.sessions.create(
+      {
+        line_items: [
+          {
+            price: priceId, // Use the price from the connected account directly
+            quantity: quantity,
           },
-          quantity: 1,
-        },
-      ],
-      mode: 'subscription',
-      success_url: successUrl || `${req.headers.get('origin')}/checkout-success?session_id={CHECKOUT_SESSION_ID}&store=${accountId}`,
-      cancel_url: cancelUrl || `${req.headers.get('origin')}/checkout-canceled`,
-      customer_email: user.email,
-      metadata,
-      subscription_data: {
-        application_fee_percent: PLATFORM_FEE_PERCENTAGE * 100,
-        transfer_data: {
-          destination: accountId,
-        },
+        ],
+        mode: 'subscription',
+        success_url: successUrl || `${req.headers.get('origin')}/checkout-success?session_id={CHECKOUT_SESSION_ID}&store=${accountId}`,
+        cancel_url: cancelUrl || `${req.headers.get('origin')}/checkout-canceled`,
+        customer_email: user.email,
         metadata,
-        description: `${merchantName} subscription`,
+        subscription_data: {
+          application_fee_percent: PLATFORM_FEE_PERCENTAGE * 100,
+          metadata,
+          description: `${merchantName} subscription`,
+        },
       },
-    });
+      {
+        stripeAccount: accountId, // Create session on connected account
+      }
+    );
 
-    console.log('Subscription checkout session created (with transfer):', session.id);
+    console.log('Subscription checkout session created on connected account:', session.id);
+
+    // Verify session URL was returned
+    if (!session.url) {
+      console.error('Stripe returned session without URL:', session.id);
+      throw new Error('Checkout session created but no URL returned');
+    }
 
     return new Response(
       JSON.stringify({
