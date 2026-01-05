@@ -198,7 +198,7 @@ serve(async (req) => {
       applicationFeeAmount = Math.round(finalStripeAmountCents * PLATFORM_FEE_PERCENTAGE);
     }
 
-    const finalAmountDollars = finalStripeAmountCents / 100;
+    let finalAmountDollars = finalStripeAmountCents / 100;
 
     // Check user's subscription tier for cashback calculation
     let userCashbackRate = 10; // Default 10x for free accounts
@@ -227,10 +227,12 @@ serve(async (req) => {
     console.log(`Calculated: fee=$${(applicationFeeAmount / 100).toFixed(2)}, pawBucks=${estimatedPawBucks}`);
 
     // STEP 7: Handle case where PawBucks covers the full amount
-    if (finalStripeAmountCents <= 0) {
-      console.log('Full amount covered by PawBucks - no Stripe checkout needed');
+    // IMPORTANT: For subscriptions, we ALWAYS need a Stripe checkout to set up recurring billing
+    // PawBucks can only be applied as a discount on the first payment, not as full payment for subscriptions
+    if (finalStripeAmountCents <= 0 && !isRecurringPrice) {
+      console.log('Full amount covered by PawBucks - no Stripe checkout needed (one-time payment)');
       
-      // Create a transaction record for this subscription (handled as a PawBucks-only payment)
+      // Create a transaction record for this payment (handled as a PawBucks-only payment)
       if (merchantId) {
         await supabaseAdmin
           .from('transactions')
@@ -240,7 +242,7 @@ serve(async (req) => {
             amount: totalAmountDollars,
             cashback_earned: 0, // No cashback on PawBucks portion
             rewards_earned: 0,
-            description: `Subscription at ${merchantName} (paid with PawBucks)`,
+            description: `Purchase at ${merchantName} (paid with PawBucks)`,
             status: 'completed',
           });
       }
@@ -251,7 +253,7 @@ serve(async (req) => {
           paid_with_pawbucks: true,
           pawbucks_used: pawbucksUsed,
           pawbucks_usd_value: pawbucksUsdValue,
-          message: `Subscription paid with ${pawbucksUsed} PawBucks ($${pawbucksUsdValue.toFixed(2)})`,
+          message: `Purchase paid with ${pawbucksUsed} PawBucks ($${pawbucksUsdValue.toFixed(2)})`,
           redirect_url: successUrl || `${req.headers.get('origin')}/checkout-success`,
         }),
         {
@@ -259,6 +261,17 @@ serve(async (req) => {
           status: 200,
         }
       );
+    }
+    
+    // For subscriptions where PawBucks would cover the full amount, 
+    // we still need Stripe checkout but won't apply PawBucks (recurring billing requires card on file)
+    if (isRecurringPrice && finalStripeAmountCents <= 0) {
+      console.log('Subscription detected - PawBucks cannot fully cover recurring payments, proceeding with full price checkout');
+      // Reset PawBucks usage for subscriptions - they need the full checkout flow
+      pawbucksUsed = 0;
+      pawbucksUsdValue = 0;
+      finalStripeAmountCents = totalAmountCents;
+      finalAmountDollars = totalAmountDollars;
     }
 
     // STEP 8: Create Checkout Session using DESTINATION CHARGES pattern
