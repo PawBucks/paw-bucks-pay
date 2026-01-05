@@ -227,10 +227,91 @@ serve(async (req) => {
     console.log(`Calculated: fee=$${(applicationFeeAmount / 100).toFixed(2)}, pawBucks=${estimatedPawBucks}`);
 
     // STEP 7: Handle case where PawBucks covers the full amount
-    // IMPORTANT: For subscriptions, we ALWAYS need a Stripe checkout to set up recurring billing
-    // PawBucks can only be applied as a discount on the first payment, not as full payment for subscriptions
+    // For one-time payments: Can be fully covered by PawBucks (no Stripe checkout needed)
+    // For subscriptions: Always need minimum $0.50 for Stripe to capture card for recurring billing
+    const MINIMUM_STRIPE_AMOUNT_CENTS = 50; // $0.50 minimum for Stripe
+    
     if (finalStripeAmountCents <= 0 && !isRecurringPrice) {
       console.log('Full amount covered by PawBucks - no Stripe checkout needed (one-time payment)');
+      
+      // Deduct PawBucks from user's wallet immediately for PawBucks-only payments
+      if (pawbucksUsed > 0) {
+        const { data: currentWallet } = await supabaseAdmin
+          .from('pawbucks_wallet')
+          .select('balance')
+          .eq('user_id', user.id)
+          .single();
+        
+        if (currentWallet && currentWallet.balance >= pawbucksUsed) {
+          // Deduct PawBucks from user
+          await supabaseAdmin
+            .from('pawbucks_wallet')
+            .update({ balance: currentWallet.balance - pawbucksUsed })
+            .eq('user_id', user.id);
+          
+          // Log user's PawBucks activity (deduction)
+          await supabaseAdmin
+            .from('pawbucks_activity')
+            .insert({
+              user_id: user.id,
+              type: 'redeem',
+              amount: -pawbucksUsed,
+              source: 'Purchase',
+              partner_id: merchantId || null,
+              description: `Paid ${pawbucksUsed} PawBucks ($${pawbucksUsdValue.toFixed(2)}) at ${merchantName}`,
+            });
+          
+          // Credit merchant's PawBucks wallet
+          if (merchantId) {
+            // Get or create merchant wallet
+            let { data: merchantWallet } = await supabaseAdmin
+              .from('merchant_pawbucks_wallet')
+              .select('balance')
+              .eq('merchant_id', merchantId)
+              .single();
+            
+            if (!merchantWallet) {
+              // Create wallet if doesn't exist
+              const { data: newWallet } = await supabaseAdmin
+                .from('merchant_pawbucks_wallet')
+                .insert({ merchant_id: merchantId, balance: 0 })
+                .select('balance')
+                .single();
+              merchantWallet = newWallet;
+            }
+            
+            if (merchantWallet) {
+              // Credit merchant
+              await supabaseAdmin
+                .from('merchant_pawbucks_wallet')
+                .update({ balance: merchantWallet.balance + pawbucksUsed })
+                .eq('merchant_id', merchantId);
+              
+              // Log merchant's PawBucks activity (credit)
+              await supabaseAdmin
+                .from('merchant_pawbucks_activity')
+                .insert({
+                  merchant_id: merchantId,
+                  type: 'earn',
+                  amount: pawbucksUsed,
+                  source: 'Customer Payment',
+                  customer_user_id: user.id,
+                  description: `Received ${pawbucksUsed} PawBucks ($${pawbucksUsdValue.toFixed(2)}) from customer`,
+                });
+              
+              console.log(`✅ Credited ${pawbucksUsed} PawBucks to merchant wallet`);
+            }
+          }
+          
+          console.log(`✅ Deducted ${pawbucksUsed} PawBucks from user wallet`);
+        } else {
+          console.error('Insufficient PawBucks balance for purchase');
+          return new Response(
+            JSON.stringify({ error: 'Insufficient PawBucks balance' }),
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+          );
+        }
+      }
       
       // Create a transaction record for this payment (handled as a PawBucks-only payment)
       if (merchantId) {
@@ -263,15 +344,27 @@ serve(async (req) => {
       );
     }
     
-    // For subscriptions where PawBucks would cover the full amount, 
-    // we still need Stripe checkout but won't apply PawBucks (recurring billing requires card on file)
-    if (isRecurringPrice && finalStripeAmountCents <= 0) {
-      console.log('Subscription detected - PawBucks cannot fully cover recurring payments, proceeding with full price checkout');
-      // Reset PawBucks usage for subscriptions - they need the full checkout flow
-      pawbucksUsed = 0;
-      pawbucksUsdValue = 0;
-      finalStripeAmountCents = totalAmountCents;
-      finalAmountDollars = totalAmountDollars;
+    // For subscriptions where PawBucks would cover the full amount:
+    // We need a minimum Stripe charge ($0.50) to capture card for recurring billing
+    // PawBucks will cover the rest, and subsequent months charge full price via card
+    if (isRecurringPrice && finalStripeAmountCents < MINIMUM_STRIPE_AMOUNT_CENTS) {
+      console.log('Subscription: Ensuring minimum Stripe amount for card capture');
+      
+      // Calculate how much PawBucks we can actually use while keeping minimum Stripe charge
+      const maxPawBucksForSubscription = Math.max(0, totalAmountCents - MINIMUM_STRIPE_AMOUNT_CENTS);
+      const actualPawBucksValue = maxPawBucksForSubscription / 100;
+      const actualPawBucksUsed = Math.floor(actualPawBucksValue * PAWBUCKS_TO_USD);
+      
+      pawbucksUsed = actualPawBucksUsed;
+      pawbucksUsdValue = actualPawBucksValue;
+      finalStripeAmountCents = totalAmountCents - maxPawBucksForSubscription;
+      finalAmountDollars = finalStripeAmountCents / 100;
+      
+      console.log('Adjusted PawBucks for subscription:', {
+        originalPawBucks: pawbucksUsed,
+        adjustedPawBucks: actualPawBucksUsed,
+        stripeAmount: `$${finalAmountDollars.toFixed(2)}`,
+      });
     }
 
     // STEP 8: Create Checkout Session using DESTINATION CHARGES pattern
