@@ -271,6 +271,124 @@ serve(async (req) => {
           if (eventError) {
             console.error('Error logging subscription event:', eventError);
           }
+          
+          // ========================================
+          // CREATE TRANSACTION RECORD FOR INITIAL SUBSCRIPTION PAYMENT
+          // ========================================
+          
+          // Get the total amount paid (including PawBucks value)
+          const stripeAmountPaid = session.amount_total ? session.amount_total / 100 : 0;
+          const totalAmount = stripeAmountPaid + pawbucksUsdValue; // Total value = Stripe + PawBucks discount
+          
+          if (merchantId && totalAmount > 0) {
+            // Determine PawBucks earned based on STRIPE amount only (not PawBucks portion)
+            let pawbucksMultiplier = 10; // Default 10x for free accounts
+            let tierName = 'Free';
+            
+            // Check user's platform subscription tier
+            const { data: platformSub } = await supabaseAdmin
+              .from('subscriptions')
+              .select('stripe_subscription_id')
+              .eq('user_id', userId)
+              .in('status', ['active', 'trialing'])
+              .maybeSingle();
+
+            if (platformSub?.stripe_subscription_id) {
+              try {
+                const platformSubscription = await stripe.subscriptions.retrieve(platformSub.stripe_subscription_id);
+                const productId = platformSubscription.items.data[0]?.price?.product;
+                
+                if (productId === 'prod_TQyZjYzt9DwoIK') {
+                  pawbucksMultiplier = 30; // PawPass+
+                  tierName = 'PawPass+';
+                } else if (productId === 'prod_TJVK9ZhLiJnnpm') {
+                  pawbucksMultiplier = 20; // PawPass
+                  tierName = 'PawPass';
+                }
+              } catch (e) {
+                console.error('Error fetching platform subscription:', e);
+              }
+            }
+            
+            // PawBucks earned only on the Stripe portion of payment
+            const pawbucksEarned = Math.floor(stripeAmountPaid * pawbucksMultiplier);
+            
+            console.log('Recording initial subscription transaction:', {
+              userId,
+              merchantId,
+              totalAmount,
+              stripeAmountPaid,
+              pawbucksUsedValue: pawbucksUsdValue,
+              pawbucksEarned,
+              tierName,
+            });
+            
+            // Create transaction record for initial subscription
+            const { data: transaction, error: transactionError } = await supabaseAdmin
+              .from('transactions')
+              .insert({
+                user_id: userId,
+                merchant_id: merchantId,
+                amount: totalAmount, // Full transaction value
+                cashback_earned: pawbucksEarned,
+                rewards_earned: pawbucksEarned,
+                description: `Subscription: ${merchantName}`,
+                status: 'completed',
+                stripe_payment_intent_id: session.payment_intent as string || `checkout_${session.id}`,
+              })
+              .select()
+              .single();
+
+            if (transactionError) {
+              console.error('Error creating subscription transaction:', transactionError);
+            } else {
+              console.log('✅ Initial subscription transaction recorded:', transaction.id);
+              
+              // Credit PawBucks earned to user's wallet (for Stripe portion of payment)
+              if (pawbucksEarned > 0) {
+                let { data: userWallet } = await supabaseAdmin
+                  .from('pawbucks_wallet')
+                  .select('*')
+                  .eq('user_id', userId)
+                  .single();
+
+                if (!userWallet) {
+                  const { data: newWallet } = await supabaseAdmin
+                    .from('pawbucks_wallet')
+                    .insert({ user_id: userId, balance: 0 })
+                    .select()
+                    .single();
+                  userWallet = newWallet;
+                }
+
+                if (userWallet) {
+                  const { error: walletUpdateError } = await supabaseAdmin
+                    .from('pawbucks_wallet')
+                    .update({ balance: userWallet.balance + pawbucksEarned })
+                    .eq('user_id', userId);
+
+                  if (walletUpdateError) {
+                    console.error('Error updating PawBucks wallet:', walletUpdateError);
+                  } else {
+                    console.log(`✅ PawBucks wallet updated: +${pawbucksEarned} PawBucks`);
+                    
+                    // Log the earned PawBucks activity
+                    await supabaseAdmin
+                      .from('pawbucks_activity')
+                      .insert({
+                        user_id: userId,
+                        type: 'earn',
+                        amount: pawbucksEarned,
+                        source: 'Subscription Purchase',
+                        partner_id: merchantId,
+                        transaction_id: transaction.id,
+                        description: `Earned ${pawbucksEarned} PawBucks (${tierName} ${pawbucksMultiplier}x) from subscription at ${merchantName}`,
+                      });
+                  }
+                }
+              }
+            }
+          }
         }
       }
     }
