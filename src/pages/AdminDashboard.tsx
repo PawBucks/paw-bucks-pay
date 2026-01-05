@@ -101,6 +101,7 @@ type Transaction = {
   cashback_earned: number;
   rewards_earned: number;
   description: string;
+  status: string;
   created_at: string;
   user_id?: string;
   merchants?: {
@@ -258,10 +259,15 @@ const AdminDashboard = () => {
       // Load transactions with merchant names and customer info
       const { data: transactionsData } = await supabase
         .from("transactions")
-        .select("*, merchants(business_name), profiles(full_name, email)")
+        .select("id, amount, cashback_earned, rewards_earned, description, status, created_at, user_id, merchants(business_name), profiles(full_name, email)")
         .order("created_at", { ascending: false })
         .limit(50);
       setTransactions(transactionsData || []);
+      
+      // Calculate total rewards excluding refunded transactions
+      const completedTransactions = (transactionsData || []).filter(t => t.status !== 'refunded');
+      const totalRewards = completedTransactions.reduce((sum, t) => sum + (t.rewards_earned || 0), 0);
+      setTotalCashback(totalRewards);
     } catch (error: any) {
       console.error("Error loading admin data:", error);
       toast.error("Failed to load admin data");
@@ -735,6 +741,7 @@ const AdminDashboard = () => {
                   <TableHead>Description</TableHead>
                   <TableHead>Amount</TableHead>
                   <TableHead>Rewards</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead>Date</TableHead>
                 </TableRow>
               </TableHeader>
@@ -750,8 +757,13 @@ const AdminDashboard = () => {
                     </TableCell>
                     <TableCell>{transaction.description}</TableCell>
                     <TableCell>${transaction.amount.toFixed(2)}</TableCell>
-                {/* Use rewards_earned (PawBucks) and convert to USD (1 PawBuck = $0.001) */}
+                    {/* Use rewards_earned (PawBucks) and convert to USD (1 PawBuck = $0.001) */}
                     <TableCell className="text-accent">${(transaction.rewards_earned * 0.001).toFixed(2)}</TableCell>
+                    <TableCell>
+                      <Badge variant={transaction.status === 'refunded' ? 'destructive' : transaction.status === 'completed' ? 'default' : 'secondary'}>
+                        {transaction.status}
+                      </Badge>
+                    </TableCell>
                     <TableCell>{format(new Date(transaction.created_at), "MMM d, h:mm a")}</TableCell>
                   </TableRow>
                 ))}
@@ -1030,6 +1042,7 @@ const AdminDashboard = () => {
                 <TableHead>Customer</TableHead>
                 <TableHead>Amount</TableHead>
                 <TableHead>Cashback</TableHead>
+                <TableHead>Status</TableHead>
                 <TableHead>Date</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
@@ -1047,18 +1060,24 @@ const AdminDashboard = () => {
                     <TableCell>${transaction.amount.toFixed(2)}</TableCell>
                     {/* Use rewards_earned (PawBucks) and convert to USD (1 PawBuck = $0.001) */}
                     <TableCell className="text-accent">${(transaction.rewards_earned * 0.001).toFixed(2)}</TableCell>
+                    <TableCell>
+                      <Badge variant={transaction.status === 'refunded' ? 'destructive' : transaction.status === 'completed' ? 'default' : 'secondary'}>
+                        {transaction.status}
+                      </Badge>
+                    </TableCell>
                   <TableCell>{format(new Date(transaction.created_at), "MMM d, h:mm a")}</TableCell>
                   <TableCell>
                     <Button
                       size="sm"
                       variant="outline"
+                      disabled={transaction.status === 'refunded'}
                       onClick={() => {
                         setSelectedTransaction(transaction);
                         setRefundDialogOpen(true);
                       }}
                     >
                       <RefreshCw className="w-4 h-4 mr-2" />
-                      Refund
+                      {transaction.status === 'refunded' ? 'Refunded' : 'Refund'}
                     </Button>
                   </TableCell>
                 </TableRow>
