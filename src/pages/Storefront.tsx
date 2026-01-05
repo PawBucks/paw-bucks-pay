@@ -10,6 +10,7 @@ import { SEO } from "@/components/SEO";
 import { useAuth } from "@/hooks/useAuth";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { PawBucksCheckoutDialog } from "@/components/PawBucksCheckoutDialog";
 
 type Product = {
   id: string;
@@ -54,12 +55,36 @@ const Storefront = () => {
   const [cashbackRate, setCashbackRate] = useState<number>(10);
   const [purchasingProductId, setPurchasingProductId] = useState<string | null>(null);
   const [stripeAccountId, setStripeAccountId] = useState<string | null>(null);
+  const [merchantAcceptsPawBucks, setMerchantAcceptsPawBucks] = useState<boolean>(false);
+  
+  // PawBucks checkout dialog state
+  const [showPawBucksDialog, setShowPawBucksDialog] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [isRecurringProduct, setIsRecurringProduct] = useState(false);
+  const [autoRedeemEnabled, setAutoRedeemEnabled] = useState(false);
 
   useEffect(() => {
     if (accountId) {
       loadStorefront();
     }
   }, [accountId]);
+
+  // Load user's auto-redeem preference
+  useEffect(() => {
+    if (user?.id) {
+      loadAutoRedeemPreference();
+    }
+  }, [user?.id]);
+
+  const loadAutoRedeemPreference = async () => {
+    if (!user?.id) return;
+    const { data } = await supabase
+      .from('profiles')
+      .select('auto_redeem_pawbucks')
+      .eq('id', user.id)
+      .single();
+    setAutoRedeemEnabled(data?.auto_redeem_pawbucks || false);
+  };
 
   const loadStorefront = async () => {
     if (!accountId) return;
@@ -88,7 +113,7 @@ const Storefront = () => {
         setCashbackRate(merchantBySlug.cashback_rate || 10);
         resolvedMerchantId = merchantBySlug.id;
 
-        // Get stripe account ID via edge function
+        // Get stripe account ID and accepts_pawbucks via edge function
         const { data: connectStatus } = await supabase.functions.invoke("get-connect-account-status", {
           body: { merchantId: merchantBySlug.id },
         });
@@ -96,6 +121,9 @@ const Storefront = () => {
         if (connectStatus?.accountId) {
           resolvedStripeAccountId = connectStatus.accountId;
           setStripeAccountId(connectStatus.accountId);
+        }
+        if (connectStatus?.acceptsPawBucks !== undefined) {
+          setMerchantAcceptsPawBucks(connectStatus.acceptsPawBucks);
         }
       } else {
         // Fall back to looking up by stripe_account_id (for backward compatibility)
@@ -109,6 +137,9 @@ const Storefront = () => {
           resolvedMerchantId = connectStatus.merchantId;
           resolvedStripeAccountId = accountId;
           setStripeAccountId(accountId);
+        }
+        if (connectStatus?.acceptsPawBucks !== undefined) {
+          setMerchantAcceptsPawBucks(connectStatus.acceptsPawBucks);
         }
 
         // Get additional merchant info
@@ -146,7 +177,8 @@ const Storefront = () => {
     }
   };
 
-  const handlePurchase = async (product: Product) => {
+  // Initiates purchase - shows PawBucks dialog if applicable
+  const handlePurchase = (product: Product) => {
     const effectiveAccountId = stripeAccountId || accountId;
     if (!product.price?.id || !effectiveAccountId) return;
 
@@ -161,8 +193,35 @@ const Storefront = () => {
       return;
     }
 
+    // Determine if product is recurring (subscription)
+    // We infer this from the price format - if it shows /month, /year, etc.
+    const priceFormatted = product.price.formatted || "";
+    const isRecurring = priceFormatted.includes('/') || 
+                        priceFormatted.toLowerCase().includes('month') ||
+                        priceFormatted.toLowerCase().includes('year');
+    
+    setSelectedProduct(product);
+    setIsRecurringProduct(isRecurring);
+
+    // For subscriptions with auto-redeem enabled, skip the dialog and proceed directly
+    // The edge function will automatically apply PawBucks
+    if (isRecurring && autoRedeemEnabled) {
+      proceedToCheckout(product, 0, true);
+      return;
+    }
+
+    // Show PawBucks dialog for user to choose how many to use
+    setShowPawBucksDialog(true);
+  };
+
+  // Proceeds to Stripe checkout with optional PawBucks
+  const proceedToCheckout = async (product: Product, pawbucksToUse: number, isAutoRedeem: boolean = false) => {
+    const effectiveAccountId = stripeAccountId || accountId;
+    if (!product.price?.id || !effectiveAccountId) return;
+
     try {
       setPurchasingProductId(product.id);
+      setShowPawBucksDialog(false);
 
       const { data, error } = await supabase.functions.invoke("create-connect-checkout", {
         body: {
@@ -172,17 +231,34 @@ const Storefront = () => {
           productName: product.name,
           successUrl: `${window.location.origin}/checkout-success?store=${accountId}`,
           cancelUrl: window.location.href,
+          // Pass manual PawBucks amount if not using auto-redeem
+          pawbucksToUse: isAutoRedeem ? undefined : pawbucksToUse,
         },
       });
 
       if (error) throw error;
 
+      // Handle full PawBucks payment (no Stripe needed)
+      if (data.paid_with_pawbucks) {
+        toast.success(data.message || `Purchase completed with PawBucks!`);
+        if (data.redirect_url) {
+          window.location.href = data.redirect_url;
+        }
+        setPurchasingProductId(null);
+        return;
+      }
+
       if (data.checkout_url) {
         // Show rewards info before redirect
+        let message = "";
+        if (data.pawbucks_applied) {
+          message = `Applied ${data.pawbucks_applied.formatted}. `;
+        }
         if (data.rewards?.estimated_pawbucks > 0) {
-          toast.success(`You'll earn ${data.rewards.formatted} on this purchase!`, {
-            duration: 2000,
-          });
+          message += `You'll earn ${data.rewards.formatted} on this purchase!`;
+        }
+        if (message) {
+          toast.success(message, { duration: 2000 });
         }
         
         // Short delay to show the toast, then redirect
@@ -194,12 +270,18 @@ const Storefront = () => {
       }
     } catch (error: any) {
       console.error("Error creating checkout:", error);
-      // Extract error message from various possible error structures
       const errorMessage = error?.message || 
                           error?.error || 
                           (typeof error === 'string' ? error : 'Failed to start checkout');
       toast.error(errorMessage);
       setPurchasingProductId(null);
+    }
+  };
+
+  // Handler for PawBucks dialog confirmation
+  const handlePawBucksDialogProceed = (pawbucksToUse: number) => {
+    if (selectedProduct) {
+      proceedToCheckout(selectedProduct, pawbucksToUse);
     }
   };
 
@@ -501,6 +583,23 @@ const Storefront = () => {
           </div>
         </div>
       </div>
+
+      {/* PawBucks Checkout Dialog */}
+      {selectedProduct && user && (
+        <PawBucksCheckoutDialog
+          open={showPawBucksDialog}
+          onOpenChange={setShowPawBucksDialog}
+          productName={selectedProduct.name}
+          priceAmount={(selectedProduct.price?.unit_amount || 0) / 100}
+          isRecurring={isRecurringProduct}
+          merchantName={merchantName}
+          merchantAcceptsPawBucks={merchantAcceptsPawBucks}
+          cashbackRate={cashbackRate}
+          userId={user.id}
+          onProceed={handlePawBucksDialogProceed}
+          isLoading={purchasingProductId === selectedProduct.id}
+        />
+      )}
     </div>
   );
 };
