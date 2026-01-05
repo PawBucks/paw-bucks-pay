@@ -581,6 +581,9 @@ serve(async (req) => {
         transfer_data: {
           destination: accountId,
         },
+        // CRITICAL: on_behalf_of makes Stripe use the connected account's branding
+        // This shows the merchant name (e.g., "iHikeDogs") instead of platform ("PawBucks LLC")
+        on_behalf_of: accountId,
         metadata,
         // Statement descriptor for subscription invoices - shows merchant name
         description: `${merchantName.substring(0, 22).replace(/[<>"']/g, '')} subscription`,
