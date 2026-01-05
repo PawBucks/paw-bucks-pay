@@ -84,7 +84,7 @@ serve(async (req) => {
     // Get full transaction details including user_id, rewards_earned, and merchant_id
     const { data: transaction, error: txError } = await supabaseAdmin
       .from('transactions')
-      .select('stripe_payment_intent_id, amount, status, user_id, rewards_earned, merchant_id, pawbucks_used')
+      .select('stripe_payment_intent_id, amount, status, user_id, rewards_earned, merchant_id')
       .eq('id', transactionId)
       .single();
 
@@ -185,91 +185,8 @@ serve(async (req) => {
       }
     }
 
-    // If PawBucks were used in the transaction, refund them back to the user
-    const pawbucksUsed = transaction.pawbucks_used || 0;
-    if (pawbucksUsed > 0 && transaction.user_id) {
-      console.log('[REFUND] Refunding', pawbucksUsed, 'PawBucks back to user:', transaction.user_id);
-      
-      const { error: refundPawbucksError } = await supabaseAdmin
-        .from('pawbucks_activity')
-        .insert({
-          user_id: transaction.user_id,
-          amount: pawbucksUsed,
-          type: 'credit',
-          source: 'refund',
-          description: `PawBucks refunded from cancelled transaction`,
-          transaction_id: transactionId,
-          pawbucks_status: 'available',
-        });
-
-      if (refundPawbucksError) {
-        console.error('[REFUND] Failed to refund user PawBucks:', refundPawbucksError);
-      } else {
-        console.log('[REFUND] User PawBucks refunded successfully');
-      }
-    }
-
-    // Deduct PawBucks from merchant if they received any
-    if (pawbucksUsed > 0 && transaction.merchant_id) {
-      console.log('[REFUND] Deducting', pawbucksUsed, 'PawBucks from merchant:', transaction.merchant_id);
-      
-      // Deduct from merchant_pawbucks_wallet
-      const { error: merchantWalletError } = await supabaseAdmin
-        .from('merchant_pawbucks_wallet')
-        .update({ 
-          balance: supabaseAdmin.rpc('decrement_merchant_balance', { 
-            merchant_id_input: transaction.merchant_id, 
-            amount_input: pawbucksUsed 
-          })
-        })
-        .eq('merchant_id', transaction.merchant_id);
-
-      // Use direct SQL update instead since RPC might not exist
-      const { error: walletUpdateError } = await supabaseAdmin
-        .rpc('raw_sql', { 
-          query: `UPDATE merchant_pawbucks_wallet SET balance = balance - ${pawbucksUsed} WHERE merchant_id = '${transaction.merchant_id}'` 
-        });
-
-      // Simpler approach: just update directly
-      const { data: currentWallet } = await supabaseAdmin
-        .from('merchant_pawbucks_wallet')
-        .select('balance')
-        .eq('merchant_id', transaction.merchant_id)
-        .single();
-
-      if (currentWallet) {
-        const newBalance = Math.max(0, (currentWallet.balance || 0) - pawbucksUsed);
-        const { error: balanceUpdateError } = await supabaseAdmin
-          .from('merchant_pawbucks_wallet')
-          .update({ balance: newBalance })
-          .eq('merchant_id', transaction.merchant_id);
-
-        if (balanceUpdateError) {
-          console.error('[REFUND] Failed to update merchant wallet balance:', balanceUpdateError);
-        } else {
-          console.log('[REFUND] Merchant wallet balance updated to:', newBalance);
-        }
-      }
-
-      // Log the merchant activity
-      const { error: merchantActivityError } = await supabaseAdmin
-        .from('merchant_pawbucks_activity')
-        .insert({
-          merchant_id: transaction.merchant_id,
-          amount: -pawbucksUsed,
-          type: 'debit',
-          source: 'refund',
-          description: `PawBucks deducted due to transaction refund`,
-          transaction_id: transactionId,
-          customer_user_id: transaction.user_id,
-        });
-
-      if (merchantActivityError) {
-        console.error('[REFUND] Failed to log merchant PawBucks activity:', merchantActivityError);
-      } else {
-        console.log('[REFUND] Merchant PawBucks activity logged');
-      }
-    }
+    // Note: PawBucks used in transactions would need to be tracked separately
+    // Currently we only handle deducting earned PawBucks on refund
 
     // Log the admin action
     try {
@@ -282,7 +199,6 @@ serve(async (req) => {
           reason: reason || 'requested_by_customer',
           stripe_refund_id: stripeRefund?.id || null,
           pawbucks_deducted: pawbucksEarned,
-          pawbucks_refunded: pawbucksUsed,
         },
       });
       console.log('[REFUND] Admin action logged');
@@ -300,7 +216,6 @@ serve(async (req) => {
           amount: refundAmount,
           status: stripeRefund?.status || 'succeeded',
           pawbucks_deducted: pawbucksEarned,
-          pawbucks_refunded: pawbucksUsed,
         }
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
