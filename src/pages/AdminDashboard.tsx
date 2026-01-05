@@ -102,8 +102,13 @@ type Transaction = {
   rewards_earned: number;
   description: string;
   created_at: string;
+  user_id?: string;
   merchants?: {
     business_name: string;
+  };
+  profiles?: {
+    full_name: string;
+    email: string;
   };
 };
 
@@ -250,10 +255,10 @@ const AdminDashboard = () => {
         .order("created_at", { ascending: false });
       setFundingRequests(fundingData || []);
 
-      // Load transactions with merchant names
+      // Load transactions with merchant names and customer info
       const { data: transactionsData } = await supabase
         .from("transactions")
-        .select("*, merchants(business_name)")
+        .select("*, merchants(business_name), profiles(full_name, email)")
         .order("created_at", { ascending: false })
         .limit(50);
       setTransactions(transactionsData || []);
@@ -726,6 +731,7 @@ const AdminDashboard = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>Merchant</TableHead>
+                  <TableHead>Customer</TableHead>
                   <TableHead>Description</TableHead>
                   <TableHead>Amount</TableHead>
                   <TableHead>Rewards</TableHead>
@@ -736,6 +742,12 @@ const AdminDashboard = () => {
                 {transactions.slice(0, 10).map((transaction) => (
                   <TableRow key={transaction.id}>
                     <TableCell className="font-medium">{transaction.merchants?.business_name}</TableCell>
+                    <TableCell>
+                      <div>
+                        <p className="font-medium">{transaction.profiles?.full_name || 'N/A'}</p>
+                        <p className="text-xs text-muted-foreground">{transaction.profiles?.email || ''}</p>
+                      </div>
+                    </TableCell>
                     <TableCell>{transaction.description}</TableCell>
                     <TableCell>${transaction.amount.toFixed(2)}</TableCell>
                 {/* Use rewards_earned (PawBucks) and convert to USD (1 PawBuck = $0.001) */}
@@ -1015,6 +1027,7 @@ const AdminDashboard = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Merchant</TableHead>
+                <TableHead>Customer</TableHead>
                 <TableHead>Amount</TableHead>
                 <TableHead>Cashback</TableHead>
                 <TableHead>Date</TableHead>
@@ -1025,6 +1038,12 @@ const AdminDashboard = () => {
               {transactions.map((transaction) => (
                 <TableRow key={transaction.id}>
                     <TableCell className="font-medium">{transaction.merchants?.business_name}</TableCell>
+                    <TableCell>
+                      <div>
+                        <p className="font-medium">{transaction.profiles?.full_name || 'N/A'}</p>
+                        <p className="text-xs text-muted-foreground">{transaction.profiles?.email || ''}</p>
+                      </div>
+                    </TableCell>
                     <TableCell>${transaction.amount.toFixed(2)}</TableCell>
                     {/* Use rewards_earned (PawBucks) and convert to USD (1 PawBuck = $0.001) */}
                     <TableCell className="text-accent">${(transaction.rewards_earned * 0.001).toFixed(2)}</TableCell>
