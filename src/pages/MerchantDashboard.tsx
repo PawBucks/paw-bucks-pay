@@ -513,11 +513,19 @@ const MerchantDashboard = () => {
               />
             </div>
             {merchant.accepts_pawbucks && (
-              <div className="mt-4 pt-4 border-t text-sm text-muted-foreground">
-                <p className="flex items-center gap-2">
+              <div className="mt-4 pt-4 border-t flex items-center justify-between">
+                <p className="flex items-center gap-2 text-sm text-muted-foreground">
                   <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
                   Customers can now pay using their PawBucks balance
                 </p>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => navigate('/merchant/pawbucks')}
+                >
+                  <Coins className="w-4 h-4 mr-2" />
+                  View Wallet
+                </Button>
               </div>
             )}
           </GradientCard>
