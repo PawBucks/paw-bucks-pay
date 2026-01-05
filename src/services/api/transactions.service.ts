@@ -52,4 +52,14 @@ export const transactionsService = {
       body: params,
     });
   },
+
+  async issueRefund(params: {
+    transactionId: string;
+    amount?: number;
+    reason?: 'duplicate' | 'fraudulent' | 'requested_by_customer';
+  }) {
+    return supabase.functions.invoke("admin-issue-refund", {
+      body: params,
+    });
+  },
 };
