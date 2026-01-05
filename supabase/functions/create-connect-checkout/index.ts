@@ -537,6 +537,8 @@ serve(async (req) => {
     console.log('Created platform price for subscription:', platformPrice.id);
     
     // Create checkout session on platform with destination charges
+    // Note: In subscription mode, we cannot use payment_intent_data - statement descriptor
+    // must be configured at the account level or in subscription_data
     const session = await stripe.checkout.sessions.create({
       line_items: [
         {
@@ -556,11 +558,8 @@ serve(async (req) => {
           destination: accountId,
         },
         metadata,
-        description: `${merchantName} subscription`,
-      },
-      payment_intent_data: {
-        // This shows merchant name on customer's card statement
-        statement_descriptor_suffix: merchantName.substring(0, 22).replace(/[<>"']/g, ''),
+        // Statement descriptor for subscription invoices - shows merchant name
+        description: `${merchantName.substring(0, 22).replace(/[<>"']/g, '')} subscription`,
       },
     });
 
