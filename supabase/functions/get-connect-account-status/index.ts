@@ -49,6 +49,7 @@ serve(async (req) => {
     let accountId = directAccountId || stripeAccountId;
     let merchantName = '';
     let resolvedMerchantId = merchantId;
+    let acceptsPawBucks = false;
     
     // If merchantId provided, look up the stripe_account_id
     if (merchantId && !accountId) {
@@ -59,7 +60,7 @@ serve(async (req) => {
       
       const { data: merchant, error: merchantError } = await supabaseAdmin
         .from('merchants')
-        .select('stripe_account_id, business_name')
+        .select('stripe_account_id, business_name, accepts_pawbucks')
         .eq('id', merchantId)
         .single();
         
@@ -73,6 +74,7 @@ serve(async (req) => {
       
       accountId = merchant.stripe_account_id;
       merchantName = merchant.business_name;
+      acceptsPawBucks = merchant.accepts_pawbucks || false;
     }
     
     // If stripeAccountId provided, look up merchant info
@@ -84,20 +86,21 @@ serve(async (req) => {
       
       const { data: merchant } = await supabaseAdmin
         .from('merchants')
-        .select('id, business_name')
+        .select('id, business_name, accepts_pawbucks')
         .eq('stripe_account_id', stripeAccountId)
         .single();
         
       if (merchant) {
         merchantName = merchant.business_name;
         resolvedMerchantId = merchant.id;
+        acceptsPawBucks = merchant.accepts_pawbucks || false;
       }
     }
     
     if (!accountId) {
       console.log('No Stripe account ID found');
       return new Response(
-        JSON.stringify({ accountId: null, merchantId: resolvedMerchantId, merchantName }),
+        JSON.stringify({ accountId: null, merchantId: resolvedMerchantId, merchantName, acceptsPawBucks }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
       );
     }
@@ -160,6 +163,7 @@ serve(async (req) => {
         accountId: account.id,
         merchantId: resolvedMerchantId,
         merchantName,
+        acceptsPawBucks,
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

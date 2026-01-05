@@ -65,7 +65,7 @@ serve(async (req) => {
 
     // STEP 3: Parse request body
     const body = await req.json();
-    const { accountId, priceId, quantity, successUrl, cancelUrl, productName } = body;
+    const { accountId, priceId, quantity, successUrl, cancelUrl, productName, pawbucksToUse: manualPawbucksToUse } = body;
 
     // Validate required fields and input types
     if (!accountId || typeof accountId !== 'string') {
@@ -139,34 +139,59 @@ serve(async (req) => {
 
     const totalAmountDollars = totalAmountCents / 100;
 
-    // STEP 6: Check for auto PawBucks redemption for recurring subscriptions
+    // STEP 6: Handle PawBucks - either manual selection or auto-redeem
     // IMPORTANT: We only CALCULATE the PawBucks to be used here, NOT deduct them
     // Actual deduction happens in stripe-webhook AFTER payment completes
     let pawbucksUsed = 0;
     let pawbucksUsdValue = 0;
     let finalStripeAmountCents = totalAmountCents;
 
-    if (isRecurringPrice && merchantAcceptsPawBucks) {
-      // Get user's profile to check auto_redeem_pawbucks preference
-      const { data: userProfile } = await supabaseAdmin
-        .from('profiles')
-        .select('auto_redeem_pawbucks')
-        .eq('id', user.id)
+    // Check if manual PawBucks amount was provided by user
+    const hasManualPawBucks = typeof manualPawbucksToUse === 'number' && manualPawbucksToUse > 0;
+    
+    if (merchantAcceptsPawBucks) {
+      // Get user's PawBucks balance
+      const { data: pawbucksWallet } = await supabaseAdmin
+        .from('pawbucks_wallet')
+        .select('balance')
+        .eq('user_id', user.id)
         .single();
 
-      if (userProfile?.auto_redeem_pawbucks) {
-        console.log('Auto PawBucks redemption enabled for user');
+      const availablePawBucks = pawbucksWallet?.balance || 0;
 
-        // Get user's PawBucks balance
-        const { data: pawbucksWallet } = await supabaseAdmin
-          .from('pawbucks_wallet')
-          .select('balance')
-          .eq('user_id', user.id)
+      if (hasManualPawBucks) {
+        // User explicitly chose how many PawBucks to use via the dialog
+        console.log('Manual PawBucks selection:', manualPawbucksToUse);
+        
+        // Validate the amount doesn't exceed balance
+        pawbucksUsed = Math.min(manualPawbucksToUse, availablePawBucks);
+        pawbucksUsdValue = pawbucksUsed / PAWBUCKS_TO_USD;
+        
+        // Ensure we don't exceed the total amount
+        if (pawbucksUsdValue > totalAmountDollars) {
+          pawbucksUsdValue = totalAmountDollars;
+          pawbucksUsed = Math.floor(pawbucksUsdValue * PAWBUCKS_TO_USD);
+        }
+        
+        finalStripeAmountCents = Math.round((totalAmountDollars - pawbucksUsdValue) * 100);
+        
+        console.log('Manual PawBucks applied:', {
+          requested: manualPawbucksToUse,
+          applied: pawbucksUsed,
+          usdValue: `$${pawbucksUsdValue.toFixed(2)}`,
+          remainingStripe: `$${(finalStripeAmountCents / 100).toFixed(2)}`,
+        });
+      } else if (isRecurringPrice) {
+        // For subscriptions without manual selection, check auto-redeem preference
+        const { data: userProfile } = await supabaseAdmin
+          .from('profiles')
+          .select('auto_redeem_pawbucks')
+          .eq('id', user.id)
           .single();
 
-        const availablePawBucks = pawbucksWallet?.balance || 0;
+        if (userProfile?.auto_redeem_pawbucks && availablePawBucks > 0) {
+          console.log('Auto PawBucks redemption enabled for subscription');
 
-        if (availablePawBucks > 0) {
           // Calculate max PawBucks that can be used (in USD)
           const maxPawBucksUsd = availablePawBucks / PAWBUCKS_TO_USD;
           
@@ -175,20 +200,19 @@ serve(async (req) => {
           pawbucksUsed = Math.floor(pawbucksUsdValue * PAWBUCKS_TO_USD);
 
           // Calculate remaining Stripe amount
-          const remainingUsd = totalAmountDollars - pawbucksUsdValue;
-          finalStripeAmountCents = Math.round(remainingUsd * 100);
+          finalStripeAmountCents = Math.round((totalAmountDollars - pawbucksUsdValue) * 100);
 
-          console.log('PawBucks calculation (pending deduction on payment completion):', {
+          console.log('Auto PawBucks calculation (pending deduction):', {
             availablePawBucks,
             pawbucksUsed,
             pawbucksUsdValue: `$${pawbucksUsdValue.toFixed(2)}`,
             remainingStripeAmount: `$${(finalStripeAmountCents / 100).toFixed(2)}`,
           });
-
-          // NOTE: PawBucks are NOT deducted here anymore!
-          // They will be deducted in stripe-webhook when checkout.session.completed fires
-          console.log(`⏳ PawBucks deduction (${pawbucksUsed}) will occur after payment completes`);
         }
+      }
+      
+      if (pawbucksUsed > 0) {
+        console.log(`⏳ PawBucks deduction (${pawbucksUsed}) will occur after payment completes`);
       }
     }
 
