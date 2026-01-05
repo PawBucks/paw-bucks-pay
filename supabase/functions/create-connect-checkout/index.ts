@@ -412,7 +412,9 @@ serve(async (req) => {
           transfer_data: {
             destination: accountId,
           },
-          // Statement descriptor shows merchant name on customer's card statement
+          // on_behalf_of ensures merchant's business info shows on statement
+          on_behalf_of: accountId,
+          // Statement descriptor suffix adds merchant name after platform name
           statement_descriptor_suffix: merchantName.substring(0, 22).replace(/[<>"']/g, ''),
           metadata,
         },
@@ -450,38 +452,119 @@ serve(async (req) => {
       );
     }
 
-    // For subscriptions with connected accounts, use DIRECT CHARGES on the connected account
-    // This approach creates the checkout session directly on the connected account
-    // Benefits: Works with recurring prices, merchant branding, simpler webhook handling
-    // The platform fee is collected via application_fee_percent
+    // For subscriptions, we need a different approach since Stripe doesn't allow
+    // price_data with transfer_data in subscription mode.
+    // 
+    // Solution: Create a one-time payment for the first discounted amount (with PawBucks applied),
+    // then create the subscription separately with trial ending when the first payment covers.
+    // OR: Use destination charges with on_behalf_of for proper webhook routing.
+    //
+    // For simplicity and to ensure webhooks come to platform (for PawBucks crediting):
+    // We'll create a coupon for the PawBucks discount and apply it to the subscription.
     
-    console.log('Creating subscription checkout on connected account:', accountId);
+    console.log('Creating subscription checkout with destination charges:', accountId);
     
-    const session = await stripe.checkout.sessions.create(
-      {
-        line_items: [
-          {
-            price: priceId, // Use the price from the connected account directly
-            quantity: quantity,
+    // For subscriptions with PawBucks discount, we need to handle differently
+    // The subscription must be created on the platform (not connected account) for webhooks to work
+    // We use on_behalf_of to show merchant branding on statements
+    
+    // First, we need to create a coupon if PawBucks are being used
+    let couponId: string | undefined;
+    
+    if (pawbucksUsed > 0 && pawbucksUsdValue > 0) {
+      // Create a one-time coupon for the PawBucks discount (in cents)
+      const discountAmountCents = Math.round(pawbucksUsdValue * 100);
+      
+      try {
+        const coupon = await stripe.coupons.create({
+          amount_off: discountAmountCents,
+          currency: 'usd',
+          duration: 'once', // Only applies to first payment
+          name: `PawBucks Discount - ${pawbucksUsed} PawBucks`,
+          metadata: {
+            pawbucks_used: pawbucksUsed.toString(),
+            user_id: user.id,
           },
-        ],
-        mode: 'subscription',
-        success_url: successUrl || `${req.headers.get('origin')}/checkout-success?session_id={CHECKOUT_SESSION_ID}&store=${accountId}`,
-        cancel_url: cancelUrl || `${req.headers.get('origin')}/checkout-canceled`,
-        customer_email: user.email,
-        metadata,
-        subscription_data: {
-          application_fee_percent: PLATFORM_FEE_PERCENTAGE * 100,
-          metadata,
-          description: `${merchantName} subscription`,
-        },
-      },
-      {
-        stripeAccount: accountId, // Create session on connected account
+        });
+        couponId = coupon.id;
+        console.log('Created coupon for PawBucks discount:', couponId);
+      } catch (couponError) {
+        console.error('Error creating coupon:', couponError);
+        // Continue without coupon if creation fails
       }
+    }
+    
+    // Get or create the price on the platform account that mirrors the connected account price
+    // Since we can't use the connected account's price directly with destination charges,
+    // we need to create a similar price on the platform
+    
+    // Retrieve the connected price details
+    const connectedPriceDetails = await stripe.prices.retrieve(priceId, {
+      stripeAccount: accountId,
+    });
+    
+    const connectedProduct = await stripe.products.retrieve(
+      connectedPriceDetails.product as string,
+      { stripeAccount: accountId }
     );
+    
+    // Create a platform-level product and price that mirrors the connected one
+    const platformProduct = await stripe.products.create({
+      name: connectedProduct.name,
+      description: connectedProduct.description || `Subscription from ${merchantName}`,
+      metadata: {
+        connected_account_id: accountId,
+        original_product_id: connectedProduct.id,
+        merchant_id: merchantId || '',
+      },
+    });
+    
+    const platformPrice = await stripe.prices.create({
+      product: platformProduct.id,
+      unit_amount: connectedPriceDetails.unit_amount!,
+      currency: connectedPriceDetails.currency,
+      recurring: connectedPriceDetails.recurring ? {
+        interval: connectedPriceDetails.recurring.interval,
+        interval_count: connectedPriceDetails.recurring.interval_count || 1,
+      } : undefined,
+      metadata: {
+        connected_account_id: accountId,
+        original_price_id: priceId,
+        merchant_id: merchantId || '',
+      },
+    });
+    
+    console.log('Created platform price for subscription:', platformPrice.id);
+    
+    // Create checkout session on platform with destination charges
+    const session = await stripe.checkout.sessions.create({
+      line_items: [
+        {
+          price: platformPrice.id,
+          quantity: quantity,
+        },
+      ],
+      mode: 'subscription',
+      success_url: successUrl || `${req.headers.get('origin')}/checkout-success?session_id={CHECKOUT_SESSION_ID}&store=${accountId}`,
+      cancel_url: cancelUrl || `${req.headers.get('origin')}/checkout-canceled`,
+      customer_email: user.email,
+      metadata,
+      discounts: couponId ? [{ coupon: couponId }] : undefined,
+      subscription_data: {
+        application_fee_percent: PLATFORM_FEE_PERCENTAGE * 100,
+        transfer_data: {
+          destination: accountId,
+        },
+        metadata,
+        description: `${merchantName} subscription`,
+      },
+      payment_intent_data: {
+        // This shows merchant name on customer's card statement
+        statement_descriptor_suffix: merchantName.substring(0, 22).replace(/[<>"']/g, ''),
+      },
+    });
 
-    console.log('Subscription checkout session created on connected account:', session.id);
+    console.log('Subscription checkout session created with destination charges:', session.id);
 
     // Verify session URL was returned
     if (!session.url) {
