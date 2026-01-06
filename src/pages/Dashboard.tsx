@@ -13,6 +13,7 @@ import { DashboardSkeleton } from "@/components/LoadingSkeleton";
 import { WalletStats } from "@/components/dashboard/WalletStats";
 import { PetProfilesSection } from "@/components/dashboard/PetProfilesSection";
 import { DiscoverServicesCard } from "@/components/dashboard/DiscoverServicesCard";
+import { AutoRedeemEducationCard } from "@/components/dashboard/AutoRedeemEducationCard";
 import { BottomNav } from "@/components/BottomNav";
 import { PullToRefresh } from "@/components/PullToRefresh";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
@@ -225,8 +226,18 @@ const Dashboard = () => {
 
         {profile.user_type === "pet_owner" ? (
           <div className="flex flex-col gap-4 sm:gap-6">
+            {/* Auto-Redeem Education Card - Prominent placement for users with PawBucks */}
+            {user && (pawbucksWallet?.balance || 0) > 0 && (
+              <motion.div custom={0} variants={cardVariants} initial="hidden" animate="visible">
+                <AutoRedeemEducationCard 
+                  userId={user.id} 
+                  pawbucksBalance={pawbucksWallet?.balance || 0} 
+                />
+              </motion.div>
+            )}
+            
             {/* Row 1: Wallet Stats (Total Saved & Total Spending) */}
-            <motion.div custom={0} variants={cardVariants} initial="hidden" animate="visible">
+            <motion.div custom={1} variants={cardVariants} initial="hidden" animate="visible">
               <WalletStats 
                 balance={(pawbucksWallet?.balance || 0) * 0.001} 
                 rewardsPoints={pawbucksWallet?.balance || 0}
@@ -237,7 +248,7 @@ const Dashboard = () => {
             
             {/* PawPass+ Receipt Upload Card */}
             {isPawPassSubscriber && (
-              <motion.div custom={1} variants={cardVariants} initial="hidden" animate="visible">
+              <motion.div custom={2} variants={cardVariants} initial="hidden" animate="visible">
                 <GradientCard className="bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20">
                   <div className="flex items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
@@ -260,17 +271,17 @@ const Dashboard = () => {
             )}
             
             {/* Row 2: My Pets - Full Width */}
-            <motion.div custom={isPawPassSubscriber ? 2 : 1} variants={cardVariants} initial="hidden" animate="visible">
+            <motion.div custom={isPawPassSubscriber ? 3 : 2} variants={cardVariants} initial="hidden" animate="visible">
               <PetProfilesSection pets={pets} onUpdate={handlePetsUpdate} />
             </motion.div>
             
             {/* Row 3: Referral Program & Discover Pet Services - Side by Side on larger screens */}
             <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
-              <motion.div custom={isPawPassSubscriber ? 3 : 2} variants={cardVariants} initial="hidden" animate="visible">
+              <motion.div custom={isPawPassSubscriber ? 4 : 3} variants={cardVariants} initial="hidden" animate="visible">
                 <ReferralCard />
               </motion.div>
               
-              <motion.div custom={isPawPassSubscriber ? 4 : 3} variants={cardVariants} initial="hidden" animate="visible">
+              <motion.div custom={isPawPassSubscriber ? 5 : 4} variants={cardVariants} initial="hidden" animate="visible">
                 <DiscoverServicesCard />
               </motion.div>
             </div>
