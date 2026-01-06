@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, memo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAdMerchants, useVerifiedProMerchants, merchantHasService, SERVICE_NAMES } from "@/hooks/useMerchantServices";
 import { Card } from "@/components/ui/card";
@@ -6,14 +6,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Star, MapPin, BadgeCheck, ArrowRight, Sparkles } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-
 interface PremiumMerchantsBannerProps {
   title?: string;
   rotationInterval?: number; // in milliseconds
   showMultiple?: boolean; // show multiple merchants at once
 }
 
-export const PremiumMerchantsBanner = ({ 
+const PremiumMerchantsBannerComponent = ({ 
   title = "Featured Premium Merchants",
   rotationInterval = 5000,
   showMultiple = true
@@ -51,9 +50,13 @@ export const PremiumMerchantsBanner = ({
     return () => clearInterval(interval);
   }, [shuffledMerchants.length, rotationInterval, showMultiple]);
 
-  const handleMerchantClick = (merchantId: string) => {
+  const handleMerchantClick = useCallback((merchantId: string) => {
     navigate(`/merchant/${merchantId}`);
-  };
+  }, [navigate]);
+
+  const handlePageClick = useCallback((pageIndex: number) => {
+    setCurrentIndex(pageIndex * 3);
+  }, []);
 
   if (isLoading) {
     return (
@@ -101,20 +104,20 @@ export const PremiumMerchantsBanner = ({
               <button
                 key={i}
                 className={`w-2 h-2 rounded-full transition-all ${
-                  Math.floor(currentIndex / 3) === i 
-                    ? 'bg-accent w-4' 
-                    : 'bg-muted-foreground/30 hover:bg-muted-foreground/50'
-                }`}
-                onClick={() => setCurrentIndex(i * 3)}
-                aria-label={`Go to page ${i + 1}`}
-              />
-            ))}
-          </div>
-        )}
-      </div>
+                Math.floor(currentIndex / 3) === i 
+                  ? 'bg-accent w-4' 
+                  : 'bg-muted-foreground/30 hover:bg-muted-foreground/50'
+              }`}
+              onClick={() => handlePageClick(i)}
+              aria-label={`Go to page ${i + 1}`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {visibleMerchants.map((merchant, index) => {
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {visibleMerchants.map((merchant, index) => {
           const isVerifiedPro = verifiedProIds?.includes(merchant.id);
           
           return (
@@ -178,3 +181,5 @@ export const PremiumMerchantsBanner = ({
     </div>
   );
 };
+
+export const PremiumMerchantsBanner = memo(PremiumMerchantsBannerComponent);
