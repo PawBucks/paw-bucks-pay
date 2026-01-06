@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useOptimizedQuery } from "@/hooks/useOptimizedQuery";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
+import { usePawBucksRealtime } from "@/hooks/usePawBucksRealtime";
 import { DataLoader } from "@/lib/dataLoader";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
@@ -74,6 +75,9 @@ const Wallet = () => {
   const { user, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  
+  // Enable realtime updates for PawBucks
+  usePawBucksRealtime(user?.id);
 
   // Optimized data loading with caching
   const { data: wallet, isLoading: walletLoading } = useOptimizedQuery<WalletData | null>(

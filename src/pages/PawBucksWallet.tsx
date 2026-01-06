@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useOptimizedQuery } from "@/hooks/useOptimizedQuery";
+import { usePawBucksRealtime } from "@/hooks/usePawBucksRealtime";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
@@ -244,6 +245,9 @@ const UpgradePrompt = ({ totalEarned, onUpgrade }: { totalEarned: number; onUpgr
 const PawBucksWallet = () => {
   const { user, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  
+  // Enable realtime updates for PawBucks
+  usePawBucksRealtime(user?.id);
 
   const { data: wallet, isLoading: walletLoading } = useOptimizedQuery<PawBucksWallet | null>(
     ['pawbucks-wallet', user?.id || ''],
