@@ -526,6 +526,14 @@ export const ServicePurchaseDialog = ({
                   </span>
                 </div>
 
+                {/* Slider instruction hint */}
+                {pawbucksToUse === 0 && (
+                  <div className="flex items-center gap-2 text-xs text-primary bg-primary/10 px-3 py-2 rounded-md animate-pulse">
+                    <span className="text-base">👆</span>
+                    <span className="font-medium">Drag the slider right to apply your PawBucks discount</span>
+                  </div>
+                )}
+
                 <Slider
                   value={[pawbucksToUse]}
                   onValueChange={([value]) => setPawbucksToUse(value)}
@@ -536,9 +544,15 @@ export const ServicePurchaseDialog = ({
                 />
 
                 <div className="flex justify-between text-sm">
-                  <span>{pawbucksToUse.toLocaleString()} PawBucks</span>
-                  <span className="font-medium text-primary">
-                    = ${pawbucksUsdValue.toFixed(2)} off
+                  <span className="text-muted-foreground">
+                    {pawbucksToUse === 0 ? (
+                      <span className="italic">No PawBucks applied</span>
+                    ) : (
+                      <>{pawbucksToUse.toLocaleString()} PawBucks</>
+                    )}
+                  </span>
+                  <span className={`font-medium ${pawbucksToUse > 0 ? 'text-primary' : 'text-muted-foreground'}`}>
+                    {pawbucksToUse > 0 ? `= $${pawbucksUsdValue.toFixed(2)} off` : '$0.00 off'}
                   </span>
                 </div>
 
