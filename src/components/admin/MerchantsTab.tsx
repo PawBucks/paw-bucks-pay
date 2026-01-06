@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Search, Edit, Check, X } from 'lucide-react';
+import { Search, Edit, Check, X, Coins } from 'lucide-react';
 import { toast } from 'sonner';
 
 type Merchant = {
@@ -18,6 +18,7 @@ type Merchant = {
   cashback_rate: number;
   stripe_account_status?: string;
   created_at: string;
+  pawbucks_balance?: number;
 };
 
 export function MerchantsTab() {
@@ -46,14 +47,27 @@ export function MerchantsTab() {
 
   const loadMerchants = async () => {
     try {
-      const { data, error } = await supabase
+      const { data: merchantsData, error } = await supabase
         .from('merchants')
         .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setMerchants(data || []);
-      setFilteredMerchants(data || []);
+
+      // Fetch PawBucks balances for all merchants
+      const { data: wallets } = await supabase
+        .from('merchant_pawbucks_wallet')
+        .select('merchant_id, balance');
+
+      const walletMap = new Map(wallets?.map(w => [w.merchant_id, w.balance]) || []);
+
+      const merchantsWithBalance = (merchantsData || []).map(m => ({
+        ...m,
+        pawbucks_balance: walletMap.get(m.id) ?? 0
+      }));
+
+      setMerchants(merchantsWithBalance);
+      setFilteredMerchants(merchantsWithBalance);
     } catch (error) {
       console.error('Error loading merchants:', error);
       toast.error('Failed to load merchants');
@@ -122,6 +136,7 @@ export function MerchantsTab() {
               <TableHead>Business Name</TableHead>
               <TableHead>Type</TableHead>
               <TableHead>Contact</TableHead>
+              <TableHead>PawBucks</TableHead>
               <TableHead>Points Rate</TableHead>
               <TableHead>Stripe Status</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -135,6 +150,12 @@ export function MerchantsTab() {
                   <Badge variant="outline">{merchant.business_type}</Badge>
                 </TableCell>
                 <TableCell>{merchant.contact_person || 'N/A'}</TableCell>
+                <TableCell>
+                  <span className="flex items-center gap-1 text-primary font-medium">
+                    <Coins className="w-3 h-3" />
+                    {(merchant.pawbucks_balance ?? 0).toLocaleString()}
+                  </span>
+                </TableCell>
                 <TableCell>{merchant.cashback_rate}x</TableCell>
                 <TableCell>
                   <Badge variant={merchant.stripe_account_status === 'active' ? 'default' : 'secondary'}>

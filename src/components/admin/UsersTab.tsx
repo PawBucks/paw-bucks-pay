@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Search, UserPlus, Edit, Trash2, Shield } from 'lucide-react';
+import { Search, UserPlus, Edit, Trash2, Shield, Coins } from 'lucide-react';
 import { toast } from 'sonner';
 
 type User = {
@@ -17,6 +17,7 @@ type User = {
   user_type: string;
   created_at: string;
   phone?: string;
+  pawbucks_balance?: number;
 };
 
 type UserRole = {
@@ -51,14 +52,27 @@ export function UsersTab() {
 
   const loadUsers = async () => {
     try {
-      const { data, error } = await supabase
+      const { data: profiles, error } = await supabase
         .from('profiles')
         .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setUsers(data || []);
-      setFilteredUsers(data || []);
+
+      // Fetch PawBucks balances for all users
+      const { data: wallets } = await supabase
+        .from('pawbucks_wallet')
+        .select('user_id, balance');
+
+      const walletMap = new Map(wallets?.map(w => [w.user_id, w.balance]) || []);
+
+      const usersWithBalance = (profiles || []).map(p => ({
+        ...p,
+        pawbucks_balance: walletMap.get(p.id) ?? 0
+      }));
+
+      setUsers(usersWithBalance);
+      setFilteredUsers(usersWithBalance);
     } catch (error) {
       console.error('Error loading users:', error);
       toast.error('Failed to load users');
@@ -163,6 +177,7 @@ export function UsersTab() {
               <TableHead>Name</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Type</TableHead>
+              <TableHead>PawBucks</TableHead>
               <TableHead>Phone</TableHead>
               <TableHead>Joined</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -177,6 +192,12 @@ export function UsersTab() {
                   <Badge variant={user.user_type === 'merchant' ? 'default' : 'secondary'}>
                     {user.user_type}
                   </Badge>
+                </TableCell>
+                <TableCell>
+                  <span className="flex items-center gap-1 text-primary font-medium">
+                    <Coins className="w-3 h-3" />
+                    {(user.pawbucks_balance ?? 0).toLocaleString()}
+                  </span>
                 </TableCell>
                 <TableCell>{user.phone || 'N/A'}</TableCell>
                 <TableCell>{new Date(user.created_at).toLocaleDateString()}</TableCell>
