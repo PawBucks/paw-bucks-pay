@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect, useCallback, memo } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
@@ -117,7 +117,7 @@ const getBusinessIcon = (type: string) => {
   return Store;
 };
 
-const StarRating = ({ rating, reviewCount }: { rating: number; reviewCount: number }) => {
+const StarRating = memo(({ rating, reviewCount }: { rating: number; reviewCount: number }) => {
   const safeRating = rating ?? 0;
   const fullStars = Math.floor(safeRating);
   const hasHalfStar = safeRating % 1 >= 0.5;
@@ -142,9 +142,10 @@ const StarRating = ({ rating, reviewCount }: { rating: number; reviewCount: numb
       <span className="text-sm text-muted-foreground">({reviewCount ?? 0})</span>
     </div>
   );
-};
+});
+StarRating.displayName = "StarRating";
 
-const MerchantCard = ({ 
+const DiscoverMerchantCard = memo(({ 
   merchant, 
   onPayClick,
   onCardClick,
@@ -283,7 +284,8 @@ const MerchantCard = ({
     </Card>
     </motion.div>
   );
-};
+});
+DiscoverMerchantCard.displayName = "DiscoverMerchantCard";
 
 const ratingFilters = [
   { label: "Any Rating", value: 0 },
@@ -900,7 +902,7 @@ const Discover = () => {
                         </div>
                         <div className="space-y-4">
                           {sponsoredMerchants.map((merchant, index) => (
-                            <MerchantCard
+                            <DiscoverMerchantCard
                               key={merchant.id}
                               merchant={merchant}
                               onPayClick={() => handleSponsoredMerchantClick(merchant, index + 1)}
@@ -922,7 +924,7 @@ const Discover = () => {
                       </h2>
                       <div className="space-y-4">
                         {regularMerchants.map((merchant, index) => (
-                          <MerchantCard
+                          <DiscoverMerchantCard
                             key={merchant.id}
                             merchant={merchant}
                             onPayClick={() => handleMerchantClick(merchant)}
@@ -989,7 +991,7 @@ const Discover = () => {
                         </div>
                         <div className="space-y-4">
                           {sponsoredMerchants.map((merchant, index) => (
-                            <MerchantCard
+                            <DiscoverMerchantCard
                               key={merchant.id}
                               merchant={merchant}
                               onPayClick={() => handleSponsoredMerchantClick(merchant, index + 1)}
@@ -1011,7 +1013,7 @@ const Discover = () => {
                       </h2>
                       <div className="space-y-4">
                         {regularMerchants.map((merchant, index) => (
-                          <MerchantCard
+                          <DiscoverMerchantCard
                             key={merchant.id}
                             merchant={merchant}
                             onPayClick={() => handleMerchantClick(merchant)}

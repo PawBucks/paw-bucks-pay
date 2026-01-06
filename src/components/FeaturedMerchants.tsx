@@ -1,9 +1,9 @@
+import { memo, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Star, MapPin, Sparkles, BadgeCheck } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSponsoredMerchants, merchantHasService, SERVICE_NAMES } from "@/hooks/useMerchantServices";
-
 interface Merchant {
   id: string;
   business_name: string;
@@ -14,9 +14,13 @@ interface Merchant {
   active_services: string[];
 }
 
-export const FeaturedMerchants = ({ onMerchantClick }: { onMerchantClick: (merchant: Merchant) => void }) => {
+const FeaturedMerchantsComponent = ({ onMerchantClick }: { onMerchantClick: (merchant: Merchant) => void }) => {
   // Use sponsored merchants from service assignments
   const { data: sponsoredMerchants = [], isLoading } = useSponsoredMerchants();
+
+  const handleMerchantClick = useCallback((merchant: Merchant) => {
+    onMerchantClick(merchant);
+  }, [onMerchantClick]);
 
   if (isLoading) {
     return (
@@ -56,7 +60,7 @@ export const FeaturedMerchants = ({ onMerchantClick }: { onMerchantClick: (merch
             <Card
               key={merchant.id}
               className="p-4 cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-[1.02] border-primary/20 bg-primary/5"
-              onClick={() => onMerchantClick(merchant)}
+              onClick={() => handleMerchantClick(merchant)}
             >
               <div className="space-y-2">
                 <div className="flex items-start justify-between">
@@ -102,3 +106,5 @@ export const FeaturedMerchants = ({ onMerchantClick }: { onMerchantClick: (merch
     </div>
   );
 };
+
+export const FeaturedMerchants = memo(FeaturedMerchantsComponent);

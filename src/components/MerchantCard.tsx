@@ -1,9 +1,9 @@
+import { memo, useCallback } from "react";
 import { GradientCard } from "@/components/ui/gradient-card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Store, MapPin, Percent, Info } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-
 type Merchant = {
   id: string;
   business_name: string;
@@ -21,7 +21,7 @@ type MerchantCardProps = {
   onPayNow: (merchantId: string, merchantName: string, cashbackRate: number) => void;
 };
 
-export const MerchantCard = ({ merchant, distance, onPayNow }: MerchantCardProps) => {
+const MerchantCardComponent = ({ merchant, distance, onPayNow }: MerchantCardProps) => {
   const businessTypeColors: Record<string, string> = {
     "pet_store": "bg-blue-500/10 text-blue-700 border-blue-500/20",
     "groomer": "bg-purple-500/10 text-purple-700 border-purple-500/20",
@@ -32,6 +32,10 @@ export const MerchantCard = ({ merchant, distance, onPayNow }: MerchantCardProps
   const getTypeColor = (type: string) => {
     return businessTypeColors[type] || "bg-gray-500/10 text-gray-700 border-gray-500/20";
   };
+
+  const handlePayNow = useCallback(() => {
+    onPayNow(merchant.id, merchant.business_name, merchant.cashback_rate);
+  }, [onPayNow, merchant.id, merchant.business_name, merchant.cashback_rate]);
 
   return (
     <GradientCard className="hover:shadow-[var(--shadow-medium)] transition-all">
@@ -84,7 +88,7 @@ export const MerchantCard = ({ merchant, distance, onPayNow }: MerchantCardProps
           )}
         </div>
         <Button 
-          onClick={() => onPayNow(merchant.id, merchant.business_name, merchant.cashback_rate)}
+          onClick={handlePayNow}
           size="sm"
           className="w-full sm:w-auto"
           aria-label={`Pay at ${merchant.business_name} and earn ${merchant.cashback_rate}x points in PawBucks`}
@@ -95,3 +99,5 @@ export const MerchantCard = ({ merchant, distance, onPayNow }: MerchantCardProps
     </GradientCard>
   );
 };
+
+export const MerchantCard = memo(MerchantCardComponent);

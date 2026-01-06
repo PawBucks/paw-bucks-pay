@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, memo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Bell, BellRing, Settings, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -80,7 +80,7 @@ const showBrowserNotification = (title: string, message: string) => {
   }
 };
 
-export const NotificationsDropdown = ({ userId }: { userId: string }) => {
+const NotificationsDropdownComponent = ({ userId }: { userId: string }) => {
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -377,3 +377,5 @@ export const NotificationsDropdown = ({ userId }: { userId: string }) => {
   </>
   );
 };
+
+export const NotificationsDropdown = memo(NotificationsDropdownComponent);

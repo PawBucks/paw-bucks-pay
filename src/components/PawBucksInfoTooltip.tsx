@@ -1,3 +1,4 @@
+import { memo, useMemo } from 'react';
 import { Info } from 'lucide-react';
 import {
   Tooltip,
@@ -11,11 +12,11 @@ interface PawBucksInfoTooltipProps {
   className?: string;
 }
 
-export const PawBucksInfoTooltip = ({ 
+const PawBucksInfoTooltipComponent = ({ 
   variant = 'earning',
   className = '' 
 }: PawBucksInfoTooltipProps) => {
-  const getContent = () => {
+  const content = useMemo(() => {
     switch (variant) {
       case 'earning':
         return (
@@ -81,7 +82,7 @@ export const PawBucksInfoTooltip = ({
       default:
         return null;
     }
-  };
+  }, [variant]);
 
   return (
     <TooltipProvider>
@@ -100,9 +101,11 @@ export const PawBucksInfoTooltip = ({
           className="bg-popover border border-border shadow-lg p-3 z-50"
           sideOffset={5}
         >
-          {getContent()}
+          {content}
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
   );
 };
+
+export const PawBucksInfoTooltip = memo(PawBucksInfoTooltipComponent);
