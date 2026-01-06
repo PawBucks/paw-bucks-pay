@@ -2713,6 +2713,42 @@ export type Database = {
           },
         ]
       }
+      shared_account_members: {
+        Row: {
+          accepted_at: string | null
+          created_at: string
+          id: string
+          invited_at: string
+          member_email: string
+          member_id: string | null
+          owner_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          id?: string
+          invited_at?: string
+          member_email: string
+          member_id?: string | null
+          owner_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          id?: string
+          invited_at?: string
+          member_email?: string
+          member_id?: string | null
+          owner_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       sponsored_placement_analytics: {
         Row: {
           created_at: string
