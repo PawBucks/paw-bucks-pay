@@ -106,6 +106,12 @@ const SharePawBucksCardComponent = () => {
       return;
     }
 
+    // Check limit of 2 members
+    if (sharedMembers.length >= 2) {
+      toast.error("You can only share with up to 2 members");
+      return;
+    }
+
     setInviting(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -219,14 +225,14 @@ const SharePawBucksCardComponent = () => {
           <div>
             <h3 className="text-xl font-semibold">Share The PawBucks</h3>
             <p className="text-sm text-muted-foreground">
-              Add family or friends to experience PawBucks together
+              Add up to 2 family members or friends ({sharedMembers.length}/2)
             </p>
           </div>
         </div>
 
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button size="sm" className="gap-1">
+            <Button size="sm" className="gap-1" disabled={sharedMembers.length >= 2}>
               <UserPlus className="w-4 h-4" />
               Add Member
             </Button>
