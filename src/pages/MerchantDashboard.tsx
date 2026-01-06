@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useGeocoding } from "@/hooks/useGeocoding";
 import { useMerchantActiveServices, SERVICE_NAMES } from "@/hooks/useMerchantServices";
+import { useMerchantPawBucksRealtime } from "@/hooks/usePawBucksRealtime";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { GradientCard } from "@/components/ui/gradient-card";
@@ -97,6 +98,9 @@ const MerchantDashboard = () => {
   const [connectingStripe, setConnectingStripe] = useState(false);
   const [requestingFunding, setRequestingFunding] = useState(false);
   const [togglingPawbucks, setTogglingPawbucks] = useState(false);
+  
+  // Enable realtime updates for merchant PawBucks and transactions
+  useMerchantPawBucksRealtime(merchant?.id);
   
   // Fetch active services for this merchant
   const { data: activeServices = [] } = useMerchantActiveServices(merchant?.id);
