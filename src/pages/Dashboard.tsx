@@ -9,6 +9,7 @@ import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { GradientCard } from "@/components/ui/gradient-card";
 import { ReferralCard } from "@/components/ReferralCard";
+import { SharePawBucksCard } from "@/components/SharePawBucksCard";
 import { AdPlacement } from "@/components/AdPlacement";
 import { DashboardSkeleton } from "@/components/LoadingSkeleton";
 import { WalletStats } from "@/components/dashboard/WalletStats";
@@ -279,13 +280,18 @@ const Dashboard = () => {
               <PetProfilesSection pets={pets} onUpdate={handlePetsUpdate} />
             </motion.div>
             
-            {/* Row 3: Referral Program & Discover Pet Services - Side by Side on larger screens */}
+            {/* Row 3: Share PawBucks - Full Width */}
+            <motion.div custom={isPawPassSubscriber ? 4 : 3} variants={cardVariants} initial="hidden" animate="visible">
+              <SharePawBucksCard />
+            </motion.div>
+            
+            {/* Row 4: Referral Program & Discover Pet Services - Side by Side on larger screens */}
             <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
-              <motion.div custom={isPawPassSubscriber ? 4 : 3} variants={cardVariants} initial="hidden" animate="visible">
+              <motion.div custom={isPawPassSubscriber ? 5 : 4} variants={cardVariants} initial="hidden" animate="visible">
                 <ReferralCard />
               </motion.div>
               
-              <motion.div custom={isPawPassSubscriber ? 5 : 4} variants={cardVariants} initial="hidden" animate="visible">
+              <motion.div custom={isPawPassSubscriber ? 6 : 5} variants={cardVariants} initial="hidden" animate="visible">
                 <DiscoverServicesCard />
               </motion.div>
             </div>
