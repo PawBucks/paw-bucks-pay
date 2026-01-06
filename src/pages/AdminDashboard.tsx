@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { AddTransactionTool } from "@/components/admin/AddTransactionTool";
-import { PawBucksCreditTool } from "@/components/admin/PawBucksCreditTool";
+import { PawBucksManagementTool } from "@/components/admin/PawBucksManagementTool";
 import { PawBucksCreditLogsTab } from "@/components/admin/PawBucksCreditLogsTab";
 import { SecurityMonitoringTab } from "@/components/admin/SecurityMonitoringTab";
 import { ConsultationBookingsTab } from "@/components/admin/ConsultationBookingsTab";
@@ -618,8 +618,8 @@ const AdminDashboard = () => {
         {/* Add Transaction Tool */}
         <AddTransactionTool />
 
-        {/* Manual PawBucks Credit Tool */}
-        <PawBucksCreditTool />
+        {/* PawBucks Management Tool (Credit/Debit for Users & Merchants) */}
+        <PawBucksManagementTool />
 
         {/* Manual PawBucks Credit Logs */}
         <PawBucksCreditLogsTab />
