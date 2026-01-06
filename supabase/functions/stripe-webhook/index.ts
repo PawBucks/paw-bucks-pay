@@ -1,11 +1,130 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.2';
 import Stripe from "https://esm.sh/stripe@18.5.0";
+import { Resend } from "https://esm.sh/resend@2.0.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, stripe-signature',
 };
+
+// Helper function to send payment confirmation email
+async function sendPaymentConfirmationEmail(params: {
+  email: string;
+  customerName?: string;
+  amount: number;
+  merchantName: string;
+  pawbucksEarned: number;
+  orderReference: string;
+  isSubscription?: boolean;
+}): Promise<void> {
+  const resendApiKey = Deno.env.get("RESEND_API_KEY");
+  if (!resendApiKey) {
+    console.log("[EMAIL] Skipping confirmation email: RESEND_API_KEY not configured");
+    return;
+  }
+
+  const resend = new Resend(resendApiKey);
+  const { email, customerName, amount, merchantName, pawbucksEarned, orderReference, isSubscription } = params;
+
+  const greeting = customerName ? `Hi ${customerName}` : "Hi there";
+  const paymentType = isSubscription ? "subscription" : "purchase";
+
+  try {
+    const emailResponse = await resend.emails.send({
+      from: "PawBucks <noreply@resend.dev>",
+      to: [email],
+      subject: `Payment Confirmed - ${merchantName}`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5;">
+          <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+            <div style="background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+              <!-- Header -->
+              <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 32px; text-align: center;">
+                <h1 style="margin: 0; color: white; font-size: 28px; font-weight: 700;">Payment Confirmed! 🎉</h1>
+              </div>
+              
+              <!-- Content -->
+              <div style="padding: 32px;">
+                <p style="font-size: 16px; color: #333; margin: 0 0 24px 0;">${greeting},</p>
+                
+                <p style="font-size: 16px; color: #333; margin: 0 0 24px 0;">
+                  Your ${paymentType} at <strong>${merchantName}</strong> has been successfully processed!
+                </p>
+                
+                <!-- Order Summary -->
+                <div style="background: #f9fafb; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+                  <h3 style="margin: 0 0 16px 0; color: #333; font-size: 18px;">Order Summary</h3>
+                  
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                    <span style="color: #666;">Amount Paid</span>
+                    <strong style="color: #333;">$${amount.toFixed(2)}</strong>
+                  </div>
+                  
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                    <span style="color: #666;">Merchant</span>
+                    <strong style="color: #333;">${merchantName}</strong>
+                  </div>
+                  
+                  <div style="display: flex; justify-content: space-between;">
+                    <span style="color: #666;">Order Reference</span>
+                    <strong style="color: #333; font-size: 12px;">${orderReference.substring(0, 20)}...</strong>
+                  </div>
+                </div>
+                
+                <!-- PawBucks Earned -->
+                ${pawbucksEarned > 0 ? `
+                <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 24px; margin-bottom: 24px; text-align: center;">
+                  <p style="margin: 0 0 8px 0; color: #92400e; font-size: 14px;">🐾 You Earned</p>
+                  <p style="margin: 0; color: #92400e; font-size: 32px; font-weight: 700;">${pawbucksEarned} PawBucks</p>
+                  <p style="margin: 8px 0 0 0; color: #a16207; font-size: 14px;">Added to your wallet!</p>
+                </div>
+                ` : ''}
+                
+                <p style="font-size: 14px; color: #666; margin: 0 0 24px 0;">
+                  Thank you for being a valued member of the PawBucks community. Your rewards are waiting for you!
+                </p>
+                
+                <!-- CTA Button -->
+                <div style="text-align: center;">
+                  <a href="https://pawbucks.app/dashboard" style="display: inline-block; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px;">
+                    View Your Dashboard
+                  </a>
+                </div>
+              </div>
+              
+              <!-- Footer -->
+              <div style="background: #f9fafb; padding: 24px; text-align: center; border-top: 1px solid #e5e7eb;">
+                <p style="margin: 0 0 8px 0; color: #999; font-size: 12px;">
+                  Questions? Reply to this email or contact support@pawbucks.app
+                </p>
+                <p style="margin: 0; color: #999; font-size: 12px;">
+                  © ${new Date().getFullYear()} PawBucks. All rights reserved.
+                </p>
+              </div>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
+    });
+
+    if (emailResponse.error) {
+      console.error("[EMAIL] Failed to send confirmation email:", emailResponse.error);
+    } else {
+      console.log(`[EMAIL] ✅ Confirmation email sent to ${email}`);
+    }
+  } catch (error) {
+    console.error("[EMAIL] Error sending confirmation email:", error);
+    // Don't throw - email failure shouldn't break the payment processing
+  }
+}
 
 serve(async (req) => {
   console.log('[STRIPE-WEBHOOK] Function invoked, method:', req.method);
@@ -404,6 +523,22 @@ serve(async (req) => {
               } catch (walletError) {
                 console.error('[SUBSCRIPTION] Error processing PawBucks earned:', walletError);
               }
+            }
+            
+            // Send confirmation email for subscription payment
+            const customerEmail = session.customer_email || session.customer_details?.email;
+            if (customerEmail) {
+              await sendPaymentConfirmationEmail({
+                email: customerEmail,
+                customerName: session.customer_details?.name || undefined,
+                amount: totalAmount,
+                merchantName,
+                pawbucksEarned,
+                orderReference: session.id,
+                isSubscription: true,
+              });
+            } else {
+              console.log('[SUBSCRIPTION] No customer email found for confirmation');
             }
           }
         } else {
@@ -1009,6 +1144,36 @@ serve(async (req) => {
         } catch (budgetError) {
           console.error('Error checking budget:', budgetError);
         }
+      }
+
+      // Send confirmation email for payment
+      const customerEmail = paymentIntent.receipt_email;
+      if (customerEmail && user_id && merchant_id) {
+        // Get merchant name for email
+        const { data: merchantInfo } = await supabaseAdmin
+          .from('merchants')
+          .select('business_name')
+          .eq('id', merchant_id)
+          .single();
+        
+        // Get user profile for name
+        const { data: userProfile } = await supabaseAdmin
+          .from('profiles')
+          .select('full_name')
+          .eq('id', user_id)
+          .single();
+
+        await sendPaymentConfirmationEmail({
+          email: customerEmail,
+          customerName: userProfile?.full_name || undefined,
+          amount,
+          merchantName: merchantInfo?.business_name || description || 'PawBucks Partner',
+          pawbucksEarned,
+          orderReference: paymentIntent.id,
+          isSubscription: false,
+        });
+      } else {
+        console.log('[PAYMENT] No receipt email found for confirmation email');
       }
 
       console.log('Payment intent succeeded processed:', paymentIntent.id);
