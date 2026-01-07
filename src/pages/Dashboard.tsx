@@ -6,6 +6,7 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { usePawBucksRealtime } from "@/hooks/usePawBucksRealtime";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
+import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { GradientCard } from "@/components/ui/gradient-card";
 import { ReferralCard } from "@/components/ReferralCard";
@@ -206,8 +207,15 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-background flex flex-col">
-      <Header isAuthenticated={true} onLogout={handleSignOut} userId={user?.id} />
+    <>
+      <SEO 
+        title="Dashboard - PawBucks"
+        description="Manage your pet expenses, track PawBucks rewards, and discover pet services. View your wallet balance and pet profiles."
+        keywords={["pet dashboard", "PawBucks wallet", "pet rewards", "pet expenses tracker"]}
+        noIndex={true}
+      />
+      <div className="min-h-[100dvh] bg-background flex flex-col">
+        <Header isAuthenticated={true} onLogout={handleSignOut} userId={user?.id} />
 
       <PullToRefresh
         ref={containerRef}
@@ -365,6 +373,7 @@ const Dashboard = () => {
         />
       )}
     </div>
+    </>
   );
 };
 

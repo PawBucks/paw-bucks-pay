@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -294,7 +295,13 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-[var(--gradient-hero)]">
+    <>
+      <SEO 
+        title="Sign In or Sign Up - PawBucks"
+        description="Create your PawBucks account or sign in to manage pet expenses, earn rewards, and discover trusted pet services."
+        keywords={["PawBucks login", "pet rewards signup", "pet owner account", "merchant registration"]}
+      />
+      <div className="min-h-screen flex items-center justify-center p-4 bg-[var(--gradient-hero)]">
       <div className="absolute left-4 top-0 pt-safe z-20">
         <Button
           variant="outline"
@@ -575,6 +582,7 @@ const Auth = () => {
         </CardContent>
       </Card>
     </div>
+    </>
   );
 };
 

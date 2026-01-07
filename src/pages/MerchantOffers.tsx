@@ -147,7 +147,7 @@ const handleSignOut = async () => {
   return (
     <>
       <SEO 
-        title="Partner Offers Management | PetalPay Merchant"
+        title="Partner Offers Management | PawBucks Merchant"
         description="Create and manage PawBucks redemption offers for your customers"
         keywords={["merchant", "offers", "rewards", "management"]}
       />

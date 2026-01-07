@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
+import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { GradientCard } from "@/components/ui/gradient-card";
 import { Input } from "@/components/ui/input";
@@ -136,8 +137,15 @@ const Referrals = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--gradient-hero)] pb-24">
-      <Header isAuthenticated={true} onLogout={handleSignOut} />
+    <>
+      <SEO 
+        title="Referrals - Earn Rewards | PawBucks"
+        description="Share your PawBucks referral code and earn $10 for each friend who makes their first purchase."
+        keywords={["PawBucks referral", "pet rewards referral", "earn rewards"]}
+        noIndex={true}
+      />
+      <div className="min-h-screen bg-[var(--gradient-hero)] pb-24">
+        <Header isAuthenticated={true} onLogout={handleSignOut} />
       <div className="container mx-auto px-4 py-8 max-w-2xl">
         {/* Header */}
         <div className="mb-8">
@@ -252,6 +260,7 @@ const Referrals = () => {
 
       <BottomNav />
     </div>
+    </>
   );
 };
 

@@ -7,6 +7,7 @@ import { usePawBucksRealtime } from "@/hooks/usePawBucksRealtime";
 import { DataLoader } from "@/lib/dataLoader";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
+import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { GradientCard } from "@/components/ui/gradient-card";
 import { BottomNav } from "@/components/BottomNav";
@@ -195,8 +196,15 @@ const Wallet = () => {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-[var(--gradient-hero)] flex flex-col">
-      <Header isAuthenticated={true} onLogout={handleSignOut} />
+    <>
+      <SEO 
+        title="Wallet & Spending - PawBucks"
+        description="Track your pet spending, view transaction history, and manage your PawBucks rewards. Budget smarter for your pet's needs."
+        keywords={["pet spending tracker", "PawBucks wallet", "pet budget", "pet expenses"]}
+        noIndex={true}
+      />
+      <div className="min-h-[100dvh] bg-[var(--gradient-hero)] flex flex-col">
+        <Header isAuthenticated={true} onLogout={handleSignOut} />
 
       <PullToRefresh
         ref={containerRef}
@@ -419,6 +427,7 @@ const Wallet = () => {
 
       <BottomNav />
     </div>
+    </>
   );
 };
 

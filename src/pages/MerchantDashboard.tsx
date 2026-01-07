@@ -5,6 +5,7 @@ import { useGeocoding } from "@/hooks/useGeocoding";
 import { useMerchantActiveServices, SERVICE_NAMES } from "@/hooks/useMerchantServices";
 import { useMerchantPawBucksRealtime } from "@/hooks/usePawBucksRealtime";
 import { supabase } from "@/integrations/supabase/client";
+import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { GradientCard } from "@/components/ui/gradient-card";
 import { NotificationsDropdown } from "@/components/NotificationsDropdown";

@@ -163,7 +163,7 @@ const handleSignOut = async () => {
   return (
     <>
       <SEO 
-        title={`${isEditMode ? "Edit" : "Create"} Offer | PetalPay Merchant`}
+        title={`${isEditMode ? "Edit" : "Create"} Offer | PawBucks Merchant`}
         description="Create or edit partner offers for PawBucks redemption"
         keywords={["merchant", "offers", "create", "edit"]}
       />
