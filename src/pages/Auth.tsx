@@ -273,9 +273,11 @@ const Auth = () => {
   const handleForgotPassword = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
+    const trimmedEmail = resetEmail.trim().toLowerCase();
+    
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!resetEmail.trim() || !emailRegex.test(resetEmail.trim())) {
+    if (!trimmedEmail || !emailRegex.test(trimmedEmail)) {
       toast.error("Please enter a valid email address");
       return;
     }
@@ -283,22 +285,29 @@ const Auth = () => {
     setIsResetting(true);
 
     try {
-      // Redirect to the dedicated reset password page
-      const redirectUrl = `${window.location.origin}/reset-password`;
+      // Use /auth/callback as the redirect - this is required by Supabase's email flow
+      // The callback page will detect type=recovery and redirect to /reset-password
+      const redirectUrl = `${window.location.origin}/auth/callback?type=recovery`;
       
-      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail.trim(), {
+      console.log("Requesting password reset for:", trimmedEmail, "redirectTo:", redirectUrl);
+      
+      const { error } = await supabase.auth.resetPasswordForEmail(trimmedEmail, {
         redirectTo: redirectUrl,
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Password reset API error:", error);
+        throw error;
+      }
 
-      toast.success("Password reset email sent! Check your inbox for a link to reset your password.");
+      // Always show success message for security (prevents email enumeration)
+      toast.success("If an account exists with this email, you'll receive a password reset link shortly.");
       setForgotPasswordOpen(false);
       setResetEmail("");
     } catch (error: any) {
       console.error("Password reset error:", error);
-      // Don't reveal if email exists or not for security
-      toast.success("If an account exists with this email, you'll receive a password reset link.");
+      // Still show success message to prevent email enumeration attacks
+      toast.success("If an account exists with this email, you'll receive a password reset link shortly.");
       setForgotPasswordOpen(false);
       setResetEmail("");
     } finally {
