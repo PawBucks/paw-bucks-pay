@@ -68,6 +68,7 @@ const MerchantPOSIntegration = lazy(() => import("./pages/MerchantPOSIntegration
 const MerchantScheduling = lazy(() => import("./pages/MerchantScheduling"));
 const MerchantTaxVault = lazy(() => import("./pages/MerchantTaxVault"));
 const MerchantPawBucksWalletPage = lazy(() => import("./pages/MerchantPawBucksWallet"));
+const DirectCheckout = lazy(() => import("./pages/DirectCheckout"));
 
 const createQueryClient = () => new QueryClient({
   defaultOptions: {
@@ -141,6 +142,7 @@ const AppRoutes = () => {
       <Route path="/spending-breakdown" element={<PageTransition><SpendingBreakdown /></PageTransition>} />
       <Route path="/lost-pets" element={<PageTransition><LostPets /></PageTransition>} />
       <Route path="/lost-pets/:id" element={<PageTransition><LostPetDetail /></PageTransition>} />
+      <Route path="/pay/:merchantId" element={<PageTransition><DirectCheckout /></PageTransition>} />
       <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
     </Routes>
   );

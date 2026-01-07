@@ -209,6 +209,86 @@ export type Database = {
           },
         ]
       }
+      direct_payments: {
+        Row: {
+          amount: number
+          application_fee: number
+          connected_account_id: string
+          created_at: string
+          currency: string
+          description: string | null
+          id: string
+          merchant_id: string | null
+          metadata: Json | null
+          pawbucks_earned: number | null
+          status: string
+          stripe_payment_intent_id: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          amount: number
+          application_fee: number
+          connected_account_id: string
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          merchant_id?: string | null
+          metadata?: Json | null
+          pawbucks_earned?: number | null
+          status?: string
+          stripe_payment_intent_id: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          application_fee?: number
+          connected_account_id?: string
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          merchant_id?: string | null
+          metadata?: Json | null
+          pawbucks_earned?: number | null
+          status?: string
+          stripe_payment_intent_id?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "direct_payments_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "direct_payments_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "direct_payments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "direct_payments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "reviewer_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       feedback_submissions: {
         Row: {
           admin_notes: string | null
@@ -1350,6 +1430,7 @@ export type Database = {
           latitude: number | null
           logo_url: string | null
           longitude: number | null
+          onboarding_complete: boolean | null
           owner_name: string | null
           phone: string | null
           price_range: number | null
@@ -1376,6 +1457,7 @@ export type Database = {
           latitude?: number | null
           logo_url?: string | null
           longitude?: number | null
+          onboarding_complete?: boolean | null
           owner_name?: string | null
           phone?: string | null
           price_range?: number | null
@@ -1402,6 +1484,7 @@ export type Database = {
           latitude?: number | null
           logo_url?: string | null
           longitude?: number | null
+          onboarding_complete?: boolean | null
           owner_name?: string | null
           phone?: string | null
           price_range?: number | null
