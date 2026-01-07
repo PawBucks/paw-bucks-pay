@@ -272,23 +272,35 @@ const Auth = () => {
 
   const handleForgotPassword = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!resetEmail.trim() || !emailRegex.test(resetEmail.trim())) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+    
     setIsResetting(true);
 
     try {
-      const redirectUrl = `${window.location.origin}/auth`;
+      // Redirect to the dedicated reset password page
+      const redirectUrl = `${window.location.origin}/reset-password`;
       
-      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail.trim(), {
         redirectTo: redirectUrl,
       });
 
       if (error) throw error;
 
-      toast.success("Password reset email sent! Check your inbox.");
+      toast.success("Password reset email sent! Check your inbox for a link to reset your password.");
       setForgotPasswordOpen(false);
       setResetEmail("");
     } catch (error: any) {
-      toast.error("Failed to send reset email. Please try again.");
       console.error("Password reset error:", error);
+      // Don't reveal if email exists or not for security
+      toast.success("If an account exists with this email, you'll receive a password reset link.");
+      setForgotPasswordOpen(false);
+      setResetEmail("");
     } finally {
       setIsResetting(false);
     }
