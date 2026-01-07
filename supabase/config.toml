@@ -200,3 +200,15 @@ verify_jwt = true
 
 [functions.send-share-invitation]
 verify_jwt = true
+
+[functions.email-hook]
+verify_jwt = false
+
+[functions.admin-create-user]
+verify_jwt = true
+
+[functions.admin-delete-user]
+verify_jwt = true
+
+[functions.create-superadmin]
+verify_jwt = false
