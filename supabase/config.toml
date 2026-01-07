@@ -197,3 +197,6 @@ verify_jwt = false
 
 [functions.get-merchant-earnings]
 verify_jwt = true
+
+[functions.send-share-invitation]
+verify_jwt = true

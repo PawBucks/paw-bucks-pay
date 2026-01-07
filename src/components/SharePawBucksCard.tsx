@@ -117,6 +117,13 @@ const SharePawBucksCardComponent = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
+      // Get inviter's profile for the email
+      const { data: inviterProfile } = await supabase
+        .from("profiles")
+        .select("full_name, email")
+        .eq("id", user.id)
+        .single();
+
       // Check if already invited
       const { data: existing } = await supabase
         .from("shared_account_members")
@@ -127,6 +134,7 @@ const SharePawBucksCardComponent = () => {
 
       if (existing) {
         toast.error("This person has already been invited");
+        setInviting(false);
         return;
       }
 
@@ -137,6 +145,7 @@ const SharePawBucksCardComponent = () => {
         .eq("email", email.toLowerCase())
         .maybeSingle();
 
+      // Insert the invitation record
       const { error } = await supabase
         .from("shared_account_members")
         .insert({
@@ -148,7 +157,23 @@ const SharePawBucksCardComponent = () => {
 
       if (error) throw error;
 
-      toast.success("Invitation sent!");
+      // Send invitation email via edge function
+      const { error: emailError } = await supabase.functions.invoke("send-share-invitation", {
+        body: {
+          inviteeEmail: email.toLowerCase(),
+          inviterName: inviterProfile?.full_name || null,
+          inviterEmail: inviterProfile?.email || user.email,
+        },
+      });
+
+      if (emailError) {
+        console.error("Failed to send invitation email:", emailError);
+        // Don't fail the whole operation - the invite is saved
+        toast.success("Invitation created! (Email notification may be delayed)");
+      } else {
+        toast.success("Invitation sent!");
+      }
+
       setEmail("");
       setDialogOpen(false);
       loadSharedMembers();
@@ -157,7 +182,7 @@ const SharePawBucksCardComponent = () => {
     } finally {
       setInviting(false);
     }
-  }, [email, loadSharedMembers]);
+  }, [email, sharedMembers.length, loadSharedMembers]);
 
   const handleRemoveMember = useCallback(async (memberId: string) => {
     try {
