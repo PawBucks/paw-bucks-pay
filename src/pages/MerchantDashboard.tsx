@@ -45,7 +45,8 @@ import { ProfileOptimizationWidget } from "@/components/merchant/ProfileOptimiza
 import { ReviewCampaignWidget } from "@/components/merchant/ReviewCampaignWidget";
 import { PrioritySupportWidget } from "@/components/merchant/PrioritySupportWidget";
 import { MerchantSpotlightWidget } from "@/components/merchant/MerchantSpotlightWidget";
-
+import { StripeConnectButton } from "@/components/merchant/StripeConnectButton";
+import { MerchantEarningsTab } from "@/components/merchant/MerchantEarningsTab";
 type Merchant = {
   id: string;
   business_name: string;
