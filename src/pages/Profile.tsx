@@ -5,6 +5,7 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
+import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { GradientCard } from "@/components/ui/gradient-card";
 import { Label } from "@/components/ui/label";
@@ -120,8 +121,15 @@ const Profile = () => {
     .slice(0, 2);
 
   return (
-    <div className="min-h-[100dvh] bg-[var(--gradient-hero)] flex flex-col">
-      <Header isAuthenticated={true} onLogout={handleSignOut} />
+    <>
+      <SEO 
+        title="My Profile - PawBucks"
+        description="Manage your PawBucks profile, subscription settings, and notification preferences."
+        keywords={["PawBucks profile", "account settings", "subscription management"]}
+        noIndex={true}
+      />
+      <div className="min-h-[100dvh] bg-[var(--gradient-hero)] flex flex-col">
+        <Header isAuthenticated={true} onLogout={handleSignOut} />
       <PullToRefresh
         ref={containerRef}
         isRefreshing={isRefreshing}
@@ -472,6 +480,7 @@ const Profile = () => {
       </PullToRefresh>
       <BottomNav />
     </div>
+    </>
   );
 };
 

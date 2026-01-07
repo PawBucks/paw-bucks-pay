@@ -134,7 +134,7 @@ export default function MerchantOfferRedemptions() {
   return (
     <>
       <SEO 
-        title="Offer Redemptions | PetalPay Merchant"
+        title="Offer Redemptions | PawBucks Merchant"
         description="View and manage offer redemptions"
         keywords={["merchant", "redemptions", "codes"]}
       />

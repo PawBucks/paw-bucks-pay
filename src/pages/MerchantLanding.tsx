@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CreditCard, TrendingUp, Shield, BarChart3, CheckCircle, ArrowRight, DollarSign, Sparkles, UserPlus, Settings, Percent } from "lucide-react";
@@ -10,7 +11,13 @@ const MerchantLanding = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-[var(--gradient-hero)] overflow-hidden">
+    <>
+      <SEO 
+        title="For Pet Merchants - Grow Your Business with PawBucks"
+        description="Join PawBucks as a pet merchant. Accept payments, reward customers automatically, and track sales in one place. Perfect for pet stores, groomers, trainers, and vets."
+        keywords={["pet merchant", "pet business payments", "PawBucks merchant", "pet store rewards", "groomer payments", "vet payment platform"]}
+      />
+      <div className="min-h-screen bg-[var(--gradient-hero)] overflow-hidden">
       <header className="border-b bg-card/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm safe-area-inset-top" role="banner">
         <nav className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between" aria-label="Main navigation">
           <div 
@@ -416,6 +423,7 @@ const MerchantLanding = () => {
         </div>
       </footer>
     </div>
+    </>
   );
 };
 

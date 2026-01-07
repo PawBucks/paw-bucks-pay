@@ -236,7 +236,7 @@ export default function MerchantOfferDetails() {
   return (
     <>
       <SEO 
-        title={`${offer.title} - Offer Details | PetalPay Merchant`}
+        title={`${offer.title} - Offer Details | PawBucks Merchant`}
         description="View offer details, analytics, and redemptions"
         keywords={["merchant", "offers", "analytics"]}
       />
