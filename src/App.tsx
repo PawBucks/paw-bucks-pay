@@ -70,6 +70,7 @@ const MerchantTaxVault = lazy(() => import("./pages/MerchantTaxVault"));
 const MerchantPawBucksWalletPage = lazy(() => import("./pages/MerchantPawBucksWallet"));
 const DirectCheckout = lazy(() => import("./pages/DirectCheckout"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const AuthCallback = lazy(() => import("./pages/AuthCallback"));
 
 const createQueryClient = () => new QueryClient({
   defaultOptions: {
@@ -97,6 +98,7 @@ const AppRoutes = () => {
     <Routes>
       <Route path="/" element={<PageTransition><Index /></PageTransition>} />
       <Route path="/auth" element={<PageTransition><Auth /></PageTransition>} />
+      <Route path="/auth/callback" element={<PageTransition><AuthCallback /></PageTransition>} />
       <Route path="/reset-password" element={<PageTransition><ResetPassword /></PageTransition>} />
       <Route path="/dashboard" element={<PageTransition><Dashboard /></PageTransition>} />
       <Route path="/create-pet-profile" element={<PageTransition><CreatePetProfile /></PageTransition>} />

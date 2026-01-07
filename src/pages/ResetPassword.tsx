@@ -20,122 +20,132 @@ const ResetPassword = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Listen for auth state changes - this handles the PKCE flow automatically
+    // First, check if we already have a valid session (e.g., redirected from AuthCallback)
+    const checkExistingSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        console.log("Valid session found, ready for password reset");
+        setIsValidSession(true);
+        return true;
+      }
+      return false;
+    };
+
+    // Listen for auth state changes - handles PASSWORD_RECOVERY event
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Auth event:", event, "Session:", !!session);
+      console.log("ResetPassword - Auth event:", event, "Session:", !!session);
       
       if (event === "PASSWORD_RECOVERY") {
-        // User clicked the recovery link and Supabase processed it
         setIsValidSession(true);
       } else if (event === "SIGNED_IN" && session) {
-        // Session established from recovery
         setIsValidSession(true);
       }
     });
 
-    // Check for recovery tokens in URL (handles both hash and query params)
-    const checkRecoverySession = async () => {
-      const url = new URL(window.location.href);
-      
-      // Check hash params (implicit flow)
-      const hashParams = new URLSearchParams(window.location.hash.substring(1));
-      const accessToken = hashParams.get("access_token");
-      const type = hashParams.get("type");
-      const errorCode = hashParams.get("error_code");
-      const errorDescription = hashParams.get("error_description");
-      
-      // Check query params (PKCE flow uses code)
-      const code = url.searchParams.get("code");
-      const typeFromQuery = url.searchParams.get("type");
-      const token = url.searchParams.get("token");
-      const tokenHash = url.searchParams.get("token_hash");
-
-      console.log("Recovery check - hash type:", type, "query type:", typeFromQuery, "code:", !!code, "token:", !!token, "tokenHash:", !!tokenHash, "accessToken:", !!accessToken);
-
-      // Handle errors from the URL
-      if (errorCode || errorDescription) {
-        console.error("Recovery error:", errorCode, errorDescription);
-        setIsValidSession(false);
-        toast.error(errorDescription || "Password reset link is invalid or expired.");
-        return;
+    // Check for existing session first
+    checkExistingSession().then((hasSession) => {
+      if (!hasSession) {
+        // No session - check URL for recovery tokens (fallback for direct link access)
+        checkRecoveryTokens();
       }
-
-      // Handle PKCE flow with code
-      if (code) {
-        try {
-          const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-          if (error) {
-            console.error("Code exchange error:", error);
-            setIsValidSession(false);
-            toast.error("Password reset link is invalid or expired. Please request a new one.");
-          } else if (data.session) {
-            setIsValidSession(true);
-            // Clean up URL
-            window.history.replaceState(null, "", window.location.pathname);
-          }
-          return;
-        } catch (err) {
-          console.error("Code exchange exception:", err);
-          setIsValidSession(false);
-          return;
-        }
-      }
-
-      // Handle token_hash (magic link style)
-      if (tokenHash && (type === "recovery" || typeFromQuery === "recovery")) {
-        try {
-          const { data, error } = await supabase.auth.verifyOtp({
-            token_hash: tokenHash,
-            type: "recovery",
-          });
-          if (error) {
-            console.error("Token hash verification error:", error);
-            setIsValidSession(false);
-            toast.error("Password reset link is invalid or expired. Please request a new one.");
-          } else if (data.session) {
-            setIsValidSession(true);
-            window.history.replaceState(null, "", window.location.pathname);
-          }
-          return;
-        } catch (err) {
-          console.error("Token hash exception:", err);
-          setIsValidSession(false);
-          return;
-        }
-      }
-
-      // Handle implicit flow with access token in hash
-      if (accessToken && type === "recovery") {
-        const refreshToken = hashParams.get("refresh_token");
-        if (refreshToken) {
-          const { error } = await supabase.auth.setSession({
-            access_token: accessToken,
-            refresh_token: refreshToken,
-          });
-          
-          if (!error) {
-            setIsValidSession(true);
-            window.history.replaceState(null, "", window.location.pathname);
-            return;
-          }
-        }
-      }
-
-      // Check if there's already a valid session
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        setIsValidSession(true);
-        return;
-      }
-
-      // No valid recovery parameters found
-      setIsValidSession(false);
-    };
-
-    checkRecoverySession();
+    });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const checkRecoveryTokens = async () => {
+    const url = new URL(window.location.href);
+    
+    // Check hash params
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const accessToken = hashParams.get("access_token");
+    const type = hashParams.get("type");
+    const errorCode = hashParams.get("error_code");
+    const errorDescription = hashParams.get("error_description");
+    
+    // Check query params
+    const code = url.searchParams.get("code");
+    const typeFromQuery = url.searchParams.get("type");
+    const tokenHash = url.searchParams.get("token_hash");
+
+    console.log("ResetPassword - Checking tokens:", {
+      hasCode: !!code,
+      hasTokenHash: !!tokenHash,
+      hasAccessToken: !!accessToken,
+      type: type || typeFromQuery,
+    });
+
+    // Handle errors
+    if (errorCode || errorDescription) {
+      console.error("Recovery error:", errorCode, errorDescription);
+      setIsValidSession(false);
+      toast.error(errorDescription || "Password reset link is invalid or expired.");
+      return;
+    }
+
+    // Handle PKCE flow with code
+    if (code) {
+      try {
+        const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+        if (error) {
+          console.error("Code exchange error:", error);
+          setIsValidSession(false);
+          toast.error("Password reset link is invalid or expired. Please request a new one.");
+        } else if (data.session) {
+          setIsValidSession(true);
+          window.history.replaceState(null, "", window.location.pathname);
+        }
+        return;
+      } catch (err) {
+        console.error("Code exchange exception:", err);
+        setIsValidSession(false);
+        return;
+      }
+    }
+
+    // Handle token_hash
+    if (tokenHash && (type === "recovery" || typeFromQuery === "recovery")) {
+      try {
+        const { data, error } = await supabase.auth.verifyOtp({
+          token_hash: tokenHash,
+          type: "recovery",
+        });
+        if (error) {
+          console.error("Token hash verification error:", error);
+          setIsValidSession(false);
+          toast.error("Password reset link is invalid or expired. Please request a new one.");
+        } else if (data.session) {
+          setIsValidSession(true);
+          window.history.replaceState(null, "", window.location.pathname);
+        }
+        return;
+      } catch (err) {
+        console.error("Token hash exception:", err);
+        setIsValidSession(false);
+        return;
+      }
+    }
+
+    // Handle implicit flow with access token in hash
+    if (accessToken && type === "recovery") {
+      const refreshToken = hashParams.get("refresh_token");
+      if (refreshToken) {
+        const { error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        });
+        
+        if (!error) {
+          setIsValidSession(true);
+          window.history.replaceState(null, "", window.location.pathname);
+          return;
+        }
+      }
+    }
+
+    // No valid recovery parameters found
+    setIsValidSession(false);
+  };
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
