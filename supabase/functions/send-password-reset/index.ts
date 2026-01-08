@@ -151,8 +151,10 @@ serve(async (req: Request): Promise<Response> => {
     console.log("Generated reset link for:", email);
 
     // Send the email via Resend
+    // IMPORTANT: The 'from' address must use a verified domain in Resend
+    // Using onboarding@resend.dev only works for emails to the Resend account owner
     const emailResponse = await resend.emails.send({
-      from: "PawBucks <onboarding@resend.dev>",
+      from: "PawBucks <noreply@pawbucks.app>",
       to: [email],
       subject: "🔑 Reset Your PawBucks Password",
       html: generatePasswordResetEmail(userName, resetLink),
