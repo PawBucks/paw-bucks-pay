@@ -91,8 +91,8 @@ const NotificationsDropdownComponent = ({ userId }: { userId: string }) => {
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
   const enableNotifications = useCallback(async () => {
-    // Browser notifications only work when the app runs in a top-level, secure context
-    if (typeof window !== "undefined") {
+    // Check if running in an iframe (preview mode) - this is the most common case
+    try {
       if (window.self !== window.top) {
         toast.error("Notifications unavailable in preview", {
           description:
@@ -101,14 +101,34 @@ const NotificationsDropdownComponent = ({ userId }: { userId: string }) => {
         });
         return;
       }
+    } catch (e) {
+      // Cross-origin iframe check failed - likely in preview
+      toast.error("Notifications unavailable in preview", {
+        description:
+          "Open the PawBucks app directly in its own tab to enable browser notifications.",
+        duration: 8000,
+      });
+      return;
+    }
 
-      if (!("Notification" in window)) {
-        toast.error("Browser does not support notifications", {
-          description: "Use a modern browser over HTTPS to enable notifications.",
+    // Check if Notification API is available
+    if (typeof Notification === "undefined") {
+      // Check if we're on HTTPS
+      const protocol = window.location.protocol;
+      const hostname = window.location.hostname;
+      const isSecure = protocol === "https:" || hostname === "localhost";
+      if (!isSecure) {
+        toast.error("HTTPS required for notifications", {
+          description: "Browser notifications require a secure connection (HTTPS).",
           duration: 8000,
         });
-        return;
+      } else {
+        toast.error("Browser does not support notifications", {
+          description: "Please use a modern browser like Chrome, Firefox, Safari, or Edge.",
+          duration: 8000,
+        });
       }
+      return;
     }
 
     const result = await requestNotificationPermission();
