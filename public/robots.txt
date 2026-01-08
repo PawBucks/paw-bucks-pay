@@ -1,12 +1,12 @@
 # PawBucks Robots.txt
-# https://42786380-3966-427e-b3d0-08c5bc7581ed.lovableproject.com
+# https://pawbucks.app
 
 # Allow all crawlers
 User-agent: *
 Allow: /
 
 # Sitemap location
-Sitemap: https://42786380-3966-427e-b3d0-08c5bc7581ed.lovableproject.com/sitemap.xml
+Sitemap: https://pawbucks.app/sitemap.xml
 
 # Disallow admin and sensitive pages
 Disallow: /admin
@@ -52,6 +52,7 @@ Allow: /lost-pets
 Allow: /auth
 Allow: /install
 Allow: /storefront/
+Allow: /referrals
 
 # Crawl-delay for respectful crawling
 Crawl-delay: 1

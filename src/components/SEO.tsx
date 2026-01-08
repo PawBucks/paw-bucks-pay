@@ -20,7 +20,7 @@ interface SEOProps {
   jsonLd?: object;
 }
 
-const BASE_URL = 'https://42786380-3966-427e-b3d0-08c5bc7581ed.lovableproject.com';
+const BASE_URL = 'https://pawbucks.app';
 
 // SEO component for better search engine optimization
 export const SEO = ({ 
