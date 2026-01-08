@@ -2531,6 +2531,13 @@ export type Database = {
             referencedRelation: "merchant_reviews"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "review_photos_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_reviews_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       search_ranking_analytics: {
@@ -3414,6 +3421,34 @@ export type Database = {
             columns: ["service_id"]
             isOneToOne: false
             referencedRelation: "merchant_market_services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      merchant_reviews_public: {
+        Row: {
+          created_at: string | null
+          id: string | null
+          merchant_id: string | null
+          rating: number | null
+          review_text: string | null
+          reviewer_avatar: string | null
+          reviewer_name: string | null
+          updated_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_reviews_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_reviews_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
             referencedColumns: ["id"]
           },
         ]
