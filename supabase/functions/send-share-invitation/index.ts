@@ -57,7 +57,7 @@ serve(async (req) => {
     const appUrl = "https://pawbucks.app"; // Update with actual production URL
 
     const { data: emailData, error: emailError } = await resend.emails.send({
-      from: "PawBucks <noreply@resend.dev>",
+      from: "PawBucks <noreply@pawbucks.app>",
       to: [inviteeEmail],
       subject: `${senderName} invited you to share PawBucks!`,
       html: `
