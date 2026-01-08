@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient, UseQueryOptions } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 // Optimized data fetching hook with caching and error handling
@@ -19,11 +19,11 @@ export const useOptimizedQuery = <T,>(
     queryFn,
     staleTime: options?.staleTime ?? 1000 * 60 * 5, // 5 minutes default
     gcTime: options?.cacheTime ?? 1000 * 60 * 30, // 30 minutes default
-    retry: options?.retry ?? 2,
+    retry: options?.retry ?? 1, // Reduced retries for faster failure
     enabled: options?.enabled ?? true,
-    refetchOnMount: options?.refetchOnMount ?? 'always',
+    refetchOnMount: options?.refetchOnMount ?? false, // Don't refetch if data is fresh
     refetchOnWindowFocus: options?.refetchOnWindowFocus ?? false,
-    // Optimize network requests
+    // Optimize network requests - use cached data first
     networkMode: 'offlineFirst',
     // Structural sharing for better re-render optimization
     structuralSharing: true,

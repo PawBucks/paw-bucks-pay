@@ -1,30 +1,17 @@
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, memo } from "react";
 
 interface PageTransitionProps {
   children: ReactNode;
 }
 
-export const PageTransition = ({ children }: PageTransitionProps) => {
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    // Trigger animation on mount
-    const timer = requestAnimationFrame(() => {
-      setIsVisible(true);
-    });
-    
-    return () => cancelAnimationFrame(timer);
-  }, []);
-
+// Simplified page transition - removed useState/useEffect for instant rendering
+// CSS handles the animation without blocking first paint
+const PageTransitionComponent = ({ children }: PageTransitionProps) => {
   return (
-    <div
-      className={`min-h-screen transition-all duration-200 ease-out ${
-        isVisible 
-          ? 'opacity-100 translate-y-0' 
-          : 'opacity-0 translate-y-2'
-      }`}
-    >
+    <div className="min-h-screen animate-fade-in">
       {children}
     </div>
   );
 };
+
+export const PageTransition = memo(PageTransitionComponent);
