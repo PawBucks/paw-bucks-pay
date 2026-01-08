@@ -54,7 +54,7 @@ serve(async (req) => {
     const resend = new Resend(resendApiKey);
 
     const senderName = inviterName || inviterEmail || "A PawBucks member";
-    const appUrl = "https://pawbucks.app"; // Update with actual production URL
+    const appUrl = "https://pawbucks.app";
 
     const { data: emailData, error: emailError } = await resend.emails.send({
       from: "PawBucks <noreply@pawbucks.app>",

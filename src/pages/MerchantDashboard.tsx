@@ -421,7 +421,14 @@ const MerchantDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <>
+      <SEO 
+        title="Merchant Dashboard - PawBucks"
+        description="Manage your PawBucks merchant account, track sales, and view analytics."
+        keywords={["merchant dashboard", "PawBucks merchant", "sales analytics"]}
+        noIndex={true}
+      />
+      <div className="min-h-screen bg-background">
       <header className="border-b border-border/50 bg-card/95 backdrop-blur-xl sticky top-0 z-50 shadow-[var(--shadow-soft)]" style={{ paddingTop: 'max(0.5rem, env(safe-area-inset-top))' }}>
         <div className="container mx-auto px-4 py-2 sm:py-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
@@ -792,6 +799,7 @@ const MerchantDashboard = () => {
         isSubmitting={requestingFunding}
       />
     </div>
+    </>
   );
 };
 

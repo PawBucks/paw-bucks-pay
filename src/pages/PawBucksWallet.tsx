@@ -5,6 +5,7 @@ import { useOptimizedQuery } from "@/hooks/useOptimizedQuery";
 import { usePawBucksRealtime } from "@/hooks/usePawBucksRealtime";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
+import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { GradientCard } from "@/components/ui/gradient-card";
 import { BottomNav } from "@/components/BottomNav";
@@ -306,8 +307,15 @@ const PawBucksWallet = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--gradient-hero)]">
-      <Header isAuthenticated={true} onLogout={handleSignOut} />
+    <>
+      <SEO 
+        title="PawBucks Wallet - Your Rewards"
+        description="View your PawBucks balance, track reward history, and redeem rewards for discounts."
+        keywords={["PawBucks wallet", "pet rewards", "reward balance"]}
+        noIndex={true}
+      />
+      <div className="min-h-screen bg-[var(--gradient-hero)]">
+        <Header isAuthenticated={true} onLogout={handleSignOut} />
 
       <main className="container mx-auto px-4 pt-6 pb-24 md:pb-12 max-w-7xl">
         {/* Ad Placement for Free Users */}
@@ -459,6 +467,7 @@ const PawBucksWallet = () => {
 
       <BottomNav />
     </div>
+    </>
   );
 };
 
