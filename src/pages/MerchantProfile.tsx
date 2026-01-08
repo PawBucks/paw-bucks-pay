@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback, memo } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useOptimizedQuery } from "@/hooks/useOptimizedQuery";
@@ -21,7 +21,7 @@ import { toast } from "sonner";
 import { ROUTES } from "@/lib/constants";
 import { useMerchantActiveServices, SERVICE_NAMES, merchantHasService } from "@/hooks/useMerchantServices";
 import { schedulingService } from "@/services/api/scheduling.service";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueries } from "@tanstack/react-query";
 import {
   Star,
   MapPin,
@@ -68,7 +68,7 @@ type Review = {
   photos: { id: string; photo_url: string }[];
 };
 
-const MerchantProfile = () => {
+const MerchantProfile = memo(() => {
   const { merchantId } = useParams<{ merchantId: string }>();
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
@@ -80,85 +80,105 @@ const MerchantProfile = () => {
   const hasVerifiedPro = merchantHasService(activeServices, SERVICE_NAMES.VERIFIED_PRO_BADGE);
   const isSponsored = merchantHasService(activeServices, SERVICE_NAMES.SPONSORED_PLACEMENT);
 
-  // Fetch merchant services for scheduling
-  const { data: merchantServices = [] } = useQuery({
-    queryKey: ["merchant-services-public", merchantId],
-    queryFn: () => schedulingService.getActiveServices(merchantId!),
-    enabled: !!merchantId,
+  // Parallel queries for merchant data, services, and stripe info
+  const queryResults = useQueries({
+    queries: [
+      // Merchant data from public view
+      {
+        queryKey: ["merchant", merchantId],
+        queryFn: async () => {
+          const { data, error } = await supabase
+            .from("merchants_public")
+            .select("id, business_name, business_type, description, logo_url, address, phone, cashback_rate, accepts_pawbucks, storefront_slug, price_range")
+            .eq("id", merchantId)
+            .single();
+          if (error) throw error;
+          return data;
+        },
+        staleTime: 1000 * 60 * 5,
+        enabled: !!merchantId,
+      },
+      // Merchant services for scheduling
+      {
+        queryKey: ["merchant-services-public", merchantId],
+        queryFn: () => schedulingService.getActiveServices(merchantId!),
+        staleTime: 1000 * 60 * 5,
+        enabled: !!merchantId,
+      },
+      // Stripe account info (only if authenticated)
+      {
+        queryKey: ["merchant-stripe", merchantId],
+        queryFn: async () => {
+          const { data, error } = await supabase.functions.invoke("get-connect-account-status", {
+            body: { merchantId },
+          });
+          if (error) return null;
+          return data;
+        },
+        staleTime: 1000 * 60 * 5,
+        enabled: !!user && !!merchantId,
+      },
+    ],
   });
 
+  const merchant = queryResults[0].data;
+  const merchantLoading = queryResults[0].isLoading;
+  const merchantServices = queryResults[1].data || [];
+  const merchantStripeInfo = queryResults[2].data;
+  const stripeAccountId = merchantStripeInfo?.accountId;
   const hasBookableServices = merchantServices.length > 0;
 
-  // Fetch merchant data from public view (excludes sensitive contact info)
-  const { data: merchant, isLoading: merchantLoading } = useOptimizedQuery(
-    ["merchant", merchantId],
-    async () => {
-      const { data, error } = await supabase
-        .from("merchants_public")
-        .select("*")
-        .eq("id", merchantId)
-        .single();
-      if (error) throw error;
-      return data;
-    },
-    { staleTime: 1000 * 60 * 5 }
-  );
-
-  // Fetch stripe_account_id separately for storefront access (requires auth)
-  const { data: merchantStripeInfo } = useOptimizedQuery(
-    ["merchant-stripe", merchantId, user?.id],
-    async () => {
-      if (!user) return null;
-      // Use the merchants service to get stripe info via edge function
-      const { data, error } = await supabase.functions.invoke("get-connect-account-status", {
-        body: { merchantId },
-      });
-      if (error) return null;
-      return data;
-    },
-    { staleTime: 1000 * 60 * 5, enabled: !!user && !!merchantId }
-  );
-
-  const stripeAccountId = merchantStripeInfo?.accountId;
-
-  // Fetch reviews with photos and user info
+  // Optimized reviews query - batch fetch photos and profiles
   const { data: reviews = [], isLoading: reviewsLoading, refetch: refetchReviews } = useOptimizedQuery<Review[]>(
     ["merchant-reviews", merchantId],
     async () => {
+      // Get reviews first
       const { data: reviewData, error: reviewError } = await supabase
         .from("merchant_reviews")
-        .select("*")
+        .select("id, user_id, rating, review_text, created_at")
         .eq("merchant_id", merchantId)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(50);
 
       if (reviewError) throw reviewError;
+      if (!reviewData?.length) return [];
 
-      // Fetch photos for each review
-      const reviewsWithPhotos = await Promise.all(
-        (reviewData || []).map(async (review) => {
-          const { data: photos } = await supabase
-            .from("review_photos")
-            .select("id, photo_url")
-            .eq("review_id", review.id);
+      const reviewIds = reviewData.map(r => r.id);
+      const userIds = [...new Set(reviewData.map(r => r.user_id))];
 
-          // Get user profile for display name using the public reviewer_profiles view
-          const { data: profile } = await supabase
-            .from("reviewer_profiles")
-            .select("full_name")
-            .eq("id", review.user_id)
-            .single();
+      // Parallel batch queries for photos and profiles
+      const [photosResult, profilesResult] = await Promise.all([
+        supabase
+          .from("review_photos")
+          .select("id, photo_url, review_id")
+          .in("review_id", reviewIds),
+        supabase
+          .from("reviewer_profiles")
+          .select("id, full_name")
+          .in("id", userIds),
+      ]);
 
-          return {
-            ...review,
-            photos: photos || [],
-            user_name: profile?.full_name || "Anonymous",
-          };
-        })
-      );
+      // Create lookup maps
+      const photosByReview = new Map<string, { id: string; photo_url: string }[]>();
+      (photosResult.data || []).forEach(photo => {
+        const existing = photosByReview.get(photo.review_id) || [];
+        existing.push({ id: photo.id, photo_url: photo.photo_url });
+        photosByReview.set(photo.review_id, existing);
+      });
 
-      return reviewsWithPhotos;
+      const profilesByUser = new Map<string, string>();
+      (profilesResult.data || []).forEach(profile => {
+        profilesByUser.set(profile.id, profile.full_name || "Anonymous");
+      });
+
+      // Combine data
+      return reviewData.map(review => ({
+        ...review,
+        photos: photosByReview.get(review.id) || [],
+        user_name: profilesByUser.get(review.user_id) || "Anonymous",
+      }));
     },
-    { staleTime: 1000 * 60 * 2 }
+    { staleTime: 1000 * 60 * 2, enabled: !!merchantId }
   );
 
   // Calculate rating stats
@@ -186,15 +206,32 @@ const MerchantProfile = () => {
     return reviews.some((r) => r.user_id === user.id);
   }, [reviews, user]);
 
-  const handlePaymentSuccess = () => {
+  const handlePaymentSuccess = useCallback(() => {
     toast.success("Redirecting to wallet...");
     setTimeout(() => navigate(ROUTES.WALLET), 1000);
-  };
+  }, [navigate]);
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     await signOut();
     navigate(ROUTES.AUTH);
-  };
+  }, [signOut, navigate]);
+
+  const handleOpenPaymentDialog = useCallback(() => {
+    if (!user) {
+      toast.error("Please sign in to make a payment");
+      navigate(ROUTES.AUTH);
+      return;
+    }
+    setPaymentDialogOpen(true);
+  }, [user, navigate]);
+
+  const handleOpenReviewDialog = useCallback(() => {
+    setReviewDialogOpen(true);
+  }, []);
+
+  const handleReviewSuccess = useCallback(() => {
+    refetchReviews();
+  }, [refetchReviews]);
 
   if (merchantLoading || reviewsLoading) {
     return <PageLoader message="Loading merchant profile..." />;
@@ -331,14 +368,7 @@ const MerchantProfile = () => {
               <Button
                 size="lg"
                 className="flex-1 min-w-[200px]"
-                onClick={() => {
-                  if (!user) {
-                    toast.error("Please sign in to make a payment");
-                    navigate(ROUTES.AUTH);
-                    return;
-                  }
-                  setPaymentDialogOpen(true);
-                }}
+                onClick={handleOpenPaymentDialog}
               >
                 <ShoppingBag className="w-4 h-4 mr-2" />
                 Pay & Earn PawBucks
@@ -347,7 +377,7 @@ const MerchantProfile = () => {
                 <Button
                   variant="outline"
                   size="lg"
-                  onClick={() => setReviewDialogOpen(true)}
+                  onClick={handleOpenReviewDialog}
                 >
                   <MessageSquare className="w-4 h-4 mr-2" />
                   Write a Review
@@ -553,7 +583,7 @@ const MerchantProfile = () => {
                   {/* Write Review Button */}
                   {user && !userHasReviewed && (
                     <div className="mt-6 pt-6 border-t">
-                      <Button onClick={() => setReviewDialogOpen(true)} className="w-full md:w-auto">
+                      <Button onClick={handleOpenReviewDialog} className="w-full md:w-auto">
                         <Camera className="w-4 h-4 mr-2" />
                         Write a Review
                       </Button>
@@ -572,7 +602,7 @@ const MerchantProfile = () => {
                       Be the first to review this merchant!
                     </p>
                     {user && (
-                      <Button onClick={() => setReviewDialogOpen(true)}>
+                      <Button onClick={handleOpenReviewDialog}>
                         Write a Review
                       </Button>
                     )}
@@ -585,7 +615,7 @@ const MerchantProfile = () => {
                       key={review.id}
                       review={review}
                       currentUserId={user?.id}
-                      onDelete={() => refetchReviews()}
+                      onDelete={handleReviewSuccess}
                     />
                   ))}
                 </div>
@@ -639,7 +669,7 @@ const MerchantProfile = () => {
             onOpenChange={setReviewDialogOpen}
             merchantId={merchantId}
             userId={user.id}
-            onSuccess={() => refetchReviews()}
+            onSuccess={handleReviewSuccess}
           />
         )}
 
@@ -647,6 +677,8 @@ const MerchantProfile = () => {
       </div>
     </>
   );
-};
+});
+
+MerchantProfile.displayName = "MerchantProfile";
 
 export default MerchantProfile;
