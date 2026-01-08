@@ -2801,6 +2801,7 @@ export type Database = {
           accepted_at: string | null
           created_at: string
           id: string
+          invite_token: string | null
           invited_at: string
           member_email: string
           member_id: string | null
@@ -2812,6 +2813,7 @@ export type Database = {
           accepted_at?: string | null
           created_at?: string
           id?: string
+          invite_token?: string | null
           invited_at?: string
           member_email: string
           member_id?: string | null
@@ -2823,6 +2825,7 @@ export type Database = {
           accepted_at?: string | null
           created_at?: string
           id?: string
+          invite_token?: string | null
           invited_at?: string
           member_email?: string
           member_id?: string | null
