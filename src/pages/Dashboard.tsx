@@ -88,15 +88,21 @@ const Dashboard = () => {
 
   // Direct fetch function - optimized with parallel loading
   const fetchDashboardData = useCallback(async () => {
-    if (!user || sharedAccount.isLoading) {
+    if (!user) {
       setDataLoading(false);
+      return;
+    }
+    
+    if (sharedAccount.isLoading) {
       return;
     }
 
     setDataLoading(true);
     
-    // Use effective wallet user ID for wallet queries (shared account owner if member)
-    const walletUserId = effectiveWalletUserId || user.id;
+    // Calculate wallet user ID inside the callback to avoid stale closure
+    const walletUserId = sharedAccount.isSharedMember && sharedAccount.ownerId 
+      ? sharedAccount.ownerId 
+      : user.id;
     
     try {
       // Fetch all data in parallel directly from Supabase - optimized queries
@@ -159,7 +165,7 @@ const Dashboard = () => {
     } finally {
       setDataLoading(false);
     }
-  }, [user, sharedAccount.isLoading, effectiveWalletUserId]);
+  }, [user, sharedAccount.isLoading, sharedAccount.isSharedMember, sharedAccount.ownerId]);
 
   // Fetch data when user changes or shared account status is determined
   useEffect(() => {
@@ -245,6 +251,13 @@ const Dashboard = () => {
           <p className="text-sm sm:text-base text-muted-foreground">
             {profile.user_type === "pet_owner" ? "Manage your pet expenses and rewards" : "Manage your business transactions"}
           </p>
+          {/* Shared Account Indicator */}
+          {sharedAccount.isSharedMember && sharedAccount.ownerName && (
+            <div className="mt-2 inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-medium">
+              <Users className="w-4 h-4" />
+              Viewing shared account with {sharedAccount.ownerName}
+            </div>
+          )}
         </div>
 
         {profile.user_type === "pet_owner" ? (
