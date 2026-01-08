@@ -285,14 +285,16 @@ const Auth = () => {
     setIsResetting(true);
 
     try {
-      // Use /auth/callback as the redirect - this is required by Supabase's email flow
-      // The callback page will detect type=recovery and redirect to /reset-password
+      // Use our custom edge function to send password reset email with proper link
       const redirectUrl = `${window.location.origin}/auth/callback?type=recovery`;
       
       console.log("Requesting password reset for:", trimmedEmail, "redirectTo:", redirectUrl);
       
-      const { error } = await supabase.auth.resetPasswordForEmail(trimmedEmail, {
-        redirectTo: redirectUrl,
+      const { data, error } = await supabase.functions.invoke("send-password-reset", {
+        body: {
+          email: trimmedEmail,
+          redirectUrl: redirectUrl,
+        },
       });
 
       if (error) {
