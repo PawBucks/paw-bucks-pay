@@ -19,30 +19,30 @@ const Index = () => {
   const { user, loading } = useAuth();
 
   useEffect(() => {
-    const checkUserAndRedirect = async () => {
-      if (!loading && user) {
-        const { data: isAdmin } = await supabase.rpc('has_role', {
-          _user_id: user.id,
-          _role: 'admin'
-        });
-
+    // Skip the async admin check if no user - faster redirect
+    if (!loading && user) {
+      // For most users, redirect immediately to dashboard
+      // Admin check happens asynchronously and redirects if needed
+      navigate("/dashboard", { replace: true });
+      
+      // Check admin in background (won't block navigation)
+      supabase.rpc('has_role', {
+        _user_id: user.id,
+        _role: 'admin'
+      }).then(({ data: isAdmin }) => {
         if (isAdmin) {
-          navigate("/admin");
-        } else {
-          navigate("/dashboard");
+          navigate("/admin", { replace: true });
         }
-      }
-    };
-
-    checkUserAndRedirect();
+      });
+    }
   }, [user, loading, navigate]);
 
+  // Show minimal loading state
   if (loading) {
     return (
       <div className="min-h-screen bg-[var(--gradient-hero)] flex items-center justify-center" role="status" aria-label="Loading">
         <div className="text-center space-y-4">
           <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" aria-hidden="true" />
-          <p className="text-muted-foreground text-lg">Loading your experience...</p>
         </div>
       </div>
     );

@@ -81,7 +81,7 @@ const Dashboard = () => {
   
   const isPawPassSubscriber = subscription.subscribed;
 
-  // Direct fetch function - no caching that could cause stale data
+  // Direct fetch function - optimized with parallel loading
   const fetchDashboardData = useCallback(async () => {
     if (!user) {
       setDataLoading(false);
@@ -91,13 +91,14 @@ const Dashboard = () => {
     setDataLoading(true);
     
     try {
-      // Fetch all data in parallel directly from Supabase
+      // Fetch all data in parallel directly from Supabase - optimized queries
       const [profileResult, walletResult, pawbucksResult, petsResult, medicalResult] = await Promise.all([
         supabase
           .from('profiles')
           .select('user_type, full_name')
           .eq('id', user.id)
-          .single(),
+          .single()
+          .throwOnError(),
         supabase
           .from('wallets')
           .select('balance, rewards_points, total_spent')
@@ -110,15 +111,16 @@ const Dashboard = () => {
           .maybeSingle(),
         supabase
           .from('pet_profiles')
-          .select('*')
+          .select('id, name, type, breed, birthday, photo_url')
           .eq('user_id', user.id)
-          .order('created_at', { ascending: false }),
-        // Fetch medical records spending
+          .order('created_at', { ascending: false })
+          .limit(10), // Limit to 10 pets for faster loading
         supabase
           .from('pet_medical_records')
           .select('price')
           .eq('user_id', user.id)
           .not('price', 'is', null)
+          .limit(100) // Limit medical records for faster aggregation
       ]);
 
       if (profileResult.data) {

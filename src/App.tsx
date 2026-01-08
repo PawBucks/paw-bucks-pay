@@ -1,4 +1,4 @@
-import { Suspense, lazy, useState } from "react";
+import { Suspense, lazy, useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,6 +10,7 @@ import { usePerformance } from "@/hooks/usePerformance";
 import { useMobileOptimizations } from "@/hooks/useMobileOptimizations";
 import { usePageTracking } from "@/hooks/usePageTracking";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
+import { useDataPrefetch } from "@/hooks/useDataPrefetch";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PageLoader } from "@/components/PageLoader";
 import { PageTransition } from "@/components/PageTransition";
@@ -75,16 +76,17 @@ const AuthCallback = lazy(() => import("./pages/AuthCallback"));
 const createQueryClient = () => new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes
-      gcTime: 1000 * 60 * 30, // 30 minutes (renamed from cacheTime)
+      staleTime: 1000 * 60 * 5, // 5 minutes - data considered fresh
+      gcTime: 1000 * 60 * 30, // 30 minutes garbage collection
       retry: (failureCount, error: any) => {
         // Don't retry on 4xx errors
         if (error?.status >= 400 && error?.status < 500) return false;
-        return failureCount < 2;
+        return failureCount < 1; // Reduced from 2 to 1 for faster failure
       },
       refetchOnWindowFocus: false,
-      refetchOnReconnect: true,
-      networkMode: 'online', // Better offline support
+      refetchOnReconnect: 'always',
+      networkMode: 'offlineFirst', // Use cached data first for instant loading
+      structuralSharing: true, // Optimize re-renders
     },
     mutations: {
       retry: 1,
@@ -159,9 +161,10 @@ const AppContent = () => {
   useMobileOptimizations();
   usePageTracking();
   useKeyboardShortcuts();
+  useDataPrefetch(); // Prefetch critical data on idle
 
   return (
-    <Suspense fallback={<PageLoader message="Loading..." />}>
+    <Suspense fallback={<PageLoader />}>
       <AppRoutes />
     </Suspense>
   );

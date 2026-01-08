@@ -393,28 +393,26 @@ const Discover = () => {
     }
   }, [maxDistance, sortBy, userLocation, locationLoading, locationError, requestLocation]);
 
-  // Fetch merchants with ratings
+  // Fetch merchants with ratings - optimized query with parallel data loading
   const { data: merchantsWithRatings = [], isLoading: loading } = useOptimizedQuery<MerchantWithRating[]>(
     ['merchants-with-ratings'],
     async () => {
-      // Fetch merchants from public view (excludes sensitive contact info)
-      const { data: merchants, error: merchantsError } = await supabase
-        .from('merchants_public')
-        .select('*')
-        .order('business_name');
+      // Fetch merchants and reviews in parallel
+      const [merchantsResult, reviewsResult] = await Promise.all([
+        supabase
+          .from('merchants_public')
+          .select('id, business_name, business_type, description, address, latitude, longitude, cashback_rate, logo_url, accepts_pawbucks, is_sponsored, sponsored_until, price_range')
+          .order('business_name'),
+        supabase
+          .from('merchant_reviews')
+          .select('merchant_id, rating')
+      ]);
       
-      if (merchantsError) throw merchantsError;
-      if (!merchants) return [];
-
-      // Fetch all reviews to calculate ratings
-      const { data: reviews, error: reviewsError } = await supabase
-        .from('merchant_reviews')
-        .select('merchant_id, rating');
-      
-      if (reviewsError) throw reviewsError;
+      if (merchantsResult.error) throw merchantsResult.error;
+      if (!merchantsResult.data) return [];
 
       // Calculate average ratings per merchant
-      const ratingsByMerchant = (reviews || []).reduce((acc, review) => {
+      const ratingsByMerchant = (reviewsResult.data || []).reduce((acc, review) => {
         if (!acc[review.merchant_id]) {
           acc[review.merchant_id] = { total: 0, count: 0 };
         }
@@ -424,7 +422,7 @@ const Discover = () => {
       }, {} as Record<string, { total: number; count: number }>);
 
       // Merge merchant data with ratings
-      return merchants.map(merchant => ({
+      return merchantsResult.data.map(merchant => ({
         ...merchant,
         avg_rating: ratingsByMerchant[merchant.id] 
           ? ratingsByMerchant[merchant.id].total / ratingsByMerchant[merchant.id].count 
@@ -432,7 +430,7 @@ const Discover = () => {
         review_count: ratingsByMerchant[merchant.id]?.count || 0
       }));
     },
-    { staleTime: QUERY_STALE_TIMES.LONG }
+    { staleTime: QUERY_STALE_TIMES.LONG, refetchOnMount: false }
   );
 
   // Toggle price filter
