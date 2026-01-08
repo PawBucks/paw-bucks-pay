@@ -186,7 +186,7 @@ export const createOrganizationSchema = () => ({
   "name": "PawBucks",
   "url": BASE_URL,
   "logo": `${BASE_URL}/logo.png`,
-  "description": "Digital payment platform for pet services with cashback rewards",
+  "description": "Digital payment platform for pet services with PawBucks rewards",
   "sameAs": [
     "https://twitter.com/PawBucks",
     "https://facebook.com/PawBucks",
