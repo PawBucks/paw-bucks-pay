@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useOptimizedQuery } from "@/hooks/useOptimizedQuery";
 import { usePawBucksRealtime } from "@/hooks/usePawBucksRealtime";
+import { useSharedAccount, getEffectiveWalletUserId } from "@/hooks/useSharedAccount";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
 import { SEO } from "@/components/SEO";
@@ -247,43 +248,47 @@ const PawBucksWallet = () => {
   const { user, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   
-  // Enable realtime updates for PawBucks
-  usePawBucksRealtime(user?.id);
+  // Check if user is part of a shared account
+  const sharedAccount = useSharedAccount(user?.id);
+  const effectiveWalletUserId = getEffectiveWalletUserId(user?.id, sharedAccount);
+  
+  // Enable realtime updates for PawBucks (use effective user ID)
+  usePawBucksRealtime(effectiveWalletUserId);
 
   const { data: wallet, isLoading: walletLoading } = useOptimizedQuery<PawBucksWallet | null>(
-    ['pawbucks-wallet', user?.id || ''],
+    ['pawbucks-wallet', effectiveWalletUserId || ''],
     async () => {
-      if (!user) return null;
+      if (!effectiveWalletUserId) return null;
       const { data, error } = await supabase
         .from('pawbucks_wallet')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', effectiveWalletUserId)
         .single();
       
       if (error) throw error;
       return data;
     },
-    { staleTime: 1000 * 30 }
+    { staleTime: 1000 * 30, enabled: !sharedAccount.isLoading }
   );
 
   const { data: activities = [], isLoading: activitiesLoading } = useOptimizedQuery<PawBucksActivity[]>(
-    ['pawbucks-activity', user?.id || ''],
+    ['pawbucks-activity', effectiveWalletUserId || ''],
     async () => {
-      if (!user) return [];
+      if (!effectiveWalletUserId) return [];
       const { data, error } = await supabase
         .from('pawbucks_activity')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', effectiveWalletUserId)
         .order('created_at', { ascending: false })
         .limit(10);
       
       if (error) throw error;
       return data || [];
     },
-    { staleTime: 1000 * 30 }
+    { staleTime: 1000 * 30, enabled: !sharedAccount.isLoading }
   );
 
-  const loading = walletLoading || activitiesLoading;
+  const loading = sharedAccount.isLoading || walletLoading || activitiesLoading;
 
   useEffect(() => {
     if (!authLoading && !user) {

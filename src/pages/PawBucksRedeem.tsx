@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useOptimizedQuery } from "@/hooks/useOptimizedQuery";
+import { useSharedAccount, getEffectiveWalletUserId } from "@/hooks/useSharedAccount";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
@@ -43,20 +44,24 @@ const PawBucksRedeem = () => {
   const [redemptionResult, setRedemptionResult] = useState<RedemptionResult | null>(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
 
+  // Check if user is part of a shared account
+  const sharedAccount = useSharedAccount(user?.id);
+  const effectiveWalletUserId = getEffectiveWalletUserId(user?.id, sharedAccount);
+
   const { data: wallet, isLoading: walletLoading, refetch: refetchWallet } = useOptimizedQuery<PawBucksWallet | null>(
-    ['pawbucks-wallet', user?.id || ''],
+    ['pawbucks-wallet', effectiveWalletUserId || ''],
     async () => {
-      if (!user) return null;
+      if (!effectiveWalletUserId) return null;
       const { data, error } = await supabase
         .from('pawbucks_wallet')
         .select('balance')
-        .eq('user_id', user.id)
+        .eq('user_id', effectiveWalletUserId)
         .single();
       
       if (error) throw error;
       return data;
     },
-    { staleTime: 1000 * 30 }
+    { staleTime: 1000 * 30, enabled: !sharedAccount.isLoading }
   );
 
   const { data: offers = [], isLoading: offersLoading } = useOptimizedQuery<PartnerOffer[]>(
@@ -70,7 +75,7 @@ const PawBucksRedeem = () => {
     { staleTime: 1000 * 60 * 5 }
   );
 
-  const loading = walletLoading || offersLoading;
+  const loading = sharedAccount.isLoading || walletLoading || offersLoading;
 
   useEffect(() => {
     if (!authLoading && !user) {
