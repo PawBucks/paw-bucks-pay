@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState, useCallback, useMemo, memo } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PawBucksCheckoutDialog } from "@/components/PawBucksCheckoutDialog";
+import { useQuery, useQueries } from "@tanstack/react-query";
 
 type Product = {
   id: string;
@@ -26,7 +27,7 @@ type Product = {
   active: boolean;
 };
 
-const ProductSkeleton = () => (
+const ProductSkeleton = memo(() => (
   <Card className="overflow-hidden">
     <CardHeader className="pb-4">
       <Skeleton className="h-6 w-3/4" />
@@ -37,149 +38,134 @@ const ProductSkeleton = () => (
       <Skeleton className="h-10 w-full" />
     </CardContent>
   </Card>
-);
+));
+ProductSkeleton.displayName = "ProductSkeleton";
 
-const Storefront = () => {
+const Storefront = memo(() => {
   const { accountId } = useParams<{ accountId: string }>();
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [merchantName, setMerchantName] = useState<string>("");
-  const [merchantId, setMerchantId] = useState<string | null>(null);
-  const [merchantDescription, setMerchantDescription] = useState<string>("");
-  const [merchantLogo, setMerchantLogo] = useState<string | null>(null);
-  const [merchantAddress, setMerchantAddress] = useState<string | null>(null);
-  const [merchantBusinessType, setMerchantBusinessType] = useState<string | null>(null);
-  const [cashbackRate, setCashbackRate] = useState<number>(10);
   const [purchasingProductId, setPurchasingProductId] = useState<string | null>(null);
-  const [stripeAccountId, setStripeAccountId] = useState<string | null>(null);
-  const [merchantAcceptsPawBucks, setMerchantAcceptsPawBucks] = useState<boolean>(false);
   
   // PawBucks checkout dialog state
   const [showPawBucksDialog, setShowPawBucksDialog] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isRecurringProduct, setIsRecurringProduct] = useState(false);
-  const [autoRedeemEnabled, setAutoRedeemEnabled] = useState(false);
 
-  useEffect(() => {
-    if (accountId) {
-      loadStorefront();
-    }
-  }, [accountId]);
-
-  // Load user's auto-redeem preference
-  useEffect(() => {
-    if (user?.id) {
-      loadAutoRedeemPreference();
-    }
-  }, [user?.id]);
-
-  const loadAutoRedeemPreference = async () => {
-    if (!user?.id) return;
-    const { data } = await supabase
-      .from('profiles')
-      .select('auto_redeem_pawbucks')
-      .eq('id', user.id)
-      .single();
-    setAutoRedeemEnabled(data?.auto_redeem_pawbucks || false);
-  };
-
-  const loadStorefront = async () => {
-    if (!accountId) return;
-
-    try {
-      setLoading(true);
-
-      // First, try to find merchant by storefront_slug
-      const { data: merchantBySlug } = await supabase
-        .from('merchants_public')
-        .select('id, business_name, description, cashback_rate, storefront_slug, logo_url, address, business_type')
-        .eq('storefront_slug', accountId)
-        .maybeSingle();
-
-      let resolvedMerchantId: string | null = null;
-      let resolvedStripeAccountId: string | null = accountId;
-
-      if (merchantBySlug) {
-        // Found by slug - need to get stripe_account_id from edge function
-        setMerchantName(merchantBySlug.business_name || "");
-        setMerchantId(merchantBySlug.id);
-        setMerchantDescription(merchantBySlug.description || "");
-        setMerchantLogo(merchantBySlug.logo_url);
-        setMerchantAddress(merchantBySlug.address);
-        setMerchantBusinessType(merchantBySlug.business_type);
-        setCashbackRate(merchantBySlug.cashback_rate || 10);
-        resolvedMerchantId = merchantBySlug.id;
-
-        // Get stripe account ID and accepts_pawbucks via edge function
-        const { data: connectStatus } = await supabase.functions.invoke("get-connect-account-status", {
-          body: { merchantId: merchantBySlug.id },
-        });
-        
-        if (connectStatus?.accountId) {
-          resolvedStripeAccountId = connectStatus.accountId;
-          setStripeAccountId(connectStatus.accountId);
-        }
-        if (connectStatus?.acceptsPawBucks !== undefined) {
-          setMerchantAcceptsPawBucks(connectStatus.acceptsPawBucks);
-        }
-      } else {
-        // Fall back to looking up by stripe_account_id (for backward compatibility)
-        const { data: connectStatus } = await supabase.functions.invoke("get-connect-account-status", {
-          body: { stripeAccountId: accountId },
-        });
-
-        if (connectStatus?.merchantName) {
-          setMerchantName(connectStatus.merchantName);
-          setMerchantId(connectStatus.merchantId);
-          resolvedMerchantId = connectStatus.merchantId;
-          resolvedStripeAccountId = accountId;
-          setStripeAccountId(accountId);
-        }
-        if (connectStatus?.acceptsPawBucks !== undefined) {
-          setMerchantAcceptsPawBucks(connectStatus.acceptsPawBucks);
-        }
-
-        // Get additional merchant info
-        if (connectStatus?.merchantId) {
-          const { data: merchantData } = await supabase
+  // Parallel queries for merchant data, products, and auto-redeem preference
+  const queryResults = useQueries({
+    queries: [
+      // Merchant data lookup by slug first
+      {
+        queryKey: ["storefront-merchant", accountId],
+        queryFn: async () => {
+          if (!accountId) return null;
+          
+          // Try slug lookup first
+          const { data: merchantBySlug } = await supabase
             .from('merchants_public')
-            .select('description, cashback_rate, logo_url, address, business_type')
-            .eq('id', connectStatus.merchantId)
-            .single();
+            .select('id, business_name, description, cashback_rate, storefront_slug, logo_url, address, business_type')
+            .eq('storefront_slug', accountId)
+            .maybeSingle();
 
-          if (merchantData) {
-            setMerchantDescription(merchantData.description || "");
-            setMerchantLogo(merchantData.logo_url);
-            setMerchantAddress(merchantData.address);
-            setMerchantBusinessType(merchantData.business_type);
-            setCashbackRate(merchantData.cashback_rate || 10);
+          if (merchantBySlug) {
+            // Get stripe account ID via edge function
+            const { data: connectStatus } = await supabase.functions.invoke("get-connect-account-status", {
+              body: { merchantId: merchantBySlug.id },
+            });
+            
+            return {
+              ...merchantBySlug,
+              stripeAccountId: connectStatus?.accountId || null,
+              acceptsPawBucks: connectStatus?.acceptsPawBucks ?? false,
+              foundBySlug: true,
+            };
           }
-        }
-      }
 
-      // Load products using the resolved stripe account ID
-      if (resolvedStripeAccountId) {
-        const { data, error } = await supabase.functions.invoke("list-connect-products", {
-          body: { accountId: resolvedStripeAccountId },
-        });
+          // Fallback to stripe account ID lookup
+          const { data: connectStatus } = await supabase.functions.invoke("get-connect-account-status", {
+            body: { stripeAccountId: accountId },
+          });
 
-        if (error) throw error;
-        setProducts(data.products || []);
-      }
-    } catch (error) {
-      console.error("Error loading storefront:", error);
-      toast.error("Failed to load storefront");
-    } finally {
-      setLoading(false);
-    }
-  };
+          if (connectStatus?.merchantId) {
+            const { data: merchantData } = await supabase
+              .from('merchants_public')
+              .select('id, business_name, description, cashback_rate, logo_url, address, business_type')
+              .eq('id', connectStatus.merchantId)
+              .single();
+
+            return {
+              ...merchantData,
+              stripeAccountId: accountId,
+              acceptsPawBucks: connectStatus?.acceptsPawBucks ?? false,
+              foundBySlug: false,
+            };
+          }
+
+          return null;
+        },
+        staleTime: 1000 * 60 * 10,
+        enabled: !!accountId,
+      },
+      // Auto-redeem preference (only for authenticated users)
+      {
+        queryKey: ["auto-redeem-preference", user?.id],
+        queryFn: async () => {
+          if (!user?.id) return false;
+          const { data } = await supabase
+            .from('profiles')
+            .select('auto_redeem_pawbucks')
+            .eq('id', user.id)
+            .single();
+          return data?.auto_redeem_pawbucks || false;
+        },
+        staleTime: 1000 * 60 * 5,
+        enabled: !!user?.id,
+      },
+    ],
+  });
+
+  const merchantData = queryResults[0].data;
+  const merchantLoading = queryResults[0].isLoading;
+  const autoRedeemEnabled = queryResults[1].data ?? false;
+
+  // Products query depends on merchant data
+  const stripeAccountId = merchantData?.stripeAccountId || accountId;
+  const { data: products = [], isLoading: productsLoading } = useQuery({
+    queryKey: ["storefront-products", stripeAccountId],
+    queryFn: async () => {
+      if (!stripeAccountId) return [];
+      const { data, error } = await supabase.functions.invoke("list-connect-products", {
+        body: { accountId: stripeAccountId },
+      });
+      if (error) throw error;
+      return data.products || [];
+    },
+    staleTime: 1000 * 60 * 5,
+    enabled: !!stripeAccountId,
+  });
+
+  // Derived values
+  const merchantName = merchantData?.business_name || "";
+  const merchantId = merchantData?.id || null;
+  const merchantDescription = merchantData?.description || "";
+  const merchantLogo = merchantData?.logo_url || null;
+  const merchantAddress = merchantData?.address || null;
+  const merchantBusinessType = merchantData?.business_type || null;
+  const cashbackRate = merchantData?.cashback_rate || 10;
+  const merchantAcceptsPawBucks = merchantData?.acceptsPawBucks ?? false;
+
+  const loading = merchantLoading || productsLoading;
+
+  // Calculate estimated PawBucks for a product
+  const getEstimatedPawBucks = useCallback((price: number) => {
+    return Math.floor(price * cashbackRate);
+  }, [cashbackRate]);
 
   // Initiates purchase - shows PawBucks dialog if applicable
-  const handlePurchase = (product: Product) => {
-    const effectiveAccountId = stripeAccountId || accountId;
+  const handlePurchase = useCallback((product: Product) => {
+    const effectiveAccountId = stripeAccountId;
     if (!product.price?.id || !effectiveAccountId) return;
 
     // Check if user is authenticated
@@ -194,7 +180,6 @@ const Storefront = () => {
     }
 
     // Determine if product is recurring (subscription)
-    // We infer this from the price format - if it shows /month, /year, etc.
     const priceFormatted = product.price.formatted || "";
     const isRecurring = priceFormatted.includes('/') || 
                         priceFormatted.toLowerCase().includes('month') ||
@@ -204,7 +189,6 @@ const Storefront = () => {
     setIsRecurringProduct(isRecurring);
 
     // For subscriptions with auto-redeem enabled, skip the dialog and proceed directly
-    // The edge function will automatically apply PawBucks
     if (isRecurring && autoRedeemEnabled) {
       proceedToCheckout(product, 0, true);
       return;
@@ -212,11 +196,11 @@ const Storefront = () => {
 
     // Show PawBucks dialog for user to choose how many to use
     setShowPawBucksDialog(true);
-  };
+  }, [stripeAccountId, user, navigate, autoRedeemEnabled]);
 
   // Proceeds to Stripe checkout with optional PawBucks
-  const proceedToCheckout = async (product: Product, pawbucksToUse: number, isAutoRedeem: boolean = false) => {
-    const effectiveAccountId = stripeAccountId || accountId;
+  const proceedToCheckout = useCallback(async (product: Product, pawbucksToUse: number, isAutoRedeem: boolean = false) => {
+    const effectiveAccountId = stripeAccountId;
     if (!product.price?.id || !effectiveAccountId) return;
 
     try {
@@ -231,7 +215,6 @@ const Storefront = () => {
           productName: product.name,
           successUrl: `${window.location.origin}/checkout-success?store=${accountId}`,
           cancelUrl: window.location.href,
-          // Pass manual PawBucks amount if not using auto-redeem
           pawbucksToUse: isAutoRedeem ? undefined : pawbucksToUse,
         },
       });
@@ -249,7 +232,6 @@ const Storefront = () => {
       }
 
       if (data.checkout_url) {
-        // Show rewards info before redirect
         let message = "";
         if (data.pawbucks_applied) {
           message = `Applied ${data.pawbucks_applied.formatted}. `;
@@ -261,7 +243,6 @@ const Storefront = () => {
           toast.success(message, { duration: 2000 });
         }
         
-        // Short delay to show the toast, then redirect
         setTimeout(() => {
           window.location.href = data.checkout_url;
         }, 500);
@@ -276,20 +257,14 @@ const Storefront = () => {
       toast.error(errorMessage);
       setPurchasingProductId(null);
     }
-  };
+  }, [stripeAccountId, accountId]);
 
   // Handler for PawBucks dialog confirmation
-  const handlePawBucksDialogProceed = (pawbucksToUse: number) => {
+  const handlePawBucksDialogProceed = useCallback((pawbucksToUse: number) => {
     if (selectedProduct) {
       proceedToCheckout(selectedProduct, pawbucksToUse);
     }
-  };
-
-  // Calculate estimated PawBucks for a product
-  // Base multiplier is 10x ($1 = 10 PawBucks), users may get more with subscriptions (20x or 30x)
-  const getEstimatedPawBucks = (price: number) => {
-    return Math.floor(price * cashbackRate);
-  };
+  }, [selectedProduct, proceedToCheckout]);
 
   if (loading || authLoading) {
     return (
@@ -602,6 +577,8 @@ const Storefront = () => {
       )}
     </div>
   );
-};
+});
+
+Storefront.displayName = "Storefront";
 
 export default Storefront;
