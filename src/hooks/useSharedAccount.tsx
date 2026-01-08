@@ -44,7 +44,6 @@ export const useSharedAccount = (userId: string | undefined): SharedAccountInfo 
         }
 
         if (membership?.owner_id) {
-          // User is a member of a shared account - fetch owner details
           const { data: ownerProfile } = await supabase
             .from("profiles")
             .select("full_name, email")
@@ -55,7 +54,6 @@ export const useSharedAccount = (userId: string | undefined): SharedAccountInfo 
           setOwnerId(membership.owner_id);
           setOwnerName(ownerProfile?.full_name || ownerProfile?.email || null);
         } else {
-          // User is not a shared member - they use their own account
           setIsSharedMember(false);
           setOwnerId(null);
           setOwnerName(null);

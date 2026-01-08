@@ -3608,6 +3608,7 @@ export type Database = {
         Returns: boolean
       }
       is_offer_valid: { Args: { offer_uuid: string }; Returns: boolean }
+      is_shared_member_of: { Args: { owner_user_id: string }; Returns: boolean }
       is_superadmin: { Args: { _user_id: string }; Returns: boolean }
       log_admin_action: {
         Args: {
