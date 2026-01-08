@@ -11,6 +11,13 @@ const logStep = (step: string, details?: Record<string, unknown>) => {
   console.log(`[SEND-SHARE-INVITATION] ${step}`, details ? JSON.stringify(details) : "");
 };
 
+// Generate a secure invite token
+function generateInviteToken(): string {
+  const array = new Uint8Array(24);
+  crypto.getRandomValues(array);
+  return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -25,16 +32,18 @@ serve(async (req) => {
     }
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-    const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
+    // Use service role to update invite token
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+    const supabaseAnon = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!);
 
     // Authenticate the user
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) throw new Error("No authorization header");
 
     const token = authHeader.replace("Bearer ", "");
-    const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
+    const { data: userData, error: userError } = await supabaseAnon.auth.getUser(token);
     if (userError) throw new Error(`Auth error: ${userError.message}`);
 
     const user = userData.user;
@@ -49,12 +58,30 @@ serve(async (req) => {
       throw new Error("Invitee email is required");
     }
 
+    // Generate invite token and update the invitation record
+    const inviteToken = generateInviteToken();
+    
+    const { error: updateError } = await supabaseAdmin
+      .from("shared_account_members")
+      .update({ invite_token: inviteToken })
+      .eq("owner_id", user.id)
+      .eq("member_email", inviteeEmail.toLowerCase())
+      .eq("status", "pending");
+
+    if (updateError) {
+      logStep("Failed to update invite token", { error: updateError });
+      // Don't fail - continue with invitation without token
+    } else {
+      logStep("Invite token saved", { inviteToken: inviteToken.substring(0, 8) + "..." });
+    }
+
     logStep("Sending invitation email", { inviteeEmail, inviterName });
 
     const resend = new Resend(resendApiKey);
 
     const senderName = inviterName || inviterEmail || "A PawBucks member";
     const appUrl = "https://pawbucks.app";
+    const signupUrl = `${appUrl}/auth?invite=${inviteToken}`;
 
     const { data: emailData, error: emailError } = await resend.emails.send({
       from: "PawBucks <noreply@pawbucks.app>",
@@ -83,27 +110,24 @@ serve(async (req) => {
                 
                 <div style="background: #fef3c7; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
                   <p style="margin: 0; color: #92400e; font-size: 15px; line-height: 1.6;">
-                    By accepting this invitation, you'll be able to share PawBucks rewards and enjoy benefits together as part of their account family.
+                    By accepting this invitation, you'll share ${senderName}'s PawBucks wallet and enjoy rewards together as part of their account family.
                   </p>
                 </div>
                 
                 <p style="font-size: 14px; color: #666; margin: 0 0 24px 0;">
-                  To accept this invitation:
+                  Click the button below to create your account and automatically join their shared account:
                 </p>
-                
-                <ol style="font-size: 14px; color: #666; margin: 0 0 24px 0; padding-left: 20px; line-height: 1.8;">
-                  <li>Log in to your PawBucks account (or create one if you don't have an account)</li>
-                  <li>Go to your Dashboard</li>
-                  <li>Look for the pending invitation under "Share The PawBucks"</li>
-                  <li>Click Accept to join!</li>
-                </ol>
                 
                 <!-- CTA Button -->
                 <div style="text-align: center; margin-top: 32px;">
-                  <a href="${appUrl}/dashboard" style="display: inline-block; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px;">
-                    View Invitation
+                  <a href="${signupUrl}" style="display: inline-block; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px;">
+                    Accept Invitation & Join
                   </a>
                 </div>
+                
+                <p style="font-size: 12px; color: #999; margin: 24px 0 0 0; text-align: center;">
+                  Already have a PawBucks account? <a href="${appUrl}/auth?invite=${inviteToken}" style="color: #f59e0b;">Sign in here</a> to accept the invitation.
+                </p>
               </div>
               
               <!-- Footer -->

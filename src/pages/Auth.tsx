@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
@@ -9,14 +9,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Eye, EyeOff, Home, KeyRound } from "lucide-react";
+import { Eye, EyeOff, Home, KeyRound, Users } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { useAuth } from "@/hooks/useAuth";
 import { signUpSchema, signInSchema } from "@/lib/validation";
 import { ROUTES } from "@/lib/constants";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const Auth = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const inviteToken = searchParams.get("invite");
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [userType, setUserType] = useState<"pet_owner" | "merchant">("pet_owner");
@@ -27,6 +30,82 @@ const Auth = () => {
   const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
   const [isResetting, setIsResetting] = useState(false);
+  const [inviteInfo, setInviteInfo] = useState<{ ownerName: string } | null>(null);
+
+  // Load invite info if there's a token
+  useEffect(() => {
+    const loadInviteInfo = async () => {
+      if (!inviteToken) return;
+      
+      try {
+        const { data: invite } = await supabase
+          .from("shared_account_members")
+          .select("owner_id, status")
+          .eq("invite_token", inviteToken)
+          .eq("status", "pending")
+          .maybeSingle();
+
+        if (invite) {
+          const { data: ownerProfile } = await supabase
+            .from("profiles")
+            .select("full_name, email")
+            .eq("id", invite.owner_id)
+            .single();
+
+          setInviteInfo({
+            ownerName: ownerProfile?.full_name || ownerProfile?.email || "A PawBucks member",
+          });
+        }
+      } catch (err) {
+        console.warn("Failed to load invite info:", err);
+      }
+    };
+
+    loadInviteInfo();
+  }, [inviteToken]);
+
+  // Helper function to accept invite after authentication
+  const acceptInviteIfPresent = useCallback(async (userId: string, userEmail: string) => {
+    if (!inviteToken) return;
+
+    try {
+      // Find the invitation by token
+      const { data: invite, error: findError } = await supabase
+        .from("shared_account_members")
+        .select("id, member_email, status")
+        .eq("invite_token", inviteToken)
+        .eq("status", "pending")
+        .maybeSingle();
+
+      if (findError || !invite) {
+        console.warn("Invite not found or already used:", findError);
+        return;
+      }
+
+      // Accept the invitation - update with user's ID and mark as accepted
+      const { error: acceptError } = await supabase
+        .from("shared_account_members")
+        .update({
+          member_id: userId,
+          member_email: userEmail.toLowerCase(),
+          status: "accepted",
+          accepted_at: new Date().toISOString(),
+        })
+        .eq("id", invite.id);
+
+      if (acceptError) {
+        console.error("Failed to accept invitation:", acceptError);
+        toast.error("Failed to join the shared account. Please try accepting from your dashboard.");
+      } else {
+        toast.success("You've joined the shared PawBucks account!", {
+          description: "You now have access to the shared wallet.",
+          duration: 5000,
+        });
+      }
+    } catch (err) {
+      console.error("Error accepting invite:", err);
+    }
+  }, [inviteToken]);
 
   // Helper function to redirect user based on their role/type
   const redirectBasedOnRole = useCallback(async (userId: string, userTypeOverride?: "pet_owner" | "merchant") => {
@@ -174,11 +253,19 @@ const Auth = () => {
           }
         }
 
+        // Accept invitation if signing up via invite link
+        await acceptInviteIfPresent(data.user.id, validatedData.email);
+
         toast.success("Account created successfully!");
         
         // Redirect - wrapped in try/catch to ensure we don't show false errors
         try {
-          await redirectBasedOnRole(data.user.id, userType);
+          // If they joined via invite, go directly to dashboard (not create-pet-profile)
+          if (inviteToken) {
+            navigate(ROUTES.DASHBOARD);
+          } else {
+            await redirectBasedOnRole(data.user.id, userType);
+          }
         } catch (redirectErr) {
           console.warn("Redirect warning:", redirectErr);
           // Fallback redirect
@@ -250,10 +337,20 @@ const Auth = () => {
       const { data: sessionData } = await supabase.auth.getSession();
       const loggedInUser = sessionData?.session?.user;
 
+      // Accept invitation if signing in via invite link
+      if (loggedInUser) {
+        await acceptInviteIfPresent(loggedInUser.id, validatedData.email);
+      }
+
       toast.success("Signed in successfully!");
       
       if (loggedInUser) {
-        await redirectBasedOnRole(loggedInUser.id);
+        // If they joined via invite, go directly to dashboard
+        if (inviteToken) {
+          navigate(ROUTES.DASHBOARD);
+        } else {
+          await redirectBasedOnRole(loggedInUser.id);
+        }
       } else {
         navigate(ROUTES.DASHBOARD);
       }
@@ -351,7 +448,18 @@ const Auth = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="signin" className="w-full">
+          {/* Show invite banner if accessing via invite link */}
+          {inviteInfo && (
+            <Alert className="mb-4 bg-amber-50 border-amber-200">
+              <Users className="h-4 w-4 text-amber-600" />
+              <AlertDescription className="text-amber-800">
+                <strong>{inviteInfo.ownerName}</strong> has invited you to share their PawBucks account! 
+                Sign up or sign in to accept the invitation automatically.
+              </AlertDescription>
+            </Alert>
+          )}
+          
+          <Tabs defaultValue={inviteToken ? "signup" : "signin"} className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="signin" className="text-sm sm:text-base">Sign In</TabsTrigger>
               <TabsTrigger value="signup" className="text-sm sm:text-base">Sign Up</TabsTrigger>
