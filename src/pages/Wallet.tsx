@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useOptimizedQuery } from "@/hooks/useOptimizedQuery";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { usePawBucksRealtime } from "@/hooks/usePawBucksRealtime";
+import { useSharedAccount, getEffectiveWalletUserId } from "@/hooks/useSharedAccount";
 import { DataLoader } from "@/lib/dataLoader";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
@@ -77,79 +78,83 @@ const Wallet = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   
-  // Enable realtime updates for PawBucks
-  usePawBucksRealtime(user?.id);
+  // Check if user is part of a shared account
+  const sharedAccount = useSharedAccount(user?.id);
+  const effectiveWalletUserId = getEffectiveWalletUserId(user?.id, sharedAccount);
+  
+  // Enable realtime updates for PawBucks (use effective user ID)
+  usePawBucksRealtime(effectiveWalletUserId);
 
-  // Optimized data loading with caching
+  // Optimized data loading with caching - using effective wallet user ID
   const { data: wallet, isLoading: walletLoading } = useOptimizedQuery<WalletData | null>(
-    ['wallet', user?.id || ''],
-    () => user ? DataLoader.loadWalletData(user.id) : Promise.resolve(null),
-    { staleTime: 1000 * 60 * 2 } // Cache for 2 minutes
+    ['wallet', effectiveWalletUserId || ''],
+    () => effectiveWalletUserId ? DataLoader.loadWalletData(effectiveWalletUserId) : Promise.resolve(null),
+    { staleTime: 1000 * 60 * 2, enabled: !sharedAccount.isLoading }
   );
 
-  // Fetch PawBucks wallet balance separately
+  // Fetch PawBucks wallet balance separately - using effective wallet user ID
   const { data: pawbucksWallet, isLoading: pawbucksLoading } = useOptimizedQuery<{ balance: number } | null>(
-    ['pawbucks_wallet', user?.id || ''],
+    ['pawbucks_wallet', effectiveWalletUserId || ''],
     async () => {
-      if (!user) return null;
+      if (!effectiveWalletUserId) return null;
       const { data, error } = await supabase
         .from('pawbucks_wallet')
         .select('balance')
-        .eq('user_id', user.id)
+        .eq('user_id', effectiveWalletUserId)
         .maybeSingle();
       if (error) throw error;
       return data;
     },
-    { staleTime: 1000 * 60 * 2 }
+    { staleTime: 1000 * 60 * 2, enabled: !sharedAccount.isLoading }
   );
 
   const { data: transactions = [], isLoading: transactionsLoading } = useOptimizedQuery<Transaction[]>(
-    ['transactions', user?.id || ''],
-    () => user ? DataLoader.loadTransactions(user.id, 10) : Promise.resolve([]),
-    { staleTime: 1000 * 60 * 2 }
+    ['transactions', effectiveWalletUserId || ''],
+    () => effectiveWalletUserId ? DataLoader.loadTransactions(effectiveWalletUserId, 10) : Promise.resolve([]),
+    { staleTime: 1000 * 60 * 2, enabled: !sharedAccount.isLoading }
   );
 
   // Fetch all transactions for current month for budget tracking
   const { data: budgetTransactions = [], isLoading: budgetTransactionsLoading } = useOptimizedQuery<BudgetTransaction[]>(
-    ['budget-transactions', user?.id || ''],
-    () => user ? DataLoader.loadTransactionsForBudget(user.id) : Promise.resolve([]),
-    { staleTime: 1000 * 60 * 2 }
+    ['budget-transactions', effectiveWalletUserId || ''],
+    () => effectiveWalletUserId ? DataLoader.loadTransactionsForBudget(effectiveWalletUserId) : Promise.resolve([]),
+    { staleTime: 1000 * 60 * 2, enabled: !sharedAccount.isLoading }
   );
 
-  // Fetch medical records to include in spending calculations
+  // Fetch medical records to include in spending calculations - using effective wallet user ID
   const { data: medicalRecords = [], isLoading: medicalLoading } = useOptimizedQuery<MedicalRecord[]>(
-    ['wallet-medical-records', user?.id || ''],
+    ['wallet-medical-records', effectiveWalletUserId || ''],
     async () => {
-      if (!user) return [];
+      if (!effectiveWalletUserId) return [];
       const { data, error } = await supabase
         .from('pet_medical_records')
         .select('id, price, record_date, title')
-        .eq('user_id', user.id)
+        .eq('user_id', effectiveWalletUserId)
         .order('record_date', { ascending: false });
       if (error) throw error;
       return data || [];
     },
-    { staleTime: 1000 * 60 * 2 }
+    { staleTime: 1000 * 60 * 2, enabled: !sharedAccount.isLoading }
   );
 
-  // Fetch PawBucks activity history
+  // Fetch PawBucks activity history - using effective wallet user ID
   const { data: pawbucksActivity = [], isLoading: activityLoading } = useOptimizedQuery<PawBucksActivity[]>(
-    ['pawbucks_activity', user?.id || ''],
+    ['pawbucks_activity', effectiveWalletUserId || ''],
     async () => {
-      if (!user) return [];
+      if (!effectiveWalletUserId) return [];
       const { data, error } = await supabase
         .from('pawbucks_activity')
         .select('id, amount, type, source, description, created_at')
-        .eq('user_id', user.id)
+        .eq('user_id', effectiveWalletUserId)
         .order('created_at', { ascending: false })
         .limit(10);
       if (error) throw error;
       return data || [];
     },
-    { staleTime: 1000 * 60 * 2 }
+    { staleTime: 1000 * 60 * 2, enabled: !sharedAccount.isLoading }
   );
 
-  const loading = walletLoading || pawbucksLoading || transactionsLoading || budgetTransactionsLoading || activityLoading || medicalLoading;
+  const loading = sharedAccount.isLoading || walletLoading || pawbucksLoading || transactionsLoading || budgetTransactionsLoading || activityLoading || medicalLoading;
 
   // Calculate true total spent including medical records
   const totalSpent = useMemo(() => {

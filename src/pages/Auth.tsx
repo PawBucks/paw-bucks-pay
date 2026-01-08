@@ -125,8 +125,13 @@ const Auth = () => {
       if (userTypeOverride === "merchant") {
         navigate(ROUTES.MERCHANT_DASHBOARD);
       } else {
-        // Pet owners go to create pet profile as first onboarding step
-        navigate("/create-pet-profile");
+        // Invited users skip pet profile creation - go straight to dashboard
+        if (inviteToken) {
+          navigate(ROUTES.DASHBOARD);
+        } else {
+          // Regular pet owners go to create pet profile as first onboarding step
+          navigate("/create-pet-profile");
+        }
       }
       return;
     }

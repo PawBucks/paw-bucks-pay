@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
 import { usePawBucksRealtime } from "@/hooks/usePawBucksRealtime";
+import { useSharedAccount, getEffectiveWalletUserId } from "@/hooks/useSharedAccount";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
 import { SEO } from "@/components/SEO";
@@ -68,8 +69,12 @@ const Dashboard = () => {
   const { subscription } = useSubscription();
   const navigate = useNavigate();
   
-  // Enable realtime updates for PawBucks on pet owner dashboard
-  usePawBucksRealtime(user?.id);
+  // Check if user is part of a shared account
+  const sharedAccount = useSharedAccount(user?.id);
+  const effectiveWalletUserId = getEffectiveWalletUserId(user?.id, sharedAccount);
+  
+  // Enable realtime updates for PawBucks on pet owner dashboard (use effective user ID)
+  usePawBucksRealtime(effectiveWalletUserId);
   
   const [profile, setProfile] = useState<Profile | null>(null);
   const [wallet, setWallet] = useState<WalletData | null>(null);
@@ -83,12 +88,15 @@ const Dashboard = () => {
 
   // Direct fetch function - optimized with parallel loading
   const fetchDashboardData = useCallback(async () => {
-    if (!user) {
+    if (!user || sharedAccount.isLoading) {
       setDataLoading(false);
       return;
     }
 
     setDataLoading(true);
+    
+    // Use effective wallet user ID for wallet queries (shared account owner if member)
+    const walletUserId = effectiveWalletUserId || user.id;
     
     try {
       // Fetch all data in parallel directly from Supabase - optimized queries
@@ -102,23 +110,23 @@ const Dashboard = () => {
         supabase
           .from('wallets')
           .select('balance, rewards_points, total_spent')
-          .eq('user_id', user.id)
+          .eq('user_id', walletUserId)
           .maybeSingle(),
         supabase
           .from('pawbucks_wallet')
           .select('balance')
-          .eq('user_id', user.id)
+          .eq('user_id', walletUserId)
           .maybeSingle(),
         supabase
           .from('pet_profiles')
           .select('id, name, type, breed, birthday, photo_url')
-          .eq('user_id', user.id)
+          .eq('user_id', walletUserId)
           .order('created_at', { ascending: false })
           .limit(10), // Limit to 10 pets for faster loading
         supabase
           .from('pet_medical_records')
           .select('price')
-          .eq('user_id', user.id)
+          .eq('user_id', walletUserId)
           .not('price', 'is', null)
           .limit(100) // Limit medical records for faster aggregation
       ]);
@@ -151,14 +159,14 @@ const Dashboard = () => {
     } finally {
       setDataLoading(false);
     }
-  }, [user]);
+  }, [user, sharedAccount.isLoading, effectiveWalletUserId]);
 
-  // Fetch data when user changes
+  // Fetch data when user changes or shared account status is determined
   useEffect(() => {
-    if (user && !authLoading) {
+    if (user && !authLoading && !sharedAccount.isLoading) {
       fetchDashboardData();
     }
-  }, [user, authLoading, fetchDashboardData]);
+  }, [user, authLoading, sharedAccount.isLoading, fetchDashboardData]);
 
   useEffect(() => {
     const checkUserAndRedirect = async () => {
