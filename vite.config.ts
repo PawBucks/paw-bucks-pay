@@ -3,16 +3,6 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
-import prerender from "@prerenderer/rollup-plugin";
-
-// Public marketing routes to pre-render for SEO
-const prerenderRoutes = [
-  "/",
-  "/merchants",
-  "/discover",
-  "/lost-pets",
-  "/install",
-];
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -115,31 +105,6 @@ export default defineConfig(({ mode }) => ({
           }
         ]
       }
-    }),
-    // Pre-render public marketing routes for SEO (production only)
-    mode === "production" && prerender({
-      routes: prerenderRoutes,
-      renderer: "@prerenderer/renderer-puppeteer",
-      rendererOptions: {
-        // Wait for network to be idle before capturing
-        renderAfterTime: 2000,
-        // Inject meta tag to identify pre-rendered pages
-        injectProperty: "__PRERENDERED",
-        // Wait for document to be fully loaded
-        renderAfterDocumentEvent: "DOMContentLoaded",
-      },
-      postProcess(renderedRoute) {
-        // Add prerendered indicator comment
-        renderedRoute.html = renderedRoute.html.replace(
-          "<head>",
-          `<head>\n    <!-- Pre-rendered by PawBucks SEO Engine -->`
-        );
-        // Remove any scripts that might cause hydration issues
-        renderedRoute.html = renderedRoute.html.replace(
-          /<script[^>]*>window\.__PRERENDERED[^<]*<\/script>/g,
-          ""
-        );
-      },
     }),
   ].filter(Boolean),
   resolve: {
