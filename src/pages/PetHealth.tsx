@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useSharedAccount, getEffectiveWalletUserId } from "@/hooks/useSharedAccount";
 import { Header } from "@/components/Header";
 import { SEO } from "@/components/SEO";
 import { Card } from "@/components/ui/card";
@@ -10,7 +11,7 @@ import { MedicalRecordsList } from "@/components/MedicalRecordsList";
 import { VetCommunication } from "@/components/VetCommunication";
 import { PetProfileCard } from "@/components/PetProfileCard";
 import { ShareHealthRecordsDialog } from "@/components/ShareHealthRecordsDialog";
-import { ArrowLeft, FileHeart, MessageCircle } from "lucide-react";
+import { ArrowLeft, FileHeart, MessageCircle, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -29,6 +30,11 @@ export default function PetHealth() {
   const [pet, setPet] = useState<PetProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [userId, setUserId] = useState<string | undefined>();
+
+  // Get shared account info
+  const sharedAccount = useSharedAccount(userId);
+  const effectiveUserId = getEffectiveWalletUserId(userId, sharedAccount);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -37,17 +43,44 @@ export default function PetHealth() {
         navigate("/auth");
         return;
       }
+      
+      setUserId(user.id);
 
       if (!petId) {
         navigate("/dashboard");
         return;
       }
-
-      loadPet();
     };
 
     checkAuth();
   }, [navigate, petId]);
+
+  // Load pet data once we have the effective user ID
+  useEffect(() => {
+    if (!petId || sharedAccount.isLoading) return;
+    
+    const loadPet = async () => {
+      try {
+        // The RLS policy now allows access if user is shared member
+        const { data, error } = await supabase
+          .from("pet_profiles")
+          .select("*")
+          .eq("id", petId)
+          .single();
+
+        if (error) throw error;
+        setPet(data);
+      } catch (error) {
+        console.error("Error loading pet:", error);
+        toast.error("Failed to load pet information");
+        navigate("/dashboard");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadPet();
+  }, [petId, sharedAccount.isLoading, navigate]);
 
   const loadPet = async () => {
     try {
@@ -62,13 +95,10 @@ export default function PetHealth() {
     } catch (error) {
       console.error("Error loading pet:", error);
       toast.error("Failed to load pet information");
-      navigate("/dashboard");
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  if (isLoading) {
+  if (isLoading || sharedAccount.isLoading) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
@@ -95,6 +125,16 @@ export default function PetHealth() {
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Dashboard
         </Button>
+
+        {/* Shared Account Banner */}
+        {sharedAccount.isSharedMember && sharedAccount.ownerName && (
+          <div className="p-3 bg-primary/10 border border-primary/20 rounded-lg flex items-center gap-2">
+            <Users className="w-4 h-4 text-primary" />
+            <span className="text-sm">
+              Viewing shared account with <strong>{sharedAccount.ownerName}</strong>
+            </span>
+          </div>
+        )}
 
         <div>
           <h1 className="text-3xl font-bold mb-2 flex items-center gap-2">
