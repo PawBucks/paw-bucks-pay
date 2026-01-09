@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useOptimizedQuery } from "@/hooks/useOptimizedQuery";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
+import { useSharedAccount, getEffectiveWalletUserId } from "@/hooks/useSharedAccount";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
@@ -43,18 +44,22 @@ const SpendingBreakdown = () => {
   const { user, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  
+  // Get shared account info for wallet queries
+  const sharedAccount = useSharedAccount(user?.id);
+  const effectiveUserId = getEffectiveWalletUserId(user?.id, sharedAccount);
 
   // Fetch all transactions with merchant info
   const { data: transactions = [], isLoading: transactionsLoading } = useOptimizedQuery<TransactionWithMerchant[]>(
-    ['spending-breakdown-transactions', user?.id || ''],
+    ['spending-breakdown-transactions', effectiveUserId || ''],
     async () => {
-      if (!user) return [];
+      if (!effectiveUserId) return [];
       
       // First get transactions
       const { data: txData, error: txError } = await supabase
         .from('transactions')
         .select('id, amount, rewards_earned, description, created_at, merchant_id')
-        .eq('user_id', user.id)
+        .eq('user_id', effectiveUserId)
         .order('created_at', { ascending: false });
       if (txError) throw txError;
       
@@ -85,13 +90,13 @@ const SpendingBreakdown = () => {
 
   // Fetch medical records with prices (vet spending)
   const { data: medicalRecords = [], isLoading: medicalLoading } = useOptimizedQuery<MedicalRecord[]>(
-    ['spending-breakdown-medical', user?.id || ''],
+    ['spending-breakdown-medical', effectiveUserId || ''],
     async () => {
-      if (!user) return [];
+      if (!effectiveUserId) return [];
       const { data, error } = await supabase
         .from('pet_medical_records')
         .select('id, title, price, record_date, record_type')
-        .eq('user_id', user.id)
+        .eq('user_id', effectiveUserId)
         .not('price', 'is', null)
         .order('record_date', { ascending: false });
       if (error) throw error;
@@ -100,7 +105,7 @@ const SpendingBreakdown = () => {
     { staleTime: 1000 * 60 * 5 }
   );
 
-  const isLoading = transactionsLoading || medicalLoading;
+  const isLoading = transactionsLoading || medicalLoading || sharedAccount.isLoading;
 
   // Calculate spending by category (including medical records as veterinary)
   const categoryBreakdown = useMemo(() => {

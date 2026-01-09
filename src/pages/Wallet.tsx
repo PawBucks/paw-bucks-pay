@@ -224,6 +224,16 @@ const Wallet = () => {
           <AdPlacement />
         </div>
 
+        {/* Shared Account Banner */}
+        {sharedAccount.isSharedMember && sharedAccount.ownerName && (
+          <div className="mb-4 p-3 bg-primary/10 border border-primary/20 rounded-lg flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-primary" />
+            <span className="text-sm">
+              Viewing shared account with <strong>{sharedAccount.ownerName}</strong>
+            </span>
+          </div>
+        )}
+
         <div className="mb-6">
           <h2 className="text-2xl sm:text-3xl font-bold mb-1">Wallet</h2>
           <p className="text-sm sm:text-base text-muted-foreground">Track your rewards and spending</p>
@@ -270,9 +280,9 @@ const Wallet = () => {
         </div>
 
         {/* PawBucks Available vs Pending Breakdown */}
-        {user && (
+        {effectiveWalletUserId && (
           <div className="mb-6">
-            <PawBucksBreakdown userId={user.id} />
+            <PawBucksBreakdown userId={effectiveWalletUserId} />
           </div>
         )}
 
