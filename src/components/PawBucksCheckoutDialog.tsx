@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2, Coins, Check, Sparkles, CreditCard } from "lucide-react";
 import { PawBucksInfoTooltip } from "@/components/PawBucksInfoTooltip";
+import { useSharedAccount, getEffectiveWalletUserId } from "@/hooks/useSharedAccount";
 
 // Pet Owner conversion rate: 1000 PawBucks = $1.00 (1 PawBuck = $0.001)
 const PAWBUCKS_TO_USD = 0.001;
@@ -50,22 +51,27 @@ export const PawBucksCheckoutDialog = ({
   const [pawbucksBalance, setPawbucksBalance] = useState(0);
   const [loadingBalance, setLoadingBalance] = useState(true);
 
-  // Load PawBucks balance when dialog opens
+  // Get effective user ID for shared accounts
+  const sharedAccount = useSharedAccount(userId);
+  const effectiveUserId = getEffectiveWalletUserId(userId, sharedAccount);
+
+  // Load PawBucks balance when dialog opens using effective user ID
   useEffect(() => {
-    if (open && userId && merchantAcceptsPawBucks) {
+    if (open && effectiveUserId && merchantAcceptsPawBucks && !sharedAccount.isLoading) {
       loadPawbucksBalance();
     } else if (open && !merchantAcceptsPawBucks) {
       setLoadingBalance(false);
     }
-  }, [open, userId, merchantAcceptsPawBucks]);
+  }, [open, effectiveUserId, merchantAcceptsPawBucks, sharedAccount.isLoading]);
 
   const loadPawbucksBalance = async () => {
+    if (!effectiveUserId) return;
     setLoadingBalance(true);
     try {
       const { data } = await supabase
         .from('pawbucks_wallet')
         .select('balance')
-        .eq('user_id', userId)
+        .eq('user_id', effectiveUserId)
         .single();
       
       setPawbucksBalance(data?.balance || 0);

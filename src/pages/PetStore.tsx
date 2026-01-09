@@ -220,7 +220,7 @@ export default function PetStore() {
 
   const purchaseMutation = useMutation({
     mutationFn: async ({ itemId, quantity }: { itemId: string; quantity: number }) => {
-      if (!user) throw new Error("Must be logged in");
+      if (!user || !effectiveUserId) throw new Error("Must be logged in");
 
       const item = items?.find(i => i.id === itemId);
       if (!item) throw new Error("Item not found");
@@ -237,7 +237,7 @@ export default function PetStore() {
         throw new Error("Not enough stock available");
       }
 
-      // Create order
+      // Create order (use actual user.id for ownership)
       const { data: order, error: orderError } = await supabase
         .from("pet_store_orders")
         .insert([{
@@ -262,19 +262,19 @@ export default function PetStore() {
 
       if (orderItemError) throw orderItemError;
 
-      // Deduct PawBucks
+      // Deduct PawBucks from effective user's wallet (owner's wallet for shared accounts)
       const { error: walletError } = await supabase
         .from("pawbucks_wallet")
         .update({ balance: wallet.balance - totalCost })
-        .eq("user_id", user.id);
+        .eq("user_id", effectiveUserId);
 
       if (walletError) throw walletError;
 
-      // Log activity
+      // Log activity on the effective user's account (owner's for shared accounts)
       const { error: activityError } = await supabase
         .from("pawbucks_activity")
         .insert([{
-          user_id: user.id,
+          user_id: effectiveUserId,
           type: "debit",
           amount: totalCost,
           source: "pet_store",
