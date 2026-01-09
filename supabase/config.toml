@@ -215,3 +215,6 @@ verify_jwt = false
 
 [functions.send-password-reset]
 verify_jwt = false
+
+[functions.admin-send-email]
+verify_jwt = true

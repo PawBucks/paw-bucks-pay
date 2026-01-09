@@ -9,6 +9,7 @@ import { SecurityMonitoringTab } from "@/components/admin/SecurityMonitoringTab"
 import { ConsultationBookingsTab } from "@/components/admin/ConsultationBookingsTab";
 import FeedbackTab from "@/components/admin/FeedbackTab";
 import { NonPartnerReceiptVerificationTab } from "@/components/admin/NonPartnerReceiptVerificationTab";
+import { EmailTab } from "@/components/admin/EmailTab";
 import { Button } from "@/components/ui/button";
 import { GradientCard } from "@/components/ui/gradient-card";
 import { Input } from "@/components/ui/input";
@@ -49,6 +50,7 @@ import {
   CalendarDays,
   MessageSquare,
   Receipt,
+  Mail,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -165,6 +167,9 @@ const AdminDashboard = () => {
   
   // Receipts dialog
   const [receiptsDialogOpen, setReceiptsDialogOpen] = useState(false);
+  
+  // Email dialog
+  const [emailDialogOpen, setEmailDialogOpen] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -557,6 +562,10 @@ const AdminDashboard = () => {
             <Button variant="ghost" size="sm" className="flex-shrink-0 h-8 px-3 text-xs" onClick={() => setReceiptsDialogOpen(true)}>
               <Receipt className="w-3.5 h-3.5 mr-1.5" />
               Non-Partner Verification
+            </Button>
+            <Button variant="ghost" size="sm" className="flex-shrink-0 h-8 px-3 text-xs" onClick={() => setEmailDialogOpen(true)}>
+              <Mail className="w-3.5 h-3.5 mr-1.5" />
+              Email
             </Button>
           </div>
         </div>
@@ -1455,6 +1464,22 @@ const AdminDashboard = () => {
             </DialogDescription>
           </DialogHeader>
           <NonPartnerReceiptVerificationTab />
+        </DialogContent>
+      </Dialog>
+
+      {/* Email Users Dialog */}
+      <Dialog open={emailDialogOpen} onOpenChange={setEmailDialogOpen}>
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Mail className="w-5 h-5" />
+              Email Users
+            </DialogTitle>
+            <DialogDescription>
+              Send emails to merchants, pet owners, or specific users
+            </DialogDescription>
+          </DialogHeader>
+          <EmailTab />
         </DialogContent>
       </Dialog>
     </div>
