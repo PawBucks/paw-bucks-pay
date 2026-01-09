@@ -6,6 +6,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Coins, Clock, CheckCircle, Info, Loader2 } from "lucide-react";
 import { Formatters } from "@/utils/formatters";
 import { format, formatDistanceToNow } from "date-fns";
+import { useSharedAccount, getEffectiveWalletUserId } from "@/hooks/useSharedAccount";
 
 interface PendingPawBucks {
   id: string;
@@ -25,26 +26,34 @@ export const PawBucksBreakdown = ({ userId }: PawBucksBreakdownProps) => {
   const [pendingItems, setPendingItems] = useState<PendingPawBucks[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Get effective user ID for shared accounts
+  const sharedAccount = useSharedAccount(userId);
+  const effectiveUserId = getEffectiveWalletUserId(userId, sharedAccount);
+
   useEffect(() => {
-    loadBreakdown();
-  }, [userId]);
+    if (effectiveUserId && !sharedAccount.isLoading) {
+      loadBreakdown();
+    }
+  }, [effectiveUserId, sharedAccount.isLoading]);
 
   const loadBreakdown = async () => {
+    if (!effectiveUserId) return;
+    
     try {
-      // Get wallet balance (available only)
+      // Get wallet balance (available only) using effective user ID
       const { data: wallet } = await supabase
         .from("pawbucks_wallet")
         .select("balance")
-        .eq("user_id", userId)
+        .eq("user_id", effectiveUserId)
         .single();
 
       setAvailableBalance(wallet?.balance || 0);
 
-      // Get pending PawBucks
+      // Get pending PawBucks using effective user ID
       const { data: pendingData } = await supabase
         .from("pawbucks_activity")
         .select("id, amount, vest_date, description, created_at")
-        .eq("user_id", userId)
+        .eq("user_id", effectiveUserId)
         .eq("pawbucks_status", "pending")
         .order("vest_date", { ascending: true });
 

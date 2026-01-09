@@ -16,6 +16,7 @@ import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-
 import { toast } from "sonner";
 import { Loader2, CreditCard, Coins, Check } from "lucide-react";
 import { PawBucksInfoTooltip } from "@/components/PawBucksInfoTooltip";
+import { useSharedAccount, getEffectiveWalletUserId } from "@/hooks/useSharedAccount";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
 
@@ -162,18 +163,23 @@ export const PaymentDialogWithPawBucks = ({
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [paymentData, setPaymentData] = useState<any>(null);
 
-  // Load PawBucks balance
+  // Get effective user ID for shared accounts
+  const sharedAccount = useSharedAccount(userId);
+  const effectiveUserId = getEffectiveWalletUserId(userId, sharedAccount);
+
+  // Load PawBucks balance using effective user ID
   useEffect(() => {
-    if (open && userId && acceptsPawbucks) {
+    if (open && effectiveUserId && acceptsPawbucks && !sharedAccount.isLoading) {
       loadPawbucksBalance();
     }
-  }, [open, userId, acceptsPawbucks]);
+  }, [open, effectiveUserId, acceptsPawbucks, sharedAccount.isLoading]);
 
   const loadPawbucksBalance = async () => {
+    if (!effectiveUserId) return;
     const { data } = await supabase
       .from('pawbucks_wallet')
       .select('balance')
-      .eq('user_id', userId)
+      .eq('user_id', effectiveUserId)
       .single();
     
     setPawbucksBalance(data?.balance || 0);

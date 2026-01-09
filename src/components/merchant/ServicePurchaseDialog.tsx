@@ -19,6 +19,7 @@ import { Loader2, CreditCard, Coins, Check, CheckCircle2, Clock, CalendarDays } 
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
+import { useSharedAccount, getEffectiveWalletUserId } from "@/hooks/useSharedAccount";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
 
@@ -177,9 +178,13 @@ export const ServicePurchaseDialog = ({
   // Check if this is a Strategy Consultation service
   const isStrategyConsultation = service?.name?.toLowerCase().includes("strategy consultation");
 
-  // Load PawBucks balance
+  // Get effective user ID for shared accounts
+  const sharedAccount = useSharedAccount(userId);
+  const effectiveUserId = getEffectiveWalletUserId(userId, sharedAccount);
+
+  // Load PawBucks balance using effective user ID
   useEffect(() => {
-    if (open && userId) {
+    if (open && effectiveUserId && !sharedAccount.isLoading) {
       loadPawbucksBalance();
       // Reset state when dialog opens
       setPawbucksToUse(0);
@@ -191,7 +196,7 @@ export const ServicePurchaseDialog = ({
       setSelectedTimeLabel(null);
       setBookedSlots([]);
     }
-  }, [open, userId]);
+  }, [open, effectiveUserId, sharedAccount.isLoading]);
 
   // Fetch booked slots when date changes (for Strategy Consultation)
   useEffect(() => {
@@ -224,10 +229,11 @@ export const ServicePurchaseDialog = ({
   }, [selectedDate, isStrategyConsultation]);
 
   const loadPawbucksBalance = async () => {
+    if (!effectiveUserId) return;
     const { data } = await supabase
       .from('pawbucks_wallet')
       .select('balance')
-      .eq('user_id', userId)
+      .eq('user_id', effectiveUserId)
       .single();
     
     setPawbucksBalance(data?.balance || 0);
