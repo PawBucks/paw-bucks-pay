@@ -2,6 +2,7 @@ import { useState, useCallback, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
+import { useSharedAccount, getEffectiveWalletUserId } from "@/hooks/useSharedAccount";
 import { supabase } from "@/integrations/supabase/client";
 import { Formatters } from "@/utils/formatters";
 import { Button } from "@/components/ui/button";
@@ -156,6 +157,8 @@ export default function PetStore() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const sharedAccount = useSharedAccount(user?.id);
+  const effectiveUserId = getEffectiveWalletUserId(user?.id, sharedAccount);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
@@ -163,21 +166,21 @@ export default function PetStore() {
   const [clientSecret, setClientSecret] = useState("");
   const [isCreatingIntent, setIsCreatingIntent] = useState(false);
 
-  // Fetch user's PawBucks balance
+  // Fetch user's PawBucks balance (using effective user ID for shared accounts)
   const { data: wallet } = useQuery({
-    queryKey: ["pawbucks-wallet", user?.id],
+    queryKey: ["pawbucks-wallet", effectiveUserId],
     queryFn: async () => {
-      if (!user) return null;
+      if (!effectiveUserId) return null;
       const { data, error } = await supabase
         .from("pawbucks_wallet")
         .select("*")
-        .eq("user_id", user.id)
+        .eq("user_id", effectiveUserId)
         .single();
       
       if (error) throw error;
       return data;
     },
-    enabled: !!user,
+    enabled: !!effectiveUserId && !sharedAccount.isLoading,
   });
 
   // Check user's subscription for cashback rate
