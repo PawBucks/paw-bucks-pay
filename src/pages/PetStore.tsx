@@ -555,8 +555,8 @@ export default function PetStore() {
       </div>
         </main>
         </PullToRefresh>
+        {user && <BottomNav />}
       </div>
-      {user && <BottomNav />}
     </>
   );
 }

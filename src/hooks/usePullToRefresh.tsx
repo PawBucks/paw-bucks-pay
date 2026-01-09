@@ -29,18 +29,26 @@ export const usePullToRefresh = ({
     if (disabled || isRefreshing || startY.current === 0) return;
     
     const container = containerRef.current;
-    if (!container || container.scrollTop > 0) {
+    if (!container) return;
+    
+    // Only activate pull-to-refresh when scrolled to top
+    if (container.scrollTop > 5) {
       startY.current = 0;
       setPullDistance(0);
       return;
     }
 
     const currentY = e.touches[0].clientY;
-    const distance = Math.max(0, currentY - startY.current);
+    const distance = currentY - startY.current;
     
-    if (distance > 0) {
+    // Only prevent default and show pull indicator when pulling DOWN from top
+    if (distance > 10 && container.scrollTop <= 0) {
       e.preventDefault();
       setPullDistance(Math.min(distance * 0.5, threshold * 1.5));
+    } else if (distance <= 0) {
+      // User is scrolling up (normal scroll) - reset and allow it
+      startY.current = 0;
+      setPullDistance(0);
     }
   }, [disabled, isRefreshing, threshold]);
 
