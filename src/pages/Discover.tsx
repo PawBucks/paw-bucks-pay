@@ -1048,9 +1048,9 @@ const Discover = () => {
             onSuccess={handlePaymentSuccess}
           />
         )}
-
-        {user && <BottomNav />}
       </PullToRefresh>
+
+      {user && <BottomNav />}
     </>
   );
 };
