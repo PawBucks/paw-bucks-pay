@@ -8,6 +8,8 @@ import { FileDown, Calendar, TrendingUp, DollarSign, Store, Loader2 } from "luci
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import jsPDF from "jspdf";
 import { getCategoryLabel, getNormalizedCategory, CATEGORY_CONFIG } from "@/lib/categoryMapping";
+import { useSharedAccount, getEffectiveWalletUserId } from "@/hooks/useSharedAccount";
+import { useAuth } from "@/hooks/useAuth";
 
 // Fixed colors for pie chart (actual HSL values, not CSS variables)
 const CATEGORY_COLORS: Record<string, string> = {
@@ -36,21 +38,23 @@ const MONTHS = [
 export function YearlySummary() {
   const currentYear = new Date().getFullYear();
   const [selectedYear, setSelectedYear] = useState(currentYear.toString());
+  const { user } = useAuth();
+  const sharedAccount = useSharedAccount(user?.id);
+  const effectiveUserId = getEffectiveWalletUserId(user?.id, sharedAccount);
 
   const { data: yearlyData, isLoading } = useQuery({
-    queryKey: ['yearly-summary', selectedYear],
+    queryKey: ['yearly-summary', selectedYear, effectiveUserId],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return null;
+      if (!effectiveUserId) return null;
 
       const startDate = new Date(parseInt(selectedYear), 0, 1);
       const endDate = new Date(parseInt(selectedYear), 11, 31, 23, 59, 59);
 
-      // Fetch transactions with merchant_id
+      // Fetch transactions with merchant_id using effective user ID
       const { data: transactions, error: txError } = await supabase
         .from('transactions')
         .select('amount, created_at, merchant_id')
-        .eq('user_id', user.id)
+        .eq('user_id', effectiveUserId)
         .eq('status', 'completed')
         .gte('created_at', startDate.toISOString())
         .lte('created_at', endDate.toISOString())
@@ -73,11 +77,11 @@ export function YearlySummary() {
         });
       }
 
-      // Fetch medical records for the year
+      // Fetch medical records for the year using effective user ID
       const { data: medicalRecords, error: medError } = await supabase
         .from('pet_medical_records')
         .select('price, record_date, title')
-        .eq('user_id', user.id)
+        .eq('user_id', effectiveUserId)
         .gte('record_date', startDate.toISOString().split('T')[0])
         .lte('record_date', endDate.toISOString().split('T')[0])
         .order('record_date', { ascending: true });

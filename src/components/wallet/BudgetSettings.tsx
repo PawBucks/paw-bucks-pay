@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { startOfMonth, endOfMonth } from "date-fns";
 import { CATEGORY_CONFIG, getNormalizedCategory, getCategoryIcon } from "@/lib/categoryMapping";
+import { useSharedAccount, getEffectiveWalletUserId } from "@/hooks/useSharedAccount";
 
 type Transaction = {
   id: string;
@@ -48,21 +49,23 @@ const BUDGET_CATEGORIES = Object.entries(CATEGORY_CONFIG)
 
 export const BudgetSettings = memo(({ transactions }: BudgetSettingsProps) => {
   const { user } = useAuth();
+  const sharedAccount = useSharedAccount(user?.id);
+  const effectiveUserId = getEffectiveWalletUserId(user?.id, sharedAccount);
   const queryClient = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<string | null>(null);
   const [budgetValue, setBudgetValue] = useState("");
   const [thresholdValue, setThresholdValue] = useState("80");
 
-  // Fetch budget settings
+  // Fetch budget settings using effective user ID
   const { data: budgets = [], isLoading } = useOptimizedQuery<BudgetSetting[]>(
-    ['budget-settings', user?.id || ''],
+    ['budget-settings', effectiveUserId || ''],
     async () => {
-      if (!user) return [];
+      if (!effectiveUserId) return [];
       const { data, error } = await supabase
         .from('budget_settings')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', effectiveUserId)
         .eq('is_active', true);
       if (error) throw error;
       return data || [];
@@ -101,7 +104,7 @@ export const BudgetSettings = memo(({ transactions }: BudgetSettingsProps) => {
   }, [budgets, categorySpending]);
 
   const handleSaveBudget = useCallback(async () => {
-    if (!user || !editingCategory || !budgetValue) return;
+    if (!effectiveUserId || !editingCategory || !budgetValue) return;
 
     const limit = parseFloat(budgetValue);
     const threshold = parseFloat(thresholdValue);
@@ -115,7 +118,7 @@ export const BudgetSettings = memo(({ transactions }: BudgetSettingsProps) => {
       const { error } = await supabase
         .from('budget_settings')
         .upsert({
-          user_id: user.id,
+          user_id: effectiveUserId,
           category: editingCategory,
           monthly_limit: limit,
           alert_threshold: threshold,
@@ -135,16 +138,16 @@ export const BudgetSettings = memo(({ transactions }: BudgetSettingsProps) => {
       console.error('Error saving budget:', error);
       toast.error("Failed to save budget");
     }
-  }, [user, editingCategory, budgetValue, thresholdValue, queryClient]);
+  }, [effectiveUserId, editingCategory, budgetValue, thresholdValue, queryClient]);
 
   const handleDeleteBudget = useCallback(async (category: string) => {
-    if (!user) return;
+    if (!effectiveUserId) return;
 
     try {
       const { error } = await supabase
         .from('budget_settings')
         .delete()
-        .eq('user_id', user.id)
+        .eq('user_id', effectiveUserId)
         .eq('category', category);
 
       if (error) throw error;
@@ -155,7 +158,7 @@ export const BudgetSettings = memo(({ transactions }: BudgetSettingsProps) => {
       console.error('Error deleting budget:', error);
       toast.error("Failed to remove budget");
     }
-  }, [user, queryClient]);
+  }, [effectiveUserId, queryClient]);
 
   const openEditDialog = useCallback((category: string, existingBudget?: BudgetSetting) => {
     setEditingCategory(category);
