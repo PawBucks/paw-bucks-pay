@@ -3,8 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { GradientCard } from "@/components/ui/gradient-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Users, UserPlus, Mail, Check, X, Clock, Trash2 } from "lucide-react";
+import { Users, UserPlus, Mail, Check, X, Clock, Trash2, Info } from "lucide-react";
 import { toast } from "sonner";
+import { useSharedAccount } from "@/hooks/useSharedAccount";
 import {
   Dialog,
   DialogContent,
@@ -40,11 +41,18 @@ const SharePawBucksCardComponent = () => {
   const [loading, setLoading] = useState(true);
   const [inviting, setInviting] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  
+  // Check if user is a shared member (not an owner)
+  const sharedAccount = useSharedAccount(currentUserId || undefined);
+  const isSharedMember = sharedAccount.isSharedMember;
 
   const loadSharedMembers = useCallback(async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
+      
+      setCurrentUserId(user.id);
 
       // Get members I've shared with
       const { data: members } = await supabase
@@ -255,13 +263,15 @@ const SharePawBucksCardComponent = () => {
           </div>
         </div>
 
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button size="sm" className="gap-1" disabled={sharedMembers.length >= 2}>
-              <UserPlus className="w-4 h-4" />
-              Add Member
-            </Button>
-          </DialogTrigger>
+        {/* Only show invite button if user is NOT a shared member */}
+        {!isSharedMember && (
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <Button size="sm" className="gap-1" disabled={sharedMembers.length >= 2}>
+                <UserPlus className="w-4 h-4" />
+                Add Member
+              </Button>
+            </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Invite a Family Member or Friend</DialogTitle>
@@ -291,7 +301,18 @@ const SharePawBucksCardComponent = () => {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        )}
       </div>
+      
+      {/* Info message for shared members */}
+      {isSharedMember && (
+        <div className="mb-4 p-3 bg-blue-500/10 rounded-lg border border-blue-500/20 flex items-start gap-2">
+          <Info className="w-4 h-4 text-blue-500 mt-0.5 shrink-0" />
+          <p className="text-sm text-muted-foreground">
+            You're a member of {sharedAccount.ownerName}'s shared account. Only the account owner can invite new members.
+          </p>
+        </div>
+      )}
 
       {/* Pending invites for this user */}
       {pendingInvites.length > 0 && (
