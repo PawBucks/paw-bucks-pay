@@ -221,3 +221,6 @@ verify_jwt = true
 
 [functions.cleanup-resolved-lost-pets]
 verify_jwt = false
+
+[functions.send-lost-pet-deletion-warning]
+verify_jwt = false
