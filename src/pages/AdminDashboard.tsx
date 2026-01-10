@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,27 +10,33 @@ import { ConsultationBookingsTab } from "@/components/admin/ConsultationBookings
 import FeedbackTab from "@/components/admin/FeedbackTab";
 import { NonPartnerReceiptVerificationTab } from "@/components/admin/NonPartnerReceiptVerificationTab";
 import { EmailTab } from "@/components/admin/EmailTab";
+import { UsersTab } from "@/components/admin/UsersTab";
+import { MerchantsTab } from "@/components/admin/MerchantsTab";
+import { TransactionsTab } from "@/components/admin/TransactionsTab";
+import { RewardsTab } from "@/components/admin/RewardsTab";
+import { FinancingTab } from "@/components/admin/FinancingTab";
+import { ProductsTab } from "@/components/admin/ProductsTab";
+import { CMSTab } from "@/components/admin/CMSTab";
+import { SettingsTab } from "@/components/admin/SettingsTab";
+import { OverviewTab } from "@/components/admin/OverviewTab";
+import { AnalyticsTab } from "@/components/admin/AnalyticsTab";
+import { AuditLogsTab } from "@/components/admin/AuditLogsTab";
 import { Button } from "@/components/ui/button";
-import { GradientCard } from "@/components/ui/gradient-card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import {
   LogOut,
   Shield,
@@ -40,80 +46,177 @@ import {
   FileText,
   Bell,
   Loader2,
-  Check,
-  X,
-  Edit,
-  Trash2,
-  UserPlus,
-  RefreshCw,
   ShieldAlert,
   CalendarDays,
   MessageSquare,
   Receipt,
   Mail,
+  LayoutDashboard,
+  Settings,
+  BarChart3,
+  Package,
+  FileEdit,
+  Banknote,
+  History,
+  Menu,
+  ChevronRight,
+  HelpCircle,
+  ExternalLink,
 } from "lucide-react";
 import { toast } from "sonner";
-import { format } from "date-fns";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { cn } from "@/lib/utils";
 
-type Merchant = {
-  id: string;
-  business_name: string;
-  contact_person: string;
-  business_type: string;
-  cashback_rate: number;
-  stripe_account_status?: string;
-  user_id: string;
-};
-
-type Profile = {
-  id: string;
-  full_name: string;
-  email: string;
-  user_type: string;
-  created_at: string;
-  role?: string;
-};
-
-type FundingRequest = {
-  id: string;
-  merchant_id: string;
-  requested_amount: number;
-  reason: string;
-  estimated_monthly_sales: number;
-  status: string;
-  created_at: string;
-  merchants?: {
-    business_name: string;
-  };
-};
-
-type Transaction = {
-  id: string;
-  amount: number;
-  cashback_earned: number;
-  rewards_earned: number;
-  description: string;
-  status: string;
-  created_at: string;
-  user_id?: string;
-  merchants?: {
-    business_name: string;
-  };
-  profiles?: {
-    full_name: string;
-    email: string;
-  };
-};
+// Define navigation sections with descriptions for clarity
+const NAV_SECTIONS = [
+  {
+    title: "Dashboard",
+    items: [
+      {
+        id: "overview",
+        label: "Overview",
+        icon: LayoutDashboard,
+        description: "Platform statistics and key metrics at a glance",
+      },
+      {
+        id: "analytics",
+        label: "Analytics",
+        icon: BarChart3,
+        description: "Detailed charts and insights about platform performance",
+      },
+    ],
+  },
+  {
+    title: "User Management",
+    items: [
+      {
+        id: "users",
+        label: "Users",
+        icon: Users,
+        description: "View, edit, and manage all registered users including role assignments",
+      },
+      {
+        id: "merchants",
+        label: "Merchants",
+        icon: Store,
+        description: "Manage merchant accounts, points rates, and Stripe status",
+      },
+    ],
+  },
+  {
+    title: "Financial",
+    items: [
+      {
+        id: "transactions",
+        label: "Transactions",
+        icon: FileText,
+        description: "View all platform transactions, issue refunds, and track revenue",
+      },
+      {
+        id: "rewards",
+        label: "PawBucks Rewards",
+        icon: DollarSign,
+        description: "Configure earn/conversion rates and manually credit/debit PawBucks",
+      },
+      {
+        id: "financing",
+        label: "Financing & Loans",
+        icon: Banknote,
+        description: "Approve or deny merchant funding requests and consumer vet loans",
+      },
+    ],
+  },
+  {
+    title: "Operations",
+    items: [
+      {
+        id: "receipts",
+        label: "Receipt Verification",
+        icon: Receipt,
+        description: "Review and approve non-partner receipt submissions for PawBucks",
+      },
+      {
+        id: "consultations",
+        label: "Consultations",
+        icon: CalendarDays,
+        description: "View and manage scheduled consultation bookings",
+      },
+      {
+        id: "feedback",
+        label: "User Feedback",
+        icon: MessageSquare,
+        description: "Review, respond to, and resolve user feedback submissions",
+      },
+    ],
+  },
+  {
+    title: "Content & Products",
+    items: [
+      {
+        id: "products",
+        label: "Pet Store Products",
+        icon: Package,
+        description: "Add, edit, and manage products available in the Pet Store",
+      },
+      {
+        id: "cms",
+        label: "Content Management",
+        icon: FileEdit,
+        description: "Manage banners, promotions, and platform announcements",
+      },
+    ],
+  },
+  {
+    title: "Communication",
+    items: [
+      {
+        id: "notifications",
+        label: "Push Notifications",
+        icon: Bell,
+        description: "Send in-app notifications to users, merchants, or everyone",
+      },
+      {
+        id: "email",
+        label: "Email Campaigns",
+        icon: Mail,
+        description: "Send bulk or individual emails to users and merchants",
+      },
+    ],
+  },
+  {
+    title: "Security & Logs",
+    items: [
+      {
+        id: "security",
+        label: "Security Monitoring",
+        icon: ShieldAlert,
+        description: "Monitor failed login attempts, suspicious activity, and security alerts",
+      },
+      {
+        id: "audit",
+        label: "Audit Logs",
+        icon: History,
+        description: "Track all admin actions and changes made to the platform",
+      },
+      {
+        id: "pawbucks-logs",
+        label: "PawBucks Credit Logs",
+        icon: DollarSign,
+        description: "View history of manual PawBucks credits and debits",
+      },
+    ],
+  },
+  {
+    title: "System",
+    items: [
+      {
+        id: "settings",
+        label: "Settings",
+        icon: Settings,
+        description: "Configure security settings, 2FA, and platform configuration",
+      },
+    ],
+  },
+];
 
 const AdminDashboard = () => {
   const { user, signOut, loading: authLoading } = useAuth();
@@ -121,55 +224,8 @@ const AdminDashboard = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [merchants, setMerchants] = useState<Merchant[]>([]);
-  const [profiles, setProfiles] = useState<Profile[]>([]);
-  const [fundingRequests, setFundingRequests] = useState<FundingRequest[]>([]);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [totalCashback, setTotalCashback] = useState(0);
-  
-  const [notificationDialogOpen, setNotificationDialogOpen] = useState(false);
-  const [notificationRecipient, setNotificationRecipient] = useState<
-    "all" | "merchants" | "merchant_specific" | "pet_owners"
-  >("all");
-  const [editCashbackDialogOpen, setEditCashbackDialogOpen] = useState(false);
-  const [selectedMerchant, setSelectedMerchant] = useState<Merchant | null>(null);
-  const [sendingNotification, setSendingNotification] = useState(false);
-  
-  // Detail view dialogs
-  const [usersDialogOpen, setUsersDialogOpen] = useState(false);
-  const [merchantsDialogOpen, setMerchantsDialogOpen] = useState(false);
-  const [transactionsDialogOpen, setTransactionsDialogOpen] = useState(false);
-  const [cashbackDialogOpen, setCashbackDialogOpen] = useState(false);
-  
-  // Add/Delete dialogs
-  const [addUserDialogOpen, setAddUserDialogOpen] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState<{type: 'user' | 'merchant', id: string, name: string} | null>(null);
-  
-  // Edit user role/type dialog
-  const [editUserDialogOpen, setEditUserDialogOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<Profile | null>(null);
-  const [updatingUser, setUpdatingUser] = useState(false);
-  
-  // Refund dialog
-  const [refundDialogOpen, setRefundDialogOpen] = useState(false);
-  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
-  const [issuingRefund, setIssuingRefund] = useState(false);
-  
-  // Security monitoring dialog
-  const [securityDialogOpen, setSecurityDialogOpen] = useState(false);
-  
-  // Consultation bookings dialog
-  const [consultationsDialogOpen, setConsultationsDialogOpen] = useState(false);
-  
-  // Feedback dialog
-  const [feedbackDialogOpen, setFeedbackDialogOpen] = useState(false);
-  
-  // Receipts dialog
-  const [receiptsDialogOpen, setReceiptsDialogOpen] = useState(false);
-  
-  // Email dialog
-  const [emailDialogOpen, setEmailDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("overview");
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -187,7 +243,6 @@ const AdminDashboard = () => {
     if (!user) return;
 
     try {
-      // Check for admin or superadmin role
       const { data, error } = await supabase
         .from("user_roles")
         .select("role")
@@ -201,137 +256,322 @@ const AdminDashboard = () => {
         return;
       }
 
-      // Check if user is superadmin
       const hasSuperAdmin = data.some(r => r.role === "superadmin");
       setIsSuperAdmin(hasSuperAdmin);
       setIsAdmin(true);
-      loadAdminData();
     } catch (error) {
       console.error("Error checking admin access:", error);
       await supabase.auth.signOut();
       navigate("/admin");
-    }
-  };
-
-  const loadAdminData = async () => {
-    try {
-      // Load analytics using the new function
-      const { data: analyticsData, error: analyticsError } = await supabase.rpc('get_admin_analytics');
-      
-      if (analyticsError) {
-        console.error('Analytics error:', analyticsError);
-      } else if (analyticsData && analyticsData.length > 0) {
-        const analytics = analyticsData[0];
-        // Update total cashback from analytics
-        setTotalCashback(Number(analytics.total_cashback_distributed) || 0);
-      }
-
-      // Load merchants
-      const { data: merchantsData } = await supabase
-        .from("merchants")
-        .select("*")
-        .order("created_at", { ascending: false });
-      setMerchants(merchantsData || []);
-
-      // Load profiles with their roles
-      const { data: profilesData } = await supabase
-        .from("profiles")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      // Fetch roles for all profiles
-      const { data: rolesData } = await supabase
-        .from("user_roles")
-        .select("user_id, role");
-
-      // Merge roles into profiles
-      const profilesWithRoles = (profilesData || []).map(profile => {
-        const userRole = rolesData?.find(r => r.user_id === profile.id);
-        return {
-          ...profile,
-          role: userRole?.role || 'user'
-        };
-      });
-      setProfiles(profilesWithRoles);
-
-      // Load funding requests with merchant names
-      const { data: fundingData } = await supabase
-        .from("funding_requests")
-        .select("*, merchants(business_name)")
-        .order("created_at", { ascending: false });
-      setFundingRequests(fundingData || []);
-
-      // Load transactions with merchant names and customer info
-      const { data: transactionsData } = await supabase
-        .from("transactions")
-        .select("id, amount, cashback_earned, rewards_earned, description, status, created_at, user_id, merchants(business_name), profiles(full_name, email)")
-        .order("created_at", { ascending: false })
-        .limit(50);
-      setTransactions(transactionsData || []);
-      
-      // Calculate total rewards excluding refunded transactions
-      const completedTransactions = (transactionsData || []).filter(t => t.status !== 'refunded');
-      const totalRewards = completedTransactions.reduce((sum, t) => sum + (t.rewards_earned || 0), 0);
-      setTotalCashback(totalRewards);
-    } catch (error: any) {
-      console.error("Error loading admin data:", error);
-      toast.error("Failed to load admin data");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleUpdateFundingRequest = async (requestId: string, status: "approved" | "denied") => {
-    try {
-      const { error } = await supabase.functions.invoke('admin-update-funding-request', {
-        body: { requestId, status },
-      });
+  const handleSignOut = useCallback(async () => {
+    await signOut();
+    navigate("/admin");
+  }, [signOut, navigate]);
 
-      if (error) throw error;
+  const handleTabChange = useCallback((tabId: string) => {
+    setActiveTab(tabId);
+    setMobileNavOpen(false);
+  }, []);
 
-      toast.success(`Funding request ${status}!`);
-      loadAdminData();
-    } catch (error: any) {
-      console.error("Error updating funding request:", error);
-      toast.error("Failed to update funding request");
+  // Find current tab info for header
+  const currentTabInfo = useMemo(() => {
+    for (const section of NAV_SECTIONS) {
+      const item = section.items.find(i => i.id === activeTab);
+      if (item) return item;
     }
+    return NAV_SECTIONS[0].items[0];
+  }, [activeTab]);
+
+  // Render tab content
+  const renderTabContent = useCallback(() => {
+    switch (activeTab) {
+      case "overview":
+        return <OverviewTab />;
+      case "analytics":
+        return <AnalyticsTab />;
+      case "users":
+        return <UsersTab />;
+      case "merchants":
+        return <MerchantsTab />;
+      case "transactions":
+        return <TransactionsTab />;
+      case "rewards":
+        return <RewardsTab />;
+      case "financing":
+        return <FinancingTab />;
+      case "receipts":
+        return <NonPartnerReceiptVerificationTab />;
+      case "consultations":
+        return <ConsultationBookingsTab />;
+      case "feedback":
+        return <FeedbackTab />;
+      case "products":
+        return <ProductsTab />;
+      case "cms":
+        return <CMSTab />;
+      case "notifications":
+        return <NotificationsTab />;
+      case "email":
+        return <EmailTab />;
+      case "security":
+        return <SecurityMonitoringTab />;
+      case "audit":
+        return <AuditLogsTab />;
+      case "pawbucks-logs":
+        return <PawBucksCreditLogsTab />;
+      case "settings":
+        return <SettingsTab />;
+      default:
+        return <OverviewTab />;
+    }
+  }, [activeTab]);
+
+  // Navigation sidebar component
+  const NavigationSidebar = ({ className }: { className?: string }) => (
+    <div className={cn("flex flex-col h-full", className)}>
+      {/* Logo and Title */}
+      <div className="p-4 border-b">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg">
+            <Shield className="w-5 h-5 text-primary-foreground" />
+          </div>
+          <div>
+            <h1 className="font-bold text-lg">Admin Dashboard</h1>
+            <p className="text-xs text-muted-foreground">PawBucks Platform</p>
+          </div>
+        </div>
+        <div className="mt-3 flex items-center gap-2">
+          <Badge variant={isSuperAdmin ? "default" : "secondary"} className="text-xs">
+            {isSuperAdmin ? "SuperAdmin" : "Admin"}
+          </Badge>
+          <span className="text-xs text-muted-foreground truncate">
+            {user?.email}
+          </span>
+        </div>
+      </div>
+
+      {/* Navigation Items */}
+      <ScrollArea className="flex-1 py-2">
+        <div className="px-3 space-y-6">
+          {NAV_SECTIONS.map((section) => (
+            <div key={section.title}>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-2">
+                {section.title}
+              </p>
+              <div className="space-y-1">
+                {section.items.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = activeTab === item.id;
+                  return (
+                    <TooltipProvider key={item.id} delayDuration={300}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            onClick={() => handleTabChange(item.id)}
+                            className={cn(
+                              "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
+                              "hover:bg-accent/50 hover:text-accent-foreground",
+                              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                              isActive && "bg-primary/10 text-primary border-l-2 border-primary"
+                            )}
+                          >
+                            <Icon className={cn("w-4 h-4 flex-shrink-0", isActive && "text-primary")} />
+                            <span className="truncate">{item.label}</span>
+                            {isActive && <ChevronRight className="w-4 h-4 ml-auto" />}
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent side="right" className="max-w-[250px]">
+                          <p className="font-semibold">{item.label}</p>
+                          <p className="text-xs text-muted-foreground">{item.description}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      </ScrollArea>
+
+      {/* Footer Actions */}
+      <div className="p-3 border-t space-y-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-full justify-start text-muted-foreground hover:text-foreground"
+          onClick={() => navigate("/admin/merchant-services")}
+        >
+          <ExternalLink className="w-4 h-4 mr-2" />
+          Merchant Services
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-full justify-start text-muted-foreground hover:text-foreground"
+          onClick={() => navigate("/admin/pet-store")}
+        >
+          <ExternalLink className="w-4 h-4 mr-2" />
+          Pet Store Admin
+        </Button>
+        <Separator />
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
+          onClick={handleSignOut}
+        >
+          <LogOut className="w-4 h-4 mr-2" />
+          Sign Out
+        </Button>
+      </div>
+    </div>
+  );
+
+  if (authLoading || loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center space-y-4">
+          <Loader2 className="w-10 h-10 animate-spin text-primary mx-auto" />
+          <p className="text-muted-foreground">Loading admin dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return null;
+  }
+
+  return (
+    <TooltipProvider>
+      <div className="min-h-screen bg-background flex">
+        {/* Desktop Sidebar */}
+        <aside className="hidden lg:flex w-64 border-r bg-card flex-shrink-0 sticky top-0 h-screen">
+          <NavigationSidebar />
+        </aside>
+
+        {/* Main Content Area */}
+        <div className="flex-1 flex flex-col min-h-screen">
+          {/* Top Header */}
+          <header className="sticky top-0 z-40 border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 safe-area-inset-top">
+            <div className="flex items-center justify-between px-4 h-16">
+              {/* Mobile Menu */}
+              <div className="flex items-center gap-3 lg:hidden">
+                <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
+                  <SheetTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <Menu className="w-5 h-5" />
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="left" className="p-0 w-72">
+                    <NavigationSidebar />
+                  </SheetContent>
+                </Sheet>
+              </div>
+
+              {/* Current Page Info */}
+              <div className="flex items-center gap-3">
+                <div className="hidden lg:block">
+                  {currentTabInfo && (
+                    <div className="flex items-center gap-2">
+                      <currentTabInfo.icon className="w-5 h-5 text-primary" />
+                      <div>
+                        <h2 className="font-semibold">{currentTabInfo.label}</h2>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <div className="lg:hidden">
+                  <h2 className="font-semibold">{currentTabInfo?.label}</h2>
+                </div>
+              </div>
+
+              {/* Header Actions */}
+              <div className="flex items-center gap-2">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button variant="ghost" size="icon" className="text-muted-foreground">
+                        <HelpCircle className="w-5 h-5" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="max-w-[300px]">
+                      <p className="font-semibold mb-1">{currentTabInfo?.label}</p>
+                      <p className="text-xs text-muted-foreground">{currentTabInfo?.description}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleSignOut}
+                  className="lg:hidden"
+                >
+                  <LogOut className="w-5 h-5" />
+                </Button>
+              </div>
+            </div>
+          </header>
+
+          {/* Page Content */}
+          <main className="flex-1 p-4 lg:p-6 overflow-x-hidden">
+            <div className="max-w-7xl mx-auto">
+              {/* Description Card for Context */}
+              <Card className="mb-6 bg-muted/30 border-dashed">
+                <CardContent className="py-3 px-4">
+                  <div className="flex items-start gap-3">
+                    <HelpCircle className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                    <p className="text-sm text-muted-foreground">
+                      {currentTabInfo?.description}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Tab Content */}
+              {renderTabContent()}
+            </div>
+          </main>
+        </div>
+      </div>
+    </TooltipProvider>
+  );
+};
+
+// Notifications Tab Component (inline since it's small)
+const NotificationsTab = () => {
+  const [profiles, setProfiles] = useState<any[]>([]);
+  const [merchants, setMerchants] = useState<any[]>([]);
+  const [sending, setSending] = useState(false);
+  const [recipient, setRecipient] = useState<"all" | "merchants" | "merchant_specific" | "pet_owners">("all");
+  const [specificMerchantId, setSpecificMerchantId] = useState("");
+  const [title, setTitle] = useState("");
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    const [profilesRes, merchantsRes] = await Promise.all([
+      supabase.from("profiles").select("id, user_type").order("created_at", { ascending: false }),
+      supabase.from("merchants").select("id, business_name, user_id").order("created_at", { ascending: false }),
+    ]);
+    setProfiles(profilesRes.data || []);
+    setMerchants(merchantsRes.data || []);
   };
 
-  const handleUpdateCashback = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSendNotification = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedMerchant) return;
+    setSending(true);
 
     try {
-      const formData = new FormData(e.currentTarget);
-      const newRate = parseFloat(formData.get("cashbackRate") as string);
-
-      const { error } = await supabase.functions.invoke('admin-update-merchant', {
-        body: { merchantId: selectedMerchant.id, cashbackRate: newRate },
-      });
-
-      if (error) throw error;
-
-      toast.success("Points rate updated successfully!");
-      setEditCashbackDialogOpen(false);
-      setSelectedMerchant(null);
-      loadAdminData();
-    } catch (error: any) {
-      console.error("Error updating points rate:", error);
-      toast.error("Failed to update points rate");
-    }
-  };
-
-  const handleSendNotification = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setSendingNotification(true);
-
-    try {
-      const formData = new FormData(e.currentTarget);
-      const title = formData.get("title") as string;
-      const message = formData.get("message") as string;
-      const recipient = (formData.get("recipient") as string) || "all";
-      const specificMerchantId = (formData.get("specificMerchantId") as string) || "";
-
       let userIds: string[] = [];
       if (recipient === "all") {
         userIds = profiles.map((p) => p.id);
@@ -340,17 +580,15 @@ const AdminDashboard = () => {
       } else if (recipient === "merchant_specific") {
         if (!specificMerchantId) {
           toast.error("Please select a merchant");
-          setSendingNotification(false);
+          setSending(false);
           return;
         }
-
         const merchant = merchants.find((m) => m.id === specificMerchantId);
         if (!merchant) {
           toast.error("Selected merchant not found");
-          setSendingNotification(false);
+          setSending(false);
           return;
         }
-
         userIds = [merchant.user_id];
       } else if (recipient === "pet_owners") {
         userIds = profiles.filter((p) => p.user_type === "pet_owner").map((p) => p.id);
@@ -358,7 +596,7 @@ const AdminDashboard = () => {
 
       if (userIds.length === 0) {
         toast.error("No recipients found for this selection");
-        setSendingNotification(false);
+        setSending(false);
         return;
       }
 
@@ -369,1119 +607,152 @@ const AdminDashboard = () => {
       }));
 
       const { error } = await supabase.from("notifications").insert(notifications);
-
       if (error) throw error;
 
       toast.success(`Notification sent to ${userIds.length} users!`);
-      setNotificationDialogOpen(false);
+      setTitle("");
+      setMessage("");
     } catch (error: any) {
       console.error("Error sending notification:", error);
       toast.error("Failed to send notification");
     } finally {
-      setSendingNotification(false);
+      setSending(false);
     }
   };
-
-  const handleSignOut = async () => {
-    await signOut();
-    navigate("/admin");
-  };
-
-  const handleDeleteUser = async () => {
-    if (!deleteTarget || deleteTarget.type !== 'user') return;
-
-    try {
-      const { data, error } = await supabase.functions.invoke('admin-delete-user', {
-        body: { user_id: deleteTarget.id },
-      });
-
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-
-      toast.success("User deleted successfully");
-      setDeleteDialogOpen(false);
-      setDeleteTarget(null);
-      loadAdminData();
-    } catch (error: any) {
-      console.error("Error deleting user:", error);
-      toast.error(error.message || "Failed to delete user");
-    }
-  };
-
-  const handleDeleteMerchant = async () => {
-    if (!deleteTarget || deleteTarget.type !== 'merchant') return;
-
-    try {
-      const { error } = await supabase
-        .from('merchants')
-        .delete()
-        .eq('id', deleteTarget.id);
-
-      if (error) throw error;
-
-      toast.success("Merchant deleted successfully");
-      setDeleteDialogOpen(false);
-      setDeleteTarget(null);
-      loadAdminData();
-    } catch (error: any) {
-      console.error("Error deleting merchant:", error);
-      toast.error("Failed to delete merchant");
-    }
-  };
-
-  const handleIssueRefund = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!selectedTransaction) return;
-
-    setIssuingRefund(true);
-    try {
-      const formData = new FormData(e.currentTarget);
-      const reason = formData.get("reason") as string;
-      const partialAmount = formData.get("partialAmount") as string;
-
-      const { error } = await supabase.functions.invoke('admin-issue-refund', {
-        body: { 
-          transactionId: selectedTransaction.id,
-          amount: partialAmount ? parseFloat(partialAmount) : undefined,
-          reason: reason as 'duplicate' | 'fraudulent' | 'requested_by_customer',
-        },
-      });
-
-      if (error) throw error;
-
-      toast.success("Refund issued successfully!");
-      setRefundDialogOpen(false);
-      setSelectedTransaction(null);
-      loadAdminData();
-    } catch (error: any) {
-      console.error("Error issuing refund:", error);
-      toast.error("Failed to issue refund");
-    } finally {
-      setIssuingRefund(false);
-    }
-  };
-
-  const handleUpdateUserRole = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!selectedUser) return;
-
-    setUpdatingUser(true);
-    try {
-      const formData = new FormData(e.currentTarget);
-      const userType = formData.get("userType") as string;
-      const role = formData.get("role") as string;
-
-      // Prevent non-superadmins from assigning admin/superadmin roles
-      if (role && (role === 'admin' || role === 'superadmin') && !isSuperAdmin) {
-        toast.error("Only SuperAdmins can assign Admin or SuperAdmin roles");
-        setUpdatingUser(false);
-        return;
-      }
-
-      const { data, error } = await supabase.functions.invoke('admin-update-user-role', {
-        body: { 
-          user_id: selectedUser.id,
-          user_type: userType || undefined,
-          role: role || undefined,
-        },
-      });
-
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-
-      toast.success("User updated successfully!");
-      setEditUserDialogOpen(false);
-      setSelectedUser(null);
-      loadAdminData();
-    } catch (error: any) {
-      console.error("Error updating user:", error);
-      toast.error(error.message || "Failed to update user");
-    } finally {
-      setUpdatingUser(false);
-    }
-  };
-
-  if (authLoading || loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  if (!isAdmin) {
-    return null;
-  }
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b bg-card sticky top-0 z-10 safe-area-inset-top">
-        <div className="container mx-auto px-4 py-3">
-          {/* Top Row: Logo + Sign Out */}
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-                <Shield className="w-4 h-4 text-primary-foreground" />
-              </div>
-              <div className="min-w-0">
-                <h1 className="text-lg font-bold leading-tight">Admin Dashboard</h1>
-                <p className="text-xs text-muted-foreground">PawBucks Management</p>
-              </div>
-            </div>
-            <Button variant="ghost" size="icon" onClick={handleSignOut} className="flex-shrink-0">
-              <LogOut className="w-4 h-4" />
-            </Button>
-          </div>
-          
-          {/* Navigation Row: Scrollable on mobile */}
-          <div className="flex gap-1 overflow-x-auto pb-1 -mx-4 px-4 scrollbar-hide">
-            <Button variant="ghost" size="sm" className="flex-shrink-0 h-8 px-3 text-xs" onClick={() => setSecurityDialogOpen(true)}>
-              <ShieldAlert className="w-3.5 h-3.5 mr-1.5" />
-              Security
-            </Button>
-            <Button variant="ghost" size="sm" className="flex-shrink-0 h-8 px-3 text-xs" onClick={() => setNotificationDialogOpen(true)}>
-              <Bell className="w-3.5 h-3.5 mr-1.5" />
-              Notify
-            </Button>
-            <Button variant="ghost" size="sm" className="flex-shrink-0 h-8 px-3 text-xs" onClick={() => navigate("/admin/merchant-services")}>
-              <Store className="w-3.5 h-3.5 mr-1.5" />
-              Services
-            </Button>
-            <Button variant="ghost" size="sm" className="flex-shrink-0 h-8 px-3 text-xs" onClick={() => navigate("/admin/pet-store")}>
-              <Store className="w-3.5 h-3.5 mr-1.5" />
-              Pet Store
-            </Button>
-            <Button variant="ghost" size="sm" className="flex-shrink-0 h-8 px-3 text-xs" onClick={() => setConsultationsDialogOpen(true)}>
-              <CalendarDays className="w-3.5 h-3.5 mr-1.5" />
-              Consults
-            </Button>
-            <Button variant="ghost" size="sm" className="flex-shrink-0 h-8 px-3 text-xs" onClick={() => setFeedbackDialogOpen(true)}>
-              <MessageSquare className="w-3.5 h-3.5 mr-1.5" />
-              Feedback
-            </Button>
-            <Button variant="ghost" size="sm" className="flex-shrink-0 h-8 px-3 text-xs" onClick={() => setReceiptsDialogOpen(true)}>
-              <Receipt className="w-3.5 h-3.5 mr-1.5" />
-              Non-Partner Verification
-            </Button>
-            <Button variant="ghost" size="sm" className="flex-shrink-0 h-8 px-3 text-xs" onClick={() => setEmailDialogOpen(true)}>
-              <Mail className="w-3.5 h-3.5 mr-1.5" />
-              Email
-            </Button>
-          </div>
-        </div>
-      </header>
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-3xl font-bold">Push Notifications</h2>
+        <p className="text-muted-foreground">Send in-app notifications to users</p>
+      </div>
 
-      <main className="container mx-auto px-4 py-6 space-y-6">
-        {/* Stats Overview - Clickable Cards */}
-        <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-          <GradientCard gradient className="cursor-pointer hover:opacity-90 transition-opacity" onClick={() => setUsersDialogOpen(true)}>
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                <Users className="w-6 h-6 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Total Users</p>
-                <p className="text-2xl font-bold">{profiles.length}</p>
-              </div>
-            </div>
-          </GradientCard>
-
-          <GradientCard className="cursor-pointer hover:opacity-90 transition-opacity" onClick={() => setMerchantsDialogOpen(true)}>
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center">
-                <Store className="w-6 h-6 text-accent" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Total Merchants</p>
-                <p className="text-2xl font-bold">{merchants.length}</p>
-              </div>
-            </div>
-          </GradientCard>
-
-          <GradientCard className="cursor-pointer hover:opacity-90 transition-opacity" onClick={() => setTransactionsDialogOpen(true)}>
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center">
-                <FileText className="w-6 h-6 text-secondary" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Transactions</p>
-                <p className="text-2xl font-bold">{transactions.length}</p>
-              </div>
-            </div>
-          </GradientCard>
-
-          <GradientCard className="cursor-pointer hover:opacity-90 transition-opacity" onClick={() => setCashbackDialogOpen(true)}>
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-orange-500/10 flex items-center justify-center">
-                <DollarSign className="w-6 h-6 text-orange-500" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Total Rewards</p>
-                {/* totalCashback stores rewards_earned (PawBucks), convert to USD (1 PawBuck = $0.001) */}
-                <p className="text-2xl font-bold">${(totalCashback * 0.001).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-              </div>
-            </div>
-          </GradientCard>
-        </div>
-
-        {/* Add Transaction Tool */}
-        <AddTransactionTool />
-
-        {/* PawBucks Management Tool (Credit/Debit for Users & Merchants) */}
-        <PawBucksManagementTool />
-
-        {/* Manual PawBucks Credit Logs */}
-        <PawBucksCreditLogsTab />
-
-        {/* Funding Requests */}
-        <GradientCard>
-          <h3 className="text-xl font-semibold mb-4">Pending Funding Requests</h3>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Merchant</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Reason</TableHead>
-                  <TableHead>Monthly Sales</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {fundingRequests.filter(r => r.status === "pending").map((request) => (
-                  <TableRow key={request.id}>
-                    <TableCell className="font-medium">{request.merchants?.business_name}</TableCell>
-                    <TableCell>${request.requested_amount.toFixed(2)}</TableCell>
-                    <TableCell className="max-w-xs truncate">{request.reason}</TableCell>
-                    <TableCell>${request.estimated_monthly_sales.toFixed(2)}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{request.status}</Badge>
-                    </TableCell>
-                    <TableCell>{format(new Date(request.created_at), "MMM d, yyyy")}</TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          onClick={() => handleUpdateFundingRequest(request.id, "approved")}
-                        >
-                          <Check className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => handleUpdateFundingRequest(request.id, "denied")}
-                        >
-                          <X className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {fundingRequests.filter(r => r.status === "pending").length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={7} className="text-center text-muted-foreground">
-                      No pending funding requests
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </GradientCard>
-
-        {/* Merchants */}
-        <GradientCard>
-          <h3 className="text-xl font-semibold mb-4">Merchants</h3>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Business Name</TableHead>
-                  <TableHead>Contact Person</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Points Rate</TableHead>
-                  <TableHead>Stripe Status</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {merchants.map((merchant) => (
-                  <TableRow key={merchant.id}>
-                    <TableCell className="font-medium">{merchant.business_name}</TableCell>
-                    <TableCell>{merchant.contact_person}</TableCell>
-                    <TableCell>{merchant.business_type}</TableCell>
-                    <TableCell>{merchant.cashback_rate}x</TableCell>
-                    <TableCell>
-                      <Badge variant={merchant.stripe_account_status === "complete" ? "default" : "outline"}>
-                        {merchant.stripe_account_status || "pending"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          setSelectedMerchant(merchant);
-                          setEditCashbackDialogOpen(true);
-                        }}
-                      >
-                        <Edit className="w-4 h-4 mr-2" />
-                        Edit Rate
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </GradientCard>
-
-        {/* Recent Transactions */}
-        <GradientCard>
-          <h3 className="text-xl font-semibold mb-4">Recent Transactions</h3>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Merchant</TableHead>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Rewards</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Date</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {transactions.slice(0, 10).map((transaction) => (
-                  <TableRow key={transaction.id}>
-                    <TableCell className="font-medium">{transaction.merchants?.business_name}</TableCell>
-                    <TableCell>
-                      <div>
-                        <p className="font-medium">{transaction.profiles?.full_name || 'N/A'}</p>
-                        <p className="text-xs text-muted-foreground">{transaction.profiles?.email || ''}</p>
-                      </div>
-                    </TableCell>
-                    <TableCell>{transaction.description}</TableCell>
-                    <TableCell>${transaction.amount.toFixed(2)}</TableCell>
-                    {/* Use rewards_earned (PawBucks) and convert to USD (1 PawBuck = $0.001) */}
-                    <TableCell className="text-accent">${(transaction.rewards_earned * 0.001).toFixed(2)}</TableCell>
-                    <TableCell>
-                      <Badge variant={transaction.status === 'refunded' ? 'destructive' : transaction.status === 'completed' ? 'default' : 'secondary'}>
-                        {transaction.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{format(new Date(transaction.created_at), "MMM d, h:mm a")}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </GradientCard>
-      </main>
-
-      {/* Edit Points Rate Dialog */}
-      <Dialog open={editCashbackDialogOpen} onOpenChange={setEditCashbackDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit Points Rate</DialogTitle>
-            <DialogDescription>
-              Update the points rate for {selectedMerchant?.business_name}
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleUpdateCashback} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="cashbackRate">Points Multiplier (x)</Label>
-              <Input
-                id="cashbackRate"
-                name="cashbackRate"
-                type="number"
-                step="0.01"
-                min="0"
-                max="100"
-                defaultValue={selectedMerchant?.cashback_rate}
-                required
-              />
-            </div>
-            <div className="flex gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setEditCashbackDialogOpen(false)}
-                className="flex-1"
-              >
-                Cancel
-              </Button>
-              <Button type="submit" className="flex-1">
-                Update Rate
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      {/* Send Notification Dialog */}
-      <Dialog open={notificationDialogOpen} onOpenChange={setNotificationDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Send Notification</DialogTitle>
-            <DialogDescription>
-              Send a push notification or in-app message to users
-            </DialogDescription>
-          </DialogHeader>
+      <Card>
+        <CardHeader>
+          <CardTitle>Compose Notification</CardTitle>
+          <CardDescription>
+            Notifications will appear in the user's notification center within the app.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
           <form onSubmit={handleSendNotification} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="recipient">Recipient</Label>
+              <label className="text-sm font-medium">Recipients</label>
               <select
-                id="recipient"
-                name="recipient"
                 className="w-full h-10 px-3 rounded-md border bg-background"
-                required
-                value={notificationRecipient}
-                onChange={(e) =>
-                  setNotificationRecipient(
-                    e.target.value as "all" | "merchants" | "merchant_specific" | "pet_owners"
-                  )
-                }
+                value={recipient}
+                onChange={(e) => setRecipient(e.target.value as any)}
               >
-                <option value="all">All Users</option>
-                <option value="merchants">All Merchants</option>
+                <option value="all">All Users ({profiles.length})</option>
+                <option value="merchants">All Merchants ({merchants.length})</option>
                 <option value="merchant_specific">Specific Merchant</option>
-                <option value="pet_owners">All Pet Owners</option>
+                <option value="pet_owners">All Pet Owners ({profiles.filter(p => p.user_type === "pet_owner").length})</option>
               </select>
+              <p className="text-xs text-muted-foreground">
+                Choose who will receive this notification
+              </p>
             </div>
-            {notificationRecipient === "merchant_specific" && (
+
+            {recipient === "merchant_specific" && (
               <div className="space-y-2">
-                <Label htmlFor="specificMerchantId">Merchant</Label>
+                <label className="text-sm font-medium">Select Merchant</label>
                 <select
-                  id="specificMerchantId"
-                  name="specificMerchantId"
                   className="w-full h-10 px-3 rounded-md border bg-background"
-                  required
+                  value={specificMerchantId}
+                  onChange={(e) => setSpecificMerchantId(e.target.value)}
                 >
-                  <option value="">Select a merchant</option>
-                  {merchants.map((merchant) => (
-                    <option key={merchant.id} value={merchant.id}>
-                      {merchant.business_name}
-                    </option>
+                  <option value="">Choose a merchant...</option>
+                  {merchants.map((m) => (
+                    <option key={m.id} value={m.id}>{m.business_name}</option>
                   ))}
                 </select>
               </div>
             )}
+
             <div className="space-y-2">
-              <Label htmlFor="title">Title</Label>
-              <Input
-                id="title"
-                name="title"
+              <label className="text-sm font-medium">Title</label>
+              <input
+                type="text"
+                className="w-full h-10 px-3 rounded-md border bg-background"
                 placeholder="Notification title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
                 required
               />
+              <p className="text-xs text-muted-foreground">
+                Keep it short and attention-grabbing (max 50 characters recommended)
+              </p>
             </div>
+
             <div className="space-y-2">
-              <Label htmlFor="message">Message</Label>
-              <Textarea
-                id="message"
-                name="message"
+              <label className="text-sm font-medium">Message</label>
+              <textarea
+                className="w-full px-3 py-2 rounded-md border bg-background min-h-[100px]"
                 placeholder="Your message here..."
-                rows={4}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
                 required
               />
+              <p className="text-xs text-muted-foreground">
+                The main content of your notification (max 200 characters recommended)
+              </p>
             </div>
-            <div className="flex gap-3">
+
+            <div className="flex gap-3 pt-4">
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setNotificationDialogOpen(false)}
+                onClick={() => { setTitle(""); setMessage(""); }}
                 className="flex-1"
-                disabled={sendingNotification}
               >
-                Cancel
+                Clear
               </Button>
-              <Button type="submit" className="flex-1" disabled={sendingNotification}>
-                {sendingNotification ? (
+              <Button type="submit" className="flex-1" disabled={sending}>
+                {sending ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                     Sending...
                   </>
                 ) : (
-                  "Send Notification"
-                )}
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      {/* Users Detail Dialog */}
-      <Dialog open={usersDialogOpen} onOpenChange={setUsersDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center justify-between">
-              <span>All Users ({profiles.length})</span>
-              <Button size="sm" onClick={() => setAddUserDialogOpen(true)}>
-                <UserPlus className="w-4 h-4 mr-2" />
-                Add User
-              </Button>
-            </DialogTitle>
-          </DialogHeader>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Created</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {profiles.map((profile) => (
-                <TableRow key={profile.id}>
-                  <TableCell className="font-medium">{profile.full_name}</TableCell>
-                  <TableCell>{profile.email}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{profile.user_type}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge 
-                      variant={profile.role === 'superadmin' ? 'default' : profile.role === 'admin' ? 'secondary' : 'outline'}
-                    >
-                      {profile.role || 'user'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{format(new Date(profile.created_at), "MMM d, yyyy")}</TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          setSelectedUser(profile);
-                          setEditUserDialogOpen(true);
-                        }}
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => {
-                          setDeleteTarget({ type: 'user', id: profile.id, name: profile.full_name });
-                          setDeleteDialogOpen(true);
-                        }}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </DialogContent>
-      </Dialog>
-
-      {/* Merchants Detail Dialog */}
-      <Dialog open={merchantsDialogOpen} onOpenChange={setMerchantsDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>All Merchants ({merchants.length})</DialogTitle>
-          </DialogHeader>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Business Name</TableHead>
-                <TableHead>Contact</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Points Rate</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {merchants.map((merchant) => (
-                <TableRow key={merchant.id}>
-                  <TableCell className="font-medium">{merchant.business_name}</TableCell>
-                  <TableCell>{merchant.contact_person}</TableCell>
-                  <TableCell>{merchant.business_type}</TableCell>
-                  <TableCell>{merchant.cashback_rate}x</TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          setSelectedMerchant(merchant);
-                          setEditCashbackDialogOpen(true);
-                        }}
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => {
-                          setDeleteTarget({ type: 'merchant', id: merchant.id, name: merchant.business_name });
-                          setDeleteDialogOpen(true);
-                        }}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </DialogContent>
-      </Dialog>
-
-      {/* Transactions Detail Dialog */}
-      <Dialog open={transactionsDialogOpen} onOpenChange={setTransactionsDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>All Transactions ({transactions.length})</DialogTitle>
-          </DialogHeader>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Merchant</TableHead>
-                <TableHead>Customer</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Cashback</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {transactions.map((transaction) => (
-                <TableRow key={transaction.id}>
-                    <TableCell className="font-medium">{transaction.merchants?.business_name}</TableCell>
-                    <TableCell>
-                      <div>
-                        <p className="font-medium">{transaction.profiles?.full_name || 'N/A'}</p>
-                        <p className="text-xs text-muted-foreground">{transaction.profiles?.email || ''}</p>
-                      </div>
-                    </TableCell>
-                    <TableCell>${transaction.amount.toFixed(2)}</TableCell>
-                    {/* Use rewards_earned (PawBucks) and convert to USD (1 PawBuck = $0.001) */}
-                    <TableCell className="text-accent">${(transaction.rewards_earned * 0.001).toFixed(2)}</TableCell>
-                    <TableCell>
-                      <Badge variant={transaction.status === 'refunded' ? 'destructive' : transaction.status === 'completed' ? 'default' : 'secondary'}>
-                        {transaction.status}
-                      </Badge>
-                    </TableCell>
-                  <TableCell>{format(new Date(transaction.created_at), "MMM d, h:mm a")}</TableCell>
-                  <TableCell>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      disabled={transaction.status === 'refunded'}
-                      onClick={() => {
-                        setSelectedTransaction(transaction);
-                        setRefundDialogOpen(true);
-                      }}
-                    >
-                      <RefreshCw className="w-4 h-4 mr-2" />
-                      {transaction.status === 'refunded' ? 'Refunded' : 'Refund'}
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </DialogContent>
-      </Dialog>
-
-      {/* Rewards Detail Dialog */}
-      <Dialog open={cashbackDialogOpen} onOpenChange={setCashbackDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            {/* totalCashback is in PawBucks, convert to USD (1 PawBuck = $0.001) */}
-            <DialogTitle>Rewards Distribution (${(totalCashback * 0.001).toFixed(2)})</DialogTitle>
-          </DialogHeader>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Merchant</TableHead>
-                <TableHead>Transaction Amount</TableHead>
-                <TableHead>Rewards Given</TableHead>
-                <TableHead>Date</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {transactions
-                .filter(t => t.rewards_earned > 0)
-                .map((transaction) => (
-                  <TableRow key={transaction.id}>
-                    <TableCell className="font-medium">{transaction.merchants?.business_name}</TableCell>
-                    <TableCell>${transaction.amount.toFixed(2)}</TableCell>
-                    {/* rewards_earned is in PawBucks, convert to USD (1 PawBuck = $0.001) */}
-                    <TableCell className="text-accent font-semibold">${(transaction.rewards_earned * 0.001).toFixed(2)}</TableCell>
-                    <TableCell>{format(new Date(transaction.created_at), "MMM d, h:mm a")}</TableCell>
-                  </TableRow>
-                ))}
-            </TableBody>
-          </Table>
-        </DialogContent>
-      </Dialog>
-
-      {/* Refund Dialog */}
-      <Dialog open={refundDialogOpen} onOpenChange={setRefundDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Issue Refund</DialogTitle>
-            <DialogDescription>
-              Refund transaction for {selectedTransaction?.merchants?.business_name}
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleIssueRefund} className="space-y-4">
-            <div className="space-y-2">
-              <Label>Original Amount</Label>
-              <p className="text-2xl font-bold">${selectedTransaction?.amount.toFixed(2)}</p>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="partialAmount">Refund Amount (optional - full refund if empty)</Label>
-              <Input
-                id="partialAmount"
-                name="partialAmount"
-                type="number"
-                step="0.01"
-                max={selectedTransaction?.amount}
-                placeholder="Leave empty for full refund"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="reason">Reason</Label>
-              <select
-                id="reason"
-                name="reason"
-                className="w-full h-10 px-3 rounded-md border bg-background"
-                required
-              >
-                <option value="requested_by_customer">Requested by Customer</option>
-                <option value="duplicate">Duplicate Charge</option>
-                <option value="fraudulent">Fraudulent</option>
-              </select>
-            </div>
-            <div className="flex gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setRefundDialogOpen(false)}
-                className="flex-1"
-                disabled={issuingRefund}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" className="flex-1" disabled={issuingRefund}>
-                {issuingRefund ? (
                   <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Processing...
+                    <Bell className="w-4 h-4 mr-2" />
+                    Send Notification
                   </>
-                ) : (
-                  "Issue Refund"
                 )}
               </Button>
             </div>
           </form>
-        </DialogContent>
-      </Dialog>
+        </CardContent>
+      </Card>
 
-      {/* Edit User Role/Type Dialog */}
-      <Dialog open={editUserDialogOpen} onOpenChange={setEditUserDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Update User Account</DialogTitle>
-            <DialogDescription>
-              Change the account type and role for {selectedUser?.full_name}
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleUpdateUserRole} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="userType">Account Type</Label>
-              <select
-                id="userType"
-                name="userType"
-                className="w-full h-10 px-3 rounded-md border bg-background"
-                defaultValue=""
-              >
-                <option value="">Keep Current</option>
-                <option value="pet_owner">Pet Owner</option>
-                <option value="merchant">Merchant</option>
-              </select>
-              <p className="text-xs text-muted-foreground">
-                Note: Admin access is controlled via User Role below, not Account Type.
-              </p>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="role">User Role</Label>
-              <select
-                id="role"
-                name="role"
-                className="w-full h-10 px-3 rounded-md border bg-background"
-              >
-                <option value="">Keep Current</option>
-                <option value="user">Regular User</option>
-                <option value="admin">Admin</option>
-                <option value="superadmin">SuperAdmin</option>
-              </select>
-              {!isSuperAdmin && (
-                <p className="text-xs text-destructive">
-                  Only SuperAdmins can assign Admin or SuperAdmin roles.
-                </p>
-              )}
-            </div>
-            <div className="bg-muted p-3 rounded-md text-sm">
-              <p className="font-semibold mb-1">Current Information:</p>
-              <p>Account Type: <Badge variant="outline">{selectedUser?.user_type}</Badge></p>
-              <p className="mt-1">Role: <Badge variant={selectedUser?.role === 'superadmin' ? 'default' : selectedUser?.role === 'admin' ? 'secondary' : 'outline'}>{selectedUser?.role || 'user'}</Badge></p>
-              <p className="mt-1 text-muted-foreground">Leave fields as "Keep Current" to maintain existing values.</p>
-            </div>
-            <div className="flex gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setEditUserDialogOpen(false)}
-                className="flex-1"
-                disabled={updatingUser}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" className="flex-1" disabled={updatingUser}>
-                {updatingUser ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Updating...
-                  </>
-                ) : (
-                  "Update User"
-                )}
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete {deleteTarget?.type} "{deleteTarget?.name}". This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={deleteTarget?.type === 'user' ? handleDeleteUser : handleDeleteMerchant}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Add User Dialog */}
-      <Dialog open={addUserDialogOpen} onOpenChange={setAddUserDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Add New User</DialogTitle>
-            <DialogDescription>
-              Create a new user account. They will receive an email to set their password.
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={async (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.currentTarget);
-            const email = formData.get('email') as string;
-            const fullName = formData.get('fullName') as string;
-            const userType = formData.get('userType') as string;
-            const assignRole = formData.get('assignRole') as string;
-            
-            if (!email || !fullName || !userType) {
-              toast.error('Please fill in all fields');
-              return;
-            }
-
-            try {
-              // Generate a temporary password
-              const tempPassword = crypto.randomUUID().slice(0, 16);
-              
-              // Create user via edge function to avoid logging out current admin
-              const { data, error } = await supabase.functions.invoke('admin-create-user', {
-                body: {
-                  email,
-                  password: tempPassword,
-                  full_name: fullName,
-                  user_type: userType,
-                }
-              });
-
-              if (error) throw error;
-              if (data?.error) throw new Error(data.error);
-
-              // If a role was assigned and user was created successfully, assign the role
-              if (data?.user && assignRole && isSuperAdmin) {
-                const { error: roleError } = await supabase
-                  .from('user_roles')
-                  .insert({ user_id: data.user.id, role: assignRole as any });
-                
-                if (roleError) {
-                  console.error('Error assigning role:', roleError);
-                  toast.error('User created but failed to assign role');
-                }
-              }
-
-              toast.success('User created successfully. They can use "Forgot Password" to set their password.');
-              setAddUserDialogOpen(false);
-              loadAdminData();
-            } catch (error: any) {
-              console.error('Error creating user:', error);
-              toast.error(error.message || 'Failed to create user');
-            }
-          }} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="fullName">Full Name</Label>
-              <Input
-                id="fullName"
-                name="fullName"
-                placeholder="John Doe"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="user@example.com"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="userType">Account Type</Label>
-              <select
-                id="userType"
-                name="userType"
-                className="w-full h-10 px-3 rounded-md border bg-background"
-                required
-              >
-                <option value="pet_owner">Pet Owner</option>
-                <option value="merchant">Merchant</option>
-              </select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="assignRole">Assign Role (Optional)</Label>
-              <select
-                id="assignRole"
-                name="assignRole"
-                className="w-full h-10 px-3 rounded-md border bg-background"
-                disabled={!isSuperAdmin}
-              >
-                <option value="">No special role</option>
-                <option value="admin">Admin</option>
-                <option value="superadmin">SuperAdmin</option>
-              </select>
-              {!isSuperAdmin && (
-                <p className="text-xs text-destructive">
-                  Only SuperAdmins can assign Admin or SuperAdmin roles.
-                </p>
-              )}
-            </div>
-            <div className="flex gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setAddUserDialogOpen(false)}
-                className="flex-1"
-              >
-                Cancel
-              </Button>
-              <Button type="submit" className="flex-1">
-                <UserPlus className="w-4 h-4 mr-2" />
-                Create User
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      {/* Security Monitoring Dialog */}
-      <Dialog open={securityDialogOpen} onOpenChange={setSecurityDialogOpen}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <ShieldAlert className="w-5 h-5" />
-              Security Monitoring
-            </DialogTitle>
-            <DialogDescription>
-              Monitor authentication events, failed login attempts, and security alerts
-            </DialogDescription>
-          </DialogHeader>
-          <SecurityMonitoringTab />
-        </DialogContent>
-      </Dialog>
-      {/* Consultation Bookings Tab */}
-      <ConsultationBookingsTab 
-        open={consultationsDialogOpen} 
-        onOpenChange={setConsultationsDialogOpen} 
-      />
-
-      {/* Feedback Management Dialog */}
-      <Dialog open={feedbackDialogOpen} onOpenChange={setFeedbackDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <MessageSquare className="w-5 h-5" />
-              User Feedback
-            </DialogTitle>
-            <DialogDescription>
-              View and manage feedback submitted by users
-            </DialogDescription>
-          </DialogHeader>
-          <FeedbackTab />
-        </DialogContent>
-      </Dialog>
-
-      {/* Receipts Management Dialog */}
-      <Dialog open={receiptsDialogOpen} onOpenChange={setReceiptsDialogOpen}>
-        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Receipt className="w-5 h-5" />
-              Non-Partner Receipt Verification
-            </DialogTitle>
-            <DialogDescription>
-              Review and manage non-partner receipt submissions
-            </DialogDescription>
-          </DialogHeader>
-          <NonPartnerReceiptVerificationTab />
-        </DialogContent>
-      </Dialog>
-
-      {/* Email Users Dialog */}
-      <Dialog open={emailDialogOpen} onOpenChange={setEmailDialogOpen}>
-        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Mail className="w-5 h-5" />
-              Email Users
-            </DialogTitle>
-            <DialogDescription>
-              Send emails to merchants, pet owners, or specific users
-            </DialogDescription>
-          </DialogHeader>
-          <EmailTab />
-        </DialogContent>
-      </Dialog>
+      {/* Info Cards */}
+      <div className="grid md:grid-cols-2 gap-4">
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">What are Push Notifications?</CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm text-muted-foreground">
+            <p>
+              Push notifications appear in the user's notification center within the app. 
+              They're ideal for quick announcements, promotions, or alerts that don't require
+              an email.
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">Best Practices</CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm text-muted-foreground">
+            <ul className="list-disc list-inside space-y-1">
+              <li>Keep titles under 50 characters</li>
+              <li>Messages should be actionable</li>
+              <li>Don't send too frequently</li>
+              <li>Target the right audience</li>
+            </ul>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

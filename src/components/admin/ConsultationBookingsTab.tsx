@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -40,6 +41,10 @@ import {
   Loader2,
   RefreshCw,
   CalendarIcon,
+  Users,
+  CheckCircle2,
+  XCircle,
+  AlertCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -69,12 +74,7 @@ const TIME_SLOTS = [
   { label: "1:30 - 1:45 PM", value: "1:30 PM" },
 ];
 
-interface ConsultationBookingsTabProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
-
-export function ConsultationBookingsTab({ open, onOpenChange }: ConsultationBookingsTabProps) {
+export function ConsultationBookingsTab() {
   const [bookings, setBookings] = useState<ConsultationBooking[]>([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
@@ -82,12 +82,11 @@ export function ConsultationBookingsTab({ open, onOpenChange }: ConsultationBook
   const [newDate, setNewDate] = useState<Date | undefined>(undefined);
   const [newTimeSlot, setNewTimeSlot] = useState<string>("");
   const [bookedSlotsForDate, setBookedSlotsForDate] = useState<string[]>([]);
+  const [statusFilter, setStatusFilter] = useState<string>("all");
 
   useEffect(() => {
-    if (open) {
-      loadBookings();
-    }
-  }, [open]);
+    loadBookings();
+  }, []);
 
   // Fetch booked slots when rescheduling date changes
   useEffect(() => {
@@ -108,10 +107,9 @@ export function ConsultationBookingsTab({ open, onOpenChange }: ConsultationBook
     fetchBookedSlots();
   }, [newDate, rescheduleBooking]);
 
-  const loadBookings = async () => {
+  const loadBookings = useCallback(async () => {
     setLoading(true);
     try {
-      // Fetch bookings
       const { data: bookingsData, error } = await supabase
         .from("consultation_bookings")
         .select("*")
@@ -141,9 +139,9 @@ export function ConsultationBookingsTab({ open, onOpenChange }: ConsultationBook
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const handleUpdateStatus = async (bookingId: string, newStatus: "confirmed" | "cancelled") => {
+  const handleUpdateStatus = useCallback(async (bookingId: string, newStatus: "confirmed" | "cancelled") => {
     setUpdating(bookingId);
     try {
       const booking = bookings.find((b) => b.id === bookingId);
@@ -195,7 +193,7 @@ export function ConsultationBookingsTab({ open, onOpenChange }: ConsultationBook
     } finally {
       setUpdating(null);
     }
-  };
+  }, [bookings, loadBookings]);
 
   const handleReschedule = async () => {
     if (!rescheduleBooking || !newDate || !newTimeSlot) {
@@ -284,118 +282,203 @@ export function ConsultationBookingsTab({ open, onOpenChange }: ConsultationBook
     return day !== 1 && day !== 3 && day !== 5;
   };
 
+  // Filter bookings by status
+  const filteredBookings = statusFilter === "all" 
+    ? bookings 
+    : bookings.filter(b => b.status === statusFilter);
+
+  // Stats
+  const stats = {
+    total: bookings.length,
+    pending: bookings.filter(b => b.status === "pending").length,
+    confirmed: bookings.filter(b => b.status === "confirmed").length,
+    cancelled: bookings.filter(b => b.status === "cancelled").length,
+  };
+
   return (
-    <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <CalendarDays className="w-5 h-5 text-primary" />
-              Consultation Bookings
-            </DialogTitle>
-            <DialogDescription>
-              Manage consultation appointments - confirm, cancel, or reschedule bookings.
-            </DialogDescription>
-          </DialogHeader>
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-3xl font-bold">Consultation Bookings</h2>
+        <p className="text-muted-foreground">
+          Manage consultation appointments - confirm, cancel, or reschedule bookings
+        </p>
+      </div>
 
-          <div className="flex justify-end mb-4">
-            <Button variant="outline" size="sm" onClick={loadBookings} disabled={loading}>
-              <RefreshCw className={cn("w-4 h-4 mr-2", loading && "animate-spin")} />
-              Refresh
-            </Button>
-          </div>
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-2">
+              <Users className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">Total</span>
+            </div>
+            <p className="text-2xl font-bold">{stats.total}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-yellow-500" />
+              <span className="text-sm text-muted-foreground">Pending</span>
+            </div>
+            <p className="text-2xl font-bold text-yellow-600">{stats.pending}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-green-500" />
+              <span className="text-sm text-muted-foreground">Confirmed</span>
+            </div>
+            <p className="text-2xl font-bold text-green-600">{stats.confirmed}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-2">
+              <XCircle className="w-4 h-4 text-red-500" />
+              <span className="text-sm text-muted-foreground">Cancelled</span>
+            </div>
+            <p className="text-2xl font-bold text-red-600">{stats.cancelled}</p>
+          </CardContent>
+        </Card>
+      </div>
 
-          {loading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="w-8 h-8 animate-spin text-primary" />
-            </div>
-          ) : bookings.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              No consultation bookings found.
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Time (PT)</TableHead>
-                    <TableHead>Requester</TableHead>
-                    <TableHead>Notes</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {bookings.map((booking) => (
-                    <TableRow key={booking.id}>
-                      <TableCell className="font-medium">
-                        {format(new Date(booking.booking_date + "T00:00:00"), "EEE, MMM d, yyyy")}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          <Clock className="w-3 h-3 text-muted-foreground" />
-                          {booking.time_slot}
-                        </div>
-                      </TableCell>
-                      <TableCell>{booking.user_email}</TableCell>
-                      <TableCell className="max-w-xs truncate">
-                        {booking.notes || "-"}
-                      </TableCell>
-                      <TableCell>{getStatusBadge(booking.status)}</TableCell>
-                      <TableCell>
-                        <div className="flex gap-1">
-                          {booking.status === "pending" && (
-                            <>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-8 w-8 p-0"
-                                onClick={() => handleUpdateStatus(booking.id, "confirmed")}
-                                disabled={updating === booking.id}
-                              >
-                                {updating === booking.id ? (
-                                  <Loader2 className="w-4 h-4 animate-spin" />
-                                ) : (
-                                  <Check className="w-4 h-4 text-green-500" />
-                                )}
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-8 w-8 p-0"
-                                onClick={() => handleUpdateStatus(booking.id, "cancelled")}
-                                disabled={updating === booking.id}
-                              >
-                                <X className="w-4 h-4 text-red-500" />
-                              </Button>
-                            </>
-                          )}
-                          {(booking.status === "pending" || booking.status === "confirmed") && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="h-8 px-2"
-                              onClick={() => {
-                                setRescheduleBooking(booking);
-                                setNewDate(new Date(booking.booking_date + "T00:00:00"));
-                                setNewTimeSlot(booking.time_slot);
-                              }}
-                              disabled={updating === booking.id}
-                            >
-                              <CalendarIcon className="w-4 h-4" />
-                            </Button>
-                          )}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* Filters and Actions */}
+      <div className="flex flex-col sm:flex-row justify-between gap-4">
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-full sm:w-[180px]">
+            <SelectValue placeholder="Filter by status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Statuses</SelectItem>
+            <SelectItem value="pending">Pending</SelectItem>
+            <SelectItem value="confirmed">Confirmed</SelectItem>
+            <SelectItem value="cancelled">Cancelled</SelectItem>
+            <SelectItem value="completed">Completed</SelectItem>
+          </SelectContent>
+        </Select>
+        
+        <Button variant="outline" onClick={loadBookings} disabled={loading}>
+          <RefreshCw className={cn("w-4 h-4 mr-2", loading && "animate-spin")} />
+          Refresh
+        </Button>
+      </div>
+
+      {/* Bookings Table */}
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      ) : filteredBookings.length === 0 ? (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <CalendarDays className="w-12 h-12 text-muted-foreground mb-4" />
+            <p className="text-muted-foreground">No consultation bookings found</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="border rounded-lg overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Date</TableHead>
+                <TableHead>Time (PT)</TableHead>
+                <TableHead>Requester</TableHead>
+                <TableHead>Notes</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredBookings.map((booking) => (
+                <TableRow key={booking.id}>
+                  <TableCell className="font-medium">
+                    {format(new Date(booking.booking_date + "T00:00:00"), "EEE, MMM d, yyyy")}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-1">
+                      <Clock className="w-3 h-3 text-muted-foreground" />
+                      {booking.time_slot}
+                    </div>
+                  </TableCell>
+                  <TableCell>{booking.user_email}</TableCell>
+                  <TableCell className="max-w-xs truncate">
+                    {booking.notes || "-"}
+                  </TableCell>
+                  <TableCell>{getStatusBadge(booking.status)}</TableCell>
+                  <TableCell>
+                    <div className="flex gap-1">
+                      {booking.status === "pending" && (
+                        <>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8 w-8 p-0"
+                            onClick={() => handleUpdateStatus(booking.id, "confirmed")}
+                            disabled={updating === booking.id}
+                            title="Confirm booking"
+                          >
+                            {updating === booking.id ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <Check className="w-4 h-4 text-green-500" />
+                            )}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8 w-8 p-0"
+                            onClick={() => handleUpdateStatus(booking.id, "cancelled")}
+                            disabled={updating === booking.id}
+                            title="Cancel booking"
+                          >
+                            <X className="w-4 h-4 text-red-500" />
+                          </Button>
+                        </>
+                      )}
+                      {(booking.status === "pending" || booking.status === "confirmed") && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-8 px-2"
+                          onClick={() => {
+                            setRescheduleBooking(booking);
+                            setNewDate(new Date(booking.booking_date + "T00:00:00"));
+                            setNewTimeSlot(booking.time_slot);
+                          }}
+                          disabled={updating === booking.id}
+                          title="Reschedule booking"
+                        >
+                          <CalendarIcon className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
+
+      {/* What are Consultations Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">About Consultations</CardTitle>
+        </CardHeader>
+        <CardContent className="text-sm text-muted-foreground space-y-2">
+          <p>
+            Consultations are 15-minute video calls scheduled by users to discuss their 
+            questions or get personalized guidance.
+          </p>
+          <ul className="list-disc list-inside space-y-1 ml-2">
+            <li><strong>Confirm:</strong> Approves the booking and sends a confirmation email</li>
+            <li><strong>Cancel:</strong> Rejects the booking and notifies the user</li>
+            <li><strong>Reschedule:</strong> Changes the date/time and notifies the user</li>
+          </ul>
+        </CardContent>
+      </Card>
 
       {/* Reschedule Dialog */}
       <Dialog open={!!rescheduleBooking} onOpenChange={(open) => !open && setRescheduleBooking(null)}>
@@ -403,7 +486,7 @@ export function ConsultationBookingsTab({ open, onOpenChange }: ConsultationBook
           <DialogHeader>
             <DialogTitle>Reschedule Consultation</DialogTitle>
             <DialogDescription>
-              Select a new date and time for this consultation.
+              Select a new date and time for this consultation. An email will be sent to notify the user.
             </DialogDescription>
           </DialogHeader>
 
@@ -477,6 +560,6 @@ export function ConsultationBookingsTab({ open, onOpenChange }: ConsultationBook
           </div>
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   );
 }
