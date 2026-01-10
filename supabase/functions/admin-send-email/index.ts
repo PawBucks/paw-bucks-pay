@@ -120,7 +120,7 @@ serve(async (req: Request) => {
       const promises = batch.map(async (email) => {
         try {
           const { error } = await resend.emails.send({
-            from: "PawBucks <noreply@resend.dev>",
+            from: "PawBucks <noreply@pawbucks.app>",
             to: [email],
             subject: subject,
             html: htmlContent,
