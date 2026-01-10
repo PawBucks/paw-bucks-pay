@@ -25,6 +25,7 @@ import { SEO } from "@/components/SEO";
 import { LostPetShareDialog } from "@/components/LostPetShareDialog";
 import { PhotoLightbox, PhotoThumbnail } from "@/components/PhotoLightbox";
 import { format } from "date-fns";
+import { jsPDF } from "jspdf";
 import {
   ArrowLeft,
   MapPin,
@@ -42,6 +43,8 @@ import {
   Share2,
   PartyPopper,
   Images,
+  Download,
+  Loader2,
 } from "lucide-react";
 
 interface LostPetPost {
@@ -100,6 +103,7 @@ const LostPetDetail = () => {
   const queryClient = useQueryClient();
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
   const { data: post, isLoading, error } = useQuery({
     queryKey: ["lost-pet-post", id],
@@ -158,6 +162,194 @@ const LostPetDetail = () => {
 
   const isOwner = user?.id === post?.user_id;
 
+  // Generate PDF Flyer
+  const generatePdfFlyer = async () => {
+    if (!post) return;
+    
+    setIsGeneratingPdf(true);
+    
+    try {
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "letter",
+      });
+
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const margin = 15;
+      let yPos = margin;
+
+      // Header Banner - Status
+      const statusText = post.status === "lost" ? "LOST PET" : post.status === "found" ? "FOUND PET" : "REUNITED";
+      const statusColor = post.status === "lost" ? [220, 38, 38] : post.status === "reunited" ? [34, 197, 94] : [59, 130, 246];
+      
+      pdf.setFillColor(statusColor[0], statusColor[1], statusColor[2]);
+      pdf.rect(0, 0, pageWidth, 25, "F");
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(28);
+      pdf.setFont("helvetica", "bold");
+      pdf.text(statusText, pageWidth / 2, 17, { align: "center" });
+
+      yPos = 35;
+
+      // Pet Name - Large
+      pdf.setTextColor(0, 0, 0);
+      pdf.setFontSize(32);
+      pdf.setFont("helvetica", "bold");
+      pdf.text(post.pet_name.toUpperCase(), pageWidth / 2, yPos, { align: "center" });
+      yPos += 12;
+
+      // Pet description line
+      pdf.setFontSize(14);
+      pdf.setFont("helvetica", "normal");
+      const description = [
+        post.breed,
+        post.color_markings,
+        post.size ? `${post.size.charAt(0).toUpperCase() + post.size.slice(1)} size` : null,
+        post.gender ? post.gender.charAt(0).toUpperCase() + post.gender.slice(1) : null,
+        post.age_estimate,
+      ].filter(Boolean).join(" • ");
+      pdf.text(description, pageWidth / 2, yPos, { align: "center", maxWidth: pageWidth - margin * 2 });
+      yPos += 10;
+
+      // Photo placeholder area
+      const photoAreaHeight = 80;
+      const photoAreaWidth = pageWidth - margin * 2;
+      
+      // Try to add pet photo
+      if (allPhotos.length > 0) {
+        try {
+          const response = await fetch(allPhotos[0]);
+          const blob = await response.blob();
+          const base64 = await new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.readAsDataURL(blob);
+          });
+          
+          // Add image centered
+          const imgWidth = 70;
+          const imgHeight = 70;
+          pdf.addImage(base64, "JPEG", (pageWidth - imgWidth) / 2, yPos, imgWidth, imgHeight);
+          yPos += imgHeight + 8;
+        } catch {
+          // If image fails, add placeholder
+          pdf.setDrawColor(200, 200, 200);
+          pdf.setFillColor(245, 245, 245);
+          pdf.roundedRect(margin, yPos, photoAreaWidth, photoAreaHeight, 3, 3, "FD");
+          pdf.setTextColor(150, 150, 150);
+          pdf.setFontSize(16);
+          pdf.text("Photo of " + post.pet_name, pageWidth / 2, yPos + photoAreaHeight / 2, { align: "center" });
+          yPos += photoAreaHeight + 8;
+        }
+      } else {
+        pdf.setDrawColor(200, 200, 200);
+        pdf.setFillColor(245, 245, 245);
+        pdf.roundedRect(margin, yPos, photoAreaWidth, photoAreaHeight, 3, 3, "FD");
+        pdf.setTextColor(150, 150, 150);
+        pdf.setFontSize(16);
+        pdf.text("Photo of " + post.pet_name, pageWidth / 2, yPos + photoAreaHeight / 2, { align: "center" });
+        yPos += photoAreaHeight + 8;
+      }
+
+      // Last Seen Box
+      pdf.setFillColor(254, 226, 226);
+      pdf.roundedRect(margin, yPos, photoAreaWidth, 28, 3, 3, "F");
+      pdf.setTextColor(153, 27, 27);
+      pdf.setFontSize(12);
+      pdf.setFont("helvetica", "bold");
+      pdf.text("LAST SEEN", margin + 5, yPos + 8);
+      pdf.setFontSize(14);
+      pdf.setFont("helvetica", "normal");
+      pdf.text(post.last_seen_location, margin + 5, yPos + 16);
+      const dateText = format(new Date(post.last_seen_date), "EEEE, MMMM d, yyyy") + (post.last_seen_time ? ` at ${post.last_seen_time}` : "");
+      pdf.setFontSize(11);
+      pdf.text(dateText, margin + 5, yPos + 23);
+      yPos += 35;
+
+      // Identifying Features
+      if (post.identifying_features || post.collar_description || post.microchip_number) {
+        pdf.setTextColor(0, 0, 0);
+        pdf.setFontSize(12);
+        pdf.setFont("helvetica", "bold");
+        pdf.text("IDENTIFYING FEATURES:", margin, yPos);
+        yPos += 6;
+        pdf.setFont("helvetica", "normal");
+        pdf.setFontSize(11);
+        
+        if (post.identifying_features) {
+          const splitFeatures = pdf.splitTextToSize(post.identifying_features, photoAreaWidth);
+          pdf.text(splitFeatures, margin, yPos);
+          yPos += splitFeatures.length * 5 + 2;
+        }
+        if (post.collar_description) {
+          pdf.text(`Collar: ${post.collar_description}`, margin, yPos);
+          yPos += 5;
+        }
+        if (post.microchip_number) {
+          pdf.text(`Microchip: ${post.microchip_number}`, margin, yPos);
+          yPos += 5;
+        }
+        yPos += 5;
+      }
+
+      // Reward Banner (if applicable)
+      if (post.reward_amount) {
+        pdf.setFillColor(34, 197, 94);
+        pdf.roundedRect(margin, yPos, photoAreaWidth, 18, 3, 3, "F");
+        pdf.setTextColor(255, 255, 255);
+        pdf.setFontSize(16);
+        pdf.setFont("helvetica", "bold");
+        pdf.text(`$${post.reward_amount} REWARD`, pageWidth / 2, yPos + 12, { align: "center" });
+        yPos += 25;
+      }
+
+      // Contact Information Box
+      pdf.setFillColor(249, 115, 22);
+      pdf.roundedRect(margin, yPos, photoAreaWidth, 35, 3, 3, "F");
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(14);
+      pdf.setFont("helvetica", "bold");
+      pdf.text("IF FOUND, PLEASE CONTACT:", pageWidth / 2, yPos + 10, { align: "center" });
+      pdf.setFontSize(18);
+      pdf.text(post.contact_name, pageWidth / 2, yPos + 20, { align: "center" });
+      pdf.setFontSize(20);
+      pdf.text(post.contact_phone, pageWidth / 2, yPos + 30, { align: "center" });
+      yPos += 42;
+
+      // Email if provided
+      if (post.contact_email) {
+        pdf.setTextColor(0, 0, 0);
+        pdf.setFontSize(11);
+        pdf.setFont("helvetica", "normal");
+        pdf.text(`Email: ${post.contact_email}`, pageWidth / 2, yPos, { align: "center" });
+        yPos += 8;
+      }
+
+      // Footer
+      pdf.setTextColor(150, 150, 150);
+      pdf.setFontSize(9);
+      pdf.text(`Flyer created via PawBucks • ${format(new Date(), "MMM d, yyyy")}`, pageWidth / 2, pageHeight - 10, { align: "center" });
+
+      // Save PDF
+      pdf.save(`${post.pet_name.toLowerCase().replace(/\s+/g, "-")}-lost-pet-flyer.pdf`);
+      
+      toast({
+        title: "PDF Downloaded!",
+        description: "Your lost pet flyer has been saved.",
+      });
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      toast({
+        title: "Failed to generate PDF",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
@@ -388,8 +580,23 @@ const LostPetDetail = () => {
               {/* Actions */}
               <Card>
                 <CardContent className="pt-6 space-y-3">
+                  <Button 
+                    className="w-full gap-2" 
+                    size="lg"
+                    variant="default"
+                    onClick={generatePdfFlyer}
+                    disabled={isGeneratingPdf}
+                  >
+                    {isGeneratingPdf ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <Download className="w-5 h-5" />
+                    )}
+                    {isGeneratingPdf ? "Generating PDF..." : "Download Flyer as PDF"}
+                  </Button>
+                  
                   <LostPetShareDialog post={post}>
-                    <Button className="w-full gap-2" size="lg">
+                    <Button className="w-full gap-2" size="lg" variant="outline">
                       <Share2 className="w-5 h-5" />
                       Share Flyer
                     </Button>
