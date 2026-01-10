@@ -9,6 +9,87 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Whitelist of allowed HTML tags for email content
+const ALLOWED_TAGS = new Set([
+  'p', 'br', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+  'strong', 'b', 'em', 'i', 'u', 's', 'strike',
+  'ul', 'ol', 'li', 'a', 'span', 'div',
+  'table', 'tr', 'td', 'th', 'thead', 'tbody',
+  'blockquote', 'hr', 'pre', 'code'
+]);
+
+// Whitelist of allowed attributes
+const ALLOWED_ATTRIBUTES: Record<string, Set<string>> = {
+  'a': new Set(['href', 'target', 'rel']),
+  'span': new Set(['style']),
+  'div': new Set(['style']),
+  'p': new Set(['style']),
+  'table': new Set(['style', 'width', 'cellpadding', 'cellspacing', 'border']),
+  'td': new Set(['style', 'width', 'colspan', 'rowspan', 'align', 'valign']),
+  'th': new Set(['style', 'width', 'colspan', 'rowspan', 'align', 'valign']),
+  'tr': new Set(['style']),
+  '*': new Set(['class']) // Global allowed attributes
+};
+
+// Dangerous patterns to remove
+const DANGEROUS_PATTERNS = [
+  /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
+  /javascript:/gi,
+  /on\w+\s*=/gi, // onclick, onload, onerror, etc.
+  /data:/gi,
+  /vbscript:/gi,
+  /<iframe\b[^>]*>.*?<\/iframe>/gi,
+  /<object\b[^>]*>.*?<\/object>/gi,
+  /<embed\b[^>]*>/gi,
+  /<form\b[^>]*>.*?<\/form>/gi,
+  /<input\b[^>]*>/gi,
+  /<button\b[^>]*>.*?<\/button>/gi,
+  /<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi,
+  /expression\s*\(/gi,
+  /url\s*\(\s*["']?\s*javascript:/gi,
+];
+
+// Sanitize HTML content to prevent XSS attacks
+function sanitizeHtml(html: string): string {
+  if (!html || typeof html !== 'string') {
+    return '';
+  }
+  
+  let sanitized = html;
+  
+  // Remove dangerous patterns
+  for (const pattern of DANGEROUS_PATTERNS) {
+    sanitized = sanitized.replace(pattern, '');
+  }
+  
+  // Remove any remaining script-like content
+  sanitized = sanitized.replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '');
+  
+  // Remove event handlers from remaining tags
+  sanitized = sanitized.replace(/\s+on\w+\s*=\s*["'][^"']*["']/gi, '');
+  sanitized = sanitized.replace(/\s+on\w+\s*=\s*[^\s>]+/gi, '');
+  
+  // Sanitize href attributes to only allow safe protocols
+  sanitized = sanitized.replace(
+    /href\s*=\s*["']([^"']*)["']/gi,
+    (match, url) => {
+      const trimmedUrl = url.trim().toLowerCase();
+      if (trimmedUrl.startsWith('http://') || 
+          trimmedUrl.startsWith('https://') || 
+          trimmedUrl.startsWith('mailto:') ||
+          trimmedUrl.startsWith('/')) {
+        return match;
+      }
+      return 'href="#"';
+    }
+  );
+  
+  // Escape any remaining potentially dangerous characters in text content
+  // while preserving legitimate HTML tags
+  
+  return sanitized;
+}
+
 interface EmailRequest {
   recipientType: "all" | "merchants" | "pet_owners" | "individual";
   individualEmails?: string[];
@@ -70,6 +151,11 @@ serve(async (req: Request) => {
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    // Sanitize HTML content to prevent XSS/injection attacks
+    const sanitizedHtmlContent = sanitizeHtml(htmlContent);
+    
+    console.log("HTML content sanitized for security");
 
     let emails: string[] = [];
 
@@ -142,7 +228,7 @@ serve(async (req: Request) => {
           <!-- Content -->
           <tr>
             <td style="padding: 40px 32px;">
-              ${htmlContent}
+              ${sanitizedHtmlContent}
             </td>
           </tr>
           
