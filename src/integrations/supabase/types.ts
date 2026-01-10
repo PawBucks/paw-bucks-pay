@@ -476,6 +476,7 @@ export type Database = {
           contact_name: string
           contact_phone: string
           created_at: string
+          deletion_warning_sent_at: string | null
           gender: string | null
           id: string
           identifying_features: string | null
@@ -505,6 +506,7 @@ export type Database = {
           contact_name: string
           contact_phone: string
           created_at?: string
+          deletion_warning_sent_at?: string | null
           gender?: string | null
           id?: string
           identifying_features?: string | null
@@ -534,6 +536,7 @@ export type Database = {
           contact_name?: string
           contact_phone?: string
           created_at?: string
+          deletion_warning_sent_at?: string | null
           gender?: string | null
           id?: string
           identifying_features?: string | null
