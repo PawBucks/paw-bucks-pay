@@ -33,8 +33,8 @@ const generatePasswordResetEmail = (
         <table width="100%" max-width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); max-width: 600px;">
           <!-- Header -->
           <tr>
-            <td style="background: linear-gradient(135deg, #8B5CF6 0%, #A855F7 100%); padding: 32px; text-align: center; border-radius: 12px 12px 0 0;">
-              <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700;">🐾 PawBucks</h1>
+            <td style="background: linear-gradient(180deg, #0a0a0a 0%, #1a1a2e 100%); padding: 32px; text-align: center; border-radius: 12px 12px 0 0;">
+              <h1 style="margin: 0; font-size: 36px; font-weight: 800; letter-spacing: 2px; color: #22d3ee; text-shadow: 0 0 20px rgba(34, 211, 238, 0.6), 0 0 40px rgba(34, 211, 238, 0.4), 0 0 60px rgba(34, 211, 238, 0.2);">PAWBUCKS</h1>
             </td>
           </tr>
           

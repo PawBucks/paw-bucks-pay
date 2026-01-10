@@ -96,10 +96,11 @@ serve(async (req) => {
         </head>
         <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5;">
           <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
-            <div style="background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+          <div style="background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
               <!-- Header -->
-              <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 32px; text-align: center;">
-                <h1 style="margin: 0; color: white; font-size: 28px; font-weight: 700;">🐾 You're Invited!</h1>
+              <div style="background: linear-gradient(180deg, #0a0a0a 0%, #1a1a2e 100%); padding: 32px; text-align: center;">
+                <h1 style="margin: 0 0 16px 0; font-size: 36px; font-weight: 800; letter-spacing: 2px; color: #22d3ee; text-shadow: 0 0 20px rgba(34, 211, 238, 0.6), 0 0 40px rgba(34, 211, 238, 0.4), 0 0 60px rgba(34, 211, 238, 0.2);">PAWBUCKS</h1>
+                <p style="margin: 0; color: #f59e0b; font-size: 16px; font-weight: 600;">🐾 You're Invited!</p>
               </div>
               
               <!-- Content -->

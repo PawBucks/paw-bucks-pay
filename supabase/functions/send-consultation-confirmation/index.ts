@@ -125,8 +125,9 @@ const handler = async (req: Request): Promise<Response> => {
       subject = "Your PawBucks Consultation is Confirmed!";
       html = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <div style="text-align: center; margin-bottom: 30px;">
-            <h1 style="color: #4F46E5; margin: 0;">Consultation Confirmed!</h1>
+          <div style="background: linear-gradient(180deg, #0a0a0a 0%, #1a1a2e 100%); padding: 24px; text-align: center; margin: -20px -20px 20px -20px; border-radius: 8px 8px 0 0;">
+            <h1 style="margin: 0 0 12px 0; font-size: 32px; font-weight: 800; letter-spacing: 2px; color: #22d3ee; text-shadow: 0 0 20px rgba(34, 211, 238, 0.6), 0 0 40px rgba(34, 211, 238, 0.4), 0 0 60px rgba(34, 211, 238, 0.2);">PAWBUCKS</h1>
+            <p style="margin: 0; color: #22c55e; font-size: 18px; font-weight: 600;">✓ Consultation Confirmed!</p>
           </div>
           
           <p>Great news! Your consultation with the PawBucks merchant success team has been confirmed.</p>
@@ -158,8 +159,9 @@ const handler = async (req: Request): Promise<Response> => {
       subject = "Your PawBucks Consultation Has Been Cancelled";
       html = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <div style="text-align: center; margin-bottom: 30px;">
-            <h1 style="color: #DC2626; margin: 0;">Consultation Cancelled</h1>
+          <div style="background: linear-gradient(180deg, #0a0a0a 0%, #1a1a2e 100%); padding: 24px; text-align: center; margin: -20px -20px 20px -20px; border-radius: 8px 8px 0 0;">
+            <h1 style="margin: 0 0 12px 0; font-size: 32px; font-weight: 800; letter-spacing: 2px; color: #22d3ee; text-shadow: 0 0 20px rgba(34, 211, 238, 0.6), 0 0 40px rgba(34, 211, 238, 0.4), 0 0 60px rgba(34, 211, 238, 0.2);">PAWBUCKS</h1>
+            <p style="margin: 0; color: #ef4444; font-size: 18px; font-weight: 600;">Consultation Cancelled</p>
           </div>
           
           <p>Your scheduled consultation has been cancelled.</p>
@@ -180,8 +182,9 @@ const handler = async (req: Request): Promise<Response> => {
       subject = "Your PawBucks Consultation Has Been Rescheduled";
       html = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <div style="text-align: center; margin-bottom: 30px;">
-            <h1 style="color: #F59E0B; margin: 0;">Consultation Rescheduled</h1>
+          <div style="background: linear-gradient(180deg, #0a0a0a 0%, #1a1a2e 100%); padding: 24px; text-align: center; margin: -20px -20px 20px -20px; border-radius: 8px 8px 0 0;">
+            <h1 style="margin: 0 0 12px 0; font-size: 32px; font-weight: 800; letter-spacing: 2px; color: #22d3ee; text-shadow: 0 0 20px rgba(34, 211, 238, 0.6), 0 0 40px rgba(34, 211, 238, 0.4), 0 0 60px rgba(34, 211, 238, 0.2);">PAWBUCKS</h1>
+            <p style="margin: 0; color: #f59e0b; font-size: 18px; font-weight: 600;">📅 Consultation Rescheduled</p>
           </div>
           
           <p>Your consultation has been rescheduled to a new time.</p>
@@ -219,8 +222,9 @@ const handler = async (req: Request): Promise<Response> => {
       subject = "New Consultation Request";
       html = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <div style="text-align: center; margin-bottom: 30px;">
-            <h1 style="color: #8B5CF6; margin: 0;">New Consultation Request</h1>
+          <div style="background: linear-gradient(180deg, #0a0a0a 0%, #1a1a2e 100%); padding: 24px; text-align: center; margin: -20px -20px 20px -20px; border-radius: 8px 8px 0 0;">
+            <h1 style="margin: 0 0 12px 0; font-size: 32px; font-weight: 800; letter-spacing: 2px; color: #22d3ee; text-shadow: 0 0 20px rgba(34, 211, 238, 0.6), 0 0 40px rgba(34, 211, 238, 0.4), 0 0 60px rgba(34, 211, 238, 0.2);">PAWBUCKS</h1>
+            <p style="margin: 0; color: #a78bfa; font-size: 18px; font-weight: 600;">📋 New Consultation Request</p>
           </div>
           
           <p>A new consultation request has been submitted.</p>
