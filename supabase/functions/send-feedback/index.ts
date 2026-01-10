@@ -192,8 +192,8 @@ const handler = async (req: Request): Promise<Response> => {
           subject: "We received your feedback - PawBucks",
           html: `
             <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-              <div style="background: linear-gradient(180deg, #0a0a0a 0%, #1a1a2e 100%); padding: 24px; text-align: center; margin: -20px -20px 20px -20px; border-radius: 8px 8px 0 0;">
-                <h1 style="margin: 0; font-size: 32px; font-weight: 800; letter-spacing: 2px; color: #22d3ee; text-shadow: 0 0 20px rgba(34, 211, 238, 0.6), 0 0 40px rgba(34, 211, 238, 0.4), 0 0 60px rgba(34, 211, 238, 0.2);">PAWBUCKS</h1>
+              <div style="background-color: #ffffff; padding: 24px; text-align: center; margin: -20px -20px 20px -20px; border-radius: 8px 8px 0 0; border-bottom: 1px solid #e5e7eb;">
+                <img src="https://pawbucks.app/email-header.png" alt="PAWBUCKS" style="max-width: 240px; height: auto;" />
               </div>
               
               <h2 style="color: #333;">Thank you for your feedback${safeName ? `, ${sanitizeForHtml(safeName.split(' ')[0])}` : ''}!</h2>
