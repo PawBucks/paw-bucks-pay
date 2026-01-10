@@ -218,3 +218,6 @@ verify_jwt = false
 
 [functions.admin-send-email]
 verify_jwt = true
+
+[functions.cleanup-resolved-lost-pets]
+verify_jwt = false
