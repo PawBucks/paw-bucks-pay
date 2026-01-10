@@ -127,33 +127,7 @@ export function EmailTab() {
           recipientType,
           individualEmails: recipientType === "individual" ? selectedEmails : undefined,
           subject,
-          htmlContent: `
-            <!DOCTYPE html>
-            <html>
-            <head>
-              <meta charset="utf-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <style>
-                body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
-                .header { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; padding: 30px; text-align: center; border-radius: 12px 12px 0 0; }
-                .content { background: #ffffff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px; }
-                .footer { text-align: center; padding: 20px; color: #6b7280; font-size: 12px; }
-              </style>
-            </head>
-            <body>
-              <div class="header">
-                <h1 style="margin: 0;">🐾 PawBucks</h1>
-              </div>
-              <div class="content">
-                ${htmlContent}
-              </div>
-              <div class="footer">
-                <p>© ${new Date().getFullYear()} PawBucks. All rights reserved.</p>
-                <p>You received this email because you're a registered user.</p>
-              </div>
-            </body>
-            </html>
-          `,
+          htmlContent: htmlContent,
         },
       });
 
