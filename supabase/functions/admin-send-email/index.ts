@@ -84,10 +84,41 @@ function sanitizeHtml(html: string): string {
     }
   );
   
-  // Escape any remaining potentially dangerous characters in text content
-  // while preserving legitimate HTML tags
-  
   return sanitized;
+}
+
+// Convert plain text with line breaks to proper HTML formatting
+function formatTextToHtml(text: string): string {
+  if (!text || typeof text !== 'string') {
+    return '';
+  }
+  
+  // Check if content already contains HTML block elements (user provided HTML)
+  const hasBlockHtml = /<(p|div|h[1-6]|ul|ol|li|table|br)\b/i.test(text);
+  
+  if (hasBlockHtml) {
+    // Content already has HTML formatting, just return it
+    return text;
+  }
+  
+  // Plain text: convert line breaks to HTML
+  // Split by double line breaks (paragraphs) first
+  const paragraphs = text.split(/\n\s*\n/);
+  
+  if (paragraphs.length > 1) {
+    // Multiple paragraphs: wrap each in <p> tags
+    return paragraphs
+      .map(p => {
+        // Convert single line breaks within paragraph to <br>
+        const content = p.trim().replace(/\n/g, '<br>');
+        return content ? `<p style="margin: 0 0 16px 0; line-height: 1.6;">${content}</p>` : '';
+      })
+      .filter(p => p)
+      .join('\n');
+  } else {
+    // Single paragraph: just convert line breaks to <br>
+    return `<p style="margin: 0; line-height: 1.6;">${text.trim().replace(/\n/g, '<br>')}</p>`;
+  }
 }
 
 interface EmailRequest {
@@ -152,10 +183,11 @@ serve(async (req: Request) => {
       );
     }
 
-    // Sanitize HTML content to prevent XSS/injection attacks
-    const sanitizedHtmlContent = sanitizeHtml(htmlContent);
+    // First format plain text to HTML (preserves existing HTML), then sanitize
+    const formattedHtmlContent = formatTextToHtml(htmlContent);
+    const sanitizedHtmlContent = sanitizeHtml(formattedHtmlContent);
     
-    console.log("HTML content sanitized for security");
+    console.log("HTML content formatted and sanitized for security");
 
     let emails: string[] = [];
 
