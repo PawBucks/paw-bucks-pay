@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useGeocoding } from "@/hooks/useGeocoding";
@@ -7,47 +7,50 @@ import { useMerchantPawBucksRealtime } from "@/hooks/usePawBucksRealtime";
 import { supabase } from "@/integrations/supabase/client";
 import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
-import { GradientCard } from "@/components/ui/gradient-card";
+import { Card, CardContent } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 import { NotificationsDropdown } from "@/components/NotificationsDropdown";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import {
   LogOut,
   PawPrint,
-  ExternalLink,
-  Edit,
   Loader2,
-  CreditCard,
-  FileText,
-  ShoppingCart,
-  AlertCircle,
-  Package,
-  Coins,
-  Store,
+  LayoutDashboard,
+  BarChart3,
   Sparkles,
-  Vault,
-  PlugZap,
-  CalendarDays,
+  Zap,
+  DollarSign,
+  Menu,
+  ChevronRight,
+  HelpCircle,
 } from "lucide-react";
-import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { format, startOfMonth, parseISO } from "date-fns";
+import { cn } from "@/lib/utils";
 
-// Extracted components
-import { MerchantAnalyticsCards } from "@/components/merchant/MerchantAnalyticsCards";
-import { MerchantCharts } from "@/components/merchant/MerchantCharts";
-import { MerchantTransactionList } from "@/components/merchant/MerchantTransactionList";
+// Tab Components
+import { MerchantOverviewTab } from "@/components/merchant/MerchantOverviewTab";
+import { MerchantQuickActionsTab } from "@/components/merchant/MerchantQuickActionsTab";
+import { MerchantPremiumServicesTab } from "@/components/merchant/MerchantPremiumServicesTab";
+import { MerchantEarningsTab } from "@/components/merchant/MerchantEarningsTab";
+
+// Dialogs
 import { EditMerchantProfileDialog } from "@/components/merchant/EditMerchantProfileDialog";
 import { FundingRequestDialog } from "@/components/merchant/FundingRequestDialog";
 import { TransactionsDialog } from "@/components/merchant/TransactionsDialog";
-import { SponsoredPlacementDashboard } from "@/components/merchant/SponsoredPlacementDashboard";
-import { FeaturedPartnerWidget } from "@/components/merchant/FeaturedPartnerWidget";
-import { SearchRankingBoosterWidget } from "@/components/merchant/SearchRankingBoosterWidget";
-import { ProfileOptimizationWidget } from "@/components/merchant/ProfileOptimizationWidget";
-import { ReviewCampaignWidget } from "@/components/merchant/ReviewCampaignWidget";
-import { PrioritySupportWidget } from "@/components/merchant/PrioritySupportWidget";
-import { MerchantSpotlightWidget } from "@/components/merchant/MerchantSpotlightWidget";
-import { StripeConnectButton } from "@/components/merchant/StripeConnectButton";
-import { MerchantEarningsTab } from "@/components/merchant/MerchantEarningsTab";
+
 type Merchant = {
   id: string;
   business_name: string;
@@ -85,6 +88,44 @@ type Transaction = {
   created_at: string;
 };
 
+// Define navigation sections
+const NAV_SECTIONS = [
+  {
+    title: "Dashboard",
+    items: [
+      {
+        id: "overview",
+        label: "Overview",
+        icon: LayoutDashboard,
+        description: "View your sales analytics, rewards, and recent transactions",
+      },
+      {
+        id: "analytics",
+        label: "Earnings",
+        icon: DollarSign,
+        description: "View your Stripe earnings, payouts, and balance information",
+      },
+    ],
+  },
+  {
+    title: "Services",
+    items: [
+      {
+        id: "premium",
+        label: "Premium Services",
+        icon: Sparkles,
+        description: "Manage your active premium service dashboards",
+      },
+      {
+        id: "actions",
+        label: "Quick Actions",
+        icon: Zap,
+        description: "Access all merchant tools, products, and settings",
+      },
+    ],
+  },
+];
+
 const MerchantDashboard = () => {
   const { user, signOut, loading: authLoading } = useAuth();
   const { geocodeAddress } = useGeocoding();
@@ -94,6 +135,10 @@ const MerchantDashboard = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [allTransactions, setAllTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("overview");
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
+  // Dialog states
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [transactionsDialogOpen, setTransactionsDialogOpen] = useState(false);
   const [fundingDialogOpen, setFundingDialogOpen] = useState(false);
@@ -198,44 +243,13 @@ const MerchantDashboard = () => {
 
       if (error) {
         console.error("Stripe Connect invocation error:", error);
-        toast.error("Failed to connect Stripe account", {
-          description: "Network error. Please check your connection and try again.",
-          duration: 5000,
-        });
+        toast.error("Failed to connect Stripe account");
         return;
       }
 
       if (data?.error || data?.success === false) {
-        console.error("Stripe Connect error:", data.error || data.originalError);
-        const errorMessage = data.error || "An unexpected error occurred";
-
-        if (errorMessage.includes("PLATFORM_NOT_CONFIGURED") || errorMessage.includes("platform-profile")) {
-          toast.error("Stripe Platform Setup Required", {
-            description: (
-              <>
-                <p className="mb-2">Before merchants can accept payments, the platform owner must complete Stripe Connect setup:</p>
-                <ol className="list-decimal list-inside space-y-1 text-sm">
-                  <li>Visit <a href="https://dashboard.stripe.com/settings/connect" target="_blank" rel="noopener noreferrer" className="underline font-medium">Stripe Dashboard</a></li>
-                  <li>Go to Settings → Connect → Platform Profile</li>
-                  <li>Complete all required fields</li>
-                  <li>Select who manages losses for connected accounts</li>
-                </ol>
-                <p className="mt-2 text-xs opacity-80">This is a one-time setup required by Stripe.</p>
-              </>
-            ),
-            duration: 20000,
-          });
-        } else if (errorMessage.includes("CAPABILITIES_ERROR") || errorMessage.includes("capabilities")) {
-          toast.error("Payment Capabilities Error", {
-            description: "Unable to enable payment capabilities. Please ensure your Stripe account has the necessary permissions.",
-            duration: 6000,
-          });
-        } else {
-          toast.error("Failed to connect Stripe account", {
-            description: errorMessage.replace(/^[A-Z_]+:\s*/, ''),
-            duration: 6000,
-          });
-        }
+        console.error("Stripe Connect error:", data.error);
+        toast.error(data.error || "Failed to connect Stripe account");
         return;
       }
 
@@ -246,10 +260,7 @@ const MerchantDashboard = () => {
       }
     } catch (error: any) {
       console.error("Unexpected error connecting Stripe:", error);
-      toast.error("Failed to connect Stripe account", {
-        description: "An unexpected error occurred. Please try again.",
-        duration: 5000,
-      });
+      toast.error("Failed to connect Stripe account");
     } finally {
       setConnectingStripe(false);
     }
@@ -299,17 +310,8 @@ const MerchantDashboard = () => {
 
       if (error) throw error;
 
-      // Geocode the new address if it changed
       if (addressChanged && newAddress) {
-        geocodeAddress(newAddress, merchant.id).then(result => {
-          if (result.latitude && result.longitude) {
-            console.log(`Merchant geocoded: lat=${result.latitude}, lng=${result.longitude}`);
-          } else {
-            console.warn("Could not geocode merchant address:", result.error);
-          }
-        }).catch(err => {
-          console.error("Geocoding error:", err);
-        });
+        geocodeAddress(newAddress, merchant.id);
       }
 
       toast.success("Profile updated successfully!");
@@ -376,7 +378,17 @@ const MerchantDashboard = () => {
     }
   };
 
-  const getMonthlySalesData = () => {
+  const handleSignOut = useCallback(async () => {
+    await signOut();
+    navigate("/auth");
+  }, [signOut, navigate]);
+
+  const handleTabChange = useCallback((tabId: string) => {
+    setActiveTab(tabId);
+    setMobileNavOpen(false);
+  }, []);
+
+  const getMonthlySalesData = useMemo(() => {
     const monthlyData: { [key: string]: number } = {};
 
     allTransactions.forEach((transaction) => {
@@ -388,11 +400,9 @@ const MerchantDashboard = () => {
       .map(([month, amount]) => ({ month, amount }))
       .sort((a, b) => new Date(a.month).getTime() - new Date(b.month).getTime())
       .slice(-6);
-  };
+  }, [allTransactions]);
 
-  const getCashbackDistribution = () => {
-    // Calculate total rewards from allTransactions using rewards_earned field
-    // rewards_earned is in PawBucks, convert to USD (1 PawBuck = $0.001)
+  const getCashbackDistribution = useMemo(() => {
     const totalRewardsPawBucks = allTransactions.reduce((sum, t) => sum + (t.rewards_earned || 0), 0);
     const totalRewardsUSD = totalRewardsPawBucks * 0.001;
     const remainingBalance = analytics?.remaining_balance || 0;
@@ -401,17 +411,163 @@ const MerchantDashboard = () => {
       { name: "Rewards Given", value: totalRewardsUSD, color: "hsl(var(--accent))" },
       { name: "Remaining Balance", value: remainingBalance, color: "hsl(var(--primary))" }
     ].filter(item => item.value > 0);
-  };
+  }, [allTransactions, analytics?.remaining_balance]);
 
-  const handleSignOut = async () => {
-    await signOut();
-    navigate("/auth");
-  };
+  // Find current tab info for header
+  const currentTabInfo = useMemo(() => {
+    for (const section of NAV_SECTIONS) {
+      const item = section.items.find(i => i.id === activeTab);
+      if (item) return item;
+    }
+    return NAV_SECTIONS[0].items[0];
+  }, [activeTab]);
+
+  // Render tab content
+  const renderTabContent = useCallback(() => {
+    if (!merchant) return null;
+
+    switch (activeTab) {
+      case "overview":
+        return (
+          <MerchantOverviewTab
+            merchant={merchant}
+            analytics={analytics}
+            transactions={transactions}
+            monthlySalesData={getMonthlySalesData}
+            cashbackDistribution={getCashbackDistribution}
+            onConnectStripe={handleConnectStripe}
+            onTogglePawbucks={handleTogglePawbucks}
+            connectingStripe={connectingStripe}
+            togglingPawbucks={togglingPawbucks}
+            onViewWallet={() => navigate('/merchant/pawbucks')}
+          />
+        );
+      case "analytics":
+        return <MerchantEarningsTab />;
+      case "premium":
+        return (
+          <MerchantPremiumServicesTab
+            merchantId={merchant.id}
+            hasSponsored={hasSponsored}
+            hasPremiumAd={hasPremiumAd}
+            hasFeaturedPartner={hasFeaturedPartner}
+            hasSearchBooster={hasSearchBooster}
+            hasProfileOptimization={hasProfileOptimization}
+            hasReviewCampaign={hasReviewCampaign}
+            hasPrioritySupport={hasPrioritySupport}
+            hasSpotlight={hasSpotlight}
+            onNavigate={navigate}
+          />
+        );
+      case "actions":
+        return (
+          <MerchantQuickActionsTab
+            hasStripeAccount={!!merchant.stripe_account_id}
+            onViewTransactions={() => setTransactionsDialogOpen(true)}
+            onRequestFunding={() => setFundingDialogOpen(true)}
+            onEditProfile={() => setEditDialogOpen(true)}
+            onNavigate={navigate}
+          />
+        );
+      default:
+        return null;
+    }
+  }, [activeTab, merchant, analytics, transactions, getMonthlySalesData, getCashbackDistribution, connectingStripe, togglingPawbucks, hasSponsored, hasPremiumAd, hasFeaturedPartner, hasSearchBooster, hasProfileOptimization, hasReviewCampaign, hasPrioritySupport, hasSpotlight, navigate]);
+
+  // Navigation sidebar component
+  const NavigationSidebar = ({ className }: { className?: string }) => (
+    <div className={cn("flex flex-col h-full", className)}>
+      {/* Logo and Title */}
+      <div className="p-4 border-b">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg">
+            <PawPrint className="w-5 h-5 text-primary-foreground" />
+          </div>
+          <div>
+            <h1 className="font-bold text-lg truncate">{merchant?.business_name || "Merchant"}</h1>
+            <p className="text-xs text-muted-foreground">Merchant Dashboard</p>
+          </div>
+        </div>
+        <div className="mt-3 flex items-center gap-2">
+          <Badge variant="secondary" className="text-xs">
+            Merchant
+          </Badge>
+          {hasPremiumServices && (
+            <Badge variant="default" className="text-xs">
+              <Sparkles className="w-3 h-3 mr-1" />
+              Premium
+            </Badge>
+          )}
+        </div>
+      </div>
+
+      {/* Navigation Items */}
+      <ScrollArea className="flex-1 py-2">
+        <div className="px-3 space-y-6">
+          {NAV_SECTIONS.map((section) => (
+            <div key={section.title}>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-2">
+                {section.title}
+              </p>
+              <div className="space-y-1">
+                {section.items.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = activeTab === item.id;
+                  return (
+                    <TooltipProvider key={item.id} delayDuration={300}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            onClick={() => handleTabChange(item.id)}
+                            className={cn(
+                              "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
+                              "hover:bg-accent/50 hover:text-accent-foreground",
+                              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                              isActive && "bg-primary/10 text-primary border-l-2 border-primary"
+                            )}
+                          >
+                            <Icon className={cn("w-4 h-4 flex-shrink-0", isActive && "text-primary")} />
+                            <span className="truncate">{item.label}</span>
+                            {isActive && <ChevronRight className="w-4 h-4 ml-auto" />}
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent side="right" className="max-w-[250px]">
+                          <p className="font-semibold">{item.label}</p>
+                          <p className="text-xs text-muted-foreground">{item.description}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      </ScrollArea>
+
+      {/* Footer Actions */}
+      <div className="p-3 border-t space-y-2">
+        <Separator className="mb-2" />
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
+          onClick={handleSignOut}
+        >
+          <LogOut className="w-4 h-4 mr-2" />
+          Sign Out
+        </Button>
+      </div>
+    </div>
+  );
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center space-y-4">
+          <Loader2 className="w-10 h-10 animate-spin text-primary mx-auto" />
+          <p className="text-muted-foreground">Loading merchant dashboard...</p>
+        </div>
       </div>
     );
   }
@@ -428,354 +584,99 @@ const MerchantDashboard = () => {
         keywords={["merchant dashboard", "PawBucks merchant", "sales analytics"]}
         noIndex={true}
       />
-      <div className="min-h-screen bg-background">
-      <header className="border-b border-border/50 bg-card/95 backdrop-blur-xl sticky top-0 z-50 shadow-[var(--shadow-soft)]" style={{ paddingTop: 'max(0.5rem, env(safe-area-inset-top))' }}>
-        <div className="container mx-auto px-4 py-2 sm:py-3 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-              <PawPrint className="w-6 h-6 text-primary-foreground" />
-            </div>
-            <div className="min-w-0">
-              <h1 className="text-lg sm:text-xl font-bold truncate">{merchant.business_name}</h1>
-              <p className="text-xs text-muted-foreground">Merchant Dashboard</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-            {user && <NotificationsDropdown userId={user.id} />}
-            <Button variant="ghost" size="icon" onClick={() => setEditDialogOpen(true)} title="Edit Profile" className="min-h-[44px] min-w-[44px]">
-              <Edit className="w-4 h-4" />
-            </Button>
-            <Button variant="outline" size="icon" onClick={handleSignOut} title="Logout" className="min-h-[44px] min-w-[44px]">
-              <LogOut className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
-      </header>
+      <TooltipProvider>
+        <div className="min-h-screen bg-background flex">
+          {/* Desktop Sidebar */}
+          <aside className="hidden lg:flex w-64 border-r bg-card flex-shrink-0 sticky top-0 h-screen">
+            <NavigationSidebar />
+          </aside>
 
-      <main className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Merchant Dashboard</h1>
-          <p className="text-muted-foreground">
-            Track your PawBucks sales, rewards, and repayments in one place.
-          </p>
-        </div>
-
-        {/* Stripe Connect Status */}
-        {!merchant.stripe_account_id && (
-          <GradientCard gradient className="mb-6 bg-accent/10 border-accent/20">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between flex-wrap gap-4">
-                <div className="flex-1">
-                  <h3 className="font-semibold mb-1">Connect Your Bank Account</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Set up Stripe Connect to receive payments directly to your bank account
-                  </p>
+          {/* Main Content Area */}
+          <div className="flex-1 flex flex-col min-h-screen">
+            {/* Top Header */}
+            <header className="sticky top-0 z-40 border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 safe-area-inset-top">
+              <div className="flex items-center justify-between px-4 h-16">
+                {/* Mobile Menu */}
+                <div className="flex items-center gap-3 lg:hidden">
+                  <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
+                    <SheetTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <Menu className="w-5 h-5" />
+                      </Button>
+                    </SheetTrigger>
+                    <SheetContent side="left" className="p-0 w-72">
+                      <NavigationSidebar />
+                    </SheetContent>
+                  </Sheet>
                 </div>
-                <Button onClick={handleConnectStripe} disabled={connectingStripe}>
-                  {connectingStripe ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Connecting...
-                    </>
-                  ) : (
-                    <>
-                      <ExternalLink className="w-4 h-4 mr-2" />
-                      Connect Stripe
-                    </>
-                  )}
-                </Button>
-              </div>
 
-              <div className="text-xs bg-background/50 p-3 rounded-md border border-border/50">
-                <p className="font-medium mb-2 text-warning flex items-center gap-2">
-                  <AlertCircle className="w-3.5 h-3.5" />
-                  Important: Platform Setup Required
-                </p>
-                <p className="opacity-90 mb-2">
-                  If you see an error when clicking "Connect Stripe", it means the platform owner needs to complete a one-time Stripe Connect setup:
-                </p>
-                <ol className="list-decimal list-inside space-y-1 ml-2 opacity-80">
-                  <li>Visit <a href="https://dashboard.stripe.com/settings/connect" target="_blank" rel="noopener noreferrer" className="underline text-primary hover:text-primary/80">Stripe Dashboard</a></li>
-                  <li>Go to Settings → Connect → Platform Profile</li>
-                  <li>Complete all required fields including loss management selection</li>
-                </ol>
-              </div>
-            </div>
-          </GradientCard>
-        )}
-
-        {/* PawBucks Acceptance Settings */}
-        {merchant.stripe_account_id && (
-          <GradientCard className="mb-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Coins className="w-6 h-6 text-primary" />
+                {/* Current Page Info */}
+                <div className="flex items-center gap-3">
+                  <div className="hidden lg:block">
+                    {currentTabInfo && (
+                      <div className="flex items-center gap-2">
+                        <currentTabInfo.icon className="w-5 h-5 text-primary" />
+                        <div>
+                          <h2 className="font-semibold">{currentTabInfo.label}</h2>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <div className="lg:hidden">
+                    <h2 className="font-semibold">{currentTabInfo?.label}</h2>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-semibold">Accept PawBucks</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Allow customers to pay with PawBucks (1000 PawBucks = $1.00)
-                  </p>
+
+                {/* Header Actions */}
+                <div className="flex items-center gap-2">
+                  {user && <NotificationsDropdown userId={user.id} />}
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon" className="text-muted-foreground">
+                          <HelpCircle className="w-5 h-5" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" className="max-w-[300px]">
+                        <p className="font-semibold mb-1">{currentTabInfo?.label}</p>
+                        <p className="text-xs text-muted-foreground">{currentTabInfo?.description}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleSignOut}
+                    className="lg:hidden"
+                  >
+                    <LogOut className="w-5 h-5" />
+                  </Button>
                 </div>
               </div>
-              <Switch
-                checked={merchant.accepts_pawbucks ?? false}
-                onCheckedChange={handleTogglePawbucks}
-                disabled={togglingPawbucks}
-              />
-            </div>
-            {merchant.accepts_pawbucks && (
-              <div className="mt-4 pt-4 border-t flex items-center justify-between">
-                <p className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-                  Customers can now pay using their PawBucks balance
-                </p>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => navigate('/merchant/pawbucks')}
-                >
-                  <Coins className="w-4 h-4 mr-2" />
-                  View Wallet
-                </Button>
+            </header>
+
+            {/* Page Content */}
+            <main className="flex-1 p-4 lg:p-6 overflow-x-hidden">
+              <div className="max-w-7xl mx-auto">
+                {/* Description Card for Context */}
+                <Card className="mb-6 bg-muted/30 border-dashed">
+                  <CardContent className="py-3 px-4">
+                    <div className="flex items-start gap-3">
+                      <HelpCircle className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                      <p className="text-sm text-muted-foreground">
+                        {currentTabInfo?.description}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Tab Content */}
+                {renderTabContent()}
               </div>
-            )}
-          </GradientCard>
-        )}
-
-        {/* Analytics Summary Cards */}
-        <MerchantAnalyticsCards analytics={analytics} />
-
-        {/* Repayment Progress */}
-        {analytics?.funding_deal_status === 'active' && analytics?.remaining_balance !== undefined && (
-          <GradientCard className="mb-8">
-            <h3 className="text-xl font-semibold mb-4">Repayment Progress</h3>
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm mb-2">
-                <span className="text-muted-foreground">Funding Balance Remaining</span>
-                <span className="font-bold">${analytics.remaining_balance.toFixed(2)}</span>
-              </div>
-              <div className="w-full bg-muted rounded-full h-4 overflow-hidden">
-                <div
-                  className="bg-gradient-to-r from-accent to-secondary h-full transition-all duration-500 rounded-full"
-                  style={{ width: analytics.remaining_balance > 0 ? '100%' : '0%' }}
-                />
-              </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                {analytics.repayment_rate}% of each sale goes toward repayment
-              </p>
-            </div>
-          </GradientCard>
-        )}
-
-        {!analytics?.funding_deal_status && (
-          <GradientCard className="mb-8 text-center py-8">
-            <CreditCard className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
-            <p className="text-muted-foreground">No active funding deal</p>
-          </GradientCard>
-        )}
-
-        {/* Charts */}
-        <MerchantCharts
-          monthlySalesData={getMonthlySalesData()}
-          cashbackDistribution={getCashbackDistribution()}
-        />
-
-        {/* Premium Services Dashboards */}
-        {hasPremiumServices && merchant && (
-          <div className="mb-8">
-            <div className="flex items-center gap-2 mb-4">
-              <Sparkles className="w-5 h-5 text-primary" />
-              <h2 className="text-xl font-bold">Premium Services</h2>
-            </div>
-            <Tabs defaultValue={hasSponsored ? "sponsored" : hasPremiumAd ? "premium-ad" : hasFeaturedPartner ? "featured" : hasSearchBooster ? "search" : hasProfileOptimization ? "profile" : hasReviewCampaign ? "reviews" : hasPrioritySupport ? "support" : "spotlight"} className="w-full">
-              <TabsList className="mb-4 flex-wrap h-auto gap-1">
-                {hasSponsored && (
-                  <TabsTrigger value="sponsored">Sponsored Placement</TabsTrigger>
-                )}
-                {hasPremiumAd && (
-                  <TabsTrigger value="premium-ad">Premium Ad Placement</TabsTrigger>
-                )}
-                {hasFeaturedPartner && (
-                  <TabsTrigger value="featured">Featured Partner</TabsTrigger>
-                )}
-                {hasSearchBooster && (
-                  <TabsTrigger value="search">Search Booster</TabsTrigger>
-                )}
-                {hasProfileOptimization && (
-                  <TabsTrigger value="profile">Profile Optimization</TabsTrigger>
-                )}
-                {hasReviewCampaign && (
-                  <TabsTrigger value="reviews">Review Campaign</TabsTrigger>
-                )}
-                {hasPrioritySupport && (
-                  <TabsTrigger value="support">Priority Support</TabsTrigger>
-                )}
-                {hasSpotlight && (
-                  <TabsTrigger value="spotlight">Spotlight</TabsTrigger>
-                )}
-              </TabsList>
-              
-              {hasSponsored && (
-                <TabsContent value="sponsored">
-                  <SponsoredPlacementDashboard merchantId={merchant.id} serviceType="sponsored" />
-                </TabsContent>
-              )}
-              
-              {hasPremiumAd && (
-                <TabsContent value="premium-ad">
-                  <SponsoredPlacementDashboard merchantId={merchant.id} serviceType="premium-ad" />
-                </TabsContent>
-              )}
-              
-              {hasFeaturedPartner && (
-                <TabsContent value="featured">
-                  <FeaturedPartnerWidget />
-                </TabsContent>
-              )}
-              
-              {hasSearchBooster && (
-                <TabsContent value="search">
-                  <SearchRankingBoosterWidget />
-                </TabsContent>
-              )}
-              
-              {hasProfileOptimization && (
-                <TabsContent value="profile">
-                  <ProfileOptimizationWidget />
-                </TabsContent>
-              )}
-              
-              {hasReviewCampaign && (
-                <TabsContent value="reviews">
-                  <ReviewCampaignWidget />
-                </TabsContent>
-              )}
-              
-              {hasPrioritySupport && (
-                <TabsContent value="support">
-                  <PrioritySupportWidget />
-                </TabsContent>
-              )}
-              
-              {hasSpotlight && (
-                <TabsContent value="spotlight">
-                  <MerchantSpotlightWidget />
-                </TabsContent>
-              )}
-            </Tabs>
+            </main>
           </div>
-        )}
-
-        {/* Quick Actions */}
-        <div className="grid gap-4 md:grid-cols-4 mb-8">
-          <Button
-            variant="outline"
-            className="h-auto py-4 justify-start"
-            onClick={() => setTransactionsDialogOpen(true)}
-          >
-            <FileText className="w-5 h-5 mr-3" />
-            <div className="text-left">
-              <p className="font-semibold">View Detailed Transactions</p>
-              <p className="text-xs text-muted-foreground">See all activity</p>
-            </div>
-          </Button>
-          <Button
-            variant="outline"
-            className="h-auto py-4 justify-start"
-            onClick={() => setFundingDialogOpen(true)}
-          >
-            <CreditCard className="w-5 h-5 mr-3" />
-            <div className="text-left">
-              <p className="font-semibold">Request Funding</p>
-              <p className="text-xs text-muted-foreground">Get advance on earnings</p>
-            </div>
-          </Button>
-          <Button
-            variant="outline"
-            className="h-auto py-4 justify-start"
-            onClick={() => setEditDialogOpen(true)}
-          >
-            <Edit className="w-5 h-5 mr-3" />
-            <div className="text-left">
-              <p className="font-semibold">Edit Profile</p>
-              <p className="text-xs text-muted-foreground">Update business info</p>
-            </div>
-          </Button>
-          {merchant.stripe_account_id && (
-            <Button
-              variant="outline"
-              className="h-auto py-4 justify-start"
-              onClick={() => navigate("/merchant/products")}
-            >
-              <Package className="w-5 h-5 mr-3" />
-              <div className="text-left">
-                <p className="font-semibold">Manage Products</p>
-                <p className="text-xs text-muted-foreground">Add and edit products</p>
-              </div>
-            </Button>
-          )}
-          <Button
-            variant="outline"
-            className="h-auto py-4 justify-start"
-            onClick={() => navigate("/merchant/offers")}
-          >
-            <ShoppingCart className="w-5 h-5 mr-3" />
-            <div className="text-left">
-              <p className="font-semibold">Partner Offers</p>
-              <p className="text-xs text-muted-foreground">PawBucks redemptions</p>
-            </div>
-          </Button>
-          <Button
-            variant="outline"
-            className="h-auto py-4 justify-start border-primary/30 bg-primary/5 hover:bg-primary/10"
-            onClick={() => navigate("/merchant/market")}
-          >
-            <Store className="w-5 h-5 mr-3 text-primary" />
-            <div className="text-left">
-              <p className="font-semibold text-primary">Merchant Market</p>
-              <p className="text-xs text-muted-foreground">Grow your business</p>
-            </div>
-          </Button>
-          <Button
-            variant="outline"
-            className="h-auto py-4 justify-start"
-            onClick={() => navigate("/merchant/pos-integration")}
-          >
-            <PlugZap className="w-5 h-5 mr-3" />
-            <div className="text-left">
-              <p className="font-semibold">POS Integration</p>
-              <p className="text-xs text-muted-foreground">Connect your POS system</p>
-            </div>
-          </Button>
-          <Button
-            variant="outline"
-            className="h-auto py-4 justify-start border-accent/30 bg-accent/5 hover:bg-accent/10"
-            onClick={() => navigate("/merchant/scheduling")}
-          >
-            <CalendarDays className="w-5 h-5 mr-3 text-accent" />
-            <div className="text-left">
-              <p className="font-semibold text-accent">Scheduling</p>
-              <p className="text-xs text-muted-foreground">Manage bookings & services</p>
-            </div>
-          </Button>
-          <Button
-            variant="outline"
-            className="h-auto py-4 justify-start border-green-500/30 bg-green-500/5 hover:bg-green-500/10"
-            onClick={() => navigate("/merchant/tax-vault")}
-          >
-            <Vault className="w-5 h-5 mr-3 text-green-600" />
-            <div className="text-left">
-              <p className="font-semibold text-green-600">Tax Vault</p>
-              <p className="text-xs text-muted-foreground">Track business expenses</p>
-            </div>
-          </Button>
         </div>
-
-        {/* Recent Transactions */}
-        <MerchantTransactionList transactions={transactions} />
-      </main>
+      </TooltipProvider>
 
       {/* Dialogs */}
       <EditMerchantProfileDialog
@@ -798,7 +699,6 @@ const MerchantDashboard = () => {
         onSubmit={handleRequestFunding}
         isSubmitting={requestingFunding}
       />
-    </div>
     </>
   );
 };

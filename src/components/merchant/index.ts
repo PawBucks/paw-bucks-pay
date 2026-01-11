@@ -17,3 +17,7 @@ export { FeaturedPartnerWidget } from "./FeaturedPartnerWidget";
 export { ReviewCampaignWidget } from "./ReviewCampaignWidget";
 export { PrioritySupportWidget } from "./PrioritySupportWidget";
 export { MerchantSpotlightWidget } from "./MerchantSpotlightWidget";
+export { MerchantOverviewTab } from "./MerchantOverviewTab";
+export { MerchantQuickActionsTab } from "./MerchantQuickActionsTab";
+export { MerchantPremiumServicesTab } from "./MerchantPremiumServicesTab";
+export { MerchantEarningsTab } from "./MerchantEarningsTab";
