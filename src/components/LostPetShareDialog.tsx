@@ -188,60 +188,60 @@ ${shareUrl}`;
 
   const shareOptions = [
     {
-      name: "Copy All Info",
-      icon: copied ? Check : Copy,
-      onClick: handleCopyLink,
-      color: "text-foreground",
-      bg: "bg-muted hover:bg-muted/80",
-    },
-    {
-      name: "SMS / Text",
-      icon: MessageSquare,
-      onClick: handleSMSShare,
-      color: "text-green-600",
-      bg: "bg-green-50 hover:bg-green-100 dark:bg-green-950 dark:hover:bg-green-900",
-    },
-    {
-      name: "WhatsApp",
-      icon: MessageCircle,
-      onClick: handleWhatsAppShare,
-      color: "text-green-500",
-      bg: "bg-green-50 hover:bg-green-100 dark:bg-green-950 dark:hover:bg-green-900",
-    },
-    {
-      name: "Email",
-      icon: Mail,
-      onClick: handleEmailShare,
-      color: "text-blue-600",
-      bg: "bg-blue-50 hover:bg-blue-100 dark:bg-blue-950 dark:hover:bg-blue-900",
-    },
-    {
       name: "Facebook",
       icon: Facebook,
       onClick: handleFacebookShare,
-      color: "text-blue-600",
-      bg: "bg-blue-50 hover:bg-blue-100 dark:bg-blue-950 dark:hover:bg-blue-900",
+      borderColor: "border-blue-600",
+      iconColor: "text-blue-600",
     },
     {
       name: "Twitter / X",
       icon: Twitter,
       onClick: handleTwitterShare,
-      color: "text-sky-500",
-      bg: "bg-sky-50 hover:bg-sky-100 dark:bg-sky-950 dark:hover:bg-sky-900",
+      borderColor: "border-sky-500",
+      iconColor: "text-sky-500",
+    },
+    {
+      name: "WhatsApp",
+      icon: MessageCircle,
+      onClick: handleWhatsAppShare,
+      borderColor: "border-green-500",
+      iconColor: "text-green-500",
+    },
+    {
+      name: "SMS / Text",
+      icon: MessageSquare,
+      onClick: handleSMSShare,
+      borderColor: "border-green-600",
+      iconColor: "text-green-600",
+    },
+    {
+      name: "Email",
+      icon: Mail,
+      onClick: handleEmailShare,
+      borderColor: "border-red-500",
+      iconColor: "text-red-500",
     },
     {
       name: "Nextdoor",
       icon: Users,
       onClick: handleNextdoorShare,
-      color: "text-emerald-600",
-      bg: "bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950 dark:hover:bg-emerald-900",
+      borderColor: "border-emerald-600",
+      iconColor: "text-emerald-600",
     },
     {
       name: "Print Flyer",
       icon: Printer,
       onClick: handlePrint,
-      color: "text-orange-600",
-      bg: "bg-orange-50 hover:bg-orange-100 dark:bg-orange-950 dark:hover:bg-orange-900",
+      borderColor: "border-orange-500",
+      iconColor: "text-orange-500",
+    },
+    {
+      name: "Copy Link",
+      icon: copied ? Check : Link2,
+      onClick: handleCopyLink,
+      borderColor: "border-gray-500",
+      iconColor: "text-gray-500",
     },
   ];
 
@@ -305,16 +305,16 @@ ${shareUrl}`;
               </Button>
             )}
 
-            {/* Share Options - Vertical list on mobile, 4 cols on desktop */}
-            <div className="flex flex-col gap-2 lg:grid lg:grid-cols-4">
+            {/* Share Options - Icon-only circular buttons */}
+            <div className="flex flex-wrap justify-center gap-3 py-2">
               {shareOptions.map((option) => (
                 <button
                   key={option.name}
                   onClick={option.onClick}
-                  className={`flex items-center gap-3 p-3 rounded-lg transition-colors lg:flex-col lg:justify-center lg:gap-1.5 ${option.bg}`}
+                  title={option.name}
+                  className={`w-12 h-12 rounded-full border-2 flex items-center justify-center transition-all hover:scale-110 hover:shadow-md bg-background ${option.borderColor}`}
                 >
-                  <option.icon className={`w-5 h-5 shrink-0 ${option.color}`} />
-                  <span className="text-sm font-medium text-foreground lg:text-xs lg:text-center lg:leading-tight">{option.name}</span>
+                  <option.icon className={`w-5 h-5 ${option.iconColor}`} />
                 </button>
               ))}
             </div>
