@@ -72,6 +72,7 @@ const MerchantPawBucksWalletPage = lazy(() => import("./pages/MerchantPawBucksWa
 const DirectCheckout = lazy(() => import("./pages/DirectCheckout"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const AuthCallback = lazy(() => import("./pages/AuthCallback"));
+const MySubscriptions = lazy(() => import("./pages/MySubscriptions"));
 
 const createQueryClient = () => new QueryClient({
   defaultOptions: {
@@ -108,6 +109,7 @@ const AppRoutes = () => {
       <Route path="/wallet" element={<PageTransition><Wallet /></PageTransition>} />
       <Route path="/referrals" element={<PageTransition><Referrals /></PageTransition>} />
       <Route path="/profile" element={<PageTransition><Profile /></PageTransition>} />
+      <Route path="/my-subscriptions" element={<PageTransition><MySubscriptions /></PageTransition>} />
       <Route path="/subscription-success" element={<PageTransition><SubscriptionSuccess /></PageTransition>} />
       <Route path="/merchants" element={<PageTransition><MerchantLanding /></PageTransition>} />
       <Route path="/merchant-onboarding" element={<PageTransition><MerchantOnboarding /></PageTransition>} />
