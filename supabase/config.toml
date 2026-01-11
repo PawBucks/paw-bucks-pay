@@ -227,3 +227,9 @@ verify_jwt = false
 
 [functions.expire-merchant-services]
 verify_jwt = false
+
+[functions.list-user-subscriptions]
+verify_jwt = true
+
+[functions.cancel-subscription]
+verify_jwt = true

@@ -389,14 +389,23 @@ const Profile = () => {
                     </span>
                   </div>
                 </div>
-                <Button 
-                  variant="outline" 
-                  className="w-full"
-                  onClick={handleManageSubscription}
-                >
-                  <Settings className="w-4 h-4 mr-2" />
-                  Manage Subscription
-                </Button>
+                <div className="flex flex-col gap-2">
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={handleManageSubscription}
+                  >
+                    <Settings className="w-4 h-4 mr-2" />
+                    Manage Billing
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    className="w-full text-muted-foreground"
+                    onClick={() => navigate("/my-subscriptions")}
+                  >
+                    View All Subscriptions
+                  </Button>
+                </div>
               </div>
             </div>
           </GradientCard>
