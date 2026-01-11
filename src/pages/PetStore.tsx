@@ -393,7 +393,7 @@ export default function PetStore() {
           isRefreshing={isRefreshing}
           pullDistance={pullDistance}
           progress={progress}
-          className="flex-1 overflow-auto"
+          className="flex-1"
         >
           <main className="container mx-auto px-4 pt-4 pb-24 md:pb-8 max-w-7xl">
             {/* Ad Placement for Free Users */}
