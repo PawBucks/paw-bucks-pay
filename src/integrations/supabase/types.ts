@@ -3396,6 +3396,84 @@ export type Database = {
         }
         Relationships: []
       }
+      lost_pet_posts_public: {
+        Row: {
+          age_estimate: string | null
+          breed: string | null
+          collar_description: string | null
+          color_markings: string | null
+          created_at: string | null
+          gender: string | null
+          id: string | null
+          identifying_features: string | null
+          is_active: boolean | null
+          last_seen_area_description: string | null
+          last_seen_date: string | null
+          last_seen_location: string | null
+          last_seen_time: string | null
+          microchip_number: string | null
+          pet_name: string | null
+          pet_type: string | null
+          photo_url: string | null
+          photo_urls: string[] | null
+          reward_amount: number | null
+          size: string | null
+          status: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          age_estimate?: string | null
+          breed?: string | null
+          collar_description?: string | null
+          color_markings?: string | null
+          created_at?: string | null
+          gender?: string | null
+          id?: string | null
+          identifying_features?: string | null
+          is_active?: boolean | null
+          last_seen_area_description?: string | null
+          last_seen_date?: string | null
+          last_seen_location?: string | null
+          last_seen_time?: string | null
+          microchip_number?: string | null
+          pet_name?: string | null
+          pet_type?: string | null
+          photo_url?: string | null
+          photo_urls?: string[] | null
+          reward_amount?: number | null
+          size?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          age_estimate?: string | null
+          breed?: string | null
+          collar_description?: string | null
+          color_markings?: string | null
+          created_at?: string | null
+          gender?: string | null
+          id?: string | null
+          identifying_features?: string | null
+          is_active?: boolean | null
+          last_seen_area_description?: string | null
+          last_seen_date?: string | null
+          last_seen_location?: string | null
+          last_seen_time?: string | null
+          microchip_number?: string | null
+          pet_name?: string | null
+          pet_type?: string | null
+          photo_url?: string | null
+          photo_urls?: string[] | null
+          reward_amount?: number | null
+          size?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       merchant_active_services_public: {
         Row: {
           expires_at: string | null
