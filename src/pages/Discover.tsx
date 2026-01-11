@@ -644,13 +644,14 @@ const Discover = () => {
         keywords={["pet merchants", "pet stores", "pet services", "PawBucks", "rewards"]}
       />
       <Header isAuthenticated={!!user} onLogout={user ? handleLogout : undefined} />
-      <PullToRefresh
-        ref={containerRef}
-        isRefreshing={isRefreshing}
-        pullDistance={pullDistance}
-        progress={progress}
-        className="min-h-[100dvh] bg-gradient-to-b from-background to-muted/20 flex flex-col overflow-auto"
-      >
+      <div className="min-h-[100dvh] bg-gradient-to-b from-background to-muted/20 flex flex-col">
+        <PullToRefresh
+          ref={containerRef}
+          isRefreshing={isRefreshing}
+          pullDistance={pullDistance}
+          progress={progress}
+          className="flex-1"
+        >
         <div className="container mx-auto px-4 pt-3 max-w-4xl">
           {/* Top Ad Placement */}
           <div className="mb-4">
@@ -1048,7 +1049,8 @@ const Discover = () => {
             onSuccess={handlePaymentSuccess}
           />
         )}
-      </PullToRefresh>
+        </PullToRefresh>
+      </div>
 
       {user && <BottomNav />}
     </>

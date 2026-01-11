@@ -17,7 +17,7 @@ export const PullToRefresh = forwardRef<HTMLDivElement, PullToRefreshProps>(
     const rotation = isRefreshing ? 0 : progress * 360;
 
     return (
-      <div ref={ref} className={cn("relative overflow-auto", className)}>
+      <div ref={ref} className={cn("relative", className)}>
         {/* Pull indicator */}
         <div
           className="absolute left-0 right-0 flex justify-center pointer-events-none z-50 transition-transform duration-200"

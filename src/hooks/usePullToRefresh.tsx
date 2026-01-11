@@ -19,8 +19,10 @@ export const usePullToRefresh = ({
   const handleTouchStart = useCallback((e: TouchEvent) => {
     if (disabled || isRefreshing) return;
     
+    // Check if we're at the top of the page (either container or document)
     const container = containerRef.current;
-    if (!container || container.scrollTop > 0) return;
+    const scrollTop = container?.scrollTop ?? window.scrollY ?? document.documentElement.scrollTop;
+    if (scrollTop > 0) return;
     
     startY.current = e.touches[0].clientY;
   }, [disabled, isRefreshing]);
@@ -28,11 +30,12 @@ export const usePullToRefresh = ({
   const handleTouchMove = useCallback((e: TouchEvent) => {
     if (disabled || isRefreshing || startY.current === 0) return;
     
+    // Check scroll position from container or document
     const container = containerRef.current;
-    if (!container) return;
+    const currentScrollTop = container?.scrollTop ?? window.scrollY ?? document.documentElement.scrollTop;
     
     // Only activate pull-to-refresh when scrolled to top
-    if (container.scrollTop > 5) {
+    if (currentScrollTop > 5) {
       startY.current = 0;
       setPullDistance(0);
       return;
@@ -42,7 +45,7 @@ export const usePullToRefresh = ({
     const distance = currentY - startY.current;
     
     // Only prevent default and show pull indicator when pulling DOWN from top
-    if (distance > 10 && container.scrollTop <= 0) {
+    if (distance > 10 && currentScrollTop <= 0) {
       e.preventDefault();
       setPullDistance(Math.min(distance * 0.5, threshold * 1.5));
     } else if (distance <= 0) {
