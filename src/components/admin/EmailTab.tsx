@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import DOMPurify from "dompurify";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -324,7 +325,15 @@ export function EmailTab() {
             <h4 className="font-medium mb-2">Preview</h4>
             <div
               className="bg-background rounded border p-4 prose prose-sm max-w-none"
-              dangerouslySetInnerHTML={{ __html: htmlContent || "<p class='text-muted-foreground'>Your content will appear here...</p>" }}
+              dangerouslySetInnerHTML={{ 
+                __html: DOMPurify.sanitize(
+                  htmlContent || "<p class='text-muted-foreground'>Your content will appear here...</p>",
+                  { 
+                    ALLOWED_TAGS: ['h1','h2','h3','h4','h5','h6','p','br','strong','b','em','i','u','ul','ol','li','a','span','div','blockquote','hr'],
+                    ALLOWED_ATTR: ['href','class','style']
+                  }
+                )
+              }}
             />
           </div>
 
