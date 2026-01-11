@@ -59,16 +59,26 @@ export function UsersTab() {
 
       if (error) throw error;
 
-      // Fetch PawBucks balances for all users
-      const { data: wallets } = await supabase
-        .from('pawbucks_wallet')
-        .select('user_id, balance');
+      // Fetch available PawBucks balances using the breakdown function for accuracy
+      // This calculates only 'available' status pawbucks, excluding 'pending'
+      const { data: activityData } = await supabase
+        .from('pawbucks_activity')
+        .select('user_id, amount, pawbucks_status');
 
-      const walletMap = new Map(wallets?.map(w => [w.user_id, w.balance]) || []);
+      // Calculate available balance per user (only available/null status, not pending)
+      const availableBalanceMap = new Map<string, number>();
+      activityData?.forEach(activity => {
+        const status = activity.pawbucks_status;
+        // Only count available pawbucks (null status means legacy available)
+        if (status === 'available' || status === null) {
+          const current = availableBalanceMap.get(activity.user_id) || 0;
+          availableBalanceMap.set(activity.user_id, current + activity.amount);
+        }
+      });
 
       const usersWithBalance = (profiles || []).map(p => ({
         ...p,
-        pawbucks_balance: walletMap.get(p.id) ?? 0
+        pawbucks_balance: availableBalanceMap.get(p.id) ?? 0
       }));
 
       setUsers(usersWithBalance);
