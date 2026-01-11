@@ -13,7 +13,7 @@ import {
   Store, Loader2, CheckCircle, XCircle, Clock, AlertCircle 
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { format, addDays, addMonths, addYears } from 'date-fns';
+import { format, addDays, addMonths, addYears, isAfter, isBefore, differenceInDays } from 'date-fns';
 
 type Merchant = {
   id: string;
@@ -353,7 +353,7 @@ export function MerchantServiceAssignments() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-5">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -364,6 +364,23 @@ export function MerchantServiceAssignments() {
             <div className="text-2xl font-bold text-green-600">
               {assignments.filter(a => a.status === 'active').length}
             </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Expiring Soon
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-orange-600">
+              {assignments.filter(a => {
+                if (a.status !== 'active' || !a.expires_at) return false;
+                const daysUntilExpiry = differenceInDays(new Date(a.expires_at), new Date());
+                return daysUntilExpiry >= 0 && daysUntilExpiry <= 7;
+              }).length}
+            </div>
+            <p className="text-xs text-muted-foreground">Within 7 days</p>
           </CardContent>
         </Card>
         <Card>
@@ -479,10 +496,24 @@ export function MerchantServiceAssignments() {
                   <TableCell>{getStatusBadge(assignment.status)}</TableCell>
                   <TableCell>
                     {assignment.expires_at ? (
-                      <div className="flex items-center gap-1 text-sm">
-                        <Calendar className="w-3 h-3" />
-                        {format(new Date(assignment.expires_at), 'MMM d, yyyy')}
-                      </div>
+                      (() => {
+                        const expiryDate = new Date(assignment.expires_at);
+                        const daysUntilExpiry = differenceInDays(expiryDate, new Date());
+                        const isExpired = daysUntilExpiry < 0;
+                        const isExpiringSoon = daysUntilExpiry >= 0 && daysUntilExpiry <= 7;
+                        
+                        return (
+                          <div className={`flex items-center gap-1 text-sm ${isExpired ? 'text-red-600' : isExpiringSoon ? 'text-orange-600' : ''}`}>
+                            <Calendar className="w-3 h-3" />
+                            <span>{format(expiryDate, 'MMM d, yyyy')}</span>
+                            {isExpiringSoon && !isExpired && (
+                              <Badge variant="outline" className="ml-1 text-xs bg-orange-50 text-orange-700 border-orange-200">
+                                {daysUntilExpiry === 0 ? 'Today' : `${daysUntilExpiry}d left`}
+                              </Badge>
+                            )}
+                          </div>
+                        );
+                      })()
                     ) : (
                       <span className="text-muted-foreground text-sm">No expiration</span>
                     )}

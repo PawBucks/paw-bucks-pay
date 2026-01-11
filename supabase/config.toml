@@ -224,3 +224,6 @@ verify_jwt = false
 
 [functions.send-lost-pet-deletion-warning]
 verify_jwt = false
+
+[functions.expire-merchant-services]
+verify_jwt = false
