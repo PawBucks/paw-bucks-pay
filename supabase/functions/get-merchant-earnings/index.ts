@@ -89,36 +89,84 @@ serve(async (req) => {
 
     logStep("Charges retrieved", { count: charges.data.length });
 
-    // Get payment history from database
-    const { data: payments, error: paymentsError } = await supabaseAdmin
+    // Get payment history from direct_payments table
+    const { data: directPayments, error: directPaymentsError } = await supabaseAdmin
       .from("direct_payments")
       .select("*")
       .eq("merchant_id", merchant.id)
       .order("created_at", { ascending: false })
       .limit(50);
 
-    if (paymentsError) {
-      logStep("Error fetching payments", { error: paymentsError.message });
+    if (directPaymentsError) {
+      logStep("Error fetching direct payments", { error: directPaymentsError.message });
     }
 
-    // Calculate totals from database
-    const { data: totals } = await supabaseAdmin
+    // Calculate totals from direct_payments
+    const { data: directPaymentTotals } = await supabaseAdmin
       .from("direct_payments")
       .select("amount, application_fee")
       .eq("merchant_id", merchant.id)
       .eq("status", "succeeded");
 
-    const totalEarnings = totals?.reduce((sum, p) => sum + (p.amount - p.application_fee), 0) || 0;
-    const totalFees = totals?.reduce((sum, p) => sum + p.application_fee, 0) || 0;
+    const directPaymentEarnings = directPaymentTotals?.reduce((sum, p) => sum + (p.amount - p.application_fee), 0) || 0;
+    const directPaymentFees = directPaymentTotals?.reduce((sum, p) => sum + p.application_fee, 0) || 0;
+
+    // ALSO get transaction history from transactions table (main source)
+    const { data: transactions, error: transactionsError } = await supabaseAdmin
+      .from("transactions")
+      .select("id, amount, cashback_earned, status, created_at, description")
+      .eq("merchant_id", merchant.id)
+      .order("created_at", { ascending: false })
+      .limit(50);
+
+    if (transactionsError) {
+      logStep("Error fetching transactions", { error: transactionsError.message });
+    }
+
+    // Calculate totals from transactions table (completed transactions)
+    const { data: transactionTotals } = await supabaseAdmin
+      .from("transactions")
+      .select("amount, cashback_earned")
+      .eq("merchant_id", merchant.id)
+      .eq("status", "completed");
+
+    const transactionEarnings = transactionTotals?.reduce((sum, t) => sum + Number(t.amount || 0), 0) || 0;
+    const transactionCashback = transactionTotals?.reduce((sum, t) => sum + Number(t.cashback_earned || 0), 0) || 0;
+    const transactionCount = transactionTotals?.length || 0;
+
+    logStep("Transaction totals calculated", { 
+      transactionEarnings, 
+      transactionCashback, 
+      transactionCount,
+      directPaymentEarnings: directPaymentEarnings / 100,
+      directPaymentCount: directPaymentTotals?.length || 0
+    });
+
+    // Combine both sources for total earnings
+    // direct_payments are in cents, transactions are in dollars
+    const totalEarningsFromDirect = directPaymentEarnings / 100; // Convert cents to dollars
+    const totalEarningsFromTransactions = transactionEarnings;
+    const combinedTotalEarnings = totalEarningsFromDirect + totalEarningsFromTransactions;
+    const combinedTransactionCount = (directPaymentTotals?.length || 0) + transactionCount;
+    const combinedFees = (directPaymentFees / 100) + (transactionCashback / 100); // cashback is PawBucks, divide by 100 for display
 
     // Create Stripe Dashboard login link
     let dashboardUrl = null;
     try {
+      // Try creating login link for Standard accounts
       const loginLink = await stripe.accounts.createLoginLink(merchant.stripe_account_id);
       dashboardUrl = loginLink.url;
       logStep("Dashboard login link created");
     } catch (e) {
-      logStep("Could not create dashboard link", { error: String(e) });
+      // For Standard accounts without Express Dashboard, try direct link
+      logStep("Could not create dashboard link, trying account link", { error: String(e) });
+      try {
+        // For Standard accounts, provide a direct Stripe dashboard link
+        dashboardUrl = `https://dashboard.stripe.com`;
+        logStep("Using direct Stripe dashboard URL for Standard account");
+      } catch (e2) {
+        logStep("Could not create account link either", { error: String(e2) });
+      }
     }
 
     return new Response(JSON.stringify({
@@ -144,11 +192,21 @@ serve(async (req) => {
         created: c.created,
         description: c.description,
       })),
-      payments: payments || [],
+      directPayments: directPayments || [],
+      transactions: transactions || [],
       summary: {
-        totalEarnings: totalEarnings / 100, // Convert to dollars
-        totalFees: totalFees / 100,
-        transactionCount: totals?.length || 0,
+        totalEarnings: combinedTotalEarnings,
+        totalFees: combinedFees,
+        transactionCount: combinedTransactionCount,
+        // Breakdown for transparency
+        breakdown: {
+          directPaymentEarnings: totalEarningsFromDirect,
+          directPaymentFees: directPaymentFees / 100,
+          directPaymentCount: directPaymentTotals?.length || 0,
+          transactionEarnings: totalEarningsFromTransactions,
+          transactionCashbackPawBucks: transactionCashback,
+          transactionCount: transactionCount,
+        }
       },
       dashboardUrl,
     }), {
