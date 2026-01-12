@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useGeocoding } from "@/hooks/useGeocoding";
 import { useMerchantActiveServices, SERVICE_NAMES } from "@/hooks/useMerchantServices";
-import { useMerchantPawBucksRealtime } from "@/hooks/usePawBucksRealtime";
+
 import { supabase } from "@/integrations/supabase/client";
 import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
@@ -147,8 +147,7 @@ const MerchantDashboard = () => {
   const [requestingFunding, setRequestingFunding] = useState(false);
   const [togglingPawbucks, setTogglingPawbucks] = useState(false);
   
-  // Enable realtime updates for merchant PawBucks and transactions
-  useMerchantPawBucksRealtime(merchant?.id);
+  
   
   // Fetch active services for this merchant
   const { data: activeServices = [] } = useMerchantActiveServices(merchant?.id);
@@ -228,6 +227,46 @@ const MerchantDashboard = () => {
       loadMerchantData();
     }
   }, [user, loadMerchantData]);
+
+  // Set up realtime subscription for transactions to auto-refresh dashboard
+  useEffect(() => {
+    if (!merchant?.id) return;
+
+    const channel = supabase
+      .channel(`merchant-dashboard-realtime-${merchant.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'transactions',
+          filter: `merchant_id=eq.${merchant.id}`,
+        },
+        (payload) => {
+          console.log('[Realtime] Transaction update detected:', payload);
+          // Reload all merchant data when a transaction changes
+          loadMerchantData();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'merchant_pawbucks_wallet',
+          filter: `merchant_id=eq.${merchant.id}`,
+        },
+        (payload) => {
+          console.log('[Realtime] Merchant PawBucks wallet update:', payload);
+          loadMerchantData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [merchant?.id, loadMerchantData]);
 
   const handleConnectStripe = async () => {
     if (!merchant) return;
