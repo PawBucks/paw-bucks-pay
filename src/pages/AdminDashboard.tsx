@@ -10,6 +10,7 @@ import { ConsultationBookingsTab } from "@/components/admin/ConsultationBookings
 import FeedbackTab from "@/components/admin/FeedbackTab";
 import { NonPartnerReceiptVerificationTab } from "@/components/admin/NonPartnerReceiptVerificationTab";
 import { EmailTab } from "@/components/admin/EmailTab";
+import { TextCampaignsTab } from "@/components/admin/TextCampaignsTab";
 import { UsersTab } from "@/components/admin/UsersTab";
 import { MerchantsTab } from "@/components/admin/MerchantsTab";
 import { TransactionsTab } from "@/components/admin/TransactionsTab";
@@ -180,6 +181,12 @@ const NAV_SECTIONS = [
         icon: Mail,
         description: "Send bulk or individual emails to users and merchants",
       },
+      {
+        id: "text-campaigns",
+        label: "Text Campaigns",
+        icon: MessageSquare,
+        description: "Send SMS text messages to users and merchants with phone numbers",
+      },
     ],
   },
   {
@@ -318,6 +325,8 @@ const AdminDashboard = () => {
         return <NotificationsTab />;
       case "email":
         return <EmailTab />;
+      case "text-campaigns":
+        return <TextCampaignsTab />;
       case "security":
         return <SecurityMonitoringTab />;
       case "audit":

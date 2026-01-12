@@ -3015,6 +3015,95 @@ export type Database = {
         }
         Relationships: []
       }
+      text_campaigns: {
+        Row: {
+          created_at: string
+          created_by: string
+          failed_count: number
+          id: string
+          message: string
+          recipient_count: number
+          recipient_type: string
+          scheduled_at: string | null
+          sent_at: string | null
+          sent_count: number
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          failed_count?: number
+          id?: string
+          message: string
+          recipient_count?: number
+          recipient_type?: string
+          scheduled_at?: string | null
+          sent_at?: string | null
+          sent_count?: number
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          failed_count?: number
+          id?: string
+          message?: string
+          recipient_count?: number
+          recipient_type?: string
+          scheduled_at?: string | null
+          sent_at?: string | null
+          sent_count?: number
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      text_message_logs: {
+        Row: {
+          campaign_id: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          phone_number: string
+          sent_at: string | null
+          status: string
+          user_id: string | null
+        }
+        Insert: {
+          campaign_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          phone_number: string
+          sent_at?: string | null
+          status?: string
+          user_id?: string | null
+        }
+        Update: {
+          campaign_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          phone_number?: string
+          sent_at?: string | null
+          status?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "text_message_logs_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "text_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       transactions: {
         Row: {
           amount: number
