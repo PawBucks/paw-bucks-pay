@@ -89,9 +89,11 @@ serve(async (req) => {
           logStep("PawBucks credited to user");
         }
 
-        // Create transaction record
+        // Create transaction record with accurate fee tracking
         if (userId && merchantId) {
           const amountInDollars = paymentIntent.amount / 100;
+          // Platform fee (3%) only on Stripe portion
+          const platformFee = amountInDollars * 0.03;
           
           await supabaseAdmin
             .from("transactions")
@@ -99,14 +101,16 @@ serve(async (req) => {
               user_id: userId,
               merchant_id: merchantId,
               amount: amountInDollars,
+              stripe_amount: amountInDollars, // Full amount via Stripe for direct payments
+              pawbucks_used: 0, // No PawBucks used in direct payments
+              application_fee: platformFee, // 3% fee on full amount
               status: "completed",
-              payment_method: "stripe_direct",
               rewards_earned: pawbucksEarned,
               cashback_earned: amountInDollars * 0.1, // 10% cashback value
               stripe_payment_intent_id: paymentIntent.id,
             });
 
-          logStep("Transaction record created");
+          logStep("Transaction record created with fee tracking");
         }
 
         break;

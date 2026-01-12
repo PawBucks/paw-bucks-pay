@@ -338,6 +338,7 @@ serve(async (req) => {
       }
       
       // Create a transaction record for this payment (handled as a PawBucks-only payment)
+      // NO platform fee since no Stripe payment
       if (merchantId) {
         await supabaseAdmin
           .from('transactions')
@@ -345,6 +346,9 @@ serve(async (req) => {
             user_id: user.id,
             merchant_id: merchantId,
             amount: totalAmountDollars,
+            stripe_amount: 0, // No Stripe payment
+            pawbucks_used: pawbucksUsed, // Full amount paid with PawBucks
+            application_fee: 0, // NO fee on PawBucks-only payments
             cashback_earned: 0, // No cashback on PawBucks portion
             rewards_earned: 0,
             description: `Purchase at ${merchantName} (paid with PawBucks)`,

@@ -457,13 +457,21 @@ serve(async (req) => {
             tierName,
           });
           
-          // Create transaction record
+          // Create transaction record with accurate fee tracking
+          // Platform fee (3%) is ONLY on the Stripe portion, NOT on PawBucks portion
+          const platformFee = stripeAmountPaid * 0.03;
+          // Convert pawbucksUsdValue back to PawBucks amount (1000 PawBucks = $1)
+          const pawbucksUsedAmount = Math.floor(pawbucksUsdValue * 1000);
+          
           const { data: transaction, error: transactionError } = await supabaseAdmin
             .from('transactions')
             .insert({
               user_id: userId,
               merchant_id: merchantId,
               amount: totalAmount,
+              stripe_amount: stripeAmountPaid, // Only the Stripe-charged portion
+              pawbucks_used: pawbucksUsedAmount, // PawBucks used for this transaction
+              application_fee: platformFee, // 3% fee only on Stripe portion
               cashback_earned: pawbucksEarned,
               rewards_earned: pawbucksEarned,
               description: `Subscription: ${merchantName}`,

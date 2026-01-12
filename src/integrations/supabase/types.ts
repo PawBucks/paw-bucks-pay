@@ -3107,39 +3107,48 @@ export type Database = {
       transactions: {
         Row: {
           amount: number
+          application_fee: number | null
           cashback_earned: number
           created_at: string
           description: string | null
           id: string
           merchant_id: string
+          pawbucks_used: number | null
           rewards_earned: number
           status: string
+          stripe_amount: number | null
           stripe_payment_intent_id: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           amount: number
+          application_fee?: number | null
           cashback_earned?: number
           created_at?: string
           description?: string | null
           id?: string
           merchant_id: string
+          pawbucks_used?: number | null
           rewards_earned?: number
           status?: string
+          stripe_amount?: number | null
           stripe_payment_intent_id?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           amount?: number
+          application_fee?: number | null
           cashback_earned?: number
           created_at?: string
           description?: string | null
           id?: string
           merchant_id?: string
+          pawbucks_used?: number | null
           rewards_earned?: number
           status?: string
+          stripe_amount?: number | null
           stripe_payment_intent_id?: string | null
           updated_at?: string
           user_id?: string
@@ -3657,30 +3666,28 @@ export type Database = {
       get_admin_analytics: {
         Args: never
         Returns: {
-          total_cashback_distributed: number
+          platform_revenue: number
           total_gmv: number
           total_merchants: number
           total_refunded_amount: number
           total_refunded_transactions: number
+          total_rewards: number
           total_transactions: number
           total_users: number
         }[]
       }
       get_merchant_analytics: {
-        Args: { _merchant_id: string }
+        Args: { p_merchant_id: string }
         Returns: {
           avg_transaction_amount: number
-          business_name: string
-          funding_deal_status: string
-          merchant_id: string
           refunded_amount: number
           refunded_transactions: number
-          remaining_balance: number
-          repayment_rate: number
-          total_cashback_paid: number
+          total_cashback: number
           total_customers: number
           total_earnings: number
-          total_transactions: number
+          total_fees: number
+          total_sales: number
+          transaction_count: number
         }[]
       }
       get_monthly_non_partner_pawbucks: {

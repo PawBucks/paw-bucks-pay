@@ -132,7 +132,7 @@ export const merchantsService = {
 
   // Analytics
   async getAnalytics(merchantId: string) {
-    return supabase.rpc("get_merchant_analytics", { _merchant_id: merchantId });
+    return supabase.rpc("get_merchant_analytics", { p_merchant_id: merchantId });
   },
 
   // Edge function calls
