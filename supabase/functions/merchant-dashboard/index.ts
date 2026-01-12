@@ -90,6 +90,8 @@ serve(async (req) => {
       repayment_rate: number;
       remaining_balance: number;
       funding_deal_status: string | null;
+      refunded_transactions: number;
+      refunded_amount: number;
     };
 
     // Format response
@@ -103,6 +105,9 @@ serve(async (req) => {
       total_customers: parseInt(String(analytics.total_customers || 0)),
       avg_transaction_amount: parseFloat(String(analytics.avg_transaction_amount || 0)),
       funding_deal_status: analytics.funding_deal_status || null,
+      // Include refund information for transparency
+      refunded_transactions: parseInt(String(analytics.refunded_transactions || 0)),
+      refunded_amount: parseFloat(String(analytics.refunded_amount || 0)),
       query_time_ms: queryTime.toFixed(2)
     };
 

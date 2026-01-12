@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, Store, DollarSign, Award, TrendingUp, Activity } from 'lucide-react';
+import { Users, Store, DollarSign, Award, TrendingUp, Activity, RotateCcw } from 'lucide-react';
 
 export function OverviewTab() {
   const [stats, setStats] = useState({
@@ -11,6 +11,8 @@ export function OverviewTab() {
     totalGMV: 0,
     totalCashback: 0,
     platformRevenue: 0,
+    refundedTransactions: 0,
+    refundedAmount: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -33,6 +35,8 @@ export function OverviewTab() {
           totalGMV: data[0].total_gmv,
           totalCashback: data[0].total_cashback_distributed,
           platformRevenue: platformFee,
+          refundedTransactions: data[0].total_refunded_transactions || 0,
+          refundedAmount: data[0].total_refunded_amount || 0,
         });
       }
     } catch (error) {
@@ -79,6 +83,12 @@ export function OverviewTab() {
       value: `$${(stats.totalCashback * 0.001).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
       icon: Award,
       color: 'text-pink-500',
+    },
+    {
+      title: 'Refunds Processed',
+      value: `${stats.refundedTransactions} ($${stats.refundedAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })})`,
+      icon: RotateCcw,
+      color: 'text-red-500',
     },
   ];
 

@@ -32,6 +32,7 @@ export function AnalyticsTab() {
     { name: 'Users', value: analytics?.total_users || 0 },
     { name: 'Merchants', value: analytics?.total_merchants || 0 },
     { name: 'Transactions', value: analytics?.total_transactions || 0 },
+    { name: 'Refunds', value: analytics?.total_refunded_transactions || 0 },
   ];
 
   // total_cashback_distributed is in PawBucks, convert to USD (1 PawBuck = $0.001)

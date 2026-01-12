@@ -3660,6 +3660,8 @@ export type Database = {
           total_cashback_distributed: number
           total_gmv: number
           total_merchants: number
+          total_refunded_amount: number
+          total_refunded_transactions: number
           total_transactions: number
           total_users: number
         }[]
@@ -3671,6 +3673,8 @@ export type Database = {
           business_name: string
           funding_deal_status: string
           merchant_id: string
+          refunded_amount: number
+          refunded_transactions: number
           remaining_balance: number
           repayment_rate: number
           total_cashback_paid: number

@@ -123,7 +123,11 @@ const MerchantTransactions = () => {
   const totalPages = Math.ceil(sortedTransactions.length / itemsPerPage);
 
   const summaryTotals = useMemo(() => {
-    const totals = sortedTransactions.reduce(
+    // Only include completed transactions in summary totals, exclude refunded
+    const completedTransactions = sortedTransactions.filter(t => t.status !== 'refunded');
+    const refundedTransactions = sortedTransactions.filter(t => t.status === 'refunded');
+    
+    const totals = completedTransactions.reduce(
       (acc, t) => ({
         totalSales: acc.totalSales + t.amount,
         totalCashback: acc.totalCashback + t.cashback_given,
@@ -132,10 +136,21 @@ const MerchantTransactions = () => {
       }),
       { totalSales: 0, totalCashback: 0, totalRepayment: 0, totalNetPayout: 0 }
     );
+
+    const refundedTotals = refundedTransactions.reduce(
+      (acc, t) => ({
+        refundedCount: acc.refundedCount + 1,
+        refundedAmount: acc.refundedAmount + t.amount,
+      }),
+      { refundedCount: 0, refundedAmount: 0 }
+    );
+
     // Convert PawBucks to USD (1 PawBuck = $0.001)
     return {
       ...totals,
       totalCashbackUSD: totals.totalCashback * 0.001,
+      completedCount: completedTransactions.length,
+      ...refundedTotals,
     };
   }, [sortedTransactions]);
 
