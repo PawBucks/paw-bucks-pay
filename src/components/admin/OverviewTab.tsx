@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, Store, DollarSign, Award, TrendingUp, Activity, RotateCcw } from 'lucide-react';
@@ -16,11 +16,7 @@ export function OverviewTab() {
   });
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadStats();
-  }, []);
-
-  const loadStats = async () => {
+  const loadStats = useCallback(async () => {
     try {
       const { data, error } = await supabase.rpc('get_admin_analytics');
       
@@ -44,7 +40,34 @@ export function OverviewTab() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadStats();
+  }, [loadStats]);
+
+  // Set up realtime subscription for transactions to auto-refresh stats
+  useEffect(() => {
+    const channel = supabase
+      .channel('admin-overview-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'transactions',
+        },
+        (payload) => {
+          console.log('[Realtime] Admin: Transaction update detected:', payload);
+          loadStats();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [loadStats]);
 
   const statCards = [
     {
