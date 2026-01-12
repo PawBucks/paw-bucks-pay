@@ -101,20 +101,28 @@ serve(async (req) => {
       logStep("Error fetching direct payments", { error: directPaymentsError.message });
     }
 
-    // Calculate totals from direct_payments
+    // Calculate totals from direct_payments (only succeeded, not refunded)
     const { data: directPaymentTotals } = await supabaseAdmin
       .from("direct_payments")
-      .select("amount, application_fee")
+      .select("amount, application_fee, status")
       .eq("merchant_id", merchant.id)
       .eq("status", "succeeded");
 
+    // Also get refunded direct payments for tracking
+    const { data: refundedDirectPayments } = await supabaseAdmin
+      .from("direct_payments")
+      .select("amount, application_fee")
+      .eq("merchant_id", merchant.id)
+      .eq("status", "refunded");
+
     const directPaymentEarnings = directPaymentTotals?.reduce((sum, p) => sum + (p.amount - p.application_fee), 0) || 0;
     const directPaymentFees = directPaymentTotals?.reduce((sum, p) => sum + p.application_fee, 0) || 0;
+    const refundedDirectAmount = refundedDirectPayments?.reduce((sum, p) => sum + p.amount, 0) || 0;
 
     // ALSO get transaction history from transactions table (main source)
     const { data: transactions, error: transactionsError } = await supabaseAdmin
       .from("transactions")
-      .select("id, amount, cashback_earned, status, created_at, description")
+      .select("id, amount, cashback_earned, rewards_earned, status, created_at, description")
       .eq("merchant_id", merchant.id)
       .order("created_at", { ascending: false })
       .limit(50);
@@ -123,32 +131,50 @@ serve(async (req) => {
       logStep("Error fetching transactions", { error: transactionsError.message });
     }
 
-    // Calculate totals from transactions table (completed transactions)
+    // Calculate totals from transactions table (completed transactions ONLY - excludes refunded)
     const { data: transactionTotals } = await supabaseAdmin
       .from("transactions")
-      .select("amount, cashback_earned")
+      .select("amount, cashback_earned, rewards_earned")
       .eq("merchant_id", merchant.id)
       .eq("status", "completed");
 
+    // Get refunded transactions separately for tracking
+    const { data: refundedTransactions } = await supabaseAdmin
+      .from("transactions")
+      .select("amount, cashback_earned, rewards_earned")
+      .eq("merchant_id", merchant.id)
+      .eq("status", "refunded");
+
     const transactionEarnings = transactionTotals?.reduce((sum, t) => sum + Number(t.amount || 0), 0) || 0;
     const transactionCashback = transactionTotals?.reduce((sum, t) => sum + Number(t.cashback_earned || 0), 0) || 0;
+    const transactionRewards = transactionTotals?.reduce((sum, t) => sum + Number(t.rewards_earned || 0), 0) || 0;
     const transactionCount = transactionTotals?.length || 0;
+
+    // Calculate refund totals
+    const refundedTransactionAmount = refundedTransactions?.reduce((sum, t) => sum + Number(t.amount || 0), 0) || 0;
+    const refundedTransactionCount = refundedTransactions?.length || 0;
+    const totalRefundedAmount = (refundedDirectAmount / 100) + refundedTransactionAmount;
+    const totalRefundedCount = (refundedDirectPayments?.length || 0) + refundedTransactionCount;
 
     logStep("Transaction totals calculated", { 
       transactionEarnings, 
-      transactionCashback, 
+      transactionCashback,
+      transactionRewards,
       transactionCount,
       directPaymentEarnings: directPaymentEarnings / 100,
-      directPaymentCount: directPaymentTotals?.length || 0
+      directPaymentCount: directPaymentTotals?.length || 0,
+      refundedAmount: totalRefundedAmount,
+      refundedCount: totalRefundedCount
     });
 
-    // Combine both sources for total earnings
+    // Combine both sources for total earnings (ONLY completed/succeeded - refunds excluded)
     // direct_payments are in cents, transactions are in dollars
     const totalEarningsFromDirect = directPaymentEarnings / 100; // Convert cents to dollars
     const totalEarningsFromTransactions = transactionEarnings;
     const combinedTotalEarnings = totalEarningsFromDirect + totalEarningsFromTransactions;
     const combinedTransactionCount = (directPaymentTotals?.length || 0) + transactionCount;
     const combinedFees = (directPaymentFees / 100) + (transactionCashback / 100); // cashback is PawBucks, divide by 100 for display
+    const combinedRewardsGiven = transactionCashback + transactionRewards; // Total rewards given to customers (in PawBucks)
 
     // Create Stripe Dashboard login link
     let dashboardUrl = null;
@@ -198,6 +224,12 @@ serve(async (req) => {
         totalEarnings: combinedTotalEarnings,
         totalFees: combinedFees,
         transactionCount: combinedTransactionCount,
+        totalRewardsGiven: combinedRewardsGiven,
+        // Refund tracking
+        refunds: {
+          count: totalRefundedCount,
+          amount: totalRefundedAmount,
+        },
         // Breakdown for transparency
         breakdown: {
           directPaymentEarnings: totalEarningsFromDirect,
@@ -205,6 +237,7 @@ serve(async (req) => {
           directPaymentCount: directPaymentTotals?.length || 0,
           transactionEarnings: totalEarningsFromTransactions,
           transactionCashbackPawBucks: transactionCashback,
+          transactionRewardsPawBucks: transactionRewards,
           transactionCount: transactionCount,
         }
       },

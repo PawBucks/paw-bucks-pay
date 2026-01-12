@@ -86,6 +86,7 @@ type Transaction = {
   rewards_earned: number;
   description: string;
   created_at: string;
+  status?: string;
 };
 
 // Define navigation sections
@@ -391,10 +392,13 @@ const MerchantDashboard = () => {
   const getMonthlySalesData = useMemo(() => {
     const monthlyData: { [key: string]: number } = {};
 
-    allTransactions.forEach((transaction) => {
-      const month = format(startOfMonth(parseISO(transaction.created_at)), "MMM yyyy");
-      monthlyData[month] = (monthlyData[month] || 0) + transaction.amount;
-    });
+    // Only include completed transactions, exclude refunded
+    allTransactions
+      .filter((t) => (t as any).status !== 'refunded')
+      .forEach((transaction) => {
+        const month = format(startOfMonth(parseISO(transaction.created_at)), "MMM yyyy");
+        monthlyData[month] = (monthlyData[month] || 0) + transaction.amount;
+      });
 
     return Object.entries(monthlyData)
       .map(([month, amount]) => ({ month, amount }))
@@ -403,7 +407,9 @@ const MerchantDashboard = () => {
   }, [allTransactions]);
 
   const getCashbackDistribution = useMemo(() => {
-    const totalRewardsPawBucks = allTransactions.reduce((sum, t) => sum + (t.rewards_earned || 0), 0);
+    // Only include completed transactions, exclude refunded
+    const completedTransactions = allTransactions.filter((t) => (t as any).status !== 'refunded');
+    const totalRewardsPawBucks = completedTransactions.reduce((sum, t) => sum + (t.rewards_earned || 0), 0);
     const totalRewardsUSD = totalRewardsPawBucks * 0.001;
     const remainingBalance = analytics?.remaining_balance || 0;
 
