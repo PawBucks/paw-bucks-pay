@@ -11,6 +11,7 @@ type Transaction = {
   amount: number;
   cashback_earned: number;
   rewards_earned: number;
+  application_fee: number | null;
   description?: string;
   status: string;
   created_at: string;
@@ -57,7 +58,10 @@ export function TransactionsTab() {
     }
   };
 
-  const totalRevenue = filteredTransactions.reduce((sum, t) => sum + (t.amount * 0.03), 0);
+  // Use actual application_fee from completed transactions (matches OverviewTab)
+  const totalRevenue = filteredTransactions
+    .filter(t => t.status === 'completed')
+    .reduce((sum, t) => sum + (t.application_fee || 0), 0);
   // rewards_earned is in PawBucks, convert to USD (1 PawBuck = $0.001)
   const totalRewardsUSD = filteredTransactions.reduce((sum, t) => sum + (t.rewards_earned * 0.001), 0);
 
