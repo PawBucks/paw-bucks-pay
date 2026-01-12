@@ -23,14 +23,14 @@ export function OverviewTab() {
       if (error) throw error;
       
       if (data && data[0]) {
-        const platformFee = data[0].total_gmv * 0.03; // 3% platform fee
+        // Platform revenue now comes directly from application_fee sum (only on Stripe portions)
         setStats({
           totalUsers: data[0].total_users,
           totalMerchants: data[0].total_merchants,
           totalTransactions: data[0].total_transactions,
           totalGMV: data[0].total_gmv,
-          totalCashback: data[0].total_cashback_distributed,
-          platformRevenue: platformFee,
+          totalCashback: data[0].total_rewards || 0, // Using total_rewards from the function
+          platformRevenue: data[0].platform_revenue || 0, // Accurate fee from application_fee column
           refundedTransactions: data[0].total_refunded_transactions || 0,
           refundedAmount: data[0].total_refunded_amount || 0,
         });

@@ -134,7 +134,7 @@ serve(async (req) => {
     // Calculate totals from transactions table (completed transactions ONLY - excludes refunded)
     const { data: transactionTotals } = await supabaseAdmin
       .from("transactions")
-      .select("amount, cashback_earned, rewards_earned")
+      .select("amount, cashback_earned, rewards_earned, stripe_amount, application_fee")
       .eq("merchant_id", merchant.id)
       .eq("status", "completed");
 
@@ -148,6 +148,8 @@ serve(async (req) => {
     const transactionEarnings = transactionTotals?.reduce((sum, t) => sum + Number(t.amount || 0), 0) || 0;
     const transactionCashback = transactionTotals?.reduce((sum, t) => sum + Number(t.cashback_earned || 0), 0) || 0;
     const transactionRewards = transactionTotals?.reduce((sum, t) => sum + Number(t.rewards_earned || 0), 0) || 0;
+    // Use actual application_fee from transactions (accurate - only charges fee on Stripe portion)
+    const transactionFees = transactionTotals?.reduce((sum, t) => sum + Number(t.application_fee || 0), 0) || 0;
     const transactionCount = transactionTotals?.length || 0;
 
     // Calculate refund totals
@@ -173,7 +175,8 @@ serve(async (req) => {
     const totalEarningsFromTransactions = transactionEarnings;
     const combinedTotalEarnings = totalEarningsFromDirect + totalEarningsFromTransactions;
     const combinedTransactionCount = (directPaymentTotals?.length || 0) + transactionCount;
-    const combinedFees = (directPaymentFees / 100) + (transactionCashback / 100); // cashback is PawBucks, divide by 100 for display
+    // Use actual application_fee values (accurate - only on Stripe portion, not PawBucks)
+    const combinedFees = (directPaymentFees / 100) + transactionFees;
     const combinedRewardsGiven = transactionCashback + transactionRewards; // Total rewards given to customers (in PawBucks)
 
     // Create Stripe Dashboard login link

@@ -65,7 +65,7 @@ serve(async (req) => {
     const startTime = performance.now();
     
     const { data: analyticsData, error: analyticsError } = await supabase
-      .rpc('get_merchant_analytics', { _merchant_id: merchant.id })
+      .rpc('get_merchant_analytics', { p_merchant_id: merchant.id })
       .single();
 
     const queryTime = performance.now() - startTime;
@@ -80,31 +80,28 @@ serve(async (req) => {
     }
 
     const analytics = analyticsData as {
-      merchant_id: string;
-      business_name: string;
-      total_transactions: number;
+      total_sales: number;
+      transaction_count: number;
       total_customers: number;
       total_earnings: number;
-      total_cashback_paid: number;
+      total_cashback: number;
       avg_transaction_amount: number;
-      repayment_rate: number;
-      remaining_balance: number;
-      funding_deal_status: string | null;
+      total_fees: number;
       refunded_transactions: number;
       refunded_amount: number;
     };
 
-    // Format response
+    // Format response - using the new accurate analytics columns
     const response = {
-      merchant_id: analytics.merchant_id,
-      total_sales: parseFloat(String(analytics.total_earnings || 0)),
-      total_cashback: parseFloat(String(analytics.total_cashback_paid || 0)),
-      repayment_rate: parseFloat(String(analytics.repayment_rate || 0)),
-      remaining_balance: parseFloat(String(analytics.remaining_balance || 0)),
-      total_transactions: parseInt(String(analytics.total_transactions || 0)),
+      merchant_id: merchant.id,
+      total_sales: parseFloat(String(analytics.total_sales || 0)),
+      total_cashback: parseFloat(String(analytics.total_cashback || 0)),
+      total_earnings: parseFloat(String(analytics.total_earnings || 0)),
+      // Platform fees - now accurately calculated only on Stripe portion, not PawBucks
+      total_fees: parseFloat(String(analytics.total_fees || 0)),
+      total_transactions: parseInt(String(analytics.transaction_count || 0)),
       total_customers: parseInt(String(analytics.total_customers || 0)),
       avg_transaction_amount: parseFloat(String(analytics.avg_transaction_amount || 0)),
-      funding_deal_status: analytics.funding_deal_status || null,
       // Include refund information for transparency
       refunded_transactions: parseInt(String(analytics.refunded_transactions || 0)),
       refunded_amount: parseFloat(String(analytics.refunded_amount || 0)),
