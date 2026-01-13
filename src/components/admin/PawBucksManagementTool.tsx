@@ -92,7 +92,7 @@ export function PawBucksManagementTool() {
         .from('pawbucks_wallet')
         .select('balance')
         .eq('user_id', data.id)
-        .single();
+        .maybeSingle();
 
       setFoundUser({
         ...data,
@@ -133,7 +133,7 @@ export function PawBucksManagementTool() {
         .from('merchant_pawbucks_wallet')
         .select('balance')
         .eq('merchant_id', data.id)
-        .single();
+        .maybeSingle();
 
       setFoundMerchant({
         ...data,
