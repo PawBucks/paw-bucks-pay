@@ -15,8 +15,12 @@ type Transaction = {
   description?: string;
   status: string;
   created_at: string;
+  user_id: string;
   merchants?: {
     business_name: string;
+  };
+  profiles?: {
+    full_name: string | null;
   };
 };
 
@@ -45,7 +49,7 @@ export function TransactionsTab() {
     try {
       const { data, error } = await supabase
         .from('transactions')
-        .select('*, merchants(business_name)')
+        .select('*, merchants(business_name), profiles(full_name)')
         .order('created_at', { ascending: false })
         .limit(100);
 
@@ -103,6 +107,7 @@ export function TransactionsTab() {
             <TableRow>
               <TableHead>Date</TableHead>
               <TableHead>Merchant</TableHead>
+              <TableHead>Pet Owner</TableHead>
               <TableHead>Amount</TableHead>
               <TableHead>Cashback</TableHead>
               <TableHead>PawBucks</TableHead>
@@ -110,26 +115,37 @@ export function TransactionsTab() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredTransactions.map((transaction) => (
-              <TableRow key={transaction.id}>
-                <TableCell>{new Date(transaction.created_at).toLocaleString()}</TableCell>
-                <TableCell className="font-medium">
-                  {transaction.merchants?.business_name || 'N/A'}
-                </TableCell>
-                <TableCell>${transaction.amount.toFixed(2)}</TableCell>
-                <TableCell className="text-green-600">
-                  ${(transaction.rewards_earned * 0.001).toFixed(2)}
-                </TableCell>
-                <TableCell className="text-purple-600">
-                  {transaction.rewards_earned}
-                </TableCell>
-                <TableCell>
-                  <Badge variant={transaction.status === 'completed' ? 'default' : 'secondary'}>
-                    {transaction.status}
-                  </Badge>
-                </TableCell>
-              </TableRow>
-            ))}
+            {filteredTransactions.map((transaction) => {
+              const isRefund = transaction.status === 'refunded';
+              return (
+                <TableRow key={transaction.id}>
+                  <TableCell>{new Date(transaction.created_at).toLocaleString()}</TableCell>
+                  <TableCell className="font-medium">
+                    {transaction.merchants?.business_name || 'N/A'}
+                  </TableCell>
+                  <TableCell>
+                    {transaction.profiles?.full_name || 'N/A'}
+                  </TableCell>
+                  <TableCell className={isRefund ? 'text-destructive' : ''}>
+                    {isRefund ? '-' : ''}${transaction.amount.toFixed(2)}
+                  </TableCell>
+                  <TableCell className="text-green-600">
+                    ${(transaction.rewards_earned * 0.001).toFixed(2)}
+                  </TableCell>
+                  <TableCell className="text-purple-600">
+                    {transaction.rewards_earned}
+                  </TableCell>
+                  <TableCell>
+                    <Badge 
+                      variant={transaction.status === 'completed' ? 'default' : 'secondary'}
+                      className={isRefund ? 'bg-destructive text-destructive-foreground hover:bg-destructive/80' : ''}
+                    >
+                      {transaction.status}
+                    </Badge>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </div>
