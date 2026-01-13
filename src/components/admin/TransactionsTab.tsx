@@ -28,9 +28,16 @@ export function TransactionsTab() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  // Use RPC data for summary cards to ensure consistency with OverviewTab
+  const [summaryStats, setSummaryStats] = useState({
+    totalTransactions: 0,
+    platformRevenue: 0,
+    totalRewards: 0, // in PawBucks
+  });
 
   useEffect(() => {
     loadTransactions();
+    loadSummaryStats();
   }, []);
 
   useEffect(() => {
@@ -62,12 +69,27 @@ export function TransactionsTab() {
     }
   };
 
-  // Use actual application_fee from completed transactions (matches OverviewTab)
-  const totalRevenue = filteredTransactions
-    .filter(t => t.status === 'completed')
-    .reduce((sum, t) => sum + (t.application_fee || 0), 0);
-  // rewards_earned is in PawBucks, convert to USD (1 PawBuck = $0.001)
-  const totalRewardsUSD = filteredTransactions.reduce((sum, t) => sum + (t.rewards_earned * 0.001), 0);
+  // Load summary stats from RPC to match OverviewTab exactly
+  const loadSummaryStats = async () => {
+    try {
+      const { data, error } = await supabase.rpc('get_admin_analytics');
+      
+      if (error) throw error;
+      
+      if (data && data[0]) {
+        setSummaryStats({
+          totalTransactions: data[0].total_transactions || 0,
+          platformRevenue: data[0].platform_revenue || 0,
+          totalRewards: data[0].total_rewards || 0, // in PawBucks
+        });
+      }
+    } catch (error) {
+      console.error('Error loading summary stats:', error);
+    }
+  };
+
+  // Convert PawBucks to USD (1 PawBuck = $0.001)
+  const totalRewardsUSD = summaryStats.totalRewards * 0.001;
 
   return (
     <div className="space-y-6">
@@ -79,15 +101,15 @@ export function TransactionsTab() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="border rounded-lg p-4">
           <div className="text-sm text-muted-foreground">Total Transactions</div>
-          <div className="text-2xl font-bold">{filteredTransactions.length}</div>
+          <div className="text-2xl font-bold">{summaryStats.totalTransactions.toLocaleString()}</div>
         </div>
         <div className="border rounded-lg p-4">
           <div className="text-sm text-muted-foreground">Platform Revenue (3%)</div>
-          <div className="text-2xl font-bold">${totalRevenue.toFixed(2)}</div>
+          <div className="text-2xl font-bold">${summaryStats.platformRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
         </div>
         <div className="border rounded-lg p-4">
           <div className="text-sm text-muted-foreground">Total Rewards</div>
-          <div className="text-2xl font-bold">${totalRewardsUSD.toFixed(2)}</div>
+          <div className="text-2xl font-bold">${totalRewardsUSD.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
         </div>
       </div>
 
