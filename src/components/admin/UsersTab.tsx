@@ -26,6 +26,7 @@ type UserRole = {
 };
 
 // Function to load users with their PawBucks balances
+// Uses pawbucks_wallet.balance as the single source of truth
 const fetchUsersWithBalances = async (): Promise<User[]> => {
   const { data: profiles, error } = await supabase
     .from('profiles')
@@ -34,26 +35,21 @@ const fetchUsersWithBalances = async (): Promise<User[]> => {
 
   if (error) throw error;
 
-  // Fetch available PawBucks balances using the breakdown function for accuracy
-  // This calculates only 'available' status pawbucks, excluding 'pending'
-  const { data: activityData } = await supabase
-    .from('pawbucks_activity')
-    .select('user_id, amount, pawbucks_status');
+  // Fetch wallet balances directly - this is the authoritative source
+  // The wallet balance is updated by edge functions and is always accurate
+  const { data: walletData } = await supabase
+    .from('pawbucks_wallet')
+    .select('user_id, balance');
 
-  // Calculate available balance per user (only available/null status, not pending)
-  const availableBalanceMap = new Map<string, number>();
-  activityData?.forEach(activity => {
-    const status = activity.pawbucks_status;
-    // Only count available pawbucks (null status means legacy available)
-    if (status === 'available' || status === null) {
-      const current = availableBalanceMap.get(activity.user_id) || 0;
-      availableBalanceMap.set(activity.user_id, current + activity.amount);
-    }
+  // Create a map of user_id to wallet balance
+  const balanceMap = new Map<string, number>();
+  walletData?.forEach(wallet => {
+    balanceMap.set(wallet.user_id, wallet.balance ?? 0);
   });
 
   return (profiles || []).map(p => ({
     ...p,
-    pawbucks_balance: availableBalanceMap.get(p.id) ?? 0
+    pawbucks_balance: balanceMap.get(p.id) ?? 0
   }));
 };
 
