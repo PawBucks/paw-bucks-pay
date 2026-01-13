@@ -181,19 +181,34 @@ serve(async (req) => {
       );
     }
 
-    // Log activity
+    // Log activity - CRITICAL: This must succeed or balances will be inconsistent
+    // Note: type must be 'earn' or 'redeem' per database constraint, using 'redeem' for debits
     if (targetType === 'user') {
-      await supabaseAdmin
+      const { error: activityError } = await supabaseAdmin
         .from('pawbucks_activity')
         .insert({
           user_id: targetId,
           amount: -amount,
-          type: 'spend',
+          type: 'redeem', // Must use 'redeem' for debits per database constraint
           source: 'admin_debit',
-          description: reason.trim()
+          description: reason.trim(),
+          pawbucks_status: 'available' // Ensure status is set for proper balance calculation
         });
+      
+      if (activityError) {
+        console.error('Failed to insert pawbucks_activity:', activityError);
+        // Rollback wallet balance on activity insert failure
+        await supabaseAdmin
+          .from('pawbucks_wallet')
+          .update({ balance: oldBalance })
+          .eq('user_id', targetId);
+        return new Response(
+          JSON.stringify({ error: 'Failed to record activity. Transaction rolled back.' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
     } else {
-      await supabaseAdmin
+      const { error: activityError } = await supabaseAdmin
         .from('merchant_pawbucks_activity')
         .insert({
           merchant_id: targetId,
@@ -202,6 +217,19 @@ serve(async (req) => {
           source: 'admin_debit',
           description: reason.trim()
         });
+      
+      if (activityError) {
+        console.error('Failed to insert merchant_pawbucks_activity:', activityError);
+        // Rollback wallet balance on activity insert failure
+        await supabaseAdmin
+          .from('merchant_pawbucks_wallet')
+          .update({ balance: oldBalance })
+          .eq('merchant_id', targetId);
+        return new Response(
+          JSON.stringify({ error: 'Failed to record activity. Transaction rolled back.' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
     }
 
     // Log admin action
