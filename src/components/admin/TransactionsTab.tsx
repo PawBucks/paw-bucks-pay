@@ -129,11 +129,11 @@ export function TransactionsTab() {
                   <TableCell className={isRefund ? 'text-destructive' : ''}>
                     {isRefund ? '-' : ''}${transaction.amount.toFixed(2)}
                   </TableCell>
-                  <TableCell className="text-green-600">
-                    ${(transaction.rewards_earned * 0.001).toFixed(2)}
+                  <TableCell className={isRefund ? 'text-destructive' : 'text-green-600'}>
+                    {isRefund ? '-' : ''}${(transaction.rewards_earned * 0.001).toFixed(2)}
                   </TableCell>
-                  <TableCell className="text-purple-600">
-                    {transaction.rewards_earned}
+                  <TableCell className={isRefund ? 'text-destructive' : 'text-purple-600'}>
+                    {isRefund ? '-' : ''}{transaction.rewards_earned}
                   </TableCell>
                   <TableCell>
                     <Badge 
