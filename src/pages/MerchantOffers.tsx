@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Search, Edit, Pause, Play, Archive, BarChart3, QrCode } from "lucide-react";
+import { Plus, Search, Edit, Pause, Play, Archive, ArchiveRestore, BarChart3, QrCode } from "lucide-react";
 import { toast } from "sonner";
 import { ErrorHandler } from "@/utils/errorHandler";
 import { MerchantOfferImport } from "@/components/MerchantOfferImport";
@@ -300,7 +300,16 @@ const handleSignOut = async () => {
                             Resume
                           </Button>
                         )}
-                        {offer.status !== "archived" && (
+                        {offer.status === "archived" ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleStatusChange(offer.id, "unarchive")}
+                          >
+                            <ArchiveRestore className="mr-2 h-4 w-4" />
+                            Unarchive
+                          </Button>
+                        ) : (
                           <Button
                             variant="outline"
                             size="sm"
