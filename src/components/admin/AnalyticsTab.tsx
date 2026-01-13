@@ -35,11 +35,13 @@ export function AnalyticsTab() {
     { name: 'Refunds', value: analytics?.total_refunded_transactions || 0 },
   ];
 
-  // total_cashback_distributed is in PawBucks, convert to USD (1 PawBuck = $0.001)
+  // Use actual values from the RPC function for consistency across dashboards
+  // total_rewards is in PawBucks, convert to USD (1 PawBuck = $0.001)
+  // platform_revenue is the actual sum of application_fee column (only on Stripe portions)
   const revenueData = [
     { name: 'GMV', value: analytics?.total_gmv || 0 },
-    { name: 'Rewards', value: (analytics?.total_cashback_distributed || 0) * 0.001 },
-    { name: 'Platform Fee', value: (analytics?.total_gmv || 0) * 0.03 },
+    { name: 'Rewards', value: (analytics?.total_rewards || 0) * 0.001 },
+    { name: 'Platform Fee', value: analytics?.platform_revenue || 0 },
   ];
 
   return (
