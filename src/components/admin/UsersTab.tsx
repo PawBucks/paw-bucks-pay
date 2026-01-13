@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -7,7 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Search, UserPlus, Edit, Trash2, Shield, Coins } from 'lucide-react';
+import { Search, Edit, Shield, Coins, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 
 type User = {
@@ -24,8 +25,40 @@ type UserRole = {
   role: string;
 };
 
+// Function to load users with their PawBucks balances
+const fetchUsersWithBalances = async (): Promise<User[]> => {
+  const { data: profiles, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+
+  // Fetch available PawBucks balances using the breakdown function for accuracy
+  // This calculates only 'available' status pawbucks, excluding 'pending'
+  const { data: activityData } = await supabase
+    .from('pawbucks_activity')
+    .select('user_id, amount, pawbucks_status');
+
+  // Calculate available balance per user (only available/null status, not pending)
+  const availableBalanceMap = new Map<string, number>();
+  activityData?.forEach(activity => {
+    const status = activity.pawbucks_status;
+    // Only count available pawbucks (null status means legacy available)
+    if (status === 'available' || status === null) {
+      const current = availableBalanceMap.get(activity.user_id) || 0;
+      availableBalanceMap.set(activity.user_id, current + activity.amount);
+    }
+  });
+
+  return (profiles || []).map(p => ({
+    ...p,
+    pawbucks_balance: availableBalanceMap.get(p.id) ?? 0
+  }));
+};
+
 export function UsersTab() {
-  const [users, setUsers] = useState<User[]>([]);
+  const queryClient = useQueryClient();
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -34,10 +67,37 @@ export function UsersTab() {
   const [selectedRole, setSelectedRole] = useState<string>('user');
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    loadUsers();
-  }, []);
+  // Use React Query for user data - this allows cache invalidation
+  const { data: users = [], refetch, isLoading } = useQuery({
+    queryKey: ['admin-users-with-pawbucks'],
+    queryFn: fetchUsersWithBalances,
+    staleTime: 30000, // Consider data stale after 30 seconds
+  });
 
+  // Subscribe to real-time PawBucks activity changes
+  useEffect(() => {
+    const channel = supabase
+      .channel('admin-users-pawbucks-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'pawbucks_activity'
+        },
+        () => {
+          // Refetch users when PawBucks activity changes
+          queryClient.invalidateQueries({ queryKey: ['admin-users-with-pawbucks'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
+
+  // Filter users based on search term
   useEffect(() => {
     if (searchTerm) {
       const filtered = users.filter(user =>
@@ -50,44 +110,10 @@ export function UsersTab() {
     }
   }, [searchTerm, users]);
 
-  const loadUsers = async () => {
-    try {
-      const { data: profiles, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      // Fetch available PawBucks balances using the breakdown function for accuracy
-      // This calculates only 'available' status pawbucks, excluding 'pending'
-      const { data: activityData } = await supabase
-        .from('pawbucks_activity')
-        .select('user_id, amount, pawbucks_status');
-
-      // Calculate available balance per user (only available/null status, not pending)
-      const availableBalanceMap = new Map<string, number>();
-      activityData?.forEach(activity => {
-        const status = activity.pawbucks_status;
-        // Only count available pawbucks (null status means legacy available)
-        if (status === 'available' || status === null) {
-          const current = availableBalanceMap.get(activity.user_id) || 0;
-          availableBalanceMap.set(activity.user_id, current + activity.amount);
-        }
-      });
-
-      const usersWithBalance = (profiles || []).map(p => ({
-        ...p,
-        pawbucks_balance: availableBalanceMap.get(p.id) ?? 0
-      }));
-
-      setUsers(usersWithBalance);
-      setFilteredUsers(usersWithBalance);
-    } catch (error) {
-      console.error('Error loading users:', error);
-      toast.error('Failed to load users');
-    }
-  };
+  const handleRefresh = useCallback(() => {
+    refetch();
+    toast.success('User data refreshed');
+  }, [refetch]);
 
   const handleUpdateUser = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -115,7 +141,7 @@ export function UsersTab() {
 
       toast.success('User updated successfully');
       setEditDialogOpen(false);
-      loadUsers();
+      refetch();
     } catch (error: any) {
       toast.error(error.message);
     } finally {
@@ -151,7 +177,7 @@ export function UsersTab() {
 
       toast.success('User role updated successfully');
       setRoleDialogOpen(false);
-      loadUsers();
+      refetch();
     } catch (error: any) {
       toast.error(error.message);
     } finally {
@@ -166,6 +192,16 @@ export function UsersTab() {
           <h2 className="text-3xl font-bold">User Management</h2>
           <p className="text-muted-foreground">Manage all platform users</p>
         </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleRefresh}
+          disabled={isLoading}
+          className="flex items-center gap-2"
+        >
+          <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+          Refresh
+        </Button>
       </div>
 
       <div className="flex gap-4">
