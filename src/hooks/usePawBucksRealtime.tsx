@@ -27,9 +27,13 @@ export function usePawBucksRealtime(userId: string | undefined) {
         },
         (payload) => {
           console.log('[Realtime] PawBucks wallet update:', payload);
-          // Invalidate all PawBucks-related queries
+          // Invalidate all PawBucks-related queries with various key formats
           queryClient.invalidateQueries({ queryKey: ['pawbucks_wallet', userId] });
           queryClient.invalidateQueries({ queryKey: ['pawbucks-wallet', userId] });
+          queryClient.invalidateQueries({ queryKey: ['pawbucks_wallet'] });
+          queryClient.invalidateQueries({ queryKey: ['pawbucks-wallet'] });
+          queryClient.invalidateQueries({ queryKey: ['wallet', userId] });
+          queryClient.invalidateQueries({ queryKey: ['wallet'] });
         }
       )
       .on(
@@ -42,9 +46,11 @@ export function usePawBucksRealtime(userId: string | undefined) {
         },
         (payload) => {
           console.log('[Realtime] PawBucks activity:', payload);
-          // Invalidate activity queries
+          // Invalidate activity queries with various key formats
           queryClient.invalidateQueries({ queryKey: ['pawbucks_activity', userId] });
           queryClient.invalidateQueries({ queryKey: ['pawbucks-activity', userId] });
+          queryClient.invalidateQueries({ queryKey: ['pawbucks_activity'] });
+          queryClient.invalidateQueries({ queryKey: ['pawbucks-activity'] });
         }
       )
       .on(
@@ -94,6 +100,8 @@ export function useMerchantPawBucksRealtime(merchantId: string | undefined) {
         (payload) => {
           console.log('[Realtime] Merchant PawBucks wallet update:', payload);
           queryClient.invalidateQueries({ queryKey: ['merchant-pawbucks-wallet', merchantId] });
+          queryClient.invalidateQueries({ queryKey: ['merchant-pawbucks-wallet'] });
+          queryClient.invalidateQueries({ queryKey: ['merchant-analytics'] });
         }
       )
       .on(
@@ -107,6 +115,7 @@ export function useMerchantPawBucksRealtime(merchantId: string | undefined) {
         (payload) => {
           console.log('[Realtime] Merchant PawBucks activity:', payload);
           queryClient.invalidateQueries({ queryKey: ['merchant-pawbucks-activity', merchantId] });
+          queryClient.invalidateQueries({ queryKey: ['merchant-pawbucks-activity'] });
         }
       )
       .on(

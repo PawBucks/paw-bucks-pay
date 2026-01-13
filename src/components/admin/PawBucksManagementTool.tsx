@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -30,6 +31,7 @@ const MAX_AMOUNT_SUPERADMIN = 750000;
 
 export function PawBucksManagementTool() {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [targetType, setTargetType] = useState<'user' | 'merchant'>('user');
   const [operation, setOperation] = useState<'credit' | 'debit'>('credit');
@@ -226,6 +228,32 @@ export function PawBucksManagementTool() {
       setLastOperation({ target: targetName || '', amount: amountNum, type: operation });
       setAmount('');
       setReason('');
+
+      // Invalidate all PawBucks-related queries to update balances across the platform
+      if (targetType === 'user') {
+        // Invalidate user wallet queries (various key formats used across the app)
+        queryClient.invalidateQueries({ queryKey: ['pawbucks_wallet'] });
+        queryClient.invalidateQueries({ queryKey: ['pawbucks-wallet'] });
+        queryClient.invalidateQueries({ queryKey: ['pawbucks_wallet', target.id] });
+        queryClient.invalidateQueries({ queryKey: ['pawbucks-wallet', target.id] });
+        queryClient.invalidateQueries({ queryKey: ['pawbucks_activity'] });
+        queryClient.invalidateQueries({ queryKey: ['pawbucks-activity'] });
+        queryClient.invalidateQueries({ queryKey: ['pawbucks_activity', target.id] });
+        queryClient.invalidateQueries({ queryKey: ['pawbucks-activity', target.id] });
+        queryClient.invalidateQueries({ queryKey: ['wallet'] });
+        queryClient.invalidateQueries({ queryKey: ['wallet', target.id] });
+      } else {
+        // Invalidate merchant wallet queries
+        queryClient.invalidateQueries({ queryKey: ['merchant-pawbucks-wallet'] });
+        queryClient.invalidateQueries({ queryKey: ['merchant-pawbucks-wallet', target.id] });
+        queryClient.invalidateQueries({ queryKey: ['merchant-pawbucks-activity'] });
+        queryClient.invalidateQueries({ queryKey: ['merchant-pawbucks-activity', target.id] });
+        queryClient.invalidateQueries({ queryKey: ['merchant-analytics'] });
+      }
+      
+      // Also invalidate admin-related queries
+      queryClient.invalidateQueries({ queryKey: ['admin-analytics'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-users'] });
     } catch (error: any) {
       toast.error(error.message || `Failed to ${operation} PawBucks`);
     } finally {
