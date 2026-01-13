@@ -254,6 +254,7 @@ export function PawBucksManagementTool() {
       // Also invalidate admin-related queries
       queryClient.invalidateQueries({ queryKey: ['admin-analytics'] });
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-users-with-pawbucks'] });
     } catch (error: any) {
       toast.error(error.message || `Failed to ${operation} PawBucks`);
     } finally {
