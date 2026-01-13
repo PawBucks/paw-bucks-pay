@@ -61,7 +61,7 @@ serve(async (req) => {
     switch (action) {
       case "pause":
         if (offer.status === "archived") {
-          throw new Error("Cannot pause archived offer");
+          throw new Error("Cannot pause archived offer. Use 'unarchive' first.");
         }
         updates = { status: "paused", is_active: false };
         actionLog = "paused";
@@ -69,7 +69,7 @@ serve(async (req) => {
 
       case "resume":
         if (offer.status === "archived") {
-          throw new Error("Cannot resume archived offer");
+          throw new Error("Cannot resume archived offer. Use 'unarchive' first.");
         }
         if (offer.end_date && new Date(offer.end_date) < new Date()) {
           throw new Error("Cannot resume expired offer");
@@ -81,6 +81,24 @@ serve(async (req) => {
       case "archive":
         updates = { status: "archived", is_active: false };
         actionLog = "archived";
+        break;
+
+      case "unarchive":
+        if (offer.status !== "archived") {
+          throw new Error("Offer is not archived");
+        }
+        // Unarchive to paused state so merchant can review before activating
+        updates = { status: "paused", is_active: false };
+        actionLog = "unarchived";
+        break;
+
+      case "activate":
+        // Allow direct activation from any non-archived state, or after unarchiving
+        if (offer.end_date && new Date(offer.end_date) < new Date()) {
+          throw new Error("Cannot activate expired offer. Update the end date first.");
+        }
+        updates = { status: "active", is_active: true };
+        actionLog = "activated";
         break;
 
       default:

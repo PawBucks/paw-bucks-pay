@@ -55,9 +55,8 @@ serve(async (req) => {
       throw new Error("Offer not found");
     }
 
-    if (existingOffer.status === "archived") {
-      throw new Error("Cannot update archived offer");
-    }
+    // Allow editing archived offers - merchant may want to reactivate them
+    // The status change will be handled by the update logic below
 
     const body = await req.json();
     const {
