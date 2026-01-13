@@ -45,7 +45,7 @@ const generatePasswordRecoveryEmail = (
           <!-- Header -->
           <tr>
             <td style="background-color: #ffffff; padding: 32px; text-align: center; border-radius: 12px 12px 0 0;">
-              <h1 style="margin: 0; font-size: 42px; font-weight: 800; letter-spacing: 1px; color: #22d3ee; text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(34, 211, 238, 0.3), 0 0 30px rgba(34, 211, 238, 0.2), 2px 2px 4px rgba(255, 255, 255, 0.9);">PAWBUCKS</h1>
+              <h1 style="margin: 0; font-size: 42px; font-weight: 800; letter-spacing: 1px; color: #7DD4D4; text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(125, 212, 212, 0.3), 0 0 30px rgba(125, 212, 212, 0.2), 2px 2px 4px rgba(255, 255, 255, 0.9);">PAWBUCKS</h1>
             </td>
           </tr>
           
@@ -67,7 +67,7 @@ const generatePasswordRecoveryEmail = (
                 <tr>
                   <td align="center" style="padding: 0 0 32px 0;">
                     <a href="${confirmationUrl}" 
-                       style="display: inline-block; background: linear-gradient(135deg, #8B5CF6 0%, #A855F7 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 8px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 14px rgba(139, 92, 246, 0.4);">
+                       style="display: inline-block; background: linear-gradient(135deg, #7DD4D4 0%, #5FCBC9 100%); color: #1a3a3a; text-decoration: none; padding: 16px 40px; border-radius: 8px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 14px rgba(125, 212, 212, 0.4);">
                       Reset Password
                     </a>
                   </td>
@@ -81,7 +81,7 @@ const generatePasswordRecoveryEmail = (
               <p style="color: #6b7280; font-size: 14px; line-height: 1.6; margin: 0;">
                 If the button above doesn't work, copy and paste this link into your browser:
               </p>
-              <p style="color: #8B5CF6; font-size: 12px; word-break: break-all; margin: 8px 0 0 0;">
+              <p style="color: #5FCBC9; font-size: 12px; word-break: break-all; margin: 8px 0 0 0;">
                 ${confirmationUrl}
               </p>
             </td>
@@ -124,7 +124,7 @@ const generateSignupConfirmationEmail = (
           <!-- Header -->
           <tr>
             <td style="background-color: #ffffff; padding: 32px; text-align: center; border-radius: 12px 12px 0 0;">
-              <h1 style="margin: 0; font-size: 42px; font-weight: 800; letter-spacing: 1px; color: #22d3ee; text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(34, 211, 238, 0.3), 0 0 30px rgba(34, 211, 238, 0.2), 2px 2px 4px rgba(255, 255, 255, 0.9);">PAWBUCKS</h1>
+              <h1 style="margin: 0; font-size: 42px; font-weight: 800; letter-spacing: 1px; color: #7DD4D4; text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(125, 212, 212, 0.3), 0 0 30px rgba(125, 212, 212, 0.2), 2px 2px 4px rgba(255, 255, 255, 0.9);">PAWBUCKS</h1>
             </td>
           </tr>
           
@@ -146,7 +146,7 @@ const generateSignupConfirmationEmail = (
                 <tr>
                   <td align="center" style="padding: 0 0 32px 0;">
                     <a href="${confirmationUrl}" 
-                       style="display: inline-block; background: linear-gradient(135deg, #8B5CF6 0%, #A855F7 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 8px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 14px rgba(139, 92, 246, 0.4);">
+                       style="display: inline-block; background: linear-gradient(135deg, #7DD4D4 0%, #5FCBC9 100%); color: #1a3a3a; text-decoration: none; padding: 16px 40px; border-radius: 8px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 14px rgba(125, 212, 212, 0.4);">
                       Confirm Email
                     </a>
                   </td>
@@ -156,7 +156,7 @@ const generateSignupConfirmationEmail = (
               <p style="color: #6b7280; font-size: 14px; line-height: 1.6; margin: 0;">
                 If the button above doesn't work, copy and paste this link into your browser:
               </p>
-              <p style="color: #8B5CF6; font-size: 12px; word-break: break-all; margin: 8px 0 0 0;">
+              <p style="color: #5FCBC9; font-size: 12px; word-break: break-all; margin: 8px 0 0 0;">
                 ${confirmationUrl}
               </p>
             </td>
@@ -199,7 +199,7 @@ const generateMagicLinkEmail = (
           <!-- Header -->
           <tr>
             <td style="background-color: #ffffff; padding: 32px; text-align: center; border-radius: 12px 12px 0 0;">
-              <h1 style="margin: 0; font-size: 42px; font-weight: 800; letter-spacing: 1px; color: #22d3ee; text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(34, 211, 238, 0.3), 0 0 30px rgba(34, 211, 238, 0.2), 2px 2px 4px rgba(255, 255, 255, 0.9);">PAWBUCKS</h1>
+              <h1 style="margin: 0; font-size: 42px; font-weight: 800; letter-spacing: 1px; color: #7DD4D4; text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(125, 212, 212, 0.3), 0 0 30px rgba(125, 212, 212, 0.2), 2px 2px 4px rgba(255, 255, 255, 0.9);">PAWBUCKS</h1>
             </td>
           </tr>
           
@@ -221,7 +221,7 @@ const generateMagicLinkEmail = (
                 <tr>
                   <td align="center" style="padding: 0 0 32px 0;">
                     <a href="${confirmationUrl}" 
-                       style="display: inline-block; background: linear-gradient(135deg, #8B5CF6 0%, #A855F7 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 8px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 14px rgba(139, 92, 246, 0.4);">
+                       style="display: inline-block; background: linear-gradient(135deg, #7DD4D4 0%, #5FCBC9 100%); color: #1a3a3a; text-decoration: none; padding: 16px 40px; border-radius: 8px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 14px rgba(125, 212, 212, 0.4);">
                       Log In
                     </a>
                   </td>
@@ -235,7 +235,7 @@ const generateMagicLinkEmail = (
               <p style="color: #6b7280; font-size: 14px; line-height: 1.6; margin: 0;">
                 If the button above doesn't work, copy and paste this link into your browser:
               </p>
-              <p style="color: #8B5CF6; font-size: 12px; word-break: break-all; margin: 8px 0 0 0;">
+              <p style="color: #5FCBC9; font-size: 12px; word-break: break-all; margin: 8px 0 0 0;">
                 ${confirmationUrl}
               </p>
             </td>
