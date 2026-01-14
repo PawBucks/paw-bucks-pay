@@ -257,7 +257,16 @@ export function UsersTab() {
             {filteredUsers.map((user) => (
               <TableRow key={user.id}>
                 <TableCell className="font-medium">{user.full_name}</TableCell>
-                <TableCell>{user.email}</TableCell>
+                <TableCell>
+                  <div>
+                    {user.email}
+                    {user.shared_with_owner && (
+                      <span className="block text-xs text-amber-600 font-medium">
+                        🔗 Shares with {user.shared_with_owner}
+                      </span>
+                    )}
+                  </div>
+                </TableCell>
                 <TableCell>
                   <Badge variant={user.user_type === 'merchant' ? 'default' : 'secondary'}>
                     {user.user_type}
@@ -267,6 +276,9 @@ export function UsersTab() {
                   <span className="flex items-center gap-1 text-primary font-medium">
                     <Coins className="w-3 h-3" />
                     {(user.pawbucks_balance ?? 0).toLocaleString()}
+                    {user.shared_with_owner && (
+                      <span className="text-xs text-muted-foreground ml-1">(shared)</span>
+                    )}
                   </span>
                 </TableCell>
                 <TableCell>{user.phone || 'N/A'}</TableCell>

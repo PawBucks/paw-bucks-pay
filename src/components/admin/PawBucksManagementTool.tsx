@@ -17,6 +17,8 @@ type UserResult = {
   email: string;
   full_name: string;
   balance: number;
+  effectiveUserId?: string; // Owner's ID if this user is a shared member
+  sharedWithOwner?: string; // Owner's email if shared
 };
 
 type MerchantResult = {
@@ -90,15 +92,40 @@ export function PawBucksManagementTool() {
         return;
       }
 
+      // Check if this user is a shared account member
+      const { data: sharedMembership } = await supabase
+        .from('shared_account_members')
+        .select('owner_id')
+        .eq('member_id', data.id)
+        .eq('status', 'accepted')
+        .maybeSingle();
+
+      let effectiveUserId = data.id;
+      let sharedWithOwner: string | undefined;
+
+      if (sharedMembership?.owner_id) {
+        effectiveUserId = sharedMembership.owner_id;
+        // Get owner's email for display
+        const { data: ownerProfile } = await supabase
+          .from('profiles')
+          .select('email')
+          .eq('id', sharedMembership.owner_id)
+          .single();
+        sharedWithOwner = ownerProfile?.email;
+      }
+
+      // Get the effective wallet balance (owner's if shared)
       const { data: wallet } = await supabase
         .from('pawbucks_wallet')
         .select('balance')
-        .eq('user_id', data.id)
+        .eq('user_id', effectiveUserId)
         .maybeSingle();
 
       setFoundUser({
         ...data,
         balance: wallet?.balance ?? 0,
+        effectiveUserId: sharedMembership?.owner_id ? effectiveUserId : undefined,
+        sharedWithOwner,
       });
     } catch (error) {
       toast.error('Failed to search for user');
@@ -346,9 +373,16 @@ export function PawBucksManagementTool() {
                 <p className="text-sm text-muted-foreground">
                   {targetType === 'user' ? foundUser?.email : foundMerchant?.email || 'No email'}
                 </p>
+                {targetType === 'user' && foundUser?.sharedWithOwner && (
+                  <p className="text-xs text-amber-600 font-medium mt-1">
+                    🔗 Shared account with {foundUser.sharedWithOwner}
+                  </p>
+                )}
               </div>
               <div className="ml-auto text-right">
-                <p className="text-sm text-muted-foreground">Current Balance</p>
+                <p className="text-sm text-muted-foreground">
+                  {targetType === 'user' && foundUser?.sharedWithOwner ? 'Shared Wallet Balance' : 'Current Balance'}
+                </p>
                 <p className="font-bold text-lg text-primary">{target.balance.toLocaleString()} PawBucks</p>
               </div>
             </div>
