@@ -198,22 +198,69 @@ const MerchantDashboard = () => {
         setAnalytics(analyticsData);
       }
 
+      // Fetch recent transactions
       const { data: transactionsData } = await supabase
         .from("transactions")
-        .select("*, profiles!transactions_user_id_fkey(full_name, email)")
+        .select("*")
         .eq("merchant_id", merchantData.id)
         .order("created_at", { ascending: false })
         .limit(10);
 
-      setTransactions(transactionsData || []);
+      // Get unique user IDs from transactions
+      const userIds = [...new Set((transactionsData || []).map(t => t.user_id).filter(Boolean))];
+      
+      // Fetch profiles for those user IDs
+      let profilesMap: Record<string, { full_name: string | null; email: string | null }> = {};
+      if (userIds.length > 0) {
+        const { data: profilesData } = await supabase
+          .from("profiles")
+          .select("id, full_name, email")
+          .in("id", userIds);
+        
+        profilesMap = (profilesData || []).reduce((acc, profile) => {
+          acc[profile.id] = { full_name: profile.full_name, email: profile.email };
+          return acc;
+        }, {} as Record<string, { full_name: string | null; email: string | null }>);
+      }
 
+      // Attach profiles to transactions
+      const transactionsWithProfiles = (transactionsData || []).map(t => ({
+        ...t,
+        profiles: t.user_id ? profilesMap[t.user_id] || null : null
+      }));
+
+      setTransactions(transactionsWithProfiles);
+
+      // Fetch all transactions for detailed view (with profiles)
       const { data: allTransactionsData } = await supabase
         .from("transactions")
         .select("*")
         .eq("merchant_id", merchantData.id)
         .order("created_at", { ascending: false });
 
-      setAllTransactions(allTransactionsData || []);
+      // Get all user IDs from all transactions
+      const allUserIds = [...new Set((allTransactionsData || []).map(t => t.user_id).filter(Boolean))];
+      
+      // Fetch profiles for all user IDs (if not already fetched)
+      const newUserIds = allUserIds.filter(id => !profilesMap[id]);
+      if (newUserIds.length > 0) {
+        const { data: moreProfilesData } = await supabase
+          .from("profiles")
+          .select("id, full_name, email")
+          .in("id", newUserIds);
+        
+        (moreProfilesData || []).forEach(profile => {
+          profilesMap[profile.id] = { full_name: profile.full_name, email: profile.email };
+        });
+      }
+
+      // Attach profiles to all transactions
+      const allTransactionsWithProfiles = (allTransactionsData || []).map(t => ({
+        ...t,
+        profiles: t.user_id ? profilesMap[t.user_id] || null : null
+      }));
+
+      setAllTransactions(allTransactionsWithProfiles);
     } catch (error: any) {
       console.error("Error loading merchant data:", error);
       toast.error("Failed to load merchant data");
