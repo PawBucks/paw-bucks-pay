@@ -80,7 +80,7 @@ serve(async (req) => {
 
     const { start_date: startDate, end_date: endDate, status, search } = validationResult.data;
 
-    // Build query
+    // Build query - fetch transactions without profile join (no FK exists)
     let query = supabase
       .from('transactions')
       .select(`
@@ -91,8 +91,7 @@ serve(async (req) => {
         status,
         description,
         stripe_payment_intent_id,
-        user_id,
-        profiles!transactions_user_id_fkey(full_name, email)
+        user_id
       `)
       .eq('merchant_id', merchant.id)
       .order('created_at', { ascending: false });
@@ -116,6 +115,23 @@ serve(async (req) => {
 
     console.log(`Found ${transactions?.length || 0} transactions`);
 
+    // Get unique user IDs from transactions
+    const userIds = [...new Set((transactions || []).map((t: any) => t.user_id).filter(Boolean))];
+    
+    // Fetch profiles for those user IDs separately
+    let profilesMap: Record<string, { full_name: string | null; email: string | null }> = {};
+    if (userIds.length > 0) {
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('id, full_name, email')
+        .in('id', userIds);
+      
+      profilesMap = (profilesData || []).reduce((acc: any, profile: any) => {
+        acc[profile.id] = { full_name: profile.full_name, email: profile.email };
+        return acc;
+      }, {});
+    }
+
     // Get funding deal info for repayment calculations
     const { data: fundingDeal } = await supabase
       .from('funding_deals')
@@ -126,23 +142,24 @@ serve(async (req) => {
 
     const repaymentRate = fundingDeal?.repayment_rate || 0;
 
-    // Format transactions
+    // Format transactions with profile data
     const formattedTransactions = transactions?.map((t: any) => {
       const amount = parseFloat(t.amount || 0);
       const cashbackGiven = parseFloat(t.cashback_earned || 0);
       const repaymentDeducted = (amount * repaymentRate) / 100;
       const netPayout = amount - cashbackGiven - repaymentDeducted;
+      const profile = t.user_id ? profilesMap[t.user_id] : null;
 
       return {
         transaction_id: t.id,
         date: t.created_at,
-        customer_name: t.profiles?.full_name || 'Unknown',
-        customer_email: t.profiles?.email || '',
+        customer_name: profile?.full_name || 'Unknown',
+        customer_email: profile?.email || '',
         amount: amount,
         cashback_given: cashbackGiven,
         repayment_deducted: repaymentDeducted,
         net_payout: netPayout,
-        payment_method: 'Card', // Default - could be expanded with Stripe data
+        payment_method: 'Card',
         status: t.status,
         description: t.description || '',
       };
