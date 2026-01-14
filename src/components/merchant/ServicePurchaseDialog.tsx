@@ -229,11 +229,25 @@ export const ServicePurchaseDialog = ({
   }, [selectedDate, isStrategyConsultation]);
 
   const loadPawbucksBalance = async () => {
-    if (!effectiveUserId) return;
+    if (!userId) return;
+    
+    // Get the merchant ID for this user
+    const { data: merchant } = await supabase
+      .from('merchants')
+      .select('id')
+      .eq('user_id', userId)
+      .single();
+    
+    if (!merchant) {
+      setPawbucksBalance(0);
+      return;
+    }
+    
+    // Fetch from merchant_pawbucks_wallet (merchant's earned PawBucks)
     const { data } = await supabase
-      .from('pawbucks_wallet')
+      .from('merchant_pawbucks_wallet')
       .select('balance')
-      .eq('user_id', effectiveUserId)
+      .eq('merchant_id', merchant.id)
       .single();
     
     setPawbucksBalance(data?.balance || 0);
