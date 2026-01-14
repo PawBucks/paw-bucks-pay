@@ -55,20 +55,22 @@ serve(async (req) => {
 
     console.log('Found merchant:', merchant.id);
 
-    // Parse and validate query parameters
-    const url = new URL(req.url);
-    const queryParams = {
-      start_date: url.searchParams.get('start_date'),
-      end_date: url.searchParams.get('end_date'),
-      status: url.searchParams.get('status'),
-      search: url.searchParams.get('search'),
-    };
+    // Parse and validate request body
+    let requestBody = {};
+    try {
+      const text = await req.text();
+      if (text) {
+        requestBody = JSON.parse(text);
+      }
+    } catch (e) {
+      console.log('No body or invalid JSON, using defaults');
+    }
 
-    const validationResult = querySchema.safeParse(queryParams);
+    const validationResult = querySchema.safeParse(requestBody);
     if (!validationResult.success) {
-      console.error('Invalid query parameters:', validationResult.error);
+      console.error('Invalid request parameters:', validationResult.error);
       return new Response(
-        JSON.stringify({ error: 'Invalid query parameters' }),
+        JSON.stringify({ error: 'Invalid request parameters' }),
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 400,
