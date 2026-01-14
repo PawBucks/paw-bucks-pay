@@ -3,8 +3,19 @@ import { supabase } from '@/integrations/supabase/client';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Search } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Search, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 type Transaction = {
   id: string;
@@ -16,6 +27,7 @@ type Transaction = {
   status: string;
   created_at: string;
   user_id: string;
+  stripe_payment_intent_id?: string | null;
   merchants?: {
     business_name: string;
   };
@@ -28,6 +40,9 @@ export function TransactionsTab() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [refundingId, setRefundingId] = useState<string | null>(null);
+  const [refundDialogOpen, setRefundDialogOpen] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   // Use RPC data for summary cards to ensure consistency with OverviewTab
   const [summaryStats, setSummaryStats] = useState({
     totalTransactions: 0,
@@ -88,6 +103,43 @@ export function TransactionsTab() {
     }
   };
 
+  const handleRefundClick = (transaction: Transaction) => {
+    setSelectedTransaction(transaction);
+    setRefundDialogOpen(true);
+  };
+
+  const handleRefund = async () => {
+    if (!selectedTransaction) return;
+    
+    setRefundingId(selectedTransaction.id);
+    setRefundDialogOpen(false);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-issue-refund', {
+        body: {
+          transactionId: selectedTransaction.id,
+          reason: 'requested_by_customer',
+        },
+      });
+
+      if (error) throw error;
+      
+      if (data?.error) {
+        throw new Error(data.error);
+      }
+
+      toast.success('Transaction refunded successfully');
+      loadTransactions();
+      loadSummaryStats();
+    } catch (error: any) {
+      console.error('Error refunding transaction:', error);
+      toast.error(error.message || 'Failed to refund transaction');
+    } finally {
+      setRefundingId(null);
+      setSelectedTransaction(null);
+    }
+  };
+
   // Convert PawBucks to USD (1 PawBuck = $0.001)
   const totalRewardsUSD = summaryStats.totalRewards * 0.001;
 
@@ -134,11 +186,13 @@ export function TransactionsTab() {
               <TableHead>Cashback</TableHead>
               <TableHead>PawBucks</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredTransactions.map((transaction) => {
               const isRefund = transaction.status === 'refunded';
+              const canRefund = transaction.status === 'completed';
               return (
                 <TableRow key={transaction.id}>
                   <TableCell>{new Date(transaction.created_at).toLocaleString()}</TableCell>
@@ -165,12 +219,44 @@ export function TransactionsTab() {
                       {transaction.status}
                     </Badge>
                   </TableCell>
+                  <TableCell>
+                    {canRefund && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleRefundClick(transaction)}
+                        disabled={refundingId === transaction.id}
+                      >
+                        <RotateCcw className="mr-2 h-4 w-4" />
+                        {refundingId === transaction.id ? 'Refunding...' : 'Refund'}
+                      </Button>
+                    )}
+                  </TableCell>
                 </TableRow>
               );
             })}
           </TableBody>
         </Table>
       </div>
+
+      <AlertDialog open={refundDialogOpen} onOpenChange={setRefundDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Refund</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to refund this transaction of ${selectedTransaction?.amount.toFixed(2)}? 
+              This will reverse the Stripe payment and deduct any earned PawBucks from the customer's account.
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleRefund} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Refund Transaction
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
