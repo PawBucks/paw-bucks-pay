@@ -15,7 +15,6 @@ import {
 
 type MerchantQuickActionsTabProps = {
   hasStripeAccount: boolean;
-  onViewTransactions: () => void;
   onRequestFunding: () => void;
   onEditProfile: () => void;
   onNavigate: (path: string) => void;
@@ -23,7 +22,6 @@ type MerchantQuickActionsTabProps = {
 
 export function MerchantQuickActionsTab({
   hasStripeAccount,
-  onViewTransactions,
   onRequestFunding,
   onEditProfile,
   onNavigate,
@@ -33,7 +31,7 @@ export function MerchantQuickActionsTab({
       title: "View Detailed Transactions",
       description: "See all your transaction activity",
       icon: FileText,
-      onClick: onViewTransactions,
+      onClick: () => onNavigate("/merchant/transactions"),
       color: "text-blue-500",
       bgColor: "bg-blue-500/10",
     },

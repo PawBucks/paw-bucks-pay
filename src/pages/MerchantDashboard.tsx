@@ -49,7 +49,7 @@ import { MerchantEarningsTab } from "@/components/merchant/MerchantEarningsTab";
 // Dialogs
 import { EditMerchantProfileDialog } from "@/components/merchant/EditMerchantProfileDialog";
 import { FundingRequestDialog } from "@/components/merchant/FundingRequestDialog";
-import { TransactionsDialog } from "@/components/merchant/TransactionsDialog";
+
 
 type Merchant = {
   id: string;
@@ -141,7 +141,7 @@ const MerchantDashboard = () => {
 
   // Dialog states
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [transactionsDialogOpen, setTransactionsDialogOpen] = useState(false);
+  
   const [fundingDialogOpen, setFundingDialogOpen] = useState(false);
   const [connectingStripe, setConnectingStripe] = useState(false);
   const [requestingFunding, setRequestingFunding] = useState(false);
@@ -559,7 +559,6 @@ const MerchantDashboard = () => {
         return (
           <MerchantQuickActionsTab
             hasStripeAccount={!!merchant.stripe_account_id}
-            onViewTransactions={() => setTransactionsDialogOpen(true)}
             onRequestFunding={() => setFundingDialogOpen(true)}
             onEditProfile={() => setEditDialogOpen(true)}
             onNavigate={navigate}
@@ -782,11 +781,6 @@ const MerchantDashboard = () => {
         onSubmit={handleUpdateProfile}
       />
 
-      <TransactionsDialog
-        open={transactionsDialogOpen}
-        onOpenChange={setTransactionsDialogOpen}
-        transactions={allTransactions}
-      />
 
       <FundingRequestDialog
         open={fundingDialogOpen}
