@@ -19,6 +19,7 @@ type User = {
   created_at: string;
   phone?: string;
   pawbucks_balance?: number;
+  shared_with_owner?: string; // Owner's email if this user is a shared member
 };
 
 type UserRole = {
@@ -27,6 +28,7 @@ type UserRole = {
 
 // Function to load users with their PawBucks balances
 // Uses pawbucks_wallet.balance as the single source of truth
+// For shared account members, shows the owner's balance
 const fetchUsersWithBalances = async (): Promise<User[]> => {
   const { data: profiles, error } = await supabase
     .from('profiles')
@@ -36,10 +38,21 @@ const fetchUsersWithBalances = async (): Promise<User[]> => {
   if (error) throw error;
 
   // Fetch wallet balances directly - this is the authoritative source
-  // The wallet balance is updated by edge functions and is always accurate
   const { data: walletData } = await supabase
     .from('pawbucks_wallet')
     .select('user_id, balance');
+
+  // Fetch shared account memberships to find who shares with whom
+  const { data: sharedMembers } = await supabase
+    .from('shared_account_members')
+    .select('member_id, owner_id')
+    .eq('status', 'accepted');
+
+  // Create a map of member_id to owner_id
+  const memberToOwnerMap = new Map<string, string>();
+  sharedMembers?.forEach(m => {
+    memberToOwnerMap.set(m.member_id, m.owner_id);
+  });
 
   // Create a map of user_id to wallet balance
   const balanceMap = new Map<string, number>();
@@ -47,10 +60,25 @@ const fetchUsersWithBalances = async (): Promise<User[]> => {
     balanceMap.set(wallet.user_id, wallet.balance ?? 0);
   });
 
-  return (profiles || []).map(p => ({
-    ...p,
-    pawbucks_balance: balanceMap.get(p.id) ?? 0
-  }));
+  // Create a map of user_id to email for owner lookup
+  const emailMap = new Map<string, string>();
+  profiles?.forEach(p => {
+    emailMap.set(p.id, p.email);
+  });
+
+  return (profiles || []).map(p => {
+    const ownerId = memberToOwnerMap.get(p.id);
+    // If user is a shared member, use owner's balance; otherwise use their own
+    const effectiveBalance = ownerId 
+      ? balanceMap.get(ownerId) ?? 0 
+      : balanceMap.get(p.id) ?? 0;
+    
+    return {
+      ...p,
+      pawbucks_balance: effectiveBalance,
+      shared_with_owner: ownerId ? emailMap.get(ownerId) : undefined
+    };
+  });
 };
 
 export function UsersTab() {
