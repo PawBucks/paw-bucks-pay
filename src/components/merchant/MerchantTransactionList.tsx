@@ -1,6 +1,7 @@
 import { memo } from "react";
 import { GradientCard } from "@/components/ui/gradient-card";
 import { format } from "date-fns";
+import { User } from "lucide-react";
 
 type Transaction = {
   id: string;
@@ -9,6 +10,10 @@ type Transaction = {
   rewards_earned?: number;
   description: string;
   created_at: string;
+  profiles?: {
+    full_name: string | null;
+    email: string | null;
+  } | null;
 };
 
 type MerchantTransactionListProps = {
@@ -27,28 +32,40 @@ const MerchantTransactionListComponent = ({
       {title && <h3 className="text-xl font-semibold mb-4">{title}</h3>}
       {transactions.length > 0 ? (
         <div className="space-y-3">
-          {transactions.map((transaction) => (
-            <div
-              key={transaction.id}
-              className="flex items-center justify-between p-4 rounded-lg border bg-card"
-            >
-              <div>
-                <p className="font-medium">{transaction.description}</p>
-                <p className="text-sm text-muted-foreground">
-                  {format(new Date(transaction.created_at), "MMM d, yyyy 'at' h:mm a")}
-                </p>
+          {transactions.map((transaction) => {
+            const customerName = transaction.profiles?.full_name || "Unknown Customer";
+            
+            return (
+              <div
+                key={transaction.id}
+                className="flex items-center justify-between p-4 rounded-lg border bg-card"
+              >
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <User className="w-4 h-4 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-medium">{customerName}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {transaction.description || "Transaction"}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {format(new Date(transaction.created_at), "MMM d, yyyy 'at' h:mm a")}
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="font-bold text-accent">
+                    +${transaction.amount.toFixed(2)}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {/* Convert PawBucks to USD (1 PawBuck = $0.001) */}
+                    Rewards: ${((transaction.rewards_earned ?? transaction.cashback_earned) * 0.001).toFixed(2)}
+                  </p>
+                </div>
               </div>
-              <div className="text-right">
-                <p className="font-bold text-accent">
-                  +${transaction.amount.toFixed(2)}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {/* Convert PawBucks to USD (1 PawBuck = $0.001) */}
-                  Rewards: ${((transaction.rewards_earned ?? transaction.cashback_earned) * 0.001).toFixed(2)}
-                </p>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       ) : (
         <div className="text-center py-8">
