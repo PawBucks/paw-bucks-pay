@@ -200,7 +200,7 @@ const MerchantDashboard = () => {
 
       const { data: transactionsData } = await supabase
         .from("transactions")
-        .select("*")
+        .select("*, profiles!transactions_user_id_fkey(full_name, email)")
         .eq("merchant_id", merchantData.id)
         .order("created_at", { ascending: false })
         .limit(10);
