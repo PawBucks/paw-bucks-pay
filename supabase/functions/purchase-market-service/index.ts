@@ -95,65 +95,75 @@ serve(async (req) => {
       stripeAmount,
     });
 
-    // If using PawBucks, verify merchant has sufficient balance
+    // If using PawBucks, verify merchant has sufficient balance from their MERCHANT wallet
     if (pawbucksToUse > 0) {
       const { data: wallet, error: walletError } = await supabaseAdmin
-        .from('pawbucks_wallet')
+        .from('merchant_pawbucks_wallet')
         .select('balance')
-        .eq('user_id', user.id)
+        .eq('merchant_id', merchant.id)
         .single();
 
       if (walletError || !wallet) {
-        throw new Error('Could not retrieve PawBucks balance');
+        throw new Error('Could not retrieve Merchant PawBucks balance');
       }
 
       if (wallet.balance < pawbucksToUse) {
         throw new Error(`Insufficient PawBucks balance. You have ${wallet.balance} PawBucks.`);
       }
 
-      logStep('PawBucks balance verified', { balance: wallet.balance, required: pawbucksToUse });
+      logStep('Merchant PawBucks balance verified', { balance: wallet.balance, required: pawbucksToUse });
     }
 
     // CASE 1: Full PawBucks payment (no Stripe needed)
     if (stripeAmount <= 0) {
       logStep('Processing full PawBucks payment');
 
-      // Get current balance and deduct
+      // Get current balance from MERCHANT wallet and deduct
       const { data: currentWallet } = await supabaseAdmin
-        .from('pawbucks_wallet')
+        .from('merchant_pawbucks_wallet')
         .select('balance')
-        .eq('user_id', user.id)
+        .eq('merchant_id', merchant.id)
         .single();
 
       const newBalance = (currentWallet?.balance || 0) - pawbucksToUse;
       
       const { error: updateError } = await supabaseAdmin
-        .from('pawbucks_wallet')
-        .update({ balance: newBalance })
-        .eq('user_id', user.id);
+        .from('merchant_pawbucks_wallet')
+        .update({ balance: newBalance, last_updated: new Date().toISOString() })
+        .eq('merchant_id', merchant.id);
 
       if (updateError) {
-        throw new Error('Failed to deduct PawBucks');
+        throw new Error('Failed to deduct PawBucks from merchant wallet');
       }
 
-      // Log the PawBucks activity
-      await supabaseAdmin.from('pawbucks_activity').insert({
-        user_id: user.id,
+      // Log the PawBucks activity in MERCHANT activity table
+      await supabaseAdmin.from('merchant_pawbucks_activity').insert({
+        merchant_id: merchant.id,
         amount: -pawbucksToUse,
-        type: 'redemption',
+        type: 'debit',
         source: 'market_service_purchase',
         description: `Purchased: ${serviceName}`,
       });
 
-      // Record the purchase
-      await supabaseAdmin.from('merchant_analytics_purchases').insert({
+      // Record the purchase in merchant_service_purchases (not analytics_purchases)
+      const expiresAt = billingPeriod === 'monthly' 
+        ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+        : billingPeriod === 'quarterly'
+        ? new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString()
+        : billingPeriod === 'annual'
+        ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
+        : null;
+
+      await supabaseAdmin.from('merchant_service_purchases').insert({
         merchant_id: merchant.id,
-        product_id: serviceId,
-        amount_paid: priceUSD,
-        payment_method: 'pawbucks',
+        service_id: serviceId,
+        amount_paid_pawbucks: pawbucksToUse,
+        amount_paid_usd: 0,
+        status: 'active',
+        expires_at: expiresAt,
       });
 
-      logStep('Full PawBucks payment completed', { pawbucksUsed: pawbucksToUse });
+      logStep('Full PawBucks payment completed', { pawbucksUsed: pawbucksToUse, expiresAt });
 
       return new Response(
         JSON.stringify({
