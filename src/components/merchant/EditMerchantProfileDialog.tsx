@@ -10,6 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Facebook, Instagram, Twitter, Linkedin } from "lucide-react";
 
 type Merchant = {
   id: string;
@@ -21,6 +22,10 @@ type Merchant = {
   description?: string;
   cashback_rate: number;
   logo_url?: string;
+  facebook_url?: string;
+  instagram_url?: string;
+  twitter_url?: string;
+  linkedin_url?: string;
 };
 
 type EditMerchantProfileDialogProps = {
@@ -190,6 +195,56 @@ export const EditMerchantProfileDialog = ({
                 defaultValue={merchant.description || ""}
                 rows={3}
               />
+            </div>
+
+            {/* Social Media Section */}
+            <div className="space-y-4 pt-4 border-t">
+              <Label className="text-base font-semibold">Social Media Links</Label>
+              <p className="text-sm text-muted-foreground">
+                Add your social media profiles so customers can follow you
+              </p>
+              
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <Facebook className="w-5 h-5 text-[#1877F2] flex-shrink-0" />
+                  <Input
+                    id="facebookUrl"
+                    name="facebookUrl"
+                    placeholder="https://facebook.com/yourbusiness"
+                    defaultValue={merchant.facebook_url || ""}
+                  />
+                </div>
+                
+                <div className="flex items-center gap-3">
+                  <Instagram className="w-5 h-5 text-[#E4405F] flex-shrink-0" />
+                  <Input
+                    id="instagramUrl"
+                    name="instagramUrl"
+                    placeholder="https://instagram.com/yourbusiness"
+                    defaultValue={merchant.instagram_url || ""}
+                  />
+                </div>
+                
+                <div className="flex items-center gap-3">
+                  <Twitter className="w-5 h-5 flex-shrink-0" />
+                  <Input
+                    id="twitterUrl"
+                    name="twitterUrl"
+                    placeholder="https://x.com/yourbusiness"
+                    defaultValue={merchant.twitter_url || ""}
+                  />
+                </div>
+                
+                <div className="flex items-center gap-3">
+                  <Linkedin className="w-5 h-5 text-[#0A66C2] flex-shrink-0" />
+                  <Input
+                    id="linkedinUrl"
+                    name="linkedinUrl"
+                    placeholder="https://linkedin.com/company/yourbusiness"
+                    defaultValue={merchant.linkedin_url || ""}
+                  />
+                </div>
+              </div>
             </div>
           </div>
           <div className="flex gap-3 pt-4 border-t mt-4">
