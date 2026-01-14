@@ -62,14 +62,15 @@ const MerchantTransactions = () => {
         throw new Error("No session");
       }
 
-      const params = new URLSearchParams();
-      if (startDate) params.append('start_date', startDate.toISOString());
-      if (endDate) params.append('end_date', endDate.toISOString());
-      if (statusFilter !== 'all') params.append('status', statusFilter);
-      if (searchQuery) params.append('search', searchQuery);
+      // Build request body with properly formatted dates (YYYY-MM-DD)
+      const requestBody: Record<string, string> = {};
+      if (startDate) requestBody.start_date = format(startDate, 'yyyy-MM-dd');
+      if (endDate) requestBody.end_date = format(endDate, 'yyyy-MM-dd');
+      if (statusFilter !== 'all') requestBody.status = statusFilter;
+      if (searchQuery) requestBody.search = searchQuery;
 
       const { data, error } = await supabase.functions.invoke('merchant-transactions', {
-        body: {},
+        body: requestBody,
         headers: {
           Authorization: `Bearer ${session.access_token}`,
         },
