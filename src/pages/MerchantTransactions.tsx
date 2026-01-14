@@ -216,7 +216,7 @@ const MerchantTransactions = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header isAuthenticated={true} onLogout={handleSignOut} />
+      <Header isAuthenticated={true} onLogout={handleSignOut} userId={user?.id} variant="merchant" />
       <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-6">
         {/* Header */}
         <div className="space-y-2">
