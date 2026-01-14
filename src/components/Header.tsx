@@ -21,9 +21,10 @@ interface HeaderProps {
   isAuthenticated?: boolean;
   onLogout?: () => void;
   userId?: string;
+  variant?: "petowner" | "merchant";
 }
 
-const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout, userId }: HeaderProps) => {
+const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout, userId, variant = "petowner" }: HeaderProps) => {
   const navigate = useNavigate();
   
   const defaultMenuItems: MenuItem[] = [
@@ -31,6 +32,15 @@ const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout, userId 
     { label: "Pet Store", path: "/pet-store" },
     { label: "Lost Pets", path: "/lost-pets" },
     { label: "For Pet Merchants", path: "/merchants" }
+  ];
+
+  const merchantMenuItems: MenuItem[] = [
+    { label: "Dashboard", path: "/merchant/dashboard" },
+    { label: "Offers", path: "/merchant/offers" },
+    { label: "Analytics", path: "/merchant/analytics" },
+    { label: "Products", path: "/merchant/products" },
+    { label: "Transactions", path: "/merchant/transactions" },
+    { label: "PawBucks Wallet", path: "/merchant/pawbucks-wallet" }
   ];
 
   return (
@@ -44,11 +54,11 @@ const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout, userId 
       <nav className="container mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-3 flex items-center justify-between gap-3" aria-label="Main navigation">
         <div 
           className="flex items-center gap-3 cursor-pointer hover:opacity-90 transition-all duration-200 active:scale-95 touch-manipulation group"
-          onClick={() => navigate("/")}
+          onClick={() => navigate(variant === "merchant" ? "/merchant/dashboard" : "/")}
           role="button"
           tabIndex={0}
-          onKeyDown={(e) => e.key === 'Enter' && navigate("/")}
-          aria-label="Go to home page"
+          onKeyDown={(e) => e.key === 'Enter' && navigate(variant === "merchant" ? "/merchant/dashboard" : "/")}
+          aria-label={variant === "merchant" ? "Go to merchant dashboard" : "Go to home page"}
         >
           <img 
             src={logo} 
@@ -62,7 +72,7 @@ const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout, userId 
         
         <div className="flex items-center gap-3">
           {/* Desktop Navigation Links for Authenticated Users */}
-          {isAuthenticated && (
+          {isAuthenticated && variant === "petowner" && (
             <div className="hidden md:flex items-center gap-1">
               <Button
                 variant="ghost"
@@ -106,6 +116,22 @@ const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout, userId 
               >
                 Profile
               </Button>
+            </div>
+          )}
+
+          {/* Desktop Navigation Links for Authenticated Merchants */}
+          {isAuthenticated && variant === "merchant" && (
+            <div className="hidden md:flex items-center gap-1">
+              {merchantMenuItems.map((item, index) => (
+                <Button
+                  key={index}
+                  variant="ghost"
+                  onClick={() => navigate(item.path)}
+                  className="text-sm font-medium hover:text-accent"
+                >
+                  {item.label}
+                </Button>
+              ))}
             </div>
           )}
 

@@ -120,7 +120,7 @@ export default function MerchantAnalytics() {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <Header />
+      <Header variant="merchant" isAuthenticated={true} />
       
       <main className="container mx-auto px-4 pt-24 pb-8">
         <div className="mb-8">

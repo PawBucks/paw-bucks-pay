@@ -419,7 +419,7 @@ export default function MerchantPOSIntegration() {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <Header />
+      <Header variant="merchant" isAuthenticated={true} />
       
       <main className="container max-w-5xl mx-auto px-4 py-6">
         <div className="flex items-center gap-3 mb-6">

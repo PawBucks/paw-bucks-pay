@@ -168,7 +168,7 @@ const handleSignOut = async () => {
         keywords={["merchant", "offers", "create", "edit"]}
       />
       <div className="min-h-screen bg-background">
-        <Header isAuthenticated={!!user} onLogout={handleSignOut} />
+        <Header isAuthenticated={!!user} onLogout={handleSignOut} userId={user?.id} variant="merchant" />
         
         <main className="container mx-auto px-4 py-8 pb-24 max-w-4xl">
           <Button variant="ghost" onClick={() => navigate("/merchant/offers")} className="mb-4">
