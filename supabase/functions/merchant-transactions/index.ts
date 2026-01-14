@@ -88,6 +88,7 @@ serve(async (req) => {
         created_at,
         amount,
         cashback_earned,
+        application_fee,
         status,
         description,
         stripe_payment_intent_id,
@@ -143,11 +144,16 @@ serve(async (req) => {
     const repaymentRate = fundingDeal?.repayment_rate || 0;
 
     // Format transactions with profile data
+    // Net Payout = Total Amount - Platform Fee (application_fee) - Funding Repayment
+    // Note: cashback_earned is in PawBucks (rewards given to customer) - merchants don't pay this
     const formattedTransactions = transactions?.map((t: any) => {
       const amount = parseFloat(t.amount || 0);
-      const cashbackGiven = parseFloat(t.cashback_earned || 0);
+      const platformFee = parseFloat(t.application_fee || 0); // 3% fee on Stripe portion
+      const cashbackGivenPawBucks = parseFloat(t.cashback_earned || 0); // In PawBucks, for display
       const repaymentDeducted = (amount * repaymentRate) / 100;
-      const netPayout = amount - cashbackGiven - repaymentDeducted;
+      
+      // Net payout = amount - platform fee - funding repayment
+      const netPayout = amount - platformFee - repaymentDeducted;
       const profile = t.user_id ? profilesMap[t.user_id] : null;
 
       return {
@@ -156,7 +162,8 @@ serve(async (req) => {
         customer_name: profile?.full_name || 'Unknown',
         customer_email: profile?.email || '',
         amount: amount,
-        cashback_given: cashbackGiven,
+        cashback_given: cashbackGivenPawBucks, // PawBucks given to customer (for display only)
+        platform_fee: platformFee, // Platform's 3% fee
         repayment_deducted: repaymentDeducted,
         net_payout: netPayout,
         payment_method: 'Card',

@@ -23,9 +23,10 @@ interface Transaction {
   customer_name: string;
   customer_email: string;
   amount: number;
-  cashback_given: number;
-  repayment_deducted: number;
-  net_payout: number;
+  cashback_given: number; // PawBucks given to customer (informational)
+  platform_fee: number; // Platform's 3% fee on Stripe portion
+  repayment_deducted: number; // Funding deal repayment (if applicable)
+  net_payout: number; // amount - platform_fee - repayment_deducted
   payment_method: string;
   status: string;
   description: string;
@@ -132,10 +133,11 @@ const MerchantTransactions = () => {
       (acc, t) => ({
         totalSales: acc.totalSales + t.amount,
         totalCashback: acc.totalCashback + t.cashback_given,
+        totalPlatformFees: acc.totalPlatformFees + (t.platform_fee || 0),
         totalRepayment: acc.totalRepayment + t.repayment_deducted,
         totalNetPayout: acc.totalNetPayout + t.net_payout,
       }),
-      { totalSales: 0, totalCashback: 0, totalRepayment: 0, totalNetPayout: 0 }
+      { totalSales: 0, totalCashback: 0, totalPlatformFees: 0, totalRepayment: 0, totalNetPayout: 0 }
     );
 
     const refundedTotals = refundedTransactions.reduce(
@@ -150,6 +152,7 @@ const MerchantTransactions = () => {
     return {
       ...totals,
       totalCashbackUSD: totals.totalCashback * 0.001,
+      totalDeductions: totals.totalPlatformFees + totals.totalRepayment,
       completedCount: completedTransactions.length,
       ...refundedTotals,
     };
@@ -165,13 +168,12 @@ const MerchantTransactions = () => {
   };
 
   const exportToCSV = () => {
-    const headers = ["Date", "Customer", "Amount", "Rewards Given", "Repayment Deducted", "Net Payout", "Payment Method", "Status"];
+    const headers = ["Date", "Customer", "Amount", "Platform Fee", "Funding Repayment", "Net Payout", "Payment Method", "Status"];
     const csvData = sortedTransactions.map(t => [
       format(new Date(t.date), "MM/dd/yyyy"),
       t.customer_name,
       `$${t.amount.toFixed(2)}`,
-      // Convert PawBucks to USD (1 PawBuck = $0.001)
-      `$${(t.cashback_given * 0.001).toFixed(2)}`,
+      `$${(t.platform_fee || 0).toFixed(2)}`,
       `$${t.repayment_deducted.toFixed(2)}`,
       `$${t.net_payout.toFixed(2)}`,
       t.payment_method,
@@ -237,16 +239,15 @@ const MerchantTransactions = () => {
           </Card>
           <Card>
             <CardHeader className="pb-3">
-              <CardDescription>Total Rewards</CardDescription>
+              <CardDescription>Platform Fees</CardDescription>
             </CardHeader>
             <CardContent>
-              {/* Display USD value converted from PawBucks */}
-              <p className="text-2xl font-bold text-accent">${summaryTotals.totalCashbackUSD.toFixed(2)}</p>
+              <p className="text-2xl font-bold text-muted-foreground">${summaryTotals.totalPlatformFees.toFixed(2)}</p>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="pb-3">
-              <CardDescription>Total Repayment</CardDescription>
+              <CardDescription>Funding Repayment</CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-2xl font-bold text-muted-foreground">${summaryTotals.totalRepayment.toFixed(2)}</p>
@@ -254,7 +255,7 @@ const MerchantTransactions = () => {
           </Card>
           <Card>
             <CardHeader className="pb-3">
-              <CardDescription>Total Net Payout</CardDescription>
+              <CardDescription>Net Payout</CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-2xl font-bold text-success">${summaryTotals.totalNetPayout.toFixed(2)}</p>
@@ -373,11 +374,11 @@ const MerchantTransactions = () => {
                         <TableHead className="cursor-pointer text-right" onClick={() => handleSort("amount")}>
                           Amount {sortColumn === "amount" && (sortDirection === "asc" ? "↑" : "↓")}
                         </TableHead>
-                        <TableHead className="cursor-pointer text-right" onClick={() => handleSort("cashback_given")}>
-                          Rewards {sortColumn === "cashback_given" && (sortDirection === "asc" ? "↑" : "↓")}
+                        <TableHead className="text-right">
+                          Platform Fee
                         </TableHead>
-                        <TableHead className="cursor-pointer text-right" onClick={() => handleSort("repayment_deducted")}>
-                          Repayment {sortColumn === "repayment_deducted" && (sortDirection === "asc" ? "↑" : "↓")}
+                        <TableHead className="text-right">
+                          Repayment
                         </TableHead>
                         <TableHead className="cursor-pointer text-right" onClick={() => handleSort("net_payout")}>
                           Net Payout {sortColumn === "net_payout" && (sortDirection === "asc" ? "↑" : "↓")}
@@ -392,8 +393,7 @@ const MerchantTransactions = () => {
                           <TableCell>{format(new Date(transaction.date), "MM/dd/yyyy")}</TableCell>
                           <TableCell className="font-medium">{transaction.customer_name}</TableCell>
                           <TableCell className="text-right font-semibold">${transaction.amount.toFixed(2)}</TableCell>
-                          {/* Convert PawBucks to USD (1 PawBuck = $0.001) */}
-                          <TableCell className="text-right text-accent">${(transaction.cashback_given * 0.001).toFixed(2)}</TableCell>
+                          <TableCell className="text-right text-muted-foreground">${(transaction.platform_fee || 0).toFixed(2)}</TableCell>
                           <TableCell className="text-right text-muted-foreground">${transaction.repayment_deducted.toFixed(2)}</TableCell>
                           <TableCell className="text-right font-semibold text-success">${transaction.net_payout.toFixed(2)}</TableCell>
                           <TableCell>{transaction.payment_method}</TableCell>
