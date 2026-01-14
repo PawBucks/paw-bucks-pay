@@ -341,6 +341,10 @@ const MerchantDashboard = () => {
         address: newAddress,
         description: formData.get("description") as string,
         logo_url: logoUrl,
+        facebook_url: formData.get("facebookUrl") as string || null,
+        instagram_url: formData.get("instagramUrl") as string || null,
+        twitter_url: formData.get("twitterUrl") as string || null,
+        linkedin_url: formData.get("linkedinUrl") as string || null,
       };
 
       const { error } = await supabase

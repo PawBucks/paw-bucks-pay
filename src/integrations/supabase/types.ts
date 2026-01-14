@@ -1427,10 +1427,13 @@ export type Database = {
           created_at: string
           description: string | null
           email: string | null
+          facebook_url: string | null
           funding_status: string | null
           id: string
+          instagram_url: string | null
           is_sponsored: boolean | null
           latitude: number | null
+          linkedin_url: string | null
           logo_url: string | null
           longitude: number | null
           onboarding_complete: boolean | null
@@ -1441,6 +1444,7 @@ export type Database = {
           storefront_slug: string
           stripe_account_id: string | null
           stripe_account_status: string | null
+          twitter_url: string | null
           updated_at: string
           user_id: string
         }
@@ -1454,10 +1458,13 @@ export type Database = {
           created_at?: string
           description?: string | null
           email?: string | null
+          facebook_url?: string | null
           funding_status?: string | null
           id?: string
+          instagram_url?: string | null
           is_sponsored?: boolean | null
           latitude?: number | null
+          linkedin_url?: string | null
           logo_url?: string | null
           longitude?: number | null
           onboarding_complete?: boolean | null
@@ -1468,6 +1475,7 @@ export type Database = {
           storefront_slug: string
           stripe_account_id?: string | null
           stripe_account_status?: string | null
+          twitter_url?: string | null
           updated_at?: string
           user_id: string
         }
@@ -1481,10 +1489,13 @@ export type Database = {
           created_at?: string
           description?: string | null
           email?: string | null
+          facebook_url?: string | null
           funding_status?: string | null
           id?: string
+          instagram_url?: string | null
           is_sponsored?: boolean | null
           latitude?: number | null
+          linkedin_url?: string | null
           logo_url?: string | null
           longitude?: number | null
           onboarding_complete?: boolean | null
@@ -1495,6 +1506,7 @@ export type Database = {
           storefront_slug?: string
           stripe_account_id?: string | null
           stripe_account_status?: string | null
+          twitter_url?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -3561,17 +3573,20 @@ export type Database = {
           business_name: string | null
           business_type: string | null
           cashback_rate: number | null
-          created_at: string | null
           description: string | null
+          facebook_url: string | null
           id: string | null
+          instagram_url: string | null
           is_sponsored: boolean | null
           latitude: number | null
+          linkedin_url: string | null
           logo_url: string | null
           longitude: number | null
           phone: string | null
           price_range: number | null
           sponsored_until: string | null
           storefront_slug: string | null
+          twitter_url: string | null
         }
         Insert: {
           accepts_pawbucks?: boolean | null
@@ -3579,17 +3594,20 @@ export type Database = {
           business_name?: string | null
           business_type?: string | null
           cashback_rate?: number | null
-          created_at?: string | null
           description?: string | null
+          facebook_url?: string | null
           id?: string | null
+          instagram_url?: string | null
           is_sponsored?: boolean | null
           latitude?: number | null
+          linkedin_url?: string | null
           logo_url?: string | null
           longitude?: number | null
           phone?: string | null
           price_range?: number | null
           sponsored_until?: string | null
           storefront_slug?: string | null
+          twitter_url?: string | null
         }
         Update: {
           accepts_pawbucks?: boolean | null
@@ -3597,17 +3615,20 @@ export type Database = {
           business_name?: string | null
           business_type?: string | null
           cashback_rate?: number | null
-          created_at?: string | null
           description?: string | null
+          facebook_url?: string | null
           id?: string | null
+          instagram_url?: string | null
           is_sponsored?: boolean | null
           latitude?: number | null
+          linkedin_url?: string | null
           logo_url?: string | null
           longitude?: number | null
           phone?: string | null
           price_range?: number | null
           sponsored_until?: string | null
           storefront_slug?: string | null
+          twitter_url?: string | null
         }
         Relationships: []
       }

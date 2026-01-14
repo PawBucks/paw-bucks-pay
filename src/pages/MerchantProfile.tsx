@@ -45,6 +45,10 @@ import {
   BadgeCheck,
   Sparkles,
   CalendarDays,
+  Facebook,
+  Instagram,
+  Twitter,
+  Linkedin,
 } from "lucide-react";
 
 const getBusinessIcon = (type: string) => {
@@ -89,7 +93,7 @@ const MerchantProfile = memo(() => {
         queryFn: async () => {
           const { data, error } = await supabase
             .from("merchants_public")
-            .select("id, business_name, business_type, description, logo_url, address, phone, cashback_rate, accepts_pawbucks, storefront_slug, price_range")
+            .select("id, business_name, business_type, description, logo_url, address, phone, cashback_rate, accepts_pawbucks, storefront_slug, price_range, facebook_url, instagram_url, twitter_url, linkedin_url")
             .eq("id", merchantId)
             .single();
           if (error) throw error;
@@ -490,6 +494,62 @@ const MerchantProfile = memo(() => {
                     <p className="text-muted-foreground text-sm">
                       No contact information available.
                     </p>
+                  )}
+
+                  {/* Social Media Links */}
+                  {(merchant.facebook_url || merchant.instagram_url || merchant.twitter_url || merchant.linkedin_url) && (
+                    <>
+                      <Separator className="my-4" />
+                      <div className="space-y-2">
+                        <p className="font-medium text-sm text-muted-foreground">Follow Us</p>
+                        <div className="flex items-center gap-3">
+                          {merchant.facebook_url && (
+                            <a
+                              href={merchant.facebook_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="w-10 h-10 rounded-full bg-[#1877F2]/10 hover:bg-[#1877F2]/20 flex items-center justify-center text-[#1877F2] transition-all hover:scale-110"
+                              aria-label="Follow on Facebook"
+                            >
+                              <Facebook className="w-5 h-5" />
+                            </a>
+                          )}
+                          {merchant.instagram_url && (
+                            <a
+                              href={merchant.instagram_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="w-10 h-10 rounded-full bg-[#E4405F]/10 hover:bg-[#E4405F]/20 flex items-center justify-center text-[#E4405F] transition-all hover:scale-110"
+                              aria-label="Follow on Instagram"
+                            >
+                              <Instagram className="w-5 h-5" />
+                            </a>
+                          )}
+                          {merchant.twitter_url && (
+                            <a
+                              href={merchant.twitter_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="w-10 h-10 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center text-foreground transition-all hover:scale-110"
+                              aria-label="Follow on X"
+                            >
+                              <Twitter className="w-5 h-5" />
+                            </a>
+                          )}
+                          {merchant.linkedin_url && (
+                            <a
+                              href={merchant.linkedin_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="w-10 h-10 rounded-full bg-[#0A66C2]/10 hover:bg-[#0A66C2]/20 flex items-center justify-center text-[#0A66C2] transition-all hover:scale-110"
+                              aria-label="Follow on LinkedIn"
+                            >
+                              <Linkedin className="w-5 h-5" />
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    </>
                   )}
                 </CardContent>
               </Card>
