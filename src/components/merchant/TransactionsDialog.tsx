@@ -14,6 +14,10 @@ type Transaction = {
   rewards_earned?: number;
   description: string;
   created_at: string;
+  profiles?: {
+    full_name: string | null;
+    email: string | null;
+  } | null;
 };
 
 type TransactionsDialogProps = {

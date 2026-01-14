@@ -785,7 +785,7 @@ const MerchantDashboard = () => {
       <TransactionsDialog
         open={transactionsDialogOpen}
         onOpenChange={setTransactionsDialogOpen}
-        transactions={transactions}
+        transactions={allTransactions}
       />
 
       <FundingRequestDialog
