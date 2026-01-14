@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { format } from "date-fns";
 import { GradientCard } from "@/components/ui/gradient-card";
+import { User } from "lucide-react";
 
 type Transaction = {
   id: string;
@@ -10,6 +11,10 @@ type Transaction = {
   rewards_earned?: number;
   description: string;
   created_at: string;
+  profiles?: {
+    full_name: string | null;
+    email: string | null;
+  } | null;
 };
 
 type VirtualTransactionListProps = {
@@ -19,25 +24,41 @@ type VirtualTransactionListProps = {
   estimatedItemHeight?: number;
 };
 
-const TransactionItem = ({ transaction }: { transaction: Transaction }) => (
-  <div className="flex items-center justify-between p-4 rounded-lg border bg-card">
-    <div>
-      <p className="font-medium">{transaction.description}</p>
-      <p className="text-sm text-muted-foreground">
-        {format(new Date(transaction.created_at), "MMM d, yyyy 'at' h:mm a")}
-      </p>
+const TransactionItem = ({ transaction }: { transaction: Transaction }) => {
+  const customerName = transaction.profiles?.full_name || "Unknown Customer";
+  const customerEmail = transaction.profiles?.email || "";
+  
+  return (
+    <div className="flex items-center justify-between p-4 rounded-lg border bg-card">
+      <div className="flex items-start gap-3">
+        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+          <User className="w-4 h-4 text-primary" />
+        </div>
+        <div>
+          <p className="font-medium">{customerName}</p>
+          {customerEmail && (
+            <p className="text-xs text-muted-foreground">{customerEmail}</p>
+          )}
+          <p className="text-sm text-muted-foreground">
+            {transaction.description || "Transaction"}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {format(new Date(transaction.created_at), "MMM d, yyyy 'at' h:mm a")}
+          </p>
+        </div>
+      </div>
+      <div className="text-right">
+        <p className="font-bold text-accent">
+          +${transaction.amount.toFixed(2)}
+        </p>
+        <p className="text-sm text-muted-foreground">
+          {/* Convert PawBucks to USD (1 PawBuck = $0.001) */}
+          Rewards: ${((transaction.rewards_earned ?? transaction.cashback_earned ?? 0) * 0.001).toFixed(2)}
+        </p>
+      </div>
     </div>
-    <div className="text-right">
-      <p className="font-bold text-accent">
-        +${transaction.amount.toFixed(2)}
-      </p>
-      <p className="text-sm text-muted-foreground">
-        {/* Convert PawBucks to USD (1 PawBuck = $0.001) */}
-        Rewards: ${((transaction.rewards_earned ?? 0) * 0.001).toFixed(2)}
-      </p>
-    </div>
-  </div>
-);
+  );
+};
 
 export const VirtualTransactionList = ({
   transactions,
