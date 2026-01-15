@@ -19,6 +19,52 @@ const combinedPaymentSchema = z.object({
 // PawBucks conversion for pet owners: 1000 PawBucks = $1.00 (1 PawBuck = $0.001)
 const PAWBUCKS_TO_USD = 0.001;
 
+// Helper function to send receipt email
+async function sendReceiptEmail(params: {
+  email: string;
+  customerName?: string;
+  transactionDate: string;
+  receiptId: string;
+  merchantName: string;
+  merchantLocation?: string;
+  items: { name: string; price: number }[];
+  subtotal: number;
+  pawbucksApplied: number;
+  cardAmount: number;
+  totalPaid: number;
+  cardBrand?: string;
+  cardLast4?: string;
+  pawbucksEarned?: number;
+}): Promise<void> {
+  try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
+    
+    if (!supabaseUrl || !supabaseAnonKey) {
+      console.log("[EMAIL] Skipping receipt email: config not available");
+      return;
+    }
+
+    const response = await fetch(`${supabaseUrl}/functions/v1/send-receipt-email`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${supabaseAnonKey}`,
+      },
+      body: JSON.stringify(params),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("[EMAIL] Failed to send receipt email:", errorText);
+    } else {
+      console.log(`[EMAIL] ✅ Receipt email sent to ${params.email}`);
+    }
+  } catch (error) {
+    console.error("[EMAIL] Error sending receipt email:", error);
+  }
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -140,6 +186,39 @@ serve(async (req) => {
         description: description || `PawBucks payment to ${merchant.business_name}`,
         status: 'completed',
       }).select().single();
+
+      // Get user profile for receipt email
+      const { data: userProfile } = await supabaseAdmin
+        .from('profiles')
+        .select('email, full_name')
+        .eq('id', user.id)
+        .single();
+
+      // Get merchant address for receipt
+      const { data: merchantDetails } = await supabaseAdmin
+        .from('merchants')
+        .select('address')
+        .eq('id', merchantId)
+        .single();
+
+      // Send receipt email for full PawBucks payment
+      const customerEmail = userProfile?.email || user.email;
+      if (customerEmail) {
+        await sendReceiptEmail({
+          email: customerEmail,
+          customerName: userProfile?.full_name || undefined,
+          transactionDate: new Date().toISOString(),
+          receiptId: transaction?.id || `PB-${Date.now()}`,
+          merchantName: merchant.business_name,
+          merchantLocation: merchantDetails?.address || undefined,
+          items: [{ name: description || 'PawBucks Payment', price: totalAmount }],
+          subtotal: totalAmount,
+          pawbucksApplied: pawbucksAmount * PAWBUCKS_TO_USD, // Convert to USD value
+          cardAmount: 0,
+          totalPaid: totalAmount,
+          pawbucksEarned: 0, // No PawBucks earned on full PawBucks payments
+        });
+      }
 
       return new Response(
         JSON.stringify({
