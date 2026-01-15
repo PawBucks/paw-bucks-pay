@@ -10,6 +10,7 @@ import { ReviewCampaignWidget } from "./ReviewCampaignWidget";
 import { PrioritySupportWidget } from "./PrioritySupportWidget";
 import { MerchantSpotlightWidget } from "./MerchantSpotlightWidget";
 import { PremiumAnalyticsDashboard } from "./PremiumAnalyticsDashboard";
+import { TrainingCourseWidget } from "./TrainingCourseWidget";
 
 type MerchantPremiumServicesTabProps = {
   merchantId: string;
@@ -22,6 +23,7 @@ type MerchantPremiumServicesTabProps = {
   hasPrioritySupport: boolean;
   hasSpotlight: boolean;
   hasPremiumAnalytics: boolean;
+  hasTrainingCourse: boolean;
   onNavigate: (path: string) => void;
 };
 
@@ -36,9 +38,10 @@ export function MerchantPremiumServicesTab({
   hasPrioritySupport,
   hasSpotlight,
   hasPremiumAnalytics,
+  hasTrainingCourse,
   onNavigate,
 }: MerchantPremiumServicesTabProps) {
-  const hasPremiumServices = hasSponsored || hasPremiumAd || hasFeaturedPartner || hasSearchBooster || hasProfileOptimization || hasReviewCampaign || hasPrioritySupport || hasSpotlight || hasPremiumAnalytics;
+  const hasPremiumServices = hasSponsored || hasPremiumAd || hasFeaturedPartner || hasSearchBooster || hasProfileOptimization || hasReviewCampaign || hasPrioritySupport || hasSpotlight || hasPremiumAnalytics || hasTrainingCourse;
 
   if (!hasPremiumServices) {
     return (
@@ -75,6 +78,7 @@ export function MerchantPremiumServicesTab({
     if (hasProfileOptimization) return "profile";
     if (hasReviewCampaign) return "reviews";
     if (hasPrioritySupport) return "support";
+    if (hasTrainingCourse) return "training";
     return "spotlight";
   };
 
@@ -116,6 +120,9 @@ export function MerchantPremiumServicesTab({
           )}
           {hasSpotlight && (
             <TabsTrigger value="spotlight">Spotlight</TabsTrigger>
+          )}
+          {hasTrainingCourse && (
+            <TabsTrigger value="training">Training Course</TabsTrigger>
           )}
         </TabsList>
         
@@ -170,6 +177,12 @@ export function MerchantPremiumServicesTab({
         {hasSpotlight && (
           <TabsContent value="spotlight">
             <MerchantSpotlightWidget />
+          </TabsContent>
+        )}
+        
+        {hasTrainingCourse && (
+          <TabsContent value="training">
+            <TrainingCourseWidget />
           </TabsContent>
         )}
       </Tabs>
