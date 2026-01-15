@@ -18,6 +18,7 @@ import { RewardsTab } from "@/components/admin/RewardsTab";
 import { FinancingTab } from "@/components/admin/FinancingTab";
 import { ProductsTab } from "@/components/admin/ProductsTab";
 import { CMSTab } from "@/components/admin/CMSTab";
+import { TrainingCourseManagementTab } from "@/components/admin/TrainingCourseManagementTab";
 import { SettingsTab } from "@/components/admin/SettingsTab";
 import { OverviewTab } from "@/components/admin/OverviewTab";
 import { AnalyticsTab } from "@/components/admin/AnalyticsTab";
@@ -62,6 +63,7 @@ import {
   Menu,
   ChevronRight,
   HelpCircle,
+  GraduationCap,
   ExternalLink,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -163,6 +165,12 @@ const NAV_SECTIONS = [
         label: "Content Management",
         icon: FileEdit,
         description: "Manage banners, promotions, and platform announcements",
+      },
+      {
+        id: "training-course",
+        label: "Training Course",
+        icon: GraduationCap,
+        description: "Manage modules, lessons, and resources for the Exclusive Training Course",
       },
     ],
   },
@@ -321,6 +329,8 @@ const AdminDashboard = () => {
         return <ProductsTab />;
       case "cms":
         return <CMSTab />;
+      case "training-course":
+        return <TrainingCourseManagementTab />;
       case "notifications":
         return <NotificationsTab />;
       case "email":
