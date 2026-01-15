@@ -292,16 +292,30 @@ serve(async (req) => {
       }).length;
 
     // ======= TOP CUSTOMERS =======
-    const topCustomers = Object.entries(customerPurchases)
+    const topCustomerEntries = Object.entries(customerPurchases)
       .sort((a, b) => b[1].total - a[1].total)
-      .slice(0, 10)
-      .map(([userId, data]) => ({
-        user_id: userId,
-        total_spent: data.total,
-        purchase_count: data.count,
-        avg_order_value: data.total / data.count,
-        days_since_last_purchase: Math.floor((now.getTime() - data.lastPurchase.getTime()) / (24 * 60 * 60 * 1000))
-      }));
+      .slice(0, 10);
+
+    // Fetch customer names from profiles table
+    const topCustomerIds = topCustomerEntries.map(([userId]) => userId);
+    const { data: customerProfiles } = await serviceClient
+      .from('profiles')
+      .select('id, full_name, email')
+      .in('id', topCustomerIds);
+
+    const profilesMap: Record<string, { full_name: string | null; email: string | null }> = {};
+    (customerProfiles || []).forEach((profile: any) => {
+      profilesMap[profile.id] = { full_name: profile.full_name, email: profile.email };
+    });
+
+    const topCustomers = topCustomerEntries.map(([userId, data]) => ({
+      user_id: userId,
+      customer_name: profilesMap[userId]?.full_name || profilesMap[userId]?.email || null,
+      total_spent: data.total,
+      purchase_count: data.count,
+      avg_order_value: data.total / data.count,
+      days_since_last_purchase: Math.floor((now.getTime() - data.lastPurchase.getTime()) / (24 * 60 * 60 * 1000))
+    }));
 
     // ======= TRANSACTION PATTERNS =======
     // By day of week
