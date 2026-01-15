@@ -717,7 +717,9 @@ export function PremiumAnalyticsDashboard() {
                           {index + 1}
                         </div>
                         <div>
-                          <p className="text-sm font-medium">Customer #{customer.user_id.slice(0, 8)}</p>
+                          <p className="text-sm font-medium">
+                            {customer.customer_name || `Customer #${customer.user_id.slice(0, 8)}`}
+                          </p>
                           <p className="text-xs text-muted-foreground">
                             {customer.purchase_count} purchases · ${customer.avg_order_value.toFixed(2)} avg
                           </p>
