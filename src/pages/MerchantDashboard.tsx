@@ -161,8 +161,9 @@ const MerchantDashboard = () => {
   const hasReviewCampaign = activeServices.includes(SERVICE_NAMES.REVIEW_CAMPAIGN);
   const hasPrioritySupport = activeServices.includes(SERVICE_NAMES.PRIORITY_SUPPORT);
   const hasSpotlight = activeServices.includes(SERVICE_NAMES.MERCHANT_SPOTLIGHT);
+  const hasPremiumAnalytics = activeServices.includes(SERVICE_NAMES.PREMIUM_ANALYTICS);
   
-  const hasPremiumServices = hasSponsored || hasPremiumAd || hasFeaturedPartner || hasSearchBooster || hasProfileOptimization || hasReviewCampaign || hasPrioritySupport || hasSpotlight;
+  const hasPremiumServices = hasSponsored || hasPremiumAd || hasFeaturedPartner || hasSearchBooster || hasProfileOptimization || hasReviewCampaign || hasPrioritySupport || hasSpotlight || hasPremiumAnalytics;
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -552,6 +553,7 @@ const MerchantDashboard = () => {
             hasReviewCampaign={hasReviewCampaign}
             hasPrioritySupport={hasPrioritySupport}
             hasSpotlight={hasSpotlight}
+            hasPremiumAnalytics={hasPremiumAnalytics}
             onNavigate={navigate}
           />
         );
