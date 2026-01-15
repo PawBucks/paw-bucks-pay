@@ -9,6 +9,7 @@ import { ProfileOptimizationWidget } from "./ProfileOptimizationWidget";
 import { ReviewCampaignWidget } from "./ReviewCampaignWidget";
 import { PrioritySupportWidget } from "./PrioritySupportWidget";
 import { MerchantSpotlightWidget } from "./MerchantSpotlightWidget";
+import { PremiumAnalyticsDashboard } from "./PremiumAnalyticsDashboard";
 
 type MerchantPremiumServicesTabProps = {
   merchantId: string;
@@ -20,6 +21,7 @@ type MerchantPremiumServicesTabProps = {
   hasReviewCampaign: boolean;
   hasPrioritySupport: boolean;
   hasSpotlight: boolean;
+  hasPremiumAnalytics: boolean;
   onNavigate: (path: string) => void;
 };
 
@@ -33,9 +35,10 @@ export function MerchantPremiumServicesTab({
   hasReviewCampaign,
   hasPrioritySupport,
   hasSpotlight,
+  hasPremiumAnalytics,
   onNavigate,
 }: MerchantPremiumServicesTabProps) {
-  const hasPremiumServices = hasSponsored || hasPremiumAd || hasFeaturedPartner || hasSearchBooster || hasProfileOptimization || hasReviewCampaign || hasPrioritySupport || hasSpotlight;
+  const hasPremiumServices = hasSponsored || hasPremiumAd || hasFeaturedPartner || hasSearchBooster || hasProfileOptimization || hasReviewCampaign || hasPrioritySupport || hasSpotlight || hasPremiumAnalytics;
 
   if (!hasPremiumServices) {
     return (
@@ -64,6 +67,7 @@ export function MerchantPremiumServicesTab({
   }
 
   const getDefaultTab = () => {
+    if (hasPremiumAnalytics) return "analytics";
     if (hasSponsored) return "sponsored";
     if (hasPremiumAd) return "premium-ad";
     if (hasFeaturedPartner) return "featured";
@@ -86,6 +90,9 @@ export function MerchantPremiumServicesTab({
 
       <Tabs defaultValue={getDefaultTab()} className="w-full">
         <TabsList className="mb-4 flex-wrap h-auto gap-1">
+          {hasPremiumAnalytics && (
+            <TabsTrigger value="analytics">Premium Analytics</TabsTrigger>
+          )}
           {hasSponsored && (
             <TabsTrigger value="sponsored">Sponsored Placement</TabsTrigger>
           )}
@@ -112,6 +119,12 @@ export function MerchantPremiumServicesTab({
           )}
         </TabsList>
         
+        {hasPremiumAnalytics && (
+          <TabsContent value="analytics">
+            <PremiumAnalyticsDashboard />
+          </TabsContent>
+        )}
+
         {hasSponsored && (
           <TabsContent value="sponsored">
             <SponsoredPlacementDashboard merchantId={merchantId} serviceType="sponsored" />
