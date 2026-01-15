@@ -35,7 +35,7 @@ const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout, userId,
   ];
 
   const merchantMenuItems: MenuItem[] = [
-    { label: "Dashboard", path: "/merchant/dashboard" },
+    { label: "Dashboard", path: "/merchant-dashboard" },
     { label: "Offers", path: "/merchant/offers" },
     { label: "Analytics", path: "/merchant-analytics" },
     { label: "Products", path: "/merchant/products" },
@@ -54,10 +54,10 @@ const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout, userId,
       <nav className="container mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-3 flex items-center justify-between gap-3" aria-label="Main navigation">
         <div 
           className="flex items-center gap-3 cursor-pointer hover:opacity-90 transition-all duration-200 active:scale-95 touch-manipulation group"
-          onClick={() => navigate(variant === "merchant" ? "/merchant/dashboard" : "/")}
+          onClick={() => navigate(variant === "merchant" ? "/merchant-dashboard" : "/")}
           role="button"
           tabIndex={0}
-          onKeyDown={(e) => e.key === 'Enter' && navigate(variant === "merchant" ? "/merchant/dashboard" : "/")}
+          onKeyDown={(e) => e.key === 'Enter' && navigate(variant === "merchant" ? "/merchant-dashboard" : "/")}
           aria-label={variant === "merchant" ? "Go to merchant dashboard" : "Go to home page"}
         >
           <img 
