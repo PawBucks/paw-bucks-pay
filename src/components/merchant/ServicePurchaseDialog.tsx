@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { format, addDays, startOfDay, getDay } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
 import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -161,8 +160,8 @@ export const ServicePurchaseDialog = ({
   onSuccess,
 }: ServicePurchaseDialogProps) => {
   const { user } = useAuth();
-  const [pawbucksToUse, setPawbucksToUse] = useState(0);
   const [pawbucksBalance, setPawbucksBalance] = useState(0);
+  const [paymentMethod, setPaymentMethod] = useState<'pawbucks' | 'usd'>('usd');
   const [clientSecret, setClientSecret] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
@@ -187,7 +186,7 @@ export const ServicePurchaseDialog = ({
     if (open && effectiveUserId && !sharedAccount.isLoading) {
       loadPawbucksBalance();
       // Reset state when dialog opens
-      setPawbucksToUse(0);
+      setPaymentMethod('usd'); // Default to USD
       setClientSecret("");
       setShowPaymentForm(false);
       setPaymentData(null);
@@ -271,9 +270,10 @@ export const ServicePurchaseDialog = ({
 
   if (!service) return null;
 
-  const pawbucksUsdValue = pawbucksToUse * PAWBUCKS_TO_USD;
-  const stripeAmount = Math.max(0, service.priceUSD - pawbucksUsdValue);
-  const maxPawbucks = Math.min(pawbucksBalance, service.pricePawBucks);
+  // Check if merchant has enough PawBucks to cover the full PawBucks price
+  const canPayWithPawBucks = pawbucksBalance >= service.pricePawBucks;
+  // Calculate savings when paying with PawBucks (25% discount)
+  const pawbucksSavings = service.priceUSD - (service.pricePawBucks * PAWBUCKS_TO_USD);
 
   const formatBillingPeriod = (period?: string) => {
     switch (period) {
@@ -346,13 +346,16 @@ export const ServicePurchaseDialog = ({
     setIsLoading(true);
 
     try {
+      // Determine if paying with PawBucks or USD
+      const usePawBucks = paymentMethod === 'pawbucks' && canPayWithPawBucks;
+
       const { data, error } = await supabase.functions.invoke('purchase-market-service', {
         body: {
           serviceId: service.id,
           serviceName: service.name,
           priceUSD: service.priceUSD,
           pricePawBucks: service.pricePawBucks,
-          pawbucksToUse,
+          payWithPawBucks: usePawBucks, // Full PawBucks or full USD
           billingPeriod: service.billingPeriod || 'one_time',
         },
       });
@@ -390,7 +393,7 @@ export const ServicePurchaseDialog = ({
       await sendStrategyConsultationNotification();
     }
     
-    setPawbucksToUse(0);
+    setPaymentMethod('usd');
     setClientSecret("");
     setShowPaymentForm(false);
     setPaymentData(null);
@@ -402,7 +405,7 @@ export const ServicePurchaseDialog = ({
   };
 
   const handleCancel = () => {
-    setPawbucksToUse(0);
+    setPaymentMethod('usd');
     setClientSecret("");
     setShowPaymentForm(false);
     setPaymentData(null);
@@ -533,85 +536,120 @@ export const ServicePurchaseDialog = ({
               </div>
             )}
 
-            {/* PawBucks Section */}
-            {pawbucksBalance > 0 && (
-              <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <Label className="flex items-center gap-2">
-                    <Coins className="w-4 h-4 text-primary" />
-                    Use PawBucks
-                  </Label>
-                  <span className="text-sm text-muted-foreground">
-                    Balance: {pawbucksBalance.toLocaleString()}
-                  </span>
-                </div>
-
-                {/* Slider instruction hint */}
-                {pawbucksToUse === 0 && (
-                  <div className="flex items-center gap-2 text-xs text-primary bg-primary/10 px-3 py-2 rounded-md animate-pulse">
-                    <span className="text-base">👆</span>
-                    <span className="font-medium">Drag the slider right to apply your PawBucks discount</span>
-                  </div>
+            {/* Payment Method Selection */}
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">Choose Payment Method</Label>
+              
+              {/* PawBucks Option */}
+              <button
+                type="button"
+                onClick={() => canPayWithPawBucks && setPaymentMethod('pawbucks')}
+                disabled={!canPayWithPawBucks}
+                className={cn(
+                  "w-full p-4 rounded-lg border-2 text-left transition-all",
+                  paymentMethod === 'pawbucks' && canPayWithPawBucks
+                    ? "border-primary bg-primary/10"
+                    : canPayWithPawBucks
+                    ? "border-border hover:border-primary/50 hover:bg-muted/50"
+                    : "border-border bg-muted/30 opacity-60 cursor-not-allowed"
                 )}
-
-                <Slider
-                  value={[pawbucksToUse]}
-                  onValueChange={([value]) => setPawbucksToUse(value)}
-                  max={maxPawbucks}
-                  min={0}
-                  step={1000}
-                  className="w-full"
-                />
-
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">
-                    {pawbucksToUse === 0 ? (
-                      <span className="italic">No PawBucks applied</span>
-                    ) : (
-                      <>{pawbucksToUse.toLocaleString()} PawBucks</>
-                    )}
-                  </span>
-                  <span className={`font-medium ${pawbucksToUse > 0 ? 'text-primary' : 'text-muted-foreground'}`}>
-                    {pawbucksToUse > 0 ? `= $${pawbucksUsdValue.toFixed(2)} off` : '$0.00 off'}
-                  </span>
-                </div>
-
-                {pawbucksToUse > 0 && stripeAmount <= 0 && (
-                  <div className="flex items-center gap-2 text-sm text-accent">
-                    <Check className="w-4 h-4" />
-                    Entire purchase covered by PawBucks!
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className={cn(
+                      "w-10 h-10 rounded-full flex items-center justify-center",
+                      paymentMethod === 'pawbucks' && canPayWithPawBucks
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted"
+                    )}>
+                      <Coins className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <p className="font-medium flex items-center gap-2">
+                        Pay with PawBucks
+                        {canPayWithPawBucks && pawbucksSavings > 0 && (
+                          <Badge variant="secondary" className="text-xs bg-accent/20 text-accent">
+                            Save ${pawbucksSavings.toFixed(2)}!
+                          </Badge>
+                        )}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {canPayWithPawBucks 
+                          ? `${service.pricePawBucks.toLocaleString()} PawBucks`
+                          : `Need ${service.pricePawBucks.toLocaleString()} PawBucks (You have ${pawbucksBalance.toLocaleString()})`
+                        }
+                      </p>
+                    </div>
                   </div>
-                )}
-              </div>
-            )}
+                  {paymentMethod === 'pawbucks' && canPayWithPawBucks && (
+                    <Check className="w-5 h-5 text-primary flex-shrink-0" />
+                  )}
+                </div>
+              </button>
 
-            {pawbucksBalance === 0 && (
-              <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
-                <Coins className="w-4 h-4 inline mr-1" />
-                You can earn PawBucks from transactions on the platform to use here!
-              </div>
-            )}
+              {/* USD Option */}
+              <button
+                type="button"
+                onClick={() => setPaymentMethod('usd')}
+                className={cn(
+                  "w-full p-4 rounded-lg border-2 text-left transition-all",
+                  paymentMethod === 'usd'
+                    ? "border-primary bg-primary/10"
+                    : "border-border hover:border-primary/50 hover:bg-muted/50"
+                )}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className={cn(
+                      "w-10 h-10 rounded-full flex items-center justify-center",
+                      paymentMethod === 'usd' ? "bg-primary text-primary-foreground" : "bg-muted"
+                    )}>
+                      <CreditCard className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <p className="font-medium">Pay with Card</p>
+                      <p className="text-sm text-muted-foreground">
+                        ${service.priceUSD.toFixed(2)} USD
+                      </p>
+                    </div>
+                  </div>
+                  {paymentMethod === 'usd' && (
+                    <Check className="w-5 h-5 text-primary flex-shrink-0" />
+                  )}
+                </div>
+              </button>
+
+              {/* Balance Info */}
+              {pawbucksBalance > 0 && (
+                <p className="text-xs text-muted-foreground text-center">
+                  Your PawBucks Balance: {pawbucksBalance.toLocaleString()} PawBucks
+                </p>
+              )}
+            </div>
 
             {/* Payment Summary */}
             <div className="bg-accent/10 border border-accent/20 rounded-lg p-4 space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Service Price:</span>
-                <span className="font-medium">${service.priceUSD.toFixed(2)}</span>
+                <span className="text-muted-foreground">Service:</span>
+                <span className="font-medium">{service.name}</span>
               </div>
-              {pawbucksToUse > 0 && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">PawBucks Discount:</span>
-                  <span className="text-primary">−${pawbucksUsdValue.toFixed(2)}</span>
-                </div>
-              )}
               <div className="flex justify-between text-sm border-t pt-2">
                 <span className="text-muted-foreground">
-                  {stripeAmount > 0 ? 'Card Payment:' : 'Total:'}
+                  {paymentMethod === 'pawbucks' ? 'PawBucks Payment:' : 'Card Payment:'}
                 </span>
                 <span className="font-bold">
-                  {stripeAmount > 0 ? `$${stripeAmount.toFixed(2)}` : '$0.00'}
+                  {paymentMethod === 'pawbucks' 
+                    ? `${service.pricePawBucks.toLocaleString()} PawBucks`
+                    : `$${service.priceUSD.toFixed(2)}`
+                  }
                 </span>
               </div>
+              {paymentMethod === 'pawbucks' && pawbucksSavings > 0 && (
+                <div className="flex justify-between text-sm text-accent">
+                  <span>You save:</span>
+                  <span className="font-medium">${pawbucksSavings.toFixed(2)}</span>
+                </div>
+              )}
             </div>
 
             <div className="flex gap-3">
@@ -625,10 +663,16 @@ export const ServicePurchaseDialog = ({
               >
                 {isLoading ? (
                   <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Loading...</>
-                ) : stripeAmount <= 0 && pawbucksToUse > 0 ? (
-                  'Purchase with PawBucks'
+                ) : paymentMethod === 'pawbucks' ? (
+                  <>
+                    <Coins className="w-4 h-4 mr-2" />
+                    Purchase with PawBucks
+                  </>
                 ) : (
-                  'Continue to Payment'
+                  <>
+                    <CreditCard className="w-4 h-4 mr-2" />
+                    Continue to Payment
+                  </>
                 )}
               </Button>
             </div>

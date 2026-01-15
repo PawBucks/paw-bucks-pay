@@ -14,7 +14,7 @@ const purchaseSchema = z.object({
   serviceName: z.string().min(1, { message: "Service name is required" }),
   priceUSD: z.number().positive({ message: "Price must be greater than 0" }),
   pricePawBucks: z.number().positive({ message: "PawBucks price must be greater than 0" }),
-  pawbucksToUse: z.number().min(0).default(0),
+  payWithPawBucks: z.boolean().default(false), // Full PawBucks or full USD - no split payments
   billingPeriod: z.enum(['one-time', 'monthly', 'quarterly', 'annual']).optional(),
 });
 
@@ -62,9 +62,9 @@ serve(async (req) => {
       );
     }
 
-    const { serviceId, serviceName, priceUSD, pricePawBucks, pawbucksToUse, billingPeriod } = validation.data;
+    const { serviceId, serviceName, priceUSD, pricePawBucks, payWithPawBucks, billingPeriod } = validation.data;
 
-    logStep('Validated request', { serviceId, priceUSD, pawbucksToUse, billingPeriod });
+    logStep('Validated request', { serviceId, priceUSD, pricePawBucks, payWithPawBucks, billingPeriod });
 
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -84,19 +84,11 @@ serve(async (req) => {
 
     logStep('Merchant verified', { merchantId: merchant.id, businessName: merchant.business_name });
 
-    // Calculate payment amounts
-    const pawbucksUsdValue = pawbucksToUse * PAWBUCKS_TO_USD;
-    const stripeAmount = Math.max(0, priceUSD - pawbucksUsdValue);
+    // CASE 1: Full PawBucks payment
+    if (payWithPawBucks) {
+      logStep('Processing full PawBucks payment', { pricePawBucks });
 
-    logStep('Payment breakdown', {
-      priceUSD,
-      pawbucksToUse,
-      pawbucksUsdValue,
-      stripeAmount,
-    });
-
-    // If using PawBucks, verify merchant has sufficient balance from their MERCHANT wallet
-    if (pawbucksToUse > 0) {
+      // Verify merchant has sufficient balance
       const { data: wallet, error: walletError } = await supabaseAdmin
         .from('merchant_pawbucks_wallet')
         .select('balance')
@@ -107,25 +99,14 @@ serve(async (req) => {
         throw new Error('Could not retrieve Merchant PawBucks balance');
       }
 
-      if (wallet.balance < pawbucksToUse) {
-        throw new Error(`Insufficient PawBucks balance. You have ${wallet.balance} PawBucks.`);
+      if (wallet.balance < pricePawBucks) {
+        throw new Error(`Insufficient PawBucks balance. You have ${wallet.balance.toLocaleString()} PawBucks but need ${pricePawBucks.toLocaleString()}.`);
       }
 
-      logStep('Merchant PawBucks balance verified', { balance: wallet.balance, required: pawbucksToUse });
-    }
+      logStep('Merchant PawBucks balance verified', { balance: wallet.balance, required: pricePawBucks });
 
-    // CASE 1: Full PawBucks payment (no Stripe needed)
-    if (stripeAmount <= 0) {
-      logStep('Processing full PawBucks payment');
-
-      // Get current balance from MERCHANT wallet and deduct
-      const { data: currentWallet } = await supabaseAdmin
-        .from('merchant_pawbucks_wallet')
-        .select('balance')
-        .eq('merchant_id', merchant.id)
-        .single();
-
-      const newBalance = (currentWallet?.balance || 0) - pawbucksToUse;
+      // Deduct PawBucks from merchant wallet
+      const newBalance = wallet.balance - pricePawBucks;
       
       const { error: updateError } = await supabaseAdmin
         .from('merchant_pawbucks_wallet')
@@ -136,16 +117,16 @@ serve(async (req) => {
         throw new Error('Failed to deduct PawBucks from merchant wallet');
       }
 
-      // Log the PawBucks activity in MERCHANT activity table
+      // Log the PawBucks activity
       await supabaseAdmin.from('merchant_pawbucks_activity').insert({
         merchant_id: merchant.id,
-        amount: -pawbucksToUse,
+        amount: -pricePawBucks,
         type: 'debit',
         source: 'market_service_purchase',
         description: `Purchased: ${serviceName}`,
       });
 
-      // Record the purchase in merchant_service_purchases (not analytics_purchases)
+      // Calculate expiration date based on billing period
       const expiresAt = billingPeriod === 'monthly' 
         ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
         : billingPeriod === 'quarterly'
@@ -154,38 +135,39 @@ serve(async (req) => {
         ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
         : null;
 
+      // Record the purchase
       await supabaseAdmin.from('merchant_service_purchases').insert({
         merchant_id: merchant.id,
         service_id: serviceId,
-        amount_paid_pawbucks: pawbucksToUse,
+        amount_paid_pawbucks: pricePawBucks,
         amount_paid_usd: 0,
         status: 'active',
         expires_at: expiresAt,
       });
 
-      logStep('Full PawBucks payment completed', { pawbucksUsed: pawbucksToUse, expiresAt });
+      logStep('Full PawBucks payment completed', { pawbucksUsed: pricePawBucks, newBalance, expiresAt });
 
       return new Response(
         JSON.stringify({
           success: true,
           paymentMethod: 'pawbucks_only',
-          pawbucksUsed: pawbucksToUse,
+          pawbucksUsed: pricePawBucks,
           serviceName,
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
       );
     }
 
-    // CASE 2 & 3: Stripe payment (full or partial with PawBucks)
-    logStep('Processing Stripe payment');
+    // CASE 2: Full USD payment via Stripe
+    logStep('Processing full USD payment via Stripe', { priceUSD });
 
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
       apiVersion: '2025-08-27.basil',
     });
 
-    const stripeAmountInCents = Math.round(stripeAmount * 100);
+    const stripeAmountInCents = Math.round(priceUSD * 100);
 
-    // Create PaymentIntent (no platform fee - direct platform purchases)
+    // Create PaymentIntent for full USD payment
     const paymentIntent = await stripe.paymentIntents.create({
       amount: stripeAmountInCents,
       currency: 'usd',
@@ -195,7 +177,6 @@ serve(async (req) => {
         service_name: serviceName,
         merchant_id: merchant.id,
         user_id: user.id,
-        pawbucks_to_deduct: pawbucksToUse.toString(),
         total_price: priceUSD.toString(),
         billing_period: billingPeriod || 'one-time',
         purchase_type: 'market_service',
@@ -204,19 +185,16 @@ serve(async (req) => {
 
     logStep('PaymentIntent created', { 
       paymentIntentId: paymentIntent.id,
-      stripeAmount,
-      pawbucksToDeduct: pawbucksToUse 
+      amountUSD: priceUSD,
     });
 
     return new Response(
       JSON.stringify({
         success: true,
-        paymentMethod: pawbucksToUse > 0 ? 'combined' : 'stripe_only',
+        paymentMethod: 'stripe_only',
         clientSecret: paymentIntent.client_secret,
         paymentIntentId: paymentIntent.id,
-        stripeAmount,
-        pawbucksToDeduct: pawbucksToUse,
-        pawbucksUsdValue,
+        stripeAmount: priceUSD,
         serviceName,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
