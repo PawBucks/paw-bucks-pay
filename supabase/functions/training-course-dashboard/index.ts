@@ -1,60 +1,67 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
-    );
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const serviceClient = createClient(supabaseUrl, supabaseKey);
 
-    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
-    if (authError || !user) {
+    // Get the user from the auth header
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
       return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ has_access: false, message: 'Not authenticated' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
       );
     }
 
-    // Get merchant
-    const { data: merchant, error: merchantError } = await supabaseClient
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await serviceClient.auth.getUser(token);
+    
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ has_access: false, message: 'Invalid authentication' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
+      );
+    }
+
+    // Get merchant for this user
+    const { data: merchant, error: merchantError } = await serviceClient
       .from('merchants')
-      .select('id, business_name')
+      .select('id')
       .eq('user_id', user.id)
-      .single();
+      .maybeSingle();
 
     if (merchantError || !merchant) {
       return new Response(
-        JSON.stringify({ has_access: false, message: 'Merchant not found' }),
+        JSON.stringify({ has_access: false, message: 'Merchant account not found' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Check for active Training Course service using service role
-    const serviceClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
-
+    // Check if merchant has purchased the training course service
     const { data: service } = await serviceClient
       .from('merchant_market_services')
-      .select('id, name')
-      .eq('name', 'Exclusive Training Course')
-      .single();
+      .select('id')
+      .ilike('name', '%training%course%')
+      .eq('is_active', true)
+      .maybeSingle();
 
     if (!service) {
       return new Response(
-        JSON.stringify({ has_access: false, message: 'Service not found' }),
+        JSON.stringify({ 
+          has_access: false, 
+          message: 'Training course service is not currently available.' 
+        }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -77,199 +84,108 @@ serve(async (req) => {
       );
     }
 
-    // Generate course content (in production, this would come from a database)
-    const modules = [
-      {
-        id: 'module-1',
-        title: 'Getting Started with PawBucks',
-        description: 'Learn the fundamentals of the PawBucks platform',
-        order: 1,
-        lessons: [
-          {
-            id: 'lesson-1-1',
-            title: 'Welcome to PawBucks',
-            description: 'An introduction to the platform and what you can achieve',
-            duration_minutes: 8,
-            video_url: null,
-            order: 1,
-            is_completed: false,
-          },
-          {
-            id: 'lesson-1-2',
-            title: 'Setting Up Your Profile',
-            description: 'How to create an optimized merchant profile that attracts customers',
-            duration_minutes: 12,
-            video_url: null,
-            order: 2,
-            is_completed: false,
-          },
-          {
-            id: 'lesson-1-3',
-            title: 'Understanding PawBucks Rewards',
-            description: 'How the rewards system works and how to maximize customer engagement',
-            duration_minutes: 10,
-            video_url: null,
-            order: 3,
-            is_completed: false,
-          },
-        ],
-      },
-      {
-        id: 'module-2',
-        title: 'Customer Engagement Strategies',
-        description: 'Master the art of attracting and retaining customers',
-        order: 2,
-        lessons: [
-          {
-            id: 'lesson-2-1',
-            title: 'Creating Compelling Offers',
-            description: 'Design offers that drive customer action and loyalty',
-            duration_minutes: 15,
-            video_url: null,
-            order: 1,
-            is_completed: false,
-          },
-          {
-            id: 'lesson-2-2',
-            title: 'Leveraging Reviews',
-            description: 'How to encourage and respond to customer reviews',
-            duration_minutes: 10,
-            video_url: null,
-            order: 2,
-            is_completed: false,
-          },
-          {
-            id: 'lesson-2-3',
-            title: 'Building Customer Loyalty',
-            description: 'Strategies for turning one-time buyers into repeat customers',
-            duration_minutes: 14,
-            video_url: null,
-            order: 3,
-            is_completed: false,
-          },
-        ],
-      },
-      {
-        id: 'module-3',
-        title: 'Analytics & Growth',
-        description: 'Use data to make smarter business decisions',
-        order: 3,
-        lessons: [
-          {
-            id: 'lesson-3-1',
-            title: 'Understanding Your Dashboard',
-            description: 'A deep dive into your analytics dashboard and key metrics',
-            duration_minutes: 12,
-            video_url: null,
-            order: 1,
-            is_completed: false,
-          },
-          {
-            id: 'lesson-3-2',
-            title: 'Tracking Customer Behavior',
-            description: 'How to analyze customer patterns and preferences',
-            duration_minutes: 11,
-            video_url: null,
-            order: 2,
-            is_completed: false,
-          },
-          {
-            id: 'lesson-3-3',
-            title: 'Growth Strategies',
-            description: 'Proven tactics to scale your business on PawBucks',
-            duration_minutes: 16,
-            video_url: null,
-            order: 3,
-            is_completed: false,
-          },
-          {
-            id: 'lesson-3-4',
-            title: 'Premium Services Deep Dive',
-            description: 'Maximize your ROI with premium platform features',
-            duration_minutes: 13,
-            video_url: null,
-            order: 4,
-            is_completed: false,
-          },
-        ],
-      },
-    ];
+    // Fetch course content from database
+    const [modulesRes, lessonsRes, resourcesRes, progressRes] = await Promise.all([
+      serviceClient
+        .from('training_course_modules')
+        .select('*')
+        .eq('is_active', true)
+        .order('display_order'),
+      serviceClient
+        .from('training_course_lessons')
+        .select('*')
+        .eq('is_active', true)
+        .order('display_order'),
+      serviceClient
+        .from('training_course_resources')
+        .select('*')
+        .eq('is_active', true)
+        .order('display_order'),
+      serviceClient
+        .from('merchant_training_progress')
+        .select('*')
+        .eq('merchant_id', merchant.id)
+    ]);
 
-    const resources = [
-      {
-        id: 'resource-1',
-        title: 'Merchant Profile Checklist',
-        description: 'Ensure your profile is fully optimized with this comprehensive checklist',
-        type: 'checklist',
-        download_url: '#',
-      },
-      {
-        id: 'resource-2',
-        title: 'Customer Engagement Playbook',
-        description: 'Step-by-step guide to engaging customers effectively',
-        type: 'guide',
-        download_url: '#',
-      },
-      {
-        id: 'resource-3',
-        title: 'Offer Creation Templates',
-        description: 'Ready-to-use templates for creating compelling offers',
-        type: 'template',
-        download_url: '#',
-      },
-      {
-        id: 'resource-4',
-        title: 'Analytics Quick Reference',
-        description: 'Quick guide to understanding your key metrics',
-        type: 'pdf',
-        download_url: '#',
-      },
-      {
-        id: 'resource-5',
-        title: 'Growth Strategy Worksheet',
-        description: 'Plan your growth strategy with this interactive worksheet',
-        type: 'template',
-        download_url: '#',
-      },
-      {
-        id: 'resource-6',
-        title: 'Best Practices Guide',
-        description: 'Industry best practices for pet service businesses',
-        type: 'guide',
-        download_url: '#',
-      },
-    ];
+    const dbModules = modulesRes.data || [];
+    const dbLessons = lessonsRes.data || [];
+    const dbResources = resourcesRes.data || [];
+    const progressRecords = progressRes.data || [];
 
-    const totalLessons = modules.reduce((acc, m) => acc + m.lessons.length, 0);
-    const completedLessons = modules.reduce(
-      (acc, m) => acc + m.lessons.filter(l => l.is_completed).length, 
-      0
+    // Build completed lessons set
+    const completedLessons = new Set(
+      progressRecords.filter(p => p.completed_at).map(p => p.lesson_id)
     );
 
-    const course = {
-      title: 'PawBucks Merchant Mastery',
-      description: 'Master the PawBucks platform and grow your pet business',
-      total_lessons: totalLessons,
-      completed_lessons: completedLessons,
-      progress_percent: Math.round((completedLessons / totalLessons) * 100),
-      modules,
-      resources,
-      certificate_earned: completedLessons === totalLessons,
-      started_at: purchase.created_at,
-      last_accessed: new Date().toISOString(),
-    };
+    // Build modules with lessons
+    const modules = dbModules.map(module => ({
+      id: module.id,
+      title: module.title,
+      description: module.description || '',
+      order: module.display_order,
+      lessons: dbLessons
+        .filter(lesson => lesson.module_id === module.id)
+        .map(lesson => ({
+          id: lesson.id,
+          title: lesson.title,
+          description: lesson.description || '',
+          duration_minutes: lesson.duration_minutes,
+          video_url: lesson.video_url,
+          order: lesson.display_order,
+          is_completed: completedLessons.has(lesson.id),
+        }))
+    }));
+
+    // Build resources
+    const resources = dbResources.map(resource => ({
+      id: resource.id,
+      title: resource.title,
+      description: resource.description || '',
+      type: resource.resource_type,
+      download_url: resource.download_url || '#',
+    }));
+
+    // Calculate progress
+    const totalLessons = dbLessons.length;
+    const completedCount = completedLessons.size;
+    const progressPercent = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
+    const certificateEarned = progressPercent === 100;
+
+    // Get first and last progress timestamps
+    const sortedProgress = [...progressRecords].sort(
+      (a, b) => new Date(a.started_at || a.created_at).getTime() - new Date(b.started_at || b.created_at).getTime()
+    );
+    const startedAt = sortedProgress[0]?.started_at || sortedProgress[0]?.created_at || null;
+    
+    const lastAccessedProgress = [...progressRecords].sort(
+      (a, b) => new Date(b.updated_at || b.created_at).getTime() - new Date(a.updated_at || a.created_at).getTime()
+    )[0];
+    const lastAccessed = lastAccessedProgress?.updated_at || lastAccessedProgress?.created_at || null;
 
     return new Response(
-      JSON.stringify({ has_access: true, course }),
+      JSON.stringify({
+        has_access: true,
+        course: {
+          title: 'PawBucks Merchant Mastery',
+          description: 'Your comprehensive guide to succeeding on the PawBucks platform',
+          total_lessons: totalLessons,
+          completed_lessons: completedCount,
+          progress_percent: progressPercent,
+          modules,
+          resources,
+          certificate_earned: certificateEarned,
+          started_at: startedAt,
+          last_accessed: lastAccessed,
+        },
+      }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
-
   } catch (error: unknown) {
-    console.error('Error in training-course-dashboard:', error);
+    console.error('Training course dashboard error:', error);
     const message = error instanceof Error ? error.message : 'Unknown error';
     return new Response(
       JSON.stringify({ error: message }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
     );
   }
 });

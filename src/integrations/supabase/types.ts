@@ -1359,6 +1359,58 @@ export type Database = {
           },
         ]
       }
+      merchant_training_progress: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          id: string
+          lesson_id: string
+          merchant_id: string
+          started_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          lesson_id: string
+          merchant_id: string
+          started_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          lesson_id?: string
+          merchant_id?: string
+          started_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_training_progress_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "training_course_lessons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_training_progress_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_training_progress_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       merchant_webhooks: {
         Row: {
           created_at: string
@@ -3115,6 +3167,119 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      training_course_lessons: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          display_order: number
+          duration_minutes: number | null
+          id: string
+          is_active: boolean | null
+          module_id: string
+          title: string
+          updated_at: string | null
+          video_url: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number
+          duration_minutes?: number | null
+          id?: string
+          is_active?: boolean | null
+          module_id: string
+          title: string
+          updated_at?: string | null
+          video_url?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number
+          duration_minutes?: number | null
+          id?: string
+          is_active?: boolean | null
+          module_id?: string
+          title?: string
+          updated_at?: string | null
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_course_lessons_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "training_course_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_course_modules: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          display_order: number
+          id: string
+          is_active: boolean | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      training_course_resources: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          display_order: number
+          download_url: string | null
+          id: string
+          is_active: boolean | null
+          resource_type: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number
+          download_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          resource_type?: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number
+          download_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          resource_type?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       transactions: {
         Row: {
