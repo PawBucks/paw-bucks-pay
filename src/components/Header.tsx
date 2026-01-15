@@ -37,10 +37,10 @@ const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout, userId,
   const merchantMenuItems: MenuItem[] = [
     { label: "Dashboard", path: "/merchant/dashboard" },
     { label: "Offers", path: "/merchant/offers" },
-    { label: "Analytics", path: "/merchant/analytics" },
+    { label: "Analytics", path: "/merchant-analytics" },
     { label: "Products", path: "/merchant/products" },
     { label: "Transactions", path: "/merchant/transactions" },
-    { label: "PawBucks Wallet", path: "/merchant/pawbucks-wallet" }
+    { label: "PawBucks Wallet", path: "/merchant/pawbucks" }
   ];
 
   return (
