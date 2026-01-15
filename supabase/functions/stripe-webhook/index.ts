@@ -8,7 +8,54 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, stripe-signature',
 };
 
-// Helper function to send payment confirmation email
+// Helper function to send receipt email via dedicated edge function
+async function sendReceiptEmail(params: {
+  email: string;
+  customerName?: string;
+  transactionDate: string;
+  receiptId: string;
+  merchantName: string;
+  merchantLocation?: string;
+  items: { name: string; price: number }[];
+  subtotal: number;
+  pawbucksApplied: number;
+  cardAmount: number;
+  totalPaid: number;
+  cardBrand?: string;
+  cardLast4?: string;
+  pawbucksEarned?: number;
+}): Promise<void> {
+  try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
+    
+    if (!supabaseUrl || !supabaseAnonKey) {
+      console.log("[EMAIL] Skipping receipt email: Supabase config not available");
+      return;
+    }
+
+    const response = await fetch(`${supabaseUrl}/functions/v1/send-receipt-email`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${supabaseAnonKey}`,
+      },
+      body: JSON.stringify(params),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("[EMAIL] Failed to send receipt email:", errorText);
+    } else {
+      console.log(`[EMAIL] ✅ Receipt email sent to ${params.email}`);
+    }
+  } catch (error) {
+    console.error("[EMAIL] Error sending receipt email:", error);
+    // Don't throw - email failure shouldn't break the payment processing
+  }
+}
+
+// Legacy helper for subscription confirmation emails (simpler format)
 async function sendPaymentConfirmationEmail(params: {
   email: string;
   customerName?: string;
@@ -18,112 +65,20 @@ async function sendPaymentConfirmationEmail(params: {
   orderReference: string;
   isSubscription?: boolean;
 }): Promise<void> {
-  const resendApiKey = Deno.env.get("RESEND_API_KEY");
-  if (!resendApiKey) {
-    console.log("[EMAIL] Skipping confirmation email: RESEND_API_KEY not configured");
-    return;
-  }
-
-  const resend = new Resend(resendApiKey);
-  const { email, customerName, amount, merchantName, pawbucksEarned, orderReference, isSubscription } = params;
-
-  const greeting = customerName ? `Hi ${customerName}` : "Hi there";
-  const paymentType = isSubscription ? "subscription" : "purchase";
-
-  try {
-    const emailResponse = await resend.emails.send({
-      from: "PawBucks <noreply@resend.dev>",
-      to: [email],
-      subject: `Payment Confirmed - ${merchantName}`,
-      html: `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <meta charset="utf-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        </head>
-        <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5;">
-          <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
-            <div style="background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-              <!-- Header -->
-              <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 32px; text-align: center;">
-                <h1 style="margin: 0; color: white; font-size: 28px; font-weight: 700;">Payment Confirmed! 🎉</h1>
-              </div>
-              
-              <!-- Content -->
-              <div style="padding: 32px;">
-                <p style="font-size: 16px; color: #333; margin: 0 0 24px 0;">${greeting},</p>
-                
-                <p style="font-size: 16px; color: #333; margin: 0 0 24px 0;">
-                  Your ${paymentType} at <strong>${merchantName}</strong> has been successfully processed!
-                </p>
-                
-                <!-- Order Summary -->
-                <div style="background: #f9fafb; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
-                  <h3 style="margin: 0 0 16px 0; color: #333; font-size: 18px;">Order Summary</h3>
-                  
-                  <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
-                    <span style="color: #666;">Amount Paid</span>
-                    <strong style="color: #333;">$${amount.toFixed(2)}</strong>
-                  </div>
-                  
-                  <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
-                    <span style="color: #666;">Merchant</span>
-                    <strong style="color: #333;">${merchantName}</strong>
-                  </div>
-                  
-                  <div style="display: flex; justify-content: space-between;">
-                    <span style="color: #666;">Order Reference</span>
-                    <strong style="color: #333; font-size: 12px;">${orderReference.substring(0, 20)}...</strong>
-                  </div>
-                </div>
-                
-                <!-- PawBucks Earned -->
-                ${pawbucksEarned > 0 ? `
-                <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 24px; margin-bottom: 24px; text-align: center;">
-                  <p style="margin: 0 0 8px 0; color: #92400e; font-size: 14px;">🐾 You Earned</p>
-                  <p style="margin: 0; color: #92400e; font-size: 32px; font-weight: 700;">${pawbucksEarned} PawBucks</p>
-                  <p style="margin: 8px 0 0 0; color: #a16207; font-size: 14px;">Added to your wallet!</p>
-                </div>
-                ` : ''}
-                
-                <p style="font-size: 14px; color: #666; margin: 0 0 24px 0;">
-                  Thank you for being a valued member of the PawBucks community. Your rewards are waiting for you!
-                </p>
-                
-                <!-- CTA Button -->
-                <div style="text-align: center;">
-                  <a href="https://pawbucks.app/dashboard" style="display: inline-block; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px;">
-                    View Your Dashboard
-                  </a>
-                </div>
-              </div>
-              
-              <!-- Footer -->
-              <div style="background: #f9fafb; padding: 24px; text-align: center; border-top: 1px solid #e5e7eb;">
-                <p style="margin: 0 0 8px 0; color: #999; font-size: 12px;">
-                  Questions? Reply to this email or contact support@pawbucks.app
-                </p>
-                <p style="margin: 0; color: #999; font-size: 12px;">
-                  © ${new Date().getFullYear()} PawBucks. All rights reserved.
-                </p>
-              </div>
-            </div>
-          </div>
-        </body>
-        </html>
-      `,
-    });
-
-    if (emailResponse.error) {
-      console.error("[EMAIL] Failed to send confirmation email:", emailResponse.error);
-    } else {
-      console.log(`[EMAIL] ✅ Confirmation email sent to ${email}`);
-    }
-  } catch (error) {
-    console.error("[EMAIL] Error sending confirmation email:", error);
-    // Don't throw - email failure shouldn't break the payment processing
-  }
+  // For subscriptions, use simplified receipt email
+  await sendReceiptEmail({
+    email: params.email,
+    customerName: params.customerName,
+    transactionDate: new Date().toISOString(),
+    receiptId: params.orderReference,
+    merchantName: params.merchantName,
+    items: [{ name: params.isSubscription ? 'Subscription Payment' : 'Purchase', price: params.amount }],
+    subtotal: params.amount,
+    pawbucksApplied: 0,
+    cardAmount: params.amount,
+    totalPaid: params.amount,
+    pawbucksEarned: params.pawbucksEarned,
+  });
 }
 
 serve(async (req) => {
@@ -1154,34 +1109,102 @@ serve(async (req) => {
         }
       }
 
-      // Send confirmation email for payment
+      // Send detailed receipt email for payment
       const customerEmail = paymentIntent.receipt_email;
       if (customerEmail && user_id && merchant_id) {
-        // Get merchant name for email
+        // Get merchant details for email
         const { data: merchantInfo } = await supabaseAdmin
           .from('merchants')
-          .select('business_name')
+          .select('business_name, address')
           .eq('id', merchant_id)
           .single();
         
         // Get user profile for name
         const { data: userProfile } = await supabaseAdmin
           .from('profiles')
-          .select('full_name')
+          .select('full_name, email')
           .eq('id', user_id)
           .single();
 
-        await sendPaymentConfirmationEmail({
+        // Get payment method details from Stripe if available
+        let cardBrand: string | undefined;
+        let cardLast4: string | undefined;
+        if (paymentIntent.payment_method) {
+          try {
+            const paymentMethod = await stripe.paymentMethods.retrieve(paymentIntent.payment_method as string);
+            if (paymentMethod.card) {
+              cardBrand = paymentMethod.card.brand?.charAt(0).toUpperCase() + paymentMethod.card.brand?.slice(1);
+              cardLast4 = paymentMethod.card.last4;
+            }
+          } catch (pmError) {
+            console.log('[PAYMENT] Could not retrieve payment method details:', pmError);
+          }
+        }
+
+        // Calculate PawBucks applied (from metadata if available)
+        const pawbucksApplied = parseFloat(paymentIntent.metadata?.pawbucks_usd_value || '0');
+        const subtotal = amount + pawbucksApplied;
+
+        // Build item name from description or metadata
+        const itemName = paymentIntent.metadata?.item_name || 
+                        paymentIntent.metadata?.product_name || 
+                        description || 
+                        'Purchase';
+
+        await sendReceiptEmail({
           email: customerEmail,
           customerName: userProfile?.full_name || undefined,
-          amount,
-          merchantName: merchantInfo?.business_name || description || 'PawBucks Partner',
+          transactionDate: new Date(paymentIntent.created * 1000).toISOString(),
+          receiptId: paymentIntent.id,
+          merchantName: merchantInfo?.business_name || 'PawBucks Partner',
+          merchantLocation: merchantInfo?.address || undefined,
+          items: [{ name: itemName, price: subtotal }],
+          subtotal: subtotal,
+          pawbucksApplied: pawbucksApplied,
+          cardAmount: amount,
+          totalPaid: subtotal,
+          cardBrand,
+          cardLast4,
           pawbucksEarned,
-          orderReference: paymentIntent.id,
-          isSubscription: false,
         });
+      } else if (user_id) {
+        // Try to get email from profile if not in payment intent
+        const { data: userProfile } = await supabaseAdmin
+          .from('profiles')
+          .select('full_name, email')
+          .eq('id', user_id)
+          .single();
+
+        if (userProfile?.email && merchant_id) {
+          const { data: merchantInfo } = await supabaseAdmin
+            .from('merchants')
+            .select('business_name, address')
+            .eq('id', merchant_id)
+            .single();
+
+          const pawbucksApplied = parseFloat(paymentIntent.metadata?.pawbucks_usd_value || '0');
+          const subtotal = amount + pawbucksApplied;
+          const itemName = paymentIntent.metadata?.item_name || description || 'Purchase';
+
+          await sendReceiptEmail({
+            email: userProfile.email,
+            customerName: userProfile.full_name || undefined,
+            transactionDate: new Date(paymentIntent.created * 1000).toISOString(),
+            receiptId: paymentIntent.id,
+            merchantName: merchantInfo?.business_name || 'PawBucks Partner',
+            merchantLocation: merchantInfo?.address || undefined,
+            items: [{ name: itemName, price: subtotal }],
+            subtotal: subtotal,
+            pawbucksApplied: pawbucksApplied,
+            cardAmount: amount,
+            totalPaid: subtotal,
+            pawbucksEarned,
+          });
+        } else {
+          console.log('[PAYMENT] No email found for receipt');
+        }
       } else {
-        console.log('[PAYMENT] No receipt email found for confirmation email');
+        console.log('[PAYMENT] No user_id found for receipt email');
       }
 
       console.log('Payment intent succeeded processed:', paymentIntent.id);

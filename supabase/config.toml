@@ -233,3 +233,12 @@ verify_jwt = true
 
 [functions.cancel-subscription]
 verify_jwt = true
+
+[functions.training-course-dashboard]
+verify_jwt = true
+
+[functions.training-course-progress]
+verify_jwt = true
+
+[functions.send-receipt-email]
+verify_jwt = false
