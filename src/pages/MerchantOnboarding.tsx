@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useGeocoding } from "@/hooks/useGeocoding";
@@ -10,20 +10,144 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Store, Loader2, PawPrint } from "lucide-react";
-import { merchantOnboardingSchema } from "@/lib/validation";
+import { 
+  Store, Loader2, PawPrint, Stethoscope, Scissors, ShoppingBag, 
+  Bone, Home, Sparkles, Dog, Sun, Camera, Shield, Truck, Mountain, 
+  Zap, Hand, Brain, Heart, Building2, Car, Users, AlertCircle, Info
+} from "lucide-react";
+import { merchantOnboardingSchema, PET_BUSINESS_TYPES, ENTITY_TYPES, WORKING_STYLES } from "@/lib/validation";
+
+// Business type configuration with icons and descriptions
+const BUSINESS_TYPE_CONFIG: Record<string, { icon: React.ElementType; label: string; description: string }> = {
+  veterinary: { icon: Stethoscope, label: "Veterinary / Clinic", description: "Full-service vet, specialty clinic, or emergency care" },
+  grooming: { icon: Scissors, label: "Grooming Salon", description: "Fixed-location grooming services" },
+  mobile_groomer: { icon: Car, label: "Mobile Groomer", description: "On-the-go grooming at client locations" },
+  training: { icon: Sparkles, label: "Training", description: "Obedience, behavior, or specialty training" },
+  walker: { icon: Dog, label: "Dog Walker", description: "Daily walking services" },
+  runner: { icon: Zap, label: "Pet Runner / Jogger", description: "Active running companions for dogs" },
+  hiker: { icon: Mountain, label: "Pet Hiker", description: "Trail and adventure excursions" },
+  sitter: { icon: Home, label: "Pet Sitter", description: "In-home pet sitting services" },
+  daycare: { icon: Sun, label: "Daycare", description: "Daytime care and socialization" },
+  boarding: { icon: Building2, label: "Boarding / Kennel", description: "Overnight stays and extended care" },
+  pet_store: { icon: ShoppingBag, label: "Pet Store / Retail", description: "Products, supplies, and merchandise" },
+  food: { icon: Bone, label: "Food & Treats", description: "Specialty foods, bakery, or nutrition" },
+  breeder: { icon: Heart, label: "Breeder", description: "Responsible breeding program" },
+  rescue_nonprofit: { icon: Users, label: "Rescue / Nonprofit", description: "Animal rescue or nonprofit organization" },
+  photography: { icon: Camera, label: "Pet Photography", description: "Professional pet portraits and sessions" },
+  insurance: { icon: Shield, label: "Pet Insurance", description: "Insurance products and services" },
+  delivery: { icon: Truck, label: "Pet Delivery", description: "Transport and delivery services" },
+  masseuse: { icon: Hand, label: "Pet Masseuse", description: "Massage and wellness therapies" },
+  behaviorist: { icon: Brain, label: "Behaviorist", description: "Advanced behavior consultation" },
+  other: { icon: PawPrint, label: "Other", description: "Other pet-related business" },
+};
+
+// Entity type configuration
+const ENTITY_TYPE_CONFIG: Record<string, { label: string; description: string; taxNote: string }> = {
+  sole_proprietor: { 
+    label: "Sole Proprietor", 
+    description: "Individual owner, no formal entity",
+    taxNote: "Schedule C on personal return"
+  },
+  llc: { 
+    label: "LLC", 
+    description: "Limited Liability Company",
+    taxNote: "Pass-through or elect corporate taxation"
+  },
+  s_corp: { 
+    label: "S-Corp", 
+    description: "S Corporation",
+    taxNote: "Pass-through taxation with payroll requirements"
+  },
+  c_corp: { 
+    label: "C-Corp", 
+    description: "C Corporation",
+    taxNote: "Corporate taxation, potential double tax"
+  },
+  partnership: { 
+    label: "Partnership", 
+    description: "Multi-member partnership",
+    taxNote: "Form 1065, K-1s to partners"
+  },
+  nonprofit: { 
+    label: "Nonprofit / 501(c)(3)", 
+    description: "Tax-exempt organization",
+    taxNote: "Form 990, limited deductions apply"
+  },
+};
+
+// Working style configuration
+const WORKING_STYLE_CONFIG: Record<string, { icon: React.ElementType; label: string; description: string; emphasis: string }> = {
+  home_based: { 
+    icon: Home, 
+    label: "Home-Based", 
+    description: "Operate primarily from your home",
+    emphasis: "Home office deductions, utilities allocation"
+  },
+  storefront: { 
+    icon: Building2, 
+    label: "Storefront / Commercial", 
+    description: "Fixed commercial location",
+    emphasis: "Rent, utilities, commercial insurance"
+  },
+  mobile: { 
+    icon: Car, 
+    label: "Mobile / Van-Based", 
+    description: "Travel to client locations",
+    emphasis: "Mileage, vehicle expenses, equipment"
+  },
+  mixed: { 
+    icon: Users, 
+    label: "Mixed / Hybrid", 
+    description: "Combination of locations",
+    emphasis: "All deduction categories apply"
+  },
+};
 
 const MerchantOnboarding = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { geocodeAddress } = useGeocoding();
   const [isLoading, setIsLoading] = useState(false);
-  const [businessType, setBusinessType] = useState("veterinary");
+  const [businessType, setBusinessType] = useState<string>("");
+  const [entityType, setEntityType] = useState<string>("");
+  const [workingStyle, setWorkingStyle] = useState<string>("");
+  const [country, setCountry] = useState("US");
+  const [stateOfIncorporation, setStateOfIncorporation] = useState("");
   const [profile, setProfile] = useState<any>(null);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [logoZoom, setLogoZoom] = useState(1);
+
+  // Show entity type section only for certain business types
+  const showEntitySection = businessType && businessType !== "";
+  
+  // Show state of incorporation for formal entities
+  const showStateOfIncorporation = entityType && ["llc", "s_corp", "c_corp", "partnership", "nonprofit"].includes(entityType);
+
+  // Tax relevance hints based on selections
+  const taxHints = useMemo(() => {
+    const hints: string[] = [];
+    
+    if (workingStyle === "home_based") {
+      hints.push("📍 Home office deduction tracking available");
+    }
+    if (workingStyle === "mobile" || workingStyle === "mixed") {
+      hints.push("🚗 Mileage log and vehicle expense tracking available");
+    }
+    if (entityType === "sole_proprietor" || entityType === "llc") {
+      hints.push("📋 Self-employment tax estimates included");
+    }
+    if (entityType === "nonprofit") {
+      hints.push("📊 Nonprofit-specific reporting available");
+    }
+    if (businessType === "veterinary" || businessType === "grooming" || businessType === "mobile_groomer") {
+      hints.push("🧴 Equipment & supplies tracking optimized");
+    }
+    
+    return hints;
+  }, [businessType, entityType, workingStyle]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -117,7 +241,11 @@ const MerchantOnboarding = () => {
         businessName,
         contactPerson,
         phone,
-        businessType,
+        businessType: businessType || "other",
+        entityType: entityType || undefined,
+        country,
+        stateOfIncorporation: stateOfIncorporation || undefined,
+        workingStyle: workingStyle || undefined,
         streetAddress,
         city,
         state,
@@ -147,13 +275,17 @@ const MerchantOnboarding = () => {
         .toLowerCase()
         .replace(/[^a-z0-9]/g, '');
 
-      // Create merchant profile
+      // Create merchant profile with smart onboarding data
       const { data: merchantData, error: merchantError } = await supabase.from("merchants").insert({
         user_id: user.id,
         business_name: validatedData.businessName,
         contact_person: validatedData.contactPerson,
         phone: validatedData.phone,
         business_type: validatedData.businessType,
+        entity_type: validatedData.entityType || null,
+        country: validatedData.country,
+        state_of_incorporation: validatedData.stateOfIncorporation || null,
+        working_style: validatedData.workingStyle || null,
         address: fullAddress,
         description: validatedData.description || null,
         cashback_rate: validatedData.cashbackRate,
@@ -203,222 +335,411 @@ const MerchantOnboarding = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--gradient-hero)] flex items-center justify-center p-4">
-      <Card className="w-full max-w-2xl">
-        <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center">
-              <Store className="w-8 h-8 text-primary-foreground" />
-            </div>
-          </div>
-          <CardTitle className="text-3xl font-bold">Set Up Your Business</CardTitle>
-          <CardDescription>Complete your merchant profile to start receiving payments</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Business Name */}
-            <div className="space-y-2">
-              <Label htmlFor="businessName">Business Name *</Label>
-              <Input
-                id="businessName"
-                name="businessName"
-                placeholder="Paws & Claws Pet Store"
-                required
-              />
-            </div>
-
-            {/* Contact Person */}
-            <div className="space-y-2">
-              <Label htmlFor="contactPerson">Contact Person *</Label>
-              <Input
-                id="contactPerson"
-                name="contactPerson"
-                placeholder="John Doe"
-                required
-              />
-            </div>
-
-            {/* Phone Number */}
-            <div className="space-y-2">
-              <Label htmlFor="phone">Phone Number *</Label>
-              <Input
-                id="phone"
-                name="phone"
-                type="tel"
-                placeholder="(310) 555-1234"
-                required
-              />
-            </div>
-
-            {/* Business Type */}
-            <div className="space-y-2">
-              <Label htmlFor="businessType">Type of Business *</Label>
-            <Select value={businessType} onValueChange={setBusinessType}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select business type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="veterinary">Veterinary</SelectItem>
-                  <SelectItem value="grooming">Grooming</SelectItem>
-                  <SelectItem value="pet_store">Pet Store</SelectItem>
-                  <SelectItem value="food">Food & Treats</SelectItem>
-                  <SelectItem value="boarding">Boarding</SelectItem>
-                  <SelectItem value="training">Training</SelectItem>
-                  <SelectItem value="walker">Walker</SelectItem>
-                  <SelectItem value="daycare">Daycare</SelectItem>
-                  <SelectItem value="photography">Photography</SelectItem>
-                  <SelectItem value="insurance">Insurance</SelectItem>
-                  <SelectItem value="delivery">Delivery</SelectItem>
-                  <SelectItem value="hiker">Hiker</SelectItem>
-                  <SelectItem value="runner">Runner</SelectItem>
-                  <SelectItem value="masseuse">Masseuse</SelectItem>
-                  <SelectItem value="behaviorist">Behaviorist</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Business Logo */}
-            <div className="space-y-2">
-              <Label htmlFor="logo">Business Logo</Label>
-              <div className="flex flex-col gap-4">
-                <Input
-                  id="logo"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleLogoChange}
-                />
-                {logoPreview && (
-                  <div className="space-y-3">
-                    <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-border mx-auto relative">
-                      <div 
-                        className="absolute inset-0 flex items-center justify-center"
-                        style={{
-                          transform: `scale(${logoZoom})`,
-                          transition: 'transform 0.2s ease'
-                        }}
-                      >
-                        <img
-                          src={logoPreview}
-                          alt="Logo preview"
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="logoZoom" className="text-sm">Adjust Logo Size</Label>
-                      <input
-                        id="logoZoom"
-                        type="range"
-                        min="0.5"
-                        max="2"
-                        step="0.1"
-                        value={logoZoom}
-                        onChange={(e) => setLogoZoom(parseFloat(e.target.value))}
-                        className="w-full"
-                      />
-                      <p className="text-xs text-muted-foreground text-center">
-                        Scale: {logoZoom.toFixed(1)}x
-                      </p>
-                    </div>
-                  </div>
-                )}
+    <div className="min-h-screen bg-[var(--gradient-hero)] py-8 px-4">
+      <SEO 
+        title="Set Up Your Pet Business | PawBucks"
+        description="Create your merchant profile and start accepting payments from pet owners"
+      />
+      
+      <div className="max-w-3xl mx-auto space-y-6">
+        {/* Header Card */}
+        <Card>
+          <CardHeader className="text-center pb-4">
+            <div className="flex justify-center mb-4">
+              <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center">
+                <Store className="w-8 h-8 text-primary-foreground" />
               </div>
             </div>
+            <CardTitle className="text-3xl font-bold">Set Up Your Pet Business</CardTitle>
+            <CardDescription className="text-base">
+              Tell us about your business so we can tailor PawBucks to your needs—including smart tax tracking
+            </CardDescription>
+          </CardHeader>
+        </Card>
 
-            {/* Address Fields */}
-            <div className="space-y-4">
-              <Label className="text-base font-semibold">Business Address *</Label>
-              <div className="space-y-3">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Step 1: Business Basics */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground text-sm flex items-center justify-center">1</span>
+                Business Basics
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Business Name */}
+              <div className="space-y-2">
+                <Label htmlFor="businessName">Business Name *</Label>
+                <Input
+                  id="businessName"
+                  name="businessName"
+                  placeholder="Paws & Claws Pet Care"
+                  required
+                />
+              </div>
+
+              {/* Contact Person & Phone */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="streetAddress">Street Address</Label>
+                  <Label htmlFor="contactPerson">Contact Person *</Label>
                   <Input
-                    id="streetAddress"
-                    name="streetAddress"
-                    placeholder="123 Pet Street"
+                    id="contactPerson"
+                    name="contactPerson"
+                    placeholder="Jane Smith"
                     required
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <Label htmlFor="city">City</Label>
-                    <Input
-                      id="city"
-                      name="city"
-                      placeholder="Los Angeles"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="state">State</Label>
-                    <Input
-                      id="state"
-                      name="state"
-                      placeholder="CA"
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="w-1/2">
-                  <div className="space-y-2">
-                    <Label htmlFor="zipCode">ZIP Code</Label>
-                    <Input
-                      id="zipCode"
-                      name="zipCode"
-                      placeholder="90066"
-                      required
-                    />
-                  </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Phone Number *</Label>
+                  <Input
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    placeholder="(310) 555-1234"
+                    required
+                  />
                 </div>
               </div>
-            </div>
 
-            {/* Description */}
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                name="description"
-                placeholder="Tell customers about your business..."
-                rows={3}
-              />
-            </div>
+              {/* Business Logo */}
+              <div className="space-y-2">
+                <Label htmlFor="logo">Business Logo (Optional)</Label>
+                <div className="flex flex-col gap-4">
+                  <Input
+                    id="logo"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleLogoChange}
+                  />
+                  {logoPreview && (
+                    <div className="space-y-3">
+                      <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-border mx-auto relative">
+                        <div 
+                          className="absolute inset-0 flex items-center justify-center"
+                          style={{
+                            transform: `scale(${logoZoom})`,
+                            transition: 'transform 0.2s ease'
+                          }}
+                        >
+                          <img
+                            src={logoPreview}
+                            alt="Logo preview"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="logoZoom" className="text-xs">Adjust Size</Label>
+                        <input
+                          id="logoZoom"
+                          type="range"
+                          min="0.5"
+                          max="2"
+                          step="0.1"
+                          value={logoZoom}
+                          onChange={(e) => setLogoZoom(parseFloat(e.target.value))}
+                          className="w-full"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-            <div className="bg-muted rounded-lg p-4">
-              <h3 className="font-semibold mb-2 flex items-center gap-2">
-                <PawPrint className="w-4 h-4" />
-                Banking Setup (Stripe Connect)
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                After creating your profile, you'll be able to connect your bank account through Stripe Connect
-                to receive payments directly.
-              </p>
-            </div>
+          {/* Step 2: Type of Business */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground text-sm flex items-center justify-center">2</span>
+                What Type of Pet Business?
+              </CardTitle>
+              <CardDescription>Select the category that best describes your services</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                {Object.entries(BUSINESS_TYPE_CONFIG).map(([key, config]) => {
+                  const Icon = config.icon;
+                  const isSelected = businessType === key;
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => setBusinessType(key)}
+                      className={`p-3 rounded-lg border-2 transition-all text-left ${
+                        isSelected 
+                          ? 'border-primary bg-primary/10' 
+                          : 'border-border hover:border-primary/50 hover:bg-muted/50'
+                      }`}
+                    >
+                      <Icon className={`w-5 h-5 mb-1 ${isSelected ? 'text-primary' : 'text-muted-foreground'}`} />
+                      <div className="text-sm font-medium truncate">{config.label}</div>
+                    </button>
+                  );
+                })}
+              </div>
+              {businessType && BUSINESS_TYPE_CONFIG[businessType] && (
+                <p className="text-sm text-muted-foreground mt-3 flex items-center gap-2">
+                  <Info className="w-4 h-4" />
+                  {BUSINESS_TYPE_CONFIG[businessType].description}
+                </p>
+              )}
+            </CardContent>
+          </Card>
 
-            <div className="flex gap-3 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => navigate("/dashboard")}
-                className="flex-1"
-                disabled={isLoading}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" className="flex-1" disabled={isLoading}>
-                {isLoading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Creating...
-                  </>
-                ) : (
-                  "Create Business Profile"
+          {/* Step 3: Entity Type & Jurisdiction */}
+          {showEntitySection && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground text-sm flex items-center justify-center">3</span>
+                  Business Structure
+                </CardTitle>
+                <CardDescription>This helps us suggest relevant tax categories (U.S. businesses only for now)</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Entity Type</Label>
+                  <Select value={entityType} onValueChange={setEntityType}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select your business structure..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(ENTITY_TYPE_CONFIG).map(([key, config]) => (
+                        <SelectItem key={key} value={key}>
+                          <div className="flex flex-col">
+                            <span>{config.label}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {entityType && ENTITY_TYPE_CONFIG[entityType] && (
+                    <div className="bg-muted/50 rounded-lg p-3 mt-2">
+                      <p className="text-sm text-muted-foreground">{ENTITY_TYPE_CONFIG[entityType].description}</p>
+                      <Badge variant="outline" className="mt-2">
+                        {ENTITY_TYPE_CONFIG[entityType].taxNote}
+                      </Badge>
+                    </div>
+                  )}
+                </div>
+
+                {showStateOfIncorporation && (
+                  <div className="space-y-2">
+                    <Label htmlFor="stateOfIncorporation">State of Incorporation/Registration</Label>
+                    <Input
+                      id="stateOfIncorporation"
+                      value={stateOfIncorporation}
+                      onChange={(e) => setStateOfIncorporation(e.target.value)}
+                      placeholder="e.g., Delaware, California"
+                    />
+                  </div>
                 )}
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+
+                {entityType === "nonprofit" && (
+                  <div className="flex items-start gap-2 p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg">
+                    <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                    <div className="text-sm">
+                      <p className="font-medium text-amber-700">Nonprofit Note</p>
+                      <p className="text-muted-foreground">Some tax deduction categories may not apply to 501(c)(3) organizations. We'll adjust recommendations accordingly.</p>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Step 4: Working Style */}
+          {showEntitySection && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground text-sm flex items-center justify-center">4</span>
+                  How Do You Work?
+                </CardTitle>
+                <CardDescription>This tailors which expense categories we emphasize for you</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {Object.entries(WORKING_STYLE_CONFIG).map(([key, config]) => {
+                    const Icon = config.icon;
+                    const isSelected = workingStyle === key;
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => setWorkingStyle(key)}
+                        className={`p-4 rounded-lg border-2 transition-all text-left ${
+                          isSelected 
+                            ? 'border-primary bg-primary/10' 
+                            : 'border-border hover:border-primary/50 hover:bg-muted/50'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <Icon className={`w-6 h-6 ${isSelected ? 'text-primary' : 'text-muted-foreground'}`} />
+                          <div>
+                            <div className="font-medium">{config.label}</div>
+                            <div className="text-sm text-muted-foreground">{config.description}</div>
+                          </div>
+                        </div>
+                        {isSelected && (
+                          <Badge variant="secondary" className="mt-2">
+                            {config.emphasis}
+                          </Badge>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Tax Hints Preview */}
+          {taxHints.length > 0 && (
+            <Card className="bg-primary/5 border-primary/20">
+              <CardContent className="pt-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                    <PawPrint className="w-4 h-4 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-medium mb-2">Tailored for Your Business:</p>
+                    <ul className="space-y-1">
+                      {taxHints.map((hint, i) => (
+                        <li key={i} className="text-sm text-muted-foreground">{hint}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Step 5: Business Address */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground text-sm flex items-center justify-center">
+                  {showEntitySection ? "5" : "3"}
+                </span>
+                Business Address
+              </CardTitle>
+              <CardDescription>
+                {workingStyle === "home_based" 
+                  ? "Your home address (kept private, used for discovery radius)" 
+                  : workingStyle === "mobile"
+                  ? "Your base of operations (for discovery)"
+                  : "Where customers can find you"
+                }
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="streetAddress">Street Address *</Label>
+                <Input
+                  id="streetAddress"
+                  name="streetAddress"
+                  placeholder="123 Pet Street"
+                  required
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="city">City *</Label>
+                  <Input
+                    id="city"
+                    name="city"
+                    placeholder="Los Angeles"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="state">State *</Label>
+                  <Input
+                    id="state"
+                    name="state"
+                    placeholder="CA"
+                    required
+                  />
+                </div>
+              </div>
+              <div className="w-1/2">
+                <div className="space-y-2">
+                  <Label htmlFor="zipCode">ZIP Code *</Label>
+                  <Input
+                    id="zipCode"
+                    name="zipCode"
+                    placeholder="90066"
+                    required
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Step 6: Description */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground text-sm flex items-center justify-center">
+                  {showEntitySection ? "6" : "4"}
+                </span>
+                About Your Business
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="description">Description (Optional)</Label>
+                <Textarea
+                  id="description"
+                  name="description"
+                  placeholder="Tell customers what makes your business special..."
+                  rows={3}
+                />
+              </div>
+
+              <div className="bg-muted rounded-lg p-4">
+                <h3 className="font-semibold mb-2 flex items-center gap-2">
+                  <PawPrint className="w-4 h-4" />
+                  Banking Setup (Stripe Connect)
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  After creating your profile, you'll connect your bank account through Stripe to receive payments directly.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Submit */}
+          <div className="flex gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => navigate("/dashboard")}
+              className="flex-1"
+              disabled={isLoading}
+            >
+              Cancel
+            </Button>
+            <Button 
+              type="submit" 
+              className="flex-1" 
+              disabled={isLoading || !businessType}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                "Create Business Profile"
+              )}
+            </Button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };
