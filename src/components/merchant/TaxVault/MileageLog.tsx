@@ -31,6 +31,8 @@ interface MileageEntry {
   created_at: string;
   start_odometer: number | null;
   end_odometer: number | null;
+  start_location: string | null;
+  end_location: string | null;
 }
 
 interface VehicleExpense {
@@ -78,6 +80,8 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
   const [vehicleName, setVehicleName] = useState('');
   const [startOdometer, setStartOdometer] = useState('');
   const [endOdometer, setEndOdometer] = useState('');
+  const [startLocation, setStartLocation] = useState('');
+  const [endLocation, setEndLocation] = useState('');
   const [useOdometer, setUseOdometer] = useState(true); // Default to odometer-based entry
 
   // Auto-calculate miles when odometers change
@@ -148,6 +152,8 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
           tax_year: taxYear,
           start_odometer: useOdometer && startOdometer ? parseFloat(startOdometer) : null,
           end_odometer: useOdometer && endOdometer ? parseFloat(endOdometer) : null,
+          start_location: startLocation || null,
+          end_location: endLocation || null,
         });
 
       if (error) throw error;
@@ -242,6 +248,8 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
     setVehicleName('');
     setStartOdometer('');
     setEndOdometer('');
+    setStartLocation('');
+    setEndLocation('');
     setUseOdometer(true);
   };
 
@@ -632,14 +640,32 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
                         </div>
                       )}
 
-                      <div className="grid gap-2">
-                        <Label htmlFor="destination">Destination (Optional)</Label>
-                        <Input
-                          id="destination"
-                          placeholder="e.g., Happy Paws Grooming"
-                          value={destination}
-                          onChange={(e) => setDestination(e.target.value)}
-                        />
+                      {/* Start & End Location */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="grid gap-2">
+                          <Label htmlFor="start-location" className="flex items-center gap-1">
+                            <MapPin className="h-3 w-3 text-green-500" />
+                            Start Location
+                          </Label>
+                          <Input
+                            id="start-location"
+                            placeholder="e.g., Home, 123 Main St"
+                            value={startLocation}
+                            onChange={(e) => setStartLocation(e.target.value)}
+                          />
+                        </div>
+                        <div className="grid gap-2">
+                          <Label htmlFor="end-location" className="flex items-center gap-1">
+                            <MapPin className="h-3 w-3 text-red-500" />
+                            End Location
+                          </Label>
+                          <Input
+                            id="end-location"
+                            placeholder="e.g., Happy Paws Grooming"
+                            value={endLocation}
+                            onChange={(e) => setEndLocation(e.target.value)}
+                          />
+                        </div>
                       </div>
 
                       <div className="grid gap-2">
@@ -693,9 +719,9 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
                       <TableRow>
                         <TableHead>Date</TableHead>
                         <TableHead>Type</TableHead>
+                        <TableHead>Route</TableHead>
                         <TableHead>Odometer</TableHead>
                         <TableHead>Miles</TableHead>
-                        <TableHead>Destination</TableHead>
                         <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -721,6 +747,26 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
                               )}
                             </Badge>
                           </TableCell>
+                          <TableCell>
+                            {entry.start_location || entry.end_location ? (
+                              <div className="text-xs space-y-0.5">
+                                {entry.start_location && (
+                                  <div className="flex items-center gap-1">
+                                    <MapPin className="h-3 w-3 text-green-500 shrink-0" />
+                                    <span className="truncate max-w-[120px]" title={entry.start_location}>{entry.start_location}</span>
+                                  </div>
+                                )}
+                                {entry.end_location && (
+                                  <div className="flex items-center gap-1">
+                                    <MapPin className="h-3 w-3 text-red-500 shrink-0" />
+                                    <span className="truncate max-w-[120px]" title={entry.end_location}>{entry.end_location}</span>
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="text-muted-foreground text-xs">—</span>
+                            )}
+                          </TableCell>
                           <TableCell className="text-xs text-muted-foreground">
                             {entry.start_odometer && entry.end_odometer ? (
                               <span>{entry.start_odometer.toLocaleString()} → {entry.end_odometer.toLocaleString()}</span>
@@ -729,16 +775,6 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
                             )}
                           </TableCell>
                           <TableCell className="font-mono font-semibold">{entry.miles.toFixed(1)}</TableCell>
-                          <TableCell>
-                            {entry.destination ? (
-                              <span className="flex items-center gap-1 text-sm">
-                                <MapPin className="h-3 w-3 text-muted-foreground" />
-                                {entry.destination}
-                              </span>
-                            ) : (
-                              <span className="text-muted-foreground">—</span>
-                            )}
-                          </TableCell>
                           <TableCell className="text-right">
                             <Button
                               variant="ghost"
