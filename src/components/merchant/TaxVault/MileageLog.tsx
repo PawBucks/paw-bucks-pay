@@ -18,6 +18,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
+// Helper to format date without timezone issues
+const formatDateLocal = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 interface MileageEntry {
   id: string;
   merchant_id: string;
@@ -143,7 +151,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
         .from('merchant_mileage_log')
         .insert({
           merchant_id: merchantId,
-          trip_date: format(tripDate, 'yyyy-MM-dd'),
+          trip_date: formatDateLocal(tripDate),
           trip_type: tripType,
           miles: finalMiles,
           description: description || null,
@@ -177,7 +185,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
         .from('merchant_vehicle_expenses')
         .insert({
           merchant_id: merchantId,
-          expense_date: format(expenseDate, 'yyyy-MM-dd'),
+          expense_date: formatDateLocal(expenseDate),
           expense_type: expenseType,
           amount: parseFloat(expenseAmount),
           description: expenseDescription || null,
