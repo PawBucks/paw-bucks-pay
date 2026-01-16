@@ -91,6 +91,49 @@ serve(async (req) => {
       refunded_amount: number;
     };
 
+    // Calculate funding eligibility data
+    // Get the first transaction date to determine days active
+    const { data: firstTransaction } = await supabase
+      .from('transactions')
+      .select('created_at')
+      .eq('merchant_id', merchant.id)
+      .eq('status', 'completed')
+      .order('created_at', { ascending: true })
+      .limit(1)
+      .single();
+
+    const now = new Date();
+    const ninetyDaysAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+    
+    let daysActive = 0;
+    if (firstTransaction?.created_at) {
+      const firstTransactionDate = new Date(firstTransaction.created_at);
+      daysActive = Math.floor((now.getTime() - firstTransactionDate.getTime()) / (1000 * 60 * 60 * 24));
+    }
+
+    // Calculate sales from the past 90 days
+    const { data: last90DaysTransactions } = await supabase
+      .from('transactions')
+      .select('amount, created_at')
+      .eq('merchant_id', merchant.id)
+      .eq('status', 'completed')
+      .gte('created_at', ninetyDaysAgo.toISOString());
+
+    let sales90Days = 0;
+    if (last90DaysTransactions && last90DaysTransactions.length > 0) {
+      sales90Days = last90DaysTransactions.reduce((sum, t) => sum + (t.amount || 0), 0);
+    }
+
+    // Average daily sales over 90 days, then multiply by 90 for the "average total" over that period
+    const avgDailySales = daysActive >= 90 ? sales90Days / 90 : 0;
+    const avg90DaySales = avgDailySales * 90; // This equals sales90Days when >= 90 days active
+
+    // Funding eligibility: must have 90+ days of active sales
+    const fundingEligible = daysActive >= 90;
+    const maxBorrowable = fundingEligible ? avg90DaySales * 0.8 : 0;
+
+    console.log('Funding eligibility:', { daysActive, sales90Days, avg90DaySales, fundingEligible, maxBorrowable });
+
     // Format response - using the new accurate analytics columns
     const response = {
       merchant_id: merchant.id,
@@ -105,6 +148,11 @@ serve(async (req) => {
       // Include refund information for transparency
       refunded_transactions: parseInt(String(analytics.refunded_transactions || 0)),
       refunded_amount: parseFloat(String(analytics.refunded_amount || 0)),
+      // Funding eligibility data
+      days_active: daysActive,
+      sales_90_days: parseFloat(String(sales90Days)),
+      funding_eligible: fundingEligible,
+      max_borrowable: parseFloat(String(maxBorrowable)),
       query_time_ms: queryTime.toFixed(2)
     };
 
