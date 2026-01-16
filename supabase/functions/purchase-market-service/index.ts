@@ -117,14 +117,18 @@ serve(async (req) => {
         throw new Error('Failed to deduct PawBucks from merchant wallet');
       }
 
-      // Log the PawBucks activity
-      await supabaseAdmin.from('merchant_pawbucks_activity').insert({
+      // Log the PawBucks activity with proper error handling
+      const { error: activityError } = await supabaseAdmin.from('merchant_pawbucks_activity').insert({
         merchant_id: merchant.id,
         amount: -pricePawBucks,
-        type: 'debit',
+        type: 'spend',
         source: 'market_service_purchase',
         description: `Purchased: ${serviceName}`,
       });
+
+      if (activityError) {
+        logStep('Warning: Failed to log PawBucks activity', { error: activityError.message });
+      }
 
       // Calculate expiration date based on billing period
       const expiresAt = billingPeriod === 'monthly' 

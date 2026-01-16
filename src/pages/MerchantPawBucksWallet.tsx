@@ -125,7 +125,7 @@ const MerchantPawBucksWallet = () => {
 
   const totalSpent = Math.abs(
     activities
-      .filter(a => a.type === 'spend' || a.type === 'redeem')
+      .filter(a => a.type === 'spend' || a.type === 'redeem' || a.type === 'debit')
       .reduce((sum, a) => sum + a.amount, 0)
   );
 
