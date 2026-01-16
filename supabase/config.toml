@@ -242,3 +242,12 @@ verify_jwt = true
 
 [functions.send-receipt-email]
 verify_jwt = false
+
+[functions.process-receipt-ocr]
+verify_jwt = true
+
+[functions.admin-send-text-campaign]
+verify_jwt = true
+
+[functions.send-quarterly-tax-reminder]
+verify_jwt = false

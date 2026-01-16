@@ -6,10 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Plus, Vault, DollarSign, Receipt, TrendingUp, Car, Home } from 'lucide-react';
+import { ArrowLeft, Plus, Vault, DollarSign, Receipt, TrendingUp, Car, Home, Calculator } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { ExpenseEntryDialog, ExpensesList, CategorySummary, ReportGenerator, MileageLog, HomeOfficeCalculator, TaxExpense, TaxExpenseCategory } from '@/components/merchant/TaxVault';
+import { ExpenseEntryDialog, ExpensesList, CategorySummary, ReportGenerator, MileageLog, HomeOfficeCalculator, TaxLiabilityEstimator, TaxExpense, TaxExpenseCategory } from '@/components/merchant/TaxVault';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 
 export default function MerchantTaxVault() {
@@ -158,8 +158,12 @@ export default function MerchantTaxVault() {
         </div>
 
         {/* Main Content Tabs */}
-        <Tabs defaultValue="expenses" className="space-y-6">
+        <Tabs defaultValue="tax-estimate" className="space-y-6">
           <TabsList className="flex-wrap h-auto gap-1">
+            <TabsTrigger value="tax-estimate" className="flex items-center gap-1">
+              <Calculator className="h-4 w-4" />
+              Tax Estimate
+            </TabsTrigger>
             <TabsTrigger value="expenses">Expenses</TabsTrigger>
             <TabsTrigger value="mileage" className="flex items-center gap-1">
               <Car className="h-4 w-4" />
@@ -172,6 +176,12 @@ export default function MerchantTaxVault() {
             <TabsTrigger value="summary">Category Summary</TabsTrigger>
             <TabsTrigger value="reports">Generate Reports</TabsTrigger>
           </TabsList>
+          
+          <TabsContent value="tax-estimate">
+            {merchantId && (
+              <TaxLiabilityEstimator merchantId={merchantId} taxYear={selectedYear} />
+            )}
+          </TabsContent>
           
           <TabsContent value="expenses">
             <Card>
