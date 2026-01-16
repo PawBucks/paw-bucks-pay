@@ -27,7 +27,7 @@ type UserRole = {
 };
 
 // Function to load users with their PawBucks balances
-// Uses pawbucks_wallet.balance as the single source of truth
+// Uses pawbucks_wallet.balance for pet owners and merchant_pawbucks_wallet for merchants
 // For shared account members, shows the owner's balance
 const fetchUsersWithBalances = async (): Promise<User[]> => {
   const { data: profiles, error } = await supabase
@@ -37,10 +37,19 @@ const fetchUsersWithBalances = async (): Promise<User[]> => {
 
   if (error) throw error;
 
-  // Fetch wallet balances directly - this is the authoritative source
+  // Fetch pet owner wallet balances
   const { data: walletData } = await supabase
     .from('pawbucks_wallet')
     .select('user_id, balance');
+
+  // Fetch merchant wallet balances - need to join with merchants to get user_id
+  const { data: merchantsData } = await supabase
+    .from('merchants')
+    .select('id, user_id');
+
+  const { data: merchantWalletData } = await supabase
+    .from('merchant_pawbucks_wallet')
+    .select('merchant_id, balance');
 
   // Fetch shared account memberships to find who shares with whom
   const { data: sharedMembers } = await supabase
@@ -54,10 +63,24 @@ const fetchUsersWithBalances = async (): Promise<User[]> => {
     memberToOwnerMap.set(m.member_id, m.owner_id);
   });
 
-  // Create a map of user_id to wallet balance
-  const balanceMap = new Map<string, number>();
+  // Create a map of user_id to pet owner wallet balance
+  const petOwnerBalanceMap = new Map<string, number>();
   walletData?.forEach(wallet => {
-    balanceMap.set(wallet.user_id, wallet.balance ?? 0);
+    petOwnerBalanceMap.set(wallet.user_id, wallet.balance ?? 0);
+  });
+
+  // Create a map of merchant_id to merchant wallet balance
+  const merchantBalanceByMerchantId = new Map<string, number>();
+  merchantWalletData?.forEach(wallet => {
+    merchantBalanceByMerchantId.set(wallet.merchant_id, wallet.balance ?? 0);
+  });
+
+  // Create a map of user_id to merchant_id
+  const userToMerchantId = new Map<string, string>();
+  merchantsData?.forEach(m => {
+    if (m.user_id) {
+      userToMerchantId.set(m.user_id, m.id);
+    }
   });
 
   // Create a map of user_id to email for owner lookup
@@ -68,10 +91,23 @@ const fetchUsersWithBalances = async (): Promise<User[]> => {
 
   return (profiles || []).map(p => {
     const ownerId = memberToOwnerMap.get(p.id);
-    // If user is a shared member, use owner's balance; otherwise use their own
-    const effectiveBalance = ownerId 
-      ? balanceMap.get(ownerId) ?? 0 
-      : balanceMap.get(p.id) ?? 0;
+    
+    // Determine balance based on user type
+    let effectiveBalance = 0;
+    
+    if (ownerId) {
+      // Shared member - use owner's balance
+      effectiveBalance = petOwnerBalanceMap.get(ownerId) ?? 0;
+    } else if (p.user_type === 'merchant') {
+      // Merchant - use merchant_pawbucks_wallet
+      const merchantId = userToMerchantId.get(p.id);
+      if (merchantId) {
+        effectiveBalance = merchantBalanceByMerchantId.get(merchantId) ?? 0;
+      }
+    } else {
+      // Pet owner - use pawbucks_wallet
+      effectiveBalance = petOwnerBalanceMap.get(p.id) ?? 0;
+    }
     
     return {
       ...p,
@@ -98,7 +134,7 @@ export function UsersTab() {
     staleTime: 30000, // Consider data stale after 30 seconds
   });
 
-  // Subscribe to real-time PawBucks activity changes
+  // Subscribe to real-time PawBucks activity changes for both pet owners and merchants
   useEffect(() => {
     const channel = supabase
       .channel('admin-users-pawbucks-updates')
@@ -110,7 +146,43 @@ export function UsersTab() {
           table: 'pawbucks_activity'
         },
         () => {
-          // Refetch users when PawBucks activity changes
+          // Refetch users when pet owner PawBucks activity changes
+          queryClient.invalidateQueries({ queryKey: ['admin-users-with-pawbucks'] });
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'merchant_pawbucks_activity'
+        },
+        () => {
+          // Refetch users when merchant PawBucks activity changes
+          queryClient.invalidateQueries({ queryKey: ['admin-users-with-pawbucks'] });
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'pawbucks_wallet'
+        },
+        () => {
+          // Refetch users when wallet balance changes directly
+          queryClient.invalidateQueries({ queryKey: ['admin-users-with-pawbucks'] });
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'merchant_pawbucks_wallet'
+        },
+        () => {
+          // Refetch users when merchant wallet balance changes directly
           queryClient.invalidateQueries({ queryKey: ['admin-users-with-pawbucks'] });
         }
       )
