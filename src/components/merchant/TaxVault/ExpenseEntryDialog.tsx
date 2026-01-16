@@ -7,13 +7,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Upload, Loader2, Info } from 'lucide-react';
-import { format } from 'date-fns';
+import { CalendarIcon, Upload, Loader2, Info, Camera, Sparkles } from 'lucide-react';
+import { format, parse } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { TaxExpenseCategory, CATEGORY_LABELS, CATEGORY_DESCRIPTIONS, CATEGORY_PRIORITY } from './types';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { SmartReceiptScanner } from './SmartReceiptScanner';
 
 interface ExpenseEntryDialogProps {
   open: boolean;
@@ -30,6 +31,36 @@ export function ExpenseEntryDialog({ open, onOpenChange, merchantId, onExpenseAd
   const [date, setDate] = useState<Date>(new Date());
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
+
+  const handleScanComplete = (data: {
+    vendor_name: string | null;
+    amount: number | null;
+    date: string | null;
+    description: string | null;
+    suggested_category: TaxExpenseCategory;
+  }, imageFile: File) => {
+    // Auto-fill form with extracted data
+    if (data.vendor_name) setVendorName(data.vendor_name);
+    if (data.amount !== null) setAmount(data.amount.toString());
+    if (data.date) {
+      try {
+        const parsedDate = parse(data.date, 'yyyy-MM-dd', new Date());
+        if (!isNaN(parsedDate.getTime())) {
+          setDate(parsedDate);
+        }
+      } catch {
+        // Keep current date if parsing fails
+      }
+    }
+    if (data.description) setDescription(data.description);
+    if (data.suggested_category) setCategory(data.suggested_category);
+    
+    // Set the receipt file
+    setReceiptFile(imageFile);
+    
+    toast.success('Receipt data loaded! Review and submit when ready.');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -110,6 +141,36 @@ export function ExpenseEntryDialog({ open, onOpenChange, merchantId, onExpenseAd
             Record a tax-deductible business expense. Categories are mapped to IRS Schedule C.
           </DialogDescription>
         </DialogHeader>
+
+        {/* Smart Receipt Scanner Button */}
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full border-dashed border-2 py-6 mb-2"
+          onClick={() => setShowScanner(true)}
+        >
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+              <Camera className="h-5 w-5 text-primary" />
+            </div>
+            <div className="text-left">
+              <p className="font-medium flex items-center gap-1.5">
+                <Sparkles className="h-4 w-4 text-primary" />
+                Smart Receipt Scanner
+              </p>
+              <p className="text-xs text-muted-foreground">Snap a photo to auto-fill expense details</p>
+            </div>
+          </div>
+        </Button>
+
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-background px-2 text-muted-foreground">or enter manually</span>
+          </div>
+        </div>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
@@ -237,6 +298,13 @@ export function ExpenseEntryDialog({ open, onOpenChange, merchantId, onExpenseAd
           </div>
         </form>
       </DialogContent>
+
+      {/* Smart Receipt Scanner Dialog */}
+      <SmartReceiptScanner
+        open={showScanner}
+        onOpenChange={setShowScanner}
+        onDataExtracted={handleScanComplete}
+      />
     </Dialog>
   );
 }

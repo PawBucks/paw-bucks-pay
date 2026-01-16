@@ -3,4 +3,5 @@ export { ExpensesList } from './ExpensesList';
 export { CategorySummary } from './CategorySummary';
 export { ReportGenerator } from './ReportGenerator';
 export { MileageLog } from './MileageLog';
+export { SmartReceiptScanner } from './SmartReceiptScanner';
 export * from './types';
