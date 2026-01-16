@@ -1310,8 +1310,12 @@ export type Database = {
           description: string | null
           expense_date: string
           id: string
+          is_auto_logged: boolean | null
           merchant_id: string
+          original_price: number | null
           receipt_url: string | null
+          savings_amount: number | null
+          source_purchase_id: string | null
           tax_year: number
           updated_at: string
           vendor_name: string | null
@@ -1323,8 +1327,12 @@ export type Database = {
           description?: string | null
           expense_date: string
           id?: string
+          is_auto_logged?: boolean | null
           merchant_id: string
+          original_price?: number | null
           receipt_url?: string | null
+          savings_amount?: number | null
+          source_purchase_id?: string | null
           tax_year: number
           updated_at?: string
           vendor_name?: string | null
@@ -1336,8 +1344,12 @@ export type Database = {
           description?: string | null
           expense_date?: string
           id?: string
+          is_auto_logged?: boolean | null
           merchant_id?: string
+          original_price?: number | null
           receipt_url?: string | null
+          savings_amount?: number | null
+          source_purchase_id?: string | null
           tax_year?: number
           updated_at?: string
           vendor_name?: string | null
@@ -3963,6 +3975,9 @@ export type Database = {
         | "software_subscriptions"
         | "training_education"
         | "other"
+        | "inventory_supplies"
+        | "specialized_equipment"
+        | "merchant_market"
       user_type: "pet_owner" | "merchant"
     }
     CompositeTypes: {
@@ -4133,6 +4148,9 @@ export const Constants = {
         "software_subscriptions",
         "training_education",
         "other",
+        "inventory_supplies",
+        "specialized_equipment",
+        "merchant_market",
       ],
       user_type: ["pet_owner", "merchant"],
     },

@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { TaxExpense, TaxExpenseCategory, CATEGORY_LABELS, SCHEDULE_C_MAPPING } from './types';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import { TrendingDown, Sparkles } from 'lucide-react';
 
 interface CategorySummaryProps {
   expenses: TaxExpense[];
@@ -18,6 +19,9 @@ const COLORS = [
   'hsl(45, 80%, 50%)',
   'hsl(170, 60%, 45%)',
   'hsl(0, 0%, 50%)',
+  'hsl(260, 60%, 55%)',
+  'hsl(120, 50%, 45%)',
+  'hsl(10, 70%, 55%)',
 ];
 
 export function CategorySummary({ expenses }: CategorySummaryProps) {
@@ -28,9 +32,17 @@ export function CategorySummary({ expenses }: CategorySummaryProps) {
 
   const totalExpenses = Object.values(categoryTotals).reduce((sum, val) => sum + val, 0);
 
+  // Calculate total savings from PawBucks discount
+  const totalSavings = expenses.reduce((sum, expense) => {
+    return sum + (expense.savings_amount || 0);
+  }, 0);
+
+  // Count auto-logged entries
+  const autoLoggedCount = expenses.filter(e => e.is_auto_logged).length;
+
   const chartData = Object.entries(categoryTotals)
     .map(([category, amount]) => ({
-      name: CATEGORY_LABELS[category as TaxExpenseCategory],
+      name: CATEGORY_LABELS[category as TaxExpenseCategory] || category,
       value: amount,
       category: category as TaxExpenseCategory,
     }))
@@ -118,11 +130,28 @@ export function CategorySummary({ expenses }: CategorySummaryProps) {
           )}
           
           {totalExpenses > 0 && (
-            <div className="pt-4 border-t">
+            <div className="pt-4 border-t space-y-3">
               <div className="flex justify-between items-center font-bold">
                 <span>Total Deductions</span>
                 <span className="text-xl">${totalExpenses.toFixed(2)}</span>
               </div>
+              
+              {totalSavings > 0 && (
+                <div className="flex justify-between items-center text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950/30 p-3 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <TrendingDown className="h-4 w-4" />
+                    <span className="font-medium">PawBucks Savings</span>
+                  </div>
+                  <span className="font-bold">${totalSavings.toFixed(2)}</span>
+                </div>
+              )}
+              
+              {autoLoggedCount > 0 && (
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <Sparkles className="h-3.5 w-3.5 text-primary" />
+                  <span>{autoLoggedCount} expense{autoLoggedCount > 1 ? 's' : ''} auto-logged from Merchant Market</span>
+                </div>
+              )}
             </div>
           )}
         </CardContent>

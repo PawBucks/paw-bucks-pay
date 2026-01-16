@@ -287,16 +287,37 @@ serve(async (req) => {
         ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
         : null;
 
-      await supabaseAdmin.from('merchant_service_purchases').insert({
+      const { data: purchaseData } = await supabaseAdmin.from('merchant_service_purchases').insert({
         merchant_id: merchant.id,
         service_id: serviceId,
         amount_paid_pawbucks: pricePawBucks,
         amount_paid_usd: 0,
         status: 'active',
         expires_at: expiresAt,
-      });
+      }).select('id').single();
 
       logStep('Full PawBucks payment completed', { pawbucksUsed: pricePawBucks, newBalance, expiresAt });
+
+      // Auto-log expense to Tax Vault with savings tracking
+      // PawBucks purchases get 25% discount, so actual paid = priceUSD equivalent
+      const actualPaidUSD = pricePawBucks * 0.001; // Convert PawBucks to USD (1 PB = $0.001)
+      const savingsAmount = priceUSD - actualPaidUSD; // Full USD price minus discounted amount
+
+      await supabaseAdmin.from('merchant_tax_expenses').insert({
+        merchant_id: merchant.id,
+        category: 'merchant_market',
+        amount: actualPaidUSD,
+        original_price: priceUSD,
+        savings_amount: savingsAmount > 0 ? savingsAmount : 0,
+        description: `${serviceName} - Merchant Market Service${billingPeriod ? ` (${billingPeriod})` : ''}`,
+        vendor_name: 'PawBucks Merchant Market',
+        expense_date: new Date().toISOString().split('T')[0],
+        tax_year: new Date().getFullYear(),
+        is_auto_logged: true,
+        source_purchase_id: purchaseData?.id || serviceId,
+      });
+
+      logStep('Tax Vault expense auto-logged', { actualPaidUSD, savingsAmount, originalPrice: priceUSD });
 
       // Send enhanced admin notification email
       await sendAdminNotification(merchant as MerchantInfo, {

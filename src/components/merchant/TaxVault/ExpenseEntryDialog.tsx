@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -7,12 +7,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Upload, Loader2 } from 'lucide-react';
+import { CalendarIcon, Upload, Loader2, Info } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { TaxExpenseCategory, CATEGORY_LABELS } from './types';
+import { TaxExpenseCategory, CATEGORY_LABELS, CATEGORY_DESCRIPTIONS, CATEGORY_PRIORITY } from './types';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface ExpenseEntryDialogProps {
   open: boolean;
@@ -95,24 +96,46 @@ export function ExpenseEntryDialog({ open, onOpenChange, merchantId, onExpenseAd
     }
   };
 
+  // Sort categories by priority, exclude merchant_market (auto-logged only)
+  const sortedCategories = CATEGORY_PRIORITY
+    .filter(cat => cat !== 'merchant_market')
+    .map(cat => ({ key: cat, label: CATEGORY_LABELS[cat] }));
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Add Business Expense</DialogTitle>
+          <DialogDescription>
+            Record a tax-deductible business expense. Categories are mapped to IRS Schedule C.
+          </DialogDescription>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="category">Category</Label>
+              <div className="flex items-center gap-1.5">
+                <Label htmlFor="category">Category</Label>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger type="button">
+                      <Info className="h-3.5 w-3.5 text-muted-foreground" />
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-[250px]">
+                      <p className="text-xs">{CATEGORY_DESCRIPTIONS[category]}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
               <Select value={category} onValueChange={(v) => setCategory(v as TaxExpenseCategory)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
-                    <SelectItem key={key} value={key}>{label}</SelectItem>
+                  {sortedCategories.map(({ key, label }) => (
+                    <SelectItem key={key} value={key}>
+                      {label}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
