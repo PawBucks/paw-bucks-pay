@@ -1,10 +1,49 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import Stripe from "https://esm.sh/stripe@18.5.0";
+import { Resend } from "https://esm.sh/resend@2.0.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+const sendAdminNotification = async (userEmail: string, itemName: string, quantity: number, totalAmount: number) => {
+  try {
+    const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+    
+    await resend.emails.send({
+      from: "PawBucks <noreply@pawbucks.app>",
+      to: ["admin@pawbucks.app"],
+      subject: `New Pet Store Purchase: ${itemName}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background: linear-gradient(135deg, #7DD4D4, #5BC0C0); padding: 20px; text-align: center;">
+            <h1 style="color: white; margin: 0; font-size: 24px;">PAWBUCKS</h1>
+          </div>
+          <div style="padding: 30px; background: #ffffff;">
+            <h2 style="color: #333; margin-bottom: 20px;">New Pet Store Purchase</h2>
+            <p style="color: #666; line-height: 1.6;">A pet owner has initiated a purchase from the Pet Store:</p>
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <p style="margin: 8px 0;"><strong>Customer Email:</strong> ${userEmail}</p>
+              <p style="margin: 8px 0;"><strong>Item:</strong> ${itemName}</p>
+              <p style="margin: 8px 0;"><strong>Quantity:</strong> ${quantity}</p>
+              <p style="margin: 8px 0;"><strong>Total Amount:</strong> $${totalAmount.toFixed(2)} USD</p>
+              <p style="margin: 8px 0;"><strong>Date:</strong> ${new Date().toLocaleString()}</p>
+            </div>
+            <p style="color: #888; font-size: 14px;">Note: This is a payment initiation. Final confirmation depends on successful Stripe payment.</p>
+          </div>
+          <div style="background: #f8f9fa; padding: 15px; text-align: center;">
+            <p style="color: #999; font-size: 12px; margin: 0;">PawBucks Admin Notification</p>
+          </div>
+        </div>
+      `,
+    });
+    
+    console.log('Admin notification email sent successfully');
+  } catch (emailError) {
+    console.error('Warning: Failed to send admin notification email', emailError);
+  }
 };
 
 serve(async (req) => {
@@ -105,6 +144,9 @@ serve(async (req) => {
     });
 
     console.log('Payment intent created:', paymentIntent.id);
+
+    // Send admin notification email
+    await sendAdminNotification(user.email || 'Unknown', item.name, quantity, totalAmount);
 
     return new Response(
       JSON.stringify({
