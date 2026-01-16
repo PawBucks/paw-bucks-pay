@@ -118,11 +118,27 @@ serve(async (req) => {
 
     console.log(`Admin ${user.id} crediting ${amount} PawBucks to user ${userId}`);
 
-    // Check if user exists and get their current wallet
+    // Check if the target user is a shared account member - if so, credit the owner's wallet
+    const { data: sharedMembership } = await supabaseAdmin
+      .from('shared_account_members')
+      .select('owner_id')
+      .eq('member_id', userId)
+      .eq('status', 'accepted')
+      .maybeSingle();
+
+    // Determine the effective user ID for the wallet (owner if shared member, otherwise the user)
+    const effectiveUserId = sharedMembership?.owner_id || userId;
+    const isSharedMember = !!sharedMembership?.owner_id;
+
+    if (isSharedMember) {
+      console.log(`User ${userId} is a shared member. Crediting owner wallet: ${effectiveUserId}`);
+    }
+
+    // Check if user exists and get their current wallet using effective user ID
     const { data: wallet, error: walletError } = await supabaseAdmin
       .from('pawbucks_wallet')
       .select('id, balance')
-      .eq('user_id', userId)
+      .eq('user_id', effectiveUserId)
       .single();
 
     if (walletError || !wallet) {
@@ -136,11 +152,11 @@ serve(async (req) => {
     const oldBalance = wallet.balance;
     const newBalance = oldBalance + amount;
 
-    // Update wallet balance
+    // Update wallet balance using effective user ID
     const { error: updateError } = await supabaseAdmin
       .from('pawbucks_wallet')
       .update({ balance: newBalance, last_updated: new Date().toISOString() })
-      .eq('user_id', userId);
+      .eq('user_id', effectiveUserId);
 
     if (updateError) {
       console.error('Failed to update wallet:', updateError);
@@ -150,15 +166,17 @@ serve(async (req) => {
       );
     }
 
-    // Log the activity (use 'earn' type which is valid per check constraint)
+    // Log the activity using effective user ID (so it appears in the shared wallet)
     const { error: activityError } = await supabaseAdmin
       .from('pawbucks_activity')
       .insert({
-        user_id: userId,
+        user_id: effectiveUserId,
         amount: amount,
         type: 'earn',
         source: 'admin_credit',
-        description: reason.trim()
+        description: isSharedMember 
+          ? `${reason.trim()} (credited via shared member)` 
+          : reason.trim()
       });
 
     if (activityError) {
@@ -173,12 +191,15 @@ serve(async (req) => {
         admin_id: user.id,
         action: 'credit_pawbucks',
         entity_type: 'pawbucks_wallet',
-        entity_id: userId,
+        entity_id: effectiveUserId,
         changes: {
           amount,
           reason: reason.trim(),
           old_balance: oldBalance,
-          new_balance: newBalance
+          new_balance: newBalance,
+          target_user_id: userId,
+          effective_user_id: effectiveUserId,
+          is_shared_member: isSharedMember
         }
       });
 
