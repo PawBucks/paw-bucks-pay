@@ -1,12 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Search, Edit, Check, X, Coins } from 'lucide-react';
+import { Search, Edit, Coins, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 
 type Merchant = {
@@ -21,17 +22,75 @@ type Merchant = {
   pawbucks_balance?: number;
 };
 
+// Fetch merchants with their PawBucks balances
+const fetchMerchantsWithBalances = async (): Promise<Merchant[]> => {
+  const { data: merchantsData, error } = await supabase
+    .from('merchants')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+
+  // Fetch PawBucks balances for all merchants
+  const { data: wallets } = await supabase
+    .from('merchant_pawbucks_wallet')
+    .select('merchant_id, balance');
+
+  const walletMap = new Map(wallets?.map(w => [w.merchant_id, w.balance]) || []);
+
+  return (merchantsData || []).map(m => ({
+    ...m,
+    pawbucks_balance: walletMap.get(m.id) ?? 0
+  }));
+};
+
 export function MerchantsTab() {
-  const [merchants, setMerchants] = useState<Merchant[]>([]);
+  const queryClient = useQueryClient();
   const [filteredMerchants, setFilteredMerchants] = useState<Merchant[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedMerchant, setSelectedMerchant] = useState<Merchant | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // Use React Query for merchant data
+  const { data: merchants = [], refetch, isLoading } = useQuery({
+    queryKey: ['admin-merchants-with-pawbucks'],
+    queryFn: fetchMerchantsWithBalances,
+    staleTime: 30000,
+  });
+
+  // Subscribe to real-time merchant PawBucks activity changes
   useEffect(() => {
-    loadMerchants();
-  }, []);
+    const channel = supabase
+      .channel('admin-merchants-pawbucks-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'merchant_pawbucks_activity'
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['admin-merchants-with-pawbucks'] });
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'merchant_pawbucks_wallet'
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['admin-merchants-with-pawbucks'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
 
   useEffect(() => {
     if (searchTerm) {
@@ -45,34 +104,10 @@ export function MerchantsTab() {
     }
   }, [searchTerm, merchants]);
 
-  const loadMerchants = async () => {
-    try {
-      const { data: merchantsData, error } = await supabase
-        .from('merchants')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      // Fetch PawBucks balances for all merchants
-      const { data: wallets } = await supabase
-        .from('merchant_pawbucks_wallet')
-        .select('merchant_id, balance');
-
-      const walletMap = new Map(wallets?.map(w => [w.merchant_id, w.balance]) || []);
-
-      const merchantsWithBalance = (merchantsData || []).map(m => ({
-        ...m,
-        pawbucks_balance: walletMap.get(m.id) ?? 0
-      }));
-
-      setMerchants(merchantsWithBalance);
-      setFilteredMerchants(merchantsWithBalance);
-    } catch (error) {
-      console.error('Error loading merchants:', error);
-      toast.error('Failed to load merchants');
-    }
-  };
+  const handleRefresh = useCallback(() => {
+    refetch();
+    toast.success('Merchant data refreshed');
+  }, [refetch]);
 
   const handleUpdateMerchant = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -104,7 +139,7 @@ export function MerchantsTab() {
 
       toast.success('Merchant updated successfully');
       setEditDialogOpen(false);
-      loadMerchants();
+      refetch();
     } catch (error: any) {
       toast.error(error.message);
     } finally {
@@ -114,9 +149,21 @@ export function MerchantsTab() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-3xl font-bold">Merchant Management</h2>
-        <p className="text-muted-foreground">Manage all merchants and their settings</p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-3xl font-bold">Merchant Management</h2>
+          <p className="text-muted-foreground">Manage all merchants and their settings</p>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleRefresh}
+          disabled={isLoading}
+          className="flex items-center gap-2"
+        >
+          <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+          Refresh
+        </Button>
       </div>
 
       <div className="relative">

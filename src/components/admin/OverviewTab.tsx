@@ -46,7 +46,7 @@ export function OverviewTab() {
     loadStats();
   }, [loadStats]);
 
-  // Set up realtime subscription for transactions to auto-refresh stats
+  // Set up realtime subscription for transactions and wallet changes to auto-refresh stats
   useEffect(() => {
     const channel = supabase
       .channel('admin-overview-realtime')
@@ -59,6 +59,28 @@ export function OverviewTab() {
         },
         (payload) => {
           console.log('[Realtime] Admin: Transaction update detected:', payload);
+          loadStats();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'pawbucks_activity',
+        },
+        () => {
+          loadStats();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'merchant_pawbucks_activity',
+        },
+        () => {
           loadStats();
         }
       )
