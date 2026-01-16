@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { PawBucksManagementTool } from './PawBucksManagementTool';
+import { PawBucksCalculator } from './PawBucksCalculator';
 
 export function RewardsTab() {
   const [settings, setSettings] = useState({
@@ -93,6 +94,9 @@ export function RewardsTab() {
         <h2 className="text-3xl font-bold">PawBucks Rewards Management</h2>
         <p className="text-muted-foreground">Configure rewards and cashback settings</p>
       </div>
+
+      {/* PawBucks Calculator */}
+      <PawBucksCalculator />
 
       {/* PawBucks Management Tool */}
       <PawBucksManagementTool />
