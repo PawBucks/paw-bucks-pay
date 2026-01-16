@@ -944,6 +944,63 @@ export type Database = {
         }
         Relationships: []
       }
+      merchant_mileage_log: {
+        Row: {
+          created_at: string
+          description: string | null
+          destination: string | null
+          id: string
+          merchant_id: string
+          miles: number
+          tax_year: number
+          trip_date: string
+          trip_type: string
+          updated_at: string
+          vehicle_name: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          destination?: string | null
+          id?: string
+          merchant_id: string
+          miles: number
+          tax_year: number
+          trip_date: string
+          trip_type: string
+          updated_at?: string
+          vehicle_name?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          destination?: string | null
+          id?: string
+          merchant_id?: string
+          miles?: number
+          tax_year?: number
+          trip_date?: string
+          trip_type?: string
+          updated_at?: string
+          vehicle_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_mileage_log_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_mileage_log_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       merchant_pawbucks_activity: {
         Row: {
           amount: number

@@ -6,10 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Plus, Vault, DollarSign, Receipt, TrendingUp } from 'lucide-react';
+import { ArrowLeft, Plus, Vault, DollarSign, Receipt, TrendingUp, Car } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { ExpenseEntryDialog, ExpensesList, CategorySummary, ReportGenerator, TaxExpense, TaxExpenseCategory } from '@/components/merchant/TaxVault';
+import { ExpenseEntryDialog, ExpensesList, CategorySummary, ReportGenerator, MileageLog, TaxExpense, TaxExpenseCategory } from '@/components/merchant/TaxVault';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 
 export default function MerchantTaxVault() {
@@ -159,8 +159,12 @@ export default function MerchantTaxVault() {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="expenses" className="space-y-6">
-          <TabsList>
+          <TabsList className="flex-wrap h-auto gap-1">
             <TabsTrigger value="expenses">Expenses</TabsTrigger>
+            <TabsTrigger value="mileage" className="flex items-center gap-1">
+              <Car className="h-4 w-4" />
+              Mileage Log
+            </TabsTrigger>
             <TabsTrigger value="summary">Category Summary</TabsTrigger>
             <TabsTrigger value="reports">Generate Reports</TabsTrigger>
           </TabsList>
@@ -181,6 +185,12 @@ export default function MerchantTaxVault() {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="mileage">
+            {merchantId && (
+              <MileageLog merchantId={merchantId} taxYear={selectedYear} />
+            )}
           </TabsContent>
           
           <TabsContent value="summary">
