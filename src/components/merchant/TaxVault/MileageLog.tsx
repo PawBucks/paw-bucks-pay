@@ -13,7 +13,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Car, CalendarIcon, Trash2, MapPin, Calculator, PawPrint, User, Info, TrendingUp, Fuel, Wrench, Trophy, ChevronRight } from 'lucide-react';
+import { Plus, Car, CalendarIcon, Trash2, MapPin, Calculator, PawPrint, User, Info, TrendingUp, Fuel, Wrench, Trophy, ChevronRight, Pencil } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -80,6 +80,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
   
   // Mileage entry state
   const [isAddMileageOpen, setIsAddMileageOpen] = useState(false);
+  const [editingEntry, setEditingEntry] = useState<MileageEntry | null>(null);
   const [tripDate, setTripDate] = useState<Date>(new Date());
   const [tripType, setTripType] = useState<'pet_commute' | 'personal'>('pet_commute');
   const [miles, setMiles] = useState('');
@@ -227,6 +228,46 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
     },
   });
 
+  // Update mileage entry mutation
+  const updateMileageMutation = useMutation({
+    mutationFn: async () => {
+      if (!editingEntry) return;
+      
+      const finalMiles = useOdometer && calculatedMiles !== null 
+        ? calculatedMiles 
+        : parseFloat(miles);
+
+      const { error } = await supabase
+        .from('merchant_mileage_log')
+        .update({
+          trip_date: formatDateLocal(tripDate),
+          trip_type: tripType,
+          miles: finalMiles,
+          description: description || null,
+          destination: destination || null,
+          vehicle_name: vehicleName || null,
+          start_odometer: useOdometer && startOdometer ? parseFloat(startOdometer) : null,
+          end_odometer: useOdometer && endOdometer ? parseFloat(endOdometer) : null,
+          start_location: startLocation || null,
+          end_location: endLocation || null,
+        })
+        .eq('id', editingEntry.id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['mileage-log', merchantId, taxYear] });
+      toast.success('Mileage entry updated');
+      resetMileageForm();
+      setEditingEntry(null);
+      setIsAddMileageOpen(false);
+    },
+    onError: (error) => {
+      toast.error('Failed to update mileage entry');
+      console.error(error);
+    },
+  });
+
   // Delete vehicle expense
   const deleteExpenseMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -259,6 +300,25 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
     setStartLocation('');
     setEndLocation('');
     setUseOdometer(true);
+    setEditingEntry(null);
+  };
+
+  const openEditMileage = (entry: MileageEntry) => {
+    // Parse the date string and create a local date to avoid timezone issues
+    const [year, month, day] = entry.trip_date.split('-').map(Number);
+    setTripDate(new Date(year, month - 1, day));
+    setTripType(entry.trip_type);
+    setMiles(entry.miles.toString());
+    setDescription(entry.description || '');
+    setDestination(entry.destination || '');
+    setVehicleName(entry.vehicle_name || '');
+    setStartOdometer(entry.start_odometer?.toString() || '');
+    setEndOdometer(entry.end_odometer?.toString() || '');
+    setStartLocation(entry.start_location || '');
+    setEndLocation(entry.end_location || '');
+    setUseOdometer(!!(entry.start_odometer && entry.end_odometer));
+    setEditingEntry(entry);
+    setIsAddMileageOpen(true);
   };
 
   const resetExpenseForm = () => {
@@ -315,7 +375,11 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
       }
     }
     
-    addMileageMutation.mutate();
+    if (editingEntry) {
+      updateMileageMutation.mutate();
+    } else {
+      addMileageMutation.mutate();
+    }
   };
 
   const handleExpenseSubmit = (e: React.FormEvent) => {
@@ -492,7 +556,12 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
                 </CardTitle>
                 <CardDescription>Track your pet business commutes and personal trips</CardDescription>
               </div>
-              <Dialog open={isAddMileageOpen} onOpenChange={setIsAddMileageOpen}>
+              <Dialog open={isAddMileageOpen} onOpenChange={(open) => {
+                setIsAddMileageOpen(open);
+                if (!open) {
+                  resetMileageForm();
+                }
+              }}>
                 <DialogTrigger asChild>
                   <Button>
                     <Plus className="mr-2 h-4 w-4" />
@@ -502,9 +571,9 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
                 <DialogContent>
                   <form onSubmit={handleMileageSubmit}>
                     <DialogHeader>
-                      <DialogTitle>Log Mileage</DialogTitle>
+                      <DialogTitle>{editingEntry ? 'Edit Mileage Entry' : 'Log Mileage'}</DialogTitle>
                       <DialogDescription>
-                        Record a trip for your mileage deduction calculations
+                        {editingEntry ? 'Update the details for this trip' : 'Record a trip for your mileage deduction calculations'}
                       </DialogDescription>
                     </DialogHeader>
 
@@ -701,8 +770,14 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
                       <Button type="button" variant="outline" onClick={() => setIsAddMileageOpen(false)}>
                         Cancel
                       </Button>
-                      <Button type="submit" disabled={addMileageMutation.isPending}>
-                        {addMileageMutation.isPending ? 'Adding...' : 'Add Entry'}
+                      <Button 
+                        type="submit" 
+                        disabled={editingEntry ? updateMileageMutation.isPending : addMileageMutation.isPending}
+                      >
+                        {editingEntry 
+                          ? (updateMileageMutation.isPending ? 'Saving...' : 'Save Changes')
+                          : (addMileageMutation.isPending ? 'Adding...' : 'Add Entry')
+                        }
                       </Button>
                     </DialogFooter>
                   </form>
@@ -784,14 +859,23 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
                           </TableCell>
                           <TableCell className="font-mono font-semibold">{entry.miles.toFixed(1)}</TableCell>
                           <TableCell className="text-right">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => deleteMileageMutation.mutate(entry.id)}
-                              disabled={deleteMileageMutation.isPending}
-                            >
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
+                            <div className="flex items-center justify-end gap-1">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => openEditMileage(entry)}
+                              >
+                                <Pencil className="h-4 w-4 text-muted-foreground" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => deleteMileageMutation.mutate(entry.id)}
+                                disabled={deleteMileageMutation.isPending}
+                              >
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))}
