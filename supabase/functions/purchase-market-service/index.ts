@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { z } from "https://esm.sh/zod@3.22.4";
+import { Resend } from "https://esm.sh/resend@2.0.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -23,6 +24,43 @@ const PAWBUCKS_TO_USD = 0.001;
 
 const logStep = (step: string, details?: Record<string, unknown>) => {
   console.log(`[PURCHASE-MARKET-SERVICE] ${step}`, details ? JSON.stringify(details) : '');
+};
+
+const sendAdminNotification = async (merchantName: string, serviceName: string, amount: string, paymentMethod: string) => {
+  try {
+    const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+    
+    await resend.emails.send({
+      from: "PawBucks <noreply@pawbucks.app>",
+      to: ["admin@pawbucks.app"],
+      subject: `New Merchant Market Purchase: ${serviceName}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background: linear-gradient(135deg, #7DD4D4, #5BC0C0); padding: 20px; text-align: center;">
+            <h1 style="color: white; margin: 0; font-size: 24px;">PAWBUCKS</h1>
+          </div>
+          <div style="padding: 30px; background: #ffffff;">
+            <h2 style="color: #333; margin-bottom: 20px;">New Merchant Market Purchase</h2>
+            <p style="color: #666; line-height: 1.6;">A merchant has purchased a service from the Merchant Market:</p>
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <p style="margin: 8px 0;"><strong>Merchant:</strong> ${merchantName}</p>
+              <p style="margin: 8px 0;"><strong>Service:</strong> ${serviceName}</p>
+              <p style="margin: 8px 0;"><strong>Amount:</strong> ${amount}</p>
+              <p style="margin: 8px 0;"><strong>Payment Method:</strong> ${paymentMethod}</p>
+              <p style="margin: 8px 0;"><strong>Date:</strong> ${new Date().toLocaleString()}</p>
+            </div>
+          </div>
+          <div style="background: #f8f9fa; padding: 15px; text-align: center;">
+            <p style="color: #999; font-size: 12px; margin: 0;">PawBucks Admin Notification</p>
+          </div>
+        </div>
+      `,
+    });
+    
+    logStep('Admin notification email sent successfully');
+  } catch (emailError) {
+    logStep('Warning: Failed to send admin notification email', { error: emailError instanceof Error ? emailError.message : 'Unknown error' });
+  }
 };
 
 serve(async (req) => {
@@ -151,6 +189,14 @@ serve(async (req) => {
 
       logStep('Full PawBucks payment completed', { pawbucksUsed: pricePawBucks, newBalance, expiresAt });
 
+      // Send admin notification email
+      await sendAdminNotification(
+        merchant.business_name,
+        serviceName,
+        `${pricePawBucks.toLocaleString()} PawBucks`,
+        'PawBucks'
+      );
+
       return new Response(
         JSON.stringify({
           success: true,
@@ -191,6 +237,14 @@ serve(async (req) => {
       paymentIntentId: paymentIntent.id,
       amountUSD: priceUSD,
     });
+
+    // Send admin notification email for Stripe payment initiation
+    await sendAdminNotification(
+      merchant.business_name,
+      serviceName,
+      `$${priceUSD.toFixed(2)} USD`,
+      'Stripe (pending payment)'
+    );
 
     return new Response(
       JSON.stringify({
