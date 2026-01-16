@@ -73,6 +73,7 @@ const DirectCheckout = lazy(() => import("./pages/DirectCheckout"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const AuthCallback = lazy(() => import("./pages/AuthCallback"));
 const MySubscriptions = lazy(() => import("./pages/MySubscriptions"));
+const AccountantPortal = lazy(() => import("./pages/AccountantPortal"));
 
 const createQueryClient = () => new QueryClient({
   defaultOptions: {
@@ -151,6 +152,7 @@ const AppRoutes = () => {
       <Route path="/lost-pets" element={<PageTransition><LostPets /></PageTransition>} />
       <Route path="/lost-pets/:id" element={<PageTransition><LostPetDetail /></PageTransition>} />
       <Route path="/pay/:merchantId" element={<PageTransition><DirectCheckout /></PageTransition>} />
+      <Route path="/accountant-portal/:token" element={<PageTransition><AccountantPortal /></PageTransition>} />
       <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
     </Routes>
   );
