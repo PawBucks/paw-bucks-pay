@@ -6,10 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Plus, Vault, DollarSign, Receipt, TrendingUp, Car, Home, Calculator } from 'lucide-react';
+import { ArrowLeft, Plus, Vault, DollarSign, Receipt, TrendingUp, Car, Home, Calculator, Download, Users } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { ExpenseEntryDialog, ExpensesList, CategorySummary, ReportGenerator, MileageLog, HomeOfficeCalculator, TaxLiabilityEstimator, TaxExpense, TaxExpenseCategory } from '@/components/merchant/TaxVault';
+import { ExpenseEntryDialog, ExpensesList, CategorySummary, ReportGenerator, MileageLog, HomeOfficeCalculator, TaxLiabilityEstimator, YearEndExports, AccountantCollaboration, TaxExpense, TaxExpenseCategory } from '@/components/merchant/TaxVault';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 
 export default function MerchantTaxVault() {
@@ -174,7 +174,14 @@ export default function MerchantTaxVault() {
               Home Office
             </TabsTrigger>
             <TabsTrigger value="summary">Category Summary</TabsTrigger>
-            <TabsTrigger value="reports">Generate Reports</TabsTrigger>
+            <TabsTrigger value="year-end" className="flex items-center gap-1">
+              <Download className="h-4 w-4" />
+              Year-End Exports
+            </TabsTrigger>
+            <TabsTrigger value="accountant" className="flex items-center gap-1">
+              <Users className="h-4 w-4" />
+              Accountant
+            </TabsTrigger>
           </TabsList>
           
           <TabsContent value="tax-estimate">
@@ -215,12 +222,21 @@ export default function MerchantTaxVault() {
             <CategorySummary expenses={expenses} />
           </TabsContent>
           
-          <TabsContent value="reports">
-            <ReportGenerator 
-              expenses={expenses} 
-              businessName={businessName} 
-              taxYear={selectedYear} 
-            />
+          <TabsContent value="year-end">
+            {merchantId && (
+              <YearEndExports 
+                merchantId={merchantId} 
+                businessName={businessName} 
+                taxYear={selectedYear}
+                expenses={expenses}
+              />
+            )}
+          </TabsContent>
+          
+          <TabsContent value="accountant">
+            {merchantId && (
+              <AccountantCollaboration merchantId={merchantId} businessName={businessName} />
+            )}
           </TabsContent>
         </Tabs>
       </main>

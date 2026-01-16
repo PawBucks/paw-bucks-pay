@@ -6,4 +6,6 @@ export { MileageLog } from './MileageLog';
 export { SmartReceiptScanner } from './SmartReceiptScanner';
 export { HomeOfficeCalculator } from './HomeOfficeCalculator';
 export { TaxLiabilityEstimator } from './TaxLiabilityEstimator';
+export { YearEndExports } from './YearEndExports';
+export { AccountantCollaboration } from './AccountantCollaboration';
 export * from './types';

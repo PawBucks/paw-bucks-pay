@@ -14,6 +14,175 @@ export type Database = {
   }
   public: {
     Tables: {
+      accountant_activity_log: {
+        Row: {
+          action: string
+          created_at: string
+          entity_id: string | null
+          entity_type: string
+          id: string
+          invitation_id: string
+          merchant_id: string
+          new_value: Json | null
+          notes: string | null
+          old_value: Json | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+          invitation_id: string
+          merchant_id: string
+          new_value?: Json | null
+          notes?: string | null
+          old_value?: Json | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+          invitation_id?: string
+          merchant_id?: string
+          new_value?: Json | null
+          notes?: string | null
+          old_value?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accountant_activity_log_invitation_id_fkey"
+            columns: ["invitation_id"]
+            isOneToOne: false
+            referencedRelation: "accountant_invitations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accountant_activity_log_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accountant_activity_log_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      accountant_expense_notes: {
+        Row: {
+          created_at: string
+          expense_id: string
+          id: string
+          invitation_id: string
+          note: string
+          suggested_category: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          expense_id: string
+          id?: string
+          invitation_id: string
+          note: string
+          suggested_category?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          expense_id?: string
+          id?: string
+          invitation_id?: string
+          note?: string
+          suggested_category?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accountant_expense_notes_expense_id_fkey"
+            columns: ["expense_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_tax_expenses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accountant_expense_notes_invitation_id_fkey"
+            columns: ["invitation_id"]
+            isOneToOne: false
+            referencedRelation: "accountant_invitations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      accountant_invitations: {
+        Row: {
+          accepted_at: string | null
+          access_token: string
+          accountant_email: string
+          accountant_name: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          invited_at: string
+          last_accessed_at: string | null
+          merchant_id: string
+          permissions: Json
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          access_token: string
+          accountant_email: string
+          accountant_name?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          invited_at?: string
+          last_accessed_at?: string | null
+          merchant_id: string
+          permissions?: Json
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          access_token?: string
+          accountant_email?: string
+          accountant_name?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          invited_at?: string
+          last_accessed_at?: string | null
+          merchant_id?: string
+          permissions?: Json
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accountant_invitations_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accountant_invitations_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_logs: {
         Row: {
           action: string
