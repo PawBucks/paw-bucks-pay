@@ -15,49 +15,163 @@ const purchaseSchema = z.object({
   serviceName: z.string().min(1, { message: "Service name is required" }),
   priceUSD: z.number().positive({ message: "Price must be greater than 0" }),
   pricePawBucks: z.number().positive({ message: "PawBucks price must be greater than 0" }),
-  payWithPawBucks: z.boolean().default(false), // Full PawBucks or full USD - no split payments
+  payWithPawBucks: z.boolean().default(false),
   billingPeriod: z.enum(['one-time', 'monthly', 'quarterly', 'annual']).optional(),
 });
 
-// Merchant PawBucks conversion: 1000 PawBucks = $1.00 (1 PawBuck = $0.001)
 const PAWBUCKS_TO_USD = 0.001;
 
 const logStep = (step: string, details?: Record<string, unknown>) => {
   console.log(`[PURCHASE-MARKET-SERVICE] ${step}`, details ? JSON.stringify(details) : '');
 };
 
-const sendAdminNotification = async (merchantName: string, serviceName: string, amount: string, paymentMethod: string) => {
+interface MerchantInfo {
+  id: string;
+  business_name: string;
+  business_type: string;
+  contact_person: string | null;
+  email: string | null;
+  phone: string | null;
+  address: string | null;
+  owner_name: string | null;
+}
+
+interface ServicePurchase {
+  serviceName: string;
+  serviceId: string;
+  priceUSD: number;
+  pricePawBucks: number;
+  billingPeriod: string;
+  paymentMethod: string;
+  amount: string;
+}
+
+const generateOrderNumber = () => {
+  const timestamp = Date.now().toString(36).toUpperCase();
+  const random = Math.random().toString(36).substring(2, 6).toUpperCase();
+  return `MKT-${timestamp}-${random}`;
+};
+
+const sendAdminNotification = async (merchant: MerchantInfo, purchase: ServicePurchase) => {
   try {
     const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+    const orderNumber = generateOrderNumber();
+    const purchaseDate = new Date().toLocaleString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZoneName: 'short'
+    });
     
     await resend.emails.send({
       from: "PawBucks <noreply@pawbucks.app>",
       to: ["admin@pawbucks.app"],
-      subject: `New Merchant Market Purchase: ${serviceName}`,
+      subject: `Merchant Market Purchase Order #${orderNumber}: ${purchase.serviceName}`,
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <div style="background: linear-gradient(135deg, #7DD4D4, #5BC0C0); padding: 20px; text-align: center;">
-            <h1 style="color: white; margin: 0; font-size: 24px;">PAWBUCKS</h1>
+        <div style="font-family: Arial, sans-serif; max-width: 700px; margin: 0 auto; border: 1px solid #e0e0e0;">
+          <div style="background: linear-gradient(135deg, #7DD4D4, #5BC0C0); padding: 25px; text-align: center;">
+            <h1 style="color: white; margin: 0; font-size: 28px; letter-spacing: 2px;">PAWBUCKS</h1>
+            <p style="color: white; margin: 5px 0 0 0; font-size: 14px;">Merchant Market Purchase Order</p>
           </div>
+          
           <div style="padding: 30px; background: #ffffff;">
-            <h2 style="color: #333; margin-bottom: 20px;">New Merchant Market Purchase</h2>
-            <p style="color: #666; line-height: 1.6;">A merchant has purchased a service from the Merchant Market:</p>
-            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-              <p style="margin: 8px 0;"><strong>Merchant:</strong> ${merchantName}</p>
-              <p style="margin: 8px 0;"><strong>Service:</strong> ${serviceName}</p>
-              <p style="margin: 8px 0;"><strong>Amount:</strong> ${amount}</p>
-              <p style="margin: 8px 0;"><strong>Payment Method:</strong> ${paymentMethod}</p>
-              <p style="margin: 8px 0;"><strong>Date:</strong> ${new Date().toLocaleString()}</p>
+            <div style="border-bottom: 2px solid #7DD4D4; padding-bottom: 15px; margin-bottom: 25px;">
+              <h2 style="color: #333; margin: 0; font-size: 20px;">Purchase Order #${orderNumber}</h2>
+              <p style="color: #666; margin: 5px 0 0 0; font-size: 14px;">${purchaseDate}</p>
+            </div>
+            
+            <!-- Merchant Information Section -->
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 25px;">
+              <h3 style="color: #7DD4D4; margin: 0 0 15px 0; font-size: 16px; text-transform: uppercase; letter-spacing: 1px;">Merchant Information</h3>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 8px 0; color: #666; width: 140px; vertical-align: top;"><strong>Business Name:</strong></td>
+                  <td style="padding: 8px 0; color: #333;">${merchant.business_name}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #666; vertical-align: top;"><strong>Business Type:</strong></td>
+                  <td style="padding: 8px 0; color: #333;">${merchant.business_type || 'N/A'}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #666; vertical-align: top;"><strong>Owner Name:</strong></td>
+                  <td style="padding: 8px 0; color: #333;">${merchant.owner_name || 'N/A'}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #666; vertical-align: top;"><strong>Contact Person:</strong></td>
+                  <td style="padding: 8px 0; color: #333;">${merchant.contact_person || 'N/A'}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #666; vertical-align: top;"><strong>Email Address:</strong></td>
+                  <td style="padding: 8px 0; color: #333;"><a href="mailto:${merchant.email}" style="color: #7DD4D4;">${merchant.email || 'N/A'}</a></td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #666; vertical-align: top;"><strong>Phone Number:</strong></td>
+                  <td style="padding: 8px 0; color: #333;">${merchant.phone || 'N/A'}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #666; vertical-align: top;"><strong>Address:</strong></td>
+                  <td style="padding: 8px 0; color: #333;">${merchant.address || 'N/A'}</td>
+                </tr>
+              </table>
+            </div>
+            
+            <!-- Service Purchased Section -->
+            <div style="margin-bottom: 25px;">
+              <h3 style="color: #7DD4D4; margin: 0 0 15px 0; font-size: 16px; text-transform: uppercase; letter-spacing: 1px;">Service Purchased</h3>
+              <table style="width: 100%; border-collapse: collapse; border: 1px solid #e0e0e0;">
+                <thead>
+                  <tr style="background: #f8f9fa;">
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #7DD4D4; color: #333;">Service</th>
+                    <th style="padding: 12px; text-align: center; border-bottom: 2px solid #7DD4D4; color: #333;">Billing Period</th>
+                    <th style="padding: 12px; text-align: right; border-bottom: 2px solid #7DD4D4; color: #333;">Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style="padding: 15px 12px; border-bottom: 1px solid #e0e0e0;">
+                      <strong style="color: #333;">${purchase.serviceName}</strong>
+                      <br><span style="color: #888; font-size: 12px;">ID: ${purchase.serviceId}</span>
+                    </td>
+                    <td style="padding: 15px 12px; text-align: center; border-bottom: 1px solid #e0e0e0; color: #666;">${purchase.billingPeriod}</td>
+                    <td style="padding: 15px 12px; text-align: right; border-bottom: 1px solid #e0e0e0;">
+                      <strong style="color: #333;">${purchase.amount}</strong>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            
+            <!-- Payment Summary -->
+            <div style="background: #f0fafa; padding: 20px; border-radius: 8px; border-left: 4px solid #7DD4D4;">
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 8px 0; color: #666;"><strong>Payment Method:</strong></td>
+                  <td style="padding: 8px 0; text-align: right; color: #333;">${purchase.paymentMethod}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #666;"><strong>USD Equivalent:</strong></td>
+                  <td style="padding: 8px 0; text-align: right; color: #333;">$${purchase.priceUSD.toFixed(2)}</td>
+                </tr>
+                <tr style="font-size: 18px;">
+                  <td style="padding: 12px 0 0 0; color: #333;"><strong>Total:</strong></td>
+                  <td style="padding: 12px 0 0 0; text-align: right; color: #7DD4D4;"><strong>${purchase.amount}</strong></td>
+                </tr>
+              </table>
             </div>
           </div>
-          <div style="background: #f8f9fa; padding: 15px; text-align: center;">
-            <p style="color: #999; font-size: 12px; margin: 0;">PawBucks Admin Notification</p>
+          
+          <div style="background: #333; padding: 20px; text-align: center;">
+            <p style="color: #999; font-size: 12px; margin: 0;">PawBucks Admin Notification • Merchant Market Purchase</p>
+            <p style="color: #666; font-size: 11px; margin: 8px 0 0 0;">This is an automated notification. Please do not reply to this email.</p>
           </div>
         </div>
       `,
     });
     
-    logStep('Admin notification email sent successfully');
+    logStep('Admin notification email sent successfully', { orderNumber });
   } catch (emailError) {
     logStep('Warning: Failed to send admin notification email', { error: emailError instanceof Error ? emailError.message : 'Unknown error' });
   }
@@ -109,10 +223,10 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Verify user is a merchant
+    // Fetch full merchant details for the email
     const { data: merchant, error: merchantError } = await supabaseAdmin
       .from('merchants')
-      .select('id, business_name')
+      .select('id, business_name, business_type, contact_person, email, phone, address, owner_name')
       .eq('user_id', user.id)
       .single();
 
@@ -126,7 +240,6 @@ serve(async (req) => {
     if (payWithPawBucks) {
       logStep('Processing full PawBucks payment', { pricePawBucks });
 
-      // Verify merchant has sufficient balance
       const { data: wallet, error: walletError } = await supabaseAdmin
         .from('merchant_pawbucks_wallet')
         .select('balance')
@@ -143,7 +256,6 @@ serve(async (req) => {
 
       logStep('Merchant PawBucks balance verified', { balance: wallet.balance, required: pricePawBucks });
 
-      // Deduct PawBucks from merchant wallet
       const newBalance = wallet.balance - pricePawBucks;
       
       const { error: updateError } = await supabaseAdmin
@@ -155,7 +267,6 @@ serve(async (req) => {
         throw new Error('Failed to deduct PawBucks from merchant wallet');
       }
 
-      // Log the PawBucks activity with proper error handling
       const { error: activityError } = await supabaseAdmin.from('merchant_pawbucks_activity').insert({
         merchant_id: merchant.id,
         amount: -pricePawBucks,
@@ -168,7 +279,6 @@ serve(async (req) => {
         logStep('Warning: Failed to log PawBucks activity', { error: activityError.message });
       }
 
-      // Calculate expiration date based on billing period
       const expiresAt = billingPeriod === 'monthly' 
         ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
         : billingPeriod === 'quarterly'
@@ -177,7 +287,6 @@ serve(async (req) => {
         ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
         : null;
 
-      // Record the purchase
       await supabaseAdmin.from('merchant_service_purchases').insert({
         merchant_id: merchant.id,
         service_id: serviceId,
@@ -189,13 +298,16 @@ serve(async (req) => {
 
       logStep('Full PawBucks payment completed', { pawbucksUsed: pricePawBucks, newBalance, expiresAt });
 
-      // Send admin notification email
-      await sendAdminNotification(
-        merchant.business_name,
+      // Send enhanced admin notification email
+      await sendAdminNotification(merchant as MerchantInfo, {
         serviceName,
-        `${pricePawBucks.toLocaleString()} PawBucks`,
-        'PawBucks'
-      );
+        serviceId,
+        priceUSD,
+        pricePawBucks,
+        billingPeriod: billingPeriod || 'one-time',
+        paymentMethod: 'PawBucks',
+        amount: `${pricePawBucks.toLocaleString()} PawBucks`,
+      });
 
       return new Response(
         JSON.stringify({
@@ -217,7 +329,6 @@ serve(async (req) => {
 
     const stripeAmountInCents = Math.round(priceUSD * 100);
 
-    // Create PaymentIntent for full USD payment
     const paymentIntent = await stripe.paymentIntents.create({
       amount: stripeAmountInCents,
       currency: 'usd',
@@ -238,13 +349,16 @@ serve(async (req) => {
       amountUSD: priceUSD,
     });
 
-    // Send admin notification email for Stripe payment initiation
-    await sendAdminNotification(
-      merchant.business_name,
+    // Send enhanced admin notification email for Stripe payment
+    await sendAdminNotification(merchant as MerchantInfo, {
       serviceName,
-      `$${priceUSD.toFixed(2)} USD`,
-      'Stripe (pending payment)'
-    );
+      serviceId,
+      priceUSD,
+      pricePawBucks,
+      billingPeriod: billingPeriod || 'one-time',
+      paymentMethod: 'Stripe (Payment Pending)',
+      amount: `$${priceUSD.toFixed(2)} USD`,
+    });
 
     return new Response(
       JSON.stringify({
