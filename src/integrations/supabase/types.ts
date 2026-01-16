@@ -1118,10 +1118,12 @@ export type Database = {
           created_at: string
           description: string | null
           destination: string | null
+          end_location: string | null
           end_odometer: number | null
           id: string
           merchant_id: string
           miles: number
+          start_location: string | null
           start_odometer: number | null
           tax_year: number
           trip_date: string
@@ -1133,10 +1135,12 @@ export type Database = {
           created_at?: string
           description?: string | null
           destination?: string | null
+          end_location?: string | null
           end_odometer?: number | null
           id?: string
           merchant_id: string
           miles: number
+          start_location?: string | null
           start_odometer?: number | null
           tax_year: number
           trip_date: string
@@ -1148,10 +1152,12 @@ export type Database = {
           created_at?: string
           description?: string | null
           destination?: string | null
+          end_location?: string | null
           end_odometer?: number | null
           id?: string
           merchant_id?: string
           miles?: number
+          start_location?: string | null
           start_odometer?: number | null
           tax_year?: number
           trip_date?: string
