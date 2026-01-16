@@ -16,6 +16,7 @@ type Merchant = {
   business_type: string;
   contact_person?: string;
   email?: string;
+  phone?: string;
   cashback_rate: number;
   stripe_account_status?: string;
   created_at: string;
@@ -183,6 +184,8 @@ export function MerchantsTab() {
               <TableHead>Business Name</TableHead>
               <TableHead>Type</TableHead>
               <TableHead>Contact</TableHead>
+              <TableHead>Phone</TableHead>
+              <TableHead>Email</TableHead>
               <TableHead>PawBucks</TableHead>
               <TableHead>Points Rate</TableHead>
               <TableHead>Stripe Status</TableHead>
@@ -197,6 +200,10 @@ export function MerchantsTab() {
                   <Badge variant="outline">{merchant.business_type}</Badge>
                 </TableCell>
                 <TableCell>{merchant.contact_person || 'N/A'}</TableCell>
+                <TableCell className="text-muted-foreground">{merchant.phone || 'N/A'}</TableCell>
+                <TableCell className="text-muted-foreground max-w-[180px] truncate" title={merchant.email || ''}>
+                  {merchant.email || 'N/A'}
+                </TableCell>
                 <TableCell>
                   <span className="flex items-center gap-1 text-primary font-medium">
                     <Coins className="w-3 h-3" />
