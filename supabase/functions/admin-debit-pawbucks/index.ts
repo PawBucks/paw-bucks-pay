@@ -117,16 +117,32 @@ serve(async (req) => {
     let walletTable: string;
     let activityTable: string;
     let idColumn: string;
+    let effectiveTargetId = targetId;
+    let isSharedMember = false;
 
     if (targetType === 'user') {
       walletTable = 'pawbucks_wallet';
       activityTable = 'pawbucks_activity';
       idColumn = 'user_id';
 
+      // Check if the target user is a shared account member - if so, debit the owner's wallet
+      const { data: sharedMembership } = await supabaseAdmin
+        .from('shared_account_members')
+        .select('owner_id')
+        .eq('member_id', targetId)
+        .eq('status', 'accepted')
+        .maybeSingle();
+
+      if (sharedMembership?.owner_id) {
+        effectiveTargetId = sharedMembership.owner_id;
+        isSharedMember = true;
+        console.log(`User ${targetId} is a shared member. Debiting owner wallet: ${effectiveTargetId}`);
+      }
+
       const { data, error } = await supabaseAdmin
         .from('pawbucks_wallet')
         .select('id, balance')
-        .eq('user_id', targetId)
+        .eq('user_id', effectiveTargetId)
         .single();
 
       if (error || !data) {
@@ -168,11 +184,12 @@ serve(async (req) => {
 
     const newBalance = oldBalance - amount;
 
-    // Update wallet balance
+    // Update wallet balance using effective target ID for users
+    const updateTargetId = targetType === 'user' ? effectiveTargetId : targetId;
     const { error: updateError } = await supabaseAdmin
       .from(walletTable)
       .update({ balance: newBalance, last_updated: new Date().toISOString() })
-      .eq(idColumn, targetId);
+      .eq(idColumn, updateTargetId);
 
     if (updateError) {
       return new Response(
@@ -187,11 +204,13 @@ serve(async (req) => {
       const { error: activityError } = await supabaseAdmin
         .from('pawbucks_activity')
         .insert({
-          user_id: targetId,
+          user_id: effectiveTargetId,
           amount: -amount,
           type: 'redeem', // Must use 'redeem' for debits per database constraint
           source: 'admin_debit',
-          description: reason.trim(),
+          description: isSharedMember 
+            ? `${reason.trim()} (debited via shared member)` 
+            : reason.trim(),
           pawbucks_status: 'available' // Ensure status is set for proper balance calculation
         });
       
@@ -201,7 +220,7 @@ serve(async (req) => {
         await supabaseAdmin
           .from('pawbucks_wallet')
           .update({ balance: oldBalance })
-          .eq('user_id', targetId);
+          .eq('user_id', effectiveTargetId);
         return new Response(
           JSON.stringify({ error: 'Failed to record activity. Transaction rolled back.' }),
           { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -239,13 +258,16 @@ serve(async (req) => {
         admin_id: user.id,
         action: 'debit_pawbucks',
         entity_type: targetType === 'user' ? 'pawbucks_wallet' : 'merchant_pawbucks_wallet',
-        entity_id: targetId,
+        entity_id: targetType === 'user' ? effectiveTargetId : targetId,
         changes: {
           amount,
           reason: reason.trim(),
           old_balance: oldBalance,
           new_balance: newBalance,
-          target_type: targetType
+          target_type: targetType,
+          target_user_id: targetId,
+          effective_user_id: effectiveTargetId,
+          is_shared_member: isSharedMember
         }
       });
 
