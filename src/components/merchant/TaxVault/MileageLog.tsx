@@ -29,6 +29,8 @@ interface MileageEntry {
   vehicle_name: string | null;
   tax_year: number;
   created_at: string;
+  start_odometer: number | null;
+  end_odometer: number | null;
 }
 
 interface VehicleExpense {
@@ -74,6 +76,14 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
   const [description, setDescription] = useState('');
   const [destination, setDestination] = useState('');
   const [vehicleName, setVehicleName] = useState('');
+  const [startOdometer, setStartOdometer] = useState('');
+  const [endOdometer, setEndOdometer] = useState('');
+  const [useOdometer, setUseOdometer] = useState(true); // Default to odometer-based entry
+
+  // Auto-calculate miles when odometers change
+  const calculatedMiles = startOdometer && endOdometer 
+    ? Math.max(0, parseFloat(endOdometer) - parseFloat(startOdometer))
+    : null;
 
   // Vehicle expense state
   const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
@@ -120,17 +130,24 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
   // Add mileage entry mutation
   const addMileageMutation = useMutation({
     mutationFn: async () => {
+      // Use calculated miles if using odometer, otherwise use manual miles input
+      const finalMiles = useOdometer && calculatedMiles !== null 
+        ? calculatedMiles 
+        : parseFloat(miles);
+
       const { error } = await supabase
         .from('merchant_mileage_log')
         .insert({
           merchant_id: merchantId,
           trip_date: format(tripDate, 'yyyy-MM-dd'),
           trip_type: tripType,
-          miles: parseFloat(miles),
+          miles: finalMiles,
           description: description || null,
           destination: destination || null,
           vehicle_name: vehicleName || null,
           tax_year: taxYear,
+          start_odometer: useOdometer && startOdometer ? parseFloat(startOdometer) : null,
+          end_odometer: useOdometer && endOdometer ? parseFloat(endOdometer) : null,
         });
 
       if (error) throw error;
@@ -223,6 +240,9 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
     setDescription('');
     setDestination('');
     setVehicleName('');
+    setStartOdometer('');
+    setEndOdometer('');
+    setUseOdometer(true);
   };
 
   const resetExpenseForm = () => {
@@ -254,10 +274,31 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
 
   const handleMileageSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!miles || parseFloat(miles) <= 0) {
-      toast.error('Please enter valid miles');
-      return;
+    
+    if (useOdometer) {
+      // Validate odometer readings
+      if (!startOdometer || !endOdometer) {
+        toast.error('Please enter both start and end odometer readings');
+        return;
+      }
+      const start = parseFloat(startOdometer);
+      const end = parseFloat(endOdometer);
+      if (isNaN(start) || isNaN(end) || start < 0 || end < 0) {
+        toast.error('Please enter valid odometer readings');
+        return;
+      }
+      if (end <= start) {
+        toast.error('End odometer must be greater than start odometer');
+        return;
+      }
+    } else {
+      // Validate manual miles input
+      if (!miles || parseFloat(miles) <= 0) {
+        toast.error('Please enter valid miles');
+        return;
+      }
     }
+    
     addMileageMutation.mutate();
   };
 
@@ -501,19 +542,95 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
                         </Popover>
                       </div>
 
-                      <div className="grid gap-2">
-                        <Label htmlFor="miles">Miles</Label>
-                        <Input
-                          id="miles"
-                          type="number"
-                          step="0.1"
-                          min="0.1"
-                          placeholder="e.g., 12.5"
-                          value={miles}
-                          onChange={(e) => setMiles(e.target.value)}
-                          required
-                        />
+                      {/* Entry Mode Toggle */}
+                      <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <Car className="h-4 w-4 text-primary" />
+                          <Label htmlFor="entry-mode" className="text-sm font-medium cursor-pointer">
+                            Use Odometer Readings
+                          </Label>
+                        </div>
+                        <Button
+                          type="button"
+                          variant={useOdometer ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setUseOdometer(!useOdometer)}
+                          className="h-8"
+                        >
+                          {useOdometer ? 'On' : 'Off'}
+                        </Button>
                       </div>
+
+                      {useOdometer ? (
+                        <>
+                          {/* Odometer-based Entry */}
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="grid gap-2">
+                              <Label htmlFor="start-odometer" className="flex items-center gap-1">
+                                <MapPin className="h-3 w-3 text-green-500" />
+                                Start Trip
+                              </Label>
+                              <Input
+                                id="start-odometer"
+                                type="number"
+                                step="0.1"
+                                min="0"
+                                placeholder="e.g., 45,230"
+                                value={startOdometer}
+                                onChange={(e) => setStartOdometer(e.target.value)}
+                              />
+                            </div>
+                            <div className="grid gap-2">
+                              <Label htmlFor="end-odometer" className="flex items-center gap-1">
+                                <MapPin className="h-3 w-3 text-red-500" />
+                                End Trip
+                              </Label>
+                              <Input
+                                id="end-odometer"
+                                type="number"
+                                step="0.1"
+                                min="0"
+                                placeholder="e.g., 45,242"
+                                value={endOdometer}
+                                onChange={(e) => setEndOdometer(e.target.value)}
+                              />
+                            </div>
+                          </div>
+
+                          {/* Auto-calculated Miles Display */}
+                          {calculatedMiles !== null && calculatedMiles >= 0 && (
+                            <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
+                              <div className="flex items-center justify-between">
+                                <span className="text-sm text-muted-foreground flex items-center gap-2">
+                                  <Calculator className="h-4 w-4" />
+                                  Calculated Miles
+                                </span>
+                                <span className="text-lg font-bold text-green-600">
+                                  {calculatedMiles.toFixed(1)} mi
+                                </span>
+                              </div>
+                              {calculatedMiles === 0 && startOdometer && endOdometer && (
+                                <p className="text-xs text-amber-600 mt-1">
+                                  End odometer should be greater than start
+                                </p>
+                              )}
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <div className="grid gap-2">
+                          <Label htmlFor="miles">Miles</Label>
+                          <Input
+                            id="miles"
+                            type="number"
+                            step="0.1"
+                            min="0.1"
+                            placeholder="e.g., 12.5"
+                            value={miles}
+                            onChange={(e) => setMiles(e.target.value)}
+                          />
+                        </div>
+                      )}
 
                       <div className="grid gap-2">
                         <Label htmlFor="destination">Destination (Optional)</Label>
@@ -576,9 +693,9 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
                       <TableRow>
                         <TableHead>Date</TableHead>
                         <TableHead>Type</TableHead>
+                        <TableHead>Odometer</TableHead>
                         <TableHead>Miles</TableHead>
                         <TableHead>Destination</TableHead>
-                        <TableHead>Notes</TableHead>
                         <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -604,7 +721,14 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
                               )}
                             </Badge>
                           </TableCell>
-                          <TableCell className="font-mono">{entry.miles.toFixed(1)}</TableCell>
+                          <TableCell className="text-xs text-muted-foreground">
+                            {entry.start_odometer && entry.end_odometer ? (
+                              <span>{entry.start_odometer.toLocaleString()} → {entry.end_odometer.toLocaleString()}</span>
+                            ) : (
+                              <span>Manual</span>
+                            )}
+                          </TableCell>
+                          <TableCell className="font-mono font-semibold">{entry.miles.toFixed(1)}</TableCell>
                           <TableCell>
                             {entry.destination ? (
                               <span className="flex items-center gap-1 text-sm">
@@ -614,9 +738,6 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
                             ) : (
                               <span className="text-muted-foreground">—</span>
                             )}
-                          </TableCell>
-                          <TableCell className="max-w-[200px] truncate">
-                            {entry.description || <span className="text-muted-foreground">—</span>}
                           </TableCell>
                           <TableCell className="text-right">
                             <Button
