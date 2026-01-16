@@ -42,10 +42,10 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
   const [notes, setNotes] = useState("");
   const [step, setStep] = useState<"service" | "date" | "time" | "confirm">("service");
 
-  // Fetch services
+  // Fetch only active services for public booking
   const { data: services = [], isLoading: servicesLoading } = useQuery({
-    queryKey: ["merchant-services", merchantId],
-    queryFn: () => schedulingService.getServices(merchantId),
+    queryKey: ["merchant-services-active", merchantId],
+    queryFn: () => schedulingService.getActiveServices(merchantId),
   });
 
   // Fetch availability
@@ -153,6 +153,13 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
         throw new Error("Missing booking information");
       }
 
+      // Fetch user profile for customer info
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("full_name, phone")
+        .eq("id", user.id)
+        .single();
+
       const slotEndMinutes = 
         parseInt(selectedSlot.split(":")[0]) * 60 + 
         parseInt(selectedSlot.split(":")[1]) + 
@@ -170,6 +177,9 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
         payment_status: selectedServiceData.payment_type === "pay_at_service" ? "pending" : "pending",
         total_price: selectedServiceData.price,
         notes: notes || undefined,
+        customer_name: profile?.full_name || undefined,
+        customer_phone: profile?.phone || undefined,
+        customer_email: user.email || undefined,
       };
 
       return schedulingService.createBooking(bookingData);
