@@ -15,6 +15,8 @@ import {
 
 type MerchantQuickActionsTabProps = {
   hasStripeAccount: boolean;
+  fundingEligible: boolean;
+  daysActive: number;
   onRequestFunding: () => void;
   onEditProfile: () => void;
   onNavigate: (path: string) => void;
@@ -22,10 +24,13 @@ type MerchantQuickActionsTabProps = {
 
 export function MerchantQuickActionsTab({
   hasStripeAccount,
+  fundingEligible,
+  daysActive,
   onRequestFunding,
   onEditProfile,
   onNavigate,
 }: MerchantQuickActionsTabProps) {
+  const daysRemaining = Math.max(0, 90 - daysActive);
   const quickActions = [
     {
       title: "View Detailed Transactions",
@@ -37,7 +42,9 @@ export function MerchantQuickActionsTab({
     },
     {
       title: "Request Funding",
-      description: "Get an advance on your earnings",
+      description: fundingEligible 
+        ? "Get an advance on your earnings" 
+        : `${daysRemaining} more days until eligible`,
       icon: CreditCard,
       onClick: onRequestFunding,
       color: "text-purple-500",

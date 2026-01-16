@@ -77,6 +77,11 @@ type Analytics = {
   total_customers: number;
   avg_transaction_amount: number;
   funding_deal_status?: string | null;
+  // Funding eligibility data
+  days_active: number;
+  sales_90_days: number;
+  funding_eligible: boolean;
+  max_borrowable: number;
 };
 
 type Transaction = {
@@ -563,6 +568,8 @@ const MerchantDashboard = () => {
         return (
           <MerchantQuickActionsTab
             hasStripeAccount={!!merchant.stripe_account_id}
+            fundingEligible={analytics?.funding_eligible || false}
+            daysActive={analytics?.days_active || 0}
             onRequestFunding={() => setFundingDialogOpen(true)}
             onEditProfile={() => setEditDialogOpen(true)}
             onNavigate={navigate}
@@ -789,7 +796,10 @@ const MerchantDashboard = () => {
       <FundingRequestDialog
         open={fundingDialogOpen}
         onOpenChange={setFundingDialogOpen}
-        totalSales={analytics?.total_sales || 0}
+        maxBorrowable={analytics?.max_borrowable || 0}
+        sales90Days={analytics?.sales_90_days || 0}
+        daysActive={analytics?.days_active || 0}
+        fundingEligible={analytics?.funding_eligible || false}
         onSubmit={handleRequestFunding}
         isSubmitting={requestingFunding}
       />
