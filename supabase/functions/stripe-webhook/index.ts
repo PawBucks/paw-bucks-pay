@@ -1025,7 +1025,64 @@ serve(async (req) => {
         }
       }
 
-      // Award PawBucks based on multiplier (already calculated above)
+      // Handle Merchant Market service purchases (USD payments)
+      if (paymentIntent.metadata?.purchase_type === 'market_service') {
+        const { service_id, service_name, total_price, billing_period } = paymentIntent.metadata;
+        const totalAmount = paymentIntent.amount / 100;
+
+        console.log('Merchant Market purchase detected:', { service_id, service_name, totalAmount });
+
+        // Get merchant details for Tax Vault entry
+        const { data: merchantForTaxVault } = await supabaseAdmin
+          .from('merchants')
+          .select('id')
+          .eq('user_id', user_id)
+          .single();
+
+        if (merchantForTaxVault) {
+          // Create the service purchase record
+          const expiresAt = billing_period === 'monthly' 
+            ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+            : billing_period === 'quarterly'
+            ? new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString()
+            : billing_period === 'annual'
+            ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
+            : null;
+
+          const { data: purchaseData } = await supabaseAdmin.from('merchant_service_purchases').insert({
+            merchant_id: merchantForTaxVault.id,
+            service_id: service_id,
+            amount_paid_pawbucks: 0,
+            amount_paid_usd: totalAmount,
+            status: 'active',
+            expires_at: expiresAt,
+            stripe_payment_intent_id: paymentIntent.id,
+          }).select('id').single();
+
+          // Auto-log expense to Tax Vault
+          // USD payment = full price, no PawBucks discount savings
+          await supabaseAdmin.from('merchant_tax_expenses').insert({
+            merchant_id: merchantForTaxVault.id,
+            category: 'merchant_market',
+            amount: totalAmount,
+            original_price: totalAmount,
+            savings_amount: 0, // No savings for USD payments
+            description: `${service_name || 'Merchant Market Service'} - USD Payment${billing_period ? ` (${billing_period})` : ''}`,
+            vendor_name: 'PawBucks Merchant Market',
+            expense_date: new Date().toISOString().split('T')[0],
+            tax_year: new Date().getFullYear(),
+            is_auto_logged: true,
+            source_purchase_id: purchaseData?.id || service_id,
+          });
+
+          console.log('✅ Merchant Market purchase completed and Tax Vault updated:', { 
+            merchantId: merchantForTaxVault.id,
+            serviceName: service_name,
+            amount: totalAmount 
+          });
+        }
+      }
+
       // Free: 10 PawBucks per $1, PawPass: 20 PawBucks per $1, PawPass+: 30 PawBucks per $1
       if (pawbucksEarned > 0 && user_id) {
         // Get or create PawBucks wallet
