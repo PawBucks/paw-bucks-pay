@@ -22,6 +22,7 @@ interface ReceiptEmailParams {
   items: ReceiptItem[];
   subtotal: number;
   pawbucksApplied: number;
+  surcharge?: number;
   cardAmount: number;
   totalPaid: number;
   cardBrand?: string;
@@ -49,6 +50,7 @@ function generateReceiptHtml(params: ReceiptEmailParams): string {
     items,
     subtotal,
     pawbucksApplied,
+    surcharge,
     cardAmount,
     totalPaid,
     cardBrand,
@@ -77,6 +79,16 @@ function generateReceiptHtml(params: ReceiptEmailParams): string {
       <td style="font-size:14px; padding:4px 0;">PawBucks Applied</td>
       <td align="right" style="font-size:14px; color:#16a34a; padding:4px 0;">
         -$${pawbucksApplied.toFixed(2)}
+      </td>
+    </tr>
+  ` : '';
+
+  // Surcharge row (only if > 0)
+  const surchargeHtml = surcharge && surcharge > 0 ? `
+    <tr>
+      <td style="font-size:14px; padding:4px 0;">Surcharge</td>
+      <td align="right" style="font-size:14px; padding:4px 0;">
+        $${surcharge.toFixed(2)}
       </td>
     </tr>
   ` : '';
@@ -188,6 +200,8 @@ function generateReceiptHtml(params: ReceiptEmailParams): string {
                 </tr>
 
                 ${pawbucksAppliedHtml}
+
+                ${surchargeHtml}
 
                 <tr>
                   <td style="font-size:14px; padding:4px 0;">Card Charged</td>
