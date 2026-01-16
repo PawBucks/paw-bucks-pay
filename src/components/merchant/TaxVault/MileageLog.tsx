@@ -528,7 +528,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-muted-foreground">Pet Commutes</p>
+                    <p className="text-sm text-muted-foreground">Business</p>
                     <p className="text-2xl font-bold">{petCommuteMiles.toFixed(1)} mi</p>
                   </div>
                   <PawPrint className="h-8 w-8 text-green-500 opacity-80" />
@@ -559,7 +559,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
                   <Car className="h-5 w-5 text-primary" />
                   Mileage Entries
                 </CardTitle>
-                <CardDescription>Track your pet business commutes and personal trips</CardDescription>
+                <CardDescription>Track your business and personal trips</CardDescription>
               </div>
               <Dialog open={isAddMileageOpen} onOpenChange={(open) => {
                 setIsAddMileageOpen(open);
@@ -593,7 +593,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
                             <SelectItem value="pet_commute">
                               <span className="flex items-center gap-2">
                                 <PawPrint className="h-4 w-4 text-green-500" />
-                                Pet Commute (Business)
+                                Business
                               </span>
                             </SelectItem>
                             <SelectItem value="personal">
@@ -798,7 +798,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
                 <div className="text-center py-12 text-muted-foreground">
                   <Car className="h-12 w-12 mx-auto mb-4 opacity-50" />
                   <p className="font-medium">No mileage entries yet</p>
-                  <p className="text-sm">Start logging your pet commutes to track deductible miles</p>
+                  <p className="text-sm">Start logging your business trips to track deductible miles</p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
@@ -829,7 +829,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
                               )}
                             >
                               {entry.trip_type === 'pet_commute' ? (
-                                <><PawPrint className="h-3 w-3 mr-1" /> Pet Commute</>
+                                <><PawPrint className="h-3 w-3 mr-1" /> Business</>
                               ) : (
                                 <><User className="h-3 w-3 mr-1" /> Personal</>
                               )}
