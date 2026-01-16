@@ -38,6 +38,22 @@ export const signInSchema = z.object({
 // Merchant Validation Schemas
 // ==========================================
 
+// Pet business-specific types for smart onboarding
+export const PET_BUSINESS_TYPES = [
+  "veterinary", "grooming", "mobile_groomer", "training", 
+  "walker", "runner", "hiker", "sitter", "daycare", "boarding",
+  "pet_store", "food", "breeder", "rescue_nonprofit",
+  "photography", "insurance", "delivery", "masseuse", "behaviorist", "other"
+] as const;
+
+export const ENTITY_TYPES = [
+  "sole_proprietor", "llc", "s_corp", "c_corp", "partnership", "nonprofit"
+] as const;
+
+export const WORKING_STYLES = [
+  "home_based", "storefront", "mobile", "mixed"
+] as const;
+
 export const merchantOnboardingSchema = z.object({
   businessName: z.string()
     .trim()
@@ -52,9 +68,17 @@ export const merchantOnboardingSchema = z.object({
     .min(1, { message: "Phone number is required" })
     .max(20, { message: "Phone number must be less than 20 characters" })
     .regex(/^[\d\s\-\(\)\+]+$/, { message: "Invalid phone number format" }),
-  businessType: z.enum(["vet", "groomer", "sitter", "pet_store", "walker", "trainer"], {
-    errorMap: () => ({ message: "Invalid business type" }),
+  businessType: z.enum(PET_BUSINESS_TYPES, {
+    errorMap: () => ({ message: "Please select a business type" }),
   }),
+  entityType: z.enum(ENTITY_TYPES, {
+    errorMap: () => ({ message: "Please select an entity type" }),
+  }).optional(),
+  country: z.string().default("US"),
+  stateOfIncorporation: z.string().optional(),
+  workingStyle: z.enum(WORKING_STYLES, {
+    errorMap: () => ({ message: "Please select your working style" }),
+  }).optional(),
   streetAddress: z.string()
     .trim()
     .min(1, { message: "Street address is required" })
@@ -90,7 +114,9 @@ export const merchantSchema = z.object({
   contactPerson: z.string()
     .min(2, "Contact person name is required")
     .max(100),
-  businessType: z.enum(["vet", "groomer", "sitter", "pet_store", "walker", "trainer"]),
+  businessType: z.enum(PET_BUSINESS_TYPES),
+  entityType: z.enum(ENTITY_TYPES).optional(),
+  workingStyle: z.enum(WORKING_STYLES).optional(),
   address: z.string().optional(),
   description: z.string().max(500, "Description is too long").optional(),
   cashbackRate: z.number()

@@ -28,12 +28,14 @@ export type CategoryConfig = {
 export const CATEGORY_CONFIG: Record<string, CategoryConfig> = {
   veterinary: { icon: Stethoscope, color: "hsl(0, 70%, 55%)", label: "Veterinary" },
   grooming: { icon: Scissors, color: "hsl(320, 70%, 55%)", label: "Grooming" },
+  mobile_groomer: { icon: Scissors, color: "hsl(320, 60%, 50%)", label: "Mobile Groomer" },
   pet_store: { icon: ShoppingBag, color: "hsl(150, 70%, 45%)", label: "Pet Store" },
   food: { icon: Bone, color: "hsl(25, 80%, 55%)", label: "Food & Treats" },
   boarding: { icon: Home, color: "hsl(180, 60%, 45%)", label: "Boarding" },
   training: { icon: Sparkles, color: "hsl(var(--primary))", label: "Training" },
   walker: { icon: Dog, color: "hsl(210, 80%, 55%)", label: "Walker" },
   daycare: { icon: Sun, color: "hsl(45, 90%, 50%)", label: "Daycare" },
+  sitter: { icon: Home, color: "hsl(180, 50%, 50%)", label: "Pet Sitter" },
   photography: { icon: Camera, color: "hsl(270, 60%, 55%)", label: "Photography" },
   insurance: { icon: Shield, color: "hsl(220, 60%, 50%)", label: "Insurance" },
   delivery: { icon: Truck, color: "hsl(30, 70%, 50%)", label: "Delivery" },
@@ -41,6 +43,8 @@ export const CATEGORY_CONFIG: Record<string, CategoryConfig> = {
   runner: { icon: Zap, color: "hsl(50, 85%, 50%)", label: "Runner" },
   masseuse: { icon: Hand, color: "hsl(340, 65%, 55%)", label: "Masseuse" },
   behaviorist: { icon: Brain, color: "hsl(280, 60%, 50%)", label: "Behaviorist" },
+  breeder: { icon: Dog, color: "hsl(10, 70%, 55%)", label: "Breeder" },
+  rescue_nonprofit: { icon: Shield, color: "hsl(200, 70%, 50%)", label: "Rescue / Nonprofit" },
   other: { icon: MoreHorizontal, color: "hsl(var(--muted-foreground))", label: "Other" },
 };
 
@@ -137,6 +141,26 @@ export const BUSINESS_TYPE_MAP: Record<string, string> = {
   'animal behaviorist': 'behaviorist',
   'behavior specialist': 'behaviorist',
   'pet behavior': 'behaviorist',
+  // Mobile Groomer
+  mobile_groomer: 'mobile_groomer',
+  'mobile groomer': 'mobile_groomer',
+  'mobile grooming': 'mobile_groomer',
+  'mobile pet groomer': 'mobile_groomer',
+  // Breeder
+  breeder: 'breeder',
+  'dog breeder': 'breeder',
+  'cat breeder': 'breeder',
+  'pet breeder': 'breeder',
+  breeding: 'breeder',
+  // Rescue / Nonprofit
+  rescue_nonprofit: 'rescue_nonprofit',
+  rescue: 'rescue_nonprofit',
+  nonprofit: 'rescue_nonprofit',
+  'non-profit': 'rescue_nonprofit',
+  'animal rescue': 'rescue_nonprofit',
+  shelter: 'rescue_nonprofit',
+  'animal shelter': 'rescue_nonprofit',
+  charity: 'rescue_nonprofit',
 };
 
 // Get normalized category key from business_type

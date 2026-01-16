@@ -1768,9 +1768,11 @@ export type Database = {
           business_type: string
           cashback_rate: number
           contact_person: string | null
+          country: string | null
           created_at: string
           description: string | null
           email: string | null
+          entity_type: string | null
           facebook_url: string | null
           funding_status: string | null
           id: string
@@ -1785,12 +1787,14 @@ export type Database = {
           phone: string | null
           price_range: number | null
           sponsored_until: string | null
+          state_of_incorporation: string | null
           storefront_slug: string
           stripe_account_id: string | null
           stripe_account_status: string | null
           twitter_url: string | null
           updated_at: string
           user_id: string
+          working_style: string | null
         }
         Insert: {
           accepts_pawbucks?: boolean
@@ -1799,9 +1803,11 @@ export type Database = {
           business_type: string
           cashback_rate?: number
           contact_person?: string | null
+          country?: string | null
           created_at?: string
           description?: string | null
           email?: string | null
+          entity_type?: string | null
           facebook_url?: string | null
           funding_status?: string | null
           id?: string
@@ -1816,12 +1822,14 @@ export type Database = {
           phone?: string | null
           price_range?: number | null
           sponsored_until?: string | null
+          state_of_incorporation?: string | null
           storefront_slug: string
           stripe_account_id?: string | null
           stripe_account_status?: string | null
           twitter_url?: string | null
           updated_at?: string
           user_id: string
+          working_style?: string | null
         }
         Update: {
           accepts_pawbucks?: boolean
@@ -1830,9 +1838,11 @@ export type Database = {
           business_type?: string
           cashback_rate?: number
           contact_person?: string | null
+          country?: string | null
           created_at?: string
           description?: string | null
           email?: string | null
+          entity_type?: string | null
           facebook_url?: string | null
           funding_status?: string | null
           id?: string
@@ -1847,12 +1857,14 @@ export type Database = {
           phone?: string | null
           price_range?: number | null
           sponsored_until?: string | null
+          state_of_incorporation?: string | null
           storefront_slug?: string
           stripe_account_id?: string | null
           stripe_account_status?: string | null
           twitter_url?: string | null
           updated_at?: string
           user_id?: string
+          working_style?: string | null
         }
         Relationships: [
           {
