@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { format, addMonths } from 'date-fns';
+import { format } from 'date-fns';
+import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -60,6 +61,7 @@ const QUARTERLY_DEADLINES = [
 const IRS_MILEAGE_RATE = 0.67;
 
 export function TaxLiabilityEstimator({ merchantId, taxYear }: TaxLiabilityEstimatorProps) {
+  const { user } = useAuth();
   const [filingStatus, setFilingStatus] = useState<'single' | 'married_joint' | 'married_separate'>('single');
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -121,19 +123,20 @@ export function TaxLiabilityEstimator({ merchantId, taxYear }: TaxLiabilityEstim
     enabled: !!merchantId,
   });
 
-  // Fetch notification preferences
+  // Fetch notification preferences (uses user_id, not merchantId)
   const { data: notificationPrefs, refetch: refetchNotifications } = useQuery({
-    queryKey: ['merchant-tax-notifications', merchantId],
+    queryKey: ['merchant-tax-notifications', user?.id],
     queryFn: async () => {
+      if (!user?.id) return null;
       const { data, error } = await supabase
         .from('notification_preferences')
         .select('*')
-        .eq('user_id', merchantId)
+        .eq('user_id', user.id)
         .single();
       if (error && error.code !== 'PGRST116') throw error;
       return data;
     },
-    enabled: !!merchantId,
+    enabled: !!user?.id,
   });
 
   const handleRefresh = async () => {

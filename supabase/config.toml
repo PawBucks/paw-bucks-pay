@@ -254,9 +254,3 @@ verify_jwt = false
 
 [functions.send-accountant-invitation]
 verify_jwt = true
-
-[functions.admin-send-text-campaign]
-verify_jwt = true
-
-[functions.send-quarterly-tax-reminder]
-verify_jwt = false
