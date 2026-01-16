@@ -159,6 +159,10 @@ const MerchantScheduling = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO 
+        title="Scheduling - Manage Services & Bookings"
+        description="Manage your pet services, set availability, and view customer bookings"
+      />
       <header className="border-b border-border/50 bg-card/95 backdrop-blur-xl sticky top-0 z-50" style={{ paddingTop: 'max(0.5rem, env(safe-area-inset-top))' }}>
         <div className="container mx-auto px-4 py-3 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
