@@ -1480,6 +1480,60 @@ export type Database = {
           },
         ]
       }
+      merchant_vehicle_expenses: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string | null
+          expense_date: string
+          expense_type: string
+          id: string
+          merchant_id: string
+          tax_year: number
+          updated_at: string
+          vehicle_name: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          description?: string | null
+          expense_date: string
+          expense_type: string
+          id?: string
+          merchant_id: string
+          tax_year: number
+          updated_at?: string
+          vehicle_name?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string | null
+          expense_date?: string
+          expense_type?: string
+          id?: string
+          merchant_id?: string
+          tax_year?: number
+          updated_at?: string
+          vehicle_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_vehicle_expenses_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_vehicle_expenses_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       merchant_webhooks: {
         Row: {
           created_at: string
