@@ -26,6 +26,12 @@ const formatDateLocal = (date: Date): string => {
   return `${year}-${month}-${day}`;
 };
 
+// Helper to parse date string (YYYY-MM-DD) without timezone shift
+const parseDateLocal = (dateStr: string): Date => {
+  const [year, month, day] = dateStr.split('-').map(Number);
+  return new Date(year, month - 1, day);
+};
+
 interface MileageEntry {
   id: string;
   merchant_id: string;
@@ -304,9 +310,8 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
   };
 
   const openEditMileage = (entry: MileageEntry) => {
-    // Parse the date string and create a local date to avoid timezone issues
-    const [year, month, day] = entry.trip_date.split('-').map(Number);
-    setTripDate(new Date(year, month - 1, day));
+    // Use helper to parse date without timezone issues
+    setTripDate(parseDateLocal(entry.trip_date));
     setTripType(entry.trip_type);
     setMiles(entry.miles.toString());
     setDescription(entry.description || '');
@@ -812,7 +817,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
                       {entries.map((entry) => (
                         <TableRow key={entry.id}>
                           <TableCell className="font-medium">
-                            {format(new Date(entry.trip_date), 'MMM d, yyyy')}
+                            {format(parseDateLocal(entry.trip_date), 'MMM d, yyyy')}
                           </TableCell>
                           <TableCell>
                             <Badge 
@@ -1075,7 +1080,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
                       {vehicleExpenses.map((expense) => (
                         <TableRow key={expense.id}>
                           <TableCell className="font-medium">
-                            {format(new Date(expense.expense_date), 'MMM d, yyyy')}
+                            {format(parseDateLocal(expense.expense_date), 'MMM d, yyyy')}
                           </TableCell>
                           <TableCell>
                             <Badge variant="outline" className="flex items-center gap-1 w-fit">
