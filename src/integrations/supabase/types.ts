@@ -4233,6 +4233,10 @@ export type Database = {
         Args: { check_user_id: string; vet_user_id: string }
         Returns: boolean
       }
+      validate_accountant_access_token: {
+        Args: { token_param: string }
+        Returns: string
+      }
       vest_pending_pawbucks: { Args: never; Returns: number }
       vet_can_view_pet: {
         Args: { pet_id: string; vet_user_id: string }
