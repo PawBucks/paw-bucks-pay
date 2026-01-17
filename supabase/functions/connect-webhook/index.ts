@@ -111,6 +111,32 @@ serve(async (req) => {
             });
 
           logStep("Transaction record created with fee tracking");
+
+          // Auto-log platform fee as Tax Vault expense
+          if (platformFee > 0) {
+            const expenseDate = new Date().toISOString().split('T')[0];
+            const taxYear = new Date().getFullYear();
+
+            const { error: expenseError } = await supabaseAdmin
+              .from("merchant_tax_expenses")
+              .insert({
+                merchant_id: merchantId,
+                category: "platform_fees",
+                amount: platformFee,
+                description: `Platform/Processing Fee (3%) on $${amountInDollars.toFixed(2)} sale`,
+                vendor_name: "PawBucks Platform",
+                expense_date: expenseDate,
+                tax_year: taxYear,
+                is_auto_logged: true,
+                source_purchase_id: paymentIntent.id,
+              });
+
+            if (expenseError) {
+              logStep("Error auto-logging platform fee expense", { error: expenseError.message });
+            } else {
+              logStep("Platform fee auto-logged to Tax Vault", { amount: platformFee });
+            }
+          }
         }
 
         break;
