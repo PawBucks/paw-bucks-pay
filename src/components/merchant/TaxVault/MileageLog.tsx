@@ -66,8 +66,12 @@ interface MileageLogProps {
   taxYear: number;
 }
 
-// IRS standard mileage rate for 2024/2025 (update as needed)
-const IRS_MILEAGE_RATE = 0.67; // $0.67 per mile for 2024
+// Fallback IRS rates if database fetch fails (updated annually)
+const FALLBACK_IRS_RATES: Record<number, number> = {
+  2024: 0.67,
+  2025: 0.70,
+  2026: 0.725,
+};
 
 const EXPENSE_TYPE_LABELS: Record<string, { label: string; icon: React.ReactNode }> = {
   gas: { label: 'Gas/Fuel', icon: <Fuel className="h-4 w-4" /> },
@@ -145,6 +149,30 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
     },
     enabled: !!merchantId,
   });
+
+  // Fetch IRS mileage rate for the selected tax year
+  const { data: irsRateData } = useQuery({
+    queryKey: ['irs-mileage-rate', taxYear],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('irs_mileage_rates')
+        .select('rate_per_mile, notes, source_url')
+        .eq('tax_year', taxYear)
+        .single();
+
+      if (error) {
+        console.warn(`No IRS rate found for ${taxYear}, using fallback`);
+        return null;
+      }
+      return data;
+    },
+    staleTime: 1000 * 60 * 60, // Cache for 1 hour - rates rarely change
+  });
+
+  // Use database rate or fallback
+  const IRS_MILEAGE_RATE = irsRateData?.rate_per_mile 
+    ? Number(irsRateData.rate_per_mile) 
+    : (FALLBACK_IRS_RATES[taxYear] || FALLBACK_IRS_RATES[2026]);
 
   // Add mileage entry mutation
   const addMileageMutation = useMutation({
@@ -405,8 +433,22 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
             <Calculator className="h-5 w-5 text-primary" />
             Vehicle Deduction Calculator
           </CardTitle>
-          <CardDescription>
-            Compare Standard Mileage Rate vs Actual Expenses to maximize your deduction
+          <CardDescription className="flex items-center gap-2">
+            <span>Compare Standard Mileage Rate vs Actual Expenses to maximize your deduction</span>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Info className="h-4 w-4 text-muted-foreground" />
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p className="font-medium">{taxYear} IRS Standard Mileage Rate: ${IRS_MILEAGE_RATE}/mile</p>
+                  {irsRateData?.notes && <p className="text-xs mt-1">{irsRateData.notes}</p>}
+                  <p className="text-xs mt-1 text-muted-foreground">
+                    Source: <a href="https://www.irs.gov/tax-professionals/standard-mileage-rates" target="_blank" rel="noopener noreferrer" className="underline">IRS.gov</a>
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </CardDescription>
         </CardHeader>
         <CardContent>
