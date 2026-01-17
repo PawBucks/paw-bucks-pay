@@ -599,6 +599,39 @@ export type Database = {
           },
         ]
       }
+      irs_mileage_rates: {
+        Row: {
+          created_at: string
+          effective_date: string
+          id: string
+          notes: string | null
+          rate_per_mile: number
+          source_url: string | null
+          tax_year: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          effective_date: string
+          id?: string
+          notes?: string | null
+          rate_per_mile: number
+          source_url?: string | null
+          tax_year: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          effective_date?: string
+          id?: string
+          notes?: string | null
+          rate_per_mile?: number
+          source_url?: string | null
+          tax_year?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       loan_activity: {
         Row: {
           action: string
