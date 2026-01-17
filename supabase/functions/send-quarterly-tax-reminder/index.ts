@@ -18,7 +18,12 @@ const QUARTERLY_DEADLINES = [
 ];
 
 const SELF_EMPLOYMENT_TAX_RATE = 0.153;
-const IRS_MILEAGE_RATE = 0.67;
+// Fallback IRS rates - will be fetched from database
+const FALLBACK_IRS_RATES: Record<number, number> = {
+  2024: 0.67,
+  2025: 0.70,
+  2026: 0.725,
+};
 
 function logStep(step: string, details?: Record<string, unknown>) {
   console.log(`[QUARTERLY-TAX-REMINDER] ${step}`, details ? JSON.stringify(details) : '');
@@ -104,13 +109,24 @@ serve(async (req: Request) => {
           .eq("merchant_id", merchant.id)
           .eq("tax_year", currentYear);
 
+        // Fetch IRS rate from database or use fallback
+        const { data: irsRateData } = await supabase
+          .from("irs_mileage_rates")
+          .select("rate_per_mile")
+          .eq("tax_year", currentYear)
+          .single();
+        
+        const irsRate = irsRateData?.rate_per_mile 
+          ? Number(irsRateData.rate_per_mile) 
+          : (FALLBACK_IRS_RATES[currentYear] || FALLBACK_IRS_RATES[2026]);
+
         // Calculate estimated tax
         const grossIncome = Number(analytics?.total_sales || 0);
         const totalExpenses = (expenses || []).reduce((sum, e) => sum + Number(e.amount || 0), 0);
         const businessMiles = (mileage || [])
           .filter((m: any) => m.trip_type === 'pet_commute')
           .reduce((sum, m: any) => sum + Number(m.miles || 0), 0);
-        const mileageDeduction = businessMiles * IRS_MILEAGE_RATE;
+        const mileageDeduction = businessMiles * irsRate;
         
         const netProfit = Math.max(0, grossIncome - totalExpenses - mileageDeduction);
         const seTaxableIncome = netProfit * 0.9235;

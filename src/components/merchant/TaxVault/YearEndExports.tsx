@@ -32,11 +32,40 @@ interface YearEndExportsProps {
   expenses: TaxExpense[];
 }
 
-const IRS_MILEAGE_RATE = 0.67;
+// Fallback IRS rates if database fetch fails (updated annually)
+const FALLBACK_IRS_RATES: Record<number, number> = {
+  2024: 0.67,
+  2025: 0.70,
+  2026: 0.725,
+};
 
 export function YearEndExports({ merchantId, businessName, taxYear, expenses }: YearEndExportsProps) {
   const [notes, setNotes] = useState('');
   const [isExporting, setIsExporting] = useState<string | null>(null);
+
+  // Fetch IRS mileage rate for the selected tax year
+  const { data: irsRateData } = useQuery({
+    queryKey: ['irs-mileage-rate', taxYear],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('irs_mileage_rates')
+        .select('rate_per_mile, notes, source_url')
+        .eq('tax_year', taxYear)
+        .single();
+
+      if (error) {
+        console.warn(`No IRS rate found for ${taxYear}, using fallback`);
+        return null;
+      }
+      return data;
+    },
+    staleTime: 1000 * 60 * 60, // Cache for 1 hour
+  });
+
+  // Use database rate or fallback
+  const IRS_MILEAGE_RATE = irsRateData?.rate_per_mile 
+    ? Number(irsRateData.rate_per_mile) 
+    : (FALLBACK_IRS_RATES[taxYear] || FALLBACK_IRS_RATES[2026]);
 
   // Fetch mileage data
   const { data: mileageEntries = [] } = useQuery({

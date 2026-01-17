@@ -91,6 +91,13 @@ const formatCategory = (category: string) => {
   return category.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 };
 
+// Fallback IRS rates if database fetch fails (updated annually)
+const FALLBACK_IRS_RATES: Record<number, number> = {
+  2024: 0.67,
+  2025: 0.70,
+  2026: 0.725,
+};
+
 export default function AccountantPortal() {
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
@@ -254,7 +261,8 @@ export default function AccountantPortal() {
 
   const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
   const totalMiles = mileage.reduce((sum, m) => sum + m.miles, 0);
-  const mileageDeduction = totalMiles * 0.67; // 2024 IRS rate
+  const irsRate = FALLBACK_IRS_RATES[selectedYear] || FALLBACK_IRS_RATES[2026];
+  const mileageDeduction = totalMiles * irsRate;
 
   if (loading) {
     return (
@@ -352,7 +360,7 @@ export default function AccountantPortal() {
                   <span className="text-sm">Mileage Deduction</span>
                 </div>
                 <p className="text-2xl font-bold">${mileageDeduction.toLocaleString()}</p>
-                <p className="text-xs text-muted-foreground">{totalMiles.toLocaleString()} miles @ $0.67</p>
+                <p className="text-xs text-muted-foreground">{totalMiles.toLocaleString()} miles @ ${irsRate}/mile ({selectedYear} rate)</p>
               </CardContent>
             </Card>
           )}
@@ -664,7 +672,7 @@ export default function AccountantPortal() {
                         <div className="bg-primary/5 p-4 rounded-lg border border-primary/20">
                           <p className="text-sm text-muted-foreground">Standard Mileage Deduction</p>
                           <p className="text-2xl font-bold text-primary">${mileageDeduction.toLocaleString()}</p>
-                          <p className="text-xs text-muted-foreground">@ $0.67/mile (2024 rate)</p>
+                          <p className="text-xs text-muted-foreground">@ ${irsRate}/mile ({selectedYear} rate)</p>
                         </div>
                       </div>
                     </>

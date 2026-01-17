@@ -58,7 +58,12 @@ const QUARTERLY_DEADLINES = [
   { quarter: 'Q4', deadline: 'January 15', months: [9, 10, 11, 12] },
 ];
 
-const IRS_MILEAGE_RATE = 0.67;
+// Fallback IRS rates if database fetch fails (updated annually)
+const FALLBACK_IRS_RATES: Record<number, number> = {
+  2024: 0.67,
+  2025: 0.70,
+  2026: 0.725,
+};
 
 export function TaxLiabilityEstimator({ merchantId, taxYear }: TaxLiabilityEstimatorProps) {
   const { user } = useAuth();
@@ -122,6 +127,25 @@ export function TaxLiabilityEstimator({ merchantId, taxYear }: TaxLiabilityEstim
     },
     enabled: !!merchantId,
   });
+
+  // Fetch IRS mileage rate for the selected tax year
+  const { data: irsRateData } = useQuery({
+    queryKey: ['irs-mileage-rate', taxYear],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('irs_mileage_rates')
+        .select('rate_per_mile, notes, source_url')
+        .eq('tax_year', taxYear)
+        .single();
+      if (error) return null;
+      return data;
+    },
+    staleTime: 1000 * 60 * 60,
+  });
+
+  const IRS_MILEAGE_RATE = irsRateData?.rate_per_mile 
+    ? Number(irsRateData.rate_per_mile) 
+    : (FALLBACK_IRS_RATES[taxYear] || FALLBACK_IRS_RATES[2026]);
 
   // Fetch notification preferences (uses user_id, not merchantId)
   const { data: notificationPrefs, refetch: refetchNotifications } = useQuery({
@@ -460,7 +484,7 @@ export function TaxLiabilityEstimator({ merchantId, taxYear }: TaxLiabilityEstim
                           <Info className="h-3 w-3 ml-1 inline text-muted-foreground" />
                         </TooltipTrigger>
                         <TooltipContent>
-                          <p className="text-xs">{businessMiles.toFixed(0)} business miles @ $0.67/mile</p>
+                          <p className="text-xs">{businessMiles.toFixed(0)} business miles @ ${IRS_MILEAGE_RATE}/mile ({taxYear} rate)</p>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
