@@ -117,30 +117,22 @@ export default function AccountantPortal() {
     try {
       setLoading(true);
 
-      // Validate the access token and get invitation details
-      const { data: invitationData, error: invError } = await supabase
-        .from('accountant_invitations')
-        .select(`
-          id,
-          merchant_id,
-          accountant_name,
-          accountant_email,
-          permissions,
-          status,
-          expires_at,
-          merchants (
-            business_name,
-            owner_name
-          )
-        `)
-        .eq('access_token', token)
-        .single();
+      // Validate the access token and get invitation details via edge function
+      const { data: validateData, error: validateError } = await supabase.functions.invoke(
+        'accountant-portal-access',
+        {
+          body: { action: 'validate', accessToken: token, selectedYear }
+        }
+      );
 
-      if (invError || !invitationData) {
-        toast.error('Invalid or expired access link');
+      if (validateError || !validateData?.success || !validateData?.invitation) {
+        const errorMsg = validateData?.error || 'Invalid or expired access link';
+        toast.error(errorMsg);
         navigate('/');
         return;
       }
+
+      const invitationData = validateData.invitation;
 
       // Check if invitation is valid
       if (invitationData.status === 'revoked') {
@@ -155,88 +147,49 @@ export default function AccountantPortal() {
         return;
       }
 
-      // Update status to accepted if pending
-      if (invitationData.status === 'pending') {
-        await supabase
-          .from('accountant_invitations')
-          .update({ 
-            status: 'accepted', 
-            accepted_at: new Date().toISOString(),
-            last_accessed_at: new Date().toISOString()
-          })
-          .eq('id', invitationData.id);
-      } else {
-        // Update last accessed time
-        await supabase
-          .from('accountant_invitations')
-          .update({ last_accessed_at: new Date().toISOString() })
-          .eq('id', invitationData.id);
-      }
-
-      // Log activity
-      await supabase.from('accountant_activity_log').insert({
-        invitation_id: invitationData.id,
-        merchant_id: invitationData.merchant_id,
-        action: 'portal_access',
-        entity_type: 'portal',
-        notes: `Accessed portal for tax year ${selectedYear}`
-      });
-
       setInvitation(invitationData as InvitationData);
 
       const permissions = invitationData.permissions as InvitationData['permissions'];
 
-      // Load data based on permissions
+      // Load data based on permissions via edge function
       if (permissions.view_expenses) {
-        const { data: expenseData } = await supabase
-          .from('merchant_tax_expenses')
-          .select('*')
-          .eq('merchant_id', invitationData.merchant_id)
-          .eq('tax_year', selectedYear)
-          .order('expense_date', { ascending: false });
+        const { data: expenseResult } = await supabase.functions.invoke(
+          'accountant-portal-access',
+          {
+            body: { action: 'getExpenses', accessToken: token, selectedYear }
+          }
+        );
         
-        setExpenses(expenseData || []);
-
-        // Load notes for expenses
-        const { data: notesData } = await supabase
-          .from('accountant_expense_notes')
-          .select('*')
-          .eq('invitation_id', invitationData.id);
-        
-        setNotes(notesData || []);
+        if (expenseResult?.success) {
+          setExpenses(expenseResult.expenses || []);
+          setNotes(expenseResult.notes || []);
+        }
       }
 
       if (permissions.view_mileage) {
-        const { data: mileageData } = await supabase
-          .from('merchant_mileage_log')
-          .select('*')
-          .eq('merchant_id', invitationData.merchant_id)
-          .eq('tax_year', selectedYear)
-          .order('trip_date', { ascending: false });
+        const { data: mileageResult } = await supabase.functions.invoke(
+          'accountant-portal-access',
+          {
+            body: { action: 'getMileage', accessToken: token, selectedYear }
+          }
+        );
         
-        setMileage(mileageData || []);
+        if (mileageResult?.success) {
+          setMileage(mileageResult.mileage || []);
+        }
       }
 
       if (permissions.view_income) {
-        // Fetch income from merchant transactions
-        const { data: earningsData } = await supabase
-          .from('direct_payments')
-          .select('amount, created_at')
-          .eq('merchant_id', invitationData.merchant_id)
-          .eq('status', 'succeeded')
-          .gte('created_at', `${selectedYear}-01-01`)
-          .lte('created_at', `${selectedYear}-12-31`);
-
-        const byMonth: Record<string, number> = {};
-        let total = 0;
-
-        (earningsData || []).forEach(payment => {
-          const month = format(new Date(payment.created_at), 'MMM yyyy');
-          byMonth[month] = (byMonth[month] || 0) + payment.amount;
-          total += payment.amount;
-        });
-
-        setIncomeData({ total, byMonth });
+        const { data: incomeResult } = await supabase.functions.invoke(
+          'accountant-portal-access',
+          {
+            body: { action: 'getIncome', accessToken: token, selectedYear }
+          }
+        );
+        
+        if (incomeResult?.success) {
+          setIncomeData(incomeResult.income || { total: 0, byMonth: {} });
+        }
       }
 
     } catch (error) {
@@ -252,24 +205,22 @@ export default function AccountantPortal() {
 
     setSavingNote(true);
     try {
-      const { error } = await supabase.from('accountant_expense_notes').insert({
-        invitation_id: invitation.id,
-        expense_id: selectedExpenseId,
-        note: newNote.trim(),
-        suggested_category: suggestedCategory || null
-      });
+      const { data, error } = await supabase.functions.invoke(
+        'accountant-portal-access',
+        {
+          body: { 
+            action: 'addNote', 
+            accessToken: token,
+            expenseId: selectedExpenseId,
+            note: newNote.trim(),
+            suggestedCategory: suggestedCategory || null
+          }
+        }
+      );
 
-      if (error) throw error;
-
-      // Log activity
-      await supabase.from('accountant_activity_log').insert({
-        invitation_id: invitation.id,
-        merchant_id: invitation.merchant_id,
-        action: 'add_note',
-        entity_type: 'expense',
-        entity_id: selectedExpenseId,
-        notes: newNote.trim()
-      });
+      if (error || !data?.success) {
+        throw new Error(data?.error || 'Failed to add note');
+      }
 
       toast.success('Note added successfully');
       setNoteDialogOpen(false);
@@ -278,12 +229,16 @@ export default function AccountantPortal() {
       setSelectedExpenseId(null);
 
       // Refresh notes
-      const { data: notesData } = await supabase
-        .from('accountant_expense_notes')
-        .select('*')
-        .eq('invitation_id', invitation.id);
+      const { data: expenseResult } = await supabase.functions.invoke(
+        'accountant-portal-access',
+        {
+          body: { action: 'getExpenses', accessToken: token, selectedYear }
+        }
+      );
       
-      setNotes(notesData || []);
+      if (expenseResult?.success) {
+        setNotes(expenseResult.notes || []);
+      }
 
     } catch (error) {
       console.error('Error adding note:', error);
