@@ -4178,6 +4178,7 @@ export type Database = {
           total_users: number
         }[]
       }
+      get_current_user_email: { Args: never; Returns: string }
       get_merchant_analytics: {
         Args: { p_merchant_id: string }
         Returns: {
