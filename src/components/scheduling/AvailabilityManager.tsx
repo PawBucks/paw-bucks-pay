@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { CalendarIcon, Plus, X, Clock } from "lucide-react";
 import { format } from "date-fns";
+import { parseLocalDate } from '@/utils/formatters';
 import { toast } from "sonner";
 import { 
   schedulingService,
@@ -233,7 +234,7 @@ export function AvailabilityManager({
                     {override.is_available ? 'Custom Hours' : 'Blocked'}
                   </Badge>
                   <span className="font-medium">
-                    {format(new Date(override.override_date), 'EEE, MMM d, yyyy')}
+                    {format(parseLocalDate(override.override_date), 'EEE, MMM d, yyyy')}
                   </span>
                   {override.is_available && override.start_time && (
                     <span className="text-sm text-muted-foreground">

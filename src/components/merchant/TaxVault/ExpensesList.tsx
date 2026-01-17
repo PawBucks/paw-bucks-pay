@@ -3,8 +3,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Trash2, Receipt, ExternalLink, Sparkles, TrendingDown } from 'lucide-react';
-import { format } from 'date-fns';
 import { TaxExpense, CATEGORY_LABELS } from './types';
+import { formatLocalDate } from '@/utils/formatters';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import {
@@ -111,7 +111,7 @@ export function ExpensesList({ expenses, onExpenseDeleted }: ExpensesListProps) 
                 <TableRow key={expense.id} className={expense.is_auto_logged ? 'bg-primary/5' : ''}>
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-1.5">
-                      {format(new Date(expense.expense_date), 'MMM d, yyyy')}
+                      {formatLocalDate(expense.expense_date, 'MMM d, yyyy')}
                       {expense.is_auto_logged && (
                         <Tooltip>
                           <TooltipTrigger>

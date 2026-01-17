@@ -1,5 +1,45 @@
 import { PAWBUCKS_CONVERSION } from '@/lib/constants';
 
+/**
+ * Parse a date string (YYYY-MM-DD) as a local date, not UTC.
+ * This prevents timezone issues where dates shift back a day in US timezones.
+ */
+export const parseLocalDate = (dateString: string): Date => {
+  // Split the date string and create a date using local timezone
+  const [year, month, day] = dateString.split('-').map(Number);
+  return new Date(year, month - 1, day);
+};
+
+/**
+ * Format a date string (YYYY-MM-DD) for display using local timezone.
+ */
+export const formatLocalDate = (dateString: string, formatStr: string = 'MMM d, yyyy'): string => {
+  const date = parseLocalDate(dateString);
+  
+  // Simple formatting for common patterns
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const fullMonths = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  
+  if (formatStr === 'MMM d, yyyy') {
+    return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+  }
+  
+  if (formatStr === 'MMMM d, yyyy') {
+    return `${fullMonths[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+  }
+  
+  if (formatStr === 'MM/dd/yyyy') {
+    return `${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}/${date.getFullYear()}`;
+  }
+  
+  if (formatStr === 'yyyy-MM-dd') {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  }
+  
+  // Default fallback
+  return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+};
+
 // Centralized formatting utilities
 export const Formatters = {
   // Currency formatting

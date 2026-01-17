@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { FileText, Download, FileSpreadsheet, Upload } from 'lucide-react';
 import { TaxExpense, CATEGORY_LABELS, SCHEDULE_C_MAPPING, TaxExpenseCategory } from './types';
 import { format } from 'date-fns';
+import { parseLocalDate } from '@/utils/formatters';
 import jsPDF from 'jspdf';
 import { toast } from 'sonner';
 
@@ -115,7 +116,7 @@ export function ReportGenerator({ expenses, businessName, taxYear }: ReportGener
         yPos = 20;
       }
       
-      doc.text(format(new Date(expense.expense_date), 'MM/dd/yy'), 20, yPos);
+      doc.text(format(parseLocalDate(expense.expense_date), 'MM/dd/yy'), 20, yPos);
       doc.text(CATEGORY_LABELS[expense.category].substring(0, 20), 45, yPos);
       doc.text((expense.vendor_name || '-').substring(0, 25), 100, yPos);
       doc.text(`$${expense.amount.toFixed(2)}`, pageWidth - 20, yPos, { align: 'right' });
@@ -129,7 +130,7 @@ export function ReportGenerator({ expenses, businessName, taxYear }: ReportGener
   const generateCSV = () => {
     const headers = ['Date', 'Category', 'Schedule C Line', 'Vendor', 'Description', 'Amount'];
     const rows = expenses.map((expense) => [
-      format(new Date(expense.expense_date), 'yyyy-MM-dd'),
+      format(parseLocalDate(expense.expense_date), 'yyyy-MM-dd'),
       CATEGORY_LABELS[expense.category],
       SCHEDULE_C_MAPPING[expense.category].line,
       expense.vendor_name || '',
@@ -160,7 +161,7 @@ export function ReportGenerator({ expenses, businessName, taxYear }: ReportGener
     ];
     
     expenses.forEach((expense) => {
-      const date = format(new Date(expense.expense_date), 'MM/dd/yyyy');
+      const date = format(parseLocalDate(expense.expense_date), 'MM/dd/yyyy');
       const account = SCHEDULE_C_MAPPING[expense.category].description;
       
       lines.push(`TRNS\tCHECK\t${date}\tChecking\t${expense.vendor_name || 'Unknown'}\t-${expense.amount.toFixed(2)}\t${expense.description || CATEGORY_LABELS[expense.category]}`);

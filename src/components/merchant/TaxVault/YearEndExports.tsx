@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
+import { parseLocalDate } from '@/utils/formatters';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -115,7 +116,7 @@ export function YearEndExports({ merchantId, businessName, taxYear, expenses }: 
     try {
       const headers = ['Date', 'Category', 'Schedule C Line', 'Vendor', 'Description', 'Amount', 'Receipt'];
       const rows = expenses.map((expense) => [
-        format(new Date(expense.expense_date), 'yyyy-MM-dd'),
+        format(parseLocalDate(expense.expense_date), 'yyyy-MM-dd'),
         CATEGORY_LABELS[expense.category],
         SCHEDULE_C_MAPPING[expense.category].line,
         expense.vendor_name || '',
@@ -173,7 +174,7 @@ export function YearEndExports({ merchantId, businessName, taxYear, expenses }: 
     try {
       const headers = ['Date', 'Trip Type', 'Miles', 'Destination', 'Description', 'Vehicle'];
       const rows = mileageEntries.map((entry: any) => [
-        format(new Date(entry.trip_date), 'yyyy-MM-dd'),
+        format(parseLocalDate(entry.trip_date), 'yyyy-MM-dd'),
         entry.trip_type === 'pet_commute' ? 'Business' : 'Personal',
         entry.miles,
         entry.destination || '',

@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { formatLocalDate } from '@/utils/formatters';
 import { 
   FileText, 
   DollarSign, 
@@ -431,7 +432,7 @@ export default function AccountantPortal() {
                           const expenseNotes = getExpenseNotes(expense.id);
                           return (
                             <TableRow key={expense.id}>
-                              <TableCell>{format(new Date(expense.expense_date), 'MMM d, yyyy')}</TableCell>
+                              <TableCell>{formatLocalDate(expense.expense_date, 'MMM d, yyyy')}</TableCell>
                               <TableCell>
                                 <Badge variant="outline">{formatCategory(expense.category)}</Badge>
                               </TableCell>
@@ -481,7 +482,7 @@ export default function AccountantPortal() {
                                         </DialogHeader>
                                         <div className="space-y-4">
                                           <div className="bg-muted/50 p-3 rounded-lg text-sm">
-                                            <p><strong>Date:</strong> {format(new Date(expense.expense_date), 'MMM d, yyyy')}</p>
+                                            <p><strong>Date:</strong> {formatLocalDate(expense.expense_date, 'MMM d, yyyy')}</p>
                                             <p><strong>Amount:</strong> ${expense.amount.toFixed(2)}</p>
                                             <p><strong>Current Category:</strong> {formatCategory(expense.category)}</p>
                                           </div>
@@ -652,7 +653,7 @@ export default function AccountantPortal() {
                         <TableBody>
                           {mileage.map(entry => (
                             <TableRow key={entry.id}>
-                              <TableCell>{format(new Date(entry.trip_date), 'MMM d, yyyy')}</TableCell>
+                              <TableCell>{formatLocalDate(entry.trip_date, 'MMM d, yyyy')}</TableCell>
                               <TableCell>
                                 <Badge variant="outline">{entry.trip_type.replace('_', ' ')}</Badge>
                               </TableCell>
