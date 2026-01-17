@@ -29,6 +29,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   specialized_equipment: 'bg-violet-100 text-violet-800 dark:bg-violet-900 dark:text-violet-300',
   professional_services: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300',
   merchant_market: 'bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary',
+  platform_fees: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300',
   gas_mileage: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
   pet_supplies_treats: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
   equipment: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
@@ -38,6 +39,18 @@ const CATEGORY_COLORS: Record<string, string> = {
   software_subscriptions: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-300',
   training_education: 'bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-300',
   other: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300',
+};
+
+// Helper to get auto-logged tooltip text based on category
+const getAutoLoggedTooltip = (category: string): string => {
+  switch (category) {
+    case 'platform_fees':
+      return 'Auto-logged platform fee (3% per transaction)';
+    case 'merchant_market':
+      return 'Auto-logged from Merchant Market purchase';
+    default:
+      return 'Auto-logged expense';
+  }
 };
 
 export function ExpensesList({ expenses, onExpenseDeleted }: ExpensesListProps) {
@@ -105,7 +118,7 @@ export function ExpensesList({ expenses, onExpenseDeleted }: ExpensesListProps) 
                             <Sparkles className="h-3.5 w-3.5 text-primary" />
                           </TooltipTrigger>
                           <TooltipContent>
-                            <p>Auto-logged from Merchant Market</p>
+                            <p>{getAutoLoggedTooltip(expense.category)}</p>
                           </TooltipContent>
                         </Tooltip>
                       )}

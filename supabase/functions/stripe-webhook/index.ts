@@ -883,6 +883,35 @@ serve(async (req) => {
       console.log('✅ Wallet updated via database trigger');
       console.log('✅ Wallet activity logged');
 
+      // Auto-log platform fee as Tax Vault expense
+      if (merchant_id) {
+        const platformFee = amount * 0.03; // 3% platform fee
+        if (platformFee > 0) {
+          const expenseDate = new Date().toISOString().split('T')[0];
+          const taxYear = new Date().getFullYear();
+
+          const { error: expenseError } = await supabaseAdmin
+            .from('merchant_tax_expenses')
+            .insert({
+              merchant_id: merchant_id,
+              category: 'platform_fees',
+              amount: platformFee,
+              description: `Platform/Processing Fee (3%) on $${amount.toFixed(2)} sale`,
+              vendor_name: 'PawBucks Platform',
+              expense_date: expenseDate,
+              tax_year: taxYear,
+              is_auto_logged: true,
+              source_purchase_id: paymentIntent.id,
+            });
+
+          if (expenseError) {
+            console.error('Error auto-logging platform fee expense:', expenseError);
+          } else {
+            console.log(`✅ Platform fee ($${platformFee.toFixed(2)}) auto-logged to Tax Vault`);
+          }
+        }
+      }
+
       // ========================================
       // FUNDING DEALS REPAYMENT LOGIC
       // ========================================
