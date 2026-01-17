@@ -16,7 +16,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { format, isSameDay, startOfToday, parseISO } from "date-fns";
+import { format, isSameDay, startOfToday } from "date-fns";
+import { parseLocalDate } from '@/utils/formatters';
 import { 
   CheckCircle, 
   XCircle, 
@@ -216,7 +217,7 @@ export function BookingsCalendar({ bookings, onUpdateStatus }: BookingsCalendarP
                     <p className="text-sm text-muted-foreground">Date</p>
                     <p className="font-medium flex items-center gap-1">
                       <CalendarIcon className="w-4 h-4" />
-                      {format(parseISO(selectedBooking.booking_date), 'MMM d, yyyy')}
+                      {format(parseLocalDate(selectedBooking.booking_date), 'MMM d, yyyy')}
                     </p>
                   </div>
                   <div>
