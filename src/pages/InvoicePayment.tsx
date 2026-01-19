@@ -32,7 +32,7 @@ import {
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
-import { invoicingService, type Invoice } from "@/services/api/invoicing.service";
+import { type Invoice } from "@/services/api/invoicing.service";
 
 const InvoicePayment = () => {
   const { invoiceId } = useParams<{ invoiceId: string }>();
@@ -82,11 +82,13 @@ const InvoicePayment = () => {
           .eq("id", invoiceId);
 
         // Log activity
-        await invoicingService.createActivity({
-          invoice_id: invoiceId,
-          action: "viewed",
-          description: "Invoice viewed by client",
-        });
+        await supabase
+          .from("invoice_activity")
+          .insert({
+            invoice_id: invoiceId,
+            action: "viewed",
+            description: "Invoice viewed by client",
+          });
 
         // Fetch merchant
         const { data: merchantData } = await supabase

@@ -254,3 +254,12 @@ verify_jwt = false
 
 [functions.send-accountant-invitation]
 verify_jwt = true
+
+[functions.send-invoice-email]
+verify_jwt = true
+
+[functions.create-invoice-payment]
+verify_jwt = false
+
+[functions.generate-invoice-pdf]
+verify_jwt = false
