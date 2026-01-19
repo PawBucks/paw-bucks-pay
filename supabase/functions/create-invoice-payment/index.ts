@@ -1,0 +1,170 @@
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import Stripe from "https://esm.sh/stripe@18.5.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
+      apiVersion: "2025-08-27.basil",
+    });
+
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      { auth: { persistSession: false } }
+    );
+
+    const { invoiceId, amount, tipAmount } = await req.json();
+
+    if (!invoiceId || !amount) {
+      throw new Error("Invoice ID and amount are required");
+    }
+
+    // Fetch the invoice
+    const { data: invoice, error: invoiceError } = await supabase
+      .from("invoices")
+      .select("*")
+      .eq("id", invoiceId)
+      .single();
+
+    if (invoiceError || !invoice) {
+      throw new Error("Invoice not found");
+    }
+
+    // Fetch the merchant
+    const { data: merchant, error: merchantError } = await supabase
+      .from("merchants")
+      .select("*")
+      .eq("id", invoice.merchant_id)
+      .single();
+
+    if (merchantError || !merchant) {
+      throw new Error("Merchant not found");
+    }
+
+    const appUrl = Deno.env.get("APP_URL") || req.headers.get("origin") || "https://paw-bucks-pay.lovable.app";
+
+    // Create line items for Stripe Checkout
+    const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
+      {
+        price_data: {
+          currency: invoice.currency || "usd",
+          product_data: {
+            name: `Invoice #${invoice.invoice_number}`,
+            description: invoice.title || `Payment for invoice from ${merchant.business_name}`,
+          },
+          unit_amount: amount,
+        },
+        quantity: 1,
+      },
+    ];
+
+    // Add tip as separate line item if provided
+    if (tipAmount && tipAmount > 0) {
+      lineItems.push({
+        price_data: {
+          currency: invoice.currency || "usd",
+          product_data: {
+            name: "Tip",
+            description: "Optional gratuity",
+          },
+          unit_amount: tipAmount,
+        },
+        quantity: 1,
+      });
+    }
+
+    // Check if merchant has Stripe Connect
+    const connectedAccountId = merchant.stripe_account_id;
+
+    let session: Stripe.Checkout.Session;
+
+    if (connectedAccountId && merchant.stripe_account_status === "active") {
+      // Use Stripe Connect for direct payments to merchant
+      const applicationFee = Math.round((amount + (tipAmount || 0)) * 0.025); // 2.5% platform fee
+
+      session = await stripe.checkout.sessions.create({
+        payment_method_types: ["card"],
+        line_items: lineItems,
+        mode: "payment",
+        success_url: `${appUrl}/invoice/${invoiceId}/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${appUrl}/invoice/${invoiceId}/pay?token=${invoice.access_token}`,
+        customer_email: invoice.client_email,
+        metadata: {
+          invoice_id: invoiceId,
+          merchant_id: merchant.id,
+          type: "invoice_payment",
+          tip_amount: String(tipAmount || 0),
+        },
+        payment_intent_data: {
+          application_fee_amount: applicationFee,
+          transfer_data: {
+            destination: connectedAccountId,
+          },
+          metadata: {
+            invoice_id: invoiceId,
+            merchant_id: merchant.id,
+          },
+        },
+        billing_address_collection: "auto",
+      });
+    } else {
+      // Standard checkout without Connect
+      session = await stripe.checkout.sessions.create({
+        payment_method_types: ["card"],
+        line_items: lineItems,
+        mode: "payment",
+        success_url: `${appUrl}/invoice/${invoiceId}/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${appUrl}/invoice/${invoiceId}/pay?token=${invoice.access_token}`,
+        customer_email: invoice.client_email,
+        metadata: {
+          invoice_id: invoiceId,
+          merchant_id: merchant.id,
+          type: "invoice_payment",
+          tip_amount: String(tipAmount || 0),
+        },
+        billing_address_collection: "auto",
+      });
+    }
+
+    // Log activity
+    await supabase
+      .from("invoice_activity")
+      .insert({
+        invoice_id: invoiceId,
+        action: "payment_initiated",
+        description: `Payment of $${(amount / 100).toFixed(2)} initiated`,
+        metadata: {
+          checkout_session_id: session.id,
+          amount: amount,
+          tip_amount: tipAmount || 0,
+        },
+      });
+
+    return new Response(
+      JSON.stringify({ url: session.url, sessionId: session.id }),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      }
+    );
+  } catch (error: any) {
+    console.error("Error creating invoice payment:", error);
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 400,
+      }
+    );
+  }
+});
