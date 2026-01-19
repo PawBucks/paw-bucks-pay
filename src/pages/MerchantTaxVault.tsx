@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Header } from '@/components/Header';
@@ -6,11 +6,19 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Plus, Vault, DollarSign, Receipt, TrendingUp, Car, Home, Calculator, Download, Users } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { ArrowLeft, Plus, Vault, DollarSign, Receipt, TrendingUp, Car, Home, Calculator, Download, Users, Info } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { ExpenseEntryDialog, ExpensesList, CategorySummary, ReportGenerator, MileageLog, HomeOfficeCalculator, TaxLiabilityEstimator, YearEndExports, AccountantCollaboration, TaxExpense, TaxExpenseCategory } from '@/components/merchant/TaxVault';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
+
+// Fallback IRS mileage rates if database fetch fails
+const FALLBACK_IRS_RATES: Record<number, number> = {
+  2024: 0.67,
+  2025: 0.70,
+  2026: 0.725,
+};
 
 export default function MerchantTaxVault() {
   const navigate = useNavigate();
@@ -66,7 +74,91 @@ export default function MerchantTaxVault() {
     enabled: !!merchantId,
   });
 
-  const totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0);
+  // Fetch mileage entries for vehicle deduction calculation
+  const { data: mileageEntries = [] } = useQuery({
+    queryKey: ['mileage-log', merchantId, selectedYear],
+    queryFn: async () => {
+      if (!merchantId) return [];
+      const { data, error } = await supabase
+        .from('merchant_mileage_log')
+        .select('*')
+        .eq('merchant_id', merchantId)
+        .eq('tax_year', selectedYear);
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!merchantId,
+  });
+
+  // Fetch vehicle expenses for actual expense method
+  const { data: vehicleExpenses = [] } = useQuery({
+    queryKey: ['vehicle-expenses', merchantId, selectedYear],
+    queryFn: async () => {
+      if (!merchantId) return [];
+      const { data, error } = await supabase
+        .from('merchant_vehicle_expenses')
+        .select('*')
+        .eq('merchant_id', merchantId)
+        .eq('tax_year', selectedYear);
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!merchantId,
+  });
+
+  // Fetch IRS mileage rate for selected year
+  const { data: irsRateData } = useQuery({
+    queryKey: ['irs-mileage-rate', selectedYear],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('irs_mileage_rates')
+        .select('rate_per_mile')
+        .eq('tax_year', selectedYear)
+        .single();
+      if (error) return null;
+      return data;
+    },
+  });
+
+  const IRS_MILEAGE_RATE = irsRateData?.rate_per_mile || FALLBACK_IRS_RATES[selectedYear] || 0.70;
+
+  // Calculate comprehensive total deductions including best vehicle option
+  const deductionBreakdown = useMemo(() => {
+    // Total general expenses
+    const totalGeneralExpenses = expenses.reduce((sum, exp) => sum + Number(exp.amount || 0), 0);
+
+    // Calculate vehicle deduction (best option)
+    const businessMiles = mileageEntries
+      .filter((m: any) => m.trip_type === 'pet_commute')
+      .reduce((sum: number, m: any) => sum + Number(m.miles || 0), 0);
+    const totalMiles = mileageEntries.reduce((sum: number, m: any) => sum + Number(m.miles || 0), 0);
+    
+    // Standard Mileage Rate method
+    const standardMileageDeduction = businessMiles * IRS_MILEAGE_RATE;
+    
+    // Actual Expenses method
+    const totalVehicleExpenses = vehicleExpenses.reduce((sum: number, v: any) => sum + Number(v.amount || 0), 0);
+    const businessMileagePercentage = totalMiles > 0 ? (businessMiles / totalMiles) : 0;
+    const actualExpensesDeduction = totalVehicleExpenses * businessMileagePercentage;
+    
+    // Use whichever vehicle deduction is higher (best option)
+    const vehicleDeduction = Math.max(standardMileageDeduction, actualExpensesDeduction);
+    const vehicleMethod = standardMileageDeduction >= actualExpensesDeduction ? 'standard' : 'actual';
+
+    // Total comprehensive deductions
+    const totalDeductions = totalGeneralExpenses + vehicleDeduction;
+
+    return {
+      totalGeneralExpenses,
+      businessMiles,
+      standardMileageDeduction,
+      actualExpensesDeduction,
+      vehicleDeduction,
+      vehicleMethod,
+      totalDeductions,
+    };
+  }, [expenses, mileageEntries, vehicleExpenses, IRS_MILEAGE_RATE]);
+
   const categoryCount = new Set(expenses.map(exp => exp.category)).size;
 
   if (!user) {
@@ -119,43 +211,95 @@ export default function MerchantTaxVault() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Total Deductions</p>
-                  <p className="text-2xl font-bold">${totalExpenses.toFixed(2)}</p>
+        <TooltipProvider>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="flex items-center gap-1">
+                      <p className="text-sm text-muted-foreground">Total Deductions</p>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs">
+                          <div className="space-y-1 text-xs">
+                            <p className="font-semibold">Deduction Breakdown:</p>
+                            <div className="flex justify-between">
+                              <span>General Expenses:</span>
+                              <span>${deductionBreakdown.totalGeneralExpenses.toFixed(2)}</span>
+                            </div>
+                            {deductionBreakdown.vehicleDeduction > 0 && (
+                              <div className="flex justify-between">
+                                <span>Vehicle ({deductionBreakdown.vehicleMethod === 'standard' ? 'Mileage' : 'Actual'}):</span>
+                                <span>${deductionBreakdown.vehicleDeduction.toFixed(2)}</span>
+                              </div>
+                            )}
+                            <p className="text-muted-foreground pt-1 border-t">
+                              Home office deductions are calculated separately in the Home Office tab.
+                            </p>
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+                    <p className="text-2xl font-bold">${deductionBreakdown.totalDeductions.toFixed(2)}</p>
+                  </div>
+                  <DollarSign className="h-8 w-8 text-green-500 opacity-80" />
                 </div>
-                <DollarSign className="h-8 w-8 text-green-500 opacity-80" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Total Expenses</p>
-                  <p className="text-2xl font-bold">{expenses.length}</p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Logged Expenses</p>
+                    <p className="text-2xl font-bold">{expenses.length}</p>
+                  </div>
+                  <Receipt className="h-8 w-8 text-blue-500 opacity-80" />
                 </div>
-                <Receipt className="h-8 w-8 text-blue-500 opacity-80" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Categories Used</p>
-                  <p className="text-2xl font-bold">{categoryCount}</p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="flex items-center gap-1">
+                      <p className="text-sm text-muted-foreground">Vehicle Deduction</p>
+                      {deductionBreakdown.vehicleDeduction > 0 && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-xs">
+                            <div className="space-y-1 text-xs">
+                              <p className="font-semibold">Best Option Selected:</p>
+                              <div className="flex justify-between">
+                                <span>Standard Mileage ({deductionBreakdown.businessMiles.toFixed(0)} mi):</span>
+                                <span>${deductionBreakdown.standardMileageDeduction.toFixed(2)}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Actual Expenses:</span>
+                                <span>${deductionBreakdown.actualExpensesDeduction.toFixed(2)}</span>
+                              </div>
+                              <p className="text-green-500 pt-1 border-t">
+                                Using {deductionBreakdown.vehicleMethod === 'standard' ? 'Standard Mileage' : 'Actual Expenses'} method (higher value)
+                              </p>
+                            </div>
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
+                    </div>
+                    <p className="text-2xl font-bold">${deductionBreakdown.vehicleDeduction.toFixed(2)}</p>
+                  </div>
+                  <Car className="h-8 w-8 text-orange-500 opacity-80" />
                 </div>
-                <TrendingUp className="h-8 w-8 text-purple-500 opacity-80" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TooltipProvider>
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="tax-estimate" className="space-y-6">
