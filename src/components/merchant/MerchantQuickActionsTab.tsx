@@ -11,6 +11,7 @@ import {
   CalendarDays,
   Vault,
   ArrowRight,
+  Receipt,
 } from "lucide-react";
 
 type MerchantQuickActionsTabProps = {
@@ -106,6 +107,14 @@ export function MerchantQuickActionsTab({
       onClick: () => onNavigate("/merchant/tax-vault"),
       color: "text-emerald-500",
       bgColor: "bg-emerald-500/10",
+    },
+    {
+      title: "Invoicing",
+      description: "Create and send professional invoices",
+      icon: Receipt,
+      onClick: () => onNavigate("/merchant/invoicing"),
+      color: "text-indigo-500",
+      bgColor: "bg-indigo-500/10",
     },
   ];
 
