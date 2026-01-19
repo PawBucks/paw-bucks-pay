@@ -446,6 +446,13 @@ export type Database = {
             foreignKeyName: "direct_payments_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "merchant_customer_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "direct_payments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -2525,6 +2532,13 @@ export type Database = {
             foreignKeyName: "merchants_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: true
+            referencedRelation: "merchant_customer_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchants_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -3127,6 +3141,13 @@ export type Database = {
             foreignKeyName: "pet_profiles_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "merchant_customer_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -3503,6 +3524,13 @@ export type Database = {
             foreignKeyName: "referrals_referee_id_fkey"
             columns: ["referee_id"]
             isOneToOne: true
+            referencedRelation: "merchant_customer_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referrals_referee_id_fkey"
+            columns: ["referee_id"]
+            isOneToOne: true
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -3511,6 +3539,13 @@ export type Database = {
             columns: ["referee_id"]
             isOneToOne: true
             referencedRelation: "reviewer_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referrals_referrer_id_fkey"
+            columns: ["referrer_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_customer_contacts"
             referencedColumns: ["id"]
           },
           {
@@ -4307,6 +4342,13 @@ export type Database = {
             foreignKeyName: "transactions_pet_owner_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "merchant_customer_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_pet_owner_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -4536,6 +4578,13 @@ export type Database = {
             foreignKeyName: "wallets_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: true
+            referencedRelation: "merchant_customer_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wallets_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -4735,6 +4784,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      merchant_customer_contacts: {
+        Row: {
+          email: string | null
+          full_name: string | null
+          id: string | null
+          phone: string | null
+          stripe_customer_id: string | null
+        }
+        Insert: {
+          email?: string | null
+          full_name?: string | null
+          id?: string | null
+          phone?: string | null
+          stripe_customer_id?: string | null
+        }
+        Update: {
+          email?: string | null
+          full_name?: string | null
+          id?: string | null
+          phone?: string | null
+          stripe_customer_id?: string | null
+        }
+        Relationships: []
       }
       merchant_reviews_public: {
         Row: {
