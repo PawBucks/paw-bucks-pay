@@ -1,0 +1,135 @@
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.2';
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+serve(async (req) => {
+  // Handle CORS preflight
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const { invoiceId, accessToken } = await req.json();
+
+    if (!invoiceId || !accessToken) {
+      return new Response(
+        JSON.stringify({ error: 'Invoice ID and access token are required' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      );
+    }
+
+    // Use service role to bypass RLS and validate access token server-side
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
+    // Fetch invoice with access token validation
+    const { data: invoice, error: invoiceError } = await supabaseAdmin
+      .from('invoices')
+      .select(`
+        id,
+        invoice_number,
+        title,
+        status,
+        issue_date,
+        due_date,
+        client_name,
+        client_email,
+        client_phone,
+        client_company,
+        client_address,
+        subtotal,
+        discount_type,
+        discount_value,
+        discount_amount,
+        tax_rate,
+        tax_amount,
+        shipping_amount,
+        total,
+        amount_paid,
+        amount_due,
+        paid_at,
+        notes,
+        terms_conditions,
+        footer,
+        allow_partial_payments,
+        allow_tips,
+        accept_credit_card,
+        accept_bank_transfer,
+        view_count,
+        merchant_id,
+        invoice_items (
+          id,
+          description,
+          quantity,
+          unit_price,
+          subtotal,
+          total
+        ),
+        invoice_payments (
+          id,
+          amount,
+          payment_date,
+          payment_method,
+          status
+        )
+      `)
+      .eq('id', invoiceId)
+      .eq('access_token', accessToken)
+      .single();
+
+    if (invoiceError || !invoice) {
+      console.log('Invoice fetch error:', invoiceError);
+      return new Response(
+        JSON.stringify({ error: 'Invoice not found or access denied' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 404 }
+      );
+    }
+
+    // Fetch merchant info (public data only)
+    const { data: merchant } = await supabaseAdmin
+      .from('merchants')
+      .select('id, business_name, logo_url, address, phone, email, stripe_account_id')
+      .eq('id', invoice.merchant_id)
+      .single();
+
+    // Update view count
+    await supabaseAdmin
+      .from('invoices')
+      .update({
+        view_count: (invoice.view_count || 0) + 1,
+        viewed_at: new Date().toISOString(),
+      })
+      .eq('id', invoiceId);
+
+    // Log activity
+    await supabaseAdmin
+      .from('invoice_activity')
+      .insert({
+        invoice_id: invoiceId,
+        action: 'viewed',
+        description: 'Invoice viewed by client',
+      });
+
+    return new Response(
+      JSON.stringify({ 
+        invoice,
+        merchant: merchant || null
+      }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
+    );
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Error fetching public invoice:', errorMessage);
+    
+    return new Response(
+      JSON.stringify({ error: errorMessage }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+    );
+  }
+});
