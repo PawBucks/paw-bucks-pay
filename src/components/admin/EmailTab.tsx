@@ -330,7 +330,9 @@ export function EmailTab() {
                   htmlContent || "<p class='text-muted-foreground'>Your content will appear here...</p>",
                   { 
                     ALLOWED_TAGS: ['h1','h2','h3','h4','h5','h6','p','br','strong','b','em','i','u','ul','ol','li','a','span','div','blockquote','hr'],
-                    ALLOWED_ATTR: ['href','class','style']
+                    ALLOWED_ATTR: ['href','class'],
+                    ADD_URI_SAFE_ATTR: ['href'],
+                    ALLOW_DATA_ATTR: false
                   }
                 )
               }}

@@ -1,10 +1,29 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.57.2';
+import { z } from "https://esm.sh/zod@3.22.4";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-api-key',
 };
+
+// Input validation schema for POS transactions
+const posTransactionSchema = z.object({
+  transaction_id: z.string().max(255).optional().nullable(),
+  customer_email: z.string().email().max(255).optional().nullable(),
+  customer_phone: z.string().max(20).optional().nullable(),
+  amount: z.number().positive().max(1000000),
+  currency: z.string().length(3).default('USD'),
+  items: z.array(z.object({
+    name: z.string().max(255).optional(),
+    quantity: z.number().positive().optional(),
+    price: z.number().positive().optional(),
+  })).optional().nullable(),
+  timestamp: z.string().optional().nullable(),
+}).refine(
+  data => data.customer_email || data.customer_phone,
+  { message: "Either customer_email or customer_phone is required" }
+);
 
 // Hash the API key to compare with stored hash
 async function hashApiKey(key: string): Promise<string> {
@@ -160,26 +179,26 @@ serve(async (req) => {
       .update({ last_used_at: new Date().toISOString() })
       .eq('id', integration.id);
 
-    // Parse transaction data
+    // Parse and validate transaction data
     const body = await req.json();
+    
+    // Validate input with Zod schema
+    const validationResult = posTransactionSchema.safeParse(body);
+    if (!validationResult.success) {
+      const errorMessage = validationResult.error.errors.map(e => e.message).join(', ');
+      console.error('Validation failed:', errorMessage);
+      throw new Error(`Invalid request data: ${errorMessage}`);
+    }
+    
     const {
       transaction_id,
       customer_email,
       customer_phone,
       amount,
-      currency = 'USD',
+      currency,
       items,
       timestamp,
-    } = body;
-
-    // Validate required fields
-    if (!amount || amount <= 0) {
-      throw new Error('Valid amount is required');
-    }
-
-    if (!customer_email && !customer_phone) {
-      throw new Error('Either customer_email or customer_phone is required to match rewards');
-    }
+    } = validationResult.data;
 
     // Check for duplicate transaction
     if (transaction_id) {

@@ -1,10 +1,27 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.76.1";
+import { z } from "https://esm.sh/zod@3.22.4";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+// Input validation schemas
+const baseRequestSchema = z.object({
+  accessToken: z.string().min(1).max(500),
+  selectedYear: z.number().int().min(2020).max(2100).optional(),
+  action: z.enum(['validate', 'getExpenses', 'getMileage', 'getIncome', 'addNote']),
+});
+
+const addNoteSchema = z.object({
+  accessToken: z.string().min(1).max(500),
+  selectedYear: z.number().int().min(2020).max(2100).optional(),
+  action: z.literal('addNote'),
+  expenseId: z.string().uuid(),
+  note: z.string().min(1).max(2000),
+  suggestedCategory: z.string().max(100).optional().nullable(),
+});
 
 function logStep(step: string, details?: Record<string, unknown>) {
   console.log(`[ACCOUNTANT-PORTAL] ${step}`, details ? JSON.stringify(details) : '');
@@ -20,14 +37,20 @@ serve(async (req: Request) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { action, accessToken, selectedYear } = await req.json();
-
-    if (!accessToken) {
+    const rawBody = await req.json();
+    
+    // Validate input with Zod schema
+    const baseValidation = baseRequestSchema.safeParse(rawBody);
+    if (!baseValidation.success) {
+      const errorMessage = baseValidation.error.errors.map(e => e.message).join(', ');
+      logStep("Validation failed", { error: errorMessage });
       return new Response(
-        JSON.stringify({ error: "Access token required" }),
+        JSON.stringify({ error: "Invalid request parameters" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    const { action, accessToken, selectedYear } = baseValidation.data;
 
     logStep("Processing request", { action, accessToken: accessToken.substring(0, 8) + "..." });
 
@@ -197,14 +220,17 @@ serve(async (req: Request) => {
         );
       }
 
-      const { expenseId, note, suggestedCategory } = await req.json();
-
-      if (!expenseId || !note) {
+      // Validate addNote request with stricter schema
+      const noteValidation = addNoteSchema.safeParse(rawBody);
+      if (!noteValidation.success) {
+        const errorMessage = noteValidation.error.errors.map(e => e.message).join(', ');
         return new Response(
-          JSON.stringify({ error: "Expense ID and note are required" }),
+          JSON.stringify({ error: "Invalid note parameters" }),
           { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
+
+      const { expenseId, note, suggestedCategory } = noteValidation.data;
 
       const { error: insertError } = await supabase.from('accountant_expense_notes').insert({
         invitation_id: invitation.id,
