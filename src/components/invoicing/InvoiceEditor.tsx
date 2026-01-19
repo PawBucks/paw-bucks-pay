@@ -760,14 +760,17 @@ export function InvoiceEditor({
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Discount</FormLabel>
-                        <Select value={field.value || ""} onValueChange={field.onChange}>
+                        <Select 
+                          value={field.value || "none"} 
+                          onValueChange={(val) => field.onChange(val === "none" ? undefined : val)}
+                        >
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="None" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="">None</SelectItem>
+                            <SelectItem value="none">None</SelectItem>
                             <SelectItem value="percentage">%</SelectItem>
                             <SelectItem value="flat">$</SelectItem>
                           </SelectContent>
