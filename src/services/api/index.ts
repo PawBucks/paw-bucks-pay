@@ -9,3 +9,4 @@ export * from './merchants.service';
 export * from './transactions.service';
 export * from './subscriptions.service';
 export * from './offers.service';
+export * from './invoicing.service';
