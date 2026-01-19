@@ -6,13 +6,12 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Generate a secure random API key
+// Generate a cryptographically secure random API key
 function generateApiKey(): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let key = 'pk_live_';
-  for (let i = 0; i < 32; i++) {
-    key += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
+  const array = new Uint8Array(32);
+  crypto.getRandomValues(array);
+  const key = 'pk_live_' + Array.from(array, b => chars[b % chars.length]).join('');
   return key;
 }
 
