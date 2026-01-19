@@ -599,6 +599,615 @@ export type Database = {
           },
         ]
       }
+      invoice_activity: {
+        Row: {
+          action: string
+          created_at: string
+          description: string | null
+          id: string
+          invoice_id: string
+          ip_address: string | null
+          metadata: Json | null
+          performed_by: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          invoice_id: string
+          ip_address?: string | null
+          metadata?: Json | null
+          performed_by?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          invoice_id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          performed_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_activity_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoice_clients: {
+        Row: {
+          address_line1: string | null
+          address_line2: string | null
+          city: string | null
+          company_name: string | null
+          country: string | null
+          created_at: string
+          email: string
+          id: string
+          is_active: boolean | null
+          merchant_id: string
+          name: string
+          notes: string | null
+          phone: string | null
+          postal_code: string | null
+          state: string | null
+          tax_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          address_line1?: string | null
+          address_line2?: string | null
+          city?: string | null
+          company_name?: string | null
+          country?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          is_active?: boolean | null
+          merchant_id: string
+          name: string
+          notes?: string | null
+          phone?: string | null
+          postal_code?: string | null
+          state?: string | null
+          tax_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address_line1?: string | null
+          address_line2?: string | null
+          city?: string | null
+          company_name?: string | null
+          country?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          is_active?: boolean | null
+          merchant_id?: string
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          postal_code?: string | null
+          state?: string | null
+          tax_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_clients_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_clients_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoice_items: {
+        Row: {
+          created_at: string
+          description: string
+          discount_amount: number | null
+          discount_type: string | null
+          discount_value: number | null
+          id: string
+          invoice_id: string
+          quantity: number
+          service_id: string | null
+          sort_order: number | null
+          subtotal: number | null
+          tax_amount: number | null
+          tax_rate: number | null
+          total: number | null
+          unit_price: number
+          unit_type: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          discount_amount?: number | null
+          discount_type?: string | null
+          discount_value?: number | null
+          id?: string
+          invoice_id: string
+          quantity?: number
+          service_id?: string | null
+          sort_order?: number | null
+          subtotal?: number | null
+          tax_amount?: number | null
+          tax_rate?: number | null
+          total?: number | null
+          unit_price: number
+          unit_type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          discount_amount?: number | null
+          discount_type?: string | null
+          discount_value?: number | null
+          id?: string
+          invoice_id?: string
+          quantity?: number
+          service_id?: string | null
+          sort_order?: number | null
+          subtotal?: number | null
+          tax_amount?: number | null
+          tax_rate?: number | null
+          total?: number | null
+          unit_price?: number
+          unit_type?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_items_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_items_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoice_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          invoice_id: string
+          notes: string | null
+          payment_date: string
+          payment_method: string
+          processing_fee: number | null
+          recorded_by: string | null
+          reference_number: string | null
+          status: string
+          stripe_charge_id: string | null
+          stripe_payment_intent_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          invoice_id: string
+          notes?: string | null
+          payment_date?: string
+          payment_method: string
+          processing_fee?: number | null
+          recorded_by?: string | null
+          reference_number?: string | null
+          status?: string
+          stripe_charge_id?: string | null
+          stripe_payment_intent_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          invoice_id?: string
+          notes?: string | null
+          payment_date?: string
+          payment_method?: string
+          processing_fee?: number | null
+          recorded_by?: string | null
+          reference_number?: string | null
+          status?: string
+          stripe_charge_id?: string | null
+          stripe_payment_intent_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_payments_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoice_settings: {
+        Row: {
+          accent_color: string | null
+          bank_account_name: string | null
+          bank_account_number_last4: string | null
+          bank_name: string | null
+          bank_routing_number: string | null
+          created_at: string
+          default_currency: string | null
+          default_footer: string | null
+          default_notes: string | null
+          default_payment_terms: number | null
+          default_tax_rate: number | null
+          id: string
+          invoice_prefix: string | null
+          late_fee_amount: number | null
+          late_fee_enabled: boolean | null
+          late_fee_grace_days: number | null
+          late_fee_type: string | null
+          logo_url: string | null
+          merchant_id: string
+          next_invoice_number: number | null
+          overdue_reminder_days: number[] | null
+          paypal_email: string | null
+          reminder_days_before: number[] | null
+          reminder_enabled: boolean | null
+          updated_at: string
+          venmo_handle: string | null
+        }
+        Insert: {
+          accent_color?: string | null
+          bank_account_name?: string | null
+          bank_account_number_last4?: string | null
+          bank_name?: string | null
+          bank_routing_number?: string | null
+          created_at?: string
+          default_currency?: string | null
+          default_footer?: string | null
+          default_notes?: string | null
+          default_payment_terms?: number | null
+          default_tax_rate?: number | null
+          id?: string
+          invoice_prefix?: string | null
+          late_fee_amount?: number | null
+          late_fee_enabled?: boolean | null
+          late_fee_grace_days?: number | null
+          late_fee_type?: string | null
+          logo_url?: string | null
+          merchant_id: string
+          next_invoice_number?: number | null
+          overdue_reminder_days?: number[] | null
+          paypal_email?: string | null
+          reminder_days_before?: number[] | null
+          reminder_enabled?: boolean | null
+          updated_at?: string
+          venmo_handle?: string | null
+        }
+        Update: {
+          accent_color?: string | null
+          bank_account_name?: string | null
+          bank_account_number_last4?: string | null
+          bank_name?: string | null
+          bank_routing_number?: string | null
+          created_at?: string
+          default_currency?: string | null
+          default_footer?: string | null
+          default_notes?: string | null
+          default_payment_terms?: number | null
+          default_tax_rate?: number | null
+          id?: string
+          invoice_prefix?: string | null
+          late_fee_amount?: number | null
+          late_fee_enabled?: boolean | null
+          late_fee_grace_days?: number | null
+          late_fee_type?: string | null
+          logo_url?: string | null
+          merchant_id?: string
+          next_invoice_number?: number | null
+          overdue_reminder_days?: number[] | null
+          paypal_email?: string | null
+          reminder_days_before?: number[] | null
+          reminder_enabled?: boolean | null
+          updated_at?: string
+          venmo_handle?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_settings_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: true
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_settings_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: true
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoice_templates: {
+        Row: {
+          allow_partial_payments: boolean | null
+          created_at: string
+          default_items: Json | null
+          description: string | null
+          discount_type: string | null
+          discount_value: number | null
+          footer: string | null
+          id: string
+          is_default: boolean | null
+          merchant_id: string
+          name: string
+          notes: string | null
+          payment_terms: number | null
+          tax_rate: number | null
+          terms_conditions: string | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          allow_partial_payments?: boolean | null
+          created_at?: string
+          default_items?: Json | null
+          description?: string | null
+          discount_type?: string | null
+          discount_value?: number | null
+          footer?: string | null
+          id?: string
+          is_default?: boolean | null
+          merchant_id: string
+          name: string
+          notes?: string | null
+          payment_terms?: number | null
+          tax_rate?: number | null
+          terms_conditions?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          allow_partial_payments?: boolean | null
+          created_at?: string
+          default_items?: Json | null
+          description?: string | null
+          discount_type?: string | null
+          discount_value?: number | null
+          footer?: string | null
+          id?: string
+          is_default?: boolean | null
+          merchant_id?: string
+          name?: string
+          notes?: string | null
+          payment_terms?: number | null
+          tax_rate?: number | null
+          terms_conditions?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_templates_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_templates_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          accept_bank_transfer: boolean | null
+          accept_credit_card: boolean | null
+          accept_pawbucks: boolean | null
+          access_token: string
+          allow_partial_payments: boolean | null
+          allow_tips: boolean | null
+          amount_due: number | null
+          amount_paid: number | null
+          attachment_urls: string[] | null
+          client_address: string | null
+          client_company: string | null
+          client_email: string
+          client_id: string | null
+          client_name: string
+          client_phone: string | null
+          created_at: string
+          currency: string | null
+          discount_amount: number | null
+          discount_type: string | null
+          discount_value: number | null
+          due_date: string
+          footer: string | null
+          id: string
+          invoice_number: string
+          is_recurring: boolean | null
+          issue_date: string
+          merchant_id: string
+          next_invoice_date: string | null
+          notes: string | null
+          paid_at: string | null
+          parent_invoice_id: string | null
+          payment_terms: number | null
+          recurring_end_date: string | null
+          recurring_interval: string | null
+          sent_at: string | null
+          shipping_amount: number | null
+          status: string
+          stripe_invoice_id: string | null
+          stripe_payment_intent_id: string | null
+          subtotal: number
+          tax_amount: number | null
+          tax_rate: number | null
+          terms_conditions: string | null
+          title: string | null
+          total: number
+          updated_at: string
+          view_count: number | null
+          viewed_at: string | null
+        }
+        Insert: {
+          accept_bank_transfer?: boolean | null
+          accept_credit_card?: boolean | null
+          accept_pawbucks?: boolean | null
+          access_token?: string
+          allow_partial_payments?: boolean | null
+          allow_tips?: boolean | null
+          amount_due?: number | null
+          amount_paid?: number | null
+          attachment_urls?: string[] | null
+          client_address?: string | null
+          client_company?: string | null
+          client_email: string
+          client_id?: string | null
+          client_name: string
+          client_phone?: string | null
+          created_at?: string
+          currency?: string | null
+          discount_amount?: number | null
+          discount_type?: string | null
+          discount_value?: number | null
+          due_date: string
+          footer?: string | null
+          id?: string
+          invoice_number: string
+          is_recurring?: boolean | null
+          issue_date?: string
+          merchant_id: string
+          next_invoice_date?: string | null
+          notes?: string | null
+          paid_at?: string | null
+          parent_invoice_id?: string | null
+          payment_terms?: number | null
+          recurring_end_date?: string | null
+          recurring_interval?: string | null
+          sent_at?: string | null
+          shipping_amount?: number | null
+          status?: string
+          stripe_invoice_id?: string | null
+          stripe_payment_intent_id?: string | null
+          subtotal?: number
+          tax_amount?: number | null
+          tax_rate?: number | null
+          terms_conditions?: string | null
+          title?: string | null
+          total?: number
+          updated_at?: string
+          view_count?: number | null
+          viewed_at?: string | null
+        }
+        Update: {
+          accept_bank_transfer?: boolean | null
+          accept_credit_card?: boolean | null
+          accept_pawbucks?: boolean | null
+          access_token?: string
+          allow_partial_payments?: boolean | null
+          allow_tips?: boolean | null
+          amount_due?: number | null
+          amount_paid?: number | null
+          attachment_urls?: string[] | null
+          client_address?: string | null
+          client_company?: string | null
+          client_email?: string
+          client_id?: string | null
+          client_name?: string
+          client_phone?: string | null
+          created_at?: string
+          currency?: string | null
+          discount_amount?: number | null
+          discount_type?: string | null
+          discount_value?: number | null
+          due_date?: string
+          footer?: string | null
+          id?: string
+          invoice_number?: string
+          is_recurring?: boolean | null
+          issue_date?: string
+          merchant_id?: string
+          next_invoice_date?: string | null
+          notes?: string | null
+          paid_at?: string | null
+          parent_invoice_id?: string | null
+          payment_terms?: number | null
+          recurring_end_date?: string | null
+          recurring_interval?: string | null
+          sent_at?: string | null
+          shipping_amount?: number | null
+          status?: string
+          stripe_invoice_id?: string | null
+          stripe_payment_intent_id?: string | null
+          subtotal?: number
+          tax_amount?: number | null
+          tax_rate?: number | null
+          terms_conditions?: string | null
+          title?: string | null
+          total?: number
+          updated_at?: string
+          view_count?: number | null
+          viewed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "invoice_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_parent_invoice_id_fkey"
+            columns: ["parent_invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       irs_mileage_rates: {
         Row: {
           created_at: string
@@ -4191,6 +4800,10 @@ export type Database = {
       aggregate_sponsored_stats: {
         Args: { target_date?: string }
         Returns: undefined
+      }
+      generate_invoice_number: {
+        Args: { p_merchant_id: string }
+        Returns: string
       }
       generate_redemption_code: { Args: never; Returns: string }
       generate_referral_code: { Args: never; Returns: string }
