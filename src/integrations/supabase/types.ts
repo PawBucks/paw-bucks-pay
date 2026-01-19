@@ -4959,6 +4959,10 @@ export type Database = {
         Args: { token_param: string }
         Returns: string
       }
+      validate_invoice_access: {
+        Args: { invoice_id: string; token: string }
+        Returns: boolean
+      }
       vest_pending_pawbucks: { Args: never; Returns: number }
       vet_can_view_pet: {
         Args: { pet_id: string; vet_user_id: string }

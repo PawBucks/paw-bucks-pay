@@ -55,49 +55,21 @@ const InvoicePayment = () => {
       }
 
       try {
-        // Fetch invoice with access token validation
-        const { data: invoiceData, error: invoiceError } = await supabase
-          .from("invoices")
-          .select(`
-            *,
-            invoice_items (*),
-            invoice_payments (*)
-          `)
-          .eq("id", invoiceId)
-          .eq("access_token", accessToken)
-          .single();
+        // Use edge function to securely fetch invoice with access token validation
+        const { data, error } = await supabase.functions.invoke("get-public-invoice", {
+          body: {
+            invoiceId,
+            accessToken,
+          },
+        });
 
-        if (invoiceError) throw invoiceError;
+        if (error) throw error;
+        if (!data?.invoice) throw new Error("Invoice not found");
         
-        setInvoice(invoiceData as any);
-        setPaymentAmount((invoiceData.amount_due || invoiceData.total || 0).toFixed(2));
+        setInvoice(data.invoice as any);
+        setPaymentAmount((data.invoice.amount_due || data.invoice.total || 0).toFixed(2));
 
-        // Track view
-        await supabase
-          .from("invoices")
-          .update({
-            view_count: (invoiceData.view_count || 0) + 1,
-            viewed_at: new Date().toISOString(),
-          })
-          .eq("id", invoiceId);
-
-        // Log activity
-        await supabase
-          .from("invoice_activity")
-          .insert({
-            invoice_id: invoiceId,
-            action: "viewed",
-            description: "Invoice viewed by client",
-          });
-
-        // Fetch merchant
-        const { data: merchantData } = await supabase
-          .from("merchants")
-          .select("*")
-          .eq("id", invoiceData.merchant_id)
-          .single();
-
-        if (merchantData) setMerchant(merchantData);
+        if (data.merchant) setMerchant(data.merchant);
       } catch (error) {
         console.error("Error loading invoice:", error);
         toast.error("Failed to load invoice");
