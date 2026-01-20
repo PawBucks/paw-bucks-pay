@@ -166,11 +166,14 @@ const MerchantInvoicing = () => {
         return new Date().toISOString().split("T")[0];
       };
       
+      // Remove 'items' from data - items are stored in separate invoice_items table
+      const { items: _items, ...invoiceData } = data;
+      
       const formattedData = {
-        ...data,
-        issue_date: formatDate(data.issue_date),
-        due_date: formatDate(data.due_date),
-        recurring_end_date: data.recurring_end_date ? formatDate(data.recurring_end_date) : null,
+        ...invoiceData,
+        issue_date: formatDate(invoiceData.issue_date),
+        due_date: formatDate(invoiceData.due_date),
+        recurring_end_date: invoiceData.recurring_end_date ? formatDate(invoiceData.recurring_end_date) : null,
       };
       
       if (selectedInvoice?.id) {
