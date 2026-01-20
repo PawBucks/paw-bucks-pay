@@ -52,8 +52,11 @@ const InvoicePayment = () => {
   const [tipAmount, setTipAmount] = useState<string>("0");
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   
-  // PawBucks state
+  // Auth state - REQUIRED for payments
   const [user, setUser] = useState<any>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  
+  // PawBucks state
   const [pawbucksBalance, setPawbucksBalance] = useState(0);
   const [pawbucksToUse, setPawbucksToUse] = useState(0);
   const [loadingPawbucks, setLoadingPawbucks] = useState(false);
@@ -92,39 +95,56 @@ const InvoicePayment = () => {
     loadInvoice();
   }, [invoiceId, accessToken]);
 
-  // Load user - REQUIRED for all invoice payments
+  // Check auth state - REQUIRED for all invoice payments
   useEffect(() => {
-    const loadUserAndPawbucks = async () => {
+    const checkAuth = async () => {
+      setAuthLoading(true);
       try {
         const { data: { user: currentUser } } = await supabase.auth.getUser();
-        if (currentUser) {
-          setUser(currentUser);
-          
-          // Load PawBucks balance if invoice accepts PawBucks
-          if (invoice?.accept_pawbucks) {
-            setLoadingPawbucks(true);
-            
-            const { data: wallet } = await supabase
-              .from("pawbucks_wallet")
-              .select("balance")
-              .eq("user_id", currentUser.id)
-              .single();
-            
-            if (wallet) {
-              setPawbucksBalance(wallet.balance);
-            }
-            setLoadingPawbucks(false);
-          }
-        }
+        setUser(currentUser);
       } catch (error) {
-        console.error("Error loading user:", error);
+        console.error("Error checking auth:", error);
+        setUser(null);
+      } finally {
+        setAuthLoading(false);
       }
     };
 
-    if (invoice) {
-      loadUserAndPawbucks();
-    }
-  }, [invoice]);
+    checkAuth();
+
+    // Listen for auth changes (e.g., user logs in from redirect)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Load PawBucks balance when user is authenticated and invoice is loaded
+  useEffect(() => {
+    const loadPawbucksBalance = async () => {
+      if (!user || !invoice?.accept_pawbucks) return;
+      
+      setLoadingPawbucks(true);
+      try {
+        const { data: wallet } = await supabase
+          .from("pawbucks_wallet")
+          .select("balance")
+          .eq("user_id", user.id)
+          .single();
+        
+        if (wallet) {
+          setPawbucksBalance(wallet.balance);
+        }
+      } catch (error) {
+        console.error("Error loading PawBucks balance:", error);
+      } finally {
+        setLoadingPawbucks(false);
+      }
+    };
+
+    loadPawbucksBalance();
+  }, [user, invoice]);
 
   const totalPayment = parseFloat(paymentAmount || "0") + parseFloat(tipAmount || "0");
   const pawbucksValueUSD = pawbucksToUse * PAWBUCKS_TO_USD;
@@ -467,6 +487,65 @@ const InvoicePayment = () => {
                   </p>
                 </CardContent>
               </Card>
+            ) : authLoading ? (
+              <Card>
+                <CardContent className="pt-6 text-center">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
+                  <p className="text-muted-foreground">Checking authentication...</p>
+                </CardContent>
+              </Card>
+            ) : !user ? (
+              /* Login Required - Must sign in to pay */
+              <Card className="border-primary/50">
+                <CardHeader className="text-center pb-2">
+                  <div className="h-16 w-16 rounded-full bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/50 dark:to-orange-900/50 flex items-center justify-center mx-auto mb-3">
+                    <Coins className="h-8 w-8 text-amber-600" />
+                  </div>
+                  <CardTitle>Sign In Required</CardTitle>
+                  <CardDescription>
+                    You must sign in or create an account to pay this invoice
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2 text-sm">
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      <span>Earn up to 30x PawBucks rewards</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      <span>Pay with PawBucks + credit card</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      <span>Track all your payment history</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      <span>Receive payment receipts via email</span>
+                    </div>
+                  </div>
+                  
+                  <Separator />
+                  
+                  <div className="p-4 bg-muted rounded-lg text-center">
+                    <p className="text-sm text-muted-foreground mb-1">Amount Due</p>
+                    <p className="text-2xl font-bold">${Number(amountDue).toFixed(2)}</p>
+                  </div>
+                  
+                  <Button 
+                    className="w-full"
+                    size="lg"
+                    onClick={() => navigate(`/auth?redirect=/invoice/${invoiceId}/pay?token=${accessToken}`)}
+                  >
+                    Sign In to Pay
+                  </Button>
+                  
+                  <p className="text-xs text-center text-muted-foreground">
+                    Don't have an account? You can create one during sign in.
+                  </p>
+                </CardContent>
+              </Card>
             ) : (
               <Card>
                 <CardHeader>
@@ -481,194 +560,163 @@ const InvoicePayment = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {/* Login Required Banner */}
-                  {!user && (
-                    <div className="p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg">
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="h-10 w-10 rounded-full bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center">
-                          <Coins className="h-5 w-5 text-amber-600" />
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-amber-900 dark:text-amber-100">Sign in to Pay</h4>
-                          <p className="text-sm text-amber-700 dark:text-amber-300">
-                            Create an account to earn PawBucks rewards!
-                          </p>
-                        </div>
+
+                  {/* Payment UI */}
+                  <div className="p-4 bg-muted rounded-lg text-center">
+                    <p className="text-sm text-muted-foreground">Amount Due</p>
+                    <p className="text-3xl font-bold">${Number(amountDue).toFixed(2)}</p>
+                  </div>
+
+                  {invoice.allow_partial_payments && (
+                    <div className="space-y-2">
+                      <Label htmlFor="paymentAmount">Payment Amount</Label>
+                      <div className="relative">
+                        <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          id="paymentAmount"
+                          type="number"
+                          step="0.01"
+                          min="0.01"
+                          max={amountDue}
+                          value={paymentAmount}
+                          onChange={(e) => setPaymentAmount(e.target.value)}
+                          className="pl-9"
+                        />
                       </div>
-                      <div className="space-y-2">
-                        <Button 
-                          className="w-full"
-                          onClick={() => navigate(`/auth?redirect=/invoice/${invoiceId}/pay?token=${accessToken}`)}
-                        >
-                          Sign In to Pay
-                        </Button>
-                        <p className="text-xs text-center text-amber-600 dark:text-amber-400">
-                          Earn up to 30x PawBucks on every payment!
-                        </p>
-                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Partial payments accepted
+                      </p>
                     </div>
                   )}
 
-                  {/* Payment UI - Only shown when logged in */}
-                  {user && (
-                    <>
-                      <div className="p-4 bg-muted rounded-lg text-center">
-                        <p className="text-sm text-muted-foreground">Amount Due</p>
-                        <p className="text-3xl font-bold">${Number(amountDue).toFixed(2)}</p>
-                      </div>
-
-                      {invoice.allow_partial_payments && (
-                        <div className="space-y-2">
-                          <Label htmlFor="paymentAmount">Payment Amount</Label>
-                          <div className="relative">
-                            <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input
-                              id="paymentAmount"
-                              type="number"
-                              step="0.01"
-                              min="0.01"
-                              max={amountDue}
-                              value={paymentAmount}
-                              onChange={(e) => setPaymentAmount(e.target.value)}
-                              className="pl-9"
-                            />
-                          </div>
-                          <p className="text-xs text-muted-foreground">
-                            Partial payments accepted
-                          </p>
-                        </div>
-                      )}
-
-                      {invoice.allow_tips && (
-                        <div className="space-y-2">
-                          <Label htmlFor="tipAmount">Add a Tip (optional)</Label>
-                          <Select value={tipAmount} onValueChange={setTipAmount}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="No tip" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="0">No tip</SelectItem>
-                              <SelectItem value={(amountDue * 0.1).toFixed(2)}>
-                                10% (${(amountDue * 0.1).toFixed(2)})
-                              </SelectItem>
-                              <SelectItem value={(amountDue * 0.15).toFixed(2)}>
-                                15% (${(amountDue * 0.15).toFixed(2)})
-                              </SelectItem>
-                              <SelectItem value={(amountDue * 0.2).toFixed(2)}>
-                                20% (${(amountDue * 0.2).toFixed(2)})
-                              </SelectItem>
-                              <SelectItem value="custom">Custom amount</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      )}
-
-                      {/* PawBucks Payment Option */}
-                      {invoice.accept_pawbucks && (
-                        <div className="space-y-3 p-4 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 rounded-lg border border-amber-200 dark:border-amber-800">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <Coins className="h-5 w-5 text-amber-600" />
-                              <span className="font-medium text-amber-900 dark:text-amber-100">Pay with PawBucks</span>
-                            </div>
-                            <Badge variant="outline" className="bg-white dark:bg-background">
-                              Balance: {pawbucksBalance.toLocaleString()} PB
-                            </Badge>
-                          </div>
-
-                          {pawbucksBalance > 0 && (
-                            <>
-                              <div className="space-y-2">
-                                <div className="flex justify-between text-sm">
-                                  <span className="text-muted-foreground">PawBucks to use</span>
-                                  <span className="font-medium">
-                                    {pawbucksToUse.toLocaleString()} PB = ${pawbucksValueUSD.toFixed(2)}
-                                  </span>
-                                </div>
-                                <Slider
-                                  value={[pawbucksToUse]}
-                                  min={0}
-                                  max={maxPawbucksCanUse}
-                                  step={100}
-                                  onValueChange={([value]) => setPawbucksToUse(value)}
-                                  className="py-2"
-                                />
-                                <div className="flex justify-between text-xs text-muted-foreground">
-                                  <span>0 PB</span>
-                                  <span>{maxPawbucksCanUse.toLocaleString()} PB</span>
-                                </div>
-                              </div>
-
-                              {pawbucksToUse > 0 && (
-                                <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
-                                  <Sparkles className="h-4 w-4" />
-                                  <span>Saving ${pawbucksValueUSD.toFixed(2)} with PawBucks!</span>
-                                </div>
-                              )}
-                            </>
-                          )}
-
-                          {pawbucksBalance === 0 && (
-                            <p className="text-sm text-muted-foreground">
-                              You don't have any PawBucks yet. Earn PawBucks by shopping at partner merchants!
-                            </p>
-                          )}
-                        </div>
-                      )}
-
-                      <Separator />
-
-                      {/* Payment Summary */}
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Subtotal</span>
-                          <span>${totalPayment.toFixed(2)}</span>
-                        </div>
-                        {pawbucksToUse > 0 && (
-                          <div className="flex justify-between text-green-600">
-                            <span>PawBucks ({pawbucksToUse.toLocaleString()} PB)</span>
-                            <span>-${pawbucksValueUSD.toFixed(2)}</span>
-                          </div>
-                        )}
-                        <Separator />
-                        <div className="flex justify-between font-semibold text-base">
-                          <span>{stripeAmount > 0 ? "Card Payment" : "Total"}</span>
-                          <span>${stripeAmount.toFixed(2)}</span>
-                        </div>
-                      </div>
-
-                      <Button
-                        className="w-full"
-                        size="lg"
-                        onClick={handlePayment}
-                        disabled={processing || !paymentAmount || parseFloat(paymentAmount) <= 0}
-                      >
-                        {processing ? (
-                          <>
-                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                            Processing...
-                          </>
-                        ) : stripeAmount > 0 ? (
-                          <>
-                            <CreditCard className="h-4 w-4 mr-2" />
-                            Pay ${stripeAmount.toFixed(2)} Now
-                          </>
-                        ) : (
-                          <>
-                            <Coins className="h-4 w-4 mr-2" />
-                            Pay with PawBucks
-                          </>
-                        )}
-                      </Button>
-
-                      <p className="text-xs text-center text-muted-foreground">
-                        {stripeAmount > 0 
-                          ? "Secure payment powered by Stripe"
-                          : "Payment will be processed instantly"
-                        }
-                      </p>
-                    </>
+                  {invoice.allow_tips && (
+                    <div className="space-y-2">
+                      <Label htmlFor="tipAmount">Add a Tip (optional)</Label>
+                      <Select value={tipAmount} onValueChange={setTipAmount}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="No tip" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="0">No tip</SelectItem>
+                          <SelectItem value={(amountDue * 0.1).toFixed(2)}>
+                            10% (${(amountDue * 0.1).toFixed(2)})
+                          </SelectItem>
+                          <SelectItem value={(amountDue * 0.15).toFixed(2)}>
+                            15% (${(amountDue * 0.15).toFixed(2)})
+                          </SelectItem>
+                          <SelectItem value={(amountDue * 0.2).toFixed(2)}>
+                            20% (${(amountDue * 0.2).toFixed(2)})
+                          </SelectItem>
+                          <SelectItem value="custom">Custom amount</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   )}
+
+                  {/* PawBucks Payment Option */}
+                  {invoice.accept_pawbucks && (
+                    <div className="space-y-3 p-4 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 rounded-lg border border-amber-200 dark:border-amber-800">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Coins className="h-5 w-5 text-amber-600" />
+                          <span className="font-medium text-amber-900 dark:text-amber-100">Pay with PawBucks</span>
+                        </div>
+                        <Badge variant="outline" className="bg-white dark:bg-background">
+                          Balance: {pawbucksBalance.toLocaleString()} PB
+                        </Badge>
+                      </div>
+
+                      {pawbucksBalance > 0 && (
+                        <>
+                          <div className="space-y-2">
+                            <div className="flex justify-between text-sm">
+                              <span className="text-muted-foreground">PawBucks to use</span>
+                              <span className="font-medium">
+                                {pawbucksToUse.toLocaleString()} PB = ${pawbucksValueUSD.toFixed(2)}
+                              </span>
+                            </div>
+                            <Slider
+                              value={[pawbucksToUse]}
+                              min={0}
+                              max={maxPawbucksCanUse}
+                              step={100}
+                              onValueChange={([value]) => setPawbucksToUse(value)}
+                              className="py-2"
+                            />
+                            <div className="flex justify-between text-xs text-muted-foreground">
+                              <span>0 PB</span>
+                              <span>{maxPawbucksCanUse.toLocaleString()} PB</span>
+                            </div>
+                          </div>
+
+                          {pawbucksToUse > 0 && (
+                            <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
+                              <Sparkles className="h-4 w-4" />
+                              <span>Saving ${pawbucksValueUSD.toFixed(2)} with PawBucks!</span>
+                            </div>
+                          )}
+                        </>
+                      )}
+
+                      {pawbucksBalance === 0 && (
+                        <p className="text-sm text-muted-foreground">
+                          You don't have any PawBucks yet. Earn PawBucks by shopping at partner merchants!
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  <Separator />
+
+                  {/* Payment Summary */}
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Subtotal</span>
+                      <span>${totalPayment.toFixed(2)}</span>
+                    </div>
+                    {pawbucksToUse > 0 && (
+                      <div className="flex justify-between text-green-600">
+                        <span>PawBucks ({pawbucksToUse.toLocaleString()} PB)</span>
+                        <span>-${pawbucksValueUSD.toFixed(2)}</span>
+                      </div>
+                    )}
+                    <Separator />
+                    <div className="flex justify-between font-semibold text-base">
+                      <span>{stripeAmount > 0 ? "Card Payment" : "Total"}</span>
+                      <span>${stripeAmount.toFixed(2)}</span>
+                    </div>
+                  </div>
+
+                  <Button
+                    className="w-full"
+                    size="lg"
+                    onClick={handlePayment}
+                    disabled={processing || !paymentAmount || parseFloat(paymentAmount) <= 0}
+                  >
+                    {processing ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Processing...
+                      </>
+                    ) : stripeAmount > 0 ? (
+                      <>
+                        <CreditCard className="h-4 w-4 mr-2" />
+                        Pay ${stripeAmount.toFixed(2)} Now
+                      </>
+                    ) : (
+                      <>
+                        <Coins className="h-4 w-4 mr-2" />
+                        Pay with PawBucks
+                      </>
+                    )}
+                  </Button>
+
+                  <p className="text-xs text-center text-muted-foreground">
+                    {stripeAmount > 0 
+                      ? "Secure payment powered by Stripe"
+                      : "Payment will be processed instantly"
+                    }
+                  </p>
                 </CardContent>
               </Card>
             )}
