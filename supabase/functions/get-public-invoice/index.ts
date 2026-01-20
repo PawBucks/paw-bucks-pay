@@ -53,6 +53,7 @@ serve(async (req) => {
         total,
         amount_paid,
         amount_due,
+        currency,
         paid_at,
         notes,
         terms_conditions,

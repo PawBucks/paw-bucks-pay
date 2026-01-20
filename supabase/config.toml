@@ -263,3 +263,6 @@ verify_jwt = false
 
 [functions.generate-invoice-pdf]
 verify_jwt = false
+
+[functions.verify-invoice-payment]
+verify_jwt = false
