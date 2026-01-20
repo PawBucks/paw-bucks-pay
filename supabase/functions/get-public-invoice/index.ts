@@ -93,10 +93,10 @@ serve(async (req) => {
       );
     }
 
-    // Fetch merchant info (public data only)
+    // Fetch merchant info (public data only) - include accepts_pawbucks for payment options
     const { data: merchant } = await supabaseAdmin
       .from('merchants')
-      .select('id, business_name, logo_url, address, phone, email, stripe_account_id')
+      .select('id, business_name, logo_url, address, phone, email, stripe_account_id, accepts_pawbucks')
       .eq('id', invoice.merchant_id)
       .single();
 

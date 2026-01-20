@@ -50,11 +50,7 @@ serve(async (req) => {
       throw new Error("Invoice not found or invalid access token");
     }
 
-    if (!invoice.accept_pawbucks && pawbucksAmountCents > 0) {
-      throw new Error("This invoice does not accept PawBucks payments");
-    }
-
-    // Fetch the merchant
+    // Fetch the merchant FIRST to check accepts_pawbucks
     const { data: merchant, error: merchantError } = await supabase
       .from("merchants")
       .select("*")
@@ -63,6 +59,12 @@ serve(async (req) => {
 
     if (merchantError || !merchant) {
       throw new Error("Merchant not found");
+    }
+
+    // Check if PawBucks are allowed - merchant setting overrides invoice setting
+    const acceptsPawbucks = invoice.accept_pawbucks || merchant.accepts_pawbucks;
+    if (!acceptsPawbucks && pawbucksAmountCents > 0) {
+      throw new Error("This invoice does not accept PawBucks payments");
     }
 
     const appUrl = Deno.env.get("APP_URL") || "https://paw-bucks-pay.lovable.app";

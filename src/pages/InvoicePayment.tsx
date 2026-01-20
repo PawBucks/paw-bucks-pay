@@ -634,8 +634,8 @@ const InvoicePayment = () => {
                     </div>
                   )}
 
-                  {/* PawBucks Payment Option - Always show if merchant accepts PawBucks */}
-                  {invoice.accept_pawbucks && (
+                  {/* PawBucks Payment Option - Show if invoice OR merchant accepts PawBucks (merchant setting overrides) */}
+                  {(invoice.accept_pawbucks || merchant?.accepts_pawbucks) && (
                     <div className="space-y-3 p-4 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 rounded-lg border border-amber-200 dark:border-amber-800">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
