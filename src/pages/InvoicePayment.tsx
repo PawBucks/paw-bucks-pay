@@ -613,7 +613,7 @@ const InvoicePayment = () => {
                     </div>
                   )}
 
-                  {/* PawBucks Payment Option */}
+                  {/* PawBucks Payment Option - Always show if merchant accepts PawBucks */}
                   {invoice.accept_pawbucks && (
                     <div className="space-y-3 p-4 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 rounded-lg border border-amber-200 dark:border-amber-800">
                       <div className="flex items-center justify-between">
@@ -621,12 +621,19 @@ const InvoicePayment = () => {
                           <Coins className="h-5 w-5 text-amber-600" />
                           <span className="font-medium text-amber-900 dark:text-amber-100">Pay with PawBucks</span>
                         </div>
-                        <Badge variant="outline" className="bg-white dark:bg-background">
-                          Balance: {pawbucksBalance.toLocaleString()} PB
-                        </Badge>
+                        {loadingPawbucks ? (
+                          <Badge variant="outline" className="bg-white dark:bg-background">
+                            <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                            Loading...
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="bg-white dark:bg-background">
+                            Balance: {pawbucksBalance.toLocaleString()} PB
+                          </Badge>
+                        )}
                       </div>
 
-                      {pawbucksBalance > 0 && (
+                      {pawbucksBalance > 0 ? (
                         <>
                           <div className="space-y-2">
                             <div className="flex justify-between text-sm">
@@ -656,12 +663,16 @@ const InvoicePayment = () => {
                             </div>
                           )}
                         </>
-                      )}
-
-                      {pawbucksBalance === 0 && (
-                        <p className="text-sm text-muted-foreground">
-                          You don't have any PawBucks yet. Earn PawBucks by shopping at partner merchants!
-                        </p>
+                      ) : (
+                        <div className="space-y-2">
+                          <p className="text-sm text-muted-foreground">
+                            You don't have any PawBucks yet. Pay with card and earn up to 30x PawBucks rewards on this purchase!
+                          </p>
+                          <div className="flex items-center gap-2 text-xs text-amber-700 dark:text-amber-300">
+                            <Sparkles className="h-3 w-3" />
+                            <span>Use earned PawBucks on future invoices</span>
+                          </div>
+                        </div>
                       )}
                     </div>
                   )}

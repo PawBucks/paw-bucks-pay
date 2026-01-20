@@ -20,6 +20,7 @@ const Auth = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const inviteToken = searchParams.get("invite");
+  const redirectUrl = searchParams.get("redirect"); // Support redirect after auth
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [userType, setUserType] = useState<"pet_owner" | "merchant">("pet_owner");
@@ -109,6 +110,12 @@ const Auth = () => {
 
   // Helper function to redirect user based on their role/type
   const redirectBasedOnRole = useCallback(async (userId: string, userTypeOverride?: "pet_owner" | "merchant") => {
+    // If there's a redirect URL specified, use it (e.g., returning to invoice payment)
+    if (redirectUrl) {
+      navigate(redirectUrl);
+      return;
+    }
+
     // Check if user is admin first
     const { data: isAdmin } = await supabase.rpc('has_role', {
       _user_id: userId,
@@ -148,7 +155,7 @@ const Auth = () => {
     } else {
       navigate(ROUTES.DASHBOARD);
     }
-  }, [navigate]);
+  }, [navigate, redirectUrl, inviteToken]);
 
   // Redirect already-logged-in users
   useEffect(() => {
@@ -265,8 +272,11 @@ const Auth = () => {
         
         // Redirect - wrapped in try/catch to ensure we don't show false errors
         try {
-          // If they joined via invite, go directly to dashboard (not create-pet-profile)
-          if (inviteToken) {
+          // If there's a specific redirect URL, use it (e.g., invoice payment)
+          if (redirectUrl) {
+            navigate(redirectUrl);
+          } else if (inviteToken) {
+            // If they joined via invite, go directly to dashboard (not create-pet-profile)
             navigate(ROUTES.DASHBOARD);
           } else {
             await redirectBasedOnRole(data.user.id, userType);
@@ -274,7 +284,7 @@ const Auth = () => {
         } catch (redirectErr) {
           console.warn("Redirect warning:", redirectErr);
           // Fallback redirect
-          navigate(userType === "merchant" ? ROUTES.MERCHANT_DASHBOARD : ROUTES.DASHBOARD);
+          navigate(redirectUrl || (userType === "merchant" ? ROUTES.MERCHANT_DASHBOARD : ROUTES.DASHBOARD));
         }
       } else {
         // User is null but no error - might need email confirmation
@@ -350,14 +360,17 @@ const Auth = () => {
       toast.success("Signed in successfully!");
       
       if (loggedInUser) {
-        // If they joined via invite, go directly to dashboard
-        if (inviteToken) {
+        // If there's a specific redirect URL, use it (e.g., invoice payment)
+        if (redirectUrl) {
+          navigate(redirectUrl);
+        } else if (inviteToken) {
+          // If they joined via invite, go directly to dashboard
           navigate(ROUTES.DASHBOARD);
         } else {
           await redirectBasedOnRole(loggedInUser.id);
         }
       } else {
-        navigate(ROUTES.DASHBOARD);
+        navigate(redirectUrl || ROUTES.DASHBOARD);
       }
     } catch (error: any) {
       if (error.errors) {
