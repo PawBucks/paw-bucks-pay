@@ -519,6 +519,9 @@ serve(async (req) => {
       if (session.mode === 'payment' && metadata.type === 'invoice_payment') {
         const invoiceId = metadata.invoice_id;
         const tipAmount = parseInt(metadata.tip_amount || '0');
+        const pawbucksUsedStr = metadata.pawbucks_used || '0';
+        const pawbucksUsed = parseInt(pawbucksUsedStr);
+        const invoicePayerUserId = metadata.user_id;
         
         console.log('[INVOICE_PAYMENT] Processing invoice payment:', {
           sessionId: session.id,
@@ -526,10 +529,13 @@ serve(async (req) => {
           merchantId,
           amountTotal: session.amount_total,
           tipAmount,
+          pawbucksUsed,
+          payerUserId: invoicePayerUserId,
         });
         
         if (invoiceId) {
           const paymentAmount = (session.amount_total || 0) / 100;
+          const stripeAmountForRewards = paymentAmount - (tipAmount / 100); // Exclude tip from rewards calculation
           
           // Record payment in invoice_payments table
           const { data: payment, error: paymentError } = await supabaseAdmin
@@ -563,8 +569,100 @@ serve(async (req) => {
                 checkout_session_id: session.id,
                 payment_intent_id: session.payment_intent,
                 tip_amount: tipAmount,
+                pawbucks_used: pawbucksUsed,
               },
             });
+          
+          // ========================================
+          // AWARD PAWBUCKS TO INVOICE PAYER
+          // ========================================
+          let pawbucksEarned = 0;
+          let tierName = 'Free';
+          
+          if (invoicePayerUserId && stripeAmountForRewards > 0) {
+            // Determine PawBucks multiplier based on subscription tier
+            let pawbucksMultiplier = 10; // Default 10x for free accounts
+            
+            try {
+              const { data: platformSub } = await supabaseAdmin
+                .from('subscriptions')
+                .select('stripe_subscription_id')
+                .eq('user_id', invoicePayerUserId)
+                .in('status', ['active', 'trialing'])
+                .maybeSingle();
+
+              if (platformSub?.stripe_subscription_id) {
+                const platformSubscription = await stripe.subscriptions.retrieve(platformSub.stripe_subscription_id);
+                const productId = platformSubscription.items.data[0]?.price?.product;
+                
+                if (productId === 'prod_TQyZjYzt9DwoIK') {
+                  pawbucksMultiplier = 30; // PawPass+
+                  tierName = 'PawPass+';
+                } else if (productId === 'prod_TJVK9ZhLiJnnpm') {
+                  pawbucksMultiplier = 20; // PawPass
+                  tierName = 'PawPass';
+                }
+              }
+            } catch (tierError) {
+              console.error('[INVOICE_PAYMENT] Error determining tier (using default):', tierError);
+            }
+            
+            pawbucksEarned = Math.floor(stripeAmountForRewards * pawbucksMultiplier);
+            
+            console.log('[INVOICE_PAYMENT] Awarding PawBucks:', {
+              userId: invoicePayerUserId,
+              stripeAmountForRewards,
+              pawbucksMultiplier,
+              pawbucksEarned,
+              tierName,
+            });
+            
+            if (pawbucksEarned > 0) {
+              // Get or create PawBucks wallet
+              let { data: wallet } = await supabaseAdmin
+                .from('pawbucks_wallet')
+                .select('*')
+                .eq('user_id', invoicePayerUserId)
+                .single();
+
+              if (!wallet) {
+                const { data: newWallet } = await supabaseAdmin
+                  .from('pawbucks_wallet')
+                  .insert({ user_id: invoicePayerUserId, balance: 0 })
+                  .select()
+                  .single();
+                wallet = newWallet;
+              }
+
+              if (wallet) {
+                // Update wallet balance
+                const { error: walletUpdateError } = await supabaseAdmin
+                  .from('pawbucks_wallet')
+                  .update({ balance: wallet.balance + pawbucksEarned })
+                  .eq('user_id', invoicePayerUserId);
+
+                if (walletUpdateError) {
+                  console.error('[INVOICE_PAYMENT] Error updating PawBucks wallet:', walletUpdateError);
+                } else {
+                  console.log(`[INVOICE_PAYMENT] ✅ PawBucks wallet updated: +${pawbucksEarned} PawBucks`);
+                }
+
+                // Log PawBucks activity
+                await supabaseAdmin
+                  .from('pawbucks_activity')
+                  .insert({
+                    user_id: invoicePayerUserId,
+                    type: 'earn',
+                    amount: pawbucksEarned,
+                    source: 'Invoice Payment',
+                    partner_id: merchantId || null,
+                    description: `Earned ${pawbucksEarned} PawBucks (${tierName} ${pawbucksMultiplier}x) from $${stripeAmountForRewards.toFixed(2)} invoice payment`,
+                  });
+
+                console.log(`[INVOICE_PAYMENT] ✅ Awarded ${pawbucksEarned} PawBucks to user ${invoicePayerUserId}`);
+              }
+            }
+          }
           
           // Send confirmation email to customer
           const customerEmail = session.customer_email || session.customer_details?.email;
@@ -591,9 +689,10 @@ serve(async (req) => {
               merchantName: merchantData?.business_name || 'Merchant',
               items: [{ name: `Invoice #${invoiceData?.invoice_number || 'Payment'}`, price: paymentAmount }],
               subtotal: paymentAmount,
-              pawbucksApplied: 0,
+              pawbucksApplied: pawbucksUsed > 0 ? (pawbucksUsed * 0.001) : 0,
               cardAmount: paymentAmount,
-              totalPaid: paymentAmount,
+              totalPaid: paymentAmount + (pawbucksUsed * 0.001),
+              pawbucksEarned: pawbucksEarned,
             });
           }
           
