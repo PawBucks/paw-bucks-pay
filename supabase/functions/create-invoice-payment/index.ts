@@ -119,10 +119,24 @@ serve(async (req) => {
         billing_address_collection: "auto",
       });
     } else {
-      // Standard checkout without Connect
+      // Standard checkout without Connect - add merchant info to product description
+      const brandedLineItems = lineItems.map(item => ({
+        ...item,
+        price_data: {
+          ...item.price_data,
+          product_data: {
+            ...item.price_data?.product_data,
+            name: item.price_data?.product_data?.name === "Tip" 
+              ? `Tip for ${merchant.business_name}`
+              : `${item.price_data?.product_data?.name} - ${merchant.business_name}`,
+            description: item.price_data?.product_data?.description || `Payment to ${merchant.business_name}`,
+          },
+        },
+      }));
+
       session = await stripe.checkout.sessions.create({
         payment_method_types: ["card"],
-        line_items: lineItems,
+        line_items: brandedLineItems as Stripe.Checkout.SessionCreateParams.LineItem[],
         mode: "payment",
         success_url: `${appUrl}/invoice/${invoiceId}/success?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${appUrl}/invoice/${invoiceId}/pay?token=${invoice.access_token}`,
