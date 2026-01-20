@@ -93,7 +93,7 @@ interface InvoiceEditorProps {
   invoiceNumber: string;
   clients: InvoiceClient[];
   settings?: InvoiceSettings;
-  onSave: (data: any, items: any[]) => Promise<void>;
+  onSave: (data: any, items: any[]) => Promise<string | null | void>;
   onSend: (data: any, items: any[]) => Promise<void>;
   onPreview: (data: any, items: any[]) => void;
   onBack: () => void;
