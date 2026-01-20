@@ -664,30 +664,67 @@ serve(async (req) => {
             }
           }
           
+          // ========================================
+          // CREATE TRANSACTION RECORD FOR INVOICE PAYMENT
+          // ========================================
+          // Fetch invoice and merchant details for transaction
+          const { data: invoiceForTx } = await supabaseAdmin
+            .from('invoices')
+            .select('invoice_number, client_name')
+            .eq('id', invoiceId)
+            .single();
+          
+          const { data: merchantForTx } = await supabaseAdmin
+            .from('merchants')
+            .select('business_name')
+            .eq('id', merchantId)
+            .single();
+          
+          if (invoicePayerUserId && merchantId) {
+            const pawbucksValueUSD = pawbucksUsed * 0.001;
+            const totalTransactionAmount = paymentAmount + pawbucksValueUSD;
+            const platformFee = paymentAmount * 0.025; // 2.5% fee only on Stripe portion
+            
+            const { data: transaction, error: transactionError } = await supabaseAdmin
+              .from('transactions')
+              .insert({
+                user_id: invoicePayerUserId,
+                merchant_id: merchantId,
+                amount: totalTransactionAmount,
+                stripe_amount: paymentAmount,
+                pawbucks_used: pawbucksUsed,
+                application_fee: platformFee,
+                cashback_earned: pawbucksEarned,
+                rewards_earned: pawbucksEarned,
+                description: `Invoice #${invoiceForTx?.invoice_number || 'Payment'}${tipAmount > 0 ? ` (includes $${(tipAmount / 100).toFixed(2)} tip)` : ''}`,
+                status: 'completed',
+                stripe_payment_intent_id: session.payment_intent as string || `invoice_${invoiceId}`,
+              })
+              .select()
+              .single();
+
+            if (transactionError) {
+              console.error('[INVOICE_PAYMENT] ❌ Error creating transaction:', transactionError);
+            } else {
+              console.log('[INVOICE_PAYMENT] ✅ Transaction recorded:', transaction.id);
+            }
+          } else {
+            console.log('[INVOICE_PAYMENT] Skipping transaction record - missing userId or merchantId:', {
+              hasUserId: !!invoicePayerUserId,
+              hasMerchantId: !!merchantId,
+            });
+          }
+          
           // Send confirmation email to customer
           const customerEmail = session.customer_email || session.customer_details?.email;
           if (customerEmail) {
-            // Fetch invoice details for email
-            const { data: invoiceData } = await supabaseAdmin
-              .from('invoices')
-              .select('invoice_number, client_name')
-              .eq('id', invoiceId)
-              .single();
-            
-            // Fetch merchant details
-            const { data: merchantData } = await supabaseAdmin
-              .from('merchants')
-              .select('business_name')
-              .eq('id', merchantId)
-              .single();
-            
             await sendReceiptEmail({
               email: customerEmail,
-              customerName: session.customer_details?.name || invoiceData?.client_name || undefined,
+              customerName: session.customer_details?.name || invoiceForTx?.client_name || undefined,
               transactionDate: new Date().toISOString(),
-              receiptId: invoiceData?.invoice_number || session.id,
-              merchantName: merchantData?.business_name || 'Merchant',
-              items: [{ name: `Invoice #${invoiceData?.invoice_number || 'Payment'}`, price: paymentAmount }],
+              receiptId: invoiceForTx?.invoice_number || session.id,
+              merchantName: merchantForTx?.business_name || 'Merchant',
+              items: [{ name: `Invoice #${invoiceForTx?.invoice_number || 'Payment'}`, price: paymentAmount }],
               subtotal: paymentAmount,
               pawbucksApplied: pawbucksUsed > 0 ? (pawbucksUsed * 0.001) : 0,
               cardAmount: paymentAmount,
