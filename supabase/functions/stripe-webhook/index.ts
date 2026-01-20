@@ -512,6 +512,94 @@ serve(async (req) => {
           });
         }
       }
+      
+      // ========================================
+      // HANDLE INVOICE PAYMENT MODE - Native Platform Invoices
+      // ========================================
+      if (session.mode === 'payment' && metadata.type === 'invoice_payment') {
+        const invoiceId = metadata.invoice_id;
+        const tipAmount = parseInt(metadata.tip_amount || '0');
+        
+        console.log('[INVOICE_PAYMENT] Processing invoice payment:', {
+          sessionId: session.id,
+          invoiceId,
+          merchantId,
+          amountTotal: session.amount_total,
+          tipAmount,
+        });
+        
+        if (invoiceId) {
+          const paymentAmount = (session.amount_total || 0) / 100;
+          
+          // Record payment in invoice_payments table
+          const { data: payment, error: paymentError } = await supabaseAdmin
+            .from('invoice_payments')
+            .insert({
+              invoice_id: invoiceId,
+              amount: paymentAmount,
+              payment_method: 'credit_card',
+              payment_date: new Date().toISOString(),
+              status: 'completed',
+              stripe_payment_intent_id: session.payment_intent as string,
+              notes: tipAmount > 0 ? `Includes $${(tipAmount / 100).toFixed(2)} tip` : null,
+            })
+            .select()
+            .single();
+          
+          if (paymentError) {
+            console.error('[INVOICE_PAYMENT] Error recording payment:', paymentError);
+          } else {
+            console.log('[INVOICE_PAYMENT] ✅ Payment recorded:', payment.id);
+          }
+          
+          // Log activity
+          await supabaseAdmin
+            .from('invoice_activity')
+            .insert({
+              invoice_id: invoiceId,
+              action: 'payment_completed',
+              description: `Payment of $${paymentAmount.toFixed(2)} completed via Stripe`,
+              metadata: {
+                checkout_session_id: session.id,
+                payment_intent_id: session.payment_intent,
+                tip_amount: tipAmount,
+              },
+            });
+          
+          // Send confirmation email to customer
+          const customerEmail = session.customer_email || session.customer_details?.email;
+          if (customerEmail) {
+            // Fetch invoice details for email
+            const { data: invoiceData } = await supabaseAdmin
+              .from('invoices')
+              .select('invoice_number, client_name')
+              .eq('id', invoiceId)
+              .single();
+            
+            // Fetch merchant details
+            const { data: merchantData } = await supabaseAdmin
+              .from('merchants')
+              .select('business_name')
+              .eq('id', merchantId)
+              .single();
+            
+            await sendReceiptEmail({
+              email: customerEmail,
+              customerName: session.customer_details?.name || invoiceData?.client_name || undefined,
+              transactionDate: new Date().toISOString(),
+              receiptId: invoiceData?.invoice_number || session.id,
+              merchantName: merchantData?.business_name || 'Merchant',
+              items: [{ name: `Invoice #${invoiceData?.invoice_number || 'Payment'}`, price: paymentAmount }],
+              subtotal: paymentAmount,
+              pawbucksApplied: 0,
+              cardAmount: paymentAmount,
+              totalPaid: paymentAmount,
+            });
+          }
+          
+          console.log('[INVOICE_PAYMENT] ✅ Invoice payment processing complete');
+        }
+      }
     }
 
     // Handle successful invoice payment (renewal) - Award PawBucks for recurring payments
