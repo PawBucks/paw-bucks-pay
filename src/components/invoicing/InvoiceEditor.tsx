@@ -850,13 +850,48 @@ export function InvoiceEditor({
                 <CardTitle>Summary</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
+                {/* Line Items Summary */}
+                {watchItems && watchItems.length > 0 && watchItems.some(item => item.description) && (
+                  <>
+                    <div className="space-y-2">
+                      {watchItems.map((item, index) => {
+                        if (!item.description) return null;
+                        const lineTotal = (item.quantity || 0) * (item.unit_price || 0);
+                        let lineDiscount = 0;
+                        if (item.discount_type === "percentage") {
+                          lineDiscount = lineTotal * ((item.discount_value || 0) / 100);
+                        } else if (item.discount_type === "flat") {
+                          lineDiscount = item.discount_value || 0;
+                        }
+                        const lineAfterDiscount = lineTotal - lineDiscount;
+                        
+                        return (
+                          <div key={index} className="flex justify-between text-sm">
+                            <span className="text-muted-foreground truncate max-w-[150px]" title={item.description}>
+                              {item.description}
+                              {item.quantity !== 1 && ` (×${item.quantity})`}
+                            </span>
+                            <div className="flex items-center gap-2">
+                              {lineDiscount > 0 && (
+                                <span className="text-xs text-green-600">-${lineDiscount.toFixed(2)}</span>
+                              )}
+                              <span>${lineAfterDiscount.toFixed(2)}</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <Separator />
+                  </>
+                )}
+                
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Subtotal</span>
                   <span>${totals.subtotal.toFixed(2)}</span>
                 </div>
                 {totals.discount > 0 && (
                   <div className="flex justify-between text-sm text-green-600">
-                    <span>Discount</span>
+                    <span>Invoice Discount</span>
                     <span>-${totals.discount.toFixed(2)}</span>
                   </div>
                 )}
