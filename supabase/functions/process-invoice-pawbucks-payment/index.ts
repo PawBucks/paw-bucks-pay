@@ -207,7 +207,7 @@ serve(async (req) => {
             merchantAddress: merchant.address,
             transactionId: payment?.id || invoiceId,
             amount: paymentAmountUSD,
-            pawbucksEarned: 0,
+            pawbucksEarned: 0, // No PawBucks earned for all-PawBucks payments
             pawbucksUsed: pawbucksUsed,
             description: `Invoice #${invoice.invoice_number}`,
           },
@@ -222,6 +222,7 @@ serve(async (req) => {
           paymentMethod: "pawbucks",
           pawbucksUsed,
           amountPaid: paymentAmountUSD,
+          pawbucksEarned: 0, // No PawBucks earned for all-PawBucks payments
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
