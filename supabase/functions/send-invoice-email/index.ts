@@ -204,7 +204,7 @@ serve(async (req) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          from: `${merchant.business_name} <invoices@paw-bucks-pay.lovable.app>`,
+          from: `${merchant.business_name} <noreply@pawbucks.app>`,
           to: [invoice.client_email],
           subject: `Invoice #${invoice.invoice_number} from ${merchant.business_name}`,
           html: emailHtml,
