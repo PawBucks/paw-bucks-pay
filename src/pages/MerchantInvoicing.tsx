@@ -169,8 +169,13 @@ const MerchantInvoicing = () => {
       // Remove 'items' from data - items are stored in separate invoice_items table
       const { items: _items, ...invoiceData } = data;
       
+      // Convert empty strings to null for UUID fields to prevent database errors
+      const sanitizeUUID = (value: string | null | undefined) => 
+        value && value.trim() !== '' ? value : null;
+      
       const formattedData = {
         ...invoiceData,
+        client_id: sanitizeUUID(invoiceData.client_id as string | null | undefined),
         issue_date: formatDate(invoiceData.issue_date),
         due_date: formatDate(invoiceData.due_date),
         recurring_end_date: invoiceData.recurring_end_date ? formatDate(invoiceData.recurring_end_date) : null,
