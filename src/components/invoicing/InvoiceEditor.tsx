@@ -163,54 +163,62 @@ export function InvoiceEditor({
     name: "items",
   });
 
-  const watchItems = form.watch("items");
   const watchDiscountType = form.watch("discount_type");
   const watchDiscountValue = form.watch("discount_value");
   const watchTaxRate = form.watch("tax_rate");
   const watchShipping = form.watch("shipping_amount");
   const watchIsRecurring = form.watch("is_recurring");
 
-  // Calculate totals
+  // Watch all form values to trigger re-calculation
+  const formValues = form.watch();
+
+  // Calculate totals - using formValues.items for reactive updates
   const totals = useMemo(() => {
-    const items = watchItems || [];
+    const items = formValues.items || [];
     let subtotal = 0;
     let itemsTax = 0;
 
     items.forEach(item => {
-      const lineTotal = (item.quantity || 0) * (item.unit_price || 0);
+      const quantity = Number(item.quantity) || 0;
+      const unitPrice = Number(item.unit_price) || 0;
+      const lineTotal = quantity * unitPrice;
+      
       let lineDiscount = 0;
       if (item.discount_type === "percentage") {
-        lineDiscount = lineTotal * ((item.discount_value || 0) / 100);
+        lineDiscount = lineTotal * ((Number(item.discount_value) || 0) / 100);
       } else if (item.discount_type === "flat") {
-        lineDiscount = item.discount_value || 0;
+        lineDiscount = Number(item.discount_value) || 0;
       }
       const lineAfterDiscount = lineTotal - lineDiscount;
-      const lineTax = lineAfterDiscount * ((item.tax_rate || 0) / 100);
+      const lineTax = lineAfterDiscount * ((Number(item.tax_rate) || 0) / 100);
       subtotal += lineAfterDiscount;
       itemsTax += lineTax;
     });
 
     // Invoice-level discount
     let invoiceDiscount = 0;
-    if (watchDiscountType === "percentage") {
-      invoiceDiscount = subtotal * ((watchDiscountValue || 0) / 100);
-    } else if (watchDiscountType === "flat") {
-      invoiceDiscount = watchDiscountValue || 0;
+    const discountType = formValues.discount_type;
+    const discountValue = Number(formValues.discount_value) || 0;
+    if (discountType === "percentage") {
+      invoiceDiscount = subtotal * (discountValue / 100);
+    } else if (discountType === "flat") {
+      invoiceDiscount = discountValue;
     }
 
     const afterDiscount = subtotal - invoiceDiscount;
     
     // Invoice-level tax
-    const invoiceTax = afterDiscount * ((watchTaxRate || 0) / 100);
+    const taxRate = Number(formValues.tax_rate) || 0;
+    const invoiceTax = afterDiscount * (taxRate / 100);
     
     // Total tax is item-level + invoice-level
     const totalTax = itemsTax + invoiceTax;
     
-    const shipping = watchShipping || 0;
+    const shipping = Number(formValues.shipping_amount) || 0;
     const total = afterDiscount + totalTax + shipping;
 
     return { subtotal, discount: invoiceDiscount, tax: totalTax, shipping, total };
-  }, [watchItems, watchDiscountType, watchDiscountValue, watchTaxRate, watchShipping]);
+  }, [formValues]);
 
   // Handle client selection
   const handleClientSelect = (clientId: string) => {
@@ -533,7 +541,7 @@ export function InvoiceEditor({
                       </div>
                       <div className="col-span-12 md:col-span-1 flex items-end justify-end">
                         <p className="font-semibold pb-2">
-                          ${((watchItems[index]?.quantity || 0) * (watchItems[index]?.unit_price || 0)).toFixed(2)}
+                          ${((formValues.items?.[index]?.quantity || 0) * (formValues.items?.[index]?.unit_price || 0)).toFixed(2)}
                         </p>
                       </div>
                     </div>
@@ -850,48 +858,13 @@ export function InvoiceEditor({
                 <CardTitle>Summary</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                {/* Line Items Summary */}
-                {watchItems && watchItems.length > 0 && watchItems.some(item => item.description) && (
-                  <>
-                    <div className="space-y-2">
-                      {watchItems.map((item, index) => {
-                        if (!item.description) return null;
-                        const lineTotal = (item.quantity || 0) * (item.unit_price || 0);
-                        let lineDiscount = 0;
-                        if (item.discount_type === "percentage") {
-                          lineDiscount = lineTotal * ((item.discount_value || 0) / 100);
-                        } else if (item.discount_type === "flat") {
-                          lineDiscount = item.discount_value || 0;
-                        }
-                        const lineAfterDiscount = lineTotal - lineDiscount;
-                        
-                        return (
-                          <div key={index} className="flex justify-between text-sm">
-                            <span className="text-muted-foreground truncate max-w-[150px]" title={item.description}>
-                              {item.description}
-                              {item.quantity !== 1 && ` (×${item.quantity})`}
-                            </span>
-                            <div className="flex items-center gap-2">
-                              {lineDiscount > 0 && (
-                                <span className="text-xs text-green-600">-${lineDiscount.toFixed(2)}</span>
-                              )}
-                              <span>${lineAfterDiscount.toFixed(2)}</span>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                    <Separator />
-                  </>
-                )}
-                
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Subtotal</span>
                   <span>${totals.subtotal.toFixed(2)}</span>
                 </div>
                 {totals.discount > 0 && (
                   <div className="flex justify-between text-sm text-green-600">
-                    <span>Invoice Discount</span>
+                    <span>Discount</span>
                     <span>-${totals.discount.toFixed(2)}</span>
                   </div>
                 )}
