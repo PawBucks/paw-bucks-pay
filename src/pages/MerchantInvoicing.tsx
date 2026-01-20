@@ -148,19 +148,39 @@ const MerchantInvoicing = () => {
     }
   };
 
-  const handleSaveInvoice = async (data: any, items: any[]) => {
-    if (!merchantId) return;
+  const handleSaveInvoice = async (data: any, items: any[], skipToast = false): Promise<string | null> => {
+    if (!merchantId) return null;
     
     setSaving(true);
     try {
+      let invoiceId: string;
+      
+      // Format dates - handle both Date objects and string dates
+      const formatDate = (date: any): string => {
+        if (date instanceof Date) {
+          return date.toISOString().split("T")[0];
+        }
+        if (typeof date === 'string') {
+          return date.split("T")[0];
+        }
+        return new Date().toISOString().split("T")[0];
+      };
+      
+      const formattedData = {
+        ...data,
+        issue_date: formatDate(data.issue_date),
+        due_date: formatDate(data.due_date),
+        recurring_end_date: data.recurring_end_date ? formatDate(data.recurring_end_date) : null,
+      };
+      
       if (selectedInvoice?.id) {
         // Update existing invoice
-        await invoicingService.updateInvoice(selectedInvoice.id, {
-          ...data,
-          issue_date: data.issue_date.toISOString().split("T")[0],
-          due_date: data.due_date.toISOString().split("T")[0],
-          recurring_end_date: data.recurring_end_date?.toISOString().split("T")[0] || null,
-        });
+        invoiceId = selectedInvoice.id;
+        const { error: updateError } = await invoicingService.updateInvoice(selectedInvoice.id, formattedData);
+        
+        if (updateError) {
+          throw updateError;
+        }
         
         // Delete existing items and recreate
         await supabase.from("invoice_items").delete().eq("invoice_id", selectedInvoice.id);
@@ -183,56 +203,69 @@ const MerchantInvoicing = () => {
           merchant_id: merchantId,
           invoice_number: nextInvoiceNumber,
           status: "draft",
-          ...data,
-          issue_date: data.issue_date.toISOString().split("T")[0],
-          due_date: data.due_date.toISOString().split("T")[0],
-          recurring_end_date: data.recurring_end_date?.toISOString().split("T")[0] || null,
+          ...formattedData,
         });
 
-        if (invoiceRes.data) {
-          for (const item of items) {
-            await invoicingService.createInvoiceItem({
-              invoice_id: invoiceRes.data.id,
-              description: item.description,
-              quantity: item.quantity,
-              unit_price: item.unit_price,
-              unit_type: item.unit_type,
-              discount_type: item.discount_type,
-              discount_value: item.discount_value,
-              tax_rate: item.tax_rate,
-            });
-          }
+        if (invoiceRes.error) {
+          throw invoiceRes.error;
+        }
+        
+        if (!invoiceRes.data) {
+          throw new Error("Failed to create invoice - no data returned");
+        }
+        
+        invoiceId = invoiceRes.data.id;
+        
+        for (const item of items) {
+          await invoicingService.createInvoiceItem({
+            invoice_id: invoiceId,
+            description: item.description,
+            quantity: item.quantity,
+            unit_price: item.unit_price,
+            unit_type: item.unit_type,
+            discount_type: item.discount_type,
+            discount_value: item.discount_value,
+            tax_rate: item.tax_rate,
+          });
         }
       }
       
-      toast.success("Invoice saved successfully");
-      setViewMode("list");
+      if (!skipToast) {
+        toast.success("Invoice saved successfully");
+        setViewMode("list");
+      }
       loadData();
-    } catch (error) {
+      return invoiceId;
+    } catch (error: any) {
       console.error("Error saving invoice:", error);
-      toast.error("Failed to save invoice");
+      toast.error(error.message || "Failed to save invoice");
+      return null;
     } finally {
       setSaving(false);
     }
   };
 
   const handleSendInvoice = async (data: any, items: any[]) => {
-    // First save, then send
-    await handleSaveInvoice(data, items);
+    // First save the invoice (skip toast since we'll show one for send)
+    const invoiceId = await handleSaveInvoice(data, items, true);
     
-    if (selectedInvoice?.id) {
-      try {
-        const { error } = await supabase.functions.invoke("send-invoice-email", {
-          body: { invoiceId: selectedInvoice.id },
-        });
+    if (!invoiceId) {
+      // Save failed, error already shown
+      return;
+    }
+    
+    try {
+      const { error } = await supabase.functions.invoke("send-invoice-email", {
+        body: { invoiceId },
+      });
 
-        if (error) throw error;
-        toast.success("Invoice sent successfully");
-        loadData();
-      } catch (error) {
-        console.error("Error sending invoice:", error);
-        toast.error("Invoice saved but failed to send email");
-      }
+      if (error) throw error;
+      toast.success("Invoice sent successfully");
+      setViewMode("list");
+      loadData();
+    } catch (error: any) {
+      console.error("Error sending invoice:", error);
+      toast.error(error.message || "Invoice saved but failed to send email");
     }
   };
 
