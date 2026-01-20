@@ -62,7 +62,6 @@ serve(async (req) => {
         allow_tips,
         accept_credit_card,
         accept_bank_transfer,
-        accept_pawbucks,
         view_count,
         merchant_id,
         invoice_items (
