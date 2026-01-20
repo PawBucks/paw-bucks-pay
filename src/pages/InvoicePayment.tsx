@@ -100,10 +100,16 @@ const InvoicePayment = () => {
     const checkAuth = async () => {
       setAuthLoading(true);
       try {
-        const { data: { user: currentUser } } = await supabase.auth.getUser();
-        setUser(currentUser);
+        const { data: { user: currentUser }, error } = await supabase.auth.getUser();
+        if (error) {
+          console.error("[Auth] Error getting user:", error);
+          setUser(null);
+        } else {
+          console.log("[Auth] Current user:", currentUser?.id, currentUser?.email);
+          setUser(currentUser);
+        }
       } catch (error) {
-        console.error("Error checking auth:", error);
+        console.error("[Auth] Unexpected error:", error);
         setUser(null);
       } finally {
         setAuthLoading(false);
@@ -114,6 +120,7 @@ const InvoicePayment = () => {
 
     // Listen for auth changes (e.g., user logs in from redirect)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("[Auth] Auth state changed:", event, session?.user?.email);
       setUser(session?.user ?? null);
     });
 
@@ -121,23 +128,37 @@ const InvoicePayment = () => {
   }, []);
 
   // Load PawBucks balance when user is authenticated and invoice is loaded
+  // Load PawBucks balance when user is authenticated and invoice is loaded
   useEffect(() => {
     const loadPawbucksBalance = async () => {
-      if (!user || !invoice?.accept_pawbucks) return;
+      // Always try to load if user is logged in (even if invoice doesn't accept pawbucks, for display)
+      if (!user) {
+        console.log("[PawBucks] No user logged in, skipping balance load");
+        return;
+      }
+      
+      console.log("[PawBucks] Loading balance for user:", user.id, "email:", user.email);
+      console.log("[PawBucks] Invoice accepts PawBucks:", invoice?.accept_pawbucks);
       
       setLoadingPawbucks(true);
       try {
-        const { data: wallet } = await supabase
+        const { data: wallet, error } = await supabase
           .from("pawbucks_wallet")
           .select("balance")
           .eq("user_id", user.id)
-          .single();
+          .maybeSingle();
         
-        if (wallet) {
+        if (error) {
+          console.error("[PawBucks] Error fetching wallet:", error);
+        } else if (wallet) {
+          console.log("[PawBucks] Wallet found! Balance:", wallet.balance);
           setPawbucksBalance(wallet.balance);
+        } else {
+          console.log("[PawBucks] No wallet found for user");
+          setPawbucksBalance(0);
         }
       } catch (error) {
-        console.error("Error loading PawBucks balance:", error);
+        console.error("[PawBucks] Unexpected error loading balance:", error);
       } finally {
         setLoadingPawbucks(false);
       }
