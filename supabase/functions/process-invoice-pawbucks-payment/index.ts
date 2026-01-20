@@ -191,6 +191,31 @@ serve(async (req) => {
         },
       });
 
+      // Create transaction record for PawBucks payment
+      const { data: transaction, error: transactionError } = await supabase
+        .from("transactions")
+        .insert({
+          user_id: userId,
+          merchant_id: merchant.id,
+          amount: paymentAmountUSD,
+          stripe_amount: 0, // No Stripe payment
+          pawbucks_used: pawbucksUsed,
+          application_fee: 0, // No platform fee on PawBucks-only payments
+          cashback_earned: 0, // No PawBucks earned for all-PawBucks payments
+          rewards_earned: 0,
+          description: `Invoice #${invoice.invoice_number}${tipAmountCents > 0 ? ` (includes $${(tipAmountCents / 100).toFixed(2)} tip)` : ''}`,
+          status: 'completed',
+          stripe_payment_intent_id: `pawbucks_invoice_${invoiceId}`,
+        })
+        .select()
+        .single();
+
+      if (transactionError) {
+        console.error("Error creating transaction:", transactionError);
+      } else {
+        console.log("✅ Transaction recorded:", transaction.id);
+      }
+
       // Send receipt email
       try {
         const { data: profile } = await supabase
