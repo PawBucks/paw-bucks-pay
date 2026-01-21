@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Plus, Users, Settings, FileText, LayoutTemplate, Package } from "lucide-react";
 import { toast } from "sonner";
-import { InvoiceList, InvoiceEditor, InvoicePreview, ClientManager, InvoiceSettingsComponent, CatalogManager } from "@/components/invoicing";
+import { InvoiceList, InvoiceEditor, InvoicePreview, ClientManager, InvoiceSettingsComponent, CatalogManager, TemplateManager } from "@/components/invoicing";
 import { invoicingService, type Invoice, type InvoiceItem, type InvoiceClient, type InvoiceSettings, type InvoiceTemplate, type CatalogItem } from "@/services/api/invoicing.service";
 
 // Helper function to calculate next invoice date based on interval
@@ -525,6 +525,138 @@ const MerchantInvoicing = () => {
     }
   };
 
+  // Template actions
+  const handleCreateTemplate = async (data: Partial<InvoiceTemplate>) => {
+    if (!merchantId) return;
+    
+    try {
+      const result = await invoicingService.createTemplate({
+        merchant_id: merchantId,
+        ...data,
+      } as any);
+      if (result.error) throw result.error;
+    } catch (error) {
+      console.error("Error creating template:", error);
+      throw error;
+    }
+  };
+
+  const handleUpdateTemplate = async (templateId: string, data: Partial<InvoiceTemplate>) => {
+    try {
+      const result = await invoicingService.updateTemplate(templateId, data);
+      if (result.error) throw result.error;
+    } catch (error) {
+      console.error("Error updating template:", error);
+      throw error;
+    }
+  };
+
+  const handleDeleteTemplate = async (templateId: string) => {
+    try {
+      const result = await invoicingService.deleteTemplate(templateId);
+      if (result.error) throw result.error;
+    } catch (error) {
+      console.error("Error deleting template:", error);
+      throw error;
+    }
+  };
+
+  const handleSetDefaultTemplate = async (templateId: string) => {
+    if (!merchantId) return;
+    
+    try {
+      const result = await invoicingService.setDefaultTemplate(merchantId, templateId);
+      if (result.error) throw result.error;
+      toast.success("Default template updated");
+      loadData();
+    } catch (error) {
+      console.error("Error setting default template:", error);
+      toast.error("Failed to set default template");
+    }
+  };
+
+  const handleUseTemplate = (template: InvoiceTemplate) => {
+    // Pre-populate invoice editor with template data
+    const defaultItems = Array.isArray(template.default_items) 
+      ? template.default_items.map((item: any, index: number) => ({
+          id: `template-${index}`,
+          invoice_id: '',
+          description: item.description || '',
+          quantity: item.quantity || 1,
+          unit_price: item.unit_price || 0,
+          unit_type: item.unit_type || 'item',
+          discount_type: null,
+          discount_value: null,
+          discount_amount: 0,
+          tax_rate: item.tax_rate || 0,
+          tax_amount: 0,
+          subtotal: (item.quantity || 1) * (item.unit_price || 0),
+          total: (item.quantity || 1) * (item.unit_price || 0),
+          sort_order: index,
+          service_id: null,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        }))
+      : [];
+
+    // Create a pre-populated invoice from template
+    const templateInvoice: Invoice & { items?: InvoiceItem[] } = {
+      id: '',
+      merchant_id: merchantId!,
+      invoice_number: nextInvoiceNumber,
+      status: 'draft',
+      issue_date: new Date().toISOString().split('T')[0],
+      due_date: new Date(Date.now() + (template.payment_terms || 30) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      client_id: null,
+      client_name: '',
+      client_email: '',
+      client_phone: null,
+      client_company: null,
+      client_address: null,
+      title: template.title || null,
+      notes: template.notes || null,
+      footer: template.footer || null,
+      terms_conditions: template.terms_conditions || null,
+      payment_terms: template.payment_terms,
+      tax_rate: template.tax_rate,
+      discount_type: template.discount_type || null,
+      discount_value: template.discount_value || null,
+      discount_amount: 0,
+      tax_amount: 0,
+      shipping_amount: 0,
+      subtotal: 0,
+      total: 0,
+      amount_paid: 0,
+      amount_due: 0,
+      currency: 'USD',
+      allow_partial_payments: template.allow_partial_payments,
+      allow_tips: false,
+      accept_credit_card: true,
+      accept_bank_transfer: true,
+      accept_pawbucks: true,
+      access_token: '',
+      view_count: 0,
+      sent_at: null,
+      viewed_at: null,
+      paid_at: null,
+      stripe_payment_intent_id: null,
+      stripe_invoice_id: null,
+      is_recurring: false,
+      recurring_interval: null,
+      recurring_end_date: null,
+      parent_invoice_id: null,
+      next_invoice_date: null,
+      attachment_urls: null,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      items: defaultItems,
+    };
+
+    setSelectedInvoice(templateInvoice);
+    setViewMode('create');
+    toast.success(`Using template: ${template.name}`);
+  };
+
   if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -687,30 +819,17 @@ const MerchantInvoicing = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {templates.length === 0 ? (
-                  <div className="text-center py-12">
-                    <LayoutTemplate className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                    <h3 className="font-semibold mb-2">No templates yet</h3>
-                    <p className="text-muted-foreground mb-4">
-                      Create templates to speed up invoice creation
-                    </p>
-                    <Button variant="outline">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Create Template
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    {templates.map((template) => (
-                      <Card key={template.id} className="cursor-pointer hover:border-primary/50 transition-colors">
-                        <CardContent className="p-4">
-                          <h4 className="font-medium">{template.name}</h4>
-                          <p className="text-sm text-muted-foreground">{template.description}</p>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
+                <TemplateManager
+                  templates={templates}
+                  catalogItems={catalogItems}
+                  loading={loading}
+                  onCreateTemplate={handleCreateTemplate}
+                  onUpdateTemplate={handleUpdateTemplate}
+                  onDeleteTemplate={handleDeleteTemplate}
+                  onSetDefault={handleSetDefaultTemplate}
+                  onUseTemplate={handleUseTemplate}
+                  onRefresh={loadData}
+                />
               </CardContent>
             </Card>
           </TabsContent>

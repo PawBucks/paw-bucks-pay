@@ -334,6 +334,59 @@ export const invoicingService = {
     return { data: (data || []) as InvoiceTemplate[], error };
   },
 
+  async getTemplateById(templateId: string) {
+    const { data, error } = await supabase
+      .from("invoice_templates")
+      .select("*")
+      .eq("id", templateId)
+      .single();
+    return { data: data as InvoiceTemplate | null, error };
+  },
+
+  async createTemplate(template: Partial<InvoiceTemplate>) {
+    const { data, error } = await supabase
+      .from("invoice_templates")
+      .insert(template as any)
+      .select()
+      .single();
+    return { data: data as InvoiceTemplate | null, error };
+  },
+
+  async updateTemplate(templateId: string, updates: Partial<InvoiceTemplate>) {
+    const { data, error } = await supabase
+      .from("invoice_templates")
+      .update(updates as any)
+      .eq("id", templateId)
+      .select()
+      .single();
+    return { data: data as InvoiceTemplate | null, error };
+  },
+
+  async deleteTemplate(templateId: string) {
+    const { error } = await supabase
+      .from("invoice_templates")
+      .delete()
+      .eq("id", templateId);
+    return { data: null, error };
+  },
+
+  async setDefaultTemplate(merchantId: string, templateId: string) {
+    // First, unset all defaults for this merchant
+    await supabase
+      .from("invoice_templates")
+      .update({ is_default: false })
+      .eq("merchant_id", merchantId);
+    
+    // Then set the new default
+    const { data, error } = await supabase
+      .from("invoice_templates")
+      .update({ is_default: true })
+      .eq("id", templateId)
+      .select()
+      .single();
+    return { data: data as InvoiceTemplate | null, error };
+  },
+
   // CATALOG ITEMS
   async getCatalogItems(merchantId: string) {
     const { data, error } = await supabase
