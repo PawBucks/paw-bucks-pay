@@ -267,6 +267,19 @@ const MerchantInvoicing = () => {
             tax_rate: item.tax_rate,
           });
         }
+        
+        // Increment the next invoice number in settings
+        if (settings) {
+          const newNextNumber = (settings.next_invoice_number || 1) + 1;
+          await invoicingService.upsertSettings(merchantId, {
+            next_invoice_number: newNextNumber,
+          });
+          // Update local state for immediate feedback
+          setSettings({ ...settings, next_invoice_number: newNextNumber });
+          setNextInvoiceNumber(
+            `${settings.invoice_prefix || "INV-"}${String(newNextNumber).padStart(5, "0")}`
+          );
+        }
       }
       
       if (!skipToast) {
