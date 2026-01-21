@@ -838,6 +838,7 @@ const MerchantInvoicing = () => {
           <TabsContent value="settings">
             <InvoiceSettingsComponent
               settings={settings}
+              merchantId={merchant?.id || ""}
               onSave={handleSaveSettings}
               loading={loading}
             />
