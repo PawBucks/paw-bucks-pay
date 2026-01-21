@@ -312,9 +312,9 @@ serve(async (req) => {
         continue;
       }
 
-      // Generate payment URL - must match InvoicePayment route: /invoice/:invoiceId?token=
+      // Generate payment URL - must match InvoicePayment route: /invoice/:invoiceId/pay?token=
       const appUrl = Deno.env.get("APP_URL") || "https://paw-bucks-pay.lovable.app";
-      const paymentUrl = `${appUrl}/invoice/${invoice.id}?token=${invoice.access_token}`;
+      const paymentUrl = `${appUrl}/invoice/${invoice.id}/pay?token=${invoice.access_token}`;
 
       // Send reminder email
       const subject = reminderType === "overdue"
