@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { addWeeks, addMonths, addYears } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { SEO } from "@/components/SEO";
@@ -10,6 +11,24 @@ import { ArrowLeft, Plus, Users, Settings, FileText, LayoutTemplate, Package } f
 import { toast } from "sonner";
 import { InvoiceList, InvoiceEditor, InvoicePreview, ClientManager, InvoiceSettingsComponent, CatalogManager } from "@/components/invoicing";
 import { invoicingService, type Invoice, type InvoiceItem, type InvoiceClient, type InvoiceSettings, type InvoiceTemplate, type CatalogItem } from "@/services/api/invoicing.service";
+
+// Helper function to calculate next invoice date based on interval
+function calculateNextInvoiceDate(fromDate: Date, interval: string): Date {
+  switch (interval) {
+    case "weekly":
+      return addWeeks(fromDate, 1);
+    case "biweekly":
+      return addWeeks(fromDate, 2);
+    case "monthly":
+      return addMonths(fromDate, 1);
+    case "quarterly":
+      return addMonths(fromDate, 3);
+    case "yearly":
+      return addYears(fromDate, 1);
+    default:
+      return addMonths(fromDate, 1);
+  }
+}
 
 const MerchantInvoicing = () => {
   const { user, loading: authLoading } = useAuth();
@@ -210,11 +229,20 @@ const MerchantInvoicing = () => {
         }
       } else {
         // Create new invoice
+        // Calculate next_invoice_date for recurring invoices
+        let nextInvoiceDateStr = null;
+        if (formattedData.is_recurring && formattedData.recurring_interval) {
+          const issueDate = new Date(formattedData.issue_date);
+          const nextDate = calculateNextInvoiceDate(issueDate, formattedData.recurring_interval);
+          nextInvoiceDateStr = nextDate.toISOString().split("T")[0];
+        }
+
         const invoiceRes = await invoicingService.createInvoice({
           merchant_id: merchantId,
           invoice_number: nextInvoiceNumber,
           status: "draft",
           ...formattedData,
+          next_invoice_date: nextInvoiceDateStr,
         });
 
         if (invoiceRes.error) {
