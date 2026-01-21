@@ -11,7 +11,10 @@ import {
   FileText,
   Hash,
   DollarSign,
+  Send,
+  Loader2,
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -63,16 +66,47 @@ type SettingsFormData = z.infer<typeof settingsSchema>;
 
 interface InvoiceSettingsProps {
   settings: InvoiceSettingsType | null;
+  merchantId: string;
   onSave: (data: Partial<InvoiceSettingsType>) => Promise<void>;
   loading: boolean;
 }
 
 export function InvoiceSettingsComponent({
   settings,
+  merchantId,
   onSave,
   loading,
 }: InvoiceSettingsProps) {
   const [saving, setSaving] = useState(false);
+  const [sendingReminders, setSendingReminders] = useState(false);
+
+  const handleSendReminders = async () => {
+    setSendingReminders(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("send-invoice-reminders", {
+        body: { merchantId },
+      });
+
+      if (error) throw error;
+
+      const { remindersSent = 0, overdueUpdated = 0 } = data || {};
+      
+      if (remindersSent > 0) {
+        toast.success(`Sent ${remindersSent} reminder${remindersSent > 1 ? "s" : ""} successfully`);
+      } else {
+        toast.info("No reminders needed - all invoices are either paid or recently reminded");
+      }
+      
+      if (overdueUpdated > 0) {
+        toast.info(`${overdueUpdated} invoice${overdueUpdated > 1 ? "s" : ""} marked as overdue`);
+      }
+    } catch (error: any) {
+      console.error("Error sending reminders:", error);
+      toast.error(error.message || "Failed to send reminders");
+    } finally {
+      setSendingReminders(false);
+    }
+  };
 
   const form = useForm<SettingsFormData>({
     resolver: zodResolver(settingsSchema),
@@ -437,6 +471,34 @@ export function InvoiceSettingsComponent({
                   <p className="text-sm text-muted-foreground">
                     Reminders sent on the due date, then 1, 7, 14, and 30 day(s) after
                   </p>
+                </div>
+                <Separator />
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium">Manual Reminders</p>
+                    <p className="text-sm text-muted-foreground">
+                      Send reminders now for all unpaid invoices that are due or overdue
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleSendReminders}
+                    disabled={sendingReminders}
+                  >
+                    {sendingReminders ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Sending...
+                      </>
+                    ) : (
+                      <>
+                        <Send className="h-4 w-4 mr-2" />
+                        Send Reminders Now
+                      </>
+                    )}
+                  </Button>
                 </div>
               </div>
             )}
