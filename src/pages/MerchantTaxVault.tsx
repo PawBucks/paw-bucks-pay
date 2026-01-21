@@ -363,7 +363,16 @@ export default function MerchantTaxVault() {
           </TabsContent>
           
           <TabsContent value="summary">
-            <CategorySummary expenses={expenses} />
+            <CategorySummary 
+              expenses={expenses} 
+              vehicleDeduction={{
+                vehicleDeduction: deductionBreakdown.vehicleDeduction,
+                vehicleMethod: deductionBreakdown.vehicleMethod as 'standard' | 'actual',
+                businessMiles: deductionBreakdown.businessMiles,
+                standardMileageDeduction: deductionBreakdown.standardMileageDeduction,
+                actualExpensesDeduction: deductionBreakdown.actualExpensesDeduction,
+              }}
+            />
           </TabsContent>
           
           <TabsContent value="year-end">
