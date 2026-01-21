@@ -4,3 +4,5 @@ export { InvoicePreview } from './InvoicePreview';
 export { ClientManager } from './ClientManager';
 export { InvoiceSettingsComponent } from './InvoiceSettings';
 export { RecordPaymentDialog } from './RecordPaymentDialog';
+export { CatalogManager } from './CatalogManager';
+export { CatalogItemPicker } from './CatalogItemPicker';

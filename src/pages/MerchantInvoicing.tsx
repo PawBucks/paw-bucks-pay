@@ -6,10 +6,10 @@ import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Plus, Users, Settings, FileText, LayoutTemplate } from "lucide-react";
+import { ArrowLeft, Plus, Users, Settings, FileText, LayoutTemplate, Package } from "lucide-react";
 import { toast } from "sonner";
-import { InvoiceList, InvoiceEditor, InvoicePreview, ClientManager, InvoiceSettingsComponent } from "@/components/invoicing";
-import { invoicingService, type Invoice, type InvoiceItem, type InvoiceClient, type InvoiceSettings, type InvoiceTemplate } from "@/services/api/invoicing.service";
+import { InvoiceList, InvoiceEditor, InvoicePreview, ClientManager, InvoiceSettingsComponent, CatalogManager } from "@/components/invoicing";
+import { invoicingService, type Invoice, type InvoiceItem, type InvoiceClient, type InvoiceSettings, type InvoiceTemplate, type CatalogItem } from "@/services/api/invoicing.service";
 
 const MerchantInvoicing = () => {
   const { user, loading: authLoading } = useAuth();
@@ -30,6 +30,7 @@ const MerchantInvoicing = () => {
   const [clients, setClients] = useState<InvoiceClient[]>([]);
   const [settings, setSettings] = useState<InvoiceSettings | null>(null);
   const [templates, setTemplates] = useState<InvoiceTemplate[]>([]);
+  const [catalogItems, setCatalogItems] = useState<CatalogItem[]>([]);
   const [nextInvoiceNumber, setNextInvoiceNumber] = useState<string>("INV-00001");
 
   useEffect(() => {
@@ -69,11 +70,12 @@ const MerchantInvoicing = () => {
     
     setLoading(true);
     try {
-      const [invoicesRes, clientsRes, settingsRes, templatesRes] = await Promise.all([
+      const [invoicesRes, clientsRes, settingsRes, templatesRes, catalogRes] = await Promise.all([
         invoicingService.getInvoices(merchantId),
         invoicingService.getClients(merchantId),
         invoicingService.getSettings(merchantId),
         invoicingService.getTemplates(merchantId),
+        invoicingService.getCatalogItems(merchantId),
       ]);
 
       if (invoicesRes.data) setInvoices(invoicesRes.data);
@@ -85,6 +87,7 @@ const MerchantInvoicing = () => {
         );
       }
       if (templatesRes.data) setTemplates(templatesRes.data);
+      if (catalogRes.data) setCatalogItems(catalogRes.data);
     } catch (error) {
       console.error("Error loading invoicing data:", error);
       toast.error("Failed to load invoicing data");
@@ -458,6 +461,42 @@ const MerchantInvoicing = () => {
     }
   };
 
+  // Catalog actions
+  const handleCreateCatalogItem = async (data: Partial<CatalogItem>) => {
+    if (!merchantId) return;
+    
+    try {
+      const result = await invoicingService.createCatalogItem({
+        merchant_id: merchantId,
+        ...data,
+      } as any);
+      if (result.error) throw result.error;
+    } catch (error) {
+      console.error("Error creating catalog item:", error);
+      throw error;
+    }
+  };
+
+  const handleUpdateCatalogItem = async (id: string, data: Partial<CatalogItem>) => {
+    try {
+      const result = await invoicingService.updateCatalogItem(id, data);
+      if (result.error) throw result.error;
+    } catch (error) {
+      console.error("Error updating catalog item:", error);
+      throw error;
+    }
+  };
+
+  const handleDeleteCatalogItem = async (id: string) => {
+    try {
+      const result = await invoicingService.deleteCatalogItem(id);
+      if (result.error) throw result.error;
+    } catch (error) {
+      console.error("Error deleting catalog item:", error);
+      throw error;
+    }
+  };
+
   if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -500,6 +539,7 @@ const MerchantInvoicing = () => {
             invoice={selectedInvoice || undefined}
             invoiceNumber={selectedInvoice?.invoice_number || nextInvoiceNumber}
             clients={clients}
+            catalogItems={catalogItems}
             settings={settings || undefined}
             onSave={handleSaveInvoice}
             onSend={handleSendInvoice}
@@ -540,7 +580,7 @@ const MerchantInvoicing = () => {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-grid">
+          <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:inline-grid">
             <TabsTrigger value="invoices" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
               <span className="hidden sm:inline">Invoices</span>
@@ -548,6 +588,10 @@ const MerchantInvoicing = () => {
             <TabsTrigger value="clients" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               <span className="hidden sm:inline">Clients</span>
+            </TabsTrigger>
+            <TabsTrigger value="catalog" className="flex items-center gap-2">
+              <Package className="h-4 w-4" />
+              <span className="hidden sm:inline">Catalog</span>
             </TabsTrigger>
             <TabsTrigger value="templates" className="flex items-center gap-2">
               <LayoutTemplate className="h-4 w-4" />
@@ -583,6 +627,27 @@ const MerchantInvoicing = () => {
               onDeleteClient={handleDeleteClient}
               onRefresh={loadData}
             />
+          </TabsContent>
+
+          <TabsContent value="catalog">
+            <Card>
+              <CardHeader>
+                <CardTitle>Product & Service Catalog</CardTitle>
+                <CardDescription>
+                  Add your products and services here to quickly add them to invoices
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <CatalogManager
+                  items={catalogItems}
+                  loading={loading}
+                  onCreateItem={handleCreateCatalogItem}
+                  onUpdateItem={handleUpdateCatalogItem}
+                  onDeleteItem={handleDeleteCatalogItem}
+                  onRefresh={loadData}
+                />
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="templates">

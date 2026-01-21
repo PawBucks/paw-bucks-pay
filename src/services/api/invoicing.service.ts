@@ -169,6 +169,21 @@ export interface InvoiceTemplate {
   updated_at: string;
 }
 
+export interface CatalogItem {
+  id: string;
+  merchant_id: string;
+  name: string;
+  description?: string | null;
+  unit_price: number;
+  unit_type: string;
+  tax_rate: number;
+  category?: string | null;
+  sku?: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export const invoicingService = {
   // CLIENTS
   async getClients(merchantId: string) {
@@ -317,6 +332,45 @@ export const invoicingService = {
   async getTemplates(merchantId: string) {
     const { data, error } = await supabase.from("invoice_templates").select("*").eq("merchant_id", merchantId).order("name");
     return { data: (data || []) as InvoiceTemplate[], error };
+  },
+
+  // CATALOG ITEMS
+  async getCatalogItems(merchantId: string) {
+    const { data, error } = await supabase
+      .from("invoice_catalog_items")
+      .select("*")
+      .eq("merchant_id", merchantId)
+      .eq("is_active", true)
+      .order("category", { ascending: true, nullsFirst: false })
+      .order("name");
+    return { data: (data || []) as CatalogItem[], error };
+  },
+
+  async createCatalogItem(item: Partial<CatalogItem>) {
+    const { data, error } = await supabase
+      .from("invoice_catalog_items")
+      .insert(item as any)
+      .select()
+      .single();
+    return { data: data as CatalogItem | null, error };
+  },
+
+  async updateCatalogItem(id: string, updates: Partial<CatalogItem>) {
+    const { data, error } = await supabase
+      .from("invoice_catalog_items")
+      .update(updates as any)
+      .eq("id", id)
+      .select()
+      .single();
+    return { data: data as CatalogItem | null, error };
+  },
+
+  async deleteCatalogItem(id: string) {
+    const { error } = await supabase
+      .from("invoice_catalog_items")
+      .update({ is_active: false })
+      .eq("id", id);
+    return { data: null, error };
   },
 
   // EDGE FUNCTIONS

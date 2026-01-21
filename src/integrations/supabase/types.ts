@@ -647,6 +647,66 @@ export type Database = {
           },
         ]
       }
+      invoice_catalog_items: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean | null
+          merchant_id: string
+          name: string
+          sku: string | null
+          tax_rate: number | null
+          unit_price: number
+          unit_type: string | null
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          merchant_id: string
+          name: string
+          sku?: string | null
+          tax_rate?: number | null
+          unit_price?: number
+          unit_type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          merchant_id?: string
+          name?: string
+          sku?: string | null
+          tax_rate?: number | null
+          unit_price?: number
+          unit_type?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_catalog_items_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_catalog_items_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invoice_clients: {
         Row: {
           address_line1: string | null
@@ -724,6 +784,7 @@ export type Database = {
       }
       invoice_items: {
         Row: {
+          catalog_item_id: string | null
           created_at: string
           description: string
           discount_amount: number | null
@@ -743,6 +804,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          catalog_item_id?: string | null
           created_at?: string
           description: string
           discount_amount?: number | null
@@ -762,6 +824,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          catalog_item_id?: string | null
           created_at?: string
           description?: string
           discount_amount?: number | null
@@ -781,6 +844,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "invoice_items_catalog_item_id_fkey"
+            columns: ["catalog_item_id"]
+            isOneToOne: false
+            referencedRelation: "invoice_catalog_items"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "invoice_items_invoice_id_fkey"
             columns: ["invoice_id"]
