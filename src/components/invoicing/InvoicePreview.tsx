@@ -54,7 +54,8 @@ export function InvoicePreview({
   const status = statusConfig[invoice.status] || statusConfig.draft;
 
   const copyPaymentLink = () => {
-    const link = `${window.location.origin}/pay/${invoice.access_token}`;
+    // Use correct route: /invoice/:invoiceId/pay?token=accessToken
+    const link = `${window.location.origin}/invoice/${invoice.id}/pay?token=${invoice.access_token}`;
     navigator.clipboard.writeText(link);
     toast.success("Payment link copied to clipboard!");
   };
