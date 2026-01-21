@@ -278,3 +278,6 @@ verify_jwt = false
 
 [functions.accountant-portal-access]
 verify_jwt = false
+
+[functions.send-invoice-reminders]
+verify_jwt = false
