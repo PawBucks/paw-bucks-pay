@@ -404,7 +404,7 @@ export function InvoiceSettingsComponent({
               Automatically send payment reminders to clients
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
             <FormField
               control={form.control}
               name="reminder_enabled"
@@ -422,6 +422,24 @@ export function InvoiceSettingsComponent({
                 </FormItem>
               )}
             />
+            
+            {form.watch("reminder_enabled") && (
+              <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+                <div>
+                  <p className="text-sm font-medium">Before Due Date</p>
+                  <p className="text-sm text-muted-foreground">
+                    Reminders sent 7, 3, and 1 day(s) before the invoice is due
+                  </p>
+                </div>
+                <Separator />
+                <div>
+                  <p className="text-sm font-medium">After Due Date (Overdue)</p>
+                  <p className="text-sm text-muted-foreground">
+                    Reminders sent on the due date, then 1, 7, 14, and 30 day(s) after
+                  </p>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 
