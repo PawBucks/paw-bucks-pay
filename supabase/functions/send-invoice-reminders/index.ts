@@ -312,9 +312,9 @@ serve(async (req) => {
         continue;
       }
 
-      // Generate payment URL
-      const baseUrl = Deno.env.get("SUPABASE_URL")?.replace(".supabase.co", "") || "https://paw-bucks-pay.lovable.app";
-      const paymentUrl = `https://paw-bucks-pay.lovable.app/pay/${invoice.access_token}`;
+      // Generate payment URL - must match InvoicePayment route: /invoice/:invoiceId?token=
+      const appUrl = Deno.env.get("APP_URL") || "https://paw-bucks-pay.lovable.app";
+      const paymentUrl = `${appUrl}/invoice/${invoice.id}?token=${invoice.access_token}`;
 
       // Send reminder email
       const subject = reminderType === "overdue"
