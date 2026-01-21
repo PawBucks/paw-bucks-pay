@@ -1,5 +1,5 @@
 import { format, parseISO } from "date-fns";
-import { Download, Send, ArrowLeft, Printer, Link as LinkIcon, Mail, Copy } from "lucide-react";
+import { Download, Send, ArrowLeft, Printer, Link as LinkIcon, Mail, Copy, FileText, Image, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { Invoice, InvoiceItem, InvoicePayment } from "@/services/api/invoicing.service";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface InvoicePreviewProps {
   invoice: Invoice;
@@ -268,6 +269,51 @@ export function InvoicePreview({
                     ))}
                   </tbody>
                 </table>
+              </div>
+            </div>
+          )}
+
+          {/* Attachments */}
+          {invoice.attachment_urls && invoice.attachment_urls.length > 0 && (
+            <div className="mb-6">
+              <h3 className="text-sm font-semibold text-muted-foreground uppercase mb-2">Attachments</h3>
+              <div className="space-y-2">
+                {invoice.attachment_urls.map((path, index) => {
+                  const fileName = path.split('/').pop() || 'Attachment';
+                  const displayName = fileName.indexOf('_') > 30 
+                    ? fileName.substring(fileName.indexOf('_') + 1) 
+                    : fileName;
+                  const isImage = /\.(jpg|jpeg|png|webp|gif)$/i.test(path);
+                  
+                  const handleView = async () => {
+                    try {
+                      const { data, error } = await supabase.storage
+                        .from("invoice-attachments")
+                        .createSignedUrl(path, 3600);
+                      if (error) throw error;
+                      window.open(data.signedUrl, "_blank");
+                    } catch (error) {
+                      console.error("Error getting signed URL:", error);
+                      toast.error("Failed to open attachment");
+                    }
+                  };
+                  
+                  return (
+                    <div 
+                      key={index} 
+                      className="flex items-center gap-3 p-2 border rounded-lg bg-muted/30 hover:bg-muted/50 cursor-pointer transition-colors"
+                      onClick={handleView}
+                    >
+                      {isImage ? (
+                        <Image className="h-4 w-4 text-blue-500" />
+                      ) : (
+                        <FileText className="h-4 w-4 text-red-500" />
+                      )}
+                      <span className="text-sm flex-1 truncate">{displayName}</span>
+                      <Eye className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}

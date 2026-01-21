@@ -7,3 +7,4 @@ export { RecordPaymentDialog } from './RecordPaymentDialog';
 export { CatalogManager } from './CatalogManager';
 export { CatalogItemPicker } from './CatalogItemPicker';
 export { TemplateManager } from './TemplateManager';
+export { InvoiceAttachments } from './InvoiceAttachments';

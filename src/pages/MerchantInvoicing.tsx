@@ -698,6 +698,7 @@ const MerchantInvoicing = () => {
           <InvoiceEditor
             invoice={selectedInvoice || undefined}
             invoiceNumber={selectedInvoice?.invoice_number || nextInvoiceNumber}
+            merchantId={merchantId!}
             clients={clients}
             catalogItems={catalogItems}
             settings={settings || undefined}

@@ -16,6 +16,7 @@ import {
   Percent,
   DollarSign,
   GripVertical,
+  Paperclip,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -47,6 +48,7 @@ import {
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Invoice, InvoiceItem, InvoiceClient, InvoiceSettings, CatalogItem } from "@/services/api/invoicing.service";
 import { CatalogItemPicker } from "./CatalogItemPicker";
+import { InvoiceAttachments } from "./InvoiceAttachments";
 import { cn } from "@/lib/utils";
 
 const invoiceSchema = z.object({
@@ -92,6 +94,7 @@ type InvoiceFormData = z.infer<typeof invoiceSchema>;
 interface InvoiceEditorProps {
   invoice?: Invoice & { items?: InvoiceItem[] };
   invoiceNumber: string;
+  merchantId: string;
   clients: InvoiceClient[];
   catalogItems?: CatalogItem[];
   settings?: InvoiceSettings;
@@ -105,6 +108,7 @@ interface InvoiceEditorProps {
 export function InvoiceEditor({
   invoice,
   invoiceNumber,
+  merchantId,
   clients,
   catalogItems = [],
   settings,
@@ -115,6 +119,9 @@ export function InvoiceEditor({
   saving,
 }: InvoiceEditorProps) {
   const [selectedClient, setSelectedClient] = useState<InvoiceClient | null>(null);
+  const [attachments, setAttachments] = useState<string[]>(
+    invoice?.attachment_urls || []
+  );
 
   const defaultValues: InvoiceFormData = {
     client_id: invoice?.client_id || "",
@@ -284,6 +291,7 @@ export function InvoiceEditor({
       discount_amount: totals.discount,
       tax_amount: totals.tax,
       total: totals.total,
+      attachment_urls: attachments.length > 0 ? attachments : null,
     };
 
     const itemsData = data.items.map((item, index) => ({
@@ -652,6 +660,24 @@ export function InvoiceEditor({
                       <FormMessage />
                     </FormItem>
                   )}
+                />
+              </CardContent>
+            </Card>
+
+            {/* Attachments */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Paperclip className="h-5 w-5" />
+                  Attachments
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <InvoiceAttachments
+                  merchantId={merchantId}
+                  invoiceId={invoice?.id}
+                  attachments={attachments}
+                  onChange={setAttachments}
                 />
               </CardContent>
             </Card>
