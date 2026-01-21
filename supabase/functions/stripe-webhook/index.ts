@@ -1031,6 +1031,34 @@ serve(async (req) => {
         user_id,
       });
 
+      // ========================================
+      // DUPLICATE PREVENTION CHECK
+      // Skip if this payment was already processed via checkout.session.completed
+      // (e.g., invoice payments, subscription payments)
+      // ========================================
+      const { data: existingTransaction } = await supabaseAdmin
+        .from('transactions')
+        .select('id')
+        .eq('stripe_payment_intent_id', paymentIntent.id)
+        .maybeSingle();
+
+      if (existingTransaction) {
+        console.log('[PAYMENT_INTENT] ⏭️ Skipping - transaction already exists for payment_intent:', paymentIntent.id);
+        return new Response(JSON.stringify({ received: true, skipped: 'duplicate' }), { status: 200 });
+      }
+
+      // Also check invoice_payments table for invoice-specific payments
+      const { data: existingInvoicePayment } = await supabaseAdmin
+        .from('invoice_payments')
+        .select('id')
+        .eq('stripe_payment_intent_id', paymentIntent.id)
+        .maybeSingle();
+
+      if (existingInvoicePayment) {
+        console.log('[PAYMENT_INTENT] ⏭️ Skipping - invoice payment already processed for payment_intent:', paymentIntent.id);
+        return new Response(JSON.stringify({ received: true, skipped: 'invoice_already_processed' }), { status: 200 });
+      }
+
       const amount = paymentIntent.amount / 100; // Convert from cents
       
       // Determine PawBucks multiplier based on subscription tier
