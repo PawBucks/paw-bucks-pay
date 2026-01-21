@@ -45,7 +45,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { Invoice, InvoiceItem, InvoiceClient, InvoiceSettings } from "@/services/api/invoicing.service";
+import { Invoice, InvoiceItem, InvoiceClient, InvoiceSettings, CatalogItem } from "@/services/api/invoicing.service";
+import { CatalogItemPicker } from "./CatalogItemPicker";
 import { cn } from "@/lib/utils";
 
 const invoiceSchema = z.object({
@@ -92,6 +93,7 @@ interface InvoiceEditorProps {
   invoice?: Invoice & { items?: InvoiceItem[] };
   invoiceNumber: string;
   clients: InvoiceClient[];
+  catalogItems?: CatalogItem[];
   settings?: InvoiceSettings;
   onSave: (data: any, items: any[]) => Promise<string | null | void>;
   onSend: (data: any, items: any[]) => Promise<void>;
@@ -104,6 +106,7 @@ export function InvoiceEditor({
   invoice,
   invoiceNumber,
   clients,
+  catalogItems = [],
   settings,
   onSave,
   onSend,
@@ -256,6 +259,19 @@ export function InvoiceEditor({
     form.setValue("payment_terms", terms);
     const issueDate = form.getValues("issue_date");
     form.setValue("due_date", addDays(issueDate, terms));
+  };
+
+  // Handle catalog item selection
+  const handleCatalogItemSelect = (catalogItem: CatalogItem) => {
+    append({
+      description: catalogItem.description 
+        ? `${catalogItem.name}\n${catalogItem.description}` 
+        : catalogItem.name,
+      quantity: 1,
+      unit_price: Number(catalogItem.unit_price),
+      unit_type: catalogItem.unit_type || "unit",
+      tax_rate: Number(catalogItem.tax_rate) || 0,
+    });
   };
 
   const handleSubmit = async (data: InvoiceFormData, sendImmediately: boolean = false) => {
@@ -441,7 +457,15 @@ export function InvoiceEditor({
             {/* Line Items */}
             <Card>
               <CardHeader>
-                <CardTitle>Line Items</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Line Items</CardTitle>
+                  {catalogItems.length > 0 && (
+                    <CatalogItemPicker 
+                      items={catalogItems} 
+                      onSelect={handleCatalogItemSelect} 
+                    />
+                  )}
+                </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 {fields.map((field, index) => (
