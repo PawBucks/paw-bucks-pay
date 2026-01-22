@@ -199,6 +199,36 @@ serve(async (req) => {
       const merchantId = metadata.merchant_id;
       const merchantName = metadata.product_name || 'Merchant';
 
+      // ========================================
+      // DUPLICATE PREVENTION CHECK
+      // Skip if this checkout session was already processed
+      // ========================================
+      const paymentIntentId = session.payment_intent as string;
+      if (paymentIntentId) {
+        const { data: existingTransaction } = await supabaseAdmin
+          .from('transactions')
+          .select('id')
+          .eq('stripe_payment_intent_id', paymentIntentId)
+          .maybeSingle();
+
+        if (existingTransaction) {
+          console.log('[CHECKOUT] ⏭️ Skipping - transaction already exists for payment_intent:', paymentIntentId);
+          return new Response(JSON.stringify({ received: true, skipped: 'duplicate_checkout' }), { status: 200 });
+        }
+
+        // Also check invoice_payments table for invoice-specific payments
+        const { data: existingInvoicePayment } = await supabaseAdmin
+          .from('invoice_payments')
+          .select('id')
+          .eq('stripe_payment_intent_id', paymentIntentId)
+          .maybeSingle();
+
+        if (existingInvoicePayment) {
+          console.log('[CHECKOUT] ⏭️ Skipping - invoice payment already processed for payment_intent:', paymentIntentId);
+          return new Response(JSON.stringify({ received: true, skipped: 'invoice_already_processed' }), { status: 200 });
+        }
+      }
+
       if (pawbucksUsed > 0 && userId) {
         console.log('Processing PawBucks auto-redemption after payment completion:', {
           pawbucksUsed,
