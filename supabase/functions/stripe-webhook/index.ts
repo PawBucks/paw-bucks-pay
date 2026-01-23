@@ -1052,19 +1052,38 @@ serve(async (req) => {
     // Handle successful payment
     if (event.type === 'payment_intent.succeeded') {
       const paymentIntent = event.data.object as Stripe.PaymentIntent;
-      const { merchant_id, user_id, description } = paymentIntent.metadata;
+      const metadata = paymentIntent.metadata || {};
+      const { merchant_id, user_id, description } = metadata;
 
       console.log('Payment succeeded:', {
         paymentIntentId: paymentIntent.id,
         amount: paymentIntent.amount / 100,
         merchant_id,
         user_id,
+        metadataType: metadata.type,
       });
+
+      // ========================================
+      // EARLY SKIP: Invoice payments are handled by checkout.session.completed
+      // This prevents race condition where both events process simultaneously
+      // ========================================
+      if (metadata.type === 'invoice_payment' || metadata.invoice_id) {
+        console.log('[PAYMENT_INTENT] ⏭️ Skipping invoice payment - handled by checkout.session.completed');
+        
+        // Mark webhook as processed and return early
+        await supabaseAdmin
+          .from('webhook_logs')
+          .update({ processed: true })
+          .eq('event_id', event.id);
+        
+        console.log('Payment intent succeeded processed:', paymentIntent.id);
+        return new Response(JSON.stringify({ received: true, skipped: 'invoice_payment_handled_by_checkout' }), { status: 200 });
+      }
 
       // ========================================
       // DUPLICATE PREVENTION CHECK
       // Skip if this payment was already processed via checkout.session.completed
-      // (e.g., invoice payments, subscription payments)
+      // (e.g., subscription payments or other payment types)
       // ========================================
       const { data: existingTransaction } = await supabaseAdmin
         .from('transactions')
@@ -1075,18 +1094,6 @@ serve(async (req) => {
       if (existingTransaction) {
         console.log('[PAYMENT_INTENT] ⏭️ Skipping - transaction already exists for payment_intent:', paymentIntent.id);
         return new Response(JSON.stringify({ received: true, skipped: 'duplicate' }), { status: 200 });
-      }
-
-      // Also check invoice_payments table for invoice-specific payments
-      const { data: existingInvoicePayment } = await supabaseAdmin
-        .from('invoice_payments')
-        .select('id')
-        .eq('stripe_payment_intent_id', paymentIntent.id)
-        .maybeSingle();
-
-      if (existingInvoicePayment) {
-        console.log('[PAYMENT_INTENT] ⏭️ Skipping - invoice payment already processed for payment_intent:', paymentIntent.id);
-        return new Response(JSON.stringify({ received: true, skipped: 'invoice_already_processed' }), { status: 200 });
       }
 
       const amount = paymentIntent.amount / 100; // Convert from cents
