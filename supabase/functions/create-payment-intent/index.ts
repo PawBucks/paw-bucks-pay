@@ -150,7 +150,7 @@ serve(async (req) => {
       amount: amountInCents,
       currency,
       payment_method_types: ['card'], // Explicit card method for global compatibility
-      on_behalf_of: merchant.stripe_account_id, // Shows merchant's business on customer statement
+      // Note: on_behalf_of is NOT used with destination charges for Express accounts
       application_fee_amount: platformFeeInCents, // Platform fee (used for cashback)
       transfer_data: {
         destination: merchant.stripe_account_id, // Send to merchant's Connect account
