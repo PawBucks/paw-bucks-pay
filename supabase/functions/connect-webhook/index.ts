@@ -40,16 +40,17 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // Handle events from connected accounts
+    // Handle events - with Express accounts using destination charges,
+    // webhooks come to the PLATFORM (not the connected account)
     const connectedAccountId = event.account;
     if (connectedAccountId) {
-      logStep("Event from connected account", { accountId: connectedAccountId });
+      logStep("Event from connected account context", { accountId: connectedAccountId });
     }
 
     switch (event.type) {
       case "payment_intent.succeeded": {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
-        logStep("Payment succeeded", { 
+        logStep("Payment succeeded (destination charge)", { 
           paymentIntentId: paymentIntent.id,
           amount: paymentIntent.amount,
           metadata: paymentIntent.metadata 
@@ -59,6 +60,7 @@ serve(async (req) => {
         const userId = metadata.user_id;
         const merchantId = metadata.merchant_id;
         const pawbucksEarned = parseInt(metadata.pawbucks_earned || "0", 10);
+        const chargeType = metadata.charge_type || "destination";
 
         // Update direct_payments status
         const { error: updateError } = await supabaseAdmin
@@ -108,6 +110,7 @@ serve(async (req) => {
               rewards_earned: pawbucksEarned,
               cashback_earned: amountInDollars * 0.1, // 10% cashback value
               stripe_payment_intent_id: paymentIntent.id,
+              description: `${chargeType === "destination" ? "Destination" : "Direct"} charge - ${metadata.business_name || "Merchant"}`,
             });
 
           logStep("Transaction record created with fee tracking");
@@ -159,21 +162,29 @@ serve(async (req) => {
 
       case "account.updated": {
         const account = event.data.object as Stripe.Account;
-        logStep("Account updated", { 
+        logStep("Express account updated", { 
           accountId: account.id,
           chargesEnabled: account.charges_enabled,
-          payoutsEnabled: account.payouts_enabled 
+          payoutsEnabled: account.payouts_enabled,
+          type: account.type
         });
 
         const isComplete = account.charges_enabled && account.payouts_enabled;
 
+        // Check for pending requirements
+        const hasPendingRequirements = 
+          (account.requirements?.currently_due?.length || 0) > 0 ||
+          (account.requirements?.past_due?.length || 0) > 0;
+
         await supabaseAdmin
           .from("merchants")
           .update({
-            onboarding_complete: isComplete,
+            onboarding_complete: isComplete && !hasPendingRequirements,
             stripe_account_status: isComplete ? "active" : "pending",
           })
           .eq("stripe_account_id", account.id);
+
+        logStep("Merchant status updated", { isComplete, hasPendingRequirements });
 
         break;
       }
@@ -194,6 +205,16 @@ serve(async (req) => {
           payoutId: payout.id,
           failureMessage: payout.failure_message,
           connectedAccount: connectedAccountId 
+        });
+        break;
+      }
+
+      case "transfer.created": {
+        const transfer = event.data.object as Stripe.Transfer;
+        logStep("Transfer created to merchant", {
+          transferId: transfer.id,
+          amount: transfer.amount,
+          destination: transfer.destination,
         });
         break;
       }

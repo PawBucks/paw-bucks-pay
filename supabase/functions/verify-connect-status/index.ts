@@ -8,7 +8,7 @@ const corsHeaders = {
 };
 
 const logStep = (step: string, details?: Record<string, unknown>) => {
-  console.log(`[VERIFY-CONNECT-STATUS] ${step}`, details ? JSON.stringify(details) : "");
+  console.log(`[VERIFY-EXPRESS-STATUS] ${step}`, details ? JSON.stringify(details) : "");
 };
 
 serve(async (req) => {

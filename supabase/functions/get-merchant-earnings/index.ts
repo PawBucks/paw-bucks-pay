@@ -179,23 +179,17 @@ serve(async (req) => {
     const combinedFees = (directPaymentFees / 100) + transactionFees;
     const combinedRewardsGiven = transactionCashback + transactionRewards; // Total rewards given to customers (in PawBucks)
 
-    // Create Stripe Dashboard login link
+    // Create Stripe Express Dashboard login link
     let dashboardUrl = null;
     try {
-      // Try creating login link for Standard accounts
+      // Express accounts support login links for the Express Dashboard
       const loginLink = await stripe.accounts.createLoginLink(merchant.stripe_account_id);
       dashboardUrl = loginLink.url;
-      logStep("Dashboard login link created");
+      logStep("Express Dashboard login link created");
     } catch (e) {
-      // For Standard accounts without Express Dashboard, try direct link
-      logStep("Could not create dashboard link, trying account link", { error: String(e) });
-      try {
-        // For Standard accounts, provide a direct Stripe dashboard link
-        dashboardUrl = `https://dashboard.stripe.com`;
-        logStep("Using direct Stripe dashboard URL for Standard account");
-      } catch (e2) {
-        logStep("Could not create account link either", { error: String(e2) });
-      }
+      logStep("Could not create Express Dashboard link", { error: String(e) });
+      // Fallback - should rarely happen with Express accounts
+      dashboardUrl = null;
     }
 
     return new Response(JSON.stringify({

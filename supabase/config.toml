@@ -186,10 +186,16 @@ verify_jwt = true
 [functions.create-standard-connect-account]
 verify_jwt = true
 
+[functions.create-express-connect-account]
+verify_jwt = true
+
 [functions.verify-connect-status]
 verify_jwt = true
 
 [functions.create-direct-charge]
+verify_jwt = true
+
+[functions.create-destination-charge]
 verify_jwt = true
 
 [functions.connect-webhook]
