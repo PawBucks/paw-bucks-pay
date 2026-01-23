@@ -23,7 +23,7 @@ serve(async (req) => {
       { auth: { persistSession: false } }
     );
 
-    const { invoiceId, amount, tipAmount } = await req.json();
+    const { invoiceId, amount, tipAmount, userId } = await req.json();
 
     if (!invoiceId || !amount) {
       throw new Error("Invoice ID and amount are required");
@@ -83,14 +83,48 @@ serve(async (req) => {
       });
     }
 
-    // Check if merchant has Stripe Connect
+    // Validate Stripe Connect account if merchant has one
     const connectedAccountId = merchant.stripe_account_id;
+    let isConnectValid = false;
+    
+    if (connectedAccountId && merchant.stripe_account_status === "active") {
+      try {
+        // Verify the account exists and is usable
+        const account = await stripe.accounts.retrieve(connectedAccountId);
+        isConnectValid = account && (account.charges_enabled || account.payouts_enabled);
+        console.log(`Stripe Connect account validation: ${connectedAccountId} - valid: ${isConnectValid}`);
+      } catch (accountError: any) {
+        console.error(`Stripe Connect account ${connectedAccountId} not found or invalid:`, accountError.message);
+        isConnectValid = false;
+        
+        // Update merchant status in database to reflect invalid account
+        await supabase
+          .from("merchants")
+          .update({ 
+            stripe_account_status: "needs_reconnect",
+            updated_at: new Date().toISOString()
+          })
+          .eq("id", merchant.id);
+      }
+    }
 
     let session: Stripe.Checkout.Session;
 
-    if (connectedAccountId && merchant.stripe_account_status === "active") {
+    // Metadata to include in checkout - always include user_id for PawBucks rewards
+    const metadata = {
+      invoice_id: invoiceId,
+      merchant_id: merchant.id,
+      type: "invoice_payment",
+      tip_amount: String(tipAmount || 0),
+      pawbucks_used: "0", // This function doesn't handle PawBucks, but included for consistency
+      user_id: userId || "", // CRITICAL: Required for PawBucks rewards and transaction records
+    };
+
+    if (isConnectValid && connectedAccountId) {
       // Use Stripe Connect destination charges (Express accounts)
       const applicationFee = Math.round((amount + (tipAmount || 0)) * 0.03); // 3% platform fee
+
+      console.log(`Creating Connect checkout for merchant ${merchant.id} with destination ${connectedAccountId}`);
 
       session = await stripe.checkout.sessions.create({
         payment_method_types: ["card"],
@@ -99,27 +133,24 @@ serve(async (req) => {
         success_url: `${appUrl}/invoice/${invoiceId}/success?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${appUrl}/invoice/${invoiceId}/pay?token=${invoice.access_token}`,
         customer_email: invoice.client_email,
-        metadata: {
-          invoice_id: invoiceId,
-          merchant_id: merchant.id,
-          type: "invoice_payment",
-          tip_amount: String(tipAmount || 0),
-        },
+        metadata,
         payment_intent_data: {
           application_fee_amount: applicationFee,
           transfer_data: {
             destination: connectedAccountId,
           },
-          // Note: on_behalf_of is NOT used with destination charges for Express accounts
           metadata: {
             invoice_id: invoiceId,
             merchant_id: merchant.id,
+            user_id: userId || "",
           },
         },
         billing_address_collection: "auto",
       });
     } else {
       // Standard checkout without Connect - add merchant info to product description
+      console.log(`Creating standard checkout for merchant ${merchant.id} (no valid Connect account)`);
+      
       const brandedLineItems = lineItems.map(item => ({
         ...item,
         price_data: {
@@ -141,12 +172,7 @@ serve(async (req) => {
         success_url: `${appUrl}/invoice/${invoiceId}/success?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${appUrl}/invoice/${invoiceId}/pay?token=${invoice.access_token}`,
         customer_email: invoice.client_email,
-        metadata: {
-          invoice_id: invoiceId,
-          merchant_id: merchant.id,
-          type: "invoice_payment",
-          tip_amount: String(tipAmount || 0),
-        },
+        metadata,
         billing_address_collection: "auto",
       });
     }
@@ -162,6 +188,7 @@ serve(async (req) => {
           checkout_session_id: session.id,
           amount: amount,
           tip_amount: tipAmount || 0,
+          user_id: userId || null,
         },
       });
 
