@@ -71,6 +71,31 @@ serve(async (req) => {
     const stripeAmountCents = totalAmountCents - pawbucksAmountCents;
     const pawbucksUsed = Math.round(pawbucksAmountCents / PAWBUCKS_TO_USD / 100); // Convert cents to PawBucks
 
+    // Validate Stripe Connect account if merchant has one
+    const connectedAccountId = merchant.stripe_account_id;
+    let isConnectValid = false;
+    
+    if (connectedAccountId && merchant.stripe_account_status === "active") {
+      try {
+        // Verify the account exists and is usable
+        const account = await stripe.accounts.retrieve(connectedAccountId);
+        isConnectValid = account && (account.charges_enabled || account.payouts_enabled);
+        console.log(`Stripe Connect account validation: ${connectedAccountId} - valid: ${isConnectValid}`);
+      } catch (accountError: any) {
+        console.error(`Stripe Connect account ${connectedAccountId} not found or invalid:`, accountError.message);
+        isConnectValid = false;
+        
+        // Update merchant status in database to reflect invalid account
+        await supabase
+          .from("merchants")
+          .update({ 
+            stripe_account_status: "needs_reconnect",
+            updated_at: new Date().toISOString()
+          })
+          .eq("id", merchant.id);
+      }
+    }
+
     // If paying entirely with PawBucks
     if (stripeAmountCents <= 0 && pawbucksAmountCents > 0) {
       if (!userId) {
@@ -256,7 +281,7 @@ serve(async (req) => {
     }
 
     // Mixed payment or Stripe-only: Create Stripe checkout
-    const connectedAccountId = merchant.stripe_account_id;
+    // Note: connectedAccountId and isConnectValid are defined earlier in the function
     
     // Build line items
     const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
@@ -303,11 +328,13 @@ serve(async (req) => {
       user_id: userId || "",
     };
 
-    if (connectedAccountId && merchant.stripe_account_status === "active") {
+    if (isConnectValid && connectedAccountId) {
       // Use Stripe Connect destination charges (Express accounts)
       const totalStripeAmount = stripeAmountCents + (tipAmountCents || 0);
       const applicationFee = Math.round(totalStripeAmount * 0.03); // 3% platform fee
 
+      console.log(`Creating Connect checkout for merchant ${merchant.id} with destination ${connectedAccountId}`);
+      
       session = await stripe.checkout.sessions.create({
         payment_method_types: ["card"],
         line_items: lineItems,
@@ -332,6 +359,8 @@ serve(async (req) => {
         billing_address_collection: "auto",
       });
     } else {
+      // Standard checkout without Connect - add merchant info to product description
+      console.log(`Creating standard checkout for merchant ${merchant.id} (no valid Connect account)`);
       // Standard checkout without Connect - add merchant info to product description
       // Update line items to include merchant name for better identification
       const brandedLineItems = lineItems.map(item => ({
