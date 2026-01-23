@@ -31,11 +31,17 @@ serve(async (req) => {
       pawbucksAmountCents, 
       tipAmountCents,
       userId,
-      accessToken 
+      accessToken,
+      isGuestCheckout, // New flag for guest checkout
     } = await req.json();
 
     if (!invoiceId || totalAmountCents === undefined) {
       throw new Error("Invoice ID and total amount are required");
+    }
+    
+    // Validate: Guest checkout cannot use PawBucks
+    if (isGuestCheckout && pawbucksAmountCents > 0) {
+      throw new Error("Guest checkout cannot use PawBucks. Please sign in to use PawBucks.");
     }
 
     // Fetch the invoice with access token validation
@@ -326,6 +332,7 @@ serve(async (req) => {
       pawbucks_used: String(pawbucksUsed || 0),
       pawbucks_amount_cents: String(pawbucksAmountCents || 0),
       user_id: userId || "",
+      is_guest_checkout: String(isGuestCheckout || false),
     };
 
     if (isConnectValid && connectedAccountId) {

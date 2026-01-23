@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -31,6 +32,7 @@ import {
   MapPin,
   Coins,
   Sparkles,
+  UserX,
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
@@ -52,9 +54,13 @@ const InvoicePayment = () => {
   const [tipAmount, setTipAmount] = useState<string>("0");
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   
-  // Auth state - REQUIRED for payments
+  // Auth state
   const [user, setUser] = useState<any>(null);
   const [authLoading, setAuthLoading] = useState(true);
+  
+  // Guest checkout state
+  const [guestCheckoutConfirmed, setGuestCheckoutConfirmed] = useState(false);
+  const [showGuestOption, setShowGuestOption] = useState(false);
   
   // PawBucks state
   const [pawbucksBalance, setPawbucksBalance] = useState(0);
@@ -178,13 +184,17 @@ const InvoicePayment = () => {
   const handlePayment = async () => {
     if (!invoice || !merchant) return;
 
+    // Determine if this is a guest checkout
+    const isGuestCheckout = !user && guestCheckoutConfirmed;
+
     setProcessing(true);
     try {
       const totalCents = Math.round(totalPayment * 100);
-      const pawbucksCents = Math.round(pawbucksValueUSD * 100);
+      // Guests cannot use PawBucks
+      const pawbucksCents = isGuestCheckout ? 0 : Math.round(pawbucksValueUSD * 100);
       const tipCents = Math.round(parseFloat(tipAmount || "0") * 100);
 
-      // Use the new edge function that handles PawBucks
+      // Use the edge function that handles PawBucks
       const { data, error } = await supabase.functions.invoke("process-invoice-pawbucks-payment", {
         body: {
           invoiceId: invoice.id,
@@ -193,6 +203,7 @@ const InvoicePayment = () => {
           tipAmountCents: tipCents,
           userId: user?.id,
           accessToken,
+          isGuestCheckout,
         },
       });
 
@@ -515,16 +526,16 @@ const InvoicePayment = () => {
                   <p className="text-muted-foreground">Checking authentication...</p>
                 </CardContent>
               </Card>
-            ) : !user ? (
-              /* Login Required - Must sign in to pay */
+            ) : !user && !guestCheckoutConfirmed ? (
+              /* Login Recommended - But can proceed as guest */
               <Card className="border-primary/50">
                 <CardHeader className="text-center pb-2">
                   <div className="h-16 w-16 rounded-full bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/50 dark:to-orange-900/50 flex items-center justify-center mx-auto mb-3">
                     <Coins className="h-8 w-8 text-amber-600" />
                   </div>
-                  <CardTitle>Sign In Required</CardTitle>
+                  <CardTitle>Sign In to Earn Rewards</CardTitle>
                   <CardDescription>
-                    You must sign in or create an account to pay this invoice
+                    Sign in to earn up to 30x PawBucks on this purchase
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -565,6 +576,49 @@ const InvoicePayment = () => {
                   <p className="text-xs text-center text-muted-foreground">
                     Don't have an account? You can create one during sign in.
                   </p>
+                  
+                  <Separator />
+                  
+                  {/* Guest Checkout Option */}
+                  {!showGuestOption ? (
+                    <Button 
+                      variant="ghost" 
+                      className="w-full text-muted-foreground"
+                      onClick={() => setShowGuestOption(true)}
+                    >
+                      <UserX className="h-4 w-4 mr-2" />
+                      Continue without signing in
+                    </Button>
+                  ) : (
+                    <div className="space-y-3 p-4 bg-amber-50 dark:bg-amber-950/30 rounded-lg border border-amber-200 dark:border-amber-800">
+                      <div className="flex items-start gap-2">
+                        <AlertCircle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+                        <div className="text-sm">
+                          <p className="font-medium text-amber-900 dark:text-amber-100">
+                            You won't earn PawBucks
+                          </p>
+                          <p className="text-amber-700 dark:text-amber-300 mt-1">
+                            By proceeding as a guest, you will not earn any PawBucks rewards on this purchase.
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-start gap-3">
+                        <Checkbox
+                          id="guest-confirm"
+                          checked={guestCheckoutConfirmed}
+                          onCheckedChange={(checked) => setGuestCheckoutConfirmed(checked === true)}
+                          className="mt-0.5"
+                        />
+                        <Label 
+                          htmlFor="guest-confirm" 
+                          className="text-sm text-amber-800 dark:text-amber-200 cursor-pointer leading-tight"
+                        >
+                          I understand that I will not earn PawBucks on this purchase by continuing as a guest.
+                        </Label>
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             ) : (
@@ -575,12 +629,35 @@ const InvoicePayment = () => {
                     Pay Invoice
                   </CardTitle>
                   <CardDescription>
-                    {invoice.accept_pawbucks 
-                      ? "Pay with credit card, PawBucks, or both"
-                      : "Secure payment via Stripe"}
+                    {!user ? (
+                      "Guest checkout - no rewards earned"
+                    ) : invoice.accept_pawbucks ? (
+                      "Pay with credit card, PawBucks, or both"
+                    ) : (
+                      "Secure payment via Stripe"
+                    )}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  
+                  {/* Guest checkout warning banner */}
+                  {!user && guestCheckoutConfirmed && (
+                    <div className="flex items-center gap-2 p-3 bg-amber-50 dark:bg-amber-950/30 rounded-lg border border-amber-200 dark:border-amber-800">
+                      <UserX className="h-4 w-4 text-amber-600 shrink-0" />
+                      <p className="text-xs text-amber-700 dark:text-amber-300">
+                        Paying as guest - no PawBucks rewards will be earned.{" "}
+                        <button 
+                          className="underline font-medium"
+                          onClick={() => {
+                            setGuestCheckoutConfirmed(false);
+                            setShowGuestOption(false);
+                          }}
+                        >
+                          Sign in instead
+                        </button>
+                      </p>
+                    </div>
+                  )}
 
                   {/* Payment UI */}
                   <div className="p-4 bg-muted rounded-lg text-center">
@@ -634,8 +711,8 @@ const InvoicePayment = () => {
                     </div>
                   )}
 
-                  {/* PawBucks Payment Option - Show if invoice OR merchant accepts PawBucks (merchant setting overrides) */}
-                  {(invoice.accept_pawbucks || merchant?.accepts_pawbucks) && (
+                  {/* PawBucks Payment Option - Only show for logged-in users when invoice OR merchant accepts PawBucks */}
+                  {user && (invoice.accept_pawbucks || merchant?.accepts_pawbucks) && (
                     <div className="space-y-3 p-4 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 rounded-lg border border-amber-200 dark:border-amber-800">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
