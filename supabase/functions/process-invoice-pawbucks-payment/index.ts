@@ -304,9 +304,9 @@ serve(async (req) => {
     };
 
     if (connectedAccountId && merchant.stripe_account_status === "active") {
-      // Use Stripe Connect with on_behalf_of for merchant branding
+      // Use Stripe Connect destination charges (Express accounts)
       const totalStripeAmount = stripeAmountCents + (tipAmountCents || 0);
-      const applicationFee = Math.round(totalStripeAmount * 0.025); // 2.5% platform fee
+      const applicationFee = Math.round(totalStripeAmount * 0.03); // 3% platform fee
 
       session = await stripe.checkout.sessions.create({
         payment_method_types: ["card"],
@@ -321,7 +321,7 @@ serve(async (req) => {
           transfer_data: {
             destination: connectedAccountId,
           },
-          on_behalf_of: connectedAccountId, // Shows merchant branding on checkout
+          // Note: on_behalf_of is NOT used with destination charges for Express accounts
           metadata: {
             invoice_id: invoiceId,
             merchant_id: merchant.id,
