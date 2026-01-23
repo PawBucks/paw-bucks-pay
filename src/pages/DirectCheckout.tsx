@@ -177,7 +177,8 @@ export default function DirectCheckout() {
 
     setCreating(true);
     try {
-      const { data, error } = await supabase.functions.invoke("create-direct-charge", {
+      // Use the new destination charge function (Express accounts)
+      const { data, error } = await supabase.functions.invoke("create-destination-charge", {
         body: {
           merchantId,
           amount: amountInCents,

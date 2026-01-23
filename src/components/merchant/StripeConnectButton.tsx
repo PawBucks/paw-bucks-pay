@@ -56,7 +56,8 @@ export function StripeConnectButton({ onStatusChange }: StripeConnectButtonProps
   const handleConnect = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke("create-standard-connect-account");
+      // Use the new Express Connect account function
+      const { data, error } = await supabase.functions.invoke("create-express-connect-account");
       
       if (error) throw error;
       
@@ -154,7 +155,7 @@ export function StripeConnectButton({ onStatusChange }: StripeConnectButtonProps
         </CardTitle>
         <CardDescription>
           Connect your Stripe account to receive payments directly from customers. 
-          You'll keep full control of your earnings with a 3% platform fee.
+          Stripe-hosted onboarding makes setup quick and easy, with a 3% platform fee.
         </CardDescription>
       </CardHeader>
       <CardContent>
