@@ -292,7 +292,7 @@ serve(async (req) => {
       payment_method_types: ['card'], // Explicit card method for global compatibility
       application_fee_amount: platformFeeInCents,
       transfer_data: { destination: merchant.stripe_account_id },
-      on_behalf_of: merchant.stripe_account_id, // Shows merchant name on card statement
+      // Note: on_behalf_of is NOT used with destination charges for Express accounts
       statement_descriptor_suffix: statementDescriptor, // Merchant name on statement
       metadata: {
         merchant_id: merchantId,

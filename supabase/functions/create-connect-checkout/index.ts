@@ -440,8 +440,7 @@ serve(async (req) => {
           transfer_data: {
             destination: accountId,
           },
-          // on_behalf_of ensures merchant's business info shows on statement
-          on_behalf_of: accountId,
+          // Note: on_behalf_of is NOT used with destination charges for Express accounts
           // Statement descriptor suffix adds merchant name after platform name
           statement_descriptor_suffix: merchantName.substring(0, 22).replace(/[<>"']/g, ''),
           metadata,
@@ -585,9 +584,7 @@ serve(async (req) => {
         transfer_data: {
           destination: accountId,
         },
-        // CRITICAL: on_behalf_of makes Stripe use the connected account's branding
-        // This shows the merchant name (e.g., "iHikeDogs") instead of platform ("PawBucks LLC")
-        on_behalf_of: accountId,
+        // Note: on_behalf_of is NOT used with destination charges for Express accounts
         metadata,
         // Statement descriptor for subscription invoices - shows merchant name
         description: `${merchantName.substring(0, 22).replace(/[<>"']/g, '')} subscription`,
