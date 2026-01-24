@@ -18,7 +18,7 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { useSharedAccount, getEffectiveWalletUserId } from "@/hooks/useSharedAccount";
-import { stripePromise } from "@/lib/stripe";
+import { getStripePromise } from "@/lib/stripe";
 
 // Merchant PawBucks conversion: 1000 PawBucks = $1.00
 const PAWBUCKS_TO_USD = 0.001;
@@ -677,7 +677,7 @@ export const ServicePurchaseDialog = ({
           </form>
         ) : (
           clientSecret && paymentData && (
-            <Elements stripe={stripePromise} options={{ clientSecret }}>
+            <Elements stripe={getStripePromise()} options={{ clientSecret }}>
               <StripePaymentForm
                 serviceName={service.name}
                 stripeAmount={paymentData.stripeAmount}

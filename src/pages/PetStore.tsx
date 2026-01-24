@@ -34,7 +34,7 @@ import { AdPlacement } from "@/components/AdPlacement";
 import { Header } from "@/components/Header";
 import { SEO } from "@/components/SEO";
 import { PullToRefresh } from "@/components/PullToRefresh";
-import { stripePromise } from "@/lib/stripe";
+import { getStripePromise } from "@/lib/stripe";
 
 const CATEGORIES = ["All", "Food", "Treats", "Toys", "Bedding", "Accessories", "Healthcare", "Grooming"];
 
@@ -532,7 +532,7 @@ export default function PetStore() {
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
             </div>
           ) : clientSecret && selectedItem ? (
-            <Elements stripe={stripePromise} options={{ clientSecret }}>
+            <Elements stripe={getStripePromise()} options={{ clientSecret }}>
               <PetStorePaymentForm
                 itemId={selectedItem.id}
                 itemName={selectedItem.name}
