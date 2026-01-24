@@ -77,19 +77,21 @@ const Profile = () => {
     try {
       const checkoutUrl = await createCheckout(tier);
       if (checkoutUrl) {
-        // Show toast briefly before redirecting
         toast.success("Redirecting to checkout...");
-        // Small delay to let toast appear, then redirect
-        setTimeout(() => {
-          window.location.href = checkoutUrl;
-        }, 100);
+        // Use window.open with _top target to work in iframe contexts (like Lovable preview)
+        // This ensures the navigation happens at the top-level window, not within the iframe
+        const opened = window.open(checkoutUrl, '_top');
+        // Fallback if window.open fails (popup blocker, etc.)
+        if (!opened) {
+          window.location.assign(checkoutUrl);
+        }
       } else {
         throw new Error('No checkout URL received');
       }
     } catch (error) {
       console.error("Subscription error:", error);
       toast.error("Failed to start subscription. Please try again.");
-      setIsSubscribing(false); // Only reset on error, not on success (we're redirecting)
+      setIsSubscribing(false);
     }
   };
 
