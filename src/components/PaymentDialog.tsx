@@ -13,7 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { toast } from "sonner";
 import { Loader2, CreditCard } from "lucide-react";
-import { stripePromise } from "@/lib/stripe";
+import { getStripePromise } from "@/lib/stripe";
 
 type PaymentFormProps = {
   merchantId: string;
@@ -303,7 +303,7 @@ export const PaymentDialog = ({
           </form>
         ) : (
           clientSecret && (
-            <Elements stripe={stripePromise} options={{ clientSecret }}>
+            <Elements stripe={getStripePromise()} options={{ clientSecret }}>
               <PaymentForm
                 merchantId={merchantId}
                 merchantName={merchantName}

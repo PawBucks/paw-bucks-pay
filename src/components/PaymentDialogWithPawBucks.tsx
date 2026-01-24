@@ -16,7 +16,7 @@ import { toast } from "sonner";
 import { Loader2, CreditCard, Coins, Check, AlertCircle } from "lucide-react";
 import { PawBucksInfoTooltip } from "@/components/PawBucksInfoTooltip";
 import { useSharedAccount, getEffectiveWalletUserId } from "@/hooks/useSharedAccount";
-import { stripePromise } from "@/lib/stripe";
+import { getStripePromise } from "@/lib/stripe";
 
 // Pet Owner conversion rate: 1000 PawBucks = $1.00 (1 PawBuck = $0.001)
 const PAWBUCKS_TO_USD = 0.001;
@@ -461,7 +461,7 @@ export const PaymentDialogWithPawBucks = ({
               </Button>
             </div>
           </form>
-        ) : !stripePromise ? (
+        ) : !getStripePromise() ? (
           // Stripe not configured error
           <div className="flex flex-col items-center justify-center py-8 space-y-4">
             <AlertCircle className="w-8 h-8 text-destructive" />
@@ -476,7 +476,7 @@ export const PaymentDialogWithPawBucks = ({
           </div>
         ) : (
           <Elements 
-            stripe={stripePromise} 
+            stripe={getStripePromise()} 
             options={{ clientSecret }}
             key={clientSecret}
           >

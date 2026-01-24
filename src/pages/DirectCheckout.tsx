@@ -11,7 +11,7 @@ import { Loader2, Store, DollarSign, Gift, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { SEO } from "@/components/SEO";
-import { stripePromise } from "@/lib/stripe";
+import { getStripePromise } from "@/lib/stripe";
 
 interface Merchant {
   id: string;
@@ -351,7 +351,7 @@ export default function DirectCheckout() {
             </div>
           ) : (
             <Elements 
-              stripe={stripePromise} 
+              stripe={getStripePromise()} 
               options={{ 
                 clientSecret,
                 appearance: { theme: "stripe" },
