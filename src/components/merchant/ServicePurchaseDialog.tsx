@@ -11,7 +11,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
-import { loadStripe } from "@stripe/stripe-js";
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { toast } from "sonner";
 import { Loader2, CreditCard, Coins, Check, CheckCircle2, Clock, CalendarDays } from "lucide-react";
@@ -19,8 +18,7 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { useSharedAccount, getEffectiveWalletUserId } from "@/hooks/useSharedAccount";
-
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
+import { stripePromise } from "@/lib/stripe";
 
 // Merchant PawBucks conversion: 1000 PawBucks = $1.00
 const PAWBUCKS_TO_USD = 0.001;

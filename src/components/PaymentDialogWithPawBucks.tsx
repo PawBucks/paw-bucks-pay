@@ -11,16 +11,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
-import { loadStripe } from "@stripe/stripe-js";
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { toast } from "sonner";
 import { Loader2, CreditCard, Coins, Check, AlertCircle } from "lucide-react";
 import { PawBucksInfoTooltip } from "@/components/PawBucksInfoTooltip";
 import { useSharedAccount, getEffectiveWalletUserId } from "@/hooks/useSharedAccount";
-
-// Only initialize Stripe if we have a key
-const stripeKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
-const stripePromise = stripeKey ? loadStripe(stripeKey) : null;
+import { stripePromise } from "@/lib/stripe";
 
 // Pet Owner conversion rate: 1000 PawBucks = $1.00 (1 PawBuck = $0.001)
 const PAWBUCKS_TO_USD = 0.001;

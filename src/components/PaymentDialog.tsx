@@ -10,14 +10,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
-import { loadStripe } from "@stripe/stripe-js";
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { toast } from "sonner";
 import { Loader2, CreditCard } from "lucide-react";
-
-
-// Initialize Stripe (you'll need to add your publishable key)
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
+import { stripePromise } from "@/lib/stripe";
 
 type PaymentFormProps = {
   merchantId: string;

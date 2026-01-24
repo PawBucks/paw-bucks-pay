@@ -27,7 +27,6 @@ import { toast } from "sonner";
 import { ShoppingCart, Coins, CreditCard, Store } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { loadStripe } from "@stripe/stripe-js";
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { Loader2 } from "lucide-react";
 import { BottomNav } from "@/components/BottomNav";
@@ -35,8 +34,7 @@ import { AdPlacement } from "@/components/AdPlacement";
 import { Header } from "@/components/Header";
 import { SEO } from "@/components/SEO";
 import { PullToRefresh } from "@/components/PullToRefresh";
-
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
+import { stripePromise } from "@/lib/stripe";
 
 const CATEGORIES = ["All", "Food", "Treats", "Toys", "Bedding", "Accessories", "Healthcare", "Grooming"];
 
