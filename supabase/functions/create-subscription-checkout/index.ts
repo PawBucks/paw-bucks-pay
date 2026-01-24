@@ -7,10 +7,10 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// PawPass subscription price IDs
+// PawPass subscription price IDs (PawBucks, Inc. platform account)
 const PRICE_IDS = {
-  basic: 'price_1ShaUIK2QqG8Wa5ziudsOxwM', // PawPass $10/month
-  plus: 'price_1ShaTRK2QqG8Wa5zaZHkZOW8',  // PawPass+ $20/month
+  basic: 'price_1St3KuHn6eXqpJI78rnXt0UP', // PawPass $10/month
+  plus: 'price_1St3LbHn6eXqpJI7ZtIFPaKu',  // PawPass+ $20/month
 };
 
 serve(async (req) => {
