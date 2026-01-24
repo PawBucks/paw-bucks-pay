@@ -65,7 +65,7 @@ export const useSubscription = () => {
     }
   }, [user, session?.access_token, checkSubscription]);
 
-  const createCheckout = async (tier: 'basic' | 'plus' = 'basic') => {
+  const createCheckout = async (tier: 'basic' | 'plus' = 'basic'): Promise<string | null> => {
     try {
       console.log('[useSubscription] Creating checkout session for tier:', tier);
       const { data, error } = await supabase.functions.invoke('create-subscription-checkout', {
@@ -75,9 +75,11 @@ export const useSubscription = () => {
       if (error) throw error;
 
       if (data?.url) {
-        // Redirect to Stripe Checkout
-        window.location.href = data.url;
+        // Return the URL for the caller to handle the redirect
+        return data.url;
       }
+      
+      throw new Error('No checkout URL returned');
     } catch (error) {
       console.error('[useSubscription] Failed to create checkout:', error);
       throw error;

@@ -75,13 +75,21 @@ const Profile = () => {
   const handleSubscribe = async (tier: 'basic' | 'plus') => {
     setIsSubscribing(true);
     try {
-      await createCheckout(tier);
-      toast.success("Opening checkout...");
+      const checkoutUrl = await createCheckout(tier);
+      if (checkoutUrl) {
+        // Show toast briefly before redirecting
+        toast.success("Redirecting to checkout...");
+        // Small delay to let toast appear, then redirect
+        setTimeout(() => {
+          window.location.href = checkoutUrl;
+        }, 100);
+      } else {
+        throw new Error('No checkout URL received');
+      }
     } catch (error) {
       console.error("Subscription error:", error);
       toast.error("Failed to start subscription. Please try again.");
-    } finally {
-      setIsSubscribing(false);
+      setIsSubscribing(false); // Only reset on error, not on success (we're redirecting)
     }
   };
 
