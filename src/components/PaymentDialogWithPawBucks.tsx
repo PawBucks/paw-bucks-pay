@@ -14,11 +14,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { toast } from "sonner";
-import { Loader2, CreditCard, Coins, Check } from "lucide-react";
+import { Loader2, CreditCard, Coins, Check, AlertCircle } from "lucide-react";
 import { PawBucksInfoTooltip } from "@/components/PawBucksInfoTooltip";
 import { useSharedAccount, getEffectiveWalletUserId } from "@/hooks/useSharedAccount";
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
+// Only initialize Stripe if we have a key
+const stripeKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+const stripePromise = stripeKey ? loadStripe(stripeKey) : null;
 
 // Pet Owner conversion rate: 1000 PawBucks = $1.00 (1 PawBuck = $0.001)
 const PAWBUCKS_TO_USD = 0.001;
@@ -402,21 +404,32 @@ export const PaymentDialogWithPawBucks = ({
               </Button>
             </div>
           </form>
-        ) : (
-          clientSecret && paymentData && (
-            <Elements stripe={stripePromise} options={{ clientSecret }}>
-              <StripePaymentForm
-                merchantName={merchantName}
-                cashbackRate={paymentData.cashbackRate}
-                stripeAmount={paymentData.stripeAmount}
-                pawbucksAmount={paymentData.pawbucksAmount}
-                totalAmount={totalAmount}
-                onSuccess={handleSuccess}
-                onCancel={handleCancel}
-              />
-            </Elements>
-          )
-        )}
+        ) : showPaymentForm && !clientSecret ? (
+          // Loading state while waiting for client secret
+          <div className="flex flex-col items-center justify-center py-8 space-y-4">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            <p className="text-muted-foreground">Preparing secure payment...</p>
+          </div>
+        ) : showPaymentForm && !stripePromise ? (
+          // Stripe not configured error
+          <div className="flex flex-col items-center justify-center py-8 space-y-4">
+            <AlertCircle className="w-8 h-8 text-destructive" />
+            <p className="text-center text-destructive">Payment system is not configured. Please contact support.</p>
+            <Button variant="outline" onClick={handleCancel}>Go Back</Button>
+          </div>
+        ) : clientSecret && paymentData && stripePromise ? (
+          <Elements stripe={stripePromise} options={{ clientSecret }}>
+            <StripePaymentForm
+              merchantName={merchantName}
+              cashbackRate={paymentData.cashbackRate}
+              stripeAmount={paymentData.stripeAmount}
+              pawbucksAmount={paymentData.pawbucksAmount}
+              totalAmount={totalAmount}
+              onSuccess={handleSuccess}
+              onCancel={handleCancel}
+            />
+          </Elements>
+        ) : null}
       </DialogContent>
     </Dialog>
   );
