@@ -57,11 +57,26 @@ export const PawBucksCheckoutDialog = ({
 
   // Load PawBucks balance when dialog opens using effective user ID
   useEffect(() => {
-    if (open && effectiveUserId && merchantAcceptsPawBucks && !sharedAccount.isLoading) {
-      loadPawbucksBalance();
-    } else if (open && !merchantAcceptsPawBucks) {
+    if (!open) return;
+    
+    // Wait for shared account check to complete
+    if (sharedAccount.isLoading) return;
+    
+    // If merchant doesn't accept PawBucks, no need to load balance
+    if (!merchantAcceptsPawBucks) {
       setLoadingBalance(false);
+      return;
     }
+    
+    // If no user ID (not logged in), can't load balance
+    if (!effectiveUserId) {
+      setLoadingBalance(false);
+      setPawbucksBalance(0);
+      return;
+    }
+    
+    // Load the balance
+    loadPawbucksBalance();
   }, [open, effectiveUserId, merchantAcceptsPawBucks, sharedAccount.isLoading]);
 
   const loadPawbucksBalance = async () => {
