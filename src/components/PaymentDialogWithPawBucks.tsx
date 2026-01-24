@@ -48,6 +48,7 @@ const StripePaymentForm = ({
   const elements = useElements();
   const [isLoading, setIsLoading] = useState(false);
   const [isReady, setIsReady] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,6 +83,66 @@ const StripePaymentForm = ({
   // Points earned as PawBucks directly (10x of dollar amount = that many PawBucks)
   const cashbackPawBucks = Math.round(stripeAmount * cashbackRate);
 
+  // Show loading state until PaymentElement is ready
+  if (!isReady && !loadError) {
+    return (
+      <div className="space-y-4">
+        <div className="bg-accent/10 border border-accent/20 rounded-lg p-4 space-y-2">
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Total Amount:</span>
+            <span className="font-medium">${totalAmount.toFixed(2)}</span>
+          </div>
+          {pawbucksAmount > 0 && (
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground flex items-center gap-1">
+                <Coins className="w-3 h-3" /> PawBucks Used:
+              </span>
+              <span className="font-medium text-primary">
+                {pawbucksAmount} (−${(pawbucksAmount * PAWBUCKS_TO_USD).toFixed(2)})
+              </span>
+            </div>
+          )}
+          <div className="flex justify-between text-sm border-t pt-2">
+            <span className="text-muted-foreground">Pay with Card:</span>
+            <span className="font-bold">${stripeAmount.toFixed(2)}</span>
+          </div>
+        </div>
+        
+        <div className="flex flex-col items-center justify-center py-8 space-y-4">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <p className="text-muted-foreground">Loading payment form...</p>
+        </div>
+        
+        {/* Hidden PaymentElement that triggers onReady */}
+        <div className="min-h-[200px]">
+          <PaymentElement 
+            onReady={() => setIsReady(true)} 
+            onLoadError={(error) => setLoadError(error.error.message)}
+          />
+        </div>
+        
+        <div className="flex gap-3">
+          <Button type="button" variant="outline" onClick={onCancel} className="flex-1">
+            Cancel
+          </Button>
+          <Button type="button" className="flex-1" disabled>
+            <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Loading...
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="flex flex-col items-center justify-center py-8 space-y-4">
+        <AlertCircle className="w-8 h-8 text-destructive" />
+        <p className="text-center text-destructive">{loadError}</p>
+        <Button variant="outline" onClick={onCancel}>Go Back</Button>
+      </div>
+    );
+  }
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="bg-accent/10 border border-accent/20 rounded-lg p-4 space-y-2">
@@ -114,18 +175,18 @@ const StripePaymentForm = ({
           <CreditCard className="w-4 h-4" />
           Payment Details
         </Label>
-        <PaymentElement onReady={() => setIsReady(true)} />
+        <div className="min-h-[200px]">
+          <PaymentElement />
+        </div>
       </div>
 
       <div className="flex gap-3">
         <Button type="button" variant="outline" onClick={onCancel} className="flex-1" disabled={isLoading}>
           Cancel
         </Button>
-        <Button type="submit" className="flex-1" disabled={isLoading || !stripe || !isReady}>
+        <Button type="submit" className="flex-1" disabled={isLoading || !stripe}>
           {isLoading ? (
             <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Processing...</>
-          ) : !isReady ? (
-            <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Loading...</>
           ) : (
             `Pay $${stripeAmount.toFixed(2)}`
           )}
@@ -404,32 +465,36 @@ export const PaymentDialogWithPawBucks = ({
               </Button>
             </div>
           </form>
-        ) : showPaymentForm && !clientSecret ? (
-          // Loading state while waiting for client secret
-          <div className="flex flex-col items-center justify-center py-8 space-y-4">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
-            <p className="text-muted-foreground">Preparing secure payment...</p>
-          </div>
-        ) : showPaymentForm && !stripePromise ? (
+        ) : !stripePromise ? (
           // Stripe not configured error
           <div className="flex flex-col items-center justify-center py-8 space-y-4">
             <AlertCircle className="w-8 h-8 text-destructive" />
             <p className="text-center text-destructive">Payment system is not configured. Please contact support.</p>
             <Button variant="outline" onClick={handleCancel}>Go Back</Button>
           </div>
-        ) : clientSecret && paymentData && stripePromise ? (
-          <Elements stripe={stripePromise} options={{ clientSecret }}>
+        ) : !clientSecret ? (
+          // Loading state while waiting for client secret
+          <div className="flex flex-col items-center justify-center py-8 space-y-4">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            <p className="text-muted-foreground">Preparing secure payment...</p>
+          </div>
+        ) : (
+          <Elements 
+            stripe={stripePromise} 
+            options={{ clientSecret }}
+            key={clientSecret}
+          >
             <StripePaymentForm
               merchantName={merchantName}
-              cashbackRate={paymentData.cashbackRate}
-              stripeAmount={paymentData.stripeAmount}
-              pawbucksAmount={paymentData.pawbucksAmount}
+              cashbackRate={paymentData?.cashbackRate || cashbackRate}
+              stripeAmount={paymentData?.stripeAmount || stripeAmount}
+              pawbucksAmount={paymentData?.pawbucksAmount || pawbucksToUse}
               totalAmount={totalAmount}
               onSuccess={handleSuccess}
               onCancel={handleCancel}
             />
           </Elements>
-        ) : null}
+        )}
       </DialogContent>
     </Dialog>
   );
