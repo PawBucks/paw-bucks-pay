@@ -74,7 +74,7 @@ export const deferNonCriticalAssets = () => {
   }
 };
 
-// Service worker update notification
+// Auto-update when new service worker is available
 export const checkForUpdates = async (callback: () => void) => {
   if ('serviceWorker' in navigator) {
     const registration = await navigator.serviceWorker.getRegistration();
@@ -84,7 +84,9 @@ export const checkForUpdates = async (callback: () => void) => {
         if (newWorker) {
           newWorker.addEventListener('statechange', () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              callback();
+              // Auto-reload to activate new version
+              console.log('[PWA] New version detected, auto-updating...');
+              window.location.reload();
             }
           });
         }
