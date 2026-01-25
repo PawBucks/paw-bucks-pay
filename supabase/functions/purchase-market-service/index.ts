@@ -16,7 +16,7 @@ const purchaseSchema = z.object({
   priceUSD: z.number().positive({ message: "Price must be greater than 0" }),
   pricePawBucks: z.number().positive({ message: "PawBucks price must be greater than 0" }),
   payWithPawBucks: z.boolean().default(false),
-  billingPeriod: z.enum(['one-time', 'monthly', 'quarterly', 'annual']).optional(),
+  billingPeriod: z.enum(['one_time', 'one-time', 'monthly', 'quarterly', 'yearly', 'annual']).optional(),
 });
 
 const PAWBUCKS_TO_USD = 0.001;
@@ -279,11 +279,13 @@ serve(async (req) => {
         logStep('Warning: Failed to log PawBucks activity', { error: activityError.message });
       }
 
-      const expiresAt = billingPeriod === 'monthly' 
+      // Normalize billing period (handle both snake_case and kebab-case, and yearly/annual)
+      const normalizedPeriod = billingPeriod?.replace('_', '-').replace('yearly', 'annual');
+      const expiresAt = normalizedPeriod === 'monthly' 
         ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-        : billingPeriod === 'quarterly'
+        : normalizedPeriod === 'quarterly'
         ? new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString()
-        : billingPeriod === 'annual'
+        : normalizedPeriod === 'annual'
         ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
         : null;
 
