@@ -1350,14 +1350,14 @@ serve(async (req) => {
 
         console.log('Merchant Market purchase detected:', { service_id, service_name, totalAmount });
 
-        // Get merchant details for Tax Vault entry
-        const { data: merchantForTaxVault } = await supabaseAdmin
+        // Get FULL merchant details for Tax Vault entry AND admin notification email
+        const { data: merchantForMarket } = await supabaseAdmin
           .from('merchants')
-          .select('id')
+          .select('id, business_name, business_type, contact_person, email, phone, address, owner_name')
           .eq('user_id', user_id)
           .single();
 
-        if (merchantForTaxVault) {
+        if (merchantForMarket) {
           // Normalize billing period (handle both snake_case and kebab-case, and yearly/annual)
           const normalizedPeriod = billing_period?.replace('_', '-').replace('yearly', 'annual');
           // Create the service purchase record
@@ -1370,7 +1370,7 @@ serve(async (req) => {
             : null;
 
           const { data: purchaseData } = await supabaseAdmin.from('merchant_service_purchases').insert({
-            merchant_id: merchantForTaxVault.id,
+            merchant_id: merchantForMarket.id,
             service_id: service_id,
             amount_paid_pawbucks: 0,
             amount_paid_usd: totalAmount,
@@ -1382,7 +1382,7 @@ serve(async (req) => {
           // Auto-log expense to Tax Vault
           // USD payment = full price, no PawBucks discount savings
           await supabaseAdmin.from('merchant_tax_expenses').insert({
-            merchant_id: merchantForTaxVault.id,
+            merchant_id: merchantForMarket.id,
             category: 'merchant_market',
             amount: totalAmount,
             original_price: totalAmount,
@@ -1395,8 +1395,94 @@ serve(async (req) => {
             source_purchase_id: purchaseData?.id || service_id,
           });
 
+          // Send admin notification email NOW that payment is complete
+          try {
+            const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+            const orderNumber = `MKT-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+            const purchaseDate = new Date().toLocaleString('en-US', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+              timeZoneName: 'short'
+            });
+
+            await resend.emails.send({
+              from: "PawBucks <noreply@pawbucks.app>",
+              to: ["admin@pawbucks.app"],
+              subject: `Merchant Market Purchase Order #${orderNumber}: ${service_name || 'Service'}`,
+              html: `
+                <div style="font-family: Arial, sans-serif; max-width: 700px; margin: 0 auto; border: 1px solid #e0e0e0;">
+                  <div style="background: linear-gradient(135deg, #7DD4D4, #5BC0C0); padding: 25px; text-align: center;">
+                    <h1 style="color: white; margin: 0; font-size: 28px; letter-spacing: 2px;">PAWBUCKS</h1>
+                    <p style="color: white; margin: 5px 0 0 0; font-size: 14px;">Merchant Market Purchase Order</p>
+                  </div>
+                  
+                  <div style="padding: 30px; background: #ffffff;">
+                    <div style="border-bottom: 2px solid #7DD4D4; padding-bottom: 15px; margin-bottom: 25px;">
+                      <h2 style="color: #333; margin: 0; font-size: 20px;">Purchase Order #${orderNumber}</h2>
+                      <p style="color: #666; margin: 5px 0 0 0; font-size: 14px;">${purchaseDate}</p>
+                    </div>
+                    
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 25px;">
+                      <h3 style="color: #7DD4D4; margin: 0 0 15px 0; font-size: 16px; text-transform: uppercase; letter-spacing: 1px;">Merchant Information</h3>
+                      <table style="width: 100%; border-collapse: collapse;">
+                        <tr><td style="padding: 8px 0; color: #666; width: 140px;"><strong>Business Name:</strong></td><td style="padding: 8px 0; color: #333;">${merchantForMarket.business_name}</td></tr>
+                        <tr><td style="padding: 8px 0; color: #666;"><strong>Business Type:</strong></td><td style="padding: 8px 0; color: #333;">${merchantForMarket.business_type || 'N/A'}</td></tr>
+                        <tr><td style="padding: 8px 0; color: #666;"><strong>Owner Name:</strong></td><td style="padding: 8px 0; color: #333;">${merchantForMarket.owner_name || 'N/A'}</td></tr>
+                        <tr><td style="padding: 8px 0; color: #666;"><strong>Contact Person:</strong></td><td style="padding: 8px 0; color: #333;">${merchantForMarket.contact_person || 'N/A'}</td></tr>
+                        <tr><td style="padding: 8px 0; color: #666;"><strong>Email:</strong></td><td style="padding: 8px 0; color: #333;"><a href="mailto:${merchantForMarket.email}" style="color: #7DD4D4;">${merchantForMarket.email || 'N/A'}</a></td></tr>
+                        <tr><td style="padding: 8px 0; color: #666;"><strong>Phone:</strong></td><td style="padding: 8px 0; color: #333;">${merchantForMarket.phone || 'N/A'}</td></tr>
+                        <tr><td style="padding: 8px 0; color: #666;"><strong>Address:</strong></td><td style="padding: 8px 0; color: #333;">${merchantForMarket.address || 'N/A'}</td></tr>
+                      </table>
+                    </div>
+                    
+                    <div style="margin-bottom: 25px;">
+                      <h3 style="color: #7DD4D4; margin: 0 0 15px 0; font-size: 16px; text-transform: uppercase; letter-spacing: 1px;">Service Purchased</h3>
+                      <table style="width: 100%; border-collapse: collapse; border: 1px solid #e0e0e0;">
+                        <thead>
+                          <tr style="background: #f8f9fa;">
+                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #7DD4D4; color: #333;">Service</th>
+                            <th style="padding: 12px; text-align: center; border-bottom: 2px solid #7DD4D4; color: #333;">Billing Period</th>
+                            <th style="padding: 12px; text-align: right; border-bottom: 2px solid #7DD4D4; color: #333;">Amount</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td style="padding: 15px 12px; border-bottom: 1px solid #e0e0e0;"><strong style="color: #333;">${service_name || 'Merchant Market Service'}</strong><br><span style="color: #888; font-size: 12px;">ID: ${service_id}</span></td>
+                            <td style="padding: 15px 12px; text-align: center; border-bottom: 1px solid #e0e0e0; color: #666;">${billing_period || 'one-time'}</td>
+                            <td style="padding: 15px 12px; text-align: right; border-bottom: 1px solid #e0e0e0;"><strong style="color: #333;">$${totalAmount.toFixed(2)} USD</strong></td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    
+                    <div style="background: #f0fafa; padding: 20px; border-radius: 8px; border-left: 4px solid #7DD4D4;">
+                      <table style="width: 100%; border-collapse: collapse;">
+                        <tr><td style="padding: 8px 0; color: #666;"><strong>Payment Method:</strong></td><td style="padding: 8px 0; text-align: right; color: #333;">Credit Card (Stripe)</td></tr>
+                        <tr style="font-size: 18px;"><td style="padding: 12px 0 0 0; color: #333;"><strong>Total:</strong></td><td style="padding: 12px 0 0 0; text-align: right; color: #7DD4D4;"><strong>$${totalAmount.toFixed(2)} USD</strong></td></tr>
+                      </table>
+                    </div>
+                  </div>
+                  
+                  <div style="background: #333; padding: 20px; text-align: center;">
+                    <p style="color: #999; font-size: 12px; margin: 0;">PawBucks Admin Notification • Merchant Market Purchase</p>
+                    <p style="color: #666; font-size: 11px; margin: 8px 0 0 0;">This is an automated notification. Please do not reply to this email.</p>
+                  </div>
+                </div>
+              `,
+            });
+
+            console.log('✅ Merchant Market admin notification email sent:', orderNumber);
+          } catch (emailError) {
+            console.error('Warning: Failed to send admin notification email:', emailError);
+            // Don't fail the webhook for email errors
+          }
+
           console.log('✅ Merchant Market purchase completed and Tax Vault updated:', { 
-            merchantId: merchantForTaxVault.id,
+            merchantId: merchantForMarket.id,
             serviceName: service_name,
             amount: totalAmount 
           });

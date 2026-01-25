@@ -372,16 +372,8 @@ serve(async (req) => {
       amountUSD: priceUSD,
     });
 
-    // Send enhanced admin notification email for Stripe payment
-    await sendAdminNotification(merchant as MerchantInfo, {
-      serviceName,
-      serviceId,
-      priceUSD,
-      pricePawBucks,
-      billingPeriod: billingPeriod || 'one-time',
-      paymentMethod: 'Stripe (Payment Pending)',
-      amount: `$${priceUSD.toFixed(2)} USD`,
-    });
+    // NOTE: Admin notification email is sent from stripe-webhook after payment succeeds
+    // This ensures emails are only sent for completed purchases, not pending checkouts
 
     return new Response(
       JSON.stringify({
