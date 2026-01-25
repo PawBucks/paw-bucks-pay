@@ -1358,12 +1358,14 @@ serve(async (req) => {
           .single();
 
         if (merchantForTaxVault) {
+          // Normalize billing period (handle both snake_case and kebab-case, and yearly/annual)
+          const normalizedPeriod = billing_period?.replace('_', '-').replace('yearly', 'annual');
           // Create the service purchase record
-          const expiresAt = billing_period === 'monthly' 
+          const expiresAt = normalizedPeriod === 'monthly' 
             ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-            : billing_period === 'quarterly'
+            : normalizedPeriod === 'quarterly'
             ? new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString()
-            : billing_period === 'annual'
+            : normalizedPeriod === 'annual'
             ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
             : null;
 
