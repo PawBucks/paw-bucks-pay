@@ -1,4 +1,8 @@
-import { Suspense, lazy, useState, useEffect } from "react";
+/**
+ * Main App component with routing and providers
+ * Cache bust: 2026-01-25T20:30:00Z
+ */
+import { Suspense, lazy, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
