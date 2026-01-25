@@ -159,7 +159,7 @@ const UpgradePrompt = ({ totalEarned, onUpgrade }: { totalEarned: number; onUpgr
                 </div>
 
                 <p className="text-center text-xs text-muted-foreground">
-                  Only $9.99/month • 7-day free trial
+                  Only $10/month • 7-day free trial
                 </p>
               </div>
             ) : (
@@ -211,7 +211,7 @@ const UpgradePrompt = ({ totalEarned, onUpgrade }: { totalEarned: number; onUpgr
 
                 <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
                   <Crown className="w-4 h-4 text-purple-500" />
-                  <span>$19.99/month • 7-day free trial • <span className="text-purple-500 font-medium">Ad-Free!</span></span>
+                  <span>$20/month • 7-day free trial • <span className="text-purple-500 font-medium">Ad-Free!</span></span>
                 </div>
               </div>
             )}
