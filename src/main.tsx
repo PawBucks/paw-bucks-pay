@@ -1,9 +1,12 @@
+/**
+ * Main application entry point
+ * Cache bust: 2026-01-25T20:30:00Z
+ */
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
 
-// Force clean rebuild to clear stale bundler cache
 const rootElement = document.getElementById("root");
 if (!rootElement) throw new Error("Root element not found");
 
