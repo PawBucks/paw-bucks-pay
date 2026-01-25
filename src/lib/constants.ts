@@ -34,8 +34,8 @@ export const getSubscriptionTier = (productId: string | null): 'free' | 'pawpass
 
 export const SUBSCRIPTION = {
   TRIAL_DAYS: 7,
-  PAWPASS_PRICE: 9.99,
-  PAWPASS_PLUS_PRICE: 19.99,
+  PAWPASS_PRICE: 10,
+  PAWPASS_PLUS_PRICE: 20,
   CURRENCY: 'USD',
 } as const;
 
