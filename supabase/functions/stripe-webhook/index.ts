@@ -81,6 +81,53 @@ async function sendPaymentConfirmationEmail(params: {
   });
 }
 
+// Helper function to send merchant invoice paid notification
+async function sendInvoicePaidNotification(params: {
+  merchantEmail: string;
+  merchantName: string;
+  invoiceNumber: string;
+  invoiceTitle?: string;
+  clientName: string;
+  clientEmail: string;
+  amountPaid: number;
+  tipAmount?: number;
+  pawbucksUsed?: number;
+  paymentMethod: 'credit_card' | 'pawbucks' | 'mixed';
+  paymentDate: string;
+  invoiceTotal: number;
+  amountDue?: number;
+  invoiceId: string;
+}): Promise<void> {
+  try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
+    
+    if (!supabaseUrl || !supabaseAnonKey) {
+      console.log("[INVOICE_PAID] Skipping merchant notification: Supabase config not available");
+      return;
+    }
+
+    const response = await fetch(`${supabaseUrl}/functions/v1/send-invoice-paid-notification`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${supabaseAnonKey}`,
+      },
+      body: JSON.stringify(params),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("[INVOICE_PAID] Failed to send merchant notification:", errorText);
+    } else {
+      console.log(`[INVOICE_PAID] ✅ Merchant notification sent to ${params.merchantEmail}`);
+    }
+  } catch (error) {
+    console.error("[INVOICE_PAID] Error sending merchant notification:", error);
+    // Don't throw - notification failure shouldn't break payment processing
+  }
+}
+
 serve(async (req) => {
   console.log('[STRIPE-WEBHOOK] Function invoked, method:', req.method);
   
@@ -761,6 +808,56 @@ serve(async (req) => {
               totalPaid: paymentAmount + (pawbucksUsed * 0.001),
               pawbucksEarned: pawbucksEarned,
             });
+          }
+          
+          // ========================================
+          // SEND MERCHANT INVOICE PAID NOTIFICATION
+          // ========================================
+          try {
+            // Fetch full invoice and merchant details for notification
+            const { data: invoiceForNotif } = await supabaseAdmin
+              .from('invoices')
+              .select('invoice_number, title, client_name, client_email, total, amount_due')
+              .eq('id', invoiceId)
+              .single();
+            
+            const { data: merchantForNotif } = await supabaseAdmin
+              .from('merchants')
+              .select('business_name, user_id')
+              .eq('id', merchantId)
+              .single();
+            
+            if (merchantForNotif?.user_id) {
+              // Get merchant user email
+              const { data: merchantProfile } = await supabaseAdmin
+                .from('profiles')
+                .select('email, full_name')
+                .eq('id', merchantForNotif.user_id)
+                .single();
+              
+              if (merchantProfile?.email) {
+                const pawbucksValueUSD = pawbucksUsed * 0.001;
+                await sendInvoicePaidNotification({
+                  merchantEmail: merchantProfile.email,
+                  merchantName: merchantProfile.full_name || merchantForNotif.business_name || 'Merchant',
+                  invoiceNumber: invoiceForNotif?.invoice_number || 'N/A',
+                  invoiceTitle: invoiceForNotif?.title || undefined,
+                  clientName: invoiceForNotif?.client_name || session.customer_details?.name || 'Customer',
+                  clientEmail: invoiceForNotif?.client_email || session.customer_email || '',
+                  amountPaid: paymentAmount,
+                  tipAmount: tipAmount > 0 ? tipAmount / 100 : 0,
+                  pawbucksUsed: pawbucksUsed,
+                  paymentMethod: pawbucksUsed > 0 ? 'mixed' : 'credit_card',
+                  paymentDate: new Date().toISOString(),
+                  invoiceTotal: invoiceForNotif?.total || paymentAmount,
+                  amountDue: invoiceForNotif?.amount_due || 0,
+                  invoiceId: invoiceId,
+                });
+              }
+            }
+          } catch (notifError) {
+            console.error('[INVOICE_PAYMENT] Error sending merchant notification:', notifError);
+            // Don't fail the payment processing due to notification error
           }
           
           console.log('[INVOICE_PAYMENT] ✅ Invoice payment processing complete');
