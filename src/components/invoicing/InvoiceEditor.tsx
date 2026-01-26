@@ -49,6 +49,7 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Invoice, InvoiceItem, InvoiceClient, InvoiceSettings, CatalogItem } from "@/services/api/invoicing.service";
 import { CatalogItemPicker } from "./CatalogItemPicker";
 import { InvoiceAttachments } from "./InvoiceAttachments";
+import { PricingCalculator } from "@/components/merchant/PricingCalculator";
 import { cn } from "@/lib/utils";
 
 const invoiceSchema = z.object({
@@ -605,6 +606,10 @@ export function InvoiceEditor({
                   <Plus className="h-4 w-4 mr-2" />
                   Add Line Item
                 </Button>
+
+                <Separator className="my-4" />
+
+                <PricingCalculator compact />
               </CardContent>
             </Card>
 
