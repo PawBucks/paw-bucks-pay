@@ -287,3 +287,6 @@ verify_jwt = false
 
 [functions.send-invoice-reminders]
 verify_jwt = false
+
+[functions.send-invoice-paid-notification]
+verify_jwt = false

@@ -274,6 +274,41 @@ serve(async (req) => {
         console.error("Error sending receipt email:", emailError);
       }
 
+      // Send merchant notification for invoice paid
+      try {
+        // Get merchant user email
+        const { data: merchantProfile } = await supabase
+          .from("profiles")
+          .select("email, full_name")
+          .eq("id", merchant.user_id)
+          .single();
+
+        if (merchantProfile?.email) {
+          await supabase.functions.invoke("send-invoice-paid-notification", {
+            body: {
+              merchantEmail: merchantProfile.email,
+              merchantName: merchantProfile.full_name || merchant.business_name || "Merchant",
+              invoiceNumber: invoice.invoice_number,
+              invoiceTitle: invoice.title || undefined,
+              clientName: invoice.client_name,
+              clientEmail: invoice.client_email,
+              amountPaid: 0, // All PawBucks payment, no card charge
+              tipAmount: tipAmountCents > 0 ? tipAmountCents / 100 : 0,
+              pawbucksUsed: pawbucksUsed,
+              paymentMethod: "pawbucks" as const,
+              paymentDate: new Date().toISOString(),
+              invoiceTotal: invoice.total,
+              amountDue: invoice.total - paymentAmountUSD - (invoice.amount_paid || 0),
+              invoiceId: invoiceId,
+            },
+          });
+          console.log("✅ Merchant invoice paid notification sent to:", merchantProfile.email);
+        }
+      } catch (notifError) {
+        console.error("Error sending merchant notification:", notifError);
+        // Don't fail the payment processing due to notification error
+      }
+
       return new Response(
         JSON.stringify({ 
           success: true, 
