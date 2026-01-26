@@ -15,7 +15,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Package, Plus, ExternalLink, Loader2, ArrowLeft, DollarSign, Store, Coins } from "lucide-react";
+import { Package, Plus, ExternalLink, Loader2, ArrowLeft, DollarSign, Store, Coins, Calculator } from "lucide-react";
+import { PricingCalculator } from "@/components/merchant/PricingCalculator";
 import { Switch } from "@/components/ui/switch";
 import { SEO } from "@/components/SEO";
 
@@ -390,6 +391,12 @@ const MerchantProducts = () => {
                 Minimum $0.50
               </p>
             </div>
+
+            {/* Fee Recovery Calculator */}
+            <PricingCalculator 
+              compact 
+              onApplyPrice={(price) => setProductPrice(price)} 
+            />
 
             {/* Pet Store Listing Toggle */}
             <div className="border rounded-lg p-4 space-y-4 bg-muted/30">
