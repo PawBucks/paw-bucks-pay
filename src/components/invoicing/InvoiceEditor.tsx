@@ -269,6 +269,14 @@ export function InvoiceEditor({
     form.setValue("due_date", addDays(issueDate, terms));
   };
 
+  // Update due date when issue date changes (respecting current payment terms)
+  const handleIssueDateChange = (date: Date | undefined) => {
+    if (!date) return;
+    form.setValue("issue_date", date);
+    const paymentTerms = form.getValues("payment_terms");
+    form.setValue("due_date", addDays(date, paymentTerms));
+  };
+
   // Handle catalog item selection
   const handleCatalogItemSelect = (catalogItem: CatalogItem) => {
     append({
@@ -738,8 +746,9 @@ export function InvoiceEditor({
                           <CalendarComponent
                             mode="single"
                             selected={field.value}
-                            onSelect={field.onChange}
+                            onSelect={handleIssueDateChange}
                             initialFocus
+                            className="pointer-events-auto"
                           />
                         </PopoverContent>
                       </Popover>
@@ -797,6 +806,7 @@ export function InvoiceEditor({
                             selected={field.value}
                             onSelect={field.onChange}
                             initialFocus
+                            className="pointer-events-auto"
                           />
                         </PopoverContent>
                       </Popover>

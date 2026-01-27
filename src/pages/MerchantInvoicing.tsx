@@ -206,7 +206,19 @@ const MerchantInvoicing = () => {
       if (selectedInvoice?.id) {
         // Update existing invoice
         invoiceId = selectedInvoice.id;
-        const { error: updateError } = await invoicingService.updateInvoice(selectedInvoice.id, formattedData);
+        
+        // Calculate next_invoice_date for recurring invoices
+        let nextInvoiceDateStr = null;
+        if (formattedData.is_recurring && formattedData.recurring_interval) {
+          const issueDate = new Date(formattedData.issue_date);
+          const nextDate = calculateNextInvoiceDate(issueDate, formattedData.recurring_interval);
+          nextInvoiceDateStr = nextDate.toISOString().split("T")[0];
+        }
+        
+        const { error: updateError } = await invoicingService.updateInvoice(selectedInvoice.id, {
+          ...formattedData,
+          next_invoice_date: nextInvoiceDateStr,
+        });
         
         if (updateError) {
           throw updateError;
