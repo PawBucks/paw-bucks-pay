@@ -8,6 +8,22 @@ const corsHeaders = {
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 
+// Format date-only strings (YYYY-MM-DD) without timezone shift
+function formatLocalDateOnly(dateString: string): string {
+  const [year, month, day] = dateString.split('-').map(Number);
+  const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  return `${months[month - 1]} ${day}, ${year}`;
+}
+
+// Check if a date string (YYYY-MM-DD) is past due (comparing in local time)
+function isDatePastDue(dateString: string): boolean {
+  const [year, month, day] = dateString.split('-').map(Number);
+  const dueDate = new Date(year, month - 1, day);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return dueDate < today;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -107,12 +123,12 @@ serve(async (req) => {
         <div style="display: flex; justify-content: space-between; margin-bottom: 25px; padding: 15px; background: #f9f9f9; border-radius: 8px;">
           <div>
             <p style="margin: 0; font-size: 12px; color: #999; text-transform: uppercase;">Issue Date</p>
-            <p style="margin: 5px 0 0 0; font-weight: 600;">${new Date(invoice.issue_date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</p>
+            <p style="margin: 5px 0 0 0; font-weight: 600;">${formatLocalDateOnly(invoice.issue_date)}</p>
           </div>
           <div style="text-align: right;">
             <p style="margin: 0; font-size: 12px; color: #999; text-transform: uppercase;">Due Date</p>
-            <p style="margin: 5px 0 0 0; font-weight: 600; color: ${new Date(invoice.due_date) < new Date() ? "#dc2626" : "#333"};">
-              ${new Date(invoice.due_date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+            <p style="margin: 5px 0 0 0; font-weight: 600; color: ${isDatePastDue(invoice.due_date) ? "#dc2626" : "#333"};">
+              ${formatLocalDateOnly(invoice.due_date)}
             </p>
           </div>
         </div>

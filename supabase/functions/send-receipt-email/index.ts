@@ -30,15 +30,24 @@ interface ReceiptEmailParams {
   pawbucksEarned?: number;
 }
 
+// Format timestamp with explicit US timezone
 function formatDate(dateString: string): string {
   const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
+  return date.toLocaleString('en-US', {
+    timeZone: 'America/New_York',
     year: 'numeric',
     month: 'long',
     day: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
   });
+}
+
+// Format date-only strings (YYYY-MM-DD) without timezone shift
+function formatLocalDateOnly(dateString: string): string {
+  const [year, month, day] = dateString.split('-').map(Number);
+  const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  return `${months[month - 1]} ${day}, ${year}`;
 }
 
 function generateReceiptHtml(params: ReceiptEmailParams): string {
