@@ -33,6 +33,7 @@ import {
   Coins,
   Sparkles,
   UserX,
+  ArrowLeft,
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
@@ -320,10 +321,18 @@ const InvoicePayment = () => {
               )}
             </div>
           </div>
-          <Button variant="outline" size="sm" onClick={handleDownloadPDF}>
-            <Download className="h-4 w-4 mr-2" />
-            Download PDF
-          </Button>
+          <div className="flex items-center gap-2">
+            {user && (
+              <Button variant="outline" size="sm" onClick={() => navigate("/dashboard")}>
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Dashboard
+              </Button>
+            )}
+            <Button variant="outline" size="sm" onClick={handleDownloadPDF}>
+              <Download className="h-4 w-4 mr-2" />
+              Download PDF
+            </Button>
+          </div>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-3">
