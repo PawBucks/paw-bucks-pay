@@ -112,7 +112,7 @@ export function PetOwnerInvoices({ userEmail }: PetOwnerInvoicesProps) {
 
   const handlePayInvoice = (invoice: PetOwnerInvoice) => {
     // Navigate to invoice payment page with access token
-    navigate(`/invoice/${invoice.id}?token=${invoice.access_token}`);
+    navigate(`/invoice/${invoice.id}/pay?token=${invoice.access_token}`);
   };
 
   const getDisplayStatus = (invoice: PetOwnerInvoice) => {
