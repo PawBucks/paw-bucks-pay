@@ -9,6 +9,26 @@ const corsHeaders = {
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
+// Format date-only strings (YYYY-MM-DD) without timezone shift
+function formatLocalDateOnly(dateString: string): string {
+  const [year, month, day] = dateString.split('-').map(Number);
+  const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  return `${months[month - 1]} ${day}, ${year}`;
+}
+
+// Get today's date in YYYY-MM-DD format using US Eastern Time
+function getTodayDateString(): string {
+  const now = new Date();
+  // Use Eastern Time for consistency
+  const formatter = new Intl.DateTimeFormat('en-CA', { 
+    timeZone: 'America/New_York',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  });
+  return formatter.format(now);
+}
+
 interface Invoice {
   id: string;
   invoice_number: string;
@@ -106,7 +126,7 @@ function generateEmailHtml(
                           <span style="color: #6b7280; font-size: 14px;">Due Date</span>
                         </td>
                         <td style="padding: 8px 0; border-bottom: 1px solid #e5e7eb; text-align: right;">
-                          <strong style="color: ${isOverdue ? '#EF4444' : '#111827'}; font-size: 14px;">${new Date(invoice.due_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</strong>
+                          <strong style="color: ${isOverdue ? '#EF4444' : '#111827'}; font-size: 14px;">${formatLocalDateOnly(invoice.due_date)}</strong>
                         </td>
                       </tr>
                       <tr>
@@ -175,7 +195,11 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const today = new Date();
+    // Get today's date string in Eastern Time for consistent comparison
+    const todayStr = getTodayDateString();
+    // Parse today as local date for date math
+    const [todayYear, todayMonth, todayDay] = todayStr.split('-').map(Number);
+    const today = new Date(todayYear, todayMonth - 1, todayDay);
     today.setHours(0, 0, 0, 0);
 
     // Get all unpaid invoices (sent, viewed, partially_paid, overdue)
@@ -260,7 +284,9 @@ serve(async (req) => {
         continue;
       }
 
-      const dueDate = new Date(invoice.due_date);
+      // Parse due_date as local date (YYYY-MM-DD format)
+      const [dueYear, dueMonth, dueDay] = invoice.due_date.split('-').map(Number);
+      const dueDate = new Date(dueYear, dueMonth - 1, dueDay);
       dueDate.setHours(0, 0, 0, 0);
       const diffTime = dueDate.getTime() - today.getTime();
       const daysUntilDue = Math.ceil(diffTime / (1000 * 60 * 60 * 24));

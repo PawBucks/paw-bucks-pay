@@ -6,6 +6,13 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Format date-only strings (YYYY-MM-DD) without timezone shift
+function formatLocalDateOnly(dateString: string): string {
+  const [year, month, day] = dateString.split('-').map(Number);
+  const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  return `${months[month - 1]} ${day}, ${year}`;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -109,8 +116,8 @@ serve(async (req) => {
     </div>
     <div class="info-section" style="text-align: right;">
       <h3>Invoice Details</h3>
-      <p><strong>Issue Date:</strong> ${new Date(invoice.issue_date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</p>
-      <p><strong>Due Date:</strong> ${new Date(invoice.due_date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</p>
+      <p><strong>Issue Date:</strong> ${formatLocalDateOnly(invoice.issue_date)}</p>
+      <p><strong>Due Date:</strong> ${formatLocalDateOnly(invoice.due_date)}</p>
       <p><strong>Status:</strong> ${invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}</p>
     </div>
   </div>
