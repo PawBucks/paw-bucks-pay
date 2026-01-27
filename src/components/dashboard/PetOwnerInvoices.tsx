@@ -63,7 +63,7 @@ export function PetOwnerInvoices({ userEmail }: PetOwnerInvoicesProps) {
 
       try {
         // Fetch invoices where the client email matches the user's email
-        const { data, error } = await supabase
+        const { data: invoicesData, error: invoicesError } = await supabase
           .from("invoices")
           .select(`
             id,
@@ -77,28 +77,46 @@ export function PetOwnerInvoices({ userEmail }: PetOwnerInvoicesProps) {
             amount_due,
             access_token,
             client_name,
-            title,
-            merchants!invoices_merchant_id_fkey (
-              business_name,
-              logo_url
-            )
+            title
           `)
           .eq("client_email", userEmail)
           .in("status", ["sent", "viewed", "paid", "partially_paid", "overdue"])
           .order("created_at", { ascending: false })
           .limit(10);
 
-        if (error) {
-          console.error("[PetOwnerInvoices] Error fetching invoices:", error);
+        if (invoicesError) {
+          console.error("[PetOwnerInvoices] Error fetching invoices:", invoicesError);
           setInvoices([]);
-        } else {
-          // Transform to flatten merchant data
-          const transformedInvoices = (data || []).map((inv: any) => ({
-            ...inv,
-            merchant: inv.merchants,
-          }));
-          setInvoices(transformedInvoices);
+          return;
         }
+
+        if (!invoicesData || invoicesData.length === 0) {
+          setInvoices([]);
+          return;
+        }
+
+        // Get unique merchant IDs and fetch from merchants_public view
+        const merchantIds = [...new Set(invoicesData.map(inv => inv.merchant_id))];
+        const { data: merchantsData, error: merchantsError } = await supabase
+          .from("merchants_public")
+          .select("id, business_name, logo_url")
+          .in("id", merchantIds);
+
+        if (merchantsError) {
+          console.error("[PetOwnerInvoices] Error fetching merchants:", merchantsError);
+        }
+
+        // Create a map of merchant data for quick lookup
+        const merchantMap = new Map(
+          (merchantsData || []).map(m => [m.id, { business_name: m.business_name, logo_url: m.logo_url }])
+        );
+
+        // Transform invoices with merchant data
+        const transformedInvoices = invoicesData.map((inv: any) => ({
+          ...inv,
+          merchant: merchantMap.get(inv.merchant_id) || null,
+        }));
+        setInvoices(transformedInvoices);
       } catch (error) {
         console.error("[PetOwnerInvoices] Unexpected error:", error);
         setInvoices([]);
