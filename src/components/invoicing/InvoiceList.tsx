@@ -17,7 +17,8 @@ import {
   AlertCircle,
   XCircle,
   DollarSign,
-  RefreshCw
+  RefreshCw,
+  CreditCard
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -60,6 +61,7 @@ interface InvoiceListProps {
   onDelete: (invoice: Invoice) => void;
   onDownloadPdf: (invoice: Invoice) => void;
   onRefresh: () => void;
+  onRecordPayment: (invoice: Invoice) => void;
 }
 
 const statusConfig: Record<string, { label: string; color: string; icon: any }> = {
@@ -84,6 +86,7 @@ export function InvoiceList({
   onDelete,
   onDownloadPdf,
   onRefresh,
+  onRecordPayment,
 }: InvoiceListProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -379,6 +382,12 @@ export function InvoiceList({
                             <DropdownMenuItem onClick={() => onSend(invoice)}>
                               <Send className="h-4 w-4 mr-2" />
                               Send
+                            </DropdownMenuItem>
+                          )}
+                          {!['paid', 'cancelled', 'refunded', 'draft'].includes(invoice.status) && (
+                            <DropdownMenuItem onClick={() => onRecordPayment(invoice)}>
+                              <CreditCard className="h-4 w-4 mr-2" />
+                              Record Payment
                             </DropdownMenuItem>
                           )}
                           <DropdownMenuItem onClick={() => onDownloadPdf(invoice)}>

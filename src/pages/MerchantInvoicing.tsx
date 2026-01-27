@@ -10,7 +10,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Plus, Users, Settings, FileText, LayoutTemplate, Package } from "lucide-react";
 import { toast } from "sonner";
 import { InvoiceList, InvoiceEditor, InvoicePreview, ClientManager, InvoiceSettingsComponent, CatalogManager, TemplateManager } from "@/components/invoicing";
-import { invoicingService, type Invoice, type InvoiceItem, type InvoiceClient, type InvoiceSettings, type InvoiceTemplate, type CatalogItem } from "@/services/api/invoicing.service";
+import { RecordPaymentDialog } from "@/components/invoicing/RecordPaymentDialog";
+import { invoicingService, type Invoice, type InvoiceItem, type InvoiceClient, type InvoiceSettings, type InvoiceTemplate, type CatalogItem, type InvoicePayment } from "@/services/api/invoicing.service";
 
 // Helper function to calculate next invoice date based on interval
 function calculateNextInvoiceDate(fromDate: Date, interval: string): Date {
@@ -51,6 +52,10 @@ const MerchantInvoicing = () => {
   const [templates, setTemplates] = useState<InvoiceTemplate[]>([]);
   const [catalogItems, setCatalogItems] = useState<CatalogItem[]>([]);
   const [nextInvoiceNumber, setNextInvoiceNumber] = useState<string>("INV-00001");
+  
+  // Record payment dialog state
+  const [recordPaymentInvoice, setRecordPaymentInvoice] = useState<Invoice | null>(null);
+  const [recordPaymentOpen, setRecordPaymentOpen] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -461,6 +466,24 @@ const MerchantInvoicing = () => {
     window.open(payUrl, "_blank");
   };
 
+  // Record payment handlers
+  const handleOpenRecordPayment = (invoice: Invoice) => {
+    setRecordPaymentInvoice(invoice);
+    setRecordPaymentOpen(true);
+  };
+
+  const handleRecordPayment = async (payment: Partial<InvoicePayment>) => {
+    try {
+      const { error } = await invoicingService.recordPayment(payment);
+      if (error) throw error;
+      
+      loadData();
+    } catch (error) {
+      console.error("Error recording payment:", error);
+      throw error;
+    }
+  };
+
   // Client actions
   const handleCreateClient = async (data: Partial<InvoiceClient>) => {
     if (!merchantId) return;
@@ -801,8 +824,19 @@ const MerchantInvoicing = () => {
               onDelete={handleDeleteInvoice}
               onDownloadPdf={handleDownloadPdf}
               onRefresh={loadData}
+              onRecordPayment={handleOpenRecordPayment}
             />
           </TabsContent>
+
+          {/* Record Payment Dialog */}
+          {recordPaymentInvoice && (
+            <RecordPaymentDialog
+              open={recordPaymentOpen}
+              onOpenChange={setRecordPaymentOpen}
+              invoice={recordPaymentInvoice}
+              onRecordPayment={handleRecordPayment}
+            />
+          )}
 
           <TabsContent value="clients">
             <ClientManager
