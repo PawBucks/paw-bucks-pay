@@ -18,6 +18,7 @@ import {
   DataBridgeTab,
   AIClinicalAssistant,
   FinancialFrictionTab,
+  PracticeGrowthTab,
 } from "@/components/vet-portal";
 import {
   Stethoscope,
@@ -30,10 +31,10 @@ import {
   Share2,
   Activity,
   Heart,
-  AlertTriangle,
   ArrowRightLeft,
   Sparkles,
   Wallet,
+  TrendingUp,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -212,7 +213,7 @@ export default function VetDashboard() {
         </div>
 
         <Tabs defaultValue="emr" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-5 lg:grid-cols-10">
+          <TabsList className="grid w-full grid-cols-6 lg:grid-cols-12">
             <TabsTrigger value="emr" className="flex items-center gap-1">
               <FileText className="w-4 h-4" />
               <span className="hidden sm:inline">EMR</span>
@@ -258,6 +259,10 @@ export default function VetDashboard() {
               <Wallet className="w-4 h-4" />
               <span className="hidden sm:inline">Financial</span>
             </TabsTrigger>
+            <TabsTrigger value="growth" className="flex items-center gap-1">
+              <TrendingUp className="w-4 h-4" />
+              <span className="hidden sm:inline">Growth</span>
+            </TabsTrigger>
             <TabsTrigger value="wellness" className="flex items-center gap-1">
               <Heart className="w-4 h-4" />
               <span className="hidden sm:inline">Wellness</span>
@@ -302,6 +307,10 @@ export default function VetDashboard() {
 
           <TabsContent value="financial">
             <FinancialFrictionTab vetId={vetInfo.id} />
+          </TabsContent>
+
+          <TabsContent value="growth">
+            <PracticeGrowthTab vetId={vetInfo.id} />
           </TabsContent>
 
           <TabsContent value="wellness">

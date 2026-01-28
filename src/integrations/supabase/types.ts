@@ -6348,6 +6348,94 @@ export type Database = {
         }
         Relationships: []
       }
+      vet_bonus_offers: {
+        Row: {
+          bonus_amount: number
+          created_at: string
+          expires_at: string
+          id: string
+          message: string | null
+          pet_id: string
+          redeemed_at: string | null
+          service_type: string
+          status: string
+          updated_at: string
+          user_id: string
+          vet_id: string
+        }
+        Insert: {
+          bonus_amount?: number
+          created_at?: string
+          expires_at?: string
+          id?: string
+          message?: string | null
+          pet_id: string
+          redeemed_at?: string | null
+          service_type: string
+          status?: string
+          updated_at?: string
+          user_id: string
+          vet_id: string
+        }
+        Update: {
+          bonus_amount?: number
+          created_at?: string
+          expires_at?: string
+          id?: string
+          message?: string | null
+          pet_id?: string
+          redeemed_at?: string | null
+          service_type?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+          vet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vet_bonus_offers_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "pet_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vet_bonus_offers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_customer_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vet_bonus_offers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vet_bonus_offers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "reviewer_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vet_bonus_offers_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vet_bonus_offers_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vet_care_shares: {
         Row: {
           created_at: string
@@ -6881,6 +6969,132 @@ export type Database = {
           },
           {
             foreignKeyName: "vet_pms_integrations_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vet_prescription_fulfillments: {
+        Row: {
+          approved_at: string | null
+          created_at: string
+          dosage: string
+          id: string
+          instructions: string | null
+          medication_name: string
+          notes: string | null
+          pet_id: string
+          product_price: number | null
+          quantity: number
+          refill_request_id: string | null
+          shipped_at: string | null
+          status: string
+          store_item_id: string | null
+          tracking_number: string | null
+          updated_at: string
+          user_id: string
+          vet_earnings: number | null
+          vet_id: string
+          vet_margin_percent: number
+        }
+        Insert: {
+          approved_at?: string | null
+          created_at?: string
+          dosage: string
+          id?: string
+          instructions?: string | null
+          medication_name: string
+          notes?: string | null
+          pet_id: string
+          product_price?: number | null
+          quantity?: number
+          refill_request_id?: string | null
+          shipped_at?: string | null
+          status?: string
+          store_item_id?: string | null
+          tracking_number?: string | null
+          updated_at?: string
+          user_id: string
+          vet_earnings?: number | null
+          vet_id: string
+          vet_margin_percent?: number
+        }
+        Update: {
+          approved_at?: string | null
+          created_at?: string
+          dosage?: string
+          id?: string
+          instructions?: string | null
+          medication_name?: string
+          notes?: string | null
+          pet_id?: string
+          product_price?: number | null
+          quantity?: number
+          refill_request_id?: string | null
+          shipped_at?: string | null
+          status?: string
+          store_item_id?: string | null
+          tracking_number?: string | null
+          updated_at?: string
+          user_id?: string
+          vet_earnings?: number | null
+          vet_id?: string
+          vet_margin_percent?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vet_prescription_fulfillments_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "pet_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vet_prescription_fulfillments_refill_request_id_fkey"
+            columns: ["refill_request_id"]
+            isOneToOne: false
+            referencedRelation: "prescription_refill_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vet_prescription_fulfillments_store_item_id_fkey"
+            columns: ["store_item_id"]
+            isOneToOne: false
+            referencedRelation: "pet_store_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vet_prescription_fulfillments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_customer_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vet_prescription_fulfillments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vet_prescription_fulfillments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "reviewer_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vet_prescription_fulfillments_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vet_prescription_fulfillments_vet_id_fkey"
             columns: ["vet_id"]
             isOneToOne: false
             referencedRelation: "partner_vets_public"
