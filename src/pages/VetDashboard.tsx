@@ -5,10 +5,9 @@ import { Header } from "@/components/Header";
 import { SEO } from "@/components/SEO";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { VetPatientsList } from "@/components/VetPatientsList";
 import { VetMessagesPanel } from "@/components/VetMessagesPanel";
-import { Stethoscope, Users, MessageSquare } from "lucide-react";
+import { EMRDashboard, ConsentManagement } from "@/components/vet-portal";
+import { Stethoscope, Users, MessageSquare, FileText, FileSignature } from "lucide-react";
 import { toast } from "sonner";
 
 type VetInfo = {
@@ -101,8 +100,9 @@ export default function VetDashboard() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO title="Veterinary Portal" description="Manage your veterinary practice" />
       <Header />
-      <div className="container max-w-6xl mx-auto px-4 py-8 space-y-6">
+      <div className="container max-w-7xl mx-auto px-4 py-8 space-y-6">
         <div>
           <h1 className="text-3xl font-bold mb-2 flex items-center gap-2">
             <Stethoscope className="w-8 h-8 text-primary" />
@@ -113,7 +113,7 @@ export default function VetDashboard() {
           </p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-6 md:grid-cols-3">
           <Card className="p-6">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
@@ -133,17 +133,33 @@ export default function VetDashboard() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Location</p>
-                <p className="text-xl font-semibold">{vetInfo.location}</p>
+                <p className="text-lg font-semibold">{vetInfo.location}</p>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                <FileText className="w-6 h-6 text-green-600" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Contact</p>
+                <p className="text-sm font-medium truncate">{vetInfo.contact_email}</p>
               </div>
             </div>
           </Card>
         </div>
 
-        <Tabs defaultValue="patients" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="patients" className="flex items-center gap-2">
-              <Users className="w-4 h-4" />
-              Patients
+        <Tabs defaultValue="emr" className="space-y-4">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="emr" className="flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              EMR Dashboard
+            </TabsTrigger>
+            <TabsTrigger value="consent" className="flex items-center gap-2">
+              <FileSignature className="w-4 h-4" />
+              Consent Forms
             </TabsTrigger>
             <TabsTrigger value="messages" className="flex items-center gap-2">
               <MessageSquare className="w-4 h-4" />
@@ -151,8 +167,12 @@ export default function VetDashboard() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="patients">
-            <VetPatientsList vetId={vetInfo.id} />
+          <TabsContent value="emr">
+            <EMRDashboard vetId={vetInfo.id} />
+          </TabsContent>
+
+          <TabsContent value="consent">
+            <ConsentManagement vetId={vetInfo.id} />
           </TabsContent>
 
           <TabsContent value="messages">
