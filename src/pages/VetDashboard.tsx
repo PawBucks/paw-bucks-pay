@@ -16,6 +16,7 @@ import {
   WellnessPlansTab,
   LostPetAlertsWidget,
   DataBridgeTab,
+  AIClinicalAssistant,
 } from "@/components/vet-portal";
 import {
   Stethoscope,
@@ -30,6 +31,7 @@ import {
   Heart,
   AlertTriangle,
   ArrowRightLeft,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -208,10 +210,14 @@ export default function VetDashboard() {
         </div>
 
         <Tabs defaultValue="emr" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-5 lg:grid-cols-9">
+          <TabsList className="grid w-full grid-cols-5 lg:grid-cols-10">
             <TabsTrigger value="emr" className="flex items-center gap-1">
               <FileText className="w-4 h-4" />
               <span className="hidden sm:inline">EMR</span>
+            </TabsTrigger>
+            <TabsTrigger value="ai-assistant" className="flex items-center gap-1">
+              <Sparkles className="w-4 h-4" />
+              <span className="hidden sm:inline">AI</span>
             </TabsTrigger>
             <TabsTrigger value="messages" className="flex items-center gap-1">
               <MessageSquare className="w-4 h-4" />
@@ -254,6 +260,10 @@ export default function VetDashboard() {
 
           <TabsContent value="emr">
             <EMRDashboard vetId={vetInfo.id} />
+          </TabsContent>
+
+          <TabsContent value="ai-assistant">
+            <AIClinicalAssistant vetId={vetInfo.id} />
           </TabsContent>
 
           <TabsContent value="messages">
