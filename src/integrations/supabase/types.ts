@@ -576,6 +576,277 @@ export type Database = {
           },
         ]
       }
+      external_imaging_results: {
+        Row: {
+          body_part: string | null
+          created_at: string
+          dicom_viewer_url: string | null
+          emr_imaging_id: string | null
+          external_patient_id: string | null
+          external_study_id: string
+          findings: Json | null
+          id: string
+          image_count: number | null
+          is_reviewed: boolean | null
+          lab_integration_id: string | null
+          lab_vendor: string
+          linked_to_emr: boolean | null
+          modality: string
+          notes: string | null
+          pet_id: string | null
+          radiologist_report: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          study_date: string
+          study_description: string | null
+          thumbnail_url: string | null
+          updated_at: string
+          vet_id: string
+        }
+        Insert: {
+          body_part?: string | null
+          created_at?: string
+          dicom_viewer_url?: string | null
+          emr_imaging_id?: string | null
+          external_patient_id?: string | null
+          external_study_id: string
+          findings?: Json | null
+          id?: string
+          image_count?: number | null
+          is_reviewed?: boolean | null
+          lab_integration_id?: string | null
+          lab_vendor: string
+          linked_to_emr?: boolean | null
+          modality: string
+          notes?: string | null
+          pet_id?: string | null
+          radiologist_report?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          study_date: string
+          study_description?: string | null
+          thumbnail_url?: string | null
+          updated_at?: string
+          vet_id: string
+        }
+        Update: {
+          body_part?: string | null
+          created_at?: string
+          dicom_viewer_url?: string | null
+          emr_imaging_id?: string | null
+          external_patient_id?: string | null
+          external_study_id?: string
+          findings?: Json | null
+          id?: string
+          image_count?: number | null
+          is_reviewed?: boolean | null
+          lab_integration_id?: string | null
+          lab_vendor?: string
+          linked_to_emr?: boolean | null
+          modality?: string
+          notes?: string | null
+          pet_id?: string | null
+          radiologist_report?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          study_date?: string
+          study_description?: string | null
+          thumbnail_url?: string | null
+          updated_at?: string
+          vet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "external_imaging_results_emr_imaging_id_fkey"
+            columns: ["emr_imaging_id"]
+            isOneToOne: false
+            referencedRelation: "pet_imaging_records"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "external_imaging_results_lab_integration_id_fkey"
+            columns: ["lab_integration_id"]
+            isOneToOne: false
+            referencedRelation: "vet_lab_integrations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "external_imaging_results_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "pet_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "external_imaging_results_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "partner_vets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "external_imaging_results_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "partner_vets_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "external_imaging_results_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "external_imaging_results_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      external_lab_results: {
+        Row: {
+          abnormal_flags: string[] | null
+          created_at: string
+          emr_lab_result_id: string | null
+          external_order_id: string
+          external_patient_id: string | null
+          has_abnormal_values: boolean | null
+          id: string
+          is_reviewed: boolean | null
+          lab_integration_id: string | null
+          lab_vendor: string
+          linked_to_emr: boolean | null
+          notes: string | null
+          pdf_url: string | null
+          pet_id: string | null
+          raw_data: Json | null
+          reference_ranges: Json | null
+          result_date: string
+          results: Json
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          test_category: string | null
+          test_code: string | null
+          test_name: string
+          updated_at: string
+          vet_id: string
+        }
+        Insert: {
+          abnormal_flags?: string[] | null
+          created_at?: string
+          emr_lab_result_id?: string | null
+          external_order_id: string
+          external_patient_id?: string | null
+          has_abnormal_values?: boolean | null
+          id?: string
+          is_reviewed?: boolean | null
+          lab_integration_id?: string | null
+          lab_vendor: string
+          linked_to_emr?: boolean | null
+          notes?: string | null
+          pdf_url?: string | null
+          pet_id?: string | null
+          raw_data?: Json | null
+          reference_ranges?: Json | null
+          result_date: string
+          results?: Json
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          test_category?: string | null
+          test_code?: string | null
+          test_name: string
+          updated_at?: string
+          vet_id: string
+        }
+        Update: {
+          abnormal_flags?: string[] | null
+          created_at?: string
+          emr_lab_result_id?: string | null
+          external_order_id?: string
+          external_patient_id?: string | null
+          has_abnormal_values?: boolean | null
+          id?: string
+          is_reviewed?: boolean | null
+          lab_integration_id?: string | null
+          lab_vendor?: string
+          linked_to_emr?: boolean | null
+          notes?: string | null
+          pdf_url?: string | null
+          pet_id?: string | null
+          raw_data?: Json | null
+          reference_ranges?: Json | null
+          result_date?: string
+          results?: Json
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          test_category?: string | null
+          test_code?: string | null
+          test_name?: string
+          updated_at?: string
+          vet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "external_lab_results_emr_lab_result_id_fkey"
+            columns: ["emr_lab_result_id"]
+            isOneToOne: false
+            referencedRelation: "pet_lab_results"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "external_lab_results_lab_integration_id_fkey"
+            columns: ["lab_integration_id"]
+            isOneToOne: false
+            referencedRelation: "vet_lab_integrations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "external_lab_results_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "pet_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "external_lab_results_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "partner_vets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "external_lab_results_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "partner_vets_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "external_lab_results_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "external_lab_results_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       feedback_submissions: {
         Row: {
           admin_notes: string | null
@@ -4184,6 +4455,106 @@ export type Database = {
         }
         Relationships: []
       }
+      pms_field_mappings: {
+        Row: {
+          created_at: string
+          id: string
+          integration_id: string
+          is_active: boolean | null
+          pawbucks_entity: string
+          pawbucks_field: string
+          pms_entity: string
+          pms_field: string
+          transform_function: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          integration_id: string
+          is_active?: boolean | null
+          pawbucks_entity: string
+          pawbucks_field: string
+          pms_entity: string
+          pms_field: string
+          transform_function?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          integration_id?: string
+          is_active?: boolean | null
+          pawbucks_entity?: string
+          pawbucks_field?: string
+          pms_entity?: string
+          pms_field?: string
+          transform_function?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pms_field_mappings_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "vet_pms_integrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pms_sync_logs: {
+        Row: {
+          completed_at: string | null
+          details: Json | null
+          direction: string
+          error_message: string | null
+          id: string
+          integration_id: string
+          records_created: number | null
+          records_failed: number | null
+          records_processed: number | null
+          records_updated: number | null
+          started_at: string
+          status: string
+          sync_type: string
+        }
+        Insert: {
+          completed_at?: string | null
+          details?: Json | null
+          direction: string
+          error_message?: string | null
+          id?: string
+          integration_id: string
+          records_created?: number | null
+          records_failed?: number | null
+          records_processed?: number | null
+          records_updated?: number | null
+          started_at?: string
+          status?: string
+          sync_type: string
+        }
+        Update: {
+          completed_at?: string | null
+          details?: Json | null
+          direction?: string
+          error_message?: string | null
+          id?: string
+          integration_id?: string
+          records_created?: number | null
+          records_failed?: number | null
+          records_processed?: number | null
+          records_updated?: number | null
+          started_at?: string
+          status?: string
+          sync_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pms_sync_logs_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "vet_pms_integrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pos_transactions: {
         Row: {
           amount: number
@@ -5458,6 +5829,72 @@ export type Database = {
           },
         ]
       }
+      vet_lab_integrations: {
+        Row: {
+          account_id: string | null
+          api_endpoint: string | null
+          api_key_encrypted: string | null
+          auto_import: boolean | null
+          created_at: string
+          id: string
+          is_active: boolean | null
+          lab_name: string
+          lab_vendor: string
+          last_import_at: string | null
+          settings: Json | null
+          supports_dicom: boolean | null
+          updated_at: string
+          vet_id: string
+        }
+        Insert: {
+          account_id?: string | null
+          api_endpoint?: string | null
+          api_key_encrypted?: string | null
+          auto_import?: boolean | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          lab_name: string
+          lab_vendor: string
+          last_import_at?: string | null
+          settings?: Json | null
+          supports_dicom?: boolean | null
+          updated_at?: string
+          vet_id: string
+        }
+        Update: {
+          account_id?: string | null
+          api_endpoint?: string | null
+          api_key_encrypted?: string | null
+          auto_import?: boolean | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          lab_name?: string
+          lab_vendor?: string
+          last_import_at?: string | null
+          settings?: Json | null
+          supports_dicom?: boolean | null
+          updated_at?: string
+          vet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vet_lab_integrations_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vet_lab_integrations_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vet_loans: {
         Row: {
           created_at: string
@@ -5679,6 +6116,75 @@ export type Database = {
           },
           {
             foreignKeyName: "vet_messages_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vet_pms_integrations: {
+        Row: {
+          api_endpoint: string | null
+          api_key_encrypted: string | null
+          client_id: string | null
+          created_at: string
+          id: string
+          is_active: boolean | null
+          last_sync_at: string | null
+          practice_id: string | null
+          provider: string
+          provider_name: string
+          settings: Json | null
+          sync_direction: string
+          sync_frequency_minutes: number | null
+          updated_at: string
+          vet_id: string
+        }
+        Insert: {
+          api_endpoint?: string | null
+          api_key_encrypted?: string | null
+          client_id?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          last_sync_at?: string | null
+          practice_id?: string | null
+          provider: string
+          provider_name: string
+          settings?: Json | null
+          sync_direction?: string
+          sync_frequency_minutes?: number | null
+          updated_at?: string
+          vet_id: string
+        }
+        Update: {
+          api_endpoint?: string | null
+          api_key_encrypted?: string | null
+          client_id?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          last_sync_at?: string | null
+          practice_id?: string | null
+          provider?: string
+          provider_name?: string
+          settings?: Json | null
+          sync_direction?: string
+          sync_frequency_minutes?: number | null
+          updated_at?: string
+          vet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vet_pms_integrations_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vet_pms_integrations_vet_id_fkey"
             columns: ["vet_id"]
             isOneToOne: false
             referencedRelation: "partner_vets_public"
