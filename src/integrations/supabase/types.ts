@@ -2982,6 +2982,207 @@ export type Database = {
         }
         Relationships: []
       }
+      pet_allergies: {
+        Row: {
+          allergy_name: string
+          allergy_type: string
+          created_at: string
+          first_observed_date: string | null
+          id: string
+          is_active: boolean
+          notes: string | null
+          pet_id: string
+          reaction_description: string | null
+          severity: string
+          updated_at: string
+          vet_id: string | null
+        }
+        Insert: {
+          allergy_name: string
+          allergy_type: string
+          created_at?: string
+          first_observed_date?: string | null
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          pet_id: string
+          reaction_description?: string | null
+          severity?: string
+          updated_at?: string
+          vet_id?: string | null
+        }
+        Update: {
+          allergy_name?: string
+          allergy_type?: string
+          created_at?: string
+          first_observed_date?: string | null
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          pet_id?: string
+          reaction_description?: string | null
+          severity?: string
+          updated_at?: string
+          vet_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pet_allergies_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "pet_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_allergies_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_allergies_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pet_consent_requests: {
+        Row: {
+          access_token: string
+          consent_type: string
+          cost_range_max: number | null
+          cost_range_min: number | null
+          created_at: string
+          description: string
+          estimated_cost: number | null
+          expires_at: string
+          id: string
+          owner_id: string
+          pet_id: string
+          procedure_details: string | null
+          reminder_sent_at: string | null
+          risks_disclosed: string | null
+          sent_via: string | null
+          signature_data: string | null
+          signed_at: string | null
+          signed_name: string | null
+          signer_ip_address: string | null
+          signer_user_agent: string | null
+          status: Database["public"]["Enums"]["consent_status"]
+          template_id: string | null
+          title: string
+          updated_at: string
+          vet_id: string
+        }
+        Insert: {
+          access_token?: string
+          consent_type: string
+          cost_range_max?: number | null
+          cost_range_min?: number | null
+          created_at?: string
+          description: string
+          estimated_cost?: number | null
+          expires_at?: string
+          id?: string
+          owner_id: string
+          pet_id: string
+          procedure_details?: string | null
+          reminder_sent_at?: string | null
+          risks_disclosed?: string | null
+          sent_via?: string | null
+          signature_data?: string | null
+          signed_at?: string | null
+          signed_name?: string | null
+          signer_ip_address?: string | null
+          signer_user_agent?: string | null
+          status?: Database["public"]["Enums"]["consent_status"]
+          template_id?: string | null
+          title: string
+          updated_at?: string
+          vet_id: string
+        }
+        Update: {
+          access_token?: string
+          consent_type?: string
+          cost_range_max?: number | null
+          cost_range_min?: number | null
+          created_at?: string
+          description?: string
+          estimated_cost?: number | null
+          expires_at?: string
+          id?: string
+          owner_id?: string
+          pet_id?: string
+          procedure_details?: string | null
+          reminder_sent_at?: string | null
+          risks_disclosed?: string | null
+          sent_via?: string | null
+          signature_data?: string | null
+          signed_at?: string | null
+          signed_name?: string | null
+          signer_ip_address?: string | null
+          signer_user_agent?: string | null
+          status?: Database["public"]["Enums"]["consent_status"]
+          template_id?: string | null
+          title?: string
+          updated_at?: string
+          vet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pet_consent_requests_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_customer_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_consent_requests_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_consent_requests_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "reviewer_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_consent_requests_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "pet_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_consent_requests_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "vet_consent_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_consent_requests_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_consent_requests_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pet_health_access_codes: {
         Row: {
           access_code: string
@@ -3028,6 +3229,207 @@ export type Database = {
             columns: ["pet_id"]
             isOneToOne: false
             referencedRelation: "pet_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pet_imaging_records: {
+        Row: {
+          body_region: string
+          created_at: string
+          findings: string | null
+          follow_up_recommended: boolean | null
+          id: string
+          image_urls: string[]
+          imaging_date: string
+          imaging_type: Database["public"]["Enums"]["imaging_type"]
+          indication: string
+          interpretation: string | null
+          is_abnormal: boolean | null
+          pet_id: string
+          radiologist_notes: string | null
+          soap_note_id: string | null
+          thumbnail_url: string | null
+          updated_at: string
+          vet_id: string
+          views: string[] | null
+        }
+        Insert: {
+          body_region: string
+          created_at?: string
+          findings?: string | null
+          follow_up_recommended?: boolean | null
+          id?: string
+          image_urls?: string[]
+          imaging_date?: string
+          imaging_type: Database["public"]["Enums"]["imaging_type"]
+          indication: string
+          interpretation?: string | null
+          is_abnormal?: boolean | null
+          pet_id: string
+          radiologist_notes?: string | null
+          soap_note_id?: string | null
+          thumbnail_url?: string | null
+          updated_at?: string
+          vet_id: string
+          views?: string[] | null
+        }
+        Update: {
+          body_region?: string
+          created_at?: string
+          findings?: string | null
+          follow_up_recommended?: boolean | null
+          id?: string
+          image_urls?: string[]
+          imaging_date?: string
+          imaging_type?: Database["public"]["Enums"]["imaging_type"]
+          indication?: string
+          interpretation?: string | null
+          is_abnormal?: boolean | null
+          pet_id?: string
+          radiologist_notes?: string | null
+          soap_note_id?: string | null
+          thumbnail_url?: string | null
+          updated_at?: string
+          vet_id?: string
+          views?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pet_imaging_records_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "pet_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_imaging_records_soap_note_id_fkey"
+            columns: ["soap_note_id"]
+            isOneToOne: false
+            referencedRelation: "pet_soap_notes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_imaging_records_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_imaging_records_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pet_lab_results: {
+        Row: {
+          abnormal_flags: string[] | null
+          created_at: string
+          file_url: string | null
+          id: string
+          interpretation: string | null
+          lab_name: string | null
+          notes: string | null
+          pet_id: string
+          result_summary: string | null
+          results: Json
+          reviewed_at: string | null
+          reviewed_by: string | null
+          soap_note_id: string | null
+          status: Database["public"]["Enums"]["lab_result_status"]
+          test_category: string
+          test_date: string
+          test_type: string
+          updated_at: string
+          vet_id: string
+        }
+        Insert: {
+          abnormal_flags?: string[] | null
+          created_at?: string
+          file_url?: string | null
+          id?: string
+          interpretation?: string | null
+          lab_name?: string | null
+          notes?: string | null
+          pet_id: string
+          result_summary?: string | null
+          results?: Json
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          soap_note_id?: string | null
+          status?: Database["public"]["Enums"]["lab_result_status"]
+          test_category: string
+          test_date?: string
+          test_type: string
+          updated_at?: string
+          vet_id: string
+        }
+        Update: {
+          abnormal_flags?: string[] | null
+          created_at?: string
+          file_url?: string | null
+          id?: string
+          interpretation?: string | null
+          lab_name?: string | null
+          notes?: string | null
+          pet_id?: string
+          result_summary?: string | null
+          results?: Json
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          soap_note_id?: string | null
+          status?: Database["public"]["Enums"]["lab_result_status"]
+          test_category?: string
+          test_date?: string
+          test_type?: string
+          updated_at?: string
+          vet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pet_lab_results_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "pet_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_lab_results_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "partner_vets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_lab_results_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "partner_vets_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_lab_results_soap_note_id_fkey"
+            columns: ["soap_note_id"]
+            isOneToOne: false
+            referencedRelation: "pet_soap_notes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_lab_results_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_lab_results_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets_public"
             referencedColumns: ["id"]
           },
         ]
@@ -3230,6 +3632,124 @@ export type Database = {
           },
         ]
       }
+      pet_soap_notes: {
+        Row: {
+          amended_at: string | null
+          amendment_reason: string | null
+          assessment_differential_diagnoses: string[] | null
+          assessment_primary_diagnosis: string
+          assessment_prognosis: string | null
+          created_at: string
+          finalized_at: string | null
+          id: string
+          objective_body_condition_score: number | null
+          objective_findings: string | null
+          objective_heart_rate: number | null
+          objective_physical_exam: string
+          objective_respiratory_rate: number | null
+          objective_temperature: number | null
+          objective_weight: number | null
+          pet_id: string
+          plan_client_education: string | null
+          plan_follow_up: string | null
+          plan_medications: string | null
+          plan_referral: string | null
+          plan_treatment: string
+          status: Database["public"]["Enums"]["soap_note_status"]
+          subjective_chief_complaint: string
+          subjective_duration: string | null
+          subjective_history: string | null
+          subjective_owner_observations: string | null
+          updated_at: string
+          vet_id: string
+          visit_date: string
+        }
+        Insert: {
+          amended_at?: string | null
+          amendment_reason?: string | null
+          assessment_differential_diagnoses?: string[] | null
+          assessment_primary_diagnosis: string
+          assessment_prognosis?: string | null
+          created_at?: string
+          finalized_at?: string | null
+          id?: string
+          objective_body_condition_score?: number | null
+          objective_findings?: string | null
+          objective_heart_rate?: number | null
+          objective_physical_exam: string
+          objective_respiratory_rate?: number | null
+          objective_temperature?: number | null
+          objective_weight?: number | null
+          pet_id: string
+          plan_client_education?: string | null
+          plan_follow_up?: string | null
+          plan_medications?: string | null
+          plan_referral?: string | null
+          plan_treatment: string
+          status?: Database["public"]["Enums"]["soap_note_status"]
+          subjective_chief_complaint: string
+          subjective_duration?: string | null
+          subjective_history?: string | null
+          subjective_owner_observations?: string | null
+          updated_at?: string
+          vet_id: string
+          visit_date?: string
+        }
+        Update: {
+          amended_at?: string | null
+          amendment_reason?: string | null
+          assessment_differential_diagnoses?: string[] | null
+          assessment_primary_diagnosis?: string
+          assessment_prognosis?: string | null
+          created_at?: string
+          finalized_at?: string | null
+          id?: string
+          objective_body_condition_score?: number | null
+          objective_findings?: string | null
+          objective_heart_rate?: number | null
+          objective_physical_exam?: string
+          objective_respiratory_rate?: number | null
+          objective_temperature?: number | null
+          objective_weight?: number | null
+          pet_id?: string
+          plan_client_education?: string | null
+          plan_follow_up?: string | null
+          plan_medications?: string | null
+          plan_referral?: string | null
+          plan_treatment?: string
+          status?: Database["public"]["Enums"]["soap_note_status"]
+          subjective_chief_complaint?: string
+          subjective_duration?: string | null
+          subjective_history?: string | null
+          subjective_owner_observations?: string | null
+          updated_at?: string
+          vet_id?: string
+          visit_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pet_soap_notes_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "pet_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_soap_notes_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_soap_notes_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pet_store_items: {
         Row: {
           category: string
@@ -3358,6 +3878,176 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      pet_surgical_notes: {
+        Row: {
+          anesthesia_duration_minutes: number | null
+          anesthesia_type: string | null
+          complications: string | null
+          created_at: string
+          follow_up_date: string | null
+          follow_up_required: boolean
+          id: string
+          operative_notes: string
+          outcome: string
+          pet_id: string
+          post_op_notes: string | null
+          pre_op_notes: string | null
+          procedure_code: string | null
+          procedure_name: string
+          surgery_date: string
+          updated_at: string
+          vet_id: string
+        }
+        Insert: {
+          anesthesia_duration_minutes?: number | null
+          anesthesia_type?: string | null
+          complications?: string | null
+          created_at?: string
+          follow_up_date?: string | null
+          follow_up_required?: boolean
+          id?: string
+          operative_notes: string
+          outcome?: string
+          pet_id: string
+          post_op_notes?: string | null
+          pre_op_notes?: string | null
+          procedure_code?: string | null
+          procedure_name: string
+          surgery_date: string
+          updated_at?: string
+          vet_id: string
+        }
+        Update: {
+          anesthesia_duration_minutes?: number | null
+          anesthesia_type?: string | null
+          complications?: string | null
+          created_at?: string
+          follow_up_date?: string | null
+          follow_up_required?: boolean
+          id?: string
+          operative_notes?: string
+          outcome?: string
+          pet_id?: string
+          post_op_notes?: string | null
+          pre_op_notes?: string | null
+          procedure_code?: string | null
+          procedure_name?: string
+          surgery_date?: string
+          updated_at?: string
+          vet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pet_surgical_notes_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "pet_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_surgical_notes_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_surgical_notes_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pet_vaccinations: {
+        Row: {
+          administered_by: string | null
+          administration_date: string
+          administration_site: string | null
+          certificate_url: string | null
+          created_at: string
+          dose: string | null
+          expiration_date: string | null
+          id: string
+          lot_number: string | null
+          manufacturer: string | null
+          next_due_date: string | null
+          pet_id: string
+          reaction_notes: string | null
+          route: string | null
+          serial_number: string | null
+          updated_at: string
+          vaccine_name: string
+          vaccine_type: string
+          vet_id: string | null
+        }
+        Insert: {
+          administered_by?: string | null
+          administration_date: string
+          administration_site?: string | null
+          certificate_url?: string | null
+          created_at?: string
+          dose?: string | null
+          expiration_date?: string | null
+          id?: string
+          lot_number?: string | null
+          manufacturer?: string | null
+          next_due_date?: string | null
+          pet_id: string
+          reaction_notes?: string | null
+          route?: string | null
+          serial_number?: string | null
+          updated_at?: string
+          vaccine_name: string
+          vaccine_type: string
+          vet_id?: string | null
+        }
+        Update: {
+          administered_by?: string | null
+          administration_date?: string
+          administration_site?: string | null
+          certificate_url?: string | null
+          created_at?: string
+          dose?: string | null
+          expiration_date?: string | null
+          id?: string
+          lot_number?: string | null
+          manufacturer?: string | null
+          next_due_date?: string | null
+          pet_id?: string
+          reaction_notes?: string | null
+          route?: string | null
+          serial_number?: string | null
+          updated_at?: string
+          vaccine_name?: string
+          vaccine_type?: string
+          vet_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pet_vaccinations_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "pet_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_vaccinations_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_vaccinations_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets_public"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       platform_settings: {
         Row: {
@@ -4449,6 +5139,57 @@ export type Database = {
         }
         Relationships: []
       }
+      vet_consent_templates: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          is_active: boolean
+          requires_witness: boolean
+          template_name: string
+          template_type: string
+          updated_at: string
+          vet_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          requires_witness?: boolean
+          template_name: string
+          template_type: string
+          updated_at?: string
+          vet_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          requires_witness?: boolean
+          template_name?: string
+          template_type?: string
+          updated_at?: string
+          vet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vet_consent_templates_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vet_consent_templates_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vet_loans: {
         Row: {
           created_at: string
@@ -5120,6 +5861,15 @@ export type Database = {
         | "cancelled"
         | "completed"
         | "no_show"
+      consent_status: "pending" | "signed" | "declined" | "expired"
+      imaging_type:
+        | "xray"
+        | "ultrasound"
+        | "mri"
+        | "ct_scan"
+        | "endoscopy"
+        | "other"
+      lab_result_status: "pending" | "completed" | "reviewed"
       medical_record_type:
         | "vaccination"
         | "checkup"
@@ -5141,6 +5891,7 @@ export type Database = {
         | "veterinary"
         | "pet_sitting"
         | "other"
+      soap_note_status: "draft" | "finalized" | "amended"
       tax_expense_category:
         | "gas_mileage"
         | "pet_supplies_treats"
@@ -5292,6 +6043,16 @@ export const Constants = {
         "completed",
         "no_show",
       ],
+      consent_status: ["pending", "signed", "declined", "expired"],
+      imaging_type: [
+        "xray",
+        "ultrasound",
+        "mri",
+        "ct_scan",
+        "endoscopy",
+        "other",
+      ],
+      lab_result_status: ["pending", "completed", "reviewed"],
       medical_record_type: [
         "vaccination",
         "checkup",
@@ -5315,6 +6076,7 @@ export const Constants = {
         "pet_sitting",
         "other",
       ],
+      soap_note_status: ["draft", "finalized", "amended"],
       tax_expense_category: [
         "gas_mileage",
         "pet_supplies_treats",

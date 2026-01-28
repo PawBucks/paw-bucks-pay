@@ -1,0 +1,11 @@
+export { EMRDashboard } from "./EMRDashboard";
+export { PatientEMRView } from "./PatientEMRView";
+export { SOAPNoteEditor } from "./SOAPNoteEditor";
+export { SOAPNotesList } from "./SOAPNotesList";
+export { VaccinationsTab } from "./VaccinationsTab";
+export { AllergiesTab } from "./AllergiesTab";
+export { SurgicalNotesTab } from "./SurgicalNotesTab";
+export { LabResultsTab } from "./LabResultsTab";
+export { ImagingTab } from "./ImagingTab";
+export { ConsentManagement } from "./ConsentManagement";
+export * from "./types";
