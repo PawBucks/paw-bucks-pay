@@ -15,4 +15,8 @@ export { CollaborativeCareTab } from "./CollaborativeCareTab";
 export { MerchantDataSyncTab } from "./MerchantDataSyncTab";
 export { WellnessPlansTab } from "./WellnessPlansTab";
 export { LostPetAlertsWidget } from "./LostPetAlertsWidget";
+export { DataBridgeTab } from "./DataBridgeTab";
+export { PMSIntegrationManager } from "./PMSIntegrationManager";
+export { LabIntegrationManager } from "./LabIntegrationManager";
+export { UniversalLabDashboard } from "./UniversalLabDashboard";
 export * from "./types";

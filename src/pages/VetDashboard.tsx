@@ -15,6 +15,7 @@ import {
   MerchantDataSyncTab,
   WellnessPlansTab,
   LostPetAlertsWidget,
+  DataBridgeTab,
 } from "@/components/vet-portal";
 import {
   Stethoscope,
@@ -28,6 +29,7 @@ import {
   Activity,
   Heart,
   AlertTriangle,
+  ArrowRightLeft,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -206,7 +208,7 @@ export default function VetDashboard() {
         </div>
 
         <Tabs defaultValue="emr" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8">
+          <TabsList className="grid w-full grid-cols-5 lg:grid-cols-9">
             <TabsTrigger value="emr" className="flex items-center gap-1">
               <FileText className="w-4 h-4" />
               <span className="hidden sm:inline">EMR</span>
@@ -240,6 +242,10 @@ export default function VetDashboard() {
               <Activity className="w-4 h-4" />
               <span className="hidden sm:inline">Sync</span>
             </TabsTrigger>
+            <TabsTrigger value="data-bridge" className="flex items-center gap-1">
+              <ArrowRightLeft className="w-4 h-4" />
+              <span className="hidden sm:inline">Bridge</span>
+            </TabsTrigger>
             <TabsTrigger value="wellness" className="flex items-center gap-1">
               <Heart className="w-4 h-4" />
               <span className="hidden sm:inline">Wellness</span>
@@ -272,6 +278,10 @@ export default function VetDashboard() {
 
           <TabsContent value="data-sync">
             <MerchantDataSyncTab vetId={vetInfo.id} />
+          </TabsContent>
+
+          <TabsContent value="data-bridge">
+            <DataBridgeTab vetId={vetInfo.id} />
           </TabsContent>
 
           <TabsContent value="wellness">
