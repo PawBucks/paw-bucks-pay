@@ -19,4 +19,5 @@ export { DataBridgeTab } from "./DataBridgeTab";
 export { PMSIntegrationManager } from "./PMSIntegrationManager";
 export { LabIntegrationManager } from "./LabIntegrationManager";
 export { UniversalLabDashboard } from "./UniversalLabDashboard";
+export { AIClinicalAssistant } from "./AIClinicalAssistant";
 export * from "./types";

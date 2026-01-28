@@ -183,6 +183,107 @@ export type Database = {
           },
         ]
       }
+      ai_soap_drafts: {
+        Row: {
+          ai_objective: string | null
+          ai_subjective: string | null
+          ai_suggested_assessment: string | null
+          ai_suggested_plan: string | null
+          applied_at: string | null
+          audio_duration_seconds: number | null
+          audio_url: string | null
+          created_at: string
+          extracted_observations: Json | null
+          extracted_symptoms: Json | null
+          extracted_vitals: Json | null
+          id: string
+          model_used: string | null
+          pet_id: string
+          processing_time_ms: number | null
+          soap_note_id: string | null
+          status: string
+          transcription: string | null
+          transcription_confidence: number | null
+          updated_at: string
+          vet_id: string
+        }
+        Insert: {
+          ai_objective?: string | null
+          ai_subjective?: string | null
+          ai_suggested_assessment?: string | null
+          ai_suggested_plan?: string | null
+          applied_at?: string | null
+          audio_duration_seconds?: number | null
+          audio_url?: string | null
+          created_at?: string
+          extracted_observations?: Json | null
+          extracted_symptoms?: Json | null
+          extracted_vitals?: Json | null
+          id?: string
+          model_used?: string | null
+          pet_id: string
+          processing_time_ms?: number | null
+          soap_note_id?: string | null
+          status?: string
+          transcription?: string | null
+          transcription_confidence?: number | null
+          updated_at?: string
+          vet_id: string
+        }
+        Update: {
+          ai_objective?: string | null
+          ai_subjective?: string | null
+          ai_suggested_assessment?: string | null
+          ai_suggested_plan?: string | null
+          applied_at?: string | null
+          audio_duration_seconds?: number | null
+          audio_url?: string | null
+          created_at?: string
+          extracted_observations?: Json | null
+          extracted_symptoms?: Json | null
+          extracted_vitals?: Json | null
+          id?: string
+          model_used?: string | null
+          pet_id?: string
+          processing_time_ms?: number | null
+          soap_note_id?: string | null
+          status?: string
+          transcription?: string | null
+          transcription_confidence?: number | null
+          updated_at?: string
+          vet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_soap_drafts_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "pet_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_soap_drafts_soap_note_id_fkey"
+            columns: ["soap_note_id"]
+            isOneToOne: false
+            referencedRelation: "pet_soap_notes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_soap_drafts_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_soap_drafts_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_logs: {
         Row: {
           action: string
@@ -485,6 +586,143 @@ export type Database = {
             columns: ["merchant_id"]
             isOneToOne: false
             referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      diagnostic_ai_analyses: {
+        Row: {
+          ai_anomalies_detected: Json | null
+          ai_confidence_score: number | null
+          ai_findings: Json
+          ai_measurements: Json | null
+          ai_recommendations: string | null
+          ai_summary: string | null
+          analysis_type: string
+          anomaly_regions: Json | null
+          created_at: string
+          external_imaging_id: string | null
+          external_lab_id: string | null
+          id: string
+          image_urls: string[] | null
+          imaging_record_id: string | null
+          lab_result_id: string | null
+          model_used: string | null
+          pet_id: string
+          processing_time_ms: number | null
+          reviewed_at: string | null
+          severity_assessment: string | null
+          status: string
+          updated_at: string
+          vet_additional_findings: string | null
+          vet_agrees: boolean | null
+          vet_corrections: string | null
+          vet_id: string
+        }
+        Insert: {
+          ai_anomalies_detected?: Json | null
+          ai_confidence_score?: number | null
+          ai_findings?: Json
+          ai_measurements?: Json | null
+          ai_recommendations?: string | null
+          ai_summary?: string | null
+          analysis_type: string
+          anomaly_regions?: Json | null
+          created_at?: string
+          external_imaging_id?: string | null
+          external_lab_id?: string | null
+          id?: string
+          image_urls?: string[] | null
+          imaging_record_id?: string | null
+          lab_result_id?: string | null
+          model_used?: string | null
+          pet_id: string
+          processing_time_ms?: number | null
+          reviewed_at?: string | null
+          severity_assessment?: string | null
+          status?: string
+          updated_at?: string
+          vet_additional_findings?: string | null
+          vet_agrees?: boolean | null
+          vet_corrections?: string | null
+          vet_id: string
+        }
+        Update: {
+          ai_anomalies_detected?: Json | null
+          ai_confidence_score?: number | null
+          ai_findings?: Json
+          ai_measurements?: Json | null
+          ai_recommendations?: string | null
+          ai_summary?: string | null
+          analysis_type?: string
+          anomaly_regions?: Json | null
+          created_at?: string
+          external_imaging_id?: string | null
+          external_lab_id?: string | null
+          id?: string
+          image_urls?: string[] | null
+          imaging_record_id?: string | null
+          lab_result_id?: string | null
+          model_used?: string | null
+          pet_id?: string
+          processing_time_ms?: number | null
+          reviewed_at?: string | null
+          severity_assessment?: string | null
+          status?: string
+          updated_at?: string
+          vet_additional_findings?: string | null
+          vet_agrees?: boolean | null
+          vet_corrections?: string | null
+          vet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "diagnostic_ai_analyses_external_imaging_id_fkey"
+            columns: ["external_imaging_id"]
+            isOneToOne: false
+            referencedRelation: "external_imaging_results"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "diagnostic_ai_analyses_external_lab_id_fkey"
+            columns: ["external_lab_id"]
+            isOneToOne: false
+            referencedRelation: "external_lab_results"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "diagnostic_ai_analyses_imaging_record_id_fkey"
+            columns: ["imaging_record_id"]
+            isOneToOne: false
+            referencedRelation: "pet_imaging_records"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "diagnostic_ai_analyses_lab_result_id_fkey"
+            columns: ["lab_result_id"]
+            isOneToOne: false
+            referencedRelation: "pet_lab_results"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "diagnostic_ai_analyses_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "pet_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "diagnostic_ai_analyses_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "diagnostic_ai_analyses_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets_public"
             referencedColumns: ["id"]
           },
         ]
@@ -5392,6 +5630,216 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      symptom_library: {
+        Row: {
+          category: string
+          created_at: string
+          follow_up_questions: Json | null
+          id: string
+          is_active: boolean | null
+          species_applicable: string[] | null
+          symptom_description: string | null
+          symptom_name: string
+          urgency_weight: number | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          follow_up_questions?: Json | null
+          id?: string
+          is_active?: boolean | null
+          species_applicable?: string[] | null
+          symptom_description?: string | null
+          symptom_name: string
+          urgency_weight?: number | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          follow_up_questions?: Json | null
+          id?: string
+          is_active?: boolean | null
+          species_applicable?: string[] | null
+          symptom_description?: string | null
+          symptom_name?: string
+          urgency_weight?: number | null
+        }
+        Relationships: []
+      }
+      symptom_triage_assessments: {
+        Row: {
+          additional_notes: string | null
+          affected_body_areas: Json | null
+          ai_differential_considerations: Json | null
+          ai_recommended_diagnostics: Json | null
+          ai_recommended_questions: Json | null
+          ai_summary: string | null
+          ai_triage_reasoning: string | null
+          ai_urgency_level: string | null
+          ai_urgency_score: number | null
+          appointment_id: string | null
+          bathroom_habits: string | null
+          behavioral_changes: Json | null
+          chief_complaint: string
+          created_at: string
+          current_medications: string | null
+          drinking_status: string | null
+          eating_status: string | null
+          energy_level: string | null
+          id: string
+          known_allergies: string | null
+          model_used: string | null
+          owner_id: string
+          pet_id: string
+          photo_urls: string[] | null
+          processing_time_ms: number | null
+          recent_changes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          symptom_duration: string | null
+          symptom_onset: string | null
+          symptom_progression: string | null
+          symptoms: Json
+          updated_at: string
+          vet_id: string | null
+          vet_notes: string | null
+        }
+        Insert: {
+          additional_notes?: string | null
+          affected_body_areas?: Json | null
+          ai_differential_considerations?: Json | null
+          ai_recommended_diagnostics?: Json | null
+          ai_recommended_questions?: Json | null
+          ai_summary?: string | null
+          ai_triage_reasoning?: string | null
+          ai_urgency_level?: string | null
+          ai_urgency_score?: number | null
+          appointment_id?: string | null
+          bathroom_habits?: string | null
+          behavioral_changes?: Json | null
+          chief_complaint: string
+          created_at?: string
+          current_medications?: string | null
+          drinking_status?: string | null
+          eating_status?: string | null
+          energy_level?: string | null
+          id?: string
+          known_allergies?: string | null
+          model_used?: string | null
+          owner_id: string
+          pet_id: string
+          photo_urls?: string[] | null
+          processing_time_ms?: number | null
+          recent_changes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          symptom_duration?: string | null
+          symptom_onset?: string | null
+          symptom_progression?: string | null
+          symptoms?: Json
+          updated_at?: string
+          vet_id?: string | null
+          vet_notes?: string | null
+        }
+        Update: {
+          additional_notes?: string | null
+          affected_body_areas?: Json | null
+          ai_differential_considerations?: Json | null
+          ai_recommended_diagnostics?: Json | null
+          ai_recommended_questions?: Json | null
+          ai_summary?: string | null
+          ai_triage_reasoning?: string | null
+          ai_urgency_level?: string | null
+          ai_urgency_score?: number | null
+          appointment_id?: string | null
+          bathroom_habits?: string | null
+          behavioral_changes?: Json | null
+          chief_complaint?: string
+          created_at?: string
+          current_medications?: string | null
+          drinking_status?: string | null
+          eating_status?: string | null
+          energy_level?: string | null
+          id?: string
+          known_allergies?: string | null
+          model_used?: string | null
+          owner_id?: string
+          pet_id?: string
+          photo_urls?: string[] | null
+          processing_time_ms?: number | null
+          recent_changes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          symptom_duration?: string | null
+          symptom_onset?: string | null
+          symptom_progression?: string | null
+          symptoms?: Json
+          updated_at?: string
+          vet_id?: string | null
+          vet_notes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "symptom_triage_assessments_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_customer_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "symptom_triage_assessments_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "symptom_triage_assessments_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "reviewer_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "symptom_triage_assessments_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "pet_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "symptom_triage_assessments_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "partner_vets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "symptom_triage_assessments_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "partner_vets_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "symptom_triage_assessments_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "symptom_triage_assessments_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets_public"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       text_campaigns: {
         Row: {

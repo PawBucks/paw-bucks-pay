@@ -290,3 +290,21 @@ verify_jwt = false
 
 [functions.send-invoice-paid-notification]
 verify_jwt = false
+
+[functions.send-compliance-reminder]
+verify_jwt = false
+
+[functions.pms-sync-webhook]
+verify_jwt = false
+
+[functions.fetch-external-labs]
+verify_jwt = true
+
+[functions.ai-transcribe-soap]
+verify_jwt = true
+
+[functions.ai-symptom-triage]
+verify_jwt = true
+
+[functions.ai-diagnostic-overlay]
+verify_jwt = true
