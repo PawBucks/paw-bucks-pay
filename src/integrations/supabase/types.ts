@@ -5329,6 +5329,84 @@ export type Database = {
         }
         Relationships: []
       }
+      vet_care_shares: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          is_active: boolean | null
+          merchant_id: string
+          notes: string | null
+          pet_id: string
+          share_type: string
+          shared_data: Json | null
+          updated_at: string
+          vet_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          merchant_id: string
+          notes?: string | null
+          pet_id: string
+          share_type: string
+          shared_data?: Json | null
+          updated_at?: string
+          vet_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          merchant_id?: string
+          notes?: string | null
+          pet_id?: string
+          share_type?: string
+          shared_data?: Json | null
+          updated_at?: string
+          vet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vet_care_shares_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vet_care_shares_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vet_care_shares_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "pet_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vet_care_shares_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vet_care_shares_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vet_consent_templates: {
         Row: {
           content: string
@@ -5440,6 +5518,78 @@ export type Database = {
           },
         ]
       }
+      vet_lost_pet_alerts: {
+        Row: {
+          acknowledged_at: string | null
+          alert_type: string
+          created_at: string
+          id: string
+          is_acknowledged: boolean | null
+          lost_pet_post_id: string
+          notes: string | null
+          pet_id: string | null
+          vet_id: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          alert_type?: string
+          created_at?: string
+          id?: string
+          is_acknowledged?: boolean | null
+          lost_pet_post_id: string
+          notes?: string | null
+          pet_id?: string | null
+          vet_id: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          alert_type?: string
+          created_at?: string
+          id?: string
+          is_acknowledged?: boolean | null
+          lost_pet_post_id?: string
+          notes?: string | null
+          pet_id?: string | null
+          vet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vet_lost_pet_alerts_lost_pet_post_id_fkey"
+            columns: ["lost_pet_post_id"]
+            isOneToOne: false
+            referencedRelation: "lost_pet_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vet_lost_pet_alerts_lost_pet_post_id_fkey"
+            columns: ["lost_pet_post_id"]
+            isOneToOne: false
+            referencedRelation: "lost_pet_posts_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vet_lost_pet_alerts_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "pet_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vet_lost_pet_alerts_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vet_lost_pet_alerts_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vet_message_attachments: {
         Row: {
           created_at: string | null
@@ -5529,6 +5679,66 @@ export type Database = {
           },
           {
             foreignKeyName: "vet_messages_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vet_wellness_plans: {
+        Row: {
+          age_category: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          pet_type: string
+          price_pawbucks: number
+          price_usd: number
+          services: Json
+          updated_at: string
+          vet_id: string
+        }
+        Insert: {
+          age_category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          pet_type: string
+          price_pawbucks: number
+          price_usd: number
+          services?: Json
+          updated_at?: string
+          vet_id: string
+        }
+        Update: {
+          age_category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          pet_type?: string
+          price_pawbucks?: number
+          price_usd?: number
+          services?: Json
+          updated_at?: string
+          vet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vet_wellness_plans_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vet_wellness_plans_vet_id_fkey"
             columns: ["vet_id"]
             isOneToOne: false
             referencedRelation: "partner_vets_public"
@@ -5712,6 +5922,107 @@ export type Database = {
           processed?: boolean | null
         }
         Relationships: []
+      }
+      wellness_plan_purchases: {
+        Row: {
+          amount_pawbucks: number | null
+          amount_usd: number | null
+          created_at: string
+          id: string
+          payment_method: string
+          pet_id: string
+          plan_id: string
+          purchased_at: string
+          services_used: Json | null
+          status: string
+          updated_at: string
+          user_id: string
+          valid_until: string | null
+          vet_id: string
+        }
+        Insert: {
+          amount_pawbucks?: number | null
+          amount_usd?: number | null
+          created_at?: string
+          id?: string
+          payment_method: string
+          pet_id: string
+          plan_id: string
+          purchased_at?: string
+          services_used?: Json | null
+          status?: string
+          updated_at?: string
+          user_id: string
+          valid_until?: string | null
+          vet_id: string
+        }
+        Update: {
+          amount_pawbucks?: number | null
+          amount_usd?: number | null
+          created_at?: string
+          id?: string
+          payment_method?: string
+          pet_id?: string
+          plan_id?: string
+          purchased_at?: string
+          services_used?: Json | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          valid_until?: string | null
+          vet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wellness_plan_purchases_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "pet_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wellness_plan_purchases_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "vet_wellness_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wellness_plan_purchases_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_customer_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wellness_plan_purchases_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wellness_plan_purchases_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "reviewer_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wellness_plan_purchases_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wellness_plan_purchases_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets_public"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
