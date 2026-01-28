@@ -308,3 +308,9 @@ verify_jwt = true
 
 [functions.ai-diagnostic-overlay]
 verify_jwt = true
+
+[functions.create-wellness-plan-subscription]
+verify_jwt = true
+
+[functions.process-insurance-claim]
+verify_jwt = true

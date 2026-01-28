@@ -17,6 +17,7 @@ import {
   LostPetAlertsWidget,
   DataBridgeTab,
   AIClinicalAssistant,
+  FinancialFrictionTab,
 } from "@/components/vet-portal";
 import {
   Stethoscope,
@@ -32,6 +33,7 @@ import {
   AlertTriangle,
   ArrowRightLeft,
   Sparkles,
+  Wallet,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -252,6 +254,10 @@ export default function VetDashboard() {
               <ArrowRightLeft className="w-4 h-4" />
               <span className="hidden sm:inline">Bridge</span>
             </TabsTrigger>
+            <TabsTrigger value="financial" className="flex items-center gap-1">
+              <Wallet className="w-4 h-4" />
+              <span className="hidden sm:inline">Financial</span>
+            </TabsTrigger>
             <TabsTrigger value="wellness" className="flex items-center gap-1">
               <Heart className="w-4 h-4" />
               <span className="hidden sm:inline">Wellness</span>
@@ -292,6 +298,10 @@ export default function VetDashboard() {
 
           <TabsContent value="data-bridge">
             <DataBridgeTab vetId={vetInfo.id} />
+          </TabsContent>
+
+          <TabsContent value="financial">
+            <FinancialFrictionTab vetId={vetInfo.id} />
           </TabsContent>
 
           <TabsContent value="wellness">
