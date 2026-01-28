@@ -1226,6 +1226,122 @@ export type Database = {
           },
         ]
       }
+      insurance_claims: {
+        Row: {
+          attachments: string[] | null
+          claim_data: Json | null
+          claim_date: string | null
+          claim_number: string | null
+          copay_amount: number | null
+          covered_amount: number | null
+          created_at: string | null
+          deductible_applied: number | null
+          denial_reason: string | null
+          diagnosis_codes: string[] | null
+          id: string
+          invoice_id: string | null
+          notes: string | null
+          owner_responsibility: number | null
+          paid_at: string | null
+          payment_reference: string | null
+          policy_id: string
+          procedure_codes: string[] | null
+          processed_at: string | null
+          service_date: string
+          status: string | null
+          submission_method: string | null
+          submitted_at: string | null
+          total_amount: number
+          updated_at: string | null
+          vet_id: string
+        }
+        Insert: {
+          attachments?: string[] | null
+          claim_data?: Json | null
+          claim_date?: string | null
+          claim_number?: string | null
+          copay_amount?: number | null
+          covered_amount?: number | null
+          created_at?: string | null
+          deductible_applied?: number | null
+          denial_reason?: string | null
+          diagnosis_codes?: string[] | null
+          id?: string
+          invoice_id?: string | null
+          notes?: string | null
+          owner_responsibility?: number | null
+          paid_at?: string | null
+          payment_reference?: string | null
+          policy_id: string
+          procedure_codes?: string[] | null
+          processed_at?: string | null
+          service_date: string
+          status?: string | null
+          submission_method?: string | null
+          submitted_at?: string | null
+          total_amount: number
+          updated_at?: string | null
+          vet_id: string
+        }
+        Update: {
+          attachments?: string[] | null
+          claim_data?: Json | null
+          claim_date?: string | null
+          claim_number?: string | null
+          copay_amount?: number | null
+          covered_amount?: number | null
+          created_at?: string | null
+          deductible_applied?: number | null
+          denial_reason?: string | null
+          diagnosis_codes?: string[] | null
+          id?: string
+          invoice_id?: string | null
+          notes?: string | null
+          owner_responsibility?: number | null
+          paid_at?: string | null
+          payment_reference?: string | null
+          policy_id?: string
+          procedure_codes?: string[] | null
+          processed_at?: string | null
+          service_date?: string
+          status?: string | null
+          submission_method?: string | null
+          submitted_at?: string | null
+          total_amount?: number
+          updated_at?: string | null
+          vet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "insurance_claims_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "insurance_claims_policy_id_fkey"
+            columns: ["policy_id"]
+            isOneToOne: false
+            referencedRelation: "pet_insurance_policies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "insurance_claims_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "insurance_claims_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invoice_activity: {
         Row: {
           action: string
@@ -3945,6 +4061,90 @@ export type Database = {
           },
         ]
       }
+      pet_insurance_policies: {
+        Row: {
+          annual_limit: number | null
+          annual_used: number | null
+          copay_percentage: number | null
+          coverage_type: string | null
+          created_at: string | null
+          deductible_amount: number | null
+          deductible_met: number | null
+          effective_date: string
+          expiration_date: string | null
+          group_number: string | null
+          id: string
+          is_active: boolean | null
+          member_id: string | null
+          pet_id: string
+          policy_holder_email: string | null
+          policy_holder_name: string | null
+          policy_holder_phone: string | null
+          policy_number: string
+          provider_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          annual_limit?: number | null
+          annual_used?: number | null
+          copay_percentage?: number | null
+          coverage_type?: string | null
+          created_at?: string | null
+          deductible_amount?: number | null
+          deductible_met?: number | null
+          effective_date: string
+          expiration_date?: string | null
+          group_number?: string | null
+          id?: string
+          is_active?: boolean | null
+          member_id?: string | null
+          pet_id: string
+          policy_holder_email?: string | null
+          policy_holder_name?: string | null
+          policy_holder_phone?: string | null
+          policy_number: string
+          provider_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          annual_limit?: number | null
+          annual_used?: number | null
+          copay_percentage?: number | null
+          coverage_type?: string | null
+          created_at?: string | null
+          deductible_amount?: number | null
+          deductible_met?: number | null
+          effective_date?: string
+          expiration_date?: string | null
+          group_number?: string | null
+          id?: string
+          is_active?: boolean | null
+          member_id?: string | null
+          pet_id?: string
+          policy_holder_email?: string | null
+          policy_holder_name?: string | null
+          policy_holder_phone?: string | null
+          policy_number?: string
+          provider_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pet_insurance_policies_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "pet_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_insurance_policies_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "vet_insurance_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pet_lab_results: {
         Row: {
           abnormal_flags: string[] | null
@@ -6277,6 +6477,54 @@ export type Database = {
           },
         ]
       }
+      vet_insurance_providers: {
+        Row: {
+          api_endpoint: string | null
+          average_processing_days: number | null
+          claim_form_url: string | null
+          claim_submission_email: string | null
+          code: string
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          phone: string | null
+          supported_species: string[] | null
+          updated_at: string | null
+          website: string | null
+        }
+        Insert: {
+          api_endpoint?: string | null
+          average_processing_days?: number | null
+          claim_form_url?: string | null
+          claim_submission_email?: string | null
+          code: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          phone?: string | null
+          supported_species?: string[] | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Update: {
+          api_endpoint?: string | null
+          average_processing_days?: number | null
+          claim_form_url?: string | null
+          claim_submission_email?: string | null
+          code?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          phone?: string | null
+          supported_species?: string[] | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
       vet_lab_integrations: {
         Row: {
           account_id: string | null
@@ -6640,50 +6888,159 @@ export type Database = {
           },
         ]
       }
+      vet_wellness_plan_services: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          frequency: string | null
+          id: string
+          plan_id: string
+          quantity_included: number | null
+          retail_value: number
+          service_category: string | null
+          service_name: string
+          sort_order: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          frequency?: string | null
+          id?: string
+          plan_id: string
+          quantity_included?: number | null
+          retail_value: number
+          service_category?: string | null
+          service_name: string
+          sort_order?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          frequency?: string | null
+          id?: string
+          plan_id?: string
+          quantity_included?: number | null
+          retail_value?: number
+          service_category?: string | null
+          service_name?: string
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vet_wellness_plan_services_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "vet_wellness_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vet_wellness_plans: {
         Row: {
           age_category: string | null
+          annual_price: number | null
+          billing_interval: string | null
+          cancellation_policy: string | null
+          commitment_months: number | null
           created_at: string
+          current_subscribers: number | null
           description: string | null
           id: string
           is_active: boolean | null
+          is_featured: boolean | null
+          max_subscribers: number | null
+          merchant_id: string | null
+          monthly_price: number | null
           name: string
           pet_type: string
           price_pawbucks: number
           price_usd: number
+          savings_percentage: number | null
           services: Json
+          setup_fee: number | null
+          species: string[] | null
+          stripe_price_id: string | null
+          stripe_product_id: string | null
+          terms_conditions: string | null
+          total_value: number | null
           updated_at: string
           vet_id: string
         }
         Insert: {
           age_category?: string | null
+          annual_price?: number | null
+          billing_interval?: string | null
+          cancellation_policy?: string | null
+          commitment_months?: number | null
           created_at?: string
+          current_subscribers?: number | null
           description?: string | null
           id?: string
           is_active?: boolean | null
+          is_featured?: boolean | null
+          max_subscribers?: number | null
+          merchant_id?: string | null
+          monthly_price?: number | null
           name: string
           pet_type: string
           price_pawbucks: number
           price_usd: number
+          savings_percentage?: number | null
           services?: Json
+          setup_fee?: number | null
+          species?: string[] | null
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+          terms_conditions?: string | null
+          total_value?: number | null
           updated_at?: string
           vet_id: string
         }
         Update: {
           age_category?: string | null
+          annual_price?: number | null
+          billing_interval?: string | null
+          cancellation_policy?: string | null
+          commitment_months?: number | null
           created_at?: string
+          current_subscribers?: number | null
           description?: string | null
           id?: string
           is_active?: boolean | null
+          is_featured?: boolean | null
+          max_subscribers?: number | null
+          merchant_id?: string | null
+          monthly_price?: number | null
           name?: string
           pet_type?: string
           price_pawbucks?: number
           price_usd?: number
+          savings_percentage?: number | null
           services?: Json
+          setup_fee?: number | null
+          species?: string[] | null
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+          terms_conditions?: string | null
+          total_value?: number | null
           updated_at?: string
           vet_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "vet_wellness_plans_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vet_wellness_plans_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "vet_wellness_plans_vet_id_fkey"
             columns: ["vet_id"]
@@ -6877,6 +7234,56 @@ export type Database = {
         }
         Relationships: []
       }
+      wellness_plan_payments: {
+        Row: {
+          amount: number
+          created_at: string | null
+          failure_reason: string | null
+          id: string
+          pawbucks_earned: number | null
+          pawbucks_used: number | null
+          payment_date: string | null
+          status: string | null
+          stripe_invoice_id: string | null
+          stripe_payment_intent_id: string | null
+          subscription_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          failure_reason?: string | null
+          id?: string
+          pawbucks_earned?: number | null
+          pawbucks_used?: number | null
+          payment_date?: string | null
+          status?: string | null
+          stripe_invoice_id?: string | null
+          stripe_payment_intent_id?: string | null
+          subscription_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          failure_reason?: string | null
+          id?: string
+          pawbucks_earned?: number | null
+          pawbucks_used?: number | null
+          payment_date?: string | null
+          status?: string | null
+          stripe_invoice_id?: string | null
+          stripe_payment_intent_id?: string | null
+          subscription_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wellness_plan_payments_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "wellness_plan_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wellness_plan_purchases: {
         Row: {
           amount_pawbucks: number | null
@@ -6974,6 +7381,87 @@ export type Database = {
             columns: ["vet_id"]
             isOneToOne: false
             referencedRelation: "partner_vets_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wellness_plan_subscriptions: {
+        Row: {
+          auto_renew: boolean | null
+          cancellation_date: string | null
+          cancellation_reason: string | null
+          created_at: string | null
+          end_date: string | null
+          id: string
+          monthly_amount: number
+          next_billing_date: string | null
+          pet_id: string
+          plan_id: string
+          services_used: Json | null
+          start_date: string | null
+          status: string | null
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          total_paid: number | null
+          total_rewards_earned: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          auto_renew?: boolean | null
+          cancellation_date?: string | null
+          cancellation_reason?: string | null
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          monthly_amount: number
+          next_billing_date?: string | null
+          pet_id: string
+          plan_id: string
+          services_used?: Json | null
+          start_date?: string | null
+          status?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          total_paid?: number | null
+          total_rewards_earned?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          auto_renew?: boolean | null
+          cancellation_date?: string | null
+          cancellation_reason?: string | null
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          monthly_amount?: number
+          next_billing_date?: string | null
+          pet_id?: string
+          plan_id?: string
+          services_used?: Json | null
+          start_date?: string | null
+          status?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          total_paid?: number | null
+          total_rewards_earned?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wellness_plan_subscriptions_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "pet_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wellness_plan_subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "vet_wellness_plans"
             referencedColumns: ["id"]
           },
         ]
@@ -7259,6 +7747,7 @@ export type Database = {
         Args: { target_date?: string }
         Returns: undefined
       }
+      generate_claim_number: { Args: never; Returns: string }
       generate_invoice_number: {
         Args: { p_merchant_id: string }
         Returns: string

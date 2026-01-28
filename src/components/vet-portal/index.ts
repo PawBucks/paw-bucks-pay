@@ -1,4 +1,7 @@
 export { EMRDashboard } from "./EMRDashboard";
+export { WellnessPlanArchitect } from "./WellnessPlanArchitect";
+export { InsuranceClaimSplitter } from "./InsuranceClaimSplitter";
+export { FinancialFrictionTab } from "./FinancialFrictionTab";
 export { PatientEMRView } from "./PatientEMRView";
 export { SOAPNoteEditor } from "./SOAPNoteEditor";
 export { SOAPNotesList } from "./SOAPNotesList";
