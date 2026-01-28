@@ -11,6 +11,10 @@ import {
   ComplianceRemindersTab,
   PrescriptionRefillsTab,
   SecureMessagingTab,
+  CollaborativeCareTab,
+  MerchantDataSyncTab,
+  WellnessPlansTab,
+  LostPetAlertsWidget,
 } from "@/components/vet-portal";
 import {
   Stethoscope,
@@ -20,6 +24,10 @@ import {
   FileSignature,
   Bell,
   Pill,
+  Share2,
+  Activity,
+  Heart,
+  AlertTriangle,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -144,6 +152,9 @@ export default function VetDashboard() {
           </p>
         </div>
 
+        {/* Lost Pet Alerts - Always visible at top */}
+        <LostPetAlertsWidget vetId={vetInfo.id} />
+
         <div className="grid gap-6 md:grid-cols-4">
           <Card className="p-6">
             <div className="flex items-center gap-4">
@@ -195,12 +206,12 @@ export default function VetDashboard() {
         </div>
 
         <Tabs defaultValue="emr" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-6">
-            <TabsTrigger value="emr" className="flex items-center gap-2">
+          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8">
+            <TabsTrigger value="emr" className="flex items-center gap-1">
               <FileText className="w-4 h-4" />
               <span className="hidden sm:inline">EMR</span>
             </TabsTrigger>
-            <TabsTrigger value="messages" className="flex items-center gap-2">
+            <TabsTrigger value="messages" className="flex items-center gap-1">
               <MessageSquare className="w-4 h-4" />
               <span className="hidden sm:inline">Messages</span>
               {stats.unreadMessages > 0 && (
@@ -209,22 +220,29 @@ export default function VetDashboard() {
                 </span>
               )}
             </TabsTrigger>
-            <TabsTrigger value="refills" className="flex items-center gap-2">
+            <TabsTrigger value="refills" className="flex items-center gap-1">
               <Pill className="w-4 h-4" />
               <span className="hidden sm:inline">Refills</span>
-              {stats.pendingRefills > 0 && (
-                <span className="bg-yellow-500 text-white text-xs rounded-full px-1.5 py-0.5 ml-1">
-                  {stats.pendingRefills}
-                </span>
-              )}
             </TabsTrigger>
-            <TabsTrigger value="reminders" className="flex items-center gap-2">
+            <TabsTrigger value="reminders" className="flex items-center gap-1">
               <Bell className="w-4 h-4" />
               <span className="hidden sm:inline">Reminders</span>
             </TabsTrigger>
-            <TabsTrigger value="consent" className="flex items-center gap-2">
+            <TabsTrigger value="consent" className="flex items-center gap-1">
               <FileSignature className="w-4 h-4" />
               <span className="hidden sm:inline">Consent</span>
+            </TabsTrigger>
+            <TabsTrigger value="care-network" className="flex items-center gap-1">
+              <Share2 className="w-4 h-4" />
+              <span className="hidden sm:inline">Network</span>
+            </TabsTrigger>
+            <TabsTrigger value="data-sync" className="flex items-center gap-1">
+              <Activity className="w-4 h-4" />
+              <span className="hidden sm:inline">Sync</span>
+            </TabsTrigger>
+            <TabsTrigger value="wellness" className="flex items-center gap-1">
+              <Heart className="w-4 h-4" />
+              <span className="hidden sm:inline">Wellness</span>
             </TabsTrigger>
           </TabsList>
 
@@ -246,6 +264,18 @@ export default function VetDashboard() {
 
           <TabsContent value="consent">
             <ConsentManagement vetId={vetInfo.id} />
+          </TabsContent>
+
+          <TabsContent value="care-network">
+            <CollaborativeCareTab vetId={vetInfo.id} />
+          </TabsContent>
+
+          <TabsContent value="data-sync">
+            <MerchantDataSyncTab vetId={vetInfo.id} />
+          </TabsContent>
+
+          <TabsContent value="wellness">
+            <WellnessPlansTab vetId={vetInfo.id} />
           </TabsContent>
         </Tabs>
       </div>

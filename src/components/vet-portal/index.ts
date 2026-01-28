@@ -11,4 +11,8 @@ export { ConsentManagement } from "./ConsentManagement";
 export { ComplianceRemindersTab } from "./ComplianceRemindersTab";
 export { PrescriptionRefillsTab } from "./PrescriptionRefillsTab";
 export { SecureMessagingTab } from "./SecureMessagingTab";
+export { CollaborativeCareTab } from "./CollaborativeCareTab";
+export { MerchantDataSyncTab } from "./MerchantDataSyncTab";
+export { WellnessPlansTab } from "./WellnessPlansTab";
+export { LostPetAlertsWidget } from "./LostPetAlertsWidget";
 export * from "./types";
