@@ -75,11 +75,11 @@ export const DiagnosticOverlayTool = ({ vetId }: DiagnosticOverlayToolProps) => 
     queryFn: async () => {
       const { data, error } = await supabase
         .from("pet_profiles")
-        .select("id, name, type, breed, birthday") as { data: any[] | null; error: any }
+        .select("id, name, type, breed, birthday")
         .order("name");
 
       if (error) throw error;
-      return data || [];
+      return (data || []) as any[];
     },
   });
 

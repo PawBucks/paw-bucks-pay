@@ -57,11 +57,11 @@ export const AutoSOAPGenerator = ({ vetId }: AutoSOAPGeneratorProps) => {
           type,
           breed,
           birthday
-        `) as { data: any[] | null; error: any }
+        `)
         .order("name");
 
       if (error) throw error;
-      return data || [];
+      return (data || []) as any[];
     },
   });
 

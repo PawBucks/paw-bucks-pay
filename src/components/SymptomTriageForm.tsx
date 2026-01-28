@@ -73,12 +73,12 @@ export const SymptomTriageForm = ({ petId, onComplete }: SymptomTriageFormProps)
       if (!user) return [];
       const { data, error } = await supabase
         .from("pet_profiles")
-        .select("id, name, type, breed, photo_url") as { data: any[] | null; error: any }
+        .select("id, name, type, breed, photo_url")
         .eq("user_id", user.id)
         .order("name");
 
       if (error) throw error;
-      return data || [];
+      return (data || []) as any[];
     },
     enabled: !!user,
   });
