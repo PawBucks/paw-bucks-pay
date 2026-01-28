@@ -327,6 +327,117 @@ export type Database = {
         }
         Relationships: []
       }
+      compliance_reminder_logs: {
+        Row: {
+          channel: string
+          error_message: string | null
+          id: string
+          reminder_id: string
+          sent_at: string | null
+          status: string
+        }
+        Insert: {
+          channel: string
+          error_message?: string | null
+          id?: string
+          reminder_id: string
+          sent_at?: string | null
+          status: string
+        }
+        Update: {
+          channel?: string
+          error_message?: string | null
+          id?: string
+          reminder_id?: string
+          sent_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compliance_reminder_logs_reminder_id_fkey"
+            columns: ["reminder_id"]
+            isOneToOne: false
+            referencedRelation: "compliance_reminders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      compliance_reminders: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          due_date: string
+          id: string
+          is_active: boolean | null
+          last_sent_at: string | null
+          next_reminder_at: string | null
+          pet_id: string
+          push_enabled: boolean | null
+          recurrence_months: number | null
+          reminder_type: string
+          sms_enabled: boolean | null
+          title: string
+          updated_at: string | null
+          vet_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          due_date: string
+          id?: string
+          is_active?: boolean | null
+          last_sent_at?: string | null
+          next_reminder_at?: string | null
+          pet_id: string
+          push_enabled?: boolean | null
+          recurrence_months?: number | null
+          reminder_type: string
+          sms_enabled?: boolean | null
+          title: string
+          updated_at?: string | null
+          vet_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          due_date?: string
+          id?: string
+          is_active?: boolean | null
+          last_sent_at?: string | null
+          next_reminder_at?: string | null
+          pet_id?: string
+          push_enabled?: boolean | null
+          recurrence_months?: number | null
+          reminder_type?: string
+          sms_enabled?: boolean | null
+          title?: string
+          updated_at?: string | null
+          vet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compliance_reminders_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "pet_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compliance_reminders_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compliance_reminders_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       consultation_bookings: {
         Row: {
           booking_date: string
@@ -4152,6 +4263,85 @@ export type Database = {
           },
         ]
       }
+      prescription_refill_requests: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string | null
+          current_dosage: string | null
+          fulfillment_notes: string | null
+          fulfillment_type: string | null
+          id: string
+          medication_name: string
+          pet_id: string
+          quantity_requested: number | null
+          reason: string | null
+          status: string
+          updated_at: string | null
+          user_id: string
+          vet_id: string
+          vet_notes: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string | null
+          current_dosage?: string | null
+          fulfillment_notes?: string | null
+          fulfillment_type?: string | null
+          id?: string
+          medication_name: string
+          pet_id: string
+          quantity_requested?: number | null
+          reason?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id: string
+          vet_id: string
+          vet_notes?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string | null
+          current_dosage?: string | null
+          fulfillment_notes?: string | null
+          fulfillment_type?: string | null
+          id?: string
+          medication_name?: string
+          pet_id?: string
+          quantity_requested?: number | null
+          reason?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id?: string
+          vet_id?: string
+          vet_notes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prescription_refill_requests_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "pet_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prescription_refill_requests_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prescription_refill_requests_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           auto_redeem_pawbucks: boolean
@@ -5250,12 +5440,52 @@ export type Database = {
           },
         ]
       }
+      vet_message_attachments: {
+        Row: {
+          created_at: string | null
+          file_name: string | null
+          file_size: number | null
+          file_type: string
+          file_url: string
+          id: string
+          message_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          file_name?: string | null
+          file_size?: number | null
+          file_type: string
+          file_url: string
+          id?: string
+          message_id: string
+        }
+        Update: {
+          created_at?: string | null
+          file_name?: string | null
+          file_size?: number | null
+          file_type?: string
+          file_url?: string
+          id?: string
+          message_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vet_message_attachments_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "vet_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vet_messages: {
         Row: {
           created_at: string
           id: string
+          is_read: boolean | null
           message: string
           pet_id: string | null
+          read_at: string | null
           sender_type: Database["public"]["Enums"]["message_sender_type"]
           user_id: string
           vet_id: string
@@ -5263,8 +5493,10 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          is_read?: boolean | null
           message: string
           pet_id?: string | null
+          read_at?: string | null
           sender_type: Database["public"]["Enums"]["message_sender_type"]
           user_id: string
           vet_id: string
@@ -5272,8 +5504,10 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          is_read?: boolean | null
           message?: string
           pet_id?: string | null
+          read_at?: string | null
           sender_type?: Database["public"]["Enums"]["message_sender_type"]
           user_id?: string
           vet_id?: string

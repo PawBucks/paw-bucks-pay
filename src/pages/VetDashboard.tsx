@@ -5,9 +5,22 @@ import { Header } from "@/components/Header";
 import { SEO } from "@/components/SEO";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { VetMessagesPanel } from "@/components/VetMessagesPanel";
-import { EMRDashboard, ConsentManagement } from "@/components/vet-portal";
-import { Stethoscope, Users, MessageSquare, FileText, FileSignature } from "lucide-react";
+import {
+  EMRDashboard,
+  ConsentManagement,
+  ComplianceRemindersTab,
+  PrescriptionRefillsTab,
+  SecureMessagingTab,
+} from "@/components/vet-portal";
+import {
+  Stethoscope,
+  Users,
+  MessageSquare,
+  FileText,
+  FileSignature,
+  Bell,
+  Pill,
+} from "lucide-react";
 import { toast } from "sonner";
 
 type VetInfo = {
@@ -23,6 +36,7 @@ export default function VetDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState({
     totalPatients: 0,
+    pendingRefills: 0,
     unreadMessages: 0,
   });
 
@@ -69,14 +83,31 @@ export default function VetDashboard() {
 
   const loadStats = async (vetId: string) => {
     try {
+      // Get unique patient count
       const { count: patientCount } = await supabase
         .from("vet_messages")
         .select("user_id", { count: "exact", head: true })
         .eq("vet_id", vetId);
 
+      // Get pending refill requests
+      const { count: refillCount } = await supabase
+        .from("prescription_refill_requests")
+        .select("id", { count: "exact", head: true })
+        .eq("vet_id", vetId)
+        .eq("status", "pending");
+
+      // Get unread messages
+      const { count: unreadCount } = await supabase
+        .from("vet_messages")
+        .select("id", { count: "exact", head: true })
+        .eq("vet_id", vetId)
+        .eq("sender_type", "owner")
+        .eq("is_read", false);
+
       setStats({
         totalPatients: patientCount || 0,
-        unreadMessages: 0,
+        pendingRefills: refillCount || 0,
+        unreadMessages: unreadCount || 0,
       });
     } catch (error) {
       console.error("Error loading stats:", error);
@@ -113,7 +144,7 @@ export default function VetDashboard() {
           </p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-4">
           <Card className="p-6">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
@@ -128,12 +159,24 @@ export default function VetDashboard() {
 
           <Card className="p-6">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center">
-                <MessageSquare className="w-6 h-6 text-accent" />
+              <div className="w-12 h-12 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center">
+                <Pill className="w-6 h-6 text-yellow-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Location</p>
-                <p className="text-lg font-semibold">{vetInfo.location}</p>
+                <p className="text-sm text-muted-foreground">Pending Refills</p>
+                <p className="text-2xl font-bold">{stats.pendingRefills}</p>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                <MessageSquare className="w-6 h-6 text-blue-600" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Unread Messages</p>
+                <p className="text-2xl font-bold">{stats.unreadMessages}</p>
               </div>
             </div>
           </Card>
@@ -144,26 +187,44 @@ export default function VetDashboard() {
                 <FileText className="w-6 h-6 text-green-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Contact</p>
-                <p className="text-sm font-medium truncate">{vetInfo.contact_email}</p>
+                <p className="text-sm text-muted-foreground">Location</p>
+                <p className="text-sm font-medium truncate">{vetInfo.location}</p>
               </div>
             </div>
           </Card>
         </div>
 
         <Tabs defaultValue="emr" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="emr" className="flex items-center gap-2">
               <FileText className="w-4 h-4" />
-              EMR Dashboard
-            </TabsTrigger>
-            <TabsTrigger value="consent" className="flex items-center gap-2">
-              <FileSignature className="w-4 h-4" />
-              Consent Forms
+              <span className="hidden sm:inline">EMR</span>
             </TabsTrigger>
             <TabsTrigger value="messages" className="flex items-center gap-2">
               <MessageSquare className="w-4 h-4" />
-              Messages
+              <span className="hidden sm:inline">Messages</span>
+              {stats.unreadMessages > 0 && (
+                <span className="bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 ml-1">
+                  {stats.unreadMessages}
+                </span>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="refills" className="flex items-center gap-2">
+              <Pill className="w-4 h-4" />
+              <span className="hidden sm:inline">Refills</span>
+              {stats.pendingRefills > 0 && (
+                <span className="bg-yellow-500 text-white text-xs rounded-full px-1.5 py-0.5 ml-1">
+                  {stats.pendingRefills}
+                </span>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="reminders" className="flex items-center gap-2">
+              <Bell className="w-4 h-4" />
+              <span className="hidden sm:inline">Reminders</span>
+            </TabsTrigger>
+            <TabsTrigger value="consent" className="flex items-center gap-2">
+              <FileSignature className="w-4 h-4" />
+              <span className="hidden sm:inline">Consent</span>
             </TabsTrigger>
           </TabsList>
 
@@ -171,12 +232,20 @@ export default function VetDashboard() {
             <EMRDashboard vetId={vetInfo.id} />
           </TabsContent>
 
-          <TabsContent value="consent">
-            <ConsentManagement vetId={vetInfo.id} />
+          <TabsContent value="messages">
+            <SecureMessagingTab vetId={vetInfo.id} />
           </TabsContent>
 
-          <TabsContent value="messages">
-            <VetMessagesPanel vetId={vetInfo.id} />
+          <TabsContent value="refills">
+            <PrescriptionRefillsTab vetId={vetInfo.id} />
+          </TabsContent>
+
+          <TabsContent value="reminders">
+            <ComplianceRemindersTab vetId={vetInfo.id} />
+          </TabsContent>
+
+          <TabsContent value="consent">
+            <ConsentManagement vetId={vetInfo.id} />
           </TabsContent>
         </Tabs>
       </div>

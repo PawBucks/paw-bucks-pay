@@ -8,4 +8,7 @@ export { SurgicalNotesTab } from "./SurgicalNotesTab";
 export { LabResultsTab } from "./LabResultsTab";
 export { ImagingTab } from "./ImagingTab";
 export { ConsentManagement } from "./ConsentManagement";
+export { ComplianceRemindersTab } from "./ComplianceRemindersTab";
+export { PrescriptionRefillsTab } from "./PrescriptionRefillsTab";
+export { SecureMessagingTab } from "./SecureMessagingTab";
 export * from "./types";
