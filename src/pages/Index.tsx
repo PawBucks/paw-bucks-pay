@@ -58,7 +58,7 @@ const Index = () => {
       <Header menuItems={[
         { label: "Explore Pet Merchants", path: "/discover" },
         { label: "Lost Pets", path: "/lost-pets" },
-        { label: "Sign In", path: "/auth" }
+        { label: "Sign In", path: "/auth?role=pet_owner" }
       ]} />
 
       <main role="main">

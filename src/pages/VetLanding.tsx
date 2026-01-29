@@ -125,7 +125,7 @@ const VetLanding = () => {
                 For Merchants
               </Button>
               <Button 
-                onClick={() => navigate("/auth")}
+                onClick={() => navigate("/auth?role=vet")}
                 className="shadow-xl hover:shadow-2xl transition-all hover:scale-105"
               >
                 Sign In
