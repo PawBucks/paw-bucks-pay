@@ -416,6 +416,23 @@ const MerchantLanding = () => {
               The pet-focused payments and rewards platform for growing businesses.
             </p>
             <SocialFollowLinks />
+            <div className="flex items-center gap-4 text-sm">
+              <a 
+                href="/vets" 
+                className="text-muted-foreground hover:text-primary transition-colors"
+                onClick={(e) => { e.preventDefault(); navigate("/vets"); }}
+              >
+                For Vets
+              </a>
+              <span className="text-muted-foreground/50">•</span>
+              <a 
+                href="/" 
+                className="text-muted-foreground hover:text-primary transition-colors"
+                onClick={(e) => { e.preventDefault(); navigate("/"); }}
+              >
+                For Pet Owners
+              </a>
+            </div>
             <p className="text-sm text-muted-foreground">
               &copy; {new Date().getFullYear()} PawBucks. All rights reserved.
             </p>
