@@ -262,6 +262,69 @@ serve(async (req) => {
       }
     }
 
+    // Create invoice slice for tracking claim recovery
+    const { data: slice, error: sliceError } = await supabaseClient
+      .from("invoice_slices")
+      .insert({
+        invoice_id: invoiceId,
+        claim_id: claim.id,
+        slice_type: "insurance",
+        original_amount: totalAmount,
+        carrier_estimate: coverage.coveredAmount,
+        gap_amount: 0, // Will be updated when carrier pays
+        recovery_status: "pending",
+      })
+      .select()
+      .single();
+
+    if (sliceError) {
+      logStep("Warning: Failed to create invoice slice", { error: sliceError.message });
+    } else {
+      logStep("Invoice slice created", { sliceId: slice?.id });
+    }
+
+    // Create locked rewards for the pet owner (pending state)
+    // Get pet owner's user_id from the policy
+    const { data: petData } = await supabaseClient
+      .from("pet_profiles")
+      .select("user_id")
+      .eq("id", policy.pet_id)
+      .single();
+
+    if (petData?.user_id && slice) {
+      // Get owner's subscription tier to calculate rewards
+      const { data: subData } = await supabaseClient
+        .from("user_subscriptions")
+        .select("tier")
+        .eq("user_id", petData.user_id)
+        .eq("status", "active")
+        .maybeSingle();
+
+      const tier = subData?.tier || "free";
+      const multiplier = tier === "pawpass_plus" ? 30 : tier === "pawpass" ? 20 : 10;
+      const lockedRewards = Math.floor(totalAmount * multiplier);
+
+      if (lockedRewards > 0) {
+        // Create locked reward entry (pending status, linked to slice)
+        await supabaseClient.from("pawbucks_activity").insert({
+          user_id: petData.user_id,
+          type: "credit",
+          amount: lockedRewards,
+          description: `Rewards for vet visit (${claim.claim_number}) - Pending insurance`,
+          source: "insurance_claim",
+          pawbucks_status: "pending",
+          slice_id: slice.id,
+        });
+
+        logStep("Locked rewards created", { 
+          ownerId: petData.user_id, 
+          lockedRewards, 
+          multiplier,
+          sliceId: slice.id 
+        });
+      }
+    }
+
     // Return claim details with payment split information
     const response = {
       success: true,
@@ -281,6 +344,8 @@ serve(async (req) => {
         code: policy.vet_insurance_providers?.code,
       },
       submission: submissionResult,
+      slice: slice ? { id: slice.id } : null,
+      lockedRewards: petData?.user_id ? true : false,
     };
 
     logStep("Claim processing complete", response);

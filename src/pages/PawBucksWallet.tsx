@@ -14,10 +14,12 @@ import { AdPlacement } from "@/components/AdPlacement";
 import { PageLoader } from "@/components/PageLoader";
 import { EmptyState } from "@/components/EmptyState";
 import { PawBucksInfoTooltip } from "@/components/PawBucksInfoTooltip";
-import { Coins, TrendingUp, Gift, ArrowUpRight, ArrowDownRight, Sparkles, Zap, Crown } from "lucide-react";
+import { Coins, TrendingUp, Gift, ArrowUpRight, ArrowDownRight, Sparkles, Zap, Crown, Lock, Unlock } from "lucide-react";
 import { Formatters } from "@/utils/formatters";
 import { PAWBUCKS_CONVERSION, ROUTES, CASHBACK_RATES } from "@/lib/constants";
 import { Progress } from "@/components/ui/progress";
+import { LockedRewardsCard } from "@/components/wallet/LockedRewardsCard";
+import { useSpendablePawBucks } from "@/hooks/useSpendablePawBucks";
 
 type PawBucksWallet = {
   id: string;
@@ -338,12 +340,19 @@ const PawBucksWallet = () => {
           <p className="text-muted-foreground text-lg">Free: $1 = 10 PawBucks • PawPass: $1 = 20 PawBucks • PawPass+: $1 = 30 PawBucks 🐾</p>
         </div>
 
+        {/* Locked Rewards Card - Shows spendable vs locked breakdown */}
+        {effectiveWalletUserId && (
+          <div className="mb-8">
+            <LockedRewardsCard userId={effectiveWalletUserId} />
+          </div>
+        )}
+
         {/* Main Wallet Card */}
         <GradientCard gradient className="mb-8">
           <div className="text-center mb-6">
             <div className="flex items-center justify-center gap-2 mb-2">
-              <Coins className="w-8 h-8 text-yellow-400" />
-              <p className="text-sm text-muted-foreground">Current Balance</p>
+              <Unlock className="w-6 h-6 text-primary" />
+              <p className="text-sm text-muted-foreground">Spendable Balance</p>
             </div>
             <p className="text-6xl font-bold mb-2">{Formatters.number(balance)}</p>
             <p className="text-2xl text-muted-foreground">PawBucks</p>

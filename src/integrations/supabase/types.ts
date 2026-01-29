@@ -3882,6 +3882,7 @@ export type Database = {
           receipt_id: string | null
           redemption_code: string | null
           redemption_used: boolean | null
+          slice_id: string | null
           source: string
           transaction_id: string | null
           type: string
@@ -3898,6 +3899,7 @@ export type Database = {
           receipt_id?: string | null
           redemption_code?: string | null
           redemption_used?: boolean | null
+          slice_id?: string | null
           source: string
           transaction_id?: string | null
           type: string
@@ -3914,6 +3916,7 @@ export type Database = {
           receipt_id?: string | null
           redemption_code?: string | null
           redemption_used?: boolean | null
+          slice_id?: string | null
           source?: string
           transaction_id?: string | null
           type?: string
@@ -3933,6 +3936,13 @@ export type Database = {
             columns: ["partner_id"]
             isOneToOne: false
             referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pawbucks_activity_slice_id_fkey"
+            columns: ["slice_id"]
+            isOneToOne: false
+            referencedRelation: "invoice_slices"
             referencedColumns: ["id"]
           },
           {
@@ -8365,6 +8375,13 @@ export type Database = {
         }[]
       }
       get_current_user_email: { Args: never; Returns: string }
+      get_locked_pawbucks: {
+        Args: { p_user_id: string }
+        Returns: {
+          items: Json
+          total_locked: number
+        }[]
+      }
       get_merchant_analytics: {
         Args: { p_merchant_id: string }
         Returns: {
@@ -8391,6 +8408,7 @@ export type Database = {
           total_balance: number
         }[]
       }
+      get_spendable_pawbucks: { Args: { p_user_id: string }; Returns: number }
       get_user_vet_ids: { Args: { check_user_id: string }; Returns: string[] }
       has_role: {
         Args: {

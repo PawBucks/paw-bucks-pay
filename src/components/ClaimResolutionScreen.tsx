@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useSpendablePawBucks } from "@/hooks/useSpendablePawBucks";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -20,6 +21,7 @@ import {
   Loader2,
   ArrowLeft,
   Info,
+  Lock,
 } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -136,8 +138,10 @@ export function ClaimResolutionScreen({
   const { subscription } = useSubscription();
   const navigate = useNavigate();
   
+  // Use the spendable PawBucks hook to get only available (non-locked) balance
+  const { spendableBalance, lockedBalance, isLoading: pawBucksLoading } = useSpendablePawBucks(user?.id);
+  
   const [slice, setSlice] = useState<ActionRequiredSlice | null>(null);
-  const [pawBucksBalance, setPawBucksBalance] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -146,6 +150,9 @@ export function ClaimResolutionScreen({
   const [paymentStep, setPaymentStep] = useState<"options" | "payment" | "success">("options");
 
   const stripePromise = getStripePromise();
+  
+  // Use spendable balance (excludes locked rewards)
+  const pawBucksBalance = spendableBalance;
 
   // Calculate values
   const gapAmount = slice ? Number(slice.gap_amount) : 0;
@@ -193,15 +200,7 @@ export function ClaimResolutionScreen({
 
       if (sliceError) throw sliceError;
       setSlice(sliceData as ActionRequiredSlice);
-
-      // Fetch PawBucks balance
-      const { data: walletData } = await supabase
-        .from("pawbucks_wallet")
-        .select("balance")
-        .eq("user_id", user.id)
-        .maybeSingle();
-
-      setPawBucksBalance(walletData?.balance || 0);
+      // PawBucks balance is now loaded via useSpendablePawBucks hook
     } catch (error) {
       console.error("Error loading resolution data:", error);
       toast.error("Failed to load claim details");
@@ -334,7 +333,7 @@ export function ClaimResolutionScreen({
     }, 3000);
   };
 
-  if (isLoading) {
+  if (isLoading || pawBucksLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex items-center justify-center">
         <div className="text-center">
@@ -580,6 +579,28 @@ export function ClaimResolutionScreen({
                   ) : (
                     <ChevronRight className="h-5 w-5 text-teal-400" />
                   )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Info about locked rewards if user has some but no spendable */}
+          {pawBucksBalance === 0 && lockedBalance > 0 && (
+            <Card className="border-amber-200 bg-amber-50/50">
+              <CardContent className="p-4">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-lg bg-amber-100">
+                    <Lock className="h-5 w-5 text-amber-700" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-amber-900">
+                      You have {lockedBalance.toLocaleString()} locked PawBucks
+                    </p>
+                    <p className="text-sm text-amber-700 mt-1">
+                      These points are currently locked until your recent vet visit is fully processed.
+                      They cannot be used for this payment.
+                    </p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
