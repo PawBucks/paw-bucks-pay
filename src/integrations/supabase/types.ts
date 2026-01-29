@@ -3590,34 +3590,94 @@ export type Database = {
       }
       partner_vets: {
         Row: {
+          accreditations: string[] | null
+          clinic_name: string | null
+          clinic_phone: string | null
           contact_email: string
           created_at: string
+          data_sync_enabled: boolean | null
+          dba_name: string | null
+          direct_pay_enabled: boolean | null
           id: string
+          insurance_partners: string[] | null
+          is_verified: boolean | null
+          license_number: string | null
+          license_state: string | null
           location: string
+          medical_director_name: string | null
           name: string
+          npi_number: string | null
+          pims_software: string | null
+          practice_type: string | null
+          preferred_referrals: string | null
+          sms_enabled: boolean | null
+          splicing_fee: number | null
+          splicing_preference: string | null
           stripe_account_id: string | null
+          tax_id: string | null
           updated_at: string
           user_id: string | null
+          website_url: string | null
         }
         Insert: {
+          accreditations?: string[] | null
+          clinic_name?: string | null
+          clinic_phone?: string | null
           contact_email: string
           created_at?: string
+          data_sync_enabled?: boolean | null
+          dba_name?: string | null
+          direct_pay_enabled?: boolean | null
           id?: string
+          insurance_partners?: string[] | null
+          is_verified?: boolean | null
+          license_number?: string | null
+          license_state?: string | null
           location: string
+          medical_director_name?: string | null
           name: string
+          npi_number?: string | null
+          pims_software?: string | null
+          practice_type?: string | null
+          preferred_referrals?: string | null
+          sms_enabled?: boolean | null
+          splicing_fee?: number | null
+          splicing_preference?: string | null
           stripe_account_id?: string | null
+          tax_id?: string | null
           updated_at?: string
           user_id?: string | null
+          website_url?: string | null
         }
         Update: {
+          accreditations?: string[] | null
+          clinic_name?: string | null
+          clinic_phone?: string | null
           contact_email?: string
           created_at?: string
+          data_sync_enabled?: boolean | null
+          dba_name?: string | null
+          direct_pay_enabled?: boolean | null
           id?: string
+          insurance_partners?: string[] | null
+          is_verified?: boolean | null
+          license_number?: string | null
+          license_state?: string | null
           location?: string
+          medical_director_name?: string | null
           name?: string
+          npi_number?: string | null
+          pims_software?: string | null
+          practice_type?: string | null
+          preferred_referrals?: string | null
+          sms_enabled?: boolean | null
+          splicing_fee?: number | null
+          splicing_preference?: string | null
           stripe_account_id?: string | null
+          tax_id?: string | null
           updated_at?: string
           user_id?: string | null
+          website_url?: string | null
         }
         Relationships: []
       }
@@ -3715,6 +3775,108 @@ export type Database = {
           id?: string
           last_updated?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      pending_onboarding: {
+        Row: {
+          accreditations: string[] | null
+          admin_splicing_fee: number | null
+          city: string | null
+          completed_at: string | null
+          created_at: string
+          current_step: number
+          data_sync_permission: boolean | null
+          dba_name: string | null
+          direct_pay_capability: boolean | null
+          dvm_license_number: string | null
+          dvm_license_state: string | null
+          form_data: Json | null
+          id: string
+          insurance_partners: string[] | null
+          legal_practice_name: string | null
+          medical_director_name: string | null
+          npi_number: string | null
+          onboarding_type: string
+          physical_address: string | null
+          pims_software: string | null
+          practice_type: string | null
+          preferred_referral_partners: string | null
+          primary_phone: string | null
+          sms_capability: boolean | null
+          splicing_preference: string | null
+          state: string | null
+          tax_id_ein: string | null
+          updated_at: string
+          user_id: string | null
+          website_url: string | null
+          zip_code: string | null
+        }
+        Insert: {
+          accreditations?: string[] | null
+          admin_splicing_fee?: number | null
+          city?: string | null
+          completed_at?: string | null
+          created_at?: string
+          current_step?: number
+          data_sync_permission?: boolean | null
+          dba_name?: string | null
+          direct_pay_capability?: boolean | null
+          dvm_license_number?: string | null
+          dvm_license_state?: string | null
+          form_data?: Json | null
+          id?: string
+          insurance_partners?: string[] | null
+          legal_practice_name?: string | null
+          medical_director_name?: string | null
+          npi_number?: string | null
+          onboarding_type?: string
+          physical_address?: string | null
+          pims_software?: string | null
+          practice_type?: string | null
+          preferred_referral_partners?: string | null
+          primary_phone?: string | null
+          sms_capability?: boolean | null
+          splicing_preference?: string | null
+          state?: string | null
+          tax_id_ein?: string | null
+          updated_at?: string
+          user_id?: string | null
+          website_url?: string | null
+          zip_code?: string | null
+        }
+        Update: {
+          accreditations?: string[] | null
+          admin_splicing_fee?: number | null
+          city?: string | null
+          completed_at?: string | null
+          created_at?: string
+          current_step?: number
+          data_sync_permission?: boolean | null
+          dba_name?: string | null
+          direct_pay_capability?: boolean | null
+          dvm_license_number?: string | null
+          dvm_license_state?: string | null
+          form_data?: Json | null
+          id?: string
+          insurance_partners?: string[] | null
+          legal_practice_name?: string | null
+          medical_director_name?: string | null
+          npi_number?: string | null
+          onboarding_type?: string
+          physical_address?: string | null
+          pims_software?: string | null
+          practice_type?: string | null
+          preferred_referral_partners?: string | null
+          primary_phone?: string | null
+          sms_capability?: boolean | null
+          splicing_preference?: string | null
+          state?: string | null
+          tax_id_ein?: string | null
+          updated_at?: string
+          user_id?: string | null
+          website_url?: string | null
+          zip_code?: string | null
         }
         Relationships: []
       }

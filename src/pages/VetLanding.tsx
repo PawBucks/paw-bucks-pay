@@ -168,7 +168,7 @@ const VetLanding = () => {
               <div className="flex flex-col sm:flex-row gap-4 justify-center mt-10">
                 <Button 
                   size="lg" 
-                  onClick={() => navigate("/auth")}
+                  onClick={() => navigate("/vet-onboarding")}
                   className="text-base sm:text-lg px-8 sm:px-10 py-6 sm:py-7 shadow-xl hover:shadow-2xl transition-all hover:scale-105 group"
                 >
                   Get Started Free
@@ -486,7 +486,7 @@ const VetLanding = () => {
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <Button 
                     size="lg" 
-                    onClick={() => navigate("/auth")}
+                    onClick={() => navigate("/vet-onboarding")}
                     className="text-lg px-10 py-7 shadow-xl hover:shadow-2xl transition-all hover:scale-105 group"
                   >
                     Get Started Free
