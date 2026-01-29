@@ -3388,12 +3388,16 @@ export type Database = {
         Row: {
           accepts_pawbucks: boolean
           address: string | null
+          approval_status: Database["public"]["Enums"]["approval_status"]
+          approved_at: string | null
+          approved_by: string | null
           business_name: string
           business_type: string
           cashback_rate: number
           contact_person: string | null
           country: string | null
           created_at: string
+          denial_reason: string | null
           description: string | null
           email: string | null
           entity_type: string | null
@@ -3423,12 +3427,16 @@ export type Database = {
         Insert: {
           accepts_pawbucks?: boolean
           address?: string | null
+          approval_status?: Database["public"]["Enums"]["approval_status"]
+          approved_at?: string | null
+          approved_by?: string | null
           business_name: string
           business_type: string
           cashback_rate?: number
           contact_person?: string | null
           country?: string | null
           created_at?: string
+          denial_reason?: string | null
           description?: string | null
           email?: string | null
           entity_type?: string | null
@@ -3458,12 +3466,16 @@ export type Database = {
         Update: {
           accepts_pawbucks?: boolean
           address?: string | null
+          approval_status?: Database["public"]["Enums"]["approval_status"]
+          approved_at?: string | null
+          approved_by?: string | null
           business_name?: string
           business_type?: string
           cashback_rate?: number
           contact_person?: string | null
           country?: string | null
           created_at?: string
+          denial_reason?: string | null
           description?: string | null
           email?: string | null
           entity_type?: string | null
@@ -3753,6 +3765,9 @@ export type Database = {
           agreed_to_splicing_liability_at: string | null
           agreed_to_tos: boolean | null
           agreed_to_tos_at: string | null
+          approval_status: Database["public"]["Enums"]["approval_status"]
+          approved_at: string | null
+          approved_by: string | null
           clinic_bio: string | null
           clinic_name: string | null
           clinic_phone: string | null
@@ -3760,6 +3775,7 @@ export type Database = {
           created_at: string
           data_sync_enabled: boolean | null
           dba_name: string | null
+          denial_reason: string | null
           direct_pay_enabled: boolean | null
           emergency_phone: string | null
           emergency_protocol: string | null
@@ -3794,6 +3810,9 @@ export type Database = {
           agreed_to_splicing_liability_at?: string | null
           agreed_to_tos?: boolean | null
           agreed_to_tos_at?: string | null
+          approval_status?: Database["public"]["Enums"]["approval_status"]
+          approved_at?: string | null
+          approved_by?: string | null
           clinic_bio?: string | null
           clinic_name?: string | null
           clinic_phone?: string | null
@@ -3801,6 +3820,7 @@ export type Database = {
           created_at?: string
           data_sync_enabled?: boolean | null
           dba_name?: string | null
+          denial_reason?: string | null
           direct_pay_enabled?: boolean | null
           emergency_phone?: string | null
           emergency_protocol?: string | null
@@ -3835,6 +3855,9 @@ export type Database = {
           agreed_to_splicing_liability_at?: string | null
           agreed_to_tos?: boolean | null
           agreed_to_tos_at?: string | null
+          approval_status?: Database["public"]["Enums"]["approval_status"]
+          approved_at?: string | null
+          approved_by?: string | null
           clinic_bio?: string | null
           clinic_name?: string | null
           clinic_phone?: string | null
@@ -3842,6 +3865,7 @@ export type Database = {
           created_at?: string
           data_sync_enabled?: boolean | null
           dba_name?: string | null
+          denial_reason?: string | null
           direct_pay_enabled?: boolean | null
           emergency_phone?: string | null
           emergency_protocol?: string | null
@@ -8306,22 +8330,43 @@ export type Database = {
       }
       partner_vets_public: {
         Row: {
-          created_at: string | null
+          accepting_new_patients: boolean | null
+          accreditations: string[] | null
+          clinic_name: string | null
+          direct_pay_enabled: boolean | null
+          emergency_protocol: string | null
           id: string | null
+          insurance_partners: string[] | null
           location: string | null
           name: string | null
+          practice_type: string | null
+          website_url: string | null
         }
         Insert: {
-          created_at?: string | null
+          accepting_new_patients?: boolean | null
+          accreditations?: string[] | null
+          clinic_name?: string | null
+          direct_pay_enabled?: boolean | null
+          emergency_protocol?: string | null
           id?: string | null
+          insurance_partners?: string[] | null
           location?: string | null
           name?: string | null
+          practice_type?: string | null
+          website_url?: string | null
         }
         Update: {
-          created_at?: string | null
+          accepting_new_patients?: boolean | null
+          accreditations?: string[] | null
+          clinic_name?: string | null
+          direct_pay_enabled?: boolean | null
+          emergency_protocol?: string | null
           id?: string | null
+          insurance_partners?: string[] | null
           location?: string | null
           name?: string | null
+          practice_type?: string | null
+          website_url?: string | null
         }
         Relationships: []
       }
@@ -8454,6 +8499,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user" | "superadmin"
+      approval_status: "pending" | "approved" | "denied"
       booking_status:
         | "pending"
         | "confirmed"
@@ -8635,6 +8681,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user", "superadmin"],
+      approval_status: ["pending", "approved", "denied"],
       booking_status: [
         "pending",
         "confirmed",

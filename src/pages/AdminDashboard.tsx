@@ -23,6 +23,7 @@ import { SettingsTab } from "@/components/admin/SettingsTab";
 import { OverviewTab } from "@/components/admin/OverviewTab";
 import { AnalyticsTab } from "@/components/admin/AnalyticsTab";
 import { AuditLogsTab } from "@/components/admin/AuditLogsTab";
+import { ApprovalsTab } from "@/components/admin/ApprovalsTab";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -65,6 +66,7 @@ import {
   HelpCircle,
   GraduationCap,
   ExternalLink,
+  Clock,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -91,6 +93,12 @@ const NAV_SECTIONS = [
   {
     title: "User Management",
     items: [
+      {
+        id: "approvals",
+        label: "Pending Approvals",
+        icon: Clock,
+        description: "Review and approve new Merchant and Vet applications",
+      },
       {
         id: "users",
         label: "Users",
@@ -309,6 +317,8 @@ const AdminDashboard = () => {
         return <OverviewTab />;
       case "analytics":
         return <AnalyticsTab />;
+      case "approvals":
+        return <ApprovalsTab />;
       case "users":
         return <UsersTab />;
       case "merchants":

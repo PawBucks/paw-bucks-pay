@@ -49,7 +49,7 @@ import { MerchantEarningsTab } from "@/components/merchant/MerchantEarningsTab";
 // Dialogs
 import { EditMerchantProfileDialog } from "@/components/merchant/EditMerchantProfileDialog";
 import { FundingRequestDialog } from "@/components/merchant/FundingRequestDialog";
-
+import { PendingApprovalNotice } from "@/components/PendingApprovalNotice";
 
 type Merchant = {
   id: string;
@@ -66,6 +66,8 @@ type Merchant = {
   accepts_pawbucks?: boolean;
   latitude?: number;
   longitude?: number;
+  approval_status?: 'pending' | 'approved' | 'denied';
+  denial_reason?: string | null;
 };
 
 type Analytics = {
@@ -776,8 +778,27 @@ const MerchantDashboard = () => {
                   </CardContent>
                 </Card>
 
-                {/* Tab Content */}
-                {renderTabContent()}
+                {/* Pending Approval Notice */}
+                {merchant?.approval_status !== 'approved' && (
+                  <div className="mb-6">
+                    <PendingApprovalNotice 
+                      entityType="merchant" 
+                      approvalStatus={merchant?.approval_status || 'pending'}
+                      denialReason={merchant?.denial_reason}
+                    />
+                  </div>
+                )}
+
+                {/* Tab Content - only show if approved */}
+                {merchant?.approval_status === 'approved' ? (
+                  renderTabContent()
+                ) : (
+                  <Card className="p-8 text-center">
+                    <p className="text-muted-foreground">
+                      Full dashboard features will be available once your account is approved.
+                    </p>
+                  </Card>
+                )}
               </div>
             </main>
           </div>
