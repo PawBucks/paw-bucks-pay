@@ -3,7 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Building2, Stethoscope, ShieldCheck, Wallet, Check, Save, ArrowRight, ArrowLeft } from "lucide-react";
+import { 
+  Building2, Stethoscope, ShieldCheck, Wallet, Check, Save, ArrowRight, ArrowLeft,
+  User, CreditCard, FileText, Phone, Sparkles, Edit, PartyPopper
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,6 +16,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -55,7 +60,24 @@ const step4Schema = z.object({
   preferred_referral_partners: z.string().optional(),
 });
 
-const fullSchema = step1Schema.merge(step2Schema).merge(step3Schema).merge(step4Schema);
+const step5Schema = z.object({
+  clinic_bio: z.string().min(10, "Please provide a clinic bio (minimum 10 characters)"),
+  services_provided: z.array(z.string()).min(1, "Select at least one service"),
+  accepting_new_patients: z.boolean().default(true),
+  emergency_phone: z.string().optional(),
+  emergency_protocol: z.string().optional(),
+});
+
+const step6Schema = z.object({
+  subscription_tier: z.string().min(1, "Please select a subscription tier"),
+});
+
+const step7Schema = z.object({
+  agreed_to_tos: z.boolean().refine(val => val === true, "You must agree to the Terms of Service"),
+  agreed_to_splicing_liability: z.boolean().refine(val => val === true, "You must agree to the Insurance Splicing Liability Agreement"),
+});
+
+const fullSchema = step1Schema.merge(step2Schema).merge(step3Schema).merge(step4Schema).merge(step5Schema).merge(step6Schema).merge(step7Schema);
 type FormData = z.infer<typeof fullSchema>;
 
 const STEPS = [
@@ -63,6 +85,10 @@ const STEPS = [
   { id: 2, title: "Medical Verification", icon: Stethoscope, description: "Credentials & licenses" },
   { id: 3, title: "Insurance Setup", icon: ShieldCheck, description: "Claim-splicing configuration" },
   { id: 4, title: "Integration", icon: Wallet, description: "Platform connections" },
+  { id: 5, title: "Public Profile", icon: User, description: "How pet owners see you" },
+  { id: 6, title: "Financial Setup", icon: CreditCard, description: "Payment & subscription" },
+  { id: 7, title: "Legal & Compliance", icon: FileText, description: "Agreements & terms" },
+  { id: 8, title: "Review", icon: Check, description: "Confirm your details" },
 ];
 
 const PRACTICE_TYPES = [
@@ -101,6 +127,17 @@ const PIMS_OPTIONS = [
   "Other",
 ];
 
+const SERVICES_PROVIDED = [
+  { id: "general", label: "General Wellness", icon: "🩺" },
+  { id: "dental", label: "Dental Care", icon: "🦷" },
+  { id: "surgery", label: "Surgery", icon: "⚕️" },
+  { id: "exotics", label: "Exotic Animals", icon: "🦎" },
+  { id: "emergency", label: "Emergency Care", icon: "🚨" },
+  { id: "dermatology", label: "Dermatology", icon: "🐾" },
+  { id: "cardiology", label: "Cardiology", icon: "❤️" },
+  { id: "oncology", label: "Oncology", icon: "🔬" },
+];
+
 const US_STATES = [
   "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA",
   "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD",
@@ -109,6 +146,142 @@ const US_STATES = [
   "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"
 ];
 
+const TERMS_OF_SERVICE = `PAWBUCKS VETERINARY PARTNER TERMS OF SERVICE
+
+Last Updated: January 2026
+
+1. ACCEPTANCE OF TERMS
+By registering as a PawBucks Veterinary Partner, you agree to be bound by these Terms of Service ("Terms"). If you do not agree to these Terms, you may not use our services.
+
+2. SERVICE DESCRIPTION
+PawBucks provides a platform connecting veterinary practices with pet owners, facilitating payment processing, appointment scheduling, and health record management.
+
+3. PARTNER OBLIGATIONS
+As a Veterinary Partner, you agree to:
+- Maintain valid veterinary licenses and certifications
+- Provide accurate information about your practice
+- Comply with all applicable laws and regulations
+- Maintain appropriate professional liability insurance
+- Protect patient data in accordance with applicable privacy laws
+
+4. PAYMENT PROCESSING
+- PawBucks processes payments through Stripe Connect
+- A platform fee of 3% applies to all transactions
+- Funds are typically deposited within 2-3 business days
+- You are responsible for all applicable taxes
+
+5. DATA PROTECTION
+- We implement industry-standard security measures
+- You retain ownership of your patient data
+- Data is encrypted in transit and at rest
+- We comply with HIPAA guidelines where applicable
+
+6. TERMINATION
+Either party may terminate this agreement with 30 days written notice. Upon termination, you will retain access to your data for 90 days.
+
+7. LIMITATION OF LIABILITY
+PawBucks shall not be liable for any indirect, incidental, or consequential damages arising from your use of the platform.
+
+8. GOVERNING LAW
+These Terms shall be governed by the laws of the State of Delaware.
+
+By clicking "I Agree," you acknowledge that you have read, understood, and agree to be bound by these Terms of Service.`;
+
+const INSURANCE_SPLICING_AGREEMENT = `PAWBUCKS INSURANCE CLAIM-SPLICING LIABILITY AGREEMENT
+
+Last Updated: January 2026
+
+1. PURPOSE
+This Agreement governs the use of PawBucks' Insurance Claim-Splicing feature, which automates the calculation and splitting of veterinary invoices between insurance carriers and pet owners.
+
+2. CLAIM-SPLICING FUNCTIONALITY
+The Claim-Splicing feature:
+- Calculates insurance coverage based on policy information provided
+- Generates split invoices for insurance and owner portions
+- Facilitates direct-pay submissions to participating carriers
+- Tracks claim status and payment reconciliation
+
+3. ACCURACY DISCLAIMER
+While PawBucks strives for accuracy in claim calculations:
+- Calculations are based on policy data provided by insurance carriers
+- Final claim decisions rest with the insurance carrier
+- Coverage estimates are not guarantees of payment
+- Policy details may change without notice
+
+4. PARTNER RESPONSIBILITIES
+As a Partner using Claim-Splicing, you agree to:
+- Verify policy information before submitting claims
+- Review all split calculations before finalization
+- Maintain records of all transactions
+- Promptly report any discrepancies
+- Collect appropriate client signatures/authorizations
+
+5. LIABILITY ALLOCATION
+- PawBucks is not liable for denied claims or coverage disputes
+- Partners assume responsibility for accurate procedure coding
+- Partners are responsible for collecting any unpaid balances
+- Insurance carriers bear ultimate claim decision authority
+
+6. INDEMNIFICATION
+You agree to indemnify PawBucks against any claims arising from:
+- Incorrect information provided to the system
+- Disputes with insurance carriers
+- Collection actions against pet owners
+- Regulatory compliance violations
+
+7. PROCESSING FEES
+- Standard processing fee: $0-$10 per claim (as configured)
+- Fees are non-refundable once claim is submitted
+- Additional fees may apply for manual adjudication
+
+8. DATA HANDLING
+All claim data is:
+- Encrypted and securely stored
+- Retained for 7 years per regulatory requirements
+- Available for export upon request
+- Protected under our Privacy Policy
+
+By clicking "I Agree," you acknowledge understanding of the Claim-Splicing feature limitations and accept responsibility for verification of all claim calculations.`;
+
+// Confetti effect component
+const ConfettiEffect = ({ active }: { active: boolean }) => {
+  if (!active) return null;
+
+  return (
+    <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
+      {[...Array(50)].map((_, i) => (
+        <div
+          key={i}
+          className="absolute animate-confetti"
+          style={{
+            left: `${Math.random() * 100}%`,
+            top: '-10px',
+            animationDelay: `${Math.random() * 2}s`,
+            animationDuration: `${2 + Math.random() * 2}s`,
+          }}
+        >
+          <div
+            className="w-3 h-3 rounded-sm"
+            style={{
+              backgroundColor: ['#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ef4444', '#ec4899'][Math.floor(Math.random() * 6)],
+              transform: `rotate(${Math.random() * 360}deg)`,
+            }}
+          />
+        </div>
+      ))}
+      <style>{`
+        @keyframes confetti {
+          0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+          100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+        .animate-confetti {
+          animation: confetti 3s ease-out forwards;
+        }
+      `}</style>
+    </div>
+  );
+};
+
 export const VetOnboardingForm = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -116,6 +289,8 @@ export const VetOnboardingForm = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [pendingId, setPendingId] = useState<string | null>(null);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
 
   const form = useForm<FormData>({
     resolver: zodResolver(fullSchema),
@@ -143,6 +318,14 @@ export const VetOnboardingForm = () => {
       pims_software: "",
       data_sync_permission: false,
       preferred_referral_partners: "",
+      clinic_bio: "",
+      services_provided: [],
+      accepting_new_patients: true,
+      emergency_phone: "",
+      emergency_protocol: "",
+      subscription_tier: "standard",
+      agreed_to_tos: false,
+      agreed_to_splicing_liability: false,
     },
     mode: "onChange",
   });
@@ -166,7 +349,6 @@ export const VetOnboardingForm = () => {
         setPendingId(data.id);
         setCurrentStep(data.current_step || 1);
         
-        // Populate form with saved data
         const formData: Partial<FormData> = {
           legal_practice_name: data.legal_practice_name || "",
           dba_name: data.dba_name || "",
@@ -191,6 +373,14 @@ export const VetOnboardingForm = () => {
           pims_software: data.pims_software || "",
           data_sync_permission: data.data_sync_permission || false,
           preferred_referral_partners: data.preferred_referral_partners || "",
+          clinic_bio: data.clinic_bio || "",
+          services_provided: data.services_provided || [],
+          accepting_new_patients: data.accepting_new_patients ?? true,
+          emergency_phone: data.emergency_phone || "",
+          emergency_protocol: data.emergency_protocol || "",
+          subscription_tier: data.subscription_tier || "standard",
+          agreed_to_tos: data.agreed_to_tos || false,
+          agreed_to_splicing_liability: data.agreed_to_splicing_liability || false,
         };
 
         Object.entries(formData).forEach(([key, value]) => {
@@ -224,6 +414,18 @@ export const VetOnboardingForm = () => {
         case 4:
           await step4Schema.parseAsync(values);
           return true;
+        case 5:
+          await step5Schema.parseAsync(values);
+          return true;
+        case 6:
+          await step6Schema.parseAsync(values);
+          return true;
+        case 7:
+          await step7Schema.parseAsync(values);
+          return true;
+        case 8:
+          // Review step - no validation needed
+          return true;
         default:
           return true;
       }
@@ -242,7 +444,7 @@ export const VetOnboardingForm = () => {
 
   const handleNext = async () => {
     const isValid = await validateCurrentStep();
-    if (isValid && currentStep < 4) {
+    if (isValid && currentStep < 8) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -251,6 +453,10 @@ export const VetOnboardingForm = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     }
+  };
+
+  const goToStep = (step: number) => {
+    setCurrentStep(step);
   };
 
   const saveDraft = async () => {
@@ -294,6 +500,14 @@ export const VetOnboardingForm = () => {
         pims_software: values.pims_software,
         data_sync_permission: values.data_sync_permission,
         preferred_referral_partners: values.preferred_referral_partners,
+        clinic_bio: values.clinic_bio,
+        services_provided: values.services_provided,
+        accepting_new_patients: values.accepting_new_patients,
+        emergency_phone: values.emergency_phone,
+        emergency_protocol: values.emergency_protocol,
+        subscription_tier: values.subscription_tier,
+        agreed_to_tos: values.agreed_to_tos,
+        agreed_to_splicing_liability: values.agreed_to_splicing_liability,
       };
 
       if (pendingId) {
@@ -331,6 +545,55 @@ export const VetOnboardingForm = () => {
     setIsSubmitting(true);
 
     try {
+      // Gather all data into a single JSON payload
+      const fullPayload = {
+        // Step 1: Practice Identity
+        legal_practice_name: data.legal_practice_name,
+        dba_name: data.dba_name,
+        primary_phone: data.primary_phone,
+        sms_capability: data.sms_capability,
+        physical_address: data.physical_address,
+        city: data.city,
+        state: data.state,
+        zip_code: data.zip_code,
+        website_url: data.website_url,
+        tax_id_ein: data.tax_id_ein,
+        // Step 2: Medical Verification
+        medical_director_name: data.medical_director_name,
+        dvm_license_number: data.dvm_license_number,
+        dvm_license_state: data.dvm_license_state,
+        npi_number: data.npi_number,
+        practice_type: data.practice_type,
+        accreditations: data.accreditations,
+        // Step 3: Insurance Setup
+        insurance_partners: data.insurance_partners,
+        direct_pay_capability: data.direct_pay_capability,
+        splicing_preference: data.splicing_preference,
+        admin_splicing_fee: data.admin_splicing_fee,
+        // Step 4: Integration
+        pims_software: data.pims_software,
+        data_sync_permission: data.data_sync_permission,
+        preferred_referral_partners: data.preferred_referral_partners,
+        // Step 5: Public Profile
+        clinic_bio: data.clinic_bio,
+        services_provided: data.services_provided,
+        accepting_new_patients: data.accepting_new_patients,
+        emergency_phone: data.emergency_phone,
+        emergency_protocol: data.emergency_protocol,
+        // Step 6: Financial
+        subscription_tier: data.subscription_tier,
+        // Step 7: Legal
+        agreed_to_tos: data.agreed_to_tos,
+        agreed_to_splicing_liability: data.agreed_to_splicing_liability,
+        // Metadata
+        user_id: user?.id,
+        user_email: user?.email,
+        submitted_at: new Date().toISOString(),
+      };
+
+      // Console log the final payload as requested
+      console.log("POST /api/v1/vet/onboarding payload:", JSON.stringify(fullPayload, null, 2));
+
       // Mark pending onboarding as completed
       if (pendingId) {
         await supabase
@@ -339,7 +602,7 @@ export const VetOnboardingForm = () => {
           .eq("id", pendingId);
       }
 
-      // Create the partner_vets record with required fields
+      // Create the partner_vets record with all fields
       const fullAddress = `${data.physical_address}, ${data.city}, ${data.state} ${data.zip_code}`;
       const { error } = await supabase.from("partner_vets").insert({
         name: data.legal_practice_name,
@@ -365,17 +628,28 @@ export const VetOnboardingForm = () => {
         pims_software: data.pims_software,
         data_sync_enabled: data.data_sync_permission,
         preferred_referrals: data.preferred_referral_partners || null,
+        clinic_bio: data.clinic_bio,
+        services_provided: data.services_provided,
+        accepting_new_patients: data.accepting_new_patients,
+        emergency_phone: data.emergency_phone || null,
+        emergency_protocol: data.emergency_protocol || null,
+        subscription_tier: data.subscription_tier,
+        agreed_to_tos: data.agreed_to_tos,
+        agreed_to_tos_at: data.agreed_to_tos ? new Date().toISOString() : null,
+        agreed_to_splicing_liability: data.agreed_to_splicing_liability,
+        agreed_to_splicing_liability_at: data.agreed_to_splicing_liability ? new Date().toISOString() : null,
         is_verified: false,
       });
 
       if (error) throw error;
 
-      toast({
-        title: "Welcome to PawBucks!",
-        description: "Your veterinary practice has been registered. Our team will verify your credentials shortly.",
-      });
+      // Show celebration effects
+      setShowConfetti(true);
+      setShowWelcomeModal(true);
 
-      navigate("/vet-dashboard");
+      // Stop confetti after 5 seconds
+      setTimeout(() => setShowConfetti(false), 5000);
+
     } catch (error) {
       console.error("Error submitting:", error);
       toast({
@@ -388,23 +662,56 @@ export const VetOnboardingForm = () => {
     }
   };
 
-  const progressPercentage = (currentStep / 4) * 100;
+  const handleWelcomeModalClose = () => {
+    setShowWelcomeModal(false);
+    navigate("/vet-dashboard");
+  };
+
+  const progressPercentage = (currentStep / 8) * 100;
+  const values = form.getValues();
 
   return (
     <div className="min-h-screen bg-slate-50">
+      <ConfettiEffect active={showConfetti} />
+      
+      {/* Welcome Modal */}
+      <Dialog open={showWelcomeModal} onOpenChange={setShowWelcomeModal}>
+        <DialogContent className="sm:max-w-md text-center">
+          <DialogHeader>
+            <div className="mx-auto mb-4 w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center">
+              <PartyPopper className="h-8 w-8 text-white" />
+            </div>
+            <DialogTitle className="text-2xl">Welcome to the PawBucks Family! 🎉</DialogTitle>
+            <DialogDescription className="text-base mt-4">
+              Your veterinary practice has been successfully registered. Our team will review your credentials 
+              and you'll be ready to start accepting patients through PawBucks within 24-48 hours.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-6">
+            <Button 
+              onClick={handleWelcomeModalClose}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white w-full rounded-lg"
+            >
+              Go to Dashboard
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Header */}
       <div className="bg-white border-b">
-        <div className="max-w-4xl mx-auto px-4 py-6">
+        <div className="max-w-5xl mx-auto px-4 py-6">
           <h1 className="text-2xl font-bold text-slate-900">Veterinary Practice Onboarding</h1>
           <p className="text-slate-600 mt-1">Join the PawBucks network and grow your practice</p>
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="max-w-5xl mx-auto px-4 py-8">
         {/* Progress Stepper */}
         <div className="mb-8">
           <Progress value={progressPercentage} className="h-2 mb-6" />
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-4 md:grid-cols-8 gap-2">
             {STEPS.map((step) => {
               const Icon = step.icon;
               const isActive = currentStep === step.id;
@@ -414,31 +721,31 @@ export const VetOnboardingForm = () => {
                 <div
                   key={step.id}
                   className={cn(
-                    "flex flex-col items-center text-center p-3 rounded-lg transition-all",
+                    "flex flex-col items-center text-center p-2 rounded-lg transition-all cursor-pointer",
                     isActive && "bg-indigo-50 border-2 border-indigo-600",
-                    isCompleted && "bg-green-50",
-                    !isActive && !isCompleted && "bg-white border border-slate-200"
+                    isCompleted && "bg-green-50 hover:bg-green-100",
+                    !isActive && !isCompleted && "bg-white border border-slate-200 hover:border-slate-300"
                   )}
+                  onClick={() => isCompleted && goToStep(step.id)}
                 >
                   <div
                     className={cn(
-                      "w-10 h-10 rounded-full flex items-center justify-center mb-2",
+                      "w-8 h-8 rounded-full flex items-center justify-center mb-1",
                       isActive && "bg-indigo-600 text-white",
                       isCompleted && "bg-green-500 text-white",
                       !isActive && !isCompleted && "bg-slate-200 text-slate-600"
                     )}
                   >
-                    {isCompleted ? <Check className="h-5 w-5" /> : <Icon className="h-5 w-5" />}
+                    {isCompleted ? <Check className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
                   </div>
                   <span className={cn(
-                    "text-sm font-medium",
+                    "text-xs font-medium hidden md:block",
                     isActive && "text-indigo-600",
                     isCompleted && "text-green-600",
                     !isActive && !isCompleted && "text-slate-500"
                   )}>
                     {step.title}
                   </span>
-                  <span className="text-xs text-slate-400 hidden sm:block">{step.description}</span>
                 </div>
               );
             })}
@@ -975,6 +1282,522 @@ export const VetOnboardingForm = () => {
               </Card>
             )}
 
+            {/* Step 5: Public Profile & Merchant Display */}
+            {currentStep === 5 && (
+              <Card className="bg-white border-slate-200 rounded-lg shadow-sm">
+                <CardHeader className="border-b border-slate-100">
+                  <CardTitle className="flex items-center gap-2 text-slate-900">
+                    <User className="h-5 w-5 text-indigo-600" />
+                    Public Profile & Merchant Display
+                  </CardTitle>
+                  <CardDescription>How pet owners will see your practice</CardDescription>
+                </CardHeader>
+                <CardContent className="pt-6 space-y-6">
+                  <FormField
+                    control={form.control}
+                    name="clinic_bio"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Clinic Bio *</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Tell pet owners about your practice, your philosophy of care, and what makes you unique..."
+                            className="rounded-lg min-h-[150px]"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          This will be displayed on your public profile. Rich formatting is supported.
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="services_provided"
+                    render={() => (
+                      <FormItem>
+                        <FormLabel>Services Provided *</FormLabel>
+                        <FormDescription>Select all services your practice offers</FormDescription>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                          {SERVICES_PROVIDED.map((service) => (
+                            <FormField
+                              key={service.id}
+                              control={form.control}
+                              name="services_provided"
+                              render={({ field }) => (
+                                <FormItem
+                                  className={cn(
+                                    "flex flex-col items-center justify-center p-4 rounded-lg border cursor-pointer transition-all text-center",
+                                    field.value?.includes(service.id)
+                                      ? "border-indigo-600 bg-indigo-50 ring-2 ring-indigo-600"
+                                      : "border-slate-200 hover:border-indigo-300"
+                                  )}
+                                  onClick={() => {
+                                    const current = field.value || [];
+                                    const updated = current.includes(service.id)
+                                      ? current.filter((v) => v !== service.id)
+                                      : [...current, service.id];
+                                    field.onChange(updated);
+                                  }}
+                                >
+                                  <span className="text-2xl mb-2">{service.icon}</span>
+                                  <FormLabel className="font-medium cursor-pointer text-sm">
+                                    {service.label}
+                                  </FormLabel>
+                                </FormItem>
+                              )}
+                            />
+                          ))}
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="accepting_new_patients"
+                    render={({ field }) => (
+                      <FormItem className="flex items-center justify-between rounded-lg border border-slate-200 p-4">
+                        <div>
+                          <FormLabel>Accepting New Patients</FormLabel>
+                          <FormDescription>
+                            Toggle off if you're currently not accepting new patients
+                          </FormDescription>
+                        </div>
+                        <FormControl>
+                          <Switch checked={field.value} onCheckedChange={field.onChange} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="space-y-4 rounded-lg border border-slate-200 p-4">
+                    <div className="flex items-center gap-2 text-slate-900 font-medium">
+                      <Phone className="h-5 w-5 text-indigo-600" />
+                      Emergency Protocol
+                    </div>
+                    
+                    <FormField
+                      control={form.control}
+                      name="emergency_phone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Emergency Phone Number</FormLabel>
+                          <FormControl>
+                            <Input placeholder="(555) 911-1234" {...field} className="rounded-lg" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="emergency_protocol"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Emergency Instructions</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="For after-hours emergencies, please call our emergency line or proceed to the nearest emergency animal hospital..."
+                              className="rounded-lg min-h-[80px]"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {values.emergency_phone && (
+                      <div className="mt-4 p-3 bg-slate-50 rounded-lg">
+                        <p className="text-sm text-slate-600 mb-2">Tap to Call Preview:</p>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="w-full rounded-lg border-indigo-200 text-indigo-600 hover:bg-indigo-50"
+                          onClick={() => window.open(`tel:${values.emergency_phone}`)}
+                        >
+                          <Phone className="h-4 w-4 mr-2" />
+                          Call Emergency Line: {values.emergency_phone}
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Step 6: Financial Onboarding */}
+            {currentStep === 6 && (
+              <Card className="bg-white border-slate-200 rounded-lg shadow-sm">
+                <CardHeader className="border-b border-slate-100">
+                  <CardTitle className="flex items-center gap-2 text-slate-900">
+                    <CreditCard className="h-5 w-5 text-indigo-600" />
+                    Financial Onboarding
+                  </CardTitle>
+                  <CardDescription>Set up your payment processing and subscription</CardDescription>
+                </CardHeader>
+                <CardContent className="pt-6 space-y-6">
+                  {/* Stripe Connect Card */}
+                  <div className="rounded-lg border-2 border-dashed border-slate-300 p-6 text-center">
+                    <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center">
+                      <CreditCard className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-slate-900 mb-2">Stripe Connect</h3>
+                    <p className="text-slate-600 mb-4">
+                      Connect your bank account to receive payments directly from pet owners and insurance carriers.
+                    </p>
+                    <Button
+                      type="button"
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg"
+                      onClick={() => {
+                        toast({
+                          title: "Stripe Connect",
+                          description: "Bank account connection will be available after registration.",
+                        });
+                      }}
+                    >
+                      Connect Bank Account
+                    </Button>
+                    <p className="text-xs text-slate-500 mt-3">
+                      You can complete this step after registration from your dashboard
+                    </p>
+                  </div>
+
+                  {/* Tier Selection */}
+                  <FormField
+                    control={form.control}
+                    name="subscription_tier"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Select Your Subscription Tier *</FormLabel>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                          {/* Standard Tier */}
+                          <div
+                            className={cn(
+                              "relative rounded-lg border-2 p-6 cursor-pointer transition-all",
+                              field.value === "standard"
+                                ? "border-indigo-600 bg-indigo-50 ring-2 ring-indigo-600"
+                                : "border-slate-200 hover:border-indigo-300"
+                            )}
+                            onClick={() => field.onChange("standard")}
+                          >
+                            {field.value === "standard" && (
+                              <div className="absolute top-3 right-3 w-6 h-6 bg-indigo-600 rounded-full flex items-center justify-center">
+                                <Check className="h-4 w-4 text-white" />
+                              </div>
+                            )}
+                            <div className="mb-4">
+                              <h4 className="text-lg font-semibold text-slate-900">Standard</h4>
+                              <p className="text-2xl font-bold text-indigo-600 mt-1">$99<span className="text-sm font-normal text-slate-500">/month</span></p>
+                            </div>
+                            <ul className="space-y-2 text-sm text-slate-600">
+                              <li className="flex items-center gap-2">
+                                <Check className="h-4 w-4 text-green-500" />
+                                Full EMR System Access
+                              </li>
+                              <li className="flex items-center gap-2">
+                                <Check className="h-4 w-4 text-green-500" />
+                                <span className="font-medium text-indigo-600">Claim-Splicing Engine</span>
+                              </li>
+                              <li className="flex items-center gap-2">
+                                <Check className="h-4 w-4 text-green-500" />
+                                AI Clinical Assistant
+                              </li>
+                              <li className="flex items-center gap-2">
+                                <Check className="h-4 w-4 text-green-500" />
+                                Patient Portal
+                              </li>
+                              <li className="flex items-center gap-2">
+                                <Check className="h-4 w-4 text-green-500" />
+                                3% Transaction Fee
+                              </li>
+                            </ul>
+                          </div>
+
+                          {/* Enterprise Tier */}
+                          <div
+                            className={cn(
+                              "relative rounded-lg border-2 p-6 cursor-pointer transition-all",
+                              field.value === "enterprise"
+                                ? "border-indigo-600 bg-indigo-50 ring-2 ring-indigo-600"
+                                : "border-slate-200 hover:border-indigo-300"
+                            )}
+                            onClick={() => field.onChange("enterprise")}
+                          >
+                            <div className="absolute -top-3 left-4 px-3 py-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-xs font-medium rounded-full">
+                              Most Popular
+                            </div>
+                            {field.value === "enterprise" && (
+                              <div className="absolute top-3 right-3 w-6 h-6 bg-indigo-600 rounded-full flex items-center justify-center">
+                                <Check className="h-4 w-4 text-white" />
+                              </div>
+                            )}
+                            <div className="mb-4">
+                              <h4 className="text-lg font-semibold text-slate-900">Enterprise</h4>
+                              <p className="text-2xl font-bold text-indigo-600 mt-1">$299<span className="text-sm font-normal text-slate-500">/month</span></p>
+                            </div>
+                            <ul className="space-y-2 text-sm text-slate-600">
+                              <li className="flex items-center gap-2">
+                                <Check className="h-4 w-4 text-green-500" />
+                                Everything in Standard
+                              </li>
+                              <li className="flex items-center gap-2">
+                                <Check className="h-4 w-4 text-green-500" />
+                                Multi-Location Support
+                              </li>
+                              <li className="flex items-center gap-2">
+                                <Check className="h-4 w-4 text-green-500" />
+                                Advanced Analytics
+                              </li>
+                              <li className="flex items-center gap-2">
+                                <Check className="h-4 w-4 text-green-500" />
+                                Priority Support
+                              </li>
+                              <li className="flex items-center gap-2">
+                                <Check className="h-4 w-4 text-green-500" />
+                                2% Transaction Fee
+                              </li>
+                              <li className="flex items-center gap-2">
+                                <Check className="h-4 w-4 text-green-500" />
+                                Custom Integrations
+                              </li>
+                            </ul>
+                          </div>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Step 7: Legal & Compliance */}
+            {currentStep === 7 && (
+              <Card className="bg-white border-slate-200 rounded-lg shadow-sm">
+                <CardHeader className="border-b border-slate-100">
+                  <CardTitle className="flex items-center gap-2 text-slate-900">
+                    <FileText className="h-5 w-5 text-indigo-600" />
+                    Legal & Compliance
+                  </CardTitle>
+                  <CardDescription>Review and agree to our terms and policies</CardDescription>
+                </CardHeader>
+                <CardContent className="pt-6 space-y-6">
+                  {/* Terms of Service */}
+                  <div className="space-y-4">
+                    <Label className="text-base font-semibold">Terms of Service</Label>
+                    <ScrollArea className="h-48 rounded-lg border border-slate-200 p-4 bg-slate-50">
+                      <pre className="text-xs text-slate-600 whitespace-pre-wrap font-sans">
+                        {TERMS_OF_SERVICE}
+                      </pre>
+                    </ScrollArea>
+                    <FormField
+                      control={form.control}
+                      name="agreed_to_tos"
+                      render={({ field }) => (
+                        <FormItem className="flex items-start space-x-3 space-y-0">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <div className="leading-none">
+                            <FormLabel className="text-sm font-medium">
+                              I have read and agree to the Terms of Service *
+                            </FormLabel>
+                          </div>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  {/* Insurance Splicing Liability Agreement */}
+                  <div className="space-y-4">
+                    <Label className="text-base font-semibold">Insurance Splicing Liability Agreement</Label>
+                    <ScrollArea className="h-48 rounded-lg border border-slate-200 p-4 bg-slate-50">
+                      <pre className="text-xs text-slate-600 whitespace-pre-wrap font-sans">
+                        {INSURANCE_SPLICING_AGREEMENT}
+                      </pre>
+                    </ScrollArea>
+                    <FormField
+                      control={form.control}
+                      name="agreed_to_splicing_liability"
+                      render={({ field }) => (
+                        <FormItem className="flex items-start space-x-3 space-y-0">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <div className="leading-none">
+                            <FormLabel className="text-sm font-medium">
+                              I have read and agree to the Insurance Splicing Liability Agreement *
+                            </FormLabel>
+                          </div>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Step 8: Review */}
+            {currentStep === 8 && (
+              <Card className="bg-white border-slate-200 rounded-lg shadow-sm">
+                <CardHeader className="border-b border-slate-100">
+                  <CardTitle className="flex items-center gap-2 text-slate-900">
+                    <Check className="h-5 w-5 text-indigo-600" />
+                    Review Your Details
+                  </CardTitle>
+                  <CardDescription>Please verify all information before submitting</CardDescription>
+                </CardHeader>
+                <CardContent className="pt-6 space-y-6">
+                  {/* Practice Identity Summary */}
+                  <div className="rounded-lg border border-slate-200 p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="font-semibold text-slate-900 flex items-center gap-2">
+                        <Building2 className="h-4 w-4 text-indigo-600" />
+                        Practice Identity
+                      </h4>
+                      <Button type="button" variant="ghost" size="sm" onClick={() => goToStep(1)}>
+                        <Edit className="h-4 w-4 mr-1" /> Edit
+                      </Button>
+                    </div>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                      <div><span className="text-slate-500">Name:</span> {values.legal_practice_name}</div>
+                      <div><span className="text-slate-500">Phone:</span> {values.primary_phone}</div>
+                      <div><span className="text-slate-500">Address:</span> {values.physical_address}, {values.city}, {values.state} {values.zip_code}</div>
+                      <div><span className="text-slate-500">EIN:</span> {values.tax_id_ein}</div>
+                    </div>
+                  </div>
+
+                  {/* Medical Verification Summary */}
+                  <div className="rounded-lg border border-slate-200 p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="font-semibold text-slate-900 flex items-center gap-2">
+                        <Stethoscope className="h-4 w-4 text-indigo-600" />
+                        Medical Verification
+                      </h4>
+                      <Button type="button" variant="ghost" size="sm" onClick={() => goToStep(2)}>
+                        <Edit className="h-4 w-4 mr-1" /> Edit
+                      </Button>
+                    </div>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                      <div><span className="text-slate-500">Medical Director:</span> {values.medical_director_name}</div>
+                      <div><span className="text-slate-500">License:</span> {values.dvm_license_number} ({values.dvm_license_state})</div>
+                      <div><span className="text-slate-500">Practice Type:</span> {values.practice_type}</div>
+                      <div><span className="text-slate-500">Accreditations:</span> {values.accreditations?.join(", ") || "None"}</div>
+                    </div>
+                  </div>
+
+                  {/* Insurance Setup Summary */}
+                  <div className="rounded-lg border border-slate-200 p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="font-semibold text-slate-900 flex items-center gap-2">
+                        <ShieldCheck className="h-4 w-4 text-indigo-600" />
+                        Insurance Setup
+                      </h4>
+                      <Button type="button" variant="ghost" size="sm" onClick={() => goToStep(3)}>
+                        <Edit className="h-4 w-4 mr-1" /> Edit
+                      </Button>
+                    </div>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                      <div><span className="text-slate-500">Partners:</span> {values.insurance_partners?.length || 0} selected</div>
+                      <div><span className="text-slate-500">Direct-Pay:</span> {values.direct_pay_capability ? "Yes" : "No"}</div>
+                      <div><span className="text-slate-500">Splicing:</span> {values.splicing_preference === "api" ? "API-Integrated" : "Manual"}</div>
+                      <div><span className="text-slate-500">Fee:</span> ${values.admin_splicing_fee || 0}</div>
+                    </div>
+                  </div>
+
+                  {/* Integration Summary */}
+                  <div className="rounded-lg border border-slate-200 p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="font-semibold text-slate-900 flex items-center gap-2">
+                        <Wallet className="h-4 w-4 text-indigo-600" />
+                        Integration
+                      </h4>
+                      <Button type="button" variant="ghost" size="sm" onClick={() => goToStep(4)}>
+                        <Edit className="h-4 w-4 mr-1" /> Edit
+                      </Button>
+                    </div>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                      <div><span className="text-slate-500">PIMS:</span> {values.pims_software}</div>
+                      <div><span className="text-slate-500">Data Sync:</span> {values.data_sync_permission ? "Authorized" : "Not Authorized"}</div>
+                    </div>
+                  </div>
+
+                  {/* Public Profile Summary */}
+                  <div className="rounded-lg border border-slate-200 p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="font-semibold text-slate-900 flex items-center gap-2">
+                        <User className="h-4 w-4 text-indigo-600" />
+                        Public Profile
+                      </h4>
+                      <Button type="button" variant="ghost" size="sm" onClick={() => goToStep(5)}>
+                        <Edit className="h-4 w-4 mr-1" /> Edit
+                      </Button>
+                    </div>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                      <div><span className="text-slate-500">Services:</span> {values.services_provided?.length || 0} selected</div>
+                      <div><span className="text-slate-500">New Patients:</span> {values.accepting_new_patients ? "Accepting" : "Not Accepting"}</div>
+                      <div><span className="text-slate-500">Emergency Phone:</span> {values.emergency_phone || "Not set"}</div>
+                    </div>
+                  </div>
+
+                  {/* Financial Summary */}
+                  <div className="rounded-lg border border-slate-200 p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="font-semibold text-slate-900 flex items-center gap-2">
+                        <CreditCard className="h-4 w-4 text-indigo-600" />
+                        Financial Setup
+                      </h4>
+                      <Button type="button" variant="ghost" size="sm" onClick={() => goToStep(6)}>
+                        <Edit className="h-4 w-4 mr-1" /> Edit
+                      </Button>
+                    </div>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                      <div><span className="text-slate-500">Subscription:</span> {values.subscription_tier === "enterprise" ? "Enterprise ($299/mo)" : "Standard ($99/mo)"}</div>
+                      <div><span className="text-slate-500">Stripe:</span> Connect after registration</div>
+                    </div>
+                  </div>
+
+                  {/* Legal Summary */}
+                  <div className="rounded-lg border border-slate-200 p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="font-semibold text-slate-900 flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-indigo-600" />
+                        Legal & Compliance
+                      </h4>
+                      <Button type="button" variant="ghost" size="sm" onClick={() => goToStep(7)}>
+                        <Edit className="h-4 w-4 mr-1" /> Edit
+                      </Button>
+                    </div>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                      <div className="flex items-center gap-2">
+                        {values.agreed_to_tos ? <Check className="h-4 w-4 text-green-500" /> : <span className="h-4 w-4 rounded border border-slate-300" />}
+                        Terms of Service
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {values.agreed_to_splicing_liability ? <Check className="h-4 w-4 text-green-500" /> : <span className="h-4 w-4 rounded border border-slate-300" />}
+                        Splicing Liability Agreement
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Navigation Buttons */}
             <div className="flex justify-between items-center mt-8">
               <Button
@@ -1001,7 +1824,7 @@ export const VetOnboardingForm = () => {
                   </Button>
                 )}
 
-                {currentStep < 4 ? (
+                {currentStep < 8 ? (
                   <Button
                     type="button"
                     onClick={handleNext}
@@ -1013,11 +1836,17 @@ export const VetOnboardingForm = () => {
                 ) : (
                   <Button
                     type="submit"
-                    disabled={isSubmitting}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg"
+                    disabled={isSubmitting || !values.agreed_to_tos || !values.agreed_to_splicing_liability}
+                    className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-lg"
                   >
-                    {isSubmitting ? "Submitting..." : "Complete Registration"}
-                    <Check className="h-4 w-4 ml-2" />
+                    {isSubmitting ? (
+                      <>Submitting...</>
+                    ) : (
+                      <>
+                        <Sparkles className="h-4 w-4 mr-2" />
+                        Complete Registration
+                      </>
+                    )}
                   </Button>
                 )}
               </div>
