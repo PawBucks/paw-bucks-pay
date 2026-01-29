@@ -19,6 +19,7 @@ import { PetProfilesSection } from "@/components/dashboard/PetProfilesSection";
 import { DiscoverServicesCard } from "@/components/dashboard/DiscoverServicesCard";
 import { AutoRedeemEducationCard } from "@/components/dashboard/AutoRedeemEducationCard";
 import { PetOwnerInvoices } from "@/components/dashboard/PetOwnerInvoices";
+import { ActionRequiredSlices } from "@/components/dashboard/ActionRequiredSlices";
 import { BottomNav } from "@/components/BottomNav";
 import { PullToRefresh } from "@/components/PullToRefresh";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
@@ -263,6 +264,11 @@ const Dashboard = () => {
 
         {profile.user_type === "pet_owner" ? (
           <div className="flex flex-col gap-4 sm:gap-6">
+            {/* Action Required - Denied insurance claims needing resolution */}
+            {user && (
+              <ActionRequiredSlices userId={user.id} />
+            )}
+            
             {/* Auto-Redeem Education Card - Prominent placement for users with PawBucks */}
             {user && (pawbucksWallet?.balance || 0) > 0 && (
               <motion.div custom={0} variants={cardVariants} initial="hidden" animate="visible">

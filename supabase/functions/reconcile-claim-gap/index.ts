@@ -57,11 +57,13 @@ serve(async (req) => {
           invoice_number,
           client_name,
           client_email,
-          merchant_id
+          merchant_id,
+          total
         ),
         claim:insurance_claims(
           id,
           claim_number,
+          total_amount,
           policy:pet_insurance_policies(
             pet:pet_profiles(name, user_id),
             vet_insurance_providers(name)
@@ -177,7 +179,7 @@ serve(async (req) => {
             source: "claim_recovery",
           });
 
-          // Mark as funded
+          // Mark as funded and release rewards
           await supabaseClient
             .from("invoice_slices")
             .update({
@@ -185,6 +187,9 @@ serve(async (req) => {
               funded_at: new Date().toISOString(),
             })
             .eq("id", sliceId);
+
+          // Release locked rewards
+          await releaseLockedRewards(supabaseClient, user.id, slice, sliceId);
 
           result = { success: true, option: "pawbucks", pawBucksUsed: pawBucksNeeded };
           logStep("PawBucks payment processed", { pawBucksUsed: pawBucksNeeded });
@@ -203,6 +208,18 @@ serve(async (req) => {
             installment_amount: installmentAmount,
             next_due_date: nextDueDate.toISOString().split("T")[0],
           });
+
+          // Update slice status to funded (plan created)
+          await supabaseClient
+            .from("invoice_slices")
+            .update({
+              recovery_status: "funded",
+              funded_at: new Date().toISOString(),
+            })
+            .eq("id", sliceId);
+
+          // Release locked rewards since payment plan is committed
+          await releaseLockedRewards(supabaseClient, user.id, slice, sliceId);
 
           result = {
             success: true,
@@ -225,6 +242,33 @@ serve(async (req) => {
         break;
       }
 
+      case "mark_funded": {
+        // Mark slice as funded after successful card payment
+        await supabaseClient
+          .from("invoice_slices")
+          .update({
+            recovery_status: "funded",
+            funded_at: new Date().toISOString(),
+          })
+          .eq("id", sliceId);
+
+        // Log the action
+        await supabaseClient.from("claim_recovery_log").insert({
+          slice_id: sliceId,
+          action: "payment_completed",
+          actor_type: "owner",
+          actor_id: user.id,
+          details: { gap_amount: slice.gap_amount, payment_method: "card" },
+        });
+
+        // Release locked rewards
+        await releaseLockedRewards(supabaseClient, user.id, slice, sliceId);
+
+        result = { success: true, action: "funded" };
+        logStep("Slice marked as funded");
+        break;
+      }
+
       default:
         throw new Error(`Unknown action: ${action}`);
     }
@@ -244,3 +288,68 @@ serve(async (req) => {
     });
   }
 });
+
+// Helper function to release locked rewards
+async function releaseLockedRewards(
+  supabaseClient: any,
+  userId: string,
+  slice: Record<string, unknown>,
+  sliceId: string
+) {
+  try {
+    // Get user's subscription tier to calculate rewards
+    const { data: subData } = await supabaseClient
+      .from("user_subscriptions")
+      .select("tier")
+      .eq("user_id", userId)
+      .eq("status", "active")
+      .maybeSingle();
+
+    const tier = subData?.tier || "free";
+    const multiplier = tier === "pawpass_plus" ? 30 : tier === "pawpass" ? 20 : 10;
+    
+    // Calculate rewards based on original transaction amount
+    const originalAmount = Number((slice as { original_amount?: number }).original_amount) || 0;
+    const rewardsToRelease = Math.floor(originalAmount * multiplier);
+
+    if (rewardsToRelease > 0) {
+      // Credit the rewards to user's wallet
+      const { data: wallet } = await supabaseClient
+        .from("pawbucks_wallet")
+        .select("balance")
+        .eq("user_id", userId)
+        .single();
+
+      const currentBalance = wallet?.balance || 0;
+
+      await supabaseClient
+        .from("pawbucks_wallet")
+        .update({ balance: currentBalance + rewardsToRelease })
+        .eq("user_id", userId);
+
+      // Log the reward release
+      await supabaseClient.from("pawbucks_activity").insert({
+        user_id: userId,
+        type: "credit",
+        amount: rewardsToRelease,
+        description: `Rewards released for resolved claim`,
+        source: "claim_recovery_reward",
+        pawbucks_status: "available",
+      });
+
+      // Log in claim recovery log
+      await supabaseClient.from("claim_recovery_log").insert({
+        slice_id: sliceId,
+        action: "rewards_released",
+        actor_type: "system",
+        actor_id: userId,
+        details: { rewards_amount: rewardsToRelease, multiplier, original_amount: originalAmount },
+      });
+
+      console.log(`[RECONCILE-CLAIM] Released ${rewardsToRelease} PawBucks to user ${userId}`);
+    }
+  } catch (error) {
+    console.error("[RECONCILE-CLAIM] Error releasing rewards:", error);
+    // Don't throw - reward release failure shouldn't block the main flow
+  }
+}
