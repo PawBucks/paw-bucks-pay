@@ -389,6 +389,94 @@ export type Database = {
         }
         Relationships: []
       }
+      claim_payment_plans: {
+        Row: {
+          created_at: string | null
+          id: string
+          installment_amount: number
+          installments: number
+          next_due_date: string | null
+          owner_id: string
+          paid_installments: number | null
+          slice_id: string
+          status: string | null
+          total_amount: number
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          installment_amount: number
+          installments?: number
+          next_due_date?: string | null
+          owner_id: string
+          paid_installments?: number | null
+          slice_id: string
+          status?: string | null
+          total_amount: number
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          installment_amount?: number
+          installments?: number
+          next_due_date?: string | null
+          owner_id?: string
+          paid_installments?: number | null
+          slice_id?: string
+          status?: string | null
+          total_amount?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "claim_payment_plans_slice_id_fkey"
+            columns: ["slice_id"]
+            isOneToOne: false
+            referencedRelation: "invoice_slices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      claim_recovery_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          actor_type: string
+          created_at: string | null
+          details: Json | null
+          id: string
+          slice_id: string
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          actor_type: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          slice_id: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          actor_type?: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          slice_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "claim_recovery_log_slice_id_fkey"
+            columns: ["slice_id"]
+            isOneToOne: false
+            referencedRelation: "invoice_slices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cms_content: {
         Row: {
           content: Json
@@ -1760,6 +1848,75 @@ export type Database = {
             columns: ["merchant_id"]
             isOneToOne: true
             referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoice_slices: {
+        Row: {
+          actual_amount: number
+          claim_id: string | null
+          created_at: string | null
+          funded_at: string | null
+          gap_amount: number | null
+          id: string
+          invoice_id: string
+          notes: string | null
+          notification_sent_at: string | null
+          option_selected_at: string | null
+          original_amount: number
+          recovery_option: string | null
+          recovery_status: string | null
+          slice_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          actual_amount?: number
+          claim_id?: string | null
+          created_at?: string | null
+          funded_at?: string | null
+          gap_amount?: number | null
+          id?: string
+          invoice_id: string
+          notes?: string | null
+          notification_sent_at?: string | null
+          option_selected_at?: string | null
+          original_amount?: number
+          recovery_option?: string | null
+          recovery_status?: string | null
+          slice_type: string
+          updated_at?: string | null
+        }
+        Update: {
+          actual_amount?: number
+          claim_id?: string | null
+          created_at?: string | null
+          funded_at?: string | null
+          gap_amount?: number | null
+          id?: string
+          invoice_id?: string
+          notes?: string | null
+          notification_sent_at?: string | null
+          option_selected_at?: string | null
+          original_amount?: number
+          recovery_option?: string | null
+          recovery_status?: string | null
+          slice_type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_slices_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "insurance_claims"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_slices_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
             referencedColumns: ["id"]
           },
         ]

@@ -19,6 +19,7 @@ import {
   AIClinicalAssistant,
   FinancialFrictionTab,
   PracticeGrowthTab,
+  ClaimRecoveryDashboard,
 } from "@/components/vet-portal";
 import {
   Stethoscope,
@@ -35,6 +36,7 @@ import {
   Sparkles,
   Wallet,
   TrendingUp,
+  Scale,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -267,6 +269,10 @@ export default function VetDashboard() {
               <Heart className="w-4 h-4" />
               <span className="hidden sm:inline">Wellness</span>
             </TabsTrigger>
+            <TabsTrigger value="claim-recovery" className="flex items-center gap-1">
+              <Scale className="w-4 h-4" />
+              <span className="hidden sm:inline">Recovery</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="emr">
@@ -315,6 +321,10 @@ export default function VetDashboard() {
 
           <TabsContent value="wellness">
             <WellnessPlansTab vetId={vetInfo.id} />
+          </TabsContent>
+
+          <TabsContent value="claim-recovery">
+            <ClaimRecoveryDashboard vetId={vetInfo.id} />
           </TabsContent>
         </Tabs>
       </div>

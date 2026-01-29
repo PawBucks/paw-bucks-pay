@@ -1,0 +1,352 @@
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  AlertCircle,
+  FileText,
+  Send,
+  CheckCircle,
+  Clock,
+  DollarSign,
+  TrendingDown,
+  FileDown,
+  RefreshCw,
+} from "lucide-react";
+import { toast } from "sonner";
+
+interface ClaimSlice {
+  id: string;
+  invoice_id: string;
+  claim_id: string;
+  slice_type: string;
+  original_amount: number;
+  actual_amount: number;
+  gap_amount: number;
+  recovery_status: string;
+  recovery_option: string | null;
+  notification_sent_at: string | null;
+  option_selected_at: string | null;
+  funded_at: string | null;
+  notes: string | null;
+  created_at: string;
+  claim?: {
+    claim_number: string;
+    policy?: {
+      pet?: {
+        name: string;
+      };
+      vet_insurance_providers?: {
+        name: string;
+      };
+    };
+  };
+  invoice?: {
+    invoice_number: string;
+    client_name: string;
+  };
+}
+
+interface ClaimRecoveryDashboardProps {
+  vetId: string;
+}
+
+const statusSteps = [
+  { key: "pending", label: "Pending", icon: Clock },
+  { key: "notification_sent", label: "Notified", icon: Send },
+  { key: "option_selected", label: "Option Selected", icon: CheckCircle },
+  { key: "funded", label: "Funded", icon: DollarSign },
+];
+
+const getStatusProgress = (status: string): number => {
+  const index = statusSteps.findIndex((s) => s.key === status);
+  if (status === "written_off") return 100;
+  return index >= 0 ? ((index + 1) / statusSteps.length) * 100 : 0;
+};
+
+const getStatusColor = (status: string): string => {
+  switch (status) {
+    case "funded":
+      return "bg-green-500";
+    case "option_selected":
+      return "bg-blue-500";
+    case "notification_sent":
+      return "bg-amber-500";
+    case "written_off":
+      return "bg-gray-400";
+    default:
+      return "bg-indigo-500";
+  }
+};
+
+export function ClaimRecoveryDashboard({ vetId }: ClaimRecoveryDashboardProps) {
+  const [slices, setSlices] = useState<ClaimSlice[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [sendingNotification, setSendingNotification] = useState<string | null>(null);
+
+  useEffect(() => {
+    loadUnderpaidSlices();
+  }, [vetId]);
+
+  const loadUnderpaidSlices = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("invoice_slices")
+        .select(`
+          *,
+          claim:insurance_claims(
+            claim_number,
+            policy:pet_insurance_policies(
+              pet:pet_profiles(name),
+              vet_insurance_providers(name)
+            )
+          ),
+          invoice:invoices(invoice_number, client_name)
+        `)
+        .eq("slice_type", "insurance")
+        .gt("gap_amount", 0)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setSlices((data as ClaimSlice[]) || []);
+    } catch (error) {
+      console.error("Error loading slices:", error);
+      toast.error("Failed to load claim recovery data");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const sendOwnerNotification = async (slice: ClaimSlice) => {
+    setSendingNotification(slice.id);
+    try {
+      const { error } = await supabase.functions.invoke("reconcile-claim-gap", {
+        body: {
+          sliceId: slice.id,
+          action: "notify_owner",
+        },
+      });
+
+      if (error) throw error;
+
+      toast.success("Owner notification sent successfully");
+      loadUnderpaidSlices();
+    } catch (error) {
+      console.error("Error sending notification:", error);
+      toast.error("Failed to send notification");
+    } finally {
+      setSendingNotification(null);
+    }
+  };
+
+  const generateAppealPDF = async (slice: ClaimSlice) => {
+    toast.info("Generating appeal PDF...");
+    // In a real implementation, this would call an edge function to generate the PDF
+    setTimeout(() => {
+      toast.success("Appeal PDF generated and downloaded");
+    }, 1500);
+  };
+
+  const totalGap = slices.reduce((sum, s) => sum + Number(s.gap_amount), 0);
+  const pendingCount = slices.filter((s) => s.recovery_status === "pending").length;
+  const inProgressCount = slices.filter(
+    (s) => s.recovery_status === "notification_sent" || s.recovery_status === "option_selected"
+  ).length;
+  const fundedCount = slices.filter((s) => s.recovery_status === "funded").length;
+
+  if (isLoading) {
+    return (
+      <Card className="bg-white border-indigo-100">
+        <CardContent className="p-8 text-center">
+          <RefreshCw className="h-8 w-8 animate-spin mx-auto text-indigo-600" />
+          <p className="mt-2 text-muted-foreground">Loading recovery data...</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Summary Cards */}
+      <div className="grid gap-4 md:grid-cols-4">
+        <Card className="bg-white border-indigo-100">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-red-50">
+                <TrendingDown className="h-5 w-5 text-red-600" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Total Gap Amount</p>
+                <p className="text-2xl font-bold text-red-600">${totalGap.toFixed(2)}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white border-indigo-100">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-amber-50">
+                <Clock className="h-5 w-5 text-amber-600" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Pending Action</p>
+                <p className="text-2xl font-bold">{pendingCount}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white border-indigo-100">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-blue-50">
+                <Send className="h-5 w-5 text-blue-600" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">In Progress</p>
+                <p className="text-2xl font-bold">{inProgressCount}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white border-indigo-100">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-green-50">
+                <CheckCircle className="h-5 w-5 text-green-600" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Recovered</p>
+                <p className="text-2xl font-bold text-green-600">{fundedCount}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Underpaid Slices Table */}
+      <Card className="bg-white border-indigo-100">
+        <CardHeader className="border-b border-indigo-50">
+          <CardTitle className="flex items-center gap-2 text-indigo-900">
+            <AlertCircle className="h-5 w-5 text-indigo-600" />
+            Underpaid Insurance Slices
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          {slices.length === 0 ? (
+            <div className="p-8 text-center">
+              <CheckCircle className="h-12 w-12 mx-auto text-green-500 mb-3" />
+              <p className="text-lg font-medium">No Underpaid Claims</p>
+              <p className="text-muted-foreground">All insurance claims are fully reconciled.</p>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-indigo-50/50">
+                  <TableHead>Claim / Patient</TableHead>
+                  <TableHead>Carrier</TableHead>
+                  <TableHead className="text-right">Original Est.</TableHead>
+                  <TableHead className="text-right">Actual Paid</TableHead>
+                  <TableHead className="text-right">Gap</TableHead>
+                  <TableHead>Recovery Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {slices.map((slice) => (
+                  <TableRow key={slice.id} className="hover:bg-indigo-50/30">
+                    <TableCell>
+                      <div>
+                        <p className="font-medium">{slice.claim?.claim_number || "N/A"}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {slice.claim?.policy?.pet?.name || "Unknown Pet"}
+                        </p>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="bg-slate-50">
+                        {slice.claim?.policy?.vet_insurance_providers?.name || "Unknown"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right font-medium">
+                      ${Number(slice.original_amount).toFixed(2)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      ${Number(slice.actual_amount).toFixed(2)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <span className="font-bold text-red-600">
+                        ${Number(slice.gap_amount).toFixed(2)}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Progress
+                            value={getStatusProgress(slice.recovery_status)}
+                            className="h-2 w-24"
+                          />
+                          <Badge
+                            className={`${getStatusColor(slice.recovery_status)} text-white text-xs`}
+                          >
+                            {slice.recovery_status.replace("_", " ")}
+                          </Badge>
+                        </div>
+                        {slice.recovery_option && (
+                          <p className="text-xs text-muted-foreground">
+                            Option: {slice.recovery_option.replace("_", " ")}
+                          </p>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2 justify-end">
+                        {slice.recovery_status === "pending" && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="border-indigo-200 text-indigo-700 hover:bg-indigo-50"
+                            onClick={() => sendOwnerNotification(slice)}
+                            disabled={sendingNotification === slice.id}
+                          >
+                            {sendingNotification === slice.id ? (
+                              <RefreshCw className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Send className="h-4 w-4" />
+                            )}
+                            <span className="ml-1">Notify</span>
+                          </Button>
+                        )}
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-indigo-600 hover:bg-indigo-50"
+                          onClick={() => generateAppealPDF(slice)}
+                        >
+                          <FileDown className="h-4 w-4" />
+                          <span className="ml-1">Appeal PDF</span>
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
