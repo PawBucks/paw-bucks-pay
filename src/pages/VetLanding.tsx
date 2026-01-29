@@ -25,6 +25,7 @@ import {
   CalendarCheck
 } from "lucide-react";
 import { SocialFollowLinks } from "@/components/SocialFollowLinks";
+import { PremiumMerchantsBanner } from "@/components/PremiumMerchantsBanner";
 import logo from "@/assets/logo.png";
 
 const VetLanding = () => {
@@ -208,8 +209,17 @@ const VetLanding = () => {
             </div>
           </section>
 
+          {/* Premium Merchants Carousel */}
+          <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+            <PremiumMerchantsBanner 
+              title="Premium Partners in the PawBucks Network"
+              rotationInterval={5000}
+              showMultiple={true}
+            />
+          </section>
+
           {/* Core Features Section */}
-          <section 
+          <section
             id="features"
             className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 lg:py-28"
           >
