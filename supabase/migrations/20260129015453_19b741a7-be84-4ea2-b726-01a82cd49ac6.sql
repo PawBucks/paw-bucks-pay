@@ -1,0 +1,22 @@
+-- Add new columns to partner_vets for comprehensive onboarding data
+ALTER TABLE public.partner_vets
+ADD COLUMN IF NOT EXISTS dba_name TEXT,
+ADD COLUMN IF NOT EXISTS clinic_name TEXT,
+ADD COLUMN IF NOT EXISTS clinic_phone TEXT,
+ADD COLUMN IF NOT EXISTS sms_enabled BOOLEAN DEFAULT false,
+ADD COLUMN IF NOT EXISTS website_url TEXT,
+ADD COLUMN IF NOT EXISTS tax_id TEXT,
+ADD COLUMN IF NOT EXISTS medical_director_name TEXT,
+ADD COLUMN IF NOT EXISTS license_number TEXT,
+ADD COLUMN IF NOT EXISTS license_state TEXT,
+ADD COLUMN IF NOT EXISTS npi_number TEXT,
+ADD COLUMN IF NOT EXISTS practice_type TEXT,
+ADD COLUMN IF NOT EXISTS accreditations TEXT[] DEFAULT '{}',
+ADD COLUMN IF NOT EXISTS insurance_partners TEXT[] DEFAULT '{}',
+ADD COLUMN IF NOT EXISTS direct_pay_enabled BOOLEAN DEFAULT false,
+ADD COLUMN IF NOT EXISTS splicing_preference TEXT,
+ADD COLUMN IF NOT EXISTS splicing_fee NUMERIC(10,2),
+ADD COLUMN IF NOT EXISTS pims_software TEXT,
+ADD COLUMN IF NOT EXISTS data_sync_enabled BOOLEAN DEFAULT false,
+ADD COLUMN IF NOT EXISTS preferred_referrals TEXT,
+ADD COLUMN IF NOT EXISTS is_verified BOOLEAN DEFAULT false;
