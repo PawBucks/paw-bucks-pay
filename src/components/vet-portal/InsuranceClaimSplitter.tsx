@@ -205,6 +205,34 @@ export function InsuranceClaimSplitter({ vetId }: InsuranceClaimSplitterProps) {
     },
   });
 
+  // Deny claim mutation
+  const [denyingClaimId, setDenyingClaimId] = useState<string | null>(null);
+  
+  const denyClaimMutation = useMutation({
+    mutationFn: async ({ claimId, denialReason }: { claimId: string; denialReason: string }) => {
+      setDenyingClaimId(claimId);
+      const { data, error } = await supabase.functions.invoke("deny-insurance-claim", {
+        body: { claimId, denialReason },
+      });
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["insurance-claims", vetId] });
+      toast.success("Claim marked as denied - owner has been notified");
+      setDenyingClaimId(null);
+    },
+    onError: (error) => {
+      toast.error(`Failed to deny claim: ${error.message}`);
+      setDenyingClaimId(null);
+    },
+  });
+
+  const handleDenyClaim = (claimId: string, denialReason: string) => {
+    denyClaimMutation.mutate({ claimId, denialReason });
+  };
+
   const resetForm = () => {
     setSelectedInvoice("");
     setSelectedPolicy("");
@@ -588,59 +616,153 @@ export function InsuranceClaimSplitter({ vetId }: InsuranceClaimSplitterProps) {
   );
 }
 
-// Helper component for claim cards
-function ClaimCard({ claim, onSubmit }: { claim: InsuranceClaim; onSubmit?: () => void }) {
+// Helper component for claim cards with deny action
+function ClaimCard({ 
+  claim, 
+  onSubmit,
+  onDeny,
+  isDenying 
+}: { 
+  claim: InsuranceClaim; 
+  onSubmit?: () => void;
+  onDeny?: (claimId: string, reason: string) => void;
+  isDenying?: boolean;
+}) {
+  const [showDenyDialog, setShowDenyDialog] = useState(false);
+  const [denialReason, setDenialReason] = useState("");
+  
   const statusConfig = STATUS_CONFIG[claim.status] || STATUS_CONFIG.draft;
   const StatusIcon = statusConfig.icon;
   const policy = claim.pet_insurance_policies;
 
+  const handleDeny = () => {
+    if (onDeny) {
+      onDeny(claim.id, denialReason);
+      setShowDenyDialog(false);
+      setDenialReason("");
+    }
+  };
+
+  const canDeny = ["submitted", "under_review"].includes(claim.status);
+
   return (
-    <Card>
-      <CardContent className="py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className={`p-2 rounded-full ${statusConfig.color}`}>
-              <StatusIcon className="h-4 w-4" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-medium">{claim.claim_number}</span>
-                <Badge variant="outline" className={statusConfig.color}>
-                  {statusConfig.label}
-                </Badge>
+    <>
+      <Card>
+        <CardContent className="py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className={`p-2 rounded-full ${statusConfig.color}`}>
+                <StatusIcon className="h-4 w-4" />
               </div>
-              <p className="text-sm text-muted-foreground">
-                {policy?.pet_profiles?.name} • {policy?.vet_insurance_providers?.name}
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="font-medium">{claim.claim_number}</span>
+                  <Badge variant="outline" className={statusConfig.color}>
+                    {statusConfig.label}
+                  </Badge>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  {policy?.pet_profiles?.name} • {policy?.vet_insurance_providers?.name}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-6">
+              <div className="text-right">
+                <p className="text-sm text-muted-foreground">Total</p>
+                <p className="font-medium">${claim.total_amount?.toFixed(2)}</p>
+              </div>
+              {claim.covered_amount !== null && (
+                <div className="text-right">
+                  <p className="text-sm text-muted-foreground">Insurance</p>
+                  <p className="font-medium text-blue-600">${claim.covered_amount?.toFixed(2)}</p>
+                </div>
+              )}
+              {claim.owner_responsibility !== null && (
+                <div className="text-right">
+                  <p className="text-sm text-muted-foreground">Owner</p>
+                  <p className="font-medium text-orange-600">${claim.owner_responsibility?.toFixed(2)}</p>
+                </div>
+              )}
+              
+              <div className="flex items-center gap-2">
+                {onSubmit && claim.status === "draft" && (
+                  <Button size="sm" onClick={onSubmit}>
+                    <Send className="h-4 w-4 mr-1" />
+                    Submit
+                  </Button>
+                )}
+                {canDeny && onDeny && (
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    className="border-red-200 text-red-700 hover:bg-red-50"
+                    onClick={() => setShowDenyDialog(true)}
+                  >
+                    <XCircle className="h-4 w-4 mr-1" />
+                    Mark Denied
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Deny Claim Dialog */}
+      <Dialog open={showDenyDialog} onOpenChange={setShowDenyDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-700">
+              <XCircle className="h-5 w-5" />
+              Mark Claim as Denied
+            </DialogTitle>
+            <DialogDescription>
+              This will notify the pet owner that their claim was denied and they need to pay the full balance.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 mt-4">
+            <div className="p-3 bg-amber-50 rounded-lg border border-amber-200">
+              <p className="text-sm text-amber-800">
+                <strong>Claim:</strong> {claim.claim_number}<br />
+                <strong>Patient:</strong> {policy?.pet_profiles?.name}<br />
+                <strong>Amount:</strong> ${claim.total_amount?.toFixed(2)}
               </p>
+            </div>
+            
+            <div>
+              <Label>Denial Reason (from carrier)</Label>
+              <Textarea
+                value={denialReason}
+                onChange={(e) => setDenialReason(e.target.value)}
+                placeholder="e.g., Pre-existing condition exclusion, Waiting period not met..."
+                rows={3}
+              />
             </div>
           </div>
 
-          <div className="flex items-center gap-6">
-            <div className="text-right">
-              <p className="text-sm text-muted-foreground">Total</p>
-              <p className="font-medium">${claim.total_amount?.toFixed(2)}</p>
-            </div>
-            {claim.covered_amount !== null && (
-              <div className="text-right">
-                <p className="text-sm text-muted-foreground">Insurance</p>
-                <p className="font-medium text-blue-600">${claim.covered_amount?.toFixed(2)}</p>
-              </div>
-            )}
-            {claim.owner_responsibility !== null && (
-              <div className="text-right">
-                <p className="text-sm text-muted-foreground">Owner</p>
-                <p className="font-medium text-orange-600">${claim.owner_responsibility?.toFixed(2)}</p>
-              </div>
-            )}
-            {onSubmit && claim.status === "draft" && (
-              <Button size="sm" onClick={onSubmit}>
-                <Send className="h-4 w-4 mr-1" />
-                Submit
-              </Button>
-            )}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => setShowDenyDialog(false)}>
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive"
+              onClick={handleDeny}
+              disabled={isDenying}
+            >
+              {isDenying ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                "Confirm Denial"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
