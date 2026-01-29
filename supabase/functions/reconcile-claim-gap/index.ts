@@ -297,6 +297,65 @@ async function releaseLockedRewards(
   sliceId: string
 ) {
   try {
+    // Find existing locked rewards linked to this slice
+    const { data: lockedRewards, error: lockedError } = await supabaseClient
+      .from("pawbucks_activity")
+      .select("id, amount, user_id")
+      .eq("slice_id", sliceId)
+      .eq("pawbucks_status", "pending")
+      .eq("type", "credit");
+
+    if (lockedError) {
+      console.error("[RECONCILE-CLAIM] Error fetching locked rewards:", lockedError);
+    }
+
+    if (lockedRewards && lockedRewards.length > 0) {
+      // Release the locked rewards by updating their status
+      const totalToRelease = lockedRewards.reduce((sum: number, r: any) => sum + r.amount, 0);
+      const rewardOwnerId = lockedRewards[0].user_id;
+
+      // Update the pending rewards to available
+      for (const reward of lockedRewards) {
+        await supabaseClient
+          .from("pawbucks_activity")
+          .update({ 
+            pawbucks_status: "available",
+            description: reward.description?.replace("Pending insurance", "Claim resolved") || "Rewards released for resolved claim"
+          })
+          .eq("id", reward.id);
+      }
+
+      // Credit the rewards to the user's wallet
+      const { data: wallet } = await supabaseClient
+        .from("pawbucks_wallet")
+        .select("balance")
+        .eq("user_id", rewardOwnerId)
+        .single();
+
+      const currentBalance = wallet?.balance || 0;
+
+      await supabaseClient
+        .from("pawbucks_wallet")
+        .update({ balance: currentBalance + totalToRelease })
+        .eq("user_id", rewardOwnerId);
+
+      // Log in claim recovery log
+      await supabaseClient.from("claim_recovery_log").insert({
+        slice_id: sliceId,
+        action: "rewards_released",
+        actor_type: "system",
+        actor_id: rewardOwnerId,
+        details: { 
+          rewards_amount: totalToRelease, 
+          locked_reward_count: lockedRewards.length,
+        },
+      });
+
+      console.log(`[RECONCILE-CLAIM] Released ${totalToRelease} locked PawBucks to user ${rewardOwnerId}`);
+      return;
+    }
+
+    // Fallback: If no locked rewards found, calculate and create new ones
     // Get user's subscription tier to calculate rewards
     const { data: subData } = await supabaseClient
       .from("user_subscriptions")

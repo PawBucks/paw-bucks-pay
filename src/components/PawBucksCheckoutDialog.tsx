@@ -9,11 +9,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Loader2, Coins, Check, Sparkles, CreditCard } from "lucide-react";
+import { Loader2, Coins, Check, Sparkles, CreditCard, Lock, Info } from "lucide-react";
 import { PawBucksInfoTooltip } from "@/components/PawBucksInfoTooltip";
-import { useSharedAccount, getEffectiveWalletUserId } from "@/hooks/useSharedAccount";
+import { useSpendablePawBucks } from "@/hooks/useSpendablePawBucks";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 // Pet Owner conversion rate: 1000 PawBucks = $1.00 (1 PawBuck = $0.001)
 const PAWBUCKS_TO_USD = 0.001;
@@ -48,55 +48,23 @@ export const PawBucksCheckoutDialog = ({
   isLoading = false,
 }: PawBucksCheckoutDialogProps) => {
   const [pawbucksToUse, setPawbucksToUse] = useState(0);
-  const [pawbucksBalance, setPawbucksBalance] = useState(0);
-  const [loadingBalance, setLoadingBalance] = useState(true);
 
-  // Get effective user ID for shared accounts
-  const sharedAccount = useSharedAccount(userId);
-  const effectiveUserId = getEffectiveWalletUserId(userId, sharedAccount);
+  // Use the spendable PawBucks hook to get only available (non-locked) balance
+  const { 
+    spendableBalance, 
+    lockedBalance, 
+    isLoading: loadingBalance 
+  } = useSpendablePawBucks(userId);
 
-  // Load PawBucks balance when dialog opens using effective user ID
+  // Reset slider when dialog closes
   useEffect(() => {
-    if (!open) return;
-    
-    // Wait for shared account check to complete
-    if (sharedAccount.isLoading) return;
-    
-    // If merchant doesn't accept PawBucks, no need to load balance
-    if (!merchantAcceptsPawBucks) {
-      setLoadingBalance(false);
-      return;
+    if (!open) {
+      setPawbucksToUse(0);
     }
-    
-    // If no user ID (not logged in), can't load balance
-    if (!effectiveUserId) {
-      setLoadingBalance(false);
-      setPawbucksBalance(0);
-      return;
-    }
-    
-    // Load the balance
-    loadPawbucksBalance();
-  }, [open, effectiveUserId, merchantAcceptsPawBucks, sharedAccount.isLoading]);
+  }, [open]);
 
-  const loadPawbucksBalance = async () => {
-    if (!effectiveUserId) return;
-    setLoadingBalance(true);
-    try {
-      const { data } = await supabase
-        .from('pawbucks_wallet')
-        .select('balance')
-        .eq('user_id', effectiveUserId)
-        .single();
-      
-      setPawbucksBalance(data?.balance || 0);
-    } catch (error) {
-      console.error("Error loading PawBucks balance:", error);
-      setPawbucksBalance(0);
-    } finally {
-      setLoadingBalance(false);
-    }
-  };
+  // The spendable balance is what they can actually use
+  const pawbucksBalance = spendableBalance;
 
   // Calculate values
   const pawbucksUsdValue = pawbucksToUse * PAWBUCKS_TO_USD;
@@ -236,8 +204,39 @@ export const PawBucksCheckoutDialog = ({
             {merchantAcceptsPawBucks && pawbucksBalance === 0 && (
               <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg flex items-start gap-2">
                 <Coins className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                <span>This merchant accepts PawBucks, but you don't have any yet. Earn PawBucks by making purchases!</span>
+                <span>This merchant accepts PawBucks, but you don't have any spendable yet. Earn PawBucks by making purchases!</span>
               </div>
+            )}
+
+            {/* Info about locked rewards */}
+            {merchantAcceptsPawBucks && lockedBalance > 0 && pawbucksBalance === 0 && (
+              <div className="text-sm text-amber-700 dark:text-amber-400 bg-amber-500/10 p-3 rounded-lg flex items-start gap-2 border border-amber-500/20">
+                <Lock className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                <div>
+                  <span className="font-medium">You have {lockedBalance.toLocaleString()} PawBucks locked</span>
+                  <p className="text-xs mt-1 text-amber-600/80 dark:text-amber-400/80">
+                    These points are currently locked until your recent vet visit is fully processed.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Show locked balance hint when they have some spendable */}
+            {merchantAcceptsPawBucks && lockedBalance > 0 && pawbucksBalance > 0 && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center gap-1 text-xs text-amber-600 cursor-help">
+                      <Lock className="w-3 h-3" />
+                      <span>+{lockedBalance.toLocaleString()} PB locked (vesting)</span>
+                      <Info className="w-3 h-3" />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="max-w-xs">
+                    <p>These rewards are from recent vet visits and will unlock once insurance claims are fully processed.</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             )}
 
             {/* Payment Summary */}
