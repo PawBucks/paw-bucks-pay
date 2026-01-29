@@ -168,10 +168,10 @@ const VetLanding = () => {
               <div className="flex flex-col sm:flex-row gap-4 justify-center mt-10">
                 <Button 
                   size="lg" 
-                  onClick={() => navigate("/vet-onboarding")}
+                  onClick={() => navigate("/auth?role=vet")}
                   className="text-base sm:text-lg px-8 sm:px-10 py-6 sm:py-7 shadow-xl hover:shadow-2xl transition-all hover:scale-105 group"
                 >
-                  Get Started Free
+                  Sign Up as a Veterinarian
                   <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                 </Button>
                 <Button 
