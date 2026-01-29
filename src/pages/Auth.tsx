@@ -21,9 +21,14 @@ const Auth = () => {
   const [searchParams] = useSearchParams();
   const inviteToken = searchParams.get("invite");
   const redirectUrl = searchParams.get("redirect"); // Support redirect after auth
+  const roleParam = searchParams.get("role") as "pet_owner" | "merchant" | "vet" | null;
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const [userType, setUserType] = useState<"pet_owner" | "merchant">("pet_owner");
+  // Map vet role to merchant for database storage, but track original role for redirect
+  const [userType, setUserType] = useState<"pet_owner" | "merchant">(
+    roleParam === "vet" ? "merchant" : (roleParam || "pet_owner")
+  );
+  const [signupRole, setSignupRole] = useState<"pet_owner" | "merchant" | "vet" | null>(roleParam);
   const [referralCode, setReferralCode] = useState("");
   const [showSignInPassword, setShowSignInPassword] = useState(false);
   const [showSignUpPassword, setShowSignUpPassword] = useState(false);
@@ -109,7 +114,7 @@ const Auth = () => {
   }, [inviteToken]);
 
   // Helper function to redirect user based on their role/type
-  const redirectBasedOnRole = useCallback(async (userId: string, userTypeOverride?: "pet_owner" | "merchant") => {
+  const redirectBasedOnRole = useCallback(async (userId: string, userTypeOverride?: "pet_owner" | "merchant", isVetSignup?: boolean) => {
     // If there's a redirect URL specified, use it (e.g., returning to invoice payment)
     if (redirectUrl) {
       navigate(redirectUrl);
@@ -124,6 +129,12 @@ const Auth = () => {
 
     if (isAdmin) {
       navigate(ROUTES.ADMIN);
+      return;
+    }
+
+    // If signing up as a vet, redirect to vet onboarding
+    if (isVetSignup) {
+      navigate("/vet-onboarding");
       return;
     }
 
@@ -279,12 +290,17 @@ const Auth = () => {
             // If they joined via invite, go directly to dashboard (not create-pet-profile)
             navigate(ROUTES.DASHBOARD);
           } else {
-            await redirectBasedOnRole(data.user.id, userType);
+            // Pass isVetSignup flag for vet role redirect
+            await redirectBasedOnRole(data.user.id, userType, signupRole === "vet");
           }
         } catch (redirectErr) {
           console.warn("Redirect warning:", redirectErr);
           // Fallback redirect
-          navigate(redirectUrl || (userType === "merchant" ? ROUTES.MERCHANT_DASHBOARD : ROUTES.DASHBOARD));
+          if (signupRole === "vet") {
+            navigate("/vet-onboarding");
+          } else {
+            navigate(redirectUrl || (userType === "merchant" ? ROUTES.MERCHANT_DASHBOARD : ROUTES.DASHBOARD));
+          }
         }
       } else {
         // User is null but no error - might need email confirmation
@@ -677,29 +693,40 @@ const Auth = () => {
                     </Button>
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <Label>Account Type</Label>
-                  <div className="grid grid-cols-2 gap-3">
-                    <Button
-                      type="button"
-                      variant={userType === "pet_owner" ? "default" : "outline"}
-                      onClick={() => setUserType("pet_owner")}
-                      className="flex-1"
-                      aria-pressed={userType === "pet_owner"}
-                    >
-                      Pet Owner
-                    </Button>
-                    <Button
-                      type="button"
-                      variant={userType === "merchant" ? "default" : "outline"}
-                      onClick={() => setUserType("merchant")}
-                      className="flex-1"
-                      aria-pressed={userType === "merchant"}
-                    >
-                      Merchant
-                    </Button>
+                {/* Only show account type selection if no role was passed via URL */}
+                {!roleParam && (
+                  <div className="space-y-2">
+                    <Label>Account Type</Label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <Button
+                        type="button"
+                        variant={userType === "pet_owner" ? "default" : "outline"}
+                        onClick={() => setUserType("pet_owner")}
+                        className="flex-1"
+                        aria-pressed={userType === "pet_owner"}
+                      >
+                        Pet Owner
+                      </Button>
+                      <Button
+                        type="button"
+                        variant={userType === "merchant" ? "default" : "outline"}
+                        onClick={() => setUserType("merchant")}
+                        className="flex-1"
+                        aria-pressed={userType === "merchant"}
+                      >
+                        Merchant
+                      </Button>
+                    </div>
                   </div>
-                </div>
+                )}
+                {/* Show which account type is being created when role is pre-selected */}
+                {roleParam && (
+                  <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
+                    <p className="text-sm text-center font-medium">
+                      Creating a <span className="text-primary capitalize">{roleParam === "pet_owner" ? "Pet Owner" : roleParam === "vet" ? "Veterinarian" : "Merchant"}</span> account
+                    </p>
+                  </div>
+                )}
                 {userType === "pet_owner" && (
                   <div className="space-y-2 animate-fade-in">
                     <Label htmlFor="referralCode">Referral Code (Optional)</Label>
