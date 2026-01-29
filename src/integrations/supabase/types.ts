@@ -3590,7 +3590,13 @@ export type Database = {
       }
       partner_vets: {
         Row: {
+          accepting_new_patients: boolean | null
           accreditations: string[] | null
+          agreed_to_splicing_liability: boolean | null
+          agreed_to_splicing_liability_at: string | null
+          agreed_to_tos: boolean | null
+          agreed_to_tos_at: string | null
+          clinic_bio: string | null
           clinic_name: string | null
           clinic_phone: string | null
           contact_email: string
@@ -3598,6 +3604,8 @@ export type Database = {
           data_sync_enabled: boolean | null
           dba_name: string | null
           direct_pay_enabled: boolean | null
+          emergency_phone: string | null
+          emergency_protocol: string | null
           id: string
           insurance_partners: string[] | null
           is_verified: boolean | null
@@ -3610,17 +3618,26 @@ export type Database = {
           pims_software: string | null
           practice_type: string | null
           preferred_referrals: string | null
+          services_provided: string[] | null
           sms_enabled: boolean | null
           splicing_fee: number | null
           splicing_preference: string | null
           stripe_account_id: string | null
+          stripe_connect_account_id: string | null
+          subscription_tier: string | null
           tax_id: string | null
           updated_at: string
           user_id: string | null
           website_url: string | null
         }
         Insert: {
+          accepting_new_patients?: boolean | null
           accreditations?: string[] | null
+          agreed_to_splicing_liability?: boolean | null
+          agreed_to_splicing_liability_at?: string | null
+          agreed_to_tos?: boolean | null
+          agreed_to_tos_at?: string | null
+          clinic_bio?: string | null
           clinic_name?: string | null
           clinic_phone?: string | null
           contact_email: string
@@ -3628,6 +3645,8 @@ export type Database = {
           data_sync_enabled?: boolean | null
           dba_name?: string | null
           direct_pay_enabled?: boolean | null
+          emergency_phone?: string | null
+          emergency_protocol?: string | null
           id?: string
           insurance_partners?: string[] | null
           is_verified?: boolean | null
@@ -3640,17 +3659,26 @@ export type Database = {
           pims_software?: string | null
           practice_type?: string | null
           preferred_referrals?: string | null
+          services_provided?: string[] | null
           sms_enabled?: boolean | null
           splicing_fee?: number | null
           splicing_preference?: string | null
           stripe_account_id?: string | null
+          stripe_connect_account_id?: string | null
+          subscription_tier?: string | null
           tax_id?: string | null
           updated_at?: string
           user_id?: string | null
           website_url?: string | null
         }
         Update: {
+          accepting_new_patients?: boolean | null
           accreditations?: string[] | null
+          agreed_to_splicing_liability?: boolean | null
+          agreed_to_splicing_liability_at?: string | null
+          agreed_to_tos?: boolean | null
+          agreed_to_tos_at?: string | null
+          clinic_bio?: string | null
           clinic_name?: string | null
           clinic_phone?: string | null
           contact_email?: string
@@ -3658,6 +3686,8 @@ export type Database = {
           data_sync_enabled?: boolean | null
           dba_name?: string | null
           direct_pay_enabled?: boolean | null
+          emergency_phone?: string | null
+          emergency_protocol?: string | null
           id?: string
           insurance_partners?: string[] | null
           is_verified?: boolean | null
@@ -3670,10 +3700,13 @@ export type Database = {
           pims_software?: string | null
           practice_type?: string | null
           preferred_referrals?: string | null
+          services_provided?: string[] | null
           sms_enabled?: boolean | null
           splicing_fee?: number | null
           splicing_preference?: string | null
           stripe_account_id?: string | null
+          stripe_connect_account_id?: string | null
+          subscription_tier?: string | null
           tax_id?: string | null
           updated_at?: string
           user_id?: string | null
@@ -3780,9 +3813,13 @@ export type Database = {
       }
       pending_onboarding: {
         Row: {
+          accepting_new_patients: boolean | null
           accreditations: string[] | null
           admin_splicing_fee: number | null
+          agreed_to_splicing_liability: boolean | null
+          agreed_to_tos: boolean | null
           city: string | null
+          clinic_bio: string | null
           completed_at: string | null
           created_at: string
           current_step: number
@@ -3791,6 +3828,8 @@ export type Database = {
           direct_pay_capability: boolean | null
           dvm_license_number: string | null
           dvm_license_state: string | null
+          emergency_phone: string | null
+          emergency_protocol: string | null
           form_data: Json | null
           id: string
           insurance_partners: string[] | null
@@ -3803,9 +3842,12 @@ export type Database = {
           practice_type: string | null
           preferred_referral_partners: string | null
           primary_phone: string | null
+          services_provided: string[] | null
           sms_capability: boolean | null
           splicing_preference: string | null
           state: string | null
+          stripe_account_id: string | null
+          subscription_tier: string | null
           tax_id_ein: string | null
           updated_at: string
           user_id: string | null
@@ -3813,9 +3855,13 @@ export type Database = {
           zip_code: string | null
         }
         Insert: {
+          accepting_new_patients?: boolean | null
           accreditations?: string[] | null
           admin_splicing_fee?: number | null
+          agreed_to_splicing_liability?: boolean | null
+          agreed_to_tos?: boolean | null
           city?: string | null
+          clinic_bio?: string | null
           completed_at?: string | null
           created_at?: string
           current_step?: number
@@ -3824,6 +3870,8 @@ export type Database = {
           direct_pay_capability?: boolean | null
           dvm_license_number?: string | null
           dvm_license_state?: string | null
+          emergency_phone?: string | null
+          emergency_protocol?: string | null
           form_data?: Json | null
           id?: string
           insurance_partners?: string[] | null
@@ -3836,9 +3884,12 @@ export type Database = {
           practice_type?: string | null
           preferred_referral_partners?: string | null
           primary_phone?: string | null
+          services_provided?: string[] | null
           sms_capability?: boolean | null
           splicing_preference?: string | null
           state?: string | null
+          stripe_account_id?: string | null
+          subscription_tier?: string | null
           tax_id_ein?: string | null
           updated_at?: string
           user_id?: string | null
@@ -3846,9 +3897,13 @@ export type Database = {
           zip_code?: string | null
         }
         Update: {
+          accepting_new_patients?: boolean | null
           accreditations?: string[] | null
           admin_splicing_fee?: number | null
+          agreed_to_splicing_liability?: boolean | null
+          agreed_to_tos?: boolean | null
           city?: string | null
+          clinic_bio?: string | null
           completed_at?: string | null
           created_at?: string
           current_step?: number
@@ -3857,6 +3912,8 @@ export type Database = {
           direct_pay_capability?: boolean | null
           dvm_license_number?: string | null
           dvm_license_state?: string | null
+          emergency_phone?: string | null
+          emergency_protocol?: string | null
           form_data?: Json | null
           id?: string
           insurance_partners?: string[] | null
@@ -3869,9 +3926,12 @@ export type Database = {
           practice_type?: string | null
           preferred_referral_partners?: string | null
           primary_phone?: string | null
+          services_provided?: string[] | null
           sms_capability?: boolean | null
           splicing_preference?: string | null
           state?: string | null
+          stripe_account_id?: string | null
+          subscription_tier?: string | null
           tax_id_ein?: string | null
           updated_at?: string
           user_id?: string | null
