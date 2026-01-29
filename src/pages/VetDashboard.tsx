@@ -39,12 +39,15 @@ import {
   Scale,
 } from "lucide-react";
 import { toast } from "sonner";
+import { PendingApprovalNotice } from "@/components/PendingApprovalNotice";
 
 type VetInfo = {
   id: string;
   name: string;
   location: string;
   contact_email: string;
+  approval_status?: 'pending' | 'approved' | 'denied';
+  denial_reason?: string | null;
 };
 
 export default function VetDashboard() {
@@ -160,6 +163,15 @@ export default function VetDashboard() {
             Welcome back, {vetInfo.name}
           </p>
         </div>
+
+        {/* Pending Approval Notice */}
+        {vetInfo.approval_status !== 'approved' && (
+          <PendingApprovalNotice 
+            entityType="vet" 
+            approvalStatus={vetInfo.approval_status || 'pending'}
+            denialReason={vetInfo.denial_reason}
+          />
+        )}
 
         {/* Lost Pet Alerts - Always visible at top */}
         <LostPetAlertsWidget vetId={vetInfo.id} />
