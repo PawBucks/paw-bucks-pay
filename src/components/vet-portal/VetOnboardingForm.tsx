@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,7 +16,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { toast } from "@/hooks/use-toast";
@@ -187,61 +186,32 @@ These Terms shall be governed by the laws of the State of Delaware.
 
 By clicking "I Agree," you acknowledge that you have read, understood, and agree to be bound by these Terms of Service.`;
 
-const INSURANCE_SPLICING_AGREEMENT = `PAWBUCKS INSURANCE CLAIM-SPLICING LIABILITY AGREEMENT
+const INSURANCE_SPLICING_AGREEMENT = `Insurance Splicing & Direct-Pay Liability Agreement
 
-Last Updated: January 2026
+Version 1.0 (January 2026)
 
-1. PURPOSE
-This Agreement governs the use of PawBucks' Insurance Claim-Splicing feature, which automates the calculation and splitting of veterinary invoices between insurance carriers and pet owners.
+1. Nature of Service
+PawBucks.app (the "Platform") provides a proprietary "Claim-Splicing" engine designed to facilitate the division of veterinary service payments between the Pet Owner (the "Subscriber") and the Pet Insurance Provider (the "Carrier"). The Merchant (the "Veterinary Practice") acknowledges that PawBucks.app is a payment facilitator and technology provider, not an insurance underwriter or a guarantor of claim approval.
 
-2. CLAIM-SPLICING FUNCTIONALITY
-The Claim-Splicing feature:
-- Calculates insurance coverage based on policy information provided
-- Generates split invoices for insurance and owner portions
-- Facilitates direct-pay submissions to participating carriers
-- Tracks claim status and payment reconciliation
+2. Adjudication & "Splicing" Logic
+• Real-Time Estimates: Spliced payment amounts are calculated based on data provided by the Carrier's API or manual input by the Veterinary Practice staff. These amounts are estimates and do not constitute a final determination of coverage.
+• Authorization: By initiating a Spliced Transaction, the Veterinary Practice authorizes PawBucks.app to execute two distinct payment instructions: (a) an immediate charge to the Owner's payment method for the "Co-pay/Deductible" portion, and (b) a pending ledger entry for the "Carrier" portion.
 
-3. ACCURACY DISCLAIMER
-While PawBucks strives for accuracy in claim calculations:
-- Calculations are based on policy data provided by insurance carriers
-- Final claim decisions rest with the insurance carrier
-- Coverage estimates are not guarantees of payment
-- Policy details may change without notice
+3. Recourse & Denied Claims
+In the event that a Carrier denies, partially pays, or "claws back" a claim that has been processed through the Claim-Splicing engine:
+• Primary Responsibility: The Pet Owner remains legally responsible for the full balance of the veterinary invoice.
+• Practice Recourse: The Veterinary Practice agrees that PawBucks.app is not liable for the unpaid balance. PawBucks.app will provide the Practice with automated tools to re-invoice the Pet Owner via the Platform for any shortfall resulting from Carrier denial.
+• Platform Fees: Processing fees and PawBucks reward distributions are calculated based on the total invoice amount and are non-refundable once the initial transaction is successful, regardless of subsequent Carrier adjudication.
 
-4. PARTNER RESPONSIBILITIES
-As a Partner using Claim-Splicing, you agree to:
-- Verify policy information before submitting claims
-- Review all split calculations before finalization
-- Maintain records of all transactions
-- Promptly report any discrepancies
-- Collect appropriate client signatures/authorizations
+4. Accuracy of Clinical Data
+The Veterinary Practice is solely responsible for the accuracy of the medical codes (ICD/CPT), clinical notes, and invoice totals submitted for splicing. Any discrepancies leading to claim rejection are the responsibility of the Practice to resolve with the Carrier.
 
-5. LIABILITY ALLOCATION
-- PawBucks is not liable for denied claims or coverage disputes
-- Partners assume responsibility for accurate procedure coding
-- Partners are responsible for collecting any unpaid balances
-- Insurance carriers bear ultimate claim decision authority
+5. Funding & Payouts
+• Owner Funds: Funds collected from the Pet Owner (Co-pay) will be settled to the Practice's Stripe Connect account according to the standard payout schedule.
+• Carrier Funds: "Spliced" funds from Carriers are settled to the Practice only upon actual receipt of funds from the Carrier, unless the Practice has opted into the "PawBucks Instant-Fund" program (if available), which is subject to a separate risk-premium agreement.
 
-6. INDEMNIFICATION
-You agree to indemnify PawBucks against any claims arising from:
-- Incorrect information provided to the system
-- Disputes with insurance carriers
-- Collection actions against pet owners
-- Regulatory compliance violations
-
-7. PROCESSING FEES
-- Standard processing fee: $0-$10 per claim (as configured)
-- Fees are non-refundable once claim is submitted
-- Additional fees may apply for manual adjudication
-
-8. DATA HANDLING
-All claim data is:
-- Encrypted and securely stored
-- Retained for 7 years per regulatory requirements
-- Available for export upon request
-- Protected under our Privacy Policy
-
-By clicking "I Agree," you acknowledge understanding of the Claim-Splicing feature limitations and accept responsibility for verification of all claim calculations.`;
+6. Acceptance of Terms
+By checking "I Agree" and clicking "Finalize Onboarding," the authorized representative of the Veterinary Practice acknowledges they have the authority to bind the Practice to these financial terms and understands the operational mechanics of the Claim-Splicing engine.`;
 
 // Confetti effect component
 const ConfettiEffect = ({ active }: { active: boolean }) => {
@@ -291,6 +261,38 @@ export const VetOnboardingForm = () => {
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+  
+  // Scroll detection for legal agreements
+  const [hasScrolledTos, setHasScrolledTos] = useState(false);
+  const [hasScrolledSplicing, setHasScrolledSplicing] = useState(false);
+  const tosScrollRef = useRef<HTMLDivElement>(null);
+  const splicingScrollRef = useRef<HTMLDivElement>(null);
+
+  // Handle scroll detection for Terms of Service
+  const handleTosScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    const target = e.currentTarget;
+    const isAtBottom = Math.abs(target.scrollHeight - target.scrollTop - target.clientHeight) < 10;
+    if (isAtBottom && !hasScrolledTos) {
+      setHasScrolledTos(true);
+    }
+  }, [hasScrolledTos]);
+
+  // Handle scroll detection for Splicing Agreement
+  const handleSplicingScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    const target = e.currentTarget;
+    const isAtBottom = Math.abs(target.scrollHeight - target.scrollTop - target.clientHeight) < 10;
+    if (isAtBottom && !hasScrolledSplicing) {
+      setHasScrolledSplicing(true);
+    }
+  }, [hasScrolledSplicing]);
+
+  // Reset scroll states when entering Step 7
+  useEffect(() => {
+    if (currentStep === 7) {
+      setHasScrolledTos(false);
+      setHasScrolledSplicing(false);
+    }
+  }, [currentStep]);
 
   const form = useForm<FormData>({
     resolver: zodResolver(fullSchema),
@@ -1592,11 +1594,21 @@ export const VetOnboardingForm = () => {
                   {/* Terms of Service */}
                   <div className="space-y-4">
                     <Label className="text-base font-semibold">Terms of Service</Label>
-                    <ScrollArea className="h-48 rounded-lg border border-slate-200 p-4 bg-slate-50">
+                    <div 
+                      ref={tosScrollRef}
+                      onScroll={handleTosScroll}
+                      className="h-48 rounded-lg border border-slate-200 p-4 bg-slate-50 overflow-y-auto"
+                    >
                       <pre className="text-xs text-slate-600 whitespace-pre-wrap font-sans">
                         {TERMS_OF_SERVICE}
                       </pre>
-                    </ScrollArea>
+                    </div>
+                    {!hasScrolledTos && (
+                      <p className="text-xs text-amber-600 flex items-center gap-1">
+                        <span className="inline-block w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
+                        Please scroll to the bottom to enable agreement
+                      </p>
+                    )}
                     <FormField
                       control={form.control}
                       name="agreed_to_tos"
@@ -1606,10 +1618,15 @@ export const VetOnboardingForm = () => {
                             <Checkbox
                               checked={field.value}
                               onCheckedChange={field.onChange}
+                              disabled={!hasScrolledTos}
+                              className={cn(!hasScrolledTos && "opacity-50 cursor-not-allowed")}
                             />
                           </FormControl>
                           <div className="leading-none">
-                            <FormLabel className="text-sm font-medium">
+                            <FormLabel className={cn(
+                              "text-sm font-medium",
+                              !hasScrolledTos && "text-slate-400"
+                            )}>
                               I have read and agree to the Terms of Service *
                             </FormLabel>
                           </div>
@@ -1619,14 +1636,24 @@ export const VetOnboardingForm = () => {
                     />
                   </div>
 
-                  {/* Insurance Splicing Liability Agreement */}
+                  {/* Insurance Splicing & Direct-Pay Liability Agreement */}
                   <div className="space-y-4">
-                    <Label className="text-base font-semibold">Insurance Splicing Liability Agreement</Label>
-                    <ScrollArea className="h-48 rounded-lg border border-slate-200 p-4 bg-slate-50">
-                      <pre className="text-xs text-slate-600 whitespace-pre-wrap font-sans">
+                    <Label className="text-base font-semibold">Insurance Splicing & Direct-Pay Liability Agreement</Label>
+                    <div 
+                      ref={splicingScrollRef}
+                      onScroll={handleSplicingScroll}
+                      className="h-64 rounded-lg border border-slate-200 p-4 bg-slate-50 overflow-y-auto"
+                    >
+                      <pre className="text-xs text-slate-600 whitespace-pre-wrap font-sans leading-relaxed">
                         {INSURANCE_SPLICING_AGREEMENT}
                       </pre>
-                    </ScrollArea>
+                    </div>
+                    {!hasScrolledSplicing && (
+                      <p className="text-xs text-amber-600 flex items-center gap-1">
+                        <span className="inline-block w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
+                        Please scroll to the bottom to enable agreement
+                      </p>
+                    )}
                     <FormField
                       control={form.control}
                       name="agreed_to_splicing_liability"
@@ -1636,11 +1663,16 @@ export const VetOnboardingForm = () => {
                             <Checkbox
                               checked={field.value}
                               onCheckedChange={field.onChange}
+                              disabled={!hasScrolledSplicing}
+                              className={cn(!hasScrolledSplicing && "opacity-50 cursor-not-allowed")}
                             />
                           </FormControl>
                           <div className="leading-none">
-                            <FormLabel className="text-sm font-medium">
-                              I have read and agree to the Insurance Splicing Liability Agreement *
+                            <FormLabel className={cn(
+                              "text-sm font-medium",
+                              !hasScrolledSplicing && "text-slate-400"
+                            )}>
+                              I have read and agree to the Insurance Splicing & Direct-Pay Liability Agreement *
                             </FormLabel>
                           </div>
                           <FormMessage />
