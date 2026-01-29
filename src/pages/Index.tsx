@@ -58,7 +58,6 @@ const Index = () => {
       <Header menuItems={[
         { label: "Explore Pet Merchants", path: "/discover" },
         { label: "Lost Pets", path: "/lost-pets" },
-        { label: "For Pet Merchants", path: "/merchants" },
         { label: "Sign In", path: "/auth" }
       ]} />
 
@@ -491,6 +490,23 @@ const Index = () => {
               Making pet care payments simple, secure, and rewarding for everyone who loves pets.
             </p>
             <SocialFollowLinks />
+            <div className="flex items-center gap-4 text-sm">
+              <a 
+                href="/vets" 
+                className="text-muted-foreground hover:text-primary transition-colors"
+                onClick={(e) => { e.preventDefault(); navigate("/vets"); }}
+              >
+                For Vets
+              </a>
+              <span className="text-muted-foreground/50">•</span>
+              <a 
+                href="/merchants" 
+                className="text-muted-foreground hover:text-primary transition-colors"
+                onClick={(e) => { e.preventDefault(); navigate("/merchants"); }}
+              >
+                For Merchants
+              </a>
+            </div>
             <p className="text-sm text-muted-foreground">
               &copy; {new Date().getFullYear()} PawBucks. All rights reserved.
             </p>
