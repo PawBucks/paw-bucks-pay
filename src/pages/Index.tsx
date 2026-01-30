@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { SocialFollowLinks } from "@/components/SocialFollowLinks";
 import logo from "@/assets/logo.png";
+import familyPetsHero from "@/assets/family-pets-hero.png";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -94,6 +95,25 @@ const Index = () => {
               </Button>
             </div>
             <p className="text-sm text-muted-foreground">No credit card required</p>
+          </div>
+        </section>
+
+        {/* Lifestyle Hero Image Section */}
+        <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+          <div className="relative max-w-5xl mx-auto">
+            <div className="relative rounded-3xl overflow-hidden shadow-2xl">
+              <img 
+                src={familyPetsHero}
+                alt="Happy family enjoying time outdoors with their dog and cat"
+                className="w-full h-auto object-cover aspect-[4/3] sm:aspect-[16/9]"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8 lg:p-10">
+                <p className="text-lg sm:text-xl lg:text-2xl font-semibold text-foreground max-w-lg">
+                  Every moment with your pet matters. Make them count — and earn rewards along the way.
+                </p>
+              </div>
+            </div>
           </div>
         </section>
 
