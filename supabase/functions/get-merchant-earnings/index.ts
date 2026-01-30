@@ -73,13 +73,16 @@ serve(async (req) => {
 
     logStep("Balance retrieved", { balance });
 
-    // Fetch recent payouts
-    const payouts = await stripe.payouts.list(
-      { limit: 10 },
+    // Fetch ALL payouts (full lifetime history) using auto-pagination
+    const allPayouts: Stripe.Payout[] = [];
+    for await (const payout of stripe.payouts.list(
+      { limit: 100 },
       { stripeAccount: merchant.stripe_account_id }
-    );
+    )) {
+      allPayouts.push(payout);
+    }
 
-    logStep("Payouts retrieved", { count: payouts.data.length });
+    logStep("All payouts retrieved", { count: allPayouts.length });
 
     // Fetch recent charges
     const charges = await stripe.charges.list(
@@ -199,7 +202,7 @@ serve(async (req) => {
         available: balance.available,
         pending: balance.pending,
       },
-      recentPayouts: payouts.data.map((p: Stripe.Payout) => ({
+      payoutHistory: allPayouts.map((p: Stripe.Payout) => ({
         id: p.id,
         amount: p.amount,
         currency: p.currency,

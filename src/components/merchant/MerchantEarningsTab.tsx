@@ -37,7 +37,7 @@ interface EarningsData {
     available: BalanceAmount[];
     pending: BalanceAmount[];
   };
-  recentPayouts: Payout[];
+  payoutHistory: Payout[];
   summary: {
     totalEarnings: number;
     totalFees: number;
@@ -195,20 +195,20 @@ export function MerchantEarningsTab() {
         </Card>
       </div>
 
-      {/* Recent Payouts */}
+      {/* Payout History */}
       <Card>
         <CardHeader>
-          <CardTitle>Recent Payouts</CardTitle>
-          <CardDescription>Your recent payouts to your bank account</CardDescription>
+          <CardTitle>Payout History</CardTitle>
+          <CardDescription>Complete history of all payouts to your bank account</CardDescription>
         </CardHeader>
         <CardContent>
-          {data.recentPayouts.length === 0 ? (
+          {data.payoutHistory.length === 0 ? (
             <p className="text-muted-foreground text-center py-4">
               No payouts yet. Payouts will appear here once processed.
             </p>
           ) : (
-            <div className="space-y-4">
-              {data.recentPayouts.map((payout) => (
+            <div className="space-y-4 max-h-[500px] overflow-y-auto">
+              {data.payoutHistory.map((payout) => (
                 <div 
                   key={payout.id} 
                   className="flex items-center justify-between p-3 rounded-lg border"
