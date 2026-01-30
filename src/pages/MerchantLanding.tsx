@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { CreditCard, TrendingUp, Shield, BarChart3, CheckCircle, ArrowRight, DollarSign, Sparkles, UserPlus, Settings, Percent } from "lucide-react";
 import { SocialFollowLinks } from "@/components/SocialFollowLinks";
 import logo from "@/assets/logo.png";
+import merchantGroomingHero from "@/assets/merchant-grooming-hero.png";
 import { PremiumMerchantsBanner } from "@/components/PremiumMerchantsBanner";
 
 const MerchantLanding = () => {
@@ -79,6 +80,25 @@ const MerchantLanding = () => {
                 Sign Up as a Merchant
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
+            </div>
+          </div>
+        </section>
+
+        {/* Lifestyle Hero Image Section */}
+        <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+          <div className="relative max-w-5xl mx-auto">
+            <div className="relative rounded-3xl overflow-hidden shadow-2xl">
+              <img 
+                src={merchantGroomingHero}
+                alt="Professional pet groomer working with a dog in a grooming salon"
+                className="w-full h-auto object-cover aspect-[4/3] sm:aspect-[16/9]"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8 lg:p-10">
+                <p className="text-lg sm:text-xl lg:text-2xl font-semibold text-foreground max-w-lg">
+                  Join thousands of pet businesses already growing with PawBucks.
+                </p>
+              </div>
             </div>
           </div>
         </section>
