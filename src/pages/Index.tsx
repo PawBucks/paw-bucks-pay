@@ -14,6 +14,7 @@ import {
 import { SocialFollowLinks } from "@/components/SocialFollowLinks";
 import logo from "@/assets/logo.png";
 import familyPetsHero from "@/assets/family-pets-hero.png";
+import familyLifestyleFooter from "@/assets/family-lifestyle-footer.png";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -464,6 +465,30 @@ const Index = () => {
                   <span className="text-foreground">{item}</span>
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Family Lifestyle Image Section */}
+        <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+          <div className="relative max-w-6xl mx-auto">
+            <div className="relative rounded-3xl overflow-hidden shadow-2xl">
+              <img 
+                src={familyLifestyleFooter}
+                alt="A happy family relaxing at home with their dogs and cat"
+                className="w-full h-auto object-cover aspect-[4/3] sm:aspect-[21/9]"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-background/70 via-transparent to-transparent" />
+              <div className="absolute inset-0 flex items-center p-6 sm:p-10 lg:p-14">
+                <div className="max-w-md space-y-3">
+                  <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground">
+                    Real families. Real pets. Real rewards.
+                  </h3>
+                  <p className="text-sm sm:text-base text-muted-foreground">
+                    Join thousands of pet owners who are saving money and earning rewards every day.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </section>
