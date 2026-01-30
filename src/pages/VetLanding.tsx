@@ -27,6 +27,7 @@ import {
 import { SocialFollowLinks } from "@/components/SocialFollowLinks";
 import { PremiumMerchantsBanner } from "@/components/PremiumMerchantsBanner";
 import logo from "@/assets/logo.png";
+import vetClinicHero from "@/assets/vet-clinic-hero.png";
 
 const VetLanding = () => {
   const navigate = useNavigate();
@@ -205,6 +206,25 @@ const VetLanding = () => {
               <div className="text-center p-6 rounded-2xl bg-card/50 backdrop-blur-sm border border-border/50">
                 <p className="text-3xl sm:text-4xl font-bold text-primary">$0</p>
                 <p className="text-muted-foreground mt-1">Setup Fee</p>
+              </div>
+            </div>
+          </section>
+
+          {/* Vet Lifestyle Hero Image Section */}
+          <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+            <div className="relative max-w-5xl mx-auto">
+              <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-br from-muted/50 to-muted">
+                <img 
+                  src={vetClinicHero}
+                  alt="Veterinarian with pets in a modern clinic setting"
+                  className="w-full h-auto object-contain"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent pointer-events-none" />
+                <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8 lg:p-10">
+                  <p className="text-lg sm:text-xl lg:text-2xl font-semibold text-foreground max-w-lg drop-shadow-sm">
+                    Trusted by veterinary practices delivering exceptional pet care.
+                  </p>
+                </div>
               </div>
             </div>
           </section>
