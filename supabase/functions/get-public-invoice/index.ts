@@ -100,13 +100,20 @@ serve(async (req) => {
       .eq('id', invoice.merchant_id)
       .single();
 
-    // Update view count
+    // Update view count and status if first view
+    const updateData: Record<string, unknown> = {
+      view_count: (invoice.view_count || 0) + 1,
+      viewed_at: new Date().toISOString(),
+    };
+    
+    // Update status to 'viewed' if it's currently 'sent' (first view)
+    if (invoice.status === 'sent') {
+      updateData.status = 'viewed';
+    }
+    
     await supabaseAdmin
       .from('invoices')
-      .update({
-        view_count: (invoice.view_count || 0) + 1,
-        viewed_at: new Date().toISOString(),
-      })
+      .update(updateData)
       .eq('id', invoiceId);
 
     // Log activity

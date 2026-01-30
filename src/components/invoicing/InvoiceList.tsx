@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { format, parseISO, isAfter, isBefore, addDays } from "date-fns";
+import { format, parseISO, isAfter, isBefore, addDays, formatDistanceToNow } from "date-fns";
 import { 
   FileText, 
   Plus, 
@@ -8,6 +8,7 @@ import {
   MoreHorizontal,
   Send,
   Eye,
+  EyeOff,
   Edit,
   Trash2,
   Copy,
@@ -318,7 +319,7 @@ export function InvoiceList({
                   <TableHead>Invoice</TableHead>
                   <TableHead>Client</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Issue Date</TableHead>
+                  <TableHead>Viewed</TableHead>
                   <TableHead>Due Date</TableHead>
                   <TableHead className="text-right">Amount</TableHead>
                   <TableHead className="text-right">Due</TableHead>
@@ -338,7 +339,26 @@ export function InvoiceList({
                       </div>
                     </TableCell>
                     <TableCell>{getStatusBadge(invoice)}</TableCell>
-                    <TableCell>{format(parseISO(invoice.issue_date), "MMM d, yyyy")}</TableCell>
+                    <TableCell>
+                      {invoice.viewed_at ? (
+                        <div className="flex items-center gap-1.5">
+                          <Eye className="h-4 w-4 text-purple-500" />
+                          <div className="text-sm">
+                            <span className="text-foreground font-medium">
+                              {invoice.view_count || 1}×
+                            </span>
+                            <p className="text-xs text-muted-foreground">
+                              {formatDistanceToNow(parseISO(invoice.viewed_at), { addSuffix: true })}
+                            </p>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1.5 text-muted-foreground">
+                          <EyeOff className="h-4 w-4" />
+                          <span className="text-sm">Not viewed</span>
+                        </div>
+                      )}
+                    </TableCell>
                     <TableCell>
                       <span className={cn(
                         isBefore(parseISO(invoice.due_date), new Date()) && 
