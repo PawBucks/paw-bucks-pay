@@ -6,6 +6,7 @@ import { CreditCard, TrendingUp, Shield, BarChart3, CheckCircle, ArrowRight, Dol
 import { SocialFollowLinks } from "@/components/SocialFollowLinks";
 import logo from "@/assets/logo.png";
 import merchantGroomingHero from "@/assets/merchant-grooming-hero.png";
+import merchantStoreLifestyle from "@/assets/merchant-store-lifestyle.png";
 import { PremiumMerchantsBanner } from "@/components/PremiumMerchantsBanner";
 
 const MerchantLanding = () => {
@@ -389,6 +390,27 @@ const MerchantLanding = () => {
                   <p className="font-medium">{item}</p>
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Merchant Store Lifestyle Image Section */}
+        <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+          <div className="relative max-w-5xl mx-auto">
+            <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-br from-muted/50 to-muted">
+              <img 
+                src={merchantStoreLifestyle}
+                alt="Pet store checkout with customer and dog at Happy Paws Pet Supplies"
+                className="w-full h-auto object-contain"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none" />
+              <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8 lg:p-10">
+                <div className="inline-block bg-background/95 backdrop-blur-sm rounded-2xl px-5 py-4 sm:px-6 sm:py-5 shadow-lg">
+                  <p className="text-lg sm:text-xl lg:text-2xl font-semibold text-foreground max-w-lg">
+                    Real pet stores. Real customers. Real growth.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </section>
