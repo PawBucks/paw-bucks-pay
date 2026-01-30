@@ -87,15 +87,15 @@ const MerchantLanding = () => {
         {/* Lifestyle Hero Image Section */}
         <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
           <div className="relative max-w-5xl mx-auto">
-            <div className="relative rounded-3xl overflow-hidden shadow-2xl">
+            <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-br from-muted/50 to-muted">
               <img 
                 src={merchantGroomingHero}
-                alt="Professional pet groomer working with a dog in a grooming salon"
-                className="w-full h-auto object-cover aspect-[4/3] sm:aspect-[16/9]"
+                alt="Professional pet groomer working with a Golden Retriever at a grooming salon"
+                className="w-full h-auto object-contain"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent pointer-events-none" />
               <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8 lg:p-10">
-                <p className="text-lg sm:text-xl lg:text-2xl font-semibold text-foreground max-w-lg">
+                <p className="text-lg sm:text-xl lg:text-2xl font-semibold text-foreground max-w-lg drop-shadow-sm">
                   Join thousands of pet businesses already growing with PawBucks.
                 </p>
               </div>
