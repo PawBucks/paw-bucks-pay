@@ -405,11 +405,9 @@ const MerchantLanding = () => {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none" />
               <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8 lg:p-10">
-                <div className="inline-block bg-background/95 backdrop-blur-sm rounded-2xl px-5 py-4 sm:px-6 sm:py-5 shadow-lg">
-                  <p className="text-lg sm:text-xl lg:text-2xl font-semibold text-foreground max-w-lg">
-                    Real pet stores. Real customers. Real growth.
-                  </p>
-                </div>
+                <p className="text-lg sm:text-xl lg:text-2xl font-semibold text-white max-w-lg drop-shadow-lg">
+                  Real pet stores. Real customers. Real growth.
+                </p>
               </div>
             </div>
           </div>
