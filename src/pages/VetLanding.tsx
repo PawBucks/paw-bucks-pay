@@ -550,9 +550,6 @@ const VetLanding = () => {
                 <button onClick={() => navigate("/merchants")} className="hover:text-foreground transition-colors">
                   For Merchants
                 </button>
-                <button onClick={() => navigate("/auth")} className="hover:text-foreground transition-colors">
-                  Sign In
-                </button>
               </div>
             </div>
             <div className="text-center mt-8 pt-8 border-t text-sm text-muted-foreground">
