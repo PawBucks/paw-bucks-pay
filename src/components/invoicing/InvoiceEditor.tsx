@@ -46,9 +46,10 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { Invoice, InvoiceItem, InvoiceClient, InvoiceSettings, CatalogItem } from "@/services/api/invoicing.service";
+import { Invoice, InvoiceItem, InvoiceClient, InvoiceSettings, CatalogItem, InvoiceRecipient } from "@/services/api/invoicing.service";
 import { CatalogItemPicker } from "./CatalogItemPicker";
 import { InvoiceAttachments } from "./InvoiceAttachments";
+import { InvoiceRecipients } from "./InvoiceRecipients";
 import { PricingCalculator } from "@/components/merchant/PricingCalculator";
 import { cn } from "@/lib/utils";
 
@@ -93,14 +94,14 @@ const invoiceSchema = z.object({
 type InvoiceFormData = z.infer<typeof invoiceSchema>;
 
 interface InvoiceEditorProps {
-  invoice?: Invoice & { items?: InvoiceItem[] };
+  invoice?: Invoice & { items?: InvoiceItem[]; recipients?: InvoiceRecipient[] };
   invoiceNumber: string;
   merchantId: string;
   clients: InvoiceClient[];
   catalogItems?: CatalogItem[];
   settings?: InvoiceSettings;
-  onSave: (data: any, items: any[]) => Promise<string | null | void>;
-  onSend: (data: any, items: any[]) => Promise<void>;
+  onSave: (data: any, items: any[], recipients?: any[]) => Promise<string | null | void>;
+  onSend: (data: any, items: any[], recipients?: any[]) => Promise<void>;
   onPreview: (data: any, items: any[]) => void;
   onBack: () => void;
   saving: boolean;
@@ -122,6 +123,9 @@ export function InvoiceEditor({
   const [selectedClient, setSelectedClient] = useState<InvoiceClient | null>(null);
   const [attachments, setAttachments] = useState<string[]>(
     invoice?.attachment_urls || []
+  );
+  const [recipients, setRecipients] = useState<InvoiceRecipient[]>(
+    invoice?.recipients || []
   );
 
   const defaultValues: InvoiceFormData = {
@@ -315,9 +319,9 @@ export function InvoiceEditor({
     }));
 
     if (sendImmediately) {
-      await onSend(invoiceData, itemsData);
+      await onSend(invoiceData, itemsData, recipients);
     } else {
-      await onSave(invoiceData, itemsData);
+      await onSave(invoiceData, itemsData, recipients);
     }
   };
 
@@ -467,6 +471,17 @@ export function InvoiceEditor({
                       <FormMessage />
                     </FormItem>
                   )}
+                />
+              </CardContent>
+            </Card>
+
+            {/* Additional Recipients */}
+            <Card>
+              <CardContent className="pt-6">
+                <InvoiceRecipients
+                  recipients={recipients}
+                  clients={clients}
+                  onChange={setRecipients}
                 />
               </CardContent>
             </Card>

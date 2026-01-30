@@ -68,6 +68,14 @@ serve(async (req) => {
       throw new Error("Invoice not found");
     }
 
+    // Fetch additional recipients
+    const { data: recipientsData } = await supabase
+      .from("invoice_recipients")
+      .select("*")
+      .eq("invoice_id", invoiceId);
+    
+    const additionalRecipients = recipientsData || [];
+
     // Verify user owns this merchant
     const { data: merchant, error: merchantError } = await supabase
       .from("merchants")
@@ -213,18 +221,39 @@ serve(async (req) => {
 
     // Send email using Resend
     if (RESEND_API_KEY) {
+      // Build recipient lists
+      const toRecipients = [invoice.client_email];
+      const ccRecipients = additionalRecipients
+        .filter((r: any) => r.recipient_type === 'cc')
+        .map((r: any) => r.email);
+      const bccRecipients = additionalRecipients
+        .filter((r: any) => r.recipient_type === 'bcc')
+        .map((r: any) => r.email);
+      
+      const emailPayload: any = {
+        from: `${merchant.business_name} <noreply@pawbucks.app>`,
+        to: toRecipients,
+        subject: `Invoice #${invoice.invoice_number} from ${merchant.business_name}`,
+        html: emailHtml,
+      };
+      
+      // Add CC recipients if any
+      if (ccRecipients.length > 0) {
+        emailPayload.cc = ccRecipients;
+      }
+      
+      // Add BCC recipients if any
+      if (bccRecipients.length > 0) {
+        emailPayload.bcc = bccRecipients;
+      }
+      
       const emailResponse = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${RESEND_API_KEY}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          from: `${merchant.business_name} <noreply@pawbucks.app>`,
-          to: [invoice.client_email],
-          subject: `Invoice #${invoice.invoice_number} from ${merchant.business_name}`,
-          html: emailHtml,
-        }),
+        body: JSON.stringify(emailPayload),
       });
 
       if (!emailResponse.ok) {
@@ -232,6 +261,8 @@ serve(async (req) => {
         console.error("Resend error:", errorText);
         throw new Error("Failed to send email");
       }
+      
+      console.log(`Invoice sent to ${toRecipients.join(', ')}${ccRecipients.length > 0 ? `, CC: ${ccRecipients.join(', ')}` : ''}${bccRecipients.length > 0 ? `, BCC: ${bccRecipients.length} recipients` : ''}`);
     } else {
       console.log("RESEND_API_KEY not configured, skipping email send");
     }
@@ -246,12 +277,13 @@ serve(async (req) => {
       .eq("id", invoiceId);
 
     // Log activity
+    const allRecipients = [invoice.client_email, ...additionalRecipients.map((r: any) => r.email)];
     await supabase
       .from("invoice_activity")
       .insert({
         invoice_id: invoiceId,
         action: "sent",
-        description: `Invoice sent to ${invoice.client_email}`,
+        description: `Invoice sent to ${allRecipients.join(', ')}`,
         performed_by: userData.user.id,
       });
 

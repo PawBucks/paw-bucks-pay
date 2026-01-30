@@ -8,3 +8,5 @@ export { CatalogManager } from './CatalogManager';
 export { CatalogItemPicker } from './CatalogItemPicker';
 export { TemplateManager } from './TemplateManager';
 export { InvoiceAttachments } from './InvoiceAttachments';
+export { InvoiceRecipients } from './InvoiceRecipients';
+export type { InvoiceRecipient } from './InvoiceRecipients';

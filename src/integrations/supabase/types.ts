@@ -1750,6 +1750,44 @@ export type Database = {
           },
         ]
       }
+      invoice_recipients: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          invoice_id: string
+          name: string | null
+          recipient_type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          invoice_id: string
+          name?: string | null
+          recipient_type?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          invoice_id?: string
+          name?: string | null
+          recipient_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_recipients_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invoice_settings: {
         Row: {
           accent_color: string | null
