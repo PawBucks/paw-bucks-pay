@@ -472,19 +472,19 @@ const Index = () => {
         {/* Family Lifestyle Image Section */}
         <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
           <div className="relative max-w-6xl mx-auto">
-            <div className="relative rounded-3xl overflow-hidden shadow-2xl">
+            <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-muted">
               <img 
                 src={familyLifestyleFooter}
                 alt="A happy family relaxing at home with their dogs and cat"
-                className="w-full h-auto object-cover aspect-[4/3] sm:aspect-[21/9]"
+                className="w-full h-auto object-contain"
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-background/70 via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent" />
               <div className="absolute inset-0 flex items-center p-6 sm:p-10 lg:p-14">
                 <div className="max-w-md space-y-3">
-                  <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground">
+                  <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white drop-shadow-lg">
                     Real families. Real pets. Real rewards.
                   </h3>
-                  <p className="text-sm sm:text-base text-muted-foreground">
+                  <p className="text-sm sm:text-base text-white/90 drop-shadow-md">
                     Join thousands of pet owners who are saving money and earning rewards every day.
                   </p>
                 </div>
