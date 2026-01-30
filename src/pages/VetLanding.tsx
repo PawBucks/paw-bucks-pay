@@ -170,7 +170,7 @@ const VetLanding = () => {
               <div className="flex flex-col sm:flex-row gap-4 justify-center mt-10">
                 <Button 
                   size="lg" 
-                  onClick={() => navigate("/auth?role=vet")}
+                  onClick={() => navigate("/vet-onboarding")}
                   className="text-base sm:text-lg px-8 sm:px-10 py-6 sm:py-7 shadow-xl hover:shadow-2xl transition-all hover:scale-105 group"
                 >
                   Sign Up as a Veterinarian
@@ -340,7 +340,11 @@ const VetLanding = () => {
                           <p className="text-muted-foreground">R/O gastroenteritis, pancreatitis, dietary indiscretion...</p>
                         </div>
                       </div>
-                      <Button className="w-full" size="sm">
+                      <Button 
+                        className="w-full" 
+                        size="sm"
+                        onClick={() => navigate("/vet-onboarding")}
+                      >
                         <CheckCircle className="w-4 h-4 mr-2" />
                         Apply to Record
                       </Button>
