@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Invoice, InvoiceItem, InvoicePayment } from "@/services/api/invoicing.service";
+import { Invoice, InvoiceItem, InvoicePayment, InvoiceRecipient } from "@/services/api/invoicing.service";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,6 +13,7 @@ interface InvoicePreviewProps {
   invoice: Invoice;
   items: InvoiceItem[];
   payments?: InvoicePayment[];
+  recipients?: InvoiceRecipient[];
   merchant: {
     business_name: string;
     address?: string;
@@ -43,6 +44,7 @@ export function InvoicePreview({
   invoice,
   items,
   payments = [],
+  recipients = [],
   merchant,
   onBack,
   onSend,
@@ -148,6 +150,18 @@ export function InvoicePreview({
                 {invoice.client_phone && <p>{invoice.client_phone}</p>}
                 {invoice.client_address && (
                   <p className="whitespace-pre-line text-muted-foreground">{invoice.client_address}</p>
+                )}
+                {recipients.length > 0 && (
+                  <div className="mt-3 pt-3 border-t">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase mb-1">CC Recipients</p>
+                    <div className="space-y-0.5">
+                      {recipients.filter(r => r.recipient_type === 'cc').map((r, i) => (
+                        <p key={i} className="text-sm text-muted-foreground">
+                          {r.name ? `${r.name} <${r.email}>` : r.email}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
                 )}
               </div>
             </div>

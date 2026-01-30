@@ -11,7 +11,7 @@ import { ArrowLeft, Plus, Users, Settings, FileText, LayoutTemplate, Package } f
 import { toast } from "sonner";
 import { InvoiceList, InvoiceEditor, InvoicePreview, ClientManager, InvoiceSettingsComponent, CatalogManager, TemplateManager } from "@/components/invoicing";
 import { RecordPaymentDialog } from "@/components/invoicing/RecordPaymentDialog";
-import { invoicingService, type Invoice, type InvoiceItem, type InvoiceClient, type InvoiceSettings, type InvoiceTemplate, type CatalogItem, type InvoicePayment } from "@/services/api/invoicing.service";
+import { invoicingService, type Invoice, type InvoiceItem, type InvoiceClient, type InvoiceSettings, type InvoiceTemplate, type CatalogItem, type InvoicePayment, type InvoiceRecipient } from "@/services/api/invoicing.service";
 
 // Helper function to calculate next invoice date based on interval
 function calculateNextInvoiceDate(fromDate: Date, interval: string): Date {
@@ -42,8 +42,8 @@ const MerchantInvoicing = () => {
   
   // View states
   const [viewMode, setViewMode] = useState<"list" | "create" | "edit" | "preview">("list");
-  const [selectedInvoice, setSelectedInvoice] = useState<(Invoice & { items?: InvoiceItem[] }) | null>(null);
-  const [previewData, setPreviewData] = useState<{ invoice: Invoice; items: InvoiceItem[] } | null>(null);
+  const [selectedInvoice, setSelectedInvoice] = useState<(Invoice & { items?: InvoiceItem[]; recipients?: InvoiceRecipient[] }) | null>(null);
+  const [previewData, setPreviewData] = useState<{ invoice: Invoice; items: InvoiceItem[]; recipients?: InvoiceRecipient[] } | null>(null);
   
   // Data
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -143,15 +143,17 @@ const MerchantInvoicing = () => {
 
   const loadInvoiceWithItems = async (invoiceId: string) => {
     try {
-      const [invoiceRes, itemsRes] = await Promise.all([
+      const [invoiceRes, itemsRes, recipientsRes] = await Promise.all([
         invoicingService.getInvoiceById(invoiceId),
         invoicingService.getInvoiceItems(invoiceId),
+        invoicingService.getInvoiceRecipients(invoiceId),
       ]);
       
       if (invoiceRes.data) {
         setSelectedInvoice({
           ...invoiceRes.data,
           items: itemsRes.data || [],
+          recipients: recipientsRes.data || [],
         });
         setViewMode("edit");
       }
@@ -163,10 +165,14 @@ const MerchantInvoicing = () => {
 
   const handleViewInvoice = async (invoice: Invoice) => {
     try {
-      const itemsRes = await invoicingService.getInvoiceItems(invoice.id);
+      const [itemsRes, recipientsRes] = await Promise.all([
+        invoicingService.getInvoiceItems(invoice.id),
+        invoicingService.getInvoiceRecipients(invoice.id),
+      ]);
       setPreviewData({
         invoice,
         items: itemsRes.data || [],
+        recipients: recipientsRes.data || [],
       });
       setViewMode("preview");
     } catch (error) {
@@ -175,7 +181,7 @@ const MerchantInvoicing = () => {
     }
   };
 
-  const handleSaveInvoice = async (data: any, items: any[], skipToast = false): Promise<string | null> => {
+  const handleSaveInvoice = async (data: any, items: any[], recipients: any[] = []): Promise<string | null> => {
     if (!merchantId) return null;
     
     setSaving(true);
@@ -299,10 +305,13 @@ const MerchantInvoicing = () => {
         }
       }
       
-      if (!skipToast) {
-        toast.success("Invoice saved successfully");
-        setViewMode("list");
+      // Save recipients
+      if (invoiceId) {
+        await invoicingService.bulkUpdateRecipients(invoiceId, recipients);
       }
+      
+      toast.success("Invoice saved successfully");
+      setViewMode("list");
       loadData();
       return invoiceId;
     } catch (error: any) {
@@ -314,9 +323,9 @@ const MerchantInvoicing = () => {
     }
   };
 
-  const handleSendInvoice = async (data: any, items: any[]) => {
-    // First save the invoice (skip toast since we'll show one for send)
-    const invoiceId = await handleSaveInvoice(data, items, true);
+  const handleSendInvoice = async (data: any, items: any[], recipients: any[] = []) => {
+    // First save the invoice
+    const invoiceId = await handleSaveInvoice(data, items, recipients);
     
     if (!invoiceId) {
       // Save failed, error already shown
@@ -722,6 +731,7 @@ const MerchantInvoicing = () => {
           <InvoicePreview
             invoice={previewData.invoice}
             items={previewData.items}
+            recipients={previewData.recipients}
             merchant={{
               business_name: merchant?.business_name || "",
               address: merchant?.address,

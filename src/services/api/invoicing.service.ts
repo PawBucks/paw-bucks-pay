@@ -121,6 +121,16 @@ export interface InvoiceItem {
   updated_at: string;
 }
 
+export interface InvoiceRecipient {
+  id?: string;
+  invoice_id?: string;
+  email: string;
+  name?: string | null;
+  recipient_type: 'cc' | 'bcc';
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface InvoicePayment {
   id: string;
   invoice_id: string;
@@ -272,12 +282,20 @@ export const invoicingService = {
   },
 
   async getInvoiceWithItems(invoiceId: string) {
-    const [invoiceResult, itemsResult] = await Promise.all([
+    const [invoiceResult, itemsResult, recipientsResult] = await Promise.all([
       supabase.from("invoices").select("*").eq("id", invoiceId).single(),
-      supabase.from("invoice_items").select("*").eq("invoice_id", invoiceId).order("sort_order")
+      supabase.from("invoice_items").select("*").eq("invoice_id", invoiceId).order("sort_order"),
+      supabase.from("invoice_recipients").select("*").eq("invoice_id", invoiceId)
     ]);
     if (invoiceResult.error) return { data: null, error: invoiceResult.error };
-    return { data: { ...(invoiceResult.data as Invoice), items: (itemsResult.data || []) as InvoiceItem[] }, error: null };
+    return { 
+      data: { 
+        ...(invoiceResult.data as Invoice), 
+        items: (itemsResult.data || []) as InvoiceItem[],
+        recipients: (recipientsResult.data || []) as InvoiceRecipient[]
+      }, 
+      error: null 
+    };
   },
 
   async createInvoice(invoice: Partial<Invoice>) {
@@ -311,6 +329,34 @@ export const invoicingService = {
     if (items.length > 0) {
       const { error } = await supabase.from("invoice_items").insert(
         items.map((item, index) => ({ ...item, invoice_id: invoiceId, sort_order: index, description: item.description || '' } as any))
+      );
+      if (error) return { data: null, error };
+    }
+    return { data: null, error: null };
+  },
+
+  // RECIPIENTS
+  async getInvoiceRecipients(invoiceId: string) {
+    const { data, error } = await supabase
+      .from("invoice_recipients")
+      .select("*")
+      .eq("invoice_id", invoiceId);
+    return { data: (data || []) as InvoiceRecipient[], error };
+  },
+
+  async bulkUpdateRecipients(invoiceId: string, recipients: Partial<InvoiceRecipient>[]) {
+    // Delete existing recipients
+    await supabase.from("invoice_recipients").delete().eq("invoice_id", invoiceId);
+    
+    // Insert new recipients
+    if (recipients.length > 0) {
+      const { error } = await supabase.from("invoice_recipients").insert(
+        recipients.map(r => ({
+          invoice_id: invoiceId,
+          email: r.email,
+          name: r.name || null,
+          recipient_type: r.recipient_type || 'cc'
+        }))
       );
       if (error) return { data: null, error };
     }
