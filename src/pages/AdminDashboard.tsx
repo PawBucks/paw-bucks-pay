@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AddTransactionTool } from "@/components/admin/AddTransactionTool";
 import { PawBucksManagementTool } from "@/components/admin/PawBucksManagementTool";
 import { PawBucksCreditLogsTab } from "@/components/admin/PawBucksCreditLogsTab";
+import { PawBucksDebitLogsTab } from "@/components/admin/PawBucksDebitLogsTab";
 import { SecurityMonitoringTab } from "@/components/admin/SecurityMonitoringTab";
 import { ConsultationBookingsTab } from "@/components/admin/ConsultationBookingsTab";
 import FeedbackTab from "@/components/admin/FeedbackTab";
@@ -221,10 +222,16 @@ const NAV_SECTIONS = [
         description: "Track all admin actions and changes made to the platform",
       },
       {
-        id: "pawbucks-logs",
+        id: "pawbucks-credit-logs",
         label: "PawBucks Credit Logs",
         icon: DollarSign,
-        description: "View history of manual PawBucks credits and debits",
+        description: "View history of manual PawBucks credits",
+      },
+      {
+        id: "pawbucks-debit-logs",
+        label: "PawBucks Debit Logs",
+        icon: DollarSign,
+        description: "View history of manual PawBucks debits",
       },
     ],
   },
@@ -351,8 +358,10 @@ const AdminDashboard = () => {
         return <SecurityMonitoringTab />;
       case "audit":
         return <AuditLogsTab />;
-      case "pawbucks-logs":
+      case "pawbucks-credit-logs":
         return <PawBucksCreditLogsTab />;
+      case "pawbucks-debit-logs":
+        return <PawBucksDebitLogsTab />;
       case "settings":
         return <SettingsTab />;
       default:
