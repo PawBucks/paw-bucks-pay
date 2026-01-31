@@ -21,8 +21,11 @@ const AdPlacementComponent = ({ position = 'top' }: AdPlacementProps) => {
   // Fetch merchants with Premium Ad Placement service
   const { data: adMerchants = [] } = useAdMerchants();
   
-  // Memoize tier calculation
-  const tier = useMemo(() => getSubscriptionTier(subscription.product_id), [subscription.product_id]);
+  // Memoize tier calculation - pass both product_id and subscription_tier for accurate detection
+  const tier = useMemo(
+    () => getSubscriptionTier(subscription.product_id, subscription.subscription_tier), 
+    [subscription.product_id, subscription.subscription_tier]
+  );
 
   // Get current merchant to display
   const currentMerchant = adMerchants[currentAdIndex];
