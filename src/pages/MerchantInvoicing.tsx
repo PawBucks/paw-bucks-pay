@@ -493,6 +493,33 @@ const MerchantInvoicing = () => {
     }
   };
 
+  // Receipt handlers
+  const handleResendReceipt = async (invoice: Invoice) => {
+    try {
+      toast.info("Sending receipt...");
+      const { error } = await invoicingService.sendInvoiceReceipt(invoice.id, true);
+      if (error) throw error;
+      toast.success("Receipt sent to " + invoice.client_email);
+    } catch (error) {
+      console.error("Error resending receipt:", error);
+      toast.error("Failed to send receipt");
+    }
+  };
+
+  const handlePrintReceipt = (invoice: Invoice) => {
+    // Open the invoice view in a new window for printing
+    const payUrl = `${window.location.origin}/invoice/${invoice.id}/pay?token=${invoice.access_token}`;
+    const printWindow = window.open(payUrl, "_blank");
+    if (printWindow) {
+      // Give it a moment to load then trigger print
+      printWindow.onload = () => {
+        setTimeout(() => {
+          printWindow.print();
+        }, 500);
+      };
+    }
+  };
+
   // Client actions
   const handleCreateClient = async (data: Partial<InvoiceClient>) => {
     if (!merchantId) return;
@@ -835,6 +862,8 @@ const MerchantInvoicing = () => {
               onDownloadPdf={handleDownloadPdf}
               onRefresh={loadData}
               onRecordPayment={handleOpenRecordPayment}
+              onResendReceipt={handleResendReceipt}
+              onPrintReceipt={handlePrintReceipt}
             />
           </TabsContent>
 
