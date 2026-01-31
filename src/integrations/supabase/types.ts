@@ -8329,6 +8329,7 @@ export type Database = {
           price_range: number | null
           sponsored_until: string | null
           storefront_slug: string | null
+          stripe_account_id: string | null
           twitter_url: string | null
         }
         Insert: {
@@ -8350,6 +8351,7 @@ export type Database = {
           price_range?: number | null
           sponsored_until?: string | null
           storefront_slug?: string | null
+          stripe_account_id?: string | null
           twitter_url?: string | null
         }
         Update: {
@@ -8371,6 +8373,7 @@ export type Database = {
           price_range?: number | null
           sponsored_until?: string | null
           storefront_slug?: string | null
+          stripe_account_id?: string | null
           twitter_url?: string | null
         }
         Relationships: []
