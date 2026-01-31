@@ -56,49 +56,40 @@ const Storefront = memo(() => {
   // Parallel queries for merchant data, products, and auto-redeem preference
   const queryResults = useQueries({
     queries: [
-      // Merchant data lookup by slug first
+      // Merchant data lookup by slug first, then by stripe_account_id
       {
         queryKey: ["storefront-merchant", accountId],
         queryFn: async () => {
           if (!accountId) return null;
           
-          // Try slug lookup first
+          // Try slug lookup first - now includes stripe_account_id directly from the view
           const { data: merchantBySlug } = await supabase
             .from('merchants_public')
-            .select('id, business_name, description, cashback_rate, storefront_slug, logo_url, address, business_type')
+            .select('id, business_name, description, cashback_rate, storefront_slug, logo_url, address, business_type, stripe_account_id, accepts_pawbucks')
             .eq('storefront_slug', accountId)
             .maybeSingle();
 
           if (merchantBySlug) {
-            // Get stripe account ID via edge function
-            const { data: connectStatus } = await supabase.functions.invoke("get-connect-account-status", {
-              body: { merchantId: merchantBySlug.id },
-            });
-            
             return {
               ...merchantBySlug,
-              stripeAccountId: connectStatus?.accountId || null,
-              acceptsPawBucks: connectStatus?.acceptsPawBucks ?? false,
+              stripeAccountId: merchantBySlug.stripe_account_id,
+              acceptsPawBucks: merchantBySlug.accepts_pawbucks ?? false,
               foundBySlug: true,
             };
           }
 
-          // Fallback to stripe account ID lookup
-          const { data: connectStatus } = await supabase.functions.invoke("get-connect-account-status", {
-            body: { stripeAccountId: accountId },
-          });
+          // Fallback: try to find by stripe_account_id directly
+          const { data: merchantByStripe } = await supabase
+            .from('merchants_public')
+            .select('id, business_name, description, cashback_rate, storefront_slug, logo_url, address, business_type, stripe_account_id, accepts_pawbucks')
+            .eq('stripe_account_id', accountId)
+            .maybeSingle();
 
-          if (connectStatus?.merchantId) {
-            const { data: merchantData } = await supabase
-              .from('merchants_public')
-              .select('id, business_name, description, cashback_rate, logo_url, address, business_type')
-              .eq('id', connectStatus.merchantId)
-              .single();
-
+          if (merchantByStripe) {
             return {
-              ...merchantData,
-              stripeAccountId: accountId,
-              acceptsPawBucks: connectStatus?.acceptsPawBucks ?? false,
+              ...merchantByStripe,
+              stripeAccountId: merchantByStripe.stripe_account_id,
+              acceptsPawBucks: merchantByStripe.accepts_pawbucks ?? false,
               foundBySlug: false,
             };
           }
