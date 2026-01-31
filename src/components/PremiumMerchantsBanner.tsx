@@ -23,6 +23,8 @@ const PremiumMerchantsBannerComponent = ({
   const navigate = useNavigate();
   const { subscription } = useSubscription();
   const { data: adMerchants, isLoading } = useAdMerchants();
+  const { data: verifiedProIds } = useVerifiedProMerchants();
+  const [currentIndex, setCurrentIndex] = useState(0);
   
   // Check if user has PawPass+ (ad-free experience)
   const tier = useMemo(
@@ -30,13 +32,6 @@ const PremiumMerchantsBannerComponent = ({
     [subscription.product_id, subscription.subscription_tier]
   );
   
-  // PawPass+ users don't see sponsored content
-  if (tier === 'pawpass_plus') {
-    return null;
-  }
-  const { data: verifiedProIds } = useVerifiedProMerchants();
-  const [currentIndex, setCurrentIndex] = useState(0);
-
   // Shuffle merchants on initial load
   const shuffledMerchants = useMemo(() => {
     if (!adMerchants || adMerchants.length === 0) return [];
@@ -72,6 +67,11 @@ const PremiumMerchantsBannerComponent = ({
   const handlePageClick = useCallback((pageIndex: number) => {
     setCurrentIndex(pageIndex * 3);
   }, []);
+
+  // PawPass+ users don't see sponsored content - check AFTER all hooks
+  if (tier === 'pawpass_plus') {
+    return null;
+  }
 
   if (isLoading) {
     return (
