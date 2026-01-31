@@ -4,8 +4,11 @@ import { useAdMerchants, useVerifiedProMerchants, merchantHasService, SERVICE_NA
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Star, MapPin, BadgeCheck, ArrowRight, Sparkles } from "lucide-react";
+import { MapPin, BadgeCheck, ArrowRight, Sparkles } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useSubscription } from "@/hooks/useSubscription";
+import { getSubscriptionTier } from "@/lib/constants";
+
 interface PremiumMerchantsBannerProps {
   title?: string;
   rotationInterval?: number; // in milliseconds
@@ -18,7 +21,19 @@ const PremiumMerchantsBannerComponent = ({
   showMultiple = true
 }: PremiumMerchantsBannerProps) => {
   const navigate = useNavigate();
+  const { subscription } = useSubscription();
   const { data: adMerchants, isLoading } = useAdMerchants();
+  
+  // Check if user has PawPass+ (ad-free experience)
+  const tier = useMemo(
+    () => getSubscriptionTier(subscription.product_id, subscription.subscription_tier),
+    [subscription.product_id, subscription.subscription_tier]
+  );
+  
+  // PawPass+ users don't see sponsored content
+  if (tier === 'pawpass_plus') {
+    return null;
+  }
   const { data: verifiedProIds } = useVerifiedProMerchants();
   const [currentIndex, setCurrentIndex] = useState(0);
 

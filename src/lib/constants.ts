@@ -23,12 +23,37 @@ export const CASHBACK_RATES = POINTS_MULTIPLIER;
 export const SUBSCRIPTION_TIERS = {
   PAWPASS_PLUS_PRODUCT_ID: 'prod_pawpass_plus', // Replace with actual Stripe product ID
   PAWPASS_PRODUCT_ID: 'prod_pawpass', // Replace with actual Stripe product ID
+  // Manual subscription product IDs (set by admin upgrades)
+  MANUAL_PAWPASS_PLUS_PRODUCT_ID: 'manual_pawpass_plus',
+  MANUAL_PAWPASS_PRODUCT_ID: 'manual_pawpass',
 } as const;
 
-export const getSubscriptionTier = (productId: string | null): 'free' | 'pawpass' | 'pawpass_plus' => {
+export const getSubscriptionTier = (productId: string | null, subscriptionTier?: string | null): 'free' | 'pawpass' | 'pawpass_plus' => {
+  // First check direct subscription_tier if provided (most reliable for manual upgrades)
+  if (subscriptionTier === 'pawpass_plus') return 'pawpass_plus';
+  if (subscriptionTier === 'pawpass') return 'pawpass';
+  
+  // Then check product_id
   if (!productId) return 'free';
-  if (productId === SUBSCRIPTION_TIERS.PAWPASS_PLUS_PRODUCT_ID) return 'pawpass_plus';
-  if (productId === SUBSCRIPTION_TIERS.PAWPASS_PRODUCT_ID) return 'pawpass';
+  
+  // Check for PawPass+ (both Stripe and manual)
+  if (
+    productId === SUBSCRIPTION_TIERS.PAWPASS_PLUS_PRODUCT_ID ||
+    productId === SUBSCRIPTION_TIERS.MANUAL_PAWPASS_PLUS_PRODUCT_ID ||
+    productId.toLowerCase().includes('plus')
+  ) {
+    return 'pawpass_plus';
+  }
+  
+  // Check for PawPass (both Stripe and manual)
+  if (
+    productId === SUBSCRIPTION_TIERS.PAWPASS_PRODUCT_ID ||
+    productId === SUBSCRIPTION_TIERS.MANUAL_PAWPASS_PRODUCT_ID ||
+    (productId.toLowerCase().includes('pawpass') && !productId.toLowerCase().includes('plus'))
+  ) {
+    return 'pawpass';
+  }
+  
   return 'free';
 };
 
