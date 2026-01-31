@@ -323,3 +323,6 @@ verify_jwt = true
 
 [functions.admin-upgrade-subscription]
 verify_jwt = false
+
+[functions.check-subscription-expirations]
+verify_jwt = false

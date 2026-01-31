@@ -11,7 +11,14 @@ import {
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Badge } from '@/components/ui/badge';
-import { Crown, Sparkles } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Crown, Sparkles, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
 
 type User = {
@@ -45,6 +52,16 @@ const SUBSCRIPTION_TIERS = {
   },
 };
 
+const DURATION_OPTIONS = [
+  { value: 7, label: '7 days' },
+  { value: 14, label: '14 days' },
+  { value: 30, label: '30 days' },
+  { value: 60, label: '60 days' },
+  { value: 90, label: '90 days' },
+  { value: 180, label: '6 months' },
+  { value: 365, label: '1 year' },
+];
+
 export function UpgradeSubscriptionDialog({
   user,
   open,
@@ -52,6 +69,7 @@ export function UpgradeSubscriptionDialog({
   onSuccess,
 }: UpgradeSubscriptionDialogProps) {
   const [selectedTier, setSelectedTier] = useState<'pawpass' | 'pawpass_plus'>('pawpass');
+  const [durationDays, setDurationDays] = useState<number>(30);
   const [loading, setLoading] = useState(false);
 
   const handleUpgrade = async () => {
@@ -63,6 +81,7 @@ export function UpgradeSubscriptionDialog({
         body: {
           user_id: user.id,
           tier: selectedTier,
+          duration_days: durationDays,
         },
       });
 
@@ -72,7 +91,8 @@ export function UpgradeSubscriptionDialog({
         throw new Error(data.error);
       }
 
-      toast.success(data.message || `User upgraded to ${SUBSCRIPTION_TIERS[selectedTier].name}`);
+      const expiresAt = data.expires_at ? new Date(data.expires_at).toLocaleDateString() : '';
+      toast.success(`${user.full_name || user.email} upgraded to ${SUBSCRIPTION_TIERS[selectedTier].name} until ${expiresAt}`);
       onOpenChange(false);
       onSuccess?.();
     } catch (error: unknown) {
@@ -87,6 +107,8 @@ export function UpgradeSubscriptionDialog({
   if (!user) return null;
 
   const isPetOwner = user.user_type === 'pet_owner';
+  const expirationDate = new Date();
+  expirationDate.setDate(expirationDate.getDate() + durationDays);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -94,10 +116,10 @@ export function UpgradeSubscriptionDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Crown className="h-5 w-5 text-primary" />
-            Upgrade Subscription
+            Grant Complimentary Subscription
           </DialogTitle>
           <DialogDescription>
-            Manually upgrade {user.full_name || user.email} to a PawPass subscription plan.
+            Manually upgrade {user.full_name || user.email} to a PawPass subscription plan without requiring payment.
           </DialogDescription>
         </DialogHeader>
 
@@ -134,8 +156,8 @@ export function UpgradeSubscriptionDialog({
                           <div className="flex items-center gap-2">
                             <TierIcon className="h-4 w-4 text-primary" />
                             <span className="font-medium">{tier.name}</span>
-                            <Badge variant="secondary" className="ml-auto">
-                              {tier.price}
+                            <Badge variant="outline" className="ml-auto text-xs">
+                              {tier.price} value
                             </Badge>
                           </div>
                           <p className="text-sm text-muted-foreground mt-1">
@@ -149,11 +171,45 @@ export function UpgradeSubscriptionDialog({
               </RadioGroup>
             </div>
 
-            <div className="bg-muted/50 rounded-lg p-3 text-sm">
-              <p className="text-muted-foreground">
-                <strong>Note:</strong> This will create a subscription in Stripe. The user will need
-                to add a payment method to continue the subscription after the initial period.
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                Subscription Duration
+              </Label>
+              <Select
+                value={durationDays.toString()}
+                onValueChange={(v) => setDurationDays(parseInt(v))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select duration" />
+                </SelectTrigger>
+                <SelectContent>
+                  {DURATION_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value.toString()}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Expires: {expirationDate.toLocaleDateString('en-US', { 
+                  weekday: 'long', 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric' 
+                })}
               </p>
+            </div>
+
+            <div className="bg-muted/50 rounded-lg p-3 text-sm space-y-2">
+              <p className="text-muted-foreground">
+                <strong>Note:</strong> This is a complimentary subscription that does not require payment from the user.
+              </p>
+              <ul className="text-muted-foreground text-xs space-y-1 list-disc list-inside">
+                <li>User will be notified of their upgrade immediately</li>
+                <li>Reminder notifications sent 7 days and 24 hours before expiration</li>
+                <li>Automatically reverts to free plan when duration ends</li>
+              </ul>
             </div>
 
             <Button
@@ -161,7 +217,7 @@ export function UpgradeSubscriptionDialog({
               disabled={loading}
               className="w-full"
             >
-              {loading ? 'Upgrading...' : `Upgrade to ${SUBSCRIPTION_TIERS[selectedTier].name}`}
+              {loading ? 'Upgrading...' : `Grant ${SUBSCRIPTION_TIERS[selectedTier].name} for ${DURATION_OPTIONS.find(d => d.value === durationDays)?.label}`}
             </Button>
           </div>
         )}

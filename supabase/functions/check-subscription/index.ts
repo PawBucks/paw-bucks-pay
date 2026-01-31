@@ -4,12 +4,18 @@ import Stripe from "https://esm.sh/stripe@18.5.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
-const logStep = (step: string, details?: any) => {
+const logStep = (step: string, details?: unknown) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
   console.log(`[CHECK-SUBSCRIPTION] ${step}${detailsStr}`);
+};
+
+// Map tier names to product IDs for consistency
+const TIER_PRODUCT_MAP = {
+  pawpass: 'manual_pawpass',
+  pawpass_plus: 'manual_pawpass_plus',
 };
 
 serve(async (req) => {
@@ -20,17 +26,16 @@ serve(async (req) => {
   try {
     logStep('Function started');
 
-    // Verify Stripe key
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
     const stripeKey = Deno.env.get('STRIPE_SECRET_KEY');
+    
     if (!stripeKey) throw new Error('STRIPE_SECRET_KEY is not set');
     logStep('Stripe key verified');
 
-    // Authenticate user
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-      { auth: { persistSession: false } }
-    );
+    const supabaseClient = createClient(supabaseUrl, supabaseServiceKey, { 
+      auth: { persistSession: false } 
+    });
 
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
@@ -41,6 +46,7 @@ serve(async (req) => {
         subscription_end: null,
         status: null,
         trial_end: null,
+        is_manual: false,
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
@@ -51,7 +57,6 @@ serve(async (req) => {
     const token = authHeader.replace('Bearer ', '');
     const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
     
-    // If session is invalid/expired, return unsubscribed state gracefully (not an error)
     if (userError || !userData.user?.email) {
       logStep('Invalid or expired session, returning unsubscribed state', { error: userError?.message });
       return new Response(JSON.stringify({ 
@@ -60,6 +65,7 @@ serve(async (req) => {
         subscription_end: null,
         status: null,
         trial_end: null,
+        is_manual: false,
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
@@ -69,10 +75,41 @@ serve(async (req) => {
     const user = userData.user;
     logStep('User authenticated', { userId: user.id, email: user.email });
 
-    // Initialize Stripe
+    // First, check for active manual subscription in database
+    const { data: manualSub, error: manualSubError } = await supabaseClient
+      .from('subscriptions')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('is_manual_upgrade', true)
+      .eq('status', 'active')
+      .gt('expires_at', new Date().toISOString())
+      .maybeSingle();
+
+    if (!manualSubError && manualSub) {
+      logStep('Active manual subscription found', { 
+        subscriptionId: manualSub.id,
+        tier: manualSub.subscription_tier,
+        expiresAt: manualSub.expires_at,
+      });
+
+      const productId = TIER_PRODUCT_MAP[manualSub.subscription_tier as keyof typeof TIER_PRODUCT_MAP] || null;
+
+      return new Response(JSON.stringify({
+        subscribed: true,
+        product_id: productId,
+        subscription_end: manualSub.expires_at,
+        status: 'active',
+        trial_end: null,
+        is_manual: true,
+        subscription_tier: manualSub.subscription_tier,
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      });
+    }
+
+    // No active manual subscription, check Stripe
     const stripe = new Stripe(stripeKey, { apiVersion: '2025-08-27.basil' });
-    
-    // Find customer by email
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
     
     if (customers.data.length === 0) {
@@ -82,6 +119,7 @@ serve(async (req) => {
         product_id: null,
         subscription_end: null,
         status: null,
+        is_manual: false,
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
@@ -91,7 +129,6 @@ serve(async (req) => {
     const customerId = customers.data[0].id;
     logStep('Found Stripe customer', { customerId });
 
-    // Check for active subscription
     const subscriptions = await stripe.subscriptions.list({
       customer: customerId,
       status: 'all',
@@ -105,6 +142,7 @@ serve(async (req) => {
         product_id: null,
         subscription_end: null,
         status: null,
+        is_manual: false,
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
@@ -116,7 +154,7 @@ serve(async (req) => {
     const subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
     const productId = subscription.items.data[0].price.product as string;
     
-    logStep('Subscription found', { 
+    logStep('Stripe subscription found', { 
       subscriptionId: subscription.id,
       status: subscription.status,
       endDate: subscriptionEnd,
@@ -129,6 +167,7 @@ serve(async (req) => {
       subscription_end: subscriptionEnd,
       status: subscription.status,
       trial_end: subscription.trial_end ? new Date(subscription.trial_end * 1000).toISOString() : null,
+      is_manual: false,
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
