@@ -314,3 +314,6 @@ verify_jwt = true
 
 [functions.process-insurance-claim]
 verify_jwt = true
+
+[functions.send-invoice-receipt]
+verify_jwt = true

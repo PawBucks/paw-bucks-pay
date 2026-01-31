@@ -480,4 +480,10 @@ export const invoicingService = {
   async sendInvoice(invoiceId: string) {
     return supabase.functions.invoke("send-invoice", { body: { invoiceId } });
   },
+
+  async sendInvoiceReceipt(invoiceId: string, isResend: boolean = false) {
+    return supabase.functions.invoke("send-invoice-receipt", { 
+      body: { invoiceId, isResend } 
+    });
+  },
 };

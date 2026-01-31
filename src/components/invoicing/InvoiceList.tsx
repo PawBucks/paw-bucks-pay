@@ -19,7 +19,9 @@ import {
   XCircle,
   DollarSign,
   RefreshCw,
-  CreditCard
+  CreditCard,
+  Mail,
+  Printer
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -63,6 +65,8 @@ interface InvoiceListProps {
   onDownloadPdf: (invoice: Invoice) => void;
   onRefresh: () => void;
   onRecordPayment: (invoice: Invoice) => void;
+  onResendReceipt?: (invoice: Invoice) => void;
+  onPrintReceipt?: (invoice: Invoice) => void;
 }
 
 const statusConfig: Record<string, { label: string; color: string; icon: any }> = {
@@ -88,6 +92,8 @@ export function InvoiceList({
   onDownloadPdf,
   onRefresh,
   onRecordPayment,
+  onResendReceipt,
+  onPrintReceipt,
 }: InvoiceListProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -408,6 +414,18 @@ export function InvoiceList({
                             <DropdownMenuItem onClick={() => onRecordPayment(invoice)}>
                               <CreditCard className="h-4 w-4 mr-2" />
                               Record Payment
+                            </DropdownMenuItem>
+                          )}
+                          {['paid', 'partially_paid'].includes(invoice.status) && onResendReceipt && (
+                            <DropdownMenuItem onClick={() => onResendReceipt(invoice)}>
+                              <Mail className="h-4 w-4 mr-2" />
+                              Resend Receipt
+                            </DropdownMenuItem>
+                          )}
+                          {['paid', 'partially_paid'].includes(invoice.status) && onPrintReceipt && (
+                            <DropdownMenuItem onClick={() => onPrintReceipt(invoice)}>
+                              <Printer className="h-4 w-4 mr-2" />
+                              Print Receipt
                             </DropdownMenuItem>
                           )}
                           <DropdownMenuItem onClick={() => onDownloadPdf(invoice)}>

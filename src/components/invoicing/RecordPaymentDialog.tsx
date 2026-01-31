@@ -35,9 +35,10 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { Invoice, InvoicePayment } from "@/services/api/invoicing.service";
+import { Invoice, InvoicePayment, invoicingService } from "@/services/api/invoicing.service";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const paymentSchema = z.object({
   amount: z.number().min(0.01, "Amount must be greater than 0"),
@@ -45,6 +46,7 @@ const paymentSchema = z.object({
   payment_date: z.date(),
   reference_number: z.string().optional(),
   notes: z.string().optional(),
+  send_receipt: z.boolean().default(true),
 });
 
 type PaymentFormData = z.infer<typeof paymentSchema>;
@@ -72,6 +74,7 @@ export function RecordPaymentDialog({
       payment_date: new Date(),
       reference_number: "",
       notes: "",
+      send_receipt: true,
     },
   });
 
@@ -92,7 +95,25 @@ export function RecordPaymentDialog({
         notes: data.notes || undefined,
         status: "completed",
       });
-      toast.success("Payment recorded successfully");
+      
+      // Send receipt email if requested
+      if (data.send_receipt) {
+        try {
+          const { error } = await invoicingService.sendInvoiceReceipt(invoice.id, false);
+          if (error) {
+            console.error("Failed to send receipt email:", error);
+            toast.warning("Payment recorded, but receipt email failed to send");
+          } else {
+            toast.success("Payment recorded and receipt sent!");
+          }
+        } catch (receiptError) {
+          console.error("Receipt email error:", receiptError);
+          toast.success("Payment recorded successfully");
+        }
+      } else {
+        toast.success("Payment recorded successfully");
+      }
+      
       onOpenChange(false);
     } catch (error) {
       toast.error("Failed to record payment");
@@ -241,6 +262,29 @@ export function RecordPaymentDialog({
                     />
                   </FormControl>
                   <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="send_receipt"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 bg-muted/50">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel className="cursor-pointer">
+                      Send receipt email to client
+                    </FormLabel>
+                    <p className="text-sm text-muted-foreground">
+                      {invoice.client_email}
+                    </p>
+                  </div>
                 </FormItem>
               )}
             />

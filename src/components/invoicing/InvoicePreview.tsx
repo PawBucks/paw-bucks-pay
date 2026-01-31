@@ -1,5 +1,5 @@
 import { format, parseISO } from "date-fns";
-import { Download, Send, ArrowLeft, Printer, Link as LinkIcon, Mail, Copy, FileText, Image, Eye } from "lucide-react";
+import { Download, Send, ArrowLeft, Printer, Link as LinkIcon, Mail, Copy, FileText, Image, Eye, Receipt } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +25,7 @@ interface InvoicePreviewProps {
   onSend?: () => void;
   onDownload?: () => void;
   onRecordPayment?: () => void;
+  onResendReceipt?: () => void;
   isPublic?: boolean;
   accentColor?: string;
 }
@@ -50,6 +51,7 @@ export function InvoicePreview({
   onSend,
   onDownload,
   onRecordPayment,
+  onResendReceipt,
   isPublic = false,
   accentColor = "#3b82f6",
 }: InvoicePreviewProps) {
@@ -78,7 +80,7 @@ export function InvoicePreview({
               <Badge className={cn("mt-1", status.color)}>{status.label}</Badge>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <Button variant="outline" size="icon" onClick={() => window.print()}>
               <Printer className="h-4 w-4" />
             </Button>
@@ -90,6 +92,12 @@ export function InvoicePreview({
               <Button variant="outline" onClick={onDownload}>
                 <Download className="h-4 w-4 mr-2" />
                 PDF
+              </Button>
+            )}
+            {['paid', 'partially_paid'].includes(invoice.status) && onResendReceipt && (
+              <Button variant="outline" onClick={onResendReceipt}>
+                <Receipt className="h-4 w-4 mr-2" />
+                Resend Receipt
               </Button>
             )}
             {invoice.status === 'draft' && onSend && (
