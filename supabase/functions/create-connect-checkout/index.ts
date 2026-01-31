@@ -65,18 +65,71 @@ serve(async (req) => {
 
     // STEP 3: Parse request body
     const body = await req.json();
-    const { accountId, priceId, quantity, successUrl, cancelUrl, productName, pawbucksToUse: manualPawbucksToUse } = body;
+    const { merchantId: bodyMerchantId, accountId: legacyAccountId, priceId, quantity, successUrl, cancelUrl, productName, pawbucksToUse: manualPawbucksToUse } = body;
 
-    // Validate required fields and input types
-    if (!accountId || typeof accountId !== 'string') {
+    // Create admin client for secure lookups
+    const supabaseAdmin = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
+
+    // Resolve stripe_account_id from merchantId (secure server-side lookup)
+    let accountId: string | null = null;
+    let merchantId: string | null = null;
+    let merchantName = 'Merchant Store';
+    let cashbackRate = 10;
+    let merchantAcceptsPawBucks = false;
+
+    if (bodyMerchantId && typeof bodyMerchantId === 'string') {
+      // New approach: lookup stripe_account_id from merchantId
+      const { data: merchant, error: merchantError } = await supabaseAdmin
+        .from('merchants')
+        .select('id, stripe_account_id, business_name, cashback_rate, accepts_pawbucks')
+        .eq('id', bodyMerchantId)
+        .eq('approval_status', 'approved')
+        .single();
+
+      if (merchantError || !merchant?.stripe_account_id) {
+        return new Response(
+          JSON.stringify({ error: 'Merchant not found or not connected to Stripe' }),
+          {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            status: 400,
+          }
+        );
+      }
+
+      accountId = merchant.stripe_account_id;
+      merchantId = merchant.id;
+      merchantName = merchant.business_name || 'Merchant Store';
+      cashbackRate = merchant.cashback_rate || 10;
+      merchantAcceptsPawBucks = merchant.accepts_pawbucks || false;
+    } else if (legacyAccountId && typeof legacyAccountId === 'string') {
+      // Legacy fallback: accountId provided directly
+      accountId = legacyAccountId;
+      
+      // Still need to lookup merchant info
+      const { data: merchant } = await supabaseAdmin
+        .from('merchants')
+        .select('id, business_name, cashback_rate, accepts_pawbucks')
+        .eq('stripe_account_id', legacyAccountId)
+        .single();
+
+      merchantId = merchant?.id || null;
+      merchantName = merchant?.business_name || 'Merchant Store';
+      cashbackRate = merchant?.cashback_rate || 10;
+      merchantAcceptsPawBucks = merchant?.accepts_pawbucks || false;
+    } else {
       return new Response(
-        JSON.stringify({ error: 'accountId is required and must be a string' }),
+        JSON.stringify({ error: 'merchantId is required' }),
         {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
           status: 400,
         }
       );
     }
+
+    // Validate other required fields
     if (!priceId || typeof priceId !== 'string') {
       return new Response(
         JSON.stringify({ error: 'priceId is required and must be a string' }),
@@ -96,25 +149,7 @@ serve(async (req) => {
       );
     }
 
-    console.log(`Creating checkout for connected account ${accountId}, price ${priceId}, user ${user.id}`);
-
-    // STEP 4: Get merchant info from Supabase for rewards tracking
-    const supabaseAdmin = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-    );
-
-    const { data: merchant } = await supabaseAdmin
-      .from('merchants')
-      .select('id, business_name, cashback_rate, accepts_pawbucks')
-      .eq('stripe_account_id', accountId)
-      .single();
-
-    const merchantId = merchant?.id || null;
-    const merchantName = merchant?.business_name || 'Merchant Store';
-    const cashbackRate = merchant?.cashback_rate || 10;
-    const merchantAcceptsPawBucks = merchant?.accepts_pawbucks || false;
-
+    console.log(`Creating checkout for merchant ${merchantId}, stripe account ${accountId?.substring(0, 10)}..., price ${priceId}, user ${user.id}`);
     console.log('Merchant found:', { merchantId, merchantName, cashbackRate, merchantAcceptsPawBucks });
 
     // STEP 5: Calculate application fee (3% platform fee for Connect payments)

@@ -56,40 +56,38 @@ const Storefront = memo(() => {
   // Parallel queries for merchant data, products, and auto-redeem preference
   const queryResults = useQueries({
     queries: [
-      // Merchant data lookup by slug first, then by stripe_account_id
+      // Merchant data lookup by slug (stripe_account_id is resolved server-side for security)
       {
         queryKey: ["storefront-merchant", accountId],
         queryFn: async () => {
           if (!accountId) return null;
           
-          // Try slug lookup first - now includes stripe_account_id directly from the view
+          // Lookup merchant by storefront slug from public view
           const { data: merchantBySlug } = await supabase
             .from('merchants_public')
-            .select('id, business_name, description, cashback_rate, storefront_slug, logo_url, address, business_type, stripe_account_id, accepts_pawbucks')
+            .select('id, business_name, description, cashback_rate, storefront_slug, logo_url, address, business_type, accepts_pawbucks')
             .eq('storefront_slug', accountId)
             .maybeSingle();
 
           if (merchantBySlug) {
             return {
               ...merchantBySlug,
-              stripeAccountId: merchantBySlug.stripe_account_id,
               acceptsPawBucks: merchantBySlug.accepts_pawbucks ?? false,
               foundBySlug: true,
             };
           }
 
-          // Fallback: try to find by stripe_account_id directly
-          const { data: merchantByStripe } = await supabase
+          // Try to find by merchant ID directly
+          const { data: merchantById } = await supabase
             .from('merchants_public')
-            .select('id, business_name, description, cashback_rate, storefront_slug, logo_url, address, business_type, stripe_account_id, accepts_pawbucks')
-            .eq('stripe_account_id', accountId)
+            .select('id, business_name, description, cashback_rate, storefront_slug, logo_url, address, business_type, accepts_pawbucks')
+            .eq('id', accountId)
             .maybeSingle();
 
-          if (merchantByStripe) {
+          if (merchantById) {
             return {
-              ...merchantByStripe,
-              stripeAccountId: merchantByStripe.stripe_account_id,
-              acceptsPawBucks: merchantByStripe.accepts_pawbucks ?? false,
+              ...merchantById,
+              acceptsPawBucks: merchantById.accepts_pawbucks ?? false,
               foundBySlug: false,
             };
           }
@@ -121,20 +119,20 @@ const Storefront = memo(() => {
   const merchantLoading = queryResults[0].isLoading;
   const autoRedeemEnabled = queryResults[1].data ?? false;
 
-  // Products query depends on merchant data
-  const stripeAccountId = merchantData?.stripeAccountId || accountId;
+  // Products query depends on merchant data - uses merchantId, stripe_account_id resolved server-side
+  const merchantIdForProducts = merchantData?.id;
   const { data: products = [], isLoading: productsLoading } = useQuery({
-    queryKey: ["storefront-products", stripeAccountId],
+    queryKey: ["storefront-products", merchantIdForProducts],
     queryFn: async () => {
-      if (!stripeAccountId) return [];
+      if (!merchantIdForProducts) return [];
       const { data, error } = await supabase.functions.invoke("list-connect-products", {
-        body: { accountId: stripeAccountId },
+        body: { merchantId: merchantIdForProducts },
       });
       if (error) throw error;
       return data.products || [];
     },
     staleTime: 1000 * 60 * 5,
-    enabled: !!stripeAccountId,
+    enabled: !!merchantIdForProducts,
   });
 
   // Derived values
@@ -156,8 +154,7 @@ const Storefront = memo(() => {
 
   // Initiates purchase - shows PawBucks dialog if applicable
   const handlePurchase = useCallback((product: Product) => {
-    const effectiveAccountId = stripeAccountId;
-    if (!product.price?.id || !effectiveAccountId) return;
+    if (!product.price?.id || !merchantIdForProducts) return;
 
     // Check if user is authenticated
     if (!user) {
@@ -187,12 +184,11 @@ const Storefront = memo(() => {
 
     // Show PawBucks dialog for user to choose how many to use
     setShowPawBucksDialog(true);
-  }, [stripeAccountId, user, navigate, autoRedeemEnabled]);
+  }, [merchantIdForProducts, user, navigate, autoRedeemEnabled]);
 
   // Proceeds to Stripe checkout with optional PawBucks
   const proceedToCheckout = useCallback(async (product: Product, pawbucksToUse: number, isAutoRedeem: boolean = false) => {
-    const effectiveAccountId = stripeAccountId;
-    if (!product.price?.id || !effectiveAccountId) return;
+    if (!product.price?.id || !merchantIdForProducts) return;
 
     try {
       setPurchasingProductId(product.id);
@@ -200,7 +196,7 @@ const Storefront = memo(() => {
 
       const { data, error } = await supabase.functions.invoke("create-connect-checkout", {
         body: {
-          accountId: effectiveAccountId,
+          merchantId: merchantIdForProducts, // Pass merchantId, stripe_account_id resolved server-side
           priceId: product.price.id,
           quantity: 1,
           productName: product.name,
@@ -248,7 +244,7 @@ const Storefront = memo(() => {
       toast.error(errorMessage);
       setPurchasingProductId(null);
     }
-  }, [stripeAccountId, accountId]);
+  }, [merchantIdForProducts, accountId]);
 
   // Handler for PawBucks dialog confirmation
   const handlePawBucksDialogProceed = useCallback((pawbucksToUse: number) => {
