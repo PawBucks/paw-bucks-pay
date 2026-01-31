@@ -8410,14 +8410,17 @@ export type Database = {
       }
       reviewer_profiles: {
         Row: {
+          avatar_url: string | null
           full_name: string | null
           id: string | null
         }
         Insert: {
+          avatar_url?: string | null
           full_name?: string | null
           id?: string | null
         }
         Update: {
+          avatar_url?: string | null
           full_name?: string | null
           id?: string | null
         }
