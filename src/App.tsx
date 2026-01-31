@@ -15,6 +15,7 @@ import { useMobileOptimizations } from "@/hooks/useMobileOptimizations";
 import { usePageTracking } from "@/hooks/usePageTracking";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useDataPrefetch } from "@/hooks/useDataPrefetch";
+import { useScrollToTop } from "@/hooks/useScrollToTop";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PageLoader } from "@/components/PageLoader";
 import { PageTransition } from "@/components/PageTransition";
@@ -180,6 +181,7 @@ const AppContent = () => {
   usePageTracking();
   useKeyboardShortcuts();
   useDataPrefetch(); // Prefetch critical data on idle
+  useScrollToTop(); // Scroll to top on route change
 
   return (
     <Suspense fallback={<PageLoader />}>
