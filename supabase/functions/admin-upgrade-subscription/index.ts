@@ -1,20 +1,16 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import Stripe from "https://esm.sh/stripe@18.5.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// Hardcoded price IDs from the platform account
 const SUBSCRIPTION_TIERS = {
   pawpass: {
-    price_id: "price_1St3KuHn6eXqpJI78rnXt0UP",
     name: "PawPass",
     amount: 10,
   },
   pawpass_plus: {
-    price_id: "price_1St3LbHn6eXqpJI7ZtIFPaKu",
     name: "PawPass+",
     amount: 20,
   },
@@ -36,11 +32,6 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
-    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
-
-    if (!stripeKey) {
-      throw new Error("STRIPE_SECRET_KEY is not set");
-    }
 
     // Verify authenticated admin user
     const authHeader = req.headers.get("Authorization");
@@ -89,7 +80,7 @@ Deno.serve(async (req) => {
     logStep("Admin verified", { isAdmin, isSuperAdmin });
 
     // Parse request body
-    const { user_id, tier } = await req.json();
+    const { user_id, tier, duration_days } = await req.json();
 
     if (!user_id || !tier) {
       return new Response(
@@ -106,7 +97,17 @@ Deno.serve(async (req) => {
       );
     }
 
-    logStep("Request parsed", { user_id, tier: validTier });
+    // Validate duration
+    const validDurations = [7, 14, 30, 60, 90, 180, 365];
+    const durationDays = duration_days || 30; // Default to 30 days
+    if (!validDurations.includes(durationDays)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid duration. Must be 7, 14, 30, 60, 90, 180, or 365 days" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    logStep("Request parsed", { user_id, tier: validTier, duration_days: durationDays });
     const tierConfig = SUBSCRIPTION_TIERS[validTier];
 
     // Get target user's profile
@@ -133,145 +134,113 @@ Deno.serve(async (req) => {
 
     logStep("Target user found", { email: targetUser.email, name: targetUser.full_name });
 
-    // Initialize Stripe
-    const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
+    // Calculate expiration date
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + durationDays);
 
-    // Check if user already exists as Stripe customer
-    let customerId: string | undefined;
-    const customers = await stripe.customers.list({ email: targetUser.email, limit: 1 });
+    // Check for existing active manual subscription
+    const { data: existingSubscription } = await supabase
+      .from("subscriptions")
+      .select("*")
+      .eq("user_id", user_id)
+      .eq("is_manual_upgrade", true)
+      .eq("status", "active")
+      .maybeSingle();
 
-    if (customers.data.length > 0) {
-      customerId = customers.data[0].id;
-      logStep("Found existing Stripe customer", { customerId });
+    let subscriptionId: string;
+    let action: "created" | "upgraded";
 
-      // Check if customer already has an active subscription
-      const subscriptions = await stripe.subscriptions.list({
-        customer: customerId,
-        status: "active",
-        limit: 1,
-      });
+    if (existingSubscription) {
+      // Update existing subscription
+      const { data: updatedSub, error: updateError } = await supabase
+        .from("subscriptions")
+        .update({
+          subscription_tier: validTier,
+          expires_at: expiresAt.toISOString(),
+          upgraded_by: user.id,
+          reminder_7_days_sent: false,
+          reminder_24_hours_sent: false,
+          current_period_end: expiresAt.toISOString(),
+        })
+        .eq("id", existingSubscription.id)
+        .select()
+        .single();
 
-      if (subscriptions.data.length > 0) {
-        const existingSub = subscriptions.data[0];
-        const existingPriceId = existingSub.items.data[0]?.price.id;
-        
-        // Check if they're already on this tier
-        if (existingPriceId === tierConfig.price_id) {
-          return new Response(
-            JSON.stringify({ error: `User is already subscribed to ${tierConfig.name}` }),
-            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-          );
-        }
-
-        // Update existing subscription to new tier
-        logStep("Updating existing subscription", { subscriptionId: existingSub.id });
-        
-        await stripe.subscriptions.update(existingSub.id, {
-          items: [
-            {
-              id: existingSub.items.data[0].id,
-              price: tierConfig.price_id,
-            },
-          ],
-          proration_behavior: "create_prorations",
-        });
-
-        // Log admin action
-        await supabase.rpc("log_admin_action", {
-          _action: "UPGRADE_SUBSCRIPTION",
-          _entity_type: "subscription",
-          _entity_id: user_id,
-          _changes: {
-            tier,
-            tier_name: tierConfig.name,
-            action: "upgraded",
-            subscription_id: existingSub.id,
-          },
-        });
-
-        logStep("Subscription upgraded successfully");
-
-        return new Response(
-          JSON.stringify({
-            success: true,
-            message: `User subscription upgraded to ${tierConfig.name}`,
-            action: "upgraded",
-            subscription_id: existingSub.id,
-          }),
-          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+      if (updateError) {
+        throw new Error(`Failed to update subscription: ${updateError.message}`);
       }
+
+      subscriptionId = updatedSub.id;
+      action = "upgraded";
+      logStep("Existing subscription updated", { subscriptionId });
     } else {
-      // Create new customer
-      const newCustomer = await stripe.customers.create({
-        email: targetUser.email,
-        name: targetUser.full_name || undefined,
-        metadata: {
+      // Create new manual subscription
+      const { data: newSub, error: insertError } = await supabase
+        .from("subscriptions")
+        .insert({
           user_id: user_id,
-          created_by_admin: user.id,
-        },
-      });
-      customerId = newCustomer.id;
-      logStep("Created new Stripe customer", { customerId });
+          subscription_tier: validTier,
+          status: "active",
+          is_manual_upgrade: true,
+          upgraded_by: user.id,
+          expires_at: expiresAt.toISOString(),
+          current_period_end: expiresAt.toISOString(),
+          start_date: new Date().toISOString(),
+        })
+        .select()
+        .single();
+
+      if (insertError) {
+        throw new Error(`Failed to create subscription: ${insertError.message}`);
+      }
+
+      subscriptionId = newSub.id;
+      action = "created";
+      logStep("New subscription created", { subscriptionId });
     }
 
-    // Create new subscription (admin-created, no payment method required initially)
-    // This creates a subscription that will require payment on the first invoice
-    const subscription = await stripe.subscriptions.create({
-      customer: customerId,
-      items: [{ price: tierConfig.price_id }],
-      payment_behavior: "default_incomplete",
-      payment_settings: {
-        save_default_payment_method: "on_subscription",
-      },
-      metadata: {
-        user_id: user_id,
-        created_by_admin: user.id,
-        tier: tier,
-      },
+    // Log subscription event
+    await supabase.from("subscription_events").insert({
+      subscription_id: subscriptionId,
+      event_type: `manual_${action}`,
     });
-
-    logStep("Subscription created", { subscriptionId: subscription.id, status: subscription.status });
 
     // Log admin action
     await supabase.rpc("log_admin_action", {
-      _action: "CREATE_SUBSCRIPTION",
+      _action: action === "created" ? "CREATE_MANUAL_SUBSCRIPTION" : "UPGRADE_MANUAL_SUBSCRIPTION",
       _entity_type: "subscription",
       _entity_id: user_id,
       _changes: {
-        tier,
+        tier: validTier,
         tier_name: tierConfig.name,
-        action: "created",
-        subscription_id: subscription.id,
-        status: subscription.status,
+        duration_days: durationDays,
+        expires_at: expiresAt.toISOString(),
+        subscription_id: subscriptionId,
       },
     });
 
-    // If the subscription needs payment, get the client secret for the invoice
-    let clientSecret: string | null = null;
-    if (subscription.status === "incomplete" && subscription.latest_invoice) {
-      const invoiceId = typeof subscription.latest_invoice === 'string' 
-        ? subscription.latest_invoice 
-        : subscription.latest_invoice.id;
-      
-      const invoice = await stripe.invoices.retrieve(invoiceId);
-      if (invoice.payment_intent) {
-        const paymentIntentId = typeof invoice.payment_intent === 'string'
-          ? invoice.payment_intent
-          : invoice.payment_intent.id;
-        const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
-        clientSecret = paymentIntent.client_secret;
-      }
-    }
+    // Send notification to user about their new subscription
+    await supabase.from("notifications").insert({
+      user_id: user_id,
+      title: `You've been upgraded to ${tierConfig.name}!`,
+      message: `An administrator has granted you a complimentary ${tierConfig.name} subscription for ${durationDays} days. Enjoy your enhanced rewards!`,
+      category: "transactional",
+    });
+
+    logStep("Manual subscription completed successfully", { 
+      subscriptionId, 
+      expiresAt: expiresAt.toISOString(),
+      durationDays 
+    });
 
     return new Response(
       JSON.stringify({
         success: true,
-        message: `User ${subscription.status === 'active' ? 'subscribed' : 'subscription created (pending payment)'} to ${tierConfig.name}`,
-        action: "created",
-        subscription_id: subscription.id,
-        status: subscription.status,
-        client_secret: clientSecret,
+        message: `User ${action === "created" ? "upgraded" : "subscription updated"} to ${tierConfig.name} for ${durationDays} days`,
+        action,
+        subscription_id: subscriptionId,
+        expires_at: expiresAt.toISOString(),
+        duration_days: durationDays,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );

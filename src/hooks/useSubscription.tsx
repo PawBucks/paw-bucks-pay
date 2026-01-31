@@ -8,6 +8,8 @@ type SubscriptionStatus = {
   subscription_end: string | null;
   status: string | null;
   trial_end: string | null;
+  is_manual: boolean;
+  subscription_tier: string | null;
 };
 
 const defaultSubscription: SubscriptionStatus = {
@@ -16,6 +18,8 @@ const defaultSubscription: SubscriptionStatus = {
   subscription_end: null,
   status: null,
   trial_end: null,
+  is_manual: false,
+  subscription_tier: null,
 };
 
 export const useSubscription = () => {

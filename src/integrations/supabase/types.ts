@@ -6256,28 +6256,49 @@ export type Database = {
         Row: {
           created_at: string
           current_period_end: string | null
+          expires_at: string | null
           id: string
+          is_manual_upgrade: boolean | null
+          reminder_24_hours_sent: boolean | null
+          reminder_7_days_sent: boolean | null
           start_date: string
           status: string
           stripe_subscription_id: string | null
+          subscription_tier: string | null
+          updated_at: string | null
+          upgraded_by: string | null
           user_id: string
         }
         Insert: {
           created_at?: string
           current_period_end?: string | null
+          expires_at?: string | null
           id?: string
+          is_manual_upgrade?: boolean | null
+          reminder_24_hours_sent?: boolean | null
+          reminder_7_days_sent?: boolean | null
           start_date?: string
           status?: string
           stripe_subscription_id?: string | null
+          subscription_tier?: string | null
+          updated_at?: string | null
+          upgraded_by?: string | null
           user_id: string
         }
         Update: {
           created_at?: string
           current_period_end?: string | null
+          expires_at?: string | null
           id?: string
+          is_manual_upgrade?: boolean | null
+          reminder_24_hours_sent?: boolean | null
+          reminder_7_days_sent?: boolean | null
           start_date?: string
           status?: string
           stripe_subscription_id?: string | null
+          subscription_tier?: string | null
+          updated_at?: string | null
+          upgraded_by?: string | null
           user_id?: string
         }
         Relationships: []
