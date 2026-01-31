@@ -28,6 +28,7 @@ import { SocialFollowLinks } from "@/components/SocialFollowLinks";
 import { PremiumMerchantsBanner } from "@/components/PremiumMerchantsBanner";
 import logo from "@/assets/logo.png";
 import vetClinicHero from "@/assets/vet-clinic-hero.png";
+import vetTeamHero from "@/assets/vet-team-hero.jpeg";
 
 const VetLanding = () => {
   const navigate = useNavigate();
@@ -501,6 +502,31 @@ const VetLanding = () => {
                     <p className="text-muted-foreground text-sm">{benefit.description}</p>
                   </div>
                 ))}
+              </div>
+            </div>
+          </section>
+
+          {/* Vet Team Lifestyle Section */}
+          <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 lg:py-28">
+            <div className="max-w-6xl mx-auto">
+              <div className="text-center mb-10">
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
+                  Join a Community of Caring Professionals
+                </h2>
+                <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto">
+                  Partner with thousands of veterinary teams who trust PawBucks to grow their practice while delivering exceptional pet care.
+                </p>
+              </div>
+              
+              {/* Lifestyle Image Container */}
+              <div className="relative rounded-3xl overflow-hidden shadow-2xl">
+                <img 
+                  src={vetTeamHero} 
+                  alt="Professional veterinary team with a husky puppy in front of their animal hospital"
+                  className="w-full h-auto object-contain"
+                />
+                {/* Subtle gradient overlay for polish */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
               </div>
             </div>
           </section>
