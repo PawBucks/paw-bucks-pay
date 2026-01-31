@@ -8148,6 +8148,9 @@ export type Database = {
           breed: string | null
           collar_description: string | null
           color_markings: string | null
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
           created_at: string | null
           gender: string | null
           id: string | null
@@ -8172,6 +8175,9 @@ export type Database = {
           breed?: string | null
           collar_description?: string | null
           color_markings?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
           created_at?: string | null
           gender?: string | null
           id?: string | null
@@ -8196,6 +8202,9 @@ export type Database = {
           breed?: string | null
           collar_description?: string | null
           color_markings?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
           created_at?: string | null
           gender?: string | null
           id?: string | null
