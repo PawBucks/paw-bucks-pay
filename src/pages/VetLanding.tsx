@@ -608,24 +608,38 @@ const VetLanding = () => {
         </main>
 
         {/* Footer */}
-        <footer className="border-t bg-card/80 backdrop-blur-lg safe-area-inset-bottom">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-              <div className="flex items-center gap-3">
-                <img src={logo} alt="PawBucks" className="h-16 w-auto" />
-              </div>
+        <footer className="border-t py-12 sm:py-16 bg-card/80 backdrop-blur-sm" role="contentinfo">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col items-center gap-6">
+              <img
+                src={logo}
+                alt="PawBucks Logo"
+                className="h-24 sm:h-32 w-auto object-contain"
+              />
+              <p className="text-sm sm:text-base text-muted-foreground text-center max-w-md">
+                Empowering veterinary practices with smart payments, rewards, and growth tools.
+              </p>
               <SocialFollowLinks />
-              <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                <button onClick={() => navigate("/")} className="hover:text-foreground transition-colors">
+              <div className="flex items-center gap-4 text-sm">
+                <a 
+                  href="/" 
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                  onClick={(e) => { e.preventDefault(); navigate("/"); }}
+                >
                   For Pet Owners
-                </button>
-                <button onClick={() => navigate("/merchants")} className="hover:text-foreground transition-colors">
+                </a>
+                <span className="text-muted-foreground/50">•</span>
+                <a 
+                  href="/merchants" 
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                  onClick={(e) => { e.preventDefault(); navigate("/merchants"); }}
+                >
                   For Merchants
-                </button>
+                </a>
               </div>
-            </div>
-            <div className="text-center mt-8 pt-8 border-t text-sm text-muted-foreground">
-              <p>© {new Date().getFullYear()} PawBucks. All rights reserved.</p>
+              <p className="text-sm text-muted-foreground">
+                &copy; {new Date().getFullYear()} PawBucks. All rights reserved.
+              </p>
             </div>
           </div>
         </footer>
