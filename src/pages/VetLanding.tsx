@@ -29,6 +29,7 @@ import { PremiumMerchantsBanner } from "@/components/PremiumMerchantsBanner";
 import logo from "@/assets/logo.png";
 import vetClinicHero from "@/assets/vet-clinic-hero.png";
 import vetTeamHero from "@/assets/vet-team-hero.jpeg";
+import vetConsultationHero from "@/assets/vet-consultation-hero.png";
 
 const VetLanding = () => {
   const navigate = useNavigate();
@@ -351,6 +352,51 @@ const VetLanding = () => {
                       </Button>
                     </Card>
                   </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Vet Consultation Lifestyle Section */}
+          <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 lg:py-28">
+            <div className="max-w-5xl mx-auto">
+              <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+                {/* Image Container */}
+                <div className="relative rounded-3xl overflow-hidden shadow-2xl order-2 lg:order-1">
+                  <img 
+                    src={vetConsultationHero} 
+                    alt="Veterinarian consulting with pet owner about their pet's care"
+                    className="w-full h-auto object-contain"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent pointer-events-none" />
+                </div>
+                
+                {/* Text Content */}
+                <div className="order-1 lg:order-2">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary font-medium mb-6">
+                    <Heart className="w-5 h-5" />
+                    Client Care
+                  </div>
+                  <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6">
+                    Build Lasting Client Relationships
+                  </h2>
+                  <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
+                    Empower pet owners with transparent care plans and seamless communication — creating trust that keeps families coming back for generations.
+                  </p>
+                  <ul className="space-y-4">
+                    <li className="flex items-center gap-3">
+                      <CheckCircle className="w-6 h-6 text-primary flex-shrink-0" />
+                      <span className="text-muted-foreground">Clear treatment explanations and cost breakdowns</span>
+                    </li>
+                    <li className="flex items-center gap-3">
+                      <CheckCircle className="w-6 h-6 text-primary flex-shrink-0" />
+                      <span className="text-muted-foreground">Automated follow-up reminders and care instructions</span>
+                    </li>
+                    <li className="flex items-center gap-3">
+                      <CheckCircle className="w-6 h-6 text-primary flex-shrink-0" />
+                      <span className="text-muted-foreground">PawBucks rewards that incentivize preventive care</span>
+                    </li>
+                  </ul>
                 </div>
               </div>
             </div>
