@@ -122,13 +122,6 @@ const VetLanding = () => {
             </div>
             <div className="flex items-center gap-4">
               <Button 
-                variant="ghost"
-                onClick={() => navigate("/merchants")}
-                className="hidden sm:inline-flex"
-              >
-                For Merchants
-              </Button>
-              <Button 
                 onClick={() => navigate("/auth?role=vet")}
                 className="shadow-xl hover:shadow-2xl transition-all hover:scale-105"
               >
