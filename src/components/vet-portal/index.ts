@@ -28,4 +28,5 @@ export { UniversalLabDashboard } from "./UniversalLabDashboard";
 export { AIClinicalAssistant } from "./AIClinicalAssistant";
 export { VetOnboardingForm } from "./VetOnboardingForm";
 export { ClaimRecoveryDashboard } from "./ClaimRecoveryDashboard";
+export { VetQuickActionsTab } from "./VetQuickActionsTab";
 export * from "./types";

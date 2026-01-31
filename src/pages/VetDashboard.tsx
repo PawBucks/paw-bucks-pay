@@ -20,6 +20,7 @@ import {
   FinancialFrictionTab,
   PracticeGrowthTab,
   ClaimRecoveryDashboard,
+  VetQuickActionsTab,
 } from "@/components/vet-portal";
 import {
   Stethoscope,
@@ -37,6 +38,7 @@ import {
   Wallet,
   TrendingUp,
   Scale,
+  Zap,
 } from "lucide-react";
 import { toast } from "sonner";
 import { PendingApprovalNotice } from "@/components/PendingApprovalNotice";
@@ -227,7 +229,7 @@ export default function VetDashboard() {
         </div>
 
         <Tabs defaultValue="emr" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-6 lg:grid-cols-12">
+          <TabsList className="grid w-full grid-cols-7 lg:grid-cols-14">
             <TabsTrigger value="emr" className="flex items-center gap-1">
               <FileText className="w-4 h-4" />
               <span className="hidden sm:inline">EMR</span>
@@ -285,6 +287,10 @@ export default function VetDashboard() {
               <Scale className="w-4 h-4" />
               <span className="hidden sm:inline">Recovery</span>
             </TabsTrigger>
+            <TabsTrigger value="quick-actions" className="flex items-center gap-1">
+              <Zap className="w-4 h-4" />
+              <span className="hidden sm:inline">Actions</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="emr">
@@ -337,6 +343,10 @@ export default function VetDashboard() {
 
           <TabsContent value="claim-recovery">
             <ClaimRecoveryDashboard vetId={vetInfo.id} />
+          </TabsContent>
+
+          <TabsContent value="quick-actions">
+            <VetQuickActionsTab vetId={vetInfo.id} hasStripeAccount={false} />
           </TabsContent>
         </Tabs>
       </div>
