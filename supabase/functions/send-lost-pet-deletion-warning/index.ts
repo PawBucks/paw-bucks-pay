@@ -37,18 +37,17 @@ Deno.serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     const resend = new Resend(resendApiKey);
 
-    // Calculate the date range: posts resolved 23-24 days ago (7 days before 30-day deletion)
+    // Calculate the date range: posts resolved 4-5 days ago (2-3 days before 7-day deletion)
     const warningStartDate = new Date();
-    warningStartDate.setDate(warningStartDate.getDate() - 24);
+    warningStartDate.setDate(warningStartDate.getDate() - 5);
     
     const warningEndDate = new Date();
-    warningEndDate.setDate(warningEndDate.getDate() - 23);
+    warningEndDate.setDate(warningEndDate.getDate() - 4);
 
     console.log(`[send-lost-pet-deletion-warning] Checking for posts resolved between ${warningStartDate.toISOString()} and ${warningEndDate.toISOString()}`);
-
     // Find posts that:
     // 1. Are marked as "found" or "reunited"
-    // 2. Were resolved 23-24 days ago
+    // 2. Were resolved 4-5 days ago (will be deleted in 2-3 days)
     // 3. Haven't already received a warning email
     const { data: postsToWarn, error: fetchError } = await supabase
       .from("lost_pet_posts")
@@ -107,10 +106,10 @@ Deno.serve(async (req) => {
         continue;
       }
 
-      // Calculate deletion date (30 days from resolution)
+      // Calculate deletion date (7 days from resolution)
       const resolutionDate = new Date(post.updated_at);
       const deletionDate = new Date(resolutionDate);
-      deletionDate.setDate(deletionDate.getDate() + 30);
+      deletionDate.setDate(deletionDate.getDate() + 7);
 
       const flyerUrl = `${supabaseUrl.replace('.supabase.co', '')}/lost-pet/${post.id}`;
       const userName = profile.full_name || "Pet Owner";
@@ -142,7 +141,7 @@ Deno.serve(async (req) => {
               
               <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 16px 20px; margin-bottom: 24px; border-radius: 0 8px 8px 0;">
                 <p style="color: #92400e; margin: 0; font-size: 14px; font-weight: 600;">⚠️ Action Required</p>
-                <p style="color: #78350f; margin: 8px 0 0 0; font-size: 14px;">Your lost pet flyer will be automatically deleted in <strong>7 days</strong>.</p>
+                <p style="color: #78350f; margin: 8px 0 0 0; font-size: 14px;">Your lost pet flyer will be automatically deleted in <strong>2-3 days</strong>.</p>
               </div>
               
               <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
@@ -150,7 +149,7 @@ Deno.serve(async (req) => {
               </p>
               
               <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
-                As part of our data cleanup policy, we automatically remove resolved lost pet flyers 30 days after they're marked as found or reunited. Your flyer for <strong>${post.pet_name}</strong> will be deleted on:
+                As part of our data cleanup policy, we automatically remove resolved lost pet flyers 7 days after they're marked as found or reunited. Your flyer for <strong>${post.pet_name}</strong> will be deleted on:
               </p>
               
               <div style="background-color: #f3f4f6; padding: 16px 20px; border-radius: 8px; text-align: center; margin-bottom: 24px;">
@@ -198,7 +197,7 @@ Deno.serve(async (req) => {
         const { error: emailError } = await resend.emails.send({
           from: "PawBucks <noreply@pawbucks.app>",
           to: [profile.email],
-          subject: `⚠️ Your ${post.pet_name} flyer will be deleted in 7 days`,
+          subject: `⚠️ Your ${post.pet_name} flyer will be deleted in 2-3 days`,
           html: htmlContent,
         });
 
