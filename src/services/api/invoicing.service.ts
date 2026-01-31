@@ -370,8 +370,21 @@ export const invoicingService = {
   },
 
   async recordPayment(payment: Partial<InvoicePayment>) {
-    const { data, error } = await supabase.from("invoice_payments").insert(payment as any).select().single();
-    return { data: data as InvoicePayment | null, error };
+    // Use edge function to record payment and create transaction for pet owner visibility
+    const { data, error } = await supabase.functions.invoke("record-manual-invoice-payment", {
+      body: payment,
+    });
+    
+    if (error) {
+      console.error("Error recording payment via edge function:", error);
+      return { data: null, error };
+    }
+    
+    if (data?.error) {
+      return { data: null, error: new Error(data.error) };
+    }
+    
+    return { data: data as InvoicePayment | null, error: null };
   },
 
   // TEMPLATES

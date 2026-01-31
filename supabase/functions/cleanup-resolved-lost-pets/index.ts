@@ -16,9 +16,9 @@ Deno.serve(async (req) => {
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Calculate the cutoff date (30 days ago)
+    // Calculate the cutoff date (7 days ago - posts are deleted 7 days after being marked found/reunited)
     const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - 30);
+    cutoffDate.setDate(cutoffDate.getDate() - 7);
     const cutoffISOString = cutoffDate.toISOString();
 
     console.log(`[cleanup-resolved-lost-pets] Running cleanup for posts resolved before ${cutoffISOString}`);
@@ -36,7 +36,7 @@ Deno.serve(async (req) => {
     }
 
     const postCount = postsToDelete?.length || 0;
-    console.log(`[cleanup-resolved-lost-pets] Found ${postCount} resolved posts older than 30 days`);
+    console.log(`[cleanup-resolved-lost-pets] Found ${postCount} resolved posts older than 7 days`);
 
     if (postCount === 0) {
       return new Response(
@@ -97,14 +97,14 @@ Deno.serve(async (req) => {
           resolved_at: p.updated_at,
         })),
         cutoff_date: cutoffISOString,
-        cleanup_reason: "Automatic 30-day cleanup of resolved lost pet posts",
+        cleanup_reason: "Automatic 7-day cleanup of resolved lost pet posts",
       },
     });
 
     return new Response(
       JSON.stringify({
         success: true,
-        message: `Successfully deleted ${count || postCount} resolved lost pet posts older than 30 days`,
+        message: `Successfully deleted ${count || postCount} resolved lost pet posts older than 7 days`,
         deleted_count: count || postCount,
         deleted_posts: postsToDelete?.map(p => ({ id: p.id, pet_name: p.pet_name, status: p.status })),
       }),
