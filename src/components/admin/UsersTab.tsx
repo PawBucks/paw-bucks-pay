@@ -8,8 +8,9 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Search, Edit, Shield, Coins, RefreshCw } from 'lucide-react';
+import { Search, Edit, Shield, Coins, RefreshCw, Crown } from 'lucide-react';
 import { toast } from 'sonner';
+import { UpgradeSubscriptionDialog } from './UpgradeSubscriptionDialog';
 
 type User = {
   id: string;
@@ -124,6 +125,7 @@ export function UsersTab() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [roleDialogOpen, setRoleDialogOpen] = useState(false);
+  const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState<string>('user');
   const [loading, setLoading] = useState(false);
 
@@ -376,6 +378,19 @@ export function UsersTab() {
                   >
                     <Shield className="w-4 h-4" />
                   </Button>
+                  {user.user_type === 'pet_owner' && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setSelectedUser(user);
+                        setUpgradeDialogOpen(true);
+                      }}
+                      title="Upgrade Subscription"
+                    >
+                      <Crown className="w-4 h-4" />
+                    </Button>
+                  )}
                 </TableCell>
               </TableRow>
             ))}
@@ -435,6 +450,13 @@ export function UsersTab() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <UpgradeSubscriptionDialog
+        user={selectedUser}
+        open={upgradeDialogOpen}
+        onOpenChange={setUpgradeDialogOpen}
+        onSuccess={() => refetch()}
+      />
     </div>
   );
 }
