@@ -62,7 +62,7 @@ serve(async (req) => {
       });
     }
 
-    const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
+    const stripe = new Stripe(stripeKey, { apiVersion: "2024-12-18.acacia" });
     
     const account = await stripe.accounts.retrieve(merchant.stripe_account_id);
     logStep("Account retrieved", { 

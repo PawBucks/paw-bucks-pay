@@ -84,7 +84,7 @@ serve(async (req) => {
       stripeAccountId: merchant.stripe_account_id 
     });
 
-    const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
+    const stripe = new Stripe(stripeKey, { apiVersion: "2024-12-18.acacia" });
 
     // Calculate platform fee (3%)
     const applicationFee = Math.round(amount * PLATFORM_FEE_PERCENT);

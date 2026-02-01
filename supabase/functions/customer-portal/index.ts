@@ -43,7 +43,7 @@ serve(async (req) => {
     logStep('User authenticated', { userId: user.id, email: user.email });
 
     // Initialize Stripe
-    const stripe = new Stripe(stripeKey, { apiVersion: '2025-08-27.basil' });
+    const stripe = new Stripe(stripeKey, { apiVersion: '2024-12-18.acacia' });
     
     // Find customer
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });

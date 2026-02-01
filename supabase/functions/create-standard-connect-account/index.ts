@@ -55,7 +55,7 @@ serve(async (req) => {
     }
     logStep("Merchant found", { merchantId: merchant.id, businessName: merchant.business_name });
 
-    const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
+    const stripe = new Stripe(stripeKey, { apiVersion: "2024-12-18.acacia" });
 
     // Check if already has a Stripe account
     if (merchant.stripe_account_id) {
