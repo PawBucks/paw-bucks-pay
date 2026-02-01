@@ -28,6 +28,17 @@ interface ReceiptEmailParams {
   cardBrand?: string;
   cardLast4?: string;
   pawbucksEarned?: number;
+  // Optional spliced breakdown for insurance claims
+  splicedBreakdown?: {
+    insuranceCovered?: number;
+    ownerResponsibility?: number;
+    pendingFromCarrier?: number;
+  };
+  // Optional tier info for rewards display
+  tierInfo?: {
+    tierName: string;
+    multiplier: number;
+  };
 }
 
 // Format timestamp with explicit US timezone
@@ -65,6 +76,8 @@ function generateReceiptHtml(params: ReceiptEmailParams): string {
     cardBrand,
     cardLast4,
     pawbucksEarned,
+    splicedBreakdown,
+    tierInfo,
   } = params;
 
   const logoUrl = "https://paw-bucks-pay.lovable.app/logo.png";
@@ -102,18 +115,52 @@ function generateReceiptHtml(params: ReceiptEmailParams): string {
     </tr>
   ` : '';
 
-  // PawBucks earned section (only if > 0)
+  // PawBucks earned section (only if > 0) - includes tier info if provided
+  const tierText = tierInfo ? `(${tierInfo.tierName} ${tierInfo.multiplier}x)` : '';
   const pawbucksEarnedHtml = pawbucksEarned && pawbucksEarned > 0 ? `
     <tr>
       <td style="padding:20px;">
         <table width="100%" cellpadding="16" cellspacing="0" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius:8px;">
           <tr>
             <td align="center">
-              <p style="margin:0 0 4px 0; font-size:14px; color:#92400e;">🐾 You Earned</p>
+              <p style="margin:0 0 4px 0; font-size:14px; color:#92400e;">🐾 You Earned ${tierText}</p>
               <p style="margin:0; font-size:28px; font-weight:bold; color:#92400e;">${pawbucksEarned} PawBucks</p>
               <p style="margin:4px 0 0 0; font-size:12px; color:#a16207;">Added to your wallet!</p>
             </td>
           </tr>
+        </table>
+      </td>
+    </tr>
+  ` : '';
+
+  // Spliced breakdown section for insurance claims (only if provided)
+  const splicedBreakdownHtml = splicedBreakdown ? `
+    <tr>
+      <td style="padding:0 20px 20px;">
+        <table width="100%" style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:8px; padding:12px;">
+          <tr>
+            <td colspan="2" style="font-size:14px; font-weight:bold; color:#0369a1; padding-bottom:8px; border-bottom:1px solid #bae6fd;">
+              📋 Payment Breakdown
+            </td>
+          </tr>
+          ${splicedBreakdown.insuranceCovered ? `
+          <tr>
+            <td style="font-size:13px; color:#0c4a6e; padding:6px 0;">Insurance Covered:</td>
+            <td align="right" style="font-size:13px; color:#0c4a6e; padding:6px 0;">$${splicedBreakdown.insuranceCovered.toFixed(2)}</td>
+          </tr>
+          ` : ''}
+          ${splicedBreakdown.ownerResponsibility ? `
+          <tr>
+            <td style="font-size:13px; color:#0c4a6e; padding:6px 0;">Your Responsibility:</td>
+            <td align="right" style="font-size:13px; color:#0c4a6e; padding:6px 0;">$${splicedBreakdown.ownerResponsibility.toFixed(2)}</td>
+          </tr>
+          ` : ''}
+          ${splicedBreakdown.pendingFromCarrier ? `
+          <tr>
+            <td style="font-size:13px; color:#f59e0b; padding:6px 0;">⏳ Pending from Carrier:</td>
+            <td align="right" style="font-size:13px; color:#f59e0b; padding:6px 0;">$${splicedBreakdown.pendingFromCarrier.toFixed(2)}</td>
+          </tr>
+          ` : ''}
         </table>
       </td>
     </tr>
@@ -228,6 +275,9 @@ function generateReceiptHtml(params: ReceiptEmailParams): string {
               </table>
             </td>
           </tr>
+
+          <!-- Spliced Breakdown (for insurance claims) -->
+          ${splicedBreakdownHtml}
 
           <!-- Payment Details -->
           <tr>
