@@ -104,11 +104,42 @@ serve(async (req) => {
       throw new Error('Payment processing is not available for this merchant.');
     }
 
-    if (!merchant.onboarding_complete) {
-      throw new Error("Merchant's Stripe account setup is incomplete");
+    // Verify the connected account can actually accept payments
+    try {
+      const connectedAccount = await stripe.accounts.retrieve(merchant.stripe_account_id);
+      logStep('Connected account status', {
+        accountId: merchant.stripe_account_id,
+        chargesEnabled: connectedAccount.charges_enabled,
+        payoutsEnabled: connectedAccount.payouts_enabled,
+        detailsSubmitted: connectedAccount.details_submitted,
+      });
+
+      if (!connectedAccount.charges_enabled) {
+        // Update the merchant's onboarding status in our database
+        await supabaseAdmin
+          .from('merchants')
+          .update({ onboarding_complete: false })
+          .eq('id', merchantId);
+
+        throw new Error(`${merchant.business_name} hasn't completed their payment setup yet. Please ask them to complete onboarding in their Merchant Dashboard.`);
+      }
+
+      // Sync our database if Stripe says charges are enabled
+      if (!merchant.onboarding_complete && connectedAccount.charges_enabled) {
+        await supabaseAdmin
+          .from('merchants')
+          .update({ onboarding_complete: true })
+          .eq('id', merchantId);
+        logStep('Updated merchant onboarding_complete to true');
+      }
+    } catch (stripeError: unknown) {
+      if (stripeError instanceof Error && stripeError.message.includes('No such account')) {
+        throw new Error('Payment processing is not available for this merchant.');
+      }
+      throw stripeError;
     }
 
-    logStep("Merchant found", { 
+    logStep("Merchant verified", { 
       merchantId, 
       stripeAccountId: merchant.stripe_account_id,
       businessName: merchant.business_name 
