@@ -154,11 +154,33 @@ serve(async (req) => {
     const subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
     const productId = subscription.items.data[0].price.product as string;
     
+    // Fetch product details to determine tier
+    let subscriptionTier: string | null = null;
+    try {
+      const product = await stripe.products.retrieve(productId);
+      const productName = product.name?.toLowerCase() || '';
+      
+      if (productName.includes('plus') || productName.includes('+')) {
+        subscriptionTier = 'plus';
+      } else if (productName.includes('pawpass') || productName.includes('paw pass')) {
+        subscriptionTier = 'basic';
+      }
+      
+      logStep('Product details retrieved', { 
+        productId,
+        productName: product.name,
+        subscriptionTier,
+      });
+    } catch (productError) {
+      logStep('Failed to retrieve product details', { error: productError });
+    }
+    
     logStep('Stripe subscription found', { 
       subscriptionId: subscription.id,
       status: subscription.status,
       endDate: subscriptionEnd,
       productId,
+      subscriptionTier,
     });
 
     return new Response(JSON.stringify({
@@ -168,6 +190,7 @@ serve(async (req) => {
       status: subscription.status,
       trial_end: subscription.trial_end ? new Date(subscription.trial_end * 1000).toISOString() : null,
       is_manual: false,
+      subscription_tier: subscriptionTier,
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
