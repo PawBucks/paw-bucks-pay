@@ -199,18 +199,25 @@ serve(async (req) => {
 
     // 3. Award PawBucks to user
     if (pawbucksEarned > 0) {
-      // Log activity
-      await supabaseAdmin
+      // Log activity with correct type 'earn' (matches what PawBucksWallet.tsx filters for)
+      const { error: activityError } = await supabaseAdmin
         .from("pawbucks_activity")
         .insert({
           user_id: userId,
           amount: pawbucksEarned,
-          type: "credit",
+          type: "earn", // CRITICAL: Must be 'earn' not 'credit' for wallet activity display
           source: "direct_payment",
           description: `Earned from payment to ${businessName}`,
           pawbucks_status: "available",
           partner_id: merchantId,
+          transaction_id: transaction.id,
         });
+
+      if (activityError) {
+        logStep("Error inserting pawbucks_activity", { error: activityError.message });
+      } else {
+        logStep("PawBucks activity logged", { amount: pawbucksEarned, type: "earn" });
+      }
 
       // Update wallet balance
       const { data: wallet } = await supabaseAdmin
@@ -220,15 +227,25 @@ serve(async (req) => {
         .single();
 
       if (wallet) {
-        await supabaseAdmin
+        const { error: walletError } = await supabaseAdmin
           .from('pawbucks_wallet')
           .update({ balance: wallet.balance + pawbucksEarned })
           .eq('user_id', userId);
         
-        logStep("PawBucks wallet updated", { 
-          previousBalance: wallet.balance, 
-          newBalance: wallet.balance + pawbucksEarned,
-          earned: pawbucksEarned 
+        if (walletError) {
+          logStep("Error updating wallet balance", { error: walletError.message });
+        } else {
+          logStep("PawBucks wallet updated", { 
+            previousBalance: wallet.balance, 
+            newBalance: wallet.balance + pawbucksEarned,
+            earned: pawbucksEarned 
+          });
+        }
+      } else {
+        logStep("Wallet not found for user, creating one", { userId });
+        await supabaseAdmin.from('pawbucks_wallet').insert({
+          user_id: userId,
+          balance: pawbucksEarned,
         });
       }
     }

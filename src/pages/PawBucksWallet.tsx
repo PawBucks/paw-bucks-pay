@@ -383,7 +383,7 @@ const PawBucksWallet = () => {
               <div>
                 <p className="text-sm text-muted-foreground">Total Earned</p>
                 <p className="text-2xl font-bold">
-                  {Formatters.number(activities.filter(a => a.type === 'earn').reduce((sum, a) => sum + a.amount, 0))}
+                  {Formatters.number(activities.filter(a => a.type === 'earn' || a.type === 'credit').reduce((sum, a) => sum + a.amount, 0))}
                 </p>
               </div>
             </div>
@@ -406,7 +406,7 @@ const PawBucksWallet = () => {
 
         {/* Animated Upgrade Prompt */}
         <UpgradePrompt 
-          totalEarned={activities.filter(a => a.type === 'earn').reduce((sum, a) => sum + a.amount, 0)} 
+          totalEarned={activities.filter(a => a.type === 'earn' || a.type === 'credit').reduce((sum, a) => sum + a.amount, 0)} 
           onUpgrade={() => navigate(ROUTES.PROFILE)}
         />
 
@@ -434,9 +434,9 @@ const PawBucksWallet = () => {
                 >
                   <div className="flex items-center gap-3">
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                      activity.type === 'earn' ? 'bg-green-500/10' : 'bg-orange-500/10'
+                      activity.type === 'earn' || activity.type === 'credit' ? 'bg-green-500/10' : 'bg-orange-500/10'
                     }`}>
-                      {activity.type === 'earn' ? (
+                      {activity.type === 'earn' || activity.type === 'credit' ? (
                         <ArrowDownRight className="w-5 h-5 text-green-500" />
                       ) : (
                         <ArrowUpRight className="w-5 h-5 text-orange-500" />
