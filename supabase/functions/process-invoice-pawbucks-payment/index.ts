@@ -8,6 +8,11 @@ const corsHeaders = {
 };
 
 const PAWBUCKS_TO_USD = 0.001; // 1 PawBuck = $0.001
+const PLATFORM_FEE_PERCENT = 0.03; // 3% platform fee
+
+const logStep = (step: string, details?: Record<string, unknown>) => {
+  console.log(`[PROCESS-INVOICE-PAWBUCKS-PAYMENT] ${step}`, details ? JSON.stringify(details) : "");
+};
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -15,6 +20,8 @@ serve(async (req) => {
   }
 
   try {
+    logStep("Function started");
+
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
       apiVersion: "2025-08-27.basil",
     });
@@ -32,7 +39,7 @@ serve(async (req) => {
       tipAmountCents,
       userId,
       accessToken,
-      isGuestCheckout, // New flag for guest checkout
+      isGuestCheckout,
     } = await req.json();
 
     if (!invoiceId || totalAmountCents === undefined) {
@@ -43,6 +50,8 @@ serve(async (req) => {
     if (isGuestCheckout && pawbucksAmountCents > 0) {
       throw new Error("Guest checkout cannot use PawBucks. Please sign in to use PawBucks.");
     }
+
+    logStep("Request validated", { invoiceId, totalAmountCents, pawbucksAmountCents });
 
     // Fetch the invoice with access token validation
     const { data: invoice, error: invoiceError } = await supabase
@@ -56,7 +65,7 @@ serve(async (req) => {
       throw new Error("Invoice not found or invalid access token");
     }
 
-    // Fetch the merchant FIRST to check accepts_pawbucks
+    // Fetch the merchant
     const { data: merchant, error: merchantError } = await supabase
       .from("merchants")
       .select("*")
@@ -67,7 +76,9 @@ serve(async (req) => {
       throw new Error("Merchant not found");
     }
 
-    // Check if PawBucks are allowed - merchant setting overrides invoice setting
+    logStep("Invoice and merchant found", { merchantId: merchant.id, businessName: merchant.business_name });
+
+    // Check if PawBucks are allowed
     const acceptsPawbucks = invoice.accept_pawbucks || merchant.accepts_pawbucks;
     if (!acceptsPawbucks && pawbucksAmountCents > 0) {
       throw new Error("This invoice does not accept PawBucks payments");
@@ -75,23 +86,21 @@ serve(async (req) => {
 
     const appUrl = Deno.env.get("APP_URL") || "https://paw-bucks-pay.lovable.app";
     const stripeAmountCents = totalAmountCents - pawbucksAmountCents;
-    const pawbucksUsed = Math.round(pawbucksAmountCents / PAWBUCKS_TO_USD / 100); // Convert cents to PawBucks
+    const pawbucksUsed = Math.round(pawbucksAmountCents / PAWBUCKS_TO_USD / 100);
 
     // Validate Stripe Connect account if merchant has one
     const connectedAccountId = merchant.stripe_account_id;
     let isConnectValid = false;
     
-    if (connectedAccountId && merchant.stripe_account_status === "active") {
+    if (connectedAccountId && merchant.stripe_account_status === "active" && merchant.onboarding_complete) {
       try {
-        // Verify the account exists and is usable
         const account = await stripe.accounts.retrieve(connectedAccountId);
         isConnectValid = account && (account.charges_enabled || account.payouts_enabled);
-        console.log(`Stripe Connect account validation: ${connectedAccountId} - valid: ${isConnectValid}`);
+        logStep(`Stripe Connect account validation: ${connectedAccountId} - valid: ${isConnectValid}`);
       } catch (accountError: any) {
         console.error(`Stripe Connect account ${connectedAccountId} not found or invalid:`, accountError.message);
         isConnectValid = false;
         
-        // Update merchant status in database to reflect invalid account
         await supabase
           .from("merchants")
           .update({ 
@@ -104,11 +113,12 @@ serve(async (req) => {
 
     // If paying entirely with PawBucks
     if (stripeAmountCents <= 0 && pawbucksAmountCents > 0) {
+      logStep("Processing full PawBucks payment");
+      
       if (!userId) {
         throw new Error("User ID is required for PawBucks payments");
       }
 
-      // Get user's PawBucks wallet
       const { data: wallet, error: walletError } = await supabase
         .from("pawbucks_wallet")
         .select("*")
@@ -146,7 +156,7 @@ serve(async (req) => {
       });
 
       // Credit merchant's PawBucks wallet
-      const { data: merchantWallet, error: merchantWalletError } = await supabase
+      const { data: merchantWallet } = await supabase
         .from("merchant_pawbucks_wallet")
         .select("*")
         .eq("merchant_id", merchant.id)
@@ -224,17 +234,17 @@ serve(async (req) => {
         },
       });
 
-      // Create transaction record for PawBucks payment
+      // Create transaction record - NO platform fee on PawBucks-only payments
       const { data: transaction, error: transactionError } = await supabase
         .from("transactions")
         .insert({
           user_id: userId,
           merchant_id: merchant.id,
           amount: paymentAmountUSD,
-          stripe_amount: 0, // No Stripe payment
+          stripe_amount: 0,
           pawbucks_used: pawbucksUsed,
-          application_fee: 0, // No platform fee on PawBucks-only payments
-          cashback_earned: 0, // No PawBucks earned for all-PawBucks payments
+          application_fee: 0, // No platform fee on PawBucks payments
+          cashback_earned: 0,
           rewards_earned: 0,
           description: `Invoice #${invoice.invoice_number}${tipAmountCents > 0 ? ` (includes $${(tipAmountCents / 100).toFixed(2)} tip)` : ''}`,
           status: 'completed',
@@ -246,10 +256,10 @@ serve(async (req) => {
       if (transactionError) {
         console.error("Error creating transaction:", transactionError);
       } else {
-        console.log("✅ Transaction recorded:", transaction.id);
+        logStep("Transaction recorded", { transactionId: transaction.id });
       }
 
-      // Send receipt email
+      // Send receipt and notification emails
       try {
         const { data: profile } = await supabase
           .from("profiles")
@@ -265,7 +275,7 @@ serve(async (req) => {
             merchantAddress: merchant.address,
             transactionId: payment?.id || invoiceId,
             amount: paymentAmountUSD,
-            pawbucksEarned: 0, // No PawBucks earned for all-PawBucks payments
+            pawbucksEarned: 0,
             pawbucksUsed: pawbucksUsed,
             description: `Invoice #${invoice.invoice_number}`,
           },
@@ -274,9 +284,8 @@ serve(async (req) => {
         console.error("Error sending receipt email:", emailError);
       }
 
-      // Send merchant notification for invoice paid
+      // Send merchant notification
       try {
-        // Get merchant user email
         const { data: merchantProfile } = await supabase
           .from("profiles")
           .select("email, full_name")
@@ -292,7 +301,7 @@ serve(async (req) => {
               invoiceTitle: invoice.title || undefined,
               clientName: invoice.client_name,
               clientEmail: invoice.client_email,
-              amountPaid: 0, // All PawBucks payment, no card charge
+              amountPaid: 0,
               tipAmount: tipAmountCents > 0 ? tipAmountCents / 100 : 0,
               pawbucksUsed: pawbucksUsed,
               paymentMethod: "pawbucks" as const,
@@ -302,11 +311,10 @@ serve(async (req) => {
               invoiceId: invoiceId,
             },
           });
-          console.log("✅ Merchant invoice paid notification sent to:", merchantProfile.email);
+          logStep("Merchant notification sent", { email: merchantProfile.email });
         }
       } catch (notifError) {
         console.error("Error sending merchant notification:", notifError);
-        // Don't fail the payment processing due to notification error
       }
 
       return new Response(
@@ -315,16 +323,23 @@ serve(async (req) => {
           paymentMethod: "pawbucks",
           pawbucksUsed,
           amountPaid: paymentAmountUSD,
-          pawbucksEarned: 0, // No PawBucks earned for all-PawBucks payments
+          pawbucksEarned: 0,
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Mixed payment or Stripe-only: Create Stripe checkout
-    // Note: connectedAccountId and isConnectValid are defined earlier in the function
-    
-    // Build line items
+    // Mixed payment or Stripe-only: Need Stripe checkout
+    // ============================================================
+    // DIRECT CHARGE ARCHITECTURE
+    // ============================================================
+    // For merchants with valid Connect accounts, we create a PaymentIntent
+    // directly on the connected account. This ensures:
+    // - Stripe fees are paid by the merchant
+    // - Platform only receives 3% application fee
+    // - Zero negative balance risk for platform
+    // ============================================================
+
     const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
 
     if (stripeAmountCents > 0) {
@@ -343,7 +358,6 @@ serve(async (req) => {
       });
     }
 
-    // Add tip as separate line item
     if (tipAmountCents && tipAmountCents > 0) {
       lineItems.push({
         price_data: {
@@ -368,43 +382,54 @@ serve(async (req) => {
       pawbucks_amount_cents: String(pawbucksAmountCents || 0),
       user_id: userId || "",
       is_guest_checkout: String(isGuestCheckout || false),
+      charge_type: "direct",
     };
 
     if (isConnectValid && connectedAccountId) {
-      // Use Stripe Connect destination charges (Express accounts)
+      // ============================================================
+      // DIRECT CHARGE via Checkout Session on Connected Account
+      // ============================================================
       const totalStripeAmount = stripeAmountCents + (tipAmountCents || 0);
-      const applicationFee = Math.round(totalStripeAmount * 0.03); // 3% platform fee
+      const applicationFee = Math.round(totalStripeAmount * PLATFORM_FEE_PERCENT);
 
-      console.log(`Creating Connect checkout for merchant ${merchant.id} with destination ${connectedAccountId}`);
-      
-      session = await stripe.checkout.sessions.create({
-        payment_method_types: ["card"],
-        line_items: lineItems,
-        mode: "payment",
-        success_url: `${appUrl}/invoice/${invoiceId}/success?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${appUrl}/invoice/${invoiceId}/pay?token=${invoice.access_token}`,
-        customer_email: invoice.client_email,
-        metadata,
-        payment_intent_data: {
-          application_fee_amount: applicationFee,
-          transfer_data: {
-            destination: connectedAccountId,
-          },
-          // Note: on_behalf_of is NOT used with destination charges for Express accounts
-          metadata: {
-            invoice_id: invoiceId,
-            merchant_id: merchant.id,
-            pawbucks_used: String(pawbucksUsed || 0),
-            user_id: userId || "",
-          },
-        },
-        billing_address_collection: "auto",
+      logStep(`Creating Direct Charge checkout for merchant ${merchant.id}`, { 
+        connectedAccountId, 
+        totalStripeAmount, 
+        applicationFee 
       });
+      
+      // Create Checkout Session ON the connected account (Direct Charge)
+      session = await stripe.checkout.sessions.create(
+        {
+          payment_method_types: ["card"],
+          line_items: lineItems,
+          mode: "payment",
+          success_url: `${appUrl}/invoice/${invoiceId}/success?session_id={CHECKOUT_SESSION_ID}`,
+          cancel_url: `${appUrl}/invoice/${invoiceId}/pay?token=${invoice.access_token}`,
+          customer_email: invoice.client_email,
+          metadata,
+          payment_intent_data: {
+            application_fee_amount: applicationFee, // 3% platform fee
+            metadata: {
+              invoice_id: invoiceId,
+              merchant_id: merchant.id,
+              pawbucks_used: String(pawbucksUsed || 0),
+              user_id: userId || "",
+              charge_type: "direct",
+            },
+          },
+          billing_address_collection: "auto",
+        },
+        {
+          stripeAccount: connectedAccountId, // DIRECT CHARGE: Session on connected account
+        }
+      );
+
+      logStep("Direct Charge checkout session created", { sessionId: session.id });
     } else {
-      // Standard checkout without Connect - add merchant info to product description
-      console.log(`Creating standard checkout for merchant ${merchant.id} (no valid Connect account)`);
-      // Standard checkout without Connect - add merchant info to product description
-      // Update line items to include merchant name for better identification
+      // Standard checkout without Connect (platform-only)
+      logStep(`Creating platform checkout for merchant ${merchant.id} (no valid Connect account)`);
+      
       const brandedLineItems = lineItems.map(item => ({
         ...item,
         price_data: {
@@ -429,9 +454,11 @@ serve(async (req) => {
         metadata,
         billing_address_collection: "auto",
       });
+
+      logStep("Platform checkout session created", { sessionId: session.id });
     }
 
-    // If using PawBucks as part of payment, deduct now (Stripe portion will be recorded by webhook)
+    // If using PawBucks as part of payment, deduct now
     if (pawbucksAmountCents > 0 && userId) {
       const { data: wallet, error: walletError } = await supabase
         .from("pawbucks_wallet")
@@ -440,7 +467,6 @@ serve(async (req) => {
         .single();
 
       if (!walletError && wallet && wallet.balance >= pawbucksUsed) {
-        // Deduct PawBucks
         await supabase
           .from("pawbucks_wallet")
           .update({ 
@@ -449,7 +475,6 @@ serve(async (req) => {
           })
           .eq("user_id", userId);
 
-        // Log activity
         await supabase.from("pawbucks_activity").insert({
           user_id: userId,
           type: "redeem",
@@ -485,38 +510,30 @@ serve(async (req) => {
           merchant_id: merchant.id,
           type: "earn",
           amount: pawbucksUsed,
-          description: `Partial Invoice #${invoice.invoice_number} payment`,
+          description: `Partial invoice payment - Invoice #${invoice.invoice_number}`,
           user_id: userId,
         });
+
+        logStep("PawBucks deducted for mixed payment", { pawbucksUsed });
       }
     }
 
-    // Log activity
-    await supabase.from("invoice_activity").insert({
-      invoice_id: invoiceId,
-      action: "payment_initiated",
-      description: `Payment of $${((stripeAmountCents + (tipAmountCents || 0)) / 100).toFixed(2)} initiated${pawbucksUsed > 0 ? ` with ${pawbucksUsed} PawBucks applied` : ''}`,
-      metadata: {
-        checkout_session_id: session.id,
-        stripe_amount: stripeAmountCents,
-        pawbucks_used: pawbucksUsed,
-        tip_amount: tipAmountCents || 0,
-      },
-    });
-
     return new Response(
       JSON.stringify({ 
-        url: session.url, 
+        success: true, 
+        checkoutUrl: session.url,
         sessionId: session.id,
-        pawbucksDeducted: pawbucksUsed > 0,
-        pawbucksUsed,
+        connectedAccountId: isConnectValid ? connectedAccountId : null, // Frontend may need this
+        pawbucksUsed: pawbucksUsed || 0,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
-  } catch (error: any) {
-    console.error("Error processing invoice payment:", error);
+
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    logStep("ERROR", { message: errorMessage });
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: errorMessage }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
     );
   }
