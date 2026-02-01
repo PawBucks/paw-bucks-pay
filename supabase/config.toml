@@ -326,3 +326,6 @@ verify_jwt = false
 
 [functions.check-subscription-expirations]
 verify_jwt = false
+
+[functions.confirm-payment-success]
+verify_jwt = true
