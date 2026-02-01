@@ -13,7 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { toast } from "sonner";
 import { Loader2, CreditCard } from "lucide-react";
-import { getStripePromise } from "@/lib/stripe";
+import { getStripeForConnectedAccount } from "@/lib/stripe";
 
 type PaymentFormProps = {
   merchantId: string;
@@ -161,6 +161,7 @@ export const PaymentDialog = ({
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const [clientSecret, setClientSecret] = useState("");
+  const [connectedAccountId, setConnectedAccountId] = useState("");
   const [isCreatingIntent, setIsCreatingIntent] = useState(false);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
 
@@ -196,7 +197,9 @@ export const PaymentDialog = ({
         return;
       }
 
+      // Store both clientSecret and connectedAccountId for Direct Charges
       setClientSecret(data.clientSecret);
+      setConnectedAccountId(data.connectedAccountId);
       setShowPaymentForm(true);
     } catch (error: any) {
       console.error("Error creating payment intent:", error);
@@ -217,6 +220,7 @@ export const PaymentDialog = ({
     setAmount("");
     setDescription("");
     setClientSecret("");
+    setConnectedAccountId("");
     setShowPaymentForm(false);
     onOpenChange(false);
     onSuccess();
@@ -226,6 +230,7 @@ export const PaymentDialog = ({
     setAmount("");
     setDescription("");
     setClientSecret("");
+    setConnectedAccountId("");
     setShowPaymentForm(false);
     onOpenChange(false);
   };
@@ -302,8 +307,12 @@ export const PaymentDialog = ({
             </div>
           </form>
         ) : (
-          clientSecret && (
-            <Elements stripe={getStripePromise()} options={{ clientSecret }}>
+          clientSecret && connectedAccountId && (
+            <Elements 
+              stripe={getStripeForConnectedAccount(connectedAccountId)} 
+              options={{ clientSecret }}
+              key={`${connectedAccountId}-${clientSecret}`}
+            >
               <PaymentForm
                 merchantId={merchantId}
                 merchantName={merchantName}

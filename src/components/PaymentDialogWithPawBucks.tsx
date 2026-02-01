@@ -16,7 +16,7 @@ import { toast } from "sonner";
 import { Loader2, CreditCard, Coins, Check, AlertCircle } from "lucide-react";
 import { PawBucksInfoTooltip } from "@/components/PawBucksInfoTooltip";
 import { useSharedAccount, getEffectiveWalletUserId } from "@/hooks/useSharedAccount";
-import { getStripePromise } from "@/lib/stripe";
+import { getStripeForConnectedAccount } from "@/lib/stripe";
 
 // Pet Owner conversion rate: 1000 PawBucks = $1.00 (1 PawBuck = $0.001)
 const PAWBUCKS_TO_USD = 0.001;
@@ -218,6 +218,7 @@ export const PaymentDialogWithPawBucks = ({
   const [pawbucksToUse, setPawbucksToUse] = useState(0);
   const [pawbucksBalance, setPawbucksBalance] = useState(0);
   const [clientSecret, setClientSecret] = useState("");
+  const [connectedAccountId, setConnectedAccountId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [paymentData, setPaymentData] = useState<any>(null);
@@ -280,8 +281,9 @@ export const PaymentDialogWithPawBucks = ({
         return;
       }
 
-      // Stripe payment required
+      // Stripe payment required - store both clientSecret and connectedAccountId
       setClientSecret(data.clientSecret);
+      setConnectedAccountId(data.connectedAccountId);
       setShowPaymentForm(true);
     } catch (error: any) {
       console.error("Payment error:", error);
@@ -296,6 +298,7 @@ export const PaymentDialogWithPawBucks = ({
     setDescription("");
     setPawbucksToUse(0);
     setClientSecret("");
+    setConnectedAccountId("");
     setShowPaymentForm(false);
     setPaymentData(null);
     onOpenChange(false);
@@ -307,6 +310,7 @@ export const PaymentDialogWithPawBucks = ({
     setDescription("");
     setPawbucksToUse(0);
     setClientSecret("");
+    setConnectedAccountId("");
     setShowPaymentForm(false);
     setPaymentData(null);
     onOpenChange(false);
@@ -461,8 +465,8 @@ export const PaymentDialogWithPawBucks = ({
               </Button>
             </div>
           </form>
-        ) : !getStripePromise() ? (
-          // Stripe not configured error
+        ) : !connectedAccountId ? (
+          // Missing connected account error
           <div className="flex flex-col items-center justify-center py-8 space-y-4">
             <AlertCircle className="w-8 h-8 text-destructive" />
             <p className="text-center text-destructive">Payment system is not configured. Please contact support.</p>
@@ -476,9 +480,9 @@ export const PaymentDialogWithPawBucks = ({
           </div>
         ) : (
           <Elements 
-            stripe={getStripePromise()} 
+            stripe={getStripeForConnectedAccount(connectedAccountId)} 
             options={{ clientSecret }}
-            key={clientSecret}
+            key={`${connectedAccountId}-${clientSecret}`}
           >
             <StripePaymentForm
               merchantName={merchantName}
