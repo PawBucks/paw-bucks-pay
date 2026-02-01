@@ -8283,24 +8283,26 @@ export type Database = {
           email: string | null
           full_name: string | null
           id: string | null
+          merchant_id: string | null
           phone: string | null
           stripe_customer_id: string | null
         }
-        Insert: {
-          email?: string | null
-          full_name?: string | null
-          id?: string | null
-          phone?: string | null
-          stripe_customer_id?: string | null
-        }
-        Update: {
-          email?: string | null
-          full_name?: string | null
-          id?: string | null
-          phone?: string | null
-          stripe_customer_id?: string | null
-        }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "transactions_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       merchant_reviews_public: {
         Row: {
@@ -8443,16 +8445,6 @@ export type Database = {
           avatar_url: string | null
           full_name: string | null
           id: string | null
-        }
-        Insert: {
-          avatar_url?: string | null
-          full_name?: string | null
-          id?: string | null
-        }
-        Update: {
-          avatar_url?: string | null
-          full_name?: string | null
-          id?: string | null
         }
         Relationships: []
       }
