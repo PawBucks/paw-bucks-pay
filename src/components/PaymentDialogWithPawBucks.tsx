@@ -27,6 +27,8 @@ type PaymentFormProps = {
   stripeAmount: number;
   pawbucksAmount: number;
   totalAmount: number;
+  paymentIntentId: string;
+  connectedAccountId: string;
   onSuccess: () => void;
   onCancel: () => void;
 };
@@ -37,6 +39,8 @@ const StripePaymentForm = ({
   stripeAmount,
   pawbucksAmount,
   totalAmount,
+  paymentIntentId,
+  connectedAccountId,
   onSuccess,
   onCancel,
 }: PaymentFormProps) => {
@@ -63,10 +67,28 @@ const StripePaymentForm = ({
 
       if (error) throw error;
 
-      const cashbackPawBucks = Math.round(stripeAmount * cashbackRate);
-      toast.success(
-        `Payment successful! You earned ${cashbackPawBucks} PawBucks!`
+      // Payment succeeded on Stripe - now call our backend to process rewards/transaction
+      console.log('[PAYMENT] Stripe payment confirmed, calling confirm-payment-success...');
+      
+      const { data: confirmData, error: confirmError } = await supabase.functions.invoke(
+        'confirm-payment-success',
+        {
+          body: { paymentIntentId, connectedAccountId },
+        }
       );
+
+      if (confirmError) {
+        console.error('[PAYMENT] confirm-payment-success error:', confirmError);
+        // Payment went through but backend processing failed - still show success but warn
+        toast.warning("Payment successful, but rewards may be delayed. Please check your wallet.");
+      } else {
+        console.log('[PAYMENT] confirm-payment-success result:', confirmData);
+        const cashbackPawBucks = confirmData?.pawbucksEarned || Math.round(stripeAmount * cashbackRate);
+        toast.success(
+          `Payment successful! You earned ${cashbackPawBucks} PawBucks!`
+        );
+      }
+
       onSuccess();
     } catch (error: any) {
       console.error("Payment error:", error);
@@ -490,6 +512,8 @@ export const PaymentDialogWithPawBucks = ({
               stripeAmount={paymentData?.stripeAmount || stripeAmount}
               pawbucksAmount={paymentData?.pawbucksAmount || pawbucksToUse}
               totalAmount={totalAmount}
+              paymentIntentId={paymentData?.paymentIntentId || ''}
+              connectedAccountId={connectedAccountId}
               onSuccess={handleSuccess}
               onCancel={handleCancel}
             />
