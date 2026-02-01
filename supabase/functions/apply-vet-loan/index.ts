@@ -7,12 +7,18 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const logStep = (step: string, details?: Record<string, unknown>) => {
+  console.log(`[APPLY-VET-LOAN] ${step}`, details ? JSON.stringify(details) : "");
+};
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    logStep("Function started");
+
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -31,7 +37,7 @@ serve(async (req) => {
       throw new Error('Unauthorized');
     }
 
-    console.log('Processing loan application for user:', user.id);
+    logStep('User authenticated', { userId: user.id });
 
     // Verify PawPass subscription
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
@@ -56,12 +62,28 @@ serve(async (req) => {
       hasActiveSub = subscriptions.data.length > 0;
     }
 
+    // Also check for manual subscriptions in database
     if (!hasActiveSub) {
-      console.log('User does not have active PawPass subscription:', user.id);
+      const { data: manualSub } = await supabase
+        .from('subscriptions')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('is_manual_upgrade', true)
+        .eq('status', 'active')
+        .gt('expires_at', new Date().toISOString())
+        .maybeSingle();
+      
+      if (manualSub) {
+        hasActiveSub = true;
+      }
+    }
+
+    if (!hasActiveSub) {
+      logStep('User does not have active PawPass subscription', { userId: user.id });
       throw new Error('An active subscription is required to apply for vet financing.');
     }
 
-    console.log('PawPass subscription verified');
+    logStep('PawPass subscription verified');
 
     const requestData = await req.json();
     const {
@@ -103,14 +125,13 @@ serve(async (req) => {
       throw new Error('Unable to process loan application. Please try again.');
     }
 
-    console.log('Vet clinic verified:', vet.name);
+    logStep('Vet clinic verified', { vetName: vet.name });
 
     // Simulate credit check (for MVP)
-    // In production, this would integrate with a real credit checking service
     const creditCheckPassed = Math.random() > 0.3; // 70% approval rate
     const status = creditCheckPassed ? 'approved' : 'declined';
 
-    console.log('Credit check result:', status);
+    logStep('Credit check result', { status });
 
     // Calculate repayment schedule
     let repayment_schedule = null;
@@ -146,7 +167,7 @@ serve(async (req) => {
       throw new Error('Unable to process loan application. Please contact support.');
     }
 
-    console.log('Loan created:', loan.id);
+    logStep('Loan created', { loanId: loan.id });
 
     // Log activity
     await supabase
@@ -162,24 +183,51 @@ serve(async (req) => {
         }
       });
 
-    // If approved, initiate Stripe Connect transfer
+    // If approved and vet has Connect account, create Direct Charge payment
+    // NOTE: Vet loans are platform-funded, so we use a different approach:
+    // The platform pays the vet, then collects from the user over time
     if (creditCheckPassed && vet.stripe_account_id) {
       try {
-        const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
-          apiVersion: '2025-08-27.basil',
-        });
-
-        // Create transfer to vet's account
+        // ============================================================
+        // VET LOAN PAYOUT: Platform funds the vet directly
+        // ============================================================
+        // For vet loans, the platform advances the money to the vet.
+        // This is NOT a customer payment, so we use a payout/transfer.
+        // The platform then collects from the customer over time.
+        // 
+        // Note: This creates liability for the platform. In production,
+        // consider using a proper lending partner or escrow service.
+        // ============================================================
+        
+        const amountInCents = Math.round(requested_amount * 100);
+        
+        // Create a payout to the vet's connected account
+        // This is a platform-initiated transfer, NOT a customer charge
         const transfer = await stripe.transfers.create({
-          amount: Math.round(requested_amount * 100), // Convert to cents
+          amount: amountInCents,
           currency: 'usd',
           destination: vet.stripe_account_id,
-          description: `Vet loan payment - ${loan.id}`,
+          description: `Vet loan payment - Loan ID: ${loan.id}`,
+          metadata: {
+            loan_id: loan.id,
+            user_id: user.id,
+            vet_id: vet_id,
+            type: 'vet_loan_disbursement',
+          },
         });
 
-        console.log('Stripe transfer created:', transfer.id);
+        logStep('Vet loan transfer created', { transferId: transfer.id, amount: requested_amount });
 
-        // Log payment
+        // Update loan with transfer details
+        await supabase
+          .from('vet_loans')
+          .update({
+            stripe_transfer_id: transfer.id,
+            disbursed_at: new Date().toISOString(),
+          })
+          .eq('id', loan.id);
+
+        // Log payment activity
         await supabase
           .from('loan_activity')
           .insert({
@@ -195,7 +243,8 @@ serve(async (req) => {
       } catch (stripeError) {
         console.error('Stripe transfer error:', stripeError);
         const errorMessage = stripeError instanceof Error ? stripeError.message : 'Transfer failed';
-        // Don't fail the whole request, but log it
+        
+        // Log the failure but don't fail the whole request
         await supabase
           .from('loan_activity')
           .insert({
@@ -206,6 +255,15 @@ serve(async (req) => {
               error: errorMessage
             }
           });
+        
+        // Update loan status to reflect the issue
+        await supabase
+          .from('vet_loans')
+          .update({ 
+            status: 'pending_disbursement',
+            notes: `Transfer failed: ${errorMessage}`
+          })
+          .eq('id', loan.id);
       }
     }
 

@@ -25,12 +25,18 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const logStep = (step: string, details?: Record<string, unknown>) => {
+  console.log(`[CREATE-PAYMENT-INTENT] ${step}`, details ? JSON.stringify(details) : "");
+};
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    logStep("Function started");
+
     // Initialize Stripe
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
       apiVersion: '2025-08-27.basil',
@@ -54,6 +60,8 @@ serve(async (req) => {
       throw new Error('User not authenticated');
     }
 
+    logStep("User authenticated", { userId: user.id });
+
     const requestBody = await req.json();
 
     // Validate input
@@ -72,7 +80,7 @@ serve(async (req) => {
 
     const { amount, currency, merchantId, description } = validationResult.data;
 
-    console.log('Creating payment intent:', { amount, merchantId, userId: user.id, description });
+    logStep('Request validated', { amount, merchantId, description });
 
     // Get merchant details including Stripe Connect account
     const supabaseAdmin = createClient(
@@ -82,7 +90,7 @@ serve(async (req) => {
 
     const { data: merchant, error: merchantError } = await supabaseAdmin
       .from('merchants')
-      .select('stripe_account_id, cashback_rate, business_name')
+      .select('stripe_account_id, cashback_rate, business_name, onboarding_complete')
       .eq('id', merchantId)
       .single();
 
@@ -96,10 +104,20 @@ serve(async (req) => {
       throw new Error('Payment processing is not available for this merchant.');
     }
 
+    if (!merchant.onboarding_complete) {
+      throw new Error("Merchant's Stripe account setup is incomplete");
+    }
+
+    logStep("Merchant found", { 
+      merchantId, 
+      stripeAccountId: merchant.stripe_account_id,
+      businessName: merchant.business_name 
+    });
+
     // Check user's subscription tier to determine cashback rate
     const { data: subscription } = await supabaseAdmin
       .from('subscriptions')
-      .select('stripe_subscription_id')
+      .select('stripe_subscription_id, subscription_tier, is_manual_upgrade, expires_at, status')
       .eq('user_id', user.id)
       .in('status', ['active', 'trialing'])
       .maybeSingle();
@@ -107,7 +125,19 @@ serve(async (req) => {
     let cashbackRate = 10; // Default 10x multiplier for free accounts
     let subscriptionTier = 'Free';
 
-    if (subscription?.stripe_subscription_id) {
+    // Check for manual subscription first
+    if (subscription?.is_manual_upgrade && subscription?.subscription_tier) {
+      const expiresAt = subscription.expires_at ? new Date(subscription.expires_at) : null;
+      if (!expiresAt || expiresAt > new Date()) {
+        if (subscription.subscription_tier === 'pawpass_plus') {
+          cashbackRate = 30;
+          subscriptionTier = 'PawPass+';
+        } else if (subscription.subscription_tier === 'pawpass') {
+          cashbackRate = 20;
+          subscriptionTier = 'PawPass';
+        }
+      }
+    } else if (subscription?.stripe_subscription_id) {
       // Get subscription details from Stripe to check product
       const stripeSubscription = await stripe.subscriptions.retrieve(subscription.stripe_subscription_id);
       const productId = stripeSubscription.items.data[0]?.price?.product;
@@ -122,7 +152,7 @@ serve(async (req) => {
       }
     }
     
-    console.log(`Cashback rate: ${cashbackRate}x (${subscriptionTier} user)`);
+    logStep(`Cashback rate: ${cashbackRate}x (${subscriptionTier} user)`);
 
     // Calculate amounts with tier-based multipliers
     // cashbackRate is the multiplier (10x, 20x, 30x) meaning $1 = 10/20/30 PawBucks
@@ -131,7 +161,7 @@ serve(async (req) => {
     // Platform fee: 3% of transaction for PawBucks platform
     const platformFeeInCents = Math.round(amount * 0.03 * 100);
 
-    console.log('Payment breakdown:', {
+    logStep('Payment breakdown', {
       totalAmount: amount,
       subscriptionTier,
       cashbackRate: `${cashbackRate}x`,
@@ -140,38 +170,77 @@ serve(async (req) => {
       merchantReceives: (amountInCents - platformFeeInCents) / 100,
     });
 
-    // Create a PaymentIntent with Stripe Connect
-    // Using on_behalf_of ensures merchant's business info appears on customer statements
-    // Explicitly specify card payment method for better international support
-    // Statement descriptor suffix shows merchant name on card statement (max 22 chars)
-    const statementDescriptor = merchant.business_name.substring(0, 22).replace(/[<>"'\\]/g, '');
+    // ============================================================
+    // DIRECT CHARGE: PaymentIntent created ON the connected account
+    // ============================================================
+    // Benefits:
+    // - Stripe processing fees are paid by the merchant (connected account)
+    // - Platform (PawBucks) only receives the application_fee_amount
+    // - Zero negative balance risk for the platform
+    // - Chargebacks are the merchant's responsibility
+    // ============================================================
     
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: amountInCents,
-      currency,
-      payment_method_types: ['card'], // Explicit card method for global compatibility
-      // Note: on_behalf_of is NOT used with destination charges for Express accounts
-      application_fee_amount: platformFeeInCents, // Platform fee (used for cashback)
-      transfer_data: {
-        destination: merchant.stripe_account_id, // Send to merchant's Connect account
+    const paymentIntent = await stripe.paymentIntents.create(
+      {
+        amount: amountInCents,
+        currency,
+        application_fee_amount: platformFeeInCents, // 3% platform fee
+        automatic_payment_methods: { enabled: true },
+        metadata: {
+          merchant_id: merchantId,
+          user_id: user.id,
+          user_email: user.email || '',
+          business_name: merchant.business_name,
+          description: description || `Payment to ${merchant.business_name}`,
+          subscription_tier: subscriptionTier,
+          pawbucks_earned: String(pawbucksEarned),
+          platform: "pawbucks",
+          charge_type: "direct",
+        },
       },
-      statement_descriptor_suffix: statementDescriptor, // Merchant name on card statement
-      metadata: {
-        merchant_id: merchantId,
-        user_id: user.id,
-        description: description || `Payment to ${merchant.business_name}`,
-        subscription_tier: subscriptionTier,
-      },
+      {
+        stripeAccount: merchant.stripe_account_id, // DIRECT CHARGE: Created on connected account
+      }
+    );
+
+    logStep('PaymentIntent created (Direct Charge)', { 
+      paymentIntentId: paymentIntent.id,
+      connectedAccount: merchant.stripe_account_id 
     });
 
-    console.log('Payment intent created:', paymentIntent.id);
+    // Create pending payment record
+    await supabaseAdmin
+      .from("direct_payments")
+      .insert({
+        stripe_payment_intent_id: paymentIntent.id,
+        connected_account_id: merchant.stripe_account_id,
+        merchant_id: merchantId,
+        user_id: user.id,
+        amount: amountInCents,
+        application_fee: platformFeeInCents,
+        currency,
+        status: "pending",
+        description: description || `Payment to ${merchant.business_name}`,
+        pawbucks_earned: pawbucksEarned,
+        metadata: {
+          business_name: merchant.business_name,
+          charge_type: "direct",
+          subscription_tier: subscriptionTier,
+        },
+      });
+
+    logStep("Payment record created");
 
     return new Response(
       JSON.stringify({
         clientSecret: paymentIntent.client_secret,
         paymentIntentId: paymentIntent.id,
+        connectedAccountId: merchant.stripe_account_id, // Frontend needs this for Stripe.js
         pawbucksEarned,
         cashbackRate,
+        amount: amountInCents,
+        applicationFee: platformFeeInCents,
+        merchantName: merchant.business_name,
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -184,7 +253,6 @@ serve(async (req) => {
       message: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined,
       type: error instanceof Error ? error.constructor.name : typeof error,
-      raw: JSON.stringify(error, Object.getOwnPropertyNames(error as object)),
     });
     
     // Return helpful error message
@@ -192,6 +260,8 @@ serve(async (req) => {
     if (error instanceof Error) {
       if (error.message.includes('country') || error.message.includes('location')) {
         userMessage = 'Payment processing is not available in your current location. Please try again later.';
+      } else if (error.message.includes('Merchant') || error.message.includes('merchant')) {
+        userMessage = error.message;
       }
     }
     

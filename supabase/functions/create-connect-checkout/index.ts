@@ -9,63 +9,66 @@ const corsHeaders = {
 
 // PawBucks to USD conversion: 1000 PawBucks = $1 USD
 const PAWBUCKS_TO_USD = 1000;
+const PLATFORM_FEE_PERCENTAGE = 0.03; // 3% platform fee
+
+const logStep = (step: string, details?: Record<string, unknown>) => {
+  console.log(`[CREATE-CONNECT-CHECKOUT] ${step}`, details ? JSON.stringify(details) : "");
+};
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    logStep("Function started");
+
     // Authenticate the request
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
       return new Response(
         JSON.stringify({ error: "Missing authorization header" }),
-        {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 401,
-        }
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 401 }
       );
     }
 
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_ANON_KEY") ?? "",
-      {
-        global: {
-          headers: { Authorization: authHeader },
-        },
-      }
+      { global: { headers: { Authorization: authHeader } } }
     );
 
-    // Verify the user is authenticated
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
     
     if (authError || !user) {
       return new Response(
         JSON.stringify({ error: "Unauthorized" }),
-        {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 401,
-        }
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 401 }
       );
     }
 
-    // STEP 1: Validate Stripe API Key
+    logStep("User authenticated", { userId: user.id });
+
+    // Initialize Stripe
     const stripeKey = Deno.env.get('STRIPE_SECRET_KEY');
     if (!stripeKey) {
       throw new Error('STRIPE_SECRET_KEY is not configured');
     }
 
-    // STEP 2: Initialize Stripe
-    const stripe = new Stripe(stripeKey, {
-      apiVersion: '2025-08-27.basil',
-    });
+    const stripe = new Stripe(stripeKey, { apiVersion: '2025-08-27.basil' });
 
-    // STEP 3: Parse request body
+    // Parse request body
     const body = await req.json();
-    const { merchantId: bodyMerchantId, accountId: legacyAccountId, priceId, quantity, successUrl, cancelUrl, productName, pawbucksToUse: manualPawbucksToUse } = body;
+    const { 
+      merchantId: bodyMerchantId, 
+      accountId: legacyAccountId, 
+      priceId, 
+      quantity, 
+      successUrl, 
+      cancelUrl, 
+      productName, 
+      pawbucksToUse: manualPawbucksToUse 
+    } = body;
 
     // Create admin client for secure lookups
     const supabaseAdmin = createClient(
@@ -73,18 +76,18 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    // Resolve stripe_account_id from merchantId (secure server-side lookup)
+    // Resolve merchant details from merchantId
     let accountId: string | null = null;
     let merchantId: string | null = null;
     let merchantName = 'Merchant Store';
     let cashbackRate = 10;
     let merchantAcceptsPawBucks = false;
+    let onboardingComplete = false;
 
     if (bodyMerchantId && typeof bodyMerchantId === 'string') {
-      // New approach: lookup stripe_account_id from merchantId
       const { data: merchant, error: merchantError } = await supabaseAdmin
         .from('merchants')
-        .select('id, stripe_account_id, business_name, cashback_rate, accepts_pawbucks')
+        .select('id, stripe_account_id, business_name, cashback_rate, accepts_pawbucks, onboarding_complete')
         .eq('id', bodyMerchantId)
         .eq('approval_status', 'approved')
         .single();
@@ -92,10 +95,7 @@ serve(async (req) => {
       if (merchantError || !merchant?.stripe_account_id) {
         return new Response(
           JSON.stringify({ error: 'Merchant not found or not connected to Stripe' }),
-          {
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-            status: 400,
-          }
+          { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
         );
       }
 
@@ -104,14 +104,13 @@ serve(async (req) => {
       merchantName = merchant.business_name || 'Merchant Store';
       cashbackRate = merchant.cashback_rate || 10;
       merchantAcceptsPawBucks = merchant.accepts_pawbucks || false;
+      onboardingComplete = merchant.onboarding_complete || false;
     } else if (legacyAccountId && typeof legacyAccountId === 'string') {
-      // Legacy fallback: accountId provided directly
       accountId = legacyAccountId;
       
-      // Still need to lookup merchant info
       const { data: merchant } = await supabaseAdmin
         .from('merchants')
-        .select('id, business_name, cashback_rate, accepts_pawbucks')
+        .select('id, business_name, cashback_rate, accepts_pawbucks, onboarding_complete')
         .eq('stripe_account_id', legacyAccountId)
         .single();
 
@@ -119,52 +118,55 @@ serve(async (req) => {
       merchantName = merchant?.business_name || 'Merchant Store';
       cashbackRate = merchant?.cashback_rate || 10;
       merchantAcceptsPawBucks = merchant?.accepts_pawbucks || false;
+      onboardingComplete = merchant?.onboarding_complete || false;
     } else {
       return new Response(
         JSON.stringify({ error: 'merchantId is required' }),
-        {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 400,
-        }
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
       );
     }
 
-    // Validate other required fields
+    if (!onboardingComplete) {
+      return new Response(
+        JSON.stringify({ error: "Merchant's Stripe account setup is incomplete" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
+      );
+    }
+
+    // Validate required fields
     if (!priceId || typeof priceId !== 'string') {
       return new Response(
         JSON.stringify({ error: 'priceId is required and must be a string' }),
-        {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 400,
-        }
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
       );
     }
     if (!quantity || typeof quantity !== 'number' || quantity < 1 || quantity > 100) {
       return new Response(
         JSON.stringify({ error: 'quantity must be a number between 1 and 100' }),
-        {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 400,
-        }
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
       );
     }
 
-    console.log(`Creating checkout for merchant ${merchantId}, stripe account ${accountId?.substring(0, 10)}..., price ${priceId}, user ${user.id}`);
-    console.log('Merchant found:', { merchantId, merchantName, cashbackRate, merchantAcceptsPawBucks });
+    logStep('Request validated', { merchantId, priceId, quantity, merchantAcceptsPawBucks });
 
-    // STEP 5: Calculate application fee (3% platform fee for Connect payments)
-    const PLATFORM_FEE_PERCENTAGE = 0.03; // 3% fee
-    
-    // Get the price details from connected account to calculate the fee and determine checkout mode
+    // Get the price details from connected account
     const connectedPrice = await stripe.prices.retrieve(priceId, {
       stripeAccount: accountId,
     });
 
-    // Determine if this is a recurring price (subscription) or one-time payment
     const isRecurringPrice = connectedPrice.type === 'recurring';
-    const checkoutMode = isRecurringPrice ? 'subscription' : 'payment';
-
-    console.log(`Price type: ${connectedPrice.type}, using checkout mode: ${checkoutMode}`);
+    
+    // NOTE: Direct Charges with subscriptions require special handling
+    // For now, we only support one-time payments with Direct Charges
+    if (isRecurringPrice) {
+      return new Response(
+        JSON.stringify({ 
+          error: 'Subscription purchases through merchant storefronts are not yet supported. Please contact the merchant directly.',
+          error_code: 'subscription_not_supported'
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
+      );
+    }
 
     // Calculate total amount in cents
     let totalAmountCents = 0;
@@ -174,18 +176,14 @@ serve(async (req) => {
 
     const totalAmountDollars = totalAmountCents / 100;
 
-    // STEP 6: Handle PawBucks - either manual selection or auto-redeem
-    // IMPORTANT: We only CALCULATE the PawBucks to be used here, NOT deduct them
-    // Actual deduction happens in stripe-webhook AFTER payment completes
+    // Handle PawBucks
     let pawbucksUsed = 0;
     let pawbucksUsdValue = 0;
     let finalStripeAmountCents = totalAmountCents;
 
-    // Check if manual PawBucks amount was provided by user
     const hasManualPawBucks = typeof manualPawbucksToUse === 'number' && manualPawbucksToUse > 0;
     
     if (merchantAcceptsPawBucks) {
-      // Get user's PawBucks balance
       const { data: pawbucksWallet } = await supabaseAdmin
         .from('pawbucks_wallet')
         .select('balance')
@@ -195,14 +193,9 @@ serve(async (req) => {
       const availablePawBucks = pawbucksWallet?.balance || 0;
 
       if (hasManualPawBucks) {
-        // User explicitly chose how many PawBucks to use via the dialog
-        console.log('Manual PawBucks selection:', manualPawbucksToUse);
-        
-        // Validate the amount doesn't exceed balance
         pawbucksUsed = Math.min(manualPawbucksToUse, availablePawBucks);
         pawbucksUsdValue = pawbucksUsed / PAWBUCKS_TO_USD;
         
-        // Ensure we don't exceed the total amount
         if (pawbucksUsdValue > totalAmountDollars) {
           pawbucksUsdValue = totalAmountDollars;
           pawbucksUsed = Math.floor(pawbucksUsdValue * PAWBUCKS_TO_USD);
@@ -210,44 +203,12 @@ serve(async (req) => {
         
         finalStripeAmountCents = Math.round((totalAmountDollars - pawbucksUsdValue) * 100);
         
-        console.log('Manual PawBucks applied:', {
+        logStep('PawBucks applied', {
           requested: manualPawbucksToUse,
           applied: pawbucksUsed,
           usdValue: `$${pawbucksUsdValue.toFixed(2)}`,
           remainingStripe: `$${(finalStripeAmountCents / 100).toFixed(2)}`,
         });
-      } else if (isRecurringPrice) {
-        // For subscriptions without manual selection, check auto-redeem preference
-        const { data: userProfile } = await supabaseAdmin
-          .from('profiles')
-          .select('auto_redeem_pawbucks')
-          .eq('id', user.id)
-          .single();
-
-        if (userProfile?.auto_redeem_pawbucks && availablePawBucks > 0) {
-          console.log('Auto PawBucks redemption enabled for subscription');
-
-          // Calculate max PawBucks that can be used (in USD)
-          const maxPawBucksUsd = availablePawBucks / PAWBUCKS_TO_USD;
-          
-          // Calculate how much to use (up to the total amount)
-          pawbucksUsdValue = Math.min(maxPawBucksUsd, totalAmountDollars);
-          pawbucksUsed = Math.floor(pawbucksUsdValue * PAWBUCKS_TO_USD);
-
-          // Calculate remaining Stripe amount
-          finalStripeAmountCents = Math.round((totalAmountDollars - pawbucksUsdValue) * 100);
-
-          console.log('Auto PawBucks calculation (pending deduction):', {
-            availablePawBucks,
-            pawbucksUsed,
-            pawbucksUsdValue: `$${pawbucksUsdValue.toFixed(2)}`,
-            remainingStripeAmount: `$${(finalStripeAmountCents / 100).toFixed(2)}`,
-          });
-        }
-      }
-      
-      if (pawbucksUsed > 0) {
-        console.log(`⏳ PawBucks deduction (${pawbucksUsed}) will occur after payment completes`);
       }
     }
 
@@ -260,40 +221,52 @@ serve(async (req) => {
     let finalAmountDollars = finalStripeAmountCents / 100;
 
     // Check user's subscription tier for cashback calculation
-    let userCashbackRate = 10; // Default 10x for free accounts
+    let userCashbackRate = 10;
     
     const { data: subscription } = await supabaseAdmin
       .from('subscriptions')
-      .select('stripe_subscription_id')
+      .select('stripe_subscription_id, subscription_tier, is_manual_upgrade, expires_at, status')
       .eq('user_id', user.id)
       .in('status', ['active', 'trialing'])
       .maybeSingle();
 
-    if (subscription?.stripe_subscription_id) {
+    // Check for manual subscription first
+    if (subscription?.is_manual_upgrade && subscription?.subscription_tier) {
+      const expiresAt = subscription.expires_at ? new Date(subscription.expires_at) : null;
+      if (!expiresAt || expiresAt > new Date()) {
+        if (subscription.subscription_tier === 'pawpass_plus') {
+          userCashbackRate = 30;
+        } else if (subscription.subscription_tier === 'pawpass') {
+          userCashbackRate = 20;
+        }
+      }
+    } else if (subscription?.stripe_subscription_id) {
       const stripeSubscription = await stripe.subscriptions.retrieve(subscription.stripe_subscription_id);
       const productId = stripeSubscription.items.data[0]?.price?.product;
       
       if (productId === 'prod_TQyZjYzt9DwoIK') {
-        userCashbackRate = 30; // PawPass+ gets 30x
+        userCashbackRate = 30;
       } else if (productId === 'prod_TJVK9ZhLiJnnpm') {
-        userCashbackRate = 20; // PawPass gets 20x
+        userCashbackRate = 20;
       }
     }
 
     // PawBucks earned based on remaining Stripe amount only
     const estimatedPawBucks = Math.floor(finalAmountDollars * userCashbackRate);
 
-    console.log(`Calculated: fee=$${(applicationFeeAmount / 100).toFixed(2)}, pawBucks=${estimatedPawBucks}`);
+    logStep('Payment calculation', { 
+      totalAmount: totalAmountDollars,
+      finalStripeAmount: finalAmountDollars,
+      applicationFee: applicationFeeAmount / 100,
+      estimatedPawBucks,
+      userCashbackRate
+    });
 
-    // STEP 7: Handle case where PawBucks covers the full amount
-    // For one-time payments: Can be fully covered by PawBucks (no Stripe checkout needed)
-    // For subscriptions: Always need minimum $0.50 for Stripe to capture card for recurring billing
-    const MINIMUM_STRIPE_AMOUNT_CENTS = 50; // $0.50 minimum for Stripe
-    
-    if (finalStripeAmountCents <= 0 && !isRecurringPrice) {
-      console.log('Full amount covered by PawBucks - no Stripe checkout needed (one-time payment)');
+    // Handle case where PawBucks covers the full amount
+    if (finalStripeAmountCents <= 0) {
+      logStep('Full amount covered by PawBucks - no Stripe checkout needed');
       
-      // Deduct PawBucks from user's wallet immediately for PawBucks-only payments
+      // Deduct PawBucks from user's wallet
       if (pawbucksUsed > 0) {
         const { data: currentWallet } = await supabaseAdmin
           .from('pawbucks_wallet')
@@ -302,13 +275,11 @@ serve(async (req) => {
           .single();
         
         if (currentWallet && currentWallet.balance >= pawbucksUsed) {
-          // Deduct PawBucks from user
           await supabaseAdmin
             .from('pawbucks_wallet')
             .update({ balance: currentWallet.balance - pawbucksUsed })
             .eq('user_id', user.id);
           
-          // Log user's PawBucks activity (deduction)
           await supabaseAdmin
             .from('pawbucks_activity')
             .insert({
@@ -322,7 +293,6 @@ serve(async (req) => {
           
           // Credit merchant's PawBucks wallet
           if (merchantId) {
-            // Get or create merchant wallet
             let { data: merchantWallet } = await supabaseAdmin
               .from('merchant_pawbucks_wallet')
               .select('balance')
@@ -330,7 +300,6 @@ serve(async (req) => {
               .single();
             
             if (!merchantWallet) {
-              // Create wallet if doesn't exist
               const { data: newWallet } = await supabaseAdmin
                 .from('merchant_pawbucks_wallet')
                 .insert({ merchant_id: merchantId, balance: 0 })
@@ -340,13 +309,11 @@ serve(async (req) => {
             }
             
             if (merchantWallet) {
-              // Credit merchant
               await supabaseAdmin
                 .from('merchant_pawbucks_wallet')
                 .update({ balance: merchantWallet.balance + pawbucksUsed })
                 .eq('merchant_id', merchantId);
               
-              // Log merchant's PawBucks activity (credit)
               await supabaseAdmin
                 .from('merchant_pawbucks_activity')
                 .insert({
@@ -355,16 +322,11 @@ serve(async (req) => {
                   amount: pawbucksUsed,
                   source: 'Customer Payment',
                   customer_user_id: user.id,
-                  description: `Received ${pawbucksUsed} PawBucks ($${pawbucksUsdValue.toFixed(2)}) from customer`,
+                  description: `Received ${pawbucksUsed} PawBucks from customer`,
                 });
-              
-              console.log(`✅ Credited ${pawbucksUsed} PawBucks to merchant wallet`);
             }
           }
-          
-          console.log(`✅ Deducted ${pawbucksUsed} PawBucks from user wallet`);
         } else {
-          console.error('Insufficient PawBucks balance for purchase');
           return new Response(
             JSON.stringify({ error: 'Insufficient PawBucks balance' }),
             { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
@@ -372,8 +334,7 @@ serve(async (req) => {
         }
       }
       
-      // Create a transaction record for this payment (handled as a PawBucks-only payment)
-      // NO platform fee since no Stripe payment
+      // Create a transaction record - NO platform fee on PawBucks-only payments
       if (merchantId) {
         await supabaseAdmin
           .from('transactions')
@@ -381,10 +342,10 @@ serve(async (req) => {
             user_id: user.id,
             merchant_id: merchantId,
             amount: totalAmountDollars,
-            stripe_amount: 0, // No Stripe payment
-            pawbucks_used: pawbucksUsed, // Full amount paid with PawBucks
-            application_fee: 0, // NO fee on PawBucks-only payments
-            cashback_earned: 0, // No cashback on PawBucks portion
+            stripe_amount: 0,
+            pawbucks_used: pawbucksUsed,
+            application_fee: 0,
+            cashback_earned: 0,
             rewards_earned: 0,
             description: `Purchase at ${merchantName} (paid with PawBucks)`,
             status: 'completed',
@@ -400,40 +361,20 @@ serve(async (req) => {
           message: `Purchase paid with ${pawbucksUsed} PawBucks ($${pawbucksUsdValue.toFixed(2)})`,
           redirect_url: successUrl || `${req.headers.get('origin')}/checkout-success`,
         }),
-        {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 200,
-        }
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
       );
     }
-    
-    // For subscriptions where PawBucks would cover the full amount:
-    // We need a minimum Stripe charge ($0.50) to capture card for recurring billing
-    // PawBucks will cover the rest, and subsequent months charge full price via card
-    if (isRecurringPrice && finalStripeAmountCents < MINIMUM_STRIPE_AMOUNT_CENTS) {
-      console.log('Subscription: Ensuring minimum Stripe amount for card capture');
-      
-      // Calculate how much PawBucks we can actually use while keeping minimum Stripe charge
-      const maxPawBucksForSubscription = Math.max(0, totalAmountCents - MINIMUM_STRIPE_AMOUNT_CENTS);
-      const actualPawBucksValue = maxPawBucksForSubscription / 100;
-      const actualPawBucksUsed = Math.floor(actualPawBucksValue * PAWBUCKS_TO_USD);
-      
-      pawbucksUsed = actualPawBucksUsed;
-      pawbucksUsdValue = actualPawBucksValue;
-      finalStripeAmountCents = totalAmountCents - maxPawBucksForSubscription;
-      finalAmountDollars = finalStripeAmountCents / 100;
-      
-      console.log('Adjusted PawBucks for subscription:', {
-        originalPawBucks: pawbucksUsed,
-        adjustedPawBucks: actualPawBucksUsed,
-        stripeAmount: `$${finalAmountDollars.toFixed(2)}`,
-      });
-    }
 
-    // STEP 8: Create Checkout Session using DESTINATION CHARGES pattern
-    // This creates the payment on the PLATFORM, then transfers to connected account
-    // Benefits: Webhooks come to platform, statement descriptor can be controlled
-    
+    // ============================================================
+    // DIRECT CHARGE: Checkout Session created ON the connected account
+    // ============================================================
+    // Benefits:
+    // - Stripe processing fees are paid by the merchant (connected account)
+    // - Platform (PawBucks) only receives the application_fee_amount
+    // - Zero negative balance risk for the platform
+    // - Chargebacks are the merchant's responsibility
+    // ============================================================
+
     const metadata = {
       connected_account_id: accountId,
       platform_fee_percentage: (PLATFORM_FEE_PERCENTAGE * 100).toString(),
@@ -441,15 +382,16 @@ serve(async (req) => {
       merchant_id: merchantId || '',
       source: 'merchant_storefront',
       product_name: productName || merchantName,
-      description: `${isRecurringPrice ? 'Subscription' : 'Purchase'} from ${merchantName}`,
+      description: `Purchase from ${merchantName}`,
       original_amount_cents: totalAmountCents.toString(),
       pawbucks_used: pawbucksUsed.toString(),
       pawbucks_usd_value: pawbucksUsdValue.toFixed(2),
+      charge_type: 'direct',
     };
 
-    // For one-time payments, use destination charges
-    if (!isRecurringPrice) {
-      const session = await stripe.checkout.sessions.create({
+    // Create Checkout Session ON the connected account (Direct Charge)
+    const session = await stripe.checkout.sessions.create(
+      {
         line_items: [
           {
             price_data: {
@@ -471,167 +413,45 @@ serve(async (req) => {
         customer_email: user.email,
         metadata,
         payment_intent_data: {
-          application_fee_amount: applicationFeeAmount,
-          transfer_data: {
-            destination: accountId,
-          },
-          // Note: on_behalf_of is NOT used with destination charges for Express accounts
-          // Statement descriptor suffix adds merchant name after platform name
-          statement_descriptor_suffix: merchantName.substring(0, 22).replace(/[<>"']/g, ''),
+          application_fee_amount: applicationFeeAmount, // 3% platform fee
           metadata,
         },
-      });
-
-      console.log('Checkout session created (destination charge):', session.id);
-
-      return new Response(
-        JSON.stringify({
-          success: true,
-          checkout_url: session.url,
-          session_id: session.id,
-          application_fee: {
-            amount: applicationFeeAmount,
-            percentage: PLATFORM_FEE_PERCENTAGE * 100,
-            formatted: `$${(applicationFeeAmount / 100).toFixed(2)}`,
-          },
-          rewards: {
-            cashback_rate: userCashbackRate,
-            estimated_pawbucks: estimatedPawBucks,
-            formatted: `+${estimatedPawBucks} PawBucks`,
-          },
-          pawbucks_applied: pawbucksUsed > 0 ? {
-            pawbucks_used: pawbucksUsed,
-            usd_value: pawbucksUsdValue,
-            formatted: `${pawbucksUsed} PawBucks ($${pawbucksUsdValue.toFixed(2)})`,
-          } : null,
-          original_amount: totalAmountDollars,
-          final_stripe_amount: finalAmountDollars,
-        }),
-        {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 200,
-        }
-      );
-    }
-
-    // For subscriptions, we need a different approach since Stripe doesn't allow
-    // price_data with transfer_data in subscription mode.
-    // 
-    // Solution: Create a one-time payment for the first discounted amount (with PawBucks applied),
-    // then create the subscription separately with trial ending when the first payment covers.
-    // OR: Use destination charges with on_behalf_of for proper webhook routing.
-    //
-    // For simplicity and to ensure webhooks come to platform (for PawBucks crediting):
-    // We'll create a coupon for the PawBucks discount and apply it to the subscription.
-    
-    console.log('Creating subscription checkout with destination charges:', accountId);
-    
-    // For subscriptions with PawBucks discount, we need to handle differently
-    // The subscription must be created on the platform (not connected account) for webhooks to work
-    // We use on_behalf_of to show merchant branding on statements
-    
-    // First, we need to create a coupon if PawBucks are being used
-    let couponId: string | undefined;
-    
-    if (pawbucksUsed > 0 && pawbucksUsdValue > 0) {
-      // Create a one-time coupon for the PawBucks discount (in cents)
-      const discountAmountCents = Math.round(pawbucksUsdValue * 100);
-      
-      try {
-        const coupon = await stripe.coupons.create({
-          amount_off: discountAmountCents,
-          currency: 'usd',
-          duration: 'once', // Only applies to first payment
-          name: `PawBucks Discount - ${pawbucksUsed} PawBucks`,
-          metadata: {
-            pawbucks_used: pawbucksUsed.toString(),
-            user_id: user.id,
-          },
-        });
-        couponId = coupon.id;
-        console.log('Created coupon for PawBucks discount:', couponId);
-      } catch (couponError) {
-        console.error('Error creating coupon:', couponError);
-        // Continue without coupon if creation fails
+      },
+      {
+        stripeAccount: accountId, // DIRECT CHARGE: Session on connected account
       }
-    }
-    
-    // Get or create the price on the platform account that mirrors the connected account price
-    // Since we can't use the connected account's price directly with destination charges,
-    // we need to create a similar price on the platform
-    
-    // Retrieve the connected price details
-    const connectedPriceDetails = await stripe.prices.retrieve(priceId, {
-      stripeAccount: accountId,
-    });
-    
-    const connectedProduct = await stripe.products.retrieve(
-      connectedPriceDetails.product as string,
-      { stripeAccount: accountId }
     );
-    
-    // Create a platform-level product and price that mirrors the connected one
-    const platformProduct = await stripe.products.create({
-      name: connectedProduct.name,
-      description: connectedProduct.description || `Subscription from ${merchantName}`,
-      metadata: {
-        connected_account_id: accountId,
-        original_product_id: connectedProduct.id,
-        merchant_id: merchantId || '',
-      },
-    });
-    
-    const platformPrice = await stripe.prices.create({
-      product: platformProduct.id,
-      unit_amount: connectedPriceDetails.unit_amount!,
-      currency: connectedPriceDetails.currency,
-      recurring: connectedPriceDetails.recurring ? {
-        interval: connectedPriceDetails.recurring.interval,
-        interval_count: connectedPriceDetails.recurring.interval_count || 1,
-      } : undefined,
-      metadata: {
-        connected_account_id: accountId,
-        original_price_id: priceId,
-        merchant_id: merchantId || '',
-      },
-    });
-    
-    console.log('Created platform price for subscription:', platformPrice.id);
-    
-    // Create checkout session on platform with destination charges
-    // Note: In subscription mode, we cannot use payment_intent_data - statement descriptor
-    // must be configured at the account level or in subscription_data
-    const session = await stripe.checkout.sessions.create({
-      line_items: [
-        {
-          price: platformPrice.id,
-          quantity: quantity,
-        },
-      ],
-      mode: 'subscription',
-      success_url: successUrl || `${req.headers.get('origin')}/checkout-success?session_id={CHECKOUT_SESSION_ID}&store=${accountId}`,
-      cancel_url: cancelUrl || `${req.headers.get('origin')}/checkout-canceled`,
-      customer_email: user.email,
-      metadata,
-      discounts: couponId ? [{ coupon: couponId }] : undefined,
-      subscription_data: {
-        application_fee_percent: PLATFORM_FEE_PERCENTAGE * 100,
-        transfer_data: {
-          destination: accountId,
-        },
-        // Note: on_behalf_of is NOT used with destination charges for Express accounts
-        metadata,
-        // Statement descriptor for subscription invoices - shows merchant name
-        description: `${merchantName.substring(0, 22).replace(/[<>"']/g, '')} subscription`,
-      },
-    });
 
-    console.log('Subscription checkout session created with destination charges:', session.id);
+    logStep('Direct Charge checkout session created', { sessionId: session.id, connectedAccount: accountId });
 
-    // Verify session URL was returned
-    if (!session.url) {
-      console.error('Stripe returned session without URL:', session.id);
-      throw new Error('Checkout session created but no URL returned');
+    // If using PawBucks, deduct now (we'll refund if checkout is abandoned)
+    if (pawbucksUsed > 0) {
+      const { data: currentWallet } = await supabaseAdmin
+        .from('pawbucks_wallet')
+        .select('balance')
+        .eq('user_id', user.id)
+        .single();
+      
+      if (currentWallet && currentWallet.balance >= pawbucksUsed) {
+        await supabaseAdmin
+          .from('pawbucks_wallet')
+          .update({ balance: currentWallet.balance - pawbucksUsed })
+          .eq('user_id', user.id);
+        
+        await supabaseAdmin
+          .from('pawbucks_activity')
+          .insert({
+            user_id: user.id,
+            type: 'redeem',
+            amount: -pawbucksUsed,
+            source: 'Checkout',
+            partner_id: merchantId || null,
+            description: `PawBucks reserved for checkout at ${merchantName} (session: ${session.id})`,
+            pawbucks_status: 'pending', // Mark as pending until checkout completes
+          });
+        
+        logStep('PawBucks deducted for checkout', { pawbucksUsed, sessionId: session.id });
+      }
     }
 
     return new Response(
@@ -639,6 +459,7 @@ serve(async (req) => {
         success: true,
         checkout_url: session.url,
         session_id: session.id,
+        connected_account_id: accountId, // Frontend needs this for proper redirect handling
         application_fee: {
           amount: applicationFeeAmount,
           percentage: PLATFORM_FEE_PERCENTAGE * 100,
@@ -657,14 +478,10 @@ serve(async (req) => {
         original_amount: totalAmountDollars,
         final_stripe_amount: finalAmountDollars,
       }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
-      }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
     );
 
   } catch (error: unknown) {
-    // Extract detailed error information for better debugging
     let errorMessage = 'An unexpected error occurred';
     let errorCode = 'unknown_error';
     let errorType = 'unknown';
@@ -672,31 +489,22 @@ serve(async (req) => {
     if (error instanceof Error) {
       errorMessage = error.message;
       
-      // Check if it's a Stripe error with additional details
       const stripeError = error as any;
-      if (stripeError.type) {
-        errorType = stripeError.type;
-      }
-      if (stripeError.code) {
-        errorCode = stripeError.code;
-      }
-      if (stripeError.raw?.message) {
-        errorMessage = stripeError.raw.message;
-      }
+      if (stripeError.type) errorType = stripeError.type;
+      if (stripeError.code) errorCode = stripeError.code;
+      if (stripeError.raw?.message) errorMessage = stripeError.raw.message;
       
-      // Log full error details server-side
       console.error('Error creating checkout session:', {
         message: errorMessage,
         type: errorType,
         code: errorCode,
         stack: error.stack,
-        raw: stripeError.raw || null,
       });
     } else {
       console.error('Non-Error exception:', error);
     }
     
-    // Provide user-friendly error messages based on error type
+    // Provide user-friendly error messages
     let userMessage = errorMessage;
     if (errorCode === 'resource_missing' || errorMessage.includes('No such price')) {
       userMessage = 'This product is no longer available. Please contact the merchant.';
@@ -704,8 +512,6 @@ serve(async (req) => {
       userMessage = 'The merchant\'s payment setup is incomplete. Please try again later.';
     } else if (errorMessage.includes('authentication') || errorMessage.includes('API key')) {
       userMessage = 'Payment service configuration error. Please contact support.';
-    } else if (errorMessage.includes('currency') || errorMessage.includes('amount')) {
-      userMessage = 'Invalid payment amount. Please try again.';
     }
     
     return new Response(
@@ -715,10 +521,7 @@ serve(async (req) => {
         error_type: errorType,
         success: false,
       }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400,
-      }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
     );
   }
 });
