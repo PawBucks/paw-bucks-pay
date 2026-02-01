@@ -134,7 +134,6 @@ serve(async (req) => {
     const metadata = paymentIntent.metadata || {};
     const userId = metadata.user_id;
     const merchantId = metadata.merchant_id;
-    const pawbucksEarned = parseInt(metadata.pawbucks_earned || "0", 10);
     const pawbucksAmount = parseInt(metadata.pawbucks_amount || "0", 10);
     const totalAmount = parseFloat(metadata.total_amount || "0");
     const businessName = metadata.business_name || "Merchant";
@@ -148,6 +147,39 @@ serve(async (req) => {
     const amountInDollars = paymentIntent.amount / 100;
     const platformFee = amountInDollars * 0.03; // 3% fee
     const pawbucksUsdValue = pawbucksAmount * 0.001;
+
+    // CRITICAL: Determine PawBucks multiplier based on user's subscription tier
+    // Default 10x for Free, 20x for PawPass, 30x for PawPass+
+    let pawbucksMultiplier = 10;
+    let tierName = 'Free';
+
+    try {
+      const { data: platformSub } = await supabaseAdmin
+        .from('subscriptions')
+        .select('stripe_subscription_id')
+        .eq('user_id', userId)
+        .in('status', ['active', 'trialing'])
+        .maybeSingle();
+
+      if (platformSub?.stripe_subscription_id) {
+        const platformSubscription = await stripe.subscriptions.retrieve(platformSub.stripe_subscription_id);
+        const productId = platformSubscription.items.data[0]?.price?.product;
+        
+        if (productId === 'prod_TQyZjYzt9DwoIK') {
+          pawbucksMultiplier = 30; // PawPass+
+          tierName = 'PawPass+';
+        } else if (productId === 'prod_TJVK9ZhLiJnnpm') {
+          pawbucksMultiplier = 20; // PawPass
+          tierName = 'PawPass';
+        }
+      }
+      logStep("User subscription tier determined", { tierName, pawbucksMultiplier });
+    } catch (tierError) {
+      logStep("Error determining tier (using default 10x)", { error: String(tierError) });
+    }
+
+    // Calculate PawBucks earned based on Stripe amount and user's tier
+    const pawbucksEarned = Math.floor(amountInDollars * pawbucksMultiplier);
 
     // Get user profile for receipt
     const { data: userProfile } = await supabaseAdmin
@@ -207,7 +239,7 @@ serve(async (req) => {
           amount: pawbucksEarned,
           type: "earn", // CRITICAL: Must be 'earn' not 'credit' for wallet activity display
           source: "direct_payment",
-          description: `Earned from payment to ${businessName}`,
+          description: `Earned ${pawbucksEarned} PawBucks (${tierName} ${pawbucksMultiplier}x) from payment to ${businessName}`,
           pawbucks_status: "available",
           partner_id: merchantId,
           transaction_id: transaction.id,

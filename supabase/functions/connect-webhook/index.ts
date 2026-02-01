@@ -76,13 +76,13 @@ serve(async (req) => {
         if (userId && pawbucksEarned > 0) {
           logStep("Awarding PawBucks", { userId, pawbucksEarned });
 
-          // Log activity
+          // Log activity - CRITICAL: Use 'earn' type to match frontend filters
           await supabaseAdmin
             .from("pawbucks_activity")
             .insert({
               user_id: userId,
               amount: pawbucksEarned,
-              type: "credit",
+              type: "earn", // Must be 'earn' not 'credit' for wallet activity display consistency
               source: "direct_payment",
               description: `Earned from payment to ${metadata.business_name || "merchant"}`,
               pawbucks_status: "available",
