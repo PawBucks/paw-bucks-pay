@@ -38,9 +38,14 @@ type PawBucksActivity = {
 };
 
 // Animated Upgrade Prompt Component
-const UpgradePrompt = ({ totalEarned, onUpgrade }: { totalEarned: number; onUpgrade: () => void }) => {
+const UpgradePrompt = ({ totalEarned, onUpgrade, isPawPassSubscriber = false }: { 
+  totalEarned: number; 
+  onUpgrade: () => void;
+  isPawPassSubscriber?: boolean;
+}) => {
   const [isVisible, setIsVisible] = useState(false);
-  const [activeTab, setActiveTab] = useState<'pawpass' | 'pawpassplus'>('pawpass');
+  // If user is PawPass subscriber, always show PawPass+ tab only
+  const [activeTab, setActiveTab] = useState<'pawpass' | 'pawpassplus'>(isPawPassSubscriber ? 'pawpassplus' : 'pawpass');
 
   useEffect(() => {
     const timer = setTimeout(() => setIsVisible(true), 300);
@@ -49,11 +54,14 @@ const UpgradePrompt = ({ totalEarned, onUpgrade }: { totalEarned: number; onUpgr
 
   // Calculate what they would have earned with each tier
   // Current multipliers: 10x (Free), 20x (PawPass), 30x (PawPass+)
-  const basePurchaseAmount = totalEarned / CASHBACK_RATES.FREE; // Reverse calculate purchases (e.g., 100 PawBucks / 10 = $10 spent)
+  // For PawPass subscribers, their current earnings are at 20x rate
+  const currentMultiplier = isPawPassSubscriber ? CASHBACK_RATES.PAWPASS : CASHBACK_RATES.FREE;
+  const basePurchaseAmount = totalEarned / currentMultiplier;
   const pawPassEarnings = Math.round(basePurchaseAmount * CASHBACK_RATES.PAWPASS);
   const pawPassPlusEarnings = Math.round(basePurchaseAmount * CASHBACK_RATES.PAWPASS_PLUS);
   
   const pawPassExtra = pawPassEarnings - totalEarned;
+  // For PawPass subscribers, show how much MORE they'd earn upgrading to PawPass+
   const pawPassPlusExtra = pawPassPlusEarnings - totalEarned;
 
   // Example projections for $100, $500, $1000 monthly spend
@@ -84,37 +92,39 @@ const UpgradePrompt = ({ totalEarned, onUpgrade }: { totalEarned: number; onUpgr
             <Sparkles className="w-5 h-5 text-yellow-500 animate-pulse" />
           </div>
 
-          {/* Tier Toggle */}
-          <div className="flex justify-center mb-6">
-            <div className="inline-flex bg-muted/50 rounded-full p-1">
-              <button
-                onClick={() => setActiveTab('pawpass')}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
-                  activeTab === 'pawpass' 
-                    ? 'bg-yellow-500 text-yellow-950 shadow-lg' 
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                <Zap className="w-4 h-4 inline mr-1" />
-                PawPass
-              </button>
-              <button
-                onClick={() => setActiveTab('pawpassplus')}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
-                  activeTab === 'pawpassplus' 
-                    ? 'bg-purple-500 text-white shadow-lg' 
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                <Crown className="w-4 h-4 inline mr-1" />
-                PawPass+
-              </button>
+          {/* Tier Toggle - Only show if NOT a PawPass subscriber */}
+          {!isPawPassSubscriber && (
+            <div className="flex justify-center mb-6">
+              <div className="inline-flex bg-muted/50 rounded-full p-1">
+                <button
+                  onClick={() => setActiveTab('pawpass')}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                    activeTab === 'pawpass' 
+                      ? 'bg-yellow-500 text-yellow-950 shadow-lg' 
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <Zap className="w-4 h-4 inline mr-1" />
+                  PawPass
+                </button>
+                <button
+                  onClick={() => setActiveTab('pawpassplus')}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                    activeTab === 'pawpassplus' 
+                      ? 'bg-purple-500 text-white shadow-lg' 
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <Crown className="w-4 h-4 inline mr-1" />
+                  PawPass+
+                </button>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Animated Content based on selected tab */}
           <div className="transition-all duration-300">
-            {activeTab === 'pawpass' ? (
+            {activeTab === 'pawpass' && !isPawPassSubscriber ? (
               <div className="space-y-4 animate-fade-in">
                 {/* What you missed section */}
                 {totalEarned > 0 && pawPassExtra > 0 && (
@@ -170,7 +180,11 @@ const UpgradePrompt = ({ totalEarned, onUpgrade }: { totalEarned: number; onUpgr
                 {/* What you missed section */}
                 {totalEarned > 0 && pawPassPlusExtra > 0 && (
                   <div className="text-center p-4 rounded-xl bg-purple-500/10 border border-purple-500/20">
-                    <p className="text-sm text-muted-foreground mb-1">With PawPass+, you would have earned</p>
+                    <p className="text-sm text-muted-foreground mb-1">
+                      {isPawPassSubscriber 
+                        ? "With PawPass+, you would earn" 
+                        : "With PawPass+, you would have earned"}
+                    </p>
                     <p className="text-3xl font-bold text-purple-500">
                       +{Formatters.number(pawPassPlusExtra)} more
                     </p>
@@ -178,25 +192,33 @@ const UpgradePrompt = ({ totalEarned, onUpgrade }: { totalEarned: number; onUpgr
                   </div>
                 )}
 
-                {/* Rate comparison */}
+                {/* Rate comparison - Different for PawPass subscribers */}
                 <div className="grid grid-cols-2 gap-3">
                   <div className="text-center p-3 rounded-lg bg-muted/30">
-                    <p className="text-xs text-muted-foreground">Free Tier</p>
-                    <p className="text-lg font-semibold">$1 = 10</p>
+                    <p className="text-xs text-muted-foreground">
+                      {isPawPassSubscriber ? "Your PawPass" : "Free Tier"}
+                    </p>
+                    <p className="text-lg font-semibold">
+                      $1 = {isPawPassSubscriber ? "20" : "10"}
+                    </p>
                   </div>
                   <div className="text-center p-3 rounded-lg bg-purple-500/10 border border-purple-500/30">
-                    <p className="text-xs text-purple-500 font-medium">PawPass+ (3x)</p>
+                    <p className="text-xs text-purple-500 font-medium">
+                      PawPass+ ({isPawPassSubscriber ? "1.5x more" : "3x"})
+                    </p>
                     <p className="text-lg font-bold text-purple-500">$1 = 30</p>
                   </div>
                 </div>
 
-                {/* Projection table */}
+                {/* Projection table - Different columns for PawPass subscribers */}
                 <div className="overflow-hidden rounded-lg border border-border/50">
                   <table className="w-full text-sm">
                     <thead className="bg-muted/30">
                       <tr>
                         <th className="py-2 px-3 text-left text-xs font-medium text-muted-foreground">Monthly Spend</th>
-                        <th className="py-2 px-3 text-center text-xs font-medium text-muted-foreground">Free</th>
+                        <th className="py-2 px-3 text-center text-xs font-medium text-muted-foreground">
+                          {isPawPassSubscriber ? "PawPass" : "Free"}
+                        </th>
                         <th className="py-2 px-3 text-center text-xs font-medium text-purple-500">PawPass+</th>
                       </tr>
                     </thead>
@@ -204,7 +226,9 @@ const UpgradePrompt = ({ totalEarned, onUpgrade }: { totalEarned: number; onUpgr
                       {projections.map((p, i) => (
                         <tr key={i} className="border-t border-border/30">
                           <td className="py-2 px-3 font-medium">${p.spend}</td>
-                          <td className="py-2 px-3 text-center text-muted-foreground">{Formatters.number(p.free)}</td>
+                          <td className="py-2 px-3 text-center text-muted-foreground">
+                            {Formatters.number(isPawPassSubscriber ? p.pawpass : p.free)}
+                          </td>
                           <td className="py-2 px-3 text-center font-semibold text-purple-500">{Formatters.number(p.pawpassplus)}</td>
                         </tr>
                       ))}
@@ -214,7 +238,12 @@ const UpgradePrompt = ({ totalEarned, onUpgrade }: { totalEarned: number; onUpgr
 
                 <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
                   <Crown className="w-4 h-4 text-purple-500" />
-                  <span>$20/month • 7-day free trial • <span className="text-purple-500 font-medium">Ad-Free!</span></span>
+                  <span>
+                    {isPawPassSubscriber 
+                      ? <>Only $10/month more • <span className="text-purple-500 font-medium">Ad-Free!</span></>
+                      : <>$20/month • 7-day free trial • <span className="text-purple-500 font-medium">Ad-Free!</span></>
+                    }
+                  </span>
                 </div>
               </div>
             )}
@@ -224,12 +253,12 @@ const UpgradePrompt = ({ totalEarned, onUpgrade }: { totalEarned: number; onUpgr
           <Button 
             onClick={onUpgrade}
             className={`w-full mt-4 font-semibold transition-all duration-300 ${
-              activeTab === 'pawpass'
+              activeTab === 'pawpass' && !isPawPassSubscriber
                 ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-yellow-950'
                 : 'bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white'
             }`}
           >
-            {activeTab === 'pawpass' ? (
+            {activeTab === 'pawpass' && !isPawPassSubscriber ? (
               <>
                 <Zap className="w-4 h-4 mr-2" />
                 Upgrade to PawPass
@@ -253,8 +282,16 @@ const PawBucksWallet = () => {
   const navigate = useNavigate();
   
   // Check if user is PawPass+ subscriber (product ID for PawPass+)
-  const isPawPassPlusSubscriber = subscription.subscribed && subscription.product_id === 'prod_TQyZjYzt9DwoIK';
+  const isPawPassPlusSubscriber = subscription.subscribed && (
+    subscription.product_id === 'prod_TQyZjYzt9DwoIK' || 
+    subscription.subscription_tier === 'plus'
+  );
   
+  // Check if user is PawPass (non-plus) subscriber (product ID for PawPass)
+  const isPawPassSubscriber = subscription.subscribed && (
+    subscription.product_id === 'prod_TJVK9ZhLiJnnpm' || 
+    subscription.subscription_tier === 'basic'
+  );
   // Check if user is part of a shared account
   const sharedAccount = useSharedAccount(user?.id);
   const effectiveWalletUserId = getEffectiveWalletUserId(user?.id, sharedAccount);
@@ -414,6 +451,7 @@ const PawBucksWallet = () => {
           <UpgradePrompt 
             totalEarned={activities.filter(a => a.type === 'earn' || a.type === 'credit').reduce((sum, a) => sum + a.amount, 0)} 
             onUpgrade={() => navigate(ROUTES.PROFILE)}
+            isPawPassSubscriber={isPawPassSubscriber}
           />
         )}
 
