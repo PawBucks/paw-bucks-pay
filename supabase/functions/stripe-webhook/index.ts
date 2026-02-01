@@ -140,7 +140,7 @@ serve(async (req) => {
     console.log('[STRIPE-WEBHOOK] Headers:', JSON.stringify(Object.fromEntries(req.headers.entries())));
     
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
-      apiVersion: '2025-08-27.basil',
+      apiVersion: '2024-12-18.acacia',
     });
 
     const signature = req.headers.get('stripe-signature');
@@ -396,7 +396,7 @@ serve(async (req) => {
         if (userId && subscriptionId) {
           try {
             const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
-              apiVersion: '2025-08-27.basil',
+              apiVersion: '2024-12-18.acacia',
             });
             
             const subscription = await stripe.subscriptions.retrieve(subscriptionId);
@@ -460,7 +460,7 @@ serve(async (req) => {
 
             if (platformSub?.stripe_subscription_id) {
               const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
-                apiVersion: '2025-08-27.basil',
+                apiVersion: '2024-12-18.acacia',
               });
               const platformSubscription = await stripe.subscriptions.retrieve(platformSub.stripe_subscription_id);
               const productId = platformSubscription.items.data[0]?.price?.product;
@@ -885,7 +885,7 @@ serve(async (req) => {
 
       if (subscriptionId && amount > 0) {
         const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
-          apiVersion: '2025-08-27.basil',
+          apiVersion: '2024-12-18.acacia',
         });
         
         const subscription = await stripe.subscriptions.retrieve(subscriptionId);

@@ -63,7 +63,7 @@ serve(async (req) => {
 
     logStep("Fetching balance from Stripe", { accountId: merchant.stripe_account_id });
 
-    const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
+    const stripe = new Stripe(stripeKey, { apiVersion: "2024-12-18.acacia" });
 
     // Fetch balance from connected account using stripeAccount header
     const balance = await stripe.balance.retrieve(

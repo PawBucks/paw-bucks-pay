@@ -55,7 +55,7 @@ serve(async (req) => {
       throw new Error('STRIPE_SECRET_KEY is not configured');
     }
 
-    const stripe = new Stripe(stripeKey, { apiVersion: '2025-08-27.basil' });
+    const stripe = new Stripe(stripeKey, { apiVersion: '2024-12-18.acacia' });
 
     // Parse request body
     const body = await req.json();
