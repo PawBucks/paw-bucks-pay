@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useSubscription } from "@/hooks/useSubscription";
 import { useOptimizedQuery } from "@/hooks/useOptimizedQuery";
 import { usePawBucksRealtime } from "@/hooks/usePawBucksRealtime";
 import { useSharedAccount, getEffectiveWalletUserId } from "@/hooks/useSharedAccount";
@@ -248,7 +249,11 @@ const UpgradePrompt = ({ totalEarned, onUpgrade }: { totalEarned: number; onUpgr
 
 const PawBucksWallet = () => {
   const { user, signOut, loading: authLoading } = useAuth();
+  const { subscription } = useSubscription();
   const navigate = useNavigate();
+  
+  // Check if user is PawPass+ subscriber (product ID for PawPass+)
+  const isPawPassPlusSubscriber = subscription.subscribed && subscription.product_id === 'prod_TQyZjYzt9DwoIK';
   
   // Check if user is part of a shared account
   const sharedAccount = useSharedAccount(user?.id);
@@ -404,11 +409,13 @@ const PawBucksWallet = () => {
         </GradientCard>
         </div>
 
-        {/* Animated Upgrade Prompt */}
-        <UpgradePrompt 
-          totalEarned={activities.filter(a => a.type === 'earn' || a.type === 'credit').reduce((sum, a) => sum + a.amount, 0)} 
-          onUpgrade={() => navigate(ROUTES.PROFILE)}
-        />
+        {/* Animated Upgrade Prompt - Only show for non-PawPass+ subscribers */}
+        {!isPawPassPlusSubscriber && (
+          <UpgradePrompt 
+            totalEarned={activities.filter(a => a.type === 'earn' || a.type === 'credit').reduce((sum, a) => sum + a.amount, 0)} 
+            onUpgrade={() => navigate(ROUTES.PROFILE)}
+          />
+        )}
 
         {/* CTA Buttons */}
         <div className="mb-8 flex justify-center">
