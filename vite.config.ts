@@ -111,5 +111,7 @@ export default defineConfig(({ mode }) => ({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+    // Prevent duplicate React instances causing "Invalid hook call" errors
+    dedupe: ["react", "react-dom", "react/jsx-runtime"],
   },
 }));
