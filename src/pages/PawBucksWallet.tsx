@@ -281,16 +281,20 @@ const PawBucksWallet = () => {
   const { subscription } = useSubscription();
   const navigate = useNavigate();
   
-  // Check if user is PawPass+ subscriber (product ID for PawPass+)
+  // Check if user is PawPass+ subscriber (product ID for PawPass+ or tier 'plus'/'pawpass_plus')
   const isPawPassPlusSubscriber = subscription.subscribed && (
     subscription.product_id === 'prod_TQyZjYzt9DwoIK' || 
-    subscription.subscription_tier === 'plus'
+    subscription.product_id === 'manual_pawpass_plus' ||
+    subscription.subscription_tier === 'plus' ||
+    subscription.subscription_tier === 'pawpass_plus'
   );
   
-  // Check if user is PawPass (non-plus) subscriber (product ID for PawPass)
+  // Check if user is PawPass (non-plus) subscriber (product ID for PawPass or tier 'basic'/'pawpass')
   const isPawPassSubscriber = subscription.subscribed && (
     subscription.product_id === 'prod_TJVK9ZhLiJnnpm' || 
-    subscription.subscription_tier === 'basic'
+    subscription.product_id === 'manual_pawpass' ||
+    subscription.subscription_tier === 'basic' ||
+    subscription.subscription_tier === 'pawpass'
   );
   // Check if user is part of a shared account
   const sharedAccount = useSharedAccount(user?.id);
