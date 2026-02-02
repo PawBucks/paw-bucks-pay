@@ -61,9 +61,11 @@ export function TransactionsTab() {
 
   useEffect(() => {
     if (debouncedSearchTerm) {
+      const searchLower = debouncedSearchTerm.toLowerCase();
       const filtered = transactions.filter(t =>
-        t.merchants?.business_name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-        t.description?.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+        t.merchants?.business_name?.toLowerCase().includes(searchLower) ||
+        t.description?.toLowerCase().includes(searchLower) ||
+        t.profiles?.full_name?.toLowerCase().includes(searchLower)
       );
       setFilteredTransactions(filtered);
     } else {
