@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useDebounce } from '@/hooks/useDebounce';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -93,17 +94,20 @@ export function MerchantsTab() {
     };
   }, [queryClient]);
 
+  // Debounce search term for better performance
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
+
   useEffect(() => {
-    if (searchTerm) {
+    if (debouncedSearchTerm) {
       const filtered = merchants.filter(m =>
-        m.business_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        m.business_type.toLowerCase().includes(searchTerm.toLowerCase())
+        m.business_name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+        m.business_type.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
       );
       setFilteredMerchants(filtered);
     } else {
       setFilteredMerchants(merchants);
     }
-  }, [searchTerm, merchants]);
+  }, [debouncedSearchTerm, merchants]);
 
   const handleRefresh = useCallback(() => {
     refetch();

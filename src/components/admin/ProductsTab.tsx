@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useDebounce } from '@/hooks/useDebounce';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -34,17 +35,20 @@ export function ProductsTab() {
     loadProducts();
   }, []);
 
+  // Debounce search term for better performance
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
+
   useEffect(() => {
-    if (searchTerm) {
+    if (debouncedSearchTerm) {
       const filtered = products.filter(p =>
-        p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.category.toLowerCase().includes(searchTerm.toLowerCase())
+        p.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+        p.category.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
       );
       setFilteredProducts(filtered);
     } else {
       setFilteredProducts(products);
     }
-  }, [searchTerm, products]);
+  }, [debouncedSearchTerm, products]);
 
   const loadProducts = async () => {
     try {

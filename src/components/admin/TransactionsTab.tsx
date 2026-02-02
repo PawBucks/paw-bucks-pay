@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useDebounce } from '@/hooks/useDebounce';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -55,17 +56,20 @@ export function TransactionsTab() {
     loadSummaryStats();
   }, []);
 
+  // Debounce search term for better performance
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
+
   useEffect(() => {
-    if (searchTerm) {
+    if (debouncedSearchTerm) {
       const filtered = transactions.filter(t =>
-        t.merchants?.business_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        t.description?.toLowerCase().includes(searchTerm.toLowerCase())
+        t.merchants?.business_name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+        t.description?.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
       );
       setFilteredTransactions(filtered);
     } else {
       setFilteredTransactions(transactions);
     }
-  }, [searchTerm, transactions]);
+  }, [debouncedSearchTerm, transactions]);
 
   const loadTransactions = async () => {
     try {
