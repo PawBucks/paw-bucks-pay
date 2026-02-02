@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useDebounce } from '@/hooks/useDebounce';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -195,18 +196,21 @@ export function UsersTab() {
     };
   }, [queryClient]);
 
-  // Filter users based on search term
+  // Debounce search term for better performance
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
+
+  // Filter users based on debounced search term
   useEffect(() => {
-    if (searchTerm) {
+    if (debouncedSearchTerm) {
       const filtered = users.filter(user =>
-        user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.full_name.toLowerCase().includes(searchTerm.toLowerCase())
+        user.email.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+        user.full_name.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
       );
       setFilteredUsers(filtered);
     } else {
       setFilteredUsers(users);
     }
-  }, [searchTerm, users]);
+  }, [debouncedSearchTerm, users]);
 
   const handleRefresh = useCallback(() => {
     refetch();

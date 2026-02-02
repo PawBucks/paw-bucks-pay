@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useDebounce } from "@/hooks/useDebounce";
 import { Header } from "@/components/Header";
 import { SEO } from "@/components/SEO";
 import { useAuth } from "@/hooks/useAuth";
@@ -52,11 +53,14 @@ export default function MerchantOffers() {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Debounce search query to avoid excessive API calls
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
+
   useEffect(() => {
     if (user) {
       fetchOffers();
     }
-  }, [user, statusFilter, searchQuery, page]);
+  }, [user, statusFilter, debouncedSearchQuery, page]);
 
   const fetchOffers = async () => {
     try {
@@ -76,8 +80,8 @@ export default function MerchantOffers() {
         params.append("status", statusFilter);
       }
 
-      if (searchQuery) {
-        params.append("search", searchQuery);
+      if (debouncedSearchQuery) {
+        params.append("search", debouncedSearchQuery);
       }
 
       const { data, error } = await supabase.functions.invoke("merchant-list-offers", {
