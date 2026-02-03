@@ -214,9 +214,15 @@ const InvoicePayment = () => {
         // Full PawBucks payment completed
         toast.success(`Payment completed with ${data.pawbucksUsed} PawBucks!`);
         navigate(`/invoice/${invoiceId}/success?pawbucks=true`);
-      } else if (data?.url) {
-        // Redirect to Stripe checkout
-        window.location.href = data.url;
+      } else if (data?.checkoutUrl || data?.url) {
+        // Redirect to Stripe checkout (handle both field names for compatibility)
+        window.location.href = data.checkoutUrl || data.url;
+      } else if (data?.success) {
+        // Success but no redirect needed
+        toast.success("Payment processed successfully!");
+        navigate(`/invoice/${invoiceId}/success`);
+      } else {
+        throw new Error("No checkout URL received from payment processor");
       }
     } catch (error: any) {
       console.error("Error processing payment:", error);
