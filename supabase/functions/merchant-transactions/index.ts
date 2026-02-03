@@ -80,7 +80,7 @@ serve(async (req) => {
 
     const { start_date: startDate, end_date: endDate, status, search } = validationResult.data;
 
-    // Build query - fetch transactions without profile join (no FK exists)
+    // Build query - fetch transactions, then fetch profiles separately for efficiency
     let query = supabase
       .from('transactions')
       .select(`

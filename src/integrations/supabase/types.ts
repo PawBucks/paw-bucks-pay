@@ -6780,27 +6780,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "transactions_pet_owner_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "merchant_customer_contacts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "transactions_pet_owner_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "transactions_pet_owner_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "reviewer_profiles"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "transactions_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
