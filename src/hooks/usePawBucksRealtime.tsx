@@ -56,16 +56,21 @@ export function usePawBucksRealtime(userId: string | undefined) {
       .on(
         'postgres_changes',
         {
-          event: 'INSERT',
+          event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
           schema: 'public',
           table: 'transactions',
           filter: `user_id=eq.${userId}`,
         },
         (payload) => {
-          console.log('[Realtime] Transaction:', payload);
-          // Invalidate transaction queries
+          console.log('[Realtime] Transaction update:', payload);
+          // Invalidate all transaction-related queries
           queryClient.invalidateQueries({ queryKey: ['transactions', userId] });
+          queryClient.invalidateQueries({ queryKey: ['transactions'] });
+          queryClient.invalidateQueries({ queryKey: ['budget-transactions', userId] });
           queryClient.invalidateQueries({ queryKey: ['wallet', userId] });
+          queryClient.invalidateQueries({ queryKey: ['wallet'] });
+          queryClient.invalidateQueries({ queryKey: ['pawbucks_wallet', userId] });
+          queryClient.invalidateQueries({ queryKey: ['pawbucks_activity', userId] });
         }
       )
       .subscribe();
@@ -121,15 +126,18 @@ export function useMerchantPawBucksRealtime(merchantId: string | undefined) {
       .on(
         'postgres_changes',
         {
-          event: 'INSERT',
+          event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
           schema: 'public',
           table: 'transactions',
           filter: `merchant_id=eq.${merchantId}`,
         },
         (payload) => {
-          console.log('[Realtime] Merchant transaction:', payload);
+          console.log('[Realtime] Merchant transaction update:', payload);
+          // Invalidate all merchant transaction queries
           queryClient.invalidateQueries({ queryKey: ['merchant-transactions', merchantId] });
+          queryClient.invalidateQueries({ queryKey: ['merchant-transactions'] });
           queryClient.invalidateQueries({ queryKey: ['merchant-analytics'] });
+          queryClient.invalidateQueries({ queryKey: ['merchant-dashboard'] });
         }
       )
       .subscribe();

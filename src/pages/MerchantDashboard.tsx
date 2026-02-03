@@ -208,12 +208,19 @@ const MerchantDashboard = () => {
       }
 
       // Fetch recent transactions
-      const { data: transactionsData } = await supabase
+      console.log('[MerchantDashboard] Fetching transactions for merchant:', merchantData.id);
+      const { data: transactionsData, error: transError } = await supabase
         .from("transactions")
         .select("*")
         .eq("merchant_id", merchantData.id)
         .order("created_at", { ascending: false })
         .limit(10);
+
+      if (transError) {
+        console.error('[MerchantDashboard] Error fetching transactions:', transError);
+      } else {
+        console.log('[MerchantDashboard] Fetched transactions:', transactionsData?.length || 0);
+      }
 
       // Get unique user IDs from transactions
       const userIds = [...new Set((transactionsData || []).map(t => t.user_id).filter(Boolean))];
@@ -221,10 +228,14 @@ const MerchantDashboard = () => {
       // Fetch profiles for those user IDs
       let profilesMap: Record<string, { full_name: string | null; email: string | null }> = {};
       if (userIds.length > 0) {
-        const { data: profilesData } = await supabase
+        const { data: profilesData, error: profilesError } = await supabase
           .from("profiles")
           .select("id, full_name, email")
           .in("id", userIds);
+        
+        if (profilesError) {
+          console.error('[MerchantDashboard] Error fetching profiles:', profilesError);
+        }
         
         profilesMap = (profilesData || []).reduce((acc, profile) => {
           acc[profile.id] = { full_name: profile.full_name, email: profile.email };

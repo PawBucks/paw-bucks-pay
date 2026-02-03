@@ -17,14 +17,14 @@ export const useOptimizedQuery = <T,>(
   return useQuery({
     queryKey: key,
     queryFn,
-    staleTime: options?.staleTime ?? 1000 * 60 * 5, // 5 minutes default
+    staleTime: options?.staleTime ?? 1000 * 60 * 2, // 2 minutes default - shorter for fresher data
     gcTime: options?.cacheTime ?? 1000 * 60 * 30, // 30 minutes default
-    retry: options?.retry ?? 1, // Reduced retries for faster failure
+    retry: options?.retry ?? 2, // Retry twice for network issues
     enabled: options?.enabled ?? true,
-    refetchOnMount: options?.refetchOnMount ?? false, // Don't refetch if data is fresh
+    refetchOnMount: options?.refetchOnMount ?? true, // Refetch on mount to ensure fresh data
     refetchOnWindowFocus: options?.refetchOnWindowFocus ?? false,
-    // Optimize network requests - use cached data first
-    networkMode: 'offlineFirst',
+    // Use online mode to always fetch fresh data when network available
+    networkMode: 'online',
     // Structural sharing for better re-render optimization
     structuralSharing: true,
   });

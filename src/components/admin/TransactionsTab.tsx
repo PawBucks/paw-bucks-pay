@@ -74,6 +74,7 @@ export function TransactionsTab() {
   }, [debouncedSearchTerm, transactions]);
 
   const loadTransactions = async () => {
+    console.log('[Admin TransactionsTab] Loading transactions...');
     try {
       // Use column hint for profiles join since there may be multiple FK paths
       const { data, error } = await supabase
@@ -82,11 +83,15 @@ export function TransactionsTab() {
         .order('created_at', { ascending: false })
         .limit(100);
 
-      if (error) throw error;
+      if (error) {
+        console.error('[Admin TransactionsTab] Error loading transactions:', error);
+        throw error;
+      }
+      console.log('[Admin TransactionsTab] Loaded transactions:', data?.length || 0);
       setTransactions((data || []) as Transaction[]);
       setFilteredTransactions((data || []) as Transaction[]);
     } catch (error) {
-      console.error('Error loading transactions:', error);
+      console.error('[Admin TransactionsTab] Error loading transactions:', error);
       toast.error('Failed to load transactions');
     }
   };
