@@ -57,7 +57,7 @@ const StripePaymentForm = ({
     setIsLoading(true);
 
     try {
-      const { error } = await stripe.confirmPayment({
+      const { error, paymentIntent } = await stripe.confirmPayment({
         elements,
         confirmParams: {
           return_url: `${window.location.origin}/wallet`,
@@ -68,21 +68,51 @@ const StripePaymentForm = ({
       if (error) throw error;
 
       // Payment succeeded on Stripe - now call our backend to process rewards/transaction
-      console.log('[PAYMENT] Stripe payment confirmed, calling confirm-payment-success...');
+      console.log('[PAYMENT] Stripe payment confirmed, calling confirm-payment-success...', {
+        paymentIntentId,
+        connectedAccountId,
+        stripePaymentStatus: paymentIntent?.status,
+      });
       
-      const { data: confirmData, error: confirmError } = await supabase.functions.invoke(
-        'confirm-payment-success',
-        {
-          body: { paymentIntentId, connectedAccountId },
-        }
-      );
+      // Retry logic for backend confirmation - critical for transaction recording
+      let confirmSuccess = false;
+      let confirmData = null;
+      let lastError = null;
+      
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        console.log(`[PAYMENT] Backend confirmation attempt ${attempt}/3`);
+        
+        const { data, error: confirmError } = await supabase.functions.invoke(
+          'confirm-payment-success',
+          {
+            body: { paymentIntentId, connectedAccountId },
+          }
+        );
 
-      if (confirmError) {
-        console.error('[PAYMENT] confirm-payment-success error:', confirmError);
+        if (!confirmError && data?.success) {
+          confirmSuccess = true;
+          confirmData = data;
+          console.log('[PAYMENT] confirm-payment-success succeeded:', data);
+          break;
+        }
+        
+        lastError = confirmError;
+        console.error(`[PAYMENT] Attempt ${attempt} failed:`, confirmError);
+        
+        // Wait before retry (exponential backoff)
+        if (attempt < 3) {
+          await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+        }
+      }
+
+      if (!confirmSuccess) {
+        console.error('[PAYMENT] All backend confirmation attempts failed:', lastError);
         // Payment went through but backend processing failed - still show success but warn
-        toast.warning("Payment successful, but rewards may be delayed. Please check your wallet.");
+        toast.warning("Payment successful! Rewards may take a moment to appear.", {
+          description: "If rewards don't appear within a few minutes, please contact support.",
+          duration: 8000,
+        });
       } else {
-        console.log('[PAYMENT] confirm-payment-success result:', confirmData);
         const cashbackPawBucks = confirmData?.pawbucksEarned || Math.round(stripeAmount * cashbackRate);
         toast.success(
           `Payment successful! You earned ${cashbackPawBucks} PawBucks!`

@@ -2,19 +2,73 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, stripe-signature',
+};
+
 const logStep = (step: string, details?: Record<string, unknown>) => {
   console.log(`[CONNECT-WEBHOOK] ${step}`, details ? JSON.stringify(details) : "");
 };
 
-serve(async (req) => {
+// Helper function to send receipt email
+async function sendReceiptEmail(params: {
+  email: string;
+  customerName?: string;
+  transactionDate: string;
+  receiptId: string;
+  merchantName: string;
+  items: { name: string; price: number }[];
+  subtotal: number;
+  pawbucksApplied: number;
+  cardAmount: number;
+  totalPaid: number;
+  pawbucksEarned?: number;
+}): Promise<void> {
   try {
-    logStep("Webhook received");
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
+    
+    if (!supabaseUrl || !supabaseAnonKey) {
+      logStep("Skipping receipt email: config not available");
+      return;
+    }
+
+    const response = await fetch(`${supabaseUrl}/functions/v1/send-receipt-email`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${supabaseAnonKey}`,
+      },
+      body: JSON.stringify(params),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Failed to send receipt email:", errorText);
+    } else {
+      logStep(`Receipt email sent to ${params.email}`);
+    }
+  } catch (error) {
+    console.error("Error sending receipt email:", error);
+  }
+}
+
+serve(async (req) => {
+  // Handle CORS preflight
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    logStep("Webhook received", { method: req.method });
 
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
-    const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
+    // Try connected account secret first, then platform secret
+    const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET") || Deno.env.get("STRIPE_PLATFORM_WEBHOOK_SECRET");
     
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
-    if (!webhookSecret) throw new Error("STRIPE_WEBHOOK_SECRET is not set");
+    if (!webhookSecret) throw new Error("No webhook secret configured");
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2024-12-18.acacia" });
 
@@ -29,38 +83,92 @@ serve(async (req) => {
     try {
       event = await stripe.webhooks.constructEventAsync(body, signature, webhookSecret);
     } catch (err) {
-      logStep("Webhook signature verification failed", { error: String(err) });
-      return new Response(JSON.stringify({ error: "Invalid signature" }), { status: 400 });
+      // Try alternate secret
+      const altSecret = Deno.env.get("STRIPE_PLATFORM_WEBHOOK_SECRET") || Deno.env.get("STRIPE_WEBHOOK_SECRET");
+      if (altSecret && altSecret !== webhookSecret) {
+        try {
+          event = await stripe.webhooks.constructEventAsync(body, signature, altSecret);
+          logStep("Verified with alternate webhook secret");
+        } catch {
+          logStep("Webhook signature verification failed with both secrets", { error: String(err) });
+          return new Response(JSON.stringify({ error: "Invalid signature" }), { status: 400 });
+        }
+      } else {
+        logStep("Webhook signature verification failed", { error: String(err) });
+        return new Response(JSON.stringify({ error: "Invalid signature" }), { status: 400 });
+      }
     }
 
-    logStep("Event received", { type: event.type, id: event.id });
+    logStep("Event verified", { type: event.type, id: event.id });
 
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // Handle events - with Express accounts using destination charges,
-    // webhooks come to the PLATFORM (not the connected account)
+    // IDEMPOTENCY CHECK: Skip if already processed
+    const { data: existingLog } = await supabaseAdmin
+      .from('webhook_logs')
+      .select('id')
+      .eq('event_id', event.id)
+      .maybeSingle();
+
+    if (existingLog) {
+      logStep('Duplicate event, skipping', { eventId: event.id });
+      return new Response(JSON.stringify({ received: true, duplicate: true }), { status: 200 });
+    }
+
+    // Log the event
+    await supabaseAdmin.from('webhook_logs').insert({
+      event_id: event.id,
+      event_type: event.type,
+      payload: event as any,
+      processed: false,
+    });
+
+    // Connected account context (for Direct Charges)
     const connectedAccountId = event.account;
     if (connectedAccountId) {
-      logStep("Event from connected account context", { accountId: connectedAccountId });
+      logStep("Event from connected account", { accountId: connectedAccountId });
     }
 
     switch (event.type) {
       case "payment_intent.succeeded": {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
-        logStep("Payment succeeded (destination charge)", { 
+        
+        logStep("Processing payment_intent.succeeded", { 
           paymentIntentId: paymentIntent.id,
           amount: paymentIntent.amount,
-          metadata: paymentIntent.metadata 
+          metadata: paymentIntent.metadata,
+          connectedAccount: connectedAccountId,
         });
+
+        // Check if transaction already exists (idempotency)
+        const { data: existingTx } = await supabaseAdmin
+          .from('transactions')
+          .select('id')
+          .eq('stripe_payment_intent_id', paymentIntent.id)
+          .maybeSingle();
+
+        if (existingTx) {
+          logStep('Transaction already exists, skipping', { transactionId: existingTx.id });
+          
+          // Mark webhook as processed
+          await supabaseAdmin.from('webhook_logs')
+            .update({ processed: true })
+            .eq('event_id', event.id);
+            
+          return new Response(JSON.stringify({ received: true, skipped: 'already_processed' }), { status: 200 });
+        }
 
         const metadata = paymentIntent.metadata || {};
         const userId = metadata.user_id;
         const merchantId = metadata.merchant_id;
-        const pawbucksEarned = parseInt(metadata.pawbucks_earned || "0", 10);
-        const chargeType = metadata.charge_type || "destination";
+        const businessName = metadata.business_name || "Merchant";
+        const description = metadata.description || `Payment to ${businessName}`;
+        const chargeType = metadata.charge_type || "direct";
+        const pawbucksAmount = parseInt(metadata.pawbucks_amount || "0", 10);
+        const totalAmount = parseFloat(metadata.total_amount || "0");
 
         // Update direct_payments status
         const { error: updateError } = await supabaseAdmin
@@ -69,76 +177,169 @@ serve(async (req) => {
           .eq("stripe_payment_intent_id", paymentIntent.id);
 
         if (updateError) {
-          logStep("Error updating payment status", { error: updateError.message });
+          logStep("Error updating direct_payment status", { error: updateError.message });
+        } else {
+          logStep("Direct payment status updated to succeeded");
         }
 
-        // Award PawBucks to user
-        if (userId && pawbucksEarned > 0) {
-          logStep("Awarding PawBucks", { userId, pawbucksEarned });
+        // Calculate amounts
+        const amountInDollars = paymentIntent.amount / 100;
+        const platformFee = amountInDollars * 0.03; // 3% platform fee
 
-          // Log activity - CRITICAL: Use 'earn' type to match frontend filters
-          await supabaseAdmin
-            .from("pawbucks_activity")
-            .insert({
-              user_id: userId,
-              amount: pawbucksEarned,
-              type: "earn", // Must be 'earn' not 'credit' for wallet activity display consistency
-              source: "direct_payment",
-              description: `Earned from payment to ${metadata.business_name || "merchant"}`,
-              pawbucks_status: "available",
-            });
+        // Determine PawBucks multiplier based on subscription tier
+        let pawbucksMultiplier = 10;
+        let tierName = 'Free';
 
-          logStep("PawBucks credited to user");
+        if (userId) {
+          try {
+            // Check for manual subscription first
+            const { data: platformSub } = await supabaseAdmin
+              .from('subscriptions')
+              .select('stripe_subscription_id, subscription_tier, is_manual_upgrade, expires_at')
+              .eq('user_id', userId)
+              .in('status', ['active', 'trialing'])
+              .maybeSingle();
+
+            if (platformSub?.is_manual_upgrade && platformSub?.subscription_tier) {
+              const expiresAt = platformSub.expires_at ? new Date(platformSub.expires_at) : null;
+              if (!expiresAt || expiresAt > new Date()) {
+                if (platformSub.subscription_tier === 'pawpass_plus') {
+                  pawbucksMultiplier = 30;
+                  tierName = 'PawPass+';
+                } else if (platformSub.subscription_tier === 'pawpass') {
+                  pawbucksMultiplier = 20;
+                  tierName = 'PawPass';
+                }
+              }
+            } else if (platformSub?.stripe_subscription_id) {
+              const stripeSubscription = await stripe.subscriptions.retrieve(platformSub.stripe_subscription_id);
+              const productId = stripeSubscription.items.data[0]?.price?.product;
+              
+              if (productId === 'prod_TQyZjYzt9DwoIK') {
+                pawbucksMultiplier = 30;
+                tierName = 'PawPass+';
+              } else if (productId === 'prod_TJVK9ZhLiJnnpm') {
+                pawbucksMultiplier = 20;
+                tierName = 'PawPass';
+              }
+            }
+            logStep("Subscription tier determined", { tierName, pawbucksMultiplier });
+          } catch (subError) {
+            logStep("Error determining subscription tier", { error: String(subError) });
+          }
         }
 
-        // Create transaction record with accurate fee tracking
+        // PawBucks earned on Stripe amount only
+        const pawbucksEarned = Math.floor(amountInDollars * pawbucksMultiplier);
+
+        // Create transaction record
         if (userId && merchantId) {
-          const amountInDollars = paymentIntent.amount / 100;
-          // Platform fee (3%) only on Stripe portion
-          const platformFee = amountInDollars * 0.03;
-          
-          await supabaseAdmin
+          const { data: transaction, error: txError } = await supabaseAdmin
             .from("transactions")
             .insert({
               user_id: userId,
               merchant_id: merchantId,
-              amount: amountInDollars,
-              stripe_amount: amountInDollars, // Full amount via Stripe for direct payments
-              pawbucks_used: 0, // No PawBucks used in direct payments
-              application_fee: platformFee, // 3% fee on full amount
+              amount: totalAmount > 0 ? totalAmount : amountInDollars,
+              stripe_amount: amountInDollars,
+              pawbucks_used: pawbucksAmount,
+              application_fee: platformFee,
               status: "completed",
               rewards_earned: pawbucksEarned,
-              cashback_earned: amountInDollars * 0.1, // 10% cashback value
+              cashback_earned: pawbucksEarned,
               stripe_payment_intent_id: paymentIntent.id,
-              description: `${chargeType === "destination" ? "Destination" : "Direct"} charge - ${metadata.business_name || "Merchant"}`,
+              description: description,
+            })
+            .select()
+            .single();
+
+          if (txError) {
+            logStep("Error creating transaction", { error: txError.message });
+          } else {
+            logStep("Transaction created", { transactionId: transaction?.id, pawbucksEarned });
+          }
+
+          // Award PawBucks to user
+          if (pawbucksEarned > 0) {
+            // Log activity - MUST be 'earn' type for wallet display
+            await supabaseAdmin.from("pawbucks_activity").insert({
+              user_id: userId,
+              amount: pawbucksEarned,
+              type: "earn",
+              source: "direct_payment",
+              description: `Earned ${pawbucksEarned} PawBucks (${tierName} ${pawbucksMultiplier}x) from payment to ${businessName}`,
+              pawbucks_status: "available",
+              partner_id: merchantId,
+              transaction_id: transaction?.id,
             });
 
-          logStep("Transaction record created with fee tracking");
+            // Update wallet balance
+            const { data: wallet } = await supabaseAdmin
+              .from('pawbucks_wallet')
+              .select('balance')
+              .eq('user_id', userId)
+              .single();
+
+            if (wallet) {
+              await supabaseAdmin
+                .from('pawbucks_wallet')
+                .update({ balance: wallet.balance + pawbucksEarned })
+                .eq('user_id', userId);
+              
+              logStep("PawBucks wallet updated", { 
+                previousBalance: wallet.balance, 
+                newBalance: wallet.balance + pawbucksEarned 
+              });
+            } else {
+              // Create wallet if doesn't exist
+              await supabaseAdmin.from('pawbucks_wallet').insert({
+                user_id: userId,
+                balance: pawbucksEarned,
+              });
+              logStep("PawBucks wallet created with initial balance");
+            }
+          }
 
           // Auto-log platform fee as Tax Vault expense
           if (platformFee > 0) {
             const expenseDate = new Date().toISOString().split('T')[0];
             const taxYear = new Date().getFullYear();
 
-            const { error: expenseError } = await supabaseAdmin
-              .from("merchant_tax_expenses")
-              .insert({
-                merchant_id: merchantId,
-                category: "platform_fees",
-                amount: platformFee,
-                description: `Platform/Processing Fee (3%) on $${amountInDollars.toFixed(2)} sale`,
-                vendor_name: "PawBucks Platform",
-                expense_date: expenseDate,
-                tax_year: taxYear,
-                is_auto_logged: true,
-                source_purchase_id: paymentIntent.id,
-              });
+            await supabaseAdmin.from("merchant_tax_expenses").insert({
+              merchant_id: merchantId,
+              category: "platform_fees",
+              amount: platformFee,
+              description: `Platform/Processing Fee (3%) on $${amountInDollars.toFixed(2)} sale`,
+              vendor_name: "PawBucks Platform",
+              expense_date: expenseDate,
+              tax_year: taxYear,
+              is_auto_logged: true,
+              source_purchase_id: paymentIntent.id,
+            });
 
-            if (expenseError) {
-              logStep("Error auto-logging platform fee expense", { error: expenseError.message });
-            } else {
-              logStep("Platform fee auto-logged to Tax Vault", { amount: platformFee });
-            }
+            logStep("Platform fee auto-logged to Tax Vault");
+          }
+
+          // Send receipt email
+          const { data: userProfile } = await supabaseAdmin
+            .from('profiles')
+            .select('email, full_name')
+            .eq('id', userId)
+            .single();
+
+          if (userProfile?.email) {
+            await sendReceiptEmail({
+              email: userProfile.email,
+              customerName: userProfile.full_name || undefined,
+              transactionDate: new Date().toISOString(),
+              receiptId: transaction?.id || paymentIntent.id,
+              merchantName: businessName,
+              items: [{ name: description, price: totalAmount > 0 ? totalAmount : amountInDollars }],
+              subtotal: totalAmount > 0 ? totalAmount : amountInDollars,
+              pawbucksApplied: pawbucksAmount * 0.001,
+              cardAmount: amountInDollars,
+              totalPaid: totalAmount > 0 ? totalAmount : amountInDollars,
+              pawbucksEarned,
+            });
           }
         }
 
@@ -162,16 +363,13 @@ serve(async (req) => {
 
       case "account.updated": {
         const account = event.data.object as Stripe.Account;
-        logStep("Express account updated", { 
+        logStep("Account updated", { 
           accountId: account.id,
           chargesEnabled: account.charges_enabled,
           payoutsEnabled: account.payouts_enabled,
-          type: account.type
         });
 
         const isComplete = account.charges_enabled && account.payouts_enabled;
-
-        // Check for pending requirements
         const hasPendingRequirements = 
           (account.requirements?.currently_due?.length || 0) > 0 ||
           (account.requirements?.past_due?.length || 0) > 0;
@@ -184,50 +382,29 @@ serve(async (req) => {
           })
           .eq("stripe_account_id", account.id);
 
-        logStep("Merchant status updated", { isComplete, hasPendingRequirements });
-
         break;
       }
 
-      case "payout.paid": {
-        const payout = event.data.object as Stripe.Payout;
-        logStep("Payout completed", { 
-          payoutId: payout.id,
-          amount: payout.amount,
-          connectedAccount: connectedAccountId 
-        });
+      case "payout.paid":
+      case "payout.failed":
+      case "transfer.created":
+        logStep("Handled event", { type: event.type });
         break;
-      }
-
-      case "payout.failed": {
-        const payout = event.data.object as Stripe.Payout;
-        logStep("Payout failed", { 
-          payoutId: payout.id,
-          failureMessage: payout.failure_message,
-          connectedAccount: connectedAccountId 
-        });
-        break;
-      }
-
-      case "transfer.created": {
-        const transfer = event.data.object as Stripe.Transfer;
-        logStep("Transfer created to merchant", {
-          transferId: transfer.id,
-          amount: transfer.amount,
-          destination: transfer.destination,
-        });
-        break;
-      }
 
       default:
         logStep("Unhandled event type", { type: event.type });
     }
 
+    // Mark as processed
+    await supabaseAdmin.from('webhook_logs')
+      .update({ processed: true })
+      .eq('event_id', event.id);
+
     return new Response(JSON.stringify({ received: true }), { status: 200 });
 
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    logStep("Webhook error", { message: errorMessage });
+    console.error("[CONNECT-WEBHOOK] Error:", errorMessage);
     return new Response(JSON.stringify({ error: errorMessage }), { status: 500 });
   }
 });
