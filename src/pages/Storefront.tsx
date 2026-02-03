@@ -5,13 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { ShoppingCart, Loader2, Store, ArrowLeft, Sparkles, Shield, CreditCard, Package, Star, MapPin, Clock } from "lucide-react";
+import { ShoppingCart, Loader2, Store, ArrowLeft, Sparkles, Shield, CreditCard, Package, Star, MapPin, Clock, RefreshCw, Check } from "lucide-react";
 import { SEO } from "@/components/SEO";
 import { useAuth } from "@/hooks/useAuth";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PawBucksCheckoutDialog } from "@/components/PawBucksCheckoutDialog";
+import { SubscriptionCheckoutDialog } from "@/components/SubscriptionCheckoutDialog";
 import { useQuery, useQueries } from "@tanstack/react-query";
+import { merchantSubscriptionPlansService } from "@/services/api/merchantSubscriptionPlans.service";
 
 type Product = {
   id: string;
@@ -25,6 +27,19 @@ type Product = {
     formatted: string;
   } | null;
   active: boolean;
+};
+
+type SubscriptionPlan = {
+  id: string;
+  name: string;
+  description: string | null;
+  amount: number;
+  currency: string;
+  billing_interval: string;
+  billing_interval_count: number;
+  stripe_price_id: string;
+  features: string[];
+  trial_days: number;
 };
 
 const ProductSkeleton = memo(() => (
@@ -133,6 +148,55 @@ const Storefront = memo(() => {
     },
     staleTime: 1000 * 60 * 5,
     enabled: !!merchantIdForProducts,
+  });
+
+  // Subscription plans query
+  const { data: subscriptionPlans = [] } = useQuery({
+    queryKey: ["storefront-subscription-plans", merchantIdForProducts],
+    queryFn: async () => {
+      if (!merchantIdForProducts) return [];
+      const { data } = await merchantSubscriptionPlansService.getPublishedPlans(merchantIdForProducts);
+      return (data || []).map(p => ({
+        ...p,
+        features: Array.isArray(p.features) ? p.features as string[] : [],
+      }));
+    },
+    staleTime: 1000 * 60 * 5,
+    enabled: !!merchantIdForProducts,
+  });
+
+  // Subscription checkout state
+  const [showSubDialog, setShowSubDialog] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
+  const [connectedAccountId, setConnectedAccountId] = useState<string | null>(null);
+
+  // Fetch connected account ID when needed
+  const fetchConnectedAccountId = useCallback(async () => {
+    if (!merchantIdForProducts) return null;
+    const { data } = await supabase
+      .from("merchants")
+      .select("stripe_account_id")
+      .eq("id", merchantIdForProducts)
+      .single();
+    return data?.stripe_account_id || null;
+  }, [merchantIdForProducts]);
+
+  const handleSubscribe = useCallback(async (plan: SubscriptionPlan) => {
+    if (!user) {
+      toast.error("Please sign in to subscribe", {
+        action: { label: "Sign In", onClick: () => navigate("/auth") },
+      });
+      return;
+    }
+    const acctId = await fetchConnectedAccountId();
+    if (!acctId) {
+      toast.error("This merchant hasn't completed payment setup.");
+      return;
+    }
+    setConnectedAccountId(acctId);
+    setSelectedPlan(plan);
+    setShowSubDialog(true);
+  }, [user, navigate, fetchConnectedAccountId]);
   });
 
   // Derived values
