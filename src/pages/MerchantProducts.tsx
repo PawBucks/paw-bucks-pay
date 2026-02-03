@@ -15,10 +15,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Package, Plus, ExternalLink, Loader2, ArrowLeft, DollarSign, Store, Coins, Calculator } from "lucide-react";
+import { Package, Plus, ExternalLink, Loader2, ArrowLeft, DollarSign, Store, Coins, Calculator, RefreshCw } from "lucide-react";
 import { PricingCalculator } from "@/components/merchant/PricingCalculator";
 import { Switch } from "@/components/ui/switch";
 import { SEO } from "@/components/SEO";
+import { Badge } from "@/components/ui/badge";
+import { merchantSubscriptionPlansService } from "@/services/api/merchantSubscriptionPlans.service";
 
 type Product = {
   id: string;
@@ -34,6 +36,18 @@ type Product = {
   active: boolean;
 };
 
+type SubscriptionPlan = {
+  id: string;
+  name: string;
+  description: string | null;
+  amount: number;
+  currency: string;
+  billing_interval: string;
+  billing_interval_count: number;
+  is_active: boolean;
+  stripe_price_id: string | null;
+};
+
 type Merchant = {
   id: string;
   business_name: string;
@@ -46,6 +60,7 @@ const MerchantProducts = () => {
   const navigate = useNavigate();
   const [merchant, setMerchant] = useState<Merchant | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
+  const [subscriptionPlans, setSubscriptionPlans] = useState<SubscriptionPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -94,8 +109,11 @@ const MerchantProducts = () => {
 
       setMerchant(merchantData);
 
-      // Load products
-      await loadProducts(merchantData.stripe_account_id);
+      // Load products and subscription plans in parallel
+      await Promise.all([
+        loadProducts(merchantData.stripe_account_id),
+        loadSubscriptionPlans(merchantData.id),
+      ]);
     } catch (error) {
       console.error("Error loading merchant data:", error);
       toast.error("Failed to load merchant data");
@@ -127,6 +145,27 @@ const MerchantProducts = () => {
       console.error("Error loading products:", error);
       toast.error("Failed to load products");
     }
+  };
+
+  const loadSubscriptionPlans = async (merchantId: string) => {
+    try {
+      const { data, error } = await merchantSubscriptionPlansService.getMyPlans(merchantId);
+      if (error) throw error;
+      setSubscriptionPlans(data || []);
+    } catch (error) {
+      console.error("Error loading subscription plans:", error);
+    }
+  };
+
+  const formatInterval = (interval: string, count: number) => {
+    const labels: Record<string, [string, string]> = {
+      day: ["day", "days"],
+      week: ["week", "weeks"],
+      month: ["month", "months"],
+      year: ["year", "years"],
+    };
+    const [singular, plural] = labels[interval] || ["period", "periods"];
+    return count === 1 ? `per ${singular}` : `every ${count} ${plural}`;
   };
 
   const handleCreateProduct = async () => {
@@ -301,7 +340,7 @@ const MerchantProducts = () => {
       )}
 
       {/* Products Grid */}
-      {products.length === 0 ? (
+      {products.length === 0 && subscriptionPlans.length === 0 ? (
         <Card className="border-dashed">
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Package className="h-12 w-12 text-muted-foreground mb-4" />
@@ -317,6 +356,47 @@ const MerchantProducts = () => {
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Subscription Plans */}
+          {subscriptionPlans.map((plan) => (
+            <Card key={`plan-${plan.id}`} className="overflow-hidden hover:shadow-lg transition-shadow border-primary/20">
+              <CardHeader className="pb-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <Badge variant="outline" className="gap-1 text-xs">
+                    <RefreshCw className="h-3 w-3" />
+                    Subscription
+                  </Badge>
+                </div>
+                <CardTitle className="line-clamp-1">{plan.name}</CardTitle>
+                {plan.description && (
+                  <CardDescription className="line-clamp-2">
+                    {plan.description}
+                  </CardDescription>
+                )}
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-baseline gap-1">
+                    <div className="flex items-center gap-1 text-2xl font-bold text-primary">
+                      <DollarSign className="h-5 w-5" />
+                      {(plan.amount / 100).toFixed(2)}
+                    </div>
+                    <span className="text-sm text-muted-foreground">
+                      {formatInterval(plan.billing_interval, plan.billing_interval_count)}
+                    </span>
+                  </div>
+                  <div className={`px-3 py-1 rounded-full text-xs font-medium ${
+                    plan.is_active 
+                      ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100" 
+                      : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100"
+                  }`}>
+                    {plan.is_active ? "Active" : "Inactive"}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+
+          {/* One-time Products */}
           {products.map((product) => (
             <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow">
               <CardHeader className="pb-4">
