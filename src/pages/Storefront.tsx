@@ -492,6 +492,81 @@ const Storefront = memo(() => {
 
             {/* Products Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {/* Subscription Plans */}
+              {subscriptionPlans.map((plan) => {
+                const formattedPrice = `$${(plan.amount / 100).toFixed(2)}`;
+                const intervalLabel = plan.billing_interval_count === 1 
+                  ? plan.billing_interval 
+                  : `${plan.billing_interval_count} ${plan.billing_interval}s`;
+                
+                return (
+                  <Card 
+                    key={`plan-${plan.id}`}
+                    className="group overflow-hidden hover:shadow-2xl transition-all duration-300 hover:border-primary/40 hover:-translate-y-1.5 bg-card/80 backdrop-blur-sm border-primary/20"
+                  >
+                    {/* Plan Header with Badge */}
+                    <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                      <RefreshCw className="h-16 w-16 text-primary/40" />
+                      <div className="absolute top-3 left-3">
+                        <Badge className="bg-primary text-primary-foreground border-0">
+                          <RefreshCw className="h-3 w-3 mr-1" />
+                          Subscription
+                        </Badge>
+                      </div>
+                      {plan.trial_days > 0 && (
+                        <div className="absolute top-3 right-3">
+                          <Badge variant="outline" className="bg-green-500/20 text-green-700 dark:text-green-400 border-green-500/30">
+                            {plan.trial_days} day trial
+                          </Badge>
+                        </div>
+                      )}
+                    </div>
+
+                    <CardHeader className="pb-2 pt-4">
+                      <CardTitle className="line-clamp-1 text-lg group-hover:text-primary transition-colors">
+                        {plan.name}
+                      </CardTitle>
+                      {plan.description && (
+                        <CardDescription className="line-clamp-2 text-sm">
+                          {plan.description}
+                        </CardDescription>
+                      )}
+                    </CardHeader>
+
+                    <CardContent className="space-y-4 pt-2">
+                      {/* Price */}
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-2xl font-bold text-foreground">{formattedPrice}</span>
+                        <span className="text-muted-foreground">/ {intervalLabel}</span>
+                      </div>
+
+                      {/* Features */}
+                      {plan.features.length > 0 && (
+                        <ul className="space-y-1">
+                          {plan.features.slice(0, 3).map((feature, i) => (
+                            <li key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <Check className="h-3 w-3 text-green-600 flex-shrink-0" />
+                              <span className="line-clamp-1">{feature}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+
+                      {/* Subscribe Button */}
+                      <Button
+                        onClick={() => handleSubscribe(plan)}
+                        className="w-full group/btn shadow-lg shadow-primary/20"
+                        size="lg"
+                      >
+                        <CreditCard className="h-4 w-4 mr-2 group-hover/btn:scale-110 transition-transform" />
+                        Subscribe
+                      </Button>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+
+              {/* One-time Products */}
               {products.map((product) => {
                 const estimatedPawBucks = product.price?.unit_amount 
                   ? getEstimatedPawBucks(product.price.unit_amount / 100)
@@ -623,6 +698,22 @@ const Storefront = memo(() => {
           userId={user.id}
           onProceed={handlePawBucksDialogProceed}
           isLoading={purchasingProductId === selectedProduct.id}
+        />
+      )}
+
+      {/* Subscription Checkout Dialog */}
+      {selectedPlan && connectedAccountId && merchantId && (
+        <SubscriptionCheckoutDialog
+          open={showSubDialog}
+          onOpenChange={setShowSubDialog}
+          plan={selectedPlan}
+          merchantId={merchantId}
+          merchantName={merchantName}
+          connectedAccountId={connectedAccountId}
+          onSuccess={() => {
+            setShowSubDialog(false);
+            setSelectedPlan(null);
+          }}
         />
       )}
     </div>
