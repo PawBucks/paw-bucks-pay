@@ -14,8 +14,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Package, Plus, ExternalLink, Loader2, ArrowLeft, DollarSign, Store, Coins, Calculator, RefreshCw } from "lucide-react";
+import { Package, Plus, ExternalLink, Loader2, ArrowLeft, DollarSign, Store, Coins, RefreshCw, Trash2 } from "lucide-react";
 import { PricingCalculator } from "@/components/merchant/PricingCalculator";
 import { Switch } from "@/components/ui/switch";
 import { SEO } from "@/components/SEO";
@@ -64,6 +74,9 @@ const MerchantProducts = () => {
   const [loading, setLoading] = useState(true);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   // Form state
   const [productName, setProductName] = useState("");
@@ -256,6 +269,36 @@ const MerchantProducts = () => {
     return `${window.location.origin}/storefront/${merchant.storefront_slug}`;
   };
 
+  const handleDeleteProduct = async () => {
+    if (!productToDelete || !merchant?.stripe_account_id) return;
+    
+    setDeleting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("delete-connect-product", {
+        body: {
+          productId: productToDelete.id,
+          accountId: merchant.stripe_account_id,
+        },
+      });
+
+      if (error) throw error;
+
+      if (data.success) {
+        toast.success("Product deleted successfully");
+        setProducts(products.filter(p => p.id !== productToDelete.id));
+      } else {
+        throw new Error(data.error || "Failed to delete product");
+      }
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to delete product");
+    } finally {
+      setDeleting(false);
+      setDeleteDialogOpen(false);
+      setProductToDelete(null);
+    }
+  };
+
   if (authLoading || loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -400,12 +443,27 @@ const MerchantProducts = () => {
           {products.map((product) => (
             <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow">
               <CardHeader className="pb-4">
-                <CardTitle className="line-clamp-1">{product.name}</CardTitle>
-                {product.description && (
-                  <CardDescription className="line-clamp-2">
-                    {product.description}
-                  </CardDescription>
-                )}
+                <div className="flex items-start justify-between">
+                  <div className="flex-1 min-w-0">
+                    <CardTitle className="line-clamp-1">{product.name}</CardTitle>
+                    {product.description && (
+                      <CardDescription className="line-clamp-2">
+                        {product.description}
+                      </CardDescription>
+                    )}
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-muted-foreground hover:text-destructive flex-shrink-0"
+                    onClick={() => {
+                      setProductToDelete(product);
+                      setDeleteDialogOpen(true);
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between">
@@ -545,6 +603,36 @@ const MerchantProducts = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Product?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will archive "{productToDelete?.name}" and remove it from your storefront. 
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteProduct}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
