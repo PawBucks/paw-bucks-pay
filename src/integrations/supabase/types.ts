@@ -3231,6 +3231,84 @@ export type Database = {
           },
         ]
       }
+      merchant_subscription_plans: {
+        Row: {
+          amount: number
+          billing_interval: string
+          billing_interval_count: number
+          created_at: string
+          currency: string
+          current_subscribers: number | null
+          description: string | null
+          features: Json | null
+          id: string
+          is_active: boolean
+          max_subscribers: number | null
+          merchant_id: string
+          name: string
+          sort_order: number | null
+          stripe_price_id: string | null
+          stripe_product_id: string | null
+          trial_days: number | null
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          billing_interval?: string
+          billing_interval_count?: number
+          created_at?: string
+          currency?: string
+          current_subscribers?: number | null
+          description?: string | null
+          features?: Json | null
+          id?: string
+          is_active?: boolean
+          max_subscribers?: number | null
+          merchant_id: string
+          name: string
+          sort_order?: number | null
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+          trial_days?: number | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          billing_interval?: string
+          billing_interval_count?: number
+          created_at?: string
+          currency?: string
+          current_subscribers?: number | null
+          description?: string | null
+          features?: Json | null
+          id?: string
+          is_active?: boolean
+          max_subscribers?: number | null
+          merchant_id?: string
+          name?: string
+          sort_order?: number | null
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+          trial_days?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_subscription_plans_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_subscription_plans_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       merchant_subscriptions: {
         Row: {
           amount: number

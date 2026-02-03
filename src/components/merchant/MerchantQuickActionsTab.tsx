@@ -12,6 +12,7 @@ import {
   Vault,
   ArrowRight,
   Receipt,
+  RefreshCw,
 } from "lucide-react";
 
 type MerchantQuickActionsTabProps = {
@@ -66,6 +67,14 @@ export function MerchantQuickActionsTab({
       onClick: () => onNavigate("/merchant/products"),
       color: "text-green-500",
       bgColor: "bg-green-500/10",
+    }] : []),
+    ...(hasStripeAccount ? [{
+      title: "Subscription Plans",
+      description: "Create recurring billing plans",
+      icon: RefreshCw,
+      onClick: () => onNavigate("/merchant/subscription-plans"),
+      color: "text-teal-500",
+      bgColor: "bg-teal-500/10",
     }] : []),
     {
       title: "Partner Offers",

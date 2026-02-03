@@ -11,3 +11,4 @@ export * from './subscriptions.service';
 export * from './offers.service';
 export * from './invoicing.service';
 export * from './merchantSubscriptions.service';
+export * from './merchantSubscriptionPlans.service';

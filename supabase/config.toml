@@ -338,3 +338,6 @@ verify_jwt = false
 
 [functions.cancel-merchant-subscription]
 verify_jwt = true
+
+[functions.publish-subscription-plan]
+verify_jwt = true

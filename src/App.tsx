@@ -84,6 +84,7 @@ const AccountantPortal = lazy(() => import("./pages/AccountantPortal"));
 const MerchantInvoicing = lazy(() => import("./pages/MerchantInvoicing"));
 const InvoicePayment = lazy(() => import("./pages/InvoicePayment"));
 const InvoicePaymentSuccess = lazy(() => import("./pages/InvoicePaymentSuccess"));
+const MerchantSubscriptionPlans = lazy(() => import("./pages/MerchantSubscriptionPlans"));
 
 const createQueryClient = () => new QueryClient({
   defaultOptions: {
@@ -166,6 +167,7 @@ const AppRoutes = () => {
       <Route path="/pay/:merchantId" element={<PageTransition><DirectCheckout /></PageTransition>} />
       <Route path="/accountant-portal/:token" element={<PageTransition><AccountantPortal /></PageTransition>} />
       <Route path="/merchant/invoicing" element={<PageTransition><MerchantInvoicing /></PageTransition>} />
+      <Route path="/merchant/subscription-plans" element={<PageTransition><MerchantSubscriptionPlans /></PageTransition>} />
       <Route path="/invoice/:invoiceId/pay" element={<PageTransition><InvoicePayment /></PageTransition>} />
       <Route path="/invoice/:invoiceId/success" element={<PageTransition><InvoicePaymentSuccess /></PageTransition>} />
       <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
