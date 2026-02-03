@@ -89,8 +89,9 @@ export class DataLoader {
   }
 
   static async loadTransactions(userId: string, limit: number = 10) {
+    console.log('[DataLoader] Loading transactions for user:', userId);
     return this.retryOperation(async () => {
-      // Use FK hint for merchants join
+      // Use FK hint for merchants join - profiles join not needed here as we're querying by user_id
       const { data, error } = await supabase
         .from('transactions')
         .select('*, merchants!transactions_merchant_id_fkey(business_type, business_name)')
@@ -98,7 +99,11 @@ export class DataLoader {
         .order('created_at', { ascending: false })
         .limit(limit);
 
-      if (error) throw error;
+      if (error) {
+        console.error('[DataLoader] Error loading transactions:', error);
+        throw error;
+      }
+      console.log('[DataLoader] Loaded transactions:', data?.length || 0, 'transactions');
       return data || [];
     });
   }
