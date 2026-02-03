@@ -13,6 +13,10 @@ const logStep = (step: string, details?: Record<string, unknown>) => {
 
 const PLATFORM_FEE_PERCENT = 0.03; // 3% platform fee
 
+// PawPass product IDs for tier determination
+const PAWPASS_PLUS_PRODUCT_ID = 'prod_TQyZjYzt9DwoIK';
+const PAWPASS_PRODUCT_ID = 'prod_TJVK9ZhLiJnnpm';
+
 interface SubscriptionToProcess {
   id: string;
   user_id: string;
@@ -28,6 +32,158 @@ interface SubscriptionToProcess {
   failed_payment_count: number;
   application_fee_percent: number;
   metadata: Record<string, string> | null;
+}
+
+// Helper function to determine user's subscription tier and multiplier
+async function getUserTierMultiplier(
+  supabaseAdmin: any,
+  stripe: Stripe,
+  userId: string
+): Promise<{ multiplier: number; tierName: string }> {
+  let pawbucksMultiplier = 10; // Default 10x for Free tier
+  let tierName = 'Free';
+
+  try {
+    const { data: platformSub } = await supabaseAdmin
+      .from('subscriptions')
+      .select('stripe_subscription_id')
+      .eq('user_id', userId)
+      .in('status', ['active', 'trialing'])
+      .maybeSingle();
+
+    if (platformSub?.stripe_subscription_id) {
+      const platformSubscription = await stripe.subscriptions.retrieve(platformSub.stripe_subscription_id);
+      const productId = platformSubscription.items.data[0]?.price?.product;
+      
+      if (productId === PAWPASS_PLUS_PRODUCT_ID) {
+        pawbucksMultiplier = 30; // PawPass+
+        tierName = 'PawPass+';
+      } else if (productId === PAWPASS_PRODUCT_ID) {
+        pawbucksMultiplier = 20; // PawPass
+        tierName = 'PawPass';
+      }
+    }
+    logStep("User subscription tier determined", { userId, tierName, pawbucksMultiplier });
+  } catch (tierError) {
+    logStep("Error determining tier (using default 10x)", { userId, error: String(tierError) });
+  }
+
+  return { multiplier: pawbucksMultiplier, tierName };
+}
+
+// Helper function to credit PawBucks to user
+async function creditPawBucksToUser(
+  supabaseAdmin: any,
+  userId: string,
+  merchantId: string,
+  amountInDollars: number,
+  multiplier: number,
+  tierName: string,
+  productName: string
+): Promise<number> {
+  const pawbucksEarned = Math.floor(amountInDollars * multiplier);
+  
+  if (pawbucksEarned <= 0) {
+    return 0;
+  }
+
+  // Log activity with type 'earn'
+  const { error: activityError } = await supabaseAdmin
+    .from("pawbucks_activity")
+    .insert({
+      user_id: userId,
+      amount: pawbucksEarned,
+      type: "earn",
+      source: "subscription_renewal",
+      description: `Earned ${pawbucksEarned} PawBucks (${tierName} ${multiplier}x) from ${productName} renewal`,
+      pawbucks_status: "available",
+      partner_id: merchantId,
+    });
+
+  if (activityError) {
+    logStep("Error inserting pawbucks_activity", { userId, error: activityError.message });
+  } else {
+    logStep("PawBucks activity logged", { userId, amount: pawbucksEarned, type: "earn" });
+  }
+
+  // Update wallet balance
+  const { data: wallet } = await supabaseAdmin
+    .from('pawbucks_wallet')
+    .select('balance')
+    .eq('user_id', userId)
+    .single();
+
+  if (wallet) {
+    const { error: walletError } = await supabaseAdmin
+      .from('pawbucks_wallet')
+      .update({ balance: wallet.balance + pawbucksEarned })
+      .eq('user_id', userId);
+    
+    if (walletError) {
+      logStep("Error updating wallet balance", { userId, error: walletError.message });
+    } else {
+      logStep("PawBucks wallet updated", { 
+        userId,
+        previousBalance: wallet.balance, 
+        newBalance: wallet.balance + pawbucksEarned,
+        earned: pawbucksEarned 
+      });
+    }
+  } else {
+    logStep("Wallet not found for user, creating one", { userId });
+    await supabaseAdmin.from('pawbucks_wallet').insert({
+      user_id: userId,
+      balance: pawbucksEarned,
+    });
+  }
+
+  return pawbucksEarned;
+}
+
+// Helper function to credit merchant earnings (1%)
+async function creditMerchantEarnings(
+  supabaseAdmin: any,
+  merchantId: string,
+  userId: string,
+  amountInDollars: number
+): Promise<number> {
+  const merchantEarnings = Math.round(amountInDollars * 10); // 1% = 10 PawBucks per dollar
+  
+  if (merchantEarnings <= 0) {
+    return 0;
+  }
+
+  const { data: merchantWallet } = await supabaseAdmin
+    .from('merchant_pawbucks_wallet')
+    .select('balance')
+    .eq('merchant_id', merchantId)
+    .single();
+
+  const currentBalance = merchantWallet?.balance || 0;
+  
+  if (merchantWallet) {
+    await supabaseAdmin
+      .from('merchant_pawbucks_wallet')
+      .update({ balance: currentBalance + merchantEarnings })
+      .eq('merchant_id', merchantId);
+  } else {
+    await supabaseAdmin.from('merchant_pawbucks_wallet').insert({
+      merchant_id: merchantId,
+      balance: merchantEarnings,
+    });
+  }
+
+  await supabaseAdmin.from('merchant_pawbucks_activity').insert({
+    merchant_id: merchantId,
+    type: 'earn',
+    amount: merchantEarnings,
+    source: 'Subscription Commission',
+    customer_user_id: userId,
+    description: `Earned 1% from $${amountInDollars.toFixed(2)} subscription renewal`,
+  });
+
+  logStep("Merchant earnings credited", { merchantId, merchantEarnings });
+  return merchantEarnings;
 }
 
 serve(async (req) => {
@@ -78,7 +234,8 @@ serve(async (req) => {
       succeeded: 0,
       failed: 0,
       skipped: 0,
-      details: [] as Array<{ subscriptionId: string; status: string; error?: string }>,
+      totalPawBucksAwarded: 0,
+      details: [] as Array<{ subscriptionId: string; status: string; pawbucksEarned?: number; error?: string }>,
     };
 
     // Process each subscription
@@ -186,10 +343,17 @@ serve(async (req) => {
         });
 
         if (paymentIntent.status === "succeeded") {
-          // Payment succeeded - update subscription
-          await handlePaymentSuccess(supabaseAdmin, subscription, paymentIntent.id);
+          // Payment succeeded - update subscription and credit PawBucks
+          const pawbucksEarned = await handlePaymentSuccess(
+            supabaseAdmin, 
+            stripe,
+            subscription, 
+            paymentIntent.id,
+            applicationFee
+          );
           results.succeeded++;
-          results.details.push({ subscriptionId: subscription.id, status: "succeeded" });
+          results.totalPawBucksAwarded += pawbucksEarned;
+          results.details.push({ subscriptionId: subscription.id, status: "succeeded", pawbucksEarned });
         } else {
           // Payment requires action or has issues
           await handlePaymentFailed(
@@ -212,11 +376,6 @@ serve(async (req) => {
           subscriptionId: subscription.id, 
           error: errorMessage 
         });
-
-        // Check if it's a card decline
-        const isCardDecline = errorMessage.includes("card") || 
-                              errorMessage.includes("decline") ||
-                              errorMessage.includes("payment_method");
 
         await handlePaymentFailed(supabaseAdmin, subscription, null, errorMessage);
         results.failed++;
@@ -249,12 +408,14 @@ serve(async (req) => {
   }
 });
 
-// Handle successful payment
+// Handle successful payment - now includes PawBucks rewards
 async function handlePaymentSuccess(
   supabase: any,
+  stripe: Stripe,
   subscription: SubscriptionToProcess,
-  paymentIntentId: string
-) {
+  paymentIntentId: string,
+  applicationFee: number
+): Promise<number> {
   const now = new Date();
   
   // Calculate next billing date
@@ -297,10 +458,64 @@ async function handlePaymentSuccess(
     payment_intent_id: paymentIntentId,
   });
 
-  logStep("Payment success recorded", { 
-    subscriptionId: subscription.id,
-    nextBilling: nextBilling.toISOString() 
+  // === PAWBUCKS REWARDS PROCESSING ===
+  const amountInDollars = subscription.amount / 100;
+
+  // Get user's subscription tier for multiplier
+  const { multiplier, tierName } = await getUserTierMultiplier(supabase, stripe, subscription.user_id);
+
+  // Credit PawBucks to user
+  const pawbucksEarned = await creditPawBucksToUser(
+    supabase,
+    subscription.user_id,
+    subscription.merchant_id,
+    amountInDollars,
+    multiplier,
+    tierName,
+    subscription.product_name
+  );
+
+  // Credit merchant 1% earnings
+  await creditMerchantEarnings(supabase, subscription.merchant_id, subscription.user_id, amountInDollars);
+
+  // Auto-log platform fee as Tax Vault expense
+  if (applicationFee > 0) {
+    const expenseDate = new Date().toISOString().split('T')[0];
+    const taxYear = new Date().getFullYear();
+
+    await supabase
+      .from("merchant_tax_expenses")
+      .insert({
+        merchant_id: subscription.merchant_id,
+        category: "platform_fees",
+        amount: applicationFee / 100, // Convert to dollars
+        description: `Platform Fee (3%) on $${amountInDollars.toFixed(2)} subscription renewal`,
+        vendor_name: "PawBucks Platform",
+        expense_date: expenseDate,
+        tax_year: taxYear,
+        is_auto_logged: true,
+        source_purchase_id: paymentIntentId,
+      });
+
+    logStep("Platform fee auto-logged to Tax Vault", { subscriptionId: subscription.id });
+  }
+
+  // Send notification to user about renewal and rewards
+  await supabase.from("notifications").insert({
+    user_id: subscription.user_id,
+    title: "Subscription Renewed",
+    message: `Your ${subscription.product_name} subscription has been renewed. You earned ${pawbucksEarned} PawBucks!`,
+    category: "transactional",
   });
+
+  logStep("Payment success recorded with PawBucks", { 
+    subscriptionId: subscription.id,
+    nextBilling: nextBilling.toISOString(),
+    pawbucksEarned,
+    tierName
+  });
+
+  return pawbucksEarned;
 }
 
 // Handle failed payment
