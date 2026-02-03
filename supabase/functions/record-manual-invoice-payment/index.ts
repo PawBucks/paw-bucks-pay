@@ -108,48 +108,51 @@ Deno.serve(async (req) => {
     console.log(`[record-manual-invoice-payment] Payment recorded:`, paymentRecord.id);
 
     // Look up the pet owner by client_email to link the transaction
-    const { data: petOwnerProfile, error: profileError } = await supabase
+    // Try case-insensitive search first
+    const { data: petOwnerProfile } = await supabase
       .from("profiles")
       .select("id, full_name, email")
-      .eq("email", invoice.client_email)
+      .ilike("email", invoice.client_email)
       .maybeSingle();
+
+    let matchedUserId: string | null = null;
+    
+    if (petOwnerProfile) {
+      matchedUserId = petOwnerProfile.id;
+      console.log(`[record-manual-invoice-payment] Found pet owner: ${petOwnerProfile.id} (${petOwnerProfile.email})`);
+    } else {
+      console.log(`[record-manual-invoice-payment] No matching user profile found for ${invoice.client_email}`);
+    }
+
+    // ALWAYS create a transaction record for merchant dashboard visibility
+    // If no user found, user_id will be null (allowed for manual payments)
+    const { data: transaction, error: transactionError } = await supabase
+      .from("transactions")
+      .insert({
+        user_id: matchedUserId, // Can be null for unregistered clients
+        merchant_id: invoice.merchant_id,
+        amount: amount,
+        rewards_earned: 0, // NO REWARDS for off-platform payments
+        cashback_earned: 0, // NO CASHBACK for off-platform payments
+        description: `Invoice #${invoice.invoice_number} - ${payment_method.replace(/_/g, ' ')} payment${!matchedUserId ? ` (${invoice.client_name})` : ''}`,
+        status: "completed",
+        stripe_amount: 0, // No Stripe involved
+        pawbucks_used: 0, // No PawBucks involved
+        application_fee: 0, // No platform fee for off-platform payments
+      })
+      .select()
+      .single();
 
     let transactionCreated = false;
     let transactionId: string | null = null;
 
-    // Only create transaction if we can identify the pet owner
-    if (petOwnerProfile) {
-      console.log(`[record-manual-invoice-payment] Found pet owner: ${petOwnerProfile.id} (${petOwnerProfile.email})`);
-
-      // Create transaction record for visibility in both merchant and pet owner history
-      // NO REWARDS - this is an off-platform payment
-      const { data: transaction, error: transactionError } = await supabase
-        .from("transactions")
-        .insert({
-          user_id: petOwnerProfile.id,
-          merchant_id: invoice.merchant_id,
-          amount: amount,
-          rewards_earned: 0, // NO REWARDS for off-platform payments
-          cashback_earned: 0, // NO CASHBACK for off-platform payments
-          description: `Invoice #${invoice.invoice_number} - ${payment_method.replace(/_/g, ' ')} payment`,
-          status: "completed",
-          stripe_amount: 0, // No Stripe involved
-          pawbucks_used: 0, // No PawBucks involved
-          application_fee: 0, // No platform fee for off-platform payments
-        })
-        .select()
-        .single();
-
-      if (transactionError) {
-        console.error("[record-manual-invoice-payment] Failed to create transaction:", transactionError);
-        // Don't fail the payment recording, just log the issue
-      } else {
-        transactionCreated = true;
-        transactionId = transaction.id;
-        console.log(`[record-manual-invoice-payment] Transaction created: ${transaction.id}`);
-      }
+    if (transactionError) {
+      console.error("[record-manual-invoice-payment] Failed to create transaction:", transactionError);
+      // Don't fail the payment recording, just log the issue
     } else {
-      console.log(`[record-manual-invoice-payment] No matching user profile found for ${invoice.client_email} - transaction will only appear in merchant records`);
+      transactionCreated = true;
+      transactionId = transaction.id;
+      console.log(`[record-manual-invoice-payment] Transaction created: ${transaction.id} (user_id: ${matchedUserId || 'null - unregistered client'})`);
     }
 
     // Log activity
