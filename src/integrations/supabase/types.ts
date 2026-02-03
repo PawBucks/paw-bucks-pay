@@ -3190,6 +3190,167 @@ export type Database = {
           },
         ]
       }
+      merchant_subscription_events: {
+        Row: {
+          amount: number | null
+          created_at: string
+          event_type: string
+          failure_reason: string | null
+          id: string
+          metadata: Json | null
+          payment_intent_id: string | null
+          subscription_id: string
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string
+          event_type: string
+          failure_reason?: string | null
+          id?: string
+          metadata?: Json | null
+          payment_intent_id?: string | null
+          subscription_id: string
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string
+          event_type?: string
+          failure_reason?: string | null
+          id?: string
+          metadata?: Json | null
+          payment_intent_id?: string | null
+          subscription_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_subscription_events_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      merchant_subscriptions: {
+        Row: {
+          amount: number
+          application_fee_percent: number
+          billing_interval: string
+          billing_interval_count: number
+          cancel_at_period_end: boolean
+          canceled_at: string | null
+          connected_account_id: string
+          created_at: string
+          currency: string
+          current_period_end: string
+          current_period_start: string
+          failed_payment_count: number
+          id: string
+          last_payment_date: string | null
+          last_payment_intent_id: string | null
+          last_payment_status: string | null
+          merchant_id: string
+          metadata: Json | null
+          next_billing_date: string
+          product_name: string
+          status: string
+          stripe_customer_id_on_connected: string
+          stripe_price_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          application_fee_percent?: number
+          billing_interval?: string
+          billing_interval_count?: number
+          cancel_at_period_end?: boolean
+          canceled_at?: string | null
+          connected_account_id: string
+          created_at?: string
+          currency?: string
+          current_period_end: string
+          current_period_start?: string
+          failed_payment_count?: number
+          id?: string
+          last_payment_date?: string | null
+          last_payment_intent_id?: string | null
+          last_payment_status?: string | null
+          merchant_id: string
+          metadata?: Json | null
+          next_billing_date: string
+          product_name: string
+          status?: string
+          stripe_customer_id_on_connected: string
+          stripe_price_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          application_fee_percent?: number
+          billing_interval?: string
+          billing_interval_count?: number
+          cancel_at_period_end?: boolean
+          canceled_at?: string | null
+          connected_account_id?: string
+          created_at?: string
+          currency?: string
+          current_period_end?: string
+          current_period_start?: string
+          failed_payment_count?: number
+          id?: string
+          last_payment_date?: string | null
+          last_payment_intent_id?: string | null
+          last_payment_status?: string | null
+          merchant_id?: string
+          metadata?: Json | null
+          next_billing_date?: string
+          product_name?: string
+          status?: string
+          stripe_customer_id_on_connected?: string
+          stripe_price_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_subscriptions_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_subscriptions_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_subscriptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_customer_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_subscriptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_subscriptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "reviewer_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       merchant_tax_expenses: {
         Row: {
           amount: number

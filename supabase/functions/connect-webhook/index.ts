@@ -137,6 +137,7 @@ serve(async (req) => {
     switch (event.type) {
       case "payment_intent.succeeded": {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
+        const metadata = paymentIntent.metadata || {};
         
         logStep("Processing payment_intent.succeeded", { 
           paymentIntentId: paymentIntent.id,
@@ -144,6 +145,20 @@ serve(async (req) => {
           metadata: paymentIntent.metadata,
           connectedAccount: connectedAccountId,
         });
+
+        // Check if this is a merchant subscription renewal payment
+        if (metadata.subscription_type === "merchant_recurring" && metadata.billing_type === "renewal") {
+          logStep("Subscription renewal payment - handled by cron job", {
+            subscriptionId: metadata.merchant_subscription_id
+          });
+          
+          // Mark webhook as processed - cron job handles the subscription update
+          await supabaseAdmin.from('webhook_logs')
+            .update({ processed: true })
+            .eq('event_id', event.id);
+          
+          return new Response(JSON.stringify({ received: true, type: 'subscription_renewal' }), { status: 200 });
+        }
 
         // Check if transaction already exists (idempotency)
         const { data: existingTx } = await supabaseAdmin
@@ -163,7 +178,6 @@ serve(async (req) => {
           return new Response(JSON.stringify({ received: true, skipped: 'already_processed' }), { status: 200 });
         }
 
-        const metadata = paymentIntent.metadata || {};
         const userId = metadata.user_id;
         const merchantId = metadata.merchant_id;
         const businessName = metadata.business_name || "Merchant";
