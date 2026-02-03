@@ -13,23 +13,25 @@ serve(async (req) => {
   }
 
   try {
-    const supabaseClient = createClient(
+    // Use service role for admin operations
+    const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? ""
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    // Authenticate user
+    // Authenticate user via JWT
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
+    if (!authHeader?.startsWith("Bearer ")) {
       throw new Error("No authorization header provided");
     }
 
     const token = authHeader.replace("Bearer ", "");
-    const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
-    if (userError || !userData.user) {
+    const { data: claimsData, error: claimsError } = await supabaseAdmin.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
       throw new Error("Unauthorized");
     }
 
+    const userId = claimsData.claims.sub;
     const { productId, accountId } = await req.json();
 
     if (!productId || !accountId) {
@@ -37,10 +39,10 @@ serve(async (req) => {
     }
 
     // Verify the user owns this merchant account
-    const { data: merchant, error: merchantError } = await supabaseClient
+    const { data: merchant, error: merchantError } = await supabaseAdmin
       .from("merchants")
       .select("id, stripe_account_id")
-      .eq("user_id", userData.user.id)
+      .eq("user_id", userId)
       .eq("stripe_account_id", accountId)
       .single();
 
