@@ -75,7 +75,7 @@ export function MerchantDataSyncTab({ vetId }: MerchantDataSyncTabProps) {
         .from("transactions")
         .select(`
           *,
-          merchant:merchants(business_name, business_type)
+          merchant:merchants!transactions_merchant_id_fkey(business_name, business_type)
         `)
         .in("user_id", userIds)
         .gte("created_at", subDays(new Date(), 90).toISOString())

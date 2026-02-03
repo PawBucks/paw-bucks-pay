@@ -25,9 +25,10 @@ export const transactionsService = {
   },
 
   async getWithMerchant(userId: string, limit = 10) {
+    // Use FK hint for merchants join
     const { data, error } = await supabase
       .from("transactions")
-      .select("*, merchants(business_name, logo_url)")
+      .select("*, merchants!transactions_merchant_id_fkey(business_name, logo_url)")
       .eq("user_id", userId)
       .order("created_at", { ascending: false })
       .limit(limit);
