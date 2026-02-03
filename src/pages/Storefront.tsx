@@ -197,7 +197,6 @@ const Storefront = memo(() => {
     setSelectedPlan(plan);
     setShowSubDialog(true);
   }, [user, navigate, fetchConnectedAccountId]);
-  });
 
   // Derived values
   const merchantName = merchantData?.business_name || "";
