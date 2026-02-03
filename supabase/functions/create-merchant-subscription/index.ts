@@ -1,0 +1,320 @@
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import Stripe from "https://esm.sh/stripe@18.5.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+const logStep = (step: string, details?: Record<string, unknown>) => {
+  console.log(`[CREATE-MERCHANT-SUBSCRIPTION] ${step}`, details ? JSON.stringify(details) : "");
+};
+
+// Request validation schema
+const subscriptionSchema = z.object({
+  merchantId: z.string().uuid(),
+  priceId: z.string().min(1), // Price ID on the connected account
+  productName: z.string().min(1).max(200),
+  paymentMethodId: z.string().min(1), // Card payment method from Stripe Elements
+  metadata: z.record(z.string()).optional(),
+});
+
+const PLATFORM_FEE_PERCENT = 0.03; // 3% platform fee
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    logStep("Function started");
+
+    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+    if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+    // Authenticate user
+    const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) throw new Error("No authorization header provided");
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
+    if (userError) throw new Error(`Authentication error: ${userError.message}`);
+    
+    const user = userData.user;
+    if (!user?.email) throw new Error("User not authenticated");
+    logStep("User authenticated", { userId: user.id, email: user.email });
+
+    // Parse and validate request body
+    const body = await req.json();
+    const parseResult = subscriptionSchema.safeParse(body);
+    if (!parseResult.success) {
+      throw new Error(`Invalid request: ${parseResult.error.message}`);
+    }
+    const { merchantId, priceId, productName, paymentMethodId, metadata } = parseResult.data;
+    logStep("Request validated", { merchantId, priceId, productName });
+
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+    const stripe = new Stripe(stripeKey, { apiVersion: "2024-12-18.acacia" });
+
+    // Get merchant details including Stripe Connect account
+    const { data: merchant, error: merchantError } = await supabaseAdmin
+      .from("merchants")
+      .select("id, business_name, stripe_account_id, onboarding_complete")
+      .eq("id", merchantId)
+      .single();
+
+    if (merchantError || !merchant) {
+      throw new Error("Merchant not found");
+    }
+
+    if (!merchant.stripe_account_id) {
+      throw new Error("Merchant has not connected their Stripe account");
+    }
+
+    const connectedAccountId = merchant.stripe_account_id;
+    logStep("Merchant found", { merchantId: merchant.id, connectedAccountId });
+
+    // SAFETY CHECK: Verify connected account is still active and can accept charges
+    logStep("Verifying connected account status...");
+    const account = await stripe.accounts.retrieve(connectedAccountId);
+    
+    if (!account.charges_enabled) {
+      logStep("Connected account cannot accept charges", { 
+        chargesEnabled: account.charges_enabled,
+        requirements: account.requirements?.currently_due 
+      });
+      
+      // Update merchant status in our database
+      await supabaseAdmin
+        .from("merchants")
+        .update({ onboarding_complete: false, stripe_account_status: "restricted" })
+        .eq("id", merchantId);
+      
+      throw new Error("Merchant's payment account is not active. They may need to complete verification.");
+    }
+    logStep("Connected account verified", { 
+      chargesEnabled: account.charges_enabled, 
+      payoutsEnabled: account.payouts_enabled 
+    });
+
+    // Get price details from the connected account
+    const price = await stripe.prices.retrieve(priceId, {}, { stripeAccount: connectedAccountId });
+    
+    if (!price.active) {
+      throw new Error("This subscription plan is no longer available");
+    }
+    
+    const amount = price.unit_amount || 0;
+    const currency = price.currency;
+    const interval = price.recurring?.interval || "month";
+    const intervalCount = price.recurring?.interval_count || 1;
+    
+    logStep("Price retrieved from connected account", { 
+      priceId, 
+      amount, 
+      currency, 
+      interval, 
+      intervalCount 
+    });
+
+    // Create or retrieve customer ON THE CONNECTED ACCOUNT (not platform)
+    let connectedCustomer: Stripe.Customer;
+    
+    // Search for existing customer on connected account by email
+    const existingCustomers = await stripe.customers.list(
+      { email: user.email, limit: 1 },
+      { stripeAccount: connectedAccountId }
+    );
+
+    if (existingCustomers.data.length > 0) {
+      connectedCustomer = existingCustomers.data[0];
+      logStep("Existing customer found on connected account", { customerId: connectedCustomer.id });
+    } else {
+      // Create new customer on connected account
+      connectedCustomer = await stripe.customers.create(
+        {
+          email: user.email,
+          name: user.user_metadata?.full_name || user.email,
+          metadata: {
+            platform_user_id: user.id,
+            source: "pawbucks_platform",
+          },
+        },
+        { stripeAccount: connectedAccountId }
+      );
+      logStep("New customer created on connected account", { customerId: connectedCustomer.id });
+    }
+
+    // Attach payment method to customer on connected account
+    await stripe.paymentMethods.attach(
+      paymentMethodId,
+      { customer: connectedCustomer.id },
+      { stripeAccount: connectedAccountId }
+    );
+
+    // Set as default payment method
+    await stripe.customers.update(
+      connectedCustomer.id,
+      { invoice_settings: { default_payment_method: paymentMethodId } },
+      { stripeAccount: connectedAccountId }
+    );
+    logStep("Payment method attached to connected customer", { paymentMethodId });
+
+    // Calculate billing dates
+    const now = new Date();
+    const periodEnd = new Date(now);
+    
+    switch (interval) {
+      case "day":
+        periodEnd.setDate(periodEnd.getDate() + intervalCount);
+        break;
+      case "week":
+        periodEnd.setDate(periodEnd.getDate() + (7 * intervalCount));
+        break;
+      case "month":
+        periodEnd.setMonth(periodEnd.getMonth() + intervalCount);
+        break;
+      case "year":
+        periodEnd.setFullYear(periodEnd.getFullYear() + intervalCount);
+        break;
+    }
+
+    // Calculate application fee (3% platform fee)
+    const applicationFee = Math.round(amount * PLATFORM_FEE_PERCENT);
+    
+    logStep("Creating initial payment", { 
+      amount, 
+      applicationFee,
+      merchantReceives: amount - applicationFee 
+    });
+
+    // Create the first PaymentIntent on the connected account (Direct Charge)
+    const paymentIntent = await stripe.paymentIntents.create(
+      {
+        amount,
+        currency,
+        customer: connectedCustomer.id,
+        payment_method: paymentMethodId,
+        off_session: false, // First payment is on-session
+        confirm: true,
+        application_fee_amount: applicationFee,
+        description: `${productName} subscription - First payment`,
+        metadata: {
+          merchant_id: merchantId,
+          user_id: user.id,
+          subscription_type: "merchant_recurring",
+          product_name: productName,
+          billing_interval: interval,
+          platform: "pawbucks",
+          ...metadata,
+        },
+      },
+      { stripeAccount: connectedAccountId }
+    );
+
+    logStep("Initial PaymentIntent created", { 
+      paymentIntentId: paymentIntent.id,
+      status: paymentIntent.status 
+    });
+
+    // Check if payment succeeded
+    if (paymentIntent.status !== "succeeded") {
+      // Payment requires action or failed
+      if (paymentIntent.status === "requires_action" || paymentIntent.status === "requires_confirmation") {
+        return new Response(JSON.stringify({
+          success: false,
+          requiresAction: true,
+          clientSecret: paymentIntent.client_secret,
+          connectedAccountId,
+          message: "Payment requires additional authentication",
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      
+      throw new Error(`Payment failed with status: ${paymentIntent.status}`);
+    }
+
+    // Payment succeeded - create subscription record
+    const { data: subscription, error: subError } = await supabaseAdmin
+      .from("merchant_subscriptions")
+      .insert({
+        user_id: user.id,
+        stripe_customer_id_on_connected: connectedCustomer.id,
+        merchant_id: merchantId,
+        connected_account_id: connectedAccountId,
+        stripe_price_id: priceId,
+        product_name: productName,
+        amount,
+        currency,
+        billing_interval: interval,
+        billing_interval_count: intervalCount,
+        status: "active",
+        current_period_start: now.toISOString(),
+        current_period_end: periodEnd.toISOString(),
+        next_billing_date: periodEnd.toISOString(),
+        last_payment_date: now.toISOString(),
+        last_payment_intent_id: paymentIntent.id,
+        last_payment_status: "succeeded",
+        application_fee_percent: PLATFORM_FEE_PERCENT * 100,
+        metadata: metadata || {},
+      })
+      .select()
+      .single();
+
+    if (subError) {
+      logStep("Error creating subscription record", { error: subError.message });
+      throw new Error("Failed to create subscription record");
+    }
+
+    logStep("Subscription created", { subscriptionId: subscription.id });
+
+    // Log subscription event
+    await supabaseAdmin.from("merchant_subscription_events").insert({
+      subscription_id: subscription.id,
+      event_type: "created",
+      amount,
+      payment_intent_id: paymentIntent.id,
+      metadata: {
+        product_name: productName,
+        billing_interval: interval,
+        merchant_name: merchant.business_name,
+      },
+    });
+
+    // Send notification to user
+    await supabaseAdmin.from("notifications").insert({
+      user_id: user.id,
+      title: "Subscription Started",
+      message: `Your subscription to ${productName} from ${merchant.business_name} is now active.`,
+      category: "transactional",
+    });
+
+    return new Response(JSON.stringify({
+      success: true,
+      subscriptionId: subscription.id,
+      status: "active",
+      nextBillingDate: periodEnd.toISOString(),
+      amount: amount / 100, // Return in dollars
+      productName,
+      merchantName: merchant.business_name,
+    }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    logStep("ERROR", { message: errorMessage });
+    return new Response(JSON.stringify({ error: errorMessage }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 400,
+    });
+  }
+});

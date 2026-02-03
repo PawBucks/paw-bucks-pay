@@ -33,14 +33,14 @@ export const subscriptionsService = {
     return { data: data || [], error };
   },
 
-  // Edge function calls
+  // Edge function calls for platform subscriptions (PawPass/PawPass+)
   async checkSubscription() {
     return supabase.functions.invoke("check-subscription");
   },
 
-  async createCheckout(priceId: string, successUrl: string, cancelUrl: string) {
+  async createCheckout(tier: 'basic' | 'plus' = 'basic') {
     return supabase.functions.invoke("create-subscription-checkout", {
-      body: { priceId, successUrl, cancelUrl },
+      body: { tier },
     });
   },
 

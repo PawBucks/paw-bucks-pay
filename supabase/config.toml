@@ -329,3 +329,12 @@ verify_jwt = false
 
 [functions.confirm-payment-success]
 verify_jwt = true
+
+[functions.create-merchant-subscription]
+verify_jwt = true
+
+[functions.process-merchant-subscriptions]
+verify_jwt = false
+
+[functions.cancel-merchant-subscription]
+verify_jwt = true
