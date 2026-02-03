@@ -64,11 +64,13 @@ serve(async (req) => {
     logStep("Webhook received", { method: req.method });
 
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
-    // Try connected account secret first, then platform secret
-    const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET") || Deno.env.get("STRIPE_PLATFORM_WEBHOOK_SECRET");
+    // Use the dedicated Connect webhook secret for connected account events
+    const webhookSecret = Deno.env.get("STRIPE_CONNECT_WEBHOOK_SECRET") || Deno.env.get("STRIPE_WEBHOOK_SECRET");
     
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
     if (!webhookSecret) throw new Error("No webhook secret configured");
+    
+    logStep("Using webhook secret", { hasConnectSecret: !!Deno.env.get("STRIPE_CONNECT_WEBHOOK_SECRET") });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2024-12-18.acacia" });
 
