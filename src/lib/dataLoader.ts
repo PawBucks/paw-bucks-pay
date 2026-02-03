@@ -90,9 +90,10 @@ export class DataLoader {
 
   static async loadTransactions(userId: string, limit: number = 10) {
     return this.retryOperation(async () => {
+      // Use FK hint for merchants join
       const { data, error } = await supabase
         .from('transactions')
-        .select('*, merchants(business_type, business_name)')
+        .select('*, merchants!transactions_merchant_id_fkey(business_type, business_name)')
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
         .limit(limit);
@@ -109,9 +110,10 @@ export class DataLoader {
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
       const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString();
       
+      // Use FK hint for merchants join
       const { data, error } = await supabase
         .from('transactions')
-        .select('id, amount, created_at, merchants(business_type)')
+        .select('id, amount, created_at, merchants!transactions_merchant_id_fkey(business_type)')
         .eq('user_id', userId)
         .gte('created_at', startOfMonth)
         .lte('created_at', endOfMonth)

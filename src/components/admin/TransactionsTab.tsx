@@ -75,15 +75,16 @@ export function TransactionsTab() {
 
   const loadTransactions = async () => {
     try {
+      // Use column hint for profiles join since there may be multiple FK paths
       const { data, error } = await supabase
         .from('transactions')
-        .select('*, merchants(business_name), profiles(full_name)')
+        .select('*, merchants!transactions_merchant_id_fkey(business_name), profiles!transactions_user_id_fkey(full_name)')
         .order('created_at', { ascending: false })
         .limit(100);
 
       if (error) throw error;
-      setTransactions(data || []);
-      setFilteredTransactions(data || []);
+      setTransactions((data || []) as Transaction[]);
+      setFilteredTransactions((data || []) as Transaction[]);
     } catch (error) {
       console.error('Error loading transactions:', error);
       toast.error('Failed to load transactions');
