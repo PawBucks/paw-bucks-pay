@@ -18,6 +18,7 @@ const subscriptionSchema = z.object({
   priceId: z.string().min(1), // Price ID on the connected account
   productName: z.string().min(1).max(200),
   paymentMethodId: z.string().min(1), // Card payment method from Stripe Elements
+  pawbucksToUse: z.number().int().min(0).optional(), // PawBucks to redeem
   metadata: z.record(z.string()).optional(),
 });
 
@@ -214,8 +215,8 @@ serve(async (req) => {
     if (!parseResult.success) {
       throw new Error(`Invalid request: ${parseResult.error.message}`);
     }
-    const { merchantId, priceId, productName, paymentMethodId, metadata } = parseResult.data;
-    logStep("Request validated", { merchantId, priceId, productName });
+    const { merchantId, priceId, productName, paymentMethodId, pawbucksToUse, metadata } = parseResult.data;
+    logStep("Request validated", { merchantId, priceId, productName, pawbucksToUse });
 
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
     const stripe = new Stripe(stripeKey, { apiVersion: "2024-12-18.acacia" });
@@ -343,26 +344,78 @@ serve(async (req) => {
         break;
     }
 
-    // Calculate application fee (3% platform fee)
-    const applicationFee = Math.round(amount * PLATFORM_FEE_PERCENT);
+    // === PAWBUCKS REDEMPTION LOGIC ===
+    const PAWBUCKS_TO_USD = 0.001; // 1000 PawBucks = $1.00
+    const MINIMUM_STRIPE_CENTS = 50; // $0.50 minimum for subscriptions
+    
+    let actualPawbucksUsed = 0;
+    let pawbucksDiscountCents = 0;
+    let stripeChargeAmount = amount;
+
+    if (pawbucksToUse && pawbucksToUse > 0) {
+      // Validate user has sufficient balance
+      const { data: wallet } = await supabaseAdmin
+        .from('pawbucks_wallet')
+        .select('balance')
+        .eq('user_id', user.id)
+        .single();
+
+      const availableBalance = wallet?.balance || 0;
+      
+      if (pawbucksToUse > availableBalance) {
+        throw new Error(`Insufficient PawBucks balance. You have ${availableBalance} but tried to use ${pawbucksToUse}.`);
+      }
+
+      // Check merchant accepts PawBucks
+      const { data: merchantCheck } = await supabaseAdmin
+        .from('merchants')
+        .select('accepts_pawbucks')
+        .eq('id', merchantId)
+        .single();
+
+      if (!merchantCheck?.accepts_pawbucks) {
+        throw new Error("This merchant does not accept PawBucks.");
+      }
+
+      // Calculate discount (ensure minimum Stripe charge)
+      const maxPawbucksDiscountCents = amount - MINIMUM_STRIPE_CENTS;
+      const requestedDiscountCents = Math.round(pawbucksToUse * PAWBUCKS_TO_USD * 100);
+      pawbucksDiscountCents = Math.min(requestedDiscountCents, maxPawbucksDiscountCents);
+      
+      // Recalculate actual PawBucks used based on capped discount
+      actualPawbucksUsed = Math.floor(pawbucksDiscountCents / PAWBUCKS_TO_USD / 100);
+      stripeChargeAmount = amount - pawbucksDiscountCents;
+
+      logStep("PawBucks redemption calculated", {
+        requested: pawbucksToUse,
+        actualUsed: actualPawbucksUsed,
+        discountCents: pawbucksDiscountCents,
+        stripeChargeAmount,
+      });
+    }
+
+    // Calculate application fee (3% platform fee on Stripe portion only)
+    const applicationFee = Math.round(stripeChargeAmount * PLATFORM_FEE_PERCENT);
     
     logStep("Creating initial payment", { 
-      amount, 
+      originalAmount: amount,
+      pawbucksDiscount: pawbucksDiscountCents,
+      stripeChargeAmount, 
       applicationFee,
-      merchantReceives: amount - applicationFee 
+      merchantReceives: stripeChargeAmount - applicationFee 
     });
 
     // Create the first PaymentIntent on the connected account (Direct Charge)
     const paymentIntent = await stripe.paymentIntents.create(
       {
-        amount,
+        amount: stripeChargeAmount,
         currency,
         customer: connectedCustomer.id,
         payment_method: paymentMethodId,
         off_session: false, // First payment is on-session
         confirm: true,
         application_fee_amount: applicationFee,
-        description: `${productName} subscription - First payment`,
+        description: `${productName} subscription - First payment${actualPawbucksUsed > 0 ? ` (${actualPawbucksUsed} PawBucks applied)` : ''}`,
         metadata: {
           merchant_id: merchantId,
           user_id: user.id,
@@ -370,6 +423,8 @@ serve(async (req) => {
           product_name: productName,
           billing_interval: interval,
           platform: "pawbucks",
+          pawbucks_used: actualPawbucksUsed.toString(),
+          original_amount: amount.toString(),
           ...metadata,
         },
       },
@@ -446,18 +501,91 @@ serve(async (req) => {
       },
     });
 
-    // === PAWBUCKS REWARDS PROCESSING ===
-    const amountInDollars = amount / 100;
+    // === PAWBUCKS REDEMPTION - DEDUCT FROM USER & CREDIT TO MERCHANT ===
+    if (actualPawbucksUsed > 0) {
+      // Deduct PawBucks from user's wallet
+      const { data: userWallet } = await supabaseAdmin
+        .from('pawbucks_wallet')
+        .select('balance')
+        .eq('user_id', user.id)
+        .single();
+
+      const currentBalance = userWallet?.balance || 0;
+      const newBalance = currentBalance - actualPawbucksUsed;
+
+      await supabaseAdmin
+        .from('pawbucks_wallet')
+        .update({ balance: newBalance })
+        .eq('user_id', user.id);
+
+      // Log debit activity
+      await supabaseAdmin.from('pawbucks_activity').insert({
+        user_id: user.id,
+        amount: -actualPawbucksUsed,
+        type: 'redeem',
+        source: 'subscription_payment',
+        description: `Redeemed ${actualPawbucksUsed} PawBucks for ${productName} subscription at ${merchant.business_name}`,
+        pawbucks_status: 'available',
+        partner_id: merchantId,
+      });
+
+      logStep("PawBucks deducted from user", { 
+        previousBalance: currentBalance, 
+        deducted: actualPawbucksUsed, 
+        newBalance 
+      });
+
+      // Credit PawBucks to merchant's wallet
+      const { data: merchantWallet } = await supabaseAdmin
+        .from('merchant_pawbucks_wallet')
+        .select('balance')
+        .eq('merchant_id', merchantId)
+        .single();
+
+      const merchantCurrentBalance = merchantWallet?.balance || 0;
+      const merchantNewBalance = merchantCurrentBalance + actualPawbucksUsed;
+
+      if (merchantWallet) {
+        await supabaseAdmin
+          .from('merchant_pawbucks_wallet')
+          .update({ balance: merchantNewBalance })
+          .eq('merchant_id', merchantId);
+      } else {
+        await supabaseAdmin.from('merchant_pawbucks_wallet').insert({
+          merchant_id: merchantId,
+          balance: actualPawbucksUsed,
+        });
+      }
+
+      // Log merchant credit activity
+      await supabaseAdmin.from('merchant_pawbucks_activity').insert({
+        merchant_id: merchantId,
+        type: 'redeem',
+        amount: actualPawbucksUsed,
+        source: 'Customer Redemption',
+        customer_user_id: user.id,
+        description: `Customer redeemed ${actualPawbucksUsed} PawBucks for subscription`,
+      });
+
+      logStep("PawBucks credited to merchant", { 
+        previousBalance: merchantCurrentBalance, 
+        credited: actualPawbucksUsed, 
+        newBalance: merchantNewBalance 
+      });
+    }
+
+    // === PAWBUCKS REWARDS PROCESSING (based on Stripe amount only) ===
+    const stripeAmountInDollars = stripeChargeAmount / 100;
 
     // Get user's subscription tier for multiplier
     const { multiplier, tierName } = await getUserTierMultiplier(supabaseAdmin, stripe, user.id);
 
-    // Credit PawBucks to user
+    // Credit PawBucks to user (rewards based on Stripe portion only)
     const pawbucksEarned = await creditPawBucksToUser(
       supabaseAdmin,
       user.id,
       merchantId,
-      amountInDollars,
+      stripeAmountInDollars,
       multiplier,
       tierName,
       productName,
@@ -465,8 +593,8 @@ serve(async (req) => {
       paymentIntent.id
     );
 
-    // Credit merchant 1% earnings
-    await creditMerchantEarnings(supabaseAdmin, merchantId, user.id, amountInDollars);
+    // Credit merchant 1% earnings (based on Stripe portion only)
+    await creditMerchantEarnings(supabaseAdmin, merchantId, user.id, stripeAmountInDollars);
 
     // Auto-log platform fee as Tax Vault expense
     if (applicationFee > 0) {
@@ -479,7 +607,7 @@ serve(async (req) => {
           merchant_id: merchantId,
           category: "platform_fees",
           amount: applicationFee / 100, // Convert to dollars
-          description: `Platform Fee (3%) on $${amountInDollars.toFixed(2)} subscription payment`,
+          description: `Platform Fee (3%) on $${stripeAmountInDollars.toFixed(2)} subscription payment`,
           vendor_name: "PawBucks Platform",
           expense_date: expenseDate,
           tax_year: taxYear,
@@ -491,10 +619,11 @@ serve(async (req) => {
     }
 
     // Send notification to user
+    const pawbucksUsedMsg = actualPawbucksUsed > 0 ? ` Used ${actualPawbucksUsed} PawBucks for $${(pawbucksDiscountCents / 100).toFixed(2)} off.` : '';
     await supabaseAdmin.from("notifications").insert({
       user_id: user.id,
       title: "Subscription Started",
-      message: `Your subscription to ${productName} from ${merchant.business_name} is now active. You earned ${pawbucksEarned} PawBucks!`,
+      message: `Your subscription to ${productName} from ${merchant.business_name} is now active.${pawbucksUsedMsg} You earned ${pawbucksEarned} PawBucks!`,
       category: "transactional",
     });
 
@@ -503,10 +632,12 @@ serve(async (req) => {
       subscriptionId: subscription.id,
       status: "active",
       nextBillingDate: periodEnd.toISOString(),
-      amount: amount / 100, // Return in dollars
+      amount: amount / 100, // Return original amount in dollars
+      stripeAmount: stripeChargeAmount / 100,
       productName,
       merchantName: merchant.business_name,
       pawbucksEarned,
+      pawbucksUsed: actualPawbucksUsed,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
