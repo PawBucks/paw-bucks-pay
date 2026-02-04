@@ -95,8 +95,14 @@ serve(async (req) => {
       }
     );
 
-    // STEP 5: Transform the products data
-    const productsData = products.data.map((product: Stripe.Product) => {
+    // STEP 5: Filter out subscription products (those with platform: "pawbucks" metadata)
+    // Subscription products are managed separately via merchant_subscription_plans table
+    const oneTimeProducts = products.data.filter((product: Stripe.Product) => {
+      return product.metadata?.platform !== "pawbucks";
+    });
+
+    // STEP 6: Transform the products data
+    const productsData = oneTimeProducts.map((product: Stripe.Product) => {
       const defaultPrice = product.default_price as Stripe.Price | null;
       
       return {
@@ -118,7 +124,7 @@ serve(async (req) => {
       };
     });
 
-    console.log(`Found ${productsData.length} products`);
+    console.log(`Found ${productsData.length} one-time products (filtered ${products.data.length - productsData.length} subscription products)`);
 
     // STEP 6: Return the products list
     return new Response(
