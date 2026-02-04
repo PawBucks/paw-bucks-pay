@@ -126,12 +126,13 @@ serve(async (req) => {
 
     console.log(`Found ${productsData.length} one-time products (filtered ${products.data.length - productsData.length} subscription products)`);
 
-    // STEP 6: Return the products list
+    // STEP 6: Return the products list (including connectedAccountId for checkout)
     return new Response(
       JSON.stringify({
         success: true,
         products: productsData,
         has_more: products.has_more,
+        connectedAccountId: stripeAccountId, // Return for subscription checkout flow
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

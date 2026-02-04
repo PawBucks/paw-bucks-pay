@@ -136,19 +136,26 @@ const Storefront = memo(() => {
 
   // Products query depends on merchant data - uses merchantId, stripe_account_id resolved server-side
   const merchantIdForProducts = merchantData?.id;
-  const { data: products = [], isLoading: productsLoading } = useQuery({
+  const { data: productsData, isLoading: productsLoading } = useQuery({
     queryKey: ["storefront-products", merchantIdForProducts],
     queryFn: async () => {
-      if (!merchantIdForProducts) return [];
+      if (!merchantIdForProducts) return { products: [], connectedAccountId: null };
       const { data, error } = await supabase.functions.invoke("list-connect-products", {
         body: { merchantId: merchantIdForProducts },
       });
       if (error) throw error;
-      return data.products || [];
+      return {
+        products: data.products || [],
+        connectedAccountId: data.connectedAccountId || null,
+      };
     },
     staleTime: 1000 * 60 * 5,
     enabled: !!merchantIdForProducts,
   });
+
+  // Extract products and connectedAccountId from query response
+  const products = productsData?.products || [];
+  const merchantConnectedAccountId = productsData?.connectedAccountId || null;
 
   // Subscription plans query
   const { data: subscriptionPlans = [] } = useQuery({
@@ -170,17 +177,6 @@ const Storefront = memo(() => {
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
   const [connectedAccountId, setConnectedAccountId] = useState<string | null>(null);
 
-  // Fetch connected account ID when needed
-  const fetchConnectedAccountId = useCallback(async () => {
-    if (!merchantIdForProducts) return null;
-    const { data } = await supabase
-      .from("merchants")
-      .select("stripe_account_id")
-      .eq("id", merchantIdForProducts)
-      .single();
-    return data?.stripe_account_id || null;
-  }, [merchantIdForProducts]);
-
   const handleSubscribe = useCallback(async (plan: SubscriptionPlan) => {
     if (!user) {
       toast.error("Please sign in to subscribe", {
@@ -188,15 +184,15 @@ const Storefront = memo(() => {
       });
       return;
     }
-    const acctId = await fetchConnectedAccountId();
-    if (!acctId) {
+    // Use pre-fetched connectedAccountId from server-side lookup
+    if (!merchantConnectedAccountId) {
       toast.error("This merchant hasn't completed payment setup.");
       return;
     }
-    setConnectedAccountId(acctId);
+    setConnectedAccountId(merchantConnectedAccountId);
     setSelectedPlan(plan);
     setShowSubDialog(true);
-  }, [user, navigate, fetchConnectedAccountId]);
+  }, [user, navigate, merchantConnectedAccountId]);
 
   // Derived values
   const merchantName = merchantData?.business_name || "";
