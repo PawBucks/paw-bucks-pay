@@ -78,14 +78,40 @@ serve(async (req) => {
           }
         }
         
+        // Safely parse timestamps - Stripe returns Unix timestamps in seconds
+        let currentPeriodEnd: string | null = null;
+        let canceledAt: string | null = null;
+        
+        try {
+          if (sub.current_period_end && typeof sub.current_period_end === 'number') {
+            currentPeriodEnd = new Date(sub.current_period_end * 1000).toISOString();
+          }
+        } catch (e) {
+          logStep("Error parsing current_period_end", { value: sub.current_period_end, error: String(e) });
+        }
+        
+        try {
+          if (sub.canceled_at && typeof sub.canceled_at === 'number' && sub.canceled_at > 0) {
+            canceledAt = new Date(sub.canceled_at * 1000).toISOString();
+          }
+        } catch (e) {
+          logStep("Error parsing canceled_at", { value: sub.canceled_at, error: String(e) });
+        }
+        
+        // Skip subscriptions without valid period end date
+        if (!currentPeriodEnd) {
+          logStep("Skipping subscription with invalid period end", { subId: sub.id });
+          continue;
+        }
+        
         subscriptions.push({
           id: sub.id,
           type: "platform",
           name: productName,
           status: sub.status,
-          current_period_end: new Date(sub.current_period_end * 1000).toISOString(),
+          current_period_end: currentPeriodEnd,
           cancel_at_period_end: sub.cancel_at_period_end,
-          canceled_at: sub.canceled_at ? new Date(sub.canceled_at * 1000).toISOString() : null,
+          canceled_at: canceledAt,
           merchant_name: "PawBucks",
           merchant_id: null,
           connected_account_id: null,
@@ -158,14 +184,40 @@ serve(async (req) => {
               }
             }
 
+            // Safely parse timestamps - Stripe returns Unix timestamps in seconds
+            let currentPeriodEnd: string | null = null;
+            let canceledAt: string | null = null;
+            
+            try {
+              if (sub.current_period_end && typeof sub.current_period_end === 'number') {
+                currentPeriodEnd = new Date(sub.current_period_end * 1000).toISOString();
+              }
+            } catch (e) {
+              logStep("Error parsing merchant sub current_period_end", { value: sub.current_period_end, error: String(e) });
+            }
+            
+            try {
+              if (sub.canceled_at && typeof sub.canceled_at === 'number' && sub.canceled_at > 0) {
+                canceledAt = new Date(sub.canceled_at * 1000).toISOString();
+              }
+            } catch (e) {
+              logStep("Error parsing merchant sub canceled_at", { value: sub.canceled_at, error: String(e) });
+            }
+            
+            // Skip subscriptions without valid period end date
+            if (!currentPeriodEnd) {
+              logStep("Skipping merchant subscription with invalid period end", { subId: sub.id });
+              continue;
+            }
+
             subscriptions.push({
               id: sub.id,
               type: "merchant",
               name: productName,
               status: sub.status,
-              current_period_end: new Date(sub.current_period_end * 1000).toISOString(),
+              current_period_end: currentPeriodEnd,
               cancel_at_period_end: sub.cancel_at_period_end,
-              canceled_at: sub.canceled_at ? new Date(sub.canceled_at * 1000).toISOString() : null,
+              canceled_at: canceledAt,
               merchant_name: merchant.business_name,
               merchant_id: merchant.id,
               connected_account_id: merchant.stripe_account_id,

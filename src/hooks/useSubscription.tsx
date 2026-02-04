@@ -98,9 +98,10 @@ export const useSubscription = () => {
       if (error) throw error;
 
       if (data?.url) {
-        window.open(data.url, '_blank');
-        // Refresh after a delay to catch any updates
-        setTimeout(checkSubscription, 3000);
+        // Use window.location.href for more reliable navigation (avoids popup blockers)
+        window.location.href = data.url;
+      } else {
+        throw new Error('No portal URL returned');
       }
     } catch (error) {
       console.error('[useSubscription] Failed to open customer portal:', error);
