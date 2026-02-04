@@ -1,6 +1,6 @@
 /**
  * Main application entry point
- * Cache bust: 2026-01-25T20:30:00Z
+ * Cache bust: 2026-02-04T20:20:00Z
  */
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";

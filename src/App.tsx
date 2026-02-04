@@ -1,6 +1,6 @@
 /**
  * Main App component with routing and providers
- * Cache bust: 2026-01-25T20:30:00Z
+ * Cache bust: 2026-02-04T20:20:00Z
  */
 import { Suspense, lazy, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
