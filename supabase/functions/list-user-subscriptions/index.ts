@@ -310,6 +310,65 @@ serve(async (req) => {
       }
     }
 
+    // === ALSO CHECK DATABASE SUBSCRIPTIONS (merchant_subscriptions table) ===
+    // This is critical because our system uses database-tracked subscriptions 
+    // (with payment intents) rather than true Stripe subscriptions
+    const { data: dbSubscriptions, error: dbSubError } = await supabaseAdmin
+      .from("merchant_subscriptions")
+      .select(`
+        id,
+        product_name,
+        status,
+        current_period_end,
+        cancel_at_period_end,
+        canceled_at,
+        amount,
+        currency,
+        billing_interval,
+        merchant_id,
+        connected_account_id,
+        merchants(business_name)
+      `)
+      .eq("user_id", user.id)
+      .in("status", ["active", "past_due", "trialing"]);
+
+    if (dbSubError) {
+      logStep("Error fetching database subscriptions", { error: dbSubError.message });
+    } else if (dbSubscriptions && dbSubscriptions.length > 0) {
+      logStep("Found database subscriptions", { count: dbSubscriptions.length });
+      
+      for (const dbSub of dbSubscriptions) {
+        // Check if we already have this subscription from Stripe (avoid duplicates)
+        const alreadyExists = subscriptions.some(
+          (s) => s.connected_account_id === dbSub.connected_account_id && 
+                 s.name === dbSub.product_name
+        );
+        
+        if (alreadyExists) {
+          logStep("Skipping duplicate subscription", { productName: dbSub.product_name });
+          continue;
+        }
+
+        const merchantData = dbSub.merchants as unknown as { business_name: string } | null;
+        
+        subscriptions.push({
+          id: dbSub.id,
+          type: "merchant",
+          name: dbSub.product_name,
+          status: dbSub.status,
+          current_period_end: dbSub.current_period_end,
+          cancel_at_period_end: dbSub.cancel_at_period_end || false,
+          canceled_at: dbSub.canceled_at,
+          merchant_name: merchantData?.business_name || "Merchant",
+          merchant_id: dbSub.merchant_id,
+          connected_account_id: dbSub.connected_account_id,
+          amount: dbSub.amount ? dbSub.amount / 100 : null,
+          currency: dbSub.currency || "usd",
+          interval: dbSub.billing_interval || "month",
+        });
+      }
+    }
+
     logStep("Subscriptions found", { count: subscriptions.length });
 
     return new Response(JSON.stringify({ subscriptions }), {
