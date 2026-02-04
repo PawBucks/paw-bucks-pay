@@ -78,21 +78,59 @@ serve(async (req) => {
           }
         }
         
-        // Safely parse timestamps - Stripe returns Unix timestamps in seconds
+        // Safely parse timestamps - Stripe can return Unix timestamps (number) or Date objects
         let currentPeriodEnd: string | null = null;
         let canceledAt: string | null = null;
         
         try {
-          if (sub.current_period_end && typeof sub.current_period_end === 'number') {
-            currentPeriodEnd = new Date(sub.current_period_end * 1000).toISOString();
+          if (sub.current_period_end) {
+            // Handle both Unix timestamp (number in seconds) and Date-like objects
+            if (typeof sub.current_period_end === 'number') {
+              currentPeriodEnd = new Date(sub.current_period_end * 1000).toISOString();
+            } else if (sub.current_period_end instanceof Date) {
+              currentPeriodEnd = sub.current_period_end.toISOString();
+            } else if (typeof sub.current_period_end === 'object') {
+              // Stripe sometimes returns a date-like object
+              const dateValue = sub.current_period_end as any;
+              if (typeof dateValue.toISOString === 'function') {
+                currentPeriodEnd = dateValue.toISOString();
+              } else if (dateValue.seconds) {
+                currentPeriodEnd = new Date(dateValue.seconds * 1000).toISOString();
+              }
+            } else if (typeof sub.current_period_end === 'string') {
+              // Already a string, validate it's a valid date
+              const parsed = new Date(sub.current_period_end);
+              if (!isNaN(parsed.getTime())) {
+                currentPeriodEnd = parsed.toISOString();
+              }
+            }
           }
+          logStep("Parsed platform current_period_end", { 
+            original: sub.current_period_end, 
+            type: typeof sub.current_period_end,
+            parsed: currentPeriodEnd 
+          });
         } catch (e) {
           logStep("Error parsing current_period_end", { value: sub.current_period_end, error: String(e) });
         }
         
         try {
-          if (sub.canceled_at && typeof sub.canceled_at === 'number' && sub.canceled_at > 0) {
-            canceledAt = new Date(sub.canceled_at * 1000).toISOString();
+          if (sub.canceled_at) {
+            if (typeof sub.canceled_at === 'number' && sub.canceled_at > 0) {
+              canceledAt = new Date(sub.canceled_at * 1000).toISOString();
+            } else if (sub.canceled_at instanceof Date) {
+              canceledAt = sub.canceled_at.toISOString();
+            } else if (typeof sub.canceled_at === 'object') {
+              const dateValue = sub.canceled_at as any;
+              if (typeof dateValue.toISOString === 'function') {
+                canceledAt = dateValue.toISOString();
+              }
+            } else if (typeof sub.canceled_at === 'string') {
+              const parsed = new Date(sub.canceled_at);
+              if (!isNaN(parsed.getTime())) {
+                canceledAt = parsed.toISOString();
+              }
+            }
           }
         } catch (e) {
           logStep("Error parsing canceled_at", { value: sub.canceled_at, error: String(e) });
@@ -184,21 +222,60 @@ serve(async (req) => {
               }
             }
 
-            // Safely parse timestamps - Stripe returns Unix timestamps in seconds
+            // Safely parse timestamps - Stripe can return Unix timestamps (number) or Date objects
             let currentPeriodEnd: string | null = null;
             let canceledAt: string | null = null;
             
             try {
-              if (sub.current_period_end && typeof sub.current_period_end === 'number') {
-                currentPeriodEnd = new Date(sub.current_period_end * 1000).toISOString();
+              if (sub.current_period_end) {
+                // Handle both Unix timestamp (number in seconds) and Date-like objects
+                if (typeof sub.current_period_end === 'number') {
+                  currentPeriodEnd = new Date(sub.current_period_end * 1000).toISOString();
+                } else if (sub.current_period_end instanceof Date) {
+                  currentPeriodEnd = sub.current_period_end.toISOString();
+                } else if (typeof sub.current_period_end === 'object') {
+                  // Stripe sometimes returns a date-like object with toISOString
+                  const dateValue = sub.current_period_end as any;
+                  if (typeof dateValue.toISOString === 'function') {
+                    currentPeriodEnd = dateValue.toISOString();
+                  } else if (dateValue.seconds) {
+                    // Firestore-style timestamp
+                    currentPeriodEnd = new Date(dateValue.seconds * 1000).toISOString();
+                  }
+                } else if (typeof sub.current_period_end === 'string') {
+                  // Already a string, validate it's a valid date
+                  const parsed = new Date(sub.current_period_end);
+                  if (!isNaN(parsed.getTime())) {
+                    currentPeriodEnd = parsed.toISOString();
+                  }
+                }
               }
+              logStep("Parsed current_period_end", { 
+                original: sub.current_period_end, 
+                type: typeof sub.current_period_end,
+                parsed: currentPeriodEnd 
+              });
             } catch (e) {
               logStep("Error parsing merchant sub current_period_end", { value: sub.current_period_end, error: String(e) });
             }
             
             try {
-              if (sub.canceled_at && typeof sub.canceled_at === 'number' && sub.canceled_at > 0) {
-                canceledAt = new Date(sub.canceled_at * 1000).toISOString();
+              if (sub.canceled_at) {
+                if (typeof sub.canceled_at === 'number' && sub.canceled_at > 0) {
+                  canceledAt = new Date(sub.canceled_at * 1000).toISOString();
+                } else if (sub.canceled_at instanceof Date) {
+                  canceledAt = sub.canceled_at.toISOString();
+                } else if (typeof sub.canceled_at === 'object') {
+                  const dateValue = sub.canceled_at as any;
+                  if (typeof dateValue.toISOString === 'function') {
+                    canceledAt = dateValue.toISOString();
+                  }
+                } else if (typeof sub.canceled_at === 'string') {
+                  const parsed = new Date(sub.canceled_at);
+                  if (!isNaN(parsed.getTime())) {
+                    canceledAt = parsed.toISOString();
+                  }
+                }
               }
             } catch (e) {
               logStep("Error parsing merchant sub canceled_at", { value: sub.canceled_at, error: String(e) });
