@@ -52,23 +52,36 @@ serve(async (req) => {
       logStep("Found platform customer", { customerId });
 
       // Get platform subscriptions (PawPass / PawPass+)
+      // Note: Cannot expand more than 4 levels - fetch product separately if needed
       const platformSubs = await stripe.subscriptions.list({
         customer: customerId,
         status: "all",
         limit: 10,
-        expand: ["data.items.data.price.product"],
       });
 
       for (const sub of platformSubs.data) {
         if (sub.status === "canceled") continue; // Skip fully canceled
         
         const priceItem = sub.items.data[0];
-        const product = priceItem?.price?.product as Stripe.Product | undefined;
+        
+        // Fetch product name separately to avoid expand depth issues
+        let productName = "PawBucks Subscription";
+        if (priceItem?.price?.product) {
+          try {
+            const productId = typeof priceItem.price.product === 'string' 
+              ? priceItem.price.product 
+              : priceItem.price.product.id;
+            const product = await stripe.products.retrieve(productId);
+            productName = product.name || productName;
+          } catch (e) {
+            logStep("Error fetching product", { error: String(e) });
+          }
+        }
         
         subscriptions.push({
           id: sub.id,
           type: "platform",
-          name: product?.name || "PawBucks Subscription",
+          name: productName,
           status: sub.status,
           current_period_end: new Date(sub.current_period_end * 1000).toISOString(),
           cancel_at_period_end: sub.cancel_at_period_end,
@@ -112,12 +125,12 @@ serve(async (req) => {
           const connectedCustomerId = connectedCustomers.data[0].id;
 
           // Get subscriptions from connected account
+          // Note: Cannot expand more than 4 levels - fetch product separately if needed
           const connectedSubs = await stripe.subscriptions.list(
             {
               customer: connectedCustomerId,
               status: "all",
               limit: 10,
-              expand: ["data.items.data.price.product"],
             },
             { stripeAccount: merchant.stripe_account_id }
           );
@@ -126,12 +139,29 @@ serve(async (req) => {
             if (sub.status === "canceled") continue;
 
             const priceItem = sub.items.data[0];
-            const product = priceItem?.price?.product as Stripe.Product | undefined;
+            
+            // Fetch product name separately to avoid expand depth issues
+            let productName = "Merchant Subscription";
+            if (priceItem?.price?.product) {
+              try {
+                const productId = typeof priceItem.price.product === 'string' 
+                  ? priceItem.price.product 
+                  : priceItem.price.product.id;
+                const product = await stripe.products.retrieve(
+                  productId, 
+                  {}, 
+                  { stripeAccount: merchant.stripe_account_id }
+                );
+                productName = product.name || productName;
+              } catch (e) {
+                logStep("Error fetching connected product", { error: String(e) });
+              }
+            }
 
             subscriptions.push({
               id: sub.id,
               type: "merchant",
-              name: product?.name || "Merchant Subscription",
+              name: productName,
               status: sub.status,
               current_period_end: new Date(sub.current_period_end * 1000).toISOString(),
               cancel_at_period_end: sub.cancel_at_period_end,

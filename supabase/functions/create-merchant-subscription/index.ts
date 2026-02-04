@@ -421,12 +421,14 @@ serve(async (req) => {
         metadata: {
           merchant_id: merchantId,
           user_id: user.id,
+          business_name: merchant.business_name, // Include for receipt emails
           subscription_type: "merchant_recurring",
           product_name: productName,
           billing_interval: interval,
           platform: "pawbucks",
           pawbucks_used: actualPawbucksUsed.toString(),
           original_amount: amount.toString(),
+          description: `${productName} subscription to ${merchant.business_name}`,
           ...metadata,
         },
       },
