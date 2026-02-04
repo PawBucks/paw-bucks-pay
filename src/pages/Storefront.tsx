@@ -710,6 +710,8 @@ const Storefront = memo(() => {
           merchantId={merchantId}
           merchantName={merchantName}
           connectedAccountId={connectedAccountId}
+          merchantAcceptsPawBucks={merchantData?.acceptsPawBucks ?? false}
+          cashbackRate={merchantData?.cashback_rate ?? 10}
           onSuccess={() => {
             setShowSubDialog(false);
             setSelectedPlan(null);

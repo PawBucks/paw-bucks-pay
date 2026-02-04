@@ -9,6 +9,7 @@ export interface CreateMerchantSubscriptionParams {
   priceId: string;
   productName: string;
   paymentMethodId: string;
+  pawbucksToUse?: number;
   metadata?: Record<string, string>;
 }
 
@@ -23,6 +24,8 @@ export interface CreateSubscriptionResult {
   requiresAction?: boolean;
   clientSecret?: string;
   connectedAccountId?: string;
+  pawbucksEarned?: number;
+  pawbucksUsed?: number;
   error?: string;
 }
 
