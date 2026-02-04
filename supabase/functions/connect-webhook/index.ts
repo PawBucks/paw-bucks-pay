@@ -24,6 +24,7 @@ async function sendReceiptEmail(params: {
   cardAmount: number;
   totalPaid: number;
   pawbucksEarned?: number;
+  tierInfo?: { tierName: string; multiplier: number };
 }): Promise<void> {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
@@ -221,9 +222,9 @@ serve(async (req) => {
           // Award PawBucks to invoice payer
           let pawbucksEarned = 0;
           let tierName = 'Free';
+          let pawbucksMultiplier = 10;
 
           if (invoicePayerUserId && stripeAmountForRewards > 0) {
-            let pawbucksMultiplier = 10;
 
             try {
               const { data: platformSub } = await supabaseAdmin
@@ -285,13 +286,21 @@ serve(async (req) => {
                   .update({ balance: wallet.balance + pawbucksEarned })
                   .eq('user_id', invoicePayerUserId);
 
+                // Get invoice number for proper description
+                const { data: invoiceForActivity } = await supabaseAdmin
+                  .from('invoices')
+                  .select('invoice_number')
+                  .eq('id', invoiceId)
+                  .single();
+                const invoiceNumber = invoiceForActivity?.invoice_number || 'Invoice';
+
                 await supabaseAdmin.from('pawbucks_activity').insert({
                   user_id: invoicePayerUserId,
                   amount: pawbucksEarned,
                   type: 'earn',
                   source: 'Invoice Payment',
                   partner_id: merchantId || null,
-                  description: `Earned ${pawbucksEarned} PawBucks (${tierName} ${pawbucksMultiplier}x) from $${stripeAmountForRewards.toFixed(2)} invoice payment`,
+                  description: `Earned ${pawbucksEarned} PawBucks (${tierName} ${pawbucksMultiplier}x) from $${stripeAmountForRewards.toFixed(2)} payment on Invoice #${invoiceNumber}`,
                   pawbucks_status: 'available',
                 });
 
@@ -362,6 +371,10 @@ serve(async (req) => {
                 cardAmount: paymentAmount,
                 totalPaid: totalTransactionAmount,
                 pawbucksEarned,
+                tierInfo: {
+                  tierName,
+                  multiplier: pawbucksMultiplier,
+                },
               });
             }
 
@@ -567,7 +580,7 @@ serve(async (req) => {
               amount: pawbucksEarned,
               type: "earn",
               source: "direct_payment",
-              description: `Earned ${pawbucksEarned} PawBucks (${tierName} ${pawbucksMultiplier}x) from payment to ${businessName}`,
+              description: `Earned ${pawbucksEarned} PawBucks (${tierName} ${pawbucksMultiplier}x) from $${amountInDollars.toFixed(2)} payment to ${businessName}`,
               pawbucks_status: "available",
               partner_id: merchantId,
               transaction_id: transaction?.id,
@@ -634,12 +647,16 @@ serve(async (req) => {
               transactionDate: new Date().toISOString(),
               receiptId: transaction?.id || paymentIntent.id,
               merchantName: businessName,
-              items: [{ name: description, price: totalAmount > 0 ? totalAmount : amountInDollars }],
+              items: [{ name: `Payment to ${businessName}`, price: totalAmount > 0 ? totalAmount : amountInDollars }],
               subtotal: totalAmount > 0 ? totalAmount : amountInDollars,
               pawbucksApplied: pawbucksAmount * 0.001,
               cardAmount: amountInDollars,
               totalPaid: totalAmount > 0 ? totalAmount : amountInDollars,
               pawbucksEarned,
+              tierInfo: {
+                tierName,
+                multiplier: pawbucksMultiplier,
+              },
             });
           }
         }
