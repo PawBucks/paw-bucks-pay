@@ -458,7 +458,7 @@ const Storefront = memo(() => {
 
       {/* Products Section */}
       <div className="container py-10 md:py-14">
-        {products.length === 0 ? (
+        {products.length === 0 && subscriptionPlans.length === 0 ? (
           <Card className="border-dashed border-2 bg-gradient-to-br from-muted/30 to-muted/50">
             <CardContent className="flex flex-col items-center justify-center py-20">
               <div className="h-24 w-24 rounded-2xl bg-gradient-to-br from-muted to-muted/80 flex items-center justify-center mb-8 shadow-inner">
@@ -485,7 +485,7 @@ const Storefront = memo(() => {
               <div>
                 <h2 className="text-2xl font-bold">Shop Products</h2>
                 <p className="text-muted-foreground mt-1">
-                  {products.length} {products.length === 1 ? 'product' : 'products'} available
+                  {products.length + subscriptionPlans.length} {(products.length + subscriptionPlans.length) === 1 ? 'item' : 'items'} available
                 </p>
               </div>
             </div>
