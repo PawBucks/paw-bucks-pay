@@ -406,12 +406,14 @@ serve(async (req) => {
     });
 
     // Create the first PaymentIntent on the connected account (Direct Charge)
+    // Use payment_method_types instead of automatic_payment_methods to avoid redirect requirements
     const paymentIntent = await stripe.paymentIntents.create(
       {
         amount: stripeChargeAmount,
         currency,
         customer: connectedCustomer.id,
         payment_method: paymentMethodId,
+        payment_method_types: ['card'], // Explicitly only allow card payments (no redirects)
         off_session: false, // First payment is on-session
         confirm: true,
         application_fee_amount: applicationFee,
