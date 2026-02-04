@@ -145,13 +145,19 @@ const MerchantSubscriptionPlans = () => {
     });
 
     if (error) {
-      toast.error("Failed to create plan");
+      const errorMessage = error instanceof Error ? error.message : "Failed to create plan";
+      toast.error(errorMessage);
       throw error;
     }
 
     if (newPlan) {
       setPlans([...plans, { ...newPlan, features: data.features }]);
-      toast.success("Subscription plan created! Publish it to make it available on your storefront.");
+      // Check if plan was auto-published (has stripe_price_id)
+      if (newPlan.stripe_price_id) {
+        toast.success("Subscription plan created and published to your storefront!");
+      } else {
+        toast.success("Plan created! Click Publish to make it available on your storefront.");
+      }
     }
   };
 
