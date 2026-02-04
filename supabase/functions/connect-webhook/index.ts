@@ -146,6 +146,291 @@ serve(async (req) => {
           connectedAccount: connectedAccountId,
         });
 
+        // ========================================
+        // HANDLE INVOICE PAYMENTS (from checkout sessions with Connect destination)
+        // ========================================
+        if (metadata.type === 'invoice_payment' && metadata.invoice_id) {
+          const invoiceId = metadata.invoice_id;
+          const merchantId = metadata.merchant_id;
+          const invoicePayerUserId = metadata.user_id;
+          const tipAmount = parseInt(metadata.tip_amount || '0');
+          const pawbucksUsed = parseInt(metadata.pawbucks_used || '0');
+          
+          logStep("Processing invoice payment", {
+            invoiceId,
+            merchantId,
+            userId: invoicePayerUserId,
+            amount: paymentIntent.amount,
+            tipAmount,
+            pawbucksUsed,
+          });
+
+          // Check if invoice payment already exists (idempotency)
+          const { data: existingInvoicePayment } = await supabaseAdmin
+            .from('invoice_payments')
+            .select('id')
+            .eq('stripe_payment_intent_id', paymentIntent.id)
+            .maybeSingle();
+
+          if (existingInvoicePayment) {
+            logStep('Invoice payment already exists, skipping', { paymentId: existingInvoicePayment.id });
+            await supabaseAdmin.from('webhook_logs')
+              .update({ processed: true })
+              .eq('event_id', event.id);
+            return new Response(JSON.stringify({ received: true, skipped: 'invoice_already_processed' }), { status: 200 });
+          }
+
+          const paymentAmount = paymentIntent.amount / 100;
+          const stripeAmountForRewards = paymentAmount - (tipAmount / 100); // Exclude tip from rewards
+
+          // Record payment in invoice_payments table
+          const { data: payment, error: paymentError } = await supabaseAdmin
+            .from('invoice_payments')
+            .insert({
+              invoice_id: invoiceId,
+              amount: paymentAmount,
+              payment_method: 'credit_card',
+              payment_date: new Date().toISOString(),
+              status: 'completed',
+              stripe_payment_intent_id: paymentIntent.id,
+              notes: tipAmount > 0 ? `Includes $${(tipAmount / 100).toFixed(2)} tip` : null,
+            })
+            .select()
+            .single();
+
+          if (paymentError) {
+            logStep("Error recording invoice payment", { error: paymentError.message });
+          } else {
+            logStep("Invoice payment recorded", { paymentId: payment.id });
+          }
+
+          // Log activity
+          await supabaseAdmin
+            .from('invoice_activity')
+            .insert({
+              invoice_id: invoiceId,
+              action: 'payment_completed',
+              description: `Payment of $${paymentAmount.toFixed(2)} completed via Stripe`,
+              metadata: {
+                payment_intent_id: paymentIntent.id,
+                tip_amount: tipAmount,
+                pawbucks_used: pawbucksUsed,
+              },
+            });
+
+          // Award PawBucks to invoice payer
+          let pawbucksEarned = 0;
+          let tierName = 'Free';
+
+          if (invoicePayerUserId && stripeAmountForRewards > 0) {
+            let pawbucksMultiplier = 10;
+
+            try {
+              const { data: platformSub } = await supabaseAdmin
+                .from('subscriptions')
+                .select('stripe_subscription_id, subscription_tier, is_manual_upgrade, expires_at')
+                .eq('user_id', invoicePayerUserId)
+                .in('status', ['active', 'trialing'])
+                .maybeSingle();
+
+              if (platformSub?.is_manual_upgrade && platformSub?.subscription_tier) {
+                const expiresAt = platformSub.expires_at ? new Date(platformSub.expires_at) : null;
+                if (!expiresAt || expiresAt > new Date()) {
+                  if (platformSub.subscription_tier === 'pawpass_plus') {
+                    pawbucksMultiplier = 30;
+                    tierName = 'PawPass+';
+                  } else if (platformSub.subscription_tier === 'pawpass') {
+                    pawbucksMultiplier = 20;
+                    tierName = 'PawPass';
+                  }
+                }
+              } else if (platformSub?.stripe_subscription_id) {
+                const stripeSubscription = await stripe.subscriptions.retrieve(platformSub.stripe_subscription_id);
+                const productId = stripeSubscription.items.data[0]?.price?.product;
+
+                if (productId === 'prod_TQyZjYzt9DwoIK') {
+                  pawbucksMultiplier = 30;
+                  tierName = 'PawPass+';
+                } else if (productId === 'prod_TJVK9ZhLiJnnpm') {
+                  pawbucksMultiplier = 20;
+                  tierName = 'PawPass';
+                }
+              }
+            } catch (tierError) {
+              logStep("Error determining tier", { error: String(tierError) });
+            }
+
+            pawbucksEarned = Math.floor(stripeAmountForRewards * pawbucksMultiplier);
+
+            if (pawbucksEarned > 0) {
+              // Get or create wallet
+              let { data: wallet } = await supabaseAdmin
+                .from('pawbucks_wallet')
+                .select('balance')
+                .eq('user_id', invoicePayerUserId)
+                .single();
+
+              if (!wallet) {
+                const { data: newWallet } = await supabaseAdmin
+                  .from('pawbucks_wallet')
+                  .insert({ user_id: invoicePayerUserId, balance: 0 })
+                  .select()
+                  .single();
+                wallet = newWallet;
+              }
+
+              if (wallet) {
+                await supabaseAdmin
+                  .from('pawbucks_wallet')
+                  .update({ balance: wallet.balance + pawbucksEarned })
+                  .eq('user_id', invoicePayerUserId);
+
+                await supabaseAdmin.from('pawbucks_activity').insert({
+                  user_id: invoicePayerUserId,
+                  amount: pawbucksEarned,
+                  type: 'earn',
+                  source: 'Invoice Payment',
+                  partner_id: merchantId || null,
+                  description: `Earned ${pawbucksEarned} PawBucks (${tierName} ${pawbucksMultiplier}x) from $${stripeAmountForRewards.toFixed(2)} invoice payment`,
+                  pawbucks_status: 'available',
+                });
+
+                logStep("PawBucks awarded", { pawbucksEarned, tierName });
+              }
+            }
+          }
+
+          // Create transaction record
+          if (invoicePayerUserId && merchantId) {
+            const { data: invoiceForTx } = await supabaseAdmin
+              .from('invoices')
+              .select('invoice_number')
+              .eq('id', invoiceId)
+              .single();
+
+            const { data: merchantForTx } = await supabaseAdmin
+              .from('merchants')
+              .select('business_name')
+              .eq('id', merchantId)
+              .single();
+
+            const pawbucksValueUSD = pawbucksUsed * 0.001;
+            const totalTransactionAmount = paymentAmount + pawbucksValueUSD;
+            const platformFee = paymentAmount * 0.03; // 3% fee on Stripe portion
+
+            const { data: transaction, error: transactionError } = await supabaseAdmin
+              .from('transactions')
+              .insert({
+                user_id: invoicePayerUserId,
+                merchant_id: merchantId,
+                amount: totalTransactionAmount,
+                stripe_amount: paymentAmount,
+                pawbucks_used: pawbucksUsed,
+                application_fee: platformFee,
+                cashback_earned: pawbucksEarned,
+                rewards_earned: pawbucksEarned,
+                description: `Invoice #${invoiceForTx?.invoice_number || 'Payment'}${tipAmount > 0 ? ` (includes $${(tipAmount / 100).toFixed(2)} tip)` : ''}`,
+                status: 'completed',
+                stripe_payment_intent_id: paymentIntent.id,
+              })
+              .select()
+              .single();
+
+            if (transactionError) {
+              logStep("Error creating transaction", { error: transactionError.message });
+            } else {
+              logStep("Transaction created", { transactionId: transaction?.id });
+            }
+
+            // Send receipt email
+            const { data: userProfile } = await supabaseAdmin
+              .from('profiles')
+              .select('email, full_name')
+              .eq('id', invoicePayerUserId)
+              .single();
+
+            if (userProfile?.email) {
+              await sendReceiptEmail({
+                email: userProfile.email,
+                customerName: userProfile.full_name || undefined,
+                transactionDate: new Date().toISOString(),
+                receiptId: invoiceForTx?.invoice_number || paymentIntent.id,
+                merchantName: merchantForTx?.business_name || 'Merchant',
+                items: [{ name: `Invoice #${invoiceForTx?.invoice_number || 'Payment'}`, price: paymentAmount }],
+                subtotal: paymentAmount,
+                pawbucksApplied: pawbucksUsed > 0 ? pawbucksValueUSD : 0,
+                cardAmount: paymentAmount,
+                totalPaid: totalTransactionAmount,
+                pawbucksEarned,
+              });
+            }
+
+            // Send merchant notification
+            try {
+              const { data: invoiceForNotif } = await supabaseAdmin
+                .from('invoices')
+                .select('invoice_number, title, client_name, client_email, total, amount_due')
+                .eq('id', invoiceId)
+                .single();
+
+              const { data: merchantForNotif } = await supabaseAdmin
+                .from('merchants')
+                .select('business_name, user_id')
+                .eq('id', merchantId)
+                .single();
+
+              if (merchantForNotif?.user_id) {
+                const { data: merchantProfile } = await supabaseAdmin
+                  .from('profiles')
+                  .select('email, full_name')
+                  .eq('id', merchantForNotif.user_id)
+                  .single();
+
+                if (merchantProfile?.email) {
+                  const supabaseUrl = Deno.env.get('SUPABASE_URL');
+                  const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
+
+                  if (supabaseUrl && supabaseAnonKey) {
+                    await fetch(`${supabaseUrl}/functions/v1/send-invoice-paid-notification`, {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${supabaseAnonKey}`,
+                      },
+                      body: JSON.stringify({
+                        merchantEmail: merchantProfile.email,
+                        merchantName: merchantProfile.full_name || merchantForNotif.business_name || 'Merchant',
+                        invoiceNumber: invoiceForNotif?.invoice_number || 'N/A',
+                        invoiceTitle: invoiceForNotif?.title || undefined,
+                        clientName: invoiceForNotif?.client_name || 'Customer',
+                        clientEmail: invoiceForNotif?.client_email || '',
+                        amountPaid: paymentAmount,
+                        tipAmount: tipAmount > 0 ? tipAmount / 100 : 0,
+                        pawbucksUsed: pawbucksUsed,
+                        paymentMethod: pawbucksUsed > 0 ? 'mixed' : 'credit_card',
+                        paymentDate: new Date().toISOString(),
+                        invoiceTotal: invoiceForNotif?.total || paymentAmount,
+                        amountDue: invoiceForNotif?.amount_due || 0,
+                        invoiceId: invoiceId,
+                      }),
+                    });
+                  }
+                }
+              }
+            } catch (notifError) {
+              logStep("Error sending merchant notification", { error: String(notifError) });
+            }
+          }
+
+          logStep("Invoice payment processing complete");
+          
+          await supabaseAdmin.from('webhook_logs')
+            .update({ processed: true })
+            .eq('event_id', event.id);
+
+          return new Response(JSON.stringify({ received: true, type: 'invoice_payment' }), { status: 200 });
+        }
+
         // Check if this is a merchant subscription renewal payment
         if (metadata.subscription_type === "merchant_recurring" && metadata.billing_type === "renewal") {
           logStep("Subscription renewal payment - handled by cron job", {
