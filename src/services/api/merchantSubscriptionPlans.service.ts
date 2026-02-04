@@ -70,9 +70,24 @@ export const merchantSubscriptionPlansService = {
   },
 
   /**
-   * Create a new subscription plan
+   * Create a new subscription plan and auto-publish to Stripe
    */
   async create(params: CreatePlanParams): Promise<ServiceResult<MerchantSubscriptionPlan>> {
+    // Check for duplicate plan name
+    const { data: existingPlans } = await supabase
+      .from("merchant_subscription_plans")
+      .select("id, name")
+      .eq("merchant_id", params.merchantId)
+      .ilike("name", params.name);
+
+    if (existingPlans && existingPlans.length > 0) {
+      return { 
+        data: null, 
+        error: new Error(`A subscription plan named "${params.name}" already exists`) 
+      };
+    }
+
+    // Create the plan in the database
     const { data, error } = await supabase
       .from("merchant_subscription_plans")
       .insert({
@@ -89,7 +104,28 @@ export const merchantSubscriptionPlansService = {
       })
       .select()
       .single();
-    return { data, error };
+    
+    if (error || !data) {
+      return { data, error };
+    }
+
+    // Auto-publish to Stripe so it's immediately available on storefront
+    const publishResult = await this.publish(data.id);
+    
+    if (publishResult.error) {
+      // Plan was created but publish failed - return the plan but log the error
+      console.error("Auto-publish failed:", publishResult.error);
+      return { data, error: null };
+    }
+
+    // Refetch the plan to get updated Stripe IDs
+    const { data: updatedPlan, error: refetchError } = await supabase
+      .from("merchant_subscription_plans")
+      .select("*")
+      .eq("id", data.id)
+      .single();
+
+    return { data: updatedPlan || data, error: refetchError };
   },
 
   /**
