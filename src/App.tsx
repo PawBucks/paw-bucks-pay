@@ -1,8 +1,8 @@
 /**
  * Main App component with routing and providers
- * Cache bust: 2026-02-04T20:20:00Z
+ * Cache bust: 2026-02-04T22:05:00Z
  */
-import { Suspense, lazy, useState } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -23,68 +23,69 @@ import { PWAInstallBanner } from "@/components/PWAInstallBanner";
 import { NetworkStatus } from "@/components/NetworkStatus";
 import { UpdatePrompt } from "@/components/UpdatePrompt";
 import { FeedbackButton } from "@/components/FeedbackButton";
+import { lazyWithRetry, clearChunkReloadFlag } from "@/lib/lazyWithRetry";
 
 // Critical pages - loaded immediately
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 
-// Lazy-loaded pages for optimal performance
-const Dashboard = lazy(() => import("./pages/Dashboard"));
-const CreatePetProfile = lazy(() => import("./pages/CreatePetProfile"));
-const Discover = lazy(() => import("./pages/Discover"));
-const Wallet = lazy(() => import("./pages/Wallet"));
-const Referrals = lazy(() => import("./pages/Referrals"));
-const Profile = lazy(() => import("./pages/Profile"));
-const SubscriptionSuccess = lazy(() => import("./pages/SubscriptionSuccess"));
-const MerchantLanding = lazy(() => import("./pages/MerchantLanding"));
-const MerchantOnboarding = lazy(() => import("./pages/MerchantOnboarding"));
-const MerchantDashboard = lazy(() => import("./pages/MerchantDashboard"));
-const MerchantTransactions = lazy(() => import("./pages/MerchantTransactions"));
-const VetLoanApply = lazy(() => import("./pages/VetLoanApply"));
-const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
-const AdminLogin = lazy(() => import("./pages/AdminLogin"));
-const AdminResetPassword = lazy(() => import("./pages/AdminResetPassword"));
-const AdminMerchantServices = lazy(() => import("./pages/AdminMerchantServices"));
-const PetHealth = lazy(() => import("./pages/PetHealth"));
-const VetDashboard = lazy(() => import("./pages/VetDashboard"));
-const VetLanding = lazy(() => import("./pages/VetLanding"));
-const VetOnboarding = lazy(() => import("./pages/VetOnboarding"));
-const PawBucksWallet = lazy(() => import("./pages/PawBucksWallet"));
-const PawBucksRedeem = lazy(() => import("./pages/PawBucksRedeem"));
-const PetStore = lazy(() => import("./pages/PetStore"));
-const PetStoreAdmin = lazy(() => import("./pages/PetStoreAdmin"));
-const MerchantProducts = lazy(() => import("./pages/MerchantProducts"));
-const Storefront = lazy(() => import("./pages/Storefront"));
-const CheckoutSuccess = lazy(() => import("./pages/CheckoutSuccess"));
-const Install = lazy(() => import("./pages/Install"));
-const NotFound = lazy(() => import("./pages/NotFound"));
-const MerchantOffers = lazy(() => import("./pages/MerchantOffers"));
-const MerchantOfferEditor = lazy(() => import("./pages/MerchantOfferEditor"));
-const MerchantOfferDetails = lazy(() => import("./pages/MerchantOfferDetails"));
-const MerchantOfferRedemptions = lazy(() => import("./pages/MerchantOfferRedemptions"));
-const MerchantOfferCodes = lazy(() => import("./pages/MerchantOfferCodes"));
-const MerchantAnalytics = lazy(() => import("./pages/MerchantAnalytics"));
-const MerchantProfile = lazy(() => import("./pages/MerchantProfile"));
-const MerchantDirectory = lazy(() => import("./pages/MerchantDirectory"));
-const MerchantMarket = lazy(() => import("./pages/MerchantMarket"));
-const NotificationPreferences = lazy(() => import("./pages/NotificationPreferences"));
-const NotificationHistory = lazy(() => import("./pages/NotificationHistory"));
-const SpendingBreakdown = lazy(() => import("./pages/SpendingBreakdown"));
-const LostPets = lazy(() => import("./pages/LostPets"));
-const LostPetDetail = lazy(() => import("./pages/LostPetDetail"));
-const MerchantPOSIntegration = lazy(() => import("./pages/MerchantPOSIntegration"));
-const MerchantScheduling = lazy(() => import("./pages/MerchantScheduling"));
-const MerchantTaxVault = lazy(() => import("./pages/MerchantTaxVault"));
-const MerchantPawBucksWalletPage = lazy(() => import("./pages/MerchantPawBucksWallet"));
-const DirectCheckout = lazy(() => import("./pages/DirectCheckout"));
-const ResetPassword = lazy(() => import("./pages/ResetPassword"));
-const AuthCallback = lazy(() => import("./pages/AuthCallback"));
-const MySubscriptions = lazy(() => import("./pages/MySubscriptions"));
-const AccountantPortal = lazy(() => import("./pages/AccountantPortal"));
-const MerchantInvoicing = lazy(() => import("./pages/MerchantInvoicing"));
-const InvoicePayment = lazy(() => import("./pages/InvoicePayment"));
-const InvoicePaymentSuccess = lazy(() => import("./pages/InvoicePaymentSuccess"));
-const MerchantSubscriptionPlans = lazy(() => import("./pages/MerchantSubscriptionPlans"));
+// Lazy-loaded pages with retry logic for resilient loading after deploys
+const Dashboard = lazyWithRetry(() => import("./pages/Dashboard"), "Dashboard");
+const CreatePetProfile = lazyWithRetry(() => import("./pages/CreatePetProfile"), "CreatePetProfile");
+const Discover = lazyWithRetry(() => import("./pages/Discover"), "Discover");
+const Wallet = lazyWithRetry(() => import("./pages/Wallet"), "Wallet");
+const Referrals = lazyWithRetry(() => import("./pages/Referrals"), "Referrals");
+const Profile = lazyWithRetry(() => import("./pages/Profile"), "Profile");
+const SubscriptionSuccess = lazyWithRetry(() => import("./pages/SubscriptionSuccess"), "SubscriptionSuccess");
+const MerchantLanding = lazyWithRetry(() => import("./pages/MerchantLanding"), "MerchantLanding");
+const MerchantOnboarding = lazyWithRetry(() => import("./pages/MerchantOnboarding"), "MerchantOnboarding");
+const MerchantDashboard = lazyWithRetry(() => import("./pages/MerchantDashboard"), "MerchantDashboard");
+const MerchantTransactions = lazyWithRetry(() => import("./pages/MerchantTransactions"), "MerchantTransactions");
+const VetLoanApply = lazyWithRetry(() => import("./pages/VetLoanApply"), "VetLoanApply");
+const AdminDashboard = lazyWithRetry(() => import("./pages/AdminDashboard"), "AdminDashboard");
+const AdminLogin = lazyWithRetry(() => import("./pages/AdminLogin"), "AdminLogin");
+const AdminResetPassword = lazyWithRetry(() => import("./pages/AdminResetPassword"), "AdminResetPassword");
+const AdminMerchantServices = lazyWithRetry(() => import("./pages/AdminMerchantServices"), "AdminMerchantServices");
+const PetHealth = lazyWithRetry(() => import("./pages/PetHealth"), "PetHealth");
+const VetDashboard = lazyWithRetry(() => import("./pages/VetDashboard"), "VetDashboard");
+const VetLanding = lazyWithRetry(() => import("./pages/VetLanding"), "VetLanding");
+const VetOnboarding = lazyWithRetry(() => import("./pages/VetOnboarding"), "VetOnboarding");
+const PawBucksWallet = lazyWithRetry(() => import("./pages/PawBucksWallet"), "PawBucksWallet");
+const PawBucksRedeem = lazyWithRetry(() => import("./pages/PawBucksRedeem"), "PawBucksRedeem");
+const PetStore = lazyWithRetry(() => import("./pages/PetStore"), "PetStore");
+const PetStoreAdmin = lazyWithRetry(() => import("./pages/PetStoreAdmin"), "PetStoreAdmin");
+const MerchantProducts = lazyWithRetry(() => import("./pages/MerchantProducts"), "MerchantProducts");
+const Storefront = lazyWithRetry(() => import("./pages/Storefront"), "Storefront");
+const CheckoutSuccess = lazyWithRetry(() => import("./pages/CheckoutSuccess"), "CheckoutSuccess");
+const Install = lazyWithRetry(() => import("./pages/Install"), "Install");
+const NotFound = lazyWithRetry(() => import("./pages/NotFound"), "NotFound");
+const MerchantOffers = lazyWithRetry(() => import("./pages/MerchantOffers"), "MerchantOffers");
+const MerchantOfferEditor = lazyWithRetry(() => import("./pages/MerchantOfferEditor"), "MerchantOfferEditor");
+const MerchantOfferDetails = lazyWithRetry(() => import("./pages/MerchantOfferDetails"), "MerchantOfferDetails");
+const MerchantOfferRedemptions = lazyWithRetry(() => import("./pages/MerchantOfferRedemptions"), "MerchantOfferRedemptions");
+const MerchantOfferCodes = lazyWithRetry(() => import("./pages/MerchantOfferCodes"), "MerchantOfferCodes");
+const MerchantAnalytics = lazyWithRetry(() => import("./pages/MerchantAnalytics"), "MerchantAnalytics");
+const MerchantProfile = lazyWithRetry(() => import("./pages/MerchantProfile"), "MerchantProfile");
+const MerchantDirectory = lazyWithRetry(() => import("./pages/MerchantDirectory"), "MerchantDirectory");
+const MerchantMarket = lazyWithRetry(() => import("./pages/MerchantMarket"), "MerchantMarket");
+const NotificationPreferences = lazyWithRetry(() => import("./pages/NotificationPreferences"), "NotificationPreferences");
+const NotificationHistory = lazyWithRetry(() => import("./pages/NotificationHistory"), "NotificationHistory");
+const SpendingBreakdown = lazyWithRetry(() => import("./pages/SpendingBreakdown"), "SpendingBreakdown");
+const LostPets = lazyWithRetry(() => import("./pages/LostPets"), "LostPets");
+const LostPetDetail = lazyWithRetry(() => import("./pages/LostPetDetail"), "LostPetDetail");
+const MerchantPOSIntegration = lazyWithRetry(() => import("./pages/MerchantPOSIntegration"), "MerchantPOSIntegration");
+const MerchantScheduling = lazyWithRetry(() => import("./pages/MerchantScheduling"), "MerchantScheduling");
+const MerchantTaxVault = lazyWithRetry(() => import("./pages/MerchantTaxVault"), "MerchantTaxVault");
+const MerchantPawBucksWalletPage = lazyWithRetry(() => import("./pages/MerchantPawBucksWallet"), "MerchantPawBucksWallet");
+const DirectCheckout = lazyWithRetry(() => import("./pages/DirectCheckout"), "DirectCheckout");
+const ResetPassword = lazyWithRetry(() => import("./pages/ResetPassword"), "ResetPassword");
+const AuthCallback = lazyWithRetry(() => import("./pages/AuthCallback"), "AuthCallback");
+const MySubscriptions = lazyWithRetry(() => import("./pages/MySubscriptions"), "MySubscriptions");
+const AccountantPortal = lazyWithRetry(() => import("./pages/AccountantPortal"), "AccountantPortal");
+const MerchantInvoicing = lazyWithRetry(() => import("./pages/MerchantInvoicing"), "MerchantInvoicing");
+const InvoicePayment = lazyWithRetry(() => import("./pages/InvoicePayment"), "InvoicePayment");
+const InvoicePaymentSuccess = lazyWithRetry(() => import("./pages/InvoicePaymentSuccess"), "InvoicePaymentSuccess");
+const MerchantSubscriptionPlans = lazyWithRetry(() => import("./pages/MerchantSubscriptionPlans"), "MerchantSubscriptionPlans");
 
 const createQueryClient = () => new QueryClient({
   defaultOptions: {
@@ -184,6 +185,11 @@ const AppContent = () => {
   useKeyboardShortcuts();
   useDataPrefetch(); // Prefetch critical data on idle
   useScrollToTop(); // Scroll to top on route change
+
+  // Clear chunk reload flags on successful mount (app loaded properly)
+  useEffect(() => {
+    clearChunkReloadFlag();
+  }, []);
 
   return (
     <Suspense fallback={<PageLoader />}>
