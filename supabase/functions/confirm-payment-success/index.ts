@@ -136,8 +136,6 @@ serve(async (req) => {
     const merchantId = metadata.merchant_id;
     const pawbucksAmount = parseInt(metadata.pawbucks_amount || "0", 10);
     const totalAmount = parseFloat(metadata.total_amount || "0");
-    const businessName = metadata.business_name || "Merchant";
-    const description = metadata.description || `Payment to ${businessName}`;
 
     // Verify user matches
     if (userId !== user.id) {
@@ -188,12 +186,18 @@ serve(async (req) => {
       .eq('id', user.id)
       .single();
 
-    // Get merchant details for receipt
+    // Get merchant details for receipt - ALWAYS use database name, not metadata
     const { data: merchant } = await supabaseAdmin
       .from('merchants')
       .select('business_name, address')
       .eq('id', merchantId)
       .single();
+
+    // Use the merchant's actual business name from database, not metadata
+    const businessName = merchant?.business_name || metadata.business_name || "Merchant";
+    const description = `Payment to ${businessName}`;
+    
+    logStep("Merchant info resolved", { businessName, merchantId });
 
     // 1. Update direct_payments status
     await supabaseAdmin
