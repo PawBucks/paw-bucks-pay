@@ -150,17 +150,17 @@ const MerchantProfile = memo(() => {
       const reviewIds = reviewData.map(r => r.id);
       const userIds = [...new Set(reviewData.map(r => r.user_id))];
 
-      // Parallel batch queries for photos and profiles
-      const [photosResult, profilesResult] = await Promise.all([
-        supabase
-          .from("review_photos")
-          .select("id, photo_url, review_id")
-          .in("review_id", reviewIds),
-        supabase
-          .from("reviewer_profiles")
-          .select("id, full_name")
-          .in("id", userIds),
-      ]);
+       // Parallel batch queries for photos and profiles
+       const [photosResult, profilesResult] = await Promise.all([
+         supabase
+           .from("review_photos")
+           .select("id, photo_url, review_id")
+           .in("review_id", reviewIds),
+         supabase
+           .from("profiles")
+           .select("id, full_name")
+           .in("id", userIds),
+       ]);
 
       // Create lookup maps
       const photosByReview = new Map<string, { id: string; photo_url: string }[]>();
