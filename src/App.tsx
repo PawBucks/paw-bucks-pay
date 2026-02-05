@@ -86,6 +86,9 @@ const MerchantInvoicing = lazyWithRetry(() => import("./pages/MerchantInvoicing"
 const InvoicePayment = lazyWithRetry(() => import("./pages/InvoicePayment"), "InvoicePayment");
 const InvoicePaymentSuccess = lazyWithRetry(() => import("./pages/InvoicePaymentSuccess"), "InvoicePaymentSuccess");
 const MerchantSubscriptionPlans = lazyWithRetry(() => import("./pages/MerchantSubscriptionPlans"), "MerchantSubscriptionPlans");
+const MerchantAvailableBalance = lazyWithRetry(() => import("./pages/MerchantAvailableBalance"), "MerchantAvailableBalance");
+const MerchantPendingBalance = lazyWithRetry(() => import("./pages/MerchantPendingBalance"), "MerchantPendingBalance");
+const MerchantTotalEarnings = lazyWithRetry(() => import("./pages/MerchantTotalEarnings"), "MerchantTotalEarnings");
 
 const createQueryClient = () => new QueryClient({
   defaultOptions: {
@@ -169,6 +172,9 @@ const AppRoutes = () => {
       <Route path="/accountant-portal/:token" element={<PageTransition><AccountantPortal /></PageTransition>} />
       <Route path="/merchant/invoicing" element={<PageTransition><MerchantInvoicing /></PageTransition>} />
       <Route path="/merchant/subscription-plans" element={<PageTransition><MerchantSubscriptionPlans /></PageTransition>} />
+      <Route path="/merchant/available-balance" element={<PageTransition><MerchantAvailableBalance /></PageTransition>} />
+      <Route path="/merchant/pending-balance" element={<PageTransition><MerchantPendingBalance /></PageTransition>} />
+      <Route path="/merchant/total-earnings" element={<PageTransition><MerchantTotalEarnings /></PageTransition>} />
       <Route path="/invoice/:invoiceId/pay" element={<PageTransition><InvoicePayment /></PageTransition>} />
       <Route path="/invoice/:invoiceId/success" element={<PageTransition><InvoicePaymentSuccess /></PageTransition>} />
       <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />

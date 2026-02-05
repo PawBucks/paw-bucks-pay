@@ -1,95 +1,15 @@
-import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { 
-  DollarSign, 
-  TrendingUp, 
-  Clock, 
-  ExternalLink, 
-  RefreshCw,
-  ArrowUpRight,
-  ArrowDownRight,
-  Wallet
-} from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { DollarSign, TrendingUp, Clock, ExternalLink, RefreshCw, ArrowUpRight, ArrowDownRight, Wallet, ChevronRight } from "lucide-react";
+import { useMerchantEarnings } from "@/hooks/useMerchantEarnings";
 import { format } from "date-fns";
 
-interface BalanceAmount {
-  amount: number;
-  currency: string;
-}
-
-interface Payout {
-  id: string;
-  amount: number;
-  currency: string;
-  status: string;
-  arrivalDate: number;
-  created: number;
-}
-
-interface EarningsData {
-  connected: boolean;
-  balance: {
-    available: BalanceAmount[];
-    pending: BalanceAmount[];
-  };
-  payoutHistory: Payout[];
-  summary: {
-    totalEarnings: number;
-    totalFees: number;
-    transactionCount: number;
-  };
-  dashboardUrl: string | null;
-}
-
 export function MerchantEarningsTab() {
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [data, setData] = useState<EarningsData | null>(null);
-
-  const fetchEarnings = async (showToast = false) => {
-    try {
-      if (showToast) setRefreshing(true);
-      
-      const { data: earnings, error } = await supabase.functions.invoke("get-merchant-earnings");
-      
-      if (error) throw error;
-      
-      setData(earnings);
-      if (showToast) toast.success("Earnings data refreshed");
-    } catch (error) {
-      console.error("Error fetching earnings:", error);
-      if (showToast) toast.error("Failed to refresh earnings data");
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchEarnings();
-  }, []);
-
-  const formatCurrency = (amount: number, currency = "usd") => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: currency.toUpperCase(),
-    }).format(amount / 100);
-  };
-
-  const getAvailableBalance = () => {
-    if (!data?.balance?.available) return 0;
-    return data.balance.available.reduce((sum, b) => sum + b.amount, 0);
-  };
-
-  const getPendingBalance = () => {
-    if (!data?.balance?.pending) return 0;
-    return data.balance.pending.reduce((sum, b) => sum + b.amount, 0);
-  };
+  const navigate = useNavigate();
+  const { loading, refreshing, data, fetchEarnings, formatCurrency, getAvailableBalance, getPendingBalance } = useMerchantEarnings();
 
   if (loading) {
     return (
@@ -153,43 +73,61 @@ export function MerchantEarningsTab() {
 
       {/* Balance Cards */}
       <div className="grid gap-4 md:grid-cols-3">
-        <Card>
+        <Card 
+          className="cursor-pointer hover:shadow-md transition-shadow group"
+          onClick={() => navigate("/merchant/available-balance")}
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Available Balance</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">
+            <div className="flex items-center gap-2 mb-1">
+              <DollarSign className="h-5 w-5 text-green-600" />
+              <span className="text-2xl font-bold text-green-600">
               {formatCurrency(getAvailableBalance())}
+              </span>
             </div>
             <p className="text-xs text-muted-foreground">Ready for payout</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card 
+          className="cursor-pointer hover:shadow-md transition-shadow group"
+          onClick={() => navigate("/merchant/pending-balance")}
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Pending Balance</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
+            <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">
+            <div className="flex items-center gap-2 mb-1">
+              <Clock className="h-5 w-5 text-yellow-600" />
+              <span className="text-2xl font-bold text-yellow-600">
               {formatCurrency(getPendingBalance())}
+              </span>
             </div>
             <p className="text-xs text-muted-foreground">Processing</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card 
+          className="cursor-pointer hover:shadow-md transition-shadow group"
+          onClick={() => navigate("/merchant/total-earnings")}
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Earnings</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              ${data.summary.totalEarnings.toFixed(2)}
+            <div className="flex items-center gap-2 mb-1">
+              <TrendingUp className="h-5 w-5 text-primary" />
+              <span className="text-2xl font-bold">
+                ${data.summary?.totalEarnings?.toFixed(2) || "0.00"}
+              </span>
             </div>
             <p className="text-xs text-muted-foreground">
-              {data.summary.transactionCount} transactions • ${data.summary.totalFees.toFixed(2)} in fees
+              {data.summary?.transactionCount || 0} transactions • ${data.summary?.totalFees?.toFixed(2) || "0.00"} in fees
             </p>
           </CardContent>
         </Card>
@@ -202,7 +140,7 @@ export function MerchantEarningsTab() {
           <CardDescription>Complete history of all payouts to your bank account</CardDescription>
         </CardHeader>
         <CardContent>
-          {data.payoutHistory.length === 0 ? (
+          {!data.payoutHistory || data.payoutHistory.length === 0 ? (
             <p className="text-muted-foreground text-center py-4">
               No payouts yet. Payouts will appear here once processed.
             </p>
