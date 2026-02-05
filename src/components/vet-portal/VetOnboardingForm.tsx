@@ -23,6 +23,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import { MERCHANT_TOS_CONTENT } from "@/components/shared/MerchantTermsOfService";
+import { VET_ADDENDUM_CONTENT } from "@/components/shared/VetServicesAddendum";
 
 // Step schemas
 const step1Schema = z.object({
@@ -74,6 +75,7 @@ const step6Schema = z.object({
 
 const step7Schema = z.object({
   agreed_to_tos: z.boolean().refine(val => val === true, "You must agree to the Terms of Service"),
+  agreed_to_vet_addendum: z.boolean().refine(val => val === true, "You must agree to the Veterinary Services Disclosure Addendum"),
   agreed_to_splicing_liability: z.boolean().refine(val => val === true, "You must agree to the Insurance Splicing Liability Agreement"),
 });
 
@@ -227,8 +229,10 @@ export const VetOnboardingForm = () => {
   
   // Scroll detection for legal agreements
   const [hasScrolledTos, setHasScrolledTos] = useState(false);
+  const [hasScrolledVetAddendum, setHasScrolledVetAddendum] = useState(false);
   const [hasScrolledSplicing, setHasScrolledSplicing] = useState(false);
   const tosScrollRef = useRef<HTMLDivElement>(null);
+  const vetAddendumScrollRef = useRef<HTMLDivElement>(null);
   const splicingScrollRef = useRef<HTMLDivElement>(null);
 
   // Handle scroll detection for Terms of Service
@@ -239,6 +243,15 @@ export const VetOnboardingForm = () => {
       setHasScrolledTos(true);
     }
   }, [hasScrolledTos]);
+
+  // Handle scroll detection for Vet Addendum
+  const handleVetAddendumScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    const target = e.currentTarget;
+    const isAtBottom = Math.abs(target.scrollHeight - target.scrollTop - target.clientHeight) < 10;
+    if (isAtBottom && !hasScrolledVetAddendum) {
+      setHasScrolledVetAddendum(true);
+    }
+  }, [hasScrolledVetAddendum]);
 
   // Handle scroll detection for Splicing Agreement
   const handleSplicingScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
@@ -253,6 +266,7 @@ export const VetOnboardingForm = () => {
   useEffect(() => {
     if (currentStep === 7) {
       setHasScrolledTos(false);
+      setHasScrolledVetAddendum(false);
       setHasScrolledSplicing(false);
     }
   }, [currentStep]);
@@ -290,6 +304,7 @@ export const VetOnboardingForm = () => {
       emergency_protocol: "",
       subscription_tier: "standard",
       agreed_to_tos: false,
+      agreed_to_vet_addendum: false,
       agreed_to_splicing_liability: false,
     },
     mode: "onChange",
@@ -345,6 +360,7 @@ export const VetOnboardingForm = () => {
           emergency_protocol: data.emergency_protocol || "",
           subscription_tier: data.subscription_tier || "standard",
           agreed_to_tos: data.agreed_to_tos || false,
+          agreed_to_vet_addendum: (data as any).agreed_to_vet_addendum || false,
           agreed_to_splicing_liability: data.agreed_to_splicing_liability || false,
         };
 
@@ -1594,6 +1610,54 @@ export const VetOnboardingForm = () => {
                               !hasScrolledTos && "text-slate-400"
                             )}>
                               I have read and agree to the PawBucks Merchant Terms of Service *
+                            </FormLabel>
+                          </div>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  {/* Veterinary Services Disclosure Addendum */}
+                  <div className="space-y-4">
+                    <Label className="text-base font-semibold">Veterinary Services Disclosure Addendum</Label>
+                    <p className="text-sm text-muted-foreground">
+                      This addendum supplements the Merchant Terms of Service and applies specifically to veterinary professionals.
+                    </p>
+                    <div 
+                      ref={vetAddendumScrollRef}
+                      onScroll={handleVetAddendumScroll}
+                      className="h-64 rounded-lg border border-slate-200 p-4 bg-slate-50 overflow-y-auto"
+                    >
+                      <pre className="text-xs text-slate-600 whitespace-pre-wrap font-sans">
+                        {VET_ADDENDUM_CONTENT}
+                      </pre>
+                    </div>
+                    {!hasScrolledVetAddendum && (
+                      <p className="text-xs text-amber-600 flex items-center gap-1">
+                        <span className="inline-block w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
+                        Please scroll to the bottom to read the entire addendum
+                      </p>
+                    )}
+                    <FormField
+                      control={form.control}
+                      name="agreed_to_vet_addendum"
+                      render={({ field }) => (
+                        <FormItem className="flex items-start space-x-3 space-y-0">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                              disabled={!hasScrolledVetAddendum}
+                              className={cn(!hasScrolledVetAddendum && "opacity-50 cursor-not-allowed")}
+                            />
+                          </FormControl>
+                          <div className="leading-none">
+                            <FormLabel className={cn(
+                              "text-sm font-medium",
+                              !hasScrolledVetAddendum && "text-slate-400"
+                            )}>
+                              I have read and agree to the Veterinary Services Disclosure Addendum *
                             </FormLabel>
                           </div>
                           <FormMessage />
