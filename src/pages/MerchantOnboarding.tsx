@@ -18,6 +18,7 @@ import {
   Zap, Hand, Brain, Heart, Building2, Car, Users, AlertCircle, Info
 } from "lucide-react";
 import { merchantOnboardingSchema, PET_BUSINESS_TYPES, ENTITY_TYPES, WORKING_STYLES } from "@/lib/validation";
+import { MerchantTermsOfService } from "@/components/shared/MerchantTermsOfService";
 
 // Business type configuration with icons and descriptions
 const BUSINESS_TYPE_CONFIG: Record<string, { icon: React.ElementType; label: string; description: string }> = {
@@ -119,6 +120,7 @@ const MerchantOnboarding = () => {
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [logoZoom, setLogoZoom] = useState(1);
+  const [agreedToTos, setAgreedToTos] = useState(false);
 
   // Show entity type section only for certain business types
   const showEntitySection = businessType && businessType !== "";
@@ -712,6 +714,13 @@ const MerchantOnboarding = () => {
             </CardContent>
           </Card>
 
+          {/* Terms of Service */}
+          <MerchantTermsOfService
+            agreed={agreedToTos}
+            onAgreeChange={setAgreedToTos}
+            disabled={isLoading}
+          />
+
           {/* Submit */}
           <div className="flex gap-3">
             <Button
@@ -726,7 +735,7 @@ const MerchantOnboarding = () => {
             <Button 
               type="submit" 
               className="flex-1" 
-              disabled={isLoading || !businessType}
+              disabled={isLoading || !businessType || !agreedToTos}
             >
               {isLoading ? (
                 <>

@@ -22,6 +22,7 @@ import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
+import { MERCHANT_TOS_CONTENT } from "@/components/shared/MerchantTermsOfService";
 
 // Step schemas
 const step1Schema = z.object({
@@ -145,46 +146,8 @@ const US_STATES = [
   "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"
 ];
 
-const TERMS_OF_SERVICE = `PAWBUCKS VETERINARY PARTNER TERMS OF SERVICE
-
-Last Updated: January 2026
-
-1. ACCEPTANCE OF TERMS
-By registering as a PawBucks Veterinary Partner, you agree to be bound by these Terms of Service ("Terms"). If you do not agree to these Terms, you may not use our services.
-
-2. SERVICE DESCRIPTION
-PawBucks provides a platform connecting veterinary practices with pet owners, facilitating payment processing, appointment scheduling, and health record management.
-
-3. PARTNER OBLIGATIONS
-As a Veterinary Partner, you agree to:
-- Maintain valid veterinary licenses and certifications
-- Provide accurate information about your practice
-- Comply with all applicable laws and regulations
-- Maintain appropriate professional liability insurance
-- Protect patient data in accordance with applicable privacy laws
-
-4. PAYMENT PROCESSING
-- PawBucks processes payments through Stripe Connect
-- A platform fee of 3% applies to all transactions
-- Funds are typically deposited within 2-3 business days
-- You are responsible for all applicable taxes
-
-5. DATA PROTECTION
-- We implement industry-standard security measures
-- You retain ownership of your patient data
-- Data is encrypted in transit and at rest
-- We comply with HIPAA guidelines where applicable
-
-6. TERMINATION
-Either party may terminate this agreement with 30 days written notice. Upon termination, you will retain access to your data for 90 days.
-
-7. LIMITATION OF LIABILITY
-PawBucks shall not be liable for any indirect, incidental, or consequential damages arising from your use of the platform.
-
-8. GOVERNING LAW
-These Terms shall be governed by the laws of the State of Delaware.
-
-By clicking "I Agree," you acknowledge that you have read, understood, and agree to be bound by these Terms of Service.`;
+// Use the shared Merchant TOS (which includes veterinary professionals)
+const TERMS_OF_SERVICE = MERCHANT_TOS_CONTENT;
 
 const INSURANCE_SPLICING_AGREEMENT = `Insurance Splicing & Direct-Pay Liability Agreement
 
@@ -1593,11 +1556,14 @@ export const VetOnboardingForm = () => {
                 <CardContent className="pt-6 space-y-6">
                   {/* Terms of Service */}
                   <div className="space-y-4">
-                    <Label className="text-base font-semibold">Terms of Service</Label>
+                    <Label className="text-base font-semibold">PawBucks Merchant Terms of Service</Label>
+                    <p className="text-sm text-muted-foreground">
+                      This agreement applies to all merchants and veterinary professionals using the platform.
+                    </p>
                     <div 
                       ref={tosScrollRef}
                       onScroll={handleTosScroll}
-                      className="h-48 rounded-lg border border-slate-200 p-4 bg-slate-50 overflow-y-auto"
+                      className="h-64 rounded-lg border border-slate-200 p-4 bg-slate-50 overflow-y-auto"
                     >
                       <pre className="text-xs text-slate-600 whitespace-pre-wrap font-sans">
                         {TERMS_OF_SERVICE}
@@ -1606,7 +1572,7 @@ export const VetOnboardingForm = () => {
                     {!hasScrolledTos && (
                       <p className="text-xs text-amber-600 flex items-center gap-1">
                         <span className="inline-block w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
-                        Please scroll to the bottom to enable agreement
+                        Please scroll to the bottom to read the entire agreement
                       </p>
                     )}
                     <FormField
@@ -1627,7 +1593,7 @@ export const VetOnboardingForm = () => {
                               "text-sm font-medium",
                               !hasScrolledTos && "text-slate-400"
                             )}>
-                              I have read and agree to the Terms of Service *
+                              I have read and agree to the PawBucks Merchant Terms of Service *
                             </FormLabel>
                           </div>
                           <FormMessage />
