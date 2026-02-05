@@ -23,6 +23,9 @@
    status: string;
    created: number;
    description: string | null;
+    stripeFee: number;
+    applicationFee: number;
+    netAmount: number;
  }
  
  interface RefundData {
