@@ -84,13 +84,44 @@ serve(async (req) => {
 
     logStep("All payouts retrieved", { count: allPayouts.length });
 
-    // Fetch recent charges
+    // Fetch recent charges with expanded balance_transaction for fee details
     const charges = await stripe.charges.list(
       { limit: 20 },
       { stripeAccount: merchant.stripe_account_id }
     );
 
-    logStep("Charges retrieved", { count: charges.data.length });
+    // Fetch balance transactions to get fee breakdown
+    const chargesWithFees = await Promise.all(
+      charges.data.map(async (charge: Stripe.Charge) => {
+        let stripeFee = 0;
+        let netAmount = charge.amount;
+        
+        if (charge.balance_transaction && typeof charge.balance_transaction === 'string') {
+          try {
+            const balanceTx = await stripe.balanceTransactions.retrieve(
+              charge.balance_transaction,
+              { stripeAccount: merchant.stripe_account_id }
+            );
+            stripeFee = balanceTx.fee || 0;
+            netAmount = balanceTx.net || charge.amount;
+          } catch (e) {
+            logStep("Could not fetch balance transaction", { chargeId: charge.id, error: String(e) });
+          }
+        }
+        
+        // Application fee is stored in the charge metadata or can be calculated
+        const applicationFeeAmount = charge.application_fee_amount || 0;
+        
+        return {
+          ...charge,
+          stripe_fee: stripeFee,
+          application_fee: applicationFeeAmount,
+          net_amount: netAmount,
+        };
+      })
+    );
+
+    logStep("Charges with fees retrieved", { count: chargesWithFees.length });
 
     // Get payment history from direct_payments table
     const { data: directPayments, error: directPaymentsError } = await supabaseAdmin
@@ -210,13 +241,16 @@ serve(async (req) => {
         arrivalDate: p.arrival_date,
         created: p.created,
       })),
-      recentCharges: charges.data.slice(0, 10).map((c: Stripe.Charge) => ({
+      recentCharges: chargesWithFees.slice(0, 10).map((c: Stripe.Charge & { stripe_fee: number; application_fee: number; net_amount: number }) => ({
         id: c.id,
         amount: c.amount,
         currency: c.currency,
         status: c.status,
         created: c.created,
         description: c.description,
+        stripeFee: c.stripe_fee,
+        applicationFee: c.application_fee,
+        netAmount: c.net_amount,
       })),
       directPayments: directPayments || [],
       transactions: transactions || [],
@@ -241,7 +275,7 @@ serve(async (req) => {
           transactionCount: transactionCount,
         }
       },
-      dashboardUrl,
+      dashboardUrl: null, // Removed - no longer linking to Stripe Express Dashboard
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
