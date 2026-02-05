@@ -8,8 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 // Default Stripe processing fees
-const DEFAULT_PERCENTAGE_FEE = 2.9; // 2.9%
-const DEFAULT_FIXED_FEE = 0.30; // $0.30
+const DEFAULT_PERCENTAGE_FEE = 3; // 3%
+const DEFAULT_FIXED_FEE = 0; // No fixed fee
 
 interface PricingCalculatorProps {
   onApplyPrice?: (price: string) => void;
@@ -66,7 +66,7 @@ export const PricingCalculator = ({ onApplyPrice, compact = false }: PricingCalc
                   <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
                 </TooltipTrigger>
                 <TooltipContent className="max-w-xs">
-                  <p>Calculate the price to charge so you receive your desired amount after processing fees. Default: 2.9% + $0.30</p>
+                  <p>Calculate the price to charge so you receive your desired amount after processing fees. Default: 3%</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -97,7 +97,7 @@ export const PricingCalculator = ({ onApplyPrice, compact = false }: PricingCalc
                 max="100"
                 value={percentageFee}
                 onChange={(e) => setPercentageFee(e.target.value)}
-                placeholder="2.9"
+                placeholder="3"
                 className="h-8 text-sm"
               />
             </div>
@@ -114,7 +114,7 @@ export const PricingCalculator = ({ onApplyPrice, compact = false }: PricingCalc
                   min="0"
                   value={fixedFee}
                   onChange={(e) => setFixedFee(e.target.value)}
-                  placeholder="0.30"
+                placeholder="0"
                   className="h-8 text-sm pl-7"
                 />
               </div>
@@ -217,7 +217,7 @@ export const PricingCalculator = ({ onApplyPrice, compact = false }: PricingCalc
                   placeholder="2.9"
                   className="mt-1.5"
                 />
-                <p className="text-xs text-muted-foreground mt-1">Default: 2.9%</p>
+                <p className="text-xs text-muted-foreground mt-1">Default: 3%</p>
               </div>
               <div>
                 <Label htmlFor="fixed-fee">Fixed Fee ($)</Label>
@@ -234,7 +234,7 @@ export const PricingCalculator = ({ onApplyPrice, compact = false }: PricingCalc
                     className="pl-9"
                   />
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">Default: $0.30</p>
+                <p className="text-xs text-muted-foreground mt-1">Default: $0.00</p>
               </div>
             </div>
           </CollapsibleContent>

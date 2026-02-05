@@ -331,7 +331,7 @@ const MerchantLanding = () => {
               <Card className="p-8 sm:p-12 text-center border-2 border-primary/20 shadow-xl">
                 <div className="mb-8">
                   <p className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-primary mb-2">
-                    5.9% + $0.30
+                    6%
                   </p>
                   <p className="text-xl text-muted-foreground">per transaction</p>
                 </div>
@@ -340,7 +340,7 @@ const MerchantLanding = () => {
                   <div className="p-6 rounded-xl bg-muted/30">
                     <div className="flex items-center gap-2 mb-3">
                       <CreditCard className="w-5 h-5 text-primary" />
-                      <h3 className="font-bold">2.9% + $0.30</h3>
+                      <h3 className="font-bold">3%</h3>
                     </div>
                     <p className="text-muted-foreground">Stripe payment processing</p>
                   </div>
