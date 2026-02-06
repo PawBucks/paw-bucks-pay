@@ -11,7 +11,7 @@ const logStep = (step: string, details?: Record<string, unknown>) => {
   console.log(`[CONNECT-WEBHOOK] ${step}`, details ? JSON.stringify(details) : "");
 };
 
-// Helper function to send receipt email
+// Helper function to send receipt email (for non-invoice payments)
 async function sendReceiptEmail(params: {
   email: string;
   customerName?: string;
@@ -52,6 +52,37 @@ async function sendReceiptEmail(params: {
     }
   } catch (error) {
     console.error("Error sending receipt email:", error);
+  }
+}
+
+// Helper function to send invoice-specific receipt email (includes line items, payment history)
+async function sendInvoiceReceiptEmail(invoiceId: string): Promise<void> {
+  try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
+    
+    if (!supabaseUrl || !supabaseAnonKey) {
+      logStep("Skipping invoice receipt email: config not available");
+      return;
+    }
+
+    const response = await fetch(`${supabaseUrl}/functions/v1/send-invoice-receipt`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${supabaseAnonKey}`,
+      },
+      body: JSON.stringify({ invoiceId, isResend: false }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Failed to send invoice receipt email:", errorText);
+    } else {
+      logStep(`Invoice receipt email sent for invoice ${invoiceId}`);
+    }
+  } catch (error) {
+    console.error("Error sending invoice receipt email:", error);
   }
 }
 
@@ -355,32 +386,8 @@ serve(async (req) => {
               logStep("Transaction created", { transactionId: transaction?.id });
             }
 
-            // Send receipt email
-            const { data: userProfile } = await supabaseAdmin
-              .from('profiles')
-              .select('email, full_name')
-              .eq('id', invoicePayerUserId)
-              .single();
-
-            if (userProfile?.email) {
-              await sendReceiptEmail({
-                email: userProfile.email,
-                customerName: userProfile.full_name || undefined,
-                transactionDate: new Date().toISOString(),
-                receiptId: invoiceForTx?.invoice_number || paymentIntent.id,
-                merchantName: merchantForTx?.business_name || 'Merchant',
-                items: [{ name: `Invoice #${invoiceForTx?.invoice_number || 'Payment'}`, price: paymentAmount }],
-                subtotal: paymentAmount,
-                pawbucksApplied: pawbucksUsed > 0 ? pawbucksValueUSD : 0,
-                cardAmount: paymentAmount,
-                totalPaid: totalTransactionAmount,
-                pawbucksEarned,
-                tierInfo: {
-                  tierName,
-                  multiplier: pawbucksMultiplier,
-                },
-              });
-            }
+            // Send invoice-specific receipt email to customer (includes line items, payment history)
+            await sendInvoiceReceiptEmail(invoiceId);
 
             // Send merchant notification
             try {
