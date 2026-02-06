@@ -31,16 +31,16 @@ export const PricingCalculator = ({ onApplyPrice, compact = false }: PricingCalc
       return null;
     }
 
-    // Formula: gross_price = (net_amount + fixed_fee) / (1 - percentage_fee)
-    const grossPrice = (desired + fxdFee) / (1 - pctFee);
-    const processingFee = (grossPrice * pctFee) + fxdFee;
-    const netAmount = grossPrice - processingFee;
+    // Simple markup formula: suggested_price = desired_amount + (desired_amount * percentage_fee) + fixed_fee
+    // For 3% fee on $100: $100 + ($100 * 0.03) + $0 = $103
+    const processingFee = (desired * pctFee) + fxdFee;
+    const suggestedPrice = desired + processingFee;
 
     return {
       desiredAmount: desired,
-      suggestedPrice: Math.ceil(grossPrice * 100) / 100, // Round up to nearest cent
+      suggestedPrice: Math.round(suggestedPrice * 100) / 100, // Round to nearest cent
       processingFee: Math.round(processingFee * 100) / 100,
-      netAmount: Math.round(netAmount * 100) / 100,
+      netAmount: desired, // Merchant receives exactly what they want
       pctFee: parseFloat(percentageFee),
       fxdFee: fxdFee,
     };
