@@ -147,8 +147,8 @@ export default function MerchantPendingBalance() {
             ) : (
               <div className="space-y-4">
                 {recentCharges.map((charge) => {
-                  const totalFees = (charge.stripeFee || 0) + (charge.applicationFee || 0);
-                  
+                  // Use totalFees from the API (correct breakdown from Stripe)
+                  const totalFees = charge.totalFees || ((charge.stripeFee || 0) + (charge.applicationFee || 0));
                   return (
                     <Card key={charge.id} className="border shadow-sm">
                       <CardContent className="p-4">
