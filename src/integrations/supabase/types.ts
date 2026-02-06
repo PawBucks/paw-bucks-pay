@@ -8685,6 +8685,16 @@ export type Database = {
           full_name: string | null
           id: string | null
         }
+        Insert: {
+          avatar_url?: string | null
+          full_name?: string | null
+          id?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          full_name?: string | null
+          id?: string | null
+        }
         Relationships: []
       }
     }
@@ -8753,6 +8763,14 @@ export type Database = {
           available_balance: number
           pending_balance: number
           total_balance: number
+        }[]
+      }
+      get_reviewer_profile: {
+        Args: { reviewer_id: string }
+        Returns: {
+          avatar_url: string
+          full_name: string
+          id: string
         }[]
       }
       get_spendable_pawbucks: { Args: { p_user_id: string }; Returns: number }
