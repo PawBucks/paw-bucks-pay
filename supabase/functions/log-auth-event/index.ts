@@ -126,7 +126,7 @@ async function sendSecurityEmailAlert(
   try {
     const resend = new Resend(resendApiKey);
     const timestamp = new Date().toLocaleString("en-US", {
-      timeZone: "UTC",
+      timeZone: "America/New_York",
       dateStyle: "full",
       timeStyle: "long",
     });
