@@ -128,6 +128,38 @@ async function sendInvoicePaidNotification(params: {
   }
 }
 
+// Helper function to send invoice-specific receipt email (includes line items, payment history)
+async function sendInvoiceReceiptEmail(invoiceId: string): Promise<void> {
+  try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
+    
+    if (!supabaseUrl || !supabaseAnonKey) {
+      console.log("[INVOICE_RECEIPT] Skipping invoice receipt email: config not available");
+      return;
+    }
+
+    const response = await fetch(`${supabaseUrl}/functions/v1/send-invoice-receipt`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${supabaseAnonKey}`,
+      },
+      body: JSON.stringify({ invoiceId, isResend: false }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("[INVOICE_RECEIPT] Failed to send invoice receipt email:", errorText);
+    } else {
+      console.log(`[INVOICE_RECEIPT] ✅ Invoice receipt email sent for invoice ${invoiceId}`);
+    }
+  } catch (error) {
+    console.error("[INVOICE_RECEIPT] Error sending invoice receipt email:", error);
+    // Don't throw - email failure shouldn't break payment processing
+  }
+}
+
 serve(async (req) => {
   console.log('[STRIPE-WEBHOOK] Function invoked, method:', req.method);
   
@@ -792,23 +824,8 @@ serve(async (req) => {
             });
           }
           
-          // Send confirmation email to customer
-          const customerEmail = session.customer_email || session.customer_details?.email;
-          if (customerEmail) {
-            await sendReceiptEmail({
-              email: customerEmail,
-              customerName: session.customer_details?.name || invoiceForTx?.client_name || undefined,
-              transactionDate: new Date().toISOString(),
-              receiptId: invoiceForTx?.invoice_number || session.id,
-              merchantName: merchantForTx?.business_name || 'Merchant',
-              items: [{ name: `Invoice #${invoiceForTx?.invoice_number || 'Payment'}`, price: paymentAmount }],
-              subtotal: paymentAmount,
-              pawbucksApplied: pawbucksUsed > 0 ? (pawbucksUsed * 0.001) : 0,
-              cardAmount: paymentAmount,
-              totalPaid: paymentAmount + (pawbucksUsed * 0.001),
-              pawbucksEarned: pawbucksEarned,
-            });
-          }
+          // Send invoice-specific receipt email to customer (includes line items, payment history)
+          await sendInvoiceReceiptEmail(invoiceId);
           
           // ========================================
           // SEND MERCHANT INVOICE PAID NOTIFICATION
