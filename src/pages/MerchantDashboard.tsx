@@ -179,10 +179,82 @@ const MerchantDashboard = () => {
     }
   }, [user, authLoading, navigate]);
 
+  // Fallback analytics fetcher when edge function fails
+  const fetchAnalyticsFallback = useCallback(async (merchantId: string): Promise<Analytics | null> => {
+    console.log('[MerchantDashboard] Using fallback analytics query for merchant:', merchantId);
+    
+    try {
+      // Use the database function directly as fallback
+      // The RPC returns a single row, but we use .single() to get the object directly
+      const { data: analyticsResult, error } = await supabase
+        .rpc('get_merchant_analytics', { p_merchant_id: merchantId })
+        .single();
+      
+      if (error) {
+        console.error('[MerchantDashboard] Fallback analytics query failed:', error);
+        return null;
+      }
+
+      // Calculate funding eligibility manually
+      const { data: firstTransaction } = await supabase
+        .from('transactions')
+        .select('created_at')
+        .eq('merchant_id', merchantId)
+        .eq('status', 'completed')
+        .order('created_at', { ascending: true })
+        .limit(1)
+        .single();
+
+      const now = new Date();
+      const ninetyDaysAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+      
+      let daysActive = 0;
+      if (firstTransaction?.created_at) {
+        const firstTransactionDate = new Date(firstTransaction.created_at);
+        daysActive = Math.floor((now.getTime() - firstTransactionDate.getTime()) / (1000 * 60 * 60 * 24));
+      }
+
+      const { data: last90DaysTransactions } = await supabase
+        .from('transactions')
+        .select('amount')
+        .eq('merchant_id', merchantId)
+        .eq('status', 'completed')
+        .gte('created_at', ninetyDaysAgo.toISOString());
+
+      let sales90Days = 0;
+      if (last90DaysTransactions && last90DaysTransactions.length > 0) {
+        sales90Days = last90DaysTransactions.reduce((sum, t) => sum + (t.amount || 0), 0);
+      }
+
+      const fundingEligible = daysActive >= 90;
+      const maxBorrowable = fundingEligible ? sales90Days * 0.8 : 0;
+
+      return {
+        total_sales: parseFloat(String(analyticsResult?.total_sales || 0)),
+        total_cashback: parseFloat(String(analyticsResult?.total_cashback || 0)),
+        repayment_rate: null,
+        remaining_balance: 0,
+        total_transactions: parseInt(String(analyticsResult?.transaction_count || 0)),
+        total_customers: parseInt(String(analyticsResult?.total_customers || 0)),
+        avg_transaction_amount: parseFloat(String(analyticsResult?.avg_transaction_amount || 0)),
+        funding_deal_status: null,
+        days_active: daysActive,
+        sales_90_days: sales90Days,
+        funding_eligible: fundingEligible,
+        max_borrowable: maxBorrowable,
+      };
+    } catch (error) {
+      console.error('[MerchantDashboard] Fallback analytics failed completely:', error);
+      return null;
+    }
+  }, []);
+
   const loadMerchantData = useCallback(async () => {
     if (!user) return;
 
     try {
+      console.log('[MerchantDashboard] Loading data for user:', user.id);
+      
       const { data: merchantData, error: merchantError } = await supabase
         .from("merchants")
         .select("*")
@@ -191,20 +263,46 @@ const MerchantDashboard = () => {
 
       if (merchantError) {
         if (merchantError.code === "PGRST116") {
+          console.log('[MerchantDashboard] No merchant found, redirecting to onboarding');
           navigate("/merchant-onboarding");
           return;
         }
         throw merchantError;
       }
 
+      console.log('[MerchantDashboard] Merchant found:', merchantData.id, merchantData.business_name);
       setMerchant(merchantData);
 
+      // Try edge function first, with fallback to direct query
+      console.log('[MerchantDashboard] Fetching analytics via edge function...');
       const { data: analyticsData, error: analyticsError } = await supabase.functions.invoke(
         "merchant-dashboard"
       );
 
-      if (!analyticsError && analyticsData) {
+      if (analyticsError) {
+        console.error('[MerchantDashboard] Edge function failed:', analyticsError);
+        console.log('[MerchantDashboard] Attempting fallback analytics...');
+        
+        // Show toast about using fallback
+        toast.info("Loading analytics from backup source...");
+        
+        const fallbackAnalytics = await fetchAnalyticsFallback(merchantData.id);
+        if (fallbackAnalytics) {
+          console.log('[MerchantDashboard] Fallback analytics succeeded:', fallbackAnalytics);
+          setAnalytics(fallbackAnalytics);
+        } else {
+          console.error('[MerchantDashboard] Both primary and fallback analytics failed');
+          toast.error("Unable to load analytics. Please refresh the page.");
+        }
+      } else if (analyticsData) {
+        console.log('[MerchantDashboard] Edge function analytics:', analyticsData);
         setAnalytics(analyticsData);
+      } else {
+        console.warn('[MerchantDashboard] Edge function returned empty data');
+        const fallbackAnalytics = await fetchAnalyticsFallback(merchantData.id);
+        if (fallbackAnalytics) {
+          setAnalytics(fallbackAnalytics);
+        }
       }
 
       // Fetch recent transactions
@@ -281,13 +379,14 @@ const MerchantDashboard = () => {
       }));
 
       setAllTransactions(allTransactionsWithProfiles);
+      console.log('[MerchantDashboard] Data load complete');
     } catch (error: any) {
       console.error("Error loading merchant data:", error);
       toast.error("Failed to load merchant data");
     } finally {
       setLoading(false);
     }
-  }, [user, navigate]);
+  }, [user, navigate, fetchAnalyticsFallback]);
 
   useEffect(() => {
     if (user) {
