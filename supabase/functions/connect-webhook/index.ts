@@ -149,8 +149,12 @@ serve(async (req) => {
 
         // ========================================
         // HANDLE INVOICE PAYMENTS (from checkout sessions with Connect destination)
+        // Also handle legacy charge_type: direct with invoice_id
         // ========================================
-        if (metadata.type === 'invoice_payment' && metadata.invoice_id) {
+        const isInvoicePayment = (metadata.type === 'invoice_payment' || 
+          (metadata.charge_type === 'direct' && metadata.invoice_id)) && metadata.invoice_id;
+        
+        if (isInvoicePayment) {
           const invoiceId = metadata.invoice_id;
           const merchantId = metadata.merchant_id;
           const invoicePayerUserId = metadata.user_id;
