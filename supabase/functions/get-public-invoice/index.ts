@@ -15,7 +15,14 @@ serve(async (req) => {
   try {
     const { invoiceId, accessToken } = await req.json();
 
+    console.log('[GET_PUBLIC_INVOICE] Request received:', { 
+      invoiceId, 
+      hasToken: !!accessToken,
+      tokenLength: accessToken?.length 
+    });
+
     if (!invoiceId || !accessToken) {
+      console.log('[GET_PUBLIC_INVOICE] Missing required parameters:', { invoiceId: !!invoiceId, accessToken: !!accessToken });
       return new Response(
         JSON.stringify({ error: 'Invoice ID and access token are required' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
@@ -86,12 +93,23 @@ serve(async (req) => {
       .single();
 
     if (invoiceError || !invoice) {
-      console.log('Invoice fetch error:', invoiceError);
+      console.log('[GET_PUBLIC_INVOICE] Invoice fetch failed:', { 
+        invoiceId, 
+        errorMessage: invoiceError?.message,
+        errorCode: invoiceError?.code,
+        hint: 'This usually means the access token does not match or invoice does not exist'
+      });
       return new Response(
         JSON.stringify({ error: 'Invoice not found or access denied' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 404 }
       );
     }
+
+    console.log('[GET_PUBLIC_INVOICE] Invoice found:', { 
+      invoiceNumber: invoice.invoice_number,
+      status: invoice.status,
+      merchantId: invoice.merchant_id
+    });
 
     // Fetch merchant info (public data only) - include accepts_pawbucks for payment options
     const { data: merchant } = await supabaseAdmin

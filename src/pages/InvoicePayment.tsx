@@ -68,9 +68,29 @@ const InvoicePayment = () => {
   const [pawbucksToUse, setPawbucksToUse] = useState(0);
   const [loadingPawbucks, setLoadingPawbucks] = useState(false);
 
+  // Track the specific error reason for better UX
+  const [errorReason, setErrorReason] = useState<string | null>(null);
+
   useEffect(() => {
     const loadInvoice = async () => {
-      if (!invoiceId || !accessToken) {
+      // Log debugging info
+      console.log("[InvoicePayment] Loading invoice:", { 
+        invoiceId, 
+        hasToken: !!accessToken,
+        tokenLength: accessToken?.length,
+        fullUrl: window.location.href 
+      });
+
+      if (!invoiceId) {
+        console.error("[InvoicePayment] Missing invoice ID in URL");
+        setErrorReason("missing_id");
+        setLoading(false);
+        return;
+      }
+
+      if (!accessToken) {
+        console.error("[InvoicePayment] Missing access token in URL. Expected format: /invoice/:id/pay?token=xxx");
+        setErrorReason("missing_token");
         setLoading(false);
         return;
       }
@@ -84,15 +104,27 @@ const InvoicePayment = () => {
           },
         });
 
+        console.log("[InvoicePayment] Edge function response:", { 
+          hasData: !!data, 
+          hasInvoice: !!data?.invoice, 
+          error: error?.message 
+        });
+
         if (error) throw error;
-        if (!data?.invoice) throw new Error("Invoice not found");
+        if (!data?.invoice) {
+          setErrorReason("not_found");
+          throw new Error("Invoice not found");
+        }
         
         setInvoice(data.invoice as any);
         setPaymentAmount((data.invoice.amount_due || data.invoice.total || 0).toFixed(2));
 
         if (data.merchant) setMerchant(data.merchant);
-      } catch (error) {
-        console.error("Error loading invoice:", error);
+      } catch (error: any) {
+        console.error("[InvoicePayment] Error loading invoice:", error);
+        if (!errorReason) {
+          setErrorReason("not_found");
+        }
         toast.error("Failed to load invoice");
       } finally {
         setLoading(false);
@@ -261,15 +293,44 @@ const InvoicePayment = () => {
   }
 
   if (!invoice || !accessToken) {
+    // Determine the specific error message based on what's missing
+    const getErrorMessage = () => {
+      if (errorReason === "missing_token") {
+        return {
+          title: "Invalid Invoice Link",
+          message: "The invoice link is incomplete. Please use the full link from your email or request a new one from the sender."
+        };
+      }
+      if (errorReason === "missing_id") {
+        return {
+          title: "Invalid Invoice Link",
+          message: "The invoice link is malformed. Please use the link from your email or request a new one from the sender."
+        };
+      }
+      return {
+        title: "Invoice Not Found",
+        message: "This invoice link is invalid, has expired, or the invoice no longer exists. Please contact the sender for a new link."
+      };
+    };
+
+    const errorInfo = getErrorMessage();
+
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <Card className="max-w-md w-full">
           <CardContent className="pt-6 text-center">
             <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
-            <h2 className="text-xl font-semibold mb-2">Invoice Not Found</h2>
-            <p className="text-muted-foreground">
-              This invoice link is invalid or has expired.
+            <h2 className="text-xl font-semibold mb-2">{errorInfo.title}</h2>
+            <p className="text-muted-foreground mb-4">
+              {errorInfo.message}
             </p>
+            <Button 
+              variant="outline" 
+              onClick={() => window.location.href = "/"}
+              className="mt-2"
+            >
+              Go to Home
+            </Button>
           </CardContent>
         </Card>
       </div>
