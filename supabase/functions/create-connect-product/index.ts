@@ -22,7 +22,7 @@ serve(async (req) => {
 
     // STEP 2: Initialize Stripe with latest API version
     const stripe = new Stripe(stripeKey, {
-      apiVersion: '2025-10-29.clover',
+      apiVersion: '2024-12-18.acacia',
     });
 
     // STEP 3: Authenticate the user
