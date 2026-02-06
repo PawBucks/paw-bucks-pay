@@ -93,7 +93,7 @@ serve(async (req) => {
     // Fetch balance transactions to get fee breakdown
     const chargesWithFees = await Promise.all(
       charges.data.map(async (charge: Stripe.Charge) => {
-        let stripeFee = 0;
+        let totalStripeFeePlusAppFee = 0;
         let netAmount = charge.amount;
         
         if (charge.balance_transaction && typeof charge.balance_transaction === 'string') {
@@ -102,20 +102,36 @@ serve(async (req) => {
               charge.balance_transaction,
               { stripeAccount: merchant.stripe_account_id }
             );
-            stripeFee = balanceTx.fee || 0;
+            // IMPORTANT: balanceTx.fee from Stripe includes BOTH Stripe processing fees AND application fees combined
+            totalStripeFeePlusAppFee = balanceTx.fee || 0;
             netAmount = balanceTx.net || charge.amount;
           } catch (e) {
             logStep("Could not fetch balance transaction", { chargeId: charge.id, error: String(e) });
           }
         }
         
-        // Application fee is stored in the charge metadata or can be calculated
+        // Application fee is the platform's cut (3% of Stripe amount)
         const applicationFeeAmount = charge.application_fee_amount || 0;
+        
+        // The actual Stripe processing fee is the total fee MINUS the application fee
+        // Total fee from Stripe = Stripe processing fee + Application fee
+        // So: Stripe processing fee = Total fee - Application fee
+        const stripeProcessingFee = Math.max(0, totalStripeFeePlusAppFee - applicationFeeAmount);
+        
+        logStep("Fee breakdown for charge", { 
+          chargeId: charge.id, 
+          amount: charge.amount,
+          totalFeeFromStripe: totalStripeFeePlusAppFee,
+          applicationFee: applicationFeeAmount,
+          stripeProcessingFee: stripeProcessingFee,
+          netAmount: netAmount
+        });
         
         return {
           ...charge,
-          stripe_fee: stripeFee,
-          application_fee: applicationFeeAmount,
+          stripe_fee: stripeProcessingFee,  // Actual Stripe processing fee only
+          application_fee: applicationFeeAmount,  // Platform's application fee
+          total_fees: totalStripeFeePlusAppFee,  // Combined total for reference
           net_amount: netAmount,
         };
       })
@@ -241,16 +257,17 @@ serve(async (req) => {
         arrivalDate: p.arrival_date,
         created: p.created,
       })),
-      recentCharges: chargesWithFees.slice(0, 10).map((c: Stripe.Charge & { stripe_fee: number; application_fee: number; net_amount: number }) => ({
+      recentCharges: chargesWithFees.slice(0, 10).map((c: Stripe.Charge & { stripe_fee: number; application_fee: number; total_fees: number; net_amount: number }) => ({
         id: c.id,
         amount: c.amount,
         currency: c.currency,
         status: c.status,
         created: c.created,
         description: c.description,
-        stripeFee: c.stripe_fee,
-        applicationFee: c.application_fee,
-        netAmount: c.net_amount,
+        stripeFee: c.stripe_fee,           // Actual Stripe processing fee (excludes application fee)
+        applicationFee: c.application_fee,  // Platform's application fee (3%)
+        totalFees: c.total_fees,            // Combined total of all fees
+        netAmount: c.net_amount,            // Net amount after all fees
       })),
       directPayments: directPayments || [],
       transactions: transactions || [],

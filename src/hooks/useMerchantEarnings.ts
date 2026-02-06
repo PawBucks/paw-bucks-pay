@@ -16,17 +16,18 @@
    created: number;
  }
  
- interface Charge {
-   id: string;
-   amount: number;
-   currency: string;
-   status: string;
-   created: number;
-   description: string | null;
-    stripeFee: number;
-    applicationFee: number;
-    netAmount: number;
- }
+interface Charge {
+  id: string;
+  amount: number;
+  currency: string;
+  status: string;
+  created: number;
+  description: string | null;
+  stripeFee: number;        // Actual Stripe processing fee only
+  applicationFee: number;   // Platform's application fee (3%)
+  totalFees: number;        // Combined total of all fees
+  netAmount: number;        // Net amount after all fees
+}
  
  interface RefundData {
    count: number;
