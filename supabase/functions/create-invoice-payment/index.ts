@@ -140,9 +140,12 @@ serve(async (req) => {
             destination: connectedAccountId,
           },
           metadata: {
+            type: "invoice_payment",
             invoice_id: invoiceId,
             merchant_id: merchant.id,
             user_id: userId || "",
+            tip_amount: String(tipAmount || 0),
+            pawbucks_used: "0",
           },
         },
         billing_address_collection: "auto",
