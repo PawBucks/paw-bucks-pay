@@ -191,6 +191,7 @@ serve(async (req) => {
           const invoicePayerUserId = metadata.user_id;
           const tipAmount = parseInt(metadata.tip_amount || '0');
           const pawbucksUsed = parseInt(metadata.pawbucks_used || '0');
+          const pawbucksAmountCents = parseInt(metadata.pawbucks_amount_cents || '0');
           
           logStep("Processing invoice payment", {
             invoiceId,
@@ -199,6 +200,7 @@ serve(async (req) => {
             amount: paymentIntent.amount,
             tipAmount,
             pawbucksUsed,
+            pawbucksAmountCents,
           });
 
           // Check if invoice payment already exists (idempotency)
@@ -216,15 +218,17 @@ serve(async (req) => {
             return new Response(JSON.stringify({ received: true, skipped: 'invoice_already_processed' }), { status: 200 });
           }
 
-          const paymentAmount = paymentIntent.amount / 100;
-          const stripeAmountForRewards = paymentAmount - (tipAmount / 100); // Exclude tip from rewards
+          const cardPaymentAmount = paymentIntent.amount / 100;
+          const pawbucksPaymentAmount = pawbucksAmountCents / 100; // Convert cents to dollars
+          const totalPaymentAmount = cardPaymentAmount + pawbucksPaymentAmount;
+          const stripeAmountForRewards = cardPaymentAmount - (tipAmount / 100); // Exclude tip from rewards
 
-          // Record payment in invoice_payments table
-          const { data: payment, error: paymentError } = await supabaseAdmin
+          // Record card payment in invoice_payments table
+          const { data: cardPayment, error: cardPaymentError } = await supabaseAdmin
             .from('invoice_payments')
             .insert({
               invoice_id: invoiceId,
-              amount: paymentAmount,
+              amount: cardPaymentAmount,
               payment_method: 'credit_card',
               payment_date: new Date().toISOString(),
               status: 'completed',
@@ -234,23 +238,52 @@ serve(async (req) => {
             .select()
             .single();
 
-          if (paymentError) {
-            logStep("Error recording invoice payment", { error: paymentError.message });
+          if (cardPaymentError) {
+            logStep("Error recording card payment", { error: cardPaymentError.message });
           } else {
-            logStep("Invoice payment recorded", { paymentId: payment.id });
+            logStep("Card payment recorded", { paymentId: cardPayment.id, amount: cardPaymentAmount });
           }
 
-          // Log activity
+          // IMPORTANT: Record PawBucks payment as a separate entry if PawBucks were used
+          // This ensures the invoice shows fully paid when combining card + PawBucks
+          let pawbucksPayment = null;
+          if (pawbucksUsed > 0 && pawbucksPaymentAmount > 0) {
+            const { data: pbPayment, error: pbPaymentError } = await supabaseAdmin
+              .from('invoice_payments')
+              .insert({
+                invoice_id: invoiceId,
+                amount: pawbucksPaymentAmount,
+                payment_method: 'pawbucks',
+                payment_date: new Date().toISOString(),
+                status: 'completed',
+                notes: `Paid with ${pawbucksUsed} PawBucks`,
+              })
+              .select()
+              .single();
+
+            if (pbPaymentError) {
+              logStep("Error recording PawBucks payment", { error: pbPaymentError.message });
+            } else {
+              pawbucksPayment = pbPayment;
+              logStep("PawBucks payment recorded", { paymentId: pbPayment.id, amount: pawbucksPaymentAmount, pawbucksUsed });
+            }
+          }
+
+          // Log activity with full payment details
           await supabaseAdmin
             .from('invoice_activity')
             .insert({
               invoice_id: invoiceId,
               action: 'payment_completed',
-              description: `Payment of $${paymentAmount.toFixed(2)} completed via Stripe`,
+              description: pawbucksUsed > 0 
+                ? `Payment of $${totalPaymentAmount.toFixed(2)} completed ($${cardPaymentAmount.toFixed(2)} card + $${pawbucksPaymentAmount.toFixed(2)} PawBucks)`
+                : `Payment of $${cardPaymentAmount.toFixed(2)} completed via Stripe`,
               metadata: {
                 payment_intent_id: paymentIntent.id,
                 tip_amount: tipAmount,
                 pawbucks_used: pawbucksUsed,
+                card_payment_id: cardPayment?.id,
+                pawbucks_payment_id: pawbucksPayment?.id,
               },
             });
 
@@ -358,9 +391,8 @@ serve(async (req) => {
               .eq('id', merchantId)
               .single();
 
-            const pawbucksValueUSD = pawbucksUsed * 0.001;
-            const totalTransactionAmount = paymentAmount + pawbucksValueUSD;
-            const platformFee = paymentAmount * 0.03; // 3% fee on Stripe portion
+            const totalTransactionAmount = cardPaymentAmount + pawbucksPaymentAmount;
+            const platformFee = cardPaymentAmount * 0.03; // 3% fee on Stripe portion only
 
             const { data: transaction, error: transactionError } = await supabaseAdmin
               .from('transactions')
@@ -368,7 +400,7 @@ serve(async (req) => {
                 user_id: invoicePayerUserId,
                 merchant_id: merchantId,
                 amount: totalTransactionAmount,
-                stripe_amount: paymentAmount,
+                stripe_amount: cardPaymentAmount,
                 pawbucks_used: pawbucksUsed,
                 application_fee: platformFee,
                 cashback_earned: pawbucksEarned,
@@ -428,12 +460,12 @@ serve(async (req) => {
                         invoiceTitle: invoiceForNotif?.title || undefined,
                         clientName: invoiceForNotif?.client_name || 'Customer',
                         clientEmail: invoiceForNotif?.client_email || '',
-                        amountPaid: paymentAmount,
+                        amountPaid: totalPaymentAmount,
                         tipAmount: tipAmount > 0 ? tipAmount / 100 : 0,
                         pawbucksUsed: pawbucksUsed,
                         paymentMethod: pawbucksUsed > 0 ? 'mixed' : 'credit_card',
                         paymentDate: new Date().toISOString(),
-                        invoiceTotal: invoiceForNotif?.total || paymentAmount,
+                        invoiceTotal: invoiceForNotif?.total || totalPaymentAmount,
                         amountDue: invoiceForNotif?.amount_due || 0,
                         invoiceId: invoiceId,
                       }),
