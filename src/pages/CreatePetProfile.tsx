@@ -87,7 +87,7 @@ const CreatePetProfile = () => {
       }
 
       // Create pet profile with all fields
-      const { error: profileError } = await supabase.from("pet_profiles").insert({
+      const { data: newPet, error: profileError } = await supabase.from("pet_profiles").insert({
         user_id: user.id,
         name: formData.name.trim(),
         type: formData.type as Database["public"]["Enums"]["pet_type"],
@@ -101,12 +101,14 @@ const CreatePetProfile = () => {
         microchip_number: formData.microchip_number || null,
         collar_description: formData.collar_description || null,
         identifying_features: formData.identifying_features || null,
-      });
+      }).select('id').single();
 
       if (profileError) throw profileError;
 
-      toast.success(`${formData.name}'s profile created successfully!`);
-      navigate("/dashboard");
+      toast.success(`${formData.name}'s profile created! Now let's discover their personality! 🐾`);
+      
+      // Navigate to personality quiz with the new pet's ID
+      navigate(`/pet-personality-quiz?petId=${newPet.id}`);
     } catch (error: any) {
       console.error("Error creating pet profile:", error);
       toast.error(error.message || "Failed to create pet profile");

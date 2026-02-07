@@ -91,6 +91,7 @@ const MerchantPendingBalance = lazyWithRetry(() => import("./pages/MerchantPendi
 const MerchantTotalEarnings = lazyWithRetry(() => import("./pages/MerchantTotalEarnings"), "MerchantTotalEarnings");
 const PetTimelinePage = lazyWithRetry(() => import("./pages/PetTimelinePage"), "PetTimelinePage");
 const BadgesPage = lazyWithRetry(() => import("./pages/BadgesPage"), "BadgesPage");
+const PetPersonalityQuizPage = lazyWithRetry(() => import("./pages/PetPersonalityQuiz"), "PetPersonalityQuiz");
 
 const createQueryClient = () => new QueryClient({
   defaultOptions: {
@@ -181,6 +182,7 @@ const AppRoutes = () => {
       <Route path="/invoice/:invoiceId/success" element={<PageTransition><InvoicePaymentSuccess /></PageTransition>} />
       <Route path="/pet-timeline" element={<PageTransition><PetTimelinePage /></PageTransition>} />
       <Route path="/badges" element={<PageTransition><BadgesPage /></PageTransition>} />
+      <Route path="/pet-personality-quiz" element={<PageTransition><PetPersonalityQuizPage /></PageTransition>} />
       <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
     </Routes>
   );
