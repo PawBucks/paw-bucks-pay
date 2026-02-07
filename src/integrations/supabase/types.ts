@@ -1215,6 +1215,58 @@ export type Database = {
         }
         Relationships: []
       }
+      flash_sale_notifications: {
+        Row: {
+          created_at: string
+          id: string
+          merchant_id: string
+          notification_type: string
+          recipients_count: number | null
+          sent_at: string
+          service_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          merchant_id: string
+          notification_type?: string
+          recipients_count?: number | null
+          sent_at?: string
+          service_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          merchant_id?: string
+          notification_type?: string
+          recipients_count?: number | null
+          sent_at?: string
+          service_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "flash_sale_notifications_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "flash_sale_notifications_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "flash_sale_notifications_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       funding_deals: {
         Row: {
           amount_funded: number
@@ -3133,8 +3185,12 @@ export type Database = {
           created_at: string
           description: string | null
           duration_minutes: number
+          flash_sale_end_at: string | null
+          flash_sale_pawbucks_price: number | null
+          flash_sale_start_at: string | null
           id: string
           is_active: boolean
+          is_flash_sale: boolean
           max_capacity: number
           merchant_id: string
           name: string
@@ -3148,8 +3204,12 @@ export type Database = {
           created_at?: string
           description?: string | null
           duration_minutes?: number
+          flash_sale_end_at?: string | null
+          flash_sale_pawbucks_price?: number | null
+          flash_sale_start_at?: string | null
           id?: string
           is_active?: boolean
+          is_flash_sale?: boolean
           max_capacity?: number
           merchant_id: string
           name: string
@@ -3163,8 +3223,12 @@ export type Database = {
           created_at?: string
           description?: string | null
           duration_minutes?: number
+          flash_sale_end_at?: string | null
+          flash_sale_pawbucks_price?: number | null
+          flash_sale_start_at?: string | null
           id?: string
           is_active?: boolean
+          is_flash_sale?: boolean
           max_capacity?: number
           merchant_id?: string
           name?: string

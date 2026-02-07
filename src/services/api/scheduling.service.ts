@@ -35,9 +35,41 @@ export interface MerchantService {
   max_capacity: number;
   requires_pet: boolean;
   is_active: boolean;
+  // Flash Sale fields
+  is_flash_sale: boolean;
+  flash_sale_pawbucks_price?: number | null;
+  flash_sale_start_at?: string | null;
+  flash_sale_end_at?: string | null;
   created_at: string;
   updated_at: string;
 }
+
+// Helper to check if flash sale is currently active
+export const isFlashSaleActive = (service: MerchantService): boolean => {
+  if (!service.is_flash_sale || !service.flash_sale_pawbucks_price) return false;
+  
+  const now = new Date();
+  const startAt = service.flash_sale_start_at ? new Date(service.flash_sale_start_at) : null;
+  const endAt = service.flash_sale_end_at ? new Date(service.flash_sale_end_at) : null;
+  
+  if (startAt && now < startAt) return false;
+  if (endAt && now > endAt) return false;
+  
+  return true;
+};
+
+// Calculate regular PawBucks price (1000 PB per $1)
+export const calculateRegularPawbucksPrice = (usdPrice: number): number => {
+  return Math.floor(usdPrice * 1000);
+};
+
+// Calculate flash sale savings percentage
+export const calculateFlashSaleSavings = (service: MerchantService): number => {
+  if (!service.flash_sale_pawbucks_price) return 0;
+  const regularPrice = calculateRegularPawbucksPrice(service.price);
+  if (regularPrice === 0) return 0;
+  return Math.round((1 - service.flash_sale_pawbucks_price / regularPrice) * 100);
+};
 
 export interface MerchantAvailability {
   id: string;

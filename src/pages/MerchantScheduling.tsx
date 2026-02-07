@@ -7,18 +7,20 @@ import { Button } from "@/components/ui/button";
 import { GradientCard } from "@/components/ui/gradient-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, ArrowLeft, Plus, Calendar, Clock, Settings, Users } from "lucide-react";
+import { Loader2, ArrowLeft, Plus, Calendar, Clock, Settings, Users, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { ServicesList } from "@/components/scheduling/ServicesList";
 import { AvailabilityManager } from "@/components/scheduling/AvailabilityManager";
 import { BookingsCalendar } from "@/components/scheduling/BookingsCalendar";
 import { ServiceDialog } from "@/components/scheduling/ServiceDialog";
+import { FlashSaleDialog } from "@/components/scheduling/FlashSaleDialog";
 import { 
   schedulingService, 
   type MerchantService, 
   type MerchantAvailability, 
   type AvailabilityOverride,
-  type BookingWithDetails 
+  type BookingWithDetails,
+  isFlashSaleActive
 } from "@/services/api/scheduling.service";
 
 const MerchantScheduling = () => {
@@ -31,7 +33,9 @@ const MerchantScheduling = () => {
   const [overrides, setOverrides] = useState<AvailabilityOverride[]>([]);
   const [bookings, setBookings] = useState<BookingWithDetails[]>([]);
   const [serviceDialogOpen, setServiceDialogOpen] = useState(false);
+  const [flashSaleDialogOpen, setFlashSaleDialogOpen] = useState(false);
   const [editingService, setEditingService] = useState<MerchantService | null>(null);
+  const [flashSaleService, setFlashSaleService] = useState<MerchantService | null>(null);
   const [activeTab, setActiveTab] = useState("services");
 
   useEffect(() => {
@@ -235,6 +239,18 @@ const MerchantScheduling = () => {
               </div>
             </div>
           </GradientCard>
+          {/* Flash Sales Active Stat */}
+          <GradientCard className="p-4 md:col-span-1 col-span-2">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-amber-500/10 rounded-lg">
+                <Zap className="w-5 h-5 text-amber-500" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{services.filter(s => isFlashSaleActive(s)).length}</p>
+                <p className="text-xs text-muted-foreground">Active Flash Sales</p>
+              </div>
+            </div>
+          </GradientCard>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -253,6 +269,10 @@ const MerchantScheduling = () => {
               }}
               onDelete={handleDeleteService}
               onToggleActive={(id, active) => handleUpdateService(id, { is_active: active })}
+              onManageFlashSale={(service) => {
+                setFlashSaleService(service);
+                setFlashSaleDialogOpen(true);
+              }}
             />
           </TabsContent>
 
@@ -287,6 +307,29 @@ const MerchantScheduling = () => {
           ? (data) => handleUpdateService(editingService.id, data)
           : handleCreateService
         }
+      />
+
+      <FlashSaleDialog
+        open={flashSaleDialogOpen}
+        onOpenChange={(open) => {
+          setFlashSaleDialogOpen(open);
+          if (!open) setFlashSaleService(null);
+        }}
+        service={flashSaleService}
+        onUpdate={async (id, data) => {
+          await handleUpdateService(id, data);
+          // Send notification if flash sale is being activated
+          if (data.is_flash_sale && data.flash_sale_pawbucks_price && merchantId) {
+            try {
+              await supabase.functions.invoke('send-flash-sale-notification', {
+                body: { serviceId: id, merchantId }
+              });
+              toast.success("Flash sale notification sent to pet owners!");
+            } catch (error) {
+              console.error("Error sending flash sale notification:", error);
+            }
+          }
+        }}
       />
     </div>
   );

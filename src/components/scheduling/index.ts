@@ -3,3 +3,7 @@ export { ServiceDialog } from "./ServiceDialog";
 export { AvailabilityManager } from "./AvailabilityManager";
 export { BookingsCalendar } from "./BookingsCalendar";
 export { BookingWidget } from "./BookingWidget";
+export { FlashSaleSection } from "./FlashSaleSection";
+export { FlashSalePriceDisplay } from "./FlashSalePriceDisplay";
+export { FlashSaleCard } from "./FlashSaleCard";
+export { FlashSaleDialog } from "./FlashSaleDialog";

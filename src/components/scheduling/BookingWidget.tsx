@@ -1,8 +1,13 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { schedulingService } from "@/services/api/scheduling.service";
+import { 
+  schedulingService,
+  isFlashSaleActive,
+  calculateRegularPawbucksPrice,
+  calculateFlashSaleSavings
+} from "@/services/api/scheduling.service";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -22,8 +27,53 @@ import {
   Sparkles,
   ArrowRight,
   Timer,
-  Users
+  Users,
+  Zap
 } from "lucide-react";
+
+// Flash Sale Countdown component for service listings
+function FlashSaleCountdown({ endAt }: { endAt: string }) {
+  const [timeRemaining, setTimeRemaining] = useState<string>("");
+
+  useEffect(() => {
+    const updateCountdown = () => {
+      const now = new Date();
+      const end = new Date(endAt);
+      const diff = end.getTime() - now.getTime();
+      
+      if (diff <= 0) {
+        setTimeRemaining("Ended");
+        return;
+      }
+      
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      
+      if (hours > 24) {
+        const days = Math.floor(hours / 24);
+        setTimeRemaining(`Ends in ${days}d ${hours % 24}h`);
+      } else if (hours > 0) {
+        setTimeRemaining(`Ends in ${hours}h ${minutes}m`);
+      } else {
+        setTimeRemaining(`Ends in ${minutes}m`);
+      }
+    };
+    
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 60000);
+    
+    return () => clearInterval(interval);
+  }, [endAt]);
+
+  if (!timeRemaining) return null;
+
+  return (
+    <div className="flex items-center gap-1 text-amber-600 text-xs justify-end">
+      <Timer className="w-3 h-3" />
+      <span>{timeRemaining}</span>
+    </div>
+  );
+}
 
 type Props = {
   merchantId: string;
@@ -299,57 +349,88 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
         {step === "service" && (
           <div className="space-y-3">
             <h3 className="font-medium text-sm text-muted-foreground mb-4">Select a Service</h3>
-            {services.map((service) => (
-              <button
-                key={service.id}
-                onClick={() => {
-                  setSelectedService(service.id);
-                  setStep("date");
-                }}
-                className={`w-full p-4 rounded-xl border text-left transition-all hover:border-primary/50 hover:bg-primary/5 ${
-                  selectedService === service.id ? "border-primary bg-primary/5" : "border-border"
-                }`}
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h4 className="font-semibold">{service.name}</h4>
-                      <Badge variant="secondary" className="text-xs capitalize">
-                        {service.category.replace(/_/g, " ")}
-                      </Badge>
-                    </div>
-                    {service.description && (
-                      <p className="text-sm text-muted-foreground line-clamp-2">
-                        {service.description}
-                      </p>
-                    )}
-                    <div className="flex items-center gap-4 mt-2 text-sm">
-                      <span className="flex items-center gap-1 text-muted-foreground">
-                        <Timer className="w-3.5 h-3.5" />
-                        {formatDuration(service.duration_minutes, service.category)}
-                      </span>
-                      {service.max_capacity > 1 && (
+            {services.map((service) => {
+              const hasFlashSale = isFlashSaleActive(service);
+              const regularPB = calculateRegularPawbucksPrice(service.price);
+              const savingsPercent = calculateFlashSaleSavings(service);
+              
+              return (
+                <button
+                  key={service.id}
+                  onClick={() => {
+                    setSelectedService(service.id);
+                    setStep("date");
+                  }}
+                  className={`w-full p-4 rounded-xl border text-left transition-all hover:border-primary/50 hover:bg-primary/5 ${
+                    selectedService === service.id ? "border-primary bg-primary/5" : "border-border"
+                  } ${hasFlashSale ? "ring-2 ring-amber-500/30" : ""}`}
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <h4 className="font-semibold">{service.name}</h4>
+                        <Badge variant="secondary" className="text-xs capitalize">
+                          {service.category.replace(/_/g, " ")}
+                        </Badge>
+                        {hasFlashSale && (
+                          <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 text-xs gap-0.5">
+                            <Zap className="w-3 h-3" />
+                            Flash Sale
+                          </Badge>
+                        )}
+                      </div>
+                      {service.description && (
+                        <p className="text-sm text-muted-foreground line-clamp-2">
+                          {service.description}
+                        </p>
+                      )}
+                      <div className="flex items-center gap-4 mt-2 text-sm">
                         <span className="flex items-center gap-1 text-muted-foreground">
-                          <Users className="w-3.5 h-3.5" />
-                          Up to {service.max_capacity}
+                          <Timer className="w-3.5 h-3.5" />
+                          {formatDuration(service.duration_minutes, service.category)}
                         </span>
+                        {service.max_capacity > 1 && (
+                          <span className="flex items-center gap-1 text-muted-foreground">
+                            <Users className="w-3.5 h-3.5" />
+                            Up to {service.max_capacity}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <div className="text-lg font-bold text-primary">
+                        ${service.price.toFixed(2)}
+                      </div>
+                      
+                      {/* Flash Sale PawBucks Pricing */}
+                      {hasFlashSale && service.flash_sale_pawbucks_price ? (
+                        <div className="mt-1 space-y-0.5">
+                          <div className="flex items-baseline gap-1 justify-end">
+                            <span className="text-xs text-muted-foreground line-through">
+                              {regularPB.toLocaleString()} PB
+                            </span>
+                          </div>
+                          <div className="text-green-600 dark:text-green-400 font-bold">
+                            {service.flash_sale_pawbucks_price.toLocaleString()} PB
+                          </div>
+                          <div className="text-xs text-green-600 font-semibold">
+                            {savingsPercent}% Off!
+                          </div>
+                          {service.flash_sale_end_at && (
+                            <FlashSaleCountdown endAt={service.flash_sale_end_at} />
+                          )}
+                        </div>
+                      ) : cashbackRate > 0 && (
+                        <div className="flex items-center gap-1 text-xs text-amber-600 mt-1">
+                          <Sparkles className="w-3 h-3" />
+                          +{Math.floor(service.price * cashbackRate)} PB
+                        </div>
                       )}
                     </div>
                   </div>
-                  <div className="text-right flex-shrink-0">
-                    <div className="text-lg font-bold text-primary">
-                      ${service.price.toFixed(2)}
-                    </div>
-                    {cashbackRate > 0 && (
-                      <div className="flex items-center gap-1 text-xs text-amber-600">
-                        <Sparkles className="w-3 h-3" />
-                        +{Math.floor(service.price * cashbackRate)} PB
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </button>
-            ))}
+                </button>
+              );
+            })}
           </div>
         )}
 
