@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { QuizIntro } from "./QuizIntro";
 import { QuizQuestion } from "./QuizQuestion";
 import { QuizResult } from "./QuizResult";
-import { quizQuestions } from "./quizQuestions";
+import { getQuestionsForPetType } from "./quizQuestions";
 import { PersonalityType, PersonalityResult, QuizState } from "./types";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
@@ -31,6 +31,10 @@ export const PetPersonalityQuiz = ({
   const [isSaving, setIsSaving] = useState(false);
   const [petId, setPetId] = useState<string>(propPetId || "");
   const [petName, setPetName] = useState<string>(propPetName || "Your pet");
+  const [petType, setPetType] = useState<string>("dog");
+
+  // Get questions based on pet type
+  const quizQuestions = useMemo(() => getQuestionsForPetType(petType), [petType]);
   
   const [quizState, setQuizState] = useState<QuizState>({
     currentQuestion: -1, // -1 = intro screen
@@ -53,23 +57,24 @@ export const PetPersonalityQuiz = ({
         setPetId(urlPetId);
       }
       
-      // Fetch pet name if we have an ID
+      // Fetch pet name and type if we have an ID
       const targetPetId = propPetId || urlPetId;
       if (targetPetId) {
         const { data: pet } = await supabase
           .from("pet_profiles")
-          .select("name")
+          .select("name, type")
           .eq("id", targetPetId)
           .single();
         
         if (pet) {
           setPetName(pet.name);
+          setPetType(pet.type || "dog");
         }
       } else {
         // Get the most recently created pet
         const { data: pets } = await supabase
           .from("pet_profiles")
-          .select("id, name")
+          .select("id, name, type")
           .eq("user_id", user.id)
           .order("created_at", { ascending: false })
           .limit(1);
@@ -77,6 +82,7 @@ export const PetPersonalityQuiz = ({
         if (pets && pets.length > 0) {
           setPetId(pets[0].id);
           setPetName(pets[0].name);
+          setPetType(pets[0].type || "dog");
         }
       }
       
