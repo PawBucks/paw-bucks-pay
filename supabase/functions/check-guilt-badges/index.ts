@@ -250,11 +250,32 @@ serve(async (req) => {
           }
         }
 
+        // Activate any promotions linked to this badge
+        const { data: promotions } = await supabaseAdmin
+          .from('badge_promotions')
+          .select('id, duration_hours')
+          .eq('badge_id', badge.id)
+          .eq('is_active', true);
+
+        for (const promo of promotions || []) {
+          const promoExpiresAt = new Date();
+          promoExpiresAt.setHours(promoExpiresAt.getHours() + promo.duration_hours);
+
+          await supabaseAdmin.from('user_badge_promotions').insert({
+            user_id: userId,
+            promotion_id: promo.id,
+            user_badge_id: newBadge.id,
+            expires_at: promoExpiresAt.toISOString(),
+          }).maybeSingle();
+
+          logStep("Promotion activated for user", { promotionId: promo.id, expiresAt: promoExpiresAt.toISOString() });
+        }
+
         // Create notification for the user
         await supabaseAdmin.from('notifications').insert({
           user_id: userId,
           title: `${badge.emoji} ${badge.name} Badge Unlocked!`,
-          message: `You earned the ${badge.name} badge! ${badge.reward_description || ''}`,
+          message: `You earned the ${badge.name} badge! ${badge.reward_description || ''} Check Pet Store for exclusive discounts!`,
           category: 'promotional',
         });
 

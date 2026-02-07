@@ -1,0 +1,1 @@
+export { PromotionalBadge } from "./PromotionalBadge";

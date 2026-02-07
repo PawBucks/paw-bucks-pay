@@ -34,6 +34,8 @@ import { AdPlacement } from "@/components/AdPlacement";
 import { Header } from "@/components/Header";
 import { SEO } from "@/components/SEO";
 import { PullToRefresh } from "@/components/PullToRefresh";
+import { PromotionalBadge } from "@/components/pet-store/PromotionalBadge";
+import { usePromotionalItems } from "@/hooks/usePromotionalItems";
 import { getStripePromise } from "@/lib/stripe";
 
 const CATEGORIES = ["All", "Food", "Treats", "Toys", "Bedding", "Accessories", "Healthcare", "Grooming"];
@@ -200,6 +202,10 @@ export default function PetStore() {
   });
 
   const cashbackRate = subscription ? 20 : 10; // 10x for free, 20x for subscribers (simplified)
+
+  // Fetch user's active promotions
+  const { data: promotionalData } = usePromotionalItems(user?.id);
+  const promotionalItemMap = promotionalData?.itemMap || new Map();
 
   // Fetch active items
   const { data: items, isLoading } = useQuery({
@@ -457,68 +463,96 @@ export default function PetStore() {
         </div>
       ) : (
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-            {filteredItems?.map((item) => (
-            <Card key={item.id} className="flex flex-col">
-              <CardHeader className="p-0">
-                {item.image_url ? (
-                  <img
-                    src={item.image_url}
-                    alt={item.name}
-                    className="w-full h-48 object-cover rounded-t-lg"
-                  />
-                ) : (
-                  <div className="w-full h-48 bg-muted rounded-t-lg flex items-center justify-center">
-                    <span className="text-muted-foreground">No image</span>
-                  </div>
-                )}
-              </CardHeader>
-              <CardContent className="flex-1 pt-4">
-                <div className="flex items-start justify-between mb-2">
-                  <CardTitle className="text-lg">{item.name}</CardTitle>
-                  <Badge variant="secondary">{item.category}</Badge>
-                </div>
-                {item.description && (
-                  <CardDescription className="line-clamp-2 mb-3">
-                    {item.description}
-                  </CardDescription>
-                )}
-                <div className="space-y-2 mb-3">
-                  <div className="flex items-center gap-2">
-                    <CreditCard className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-lg font-bold">${(item.price / 100).toFixed(2)}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Coins className="h-4 w-4 text-primary" />
-                    <span className="text-lg font-bold text-primary">
-                      {Formatters.number(item.price_pawbucks)} PawBucks
-                    </span>
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    {item.stock_quantity} in stock
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter className="flex-col gap-2">
-                <Button
-                  className="w-full"
-                  onClick={() => handlePurchaseWithCard(item)}
-                  disabled={!user || item.stock_quantity === 0}
-                >
-                  <CreditCard className="mr-2 h-4 w-4" />
-                  {item.stock_quantity === 0 ? "Out of Stock" : `Pay $${(item.price / 100).toFixed(2)}`}
-                </Button>
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => handlePurchaseWithPawBucks(item.id)}
-                  disabled={!user || item.stock_quantity === 0 || purchaseMutation.isPending || (wallet?.balance || 0) < item.price_pawbucks}
-                >
-                  <Coins className="mr-2 h-4 w-4" />
-                  {item.stock_quantity === 0 ? "Out of Stock" : `Pay ${Formatters.number(item.price_pawbucks)} PawBucks`}
-                </Button>
-              </CardFooter>
-            </Card>
-          ))}
+            {filteredItems?.map((item) => {
+              const promo = promotionalItemMap.get(item.id);
+              const hasPromo = !!promo;
+              const discountedPrice = hasPromo 
+                ? Math.round(item.price * (1 - promo.discountPercentage / 100))
+                : item.price;
+              
+              return (
+                <Card key={item.id} className={`flex flex-col relative ${hasPromo ? 'ring-2 ring-primary/50' : ''}`}>
+                  <CardHeader className="p-0 relative">
+                    {hasPromo && (
+                      <PromotionalBadge
+                        discountPercentage={promo.discountPercentage}
+                        badgeEmoji={promo.badgeEmoji}
+                        badgeName={promo.badgeName}
+                        expiresAt={promo.expiresAt}
+                        variant="overlay"
+                      />
+                    )}
+                    {item.image_url ? (
+                      <img
+                        src={item.image_url}
+                        alt={item.name}
+                        className="w-full h-48 object-cover rounded-t-lg"
+                      />
+                    ) : (
+                      <div className="w-full h-48 bg-muted rounded-t-lg flex items-center justify-center">
+                        <span className="text-muted-foreground">No image</span>
+                      </div>
+                    )}
+                  </CardHeader>
+                  <CardContent className="flex-1 pt-4">
+                    <div className="flex items-start justify-between mb-2">
+                      <CardTitle className="text-lg">{item.name}</CardTitle>
+                      <Badge variant="secondary">{item.category}</Badge>
+                    </div>
+                    {item.description && (
+                      <CardDescription className="line-clamp-2 mb-3">
+                        {item.description}
+                      </CardDescription>
+                    )}
+                    <div className="space-y-2 mb-3">
+                      <div className="flex items-center gap-2">
+                        <CreditCard className="h-4 w-4 text-muted-foreground" />
+                        {hasPromo ? (
+                          <div className="flex items-center gap-2">
+                            <span className="text-lg font-bold text-primary">
+                              ${(discountedPrice / 100).toFixed(2)}
+                            </span>
+                            <span className="text-sm text-muted-foreground line-through">
+                              ${(item.price / 100).toFixed(2)}
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-lg font-bold">${(item.price / 100).toFixed(2)}</span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Coins className="h-4 w-4 text-primary" />
+                        <span className="text-lg font-bold text-primary">
+                          {Formatters.number(item.price_pawbucks)} PawBucks
+                        </span>
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {item.stock_quantity} in stock
+                      </div>
+                    </div>
+                  </CardContent>
+                  <CardFooter className="flex-col gap-2">
+                    <Button
+                      className="w-full"
+                      onClick={() => handlePurchaseWithCard({ ...item, price: discountedPrice })}
+                      disabled={!user || item.stock_quantity === 0}
+                    >
+                      <CreditCard className="mr-2 h-4 w-4" />
+                      {item.stock_quantity === 0 ? "Out of Stock" : `Pay $${(discountedPrice / 100).toFixed(2)}`}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => handlePurchaseWithPawBucks(item.id)}
+                      disabled={!user || item.stock_quantity === 0 || purchaseMutation.isPending || (wallet?.balance || 0) < item.price_pawbucks}
+                    >
+                      <Coins className="mr-2 h-4 w-4" />
+                      {item.stock_quantity === 0 ? "Out of Stock" : `Pay ${Formatters.number(item.price_pawbucks)} PawBucks`}
+                    </Button>
+                  </CardFooter>
+                </Card>
+              );
+            })}
         </div>
       )}
 

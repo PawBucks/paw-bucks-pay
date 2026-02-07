@@ -356,6 +356,95 @@ export type Database = {
         }
         Relationships: []
       }
+      badge_promotion_items: {
+        Row: {
+          created_at: string
+          id: string
+          item_id: string
+          promotion_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          item_id: string
+          promotion_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          item_id?: string
+          promotion_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "badge_promotion_items_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "pet_store_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "badge_promotion_items_promotion_id_fkey"
+            columns: ["promotion_id"]
+            isOneToOne: false
+            referencedRelation: "badge_promotions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      badge_promotions: {
+        Row: {
+          badge_id: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          discount_percentage: number
+          duration_hours: number
+          end_date: string | null
+          id: string
+          is_active: boolean
+          name: string
+          start_date: string | null
+          updated_at: string
+        }
+        Insert: {
+          badge_id: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          discount_percentage: number
+          duration_hours?: number
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          start_date?: string | null
+          updated_at?: string
+        }
+        Update: {
+          badge_id?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          discount_percentage?: number
+          duration_hours?: number
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          start_date?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "badge_promotions_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "guilt_badge_definitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       budget_settings: {
         Row: {
           alert_threshold: number
@@ -7343,6 +7432,54 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "reviewer_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_badge_promotions: {
+        Row: {
+          activated_at: string
+          expires_at: string
+          id: string
+          is_used: boolean
+          promotion_id: string
+          used_at: string | null
+          user_badge_id: string
+          user_id: string
+        }
+        Insert: {
+          activated_at?: string
+          expires_at: string
+          id?: string
+          is_used?: boolean
+          promotion_id: string
+          used_at?: string | null
+          user_badge_id: string
+          user_id: string
+        }
+        Update: {
+          activated_at?: string
+          expires_at?: string
+          id?: string
+          is_used?: boolean
+          promotion_id?: string
+          used_at?: string | null
+          user_badge_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_badge_promotions_promotion_id_fkey"
+            columns: ["promotion_id"]
+            isOneToOne: false
+            referencedRelation: "badge_promotions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_badge_promotions_user_badge_id_fkey"
+            columns: ["user_badge_id"]
+            isOneToOne: false
+            referencedRelation: "user_guilt_badges"
             referencedColumns: ["id"]
           },
         ]
