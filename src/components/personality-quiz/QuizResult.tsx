@@ -4,15 +4,22 @@ import { Badge } from "@/components/ui/badge";
 import { PersonalityResult } from "./types";
 import { Sparkles, ArrowRight, Star, Lightbulb } from "lucide-react";
 import confetti from "canvas-confetti";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
+import { transformPersonalityData } from "./personalityNameUtils";
 
 interface QuizResultProps {
   petName: string;
+  petType: string;
   result: PersonalityResult;
   onContinue: () => void;
 }
 
-export const QuizResult = ({ petName, result, onContinue }: QuizResultProps) => {
+export const QuizResult = ({ petName, petType, result, onContinue }: QuizResultProps) => {
+  // Transform personality data to match pet type (e.g., "Guard Dog" → "Guard Cat")
+  const transformedResult = useMemo(
+    () => transformPersonalityData(result, petType),
+    [result, petType]
+  );
   // Trigger confetti on mount
   useEffect(() => {
     const duration = 3000;
@@ -55,7 +62,7 @@ export const QuizResult = ({ petName, result, onContinue }: QuizResultProps) => 
         transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
         className="text-center"
       >
-        <span className="text-6xl mb-4 block">{result.emoji}</span>
+        <span className="text-6xl mb-4 block">{transformedResult.emoji}</span>
         <h1 className="text-3xl md:text-4xl font-bold mb-2">
           {petName} is...
         </h1>
@@ -64,9 +71,9 @@ export const QuizResult = ({ petName, result, onContinue }: QuizResultProps) => 
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.5 }}
           className="text-4xl md:text-5xl font-bold"
-          style={{ color: result.color_primary }}
+          style={{ color: transformedResult.color_primary }}
         >
-          {result.name}!
+          {transformedResult.name}!
         </motion.h2>
       </motion.div>
 
@@ -77,7 +84,7 @@ export const QuizResult = ({ petName, result, onContinue }: QuizResultProps) => 
         transition={{ delay: 0.7 }}
         className="text-xl text-center text-muted-foreground italic"
       >
-        "{result.tagline}"
+        "{transformedResult.tagline}"
       </motion.p>
 
       {/* Description card */}
@@ -87,11 +94,11 @@ export const QuizResult = ({ petName, result, onContinue }: QuizResultProps) => 
         transition={{ delay: 0.9 }}
         className="bg-gradient-to-br rounded-2xl p-6 border-2"
         style={{
-          borderColor: result.color_primary,
-          background: `linear-gradient(135deg, ${result.color_primary}10, ${result.color_secondary}10)`,
+          borderColor: transformedResult.color_primary,
+          background: `linear-gradient(135deg, ${transformedResult.color_primary}10, ${transformedResult.color_secondary}10)`,
         }}
       >
-        <p className="text-center text-lg">{result.description}</p>
+        <p className="text-center text-lg">{transformedResult.description}</p>
       </motion.div>
 
       {/* Traits */}
@@ -106,7 +113,7 @@ export const QuizResult = ({ petName, result, onContinue }: QuizResultProps) => 
           Key Traits
         </h3>
         <div className="flex flex-wrap justify-center gap-2">
-          {result.traits.map((trait, i) => (
+          {transformedResult.traits.map((trait, i) => (
             <motion.div
               key={trait}
               initial={{ scale: 0 }}
@@ -116,7 +123,7 @@ export const QuizResult = ({ petName, result, onContinue }: QuizResultProps) => 
               <Badge
                 variant="secondary"
                 className="text-sm px-3 py-1"
-                style={{ backgroundColor: `${result.color_primary}20` }}
+                style={{ backgroundColor: `${transformedResult.color_primary}20` }}
               >
                 {trait}
               </Badge>
@@ -134,10 +141,10 @@ export const QuizResult = ({ petName, result, onContinue }: QuizResultProps) => 
       >
         <h3 className="font-semibold mb-3 flex items-center gap-2">
           <Lightbulb className="w-4 h-4 text-yellow-500" />
-          Tips for {result.name} Parents
+          Tips for {transformedResult.name} Parents
         </h3>
         <ul className="space-y-2">
-          {result.tips.map((tip, i) => (
+          {transformedResult.tips.map((tip, i) => (
             <motion.li
               key={i}
               initial={{ opacity: 0, x: -10 }}
@@ -162,11 +169,11 @@ export const QuizResult = ({ petName, result, onContinue }: QuizResultProps) => 
         <div
           className="inline-block px-6 py-3 rounded-full font-bold text-white shadow-lg"
           style={{
-            background: `linear-gradient(135deg, ${result.color_primary}, ${result.color_secondary})`,
+            background: `linear-gradient(135deg, ${transformedResult.color_primary}, ${transformedResult.color_secondary})`,
           }}
         >
           <Sparkles className="w-4 h-4 inline mr-2" />
-          {result.badge_text}
+          {transformedResult.badge_text}
         </div>
         <p className="text-sm text-muted-foreground mt-2">
           🎉 Badge added to your profile!

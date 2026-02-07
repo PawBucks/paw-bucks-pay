@@ -7,6 +7,7 @@ import { Calendar, PawPrint, FileHeart, Pencil, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { EditPetProfileDialog } from "./EditPetProfileDialog";
 import { usePetPersonality } from "@/hooks/usePersonalityBadges";
+import { transformPersonalityName } from "@/components/personality-quiz/personalityNameUtils";
 
 type PetProfile = {
   id: string;
@@ -44,6 +45,12 @@ const PetProfileCardComponent = ({ pet, onUpdate, index = 0 }: PetProfileCardPro
   
   // Fetch personality data
   const { data: personalityData } = usePetPersonality(pet.id);
+  
+  // Transform personality name to match pet type (e.g., "Guard Dog" → "Guard Cat")
+  const displayPersonalityName = useMemo(
+    () => personalityData?.name ? transformPersonalityName(personalityData.name, pet.type) : null,
+    [personalityData?.name, pet.type]
+  );
 
   // Memoize age calculation
   const age = useMemo(() => {
@@ -104,7 +111,7 @@ const PetProfileCardComponent = ({ pet, onUpdate, index = 0 }: PetProfileCardPro
               >
                 {petTypeLabel}
               </Badge>
-              {personalityData ? (
+              {personalityData && displayPersonalityName ? (
                 <Badge
                   variant="secondary"
                   className="text-xs font-medium"
@@ -113,7 +120,7 @@ const PetProfileCardComponent = ({ pet, onUpdate, index = 0 }: PetProfileCardPro
                     color: personalityData.color_primary,
                   }}
                 >
-                  {personalityData.emoji} {personalityData.name}
+                  {personalityData.emoji} {displayPersonalityName}
                 </Badge>
               ) : (
                 <Button
