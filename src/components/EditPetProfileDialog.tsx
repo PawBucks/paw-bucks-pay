@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { petsService } from "@/services/api/pets.service";
 import type { Database } from "@/integrations/supabase/types";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -111,26 +112,27 @@ export const EditPetProfileDialog = ({ pet, open, onOpenChange, onSuccess }: Edi
         photoUrl = publicUrl;
       }
 
-      // Update pet profile with all fields
-      const { error: updateError } = await supabase
-        .from("pet_profiles")
-        .update({
-          name: formData.name,
-          type: formData.type as Database["public"]["Enums"]["pet_type"],
-          breed: formData.breed || null,
-          birthday: formData.birthday || null,
-          photo_url: photoUrl || null,
-          color_markings: formData.color_markings || null,
-          size: formData.size || null,
-          gender: formData.gender || null,
-          age_estimate: formData.age_estimate || null,
-          microchip_number: formData.microchip_number || null,
-          collar_description: formData.collar_description || null,
-          identifying_features: formData.identifying_features || null,
-        })
-        .eq("id", pet.id);
+      // Update pet profile with all fields using service layer
+      const { data: updatedPet, error: updateError } = await petsService.update(pet.id, {
+        name: formData.name,
+        type: formData.type as Database["public"]["Enums"]["pet_type"],
+        breed: formData.breed || null,
+        birthday: formData.birthday || null,
+        photo_url: photoUrl || null,
+        color_markings: formData.color_markings || null,
+        size: formData.size || null,
+        gender: formData.gender || null,
+        age_estimate: formData.age_estimate || null,
+        microchip_number: formData.microchip_number || null,
+        collar_description: formData.collar_description || null,
+        identifying_features: formData.identifying_features || null,
+      });
 
       if (updateError) throw updateError;
+      
+      if (!updatedPet) {
+        throw new Error("Failed to save pet profile - no data returned");
+      }
 
       toast.success("Pet profile updated successfully!");
       onSuccess();
