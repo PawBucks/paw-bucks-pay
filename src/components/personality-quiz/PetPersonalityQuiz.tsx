@@ -250,6 +250,7 @@ export const PetPersonalityQuiz = ({
           {quizState.isComplete && quizState.result && (
             <QuizResult
               petName={petName}
+              petType={petType}
               result={quizState.result}
               onContinue={handleContinue}
             />

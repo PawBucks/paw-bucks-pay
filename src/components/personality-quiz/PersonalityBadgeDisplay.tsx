@@ -3,10 +3,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useMemo } from "react";
+import { transformPersonalityName } from "./personalityNameUtils";
 
 interface PersonalityBadgeDisplayProps {
   petId: string;
   petName: string;
+  petType: string;
   personalityType?: string | null;
   personalityData?: {
     name: string;
@@ -20,11 +23,18 @@ interface PersonalityBadgeDisplayProps {
 export const PersonalityBadgeDisplay = ({
   petId,
   petName,
+  petType,
   personalityType,
   personalityData,
   compact = false,
 }: PersonalityBadgeDisplayProps) => {
   const navigate = useNavigate();
+
+  // Transform personality name to match pet type (e.g., "Guard Dog" → "Guard Cat")
+  const displayName = useMemo(
+    () => personalityData?.name ? transformPersonalityName(personalityData.name, petType) : null,
+    [personalityData?.name, petType]
+  );
 
   // No personality yet - show CTA to take quiz
   if (!personalityType || !personalityData) {
@@ -76,7 +86,7 @@ export const PersonalityBadgeDisplay = ({
           color: personalityData.color_primary,
         }}
       >
-        {personalityData.emoji} {personalityData.name}
+        {personalityData.emoji} {displayName}
       </Badge>
     );
   }
@@ -94,7 +104,7 @@ export const PersonalityBadgeDisplay = ({
       <div className="flex items-center gap-3">
         <span className="text-2xl">{personalityData.emoji}</span>
         <div>
-          <p className="font-medium text-sm">{personalityData.name}</p>
+          <p className="font-medium text-sm">{displayName}</p>
           <p className="text-xs text-muted-foreground">{personalityData.badge_text}</p>
         </div>
       </div>
