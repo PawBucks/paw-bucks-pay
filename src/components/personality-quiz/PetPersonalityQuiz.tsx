@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { petsService } from "@/services/api/pets.service";
 import { Card, CardContent } from "@/components/ui/card";
 import { QuizIntro } from "./QuizIntro";
 import { QuizQuestion } from "./QuizQuestion";
@@ -177,18 +178,19 @@ export const PetPersonalityQuiz = ({
 
     setIsSaving(true);
     try {
-      // Update pet profile
-      const { error: profileError } = await supabase
-        .from("pet_profiles")
-        .update({
-          personality_type: personalityType,
-          personality_quiz_completed: true,
-          personality_quiz_answers: answers,
-          personality_completed_at: new Date().toISOString(),
-        })
-        .eq("id", petId);
+      // Update pet profile using service layer
+      const { data: updatedPet, error: profileError } = await petsService.update(petId, {
+        personality_type: personalityType,
+        personality_quiz_completed: true,
+        personality_quiz_answers: answers,
+        personality_completed_at: new Date().toISOString(),
+      });
 
       if (profileError) throw profileError;
+      
+      if (!updatedPet) {
+        throw new Error("Failed to save personality quiz result - no data returned");
+      }
 
       // Create badge
       const { error: badgeError } = await supabase

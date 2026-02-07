@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { petsService } from "@/services/api/pets.service";
 import type { Database } from "@/integrations/supabase/types";
 import { Header } from "@/components/Header";
 import { SEO } from "@/components/SEO";
@@ -86,8 +87,8 @@ const CreatePetProfile = () => {
         photoUrl = publicUrl;
       }
 
-      // Create pet profile with all fields
-      const { data: newPet, error: profileError } = await supabase.from("pet_profiles").insert({
+      // Create pet profile with all fields using service layer
+      const { data: newPet, error: profileError } = await petsService.create({
         user_id: user.id,
         name: formData.name.trim(),
         type: formData.type as Database["public"]["Enums"]["pet_type"],
@@ -101,9 +102,13 @@ const CreatePetProfile = () => {
         microchip_number: formData.microchip_number || null,
         collar_description: formData.collar_description || null,
         identifying_features: formData.identifying_features || null,
-      }).select('id').single();
+      });
 
       if (profileError) throw profileError;
+      
+      if (!newPet) {
+        throw new Error("Failed to create pet profile - no data returned");
+      }
 
       toast.success(`${formData.name}'s profile created! Now let's discover their personality! 🐾`);
       
