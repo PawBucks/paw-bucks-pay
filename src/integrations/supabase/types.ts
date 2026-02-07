@@ -5535,6 +5535,84 @@ export type Database = {
           },
         ]
       }
+      pet_timeline_moments: {
+        Row: {
+          amount: number | null
+          created_at: string
+          emoji: string
+          id: string
+          merchant_category: string | null
+          merchant_name: string | null
+          moment_date: string
+          moment_type: string
+          mood: string | null
+          narrative: string
+          pawbucks_earned: number | null
+          pet_id: string
+          photo_prompt: string | null
+          photo_url: string | null
+          title: string
+          transaction_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string
+          emoji?: string
+          id?: string
+          merchant_category?: string | null
+          merchant_name?: string | null
+          moment_date?: string
+          moment_type?: string
+          mood?: string | null
+          narrative: string
+          pawbucks_earned?: number | null
+          pet_id: string
+          photo_prompt?: string | null
+          photo_url?: string | null
+          title: string
+          transaction_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string
+          emoji?: string
+          id?: string
+          merchant_category?: string | null
+          merchant_name?: string | null
+          moment_date?: string
+          moment_type?: string
+          mood?: string | null
+          narrative?: string
+          pawbucks_earned?: number | null
+          pet_id?: string
+          photo_prompt?: string | null
+          photo_url?: string | null
+          title?: string
+          transaction_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pet_timeline_moments_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "pet_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_timeline_moments_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pet_vaccinations: {
         Row: {
           administered_by: string | null

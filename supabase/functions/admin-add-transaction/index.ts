@@ -97,7 +97,7 @@ serve(async (req) => {
     // Verify merchant exists
     const { data: merchant, error: merchantError } = await supabase
       .from('merchants')
-      .select('id, business_name, cashback_rate')
+      .select('id, business_name, cashback_rate, business_type')
       .eq('id', merchant_id)
       .single();
 
@@ -250,6 +250,47 @@ serve(async (req) => {
     });
 
     console.log('Transaction created successfully:', transaction.id);
+
+    // Generate Pet Timeline moment for this transaction
+    try {
+      // Get user's pet (first pet for now)
+      const { data: userPets } = await supabase
+        .from('pet_profiles')
+        .select('id, name, type')
+        .eq('user_id', user_id)
+        .limit(1);
+
+      if (userPets && userPets.length > 0) {
+        const pet = userPets[0];
+        const supabaseUrl = Deno.env.get("SUPABASE_URL");
+        
+        // Trigger timeline moment generation (fire and forget)
+        fetch(`${supabaseUrl}/functions/v1/generate-timeline-moment`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+          },
+          body: JSON.stringify({
+            transactionId: transaction.id,
+            petId: pet.id,
+            userId: user_id,
+            petName: pet.name,
+            petType: pet.type,
+            merchantName: merchant.business_name,
+            merchantCategory: merchant.business_type,
+            amount,
+            pawbucksEarned,
+            description: sanitizedDescription,
+          }),
+        }).catch(err => console.error("[ADMIN-ADD-TRANSACTION] Timeline moment error:", err));
+
+        console.log(`Timeline moment generation triggered for pet: ${pet.id}`);
+      }
+    } catch (timelineError) {
+      // Don't fail the transaction for timeline errors
+      console.error('[ADMIN-ADD-TRANSACTION] Error triggering timeline moment:', timelineError);
+    }
 
     return new Response(
       JSON.stringify({

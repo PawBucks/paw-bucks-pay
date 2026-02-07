@@ -702,6 +702,56 @@ serve(async (req) => {
               },
             });
           }
+
+          // Generate Pet Timeline moment for this transaction
+          if (transaction?.id) {
+            try {
+              // Get user's pet (first pet for now - could be enhanced to select based on merchant category)
+              const { data: userPets } = await supabaseAdmin
+                .from('pet_profiles')
+                .select('id, name, type')
+                .eq('user_id', userId)
+                .limit(1);
+
+              if (userPets && userPets.length > 0) {
+                const pet = userPets[0];
+                
+                // Get merchant category from database
+                const { data: merchantDetails } = await supabaseAdmin
+                  .from('merchants')
+                  .select('business_type')
+                  .eq('id', merchantId)
+                  .single();
+
+                // Trigger timeline moment generation (fire and forget)
+                const supabaseUrl = Deno.env.get("SUPABASE_URL");
+                fetch(`${supabaseUrl}/functions/v1/generate-timeline-moment`, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+                  },
+                  body: JSON.stringify({
+                    transactionId: transaction.id,
+                    petId: pet.id,
+                    userId,
+                    petName: pet.name,
+                    petType: pet.type,
+                    merchantName: businessName,
+                    merchantCategory: merchantDetails?.business_type || description,
+                    amount: totalAmount > 0 ? totalAmount : amountInDollars,
+                    pawbucksEarned,
+                    description,
+                  }),
+                }).catch(err => console.error("[CONNECT-WEBHOOK] Timeline moment error:", err));
+
+                logStep("Timeline moment generation triggered", { petId: pet.id });
+              }
+            } catch (timelineError) {
+              // Don't fail the webhook for timeline errors
+              console.error("[CONNECT-WEBHOOK] Error triggering timeline moment:", timelineError);
+            }
+          }
         }
 
         break;
