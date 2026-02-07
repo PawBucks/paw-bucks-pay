@@ -145,6 +145,39 @@ const Index = () => {
           </div>
         </section>
 
+        {/* How It Works */}
+        <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20" aria-labelledby="how-it-works-heading">
+          <div className="text-center mb-12">
+            <h2 id="how-it-works-heading" className="text-3xl sm:text-4xl font-bold mb-4">
+              How It Works
+            </h2>
+          </div>
+
+          <div className="grid gap-8 md:grid-cols-3 max-w-4xl mx-auto">
+            <div className="text-center space-y-4">
+              <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mx-auto text-2xl font-bold text-accent">
+                1
+              </div>
+              <h3 className="text-xl font-bold">Sign up for free</h3>
+              <p className="text-muted-foreground">Create your account in seconds — no credit card required.</p>
+            </div>
+            <div className="text-center space-y-4">
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto text-2xl font-bold text-primary">
+                2
+              </div>
+              <h3 className="text-xl font-bold">Spend on your pet like you already do</h3>
+              <p className="text-muted-foreground">Shop at partner pet businesses for food, grooming, vet visits, and more.</p>
+            </div>
+            <div className="text-center space-y-4">
+              <div className="w-16 h-16 rounded-full bg-secondary/10 flex items-center justify-center mx-auto text-2xl font-bold text-secondary">
+                3
+              </div>
+              <h3 className="text-xl font-bold">Earn PawBucks and use them</h3>
+              <p className="text-muted-foreground">Redeem for discounts, services, and products at the PawBucks store.</p>
+            </div>
+          </div>
+        </section>
+
         {/* What You Can Do Section */}
         <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20" id="features" aria-labelledby="features-heading">
           <div className="text-center mb-12">
@@ -209,7 +242,7 @@ const Index = () => {
               <div className="w-14 h-14 rounded-xl bg-secondary/10 flex items-center justify-center">
                 <MapPin className="w-7 h-7 text-secondary" />
               </div>
-              <h3 className="text-xl font-bold">Discover Trusted Local Pet Businesses</h3>
+              <h3 className="text-xl font-bold">Support Verified Local Businesses</h3>
               <ul className="space-y-2 text-muted-foreground">
                 <li className="flex items-start gap-2">
                   <CheckCircle className="w-4 h-4 text-secondary mt-1 flex-shrink-0" />
@@ -409,40 +442,6 @@ const Index = () => {
             </div>
           </div>
         </section>
-
-        {/* How It Works */}
-        <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20" aria-labelledby="how-it-works-heading">
-          <div className="text-center mb-12">
-            <h2 id="how-it-works-heading" className="text-3xl sm:text-4xl font-bold mb-4">
-              How It Works
-            </h2>
-          </div>
-
-          <div className="grid gap-8 md:grid-cols-3 max-w-4xl mx-auto">
-            <div className="text-center space-y-4">
-              <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mx-auto text-2xl font-bold text-accent">
-                1
-              </div>
-              <h3 className="text-xl font-bold">Sign up for free</h3>
-              <p className="text-muted-foreground">Create your account in seconds — no credit card required.</p>
-            </div>
-            <div className="text-center space-y-4">
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto text-2xl font-bold text-primary">
-                2
-              </div>
-              <h3 className="text-xl font-bold">Spend on your pet like you already do</h3>
-              <p className="text-muted-foreground">Shop at partner pet businesses for food, grooming, vet visits, and more.</p>
-            </div>
-            <div className="text-center space-y-4">
-              <div className="w-16 h-16 rounded-full bg-secondary/10 flex items-center justify-center mx-auto text-2xl font-bold text-secondary">
-                3
-              </div>
-              <h3 className="text-xl font-bold">Earn PawBucks and use them</h3>
-              <p className="text-muted-foreground">Redeem for discounts, services, and products at the PawBucks store.</p>
-            </div>
-          </div>
-        </section>
-
         {/* Why Pet Owners Love PawBucks */}
         <section className="bg-gradient-to-br from-accent/5 via-transparent to-primary/5 py-16 sm:py-20" aria-labelledby="love-heading">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
