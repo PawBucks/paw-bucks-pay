@@ -159,35 +159,39 @@ serve(async (req) => {
     const photoUrl = getPhotoForMoment(merchantCategory || description || '', petType || 'dog');
 
     // Generate narrative using AI - GROUNDED IN REAL DATA ONLY
-    const prompt = `You are creating a brief narrative moment for a pet timeline based ONLY on REAL transaction data. Do NOT invent or hallucinate any details.
+    // Generate FUN narrative using AI - but ONLY from real data
+    const prompt = `You are a playful, warm storyteller creating timeline moments for pet owners. Make it FUN and EMOTIONAL while using ONLY the real data provided.
 
-REAL TRANSACTION DATA (use ONLY this information):
+REAL EVENT DATA:
 - Pet Name: ${petName || 'Pet'}
 - Pet Type: ${petType || 'pet'}
 - Day: ${dayName}
-- Merchant Name: ${merchantName || 'Pet Business'}
-- Service Category: ${merchantCategory || 'Pet Services'}
-- Amount Paid: $${amount?.toFixed(2) || '0.00'}
+- Merchant: ${merchantName || 'Pet Business'}
+- Service: ${merchantCategory || 'Pet Services'}
+- Amount: $${amount?.toFixed(2) || '0.00'}
 - PawBucks Earned: ${pawbucksEarned || 0}
-- Service Description: ${description || ''}
+- Description: ${description || ''}
 
-STRICT RULES:
-1. ONLY mention facts from the data above - no invented details
-2. Do NOT add fictional scenarios, cookies, treats, or events that aren't in the data
-3. Keep it simple and factual with a warm tone
-4. The narrative should be 1-2 sentences describing what ACTUALLY happened
-5. Format: "[Pet Name] [visited/had] [actual service] at [Merchant Name]. [Amount and PawBucks earned]."
+CREATE A FUN MOMENT:
+1. Use playful language, emojis in the narrative, and pet personality
+2. Add warmth and charm - make pet owners smile!
+3. You CAN use phrases like "rocked it", "nailed it", "like a boss", "VIP treatment"
+4. You CAN describe the type of service in a fun way (e.g., "spa day" for grooming, "health check" for vet)
+5. Do NOT invent specific events that didn't happen (no "made friends", "got treats", "was scared")
+6. The reward/PawBucks should feel celebratory
 
-Examples of GOOD narratives (factual):
-- "Milo had a dental cleaning at Happy Paws Vet. $47.89 spent → 478 PawBucks earned!"
-- "Luna visited PetSmart for food supplies. 234 PawBucks added to the stash!"
+GOOD examples (fun but factual):
+- "✨ ${petName}'s ${dayName} Glow-Up! Spa day at ${merchantName} = one fresh pupper. +${pawbucksEarned} PawBucks in the bank!"
+- "🏥 Health check complete! ${petName} crushed it at the vet today. $${amount?.toFixed(2)} well spent → ${pawbucksEarned} PawBucks earned!"
+- "🍖 Treat run! ${petName}'s pantry just got restocked at ${merchantName}. Cha-ching: +${pawbucksEarned} PawBucks!"
 
-Examples of BAD narratives (hallucinated - DO NOT DO THIS):
-- "Milo got a cookie after being brave!" (no cookie in data)
-- "Luna made new friends at daycare!" (no friend data exists)
+BAD examples (invents fake events - NEVER DO):
+- "Made so many friends today!" (no friend data)
+- "Got a special treat for being brave!" (no treat data)
+- "The groomer said she was the cutest!" (no groomer feedback data)
 
-Respond ONLY in this exact JSON format:
-{"title": "Brief Factual Title", "narrative": "Factual narrative here."}`;
+Respond ONLY in JSON format:
+{"title": "Catchy 3-5 Word Title", "narrative": "Fun 1-2 sentence narrative with emoji."}`;
 
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
