@@ -1366,6 +1366,167 @@ export type Database = {
           },
         ]
       }
+      guilt_badge_definitions: {
+        Row: {
+          badge_key: string
+          category: string
+          created_at: string
+          description: string
+          display_order: number | null
+          emoji: string
+          icon_url: string | null
+          id: string
+          is_active: boolean
+          name: string
+          reward_description: string | null
+          reward_duration_hours: number | null
+          reward_type: string | null
+          reward_value: number | null
+          threshold_amount: number
+          threshold_period: string
+          updated_at: string
+        }
+        Insert: {
+          badge_key: string
+          category: string
+          created_at?: string
+          description: string
+          display_order?: number | null
+          emoji: string
+          icon_url?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          reward_description?: string | null
+          reward_duration_hours?: number | null
+          reward_type?: string | null
+          reward_value?: number | null
+          threshold_amount: number
+          threshold_period?: string
+          updated_at?: string
+        }
+        Update: {
+          badge_key?: string
+          category?: string
+          created_at?: string
+          description?: string
+          display_order?: number | null
+          emoji?: string
+          icon_url?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          reward_description?: string | null
+          reward_duration_hours?: number | null
+          reward_type?: string | null
+          reward_value?: number | null
+          threshold_amount?: number
+          threshold_period?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      guilt_badge_progress: {
+        Row: {
+          badge_id: string
+          current_amount: number
+          id: string
+          last_updated: string
+          period_end: string
+          period_start: string
+          user_id: string
+        }
+        Insert: {
+          badge_id: string
+          current_amount?: number
+          id?: string
+          last_updated?: string
+          period_end: string
+          period_start: string
+          user_id: string
+        }
+        Update: {
+          badge_id?: string
+          current_amount?: number
+          id?: string
+          last_updated?: string
+          period_end?: string
+          period_start?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guilt_badge_progress_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "guilt_badge_definitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guilt_badge_rewards: {
+        Row: {
+          badge_id: string
+          created_at: string
+          expires_at: string
+          id: string
+          reward_code: string | null
+          reward_type: string
+          reward_value: number
+          status: string
+          updated_at: string
+          used_at: string | null
+          used_on_transaction_id: string | null
+          user_badge_id: string
+          user_id: string
+        }
+        Insert: {
+          badge_id: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          reward_code?: string | null
+          reward_type: string
+          reward_value: number
+          status?: string
+          updated_at?: string
+          used_at?: string | null
+          used_on_transaction_id?: string | null
+          user_badge_id: string
+          user_id: string
+        }
+        Update: {
+          badge_id?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          reward_code?: string | null
+          reward_type?: string
+          reward_value?: number
+          status?: string
+          updated_at?: string
+          used_at?: string | null
+          used_on_transaction_id?: string | null
+          user_badge_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guilt_badge_rewards_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "guilt_badge_definitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guilt_badge_rewards_user_badge_id_fkey"
+            columns: ["user_badge_id"]
+            isOneToOne: false
+            referencedRelation: "user_guilt_badges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       insurance_claims: {
         Row: {
           attachments: string[] | null
@@ -7182,6 +7343,59 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "reviewer_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_guilt_badges: {
+        Row: {
+          badge_id: string
+          created_at: string
+          earned_at: string
+          id: string
+          metadata: Json | null
+          period_end: string
+          period_start: string
+          reward_claimed: boolean
+          reward_claimed_at: string | null
+          reward_expires_at: string | null
+          spending_amount: number
+          user_id: string
+        }
+        Insert: {
+          badge_id: string
+          created_at?: string
+          earned_at?: string
+          id?: string
+          metadata?: Json | null
+          period_end: string
+          period_start: string
+          reward_claimed?: boolean
+          reward_claimed_at?: string | null
+          reward_expires_at?: string | null
+          spending_amount: number
+          user_id: string
+        }
+        Update: {
+          badge_id?: string
+          created_at?: string
+          earned_at?: string
+          id?: string
+          metadata?: Json | null
+          period_end?: string
+          period_start?: string
+          reward_claimed?: boolean
+          reward_claimed_at?: string | null
+          reward_expires_at?: string | null
+          spending_amount?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_guilt_badges_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "guilt_badge_definitions"
             referencedColumns: ["id"]
           },
         ]

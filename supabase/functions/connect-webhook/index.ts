@@ -751,6 +751,33 @@ serve(async (req) => {
               // Don't fail the webhook for timeline errors
               console.error("[CONNECT-WEBHOOK] Error triggering timeline moment:", timelineError);
             }
+
+            // Check for Guilt-Free Badges (gamification)
+            try {
+              const { data: merchantForBadge } = await supabaseAdmin
+                .from('merchants')
+                .select('business_type')
+                .eq('id', merchantId)
+                .single();
+
+              fetch(`${supabaseUrl}/functions/v1/check-guilt-badges`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+                },
+                body: JSON.stringify({
+                  userId,
+                  transactionAmount: totalAmount > 0 ? totalAmount : amountInDollars,
+                  merchantCategory: merchantForBadge?.business_type || 'other',
+                  transactionId: transaction.id,
+                }),
+              }).catch(err => console.error("[CONNECT-WEBHOOK] Badge check error:", err));
+
+              logStep("Badge check triggered");
+            } catch (badgeError) {
+              console.error("[CONNECT-WEBHOOK] Error triggering badge check:", badgeError);
+            }
           }
         }
 

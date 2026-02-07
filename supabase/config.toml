@@ -347,3 +347,6 @@ verify_jwt = false
 
 [functions.send-flash-sale-notification]
 verify_jwt = true
+
+[functions.check-guilt-badges]
+verify_jwt = false

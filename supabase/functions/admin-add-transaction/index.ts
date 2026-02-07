@@ -292,6 +292,29 @@ serve(async (req) => {
       console.error('[ADMIN-ADD-TRANSACTION] Error triggering timeline moment:', timelineError);
     }
 
+    // Check for Guilt-Free Badges (gamification)
+    try {
+      const supabaseUrl = Deno.env.get("SUPABASE_URL");
+      
+      fetch(`${supabaseUrl}/functions/v1/check-guilt-badges`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+        },
+        body: JSON.stringify({
+          userId: user_id,
+          transactionAmount: amount,
+          merchantCategory: merchant.business_type || 'other',
+          transactionId: transaction.id,
+        }),
+      }).catch(err => console.error("[ADMIN-ADD-TRANSACTION] Badge check error:", err));
+
+      console.log(`Badge check triggered for user: ${user_id}`);
+    } catch (badgeError) {
+      console.error('[ADMIN-ADD-TRANSACTION] Error triggering badge check:', badgeError);
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
