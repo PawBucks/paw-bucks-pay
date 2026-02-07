@@ -18,6 +18,7 @@ import { TransactionsTab } from "@/components/admin/TransactionsTab";
 import { RewardsTab } from "@/components/admin/RewardsTab";
 import { FinancingTab } from "@/components/admin/FinancingTab";
 import { ProductsTab } from "@/components/admin/ProductsTab";
+import { BadgePromotionsTab } from "@/components/admin/BadgePromotionsTab";
 import { CMSTab } from "@/components/admin/CMSTab";
 import { TrainingCourseManagementTab } from "@/components/admin/TrainingCourseManagementTab";
 import { SettingsTab } from "@/components/admin/SettingsTab";
@@ -68,6 +69,7 @@ import {
   GraduationCap,
   ExternalLink,
   Clock,
+  Gift,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -168,6 +170,12 @@ const NAV_SECTIONS = [
         label: "Pet Store Products",
         icon: Package,
         description: "Add, edit, and manage products available in the Pet Store",
+      },
+      {
+        id: "badge-promotions",
+        label: "Guilt-Free Splurge",
+        icon: Gift,
+        description: "Manage promotional discounts for badge earners in the Pet Store",
       },
       {
         id: "cms",
@@ -344,6 +352,8 @@ const AdminDashboard = () => {
         return <FeedbackTab />;
       case "products":
         return <ProductsTab />;
+      case "badge-promotions":
+        return <BadgePromotionsTab />;
       case "cms":
         return <CMSTab />;
       case "training-course":

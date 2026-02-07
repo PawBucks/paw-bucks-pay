@@ -253,8 +253,47 @@ serve(async (req) => {
       address: profile?.address || null,
     };
 
-    const totalAmount = item.price * quantity;
-    const amountInCents = totalAmount * 100;
+    // Check for active promotional discounts for this item
+    let discountPercentage = 0;
+    let appliedPromotionId: string | null = null;
+    let userBadgePromotionId: string | null = null;
+
+    const { data: userPromos } = await supabaseAdmin
+      .from('user_badge_promotions')
+      .select(`
+        id,
+        promotion_id,
+        expires_at,
+        badge_promotions:promotion_id (
+          id,
+          discount_percentage,
+          badge_promotion_items (item_id)
+        )
+      `)
+      .eq('user_id', user.id)
+      .eq('is_used', false)
+      .gt('expires_at', new Date().toISOString());
+
+    // Find the best promotion for this item
+    for (const up of userPromos || []) {
+      const promo = up.badge_promotions as any;
+      if (!promo) continue;
+      
+      const items = promo.badge_promotion_items || [];
+      const itemIncluded = items.some((i: any) => i.item_id === itemId);
+      
+      if (itemIncluded && promo.discount_percentage > discountPercentage) {
+        discountPercentage = promo.discount_percentage;
+        appliedPromotionId = promo.id;
+        userBadgePromotionId = up.id;
+      }
+    }
+
+    // Calculate final price with discount
+    const originalPrice = item.price * quantity;
+    const discountAmount = discountPercentage > 0 ? Math.round(originalPrice * (discountPercentage / 100)) : 0;
+    const totalAmount = originalPrice - discountAmount;
+    const amountInCents = Math.round(totalAmount * 100);
 
     // Check subscription status for multiplier
     const { data: subscription } = await supabaseAdmin
@@ -272,9 +311,13 @@ serve(async (req) => {
       itemId,
       itemName: item.name,
       quantity,
+      originalPrice,
+      discountPercentage,
+      discountAmount,
       totalAmount,
       pawbucksMultiplier,
       pawbucksEarned,
+      appliedPromotionId,
     });
 
     // Create a PaymentIntent
@@ -292,10 +335,31 @@ serve(async (req) => {
         source: 'pet_store',
         pawbucks_earned: pawbucksEarned.toString(),
         pawbucks_multiplier: pawbucksMultiplier.toString(),
+        discount_percentage: discountPercentage.toString(),
+        original_price: originalPrice.toString(),
+        promotion_id: appliedPromotionId || '',
+        user_badge_promotion_id: userBadgePromotionId || '',
       },
     });
 
     console.log('Payment intent created:', paymentIntent.id);
+
+    // If a promotion was applied, mark it as used
+    if (userBadgePromotionId) {
+      await supabaseAdmin
+        .from('user_badge_promotions')
+        .update({ 
+          is_used: true, 
+          used_at: new Date().toISOString() 
+        })
+        .eq('id', userBadgePromotionId);
+      
+      console.log('Promotional discount applied and marked as used:', {
+        promotionId: appliedPromotionId,
+        discountPercentage,
+        savedAmount: discountAmount,
+      });
+    }
 
     // Send enhanced admin notification email
     await sendAdminNotification(customerInfo, {
@@ -312,6 +376,10 @@ serve(async (req) => {
         paymentIntentId: paymentIntent.id,
         pawbucksEarned,
         pawbucksMultiplier,
+        discountApplied: discountPercentage > 0,
+        discountPercentage,
+        originalPrice,
+        finalPrice: totalAmount,
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
