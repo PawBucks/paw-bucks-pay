@@ -158,27 +158,36 @@ serve(async (req) => {
     const mood = getMoodForCategory(merchantCategory || description || '');
     const photoUrl = getPhotoForMoment(merchantCategory || description || '', petType || 'dog');
 
-    // Generate narrative using AI
-    const prompt = `You are creating a fun, emotional, and brief narrative moment for a pet timeline. The pet is named ${petName || 'the pet'} (a ${petType || 'pet'}).
+    // Generate narrative using AI - GROUNDED IN REAL DATA ONLY
+    const prompt = `You are creating a brief narrative moment for a pet timeline based ONLY on REAL transaction data. Do NOT invent or hallucinate any details.
 
-Transaction details:
+REAL TRANSACTION DATA (use ONLY this information):
+- Pet Name: ${petName || 'Pet'}
+- Pet Type: ${petType || 'pet'}
 - Day: ${dayName}
-- Merchant: ${merchantName || 'a local pet business'}
-- Category: ${merchantCategory || 'pet services'}
-- Amount spent: $${amount?.toFixed(2) || '0.00'}
-- PawBucks earned: ${pawbucksEarned || 0}
-- Description: ${description || 'Pet service'}
+- Merchant Name: ${merchantName || 'Pet Business'}
+- Service Category: ${merchantCategory || 'Pet Services'}
+- Amount Paid: $${amount?.toFixed(2) || '0.00'}
+- PawBucks Earned: ${pawbucksEarned || 0}
+- Service Description: ${description || ''}
 
-Generate a SHORT, playful narrative (max 2 sentences) that:
-1. Tells the story from the pet's perspective or about the pet
-2. Makes it emotional and relatable for pet owners
-3. Includes a cute or funny detail
-4. Mentions the PawBucks earned as a reward
+STRICT RULES:
+1. ONLY mention facts from the data above - no invented details
+2. Do NOT add fictional scenarios, cookies, treats, or events that aren't in the data
+3. Keep it simple and factual with a warm tone
+4. The narrative should be 1-2 sentences describing what ACTUALLY happened
+5. Format: "[Pet Name] [visited/had] [actual service] at [Merchant Name]. [Amount and PawBucks earned]."
 
-Also provide a catchy title (max 6 words).
+Examples of GOOD narratives (factual):
+- "Milo had a dental cleaning at Happy Paws Vet. $47.89 spent → 478 PawBucks earned!"
+- "Luna visited PetSmart for food supplies. 234 PawBucks added to the stash!"
+
+Examples of BAD narratives (hallucinated - DO NOT DO THIS):
+- "Milo got a cookie after being brave!" (no cookie in data)
+- "Luna made new friends at daycare!" (no friend data exists)
 
 Respond ONLY in this exact JSON format:
-{"title": "Title Here", "narrative": "The narrative here."}`;
+{"title": "Brief Factual Title", "narrative": "Factual narrative here."}`;
 
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -197,9 +206,9 @@ Respond ONLY in this exact JSON format:
 
     if (!aiResponse.ok) {
       console.error("[generate-timeline-moment] AI API error:", aiResponse.status);
-      // Fallback to template-based narrative
-      const fallbackTitle = `${petName || 'Pet'}'s ${dayName}`;
-      const fallbackNarrative = `${petName || 'Our furry friend'} visited ${merchantName || 'their favorite spot'} and earned ${pawbucksEarned || 0} PawBucks! ${emoji} Another adventure in the books!`;
+      // Fallback to template-based narrative - FACTUAL ONLY
+      const fallbackTitle = `${merchantCategory || 'Visit'} at ${merchantName || 'Pet Business'}`;
+      const fallbackNarrative = `${petName || 'Pet'} had ${merchantCategory?.toLowerCase() || 'a service'} at ${merchantName || 'a local business'}. $${amount?.toFixed(2) || '0.00'} spent → ${pawbucksEarned || 0} PawBucks earned!`;
       
       const { data: moment, error: insertError } = await supabase
         .from("pet_timeline_moments")
@@ -237,8 +246,9 @@ Respond ONLY in this exact JSON format:
     
     console.log("[generate-timeline-moment] AI response:", aiContent);
 
-    let title = `${petName || 'Pet'}'s ${dayName}`;
-    let narrative = `${petName || 'Our furry friend'} had an adventure at ${merchantName || 'their favorite spot'} and earned ${pawbucksEarned || 0} PawBucks! ${emoji}`;
+    // Factual fallback defaults
+    let title = `${merchantCategory || 'Visit'} at ${merchantName || 'Pet Business'}`;
+    let narrative = `${petName || 'Pet'} had ${merchantCategory?.toLowerCase() || 'a service'} at ${merchantName || 'a local business'}. $${amount?.toFixed(2) || '0.00'} spent → ${pawbucksEarned || 0} PawBucks earned!`;
 
     try {
       // Try to parse AI response
