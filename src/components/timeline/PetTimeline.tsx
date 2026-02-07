@@ -26,6 +26,7 @@ interface TimelineMoment {
   mood: string;
   moment_date: string;
   created_at: string;
+  source?: 'transaction' | 'medical_visit' | 'medical_record';
 }
 
 interface PetInfo {
@@ -223,15 +224,58 @@ export const PetTimeline = ({
     const fetchMoments = async () => {
       try {
         const petIds = pets.map(p => p.id);
-        const { data, error } = await supabase
+        
+        // Fetch timeline moments from transactions
+        const { data: transactionMoments, error: tmError } = await supabase
           .from("pet_timeline_moments")
           .select("*")
           .in("pet_id", petIds)
           .order("moment_date", { ascending: false })
           .limit(limit);
 
-        if (error) throw error;
-        setMoments(data || []);
+        if (tmError) console.error("[PetTimeline] Error fetching transaction moments:", tmError);
+
+        // Fetch medical visits and convert to timeline format
+        const { data: medicalVisits, error: mvError } = await supabase
+          .from("pet_medical_visits")
+          .select("id, pet_id, vet_name, doctor_name, visit_date, notes, created_at")
+          .in("pet_id", petIds)
+          .order("visit_date", { ascending: false })
+          .limit(limit);
+
+        if (mvError) console.error("[PetTimeline] Error fetching medical visits:", mvError);
+
+        // Convert medical visits to timeline moments format
+        const visitMoments: TimelineMoment[] = (medicalVisits || []).map((visit) => {
+          const pet = pets.find(p => p.id === visit.pet_id);
+          const petName = pet?.name || "Pet";
+          return {
+            id: `visit-${visit.id}`,
+            pet_id: visit.pet_id,
+            title: `🏥 Vet Visit at ${visit.vet_name || "Veterinary Clinic"}`,
+            narrative: `${petName} had a checkup${visit.doctor_name ? ` with ${visit.doctor_name}` : ""} at ${visit.vet_name || "the vet"}. Way to stay healthy! 💪`,
+            emoji: "🏥",
+            photo_url: null,
+            merchant_name: visit.vet_name,
+            merchant_category: "Vet",
+            amount: null,
+            pawbucks_earned: 0,
+            moment_type: "medical_visit",
+            mood: "brave",
+            moment_date: visit.visit_date,
+            created_at: visit.created_at,
+            source: 'medical_visit' as const,
+          };
+        });
+
+        // Combine and sort all moments by date
+        const allMoments = [
+          ...(transactionMoments || []).map(m => ({ ...m, source: 'transaction' as const })),
+          ...visitMoments,
+        ].sort((a, b) => new Date(b.moment_date).getTime() - new Date(a.moment_date).getTime())
+          .slice(0, limit);
+
+        setMoments(allMoments);
       } catch (error) {
         console.error("[PetTimeline] Error fetching moments:", error);
       } finally {
@@ -241,7 +285,7 @@ export const PetTimeline = ({
 
     fetchMoments();
 
-    // Subscribe to realtime updates
+    // Subscribe to realtime updates for transaction moments
     const channel = supabase
       .channel("pet-timeline-updates")
       .on(
