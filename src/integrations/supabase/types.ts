@@ -5377,6 +5377,57 @@ export type Database = {
         }
         Relationships: []
       }
+      pet_personality_types: {
+        Row: {
+          avatar_style: string
+          badge_text: string
+          color_primary: string
+          color_secondary: string
+          created_at: string
+          description: string
+          emoji: string
+          id: string
+          is_active: boolean | null
+          name: string
+          tagline: string
+          tips: string[]
+          traits: string[]
+          type_key: string
+        }
+        Insert: {
+          avatar_style: string
+          badge_text: string
+          color_primary: string
+          color_secondary: string
+          created_at?: string
+          description: string
+          emoji: string
+          id?: string
+          is_active?: boolean | null
+          name: string
+          tagline: string
+          tips?: string[]
+          traits?: string[]
+          type_key: string
+        }
+        Update: {
+          avatar_style?: string
+          badge_text?: string
+          color_primary?: string
+          color_secondary?: string
+          created_at?: string
+          description?: string
+          emoji?: string
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          tagline?: string
+          tips?: string[]
+          traits?: string[]
+          type_key?: string
+        }
+        Relationships: []
+      }
       pet_profiles: {
         Row: {
           age_estimate: string | null
@@ -5390,6 +5441,10 @@ export type Database = {
           identifying_features: string | null
           microchip_number: string | null
           name: string
+          personality_completed_at: string | null
+          personality_quiz_answers: Json | null
+          personality_quiz_completed: boolean | null
+          personality_type: string | null
           photo_url: string | null
           size: string | null
           type: Database["public"]["Enums"]["pet_type"]
@@ -5408,6 +5463,10 @@ export type Database = {
           identifying_features?: string | null
           microchip_number?: string | null
           name: string
+          personality_completed_at?: string | null
+          personality_quiz_answers?: Json | null
+          personality_quiz_completed?: boolean | null
+          personality_type?: string | null
           photo_url?: string | null
           size?: string | null
           type: Database["public"]["Enums"]["pet_type"]
@@ -5426,6 +5485,10 @@ export type Database = {
           identifying_features?: string | null
           microchip_number?: string | null
           name?: string
+          personality_completed_at?: string | null
+          personality_quiz_answers?: Json | null
+          personality_quiz_completed?: boolean | null
+          personality_type?: string | null
           photo_url?: string | null
           size?: string | null
           type?: Database["public"]["Enums"]["pet_type"]
@@ -7533,6 +7596,44 @@ export type Database = {
             columns: ["badge_id"]
             isOneToOne: false
             referencedRelation: "guilt_badge_definitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_personality_badges: {
+        Row: {
+          badge_earned_at: string
+          created_at: string
+          id: string
+          is_displayed: boolean | null
+          personality_type: string
+          pet_id: string
+          user_id: string
+        }
+        Insert: {
+          badge_earned_at?: string
+          created_at?: string
+          id?: string
+          is_displayed?: boolean | null
+          personality_type: string
+          pet_id: string
+          user_id: string
+        }
+        Update: {
+          badge_earned_at?: string
+          created_at?: string
+          id?: string
+          is_displayed?: boolean | null
+          personality_type?: string
+          pet_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_personality_badges_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: true
+            referencedRelation: "pet_profiles"
             referencedColumns: ["id"]
           },
         ]

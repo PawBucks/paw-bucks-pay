@@ -3,9 +3,10 @@ import { motion } from "framer-motion";
 import { GradientCard } from "@/components/ui/gradient-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, PawPrint, FileHeart, Pencil } from "lucide-react";
+import { Calendar, PawPrint, FileHeart, Pencil, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { EditPetProfileDialog } from "./EditPetProfileDialog";
+import { usePetPersonality } from "@/hooks/usePersonalityBadges";
 
 type PetProfile = {
   id: string;
@@ -21,6 +22,8 @@ type PetProfile = {
   microchip_number?: string;
   collar_description?: string;
   identifying_features?: string;
+  personality_type?: string | null;
+  personality_quiz_completed?: boolean | null;
 };
 
 type PetProfileCardProps = {
@@ -38,6 +41,9 @@ const petTypeColors = {
 const PetProfileCardComponent = ({ pet, onUpdate, index = 0 }: PetProfileCardProps) => {
   const navigate = useNavigate();
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  
+  // Fetch personality data
+  const { data: personalityData } = usePetPersonality(pet.id);
 
   // Memoize age calculation
   const age = useMemo(() => {
@@ -57,6 +63,7 @@ const PetProfileCardComponent = ({ pet, onUpdate, index = 0 }: PetProfileCardPro
   // Memoize handlers
   const handleEditClick = useCallback(() => setEditDialogOpen(true), []);
   const handleHealthClick = useCallback(() => navigate(`/pet-health/${pet.id}`), [navigate, pet.id]);
+  const handleQuizClick = useCallback(() => navigate(`/pet-personality-quiz?petId=${pet.id}`), [navigate, pet.id]);
   const handleEditSuccess = useCallback(() => onUpdate?.(), [onUpdate]);
   const handleDialogChange = useCallback((open: boolean) => setEditDialogOpen(open), []);
 
@@ -90,12 +97,36 @@ const PetProfileCardComponent = ({ pet, onUpdate, index = 0 }: PetProfileCardPro
 
           {/* Pet Info - Stacked Vertically */}
           <div className="flex-1 min-w-0 space-y-1">
-            <Badge
-              variant="outline"
-              className={`${petTypeColors[pet.type]} text-xs`}
-            >
-              {petTypeLabel}
-            </Badge>
+            <div className="flex items-center gap-2 flex-wrap">
+              <Badge
+                variant="outline"
+                className={`${petTypeColors[pet.type]} text-xs`}
+              >
+                {petTypeLabel}
+              </Badge>
+              {personalityData ? (
+                <Badge
+                  variant="secondary"
+                  className="text-xs font-medium"
+                  style={{
+                    backgroundColor: `${personalityData.color_primary}20`,
+                    color: personalityData.color_primary,
+                  }}
+                >
+                  {personalityData.emoji} {personalityData.name}
+                </Badge>
+              ) : (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleQuizClick}
+                  className="text-xs h-5 px-2 text-primary hover:text-primary/80"
+                >
+                  <Sparkles className="w-3 h-3 mr-1" />
+                  Take Quiz
+                </Button>
+              )}
+            </div>
             <h3 className="text-lg font-bold leading-tight">{pet.name}</h3>
             {pet.breed && (
               <p className="text-sm text-muted-foreground">{pet.breed}</p>

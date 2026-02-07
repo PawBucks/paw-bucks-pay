@@ -26,6 +26,7 @@ import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { ReceiptUploadDialog } from "@/components/ReceiptUploadDialog";
 import { TimelineTeaser } from "@/components/timeline";
 import { BadgeTeaser } from "@/components/badges";
+import { PersonalityQuizCTA } from "@/components/dashboard/PersonalityQuizCTA";
 import { Store, Users, TrendingUp, Receipt } from "lucide-react";
 
 const cardVariants = {
@@ -66,6 +67,8 @@ type PetProfile = {
   breed?: string;
   birthday?: string;
   photo_url?: string;
+  personality_type?: string | null;
+  personality_quiz_completed?: boolean | null;
 };
 
 const Dashboard = () => {
@@ -129,7 +132,7 @@ const Dashboard = () => {
           .maybeSingle(),
         supabase
           .from('pet_profiles')
-          .select('id, name, type, breed, birthday, photo_url')
+          .select('id, name, type, breed, birthday, photo_url, personality_type, personality_quiz_completed')
           .eq('user_id', walletUserId)
           .order('created_at', { ascending: false })
           .limit(10), // Limit to 10 pets for faster loading
@@ -319,6 +322,16 @@ const Dashboard = () => {
             <motion.div custom={isPawPassSubscriber ? 3 : 2} variants={cardVariants} initial="hidden" animate="visible">
               <PetProfilesSection pets={pets} onUpdate={handlePetsUpdate} />
             </motion.div>
+            
+            {/* Pet Personality Quiz CTA - Show for first pet without completed quiz */}
+            {(() => {
+              const petWithoutQuiz = pets.find(p => !p.personality_quiz_completed);
+              return petWithoutQuiz ? (
+                <motion.div custom={isPawPassSubscriber ? 3.5 : 2.5} variants={cardVariants} initial="hidden" animate="visible">
+                  <PersonalityQuizCTA petId={petWithoutQuiz.id} petName={petWithoutQuiz.name} />
+                </motion.div>
+              ) : null;
+            })()}
             
             {/* Row 3: Pet Timeline - The emotional hook */}
             {user && pets.length > 0 && (
