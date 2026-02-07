@@ -373,6 +373,33 @@ serve(async (req) => {
         } catch (timelineError) {
           console.error('[POS-SUBMIT] Error triggering timeline moment:', timelineError);
         }
+
+        // Check for Guilt-Free Badges (gamification)
+        try {
+          const { data: merchantForBadge } = await supabaseAdmin
+            .from('merchants')
+            .select('business_type')
+            .eq('id', integration.merchant_id)
+            .single();
+
+          fetch(`${supabaseUrl}/functions/v1/check-guilt-badges`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+            },
+            body: JSON.stringify({
+              userId: matchedUser.id,
+              transactionAmount: amount,
+              merchantCategory: merchantForBadge?.business_type || 'other',
+              transactionId: transaction?.id,
+            }),
+          }).catch(err => console.error("[POS-SUBMIT] Badge check error:", err));
+
+          console.log(`Badge check triggered for user: ${matchedUser.id}`);
+        } catch (badgeError) {
+          console.error('[POS-SUBMIT] Error triggering badge check:', badgeError);
+        }
       }
     } else {
       // No matching user found

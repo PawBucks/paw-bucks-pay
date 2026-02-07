@@ -25,6 +25,7 @@ import { PullToRefresh } from "@/components/PullToRefresh";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { ReceiptUploadDialog } from "@/components/ReceiptUploadDialog";
 import { TimelineTeaser } from "@/components/timeline";
+import { BadgeTeaser } from "@/components/badges";
 import { Store, Users, TrendingUp, Receipt } from "lucide-react";
 
 const cardVariants = {
@@ -326,6 +327,13 @@ const Dashboard = () => {
                   userId={effectiveWalletUserId || user.id} 
                   pets={pets.map(p => ({ id: p.id, name: p.name }))} 
                 />
+              </motion.div>
+            )}
+            
+            {/* Row 3.5: Guilt-Free Badges - Gamification hook */}
+            {user && (
+              <motion.div custom={isPawPassSubscriber ? 4.5 : 3.5} variants={cardVariants} initial="hidden" animate="visible">
+                <BadgeTeaser userId={effectiveWalletUserId || user.id} />
               </motion.div>
             )}
             
