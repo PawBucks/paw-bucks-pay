@@ -169,7 +169,7 @@ serve(async (req) => {
     // Get all merchants with connected Stripe accounts
     const { data: merchants } = await supabaseAdmin
       .from("merchants")
-      .select("id, business_name, stripe_account_id")
+      .select("id, business_name, stripe_account_id, logo_url")
       .not("stripe_account_id", "is", null)
       .eq("stripe_account_status", "active");
 
@@ -301,6 +301,7 @@ serve(async (req) => {
               amount: priceItem?.price?.unit_amount ? priceItem.price.unit_amount / 100 : null,
               currency: priceItem?.price?.currency || "usd",
               interval: priceItem?.price?.recurring?.interval || "month",
+              logo_url: merchant.logo_url || null,
             });
           }
         } catch (err) {
@@ -327,7 +328,7 @@ serve(async (req) => {
         billing_interval,
         merchant_id,
         connected_account_id,
-        merchants(business_name)
+        merchants(business_name, logo_url)
       `)
       .eq("user_id", user.id)
       .in("status", ["active", "past_due", "trialing"]);
@@ -349,7 +350,7 @@ serve(async (req) => {
           continue;
         }
 
-        const merchantData = dbSub.merchants as unknown as { business_name: string } | null;
+        const merchantData = dbSub.merchants as unknown as { business_name: string; logo_url: string | null } | null;
         
         subscriptions.push({
           id: dbSub.id,
@@ -365,6 +366,7 @@ serve(async (req) => {
           amount: dbSub.amount ? dbSub.amount / 100 : null,
           currency: dbSub.currency || "usd",
           interval: dbSub.billing_interval || "month",
+          logo_url: merchantData?.logo_url || null,
         });
       }
     }

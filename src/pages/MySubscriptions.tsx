@@ -45,6 +45,7 @@ type Subscription = {
   amount: number | null;
   currency: string;
   interval: string;
+  logo_url: string | null;
 };
 
 const MySubscriptions = () => {
@@ -238,19 +239,21 @@ const MySubscriptions = () => {
                 <GradientCard key={subscription.id} className="space-y-4">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
-                      <div
-                        className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                          subscription.type === "platform"
-                            ? "bg-gradient-to-br from-purple-500 to-pink-500"
-                            : "bg-gradient-to-br from-blue-500 to-cyan-500"
-                        }`}
-                      >
-                        {subscription.type === "platform" ? (
+                      {subscription.type === "platform" ? (
+                        <div className="w-12 h-12 rounded-full flex items-center justify-center bg-gradient-to-br from-purple-500 to-pink-500">
                           <Crown className="w-6 h-6 text-white" />
-                        ) : (
+                        </div>
+                      ) : subscription.logo_url ? (
+                        <img
+                          src={subscription.logo_url}
+                          alt={`${subscription.merchant_name} logo`}
+                          className="w-12 h-12 rounded-full object-cover border border-border"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 rounded-full flex items-center justify-center bg-gradient-to-br from-blue-500 to-cyan-500">
                           <Store className="w-6 h-6 text-white" />
-                        )}
-                      </div>
+                        </div>
+                      )}
                       <div>
                         <h3 className="font-semibold">{subscription.name}</h3>
                         <p className="text-sm text-muted-foreground">
