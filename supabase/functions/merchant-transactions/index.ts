@@ -92,7 +92,8 @@ serve(async (req) => {
         status,
         description,
         stripe_payment_intent_id,
-        user_id
+        user_id,
+        payment_method
       `)
       .eq('merchant_id', merchant.id)
       .order('created_at', { ascending: false });
@@ -155,6 +156,24 @@ serve(async (req) => {
       // Net payout = amount - platform fee - funding repayment
       const netPayout = amount - platformFee - repaymentDeducted;
       const profile = t.user_id ? profilesMap[t.user_id] : null;
+      
+      // Format payment method for display
+      const formatPaymentMethod = (method: string | null): string => {
+        if (!method) return 'Card';
+        // Map payment method values to display labels
+        const methodMap: Record<string, string> = {
+          'card': 'Card',
+          'credit_card': 'Credit Card',
+          'cash': 'Cash',
+          'check': 'Check',
+          'bank_transfer': 'Bank Transfer',
+          'venmo': 'Venmo',
+          'paypal': 'PayPal',
+          'zelle': 'Zelle',
+          'other': 'Other',
+        };
+        return methodMap[method] || method.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      };
 
       return {
         transaction_id: t.id,
@@ -166,7 +185,7 @@ serve(async (req) => {
         platform_fee: platformFee, // Platform's 3% fee
         repayment_deducted: repaymentDeducted,
         net_payout: netPayout,
-        payment_method: 'Card',
+        payment_method: formatPaymentMethod(t.payment_method),
         status: t.status,
         description: t.description || '',
       };

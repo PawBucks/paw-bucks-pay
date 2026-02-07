@@ -139,6 +139,7 @@ Deno.serve(async (req) => {
         stripe_amount: 0, // No Stripe involved
         pawbucks_used: 0, // No PawBucks involved
         application_fee: 0, // No platform fee for off-platform payments
+        payment_method: payment_method, // Store the actual payment method
       })
       .select()
       .single();
@@ -153,6 +154,72 @@ Deno.serve(async (req) => {
       transactionCreated = true;
       transactionId = transaction.id;
       console.log(`[record-manual-invoice-payment] Transaction created: ${transaction.id} (user_id: ${matchedUserId || 'null - unregistered client'})`);
+    }
+
+    // Check if invoice is now fully paid and send merchant notification
+    const { data: updatedInvoice } = await supabase
+      .from("invoices")
+      .select("status, amount_paid, amount_due, total")
+      .eq("id", invoice_id)
+      .single();
+
+    if (updatedInvoice && (updatedInvoice.status === 'paid' || updatedInvoice.amount_due <= 0)) {
+      console.log(`[record-manual-invoice-payment] Invoice is now fully paid, sending merchant notification`);
+      
+      // Get merchant details for notification
+      const { data: merchantProfile } = await supabase
+        .from("profiles")
+        .select("email, full_name")
+        .eq("id", merchant.user_id)
+        .single();
+
+      if (merchantProfile?.email) {
+        // Format payment method for display
+        const formattedPaymentMethod = payment_method.replace(/_/g, ' ');
+        
+        try {
+          // Call the send-invoice-paid-notification function
+          const notificationPayload = {
+            merchantEmail: merchantProfile.email,
+            merchantName: merchant.business_name || merchantProfile.full_name || "Merchant",
+            invoiceNumber: invoice.invoice_number,
+            invoiceTitle: invoice.description || undefined,
+            clientName: invoice.client_name,
+            clientEmail: invoice.client_email,
+            amountPaid: amount,
+            tipAmount: 0,
+            pawbucksUsed: 0,
+            paymentMethod: 'manual' as const,
+            paymentMethodDetail: formattedPaymentMethod, // Include the specific manual method
+            paymentDate: payment_date,
+            invoiceTotal: invoice.total,
+            amountDue: 0,
+            invoiceId: invoice_id,
+          };
+
+          const notificationResponse = await fetch(
+            `${supabaseUrl}/functions/v1/send-invoice-paid-notification`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${supabaseServiceKey}`,
+              },
+              body: JSON.stringify(notificationPayload),
+            }
+          );
+
+          if (notificationResponse.ok) {
+            console.log(`[record-manual-invoice-payment] ✅ Merchant notification sent successfully`);
+          } else {
+            const errorText = await notificationResponse.text();
+            console.error(`[record-manual-invoice-payment] Failed to send merchant notification:`, errorText);
+          }
+        } catch (notifyError) {
+          console.error(`[record-manual-invoice-payment] Error sending merchant notification:`, notifyError);
+          // Don't fail the payment recording for notification errors
+        }
+      }
     }
 
     // Log activity

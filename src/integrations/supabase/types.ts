@@ -7028,6 +7028,7 @@ export type Database = {
           id: string
           merchant_id: string
           pawbucks_used: number | null
+          payment_method: string | null
           rewards_earned: number
           status: string
           stripe_amount: number | null
@@ -7044,6 +7045,7 @@ export type Database = {
           id?: string
           merchant_id: string
           pawbucks_used?: number | null
+          payment_method?: string | null
           rewards_earned?: number
           status?: string
           stripe_amount?: number | null
@@ -7060,6 +7062,7 @@ export type Database = {
           id?: string
           merchant_id?: string
           pawbucks_used?: number | null
+          payment_method?: string | null
           rewards_earned?: number
           status?: string
           stripe_amount?: number | null

@@ -16,7 +16,8 @@ interface InvoicePaidNotificationParams {
   amountPaid: number;
   tipAmount?: number;
   pawbucksUsed?: number;
-  paymentMethod: 'credit_card' | 'pawbucks' | 'mixed';
+  paymentMethod: 'credit_card' | 'pawbucks' | 'mixed' | 'manual';
+  paymentMethodDetail?: string; // For manual payments: "Cash", "Check", etc.
   paymentDate: string;
   invoiceTotal: number;
   amountDue?: number;
@@ -47,7 +48,11 @@ function formatCurrency(amount: number): string {
   return `$${amount.toFixed(2)}`;
 }
 
-function getPaymentMethodLabel(method: string, pawbucksUsed?: number): string {
+function getPaymentMethodLabel(method: string, pawbucksUsed?: number, paymentMethodDetail?: string): string {
+  if (method === 'manual' && paymentMethodDetail) {
+    // Capitalize the manual payment method detail
+    return paymentMethodDetail.charAt(0).toUpperCase() + paymentMethodDetail.slice(1);
+  }
   if (method === 'pawbucks') {
     return 'PawBucks';
   } else if (method === 'mixed' || (pawbucksUsed && pawbucksUsed > 0)) {
@@ -67,6 +72,7 @@ function generateInvoicePaidEmailHtml(params: InvoicePaidNotificationParams): st
     tipAmount = 0,
     pawbucksUsed = 0,
     paymentMethod,
+    paymentMethodDetail,
     paymentDate,
     invoiceTotal,
     amountDue = 0,
@@ -75,13 +81,33 @@ function generateInvoicePaidEmailHtml(params: InvoicePaidNotificationParams): st
 
   const logoUrl = "https://paw-bucks-pay.lovable.app/logo.png";
   const formattedDate = formatDate(paymentDate);
-  const paymentMethodLabel = getPaymentMethodLabel(paymentMethod, pawbucksUsed);
+  const paymentMethodLabel = getPaymentMethodLabel(paymentMethod, pawbucksUsed, paymentMethodDetail);
+  const isManualPayment = paymentMethod === 'manual';
   const pawbucksValueUSD = pawbucksUsed * 0.001;
   const totalPaymentReceived = amountPaid + pawbucksValueUSD;
   const isFullyPaid = amountDue <= 0;
 
-  // Payment breakdown rows
-  const paymentBreakdownHtml = `
+  // Payment breakdown rows - different for manual payments
+  const paymentBreakdownHtml = isManualPayment ? `
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:16px;">
+      <tr>
+        <td style="font-size:14px; color:#374151; padding:8px 0; border-bottom:1px solid #e5e7eb;">
+          ${paymentMethodLabel} Payment
+        </td>
+        <td align="right" style="font-size:14px; color:#374151; padding:8px 0; border-bottom:1px solid #e5e7eb;">
+          ${formatCurrency(amountPaid)}
+        </td>
+      </tr>
+      <tr>
+        <td style="font-size:16px; font-weight:bold; color:#111827; padding:12px 0;">
+          Total Received
+        </td>
+        <td align="right" style="font-size:16px; font-weight:bold; color:#16a34a; padding:12px 0;">
+          ${formatCurrency(amountPaid)}
+        </td>
+      </tr>
+    </table>
+  ` : `
     <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:16px;">
       ${pawbucksUsed > 0 ? `
         <tr>
@@ -123,7 +149,6 @@ function generateInvoicePaidEmailHtml(params: InvoicePaidNotificationParams): st
       </tr>
     </table>
   `;
-
   // Status badge
   const statusBadgeHtml = isFullyPaid
     ? `<span style="display:inline-block; background-color:#dcfce7; color:#166534; padding:6px 16px; border-radius:16px; font-size:14px; font-weight:600;">✓ Fully Paid</span>`
