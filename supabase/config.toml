@@ -341,3 +341,9 @@ verify_jwt = true
 
 [functions.publish-subscription-plan]
 verify_jwt = true
+
+[functions.generate-timeline-moment]
+verify_jwt = false
+
+[functions.send-flash-sale-notification]
+verify_jwt = true

@@ -1,0 +1,295 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+};
+
+// Stock photo collections by category/mood
+const stockPhotoCollections: Record<string, string[]> = {
+  vet: [
+    "https://images.unsplash.com/photo-1628009368231-7bb7cfcb0def?w=400&h=300&fit=crop", // Dog at vet
+    "https://images.unsplash.com/photo-1612531386530-97286d97c2d2?w=400&h=300&fit=crop", // Happy dog after vet
+    "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&h=300&fit=crop", // Golden retriever smiling
+    "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=400&h=300&fit=crop", // Dog with bandana
+  ],
+  grooming: [
+    "https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?w=400&h=300&fit=crop", // Fluffy dog
+    "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&h=300&fit=crop", // Happy golden
+    "https://images.unsplash.com/photo-1552053831-71594a27632d?w=400&h=300&fit=crop", // Clean golden retriever
+    "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=400&h=300&fit=crop", // Fresh looking dog
+  ],
+  food: [
+    "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=400&h=300&fit=crop", // Dog eating
+    "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&h=300&fit=crop", // Happy dog
+    "https://images.unsplash.com/photo-1544568100-847a948585b9?w=400&h=300&fit=crop", // Dog with tongue out
+    "https://images.unsplash.com/photo-1518717758536-85ae29035b6d?w=400&h=300&fit=crop", // Happy dog portrait
+  ],
+  daycare: [
+    "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=400&h=300&fit=crop", // Dogs playing
+    "https://images.unsplash.com/photo-1558929996-da64ba858215?w=400&h=300&fit=crop", // Dog at park
+    "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&h=300&fit=crop", // Happy dog
+    "https://images.unsplash.com/photo-1477884213360-7e9d7dcc1e48?w=400&h=300&fit=crop", // Playful dog
+  ],
+  walker: [
+    "https://images.unsplash.com/photo-1558929996-da64ba858215?w=400&h=300&fit=crop", // Dog walking
+    "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=400&h=300&fit=crop", // Dogs outdoor
+    "https://images.unsplash.com/photo-1477884213360-7e9d7dcc1e48?w=400&h=300&fit=crop", // Happy outdoor dog
+    "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&h=300&fit=crop", // Smiling dog
+  ],
+  trainer: [
+    "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&h=300&fit=crop", // Good boy dog
+    "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=400&h=300&fit=crop", // Proud dog
+    "https://images.unsplash.com/photo-1552053831-71594a27632d?w=400&h=300&fit=crop", // Attentive dog
+    "https://images.unsplash.com/photo-1518717758536-85ae29035b6d?w=400&h=300&fit=crop", // Smart dog
+  ],
+  store: [
+    "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&h=300&fit=crop", // Happy dog
+    "https://images.unsplash.com/photo-1544568100-847a948585b9?w=400&h=300&fit=crop", // Dog with tongue
+    "https://images.unsplash.com/photo-1518717758536-85ae29035b6d?w=400&h=300&fit=crop", // Cute dog
+    "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=400&h=300&fit=crop", // Dog with treats
+  ],
+  cat_vet: [
+    "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&h=300&fit=crop", // Cat portrait
+    "https://images.unsplash.com/photo-1573865526739-10659fec78a5?w=400&h=300&fit=crop", // Orange cat
+    "https://images.unsplash.com/photo-1495360010541-f48722b34f7d?w=400&h=300&fit=crop", // Calm cat
+    "https://images.unsplash.com/photo-1574158622682-e40e69881006?w=400&h=300&fit=crop", // Cute cat
+  ],
+  cat_grooming: [
+    "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&h=300&fit=crop", // Beautiful cat
+    "https://images.unsplash.com/photo-1573865526739-10659fec78a5?w=400&h=300&fit=crop", // Fluffy cat
+    "https://images.unsplash.com/photo-1574158622682-e40e69881006?w=400&h=300&fit=crop", // Clean cat
+    "https://images.unsplash.com/photo-1533738363-b7f9aef128ce?w=400&h=300&fit=crop", // Cat with sunglasses
+  ],
+  cat_food: [
+    "https://images.unsplash.com/photo-1574158622682-e40e69881006?w=400&h=300&fit=crop", // Happy cat
+    "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&h=300&fit=crop", // Content cat
+    "https://images.unsplash.com/photo-1573865526739-10659fec78a5?w=400&h=300&fit=crop", // Well-fed cat
+    "https://images.unsplash.com/photo-1495360010541-f48722b34f7d?w=400&h=300&fit=crop", // Relaxed cat
+  ],
+  default: [
+    "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&h=300&fit=crop",
+    "https://images.unsplash.com/photo-1544568100-847a948585b9?w=400&h=300&fit=crop",
+    "https://images.unsplash.com/photo-1574158622682-e40e69881006?w=400&h=300&fit=crop",
+    "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&h=300&fit=crop",
+  ],
+};
+
+function getPhotoForMoment(category: string, petType: string): string {
+  const categoryLower = category?.toLowerCase() || '';
+  const petPrefix = petType === 'cat' ? 'cat_' : '';
+  
+  let collection = stockPhotoCollections.default;
+  
+  if (categoryLower.includes('vet') || categoryLower.includes('clinic') || categoryLower.includes('dental') || categoryLower.includes('medical')) {
+    collection = stockPhotoCollections[`${petPrefix}vet`] || stockPhotoCollections.vet;
+  } else if (categoryLower.includes('groom') || categoryLower.includes('spa') || categoryLower.includes('bath')) {
+    collection = stockPhotoCollections[`${petPrefix}grooming`] || stockPhotoCollections.grooming;
+  } else if (categoryLower.includes('food') || categoryLower.includes('nutrition') || categoryLower.includes('treat')) {
+    collection = stockPhotoCollections[`${petPrefix}food`] || stockPhotoCollections.food;
+  } else if (categoryLower.includes('daycare') || categoryLower.includes('boarding') || categoryLower.includes('kennel')) {
+    collection = stockPhotoCollections.daycare;
+  } else if (categoryLower.includes('walk') || categoryLower.includes('hike') || categoryLower.includes('outdoor')) {
+    collection = stockPhotoCollections.walker;
+  } else if (categoryLower.includes('train') || categoryLower.includes('obedience') || categoryLower.includes('behavior')) {
+    collection = stockPhotoCollections.trainer;
+  } else if (categoryLower.includes('store') || categoryLower.includes('shop') || categoryLower.includes('supply')) {
+    collection = stockPhotoCollections.store;
+  }
+  
+  // Pick a random photo from the collection
+  return collection[Math.floor(Math.random() * collection.length)];
+}
+
+function getMoodForCategory(category: string): string {
+  const categoryLower = category?.toLowerCase() || '';
+  
+  if (categoryLower.includes('vet') || categoryLower.includes('dental') || categoryLower.includes('medical')) {
+    return 'brave';
+  } else if (categoryLower.includes('groom') || categoryLower.includes('spa')) {
+    return 'cozy';
+  } else if (categoryLower.includes('walk') || categoryLower.includes('hike') || categoryLower.includes('park')) {
+    return 'adventurous';
+  } else if (categoryLower.includes('train')) {
+    return 'proud';
+  } else if (categoryLower.includes('daycare') || categoryLower.includes('play')) {
+    return 'playful';
+  }
+  return 'happy';
+}
+
+function getEmojiForCategory(category: string): string {
+  const categoryLower = category?.toLowerCase() || '';
+  
+  if (categoryLower.includes('dental')) return '😷';
+  if (categoryLower.includes('vet') || categoryLower.includes('medical') || categoryLower.includes('clinic')) return '🏥';
+  if (categoryLower.includes('groom') || categoryLower.includes('spa') || categoryLower.includes('bath')) return '✨';
+  if (categoryLower.includes('food') || categoryLower.includes('treat') || categoryLower.includes('nutrition')) return '🍖';
+  if (categoryLower.includes('walk') || categoryLower.includes('hike')) return '🚶';
+  if (categoryLower.includes('train')) return '🎓';
+  if (categoryLower.includes('daycare') || categoryLower.includes('boarding')) return '🏠';
+  if (categoryLower.includes('store') || categoryLower.includes('shop')) return '🛍️';
+  return '🐾';
+}
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const { transactionId, petId, userId, petName, petType, merchantName, merchantCategory, amount, pawbucksEarned, description } = await req.json();
+    
+    console.log("[generate-timeline-moment] Generating moment for:", { transactionId, petName, merchantName, amount });
+
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) {
+      throw new Error("LOVABLE_API_KEY is not configured");
+    }
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Get day of week for narrative
+    const dayName = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+    const emoji = getEmojiForCategory(merchantCategory || description || '');
+    const mood = getMoodForCategory(merchantCategory || description || '');
+    const photoUrl = getPhotoForMoment(merchantCategory || description || '', petType || 'dog');
+
+    // Generate narrative using AI
+    const prompt = `You are creating a fun, emotional, and brief narrative moment for a pet timeline. The pet is named ${petName || 'the pet'} (a ${petType || 'pet'}).
+
+Transaction details:
+- Day: ${dayName}
+- Merchant: ${merchantName || 'a local pet business'}
+- Category: ${merchantCategory || 'pet services'}
+- Amount spent: $${amount?.toFixed(2) || '0.00'}
+- PawBucks earned: ${pawbucksEarned || 0}
+- Description: ${description || 'Pet service'}
+
+Generate a SHORT, playful narrative (max 2 sentences) that:
+1. Tells the story from the pet's perspective or about the pet
+2. Makes it emotional and relatable for pet owners
+3. Includes a cute or funny detail
+4. Mentions the PawBucks earned as a reward
+
+Also provide a catchy title (max 6 words).
+
+Respond ONLY in this exact JSON format:
+{"title": "Title Here", "narrative": "The narrative here."}`;
+
+    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash",
+        messages: [
+          { role: "system", content: "You are a creative writer who creates adorable, emotional pet timeline moments. Always respond with valid JSON only." },
+          { role: "user", content: prompt }
+        ],
+      }),
+    });
+
+    if (!aiResponse.ok) {
+      console.error("[generate-timeline-moment] AI API error:", aiResponse.status);
+      // Fallback to template-based narrative
+      const fallbackTitle = `${petName || 'Pet'}'s ${dayName}`;
+      const fallbackNarrative = `${petName || 'Our furry friend'} visited ${merchantName || 'their favorite spot'} and earned ${pawbucksEarned || 0} PawBucks! ${emoji} Another adventure in the books!`;
+      
+      const { data: moment, error: insertError } = await supabase
+        .from("pet_timeline_moments")
+        .insert({
+          pet_id: petId,
+          user_id: userId,
+          transaction_id: transactionId,
+          title: fallbackTitle,
+          narrative: fallbackNarrative,
+          emoji,
+          photo_url: photoUrl,
+          photo_prompt: merchantCategory || description,
+          merchant_name: merchantName,
+          merchant_category: merchantCategory,
+          amount,
+          pawbucks_earned: pawbucksEarned,
+          moment_type: 'transaction',
+          mood,
+        })
+        .select()
+        .single();
+
+      if (insertError) {
+        console.error("[generate-timeline-moment] Insert error:", insertError);
+        throw insertError;
+      }
+
+      return new Response(JSON.stringify({ success: true, moment }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const aiData = await aiResponse.json();
+    const aiContent = aiData.choices?.[0]?.message?.content || '';
+    
+    console.log("[generate-timeline-moment] AI response:", aiContent);
+
+    let title = `${petName || 'Pet'}'s ${dayName}`;
+    let narrative = `${petName || 'Our furry friend'} had an adventure at ${merchantName || 'their favorite spot'} and earned ${pawbucksEarned || 0} PawBucks! ${emoji}`;
+
+    try {
+      // Try to parse AI response
+      const jsonMatch = aiContent.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        const parsed = JSON.parse(jsonMatch[0]);
+        if (parsed.title) title = parsed.title;
+        if (parsed.narrative) narrative = parsed.narrative;
+      }
+    } catch (parseError) {
+      console.log("[generate-timeline-moment] Parse error, using fallback:", parseError);
+    }
+
+    // Insert moment into database
+    const { data: moment, error: insertError } = await supabase
+      .from("pet_timeline_moments")
+      .insert({
+        pet_id: petId,
+        user_id: userId,
+        transaction_id: transactionId,
+        title,
+        narrative,
+        emoji,
+        photo_url: photoUrl,
+        photo_prompt: merchantCategory || description,
+        merchant_name: merchantName,
+        merchant_category: merchantCategory,
+        amount,
+        pawbucks_earned: pawbucksEarned,
+        moment_type: 'transaction',
+        mood,
+      })
+      .select()
+      .single();
+
+    if (insertError) {
+      console.error("[generate-timeline-moment] Insert error:", insertError);
+      throw insertError;
+    }
+
+    console.log("[generate-timeline-moment] Created moment:", moment.id);
+
+    return new Response(JSON.stringify({ success: true, moment }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+
+  } catch (error) {
+    console.error("[generate-timeline-moment] Error:", error);
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+});

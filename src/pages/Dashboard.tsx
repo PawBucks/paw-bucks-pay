@@ -24,6 +24,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { PullToRefresh } from "@/components/PullToRefresh";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { ReceiptUploadDialog } from "@/components/ReceiptUploadDialog";
+import { TimelineTeaser } from "@/components/timeline";
 import { Store, Users, TrendingUp, Receipt } from "lucide-react";
 
 const cardVariants = {
@@ -318,25 +319,35 @@ const Dashboard = () => {
               <PetProfilesSection pets={pets} onUpdate={handlePetsUpdate} />
             </motion.div>
             
-            {/* Row 3: My Invoices - Shows invoices sent to this pet owner */}
-            {user?.email && (
+            {/* Row 3: Pet Timeline - The emotional hook */}
+            {user && pets.length > 0 && (
               <motion.div custom={isPawPassSubscriber ? 4 : 3} variants={cardVariants} initial="hidden" animate="visible">
+                <TimelineTeaser 
+                  userId={effectiveWalletUserId || user.id} 
+                  pets={pets.map(p => ({ id: p.id, name: p.name }))} 
+                />
+              </motion.div>
+            )}
+            
+            {/* Row 4: My Invoices - Shows invoices sent to this pet owner */}
+            {user?.email && (
+              <motion.div custom={isPawPassSubscriber ? 5 : 4} variants={cardVariants} initial="hidden" animate="visible">
                 <PetOwnerInvoices userEmail={user.email} />
               </motion.div>
             )}
             
-            {/* Row 4: Share PawBucks - Full Width */}
-            <motion.div custom={isPawPassSubscriber ? 5 : 4} variants={cardVariants} initial="hidden" animate="visible">
+            {/* Row 5: Share PawBucks - Full Width */}
+            <motion.div custom={isPawPassSubscriber ? 6 : 5} variants={cardVariants} initial="hidden" animate="visible">
               <SharePawBucksCard />
             </motion.div>
             
-            {/* Row 5: Referral Program & Discover Pet Services - Side by Side on larger screens */}
+            {/* Row 6: Referral Program & Discover Pet Services - Side by Side on larger screens */}
             <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
-              <motion.div custom={isPawPassSubscriber ? 6 : 5} variants={cardVariants} initial="hidden" animate="visible">
+              <motion.div custom={isPawPassSubscriber ? 7 : 6} variants={cardVariants} initial="hidden" animate="visible">
                 <ReferralCard />
               </motion.div>
               
-              <motion.div custom={isPawPassSubscriber ? 7 : 6} variants={cardVariants} initial="hidden" animate="visible">
+              <motion.div custom={isPawPassSubscriber ? 8 : 7} variants={cardVariants} initial="hidden" animate="visible">
                 <DiscoverServicesCard />
               </motion.div>
             </div>

@@ -332,6 +332,48 @@ serve(async (req) => {
         amount: amount,
         pawbucks_awarded: pawbucksAwarded,
       });
+
+      // Generate Pet Timeline moment for this POS transaction
+      if (pawbucksAwarded > 0) {
+        try {
+          // Get user's pet (first pet for now)
+          const { data: userPets } = await supabaseAdmin
+            .from('pet_profiles')
+            .select('id, name, type')
+            .eq('user_id', matchedUser.id)
+            .limit(1);
+
+          if (userPets && userPets.length > 0) {
+            const pet = userPets[0];
+            const supabaseUrl = Deno.env.get("SUPABASE_URL");
+            
+            // Trigger timeline moment generation (fire and forget)
+            fetch(`${supabaseUrl}/functions/v1/generate-timeline-moment`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+              },
+              body: JSON.stringify({
+                transactionId: posTransaction.id,
+                petId: pet.id,
+                userId: matchedUser.id,
+                petName: pet.name,
+                petType: pet.type,
+                merchantName: merchantData?.business_name || 'Partner Store',
+                merchantCategory: merchantData?.business_type,
+                amount,
+                pawbucksEarned: pawbucksAwarded,
+                description: `POS purchase at ${merchantData?.business_name || 'Partner Store'}`,
+              }),
+            }).catch(err => console.error("[POS-SUBMIT] Timeline moment error:", err));
+
+            console.log(`Timeline moment generation triggered for pet: ${pet.id}`);
+          }
+        } catch (timelineError) {
+          console.error('[POS-SUBMIT] Error triggering timeline moment:', timelineError);
+        }
+      }
     } else {
       // No matching user found
       await supabaseAdmin
