@@ -8955,6 +8955,7 @@ export type Database = {
           sync_frequency_minutes: number | null
           updated_at: string
           vet_id: string
+          webhook_secret: string | null
         }
         Insert: {
           api_endpoint?: string | null
@@ -8972,6 +8973,7 @@ export type Database = {
           sync_frequency_minutes?: number | null
           updated_at?: string
           vet_id: string
+          webhook_secret?: string | null
         }
         Update: {
           api_endpoint?: string | null
@@ -8989,6 +8991,7 @@ export type Database = {
           sync_frequency_minutes?: number | null
           updated_at?: string
           vet_id?: string
+          webhook_secret?: string | null
         }
         Relationships: [
           {
@@ -10117,6 +10120,10 @@ export type Database = {
       }
       user_has_vet_relationship: {
         Args: { check_user_id: string; check_vet_id: string }
+        Returns: boolean
+      }
+      user_owns_merchant: {
+        Args: { check_merchant_id: string }
         Returns: boolean
       }
       user_owns_vet: {
