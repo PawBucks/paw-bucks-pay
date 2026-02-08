@@ -28,6 +28,7 @@ import { TimelineTeaser } from "@/components/timeline";
 import { BadgeTeaser } from "@/components/badges";
 import { PersonalityQuizCTA } from "@/components/dashboard/PersonalityQuizCTA";
 import { LoyaltyDashboardWidget } from "@/components/loyalty";
+import { WelcomeCreditCard } from "@/components/dashboard/WelcomeCreditCard";
 import { Store, Users, TrendingUp, Receipt } from "lucide-react";
 
 const cardVariants = {
@@ -270,6 +271,11 @@ const Dashboard = () => {
 
         {profile.user_type === "pet_owner" ? (
           <div className="flex flex-col gap-4 sm:gap-6">
+            {/* Welcome Credit Card - First-time user conversion */}
+            {user && (
+              <WelcomeCreditCard userId={user.id} />
+            )}
+            
             {/* Action Required - Denied insurance claims needing resolution */}
             {user && (
               <ActionRequiredSlices userId={user.id} />

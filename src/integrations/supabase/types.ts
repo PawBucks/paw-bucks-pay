@@ -4209,6 +4209,7 @@ export type Database = {
       merchants: {
         Row: {
           accepts_pawbucks: boolean
+          accepts_welcome_credit: boolean | null
           address: string | null
           approval_status: Database["public"]["Enums"]["approval_status"]
           approved_at: string | null
@@ -4244,10 +4245,12 @@ export type Database = {
           twitter_url: string | null
           updated_at: string
           user_id: string
+          welcome_credit_opted_in_at: string | null
           working_style: string | null
         }
         Insert: {
           accepts_pawbucks?: boolean
+          accepts_welcome_credit?: boolean | null
           address?: string | null
           approval_status?: Database["public"]["Enums"]["approval_status"]
           approved_at?: string | null
@@ -4283,10 +4286,12 @@ export type Database = {
           twitter_url?: string | null
           updated_at?: string
           user_id: string
+          welcome_credit_opted_in_at?: string | null
           working_style?: string | null
         }
         Update: {
           accepts_pawbucks?: boolean
+          accepts_welcome_credit?: boolean | null
           address?: string | null
           approval_status?: Database["public"]["Enums"]["approval_status"]
           approved_at?: string | null
@@ -4322,6 +4327,7 @@ export type Database = {
           twitter_url?: string | null
           updated_at?: string
           user_id?: string
+          welcome_credit_opted_in_at?: string | null
           working_style?: string | null
         }
         Relationships: [
@@ -8379,6 +8385,93 @@ export type Database = {
         }
         Relationships: []
       }
+      user_welcome_credits: {
+        Row: {
+          created_at: string
+          credit_amount: number
+          device_fingerprint: string | null
+          expires_at: string
+          id: string
+          ip_address: string | null
+          revocation_reason: string | null
+          status: string
+          transaction_total_cents: number | null
+          updated_at: string
+          used_at: string | null
+          used_in_transaction_id: string | null
+          used_with_merchant_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          credit_amount?: number
+          device_fingerprint?: string | null
+          expires_at: string
+          id?: string
+          ip_address?: string | null
+          revocation_reason?: string | null
+          status?: string
+          transaction_total_cents?: number | null
+          updated_at?: string
+          used_at?: string | null
+          used_in_transaction_id?: string | null
+          used_with_merchant_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          credit_amount?: number
+          device_fingerprint?: string | null
+          expires_at?: string
+          id?: string
+          ip_address?: string | null
+          revocation_reason?: string | null
+          status?: string
+          transaction_total_cents?: number | null
+          updated_at?: string
+          used_at?: string | null
+          used_in_transaction_id?: string | null
+          used_with_merchant_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_welcome_credits_used_with_merchant_id_fkey"
+            columns: ["used_with_merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_welcome_credits_used_with_merchant_id_fkey"
+            columns: ["used_with_merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_welcome_credits_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "merchant_customer_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_welcome_credits_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_welcome_credits_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "reviewer_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vet_bonus_offers: {
         Row: {
           bonus_amount: number
@@ -9482,6 +9575,150 @@ export type Database = {
         }
         Relationships: []
       }
+      welcome_credit_abuse_signals: {
+        Row: {
+          created_at: string
+          id: string
+          severity: string
+          signal_data: Json | null
+          signal_type: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          severity?: string
+          signal_data?: Json | null
+          signal_type: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          severity?: string
+          signal_data?: Json | null
+          signal_type?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "welcome_credit_abuse_signals_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_customer_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "welcome_credit_abuse_signals_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "welcome_credit_abuse_signals_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "reviewer_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      welcome_credit_analytics: {
+        Row: {
+          created_at: string
+          event_data: Json | null
+          event_type: string
+          id: string
+          merchant_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_data?: Json | null
+          event_type: string
+          id?: string
+          merchant_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_data?: Json | null
+          event_type?: string
+          id?: string
+          merchant_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "welcome_credit_analytics_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "welcome_credit_analytics_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "welcome_credit_analytics_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_customer_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "welcome_credit_analytics_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "welcome_credit_analytics_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "reviewer_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      welcome_credit_reminders: {
+        Row: {
+          channel: string
+          id: string
+          reminder_type: string
+          sent_at: string
+          welcome_credit_id: string
+        }
+        Insert: {
+          channel?: string
+          id?: string
+          reminder_type: string
+          sent_at?: string
+          welcome_credit_id: string
+        }
+        Update: {
+          channel?: string
+          id?: string
+          reminder_type?: string
+          sent_at?: string
+          welcome_credit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "welcome_credit_reminders_welcome_credit_id_fkey"
+            columns: ["welcome_credit_id"]
+            isOneToOne: false
+            referencedRelation: "user_welcome_credits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wellness_plan_payments: {
         Row: {
           amount: number
@@ -10030,6 +10267,15 @@ export type Database = {
         Args: { target_date?: string }
         Returns: undefined
       }
+      check_welcome_credit_eligibility: {
+        Args: { p_merchant_id: string; p_user_id: string }
+        Returns: {
+          credit_amount: number
+          expires_at: string
+          is_eligible: boolean
+          reason: string
+        }[]
+      }
       generate_claim_number: { Args: never; Returns: string }
       generate_invoice_number: {
         Args: { p_merchant_id: string }
@@ -10112,6 +10358,20 @@ export type Database = {
       is_offer_valid: { Args: { offer_uuid: string }; Returns: boolean }
       is_shared_member_of: { Args: { owner_user_id: string }; Returns: boolean }
       is_superadmin: { Args: { _user_id: string }; Returns: boolean }
+      issue_welcome_credit: {
+        Args: {
+          p_device_fingerprint?: string
+          p_ip_address?: string
+          p_user_id: string
+        }
+        Returns: {
+          credit_amount: number
+          credit_id: string
+          expires_at: string
+          message: string
+          success: boolean
+        }[]
+      }
       log_admin_action: {
         Args: {
           _action: string
@@ -10121,6 +10381,19 @@ export type Database = {
           _ip_address?: string
         }
         Returns: undefined
+      }
+      redeem_welcome_credit: {
+        Args: {
+          p_merchant_id: string
+          p_transaction_id?: string
+          p_transaction_total_cents: number
+          p_user_id: string
+        }
+        Returns: {
+          credit_applied: number
+          message: string
+          success: boolean
+        }[]
       }
       user_has_vet_relationship: {
         Args: { check_user_id: string; check_vet_id: string }

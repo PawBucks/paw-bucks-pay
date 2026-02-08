@@ -18,6 +18,7 @@ const paymentIntentSchema = z.object({
   description: z.string()
     .max(500, { message: "Description must be less than 500 characters" })
     .optional(),
+  useWelcomeCredit: z.boolean().optional().default(false),
 });
 
 const corsHeaders = {
@@ -78,9 +79,9 @@ serve(async (req) => {
       );
     }
 
-    const { amount, currency, merchantId, description } = validationResult.data;
+    const { amount, currency, merchantId, description, useWelcomeCredit } = validationResult.data;
 
-    logStep('Request validated', { amount, merchantId, description });
+    logStep('Request validated', { amount, merchantId, description, useWelcomeCredit });
 
     // Get merchant details including Stripe Connect account
     const supabaseAdmin = createClient(
@@ -90,7 +91,7 @@ serve(async (req) => {
 
     const { data: merchant, error: merchantError } = await supabaseAdmin
       .from('merchants')
-      .select('stripe_account_id, cashback_rate, business_name, onboarding_complete')
+      .select('stripe_account_id, cashback_rate, business_name, onboarding_complete, accepts_welcome_credit')
       .eq('id', merchantId)
       .single();
 
@@ -102,6 +103,78 @@ serve(async (req) => {
     if (!merchant.stripe_account_id) {
       console.error('Merchant Stripe account not configured:', merchantId);
       throw new Error('Payment processing is not available for this merchant.');
+    }
+
+    // ============================================================
+    // WELCOME CREDIT VALIDATION (if requested)
+    // ============================================================
+    let welcomeCreditAmount = 0;
+    let welcomeCreditId: string | null = null;
+    const minWelcomeCreditTransaction = 75; // $75 minimum
+
+    if (useWelcomeCredit) {
+      // Validate merchant accepts welcome credit
+      if (!merchant.accepts_welcome_credit) {
+        throw new Error('This merchant does not accept Welcome Credit.');
+      }
+
+      // Validate minimum transaction amount
+      if (amount < minWelcomeCreditTransaction) {
+        throw new Error(`Minimum $${minWelcomeCreditTransaction} transaction required to use Welcome Credit.`);
+      }
+
+      // Get user's active welcome credit
+      const { data: welcomeCredit, error: wcError } = await supabaseAdmin
+        .from('user_welcome_credits')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .maybeSingle();
+
+      if (wcError || !welcomeCredit) {
+        throw new Error('No active Welcome Credit found.');
+      }
+
+      // Check if expired
+      if (new Date(welcomeCredit.expires_at) < new Date()) {
+        await supabaseAdmin
+          .from('user_welcome_credits')
+          .update({ status: 'expired' })
+          .eq('id', welcomeCredit.id);
+        throw new Error('Your Welcome Credit has expired.');
+      }
+
+      // Check if user has any previous transactions (first transaction only)
+      const { count: transactionCount } = await supabaseAdmin
+        .from('transactions')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+
+      if (transactionCount && transactionCount > 0) {
+        throw new Error('Welcome Credit can only be used on your first transaction.');
+      }
+
+      // Check if user has transacted with this merchant before
+      const { count: merchantTransactionCount } = await supabaseAdmin
+        .from('transactions')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('merchant_id', merchantId);
+
+      if (merchantTransactionCount && merchantTransactionCount > 0) {
+        throw new Error('Welcome Credit can only be used on your first transaction with this merchant.');
+      }
+
+      // Credit cannot exceed transaction total (in cents)
+      const amountInCentsForWelcome = Math.round(amount * 100);
+      welcomeCreditAmount = Math.min(welcomeCredit.credit_amount, amountInCentsForWelcome);
+      welcomeCreditId = welcomeCredit.id;
+
+      logStep('Welcome Credit validated', {
+        creditId: welcomeCreditId,
+        creditAmount: welcomeCreditAmount,
+        originalAmount: amountInCentsForWelcome,
+      });
     }
 
     // Verify the connected account can actually accept payments
@@ -188,18 +261,78 @@ serve(async (req) => {
     // Calculate amounts with tier-based multipliers
     // cashbackRate is the multiplier (10x, 20x, 30x) meaning $1 = 10/20/30 PawBucks
     const amountInCents = Math.round(amount * 100);
-    const pawbucksEarned = Math.round(amount * cashbackRate);
-    // Platform fee: 3% of transaction for PawBucks platform
-    const platformFeeInCents = Math.round(amount * 0.03 * 100);
+    
+    // ============================================================
+    // WELCOME CREDIT: Reduces the Stripe charge amount
+    // Welcome Credit is a merchant-funded promotional discount
+    // No reimbursement to merchant - this is their CAC
+    // ============================================================
+    const stripeAmountInCents = amountInCents - welcomeCreditAmount;
+    
+    // PawBucks earned is based on the STRIPE portion only (not the welcome credit)
+    // This prevents gaming by using welcome credit to earn rewards
+    const stripeAmountDollars = stripeAmountInCents / 100;
+    const pawbucksEarned = stripeAmountInCents > 0 ? Math.round(stripeAmountDollars * cashbackRate) : 0;
+    
+    // Platform fee: 3% of STRIPE portion only (welcome credit has 0 fee)
+    const platformFeeInCents = stripeAmountInCents > 0 ? Math.round(stripeAmountDollars * 0.03 * 100) : 0;
 
     logStep('Payment breakdown', {
       totalAmount: amount,
+      welcomeCreditUsed: welcomeCreditAmount / 100,
+      stripeAmount: stripeAmountInCents / 100,
       subscriptionTier,
       cashbackRate: `${cashbackRate}x`,
       pawbucksEarned,
       platformFee: platformFeeInCents / 100,
-      merchantReceives: (amountInCents - platformFeeInCents) / 100,
+      merchantReceives: (stripeAmountInCents - platformFeeInCents) / 100,
     });
+
+    // If welcome credit covers the entire transaction, no Stripe charge needed
+    if (stripeAmountInCents <= 0) {
+      // Mark welcome credit as used
+      if (welcomeCreditId) {
+        await supabaseAdmin
+          .from('user_welcome_credits')
+          .update({
+            status: 'used',
+            used_at: new Date().toISOString(),
+            used_with_merchant_id: merchantId,
+            transaction_total_cents: amountInCents,
+          })
+          .eq('id', welcomeCreditId);
+
+        // Log analytics
+        await supabaseAdmin
+          .from('welcome_credit_analytics')
+          .insert({
+            event_type: 'credit_used',
+            user_id: user.id,
+            merchant_id: merchantId,
+            event_data: {
+              credit_id: welcomeCreditId,
+              credit_applied: welcomeCreditAmount,
+              transaction_total: amountInCents,
+              fully_covered: true,
+            },
+          });
+      }
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          fullyCovered: true,
+          welcomeCreditApplied: welcomeCreditAmount,
+          pawbucksEarned: 0, // No rewards for fully covered transactions
+          merchantName: merchant.business_name,
+          message: 'Transaction fully covered by Welcome Credit!',
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
+        }
+      );
+    }
 
     // ============================================================
     // DIRECT CHARGE: PaymentIntent created ON the connected account
@@ -213,9 +346,9 @@ serve(async (req) => {
     
     const paymentIntent = await stripe.paymentIntents.create(
       {
-        amount: amountInCents,
+        amount: stripeAmountInCents, // Reduced by welcome credit
         currency,
-        application_fee_amount: platformFeeInCents, // 3% platform fee
+        application_fee_amount: platformFeeInCents, // 3% platform fee on Stripe portion
         automatic_payment_methods: { enabled: true },
         metadata: {
           merchant_id: merchantId,
@@ -227,6 +360,9 @@ serve(async (req) => {
           pawbucks_earned: String(pawbucksEarned),
           platform: "pawbucks",
           charge_type: "direct",
+          welcome_credit_used: String(welcomeCreditAmount),
+          welcome_credit_id: welcomeCreditId || '',
+          original_amount: String(amountInCents),
         },
       },
       {
@@ -236,7 +372,8 @@ serve(async (req) => {
 
     logStep('PaymentIntent created (Direct Charge)', { 
       paymentIntentId: paymentIntent.id,
-      connectedAccount: merchant.stripe_account_id 
+      connectedAccount: merchant.stripe_account_id,
+      welcomeCreditApplied: welcomeCreditAmount,
     });
 
     // Create pending payment record
@@ -247,7 +384,7 @@ serve(async (req) => {
         connected_account_id: merchant.stripe_account_id,
         merchant_id: merchantId,
         user_id: user.id,
-        amount: amountInCents,
+        amount: stripeAmountInCents,
         application_fee: platformFeeInCents,
         currency,
         status: "pending",
@@ -257,6 +394,9 @@ serve(async (req) => {
           business_name: merchant.business_name,
           charge_type: "direct",
           subscription_tier: subscriptionTier,
+          welcome_credit_used: welcomeCreditAmount,
+          welcome_credit_id: welcomeCreditId,
+          original_amount: amountInCents,
         },
       });
 
@@ -269,7 +409,10 @@ serve(async (req) => {
         connectedAccountId: merchant.stripe_account_id, // Frontend needs this for Stripe.js
         pawbucksEarned,
         cashbackRate,
-        amount: amountInCents,
+        amount: stripeAmountInCents,
+        originalAmount: amountInCents,
+        welcomeCreditApplied: welcomeCreditAmount,
+        welcomeCreditId,
         applicationFee: platformFeeInCents,
         merchantName: merchant.business_name,
       }),
@@ -292,6 +435,10 @@ serve(async (req) => {
       if (error.message.includes('country') || error.message.includes('location')) {
         userMessage = 'Payment processing is not available in your current location. Please try again later.';
       } else if (error.message.includes('Merchant') || error.message.includes('merchant')) {
+        userMessage = error.message;
+      } else if (error.message.includes('Welcome Credit') || error.message.includes('welcome credit')) {
+        userMessage = error.message;
+      } else if (error.message.includes('Minimum')) {
         userMessage = error.message;
       }
     }
