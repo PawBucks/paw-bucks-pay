@@ -664,7 +664,7 @@ export const ServicePurchaseDialog = ({
                 ) : paymentMethod === 'pawbucks' ? (
                   <>
                     <Coins className="w-4 h-4 mr-2" />
-                    Purchase with PawBucks
+                    Pay with PawBucks
                   </>
                 ) : (
                   <>
