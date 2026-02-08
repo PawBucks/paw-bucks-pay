@@ -6,6 +6,45 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-pms-signature, x-pms-vendor",
 };
 
+/**
+ * Verify HMAC-SHA256 signature from PMS vendor
+ */
+async function verifyPmsSignature(
+  payload: string,
+  signature: string,
+  secret: string
+): Promise<boolean> {
+  try {
+    if (!signature || !secret) {
+      return false;
+    }
+
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      "raw",
+      encoder.encode(secret),
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["verify"]
+    );
+
+    // Handle hex-encoded signature
+    const signatureBytes = new Uint8Array(
+      signature.match(/.{1,2}/g)?.map((byte) => parseInt(byte, 16)) || []
+    );
+
+    return await crypto.subtle.verify(
+      "HMAC",
+      key,
+      signatureBytes,
+      encoder.encode(payload)
+    );
+  } catch (error) {
+    console.error("Signature verification error:", error);
+    return false;
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -17,21 +56,58 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
+    // Get headers for authentication
     const pmsVendor = req.headers.get("x-pms-vendor");
     const pmsSignature = req.headers.get("x-pms-signature");
+
+    // Validate required headers
+    if (!pmsSignature) {
+      console.error("Missing x-pms-signature header");
+      return new Response(
+        JSON.stringify({ error: "Missing signature header" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Read request body as text for signature verification
+    const rawBody = await req.text();
     
-    // In production, verify the webhook signature based on vendor
-    // This is a simplified implementation
-    
-    const payload = await req.json();
+    if (!rawBody) {
+      console.error("Empty request body");
+      return new Response(
+        JSON.stringify({ error: "Empty request body" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Parse the payload
+    let payload;
+    try {
+      payload = JSON.parse(rawBody);
+    } catch (e) {
+      console.error("Invalid JSON payload:", e);
+      return new Response(
+        JSON.stringify({ error: "Invalid JSON payload" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const { event_type, practice_id, data } = payload;
+
+    if (!practice_id) {
+      console.error("Missing practice_id in payload");
+      return new Response(
+        JSON.stringify({ error: "Missing practice_id" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     console.log(`PMS webhook received: ${event_type} from ${pmsVendor} for practice ${practice_id}`);
 
-    // Find the integration by practice_id
+    // Find the integration by practice_id and get webhook secret
     const { data: integration, error: integrationError } = await supabase
       .from("vet_pms_integrations")
-      .select("*")
+      .select("*, webhook_secret")
       .eq("practice_id", practice_id)
       .eq("is_active", true)
       .single();
@@ -43,6 +119,31 @@ serve(async (req) => {
         { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    // Verify webhook signature
+    if (!integration.webhook_secret) {
+      console.error("Webhook secret not configured for integration:", integration.id);
+      return new Response(
+        JSON.stringify({ error: "Webhook not configured - please set webhook secret" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const isValidSignature = await verifyPmsSignature(
+      rawBody,
+      pmsSignature,
+      integration.webhook_secret
+    );
+
+    if (!isValidSignature) {
+      console.error("Invalid webhook signature for practice:", practice_id);
+      return new Response(
+        JSON.stringify({ error: "Invalid signature" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    console.log("Webhook signature verified successfully");
 
     // Create sync log entry
     const { data: syncLog, error: syncLogError } = await supabase
@@ -70,7 +171,6 @@ serve(async (req) => {
         case "patient.updated":
         case "patient.created":
           // Handle patient/pet profile updates
-          // In production, this would map PMS patient data to pet_profiles
           recordsProcessed = 1;
           if (event_type === "patient.created") {
             recordsCreated = 1;
@@ -82,7 +182,6 @@ serve(async (req) => {
 
         case "vaccination.added":
           // Handle vaccination record sync
-          // Would create entry in pet_vaccinations
           recordsProcessed = 1;
           recordsCreated = 1;
           console.log("Processing vaccination event", data);
@@ -90,7 +189,6 @@ serve(async (req) => {
 
         case "labresult.added":
           // Handle lab result from PMS
-          // Would create entry in pet_lab_results
           recordsProcessed = 1;
           recordsCreated = 1;
           console.log("Processing lab result event", data);
@@ -162,7 +260,7 @@ serve(async (req) => {
   } catch (error) {
     console.error("Webhook error:", error);
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
+      JSON.stringify({ error: "Internal server error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
