@@ -345,10 +345,10 @@ serve(async (req) => {
 
           if (userPets && userPets.length > 0) {
             const pet = userPets[0];
-            const supabaseUrl = Deno.env.get("SUPABASE_URL");
+            const supabaseUrlEnv = Deno.env.get("SUPABASE_URL");
             
             // Trigger timeline moment generation (fire and forget)
-            fetch(`${supabaseUrl}/functions/v1/generate-timeline-moment`, {
+            fetch(`${supabaseUrlEnv}/functions/v1/generate-timeline-moment`, {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
@@ -361,7 +361,6 @@ serve(async (req) => {
                 petName: pet.name,
                 petType: pet.type,
                 merchantName: merchantData?.business_name || 'Partner Store',
-                merchantCategory: merchantData?.business_type,
                 amount,
                 pawbucksEarned: pawbucksAwarded,
                 description: `POS purchase at ${merchantData?.business_name || 'Partner Store'}`,
@@ -382,7 +381,8 @@ serve(async (req) => {
             .eq('id', integration.merchant_id)
             .single();
 
-          fetch(`${supabaseUrl}/functions/v1/check-guilt-badges`, {
+          const supabaseUrlForBadge = Deno.env.get("SUPABASE_URL");
+          fetch(`${supabaseUrlForBadge}/functions/v1/check-guilt-badges`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -392,7 +392,7 @@ serve(async (req) => {
               userId: matchedUser.id,
               transactionAmount: amount,
               merchantCategory: merchantForBadge?.business_type || 'other',
-              transactionId: transaction?.id,
+              transactionId: posTransaction.id,
             }),
           }).catch(err => console.error("[POS-SUBMIT] Badge check error:", err));
 

@@ -836,7 +836,8 @@ serve(async (req) => {
                 .eq('id', merchantId)
                 .single();
 
-              fetch(`${supabaseUrl}/functions/v1/check-guilt-badges`, {
+              const supabaseUrlEnv = Deno.env.get("SUPABASE_URL");
+              fetch(`${supabaseUrlEnv}/functions/v1/check-guilt-badges`, {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/json",
@@ -846,7 +847,7 @@ serve(async (req) => {
                   userId,
                   transactionAmount: totalAmount > 0 ? totalAmount : amountInDollars,
                   merchantCategory: merchantForBadge?.business_type || 'other',
-                  transactionId: transaction.id,
+                  transactionId: paymentIntentId,
                 }),
               }).catch(err => console.error("[CONNECT-WEBHOOK] Badge check error:", err));
 
