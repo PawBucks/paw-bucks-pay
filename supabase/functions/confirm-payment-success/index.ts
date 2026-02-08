@@ -365,40 +365,8 @@ serve(async (req) => {
       logStep("Platform fee auto-logged to Tax Vault");
     }
 
-    // 6. Credit merchant 1% as PawBucks (merchant earnings)
-    const merchantEarnings = Math.round(amountInDollars * 10); // 1% = 10 PawBucks per dollar
-    if (merchantEarnings > 0 && merchantId) {
-      const { data: merchantWallet } = await supabaseAdmin
-        .from('merchant_pawbucks_wallet')
-        .select('balance')
-        .eq('merchant_id', merchantId)
-        .single();
-
-      const currentBalance = merchantWallet?.balance || 0;
-      
-      if (merchantWallet) {
-        await supabaseAdmin
-          .from('merchant_pawbucks_wallet')
-          .update({ balance: currentBalance + merchantEarnings })
-          .eq('merchant_id', merchantId);
-      } else {
-        await supabaseAdmin.from('merchant_pawbucks_wallet').insert({
-          merchant_id: merchantId,
-          balance: merchantEarnings,
-        });
-      }
-
-      await supabaseAdmin.from('merchant_pawbucks_activity').insert({
-        merchant_id: merchantId,
-        type: 'earn',
-        amount: merchantEarnings,
-        source: 'Sales Commission',
-        customer_user_id: userId,
-        description: `Earned 1% from $${amountInDollars.toFixed(2)} sale`,
-      });
-
-      logStep("Merchant earnings credited", { merchantEarnings });
-    }
+    // NOTE: Merchants only earn PawBucks when customers USE PawBucks in payment
+    // No commission on card-only payments
 
     // 7. Send receipt email
     const customerEmail = userProfile?.email || user.email;
