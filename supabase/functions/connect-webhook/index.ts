@@ -418,6 +418,77 @@ serve(async (req) => {
               logStep("Transaction created", { transactionId: transaction?.id });
             }
 
+            // ========================================
+            // CREDIT PAWBUCKS TO MERCHANT (when customer uses PawBucks for invoice)
+            // ========================================
+            if (pawbucksUsed > 0 && merchantId) {
+              const { data: merchantWallet } = await supabaseAdmin
+                .from('merchant_pawbucks_wallet')
+                .select('balance')
+                .eq('merchant_id', merchantId)
+                .single();
+
+              if (merchantWallet) {
+                await supabaseAdmin
+                  .from('merchant_pawbucks_wallet')
+                  .update({ balance: merchantWallet.balance + pawbucksUsed })
+                  .eq('merchant_id', merchantId);
+              } else {
+                await supabaseAdmin.from('merchant_pawbucks_wallet').insert({
+                  merchant_id: merchantId,
+                  balance: pawbucksUsed,
+                });
+              }
+
+              await supabaseAdmin.from('merchant_pawbucks_activity').insert({
+                merchant_id: merchantId,
+                type: 'earn',
+                amount: pawbucksUsed,
+                source: 'Invoice Payment',
+                customer_user_id: invoicePayerUserId,
+                description: `Received ${pawbucksUsed} PawBucks from invoice payment`,
+              });
+
+              logStep("PawBucks credited to merchant from invoice payment", { merchantId, pawbucksUsed });
+            }
+
+            // ========================================
+            // CREDIT MERCHANT 1% EARNINGS ON STRIPE PORTION
+            // ========================================
+            const invoiceMerchantEarnings = Math.round(cardPaymentAmount * 10); // 1% = 10 PB per dollar
+            if (invoiceMerchantEarnings > 0 && merchantId) {
+              const { data: merchantWalletForEarnings } = await supabaseAdmin
+                .from('merchant_pawbucks_wallet')
+                .select('balance')
+                .eq('merchant_id', merchantId)
+                .single();
+
+              const currentBalance = merchantWalletForEarnings?.balance || 0;
+              
+              if (merchantWalletForEarnings) {
+                await supabaseAdmin
+                  .from('merchant_pawbucks_wallet')
+                  .update({ balance: currentBalance + invoiceMerchantEarnings })
+                  .eq('merchant_id', merchantId);
+              } else {
+                await supabaseAdmin.from('merchant_pawbucks_wallet').insert({
+                  merchant_id: merchantId,
+                  balance: invoiceMerchantEarnings,
+                });
+              }
+
+              await supabaseAdmin.from('merchant_pawbucks_activity').insert({
+                merchant_id: merchantId,
+                type: 'earn',
+                amount: invoiceMerchantEarnings,
+                source: 'Invoice Commission',
+                customer_user_id: invoicePayerUserId,
+                description: `Earned 1% from $${cardPaymentAmount.toFixed(2)} invoice payment`,
+              });
+
+              logStep("Merchant 1% earnings credited from invoice", { merchantId, invoiceMerchantEarnings });
+            }
+
             // Send invoice-specific receipt email to customer (includes line items, payment history)
             await sendInvoiceReceiptEmail(invoiceId);
 
@@ -653,7 +724,80 @@ serve(async (req) => {
                 balance: pawbucksEarned,
               });
               logStep("PawBucks wallet created with initial balance");
+          }
+          }
+
+          // ========================================
+          // CREDIT PAWBUCKS TO MERCHANT (when customer uses PawBucks)
+          // ========================================
+          if (pawbucksAmount > 0 && merchantId) {
+            // Credit merchant's PawBucks wallet with the PawBucks customer used
+            const { data: merchantWallet } = await supabaseAdmin
+              .from('merchant_pawbucks_wallet')
+              .select('balance')
+              .eq('merchant_id', merchantId)
+              .single();
+
+            if (merchantWallet) {
+              await supabaseAdmin
+                .from('merchant_pawbucks_wallet')
+                .update({ balance: merchantWallet.balance + pawbucksAmount })
+                .eq('merchant_id', merchantId);
+            } else {
+              await supabaseAdmin.from('merchant_pawbucks_wallet').insert({
+                merchant_id: merchantId,
+                balance: pawbucksAmount,
+              });
             }
+
+            // Log merchant activity for receiving PawBucks
+            await supabaseAdmin.from('merchant_pawbucks_activity').insert({
+              merchant_id: merchantId,
+              type: 'earn',
+              amount: pawbucksAmount,
+              source: 'Customer Payment',
+              customer_user_id: userId,
+              description: `Received ${pawbucksAmount} PawBucks from customer payment`,
+            });
+
+            logStep("PawBucks credited to merchant", { merchantId, pawbucksAmount });
+          }
+
+          // ========================================
+          // CREDIT MERCHANT 1% EARNINGS COMMISSION
+          // ========================================
+          const merchantEarnings = Math.round(amountInDollars * 10); // 1% = 10 PawBucks per dollar
+          if (merchantEarnings > 0 && merchantId) {
+            const { data: merchantWalletForEarnings } = await supabaseAdmin
+              .from('merchant_pawbucks_wallet')
+              .select('balance')
+              .eq('merchant_id', merchantId)
+              .single();
+
+            const currentBalance = merchantWalletForEarnings?.balance || 0;
+            
+            if (merchantWalletForEarnings) {
+              await supabaseAdmin
+                .from('merchant_pawbucks_wallet')
+                .update({ balance: currentBalance + merchantEarnings })
+                .eq('merchant_id', merchantId);
+            } else {
+              await supabaseAdmin.from('merchant_pawbucks_wallet').insert({
+                merchant_id: merchantId,
+                balance: merchantEarnings,
+              });
+            }
+
+            await supabaseAdmin.from('merchant_pawbucks_activity').insert({
+              merchant_id: merchantId,
+              type: 'earn',
+              amount: merchantEarnings,
+              source: 'Sales Commission',
+              customer_user_id: userId,
+              description: `Earned 1% from $${amountInDollars.toFixed(2)} sale`,
+            });
+
+            logStep("Merchant 1% earnings credited", { merchantId, merchantEarnings });
           }
 
           // Auto-log platform fee as Tax Vault expense
