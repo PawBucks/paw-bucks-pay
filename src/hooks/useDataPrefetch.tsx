@@ -1,18 +1,26 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 
 /**
  * Enhanced data prefetching for critical routes - optimized for speed
+ * Prefetches data on idle and on route hover for instant navigation
  */
 export const useDataPrefetch = () => {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const prefetchedRef = useRef<Set<string>>(new Set());
 
+  // Prefetch merchants with ratings - optimized query
   const prefetchMerchants = useCallback(async () => {
-    // Prefetch merchants list with optimized query
+    if (prefetchedRef.current.has('merchants')) return;
+    prefetchedRef.current.add('merchants');
+
     await queryClient.prefetchQuery({
       queryKey: ['merchants-with-ratings'],
       queryFn: async () => {
+        // Use parallel queries for speed
         const [merchantsResult, reviewsResult] = await Promise.all([
           supabase
             .from('merchants_public')
@@ -26,39 +34,143 @@ export const useDataPrefetch = () => {
         
         if (merchantsResult.error) return [];
         
-        const ratingsByMerchant = (reviewsResult.data || []).reduce((acc, review) => {
-          if (!acc[review.merchant_id]) {
-            acc[review.merchant_id] = { total: 0, count: 0 };
+        // Fast rating calculation using Map
+        const ratingsByMerchant = new Map<string, { total: number; count: number }>();
+        for (const review of reviewsResult.data || []) {
+          const existing = ratingsByMerchant.get(review.merchant_id);
+          if (existing) {
+            existing.total += review.rating;
+            existing.count += 1;
+          } else {
+            ratingsByMerchant.set(review.merchant_id, { total: review.rating, count: 1 });
           }
-          acc[review.merchant_id].total += review.rating;
-          acc[review.merchant_id].count += 1;
-          return acc;
-        }, {} as Record<string, { total: number; count: number }>);
+        }
 
-        return merchantsResult.data.map(merchant => ({
-          ...merchant,
-          avg_rating: ratingsByMerchant[merchant.id] 
-            ? ratingsByMerchant[merchant.id].total / ratingsByMerchant[merchant.id].count 
-            : 0,
-          review_count: ratingsByMerchant[merchant.id]?.count || 0
-        }));
+        return merchantsResult.data.map(merchant => {
+          const ratings = ratingsByMerchant.get(merchant.id);
+          return {
+            ...merchant,
+            avg_rating: ratings ? ratings.total / ratings.count : 0,
+            review_count: ratings?.count || 0
+          };
+        });
       },
       staleTime: 1000 * 60 * 10, // 10 minutes
     });
   }, [queryClient]);
 
+  // Prefetch user-specific data when authenticated
+  const prefetchUserData = useCallback(async () => {
+    if (!user?.id || prefetchedRef.current.has('user-data')) return;
+    prefetchedRef.current.add('user-data');
+
+    // Parallel prefetch of critical user data
+    await Promise.all([
+      // PawBucks wallet
+      queryClient.prefetchQuery({
+        queryKey: ['pawbucks-wallet', user.id],
+        queryFn: async () => {
+          const { data } = await supabase
+            .from('pawbucks_wallet')
+            .select('*')
+            .eq('user_id', user.id)
+            .single();
+          return data;
+        },
+        staleTime: 1000 * 60 * 5,
+      }),
+      // User profile
+      queryClient.prefetchQuery({
+        queryKey: ['profile', user.id],
+        queryFn: async () => {
+          const { data } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', user.id)
+            .single();
+          return data;
+        },
+        staleTime: 1000 * 60 * 10,
+      }),
+      // Pet profiles
+      queryClient.prefetchQuery({
+        queryKey: ['pets', user.id],
+        queryFn: async () => {
+          const { data } = await supabase
+            .from('pet_profiles')
+            .select('*')
+            .eq('user_id', user.id);
+          return data || [];
+        },
+        staleTime: 1000 * 60 * 10,
+      }),
+      // Unread notifications count
+      queryClient.prefetchQuery({
+        queryKey: ['unread-notifications-count', user.id],
+        queryFn: async () => {
+          const { count } = await supabase
+            .from('notifications')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', user.id)
+            .eq('is_read', false);
+          return count || 0;
+        },
+        staleTime: 1000 * 30, // 30 seconds for notifications
+      }),
+    ]);
+  }, [queryClient, user?.id]);
+
+  // Prefetch on idle with high priority
   useEffect(() => {
-    // Prefetch on idle with short timeout for faster perceived performance
+    const prefetchAll = () => {
+      prefetchMerchants();
+      if (user?.id) {
+        prefetchUserData();
+      }
+    };
+
     if ('requestIdleCallback' in window) {
-      requestIdleCallback(() => {
-        prefetchMerchants();
-      }, { timeout: 2000 });
+      const id = requestIdleCallback(prefetchAll, { timeout: 1500 });
+      return () => cancelIdleCallback(id);
     } else {
-      setTimeout(prefetchMerchants, 1000);
+      const timer = setTimeout(prefetchAll, 500);
+      return () => clearTimeout(timer);
     }
-  }, [prefetchMerchants]);
+  }, [prefetchMerchants, prefetchUserData, user?.id]);
 
   return {
     prefetchMerchants,
+    prefetchUserData,
   };
+};
+
+/**
+ * Hook for route-specific prefetching
+ */
+export const useRoutePrefetch = () => {
+  const queryClient = useQueryClient();
+  const prefetchedRef = useRef<Set<string>>(new Set());
+
+  const prefetchRouteData = useCallback((route: string) => {
+    if (prefetchedRef.current.has(route)) return;
+    prefetchedRef.current.add(route);
+
+    // Route-specific prefetch logic
+    switch (route) {
+      case '/discover':
+        queryClient.prefetchQuery({
+          queryKey: ['merchants-with-ratings'],
+          staleTime: 1000 * 60 * 10,
+        });
+        break;
+      case '/wallet':
+      case '/pawbucks/wallet':
+        // Will use cached user data
+        break;
+      default:
+        break;
+    }
+  }, [queryClient]);
+
+  return { prefetchRouteData };
 };
