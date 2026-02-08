@@ -103,6 +103,15 @@ export const merchantsService = {
     return { data, error };
   },
 
+  // Get reviewer profiles for public display (uses secure view with limited fields)
+  async getReviewerProfiles(userIds: string[]) {
+    const { data, error } = await supabase
+      .from("reviewer_profiles")
+      .select("id, full_name, avatar_url")
+      .in("id", userIds);
+    return { data: data || [], error };
+  },
+
   // Funding
   async getFundingRequests(merchantId: string): Promise<ServiceListResult<FundingRequest>> {
     const { data, error } = await supabase
