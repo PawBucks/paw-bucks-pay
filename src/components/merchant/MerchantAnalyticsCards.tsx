@@ -17,6 +17,9 @@ type Analytics = {
   total_customers: number;
   avg_transaction_amount: number;
   funding_deal_status?: string | null;
+  // New fields from edge function for accurate rewards tracking
+  total_fees?: number;
+  total_earnings?: number;
 };
 
 type MerchantAnalyticsCardsProps = {
@@ -25,8 +28,11 @@ type MerchantAnalyticsCardsProps = {
 
 const MerchantAnalyticsCardsComponent = ({ analytics }: MerchantAnalyticsCardsProps) => {
   const formattedValues = useMemo(() => {
-    // Merchant "Total Rewards Given" = 1% of Total Sales (merchant pays 1% as rewards to customers)
-    const totalRewardsUSD = (analytics?.total_sales || 0) * 0.01;
+    // Total Rewards Given uses actual cashback data from database (in PawBucks)
+    // Convert PawBucks to USD: 1000 PawBucks = $1 USD
+    const totalCashbackPawBucks = analytics?.total_cashback || 0;
+    const totalRewardsUSD = totalCashbackPawBucks / 1000;
+    
     return {
       totalSales: analytics?.total_sales?.toFixed(2) || "0.00",
       totalRewards: totalRewardsUSD.toFixed(2),
