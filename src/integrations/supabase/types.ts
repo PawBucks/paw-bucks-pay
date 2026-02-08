@@ -10088,6 +10088,10 @@ export type Database = {
           total_balance: number
         }[]
       }
+      get_reviewer_display_name: {
+        Args: { reviewer_id: string }
+        Returns: string
+      }
       get_reviewer_profile: {
         Args: { reviewer_id: string }
         Returns: {
