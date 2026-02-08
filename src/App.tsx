@@ -92,6 +92,7 @@ const MerchantTotalEarnings = lazyWithRetry(() => import("./pages/MerchantTotalE
 const PetTimelinePage = lazyWithRetry(() => import("./pages/PetTimelinePage"), "PetTimelinePage");
 const BadgesPage = lazyWithRetry(() => import("./pages/BadgesPage"), "BadgesPage");
 const PetPersonalityQuizPage = lazyWithRetry(() => import("./pages/PetPersonalityQuiz"), "PetPersonalityQuiz");
+const LoyaltyPage = lazyWithRetry(() => import("./pages/LoyaltyPage"), "LoyaltyPage");
 
 const createQueryClient = () => new QueryClient({
   defaultOptions: {
@@ -183,6 +184,7 @@ const AppRoutes = () => {
       <Route path="/pet-timeline" element={<PageTransition><PetTimelinePage /></PageTransition>} />
       <Route path="/badges" element={<PageTransition><BadgesPage /></PageTransition>} />
       <Route path="/pet-personality-quiz" element={<PageTransition><PetPersonalityQuizPage /></PageTransition>} />
+      <Route path="/loyalty" element={<PageTransition><LoyaltyPage /></PageTransition>} />
       <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
     </Routes>
   );

@@ -356,6 +356,54 @@ export type Database = {
         }
         Relationships: []
       }
+      badge_collections: {
+        Row: {
+          completion_reward_description: string | null
+          completion_reward_type: string | null
+          completion_reward_value: number | null
+          created_at: string
+          description: string
+          emoji: string
+          end_date: string | null
+          id: string
+          is_active: boolean
+          is_seasonal: boolean
+          name: string
+          start_date: string | null
+          updated_at: string
+        }
+        Insert: {
+          completion_reward_description?: string | null
+          completion_reward_type?: string | null
+          completion_reward_value?: number | null
+          created_at?: string
+          description: string
+          emoji: string
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          is_seasonal?: boolean
+          name: string
+          start_date?: string | null
+          updated_at?: string
+        }
+        Update: {
+          completion_reward_description?: string | null
+          completion_reward_type?: string | null
+          completion_reward_value?: number | null
+          created_at?: string
+          description?: string
+          emoji?: string
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          is_seasonal?: boolean
+          name?: string
+          start_date?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       badge_promotion_items: {
         Row: {
           created_at: string
@@ -766,6 +814,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      consumer_tier_definitions: {
+        Row: {
+          annual_free_credit_value: number
+          created_at: string
+          description: string
+          display_name: string
+          emoji: string
+          exclusive_perks: Json | null
+          id: string
+          min_badges_per_year: number
+          min_consecutive_months: number
+          min_transactions_per_year: number
+          priority_offers: boolean
+          reward_multiplier: number
+          tier: Database["public"]["Enums"]["consumer_tier"]
+          updated_at: string
+        }
+        Insert: {
+          annual_free_credit_value?: number
+          created_at?: string
+          description: string
+          display_name: string
+          emoji: string
+          exclusive_perks?: Json | null
+          id?: string
+          min_badges_per_year?: number
+          min_consecutive_months?: number
+          min_transactions_per_year?: number
+          priority_offers?: boolean
+          reward_multiplier?: number
+          tier: Database["public"]["Enums"]["consumer_tier"]
+          updated_at?: string
+        }
+        Update: {
+          annual_free_credit_value?: number
+          created_at?: string
+          description?: string
+          display_name?: string
+          emoji?: string
+          exclusive_perks?: Json | null
+          id?: string
+          min_badges_per_year?: number
+          min_consecutive_months?: number
+          min_transactions_per_year?: number
+          priority_offers?: boolean
+          reward_multiplier?: number
+          tier?: Database["public"]["Enums"]["consumer_tier"]
+          updated_at?: string
+        }
+        Relationships: []
       }
       diagnostic_ai_analyses: {
         Row: {
@@ -1459,16 +1558,21 @@ export type Database = {
         Row: {
           badge_key: string
           category: string
+          collection_id: string | null
+          contributes_to_milestone: boolean | null
           created_at: string
           description: string
           display_order: number | null
           emoji: string
+          fixed_reward_amount: number | null
           icon_url: string | null
           id: string
           is_active: boolean
+          is_streak_badge: boolean | null
           name: string
           reward_description: string | null
           reward_duration_hours: number | null
+          reward_expires_hours: number | null
           reward_type: string | null
           reward_value: number | null
           threshold_amount: number
@@ -1478,16 +1582,21 @@ export type Database = {
         Insert: {
           badge_key: string
           category: string
+          collection_id?: string | null
+          contributes_to_milestone?: boolean | null
           created_at?: string
           description: string
           display_order?: number | null
           emoji: string
+          fixed_reward_amount?: number | null
           icon_url?: string | null
           id?: string
           is_active?: boolean
+          is_streak_badge?: boolean | null
           name: string
           reward_description?: string | null
           reward_duration_hours?: number | null
+          reward_expires_hours?: number | null
           reward_type?: string | null
           reward_value?: number | null
           threshold_amount: number
@@ -1497,16 +1606,21 @@ export type Database = {
         Update: {
           badge_key?: string
           category?: string
+          collection_id?: string | null
+          contributes_to_milestone?: boolean | null
           created_at?: string
           description?: string
           display_order?: number | null
           emoji?: string
+          fixed_reward_amount?: number | null
           icon_url?: string | null
           id?: string
           is_active?: boolean
+          is_streak_badge?: boolean | null
           name?: string
           reward_description?: string | null
           reward_duration_hours?: number | null
+          reward_expires_hours?: number | null
           reward_type?: string | null
           reward_value?: number | null
           threshold_amount?: number
@@ -2676,6 +2790,123 @@ export type Database = {
           status?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      loyalty_milestones: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          credit_value: number
+          current_count: number
+          id: string
+          merchant_contribution: number
+          merchant_id: string | null
+          milestone_type: string
+          period_end: string
+          period_start: string
+          platform_contribution: number
+          status: string
+          target_count: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          credit_value?: number
+          current_count?: number
+          id?: string
+          merchant_contribution?: number
+          merchant_id?: string | null
+          milestone_type?: string
+          period_end: string
+          period_start: string
+          platform_contribution?: number
+          status?: string
+          target_count?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          credit_value?: number
+          current_count?: number
+          id?: string
+          merchant_contribution?: number
+          merchant_id?: string | null
+          milestone_type?: string
+          period_end?: string
+          period_start?: string
+          platform_contribution?: number
+          status?: string
+          target_count?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loyalty_milestones_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loyalty_milestones_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      loyalty_warnings: {
+        Row: {
+          action_deadline: string | null
+          created_at: string
+          dismissed_at: string | null
+          id: string
+          is_dismissed: boolean
+          message: string
+          notification_sent: boolean
+          notification_sent_at: string | null
+          related_entity_id: string | null
+          related_entity_type: string | null
+          urgency: string
+          user_id: string
+          warning_type: string
+        }
+        Insert: {
+          action_deadline?: string | null
+          created_at?: string
+          dismissed_at?: string | null
+          id?: string
+          is_dismissed?: boolean
+          message: string
+          notification_sent?: boolean
+          notification_sent_at?: string | null
+          related_entity_id?: string | null
+          related_entity_type?: string | null
+          urgency?: string
+          user_id: string
+          warning_type: string
+        }
+        Update: {
+          action_deadline?: string | null
+          created_at?: string
+          dismissed_at?: string | null
+          id?: string
+          is_dismissed?: boolean
+          message?: string
+          notification_sent?: boolean
+          notification_sent_at?: string | null
+          related_entity_id?: string | null
+          related_entity_type?: string | null
+          urgency?: string
+          user_id?: string
+          warning_type?: string
         }
         Relationships: []
       }
@@ -4117,6 +4348,48 @@ export type Database = {
           },
         ]
       }
+      milestone_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          milestone_id: string
+          transaction_date: string
+          transaction_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          milestone_id: string
+          transaction_date: string
+          transaction_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          milestone_id?: string
+          transaction_date?: string
+          transaction_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "milestone_transactions_milestone_id_fkey"
+            columns: ["milestone_id"]
+            isOneToOne: false
+            referencedRelation: "loyalty_milestones"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "milestone_transactions_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_preferences: {
         Row: {
           created_at: string
@@ -4719,6 +4992,90 @@ export type Database = {
           user_id?: string | null
           website_url?: string | null
           zip_code?: string | null
+        }
+        Relationships: []
+      }
+      personality_evolutions: {
+        Row: {
+          base_personality: string
+          bonus_perks: Json | null
+          created_at: string
+          duration_days: number
+          evolution_name: string
+          evolved_personality: string
+          id: string
+          is_active: boolean
+          trigger_threshold: Json
+          trigger_type: string
+        }
+        Insert: {
+          base_personality: string
+          bonus_perks?: Json | null
+          created_at?: string
+          duration_days?: number
+          evolution_name: string
+          evolved_personality: string
+          id?: string
+          is_active?: boolean
+          trigger_threshold: Json
+          trigger_type: string
+        }
+        Update: {
+          base_personality?: string
+          bonus_perks?: Json | null
+          created_at?: string
+          duration_days?: number
+          evolution_name?: string
+          evolved_personality?: string
+          id?: string
+          is_active?: boolean
+          trigger_threshold?: Json
+          trigger_type?: string
+        }
+        Relationships: []
+      }
+      personality_perks: {
+        Row: {
+          created_at: string
+          description: string
+          emoji: string
+          id: string
+          is_active: boolean
+          name: string
+          perk_type: string
+          perk_value: number | null
+          perk_value_type: string
+          personality_type: string
+          service_category: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          emoji: string
+          id?: string
+          is_active?: boolean
+          name: string
+          perk_type: string
+          perk_value?: number | null
+          perk_value_type: string
+          personality_type: string
+          service_category?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          emoji?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          perk_type?: string
+          perk_value?: number | null
+          perk_value_type?: string
+          personality_type?: string
+          service_category?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -6767,6 +7124,105 @@ export type Database = {
           },
         ]
       }
+      service_credit_usage: {
+        Row: {
+          amount_used: number
+          credit_id: string
+          id: string
+          transaction_id: string | null
+          used_at: string
+        }
+        Insert: {
+          amount_used: number
+          credit_id: string
+          id?: string
+          transaction_id?: string | null
+          used_at?: string
+        }
+        Update: {
+          amount_used?: number
+          credit_id?: string
+          id?: string
+          transaction_id?: string | null
+          used_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_credit_usage_credit_id_fkey"
+            columns: ["credit_id"]
+            isOneToOne: false
+            referencedRelation: "service_credits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_credit_usage_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_credits: {
+        Row: {
+          created_at: string
+          credit_value: number
+          description: string
+          expires_at: string
+          id: string
+          merchant_id: string | null
+          remaining_value: number
+          source_id: string | null
+          source_type: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          credit_value: number
+          description: string
+          expires_at: string
+          id?: string
+          merchant_id?: string | null
+          remaining_value: number
+          source_id?: string | null
+          source_type: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          credit_value?: number
+          description?: string
+          expires_at?: string
+          id?: string
+          merchant_id?: string | null
+          remaining_value?: number
+          source_id?: string | null
+          source_type?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_credits_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_credits_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shared_account_members: {
         Row: {
           accepted_at: string | null
@@ -7499,6 +7955,50 @@ export type Database = {
           },
         ]
       }
+      user_badge_collection_progress: {
+        Row: {
+          badges_earned: number
+          collection_id: string
+          completed_at: string | null
+          created_at: string
+          id: string
+          reward_claimed: boolean
+          total_badges: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          badges_earned?: number
+          collection_id: string
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          reward_claimed?: boolean
+          total_badges: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          badges_earned?: number
+          collection_id?: string
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          reward_claimed?: boolean
+          total_badges?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_badge_collection_progress_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "badge_collections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_badge_promotions: {
         Row: {
           activated_at: string
@@ -7546,6 +8046,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_badge_streaks: {
+        Row: {
+          created_at: string
+          current_streak: number
+          id: string
+          last_earned_date: string | null
+          longest_streak: number
+          streak_start_date: string | null
+          streak_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_streak?: number
+          id?: string
+          last_earned_date?: string | null
+          longest_streak?: number
+          streak_start_date?: string | null
+          streak_type?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_streak?: number
+          id?: string
+          last_earned_date?: string | null
+          longest_streak?: number
+          streak_start_date?: string | null
+          streak_type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       user_guilt_badges: {
         Row: {
@@ -7638,6 +8174,121 @@ export type Database = {
           },
         ]
       }
+      user_personality_evolutions: {
+        Row: {
+          created_at: string
+          evolution_id: string
+          expires_at: string
+          id: string
+          is_active: boolean
+          pet_id: string | null
+          started_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          evolution_id: string
+          expires_at: string
+          id?: string
+          is_active?: boolean
+          pet_id?: string | null
+          started_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          evolution_id?: string
+          expires_at?: string
+          id?: string
+          is_active?: boolean
+          pet_id?: string | null
+          started_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_personality_evolutions_evolution_id_fkey"
+            columns: ["evolution_id"]
+            isOneToOne: false
+            referencedRelation: "personality_evolutions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_personality_evolutions_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "pet_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_personality_perks: {
+        Row: {
+          claimed_at: string | null
+          created_at: string
+          eligible_at: string
+          expires_at: string
+          id: string
+          perk_id: string
+          pet_id: string | null
+          status: string
+          updated_at: string
+          used_at: string | null
+          used_on_transaction_id: string | null
+          user_id: string
+        }
+        Insert: {
+          claimed_at?: string | null
+          created_at?: string
+          eligible_at: string
+          expires_at: string
+          id?: string
+          perk_id: string
+          pet_id?: string | null
+          status?: string
+          updated_at?: string
+          used_at?: string | null
+          used_on_transaction_id?: string | null
+          user_id: string
+        }
+        Update: {
+          claimed_at?: string | null
+          created_at?: string
+          eligible_at?: string
+          expires_at?: string
+          id?: string
+          perk_id?: string
+          pet_id?: string | null
+          status?: string
+          updated_at?: string
+          used_at?: string | null
+          used_on_transaction_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_personality_perks_perk_id_fkey"
+            columns: ["perk_id"]
+            isOneToOne: false
+            referencedRelation: "personality_perks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_personality_perks_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "pet_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_personality_perks_used_on_transaction_id_fkey"
+            columns: ["used_on_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string
@@ -7652,6 +8303,78 @@ export type Database = {
         Update: {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_tier_history: {
+        Row: {
+          created_at: string
+          id: string
+          new_tier: Database["public"]["Enums"]["consumer_tier"]
+          old_tier: Database["public"]["Enums"]["consumer_tier"] | null
+          reason: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          new_tier: Database["public"]["Enums"]["consumer_tier"]
+          old_tier?: Database["public"]["Enums"]["consumer_tier"] | null
+          reason: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          new_tier?: Database["public"]["Enums"]["consumer_tier"]
+          old_tier?: Database["public"]["Enums"]["consumer_tier"] | null
+          reason?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_tier_status: {
+        Row: {
+          badges_earned_this_year: number
+          consecutive_active_months: number
+          created_at: string
+          current_tier: Database["public"]["Enums"]["consumer_tier"]
+          id: string
+          last_active_month: string | null
+          tier_paused: boolean
+          tier_paused_at: string | null
+          tier_start_date: string
+          transactions_this_year: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          badges_earned_this_year?: number
+          consecutive_active_months?: number
+          created_at?: string
+          current_tier?: Database["public"]["Enums"]["consumer_tier"]
+          id?: string
+          last_active_month?: string | null
+          tier_paused?: boolean
+          tier_paused_at?: string | null
+          tier_start_date?: string
+          transactions_this_year?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          badges_earned_this_year?: number
+          consecutive_active_months?: number
+          created_at?: string
+          current_tier?: Database["public"]["Enums"]["consumer_tier"]
+          id?: string
+          last_active_month?: string | null
+          tier_paused?: boolean
+          tier_paused_at?: string | null
+          tier_start_date?: string
+          transactions_this_year?: number
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -9424,6 +10147,7 @@ export type Database = {
         | "completed"
         | "no_show"
       consent_status: "pending" | "signed" | "declined" | "expired"
+      consumer_tier: "silver" | "gold" | "platinum"
       imaging_type:
         | "xray"
         | "ultrasound"
@@ -9607,6 +10331,7 @@ export const Constants = {
         "no_show",
       ],
       consent_status: ["pending", "signed", "declined", "expired"],
+      consumer_tier: ["silver", "gold", "platinum"],
       imaging_type: [
         "xray",
         "ultrasound",

@@ -27,6 +27,7 @@ import { ReceiptUploadDialog } from "@/components/ReceiptUploadDialog";
 import { TimelineTeaser } from "@/components/timeline";
 import { BadgeTeaser } from "@/components/badges";
 import { PersonalityQuizCTA } from "@/components/dashboard/PersonalityQuizCTA";
+import { LoyaltyDashboardWidget } from "@/components/loyalty";
 import { Store, Users, TrendingUp, Receipt } from "lucide-react";
 
 const cardVariants = {
@@ -343,9 +344,16 @@ const Dashboard = () => {
               </motion.div>
             )}
             
-            {/* Row 3.5: Guilt-Free Badges - Gamification hook */}
+            {/* Row 3.5: Loyalty Rewards - Outcome-first rewards */}
             {user && (
               <motion.div custom={isPawPassSubscriber ? 4.5 : 3.5} variants={cardVariants} initial="hidden" animate="visible">
+                <LoyaltyDashboardWidget userId={effectiveWalletUserId || user.id} />
+              </motion.div>
+            )}
+            
+            {/* Row 4: Guilt-Free Badges - Gamification hook */}
+            {user && (
+              <motion.div custom={isPawPassSubscriber ? 5 : 4} variants={cardVariants} initial="hidden" animate="visible">
                 <BadgeTeaser userId={effectiveWalletUserId || user.id} />
               </motion.div>
             )}
