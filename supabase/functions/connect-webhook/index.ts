@@ -452,42 +452,8 @@ serve(async (req) => {
               logStep("PawBucks credited to merchant from invoice payment", { merchantId, pawbucksUsed });
             }
 
-            // ========================================
-            // CREDIT MERCHANT 1% EARNINGS ON STRIPE PORTION
-            // ========================================
-            const invoiceMerchantEarnings = Math.round(cardPaymentAmount * 10); // 1% = 10 PB per dollar
-            if (invoiceMerchantEarnings > 0 && merchantId) {
-              const { data: merchantWalletForEarnings } = await supabaseAdmin
-                .from('merchant_pawbucks_wallet')
-                .select('balance')
-                .eq('merchant_id', merchantId)
-                .single();
-
-              const currentBalance = merchantWalletForEarnings?.balance || 0;
-              
-              if (merchantWalletForEarnings) {
-                await supabaseAdmin
-                  .from('merchant_pawbucks_wallet')
-                  .update({ balance: currentBalance + invoiceMerchantEarnings })
-                  .eq('merchant_id', merchantId);
-              } else {
-                await supabaseAdmin.from('merchant_pawbucks_wallet').insert({
-                  merchant_id: merchantId,
-                  balance: invoiceMerchantEarnings,
-                });
-              }
-
-              await supabaseAdmin.from('merchant_pawbucks_activity').insert({
-                merchant_id: merchantId,
-                type: 'earn',
-                amount: invoiceMerchantEarnings,
-                source: 'Invoice Commission',
-                customer_user_id: invoicePayerUserId,
-                description: `Earned 1% from $${cardPaymentAmount.toFixed(2)} invoice payment`,
-              });
-
-              logStep("Merchant 1% earnings credited from invoice", { merchantId, invoiceMerchantEarnings });
-            }
+            // NOTE: Merchants only earn PawBucks when customers USE PawBucks in payment
+            // No commission on card-only payments
 
             // Send invoice-specific receipt email to customer (includes line items, payment history)
             await sendInvoiceReceiptEmail(invoiceId);
@@ -763,42 +729,8 @@ serve(async (req) => {
             logStep("PawBucks credited to merchant", { merchantId, pawbucksAmount });
           }
 
-          // ========================================
-          // CREDIT MERCHANT 1% EARNINGS COMMISSION
-          // ========================================
-          const merchantEarnings = Math.round(amountInDollars * 10); // 1% = 10 PawBucks per dollar
-          if (merchantEarnings > 0 && merchantId) {
-            const { data: merchantWalletForEarnings } = await supabaseAdmin
-              .from('merchant_pawbucks_wallet')
-              .select('balance')
-              .eq('merchant_id', merchantId)
-              .single();
-
-            const currentBalance = merchantWalletForEarnings?.balance || 0;
-            
-            if (merchantWalletForEarnings) {
-              await supabaseAdmin
-                .from('merchant_pawbucks_wallet')
-                .update({ balance: currentBalance + merchantEarnings })
-                .eq('merchant_id', merchantId);
-            } else {
-              await supabaseAdmin.from('merchant_pawbucks_wallet').insert({
-                merchant_id: merchantId,
-                balance: merchantEarnings,
-              });
-            }
-
-            await supabaseAdmin.from('merchant_pawbucks_activity').insert({
-              merchant_id: merchantId,
-              type: 'earn',
-              amount: merchantEarnings,
-              source: 'Sales Commission',
-              customer_user_id: userId,
-              description: `Earned 1% from $${amountInDollars.toFixed(2)} sale`,
-            });
-
-            logStep("Merchant 1% earnings credited", { merchantId, merchantEarnings });
-          }
+          // NOTE: Merchants only earn PawBucks when customers USE PawBucks in payment
+          // No commission on card-only payments
 
           // Auto-log platform fee as Tax Vault expense
           if (platformFee > 0) {
