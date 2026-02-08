@@ -102,12 +102,14 @@ const createQueryClient = () => new QueryClient({
       retry: (failureCount, error: any) => {
         // Don't retry on 4xx errors
         if (error?.status >= 400 && error?.status < 500) return false;
-        return failureCount < 1; // Reduced from 2 to 1 for faster failure
+        return failureCount < 1; // Single retry for faster failure
       },
       refetchOnWindowFocus: false,
       refetchOnReconnect: 'always',
       networkMode: 'offlineFirst', // Use cached data first for instant loading
       structuralSharing: true, // Optimize re-renders
+      // Reduce unnecessary refetches
+      refetchOnMount: false,
     },
     mutations: {
       retry: 1,
