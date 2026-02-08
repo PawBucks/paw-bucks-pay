@@ -71,6 +71,7 @@ const Index = () => {
           
           <div className="relative max-w-4xl mx-auto text-center space-y-6 animate-fade-in">
             <h1 
+              <meta name='impact-site-verification' value='undefined'>
               id="hero-heading"
               className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold leading-[1.1] tracking-tight text-foreground"
             >
