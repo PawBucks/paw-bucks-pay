@@ -146,12 +146,13 @@ serve(async (req) => {
     if (merchantId) {
       const { data: merchant } = await supabaseAdmin
         .from('merchants')
-        .select('business_name, accepts_welcome_credit')
+        .select('business_name, accepts_pawbucks')
         .eq('id', merchantId)
         .single();
 
       if (merchant) {
-        merchantEligible = merchant.accepts_welcome_credit;
+        // Any merchant that accepts PawBucks automatically accepts Welcome Credit
+        merchantEligible = merchant.accepts_pawbucks ?? false;
         merchantName = merchant.business_name;
       }
     }

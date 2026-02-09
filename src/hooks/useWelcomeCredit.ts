@@ -97,7 +97,7 @@ export const useWelcomeCredit = (userId: string | undefined, merchantId?: string
     if (status.merchantEligible === false) {
       return { 
         canUse: false, 
-        reason: 'This merchant does not accept Welcome Credit' 
+        reason: 'This merchant does not accept PawBucks' 
       };
     }
 
