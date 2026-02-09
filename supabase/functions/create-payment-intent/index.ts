@@ -91,7 +91,7 @@ serve(async (req) => {
 
     const { data: merchant, error: merchantError } = await supabaseAdmin
       .from('merchants')
-      .select('stripe_account_id, cashback_rate, business_name, onboarding_complete, accepts_welcome_credit')
+      .select('stripe_account_id, cashback_rate, business_name, onboarding_complete, accepts_pawbucks')
       .eq('id', merchantId)
       .single();
 
@@ -113,9 +113,9 @@ serve(async (req) => {
     const minWelcomeCreditTransaction = 75; // $75 minimum
 
     if (useWelcomeCredit) {
-      // Validate merchant accepts welcome credit
-      if (!merchant.accepts_welcome_credit) {
-        throw new Error('This merchant does not accept Welcome Credit.');
+      // Any merchant accepting PawBucks automatically accepts Welcome Credit
+      if (!merchant.accepts_pawbucks) {
+        throw new Error('This merchant does not accept PawBucks payments.');
       }
 
       // Validate minimum transaction amount

@@ -15,7 +15,6 @@ type Merchant = {
   latitude?: number;
   longitude?: number;
   cashback_rate: number;
-  accepts_welcome_credit?: boolean;
 };
 
 type MerchantCardProps = {
@@ -56,9 +55,7 @@ const MerchantCardComponent = ({ merchant, distance, onPayNow }: MerchantCardPro
               <Badge variant="outline" className={`${getTypeColor(merchant.business_type)} text-xs`}>
                 {merchant.business_type.replace("_", " ").toUpperCase()}
               </Badge>
-              {merchant.accepts_welcome_credit && (
-                <WelcomeCreditBadge size="sm" />
-              )}
+              <WelcomeCreditBadge size="sm" />
             </div>
           </div>
         </div>

@@ -11,7 +11,6 @@ import {
 import { MerchantAnalyticsCards } from "./MerchantAnalyticsCards";
 import { MerchantCharts } from "./MerchantCharts";
 import { MerchantTransactionList } from "./MerchantTransactionList";
-import { WelcomeCreditOptIn } from "./WelcomeCreditOptIn";
 
 type Merchant = {
   id: string;
@@ -154,11 +153,6 @@ export function MerchantOverviewTab({
             </div>
           )}
         </GradientCard>
-      )}
-
-      {/* Welcome Credit Program Opt-In */}
-      {merchant.stripe_account_id && (
-        <WelcomeCreditOptIn merchantId={merchant.id} />
       )}
 
       {/* Analytics Summary Cards */}
