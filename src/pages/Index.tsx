@@ -99,6 +99,51 @@ const Index = () => {
           </div>
         </section>
 
+        {/* Welcome Credit Banner */}
+        <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10" aria-label="Welcome Credit Offer">
+          <div className="relative max-w-4xl mx-auto">
+            <div className="relative rounded-2xl overflow-hidden border-2 border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-yellow-500/10 p-6 sm:p-8 shadow-xl">
+              {/* Sparkle decorations */}
+              <div className="absolute top-3 right-6 w-2.5 h-2.5 bg-yellow-400 rounded-full animate-pulse" aria-hidden="true" />
+              <div className="absolute top-8 right-3 w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse delay-150" aria-hidden="true" />
+              <div className="absolute bottom-4 left-8 w-2 h-2 bg-orange-400 rounded-full animate-pulse delay-300" aria-hidden="true" />
+              <div className="absolute top-4 left-4 w-1.5 h-1.5 bg-yellow-300 rounded-full animate-pulse delay-500" aria-hidden="true" />
+
+              <div className="flex flex-col sm:flex-row items-center gap-5 sm:gap-8">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shrink-0 shadow-lg">
+                  <Gift className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+                </div>
+                <div className="flex-1 text-center sm:text-left space-y-2">
+                  <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
+                    <h2 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-foreground">
+                      🎉 Get 50,000 PawBucks Free
+                    </h2>
+                    <span className="inline-flex items-center px-3 py-1 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 text-xs font-semibold">
+                      New Members Only
+                    </span>
+                  </div>
+                  <p className="text-muted-foreground text-base sm:text-lg">
+                    That's <span className="font-bold text-amber-600 dark:text-amber-400">$50 toward your first booking</span> with a participating partner. 
+                    Sign up, claim your credit, and try PawBucks risk-free.
+                  </p>
+                  <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
+                    <Button
+                      size="lg"
+                      onClick={() => navigate("/auth?role=pet_owner")}
+                      className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-md font-semibold"
+                    >
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      Claim Your Welcome Credit
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                    <span className="text-xs text-muted-foreground">One-time use • Expires in 45 days • No credit card needed</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Lifestyle Hero Image Section */}
         <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
           <div className="relative max-w-5xl mx-auto">
