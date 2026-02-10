@@ -24,6 +24,7 @@ import { NetworkStatus } from "@/components/NetworkStatus";
 import { UpdatePrompt } from "@/components/UpdatePrompt";
 import { FeedbackButton } from "@/components/FeedbackButton";
 import { lazyWithRetry, clearChunkReloadFlag } from "@/lib/lazyWithRetry";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 // Critical pages - loaded immediately
 import Index from "./pages/Index";
@@ -121,72 +122,82 @@ const createQueryClient = () => new QueryClient({
 const AppRoutes = () => {
   return (
     <Routes>
+      {/* Public routes */}
       <Route path="/" element={<PageTransition><Index /></PageTransition>} />
       <Route path="/auth" element={<PageTransition><Auth /></PageTransition>} />
       <Route path="/auth/callback" element={<PageTransition><AuthCallback /></PageTransition>} />
       <Route path="/reset-password" element={<PageTransition><ResetPassword /></PageTransition>} />
-      <Route path="/dashboard" element={<PageTransition><Dashboard /></PageTransition>} />
-      <Route path="/create-pet-profile" element={<PageTransition><CreatePetProfile /></PageTransition>} />
-      <Route path="/discover" element={<PageTransition><Discover /></PageTransition>} />
-      <Route path="/wallet" element={<PageTransition><Wallet /></PageTransition>} />
-      <Route path="/referrals" element={<PageTransition><Referrals /></PageTransition>} />
-      <Route path="/profile" element={<PageTransition><Profile /></PageTransition>} />
-      <Route path="/my-subscriptions" element={<PageTransition><MySubscriptions /></PageTransition>} />
-      <Route path="/subscription-success" element={<PageTransition><SubscriptionSuccess /></PageTransition>} />
       <Route path="/merchants" element={<PageTransition><MerchantLanding /></PageTransition>} />
-      <Route path="/merchant-onboarding" element={<PageTransition><MerchantOnboarding /></PageTransition>} />
-      <Route path="/merchant-dashboard" element={<PageTransition><MerchantDashboard /></PageTransition>} />
-      <Route path="/merchant/transactions" element={<PageTransition><MerchantTransactions /></PageTransition>} />
-      <Route path="/vet-loan/apply" element={<PageTransition><VetLoanApply /></PageTransition>} />
-      <Route path="/pet-health/:petId" element={<PageTransition><PetHealth /></PageTransition>} />
-      <Route path="/vet-dashboard" element={<PageTransition><VetDashboard /></PageTransition>} />
       <Route path="/vets" element={<PageTransition><VetLanding /></PageTransition>} />
-      <Route path="/vet-onboarding" element={<PageTransition><VetOnboarding /></PageTransition>} />
-      <Route path="/admin" element={<PageTransition><AdminLogin /></PageTransition>} />
-      <Route path="/admin/reset-password" element={<PageTransition><AdminResetPassword /></PageTransition>} />
-      <Route path="/admin/dashboard" element={<PageTransition><AdminDashboard /></PageTransition>} />
-      <Route path="/admin/merchant-services" element={<PageTransition><AdminMerchantServices /></PageTransition>} />
-      <Route path="/pawbucks/wallet" element={<PageTransition><PawBucksWallet /></PageTransition>} />
-      <Route path="/pawbucks/redeem" element={<PageTransition><PawBucksRedeem /></PageTransition>} />
-      <Route path="/pet-store" element={<PageTransition><PetStore /></PageTransition>} />
-      <Route path="/admin/pet-store" element={<PageTransition><PetStoreAdmin /></PageTransition>} />
-      <Route path="/merchant/products" element={<PageTransition><MerchantProducts /></PageTransition>} />
-      <Route path="/merchant/offers" element={<PageTransition><MerchantOffers /></PageTransition>} />
-      <Route path="/merchant/offers/new" element={<PageTransition><MerchantOfferEditor /></PageTransition>} />
-      <Route path="/merchant/offers/:id" element={<PageTransition><MerchantOfferDetails /></PageTransition>} />
-      <Route path="/merchant/offers/:id/edit" element={<PageTransition><MerchantOfferEditor /></PageTransition>} />
-      <Route path="/merchant/offers/:id/redemptions" element={<PageTransition><MerchantOfferRedemptions /></PageTransition>} />
-      <Route path="/merchant/offers/:id/codes" element={<PageTransition><MerchantOfferCodes /></PageTransition>} />
-      <Route path="/merchant-analytics" element={<PageTransition><MerchantAnalytics /></PageTransition>} />
-      <Route path="/merchant/:merchantId" element={<PageTransition><MerchantProfile /></PageTransition>} />
+      <Route path="/install" element={<PageTransition><Install /></PageTransition>} />
       <Route path="/directory" element={<PageTransition><MerchantDirectory /></PageTransition>} />
-      <Route path="/merchant/market" element={<PageTransition><MerchantMarket /></PageTransition>} />
-      <Route path="/merchant/pos-integration" element={<PageTransition><MerchantPOSIntegration /></PageTransition>} />
-      <Route path="/merchant/scheduling" element={<PageTransition><MerchantScheduling /></PageTransition>} />
-      <Route path="/merchant/tax-vault" element={<PageTransition><MerchantTaxVault /></PageTransition>} />
-      <Route path="/merchant/pawbucks" element={<PageTransition><MerchantPawBucksWalletPage /></PageTransition>} />
       <Route path="/storefront/:accountId" element={<PageTransition><Storefront /></PageTransition>} />
       <Route path="/store/:accountId" element={<PageTransition><Storefront /></PageTransition>} />
       <Route path="/checkout-success" element={<PageTransition><CheckoutSuccess /></PageTransition>} />
-      <Route path="/install" element={<PageTransition><Install /></PageTransition>} />
-      <Route path="/notification-preferences" element={<PageTransition><NotificationPreferences /></PageTransition>} />
-      <Route path="/notifications" element={<PageTransition><NotificationHistory /></PageTransition>} />
-      <Route path="/spending-breakdown" element={<PageTransition><SpendingBreakdown /></PageTransition>} />
-      <Route path="/lost-pets" element={<PageTransition><LostPets /></PageTransition>} />
-      <Route path="/lost-pets/:id" element={<PageTransition><LostPetDetail /></PageTransition>} />
       <Route path="/pay/:merchantId" element={<PageTransition><DirectCheckout /></PageTransition>} />
       <Route path="/accountant-portal/:token" element={<PageTransition><AccountantPortal /></PageTransition>} />
-      <Route path="/merchant/invoicing" element={<PageTransition><MerchantInvoicing /></PageTransition>} />
-      <Route path="/merchant/subscription-plans" element={<PageTransition><MerchantSubscriptionPlans /></PageTransition>} />
-      <Route path="/merchant/available-balance" element={<PageTransition><MerchantAvailableBalance /></PageTransition>} />
-      <Route path="/merchant/pending-balance" element={<PageTransition><MerchantPendingBalance /></PageTransition>} />
-      <Route path="/merchant/total-earnings" element={<PageTransition><MerchantTotalEarnings /></PageTransition>} />
       <Route path="/invoice/:invoiceId/pay" element={<PageTransition><InvoicePayment /></PageTransition>} />
       <Route path="/invoice/:invoiceId/success" element={<PageTransition><InvoicePaymentSuccess /></PageTransition>} />
-      <Route path="/pet-timeline" element={<PageTransition><PetTimelinePage /></PageTransition>} />
-      <Route path="/badges" element={<PageTransition><BadgesPage /></PageTransition>} />
-      <Route path="/pet-personality-quiz" element={<PageTransition><PetPersonalityQuizPage /></PageTransition>} />
-      <Route path="/loyalty" element={<PageTransition><LoyaltyPage /></PageTransition>} />
+      <Route path="/merchant/:merchantId" element={<PageTransition><MerchantProfile /></PageTransition>} />
+      <Route path="/lost-pets" element={<PageTransition><LostPets /></PageTransition>} />
+      <Route path="/lost-pets/:id" element={<PageTransition><LostPetDetail /></PageTransition>} />
+
+      {/* Authenticated pet owner routes */}
+      <Route path="/dashboard" element={<ProtectedRoute><PageTransition><Dashboard /></PageTransition></ProtectedRoute>} />
+      <Route path="/create-pet-profile" element={<ProtectedRoute><PageTransition><CreatePetProfile /></PageTransition></ProtectedRoute>} />
+      <Route path="/discover" element={<ProtectedRoute><PageTransition><Discover /></PageTransition></ProtectedRoute>} />
+      <Route path="/wallet" element={<ProtectedRoute><PageTransition><Wallet /></PageTransition></ProtectedRoute>} />
+      <Route path="/referrals" element={<ProtectedRoute><PageTransition><Referrals /></PageTransition></ProtectedRoute>} />
+      <Route path="/profile" element={<ProtectedRoute><PageTransition><Profile /></PageTransition></ProtectedRoute>} />
+      <Route path="/my-subscriptions" element={<ProtectedRoute><PageTransition><MySubscriptions /></PageTransition></ProtectedRoute>} />
+      <Route path="/subscription-success" element={<ProtectedRoute><PageTransition><SubscriptionSuccess /></PageTransition></ProtectedRoute>} />
+      <Route path="/pet-health/:petId" element={<ProtectedRoute><PageTransition><PetHealth /></PageTransition></ProtectedRoute>} />
+      <Route path="/pawbucks/wallet" element={<ProtectedRoute><PageTransition><PawBucksWallet /></PageTransition></ProtectedRoute>} />
+      <Route path="/pawbucks/redeem" element={<ProtectedRoute><PageTransition><PawBucksRedeem /></PageTransition></ProtectedRoute>} />
+      <Route path="/pet-store" element={<ProtectedRoute><PageTransition><PetStore /></PageTransition></ProtectedRoute>} />
+      <Route path="/notification-preferences" element={<ProtectedRoute><PageTransition><NotificationPreferences /></PageTransition></ProtectedRoute>} />
+      <Route path="/notifications" element={<ProtectedRoute><PageTransition><NotificationHistory /></PageTransition></ProtectedRoute>} />
+      <Route path="/spending-breakdown" element={<ProtectedRoute><PageTransition><SpendingBreakdown /></PageTransition></ProtectedRoute>} />
+      <Route path="/vet-loan/apply" element={<ProtectedRoute><PageTransition><VetLoanApply /></PageTransition></ProtectedRoute>} />
+      <Route path="/pet-timeline" element={<ProtectedRoute><PageTransition><PetTimelinePage /></PageTransition></ProtectedRoute>} />
+      <Route path="/badges" element={<ProtectedRoute><PageTransition><BadgesPage /></PageTransition></ProtectedRoute>} />
+      <Route path="/pet-personality-quiz" element={<ProtectedRoute><PageTransition><PetPersonalityQuizPage /></PageTransition></ProtectedRoute>} />
+      <Route path="/loyalty" element={<ProtectedRoute><PageTransition><LoyaltyPage /></PageTransition></ProtectedRoute>} />
+
+      {/* Admin routes - requires admin or superadmin role */}
+      <Route path="/admin" element={<PageTransition><AdminLogin /></PageTransition>} />
+      <Route path="/admin/reset-password" element={<PageTransition><AdminResetPassword /></PageTransition>} />
+      <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['admin', 'superadmin']}><PageTransition><AdminDashboard /></PageTransition></ProtectedRoute>} />
+      <Route path="/admin/merchant-services" element={<ProtectedRoute allowedRoles={['admin', 'superadmin']}><PageTransition><AdminMerchantServices /></PageTransition></ProtectedRoute>} />
+      <Route path="/admin/pet-store" element={<ProtectedRoute allowedRoles={['admin', 'superadmin']}><PageTransition><PetStoreAdmin /></PageTransition></ProtectedRoute>} />
+
+      {/* Merchant routes - requires merchant account */}
+      <Route path="/merchant-onboarding" element={<ProtectedRoute><PageTransition><MerchantOnboarding /></PageTransition></ProtectedRoute>} />
+      <Route path="/merchant-dashboard" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantDashboard /></PageTransition></ProtectedRoute>} />
+      <Route path="/merchant/transactions" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantTransactions /></PageTransition></ProtectedRoute>} />
+      <Route path="/merchant/products" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantProducts /></PageTransition></ProtectedRoute>} />
+      <Route path="/merchant/offers" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantOffers /></PageTransition></ProtectedRoute>} />
+      <Route path="/merchant/offers/new" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantOfferEditor /></PageTransition></ProtectedRoute>} />
+      <Route path="/merchant/offers/:id" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantOfferDetails /></PageTransition></ProtectedRoute>} />
+      <Route path="/merchant/offers/:id/edit" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantOfferEditor /></PageTransition></ProtectedRoute>} />
+      <Route path="/merchant/offers/:id/redemptions" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantOfferRedemptions /></PageTransition></ProtectedRoute>} />
+      <Route path="/merchant/offers/:id/codes" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantOfferCodes /></PageTransition></ProtectedRoute>} />
+      <Route path="/merchant-analytics" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantAnalytics /></PageTransition></ProtectedRoute>} />
+      <Route path="/merchant/market" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantMarket /></PageTransition></ProtectedRoute>} />
+      <Route path="/merchant/pos-integration" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantPOSIntegration /></PageTransition></ProtectedRoute>} />
+      <Route path="/merchant/scheduling" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantScheduling /></PageTransition></ProtectedRoute>} />
+      <Route path="/merchant/tax-vault" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantTaxVault /></PageTransition></ProtectedRoute>} />
+      <Route path="/merchant/pawbucks" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantPawBucksWalletPage /></PageTransition></ProtectedRoute>} />
+      <Route path="/merchant/invoicing" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantInvoicing /></PageTransition></ProtectedRoute>} />
+      <Route path="/merchant/subscription-plans" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantSubscriptionPlans /></PageTransition></ProtectedRoute>} />
+      <Route path="/merchant/available-balance" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantAvailableBalance /></PageTransition></ProtectedRoute>} />
+      <Route path="/merchant/pending-balance" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantPendingBalance /></PageTransition></ProtectedRoute>} />
+      <Route path="/merchant/total-earnings" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantTotalEarnings /></PageTransition></ProtectedRoute>} />
+
+      {/* Vet routes - requires vet account */}
+      <Route path="/vet-onboarding" element={<ProtectedRoute><PageTransition><VetOnboarding /></PageTransition></ProtectedRoute>} />
+      <Route path="/vet-dashboard" element={<ProtectedRoute allowedRoles={['vet']}><PageTransition><VetDashboard /></PageTransition></ProtectedRoute>} />
+
       <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
     </Routes>
   );

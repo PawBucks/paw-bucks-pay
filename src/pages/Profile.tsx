@@ -19,6 +19,7 @@ import { LogOut, User, Mail, Calendar, Crown, Sparkles, Settings, Loader2, Info,
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { getSubscriptionTier } from "@/lib/constants";
 
 type Profile = {
   full_name: string;
@@ -358,11 +359,11 @@ const Profile = () => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                    subscription.product_id === 'prod_TQyZjYzt9DwoIK' 
+                    getSubscriptionTier(subscription.product_id, subscription.subscription_tier) === 'pawpass_plus'
                       ? 'bg-gradient-to-br from-purple-500 to-pink-500'
                       : 'bg-gradient-to-br from-yellow-500 to-orange-500'
                   }`}>
-                    {subscription.product_id === 'prod_TQyZjYzt9DwoIK' ? (
+                    {getSubscriptionTier(subscription.product_id, subscription.subscription_tier) === 'pawpass_plus' ? (
                       <Crown className="w-6 h-6 text-white" />
                     ) : (
                       <Sparkles className="w-6 h-6 text-white" />
@@ -370,7 +371,7 @@ const Profile = () => {
                   </div>
                   <div>
                     <h3 className="font-semibold text-lg">
-                      {subscription.product_id === 'prod_TQyZjYzt9DwoIK' ? 'PawPass+' : 'PawPass'}
+                      {getSubscriptionTier(subscription.product_id, subscription.subscription_tier) === 'pawpass_plus' ? 'PawPass+' : 'PawPass'}
                     </h3>
                     <p className="text-sm text-muted-foreground">Active Subscription</p>
                   </div>
