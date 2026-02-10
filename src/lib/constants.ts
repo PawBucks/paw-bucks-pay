@@ -19,10 +19,9 @@ export const POINTS_MULTIPLIER = {
 export const CASHBACK_RATES = POINTS_MULTIPLIER;
 
 // Map Stripe product IDs to subscription tiers
-// These would be actual Stripe product IDs in production
 export const SUBSCRIPTION_TIERS = {
-  PAWPASS_PLUS_PRODUCT_ID: 'prod_pawpass_plus', // Replace with actual Stripe product ID
-  PAWPASS_PRODUCT_ID: 'prod_pawpass', // Replace with actual Stripe product ID
+  PAWPASS_PLUS_PRODUCT_ID: 'prod_TQyZjYzt9DwoIK', // PawPass+ $20/month
+  PAWPASS_PRODUCT_ID: 'prod_TJVK9ZhLiJnnpm', // PawPass $10/month
   // Manual subscription product IDs (set by admin upgrades)
   MANUAL_PAWPASS_PLUS_PRODUCT_ID: 'manual_pawpass_plus',
   MANUAL_PAWPASS_PRODUCT_ID: 'manual_pawpass',

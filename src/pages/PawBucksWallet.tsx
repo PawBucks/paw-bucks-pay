@@ -17,7 +17,7 @@ import { EmptyState } from "@/components/EmptyState";
 import { PawBucksInfoTooltip } from "@/components/PawBucksInfoTooltip";
 import { Coins, TrendingUp, Gift, ArrowUpRight, ArrowDownRight, Sparkles, Zap, Crown, Lock, Unlock } from "lucide-react";
 import { Formatters } from "@/utils/formatters";
-import { PAWBUCKS_CONVERSION, ROUTES, CASHBACK_RATES } from "@/lib/constants";
+import { PAWBUCKS_CONVERSION, ROUTES, CASHBACK_RATES, getSubscriptionTier } from "@/lib/constants";
 import { Progress } from "@/components/ui/progress";
 import { LockedRewardsCard } from "@/components/wallet/LockedRewardsCard";
 import { useSpendablePawBucks } from "@/hooks/useSpendablePawBucks";
@@ -281,21 +281,10 @@ const PawBucksWallet = () => {
   const { subscription } = useSubscription();
   const navigate = useNavigate();
   
-  // Check if user is PawPass+ subscriber (product ID for PawPass+ or tier 'plus'/'pawpass_plus')
-  const isPawPassPlusSubscriber = subscription.subscribed && (
-    subscription.product_id === 'prod_TQyZjYzt9DwoIK' || 
-    subscription.product_id === 'manual_pawpass_plus' ||
-    subscription.subscription_tier === 'plus' ||
-    subscription.subscription_tier === 'pawpass_plus'
-  );
-  
-  // Check if user is PawPass (non-plus) subscriber (product ID for PawPass or tier 'basic'/'pawpass')
-  const isPawPassSubscriber = subscription.subscribed && (
-    subscription.product_id === 'prod_TJVK9ZhLiJnnpm' || 
-    subscription.product_id === 'manual_pawpass' ||
-    subscription.subscription_tier === 'basic' ||
-    subscription.subscription_tier === 'pawpass'
-  );
+  // Use centralized tier detection
+  const currentTier = getSubscriptionTier(subscription.product_id, subscription.subscription_tier);
+  const isPawPassPlusSubscriber = subscription.subscribed && currentTier === 'pawpass_plus';
+  const isPawPassSubscriber = subscription.subscribed && currentTier === 'pawpass';
   // Check if user is part of a shared account
   const sharedAccount = useSharedAccount(user?.id);
   const effectiveWalletUserId = getEffectiveWalletUserId(user?.id, sharedAccount);
