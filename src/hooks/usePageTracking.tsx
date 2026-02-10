@@ -1,48 +1,23 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 
 /**
- * Track page views and navigation for analytics and performance monitoring
+ * Lightweight page view tracking - no heavy observers per route change
  */
 export const usePageTracking = () => {
   const location = useLocation();
+  const isFirstRender = useRef(true);
 
   useEffect(() => {
-    // Track page view
-    const pageView = {
-      path: location.pathname,
-      search: location.search,
-      timestamp: new Date().toISOString(),
-    };
+    // Skip logging on first render (already tracked by initial load)
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
 
-    // Log page navigation (can be extended to send to analytics service)
+    // Track page view - lightweight, no observers
     if (process.env.NODE_ENV === 'production') {
-      console.log('Page view:', pageView);
-      // TODO: Send to analytics service (e.g., Google Analytics, Mixpanel)
+      // Future: send to analytics service
     }
-
-    // Track performance metrics
-    if ('PerformanceObserver' in window) {
-      try {
-        const perfObserver = new PerformanceObserver((list) => {
-          for (const entry of list.getEntries()) {
-            if (entry.entryType === 'navigation') {
-              const navEntry = entry as PerformanceNavigationTiming;
-              console.log('Navigation timing:', {
-                dns: navEntry.domainLookupEnd - navEntry.domainLookupStart,
-                tcp: navEntry.connectEnd - navEntry.connectStart,
-                ttfb: navEntry.responseStart - navEntry.requestStart,
-                load: navEntry.loadEventEnd - navEntry.loadEventStart,
-              });
-            }
-          }
-        });
-        perfObserver.observe({ entryTypes: ['navigation'] });
-        
-        return () => perfObserver.disconnect();
-      } catch (error) {
-        // PerformanceObserver not fully supported
-      }
-    }
-  }, [location]);
+  }, [location.pathname]);
 };
