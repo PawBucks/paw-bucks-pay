@@ -65,6 +65,8 @@ export default defineConfig(({ mode }) => ({
         cleanupOutdatedCaches: true,
         skipWaiting: true,
         clientsClaim: true,
+        // Never intercept auth callbacks or OAuth redirects
+        navigateFallbackDenylist: [/^\/auth\/callback/, /^\/~oauth/, /^\/reset-password/],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -81,15 +83,16 @@ export default defineConfig(({ mode }) => ({
             }
           },
           {
-            urlPattern: /^https:\/\/yxpnkipcoxksmnsvpvwi\.supabase\.co\/.*$/i,
+            // Only cache Supabase REST/storage — NEVER auth or functions endpoints
+            urlPattern: /^https:\/\/yxpnkipcoxksmnsvpvwi\.supabase\.co\/rest\/.*$/i,
             handler: "NetworkFirst",
             options: {
-              cacheName: "supabase-api-cache",
+              cacheName: "supabase-rest-cache",
               expiration: {
                 maxEntries: 100,
-                maxAgeSeconds: 60 * 5 // 5 minutes
+                maxAgeSeconds: 60 * 5
               },
-              networkTimeoutSeconds: 5 // Reduced from 10 for faster fallback
+              networkTimeoutSeconds: 5
             }
           },
           {
@@ -99,7 +102,7 @@ export default defineConfig(({ mode }) => ({
               cacheName: "images-cache",
               expiration: {
                 maxEntries: 200,
-                maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
+                maxAgeSeconds: 60 * 60 * 24 * 30
               }
             }
           }
