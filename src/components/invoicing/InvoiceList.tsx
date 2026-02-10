@@ -13,6 +13,8 @@ import {
   Trash2,
   Copy,
   Download,
+  Share2,
+  Link,
   Clock,
   CheckCircle,
   AlertCircle,
@@ -23,6 +25,7 @@ import {
   Mail,
   Printer
 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -436,6 +439,16 @@ export function InvoiceList({
                             <Copy className="h-4 w-4 mr-2" />
                             Duplicate
                           </DropdownMenuItem>
+                          {invoice.status !== 'draft' && (
+                            <DropdownMenuItem onClick={() => {
+                              const shareUrl = `${window.location.origin}/invoice/${invoice.id}/pay?token=${invoice.access_token}`;
+                              navigator.clipboard.writeText(shareUrl);
+                              toast.success("Share link copied to clipboard");
+                            }}>
+                              <Link className="h-4 w-4 mr-2" />
+                              Copy Share Link
+                            </DropdownMenuItem>
+                          )}
                           <DropdownMenuSeparator />
                           <DropdownMenuItem 
                             onClick={() => onDelete(invoice)}
