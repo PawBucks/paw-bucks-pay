@@ -22,6 +22,7 @@ import {
   ClaimRecoveryDashboard,
   VetQuickActionsTab,
 } from "@/components/vet-portal";
+import { SalesReportGenerator } from "@/components/shared/SalesReportGenerator";
 import {
   Stethoscope,
   Users,
@@ -39,6 +40,7 @@ import {
   TrendingUp,
   Scale,
   Zap,
+  BarChart3,
 } from "lucide-react";
 import { toast } from "sonner";
 import { PendingApprovalNotice } from "@/components/PendingApprovalNotice";
@@ -229,7 +231,7 @@ export default function VetDashboard() {
         </div>
 
         <Tabs defaultValue="emr" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-7 lg:grid-cols-14">
+          <TabsList className="grid w-full grid-cols-8 lg:grid-cols-15">
             <TabsTrigger value="emr" className="flex items-center gap-1">
               <FileText className="w-4 h-4" />
               <span className="hidden sm:inline">EMR</span>
@@ -291,6 +293,10 @@ export default function VetDashboard() {
               <Zap className="w-4 h-4" />
               <span className="hidden sm:inline">Actions</span>
             </TabsTrigger>
+            <TabsTrigger value="sales-report" className="flex items-center gap-1">
+              <BarChart3 className="w-4 h-4" />
+              <span className="hidden sm:inline">Reports</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="emr">
@@ -347,6 +353,10 @@ export default function VetDashboard() {
 
           <TabsContent value="quick-actions">
             <VetQuickActionsTab vetId={vetInfo.id} hasStripeAccount={false} />
+          </TabsContent>
+
+          <TabsContent value="sales-report">
+            <SalesReportGenerator entityId={vetInfo.id} entityType="vet" entityName={vetInfo.name} />
           </TabsContent>
         </Tabs>
       </div>

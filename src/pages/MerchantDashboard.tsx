@@ -45,6 +45,7 @@ import { MerchantOverviewTab } from "@/components/merchant/MerchantOverviewTab";
 import { MerchantQuickActionsTab } from "@/components/merchant/MerchantQuickActionsTab";
 import { MerchantPremiumServicesTab } from "@/components/merchant/MerchantPremiumServicesTab";
 import { MerchantEarningsTab } from "@/components/merchant/MerchantEarningsTab";
+import { SalesReportGenerator } from "@/components/shared/SalesReportGenerator";
 
 // Dialogs
 import { EditMerchantProfileDialog } from "@/components/merchant/EditMerchantProfileDialog";
@@ -112,6 +113,12 @@ const NAV_SECTIONS = [
         label: "Earnings",
         icon: DollarSign,
         description: "View your Stripe earnings, payouts, and balance information",
+      },
+      {
+        id: "reports",
+        label: "Sales Report",
+        icon: BarChart3,
+        description: "Generate and download detailed sales reports",
       },
     ],
   },
@@ -659,6 +666,14 @@ const MerchantDashboard = () => {
         );
       case "analytics":
         return <MerchantEarningsTab />;
+      case "reports":
+        return (
+          <SalesReportGenerator
+            entityId={merchant.id}
+            entityType="merchant"
+            entityName={merchant.business_name}
+          />
+        );
       case "premium":
         return (
           <MerchantPremiumServicesTab
