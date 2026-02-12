@@ -825,6 +825,7 @@ export type Database = {
           exclusive_perks: Json | null
           id: string
           min_badges_per_year: number
+          min_cash_per_transaction: number
           min_consecutive_months: number
           min_transactions_per_year: number
           priority_offers: boolean
@@ -841,6 +842,7 @@ export type Database = {
           exclusive_perks?: Json | null
           id?: string
           min_badges_per_year?: number
+          min_cash_per_transaction?: number
           min_consecutive_months?: number
           min_transactions_per_year?: number
           priority_offers?: boolean
@@ -857,6 +859,7 @@ export type Database = {
           exclusive_perks?: Json | null
           id?: string
           min_badges_per_year?: number
+          min_cash_per_transaction?: number
           min_consecutive_months?: number
           min_transactions_per_year?: number
           priority_offers?: boolean
@@ -1575,6 +1578,7 @@ export type Database = {
           reward_expires_hours: number | null
           reward_type: string | null
           reward_value: number | null
+          streak_required_count: number
           threshold_amount: number
           threshold_period: string
           updated_at: string
@@ -1599,6 +1603,7 @@ export type Database = {
           reward_expires_hours?: number | null
           reward_type?: string | null
           reward_value?: number | null
+          streak_required_count?: number
           threshold_amount: number
           threshold_period?: string
           updated_at?: string
@@ -1623,6 +1628,7 @@ export type Database = {
           reward_expires_hours?: number | null
           reward_type?: string | null
           reward_value?: number | null
+          streak_required_count?: number
           threshold_amount?: number
           threshold_period?: string
           updated_at?: string
