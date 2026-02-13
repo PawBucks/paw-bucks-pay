@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Header } from '@/components/Header';
@@ -7,13 +7,51 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { ArrowLeft, Plus, Vault, DollarSign, Receipt, TrendingUp, Car, Home, Calculator, Download, Users, Info } from 'lucide-react';
+import { ArrowLeft, Plus, Vault, DollarSign, Receipt, TrendingUp, Car, Home, Calculator, Download, Users, Info, RefreshCw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { ExpenseEntryDialog, ExpensesList, CategorySummary, ReportGenerator, MileageLog, HomeOfficeCalculator, TaxLiabilityEstimator, YearEndExports, AccountantCollaboration, TaxExpense, TaxExpenseCategory } from '@/components/merchant/TaxVault';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { toast } from 'sonner';
 
-// Fallback IRS mileage rates if database fetch fails
+function BackfillFeesButton({ onComplete }: { onComplete: () => void }) {
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  const handleSync = async () => {
+    setIsSyncing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('backfill-fee-expenses');
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      
+      const { backfilledPlatform = 0, backfilledProcessing = 0 } = data || {};
+      const total = backfilledPlatform + backfilledProcessing;
+      
+      if (total > 0) {
+        toast.success(`Synced ${total} fee expense(s) from Stripe`, {
+          description: `${backfilledPlatform} platform fee(s), ${backfilledProcessing} processing fee(s)`,
+        });
+        onComplete();
+      } else {
+        toast.info('All fees are already synced');
+      }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to sync fees';
+      console.error('Backfill error:', err);
+      toast.error(message);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  return (
+    <Button variant="outline" size="sm" onClick={handleSync} disabled={isSyncing}>
+      <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
+      {isSyncing ? 'Syncing...' : 'Sync Fees from Stripe'}
+    </Button>
+  );
+}
+
 const FALLBACK_IRS_RATES: Record<number, number> = {
   2024: 0.67,
   2025: 0.70,
@@ -337,8 +375,13 @@ export default function MerchantTaxVault() {
           <TabsContent value="expenses">
             <Card>
               <CardHeader>
-                <CardTitle>Expense Log</CardTitle>
-                <CardDescription>All recorded business expenses for {selectedYear}</CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Expense Log</CardTitle>
+                    <CardDescription>All recorded business expenses for {selectedYear}</CardDescription>
+                  </div>
+                  <BackfillFeesButton onComplete={refetch} />
+                </div>
               </CardHeader>
               <CardContent>
                 {isLoading ? (
