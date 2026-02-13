@@ -732,24 +732,69 @@ serve(async (req) => {
           // NOTE: Merchants only earn PawBucks when customers USE PawBucks in payment
           // No commission on card-only payments
 
-          // Auto-log platform fee as Tax Vault expense
-          if (platformFee > 0) {
+          // Auto-log platform fee AND Stripe processing fee as separate Tax Vault expenses
+          if (merchantId && amountInDollars > 0) {
             const expenseDate = new Date().toISOString().split('T')[0];
             const taxYear = new Date().getFullYear();
 
-            await supabaseAdmin.from("merchant_tax_expenses").insert({
-              merchant_id: merchantId,
-              category: "platform_fees",
-              amount: platformFee,
-              description: `Platform/Processing Fee (3%) on $${amountInDollars.toFixed(2)} sale`,
-              vendor_name: "PawBucks Platform",
-              expense_date: expenseDate,
-              tax_year: taxYear,
-              is_auto_logged: true,
-              source_purchase_id: paymentIntent.id,
-            });
+            // Retrieve actual Stripe processing fee from charge's balance_transaction
+            let stripeProcessingFee = 0;
+            try {
+              const chargeId = typeof paymentIntent.latest_charge === 'string' 
+                ? paymentIntent.latest_charge 
+                : paymentIntent.latest_charge?.id;
+              
+              if (chargeId) {
+                const charge = await stripe.charges.retrieve(chargeId, {
+                  expand: ['balance_transaction'],
+                }, { stripeAccount: connectedAccountId });
+                
+                if (charge.balance_transaction && typeof charge.balance_transaction === 'object') {
+                  const totalStripeFee = (charge.balance_transaction as Stripe.BalanceTransaction).fee / 100;
+                  stripeProcessingFee = Math.max(0, totalStripeFee - platformFee);
+                }
+              }
+            } catch (feeError) {
+              logStep("Could not retrieve Stripe processing fee, estimating", { error: String(feeError) });
+              stripeProcessingFee = Math.round((amountInDollars * 0.029 + 0.30) * 100) / 100;
+            }
 
-            logStep("Platform fee auto-logged to Tax Vault");
+            const expenseRows = [];
+
+            // PawBucks Platform Fee (3%)
+            if (platformFee > 0) {
+              expenseRows.push({
+                merchant_id: merchantId,
+                category: "platform_fees" as const,
+                amount: platformFee,
+                description: `PawBucks Platform Fee (3%) on $${amountInDollars.toFixed(2)} sale`,
+                vendor_name: "PawBucks Platform",
+                expense_date: expenseDate,
+                tax_year: taxYear,
+                is_auto_logged: true,
+                source_purchase_id: paymentIntent.id,
+              });
+            }
+
+            // Stripe Processing Fee
+            if (stripeProcessingFee > 0) {
+              expenseRows.push({
+                merchant_id: merchantId,
+                category: "processing_fees" as const,
+                amount: stripeProcessingFee,
+                description: `Stripe Processing Fee on $${amountInDollars.toFixed(2)} sale`,
+                vendor_name: "Stripe",
+                expense_date: expenseDate,
+                tax_year: taxYear,
+                is_auto_logged: true,
+                source_purchase_id: `${paymentIntent.id}_processing`,
+              });
+            }
+
+            if (expenseRows.length > 0) {
+              await supabaseAdmin.from("merchant_tax_expenses").insert(expenseRows);
+              logStep("Fees auto-logged to Tax Vault", { platformFee, stripeProcessingFee });
+            }
           }
 
           // Send receipt email

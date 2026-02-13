@@ -4,6 +4,7 @@ export type TaxExpenseCategory =
   | 'professional_services'
   | 'merchant_market'
   | 'platform_fees'
+  | 'processing_fees'
   | 'gas_mileage'
   | 'pet_supplies_treats'
   | 'equipment'
@@ -39,7 +40,8 @@ export const CATEGORY_LABELS: Record<TaxExpenseCategory, string> = {
   specialized_equipment: 'Specialized Equipment',
   professional_services: 'Professional Services',
   merchant_market: 'Merchant Market Services',
-  platform_fees: 'Platform/Processing Fees',
+  platform_fees: 'PawBucks Platform Fees',
+  processing_fees: 'Stripe Processing Fees',
   gas_mileage: 'Gas & Mileage',
   pet_supplies_treats: 'Pet Supplies & Treats',
   equipment: 'Equipment',
@@ -57,7 +59,8 @@ export const CATEGORY_DESCRIPTIONS: Record<TaxExpenseCategory, string> = {
   specialized_equipment: 'Grooming tables, high-velocity dryers, kennels, medical equipment',
   professional_services: 'Veterinary consultant fees, insurance premiums, certifications, legal',
   merchant_market: 'PawBucks Merchant Market services (auto-logged with savings)',
-  platform_fees: 'Platform and payment processing fees (3% per transaction, auto-logged)',
+  platform_fees: 'PawBucks 3% platform fee per transaction (auto-logged)',
+  processing_fees: 'Stripe card processing fees per transaction (auto-logged from Stripe)',
   gas_mileage: 'Vehicle fuel, mileage for business trips, travel expenses',
   pet_supplies_treats: 'Supplies and treats for business use',
   equipment: 'General business equipment and tools',
@@ -76,6 +79,7 @@ export const SCHEDULE_C_MAPPING: Record<TaxExpenseCategory, { line: string; desc
   professional_services: { line: 'Line 17', description: 'Legal and professional services' },
   merchant_market: { line: 'Line 8', description: 'Advertising / Line 27a Other' },
   platform_fees: { line: 'Line 10', description: 'Commissions and fees' },
+  processing_fees: { line: 'Line 10', description: 'Commissions and fees' },
   gas_mileage: { line: 'Line 9', description: 'Car and truck expenses' },
   pet_supplies_treats: { line: 'Line 22', description: 'Supplies' },
   equipment: { line: 'Line 13', description: 'Depreciation' },
@@ -90,6 +94,7 @@ export const SCHEDULE_C_MAPPING: Record<TaxExpenseCategory, { line: string; desc
 // Priority order for displaying categories (most common first)
 export const CATEGORY_PRIORITY: TaxExpenseCategory[] = [
   'platform_fees',
+  'processing_fees',
   'inventory_supplies',
   'specialized_equipment',
   'professional_services',

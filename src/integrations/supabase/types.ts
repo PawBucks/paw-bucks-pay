@@ -10483,6 +10483,7 @@ export type Database = {
         | "specialized_equipment"
         | "merchant_market"
         | "platform_fees"
+        | "processing_fees"
       user_type: "pet_owner" | "merchant"
     }
     CompositeTypes: {
@@ -10670,6 +10671,7 @@ export const Constants = {
         "specialized_equipment",
         "merchant_market",
         "platform_fees",
+        "processing_fees",
       ],
       user_type: ["pet_owner", "merchant"],
     },

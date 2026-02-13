@@ -30,6 +30,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   professional_services: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300',
   merchant_market: 'bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary',
   platform_fees: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300',
+  processing_fees: 'bg-rose-100 text-rose-800 dark:bg-rose-900 dark:text-rose-300',
   gas_mileage: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
   pet_supplies_treats: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
   equipment: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
@@ -45,7 +46,9 @@ const CATEGORY_COLORS: Record<string, string> = {
 const getAutoLoggedTooltip = (category: string): string => {
   switch (category) {
     case 'platform_fees':
-      return 'Auto-logged platform fee (3% per transaction)';
+      return 'Auto-logged PawBucks platform fee (3% per transaction)';
+    case 'processing_fees':
+      return 'Auto-logged Stripe card processing fee (pulled from Stripe)';
     case 'merchant_market':
       return 'Auto-logged from Merchant Market purchase';
     default:
