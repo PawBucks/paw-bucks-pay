@@ -223,11 +223,11 @@ const MerchantProfile = memo(() => {
   const handleOpenPaymentDialog = useCallback(() => {
     if (!user) {
       toast.error("Please sign in to make a payment");
-      navigate(ROUTES.AUTH);
+      navigate(`${ROUTES.AUTH}?redirect=/merchant/${merchantId}`);
       return;
     }
     setPaymentDialogOpen(true);
-  }, [user, navigate]);
+  }, [user, navigate, merchantId]);
 
   const handleOpenReviewDialog = useCallback(() => {
     setReviewDialogOpen(true);
@@ -377,6 +377,18 @@ const MerchantProfile = memo(() => {
                 <ShoppingBag className="w-4 h-4 mr-2" />
                 Pay & Earn PawBucks
               </Button>
+              {merchant?.storefront_slug && (
+                <Button
+                  variant="outline"
+                  size="lg"
+                  asChild
+                >
+                  <Link to={`/storefront/${merchant.storefront_slug}`}>
+                    <Store className="w-4 h-4 mr-2" />
+                    View Storefront
+                  </Link>
+                </Button>
+              )}
               {user && !userHasReviewed && (
                 <Button
                   variant="outline"
