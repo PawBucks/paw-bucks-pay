@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Search, Edit, Shield, Coins, RefreshCw, Crown } from 'lucide-react';
+import { Search, Edit, Shield, Coins, RefreshCw, Crown, Gift } from 'lucide-react';
 import { toast } from 'sonner';
 import { UpgradeSubscriptionDialog } from './UpgradeSubscriptionDialog';
 
@@ -22,6 +22,9 @@ type User = {
   phone?: string;
   pawbucks_balance?: number;
   shared_with_owner?: string; // Owner's email if this user is a shared member
+  welcome_credit_status?: string | null;
+  welcome_credit_amount?: number | null;
+  welcome_credit_expires?: string | null;
 };
 
 type UserRole = {
@@ -59,6 +62,11 @@ const fetchUsersWithBalances = async (): Promise<User[]> => {
     .select('member_id, owner_id')
     .eq('status', 'accepted');
 
+  // Fetch welcome credit data
+  const { data: welcomeCredits } = await supabase
+    .from('user_welcome_credits')
+    .select('user_id, status, credit_amount, expires_at');
+
   // Create a map of member_id to owner_id
   const memberToOwnerMap = new Map<string, string>();
   sharedMembers?.forEach(m => {
@@ -91,6 +99,12 @@ const fetchUsersWithBalances = async (): Promise<User[]> => {
     emailMap.set(p.id, p.email);
   });
 
+  // Create a map of user_id to welcome credit info
+  const welcomeCreditMap = new Map<string, { status: string; amount: number; expires_at: string }>();
+  welcomeCredits?.forEach(wc => {
+    welcomeCreditMap.set(wc.user_id, { status: wc.status, amount: wc.credit_amount, expires_at: wc.expires_at });
+  });
+
   return (profiles || []).map(p => {
     const ownerId = memberToOwnerMap.get(p.id);
     
@@ -111,10 +125,14 @@ const fetchUsersWithBalances = async (): Promise<User[]> => {
       effectiveBalance = petOwnerBalanceMap.get(p.id) ?? 0;
     }
     
+    const wc = welcomeCreditMap.get(p.id);
     return {
       ...p,
       pawbucks_balance: effectiveBalance,
-      shared_with_owner: ownerId ? emailMap.get(ownerId) : undefined
+      shared_with_owner: ownerId ? emailMap.get(ownerId) : undefined,
+      welcome_credit_status: wc?.status ?? null,
+      welcome_credit_amount: wc?.amount ?? null,
+      welcome_credit_expires: wc?.expires_at ?? null,
     };
   });
 };
@@ -326,6 +344,7 @@ export function UsersTab() {
               <TableHead>Email</TableHead>
               <TableHead>Type</TableHead>
               <TableHead>PawBucks</TableHead>
+              <TableHead>Welcome Credit</TableHead>
               <TableHead>Phone</TableHead>
               <TableHead>Joined</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -358,6 +377,34 @@ export function UsersTab() {
                       <span className="text-xs text-muted-foreground ml-1">(shared)</span>
                     )}
                   </span>
+                </TableCell>
+                <TableCell>
+                  {user.welcome_credit_status ? (
+                    <div className="flex flex-col gap-0.5">
+                      <Badge
+                        variant="outline"
+                        className={
+                          user.welcome_credit_status === 'active'
+                            ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30'
+                            : user.welcome_credit_status === 'used'
+                            ? 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/30'
+                            : user.welcome_credit_status === 'expired'
+                            ? 'bg-muted text-muted-foreground border-border'
+                            : 'bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/30'
+                        }
+                      >
+                        <Gift className="w-3 h-3 mr-1" />
+                        {user.welcome_credit_status === 'active' ? `$${((user.welcome_credit_amount ?? 0) / 1000).toFixed(0)} Active` : user.welcome_credit_status.charAt(0).toUpperCase() + user.welcome_credit_status.slice(1)}
+                      </Badge>
+                      {user.welcome_credit_status === 'active' && user.welcome_credit_expires && (
+                        <span className="text-xs text-muted-foreground">
+                          Exp {new Date(user.welcome_credit_expires).toLocaleDateString()}
+                        </span>
+                      )}
+                    </div>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">—</span>
+                  )}
                 </TableCell>
                 <TableCell>{user.phone || 'N/A'}</TableCell>
                 <TableCell>{new Date(user.created_at).toLocaleDateString()}</TableCell>
