@@ -266,7 +266,7 @@ serve(async (req) => {
     if (finalStripeAmountCents <= 0) {
       logStep('Full amount covered by PawBucks - no Stripe checkout needed');
       
-      // Deduct PawBucks from user's wallet
+      // Deduct PawBucks from user's wallet (and welcome credit if needed)
       if (pawbucksUsed > 0) {
         const { data: currentWallet } = await supabaseAdmin
           .from('pawbucks_wallet')
@@ -274,10 +274,15 @@ serve(async (req) => {
           .eq('user_id', user.id)
           .single();
         
-        if (currentWallet && currentWallet.balance >= pawbucksUsed) {
+        const walletBalance = currentWallet?.balance || 0;
+        const walletDeduction = Math.min(walletBalance, pawbucksUsed);
+        const welcomeCreditDeduction = pawbucksUsed - walletDeduction;
+
+        // Deduct from wallet
+        if (walletDeduction > 0 && walletBalance >= walletDeduction) {
           await supabaseAdmin
             .from('pawbucks_wallet')
-            .update({ balance: currentWallet.balance - pawbucksUsed })
+            .update({ balance: walletBalance - walletDeduction })
             .eq('user_id', user.id);
           
           await supabaseAdmin
@@ -285,14 +290,26 @@ serve(async (req) => {
             .insert({
               user_id: user.id,
               type: 'redeem',
-              amount: -pawbucksUsed,
+              amount: -walletDeduction,
               source: 'Purchase',
               partner_id: merchantId || null,
-              description: `Paid ${pawbucksUsed} PawBucks ($${pawbucksUsdValue.toFixed(2)}) at ${merchantName}`,
+              description: `Paid ${walletDeduction} PawBucks ($${(walletDeduction * 0.001).toFixed(2)}) at ${merchantName}`,
             });
+        }
+
+        // Redeem welcome credit if needed
+        if (welcomeCreditDeduction > 0 && merchantId) {
+          const totalCents = Math.round(totalAmount * 100);
+          await supabaseAdmin.rpc('redeem_welcome_credit', {
+            p_user_id: user.id,
+            p_merchant_id: merchantId,
+            p_transaction_total_cents: totalCents,
+          });
+          logStep('Welcome credit redeemed in checkout', { amount: welcomeCreditDeduction });
+        }
           
-          // Credit merchant's PawBucks wallet
-          if (merchantId) {
+        // Credit merchant's PawBucks wallet
+        if (merchantId) {
             let { data: merchantWallet } = await supabaseAdmin
               .from('merchant_pawbucks_wallet')
               .select('balance')
@@ -325,13 +342,9 @@ serve(async (req) => {
                   description: `Received ${pawbucksUsed} PawBucks from customer`,
                 });
             }
-          }
-        } else {
-          return new Response(
-            JSON.stringify({ error: 'Insufficient PawBucks balance' }),
-            { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
-          );
         }
+        
+        logStep('PawBucks deducted for full PawBucks checkout', { pawbucksUsed, walletDeduction, welcomeCreditDeduction: pawbucksUsed - walletDeduction });
       }
       
       // Create a transaction record - NO platform fee on PawBucks-only payments
