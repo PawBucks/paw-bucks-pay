@@ -210,6 +210,51 @@ serve(async (req) => {
 
     console.log(`Successfully credited ${amount} PawBucks. New balance: ${newBalance}`);
 
+    // Send email notification to the user
+    try {
+      // Get user profile for email and name
+      const { data: profile } = await supabaseAdmin
+        .from('profiles')
+        .select('email, full_name')
+        .eq('id', userId)
+        .single();
+
+      if (profile?.email) {
+        const notificationPayload = {
+          recipientEmail: profile.email,
+          recipientName: profile.full_name || 'PawBucks User',
+          type: 'credit',
+          amount,
+          reason: reason.trim(),
+          newBalance,
+          oldBalance,
+          isSharedMember,
+        };
+
+        // Fire-and-forget: invoke the notification function
+        const notifyResponse = await fetch(
+          `${supabaseUrl}/functions/v1/send-pawbucks-notification`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${supabaseServiceKey}`,
+            },
+            body: JSON.stringify(notificationPayload),
+          }
+        );
+        const notifyResult = await notifyResponse.json();
+        if (!notifyResult.success) {
+          console.error('Email notification failed:', notifyResult.error);
+        } else {
+          console.log(`Credit notification email sent to ${profile.email}`);
+        }
+      }
+    } catch (emailErr) {
+      console.error('Failed to send credit notification email:', emailErr);
+      // Don't fail the operation for email errors
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
