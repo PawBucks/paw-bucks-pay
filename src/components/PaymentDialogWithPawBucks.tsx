@@ -13,13 +13,15 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { toast } from "sonner";
-import { Loader2, CreditCard, Coins, Check, AlertCircle } from "lucide-react";
+import { Loader2, CreditCard, Coins, Check, AlertCircle, Gift } from "lucide-react";
 import { PawBucksInfoTooltip } from "@/components/PawBucksInfoTooltip";
-import { useSharedAccount, getEffectiveWalletUserId } from "@/hooks/useSharedAccount";
+import { useSpendablePawBucks } from "@/hooks/useSpendablePawBucks";
 import { getStripeForConnectedAccount } from "@/lib/stripe";
 
 // Pet Owner conversion rate: 1000 PawBucks = $1.00 (1 PawBuck = $0.001)
 const PAWBUCKS_TO_USD = 0.001;
+// Minimum transaction for Welcome Credit
+const WELCOME_CREDIT_MIN_USD = 75;
 
 type PaymentFormProps = {
   merchantName: string;
@@ -268,36 +270,28 @@ export const PaymentDialogWithPawBucks = ({
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const [pawbucksToUse, setPawbucksToUse] = useState(0);
-  const [pawbucksBalance, setPawbucksBalance] = useState(0);
   const [clientSecret, setClientSecret] = useState("");
   const [connectedAccountId, setConnectedAccountId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [paymentData, setPaymentData] = useState<any>(null);
 
-  // Get effective user ID for shared accounts
-  const sharedAccount = useSharedAccount(userId);
-  const effectiveUserId = getEffectiveWalletUserId(userId, sharedAccount);
-
-  // Load PawBucks balance using effective user ID
-  useEffect(() => {
-    if (open && effectiveUserId && acceptsPawbucks && !sharedAccount.isLoading) {
-      loadPawbucksBalance();
-    }
-  }, [open, effectiveUserId, acceptsPawbucks, sharedAccount.isLoading]);
-
-  const loadPawbucksBalance = async () => {
-    if (!effectiveUserId) return;
-    const { data } = await supabase
-      .from('pawbucks_wallet')
-      .select('balance')
-      .eq('user_id', effectiveUserId)
-      .single();
-    
-    setPawbucksBalance(data?.balance || 0);
-  };
+  // Use the spendable PawBucks hook which includes Welcome Credit
+  const {
+    spendableBalance,
+    welcomeCreditBalance,
+    hasWelcomeCredit,
+    isLoading: loadingBalance,
+  } = useSpendablePawBucks(userId);
 
   const totalAmount = parseFloat(amount) || 0;
+
+  // Welcome credit is available only if merchant accepts PawBucks and transaction >= $75
+  const welcomeCreditApplicable = hasWelcomeCredit && acceptsPawbucks && totalAmount >= WELCOME_CREDIT_MIN_USD;
+
+  // Combined effective balance: wallet PawBucks + welcome credit (if applicable)
+  const pawbucksBalance = spendableBalance + (welcomeCreditApplicable ? welcomeCreditBalance : 0);
+
   const pawbucksUsdValue = pawbucksToUse * PAWBUCKS_TO_USD;
   const stripeAmount = Math.max(0, totalAmount - pawbucksUsdValue);
   const maxPawbucks = Math.min(pawbucksBalance, Math.ceil(totalAmount / PAWBUCKS_TO_USD));
@@ -410,6 +404,36 @@ export const PaymentDialogWithPawBucks = ({
               />
             </div>
 
+            {/* Welcome Credit Banner */}
+            {welcomeCreditApplicable && totalAmount > 0 && (
+              <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-3 flex items-start gap-2">
+                <Gift className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
+                    🎉 Welcome Credit Available: {welcomeCreditBalance.toLocaleString()} PB (${(welcomeCreditBalance * PAWBUCKS_TO_USD).toFixed(2)})
+                  </p>
+                  <p className="text-xs text-emerald-600/80 dark:text-emerald-400/80 mt-0.5">
+                    Your Welcome Credit is included in your available balance below. Use the slider to apply it!
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Welcome Credit not applicable - below $75 minimum */}
+            {hasWelcomeCredit && acceptsPawbucks && totalAmount > 0 && totalAmount < WELCOME_CREDIT_MIN_USD && (
+              <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 flex items-start gap-2">
+                <Gift className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-medium text-amber-700 dark:text-amber-400">
+                    Welcome Credit: ${(welcomeCreditBalance * PAWBUCKS_TO_USD).toFixed(2)} available
+                  </p>
+                  <p className="text-xs text-amber-600/80 dark:text-amber-400/80 mt-0.5">
+                    Requires a minimum ${WELCOME_CREDIT_MIN_USD} purchase to use. Add ${(WELCOME_CREDIT_MIN_USD - totalAmount).toFixed(2)} more to qualify.
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* PawBucks Section */}
             {acceptsPawbucks && totalAmount > 0 && pawbucksBalance > 0 && (
               <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 space-y-3">
@@ -419,7 +443,10 @@ export const PaymentDialogWithPawBucks = ({
                     Use PawBucks
                   </Label>
                   <span className="text-sm text-muted-foreground">
-                    Balance: {pawbucksBalance.toLocaleString()} PawBucks
+                    Balance: {pawbucksBalance.toLocaleString()} PB
+                    {welcomeCreditApplicable && (
+                      <span className="text-emerald-600 ml-1">(incl. credit)</span>
+                    )}
                   </span>
                 </div>
 
@@ -436,7 +463,7 @@ export const PaymentDialogWithPawBucks = ({
                   onValueChange={([value]) => setPawbucksToUse(value)}
                   max={maxPawbucks}
                   min={0}
-                  step={1}
+                  step={100}
                   className="w-full"
                 />
 
@@ -462,7 +489,7 @@ export const PaymentDialogWithPawBucks = ({
               </div>
             )}
 
-            {acceptsPawbucks && pawbucksBalance === 0 && totalAmount > 0 && (
+            {acceptsPawbucks && pawbucksBalance === 0 && totalAmount > 0 && !hasWelcomeCredit && (
               <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
                 <Coins className="w-4 h-4 inline mr-1" />
                 This merchant accepts PawBucks, but you don't have any yet. Earn PawBucks by making purchases!
