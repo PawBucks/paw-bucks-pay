@@ -13,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
-import { Loader2, Check, CreditCard, RefreshCw, Shield, Sparkles, Coins, Lock, Info } from "lucide-react";
+import { Loader2, Check, CreditCard, RefreshCw, Shield, Sparkles, Coins, Lock, Info, Gift } from "lucide-react";
 import { toast } from "sonner";
 import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { useSpendablePawBucks } from "@/hooks/useSpendablePawBucks";
@@ -24,6 +24,8 @@ import { PawBucksInfoTooltip } from "@/components/PawBucksInfoTooltip";
 const PAWBUCKS_TO_USD = 0.001;
 // Minimum Stripe charge for subscriptions
 const MINIMUM_STRIPE_AMOUNT = 0.50;
+// Minimum transaction for Welcome Credit
+const WELCOME_CREDIT_MIN_USD = 75;
 
 interface SubscriptionCheckoutDialogProps {
   open: boolean;
@@ -72,10 +74,12 @@ const CheckoutForm = ({
   const [error, setError] = useState<string | null>(null);
   const [pawbucksToUse, setPawbucksToUse] = useState(0);
 
-  // Use the spendable PawBucks hook to get only available (non-locked) balance
+  // Use the spendable PawBucks hook to get available balance + welcome credit
   const { 
     spendableBalance, 
     lockedBalance, 
+    welcomeCreditBalance,
+    hasWelcomeCredit,
     isLoading: loadingBalance 
   } = useSpendablePawBucks(user?.id);
 
@@ -85,7 +89,11 @@ const CheckoutForm = ({
   }, []);
 
   const priceAmount = plan.amount / 100; // Convert cents to dollars
-  const pawbucksBalance = spendableBalance;
+  
+  // Welcome credit applicable if merchant accepts PawBucks and price >= $75
+  const welcomeCreditApplicable = hasWelcomeCredit && merchantAcceptsPawBucks && priceAmount >= WELCOME_CREDIT_MIN_USD;
+  const effectiveBalance = spendableBalance + (welcomeCreditApplicable ? welcomeCreditBalance : 0);
+  const pawbucksBalance = effectiveBalance;
 
   // Calculate values
   const pawbucksUsdValue = pawbucksToUse * PAWBUCKS_TO_USD;
@@ -241,6 +249,36 @@ const CheckoutForm = ({
             )}
           </div>
 
+          {/* Welcome Credit Banner */}
+          {welcomeCreditApplicable && (
+            <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-3 flex items-start gap-2">
+              <Gift className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
+                  🎉 Welcome Credit Available: {welcomeCreditBalance.toLocaleString()} PB (${(welcomeCreditBalance * PAWBUCKS_TO_USD).toFixed(2)})
+                </p>
+                <p className="text-xs text-emerald-600/80 dark:text-emerald-400/80 mt-0.5">
+                  Your Welcome Credit is included in your available balance below.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Welcome Credit not applicable - below $75 minimum */}
+          {hasWelcomeCredit && merchantAcceptsPawBucks && priceAmount < WELCOME_CREDIT_MIN_USD && (
+            <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 flex items-start gap-2">
+              <Gift className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="text-sm font-medium text-amber-700 dark:text-amber-400">
+                  Welcome Credit: ${(welcomeCreditBalance * PAWBUCKS_TO_USD).toFixed(2)} available
+                </p>
+                <p className="text-xs text-amber-600/80 dark:text-amber-400/80 mt-0.5">
+                  Requires a minimum ${WELCOME_CREDIT_MIN_USD} purchase to use.
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* PawBucks Section */}
           {showPawBucksSection && (
             <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 space-y-3">
@@ -252,6 +290,9 @@ const CheckoutForm = ({
                 </span>
                 <span className="text-sm text-muted-foreground">
                   Balance: {pawbucksBalance.toLocaleString()} PB
+                  {welcomeCreditApplicable && (
+                    <span className="text-emerald-600 ml-1">(incl. credit)</span>
+                  )}
                 </span>
               </div>
 
@@ -294,7 +335,7 @@ const CheckoutForm = ({
           )}
 
           {/* Info when merchant accepts PawBucks but user has none */}
-          {merchantAcceptsPawBucks && pawbucksBalance === 0 && (
+          {merchantAcceptsPawBucks && pawbucksBalance === 0 && !hasWelcomeCredit && (
             <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg flex items-start gap-2">
               <Coins className="w-4 h-4 mt-0.5 flex-shrink-0" />
               <span>This merchant accepts PawBucks, but you don't have any spendable yet. Earn PawBucks by making purchases!</span>
@@ -343,6 +384,13 @@ const CheckoutForm = ({
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">PawBucks Discount:</span>
                 <span className="text-primary font-medium">−${pawbucksUsdValue.toFixed(2)}</span>
+              </div>
+            )}
+
+            {pawbucksToUse > 0 && welcomeCreditApplicable && pawbucksToUse > spendableBalance && (
+              <div className="flex justify-between text-xs text-emerald-600 pl-4">
+                <span>└ includes Welcome Credit</span>
+                <span>{Math.min(pawbucksToUse - spendableBalance, welcomeCreditBalance).toLocaleString()} PB</span>
               </div>
             )}
             

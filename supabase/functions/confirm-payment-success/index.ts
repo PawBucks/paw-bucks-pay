@@ -288,59 +288,91 @@ serve(async (req) => {
 
     // 4. Deduct PawBucks if user used any
     if (pawbucksAmount > 0) {
-      // Already logged when payment was created, but ensure deduction
+      // Get wallet balance
       const { data: userWallet } = await supabaseAdmin
         .from('pawbucks_wallet')
         .select('balance')
         .eq('user_id', userId)
         .single();
 
-      if (userWallet && userWallet.balance >= pawbucksAmount) {
+      const walletBalance = userWallet?.balance || 0;
+
+      // Check for active welcome credit if wallet balance is insufficient
+      let walletDeduction = Math.min(walletBalance, pawbucksAmount);
+      let welcomeCreditDeduction = 0;
+
+      if (walletDeduction < pawbucksAmount) {
+        // Check welcome credit
+        const { data: welcomeCredit } = await supabaseAdmin
+          .from('user_welcome_credits')
+          .select('id, credit_amount, status, expires_at')
+          .eq('user_id', userId)
+          .eq('status', 'active')
+          .maybeSingle();
+
+        if (welcomeCredit && new Date(welcomeCredit.expires_at) > new Date()) {
+          welcomeCreditDeduction = Math.min(pawbucksAmount - walletDeduction, welcomeCredit.credit_amount);
+        }
+      }
+
+      // Deduct from wallet
+      if (walletDeduction > 0 && walletBalance >= walletDeduction) {
         await supabaseAdmin
           .from('pawbucks_wallet')
-          .update({ balance: userWallet.balance - pawbucksAmount })
+          .update({ balance: walletBalance - walletDeduction })
           .eq('user_id', userId);
 
         // Log redemption activity
         await supabaseAdmin.from('pawbucks_activity').insert({
           user_id: userId,
-          amount: -pawbucksAmount,
+          amount: -walletDeduction,
           type: 'redemption',
           source: 'merchant_payment',
           description: `Payment to ${businessName}`,
           partner_id: merchantId,
         });
-
-        // Credit merchant's PawBucks wallet
-        const { data: merchantWallet } = await supabaseAdmin
-          .from('merchant_pawbucks_wallet')
-          .select('balance')
-          .eq('merchant_id', merchantId)
-          .single();
-
-        if (merchantWallet) {
-          await supabaseAdmin
-            .from('merchant_pawbucks_wallet')
-            .update({ balance: merchantWallet.balance + pawbucksAmount })
-            .eq('merchant_id', merchantId);
-        } else {
-          await supabaseAdmin.from('merchant_pawbucks_wallet').insert({
-            merchant_id: merchantId,
-            balance: pawbucksAmount,
-          });
-        }
-
-        await supabaseAdmin.from('merchant_pawbucks_activity').insert({
-          merchant_id: merchantId,
-          type: 'earn',
-          amount: pawbucksAmount,
-          source: 'Customer Payment',
-          customer_user_id: userId,
-          description: `Received ${pawbucksAmount} PawBucks from customer`,
-        });
-
-        logStep("PawBucks deducted and credited to merchant", { pawbucksAmount });
       }
+
+      // Redeem welcome credit if needed
+      if (welcomeCreditDeduction > 0) {
+        const totalCents = Math.round(amountInDollars * 100);
+        await supabaseAdmin.rpc('redeem_welcome_credit', {
+          p_user_id: userId,
+          p_merchant_id: merchantId,
+          p_transaction_total_cents: totalCents,
+        });
+        logStep("Welcome credit redeemed", { amount: welcomeCreditDeduction });
+      }
+
+      // Credit merchant's PawBucks wallet (full pawbucksAmount)
+      const { data: merchantWallet } = await supabaseAdmin
+        .from('merchant_pawbucks_wallet')
+        .select('balance')
+        .eq('merchant_id', merchantId)
+        .single();
+
+      if (merchantWallet) {
+        await supabaseAdmin
+          .from('merchant_pawbucks_wallet')
+          .update({ balance: merchantWallet.balance + pawbucksAmount })
+          .eq('merchant_id', merchantId);
+      } else {
+        await supabaseAdmin.from('merchant_pawbucks_wallet').insert({
+          merchant_id: merchantId,
+          balance: pawbucksAmount,
+        });
+      }
+
+      await supabaseAdmin.from('merchant_pawbucks_activity').insert({
+        merchant_id: merchantId,
+        type: 'earn',
+        amount: pawbucksAmount,
+        source: 'Customer Payment',
+        customer_user_id: userId,
+        description: `Received ${pawbucksAmount} PawBucks from customer`,
+      });
+
+      logStep("PawBucks deducted and credited to merchant", { pawbucksAmount, walletDeduction, welcomeCreditDeduction });
     }
 
     // 5. Auto-log platform fee AND Stripe processing fee as separate Tax Vault expenses

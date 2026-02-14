@@ -6,6 +6,8 @@ interface SpendablePawBucksResult {
   spendableBalance: number;
   lockedBalance: number;
   totalBalance: number;
+  welcomeCreditBalance: number;
+  hasWelcomeCredit: boolean;
   isLoading: boolean;
   error: Error | null;
   refresh: () => Promise<void>;
@@ -13,11 +15,14 @@ interface SpendablePawBucksResult {
 
 /**
  * Hook to get the user's spendable PawBucks balance (excludes locked/pending rewards).
+ * Also fetches Welcome Credit balance for new users.
  * Use this hook in checkout flows to ensure users can only spend available rewards.
  */
 export function useSpendablePawBucks(userId: string | undefined): SpendablePawBucksResult {
   const [spendableBalance, setSpendableBalance] = useState(0);
   const [lockedBalance, setLockedBalance] = useState(0);
+  const [welcomeCreditBalance, setWelcomeCreditBalance] = useState(0);
+  const [hasWelcomeCredit, setHasWelcomeCredit] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -28,6 +33,8 @@ export function useSpendablePawBucks(userId: string | undefined): SpendablePawBu
     if (!effectiveUserId) {
       setSpendableBalance(0);
       setLockedBalance(0);
+      setWelcomeCreditBalance(0);
+      setHasWelcomeCredit(false);
       setIsLoading(false);
       return;
     }
@@ -36,36 +43,54 @@ export function useSpendablePawBucks(userId: string | undefined): SpendablePawBu
       setIsLoading(true);
       setError(null);
 
-      // Get spendable balance from wallet (this is the available balance)
-      const { data: wallet, error: walletError } = await supabase
-        .from("pawbucks_wallet")
-        .select("balance")
-        .eq("user_id", effectiveUserId)
-        .single();
+      // Fetch wallet balance, locked rewards, and welcome credit in parallel
+      const [walletResult, lockedResult, welcomeCreditResult] = await Promise.all([
+        supabase
+          .from("pawbucks_wallet")
+          .select("balance")
+          .eq("user_id", effectiveUserId)
+          .single(),
+        supabase
+          .from("pawbucks_activity")
+          .select("amount")
+          .eq("user_id", effectiveUserId)
+          .eq("pawbucks_status", "pending")
+          .eq("type", "credit")
+          .not("slice_id", "is", null),
+        supabase
+          .from("user_welcome_credits")
+          .select("credit_amount, status, expires_at")
+          .eq("user_id", effectiveUserId)
+          .eq("status", "active")
+          .maybeSingle(),
+      ]);
 
-      if (walletError && walletError.code !== "PGRST116") {
-        throw new Error(walletError.message);
+      if (walletResult.error && walletResult.error.code !== "PGRST116") {
+        throw new Error(walletResult.error.message);
       }
 
-      const spendable = wallet?.balance || 0;
-
-      // Get locked rewards (pending status linked to insurance slices)
-      const { data: lockedData, error: lockedError } = await supabase
-        .from("pawbucks_activity")
-        .select("amount")
-        .eq("user_id", effectiveUserId)
-        .eq("pawbucks_status", "pending")
-        .eq("type", "credit")
-        .not("slice_id", "is", null);
-
-      if (lockedError) {
-        console.error("Error fetching locked rewards:", lockedError);
+      if (lockedResult.error) {
+        console.error("Error fetching locked rewards:", lockedResult.error);
       }
 
-      const locked = lockedData?.reduce((sum, item) => sum + (item.amount || 0), 0) || 0;
+      const spendable = walletResult.data?.balance || 0;
+      const locked = lockedResult.data?.reduce((sum, item) => sum + (item.amount || 0), 0) || 0;
+
+      // Check welcome credit - only valid if not expired
+      let wcBalance = 0;
+      let wcActive = false;
+      if (welcomeCreditResult.data && welcomeCreditResult.data.status === "active") {
+        const expiresAt = new Date(welcomeCreditResult.data.expires_at);
+        if (expiresAt > new Date()) {
+          wcBalance = welcomeCreditResult.data.credit_amount || 0;
+          wcActive = true;
+        }
+      }
 
       setSpendableBalance(spendable);
       setLockedBalance(locked);
+      setWelcomeCreditBalance(wcBalance);
+      setHasWelcomeCredit(wcActive);
     } catch (err) {
       console.error("Error loading PawBucks balances:", err);
       setError(err instanceof Error ? err : new Error("Failed to load balance"));
@@ -84,6 +109,8 @@ export function useSpendablePawBucks(userId: string | undefined): SpendablePawBu
     spendableBalance,
     lockedBalance,
     totalBalance: spendableBalance + lockedBalance,
+    welcomeCreditBalance,
+    hasWelcomeCredit,
     isLoading: isLoading || sharedAccount.isLoading,
     error,
     refresh: loadBalances,
