@@ -273,6 +273,51 @@ serve(async (req) => {
 
     console.log(`Successfully debited ${amount} PawBucks from ${targetType} ${targetId}. New balance: ${newBalance}`);
 
+    // Send email notification for user debits
+    if (targetType === 'user') {
+      try {
+        const { data: profile } = await supabaseAdmin
+          .from('profiles')
+          .select('email, full_name')
+          .eq('id', targetId)
+          .single();
+
+        if (profile?.email) {
+          const notificationPayload = {
+            recipientEmail: profile.email,
+            recipientName: profile.full_name || 'PawBucks User',
+            type: 'debit',
+            amount,
+            reason: reason.trim(),
+            newBalance,
+            oldBalance,
+            isSharedMember,
+          };
+
+          const notifyResponse = await fetch(
+            `${supabaseUrl}/functions/v1/send-pawbucks-notification`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${supabaseServiceKey}`,
+              },
+              body: JSON.stringify(notificationPayload),
+            }
+          );
+          const notifyResult = await notifyResponse.json();
+          if (!notifyResult.success) {
+            console.error('Email notification failed:', notifyResult.error);
+          } else {
+            console.log(`Debit notification email sent to ${profile.email}`);
+          }
+        }
+      } catch (emailErr) {
+        console.error('Failed to send debit notification email:', emailErr);
+        // Don't fail the operation for email errors
+      }
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
