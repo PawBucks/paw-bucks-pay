@@ -56,8 +56,12 @@ serve(async (req) => {
         throw new Error('Only existing SuperAdmins can create new SuperAdmins');
       }
     } else {
-      // First superadmin setup - require setup key for security
-      if (setup_key !== 'PAWBUCKS_INITIAL_SETUP_2024') {
+      // First superadmin setup - require setup key from environment variable
+      const SETUP_KEY = Deno.env.get('INITIAL_SUPERADMIN_SETUP_KEY');
+      if (!SETUP_KEY) {
+        throw new Error('Setup key not configured on server');
+      }
+      if (setup_key !== SETUP_KEY) {
         throw new Error('Invalid setup key for initial SuperAdmin creation');
       }
     }
