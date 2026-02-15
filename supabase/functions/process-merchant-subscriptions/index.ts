@@ -541,6 +541,98 @@ async function handlePaymentSuccess(
     category: "transactional",
   });
 
+  // === SEND RECEIPT EMAIL TO CUSTOMER ===
+  try {
+    const { data: userProfile } = await supabase
+      .from('profiles')
+      .select('email, full_name')
+      .eq('id', subscription.user_id)
+      .single();
+
+    const { data: merchantData } = await supabase
+      .from('merchants')
+      .select('business_name, user_id, address')
+      .eq('id', subscription.merchant_id)
+      .single();
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
+
+    if (userProfile?.email && supabaseUrl && supabaseAnonKey) {
+      // Send receipt email to customer
+      await fetch(`${supabaseUrl}/functions/v1/send-receipt-email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${supabaseAnonKey}`,
+        },
+        body: JSON.stringify({
+          email: userProfile.email,
+          customerName: userProfile.full_name || undefined,
+          transactionDate: new Date().toISOString(),
+          receiptId: paymentIntentId || subscription.id,
+          merchantName: merchantData?.business_name || subscription.product_name,
+          merchantLocation: merchantData?.address || undefined,
+          items: [{ name: `${subscription.product_name} Subscription (Renewal)`, price: amountInDollars }],
+          subtotal: amountInDollars,
+          pawbucksApplied: 0,
+          cardAmount: amountInDollars,
+          totalPaid: amountInDollars,
+          pawbucksEarned,
+          tierInfo: { tierName, multiplier },
+        }),
+      });
+
+      logStep("Renewal receipt email sent", { email: userProfile.email });
+    }
+
+    // Send in-app notification to merchant
+    if (merchantData?.user_id) {
+      await supabase.from("notifications").insert({
+        user_id: merchantData.user_id,
+        title: "💰 Subscription Renewal Payment",
+        message: `${userProfile?.full_name || 'A customer'}'s ${subscription.product_name} subscription renewed for $${amountInDollars.toFixed(2)}.`,
+        category: "transactional",
+      });
+
+      // Send payment received email to merchant
+      const { data: merchantProfile } = await supabase
+        .from('profiles')
+        .select('email, full_name')
+        .eq('id', merchantData.user_id)
+        .single();
+
+      if (merchantProfile?.email) {
+        await fetch(`${supabaseUrl}/functions/v1/send-invoice-paid-notification`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${supabaseAnonKey}`,
+          },
+          body: JSON.stringify({
+            merchantEmail: merchantProfile.email,
+            merchantName: merchantProfile.full_name || merchantData.business_name || 'Merchant',
+            invoiceNumber: `RENEWAL-${Date.now().toString(36).toUpperCase()}`,
+            invoiceTitle: `${subscription.product_name} Subscription Renewal`,
+            clientName: userProfile?.full_name || 'Customer',
+            clientEmail: userProfile?.email || '',
+            amountPaid: amountInDollars,
+            pawbucksUsed: 0,
+            paymentMethod: 'credit_card',
+            paymentDate: new Date().toISOString(),
+            invoiceTotal: amountInDollars,
+            amountDue: 0,
+          }),
+        });
+
+        logStep("Merchant renewal notification sent", { email: merchantProfile.email });
+      }
+    }
+  } catch (emailError) {
+    // Don't fail the renewal for email errors
+    logStep("Error sending renewal emails", { error: String(emailError) });
+  }
+
   logStep("Payment success recorded with PawBucks", { 
     subscriptionId: subscription.id,
     nextBilling: nextBilling.toISOString(),

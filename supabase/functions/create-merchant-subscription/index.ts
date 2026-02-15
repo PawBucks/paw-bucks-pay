@@ -12,6 +12,104 @@ const logStep = (step: string, details?: Record<string, unknown>) => {
   console.log(`[CREATE-MERCHANT-SUBSCRIPTION] ${step}`, details ? JSON.stringify(details) : "");
 };
 
+// Helper function to send receipt email to customer
+async function sendReceiptEmail(params: {
+  email: string;
+  customerName?: string;
+  transactionDate: string;
+  receiptId: string;
+  merchantName: string;
+  merchantLocation?: string;
+  items: { name: string; price: number }[];
+  subtotal: number;
+  pawbucksApplied: number;
+  cardAmount: number;
+  totalPaid: number;
+  pawbucksEarned?: number;
+  tierInfo?: { tierName: string; multiplier: number };
+}): Promise<void> {
+  try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
+    
+    if (!supabaseUrl || !supabaseAnonKey) {
+      logStep("Skipping receipt email: config not available");
+      return;
+    }
+
+    const response = await fetch(`${supabaseUrl}/functions/v1/send-receipt-email`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${supabaseAnonKey}`,
+      },
+      body: JSON.stringify(params),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Failed to send receipt email:", errorText);
+    } else {
+      logStep(`Receipt email sent to ${params.email}`);
+    }
+  } catch (error) {
+    console.error("Error sending receipt email:", error);
+  }
+}
+
+// Helper function to send payment notification email to merchant
+async function sendMerchantPaymentNotification(params: {
+  merchantEmail: string;
+  merchantName: string;
+  customerName: string;
+  customerEmail: string;
+  productName: string;
+  amountPaid: number;
+  pawbucksUsed: number;
+  paymentDate: string;
+}): Promise<void> {
+  try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
+    
+    if (!supabaseUrl || !supabaseAnonKey) {
+      logStep("Skipping merchant payment notification: config not available");
+      return;
+    }
+
+    const response = await fetch(`${supabaseUrl}/functions/v1/send-invoice-paid-notification`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${supabaseAnonKey}`,
+      },
+      body: JSON.stringify({
+        merchantEmail: params.merchantEmail,
+        merchantName: params.merchantName,
+        invoiceNumber: `SUB-${Date.now().toString(36).toUpperCase()}`,
+        invoiceTitle: `${params.productName} Subscription`,
+        clientName: params.customerName,
+        clientEmail: params.customerEmail,
+        amountPaid: params.amountPaid,
+        pawbucksUsed: params.pawbucksUsed,
+        paymentMethod: params.pawbucksUsed > 0 ? 'mixed' : 'credit_card',
+        paymentDate: params.paymentDate,
+        invoiceTotal: params.amountPaid + (params.pawbucksUsed * 0.001),
+        amountDue: 0,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Failed to send merchant payment notification:", errorText);
+    } else {
+      logStep(`Merchant payment notification sent to ${params.merchantEmail}`);
+    }
+  } catch (error) {
+    console.error("Error sending merchant payment notification:", error);
+  }
+}
+
 // Request validation schema
 const subscriptionSchema = z.object({
   merchantId: z.string().uuid(),
@@ -257,7 +355,7 @@ serve(async (req) => {
     // Get merchant details including Stripe Connect account
     const { data: merchant, error: merchantError } = await supabaseAdmin
       .from("merchants")
-      .select("id, business_name, stripe_account_id, onboarding_complete")
+      .select("id, business_name, stripe_account_id, onboarding_complete, user_id, address")
       .eq("id", merchantId)
       .single();
 
@@ -663,6 +761,68 @@ serve(async (req) => {
       message: `Your subscription to ${productName} from ${merchant.business_name} is now active.${pawbucksUsedMsg} You earned ${pawbucksEarned} PawBucks!`,
       category: "transactional",
     });
+
+    // Send receipt email to customer
+    const { data: userProfile } = await supabaseAdmin
+      .from('profiles')
+      .select('email, full_name')
+      .eq('id', user.id)
+      .single();
+
+    const customerEmail = userProfile?.email || user.email;
+    const amountInDollars = amount / 100;
+    const pawbucksAppliedDollars = pawbucksDiscountCents / 100;
+
+    if (customerEmail) {
+      const { multiplier: tierMultiplier, tierName: userTierName } = await getUserTierMultiplier(supabaseAdmin, stripe, user.id);
+      
+      await sendReceiptEmail({
+        email: customerEmail,
+        customerName: userProfile?.full_name || undefined,
+        transactionDate: new Date().toISOString(),
+        receiptId: subscription.id,
+        merchantName: merchant.business_name,
+        merchantLocation: merchant.address || undefined,
+        items: [{ name: `${productName} Subscription`, price: amountInDollars }],
+        subtotal: amountInDollars,
+        pawbucksApplied: pawbucksAppliedDollars,
+        cardAmount: stripeChargeAmount / 100,
+        totalPaid: amountInDollars,
+        pawbucksEarned,
+        tierInfo: {
+          tierName: userTierName,
+          multiplier: tierMultiplier,
+        },
+      });
+    }
+
+    // Send in-app notification to merchant
+    await supabaseAdmin.from("notifications").insert({
+      user_id: merchant.user_id,
+      title: "💰 New Payment Received",
+      message: `${userProfile?.full_name || 'A customer'} subscribed to ${productName} for $${amountInDollars.toFixed(2)}.`,
+      category: "transactional",
+    });
+
+    // Send payment received email notification to merchant
+    const { data: merchantProfile } = await supabaseAdmin
+      .from('profiles')
+      .select('email, full_name')
+      .eq('id', merchant.user_id)
+      .single();
+
+    if (merchantProfile?.email) {
+      await sendMerchantPaymentNotification({
+        merchantEmail: merchantProfile.email,
+        merchantName: merchantProfile.full_name || merchant.business_name,
+        customerName: userProfile?.full_name || 'Customer',
+        customerEmail: customerEmail || '',
+        productName,
+        amountPaid: amountInDollars,
+        pawbucksUsed: actualPawbucksUsed,
+        paymentDate: new Date().toISOString(),
+      });
+    }
 
     return new Response(JSON.stringify({
       success: true,
