@@ -12,10 +12,20 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, Download, Search, X } from "lucide-react";
+import { CalendarIcon, Download, Search, X, RotateCcw } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Transaction {
   transaction_id: string;
@@ -45,6 +55,9 @@ const MerchantTransactions = () => {
   const [endDate, setEndDate] = useState<Date | undefined>();
   const [sortColumn, setSortColumn] = useState<keyof Transaction>("date");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  const [refundingId, setRefundingId] = useState<string | null>(null);
+  const [refundDialogOpen, setRefundDialogOpen] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   
   const itemsPerPage = 15;
 
@@ -194,6 +207,46 @@ const MerchantTransactions = () => {
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     navigate("/auth");
+  };
+
+  const handleRefundClick = (transaction: Transaction) => {
+    setSelectedTransaction(transaction);
+    setRefundDialogOpen(true);
+  };
+
+  const handleRefund = async () => {
+    if (!selectedTransaction) return;
+
+    setRefundingId(selectedTransaction.transaction_id);
+    setRefundDialogOpen(false);
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('Not authenticated');
+
+      const { data, error } = await supabase.functions.invoke('merchant-issue-refund', {
+        body: {
+          transactionId: selectedTransaction.transaction_id,
+          reason: 'requested_by_customer',
+        },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      toast.success(`Transaction of $${selectedTransaction.amount.toFixed(2)} refunded successfully`);
+      fetchTransactions();
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to process refund';
+      console.error('Refund error:', error);
+      toast.error(errorMessage);
+    } finally {
+      setRefundingId(null);
+      setSelectedTransaction(null);
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -385,6 +438,7 @@ const MerchantTransactions = () => {
                         </TableHead>
                         <TableHead>Payment</TableHead>
                         <TableHead>Status</TableHead>
+                        <TableHead>Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -401,6 +455,20 @@ const MerchantTransactions = () => {
                             <Badge variant="outline" className={getStatusColor(transaction.status)}>
                               {transaction.status}
                             </Badge>
+                          </TableCell>
+                          <TableCell>
+                            {transaction.status === 'completed' && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleRefundClick(transaction)}
+                                disabled={refundingId === transaction.transaction_id}
+                                className="text-destructive border-destructive/30 hover:bg-destructive/10"
+                              >
+                                <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
+                                {refundingId === transaction.transaction_id ? 'Refunding...' : 'Refund'}
+                              </Button>
+                            )}
                           </TableCell>
                         </TableRow>
                       ))}
@@ -441,6 +509,25 @@ const MerchantTransactions = () => {
           </CardContent>
         </Card>
       </div>
+
+      <AlertDialog open={refundDialogOpen} onOpenChange={setRefundDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Refund</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to refund this transaction of ${selectedTransaction?.amount.toFixed(2)} to {selectedTransaction?.customer_name}? 
+              This will reverse the Stripe payment and deduct any earned PawBucks from the customer's account.
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleRefund} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Refund Transaction
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
