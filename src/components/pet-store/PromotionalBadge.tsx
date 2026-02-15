@@ -1,6 +1,6 @@
+import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, Clock } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
 
 type PromotionalBadgeProps = {
   discountPercentage: number;
@@ -10,6 +10,34 @@ type PromotionalBadgeProps = {
   variant?: "overlay" | "inline";
 };
 
+function useCountdown(expiresAt?: string) {
+  const [timeRemaining, setTimeRemaining] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!expiresAt) return;
+
+    const update = () => {
+      const diff = new Date(expiresAt).getTime() - Date.now();
+      if (diff <= 0) { setTimeRemaining("Expired"); return; }
+      const days = Math.floor(diff / 86400000);
+      const hours = Math.floor((diff % 86400000) / 3600000);
+      const mins = Math.floor((diff % 3600000) / 60000);
+      setTimeRemaining(
+        days > 1 ? `${days}d ${hours}h` :
+        days === 1 ? `${hours + 24}h ${mins}m` :
+        hours > 0 ? `${hours}h ${mins}m` :
+        `${mins}m`
+      );
+    };
+
+    update();
+    const id = setInterval(update, 60000);
+    return () => clearInterval(id);
+  }, [expiresAt]);
+
+  return timeRemaining;
+}
+
 export function PromotionalBadge({
   discountPercentage,
   badgeEmoji,
@@ -17,9 +45,7 @@ export function PromotionalBadge({
   expiresAt,
   variant = "overlay",
 }: PromotionalBadgeProps) {
-  const timeRemaining = expiresAt
-    ? formatDistanceToNow(new Date(expiresAt), { addSuffix: false })
-    : null;
+  const timeRemaining = useCountdown(expiresAt);
 
   if (variant === "overlay") {
     return (

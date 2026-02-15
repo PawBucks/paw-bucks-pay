@@ -26,6 +26,13 @@ export const WelcomeCreditCard = ({ userId }: WelcomeCreditCardProps) => {
   const navigate = useNavigate();
   const [creditStatus, setCreditStatus] = useState<WelcomeCreditStatus | null>(null);
   const [loading, setLoading] = useState(true);
+  const [now, setNow] = useState(() => new Date());
+
+  // Live countdown: update every minute
+  useEffect(() => {
+    const interval = setInterval(() => setNow(new Date()), 60_000);
+    return () => clearInterval(interval);
+  }, []);
 
   const fetchCreditStatus = useCallback(async () => {
     try {
@@ -57,9 +64,25 @@ export const WelcomeCreditCard = ({ userId }: WelcomeCreditCardProps) => {
   if (!creditStatus) return null;
   if (!creditStatus.hasCredit || creditStatus.status !== 'active') return null;
 
+  // Compute days/hours remaining client-side from expiresAt for accuracy
+  const expiresAt = creditStatus.expiresAt ? new Date(creditStatus.expiresAt) : null;
+  const msRemaining = expiresAt ? Math.max(0, expiresAt.getTime() - now.getTime()) : 0;
+  const daysRemaining = Math.ceil(msRemaining / (1000 * 60 * 60 * 24));
+  const hoursRemaining = Math.floor(msRemaining / (1000 * 60 * 60));
+  const minutesRemaining = Math.floor((msRemaining % (1000 * 60 * 60)) / (1000 * 60));
+
   const creditValueUSD = (creditStatus.creditAmount || 50000) / PAWBUCKS_CONVERSION.PET_OWNER_TO_USD;
-  const isUrgent = creditStatus.daysRemaining !== undefined && creditStatus.daysRemaining <= 7;
-  const isCritical = creditStatus.daysRemaining !== undefined && creditStatus.daysRemaining <= 2;
+  const isUrgent = daysRemaining <= 7;
+  const isCritical = daysRemaining <= 2;
+
+  // Format the countdown string
+  const countdownText = daysRemaining > 1
+    ? `${daysRemaining} days remaining`
+    : daysRemaining === 1
+      ? `${hoursRemaining}h ${minutesRemaining}m remaining`
+      : hoursRemaining > 0
+        ? `${hoursRemaining}h ${minutesRemaining}m remaining`
+        : `${minutesRemaining}m remaining`;
 
   return (
     <motion.div
@@ -115,14 +138,14 @@ export const WelcomeCreditCard = ({ userId }: WelcomeCreditCardProps) => {
                 <span className={`text-sm font-medium ${
                   isCritical ? 'text-red-600 dark:text-red-400' : isUrgent ? 'text-orange-600 dark:text-orange-400' : 'text-foreground'
                 }`}>
-                  {creditStatus.daysRemaining} {creditStatus.daysRemaining === 1 ? 'day' : 'days'} remaining
+                  {countdownText}
                 </span>
               </div>
               
               {/* Progress bar showing time remaining */}
               <div className="flex-1 max-w-32">
                 <Progress 
-                  value={Math.max(0, Math.min(100, ((creditStatus.daysRemaining || 0) / 45) * 100))} 
+                  value={Math.max(0, Math.min(100, (daysRemaining / 45) * 100))} 
                   className={`h-2 ${
                     isCritical ? '[&>div]:bg-red-500' : isUrgent ? '[&>div]:bg-orange-500' : '[&>div]:bg-emerald-500'
                   }`}
