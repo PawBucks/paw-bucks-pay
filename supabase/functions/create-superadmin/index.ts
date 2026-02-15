@@ -7,6 +7,25 @@ const corsHeaders = {
 };
 
 // This function is used for initial setup only - creates the first superadmin
+// In-memory rate limiting for setup key attempts (5 attempts per hour globally)
+const setupAttempts: { count: number; resetTime: number } = { count: 0, resetTime: 0 };
+const SETUP_RATE_LIMIT = 5;
+const SETUP_RATE_WINDOW = 3600000; // 1 hour in ms
+
+function isSetupRateLimited(): boolean {
+  const now = Date.now();
+  if (now > setupAttempts.resetTime) {
+    setupAttempts.count = 1;
+    setupAttempts.resetTime = now + SETUP_RATE_WINDOW;
+    return false;
+  }
+  if (setupAttempts.count >= SETUP_RATE_LIMIT) {
+    return true;
+  }
+  setupAttempts.count++;
+  return false;
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -56,14 +75,46 @@ serve(async (req) => {
         throw new Error('Only existing SuperAdmins can create new SuperAdmins');
       }
     } else {
-      // First superadmin setup - require setup key from environment variable
+      // First superadmin setup - enforce rate limiting
+      if (isSetupRateLimited()) {
+        console.warn('Rate limit exceeded for superadmin setup attempts');
+        // Log the rate-limited attempt
+        await supabase.from('auth_security_events').insert({
+          event_type: 'superadmin_setup_rate_limited',
+          success: false,
+          failure_reason: 'Rate limit exceeded',
+          email: email || null,
+          ip_address: req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || null,
+        });
+        return new Response(
+          JSON.stringify({ error: 'Too many attempts. Please try again later.' }),
+          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Retry-After': '3600' } }
+        );
+      }
+
       const SETUP_KEY = Deno.env.get('INITIAL_SUPERADMIN_SETUP_KEY');
       if (!SETUP_KEY) {
         throw new Error('Setup key not configured on server');
       }
       if (setup_key !== SETUP_KEY) {
+        // Log failed attempt
+        await supabase.from('auth_security_events').insert({
+          event_type: 'superadmin_setup_failed',
+          success: false,
+          failure_reason: 'Invalid setup key',
+          email: email || null,
+          ip_address: req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || null,
+        });
         throw new Error('Invalid setup key for initial SuperAdmin creation');
       }
+
+      // Log successful setup key usage
+      await supabase.from('auth_security_events').insert({
+        event_type: 'superadmin_setup_initiated',
+        success: true,
+        email: email || null,
+        ip_address: req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || null,
+      });
     }
 
     // Create the user
