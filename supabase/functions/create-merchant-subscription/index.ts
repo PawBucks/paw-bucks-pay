@@ -352,6 +352,64 @@ serve(async (req) => {
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
     const stripe = new Stripe(stripeKey, { apiVersion: "2024-12-18.acacia" });
 
+    // === DUPLICATE PREVENTION: Block identical subscription purchases within 60 seconds ===
+    const oneMinuteAgo = new Date(Date.now() - 60_000).toISOString();
+
+    // Check 1: Already has an active subscription to this exact plan
+    const { data: existingActiveSub } = await supabaseAdmin
+      .from("merchant_subscriptions")
+      .select("id, created_at")
+      .eq("user_id", user.id)
+      .eq("merchant_id", merchantId)
+      .eq("stripe_price_id", priceId)
+      .in("status", ["active", "trialing"])
+      .maybeSingle();
+
+    if (existingActiveSub) {
+      logStep("DUPLICATE BLOCKED: User already has active subscription to this plan", {
+        existingSubId: existingActiveSub.id,
+        userId: user.id,
+        merchantId,
+        priceId,
+      });
+      return new Response(JSON.stringify({
+        success: false,
+        error: "You already have an active subscription to this plan.",
+        duplicatePrevention: true,
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 409,
+      });
+    }
+
+    // Check 2: A subscription was just created in the last 60 seconds (race condition guard)
+    const { data: recentSub } = await supabaseAdmin
+      .from("merchant_subscriptions")
+      .select("id, created_at")
+      .eq("user_id", user.id)
+      .eq("merchant_id", merchantId)
+      .eq("stripe_price_id", priceId)
+      .gte("created_at", oneMinuteAgo)
+      .maybeSingle();
+
+    if (recentSub) {
+      logStep("DUPLICATE BLOCKED: Subscription created within last 60 seconds", {
+        recentSubId: recentSub.id,
+        createdAt: recentSub.created_at,
+        userId: user.id,
+      });
+      return new Response(JSON.stringify({
+        success: false,
+        error: "This subscription was just processed. Please wait a moment before trying again.",
+        duplicatePrevention: true,
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 409,
+      });
+    }
+
+    logStep("Duplicate check passed");
+
     // Get merchant details including Stripe Connect account
     const { data: merchant, error: merchantError } = await supabaseAdmin
       .from("merchants")
