@@ -824,6 +824,65 @@ serve(async (req) => {
             });
           }
 
+          // Send in-app notification and email to merchant
+          if (merchantId) {
+            try {
+              const { data: merchantForNotif } = await supabaseAdmin
+                .from('merchants')
+                .select('business_name, user_id')
+                .eq('id', merchantId)
+                .single();
+
+              if (merchantForNotif?.user_id) {
+                // In-app notification
+                await supabaseAdmin.from("notifications").insert({
+                  user_id: merchantForNotif.user_id,
+                  title: "💰 New Payment Received",
+                  message: `${userProfile?.full_name || 'A customer'} paid $${(totalAmount > 0 ? totalAmount : amountInDollars).toFixed(2)} for ${description}.`,
+                  category: "transactional",
+                });
+
+                // Email notification
+                const { data: merchantProfile } = await supabaseAdmin
+                  .from('profiles')
+                  .select('email, full_name')
+                  .eq('id', merchantForNotif.user_id)
+                  .single();
+
+                if (merchantProfile?.email) {
+                  const supabaseUrl = Deno.env.get('SUPABASE_URL');
+                  const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
+
+                  if (supabaseUrl && supabaseAnonKey) {
+                    fetch(`${supabaseUrl}/functions/v1/send-invoice-paid-notification`, {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${supabaseAnonKey}`,
+                      },
+                      body: JSON.stringify({
+                        merchantEmail: merchantProfile.email,
+                        merchantName: merchantProfile.full_name || merchantForNotif.business_name || 'Merchant',
+                        invoiceNumber: `PAY-${(transaction?.id || paymentIntent.id).substring(0, 8).toUpperCase()}`,
+                        invoiceTitle: description,
+                        clientName: userProfile?.full_name || 'Customer',
+                        clientEmail: userProfile?.email || '',
+                        amountPaid: totalAmount > 0 ? totalAmount : amountInDollars,
+                        pawbucksUsed: pawbucksAmount,
+                        paymentMethod: pawbucksAmount > 0 ? 'mixed' : 'credit_card',
+                        paymentDate: new Date().toISOString(),
+                        invoiceTotal: totalAmount > 0 ? totalAmount : amountInDollars,
+                        amountDue: 0,
+                      }),
+                    }).catch(err => logStep("Merchant notification error", { error: String(err) }));
+                  }
+                }
+              }
+            } catch (notifError) {
+              logStep("Error sending merchant notification", { error: String(notifError) });
+            }
+          }
+
           // Generate Pet Timeline moment for this transaction
           if (transaction?.id) {
             try {
