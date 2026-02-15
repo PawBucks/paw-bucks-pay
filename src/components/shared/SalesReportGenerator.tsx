@@ -15,13 +15,16 @@ import jsPDF from "jspdf";
 type TimeframeOption = "1d" | "1w" | "1m" | "3m" | "1y" | "custom";
 
 interface SalesReportData {
-  totalSales: number;
+  totalSales: number; // Gross sales (before fees)
   totalTransactions: number;
   uniqueCustomers: number;
   avgTransactionAmount: number;
   totalRefunds: number;
   refundCount: number;
-  netSales: number;
+  totalPlatformFees: number; // 3% application fee
+  totalProcessingFees: number; // Estimated Stripe processing fees (2.9% + $0.30)
+  totalFees: number; // Combined fees
+  netSales: number; // Gross - Refunds - All Fees
   totalPawbucksEarned: number;
   transactions: Array<{
     id: string;
@@ -127,6 +130,14 @@ export function SalesReportGenerator({ entityId, entityType, entityName }: Sales
 
       const totalSales = completed.reduce((s, t) => s + t.amount, 0);
       const totalRefunds = refunded.reduce((s, t) => s + t.amount, 0);
+      const totalPlatformFees = completed.reduce((s, t) => s + (t.application_fee || 0), 0);
+      // Estimated Stripe processing fees: 2.9% + $0.30 on the Stripe-funded portion
+      const totalProcessingFees = completed.reduce((s, t) => {
+        const stripeAmount = t.stripe_amount || 0;
+        if (stripeAmount <= 0) return s;
+        return s + (stripeAmount * 0.029 + 0.30);
+      }, 0);
+      const totalFees = totalPlatformFees + totalProcessingFees;
 
       setReportData({
         totalSales,
@@ -135,7 +146,10 @@ export function SalesReportGenerator({ entityId, entityType, entityName }: Sales
         avgTransactionAmount: completed.length > 0 ? totalSales / completed.length : 0,
         totalRefunds,
         refundCount: refunded.length,
-        netSales: totalSales - totalRefunds,
+        totalPlatformFees,
+        totalProcessingFees: Math.round(totalProcessingFees * 100) / 100,
+        totalFees: Math.round(totalFees * 100) / 100,
+        netSales: totalSales - totalRefunds - totalFees,
         totalPawbucksEarned: completed.reduce((s, t) => s + (t.cashback_earned || 0), 0),
         transactions: txns.map(t => ({
           id: t.id,
@@ -190,6 +204,8 @@ export function SalesReportGenerator({ entityId, entityType, entityName }: Sales
     const summaryItems = [
       ["Gross Sales", `$${reportData.totalSales.toFixed(2)}`],
       ["Refunds", `- $${reportData.totalRefunds.toFixed(2)} (${reportData.refundCount})`],
+      ["Platform Fees (3%)", `- $${reportData.totalPlatformFees.toFixed(2)}`],
+      ["Processing Fees (est.)", `- $${reportData.totalProcessingFees.toFixed(2)}`],
       ["Net Sales", `$${reportData.netSales.toFixed(2)}`],
       ["Total Transactions", `${reportData.totalTransactions}`],
       ["Unique Customers", `${reportData.uniqueCustomers}`],
@@ -363,6 +379,11 @@ export function SalesReportGenerator({ entityId, entityType, entityName }: Sales
                 <span className="text-right font-medium">${reportData.totalSales.toFixed(2)}</span>
                 <span className="text-muted-foreground">Refunds</span>
                 <span className="text-right text-destructive">-${reportData.totalRefunds.toFixed(2)} ({reportData.refundCount})</span>
+                <span className="text-muted-foreground">Platform Fees (3%)</span>
+                <span className="text-right text-destructive">-${reportData.totalPlatformFees.toFixed(2)}</span>
+                <span className="text-muted-foreground">Processing Fees (est.)</span>
+                <span className="text-right text-destructive">-${reportData.totalProcessingFees.toFixed(2)}</span>
+                <Separator className="col-span-2 my-1" />
                 <span className="text-muted-foreground">Net Sales</span>
                 <span className="text-right font-bold">${reportData.netSales.toFixed(2)}</span>
                 <span className="text-muted-foreground">PawBucks Distributed</span>
