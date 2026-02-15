@@ -44,7 +44,7 @@ interface WebhookConfig {
   id: string;
   name: string;
   url: string;
-  secret: string;
+  secret?: string;
   events: string[];
   is_active: boolean;
   last_triggered_at: string | null;
@@ -146,7 +146,7 @@ export default function MerchantPOSIntegration() {
       // Load webhooks
       const { data: webhooksData } = await supabase
         .from("merchant_webhooks")
-        .select("*")
+        .select("id, merchant_id, name, url, events, is_active, last_triggered_at, failure_count, created_at, updated_at")
         .eq("merchant_id", merchantData.id)
         .order("created_at", { ascending: false });
 
@@ -596,7 +596,7 @@ export default function MerchantPOSIntegration() {
                           ))}
                         </div>
                         <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                          <span>Secret: <code>{webhook.secret.substring(0, 12)}...</code></span>
+                          <span>Secret: <code>whsec_••••••••</code></span>
                           {webhook.last_triggered_at && (
                             <span>Last triggered: {new Date(webhook.last_triggered_at).toLocaleString()}</span>
                           )}
