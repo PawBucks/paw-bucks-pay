@@ -63,4 +63,13 @@ export const transactionsService = {
       body: params,
     });
   },
+
+  async merchantIssueRefund(params: {
+    transactionId: string;
+    reason?: 'duplicate' | 'fraudulent' | 'requested_by_customer';
+  }) {
+    return supabase.functions.invoke("merchant-issue-refund", {
+      body: params,
+    });
+  },
 };
