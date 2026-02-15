@@ -122,8 +122,13 @@ const CheckoutForm = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!stripe || !elements || !user) {
-      setError("Payment system not ready. Please try again.");
+    if (!user) {
+      setError("You must be logged in to subscribe. Please sign in and try again.");
+      return;
+    }
+
+    if (!stripe || !elements) {
+      setError("Payment system is still loading. Please wait a moment and try again.");
       return;
     }
 
@@ -448,7 +453,7 @@ const CheckoutForm = ({
         <Button type="button" variant="outline" onClick={onClose} disabled={isProcessing}>
           Cancel
         </Button>
-        <Button type="submit" disabled={!stripe || isProcessing || loadingBalance}>
+        <Button type="submit" disabled={!stripe || !user || isProcessing || loadingBalance}>
           {isProcessing ? (
             <>
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
