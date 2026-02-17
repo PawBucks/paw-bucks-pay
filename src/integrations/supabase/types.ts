@@ -6673,6 +6673,7 @@ export type Database = {
           email: string
           full_name: string
           id: string
+          normalized_email: string | null
           phone: string | null
           referral_code: string | null
           stripe_customer_id: string | null
@@ -6686,6 +6687,7 @@ export type Database = {
           email: string
           full_name: string
           id: string
+          normalized_email?: string | null
           phone?: string | null
           referral_code?: string | null
           stripe_customer_id?: string | null
@@ -6699,6 +6701,7 @@ export type Database = {
           email?: string
           full_name?: string
           id?: string
+          normalized_email?: string | null
           phone?: string | null
           referral_code?: string | null
           stripe_customer_id?: string | null
@@ -10273,6 +10276,13 @@ export type Database = {
         Args: { target_date?: string }
         Returns: undefined
       }
+      check_welcome_credit_abuse: {
+        Args: { p_email: string; p_ip?: string; p_phone?: string }
+        Returns: {
+          is_abusive: boolean
+          reason: string
+        }[]
+      }
       check_welcome_credit_eligibility: {
         Args: { p_merchant_id: string; p_user_id: string }
         Returns: {
@@ -10388,6 +10398,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      normalize_email: { Args: { raw_email: string }; Returns: string }
       redeem_welcome_credit: {
         Args: {
           p_merchant_id: string
