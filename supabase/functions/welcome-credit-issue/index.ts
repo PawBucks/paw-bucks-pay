@@ -82,7 +82,80 @@ serve(async (req) => {
       );
     }
 
-    // Abuse prevention: Check device fingerprint
+    // === ABUSE PREVENTION ===
+
+    // Check 1: Normalized email alias detection
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('normalized_email, phone')
+      .eq('id', user.id)
+      .single();
+
+    if (profile?.normalized_email) {
+      const { data: emailAliasMatches } = await supabaseAdmin
+        .from('profiles')
+        .select('id')
+        .eq('normalized_email', profile.normalized_email)
+        .neq('id', user.id);
+
+      if (emailAliasMatches && emailAliasMatches.length > 0) {
+        // Check if any of those profiles have a welcome credit
+        const aliasUserIds = emailAliasMatches.map(m => m.id);
+        const { data: aliasCredits } = await supabaseAdmin
+          .from('user_welcome_credits')
+          .select('id')
+          .in('user_id', aliasUserIds)
+          .in('status', ['active', 'used']);
+
+        if (aliasCredits && aliasCredits.length > 0) {
+          logStep("ABUSE BLOCKED: Email alias detected", { normalizedEmail: profile.normalized_email });
+          await supabaseAdmin.from('welcome_credit_abuse_signals').insert({
+            user_id: user.id,
+            signal_type: 'email_alias_match',
+            signal_data: { normalized_email: profile.normalized_email, matching_profiles: aliasUserIds.length },
+            severity: 'critical',
+          });
+          return new Response(
+            JSON.stringify({ success: false, message: 'Not eligible for welcome credit' }),
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+      }
+    }
+
+    // Check 2: Phone number reuse
+    if (profile?.phone) {
+      const { data: phoneMatches } = await supabaseAdmin
+        .from('profiles')
+        .select('id')
+        .eq('phone', profile.phone)
+        .neq('id', user.id);
+
+      if (phoneMatches && phoneMatches.length > 0) {
+        const phoneUserIds = phoneMatches.map(m => m.id);
+        const { data: phoneCredits } = await supabaseAdmin
+          .from('user_welcome_credits')
+          .select('id')
+          .in('user_id', phoneUserIds)
+          .in('status', ['active', 'used']);
+
+        if (phoneCredits && phoneCredits.length > 0) {
+          logStep("ABUSE BLOCKED: Phone reuse detected", { phone: profile.phone });
+          await supabaseAdmin.from('welcome_credit_abuse_signals').insert({
+            user_id: user.id,
+            signal_type: 'phone_number_reuse',
+            signal_data: { phone: profile.phone },
+            severity: 'critical',
+          });
+          return new Response(
+            JSON.stringify({ success: false, message: 'Not eligible for welcome credit' }),
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+      }
+    }
+
+    // Check 3: Device fingerprint
     if (deviceFingerprint) {
       const { data: fingerprintMatches } = await supabaseAdmin
         .from('user_welcome_credits')
@@ -91,27 +164,46 @@ serve(async (req) => {
         .in('status', ['active', 'used']);
 
       if (fingerprintMatches && fingerprintMatches.length > 0) {
-        logStep("Device fingerprint match detected", { fingerprint: deviceFingerprint });
-        
-        // Log abuse signal
-        await supabaseAdmin
-          .from('welcome_credit_abuse_signals')
-          .insert({
-            user_id: user.id,
-            signal_type: 'device_fingerprint_match',
-            signal_data: { fingerprint: deviceFingerprint },
-            severity: 'high',
-          });
-
+        logStep("ABUSE BLOCKED: Device fingerprint match", { fingerprint: deviceFingerprint });
+        await supabaseAdmin.from('welcome_credit_abuse_signals').insert({
+          user_id: user.id,
+          signal_type: 'device_fingerprint_match',
+          signal_data: { fingerprint: deviceFingerprint },
+          severity: 'high',
+        });
         return new Response(
-          JSON.stringify({
-            success: false,
-            message: 'Not eligible for welcome credit',
-          }),
+          JSON.stringify({ success: false, message: 'Not eligible for welcome credit' }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
     }
+
+    // Check 4: IP rate limiting (max 3 credits from same IP in 30 days)
+    if (ipAddress) {
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+      const { data: ipCredits } = await supabaseAdmin
+        .from('user_welcome_credits')
+        .select('id')
+        .eq('ip_address', ipAddress)
+        .gte('created_at', thirtyDaysAgo)
+        .in('status', ['active', 'used']);
+
+      if (ipCredits && ipCredits.length >= 3) {
+        logStep("ABUSE BLOCKED: IP rate limit exceeded", { ip: ipAddress });
+        await supabaseAdmin.from('welcome_credit_abuse_signals').insert({
+          user_id: user.id,
+          signal_type: 'ip_rate_limit',
+          signal_data: { ip_address: ipAddress, count: ipCredits.length },
+          severity: 'high',
+        });
+        return new Response(
+          JSON.stringify({ success: false, message: 'Not eligible for welcome credit' }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
+    logStep("All abuse checks passed");
 
     // Issue the welcome credit (45 days expiration)
     const expiresAt = new Date();
