@@ -869,6 +869,64 @@ export type Database = {
         }
         Relationships: []
       }
+      customer_punch_cards: {
+        Row: {
+          cards_completed: number
+          created_at: string
+          current_punches: number
+          id: string
+          merchant_id: string
+          program_id: string
+          total_punches_earned: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cards_completed?: number
+          created_at?: string
+          current_punches?: number
+          id?: string
+          merchant_id: string
+          program_id: string
+          total_punches_earned?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cards_completed?: number
+          created_at?: string
+          current_punches?: number
+          id?: string
+          merchant_id?: string
+          program_id?: string
+          total_punches_earned?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_punch_cards_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_punch_cards_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_punch_cards_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_loyalty_programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       diagnostic_ai_analyses: {
         Row: {
           ai_anomalies_detected: Json | null
@@ -2868,6 +2926,81 @@ export type Database = {
           },
         ]
       }
+      loyalty_reward_redemptions: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          merchant_id: string
+          program_id: string
+          punch_card_id: string
+          redeemed_at: string | null
+          redeemed_transaction_id: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          merchant_id: string
+          program_id: string
+          punch_card_id: string
+          redeemed_at?: string | null
+          redeemed_transaction_id?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          merchant_id?: string
+          program_id?: string
+          punch_card_id?: string
+          redeemed_at?: string | null
+          redeemed_transaction_id?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loyalty_reward_redemptions_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loyalty_reward_redemptions_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loyalty_reward_redemptions_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_loyalty_programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loyalty_reward_redemptions_punch_card_id_fkey"
+            columns: ["punch_card_id"]
+            isOneToOne: false
+            referencedRelation: "customer_punch_cards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loyalty_reward_redemptions_redeemed_transaction_id_fkey"
+            columns: ["redeemed_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       loyalty_warnings: {
         Row: {
           action_deadline: string | null
@@ -3238,6 +3371,66 @@ export type Database = {
           },
           {
             foreignKeyName: "merchant_customer_analytics_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      merchant_loyalty_programs: {
+        Row: {
+          created_at: string
+          description: string | null
+          emoji: string | null
+          id: string
+          is_active: boolean
+          merchant_id: string
+          name: string
+          punches_required: number
+          qualifying_description: string | null
+          reward_description: string
+          reward_type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          emoji?: string | null
+          id?: string
+          is_active?: boolean
+          merchant_id: string
+          name: string
+          punches_required: number
+          qualifying_description?: string | null
+          reward_description: string
+          reward_type?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          emoji?: string | null
+          id?: string
+          is_active?: boolean
+          merchant_id?: string
+          name?: string
+          punches_required?: number
+          qualifying_description?: string | null
+          reward_description?: string
+          reward_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_loyalty_programs_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_loyalty_programs_merchant_id_fkey"
             columns: ["merchant_id"]
             isOneToOne: false
             referencedRelation: "merchants_public"
@@ -6709,6 +6902,48 @@ export type Database = {
           user_type?: Database["public"]["Enums"]["user_type"]
         }
         Relationships: []
+      }
+      punch_card_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          punch_card_id: string
+          punches_added: number
+          transaction_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          punch_card_id: string
+          punches_added?: number
+          transaction_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          punch_card_id?: string
+          punches_added?: number
+          transaction_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "punch_card_events_punch_card_id_fkey"
+            columns: ["punch_card_id"]
+            isOneToOne: false
+            referencedRelation: "customer_punch_cards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "punch_card_events_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       receipt_submissions: {
         Row: {

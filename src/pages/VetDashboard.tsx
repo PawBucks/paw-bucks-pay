@@ -23,6 +23,7 @@ import {
   VetQuickActionsTab,
 } from "@/components/vet-portal";
 import { SalesReportGenerator } from "@/components/shared/SalesReportGenerator";
+import { MerchantLoyaltyProgramTab } from "@/components/merchant/MerchantLoyaltyProgramTab";
 import {
   Stethoscope,
   Users,
@@ -41,6 +42,7 @@ import {
   Scale,
   Zap,
   BarChart3,
+  Stamp,
 } from "lucide-react";
 import { toast } from "sonner";
 import { PendingApprovalNotice } from "@/components/PendingApprovalNotice";
@@ -293,6 +295,10 @@ export default function VetDashboard() {
               <Zap className="w-4 h-4" />
               <span className="hidden sm:inline">Actions</span>
             </TabsTrigger>
+            <TabsTrigger value="loyalty-program" className="flex items-center gap-1">
+              <Stamp className="w-4 h-4" />
+              <span className="hidden sm:inline">Loyalty</span>
+            </TabsTrigger>
             <TabsTrigger value="sales-report" className="flex items-center gap-1">
               <BarChart3 className="w-4 h-4" />
               <span className="hidden sm:inline">Reports</span>
@@ -353,6 +359,10 @@ export default function VetDashboard() {
 
           <TabsContent value="quick-actions">
             <VetQuickActionsTab vetId={vetInfo.id} hasStripeAccount={false} />
+          </TabsContent>
+
+          <TabsContent value="loyalty-program">
+            <MerchantLoyaltyProgramTab merchantId={vetInfo.id} />
           </TabsContent>
 
           <TabsContent value="sales-report">

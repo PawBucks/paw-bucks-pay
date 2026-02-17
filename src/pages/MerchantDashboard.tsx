@@ -35,6 +35,7 @@ import {
   Menu,
   ChevronRight,
   HelpCircle,
+  Stamp,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format, startOfMonth, parseISO } from "date-fns";
@@ -43,6 +44,7 @@ import { cn } from "@/lib/utils";
 // Tab Components
 import { MerchantOverviewTab } from "@/components/merchant/MerchantOverviewTab";
 import { MerchantQuickActionsTab } from "@/components/merchant/MerchantQuickActionsTab";
+import { MerchantLoyaltyProgramTab } from "@/components/merchant/MerchantLoyaltyProgramTab";
 import { MerchantPremiumServicesTab } from "@/components/merchant/MerchantPremiumServicesTab";
 import { MerchantEarningsTab } from "@/components/merchant/MerchantEarningsTab";
 import { SalesReportGenerator } from "@/components/shared/SalesReportGenerator";
@@ -125,6 +127,12 @@ const NAV_SECTIONS = [
   {
     title: "Services",
     items: [
+      {
+        id: "loyalty",
+        label: "Loyalty Program",
+        icon: Stamp,
+        description: "Create and manage punch card loyalty programs for your customers",
+      },
       {
         id: "premium",
         label: "Premium Services",
@@ -674,6 +682,8 @@ const MerchantDashboard = () => {
             entityName={merchant.business_name}
           />
         );
+      case "loyalty":
+        return <MerchantLoyaltyProgramTab merchantId={merchant.id} />;
       case "premium":
         return (
           <MerchantPremiumServicesTab
