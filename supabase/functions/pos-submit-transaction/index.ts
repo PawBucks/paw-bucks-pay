@@ -324,6 +324,23 @@ serve(async (req) => {
 
       console.log(`POS transaction ${posTransaction.id}: Awarded ${pawbucksAwarded} PawBucks to user ${matchedUser.id}`);
       
+      // Trigger loyalty punch card advancement for POS transaction
+      if (posTransaction?.id && matchedUser?.id) {
+        const supabaseUrlForLoyalty = Deno.env.get('SUPABASE_URL');
+        fetch(`${supabaseUrlForLoyalty}/functions/v1/loyalty-punch-advance`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+          },
+          body: JSON.stringify({
+            transaction_id: posTransaction.id,
+            user_id: matchedUser.id,
+            merchant_id: integration.merchant_id,
+          }),
+        }).catch(err => console.error("[POS-SUBMIT] Loyalty punch error:", err));
+      }
+
       // Trigger webhooks for reward.awarded event
       await triggerWebhooks(supabaseAdmin, integration.merchant_id, 'reward.awarded', {
         transaction_id: posTransaction.id,

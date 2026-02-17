@@ -515,6 +515,23 @@ serve(async (req) => {
             }
           }
 
+          // Trigger loyalty punch card advancement for invoice payment
+          if (transaction?.id && invoicePayerUserId && merchantId) {
+            const supabaseUrl = Deno.env.get('SUPABASE_URL');
+            fetch(`${supabaseUrl}/functions/v1/loyalty-punch-advance`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+              },
+              body: JSON.stringify({
+                transaction_id: transaction.id,
+                user_id: invoicePayerUserId,
+                merchant_id: merchantId,
+              }),
+            }).catch(err => logStep("Loyalty punch error", { error: String(err) }));
+          }
+
           logStep("Invoice payment processing complete");
           
           await supabaseAdmin.from('webhook_logs')
@@ -881,6 +898,23 @@ serve(async (req) => {
             } catch (notifError) {
               logStep("Error sending merchant notification", { error: String(notifError) });
             }
+          }
+
+          // Trigger loyalty punch card advancement for direct charge
+          if (transaction?.id && userId && merchantId) {
+            const supabaseUrlForLoyalty = Deno.env.get('SUPABASE_URL');
+            fetch(`${supabaseUrlForLoyalty}/functions/v1/loyalty-punch-advance`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+              },
+              body: JSON.stringify({
+                transaction_id: transaction.id,
+                user_id: userId,
+                merchant_id: merchantId,
+              }),
+            }).catch(err => logStep("Loyalty punch error", { error: String(err) }));
           }
 
           // Generate Pet Timeline moment for this transaction
