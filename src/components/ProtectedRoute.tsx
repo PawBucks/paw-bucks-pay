@@ -15,7 +15,10 @@ interface ProtectedRouteProps {
   allowedRoles?: AllowedRole[];
 }
 
-// Protected route wrapper for authentication and role-based access checks
+// SECURITY: This is a UX-level check only for routing/navigation purposes.
+// All sensitive data operations MUST be validated server-side via edge functions
+// that verify auth.uid() and user_roles. Never trust client-supplied role claims
+// for authorization of data access or mutations.
 export const ProtectedRoute = ({ 
   children, 
   requireAuth = true,

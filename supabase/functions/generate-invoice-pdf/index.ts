@@ -13,6 +13,16 @@ function formatLocalDateOnly(dateString: string): string {
   return `${months[month - 1]} ${day}, ${year}`;
 }
 
+function escapeHtml(unsafe: string | null | undefined): string {
+  if (!unsafe) return '';
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -60,8 +70,8 @@ serve(async (req) => {
     const items = invoice.invoice_items || [];
     const itemsHtml = items.map((item: any) => `
       <tr>
-        <td style="padding: 8px; border-bottom: 1px solid #eee;">${item.description}</td>
-        <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
+        <td style="padding: 8px; border-bottom: 1px solid #eee;">${escapeHtml(item.description)}</td>
+        <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: center;">${Number(item.quantity)}</td>
         <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">$${Number(item.unit_price).toFixed(2)}</td>
         <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">$${(Number(item.quantity) * Number(item.unit_price)).toFixed(2)}</td>
       </tr>
@@ -72,7 +82,7 @@ serve(async (req) => {
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Invoice #${invoice.invoice_number}</title>
+  <title>Invoice #${escapeHtml(invoice.invoice_number)}</title>
   <style>
     body { font-family: Arial, sans-serif; margin: 0; padding: 40px; font-size: 12px; }
     .header { display: flex; justify-content: space-between; margin-bottom: 40px; }
@@ -93,26 +103,26 @@ serve(async (req) => {
 <body>
   <div class="header">
     <div>
-      ${merchant.logo_url ? `<img src="${merchant.logo_url}" class="logo" alt="${merchant.business_name}">` : ""}
-      <h1 style="margin: 10px 0 5px 0;">${merchant.business_name}</h1>
-      <p style="margin: 0; color: #666;">${merchant.address || ""}</p>
-      ${merchant.phone ? `<p style="margin: 0; color: #666;">${merchant.phone}</p>` : ""}
+      ${merchant.logo_url ? `<img src="${escapeHtml(merchant.logo_url)}" class="logo" alt="${escapeHtml(merchant.business_name)}">` : ""}
+      <h1 style="margin: 10px 0 5px 0;">${escapeHtml(merchant.business_name)}</h1>
+      <p style="margin: 0; color: #666;">${escapeHtml(merchant.address)}</p>
+      ${merchant.phone ? `<p style="margin: 0; color: #666;">${escapeHtml(merchant.phone)}</p>` : ""}
     </div>
     <div style="text-align: right;">
       <div class="invoice-title">INVOICE</div>
-      <p style="margin: 5px 0;"><strong>#${invoice.invoice_number}</strong></p>
-      ${invoice.title ? `<p style="margin: 0; color: #666;">${invoice.title}</p>` : ""}
+      <p style="margin: 5px 0;"><strong>#${escapeHtml(invoice.invoice_number)}</strong></p>
+      ${invoice.title ? `<p style="margin: 0; color: #666;">${escapeHtml(invoice.title)}</p>` : ""}
     </div>
   </div>
 
   <div class="info-grid">
     <div class="info-section">
       <h3>Bill To</h3>
-      <p><strong>${invoice.client_name}</strong></p>
-      ${invoice.client_company ? `<p>${invoice.client_company}</p>` : ""}
-      <p>${invoice.client_email}</p>
-      ${invoice.client_phone ? `<p>${invoice.client_phone}</p>` : ""}
-      ${invoice.client_address ? `<p>${invoice.client_address}</p>` : ""}
+      <p><strong>${escapeHtml(invoice.client_name)}</strong></p>
+      ${invoice.client_company ? `<p>${escapeHtml(invoice.client_company)}</p>` : ""}
+      <p>${escapeHtml(invoice.client_email)}</p>
+      ${invoice.client_phone ? `<p>${escapeHtml(invoice.client_phone)}</p>` : ""}
+      ${invoice.client_address ? `<p>${escapeHtml(invoice.client_address)}</p>` : ""}
     </div>
     <div class="info-section" style="text-align: right;">
       <h3>Invoice Details</h3>
@@ -168,19 +178,19 @@ serve(async (req) => {
   ${invoice.notes ? `
   <div class="notes">
     <h3 style="margin: 0 0 10px 0; font-size: 12px;">Notes</h3>
-    <p style="margin: 0; white-space: pre-wrap;">${invoice.notes}</p>
+    <p style="margin: 0; white-space: pre-wrap;">${escapeHtml(invoice.notes)}</p>
   </div>
   ` : ""}
 
   ${invoice.terms_conditions ? `
   <div class="notes" style="background: #fff; border: 1px solid #eee;">
     <h3 style="margin: 0 0 10px 0; font-size: 12px;">Terms & Conditions</h3>
-    <p style="margin: 0; white-space: pre-wrap;">${invoice.terms_conditions}</p>
+    <p style="margin: 0; white-space: pre-wrap;">${escapeHtml(invoice.terms_conditions)}</p>
   </div>
   ` : ""}
 
   <div class="footer">
-    ${invoice.footer || "Thank you for your business!"}
+    ${escapeHtml(invoice.footer) || "Thank you for your business!"}
   </div>
 </body>
 </html>
