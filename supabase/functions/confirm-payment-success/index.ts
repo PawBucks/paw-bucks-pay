@@ -535,6 +535,23 @@ serve(async (req) => {
       }
     }
 
+    // Trigger loyalty punch card advancement
+    if (transaction?.id && userId && merchantId) {
+      const supabaseUrl = Deno.env.get('SUPABASE_URL');
+      fetch(`${supabaseUrl}/functions/v1/loyalty-punch-advance`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+        },
+        body: JSON.stringify({
+          transaction_id: transaction.id,
+          user_id: userId,
+          merchant_id: merchantId,
+        }),
+      }).catch(err => logStep("Loyalty punch error", { error: String(err) }));
+    }
+
     logStep("Payment processing complete", { 
       transactionId: transaction.id,
       pawbucksEarned,
