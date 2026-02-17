@@ -94,6 +94,7 @@ const PetTimelinePage = lazyWithRetry(() => import("./pages/PetTimelinePage"), "
 const BadgesPage = lazyWithRetry(() => import("./pages/BadgesPage"), "BadgesPage");
 const PetPersonalityQuizPage = lazyWithRetry(() => import("./pages/PetPersonalityQuiz"), "PetPersonalityQuiz");
 const LoyaltyPage = lazyWithRetry(() => import("./pages/LoyaltyPage"), "LoyaltyPage");
+const LoyaltyCardsPage = lazyWithRetry(() => import("./pages/LoyaltyCardsPage"), "LoyaltyCardsPage");
 
 const createQueryClient = () => new QueryClient({
   defaultOptions: {
@@ -163,6 +164,7 @@ const AppRoutes = () => {
       <Route path="/badges" element={<ProtectedRoute><PageTransition><BadgesPage /></PageTransition></ProtectedRoute>} />
       <Route path="/pet-personality-quiz" element={<ProtectedRoute><PageTransition><PetPersonalityQuizPage /></PageTransition></ProtectedRoute>} />
       <Route path="/loyalty" element={<ProtectedRoute><PageTransition><LoyaltyPage /></PageTransition></ProtectedRoute>} />
+      <Route path="/loyalty-cards" element={<ProtectedRoute><PageTransition><LoyaltyCardsPage /></PageTransition></ProtectedRoute>} />
 
       {/* Admin routes - requires admin or superadmin role */}
       <Route path="/admin" element={<PageTransition><AdminLogin /></PageTransition>} />
