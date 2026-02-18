@@ -472,16 +472,26 @@ const PawBucksWallet = () => {
                 >
                   <div className="flex items-center gap-3">
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                      activity.source === 'refund' ? 'bg-destructive/10' :
                       activity.type === 'earn' || activity.type === 'credit' ? 'bg-green-500/10' : 'bg-orange-500/10'
                     }`}>
-                      {activity.type === 'earn' || activity.type === 'credit' ? (
+                      {activity.source === 'refund' ? (
+                        <ArrowUpRight className="w-5 h-5 text-destructive" />
+                      ) : activity.type === 'earn' || activity.type === 'credit' ? (
                         <ArrowDownRight className="w-5 h-5 text-green-500" />
                       ) : (
                         <ArrowUpRight className="w-5 h-5 text-orange-500" />
                       )}
                     </div>
                     <div>
-                      <p className="font-medium">{activity.description}</p>
+                      <p className="font-medium">
+                        {activity.description}
+                        {activity.source === 'refund' && (
+                          <span className="ml-2 text-xs font-semibold text-destructive bg-destructive/10 px-2 py-0.5 rounded-full">
+                            Refund
+                          </span>
+                        )}
+                      </p>
                       <p className="text-xs text-muted-foreground">
                         {Formatters.date(activity.created_at, 'relative')}
                       </p>
@@ -489,6 +499,7 @@ const PawBucksWallet = () => {
                   </div>
                   <div className="text-right">
                     <p className={`font-bold text-lg ${
+                      activity.source === 'refund' ? 'text-destructive' :
                       activity.type === 'earn' ? 'text-green-500' : 'text-orange-500'
                     }`}>
                       {activity.type === 'earn' ? '+' : ''}{Formatters.number(activity.amount)}

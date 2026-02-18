@@ -242,9 +242,12 @@ const MerchantPawBucksWallet = () => {
                 >
                   <div className="flex items-center gap-3">
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                      activity.source === 'refund' ? 'bg-destructive/10' :
                       activity.type === 'earn' ? 'bg-green-500/10' : 'bg-blue-500/10'
                     }`}>
-                      {activity.type === 'earn' ? (
+                      {activity.source === 'refund' ? (
+                        <ArrowDownRight className="w-4 h-4 text-destructive" />
+                      ) : activity.type === 'earn' ? (
                         <ArrowUpRight className="w-4 h-4 text-green-500" />
                       ) : (
                         <ArrowDownRight className="w-4 h-4 text-blue-500" />
@@ -253,6 +256,11 @@ const MerchantPawBucksWallet = () => {
                     <div>
                       <p className="font-medium text-sm">
                         {activity.description || (activity.type === 'earn' ? 'Earned' : 'Spent')}
+                        {activity.source === 'refund' && (
+                          <span className="ml-2 text-xs font-semibold text-destructive bg-destructive/10 px-2 py-0.5 rounded-full">
+                            Refund
+                          </span>
+                        )}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {format(parseISO(activity.created_at), 'MMM d, yyyy h:mm a')}
@@ -260,6 +268,7 @@ const MerchantPawBucksWallet = () => {
                     </div>
                   </div>
                   <span className={`font-semibold ${
+                    activity.source === 'refund' ? 'text-destructive' :
                     activity.type === 'earn' ? 'text-green-500' : 'text-blue-500'
                   }`}>
                     {activity.type === 'earn' ? '+' : '-'}{Formatters.number(Math.abs(activity.amount))}

@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { format } from "date-fns";
 import { GradientCard } from "@/components/ui/gradient-card";
-import { User } from "lucide-react";
+import { User, RotateCcw } from "lucide-react";
 
 type Transaction = {
   id: string;
@@ -11,6 +11,7 @@ type Transaction = {
   rewards_earned?: number;
   description: string;
   created_at: string;
+  status?: string;
   profiles?: {
     full_name: string | null;
     email: string | null;
@@ -27,15 +28,31 @@ type VirtualTransactionListProps = {
 const TransactionItem = ({ transaction }: { transaction: Transaction }) => {
   const customerName = transaction.profiles?.full_name || "Unknown Customer";
   const customerEmail = transaction.profiles?.email || "";
+  const isRefunded = transaction.status === 'refunded';
   
   return (
-    <div className="flex items-center justify-between p-4 rounded-lg border bg-card">
+    <div className={`flex items-center justify-between p-4 rounded-lg border ${
+      isRefunded ? 'bg-destructive/5 border-destructive/20' : 'bg-card'
+    }`}>
       <div className="flex items-start gap-3">
-        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-          <User className="w-4 h-4 text-primary" />
+        <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+          isRefunded ? 'bg-destructive/10' : 'bg-primary/10'
+        }`}>
+          {isRefunded ? (
+            <RotateCcw className="w-4 h-4 text-destructive" />
+          ) : (
+            <User className="w-4 h-4 text-primary" />
+          )}
         </div>
         <div>
-          <p className="font-medium">{customerName}</p>
+          <p className="font-medium">
+            {customerName}
+            {isRefunded && (
+              <span className="ml-2 text-xs font-semibold text-destructive bg-destructive/10 px-2 py-0.5 rounded-full">
+                Refunded
+              </span>
+            )}
+          </p>
           {customerEmail && (
             <p className="text-xs text-muted-foreground">{customerEmail}</p>
           )}
@@ -48,10 +65,10 @@ const TransactionItem = ({ transaction }: { transaction: Transaction }) => {
         </div>
       </div>
       <div className="text-right">
-        <p className="font-bold text-accent">
+        <p className={`font-bold ${isRefunded ? 'text-destructive line-through' : 'text-accent'}`}>
           +${transaction.amount.toFixed(2)}
         </p>
-        <p className="text-sm text-muted-foreground">
+        <p className={`text-sm ${isRefunded ? 'text-destructive line-through' : 'text-muted-foreground'}`}>
           {/* Convert PawBucks to USD (1 PawBuck = $0.001) */}
           Rewards: ${((transaction.rewards_earned ?? transaction.cashback_earned ?? 0) * 0.001).toFixed(2)}
         </p>

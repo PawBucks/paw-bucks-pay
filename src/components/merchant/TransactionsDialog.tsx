@@ -14,6 +14,7 @@ type Transaction = {
   rewards_earned?: number;
   description: string;
   created_at: string;
+  status?: string;
   profiles?: {
     full_name: string | null;
     email: string | null;
