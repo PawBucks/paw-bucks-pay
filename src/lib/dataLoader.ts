@@ -110,16 +110,17 @@ export class DataLoader {
 
   static async loadTransactionsForBudget(userId: string) {
     return this.retryOperation(async () => {
-      // Fetch current month's transactions with merchant info for budget tracking
+      // Fetch current month's completed transactions with merchant info for budget tracking
       const now = new Date();
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
       const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString();
       
-      // Use FK hint for merchants join
+      // Use FK hint for merchants join - exclude refunded transactions from budget
       const { data, error } = await supabase
         .from('transactions')
         .select('id, amount, created_at, merchants!transactions_merchant_id_fkey(business_type)')
         .eq('user_id', userId)
+        .neq('status', 'refunded')
         .gte('created_at', startOfMonth)
         .lte('created_at', endOfMonth)
         .order('created_at', { ascending: false });
