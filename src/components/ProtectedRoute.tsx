@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { PageLoader } from '@/components/PageLoader';
@@ -11,8 +11,15 @@ interface ProtectedRouteProps {
   children: ReactNode;
   requireAuth?: boolean;
   redirectTo?: string;
-  /** If set, checks user_roles table for admin/superadmin, or profiles.user_type for merchant/vet/pet_owner */
   allowedRoles?: AllowedRole[];
+}
+
+// Module-level cache for role checks - survives across route navigations
+const roleCache = new Map<string, { authorized: boolean; timestamp: number }>();
+const ROLE_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+function getCacheKey(userId: string, roles: AllowedRole[]): string {
+  return `${userId}:${roles.sort().join(',')}`;
 }
 
 // SECURITY: This is a UX-level check only for routing/navigation purposes.
@@ -29,6 +36,7 @@ export const ProtectedRoute = ({
   const navigate = useNavigate();
   const [roleChecked, setRoleChecked] = useState(!allowedRoles);
   const [authorized, setAuthorized] = useState(false);
+  const checkingRef = useRef(false);
 
   useEffect(() => {
     if (!loading && requireAuth && !user) {
@@ -36,56 +44,59 @@ export const ProtectedRoute = ({
     }
   }, [user, loading, requireAuth, redirectTo, navigate]);
 
-  // Role-based check
+  // Role-based check with caching
   useEffect(() => {
     if (!user || !allowedRoles || loading) return;
+    if (checkingRef.current) return;
+
+    const cacheKey = getCacheKey(user.id, allowedRoles);
+    const cached = roleCache.get(cacheKey);
+    
+    // Use cache if fresh
+    if (cached && Date.now() - cached.timestamp < ROLE_CACHE_TTL) {
+      setAuthorized(cached.authorized);
+      setRoleChecked(true);
+      return;
+    }
+
+    checkingRef.current = true;
 
     const checkRoles = async () => {
       try {
         let hasAccess = false;
 
-        // Check admin/superadmin roles via user_roles table
         const systemRoles = allowedRoles.filter(r => r === 'admin' || r === 'superadmin');
-        if (systemRoles.length > 0) {
-          const { data } = await supabase
-            .from('user_roles')
-            .select('role')
-            .eq('user_id', user.id)
-            .in('role', systemRoles);
-          if (data && data.length > 0) hasAccess = true;
-        }
-
-        // Check profile-based roles (merchant, vet, pet_owner)
         const profileRoles = allowedRoles.filter(r => r !== 'admin' && r !== 'superadmin');
-        if (!hasAccess && profileRoles.length > 0) {
-          // Check merchant
-          if (profileRoles.includes('merchant')) {
-            const { data } = await supabase
-              .from('merchants')
-              .select('id')
-              .eq('user_id', user.id)
-              .limit(1);
-            if (data && data.length > 0) hasAccess = true;
-          }
-          // Check vet
-          if (!hasAccess && profileRoles.includes('vet')) {
-            const { data } = await supabase
-              .from('partner_vets')
-              .select('id')
-              .eq('user_id', user.id)
-              .limit(1);
-            if (data && data.length > 0) hasAccess = true;
-          }
-          // Check pet_owner via profiles
-          if (!hasAccess && profileRoles.includes('pet_owner')) {
-            const { data } = await supabase
-              .from('profiles')
-              .select('user_type')
-              .eq('id', user.id)
-              .single();
-            if (data?.user_type === 'pet_owner') hasAccess = true;
-          }
-        }
+
+        // Run ALL checks in parallel instead of sequential
+        const checks = await Promise.all([
+          // System roles check
+          systemRoles.length > 0
+            ? supabase.from('user_roles').select('role').eq('user_id', user.id).in('role', systemRoles)
+            : Promise.resolve({ data: null }),
+          // Merchant check
+          profileRoles.includes('merchant')
+            ? supabase.from('merchants').select('id').eq('user_id', user.id).limit(1)
+            : Promise.resolve({ data: null }),
+          // Vet check
+          profileRoles.includes('vet')
+            ? supabase.from('partner_vets').select('id').eq('user_id', user.id).limit(1)
+            : Promise.resolve({ data: null }),
+          // Pet owner check
+          profileRoles.includes('pet_owner')
+            ? supabase.from('profiles').select('user_type').eq('id', user.id).single()
+            : Promise.resolve({ data: null }),
+        ]);
+
+        const [systemResult, merchantResult, vetResult, profileResult] = checks;
+
+        if (systemResult.data && (systemResult.data as any[]).length > 0) hasAccess = true;
+        if (!hasAccess && merchantResult.data && (merchantResult.data as any[]).length > 0) hasAccess = true;
+        if (!hasAccess && vetResult.data && (vetResult.data as any[]).length > 0) hasAccess = true;
+        if (!hasAccess && profileResult.data && (profileResult.data as any).user_type === 'pet_owner') hasAccess = true;
+
+        // Cache the result
+        roleCache.set(cacheKey, { authorized: hasAccess, timestamp: Date.now() });
 
         setAuthorized(hasAccess);
       } catch (error) {
@@ -93,6 +104,7 @@ export const ProtectedRoute = ({
         setAuthorized(false);
       } finally {
         setRoleChecked(true);
+        checkingRef.current = false;
       }
     };
 
@@ -108,10 +120,12 @@ export const ProtectedRoute = ({
   }
 
   if (allowedRoles && !authorized) {
-    // Redirect unauthorized users to their appropriate dashboard
     navigate(ROUTES.DASHBOARD, { replace: true });
     return null;
   }
 
   return <>{children}</>;
 };
+
+// Clear role cache on sign out
+export const clearRoleCache = () => roleCache.clear();
