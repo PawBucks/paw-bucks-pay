@@ -171,7 +171,7 @@ serve(async (req) => {
         .insert({
           user_id: transaction.user_id,
           amount: -pawbucksEarned,
-          type: 'debit',
+          type: 'redeem',
           source: 'refund',
           description: `PawBucks deducted due to refund of transaction`,
           transaction_id: transactionId,
@@ -182,6 +182,21 @@ serve(async (req) => {
         console.error('[REFUND] Failed to deduct user PawBucks:', pawbucksError);
       } else {
         console.log('[REFUND] User PawBucks deducted successfully');
+
+        // Update wallet balance
+        const { data: wallet } = await supabaseAdmin
+          .from('pawbucks_wallet')
+          .select('balance')
+          .eq('user_id', transaction.user_id)
+          .single();
+
+        if (wallet) {
+          await supabaseAdmin
+            .from('pawbucks_wallet')
+            .update({ balance: Math.max(0, wallet.balance - pawbucksEarned) })
+            .eq('user_id', transaction.user_id);
+          console.log('[REFUND] Wallet balance updated', { previousBalance: wallet.balance, deducted: pawbucksEarned });
+        }
       }
     }
 

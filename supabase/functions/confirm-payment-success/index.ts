@@ -233,8 +233,20 @@ serve(async (req) => {
 
     logStep("Transaction record created", { transactionId: transaction.id });
 
-    // 3. Award PawBucks to user
+    // 3. Award PawBucks to user (only if not already credited for this payment intent)
     if (pawbucksEarned > 0) {
+      // Check if PawBucks were already credited (e.g., by create-merchant-subscription)
+      const { data: existingCredit } = await supabaseAdmin
+        .from("pawbucks_activity")
+        .select("id")
+        .eq("user_id", userId)
+        .eq("transaction_id", transaction.id)
+        .eq("type", "earn")
+        .limit(1);
+
+      if (existingCredit && existingCredit.length > 0) {
+        logStep("PawBucks already credited for this transaction, skipping", { transactionId: transaction.id });
+      } else {
       // Log activity with correct type 'earn' (matches what PawBucksWallet.tsx filters for)
       const { error: activityError } = await supabaseAdmin
         .from("pawbucks_activity")
@@ -284,6 +296,7 @@ serve(async (req) => {
           balance: pawbucksEarned,
         });
       }
+      } // end else (no existing credit)
     }
 
     // 4. Deduct PawBucks if user used any
