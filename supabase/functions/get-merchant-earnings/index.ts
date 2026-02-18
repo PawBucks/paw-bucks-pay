@@ -131,61 +131,29 @@ serve(async (req) => {
 
     logStep("Charges with fees retrieved", { count: chargesWithFees.length });
 
-    // Get payment history from direct_payments table
-    const { data: directPayments, error: directPaymentsError } = await supabaseAdmin
-      .from("direct_payments")
-      .select("*")
-      .eq("merchant_id", merchant.id)
-      .order("created_at", { ascending: false })
-      .limit(50);
+    // Batch ALL Supabase queries in parallel instead of sequential
+    const [
+      { data: directPayments, error: directPaymentsError },
+      { data: directPaymentTotals },
+      { data: refundedDirectPayments },
+      { data: transactions, error: transactionsError },
+      { data: transactionTotals },
+      { data: refundedTransactions },
+    ] = await Promise.all([
+      supabaseAdmin.from("direct_payments").select("*").eq("merchant_id", merchant.id).order("created_at", { ascending: false }).limit(50),
+      supabaseAdmin.from("direct_payments").select("amount, application_fee, status").eq("merchant_id", merchant.id).eq("status", "succeeded"),
+      supabaseAdmin.from("direct_payments").select("amount, application_fee").eq("merchant_id", merchant.id).eq("status", "refunded"),
+      supabaseAdmin.from("transactions").select("id, amount, cashback_earned, rewards_earned, status, created_at, description").eq("merchant_id", merchant.id).order("created_at", { ascending: false }).limit(50),
+      supabaseAdmin.from("transactions").select("amount, cashback_earned, rewards_earned, stripe_amount, application_fee").eq("merchant_id", merchant.id).eq("status", "completed"),
+      supabaseAdmin.from("transactions").select("amount, cashback_earned, rewards_earned").eq("merchant_id", merchant.id).eq("status", "refunded"),
+    ]);
 
-    if (directPaymentsError) {
-      logStep("Error fetching direct payments", { error: directPaymentsError.message });
-    }
-
-    // Calculate totals from direct_payments (only succeeded, not refunded)
-    const { data: directPaymentTotals } = await supabaseAdmin
-      .from("direct_payments")
-      .select("amount, application_fee, status")
-      .eq("merchant_id", merchant.id)
-      .eq("status", "succeeded");
-
-    // Also get refunded direct payments for tracking
-    const { data: refundedDirectPayments } = await supabaseAdmin
-      .from("direct_payments")
-      .select("amount, application_fee")
-      .eq("merchant_id", merchant.id)
-      .eq("status", "refunded");
+    if (directPaymentsError) logStep("Error fetching direct payments", { error: directPaymentsError.message });
+    if (transactionsError) logStep("Error fetching transactions", { error: transactionsError.message });
 
     const directPaymentEarnings = directPaymentTotals?.reduce((sum, p) => sum + (p.amount - p.application_fee), 0) || 0;
     const directPaymentFees = directPaymentTotals?.reduce((sum, p) => sum + p.application_fee, 0) || 0;
     const refundedDirectAmount = refundedDirectPayments?.reduce((sum, p) => sum + p.amount, 0) || 0;
-
-    // ALSO get transaction history from transactions table (main source)
-    const { data: transactions, error: transactionsError } = await supabaseAdmin
-      .from("transactions")
-      .select("id, amount, cashback_earned, rewards_earned, status, created_at, description")
-      .eq("merchant_id", merchant.id)
-      .order("created_at", { ascending: false })
-      .limit(50);
-
-    if (transactionsError) {
-      logStep("Error fetching transactions", { error: transactionsError.message });
-    }
-
-    // Calculate totals from transactions table (completed transactions ONLY - excludes refunded)
-    const { data: transactionTotals } = await supabaseAdmin
-      .from("transactions")
-      .select("amount, cashback_earned, rewards_earned, stripe_amount, application_fee")
-      .eq("merchant_id", merchant.id)
-      .eq("status", "completed");
-
-    // Get refunded transactions separately for tracking
-    const { data: refundedTransactions } = await supabaseAdmin
-      .from("transactions")
-      .select("amount, cashback_earned, rewards_earned")
-      .eq("merchant_id", merchant.id)
-      .eq("status", "refunded");
 
     const transactionEarnings = transactionTotals?.reduce((sum, t) => sum + Number(t.amount || 0), 0) || 0;
     const transactionCashback = transactionTotals?.reduce((sum, t) => sum + Number(t.cashback_earned || 0), 0) || 0;
