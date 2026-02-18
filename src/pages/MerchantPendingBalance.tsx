@@ -4,13 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Clock, RefreshCw, Wallet, CreditCard, Receipt } from "lucide-react";
+import { ArrowLeft, Clock, RefreshCw, Wallet, CreditCard, Receipt, CalendarClock, Info } from "lucide-react";
 import { useMerchantEarnings } from "@/hooks/useMerchantEarnings";
 import { format } from "date-fns";
 
 export default function MerchantPendingBalance() {
   const navigate = useNavigate();
-  const { loading, refreshing, data, fetchEarnings, formatCurrency } = useMerchantEarnings();
+  const { loading, refreshing, data, fetchEarnings, formatCurrency, formatPayoutSchedule } = useMerchantEarnings();
 
   if (loading) {
     return (
@@ -28,7 +28,7 @@ export default function MerchantPendingBalance() {
     return (
       <div className="min-h-screen bg-background p-4 md:p-8">
         <div className="max-w-4xl mx-auto">
- <Button variant="ghost" onClick={() => navigate("/merchant-dashboard")} className="mb-6">
+          <Button variant="ghost" onClick={() => navigate("/merchant-dashboard")} className="mb-6">
             <ArrowLeft className="h-4 w-4 mr-2" /> Back to Dashboard
           </Button>
           <Card>
@@ -53,7 +53,7 @@ export default function MerchantPendingBalance() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
- <Button variant="ghost" onClick={() => navigate("/merchant-dashboard")} size="icon">
+            <Button variant="ghost" onClick={() => navigate("/merchant-dashboard")} size="icon">
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div>
@@ -67,7 +67,7 @@ export default function MerchantPendingBalance() {
           </Button>
         </div>
 
-        {/* Main Balance Card */}
+        {/* Main Balance Card with Estimated Arrival */}
         <Card className="border-yellow-200 bg-yellow-50/50 dark:bg-yellow-950/20">
           <CardHeader>
             <div className="flex items-center gap-3">
@@ -82,7 +82,33 @@ export default function MerchantPendingBalance() {
               </div>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
+            {/* Estimated Arrival */}
+            {data.estimatedNextArrival && totalPending > 0 && (
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-yellow-100/50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800">
+                <CalendarClock className="h-5 w-5 text-yellow-600 shrink-0" />
+                <div>
+                  <p className="text-sm font-medium text-yellow-800 dark:text-yellow-300">
+                    Estimated next arrival: {format(new Date(data.estimatedNextArrival * 1000), "EEEE, MMM d, yyyy")}
+                  </p>
+                  <p className="text-xs text-yellow-600 dark:text-yellow-400">
+                    Based on your payout schedule
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Payout Schedule */}
+            {data.payoutSchedule && (
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-background border">
+                <Info className="h-4 w-4 text-muted-foreground shrink-0" />
+                <div>
+                  <p className="text-sm font-medium">Payout Schedule</p>
+                  <p className="text-xs text-muted-foreground">{formatPayoutSchedule()}</p>
+                </div>
+              </div>
+            )}
+
             {pendingBalances.length > 0 ? (
               <div className="space-y-3">
                 <p className="text-sm font-medium text-muted-foreground mb-2">Balance by Currency</p>
@@ -119,12 +145,20 @@ export default function MerchantPendingBalance() {
                     <div>
                       <p className="font-medium">{formatCurrency(payout.amount, payout.currency)}</p>
                       <p className="text-sm text-muted-foreground">
-                        Expected {format(new Date(payout.arrivalDate * 1000), "MMM d, yyyy")}
+                        Expected {format(new Date(payout.arrivalDate * 1000), "EEEE, MMM d, yyyy")}
                       </p>
+                      {payout.description && (
+                        <p className="text-xs text-muted-foreground mt-1">{payout.description}</p>
+                      )}
                     </div>
-                    <Badge className="bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300">
-                      {payout.status === "in_transit" ? "In Transit" : "Pending"}
-                    </Badge>
+                    <div className="flex flex-col items-end gap-1">
+                      <Badge className="bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300">
+                        {payout.status === "in_transit" ? "In Transit" : "Pending"}
+                      </Badge>
+                      {payout.method && (
+                        <span className="text-xs text-muted-foreground capitalize">{payout.method}</span>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -147,12 +181,10 @@ export default function MerchantPendingBalance() {
             ) : (
               <div className="space-y-4">
                 {recentCharges.map((charge) => {
-                  // Use totalFees from the API (correct breakdown from Stripe)
                   const totalFees = charge.totalFees || ((charge.stripeFee || 0) + (charge.applicationFee || 0));
                   return (
                     <Card key={charge.id} className="border shadow-sm">
                       <CardContent className="p-4">
-                        {/* Header with date and status */}
                         <div className="flex items-center justify-between mb-4">
                           <div className="flex items-center gap-2">
                             <Receipt className="h-4 w-4 text-muted-foreground" />
@@ -165,12 +197,10 @@ export default function MerchantPendingBalance() {
                           </Badge>
                         </div>
 
-                        {/* Description */}
                         {charge.description && (
                           <p className="text-sm text-muted-foreground mb-4">{charge.description}</p>
                         )}
 
-                        {/* Payment Breakdown */}
                         <div className="space-y-3">
                           <div className="flex items-center justify-between">
                             <span className="font-medium">Payment amount</span>
@@ -181,7 +211,6 @@ export default function MerchantPendingBalance() {
 
                           <Separator />
 
-                          {/* Fees Section */}
                           <div className="space-y-2">
                             <span className="text-sm font-medium text-muted-foreground">Fees</span>
                             
@@ -209,7 +238,6 @@ export default function MerchantPendingBalance() {
 
                           <Separator />
 
-                          {/* Net Amount */}
                           <div className="flex items-center justify-between pt-1">
                             <span className="font-semibold text-lg">Net amount</span>
                             <span className="font-bold text-lg text-primary">
@@ -231,7 +259,12 @@ export default function MerchantPendingBalance() {
           <CardContent className="py-4">
             <p className="text-sm text-muted-foreground">
               <strong>Note:</strong> Pending balance represents funds from recent transactions that are still being processed. 
-              These typically take 2-7 business days to clear and become available for payout, depending on your account settings.
+              {data.payoutSchedule && (
+                <> Your payouts are scheduled <strong>{formatPayoutSchedule().toLowerCase()}</strong>.</>
+              )}
+              {!data.payoutSchedule && (
+                <> These typically take 2-7 business days to clear and become available for payout, depending on your account settings.</>
+              )}
             </p>
           </CardContent>
         </Card>

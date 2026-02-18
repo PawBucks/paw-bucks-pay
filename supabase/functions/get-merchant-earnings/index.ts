@@ -64,35 +64,42 @@ serve(async (req) => {
     logStep("Fetching balance from Stripe", { accountId: merchant.stripe_account_id });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2024-12-18.acacia" });
+    const stripeAccountOpts = { stripeAccount: merchant.stripe_account_id };
 
-    // Fetch balance from connected account using stripeAccount header
-    const balance = await stripe.balance.retrieve(
-      {},
-      { stripeAccount: merchant.stripe_account_id }
-    );
+    // Fetch balance, account info, and payouts in parallel
+    const [balance, account, allPayoutsResult, chargesResult, disputesResult] = await Promise.all([
+      stripe.balance.retrieve({}, stripeAccountOpts),
+      stripe.accounts.retrieve(merchant.stripe_account_id),
+      (async () => {
+        const payouts: Stripe.Payout[] = [];
+        for await (const payout of stripe.payouts.list({ limit: 100 }, stripeAccountOpts)) {
+          payouts.push(payout);
+        }
+        return payouts;
+      })(),
+      stripe.charges.list({ limit: 20 }, stripeAccountOpts),
+      stripe.disputes.list({ limit: 10 }, stripeAccountOpts).catch(() => ({ data: [] })),
+    ]);
 
-    logStep("Balance retrieved", { balance });
+    logStep("Parallel Stripe fetches complete", { 
+      payoutCount: allPayoutsResult.length,
+      chargeCount: chargesResult.data.length,
+      disputeCount: disputesResult.data.length,
+    });
 
-    // Fetch ALL payouts (full lifetime history) using auto-pagination
-    const allPayouts: Stripe.Payout[] = [];
-    for await (const payout of stripe.payouts.list(
-      { limit: 100 },
-      { stripeAccount: merchant.stripe_account_id }
-    )) {
-      allPayouts.push(payout);
-    }
+    // Extract payout schedule from account settings
+    const payoutSchedule = account.settings?.payouts?.schedule || null;
+    const payoutsEnabled = account.payouts_enabled || false;
 
-    logStep("All payouts retrieved", { count: allPayouts.length });
+    // Compute estimated arrival for pending balance from upcoming payouts
+    const pendingPayouts = allPayoutsResult.filter(p => ["pending", "in_transit"].includes(p.status));
+    const nextArrivalDate = pendingPayouts.length > 0
+      ? Math.min(...pendingPayouts.map(p => p.arrival_date))
+      : null;
 
-    // Fetch recent charges with expanded balance_transaction for fee details
-    const charges = await stripe.charges.list(
-      { limit: 20 },
-      { stripeAccount: merchant.stripe_account_id }
-    );
-
-    // Fetch balance transactions to get fee breakdown
+    // Fetch balance transactions to get fee breakdown for charges
     const chargesWithFees = await Promise.all(
-      charges.data.map(async (charge: Stripe.Charge) => {
+      chargesResult.data.map(async (charge: Stripe.Charge) => {
         let totalStripeFeePlusAppFee = 0;
         let netAmount = charge.amount;
         
@@ -100,9 +107,8 @@ serve(async (req) => {
           try {
             const balanceTx = await stripe.balanceTransactions.retrieve(
               charge.balance_transaction,
-              { stripeAccount: merchant.stripe_account_id }
+              stripeAccountOpts
             );
-            // IMPORTANT: balanceTx.fee from Stripe includes BOTH Stripe processing fees AND application fees combined
             totalStripeFeePlusAppFee = balanceTx.fee || 0;
             netAmount = balanceTx.net || charge.amount;
           } catch (e) {
@@ -110,28 +116,14 @@ serve(async (req) => {
           }
         }
         
-        // Application fee is the platform's cut (3% of Stripe amount)
         const applicationFeeAmount = charge.application_fee_amount || 0;
-        
-        // The actual Stripe processing fee is the total fee MINUS the application fee
-        // Total fee from Stripe = Stripe processing fee + Application fee
-        // So: Stripe processing fee = Total fee - Application fee
         const stripeProcessingFee = Math.max(0, totalStripeFeePlusAppFee - applicationFeeAmount);
-        
-        logStep("Fee breakdown for charge", { 
-          chargeId: charge.id, 
-          amount: charge.amount,
-          totalFeeFromStripe: totalStripeFeePlusAppFee,
-          applicationFee: applicationFeeAmount,
-          stripeProcessingFee: stripeProcessingFee,
-          netAmount: netAmount
-        });
         
         return {
           ...charge,
-          stripe_fee: stripeProcessingFee,  // Actual Stripe processing fee only
-          application_fee: applicationFeeAmount,  // Platform's application fee
-          total_fees: totalStripeFeePlusAppFee,  // Combined total for reference
+          stripe_fee: stripeProcessingFee,
+          application_fee: applicationFeeAmount,
+          total_fees: totalStripeFeePlusAppFee,
           net_amount: netAmount,
         };
       })
@@ -198,7 +190,6 @@ serve(async (req) => {
     const transactionEarnings = transactionTotals?.reduce((sum, t) => sum + Number(t.amount || 0), 0) || 0;
     const transactionCashback = transactionTotals?.reduce((sum, t) => sum + Number(t.cashback_earned || 0), 0) || 0;
     const transactionRewards = transactionTotals?.reduce((sum, t) => sum + Number(t.rewards_earned || 0), 0) || 0;
-    // Use actual application_fee from transactions (accurate - only charges fee on Stripe portion)
     const transactionFees = transactionTotals?.reduce((sum, t) => sum + Number(t.application_fee || 0), 0) || 0;
     const transactionCount = transactionTotals?.length || 0;
 
@@ -208,39 +199,32 @@ serve(async (req) => {
     const totalRefundedAmount = (refundedDirectAmount / 100) + refundedTransactionAmount;
     const totalRefundedCount = (refundedDirectPayments?.length || 0) + refundedTransactionCount;
 
-    logStep("Transaction totals calculated", { 
-      transactionEarnings, 
-      transactionCashback,
-      transactionRewards,
-      transactionCount,
-      directPaymentEarnings: directPaymentEarnings / 100,
-      directPaymentCount: directPaymentTotals?.length || 0,
-      refundedAmount: totalRefundedAmount,
-      refundedCount: totalRefundedCount
-    });
-
-    // Combine both sources for total earnings (ONLY completed/succeeded - refunds excluded)
-    // direct_payments are in cents, transactions are in dollars
-    const totalEarningsFromDirect = directPaymentEarnings / 100; // Convert cents to dollars
+    // Combine both sources for total earnings
+    const totalEarningsFromDirect = directPaymentEarnings / 100;
     const totalEarningsFromTransactions = transactionEarnings;
     const combinedTotalEarnings = totalEarningsFromDirect + totalEarningsFromTransactions;
     const combinedTransactionCount = (directPaymentTotals?.length || 0) + transactionCount;
-    // Use actual application_fee values (accurate - only on Stripe portion, not PawBucks)
     const combinedFees = (directPaymentFees / 100) + transactionFees;
-    const combinedRewardsGiven = transactionCashback + transactionRewards; // Total rewards given to customers (in PawBucks)
+    const combinedRewardsGiven = transactionCashback + transactionRewards;
 
-    // Create Stripe Express Dashboard login link
-    let dashboardUrl = null;
-    try {
-      // Express accounts support login links for the Express Dashboard
-      const loginLink = await stripe.accounts.createLoginLink(merchant.stripe_account_id);
-      dashboardUrl = loginLink.url;
-      logStep("Express Dashboard login link created");
-    } catch (e) {
-      logStep("Could not create Express Dashboard link", { error: String(e) });
-      // Fallback - should rarely happen with Express accounts
-      dashboardUrl = null;
-    }
+    // Disputes summary
+    const openDisputes = disputesResult.data.filter((d: Stripe.Dispute) => 
+      ["warning_needs_response", "needs_response", "warning_under_review", "under_review"].includes(d.status)
+    );
+    const disputesSummary = {
+      total: disputesResult.data.length,
+      open: openDisputes.length,
+      totalAmount: disputesResult.data.reduce((sum: number, d: Stripe.Dispute) => sum + d.amount, 0),
+      disputes: disputesResult.data.slice(0, 5).map((d: Stripe.Dispute) => ({
+        id: d.id,
+        amount: d.amount,
+        currency: d.currency,
+        status: d.status,
+        reason: d.reason,
+        created: d.created,
+        chargeId: typeof d.charge === 'string' ? d.charge : d.charge?.id,
+      })),
+    };
 
     return new Response(JSON.stringify({
       connected: true,
@@ -249,13 +233,24 @@ serve(async (req) => {
         available: balance.available,
         pending: balance.pending,
       },
-      payoutHistory: allPayouts.map((p: Stripe.Payout) => ({
+      payoutSchedule: payoutSchedule ? {
+        interval: payoutSchedule.interval,
+        delay_days: payoutSchedule.delay_days,
+        weekly_anchor: payoutSchedule.weekly_anchor || null,
+        monthly_anchor: payoutSchedule.monthly_anchor || null,
+      } : null,
+      payoutsEnabled,
+      estimatedNextArrival: nextArrivalDate,
+      payoutHistory: allPayoutsResult.map((p: Stripe.Payout) => ({
         id: p.id,
         amount: p.amount,
         currency: p.currency,
         status: p.status,
         arrivalDate: p.arrival_date,
         created: p.created,
+        method: p.method,
+        type: p.type,
+        description: p.description,
       })),
       recentCharges: chargesWithFees.slice(0, 10).map((c: Stripe.Charge & { stripe_fee: number; application_fee: number; total_fees: number; net_amount: number }) => ({
         id: c.id,
@@ -264,11 +259,12 @@ serve(async (req) => {
         status: c.status,
         created: c.created,
         description: c.description,
-        stripeFee: c.stripe_fee,           // Actual Stripe processing fee (excludes application fee)
-        applicationFee: c.application_fee,  // Platform's application fee (3%)
-        totalFees: c.total_fees,            // Combined total of all fees
-        netAmount: c.net_amount,            // Net amount after all fees
+        stripeFee: c.stripe_fee,
+        applicationFee: c.application_fee,
+        totalFees: c.total_fees,
+        netAmount: c.net_amount,
       })),
+      disputes: disputesSummary,
       directPayments: directPayments || [],
       transactions: transactions || [],
       summary: {
@@ -276,12 +272,10 @@ serve(async (req) => {
         totalFees: combinedFees,
         transactionCount: combinedTransactionCount,
         totalRewardsGiven: combinedRewardsGiven,
-        // Refund tracking
         refunds: {
           count: totalRefundedCount,
           amount: totalRefundedAmount,
         },
-        // Breakdown for transparency
         breakdown: {
           directPaymentEarnings: totalEarningsFromDirect,
           directPaymentFees: directPaymentFees / 100,
@@ -292,7 +286,7 @@ serve(async (req) => {
           transactionCount: transactionCount,
         }
       },
-      dashboardUrl: null, // Removed - no longer linking to Stripe Express Dashboard
+      dashboardUrl: null,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
