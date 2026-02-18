@@ -3,13 +3,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { DollarSign, TrendingUp, Clock, ExternalLink, RefreshCw, ArrowUpRight, ArrowDownRight, Wallet, ChevronRight } from "lucide-react";
+import { 
+  DollarSign, TrendingUp, Clock, RefreshCw, ArrowUpRight, ArrowDownRight, 
+  Wallet, ChevronRight, AlertTriangle, Calendar, Shield, Receipt
+} from "lucide-react";
 import { useMerchantEarnings } from "@/hooks/useMerchantEarnings";
 import { format } from "date-fns";
 
 export function MerchantEarningsTab() {
   const navigate = useNavigate();
-  const { loading, refreshing, data, fetchEarnings, formatCurrency, getAvailableBalance, getPendingBalance } = useMerchantEarnings();
+  const { loading, refreshing, data, fetchEarnings, formatCurrency, getAvailableBalance, getPendingBalance, formatPayoutSchedule } = useMerchantEarnings();
 
   if (loading) {
     return (
@@ -43,32 +46,22 @@ export function MerchantEarningsTab() {
     );
   }
 
+  const pendingBalance = getPendingBalance();
+
   return (
     <div className="space-y-6">
-      {/* Header with refresh and dashboard link */}
+      {/* Header with refresh */}
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Earnings & Payouts</h2>
-        <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => fetchEarnings(true)}
-            disabled={refreshing}
-          >
-            <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? "animate-spin" : ""}`} />
-            Refresh
-          </Button>
-          {data.dashboardUrl && (
-            <Button 
-              variant="default" 
-              size="sm" 
-              onClick={() => window.open(data.dashboardUrl!, "_blank")}
-            >
-              <ExternalLink className="h-4 w-4 mr-2" />
-              Stripe Dashboard
-            </Button>
-          )}
-        </div>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={() => fetchEarnings(true)}
+          disabled={refreshing}
+        >
+          <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? "animate-spin" : ""}`} />
+          Refresh
+        </Button>
       </div>
 
       {/* Balance Cards */}
@@ -104,10 +97,16 @@ export function MerchantEarningsTab() {
             <div className="flex items-center gap-2 mb-1">
               <Clock className="h-5 w-5 text-yellow-600" />
               <span className="text-2xl font-bold text-yellow-600">
-              {formatCurrency(getPendingBalance())}
+              {formatCurrency(pendingBalance)}
               </span>
             </div>
-            <p className="text-xs text-muted-foreground">Processing</p>
+            {data.estimatedNextArrival && pendingBalance > 0 ? (
+              <p className="text-xs text-muted-foreground">
+                Est. arrival {format(new Date(data.estimatedNextArrival * 1000), "MMM d, yyyy")}
+              </p>
+            ) : (
+              <p className="text-xs text-muted-foreground">Processing</p>
+            )}
           </CardContent>
         </Card>
 
@@ -132,6 +131,101 @@ export function MerchantEarningsTab() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Secondary Stats Row */}
+      <div className="grid gap-4 md:grid-cols-4">
+        {/* Payout Schedule */}
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2 mb-2">
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium">Payout Schedule</span>
+            </div>
+            <p className="text-sm text-muted-foreground">{formatPayoutSchedule()}</p>
+          </CardContent>
+        </Card>
+
+        {/* Rewards Given */}
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2 mb-2">
+              <Receipt className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium">Rewards Given</span>
+            </div>
+            <p className="text-lg font-bold">{data.summary?.totalRewardsGiven || 0} <span className="text-sm font-normal text-muted-foreground">PB</span></p>
+          </CardContent>
+        </Card>
+
+        {/* Refunds */}
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2 mb-2">
+              <Shield className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium">Refunds</span>
+            </div>
+            <p className="text-lg font-bold">
+              {data.summary?.refunds?.count || 0}
+              {(data.summary?.refunds?.amount || 0) > 0 && (
+                <span className="text-sm font-normal text-destructive ml-2">
+                  -${data.summary.refunds.amount.toFixed(2)}
+                </span>
+              )}
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Disputes */}
+        <Card className={data.disputes?.open > 0 ? "border-destructive/50" : ""}>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2 mb-2">
+              <AlertTriangle className={`h-4 w-4 ${data.disputes?.open > 0 ? "text-destructive" : "text-muted-foreground"}`} />
+              <span className="text-sm font-medium">Disputes</span>
+            </div>
+            {data.disputes?.open > 0 ? (
+              <p className="text-lg font-bold text-destructive">
+                {data.disputes.open} open
+                <span className="text-sm font-normal text-muted-foreground ml-1">
+                  ({formatCurrency(data.disputes.totalAmount)})
+                </span>
+              </p>
+            ) : (
+              <p className="text-lg font-bold text-green-600">None</p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Open Disputes Alert */}
+      {data.disputes?.open > 0 && (
+        <Card className="border-destructive/30 bg-destructive/5">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-destructive text-base">
+              <AlertTriangle className="h-5 w-5" />
+              {data.disputes.open} Open Dispute{data.disputes.open > 1 ? "s" : ""} — Action Required
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {data.disputes.disputes
+                .filter(d => ["warning_needs_response", "needs_response", "warning_under_review", "under_review"].includes(d.status))
+                .map((dispute) => (
+                  <div key={dispute.id} className="flex items-center justify-between p-3 rounded-lg border bg-background">
+                    <div>
+                      <p className="font-medium">{formatCurrency(dispute.amount, dispute.currency)}</p>
+                      <p className="text-sm text-muted-foreground capitalize">{dispute.reason.replace(/_/g, " ")}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {format(new Date(dispute.created * 1000), "MMM d, yyyy")}
+                      </p>
+                    </div>
+                    <Badge variant="destructive" className="capitalize">
+                      {dispute.status.replace(/_/g, " ")}
+                    </Badge>
+                  </div>
+                ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Payout History */}
       <Card>
@@ -162,16 +256,27 @@ export function MerchantEarningsTab() {
                         {formatCurrency(payout.amount, payout.currency)}
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        {format(new Date(payout.created * 1000), "MMM d, yyyy")}
+                        {payout.status === "paid" 
+                          ? `Arrived ${format(new Date(payout.arrivalDate * 1000), "MMM d, yyyy")}`
+                          : `Expected ${format(new Date(payout.arrivalDate * 1000), "MMM d, yyyy")}`
+                        }
                       </p>
+                      {payout.description && (
+                        <p className="text-xs text-muted-foreground">{payout.description}</p>
+                      )}
                     </div>
                   </div>
-                  <Badge 
-                    variant={payout.status === "paid" ? "default" : "secondary"}
-                    className={payout.status === "paid" ? "bg-green-100 text-green-700" : ""}
-                  >
-                    {payout.status}
-                  </Badge>
+                  <div className="flex flex-col items-end gap-1">
+                    <Badge 
+                      variant={payout.status === "paid" ? "default" : "secondary"}
+                      className={payout.status === "paid" ? "bg-green-100 text-green-700" : ""}
+                    >
+                      {payout.status === "in_transit" ? "In Transit" : payout.status}
+                    </Badge>
+                    {payout.method && (
+                      <span className="text-xs text-muted-foreground capitalize">{payout.method}</span>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
