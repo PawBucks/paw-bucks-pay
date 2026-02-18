@@ -24,7 +24,7 @@ import { SpendingInsights } from "@/components/wallet/SpendingInsights";
 import { RecurringExpenses } from "@/components/wallet/RecurringExpenses";
 import { SpendingGoals } from "@/components/wallet/SpendingGoals";
 import { CategoryComparison } from "@/components/wallet/CategoryComparison";
-import { Wallet as WalletIcon, TrendingUp, Gift, ArrowUpRight, ArrowDownRight, Coins, Sparkles, PieChart, Calendar } from "lucide-react";
+import { Wallet as WalletIcon, TrendingUp, Gift, ArrowUpRight, ArrowDownRight, Coins, Sparkles, PieChart, Calendar, RotateCcw } from "lucide-react";
 import { format } from "date-fns";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -42,6 +42,7 @@ type Transaction = {
   description: string;
   created_at: string;
   merchant_id: string;
+  status: string;
   merchants?: {
     business_type: string;
     business_name: string;
@@ -156,12 +157,18 @@ const Wallet = () => {
 
   const loading = sharedAccount.isLoading || walletLoading || pawbucksLoading || transactionsLoading || budgetTransactionsLoading || activityLoading || medicalLoading;
 
-  // Calculate true total spent including medical records
+  // Filter out refunded transactions for spending analytics
+  const completedTransactions = useMemo(() => 
+    transactions.filter(t => t.status !== 'refunded'), 
+    [transactions]
+  );
+
+  // Calculate true total spent including medical records (only completed transactions)
   const totalSpent = useMemo(() => {
-    const transactionTotal = wallet?.total_spent || 0;
+    const transactionTotal = completedTransactions.reduce((sum, t) => sum + t.amount, 0);
     const medicalTotal = medicalRecords.reduce((sum, record) => sum + (record.price || 0), 0);
     return transactionTotal + medicalTotal;
-  }, [wallet?.total_spent, medicalRecords]);
+  }, [completedTransactions, medicalRecords]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -303,24 +310,24 @@ const Wallet = () => {
 
         {/* Smart Insights */}
         <div className="mb-6">
-          <SpendingInsights transactions={transactions} medicalRecords={medicalRecords} />
+          <SpendingInsights transactions={completedTransactions} medicalRecords={medicalRecords} />
         </div>
 
         {/* Spending Goals & Month Comparison */}
         <div className="grid gap-6 md:grid-cols-2 mb-6">
-          <SpendingGoals transactions={transactions} medicalRecords={medicalRecords} />
-          <MonthlyComparison transactions={transactions} medicalRecords={medicalRecords} />
+          <SpendingGoals transactions={completedTransactions} medicalRecords={medicalRecords} />
+          <MonthlyComparison transactions={completedTransactions} medicalRecords={medicalRecords} />
         </div>
 
         {/* Enhanced Spending Chart */}
         <div className="mb-6">
-          <EnhancedSpendingChart transactions={transactions} medicalRecords={medicalRecords} />
+          <EnhancedSpendingChart transactions={completedTransactions} medicalRecords={medicalRecords} />
         </div>
 
         {/* Category Comparison & Recurring Expenses */}
         <div className="grid gap-6 md:grid-cols-2 mb-6">
-          <CategoryComparison transactions={transactions} medicalRecords={medicalRecords} />
-          <RecurringExpenses transactions={transactions} />
+          <CategoryComparison transactions={completedTransactions} medicalRecords={medicalRecords} />
+          <RecurringExpenses transactions={completedTransactions} />
         </div>
 
         {/* Budget Settings */}
@@ -338,29 +345,51 @@ const Wallet = () => {
           <h3 className="text-xl font-semibold mb-4">Recent Transactions</h3>
           {transactions.length > 0 ? (
             <div className="space-y-3">
-              {transactions.map((transaction) => (
+              {transactions.map((transaction) => {
+                const isRefunded = transaction.status === 'refunded';
+                return (
                 <div
                   key={transaction.id}
-                  className="flex items-center justify-between p-4 rounded-xl bg-muted/30 border border-border/50 hover:bg-muted/50 transition-colors"
+                  className={`flex items-center justify-between p-4 rounded-xl border border-border/50 hover:bg-muted/50 transition-colors ${
+                    isRefunded ? 'bg-destructive/5 border-destructive/20' : 'bg-muted/30'
+                  }`}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                      <ArrowUpRight className="w-5 h-5 text-primary" />
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                      isRefunded ? 'bg-destructive/10' : 'bg-primary/10'
+                    }`}>
+                      {isRefunded ? (
+                        <RotateCcw className="w-5 h-5 text-destructive" />
+                      ) : (
+                        <ArrowUpRight className="w-5 h-5 text-primary" />
+                      )}
                     </div>
                     <div>
-                      <p className="font-medium">{transaction.description}</p>
+                      <p className="font-medium">
+                        {transaction.description}
+                        {isRefunded && (
+                          <span className="ml-2 text-xs font-semibold text-destructive bg-destructive/10 px-2 py-0.5 rounded-full">
+                            Refunded
+                          </span>
+                        )}
+                      </p>
                       <p className="text-xs text-muted-foreground">
                         {format(new Date(transaction.created_at), "MMM d, yyyy")}
                       </p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="font-bold text-foreground">-${transaction.amount.toFixed(2)}</p>
+                    <p className={`font-bold ${isRefunded ? 'text-destructive line-through' : 'text-foreground'}`}>
+                      -${transaction.amount.toFixed(2)}
+                    </p>
                     {/* rewards_earned stores the correct PawBucks amount (amount * multiplier) */}
-                    <p className="text-xs text-accent">+{transaction.rewards_earned} PawBucks</p>
+                    <p className={`text-xs ${isRefunded ? 'text-destructive line-through' : 'text-accent'}`}>
+                      +{transaction.rewards_earned} PawBucks
+                    </p>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <div className="text-center py-12">
