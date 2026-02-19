@@ -97,6 +97,7 @@ serve(async (req) => {
       .from('transactions')
       .select('*')
       .eq('merchant_id', merchant.id)
+      .eq('status', 'completed')
       .order('created_at', { ascending: false });
 
     const transactions = allTransactions || [];
