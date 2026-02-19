@@ -4444,6 +4444,7 @@ export type Database = {
           twitter_url: string | null
           updated_at: string
           user_id: string
+          website_url: string | null
           welcome_credit_opted_in_at: string | null
           working_style: string | null
         }
@@ -4485,6 +4486,7 @@ export type Database = {
           twitter_url?: string | null
           updated_at?: string
           user_id: string
+          website_url?: string | null
           welcome_credit_opted_in_at?: string | null
           working_style?: string | null
         }
@@ -4526,6 +4528,7 @@ export type Database = {
           twitter_url?: string | null
           updated_at?: string
           user_id?: string
+          website_url?: string | null
           welcome_credit_opted_in_at?: string | null
           working_style?: string | null
         }
@@ -10396,6 +10399,7 @@ export type Database = {
           sponsored_until: string | null
           storefront_slug: string | null
           twitter_url: string | null
+          website_url: string | null
         }
         Insert: {
           accepts_pawbucks?: boolean | null
@@ -10417,6 +10421,7 @@ export type Database = {
           sponsored_until?: string | null
           storefront_slug?: string | null
           twitter_url?: string | null
+          website_url?: string | null
         }
         Update: {
           accepts_pawbucks?: boolean | null
@@ -10438,6 +10443,7 @@ export type Database = {
           sponsored_until?: string | null
           storefront_slug?: string | null
           twitter_url?: string | null
+          website_url?: string | null
         }
         Relationships: []
       }
