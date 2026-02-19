@@ -1,0 +1,1 @@
+ALTER TABLE public.merchants ADD COLUMN website_url text;

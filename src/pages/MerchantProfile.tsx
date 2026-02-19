@@ -93,7 +93,7 @@ const MerchantProfile = memo(() => {
         queryFn: async () => {
           const { data, error } = await supabase
             .from("merchants_public")
-            .select("id, business_name, business_type, description, logo_url, address, phone, cashback_rate, accepts_pawbucks, storefront_slug, price_range, facebook_url, instagram_url, twitter_url, linkedin_url")
+            .select("id, business_name, business_type, description, logo_url, address, phone, cashback_rate, accepts_pawbucks, storefront_slug, price_range, facebook_url, instagram_url, twitter_url, linkedin_url, website_url")
             .eq("id", merchantId)
             .single();
           if (error) throw error;
@@ -506,6 +506,25 @@ const MerchantProfile = memo(() => {
                     <p className="text-muted-foreground text-sm">
                       No contact information available.
                     </p>
+                  )}
+
+                  {/* Website Link */}
+                  {merchant.website_url && (
+                    <>
+                      <Separator className="my-4" />
+                      <div className="space-y-2">
+                        <p className="font-medium text-sm text-muted-foreground">Website</p>
+                        <a
+                          href={merchant.website_url.startsWith('http') ? merchant.website_url : `https://${merchant.website_url}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 text-primary hover:underline text-sm"
+                        >
+                          <Globe className="w-4 h-4" />
+                          {merchant.website_url.replace(/^https?:\/\//, '')}
+                        </a>
+                      </div>
+                    </>
                   )}
 
                   {/* Social Media Links */}
