@@ -7,6 +7,8 @@ const refundSchema = z.object({
   transactionId: z.string().uuid(),
   amount: z.number().positive().optional(),
   reason: z.enum(['duplicate', 'fraudulent', 'requested_by_customer']).optional(),
+  note: z.string().max(500).optional(),
+  refundApplicationFee: z.boolean().optional().default(true),
 });
 
 const corsHeaders = {
@@ -78,7 +80,7 @@ serve(async (req) => {
       );
     }
 
-    const { transactionId, amount, reason } = validationResult.data;
+    const { transactionId, amount, reason, note, refundApplicationFee } = validationResult.data;
     console.log('[REFUND] Processing refund for transaction:', transactionId);
 
     // Get full transaction details including user_id, rewards_earned, and merchant_id
@@ -143,7 +145,7 @@ serve(async (req) => {
         // For Direct Charges on connected accounts, add reverse_transfer and refund_application_fee
         if (merchantStripeAccountId) {
           refundParams.reverse_transfer = true;
-          refundParams.refund_application_fee = true;
+          refundParams.refund_application_fee = refundApplicationFee !== false;
           stripeRefund = await stripe.refunds.create(
             refundParams as Stripe.RefundCreateParams,
             { stripeAccount: merchantStripeAccountId }
@@ -237,6 +239,8 @@ serve(async (req) => {
         _changes: {
           refund_amount: refundAmount,
           reason: reason || 'requested_by_customer',
+          note: note || null,
+          refund_application_fee: refundApplicationFee !== false,
           stripe_refund_id: stripeRefund?.id || null,
           pawbucks_deducted: pawbucksEarned,
         },
