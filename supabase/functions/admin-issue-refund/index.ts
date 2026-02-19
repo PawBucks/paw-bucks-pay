@@ -88,6 +88,18 @@ serve(async (req) => {
       .eq('id', transactionId)
       .single();
 
+    // Look up the merchant's Stripe Connect account for Direct Charge refunds
+    let merchantStripeAccountId: string | null = null;
+    if (transaction?.merchant_id) {
+      const { data: merchant } = await supabaseAdmin
+        .from('merchants')
+        .select('stripe_account_id')
+        .eq('id', transaction.merchant_id)
+        .single();
+      merchantStripeAccountId = merchant?.stripe_account_id || null;
+      console.log('[REFUND] Merchant Stripe account:', merchantStripeAccountId || 'none');
+    }
+
     if (txError || !transaction) {
       console.error('[REFUND] Transaction not found:', txError);
       return new Response(
@@ -122,11 +134,24 @@ serve(async (req) => {
 
         const refundAmountCents = Math.round(refundAmount * 100);
         
-        stripeRefund = await stripe.refunds.create({
+        const refundParams: Record<string, unknown> = {
           payment_intent: transaction.stripe_payment_intent_id,
           amount: refundAmountCents,
           reason: reason || 'requested_by_customer',
-        });
+        };
+
+        // For Direct Charges on connected accounts, add reverse_transfer and refund_application_fee
+        if (merchantStripeAccountId) {
+          refundParams.reverse_transfer = true;
+          refundParams.refund_application_fee = true;
+          stripeRefund = await stripe.refunds.create(
+            refundParams as Stripe.RefundCreateParams,
+            { stripeAccount: merchantStripeAccountId }
+          );
+        } else {
+          // Platform-level charge (no connected account)
+          stripeRefund = await stripe.refunds.create(refundParams as Stripe.RefundCreateParams);
+        }
 
         console.log('[REFUND] Stripe refund created:', stripeRefund.id);
       } catch (stripeError: unknown) {
