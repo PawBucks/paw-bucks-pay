@@ -5,7 +5,10 @@ import { z } from "https://esm.sh/zod@3.22.4";
 
 const refundSchema = z.object({
   transactionId: z.string().uuid(),
+  amount: z.number().positive().optional(),
   reason: z.enum(['duplicate', 'fraudulent', 'requested_by_customer']).optional(),
+  note: z.string().max(500).optional(),
+  refundApplicationFee: z.boolean().optional().default(true),
 });
 
 const corsHeaders = {
@@ -64,7 +67,7 @@ serve(async (req) => {
       );
     }
 
-    const { transactionId, reason } = validation.data;
+    const { transactionId, amount: requestedAmount, reason, note, refundApplicationFee } = validation.data;
 
     // Get the transaction - verify it belongs to this merchant
     const { data: transaction, error: txError } = await supabaseAdmin
@@ -98,7 +101,7 @@ serve(async (req) => {
     }
 
     let stripeRefund = null;
-    const refundAmount = transaction.amount;
+    const refundAmount = requestedAmount || transaction.amount;
 
     // Attempt Stripe refund if there's a valid payment intent
     if (
@@ -121,7 +124,7 @@ serve(async (req) => {
           amount: refundAmountCents,
           reason: reason || 'requested_by_customer',
           reverse_transfer: true,
-          refund_application_fee: true,
+          refund_application_fee: refundApplicationFee !== false,
         };
 
         if (merchant.stripe_account_id) {
@@ -214,6 +217,8 @@ serve(async (req) => {
         changes: {
           refund_amount: refundAmount,
           reason: reason || 'requested_by_customer',
+          note: note || null,
+          refund_application_fee: refundApplicationFee !== false,
           stripe_refund_id: stripeRefund?.id || null,
           pawbucks_deducted: pawbucksEarned,
           merchant_id: merchant.id,

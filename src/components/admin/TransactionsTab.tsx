@@ -7,16 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Search, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+import { RefundPaymentDialog } from '@/components/shared/RefundPaymentDialog';
 
 type Transaction = {
   id: string;
@@ -120,7 +111,7 @@ export function TransactionsTab() {
     setRefundDialogOpen(true);
   };
 
-  const handleRefund = async () => {
+  const handleRefund = async (params: { amount: number; reason: string; note: string; refundApplicationFee: boolean }) => {
     if (!selectedTransaction) return;
     
     setRefundingId(selectedTransaction.id);
@@ -130,7 +121,10 @@ export function TransactionsTab() {
       const { data, error } = await supabase.functions.invoke('admin-issue-refund', {
         body: {
           transactionId: selectedTransaction.id,
-          reason: 'requested_by_customer',
+          amount: params.amount,
+          reason: params.reason,
+          note: params.note,
+          refundApplicationFee: params.refundApplicationFee,
         },
       });
 
@@ -140,7 +134,7 @@ export function TransactionsTab() {
         throw new Error(data.error);
       }
 
-      toast.success('Transaction refunded successfully');
+      toast.success(`Refund of $${params.amount.toFixed(2)} processed successfully`);
       loadTransactions();
       loadSummaryStats();
     } catch (error: any) {
@@ -251,24 +245,14 @@ export function TransactionsTab() {
         </Table>
       </div>
 
-      <AlertDialog open={refundDialogOpen} onOpenChange={setRefundDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirm Refund</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to refund this transaction of ${selectedTransaction?.amount.toFixed(2)}? 
-              This will reverse the Stripe payment and deduct any earned PawBucks from the customer's account.
-              This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleRefund} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Refund Transaction
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <RefundPaymentDialog
+        open={refundDialogOpen}
+        onOpenChange={setRefundDialogOpen}
+        transactionAmount={selectedTransaction?.amount || 0}
+        customerName={selectedTransaction?.profiles?.full_name || undefined}
+        onRefund={handleRefund}
+        isRefunding={!!refundingId}
+      />
     </div>
   );
 }
