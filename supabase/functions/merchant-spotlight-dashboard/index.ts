@@ -88,6 +88,7 @@ serve(async (req) => {
       .from('transactions')
       .select('amount, created_at')
       .eq('merchant_id', merchant.id)
+      .eq('status', 'completed')
       .gte('created_at', purchase.created_at);
 
     // Get transactions in equivalent period before spotlight
@@ -96,6 +97,7 @@ serve(async (req) => {
       .from('transactions')
       .select('amount, created_at')
       .eq('merchant_id', merchant.id)
+      .eq('status', 'completed')
       .gte('created_at', beforeDate.toISOString())
       .lt('created_at', purchase.created_at);
 
