@@ -262,7 +262,50 @@
 
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <noscript>
+      <div style="max-width:800px;margin:0 auto;padding:40px 20px;font-family:system-ui,sans-serif;">
+        <h1>PawBucks - Rewards for Every Dollar You Spend on Your Pet</h1>
+        <p>Manage pet expenses, discover trusted local services, and earn PawBucks every time you care for your pet. Track spending, find local businesses, and turn everyday pet care into rewards.</p>
+        <h2>What is PawBucks?</h2>
+        <p>PawBucks is an all-in-one pet ecosystem connecting pet owners with trusted local merchants — pet stores, groomers, trainers, veterinarians, and more — while rewarding every purchase with cashback PawBucks.</p>
+        <h2>How It Works</h2>
+        <ul>
+          <li><strong>Discover</strong> — Find trusted pet businesses near you</li>
+          <li><strong>Pay</strong> — Use PawBucks to pay at partner merchants</li>
+          <li><strong>Earn</strong> — Get 10x-30x PawBucks per dollar spent</li>
+          <li><strong>Redeem</strong> — Use earned PawBucks for discounts on future purchases</li>
+        </ul>
+        <h2>Features</h2>
+        <ul>
+          <li>Digital wallet for pet expenses</li>
+          <li>Local merchant directory with reviews</li>
+          <li>Lost pet alerts and community flyers</li>
+          <li>Pet store with rewards on every purchase</li>
+          <li>Spending breakdown and budget tracking</li>
+          <li>Referral rewards program</li>
+        </ul>
+        <h2>For Merchants</h2>
+        <p>Accept payments, reward customers automatically, and grow your pet business. <a href="/merchants">Learn more for merchants</a>.</p>
+        <h2>For Veterinarians</h2>
+        <p>Complete EMR, AI clinical tools, insurance claim management, and more. <a href="/vet-landing">Learn more for vets</a>.</p>
+        <p><a href="/auth">Sign Up Free</a> | <a href="/discover">Browse Pet Services</a></p>
+      </div>
+    </noscript>
+    <div id="prerender-content" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;" aria-hidden="true">
+      <h1>PawBucks - Rewards for Every Dollar You Spend on Your Pet</h1>
+      <p>Manage pet expenses, discover trusted local services, and earn PawBucks every time you care for your pet.</p>
+      <p>PawBucks is an all-in-one pet ecosystem connecting pet owners with trusted local merchants while rewarding every purchase with cashback.</p>
+      <ul>
+        <li>Digital wallet for pet expenses</li>
+        <li>Local merchant directory with reviews</li>
+        <li>Lost pet alerts and community flyers</li>
+        <li>Pet store with rewards</li>
+        <li>Spending breakdown and budget tracking</li>
+      </ul>
+      <a href="/merchants">For Merchants</a>
+      <a href="/vet-landing">For Veterinarians</a>
+      <a href="/discover">Browse Pet Services</a>
+    </div>
     <script>
       // Enterprise Security Headers via meta tags
       // Note: For production, these should also be set via server response headers
