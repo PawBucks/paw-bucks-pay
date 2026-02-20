@@ -10,10 +10,24 @@ import {
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { MessageSquare, Send } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { MessageSquare, Send, Bug, CreditCard, Lightbulb, HelpCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { LoadingSpinner } from './LoadingSpinner';
+
+const FEEDBACK_CATEGORIES = [
+  { value: 'general', label: 'General Feedback', icon: HelpCircle },
+  { value: 'technical_issue', label: 'Report a Bug', icon: Bug },
+  { value: 'billing_payments', label: 'Billing Question', icon: CreditCard },
+  { value: 'feature_request', label: 'Feature Suggestion', icon: Lightbulb },
+];
 
 /**
  * Floating feedback button for users to submit feedback
@@ -21,13 +35,14 @@ import { LoadingSpinner } from './LoadingSpinner';
 export const FeedbackButton = () => {
   const [open, setOpen] = useState(false);
   const [feedback, setFeedback] = useState('');
+  const [category, setCategory] = useState('general');
+  const [subject, setSubject] = useState('');
   const [loading, setLoading] = useState(false);
   const [userEmail, setUserEmail] = useState<string | undefined>();
   const [userName, setUserName] = useState<string | undefined>();
-
   const [userId, setUserId] = useState<string | undefined>();
 
-  // Fetch user data when dialog opens to ensure we have the latest info
+  // Fetch user data when dialog opens
   useEffect(() => {
     const fetchUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -35,21 +50,18 @@ export const FeedbackButton = () => {
         setUserId(user.id);
         setUserEmail(user.email);
         
-        // Fetch profile info
         const { data: profile } = await supabase
           .from('profiles')
           .select('full_name')
           .eq('id', user.id)
           .single();
         
-        // Also check if user is a merchant and get business name
         const { data: merchant } = await supabase
           .from('merchants')
           .select('business_name')
           .eq('user_id', user.id)
           .maybeSingle();
         
-        // Use business name if available, otherwise use full name
         if (merchant?.business_name) {
           setUserName(`${profile?.full_name || 'User'} (${merchant.business_name})`);
         } else if (profile?.full_name) {
@@ -58,7 +70,6 @@ export const FeedbackButton = () => {
       }
     };
     
-    // Fetch when dialog opens
     if (open) {
       fetchUser();
     }
@@ -75,14 +86,37 @@ export const FeedbackButton = () => {
     setLoading(true);
     
     try {
+      // Save as a support ticket if user is authenticated
+      if (userId) {
+        const { error: ticketError } = await supabase
+          .from('support_tickets')
+          .insert({
+            user_id: userId,
+            submitter_type: 'pet_owner',
+            category: category as any,
+            priority: 'medium',
+            subject: subject.trim() || `${FEEDBACK_CATEGORIES.find(c => c.value === category)?.label || 'Feedback'}`,
+            description: feedback.trim(),
+            ticket_number: '',
+          });
+
+        if (ticketError) {
+          console.error('Error saving ticket:', ticketError);
+          // Fall back to email-only
+        }
+      }
+
+      // Also send email notification
       const { error } = await supabase.functions.invoke('send-feedback', {
         body: { feedback, userEmail, userName, userId }
       });
 
       if (error) throw error;
       
-      toast.success('Thank you for your feedback!');
+      toast.success('Thank you for your feedback! We\'ll review it shortly.');
       setFeedback('');
+      setSubject('');
+      setCategory('general');
       setOpen(false);
     } catch (error) {
       console.error('Error submitting feedback:', error);
@@ -111,18 +145,57 @@ export const FeedbackButton = () => {
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Category */}
           <div className="space-y-2">
-            <Label htmlFor="feedback">Your Feedback</Label>
+            <Label>Category</Label>
+            <Select value={category} onValueChange={setCategory}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {FEEDBACK_CATEGORIES.map(cat => (
+                  <SelectItem key={cat.value} value={cat.value}>
+                    <div className="flex items-center gap-2">
+                      <cat.icon className="w-4 h-4" />
+                      {cat.label}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Subject */}
+          <div className="space-y-2">
+            <Label htmlFor="subject">Subject (optional)</Label>
+            <input
+              id="subject"
+              type="text"
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              placeholder="Brief summary..."
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+              maxLength={200}
+              disabled={loading}
+            />
+          </div>
+
+          {/* Feedback */}
+          <div className="space-y-2">
+            <Label htmlFor="feedback">Your Feedback *</Label>
             <Textarea
               id="feedback"
               placeholder="Tell us what you think..."
               value={feedback}
               onChange={(e) => setFeedback(e.target.value)}
-              rows={6}
+              rows={5}
               disabled={loading}
               className="resize-none"
+              maxLength={5000}
             />
+            <p className="text-xs text-muted-foreground text-right">{feedback.length}/5000</p>
           </div>
+
           <div className="flex gap-3">
             <Button
               type="button"
@@ -133,7 +206,7 @@ export const FeedbackButton = () => {
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={loading} className="flex-1">
+            <Button type="submit" disabled={loading || !feedback.trim()} className="flex-1">
               {loading ? (
                 <LoadingSpinner size="sm" />
               ) : (

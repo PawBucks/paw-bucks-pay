@@ -43,9 +43,11 @@ import {
   Zap,
   BarChart3,
   Stamp,
+  LifeBuoy,
 } from "lucide-react";
 import { toast } from "sonner";
 import { PendingApprovalNotice } from "@/components/PendingApprovalNotice";
+import { SupportTab } from "@/components/support/SupportTab";
 
 type VetInfo = {
   id: string;
@@ -303,6 +305,10 @@ export default function VetDashboard() {
               <BarChart3 className="w-4 h-4" />
               <span className="hidden sm:inline">Reports</span>
             </TabsTrigger>
+            <TabsTrigger value="support" className="flex items-center gap-1">
+              <LifeBuoy className="w-4 h-4" />
+              <span className="hidden sm:inline">Support</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="emr">
@@ -367,6 +373,10 @@ export default function VetDashboard() {
 
           <TabsContent value="sales-report">
             <SalesReportGenerator entityId={vetInfo.id} entityType="vet" entityName={vetInfo.name} />
+          </TabsContent>
+
+          <TabsContent value="support">
+            <SupportTab submitterType="vet" entityId={vetInfo.id} />
           </TabsContent>
         </Tabs>
       </div>

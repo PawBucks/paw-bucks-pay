@@ -36,6 +36,7 @@ import {
   ChevronRight,
   HelpCircle,
   Stamp,
+  LifeBuoy,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format, startOfMonth, parseISO } from "date-fns";
@@ -53,6 +54,7 @@ import { SalesReportGenerator } from "@/components/shared/SalesReportGenerator";
 import { EditMerchantProfileDialog } from "@/components/merchant/EditMerchantProfileDialog";
 import { FundingRequestDialog } from "@/components/merchant/FundingRequestDialog";
 import { PendingApprovalNotice } from "@/components/PendingApprovalNotice";
+import { SupportTab } from "@/components/support/SupportTab";
 
 type Merchant = {
   id: string;
@@ -144,6 +146,17 @@ const NAV_SECTIONS = [
         label: "Quick Actions",
         icon: Zap,
         description: "Access all merchant tools, products, and settings",
+      },
+    ],
+  },
+  {
+    title: "Support",
+    items: [
+      {
+        id: "support",
+        label: "Support Center",
+        icon: LifeBuoy,
+        description: "Submit and track support tickets for issues and requests",
       },
     ],
   },
@@ -713,6 +726,8 @@ const MerchantDashboard = () => {
             onNavigate={navigate}
           />
         );
+      case "support":
+        return <SupportTab submitterType="merchant" entityId={merchant.id} />;
       default:
         return null;
     }
