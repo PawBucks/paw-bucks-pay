@@ -9,6 +9,7 @@ import { PawBucksDebitLogsTab } from "@/components/admin/PawBucksDebitLogsTab";
 import { SecurityMonitoringTab } from "@/components/admin/SecurityMonitoringTab";
 import { ConsultationBookingsTab } from "@/components/admin/ConsultationBookingsTab";
 import FeedbackTab from "@/components/admin/FeedbackTab";
+import { SupportTicketsTab } from "@/components/admin/SupportTicketsTab";
 import { NonPartnerReceiptVerificationTab } from "@/components/admin/NonPartnerReceiptVerificationTab";
 import { EmailTab } from "@/components/admin/EmailTab";
 import { TextCampaignsTab } from "@/components/admin/TextCampaignsTab";
@@ -159,6 +160,12 @@ const NAV_SECTIONS = [
         label: "User Feedback",
         icon: MessageSquare,
         description: "Review, respond to, and resolve user feedback submissions",
+      },
+      {
+        id: "support-tickets",
+        label: "Support Tickets",
+        icon: HelpCircle,
+        description: "Manage detailed support tickets from merchants, vets, and pet owners",
       },
     ],
   },
@@ -350,6 +357,8 @@ const AdminDashboard = () => {
         return <ConsultationBookingsTab />;
       case "feedback":
         return <FeedbackTab />;
+      case "support-tickets":
+        return <SupportTicketsTab />;
       case "products":
         return <ProductsTab />;
       case "badge-promotions":

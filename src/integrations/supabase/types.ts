@@ -7706,6 +7706,154 @@ export type Database = {
         }
         Relationships: []
       }
+      support_ticket_replies: {
+        Row: {
+          attachment_urls: string[] | null
+          created_at: string
+          id: string
+          is_admin_reply: boolean
+          message: string
+          ticket_id: string
+          user_id: string
+        }
+        Insert: {
+          attachment_urls?: string[] | null
+          created_at?: string
+          id?: string
+          is_admin_reply?: boolean
+          message: string
+          ticket_id: string
+          user_id: string
+        }
+        Update: {
+          attachment_urls?: string[] | null
+          created_at?: string
+          id?: string
+          is_admin_reply?: boolean
+          message?: string
+          ticket_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_ticket_replies_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_tickets: {
+        Row: {
+          actual_behavior: string | null
+          affected_feature: string | null
+          assigned_to: string | null
+          browser_info: string | null
+          category: Database["public"]["Enums"]["ticket_category"]
+          created_at: string
+          description: string
+          expected_behavior: string | null
+          id: string
+          priority: Database["public"]["Enums"]["ticket_priority"]
+          related_invoice_id: string | null
+          related_merchant_id: string | null
+          related_transaction_id: string | null
+          related_vet_id: string | null
+          resolution_notes: string | null
+          resolved_at: string | null
+          screenshot_urls: string[] | null
+          status: Database["public"]["Enums"]["ticket_status"]
+          steps_to_reproduce: string | null
+          subject: string
+          submitter_type: Database["public"]["Enums"]["ticket_submitter_type"]
+          ticket_number: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          actual_behavior?: string | null
+          affected_feature?: string | null
+          assigned_to?: string | null
+          browser_info?: string | null
+          category?: Database["public"]["Enums"]["ticket_category"]
+          created_at?: string
+          description: string
+          expected_behavior?: string | null
+          id?: string
+          priority?: Database["public"]["Enums"]["ticket_priority"]
+          related_invoice_id?: string | null
+          related_merchant_id?: string | null
+          related_transaction_id?: string | null
+          related_vet_id?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          screenshot_urls?: string[] | null
+          status?: Database["public"]["Enums"]["ticket_status"]
+          steps_to_reproduce?: string | null
+          subject: string
+          submitter_type?: Database["public"]["Enums"]["ticket_submitter_type"]
+          ticket_number: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          actual_behavior?: string | null
+          affected_feature?: string | null
+          assigned_to?: string | null
+          browser_info?: string | null
+          category?: Database["public"]["Enums"]["ticket_category"]
+          created_at?: string
+          description?: string
+          expected_behavior?: string | null
+          id?: string
+          priority?: Database["public"]["Enums"]["ticket_priority"]
+          related_invoice_id?: string | null
+          related_merchant_id?: string | null
+          related_transaction_id?: string | null
+          related_vet_id?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          screenshot_urls?: string[] | null
+          status?: Database["public"]["Enums"]["ticket_status"]
+          steps_to_reproduce?: string | null
+          subject?: string
+          submitter_type?: Database["public"]["Enums"]["ticket_submitter_type"]
+          ticket_number?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_tickets_related_merchant_id_fkey"
+            columns: ["related_merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_related_merchant_id_fkey"
+            columns: ["related_merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_related_vet_id_fkey"
+            columns: ["related_vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_related_vet_id_fkey"
+            columns: ["related_vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       symptom_library: {
         Row: {
           category: string
@@ -10544,6 +10692,7 @@ export type Database = {
         Args: { business_name: string }
         Returns: string
       }
+      generate_ticket_number: { Args: never; Returns: string }
       get_admin_analytics: {
         Args: never
         Returns: {
@@ -10736,6 +10885,21 @@ export type Database = {
         | "merchant_market"
         | "platform_fees"
         | "processing_fees"
+      ticket_category:
+        | "technical_issue"
+        | "billing_payments"
+        | "account_profile"
+        | "feature_request"
+        | "general"
+        | "other"
+      ticket_priority: "low" | "medium" | "high" | "urgent"
+      ticket_status:
+        | "open"
+        | "in_progress"
+        | "awaiting_response"
+        | "resolved"
+        | "closed"
+      ticket_submitter_type: "pet_owner" | "merchant" | "vet"
       user_type: "pet_owner" | "merchant"
     }
     CompositeTypes: {
@@ -10925,6 +11089,23 @@ export const Constants = {
         "platform_fees",
         "processing_fees",
       ],
+      ticket_category: [
+        "technical_issue",
+        "billing_payments",
+        "account_profile",
+        "feature_request",
+        "general",
+        "other",
+      ],
+      ticket_priority: ["low", "medium", "high", "urgent"],
+      ticket_status: [
+        "open",
+        "in_progress",
+        "awaiting_response",
+        "resolved",
+        "closed",
+      ],
+      ticket_submitter_type: ["pet_owner", "merchant", "vet"],
       user_type: ["pet_owner", "merchant"],
     },
   },
