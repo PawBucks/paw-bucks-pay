@@ -84,7 +84,7 @@ serve(async (req) => {
       throw new Error("This invoice does not accept PawBucks payments");
     }
 
-    const appUrl = Deno.env.get("APP_URL") || "https://paw-bucks-pay.lovable.app";
+    const appUrl = Deno.env.get("APP_URL") || "https://pawbucks.app";
     const stripeAmountCents = totalAmountCents - pawbucksAmountCents;
     const pawbucksUsed = Math.round(pawbucksAmountCents / PAWBUCKS_TO_USD / 100);
 

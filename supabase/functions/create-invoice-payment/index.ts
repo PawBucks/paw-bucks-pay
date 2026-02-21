@@ -51,7 +51,7 @@ serve(async (req) => {
       throw new Error("Merchant not found");
     }
 
-    const appUrl = Deno.env.get("APP_URL") || req.headers.get("origin") || "https://paw-bucks-pay.lovable.app";
+    const appUrl = Deno.env.get("APP_URL") || req.headers.get("origin") || "https://pawbucks.app";
 
     // Create line items for Stripe Checkout
     const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [

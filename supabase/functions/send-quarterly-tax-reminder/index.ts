@@ -226,7 +226,7 @@ serve(async (req: Request) => {
               <table width="100%" cellpadding="0" cellspacing="0">
                 <tr>
                   <td align="center">
-                    <a href="https://paw-bucks-pay.lovable.app/merchant/tax-vault" 
+                    <a href="https://pawbucks.app/merchant/tax-vault" 
                        style="display: inline-block; background-color: #7DD4D4; color: #ffffff; font-weight: 600; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-size: 16px;">
                       View Your Tax Vault →
                     </a>

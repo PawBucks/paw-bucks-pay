@@ -80,7 +80,7 @@ function generateReceiptHtml(params: ReceiptEmailParams): string {
     tierInfo,
   } = params;
 
-  const logoUrl = "https://paw-bucks-pay.lovable.app/logo.png";
+  const logoUrl = "https://pawbucks.app/logo.png";
   const formattedDate = formatDate(transactionDate);
   
   // Generate items rows
@@ -295,7 +295,7 @@ function generateReceiptHtml(params: ReceiptEmailParams): string {
           <!-- CTA Button -->
           <tr>
             <td style="padding:0 20px 20px; text-align:center;">
-              <a href="https://paw-bucks-pay.lovable.app/dashboard" style="display:inline-block; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color:white; text-decoration:none; padding:14px 32px; border-radius:8px; font-weight:600; font-size:16px;">
+              <a href="https://pawbucks.app/dashboard" style="display:inline-block; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color:white; text-decoration:none; padding:14px 32px; border-radius:8px; font-weight:600; font-size:16px;">
                 View Your Dashboard
               </a>
             </td>
