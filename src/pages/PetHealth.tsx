@@ -11,7 +11,8 @@ import { MedicalRecordsList } from "@/components/MedicalRecordsList";
 import { VetCommunication } from "@/components/VetCommunication";
 import { PetProfileCard } from "@/components/PetProfileCard";
 import { ShareHealthRecordsDialog } from "@/components/ShareHealthRecordsDialog";
-import { ArrowLeft, FileHeart, MessageCircle, Users } from "lucide-react";
+import { PetEmailInbox } from "@/components/pet-health/PetEmailInbox";
+import { ArrowLeft, FileHeart, MessageCircle, Users, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -154,10 +155,14 @@ export default function PetHealth() {
         </div>
 
         <Tabs defaultValue="records" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="records" className="flex items-center gap-2">
               <FileHeart className="w-4 h-4" />
               Medical Records
+            </TabsTrigger>
+            <TabsTrigger value="inbox" className="flex items-center gap-2">
+              <Mail className="w-4 h-4" />
+              Email Inbox
             </TabsTrigger>
             <TabsTrigger value="vets" className="flex items-center gap-2">
               <MessageCircle className="w-4 h-4" />
@@ -173,6 +178,10 @@ export default function PetHealth() {
               />
             </div>
             <MedicalRecordsList petId={pet.id} refreshTrigger={refreshTrigger} />
+          </TabsContent>
+
+          <TabsContent value="inbox" className="space-y-4">
+            <PetEmailInbox petId={pet.id} petName={pet.name} />
           </TabsContent>
 
           <TabsContent value="vets">

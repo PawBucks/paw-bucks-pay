@@ -5488,6 +5488,44 @@ export type Database = {
           },
         ]
       }
+      pet_email_addresses: {
+        Row: {
+          created_at: string
+          email_address: string
+          id: string
+          is_active: boolean
+          pet_id: string
+          short_code: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email_address: string
+          id?: string
+          is_active?: boolean
+          pet_id: string
+          short_code: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email_address?: string
+          id?: string
+          is_active?: boolean
+          pet_id?: string
+          short_code?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pet_email_addresses_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: true
+            referencedRelation: "pet_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pet_health_access_codes: {
         Row: {
           access_code: string
@@ -5626,6 +5664,132 @@ export type Database = {
             columns: ["vet_id"]
             isOneToOne: false
             referencedRelation: "partner_vets_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pet_inbound_documents: {
+        Row: {
+          ai_confidence: number | null
+          ai_summary: string | null
+          category: string
+          created_at: string
+          email_id: string | null
+          file_name: string
+          file_size_bytes: number | null
+          file_type: string | null
+          file_url: string
+          id: string
+          is_reviewed: boolean
+          pet_id: string
+          sender_email: string | null
+          sender_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          ai_confidence?: number | null
+          ai_summary?: string | null
+          category?: string
+          created_at?: string
+          email_id?: string | null
+          file_name: string
+          file_size_bytes?: number | null
+          file_type?: string | null
+          file_url: string
+          id?: string
+          is_reviewed?: boolean
+          pet_id: string
+          sender_email?: string | null
+          sender_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ai_confidence?: number | null
+          ai_summary?: string | null
+          category?: string
+          created_at?: string
+          email_id?: string | null
+          file_name?: string
+          file_size_bytes?: number | null
+          file_type?: string | null
+          file_url?: string
+          id?: string
+          is_reviewed?: boolean
+          pet_id?: string
+          sender_email?: string | null
+          sender_name?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pet_inbound_documents_email_id_fkey"
+            columns: ["email_id"]
+            isOneToOne: false
+            referencedRelation: "pet_inbound_emails"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_inbound_documents_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "pet_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pet_inbound_emails: {
+        Row: {
+          body_html: string | null
+          body_text: string | null
+          created_at: string
+          from_email: string
+          from_name: string | null
+          id: string
+          pet_email_id: string
+          pet_id: string
+          processing_status: string
+          received_at: string
+          subject: string | null
+        }
+        Insert: {
+          body_html?: string | null
+          body_text?: string | null
+          created_at?: string
+          from_email: string
+          from_name?: string | null
+          id?: string
+          pet_email_id: string
+          pet_id: string
+          processing_status?: string
+          received_at?: string
+          subject?: string | null
+        }
+        Update: {
+          body_html?: string | null
+          body_text?: string | null
+          created_at?: string
+          from_email?: string
+          from_name?: string | null
+          id?: string
+          pet_email_id?: string
+          pet_id?: string
+          processing_status?: string
+          received_at?: string
+          subject?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pet_inbound_emails_pet_email_id_fkey"
+            columns: ["pet_email_id"]
+            isOneToOne: false
+            referencedRelation: "pet_email_addresses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_inbound_emails_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "pet_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -10686,6 +10850,7 @@ export type Database = {
         Args: { p_merchant_id: string }
         Returns: string
       }
+      generate_pet_email_short_code: { Args: never; Returns: string }
       generate_redemption_code: { Args: never; Returns: string }
       generate_referral_code: { Args: never; Returns: string }
       generate_storefront_slug: {
