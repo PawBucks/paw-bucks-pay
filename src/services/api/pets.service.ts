@@ -92,4 +92,33 @@ export const petsService = {
       .order("created_at", { ascending: false });
     return { data: data || [], error };
   },
+
+  // Update Pet Email Address
+  async updatePetEmailName(petId: string, newName: string): Promise<ServiceResult<{ email_address: string }>> {
+    const emailAddress = `${newName}@inbox.pawbucks.app`;
+    const { data, error } = await supabase
+      .from("pet_email_addresses")
+      .update({ email_address: emailAddress, short_code: newName })
+      .eq("pet_id", petId)
+      .eq("is_active", true)
+      .select("email_address")
+      .single();
+    return { data, error };
+  },
+
+  // Check if email name is available
+  async checkEmailNameAvailable(name: string, currentPetId?: string): Promise<{ available: boolean; error: Error | null }> {
+    let query = supabase
+      .from("pet_email_addresses")
+      .select("pet_id")
+      .eq("short_code", name.toLowerCase())
+      .eq("is_active", true);
+    
+    if (currentPetId) {
+      query = query.neq("pet_id", currentPetId);
+    }
+
+    const { data, error } = await query.maybeSingle();
+    return { available: !data, error };
+  },
 };
