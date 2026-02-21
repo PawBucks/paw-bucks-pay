@@ -79,7 +79,7 @@ function generateInvoicePaidEmailHtml(params: InvoicePaidNotificationParams): st
     invoiceId,
   } = params;
 
-  const logoUrl = "https://paw-bucks-pay.lovable.app/logo.png";
+  const logoUrl = "https://pawbucks.app/logo.png";
   const formattedDate = formatDate(paymentDate);
   const paymentMethodLabel = getPaymentMethodLabel(paymentMethod, pawbucksUsed, paymentMethodDetail);
   const isManualPayment = paymentMethod === 'manual';
@@ -282,7 +282,7 @@ function generateInvoicePaidEmailHtml(params: InvoicePaidNotificationParams): st
           <!-- CTA Button -->
           <tr>
             <td style="padding:0 20px 24px; text-align:center;">
-              <a href="https://paw-bucks-pay.lovable.app/merchant/invoicing" style="display:inline-block; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color:white; text-decoration:none; padding:14px 32px; border-radius:8px; font-weight:600; font-size:16px;">
+              <a href="https://pawbucks.app/merchant/invoicing" style="display:inline-block; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color:white; text-decoration:none; padding:14px 32px; border-radius:8px; font-weight:600; font-size:16px;">
                 View Invoice Details
               </a>
             </td>

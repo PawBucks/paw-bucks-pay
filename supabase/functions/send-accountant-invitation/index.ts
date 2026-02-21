@@ -47,7 +47,7 @@ serve(async (req: Request) => {
     logStep("Sending accountant invitation", { invitationId, accountantEmail, businessName });
 
     // Build portal URL
-    const portalUrl = `https://paw-bucks-pay.lovable.app/accountant-portal/${accessToken}`;
+    const portalUrl = `https://pawbucks.app/accountant-portal/${accessToken}`;
 
     const emailHtml = `
 <!DOCTYPE html>

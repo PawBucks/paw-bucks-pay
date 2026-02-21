@@ -147,7 +147,7 @@ serve(async (req) => {
     }
 
     // Create checkout session for subscription
-    const origin = req.headers.get("origin") || "https://paw-bucks-pay.lovable.app";
+    const origin = req.headers.get("origin") || "https://pawbucks.app";
     
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
       customer: customerId,
