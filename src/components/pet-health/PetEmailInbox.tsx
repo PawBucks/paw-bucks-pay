@@ -1,8 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Mail,
@@ -21,6 +23,9 @@ import {
   ExternalLink,
   Inbox,
   Loader2,
+  Pencil,
+  AlertCircle,
+  CheckCircle2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -46,10 +51,18 @@ const CATEGORY_CONFIG: Record<string, { label: string; icon: any; color: string 
 
 export const PetEmailInbox = ({ petId, petName }: PetEmailInboxProps) => {
   const [emailAddress, setEmailAddress] = useState<string | null>(null);
+  const [shortCode, setShortCode] = useState<string>("");
   const [documents, setDocuments] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [filter, setFilter] = useState<string>("all");
+
+  // Custom email name state
+  const [isEditing, setIsEditing] = useState(false);
+  const [customName, setCustomName] = useState("");
+  const [nameStatus, setNameStatus] = useState<"idle" | "checking" | "available" | "taken" | "invalid">("idle");
+  const [isSaving, setIsSaving] = useState(false);
+  const [checkTimeout, setCheckTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     loadData();
@@ -58,17 +71,16 @@ export const PetEmailInbox = ({ petId, petName }: PetEmailInboxProps) => {
   const loadData = async () => {
     setIsLoading(true);
     try {
-      // Load email address
       const { data: emailData } = await supabase
         .from("pet_email_addresses")
-        .select("email_address")
+        .select("email_address, short_code")
         .eq("pet_id", petId)
         .eq("is_active", true)
         .maybeSingle();
 
       setEmailAddress(emailData?.email_address || null);
+      setShortCode(emailData?.short_code || "");
 
-      // Load documents
       const { data: docs } = await supabase
         .from("pet_inbound_documents")
         .select("*")
@@ -80,6 +92,74 @@ export const PetEmailInbox = ({ petId, petName }: PetEmailInboxProps) => {
       console.error("Error loading pet email data:", err);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const validateName = (name: string): boolean => {
+    // Only allow lowercase letters, numbers, hyphens, underscores, dots. 3-30 chars.
+    return /^[a-z0-9][a-z0-9._-]{1,28}[a-z0-9]$/.test(name);
+  };
+
+  const checkAvailability = useCallback(async (name: string) => {
+    if (!validateName(name)) {
+      setNameStatus("invalid");
+      return;
+    }
+    setNameStatus("checking");
+    const { data } = await supabase
+      .from("pet_email_addresses")
+      .select("pet_id")
+      .eq("short_code", name.toLowerCase())
+      .eq("is_active", true)
+      .neq("pet_id", petId)
+      .maybeSingle();
+
+    setNameStatus(data ? "taken" : "available");
+  }, [petId]);
+
+  const handleNameChange = (value: string) => {
+    const cleaned = value.toLowerCase().replace(/[^a-z0-9._-]/g, "");
+    setCustomName(cleaned);
+
+    if (checkTimeout) clearTimeout(checkTimeout);
+
+    if (!cleaned || cleaned.length < 3) {
+      setNameStatus("idle");
+      return;
+    }
+
+    const timeout = setTimeout(() => checkAvailability(cleaned), 400);
+    setCheckTimeout(timeout);
+  };
+
+  const handleSaveCustomEmail = async () => {
+    if (nameStatus !== "available" || !customName) return;
+    setIsSaving(true);
+    try {
+      const emailAddr = `${customName}@inbox.pawbucks.app`;
+      const { error } = await supabase
+        .from("pet_email_addresses")
+        .update({ email_address: emailAddr, short_code: customName })
+        .eq("pet_id", petId)
+        .eq("is_active", true);
+
+      if (error) throw error;
+
+      setEmailAddress(emailAddr);
+      setShortCode(customName);
+      setIsEditing(false);
+      setNameStatus("idle");
+      toast.success("Email address updated!");
+    } catch (err: any) {
+      console.error("Error updating email:", err);
+      if (err.message?.includes("unique") || err.code === "23505") {
+        setNameStatus("taken");
+        toast.error("That name was just taken. Please try another.");
+      } else {
+        toast.error("Failed to update email address");
+      }
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -124,7 +204,60 @@ export const PetEmailInbox = ({ petId, petName }: PetEmailInboxProps) => {
             <p className="text-xs text-muted-foreground mb-2">
               Share this email with your vet. Documents sent here are automatically organized.
             </p>
-            {emailAddress ? (
+
+            {isEditing ? (
+              <div className="space-y-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="custom-email" className="text-xs">Choose your email name</Label>
+                  <div className="flex items-center gap-1">
+                    <Input
+                      id="custom-email"
+                      value={customName}
+                      onChange={(e) => handleNameChange(e.target.value)}
+                      placeholder={petName.toLowerCase().replace(/\s+/g, "")}
+                      className="font-mono text-sm max-w-[180px]"
+                      maxLength={30}
+                    />
+                    <span className="text-sm text-muted-foreground whitespace-nowrap">@inbox.pawbucks.app</span>
+                  </div>
+                  {/* Status indicator */}
+                  <div className="flex items-center gap-1.5 min-h-[20px]">
+                    {nameStatus === "checking" && (
+                      <><Loader2 className="w-3 h-3 animate-spin text-muted-foreground" /><span className="text-xs text-muted-foreground">Checking availability...</span></>
+                    )}
+                    {nameStatus === "available" && (
+                      <><CheckCircle2 className="w-3 h-3 text-green-600" /><span className="text-xs text-green-600">Available!</span></>
+                    )}
+                    {nameStatus === "taken" && (
+                      <><AlertCircle className="w-3 h-3 text-destructive" /><span className="text-xs text-destructive">Already taken</span></>
+                    )}
+                    {nameStatus === "invalid" && customName.length >= 3 && (
+                      <><AlertCircle className="w-3 h-3 text-destructive" /><span className="text-xs text-destructive">Letters, numbers, hyphens, underscores only (3-30 chars)</span></>
+                    )}
+                    {nameStatus === "idle" && customName.length > 0 && customName.length < 3 && (
+                      <span className="text-xs text-muted-foreground">At least 3 characters</span>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    onClick={handleSaveCustomEmail}
+                    disabled={nameStatus !== "available" || isSaving}
+                  >
+                    {isSaving ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : null}
+                    Save
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => { setIsEditing(false); setCustomName(""); setNameStatus("idle"); }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            ) : emailAddress ? (
               <div className="flex items-center gap-2">
                 <code className="text-sm font-mono bg-background px-3 py-1.5 rounded border truncate">
                   {emailAddress}
@@ -140,6 +273,14 @@ export const PetEmailInbox = ({ petId, petName }: PetEmailInboxProps) => {
                   ) : (
                     <Copy className="w-4 h-4" />
                   )}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => { setIsEditing(true); setCustomName(shortCode); }}
+                  className="flex-shrink-0"
+                >
+                  <Pencil className="w-4 h-4" />
                 </Button>
               </div>
             ) : (
