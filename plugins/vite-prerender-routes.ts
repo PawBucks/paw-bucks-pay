@@ -24,34 +24,32 @@ const ROUTES_TO_PRERENDER: RouteContent[] = [
   {
     path: '/merchants',
     title: 'For Pet Merchants - Grow Your Business with PawBucks',
-    description: 'Join PawBucks as a pet merchant. Accept payments, reward customers automatically, and track sales in one place. Perfect for pet stores, groomers, trainers, and vets.',
+    description: 'Get new paying customers for your pet business — pay only when PawBucks delivers them. No discounts, no ads, no upfront spend. Performance-based customer acquisition.',
     ogTitle: 'For Pet Merchants - Grow Your Business with PawBucks',
-    ogDescription: 'Accept payments, reward customers automatically, and track your sales — all in one place. PawBucks is a pet-focused payments and rewards platform.',
+    ogDescription: 'Get new paying customers — pay only when PawBucks delivers them. A pet-focused payments and rewards platform for pet stores, groomers, trainers, and vets.',
     canonical: 'https://pawbucks.app/merchants',
     staticContent: `
-      <h1>Grow Your Pet Business Without Extra Work</h1>
-      <p>Accept payments, reward customers automatically, and track your sales — all in one place.</p>
-      <p>PawBucks is a pet-focused payments and rewards platform built for pet stores, groomers, trainers, and service providers. You get paid through Stripe, customers earn cashback automatically, and everything is tracked in a simple analytics dashboard.</p>
-      <h2>How PawBucks Works for Merchants</h2>
+      <h1>Grow Your Pet Business With Customers Who Arrive Ready to Spend</h1>
+      <p>Get new paying customers — pay only when PawBucks delivers them.</p>
+      <p>PawBucks is a pet-focused payments and rewards platform that helps pet businesses acquire customers without discounts, ads, or upfront spend.</p>
+      <h2>Why PawBucks Is Different</h2>
+      <p>Every new PawBucks user joins with $50 in PawBucks, redeemable only on purchases of $75 or more at PawBucks partner businesses. That means customers come in ready to buy, not browse.</p>
+      <h2>How a PawBucks Transaction Works</h2>
+      <p>A PawBucks customer spends $75. They apply $50 PawBucks. You receive $24.25 USD (withdrawable cash) and $50 PawBucks you can use on Merchant Market services.</p>
+      <p>PawBucks earns a 3% performance commission on the cash portion only — and only because we delivered the customer. No customers = no commission.</p>
+      <h2>Turn Customer Spend Into Marketing</h2>
+      <p>Your earned PawBucks are prepaid marketing dollars you can use on any of our 16 Merchant Market services, including featured placement, sponsored visibility, premium analytics, and customer acquisition tools.</p>
+      <h2>Transparent, Performance-Based Pricing</h2>
+      <p>2.9% + $0.30 — Stripe processing. 3% performance commission charged only when PawBucks delivers a paying customer, applied only to the cash portion. No contracts. No subscriptions. No hidden fees.</p>
+      <h2>Built for Pet Businesses</h2>
       <ul>
-        <li><strong>Step 1: Sign Up Free</strong> — Create your merchant account in minutes. No setup fees, no contracts.</li>
-        <li><strong>Step 2: Accept Payments</strong> — Customers pay via the PawBucks app. You receive funds directly through Stripe.</li>
-        <li><strong>Step 3: Customers Earn Rewards</strong> — Every transaction automatically earns PawBucks for your customers, bringing them back.</li>
-        <li><strong>Step 4: Track Everything</strong> — View sales, customer analytics, and reward metrics from your merchant dashboard.</li>
+        <li>Veterinarians</li>
+        <li>Groomers</li>
+        <li>Trainers</li>
+        <li>Pet retailers</li>
+        <li>Boarding &amp; daycare providers</li>
       </ul>
-      <h2>Transparent Pricing</h2>
-      <p>Total transaction fee: 5.9% + $0.30. Stripe processing fee: 2.9% + $0.30. No hidden fees. No monthly minimums.</p>
-      <h2>Features</h2>
-      <ul>
-        <li>Instant payment processing via Stripe Connect</li>
-        <li>Automatic customer rewards and loyalty programs</li>
-        <li>Real-time sales analytics dashboard</li>
-        <li>Digital punch cards and offer codes</li>
-        <li>Customer scheduling and booking</li>
-        <li>Product catalog management</li>
-        <li>POS integration</li>
-      </ul>
-      <p><a href="/auth?role=merchant">Sign Up as a Merchant</a></p>
+      <p><a href="/auth?role=merchant">Get Started</a></p>
     `,
   },
   {
