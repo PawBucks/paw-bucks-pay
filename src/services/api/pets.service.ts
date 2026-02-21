@@ -71,4 +71,25 @@ export const petsService = {
       .order("visit_date", { ascending: false });
     return { data: data || [], error };
   },
+
+  // Pet Email
+  async getPetEmailAddress(petId: string): Promise<ServiceResult<{ email_address: string }>> {
+    const { data, error } = await supabase
+      .from("pet_email_addresses")
+      .select("email_address")
+      .eq("pet_id", petId)
+      .eq("is_active", true)
+      .maybeSingle();
+    return { data, error };
+  },
+
+  // Inbound Documents
+  async getInboundDocuments(petId: string): Promise<ServiceListResult<any>> {
+    const { data, error } = await supabase
+      .from("pet_inbound_documents")
+      .select("*")
+      .eq("pet_id", petId)
+      .order("created_at", { ascending: false });
+    return { data: data || [], error };
+  },
 };
