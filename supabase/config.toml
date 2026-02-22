@@ -350,3 +350,9 @@ verify_jwt = true
 
 [functions.check-guilt-badges]
 verify_jwt = false
+
+[functions.receive-pet-email]
+verify_jwt = false
+
+[functions.categorize-pet-document]
+verify_jwt = false
