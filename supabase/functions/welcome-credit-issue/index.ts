@@ -205,6 +205,23 @@ serve(async (req) => {
 
     logStep("All abuse checks passed");
 
+    // Check if welcome credit program is enabled
+    const { data: programSetting } = await supabaseAdmin
+      .from('platform_settings')
+      .select('value')
+      .eq('key', 'welcome_credit_enabled')
+      .maybeSingle();
+
+    const programEnabled = programSetting ? programSetting.value === true || programSetting.value === 'true' : true;
+
+    if (!programEnabled) {
+      logStep("BLOCKED: Welcome credit program is paused");
+      return new Response(
+        JSON.stringify({ success: false, message: 'Welcome credit program is currently paused' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Issue the welcome credit (45 days expiration)
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 45);
