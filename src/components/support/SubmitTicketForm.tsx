@@ -98,11 +98,24 @@ export const SubmitTicketForm = ({ submitterType, entityId, onTicketCreated }: S
         ticketData.related_vet_id = entityId;
       }
 
-      const { error } = await supabase
+      const { data: insertedTickets, error } = await supabase
         .from('support_tickets')
-        .insert(ticketData as any);
+        .insert(ticketData as any)
+        .select('id, ticket_number')
+        .single();
 
       if (error) throw error;
+
+      // Send notifications (fire-and-forget)
+      supabase.functions.invoke('send-support-ticket-notification', {
+        body: {
+          type: 'ticket_created',
+          ticketId: insertedTickets.id,
+          ticketNumber: insertedTickets.ticket_number,
+          ticketSubject: subject.trim(),
+          submitterType: submitterType,
+        },
+      }).catch((err) => console.error('Notification error:', err));
 
       toast.success('Support ticket submitted successfully! We\'ll get back to you soon.');
 
