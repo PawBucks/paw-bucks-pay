@@ -95,6 +95,13 @@ export const MyTicketsTab = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
+      // Get user name for notification
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', user.id)
+        .single();
+
       const { error } = await supabase
         .from('support_ticket_replies')
         .insert({
@@ -104,6 +111,19 @@ export const MyTicketsTab = () => {
           message: message.trim(),
         });
       if (error) throw error;
+
+      // Notify admins about user reply (fire-and-forget)
+      supabase.functions.invoke('send-support-ticket-notification', {
+        body: {
+          type: 'user_reply',
+          ticketId: selectedTicket.id,
+          ticketNumber: selectedTicket.ticket_number,
+          ticketSubject: selectedTicket.subject,
+          replyMessage: message.trim(),
+          senderName: profile?.full_name || 'User',
+          submitterType: selectedTicket.submitter_type,
+        },
+      }).catch((err) => console.error('Notification error:', err));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ticket-replies', selectedTicket?.id] });

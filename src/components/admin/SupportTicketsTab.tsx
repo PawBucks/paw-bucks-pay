@@ -102,12 +102,28 @@ export const SupportTicketsTab = () => {
   });
 
   const updateTicketMutation = useMutation({
-    mutationFn: async ({ id, updates }: { id: string; updates: Record<string, unknown> }) => {
+    mutationFn: async ({ id, updates, ticket }: { id: string; updates: Record<string, unknown>; ticket?: any }) => {
+      const oldStatus = ticket?.status;
       const { error } = await supabase
         .from('support_tickets')
         .update(updates)
         .eq('id', id);
       if (error) throw error;
+
+      // Send status change notification if status changed
+      if (ticket && updates.status && updates.status !== oldStatus) {
+        supabase.functions.invoke('send-support-ticket-notification', {
+          body: {
+            type: 'status_changed',
+            ticketId: id,
+            ticketNumber: ticket.ticket_number,
+            ticketSubject: ticket.subject,
+            newStatus: updates.status,
+            oldStatus: oldStatus,
+            resolutionNotes: updates.resolution_notes || undefined,
+          },
+        }).catch((err) => console.error('Notification error:', err));
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-support-tickets'] });
@@ -138,6 +154,17 @@ export const SupportTicketsTab = () => {
           .update({ status: 'awaiting_response' })
           .eq('id', selectedTicket.id);
       }
+
+      // Notify ticket owner about admin reply (fire-and-forget)
+      supabase.functions.invoke('send-support-ticket-notification', {
+        body: {
+          type: 'admin_reply',
+          ticketId: selectedTicket.id,
+          ticketNumber: selectedTicket.ticket_number,
+          ticketSubject: selectedTicket.subject,
+          replyMessage: message.trim(),
+        },
+      }).catch((err) => console.error('Notification error:', err));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-ticket-replies', selectedTicket?.id] });
@@ -148,18 +175,18 @@ export const SupportTicketsTab = () => {
     onError: () => toast.error('Failed to send reply'),
   });
 
-  const handleStatusChange = (ticketId: string, newStatus: string) => {
+  const handleStatusChange = (ticket: any, newStatus: string) => {
     const updates: Record<string, unknown> = { status: newStatus };
     if (newStatus === 'resolved') {
       updates.resolved_at = new Date().toISOString();
       if (resolutionNotes.trim()) updates.resolution_notes = resolutionNotes.trim();
     }
-    updateTicketMutation.mutate({ id: ticketId, updates });
+    updateTicketMutation.mutate({ id: ticket.id, updates, ticket });
   };
 
   const handleResolve = () => {
     if (!selectedTicket) return;
-    handleStatusChange(selectedTicket.id, 'resolved');
+    handleStatusChange(selectedTicket, 'resolved');
     setSelectedTicket(null);
     setResolutionNotes('');
   };
@@ -256,7 +283,7 @@ export const SupportTicketsTab = () => {
                       <p className="text-xs text-muted-foreground mt-1">{format(new Date(ticket.created_at), 'MMM d, yyyy h:mm a')}</p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Select value={ticket.status} onValueChange={(v) => { handleStatusChange(ticket.id, v); }}>
+                      <Select value={ticket.status} onValueChange={(v) => { handleStatusChange(ticket, v); }}>
                         <SelectTrigger className="w-36" onClick={e => e.stopPropagation()}><SelectValue /></SelectTrigger>
                         <SelectContent>
                           {Object.entries(STATUS_CONFIG).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}
@@ -358,7 +385,7 @@ export const SupportTicketsTab = () => {
                 <Textarea placeholder="Add resolution notes..." value={resolutionNotes} onChange={e => setResolutionNotes(e.target.value)} rows={2} className="resize-none" />
 
                 <div className="flex items-center justify-between">
-                  <Select value={selectedTicket.status} onValueChange={v => { handleStatusChange(selectedTicket.id, v); setSelectedTicket({ ...selectedTicket, status: v }); }}>
+                  <Select value={selectedTicket.status} onValueChange={v => { handleStatusChange(selectedTicket, v); setSelectedTicket({ ...selectedTicket, status: v }); }}>
                     <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       {Object.entries(STATUS_CONFIG).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}
