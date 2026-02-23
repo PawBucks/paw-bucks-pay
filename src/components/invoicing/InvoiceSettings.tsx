@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -108,30 +108,39 @@ export function InvoiceSettingsComponent({
     }
   };
 
+  const getFormValues = (s: InvoiceSettingsType | null): SettingsFormData => ({
+    invoice_prefix: s?.invoice_prefix || "INV-",
+    next_invoice_number: s?.next_invoice_number || 1001,
+    default_payment_terms: s?.default_payment_terms || 30,
+    default_tax_rate: s?.default_tax_rate || 0,
+    default_notes: s?.default_notes || "",
+    default_footer: s?.default_footer || "",
+    late_fee_enabled: s?.late_fee_enabled || false,
+    late_fee_type: (s?.late_fee_type as "percentage" | "flat") || "percentage",
+    late_fee_amount: s?.late_fee_amount || 0,
+    late_fee_grace_days: s?.late_fee_grace_days || 0,
+    reminder_enabled: s?.reminder_enabled ?? true,
+    accent_color: s?.accent_color || "#3b82f6",
+    bank_name: s?.bank_name || "",
+    bank_account_name: s?.bank_account_name || "",
+    bank_routing_number: s?.bank_routing_number || "",
+    bank_account_number_last4: s?.bank_account_number_last4 || "",
+    paypal_email: s?.paypal_email || "",
+    venmo_handle: s?.venmo_handle || "",
+    default_currency: s?.default_currency || "USD",
+  });
+
   const form = useForm<SettingsFormData>({
     resolver: zodResolver(settingsSchema),
-    defaultValues: {
-      invoice_prefix: settings?.invoice_prefix || "INV-",
-      next_invoice_number: settings?.next_invoice_number || 1001,
-      default_payment_terms: settings?.default_payment_terms || 30,
-      default_tax_rate: settings?.default_tax_rate || 0,
-      default_notes: settings?.default_notes || "",
-      default_footer: settings?.default_footer || "",
-      late_fee_enabled: settings?.late_fee_enabled || false,
-      late_fee_type: (settings?.late_fee_type as "percentage" | "flat") || "percentage",
-      late_fee_amount: settings?.late_fee_amount || 0,
-      late_fee_grace_days: settings?.late_fee_grace_days || 0,
-      reminder_enabled: settings?.reminder_enabled ?? true,
-      accent_color: settings?.accent_color || "#3b82f6",
-      bank_name: settings?.bank_name || "",
-      bank_account_name: settings?.bank_account_name || "",
-      bank_routing_number: settings?.bank_routing_number || "",
-      bank_account_number_last4: settings?.bank_account_number_last4 || "",
-      paypal_email: settings?.paypal_email || "",
-      venmo_handle: settings?.venmo_handle || "",
-      default_currency: settings?.default_currency || "USD",
-    },
+    defaultValues: getFormValues(settings),
   });
+
+  // Reset form when settings are loaded/updated from the server
+  useEffect(() => {
+    if (settings) {
+      form.reset(getFormValues(settings));
+    }
+  }, [settings]);
 
   const watchLateFeeEnabled = form.watch("late_fee_enabled");
   const watchLateFeeType = form.watch("late_fee_type");
