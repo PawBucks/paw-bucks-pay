@@ -1,0 +1,1 @@
+ALTER TABLE public.pet_store_items ADD COLUMN item_type text NOT NULL DEFAULT 'product' CHECK (item_type IN ('product', 'service'));

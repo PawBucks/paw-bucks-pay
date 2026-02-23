@@ -39,6 +39,7 @@ import { usePromotionalItems } from "@/hooks/usePromotionalItems";
 import { getStripePromise } from "@/lib/stripe";
 
 const CATEGORIES = ["All", "Food", "Treats", "Toys", "Bedding", "Accessories", "Healthcare", "Grooming"];
+const ITEM_TYPES = ["All", "Product", "Service"] as const;
 
 type PaymentMethod = "pawbucks" | "credit_card";
 
@@ -160,6 +161,7 @@ export default function PetStore() {
   const sharedAccount = useSharedAccount(user?.id);
   const effectiveUserId = getEffectiveWalletUserId(user?.id, sharedAccount);
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedType, setSelectedType] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any>(null);
@@ -377,10 +379,13 @@ export default function PetStore() {
 
   const filteredItems = useMemo(() => items?.filter(item => {
     const matchesCategory = selectedCategory === "All" || item.category === selectedCategory;
+    const matchesType = selectedType === "All" || 
+      (selectedType === "Product" && (item.item_type === "product" || !item.item_type)) ||
+      (selectedType === "Service" && item.item_type === "service");
     const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          item.description?.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  }), [items, selectedCategory, searchQuery]);
+    return matchesCategory && matchesType && matchesSearch;
+  }), [items, selectedCategory, selectedType, searchQuery]);
 
   return (
     <>
@@ -425,6 +430,16 @@ export default function PetStore() {
           onChange={(e) => setSearchQuery(e.target.value)}
           className="sm:w-96"
         />
+        <Select value={selectedType} onValueChange={setSelectedType}>
+          <SelectTrigger className="sm:w-40">
+            <SelectValue placeholder="Type" />
+          </SelectTrigger>
+          <SelectContent>
+            {ITEM_TYPES.map((type) => (
+              <SelectItem key={type} value={type}>{type}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <Select value={selectedCategory} onValueChange={setSelectedCategory}>
           <SelectTrigger className="sm:w-48">
             <SelectValue placeholder="Category" />
@@ -457,7 +472,7 @@ export default function PetStore() {
           </div>
           <h3 className="text-xl font-semibold mb-2">No items found</h3>
           <p className="text-muted-foreground mb-4">Try adjusting your search or filters.</p>
-          <Button variant="outline" onClick={() => { setSearchQuery(""); setSelectedCategory("All"); }}>
+          <Button variant="outline" onClick={() => { setSearchQuery(""); setSelectedCategory("All"); setSelectedType("All"); }}>
             Clear Filters
           </Button>
         </div>
@@ -497,7 +512,12 @@ export default function PetStore() {
                   <CardContent className="flex-1 pt-4">
                     <div className="flex items-start justify-between mb-2">
                       <CardTitle className="text-lg">{item.name}</CardTitle>
-                      <Badge variant="secondary">{item.category}</Badge>
+                      <div className="flex gap-1 flex-shrink-0">
+                        <Badge variant={item.item_type === 'service' ? 'default' : 'outline'} className="text-xs">
+                          {item.item_type === 'service' ? 'Service' : 'Product'}
+                        </Badge>
+                        <Badge variant="secondary">{item.category}</Badge>
+                      </div>
                     </div>
                     {item.description && (
                       <CardDescription className="line-clamp-2 mb-3">

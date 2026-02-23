@@ -28,6 +28,7 @@ import { toast } from "sonner";
 import { Package, Plus, ExternalLink, Loader2, ArrowLeft, DollarSign, Store, Coins, RefreshCw, Trash2 } from "lucide-react";
 import { PricingCalculator } from "@/components/merchant/PricingCalculator";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SEO } from "@/components/SEO";
 import { Badge } from "@/components/ui/badge";
 import { merchantSubscriptionPlansService } from "@/services/api/merchantSubscriptionPlans.service";
@@ -82,6 +83,7 @@ const MerchantProducts = () => {
   const [productName, setProductName] = useState("");
   const [productDescription, setProductDescription] = useState("");
   const [productPrice, setProductPrice] = useState("");
+  const [productItemType, setProductItemType] = useState<"product" | "service">("product");
   const [listInPetStore, setListInPetStore] = useState(false);
   const [pawbucksPrice, setPawbucksPrice] = useState("");
 
@@ -229,11 +231,12 @@ const MerchantProducts = () => {
               name: productName,
               description: productDescription || null,
               category: "Merchant Products",
-              price: priceInCents, // Store in cents
+              item_type: productItemType,
+              price: priceInCents,
               price_pawbucks: parseInt(pawbucksPrice),
               merchant_id: merchant.id,
               is_active: true,
-              stock_quantity: 999, // Default to high stock for merchant products
+              stock_quantity: 999,
             });
 
           if (petStoreError) {
@@ -250,6 +253,7 @@ const MerchantProducts = () => {
         setProductName("");
         setProductDescription("");
         setProductPrice("");
+        setProductItemType("product");
         setListInPetStore(false);
         setPawbucksPrice("");
         await loadProducts(merchant.stripe_account_id);
@@ -496,13 +500,25 @@ const MerchantProducts = () => {
           </DialogHeader>
           <div className="space-y-4 mt-4">
             <div>
-              <Label htmlFor="name">Product Name *</Label>
+              <Label htmlFor="name">Name *</Label>
               <Input
                 id="name"
                 value={productName}
                 onChange={(e) => setProductName(e.target.value)}
                 placeholder="e.g., Premium Dog Food"
               />
+            </div>
+            <div>
+              <Label htmlFor="item-type">Type *</Label>
+              <Select value={productItemType} onValueChange={(v: "product" | "service") => setProductItemType(v)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="product">Product</SelectItem>
+                  <SelectItem value="service">Service</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label htmlFor="description">Description</Label>
