@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { petsService } from "@/services/api/pets.service";
+import { clearPetOnboardingCache } from "@/components/ProtectedRoute";
 import type { Database } from "@/integrations/supabase/types";
 import { Header } from "@/components/Header";
 import { SEO } from "@/components/SEO";
@@ -111,6 +112,9 @@ const CreatePetProfile = () => {
       }
 
       toast.success(`${formData.name}'s profile created! Now let's discover their personality! 🐾`);
+      
+      // Clear the pet onboarding cache so ProtectedRoute knows we have a pet now
+      clearPetOnboardingCache();
       
       // Navigate to personality quiz with the new pet's ID
       navigate(`/pet-personality-quiz?petId=${newPet.id}`);
@@ -324,15 +328,6 @@ const CreatePetProfile = () => {
               </div>
 
               <div className="flex gap-3 pt-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => navigate("/dashboard")}
-                  className="flex-1"
-                  disabled={isLoading}
-                >
-                  Skip for Now
-                </Button>
                 <Button type="submit" className="flex-1" disabled={isLoading}>
                   {isLoading ? (
                     <>
