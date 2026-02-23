@@ -22,7 +22,17 @@ serve(async (req) => {
     let emailData: any;
 
     if (contentType.includes("application/json")) {
-      emailData = await req.json();
+      const rawPayload = await req.json();
+      console.log("Raw JSON payload keys:", Object.keys(rawPayload));
+      
+      // Resend webhook wraps email data inside "data" key
+      // Format: { type: "email.received", created_at: "...", data: { from, to, subject, ... } }
+      if (rawPayload.data && (rawPayload.type || rawPayload.created_at)) {
+        console.log("Detected Resend webhook format, unwrapping data");
+        emailData = rawPayload.data;
+      } else {
+        emailData = rawPayload;
+      }
     } else {
       // Handle multipart form data from Resend
       const formData = await req.formData();
