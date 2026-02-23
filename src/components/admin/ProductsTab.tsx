@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search, Plus, Edit, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -18,6 +19,7 @@ type Product = {
   price: number;
   price_pawbucks: number;
   category: string;
+  item_type: 'product' | 'service';
   stock_quantity: number;
   is_active: boolean;
   created_at: string;
@@ -58,8 +60,9 @@ export function ProductsTab() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setProducts(data || []);
-      setFilteredProducts(data || []);
+      const typed = (data || []) as Product[];
+      setProducts(typed);
+      setFilteredProducts(typed);
     } catch (error) {
       console.error('Error loading products:', error);
       toast.error('Failed to load products');
@@ -77,11 +80,12 @@ export function ProductsTab() {
         const { error } = await supabase
           .from('pet_store_items')
           .update({
-            name: selectedProduct.name,
+           name: selectedProduct.name,
             description: selectedProduct.description,
             price: selectedProduct.price,
             price_pawbucks: selectedProduct.price_pawbucks,
             category: selectedProduct.category,
+            item_type: selectedProduct.item_type,
             stock_quantity: selectedProduct.stock_quantity,
             is_active: selectedProduct.is_active,
           })
@@ -105,6 +109,7 @@ export function ProductsTab() {
             price: selectedProduct.price,
             price_pawbucks: selectedProduct.price_pawbucks,
             category: selectedProduct.category,
+            item_type: selectedProduct.item_type,
             stock_quantity: selectedProduct.stock_quantity,
             is_active: selectedProduct.is_active,
           }]);
@@ -162,6 +167,7 @@ export function ProductsTab() {
       price: 0,
       price_pawbucks: 0,
       category: 'food',
+      item_type: 'product',
       stock_quantity: 0,
       is_active: true,
       created_at: new Date().toISOString(),
@@ -196,7 +202,8 @@ export function ProductsTab() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Product Name</TableHead>
+              <TableHead>Name</TableHead>
+              <TableHead>Type</TableHead>
               <TableHead>Category</TableHead>
               <TableHead>USD Price</TableHead>
               <TableHead>PawBucks Price</TableHead>
@@ -209,6 +216,11 @@ export function ProductsTab() {
             {filteredProducts.map((product) => (
               <TableRow key={product.id}>
                 <TableCell className="font-medium">{product.name}</TableCell>
+                <TableCell>
+                  <Badge variant={product.item_type === 'service' ? 'default' : 'secondary'}>
+                    {product.item_type === 'service' ? 'Service' : 'Product'}
+                  </Badge>
+                </TableCell>
                 <TableCell>
                   <Badge variant="outline">{product.category}</Badge>
                 </TableCell>
@@ -257,12 +269,27 @@ export function ProductsTab() {
             <form onSubmit={handleSaveProduct} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Product Name</Label>
+                  <Label>Name</Label>
                   <Input
                     value={selectedProduct.name}
                     onChange={(e) => setSelectedProduct({ ...selectedProduct, name: e.target.value })}
                     required
                   />
+                </div>
+                <div className="space-y-2">
+                  <Label>Type</Label>
+                  <Select
+                    value={selectedProduct.item_type}
+                    onValueChange={(value: 'product' | 'service') => setSelectedProduct({ ...selectedProduct, item_type: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="product">Product</SelectItem>
+                      <SelectItem value="service">Service</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label>Category</Label>

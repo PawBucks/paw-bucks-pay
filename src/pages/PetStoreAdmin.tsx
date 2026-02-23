@@ -45,6 +45,7 @@ export default function PetStoreAdmin() {
     name: "",
     description: "",
     category: "",
+    item_type: "product" as "product" | "service",
     price: "",
     price_pawbucks: "",
     stock_quantity: "",
@@ -147,6 +148,7 @@ export default function PetStoreAdmin() {
       name: "",
       description: "",
       category: "",
+      item_type: "product",
       price: "",
       price_pawbucks: "",
       stock_quantity: "",
@@ -162,7 +164,8 @@ export default function PetStoreAdmin() {
       name: formData.name,
       description: formData.description,
       category: formData.category,
-      price: parseFloat(formData.price) * 100, // Convert dollars to cents
+      item_type: formData.item_type,
+      price: parseFloat(formData.price) * 100,
       price_pawbucks: parseInt(formData.price_pawbucks),
       stock_quantity: parseInt(formData.stock_quantity),
       image_url: formData.image_url || null,
@@ -182,7 +185,8 @@ export default function PetStoreAdmin() {
       name: item.name,
       description: item.description || "",
       category: item.category,
-      price: (item.price / 100).toFixed(2), // Convert cents to dollars for display
+      item_type: item.item_type || "product",
+      price: (item.price / 100).toFixed(2),
       price_pawbucks: item.price_pawbucks.toString(),
       stock_quantity: item.stock_quantity.toString(),
       image_url: item.image_url || "",
@@ -246,6 +250,23 @@ export default function PetStoreAdmin() {
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="item_type">Type</Label>
+                    <Select
+                      required
+                      value={formData.item_type}
+                      onValueChange={(value: "product" | "service") => setFormData({ ...formData, item_type: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="product">Product</SelectItem>
+                        <SelectItem value="service">Service</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   
                   <div>
@@ -413,20 +434,21 @@ export default function PetStoreAdmin() {
               <Table className="hidden sm:table">
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-16">Image</TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Category</TableHead>
-                    <TableHead>Price (USD)</TableHead>
-                    <TableHead>Price (PB)</TableHead>
-                    <TableHead>Stock</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                     <TableHead className="w-16">Image</TableHead>
+                     <TableHead>Name</TableHead>
+                     <TableHead>Type</TableHead>
+                     <TableHead>Category</TableHead>
+                     <TableHead>Price (USD)</TableHead>
+                     <TableHead>Price (PB)</TableHead>
+                     <TableHead>Stock</TableHead>
+                     <TableHead>Status</TableHead>
+                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {items?.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                      <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
                         No items yet. Add your first item to get started!
                       </TableCell>
                     </TableRow>
@@ -443,6 +465,15 @@ export default function PetStoreAdmin() {
                           )}
                         </TableCell>
                         <TableCell className="font-medium">{item.name}</TableCell>
+                        <TableCell>
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            item.item_type === 'service'
+                              ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100"
+                              : "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-100"
+                          }`}>
+                            {item.item_type === 'service' ? 'Service' : 'Product'}
+                          </span>
+                        </TableCell>
                         <TableCell>{item.category}</TableCell>
                         <TableCell>${(item.price / 100).toFixed(2)}</TableCell>
                         <TableCell>{item.price_pawbucks} PB</TableCell>
