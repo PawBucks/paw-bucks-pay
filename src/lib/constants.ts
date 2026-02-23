@@ -78,6 +78,7 @@ export const ROUTES = {
   HOME: '/',
   AUTH: '/auth',
   DASHBOARD: '/dashboard',
+  CREATE_PET_PROFILE: '/create-pet-profile',
   ADMIN: '/admin',
   DISCOVER: '/discover',
   WALLET: '/wallet',
