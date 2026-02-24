@@ -8955,6 +8955,10 @@ export type Database = {
           expires_at: string
           id: string
           ip_address: string | null
+          phase_1_amount: number
+          phase_2_amount: number
+          phase_2_unlocked: boolean
+          phase_2_unlocked_at: string | null
           revocation_reason: string | null
           status: string
           transaction_total_cents: number | null
@@ -8971,6 +8975,10 @@ export type Database = {
           expires_at: string
           id?: string
           ip_address?: string | null
+          phase_1_amount?: number
+          phase_2_amount?: number
+          phase_2_unlocked?: boolean
+          phase_2_unlocked_at?: string | null
           revocation_reason?: string | null
           status?: string
           transaction_total_cents?: number | null
@@ -8987,6 +8995,10 @@ export type Database = {
           expires_at?: string
           id?: string
           ip_address?: string | null
+          phase_1_amount?: number
+          phase_2_amount?: number
+          phase_2_unlocked?: boolean
+          phase_2_unlocked_at?: string | null
           revocation_reason?: string | null
           status?: string
           transaction_total_cents?: number | null

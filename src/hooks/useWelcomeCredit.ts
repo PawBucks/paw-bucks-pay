@@ -7,6 +7,10 @@ export interface WelcomeCreditStatus {
   status?: 'active' | 'used' | 'expired' | 'revoked';
   creditId?: string;
   creditAmount?: number;
+  phase1Amount?: number;
+  phase2Amount?: number;
+  phase2Unlocked?: boolean;
+  phase2UnlockedAt?: string;
   expiresAt?: string;
   daysRemaining?: number;
   canIssue?: boolean;
@@ -120,5 +124,7 @@ export const useWelcomeCredit = (userId: string | undefined, merchantId?: string
     hasActiveCredit: status?.hasCredit && status?.status === 'active',
     creditAmountUSD: status?.creditAmount ? status.creditAmount / 1000 : 0,
     daysRemaining: status?.daysRemaining,
+    phase2Unlocked: status?.phase2Unlocked ?? false,
+    phase2AmountUSD: status?.phase2Amount ? status.phase2Amount / 1000 : 0,
   };
 };
