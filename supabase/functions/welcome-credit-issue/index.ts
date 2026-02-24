@@ -222,7 +222,7 @@ serve(async (req) => {
       );
     }
 
-    // Issue the welcome credit (45 days expiration)
+    // Issue the welcome credit - Phase 1: 30k immediately, Phase 2: 20k after first transaction
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 45);
 
@@ -230,11 +230,14 @@ serve(async (req) => {
       .from('user_welcome_credits')
       .insert({
         user_id: user.id,
-        credit_amount: 50000,
+        credit_amount: 30000,
         status: 'active',
         expires_at: expiresAt.toISOString(),
         device_fingerprint: deviceFingerprint || null,
         ip_address: ipAddress || null,
+        phase_1_amount: 30000,
+        phase_2_amount: 20000,
+        phase_2_unlocked: false,
       })
       .select()
       .single();
@@ -252,7 +255,9 @@ serve(async (req) => {
         user_id: user.id,
         event_data: {
           credit_id: newCredit.id,
-          amount: 50000,
+          amount: 30000,
+          phase_1_amount: 30000,
+          phase_2_amount: 20000,
           expires_at: expiresAt.toISOString(),
         },
       });
@@ -262,14 +267,15 @@ serve(async (req) => {
       .from('notifications')
       .insert({
         user_id: user.id,
-        title: '🎉 50,000 PawBucks Welcome Credit!',
-        message: 'You have $50 toward your first booking with a participating partner. Use it before it expires!',
+        title: '🎉 30,000 PawBucks Welcome Credit!',
+        message: 'You have $30 toward your first booking! Complete your first transaction to unlock an additional $20 bonus!',
         category: 'promotional',
       });
 
-    logStep("Welcome credit issued", {
+    logStep("Welcome credit issued (phase 1)", {
       creditId: newCredit.id,
-      amount: 50000,
+      amount: 30000,
+      phase2Locked: true,
       expiresAt: expiresAt.toISOString(),
     });
 
@@ -280,6 +286,9 @@ serve(async (req) => {
         credit: {
           id: newCredit.id,
           amount: newCredit.credit_amount,
+          phase1Amount: 30000,
+          phase2Amount: 20000,
+          phase2Unlocked: false,
           expiresAt: newCredit.expires_at,
           daysRemaining: 45,
         },

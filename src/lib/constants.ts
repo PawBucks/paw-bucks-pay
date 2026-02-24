@@ -6,6 +6,9 @@ export const PAWBUCKS_CONVERSION = {
   PAWBUCKS_USD_VALUE: 0.001, // Direct multiplier: PawBucks × 0.001 = USD
   // Merchant rates (for platform services like marketing/advertising): 1 PawBuck = $0.005 USD
   MERCHANT_TO_USD: 200, // 200 PawBucks = $1 USD when merchants spend on platform
+  WELCOME_CREDIT_PHASE_1: 30000, // 30k PawBucks on signup ($30)
+  WELCOME_CREDIT_PHASE_2: 20000, // 20k PawBucks after first transaction ($20)
+  WELCOME_CREDIT_TOTAL: 50000, // Total welcome credit ($50)
   REWARD_THRESHOLD: 10000, // PawBucks needed for $10 credit (1000 * 10)
 } as const;
 

@@ -83,7 +83,10 @@ serve(async (req) => {
           hasCredit: false,
           isEligible: true,
           canIssue: true,
-          creditAmount: 50000,
+          creditAmount: 30000,
+          phase1Amount: 30000,
+          phase2Amount: 20000,
+          phase2Unlocked: false,
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
@@ -171,6 +174,10 @@ serve(async (req) => {
         status: 'active',
         creditId: credit.id,
         creditAmount: credit.credit_amount,
+        phase1Amount: credit.phase_1_amount,
+        phase2Amount: credit.phase_2_amount,
+        phase2Unlocked: credit.phase_2_unlocked,
+        phase2UnlockedAt: credit.phase_2_unlocked_at,
         expiresAt: credit.expires_at,
         daysRemaining,
         merchantEligible,
