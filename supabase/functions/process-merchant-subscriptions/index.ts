@@ -173,51 +173,8 @@ async function creditPawBucksToUser(
   return pawbucksEarned;
 }
 
-// Helper function to credit merchant earnings (1%)
-async function creditMerchantEarnings(
-  supabaseAdmin: any,
-  merchantId: string,
-  userId: string,
-  amountInDollars: number
-): Promise<number> {
-  const merchantEarnings = Math.round(amountInDollars * 10); // 1% = 10 PawBucks per dollar
-  
-  if (merchantEarnings <= 0) {
-    return 0;
-  }
-
-  const { data: merchantWallet } = await supabaseAdmin
-    .from('merchant_pawbucks_wallet')
-    .select('balance')
-    .eq('merchant_id', merchantId)
-    .single();
-
-  const currentBalance = merchantWallet?.balance || 0;
-  
-  if (merchantWallet) {
-    await supabaseAdmin
-      .from('merchant_pawbucks_wallet')
-      .update({ balance: currentBalance + merchantEarnings })
-      .eq('merchant_id', merchantId);
-  } else {
-    await supabaseAdmin.from('merchant_pawbucks_wallet').insert({
-      merchant_id: merchantId,
-      balance: merchantEarnings,
-    });
-  }
-
-  await supabaseAdmin.from('merchant_pawbucks_activity').insert({
-    merchant_id: merchantId,
-    type: 'earn',
-    amount: merchantEarnings,
-    source: 'Subscription Commission',
-    customer_user_id: userId,
-    description: `Earned 1% from $${amountInDollars.toFixed(2)} subscription renewal`,
-  });
-
-  logStep("Merchant earnings credited", { merchantId, merchantEarnings });
-  return merchantEarnings;
-}
+// Merchants do NOT earn PawBucks from sales/subscriptions.
+// They only receive PawBucks when a Pet Owner pays them WITH PawBucks.
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -507,9 +464,6 @@ async function handlePaymentSuccess(
     tierName,
     subscription.product_name
   );
-
-  // Credit merchant 1% earnings
-  await creditMerchantEarnings(supabase, subscription.merchant_id, subscription.user_id, amountInDollars);
 
   // Auto-log platform fee as Tax Vault expense
   if (applicationFee > 0) {
