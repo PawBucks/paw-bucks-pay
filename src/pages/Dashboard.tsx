@@ -185,25 +185,13 @@ const Dashboard = () => {
   }, [user, authLoading, sharedAccount.isLoading, fetchDashboardData]);
 
   useEffect(() => {
-    const checkUserAndRedirect = async () => {
-      if (!authLoading && !user) {
-        navigate("/auth");
-      } else if (!authLoading && user && profile) {
-        // Check if user is admin
-        const { data: isAdmin } = await supabase.rpc('has_role', {
-          _user_id: user.id,
-          _role: 'admin'
-        });
-
-        if (isAdmin) {
-          navigate("/admin");
-        } else if (profile.user_type === "merchant") {
-          navigate("/merchant-dashboard");
-        }
+    if (!authLoading && !user) {
+      navigate("/auth");
+    } else if (!authLoading && user && profile) {
+      if (profile.user_type === "merchant") {
+        navigate("/merchant-dashboard");
       }
-    };
-
-    checkUserAndRedirect();
+    }
   }, [user, authLoading, profile, navigate]);
 
   const handleSignOut = useCallback(async () => {

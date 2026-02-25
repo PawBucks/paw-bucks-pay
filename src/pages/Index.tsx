@@ -154,6 +154,8 @@ const Index = () => {
                 src={familyPetsHero}
                 alt="Happy family enjoying time outdoors with their dog and cat"
                 className="w-full h-auto object-cover aspect-[4/3] sm:aspect-[16/9]"
+                loading="lazy"
+                decoding="async"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8 lg:p-10">
