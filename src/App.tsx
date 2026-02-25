@@ -26,9 +26,9 @@ import { FeedbackButton } from "@/components/FeedbackButton";
 import { lazyWithRetry, clearChunkReloadFlag } from "@/lib/lazyWithRetry";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 
-// Critical pages - loaded immediately
-import Index from "./pages/Index";
+// Critical pages - Auth loaded immediately, Index lazy (734 lines + heavy images)
 import Auth from "./pages/Auth";
+const Index = lazyWithRetry(() => import("./pages/Index"), "Index");
 
 // Lazy-loaded pages with retry logic for resilient loading after deploys
 const Dashboard = lazyWithRetry(() => import("./pages/Dashboard"), "Dashboard");
