@@ -15,6 +15,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { signUpSchema, signInSchema } from "@/lib/validation";
 import { ROUTES } from "@/lib/constants";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { BiometricLoginButton } from "@/components/BiometricLoginButton";
+import { BiometricEnrollPrompt } from "@/components/BiometricEnrollPrompt";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -37,6 +39,9 @@ const Auth = () => {
   const [resetEmail, setResetEmail] = useState("");
   const [isResetting, setIsResetting] = useState(false);
   const [inviteInfo, setInviteInfo] = useState<{ ownerName: string } | null>(null);
+  const [biometricEnroll, setBiometricEnroll] = useState<{ open: boolean; email: string; password: string }>({
+    open: false, email: "", password: "",
+  });
 
   // Load invite info if there's a token
   useEffect(() => {
@@ -374,6 +379,15 @@ const Auth = () => {
       }
 
       toast.success("Signed in successfully!");
+
+      // Prompt biometric enrollment on native platforms
+      const { isNativePlatform, isBiometricAvailable: checkBio, isBiometricEnabled: bioEnabled } = await import("@/services/biometricAuth");
+      if (isNativePlatform()) {
+        const { available } = await checkBio();
+        if (available && !bioEnabled()) {
+          setBiometricEnroll({ open: true, email: validatedData.email, password: validatedData.password });
+        }
+      }
       
       if (loggedInUser) {
         // If there's a specific redirect URL, use it (e.g., invoice payment)
@@ -548,6 +562,29 @@ const Auth = () => {
                 >
                   {isLoading ? "Signing in..." : "Sign In"}
                 </Button>
+
+                <BiometricLoginButton
+                  isLoading={isLoading}
+                  onCredentialsRetrieved={async (email, password) => {
+                    setIsLoading(true);
+                    try {
+                      const { error } = await supabase.auth.signInWithPassword({ email, password });
+                      if (error) throw error;
+                      toast.success("Signed in successfully!");
+                      const { data: sessionData } = await supabase.auth.getSession();
+                      const loggedInUser = sessionData?.session?.user;
+                      if (loggedInUser) {
+                        await redirectBasedOnRole(loggedInUser.id);
+                      } else {
+                        navigate(ROUTES.DASHBOARD);
+                      }
+                    } catch {
+                      toast.error("Biometric login failed. Please sign in manually.");
+                    } finally {
+                      setIsLoading(false);
+                    }
+                  }}
+                />
                 
                 <Dialog open={forgotPasswordOpen} onOpenChange={setForgotPasswordOpen}>
                   <DialogTrigger asChild>
@@ -758,6 +795,13 @@ const Auth = () => {
         </CardContent>
       </Card>
     </div>
+
+    <BiometricEnrollPrompt
+      email={biometricEnroll.email}
+      password={biometricEnroll.password}
+      open={biometricEnroll.open}
+      onClose={() => setBiometricEnroll(prev => ({ ...prev, open: false }))}
+    />
     </>
   );
 };
