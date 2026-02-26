@@ -98,7 +98,6 @@ Deno.serve(async (req) => {
             shipping_amount: parentInvoice.shipping_amount,
             total: parentInvoice.total,
             amount_paid: 0,
-            amount_due: parentInvoice.total,
             currency: parentInvoice.currency,
             title: parentInvoice.title,
             notes: parentInvoice.notes,
