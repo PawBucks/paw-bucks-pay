@@ -234,7 +234,7 @@ Deno.serve(async (req) => {
 
         // Calculate new dates
         const issueDate = new Date();
-        const paymentTerms = parentInvoice.payment_terms || 30;
+        const paymentTerms = parentInvoice.payment_terms ?? 30;
         const dueDate = addDays(issueDate, paymentTerms);
         const nextInvoiceDate = calculateNextDate(issueDate, parentInvoice.recurring_interval);
         const accessToken = crypto.randomUUID();
