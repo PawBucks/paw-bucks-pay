@@ -265,7 +265,39 @@ serve(async (req) => {
     // Handle case where PawBucks covers the full amount
     if (finalStripeAmountCents <= 0) {
       logStep('Full amount covered by PawBucks - no Stripe checkout needed');
-      
+
+      // ============================================================
+      // IDEMPOTENCY CHECK: Prevent duplicate PawBucks-only transactions
+      // ============================================================
+      if (merchantId) {
+        const sixtySecondsAgo = new Date(Date.now() - 60_000).toISOString();
+        const { data: recentDuplicate } = await supabaseAdmin
+          .from('transactions')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('merchant_id', merchantId)
+          .eq('amount', totalAmountDollars)
+          .eq('stripe_amount', 0)
+          .eq('status', 'completed')
+          .gte('created_at', sixtySecondsAgo)
+          .limit(1)
+          .maybeSingle();
+
+        if (recentDuplicate) {
+          logStep("Duplicate PawBucks checkout detected", { existingId: recentDuplicate.id });
+          return new Response(
+            JSON.stringify({
+              success: true,
+              paid_with_pawbucks: true,
+              pawbucks_used: pawbucksUsed,
+              duplicate: true,
+              redirect_url: successUrl || `${req.headers.get('origin')}/checkout-success`,
+            }),
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
+          );
+        }
+      }
+
       // Deduct PawBucks from user's wallet (and welcome credit if needed)
       if (pawbucksUsed > 0) {
         const { data: currentWallet } = await supabaseAdmin
