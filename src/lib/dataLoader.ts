@@ -119,8 +119,8 @@ export class DataLoader {
       const { data, error } = await supabase
         .from('transactions')
         .select('id, amount, created_at, merchants!transactions_merchant_id_fkey(business_type)')
-        .eq('user_id', userId)
-        .neq('status', 'refunded')
+      .eq('user_id', userId)
+        .eq('status', 'completed')
         .gte('created_at', startOfMonth)
         .lte('created_at', endOfMonth)
         .order('created_at', { ascending: false });

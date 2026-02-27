@@ -78,6 +78,7 @@ export function MerchantDataSyncTab({ vetId }: MerchantDataSyncTabProps) {
           merchant:merchants!transactions_merchant_id_fkey(business_name, business_type)
         `)
         .in("user_id", userIds)
+        .eq("status", "completed")
         .gte("created_at", subDays(new Date(), 90).toISOString())
         .order("created_at", { ascending: false })
         .limit(100);
