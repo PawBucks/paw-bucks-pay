@@ -129,8 +129,8 @@ const MerchantTransactions = () => {
   const totalPages = Math.ceil(sortedTransactions.length / itemsPerPage);
 
   const summaryTotals = useMemo(() => {
-    // Only include completed transactions in summary totals, exclude refunded
-    const completedTransactions = sortedTransactions.filter(t => t.status !== 'refunded');
+    // Only include completed transactions in summary totals
+    const completedTransactions = sortedTransactions.filter(t => t.status === 'completed');
     const refundedTransactions = sortedTransactions.filter(t => t.status === 'refunded');
     
     const totals = completedTransactions.reduce(

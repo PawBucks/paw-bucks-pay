@@ -107,6 +107,9 @@ serve(async (req) => {
     }
     if (status && status !== 'all') {
       query = query.eq('status', status);
+    } else {
+      // By default, exclude failed transactions — they should never appear in merchant views
+      query = query.neq('status', 'failed');
     }
 
     const { data: transactions, error: transactionsError } = await query;
