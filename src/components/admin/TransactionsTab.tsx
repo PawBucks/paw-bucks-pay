@@ -320,18 +320,18 @@ export function TransactionsTab() {
                           <div className="space-y-1">
                             <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Identification</h4>
                             <DetailRow icon={Hash} label="Transaction ID" value={
-                              <span className="font-mono text-xs">{transaction.id.slice(0, 8)}...{transaction.id.slice(-4)}</span>
+                              <span className="font-mono text-xs">{transaction.id?.slice(0, 8) ?? '—'}...{transaction.id?.slice(-4) ?? ''}</span>
                             } />
                             <DetailRow icon={Store} label="Merchant" value={transaction.merchants?.business_name || 'N/A'} />
                             <DetailRow icon={Hash} label="Merchant ID" value={
-                              <span className="font-mono text-xs">{transaction.merchant_id.slice(0, 8)}...</span>
+                              <span className="font-mono text-xs">{transaction.merchant_id?.slice(0, 8) ?? '—'}...</span>
                             } />
                             <DetailRow icon={User} label="Pet Owner" value={transaction.profiles?.full_name || 'N/A'} />
                             {transaction.profiles?.email && (
                               <DetailRow icon={User} label="Email" value={transaction.profiles.email} />
                             )}
                             <DetailRow icon={Hash} label="User ID" value={
-                              <span className="font-mono text-xs">{transaction.user_id.slice(0, 8)}...</span>
+                              <span className="font-mono text-xs">{transaction.user_id?.slice(0, 8) ?? '—'}...</span>
                             } />
                             {transaction.stripe_payment_intent_id && (
                               <DetailRow icon={CreditCard} label="Stripe PI" value={
