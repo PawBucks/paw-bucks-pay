@@ -506,6 +506,20 @@ const MerchantInvoicing = () => {
     }
   };
 
+  const handleResendInvoiceEmail = async (invoice: Invoice) => {
+    try {
+      toast.info("Resending invoice email...");
+      const { error } = await supabase.functions.invoke("send-invoice-email", {
+        body: { invoiceId: invoice.id },
+      });
+      if (error) throw error;
+      toast.success("Invoice email resent to " + invoice.client_email);
+    } catch (error) {
+      console.error("Error resending invoice email:", error);
+      toast.error("Failed to resend invoice email");
+    }
+  };
+
   const handlePrintReceipt = (invoice: Invoice) => {
     // Open the invoice view in a new window for printing
     const payUrl = `${window.location.origin}/invoice/${invoice.id}/pay?token=${invoice.access_token}`;
@@ -863,6 +877,7 @@ const MerchantInvoicing = () => {
               onRefresh={loadData}
               onRecordPayment={handleOpenRecordPayment}
               onResendReceipt={handleResendReceipt}
+              onResendInvoiceEmail={handleResendInvoiceEmail}
               onPrintReceipt={handlePrintReceipt}
             />
           </TabsContent>

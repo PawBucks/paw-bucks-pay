@@ -69,6 +69,7 @@ interface InvoiceListProps {
   onRefresh: () => void;
   onRecordPayment: (invoice: Invoice) => void;
   onResendReceipt?: (invoice: Invoice) => void;
+  onResendInvoiceEmail?: (invoice: Invoice) => void;
   onPrintReceipt?: (invoice: Invoice) => void;
 }
 
@@ -96,6 +97,7 @@ export function InvoiceList({
   onRefresh,
   onRecordPayment,
   onResendReceipt,
+  onResendInvoiceEmail,
   onPrintReceipt,
 }: InvoiceListProps) {
   const [searchTerm, setSearchTerm] = useState("");
@@ -417,6 +419,12 @@ export function InvoiceList({
                             <DropdownMenuItem onClick={() => onRecordPayment(invoice)}>
                               <CreditCard className="h-4 w-4 mr-2" />
                               Record Payment
+                            </DropdownMenuItem>
+                          )}
+                          {['sent', 'viewed', 'overdue', 'partially_paid'].includes(invoice.status) && onResendInvoiceEmail && (
+                            <DropdownMenuItem onClick={() => onResendInvoiceEmail(invoice)}>
+                              <RefreshCw className="h-4 w-4 mr-2" />
+                              Resend Invoice Email
                             </DropdownMenuItem>
                           )}
                           {['paid', 'partially_paid'].includes(invoice.status) && onResendReceipt && (
