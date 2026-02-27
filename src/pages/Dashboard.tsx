@@ -116,7 +116,7 @@ const Dashboard = () => {
     
     try {
       // Fetch all data in parallel directly from Supabase - optimized queries
-      const [profileResult, walletResult, pawbucksResult, petsResult, medicalResult] = await Promise.all([
+      const [profileResult, completedTxResult, pawbucksResult, petsResult, medicalResult] = await Promise.all([
         supabase
           .from('profiles')
           .select('user_type, full_name')
@@ -124,10 +124,10 @@ const Dashboard = () => {
           .single()
           .throwOnError(),
         supabase
-          .from('wallets')
-          .select('balance, rewards_points, total_spent')
+          .from('transactions')
+          .select('amount')
           .eq('user_id', walletUserId)
-          .maybeSingle(),
+          .eq('status', 'completed'),
         supabase
           .from('pawbucks_wallet')
           .select('balance')
@@ -138,21 +138,23 @@ const Dashboard = () => {
           .select('id, name, type, breed, birthday, photo_url, personality_type, personality_quiz_completed')
           .eq('user_id', walletUserId)
           .order('created_at', { ascending: false })
-          .limit(10), // Limit to 10 pets for faster loading
+          .limit(10),
         supabase
           .from('pet_medical_records')
           .select('price')
           .eq('user_id', walletUserId)
           .not('price', 'is', null)
-          .limit(100) // Limit medical records for faster aggregation
+          .limit(100)
       ]);
 
       if (profileResult.data) {
         setProfile(profileResult.data as Profile);
       }
       
-      if (walletResult.data) {
-        setWallet(walletResult.data);
+      // Compute total_spent from completed transactions only
+      if (completedTxResult.data) {
+        const totalSpent = completedTxResult.data.reduce((sum, t) => sum + (t.amount || 0), 0);
+        setWallet({ balance: 0, rewards_points: 0, total_spent: totalSpent });
       }
 
       if (pawbucksResult.data) {

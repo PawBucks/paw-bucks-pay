@@ -58,8 +58,9 @@ const SpendingBreakdown = () => {
       // First get transactions
       const { data: txData, error: txError } = await supabase
         .from('transactions')
-        .select('id, amount, rewards_earned, description, created_at, merchant_id')
+        .select('id, amount, rewards_earned, description, created_at, merchant_id, status')
         .eq('user_id', effectiveUserId)
+        .eq('status', 'completed')
         .order('created_at', { ascending: false });
       if (txError) throw txError;
       

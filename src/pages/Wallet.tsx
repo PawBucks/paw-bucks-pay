@@ -157,9 +157,9 @@ const Wallet = () => {
 
   const loading = sharedAccount.isLoading || walletLoading || pawbucksLoading || transactionsLoading || budgetTransactionsLoading || activityLoading || medicalLoading;
 
-  // Filter out refunded transactions for spending analytics
+  // Filter to only completed transactions for spending analytics
   const completedTransactions = useMemo(() => 
-    transactions.filter(t => t.status !== 'refunded'), 
+    transactions.filter(t => t.status === 'completed'), 
     [transactions]
   );
 
