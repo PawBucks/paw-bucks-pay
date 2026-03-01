@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -138,6 +139,7 @@ const fetchUsersWithBalances = async (): Promise<User[]> => {
 };
 
 export function UsersTab() {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -352,7 +354,7 @@ export function UsersTab() {
           </TableHeader>
           <TableBody>
             {filteredUsers.map((user) => (
-              <TableRow key={user.id}>
+              <TableRow key={user.id} className="cursor-pointer hover:bg-muted/50" onClick={() => navigate(`/admin/users/${user.id}`)}>
                 <TableCell className="font-medium">{user.full_name}</TableCell>
                 <TableCell>
                   <div>
@@ -408,7 +410,7 @@ export function UsersTab() {
                 </TableCell>
                 <TableCell>{user.phone || 'N/A'}</TableCell>
                 <TableCell>{new Date(user.created_at).toLocaleDateString()}</TableCell>
-                <TableCell className="text-right">
+                <TableCell className="text-right" onClick={e => e.stopPropagation()}>
                   <Button
                     variant="ghost"
                     size="sm"

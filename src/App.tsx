@@ -47,6 +47,7 @@ const AdminDashboard = lazyWithRetry(() => import("./pages/AdminDashboard"), "Ad
 const AdminLogin = lazyWithRetry(() => import("./pages/AdminLogin"), "AdminLogin");
 const AdminResetPassword = lazyWithRetry(() => import("./pages/AdminResetPassword"), "AdminResetPassword");
 const AdminMerchantServices = lazyWithRetry(() => import("./pages/AdminMerchantServices"), "AdminMerchantServices");
+const AdminUserDetail = lazyWithRetry(() => import("./pages/AdminUserDetail"), "AdminUserDetail");
 const PetHealth = lazyWithRetry(() => import("./pages/PetHealth"), "PetHealth");
 const VetDashboard = lazyWithRetry(() => import("./pages/VetDashboard"), "VetDashboard");
 const VetLanding = lazyWithRetry(() => import("./pages/VetLanding"), "VetLanding");
@@ -172,6 +173,7 @@ const AppRoutes = () => {
       <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['admin', 'superadmin']}><PageTransition><AdminDashboard /></PageTransition></ProtectedRoute>} />
       <Route path="/admin/merchant-services" element={<ProtectedRoute allowedRoles={['admin', 'superadmin']}><PageTransition><AdminMerchantServices /></PageTransition></ProtectedRoute>} />
       <Route path="/admin/pet-store" element={<ProtectedRoute allowedRoles={['admin', 'superadmin']}><PageTransition><PetStoreAdmin /></PageTransition></ProtectedRoute>} />
+      <Route path="/admin/users/:userId" element={<ProtectedRoute allowedRoles={['admin', 'superadmin']}><PageTransition><AdminUserDetail /></PageTransition></ProtectedRoute>} />
 
       {/* Merchant routes - requires merchant account */}
       <Route path="/merchant-onboarding" element={<ProtectedRoute><PageTransition><MerchantOnboarding /></PageTransition></ProtectedRoute>} />
