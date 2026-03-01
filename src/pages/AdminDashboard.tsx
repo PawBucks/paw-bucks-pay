@@ -14,6 +14,7 @@ import { NonPartnerReceiptVerificationTab } from "@/components/admin/NonPartnerR
 import { EmailTab } from "@/components/admin/EmailTab";
 import { TextCampaignsTab } from "@/components/admin/TextCampaignsTab";
 import { UsersTab } from "@/components/admin/UsersTab";
+import { UserLookupTab } from "@/components/admin/UserLookupTab";
 import { MerchantsTab } from "@/components/admin/MerchantsTab";
 import { TransactionsTab } from "@/components/admin/TransactionsTab";
 import { RewardsTab } from "@/components/admin/RewardsTab";
@@ -71,6 +72,7 @@ import {
   ExternalLink,
   Clock,
   Gift,
+  UserSearch,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -114,6 +116,12 @@ const NAV_SECTIONS = [
         label: "Merchants",
         icon: Store,
         description: "Manage merchant accounts, points rates, and Stripe status",
+      },
+      {
+        id: "user-lookup",
+        label: "User Lookup",
+        icon: UserSearch,
+        description: "Search for any user and view their full platform history",
       },
     ],
   },
@@ -345,6 +353,8 @@ const AdminDashboard = () => {
         return <UsersTab />;
       case "merchants":
         return <MerchantsTab />;
+      case "user-lookup":
+        return <UserLookupTab />;
       case "transactions":
         return <TransactionsTab />;
       case "rewards":
