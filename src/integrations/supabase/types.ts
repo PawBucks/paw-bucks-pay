@@ -1617,6 +1617,7 @@ export type Database = {
       }
       geo_cell_service_limits: {
         Row: {
+          business_category: string | null
           created_at: string
           geo_cell_id: string
           id: string
@@ -1627,6 +1628,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          business_category?: string | null
           created_at?: string
           geo_cell_id: string
           id?: string
@@ -1637,6 +1639,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          business_category?: string | null
           created_at?: string
           geo_cell_id?: string
           id?: string
@@ -1665,6 +1668,7 @@ export type Database = {
       }
       geo_cell_slot_reservations: {
         Row: {
+          business_category: string | null
           created_at: string
           expires_at: string
           geo_cell_id: string
@@ -1676,6 +1680,7 @@ export type Database = {
           service_id: string
         }
         Insert: {
+          business_category?: string | null
           created_at?: string
           expires_at: string
           geo_cell_id: string
@@ -1687,6 +1692,7 @@ export type Database = {
           service_id: string
         }
         Update: {
+          business_category?: string | null
           created_at?: string
           expires_at?: string
           geo_cell_id?: string
@@ -11043,15 +11049,30 @@ export type Database = {
         }[]
       }
       get_current_user_email: { Args: never; Returns: string }
-      get_geo_cell_availability: {
-        Args: { p_geo_cell_id: string; p_service_id: string }
-        Returns: {
-          available_slots: number
-          max_slots: number
-          time_window_days: number
-          used_slots: number
-        }[]
-      }
+      get_geo_cell_availability:
+        | {
+            Args: { p_geo_cell_id: string; p_service_id: string }
+            Returns: {
+              available_slots: number
+              max_slots: number
+              time_window_days: number
+              used_slots: number
+            }[]
+          }
+        | {
+            Args: {
+              p_business_category?: string
+              p_geo_cell_id: string
+              p_service_id: string
+            }
+            Returns: {
+              available_slots: number
+              business_category: string
+              max_slots: number
+              time_window_days: number
+              used_slots: number
+            }[]
+          }
       get_locked_pawbucks: {
         Args: { p_user_id: string }
         Returns: {

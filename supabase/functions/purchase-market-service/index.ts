@@ -142,7 +142,8 @@ async function checkGeoCellScarcity(
   supabaseAdmin: ReturnType<typeof createClient>,
   merchantId: string,
   serviceId: string,
-  billingPeriod: string | undefined
+  billingPeriod: string | undefined,
+  businessCategory: string | null
 ) {
   // 1. Find which geo cell the merchant belongs to
   const { data: cellId, error: cellError } = await supabaseAdmin
@@ -158,8 +159,8 @@ async function checkGeoCellScarcity(
   logStep('Merchant geo cell found', { merchantId, geoCellId: cellId });
 
   // 2. Check if there's a limit configured for this cell + service
-  const { data: availability, error: availError } = await supabaseAdmin
-    .rpc('get_geo_cell_availability', { p_geo_cell_id: cellId, p_service_id: serviceId });
+    const { data: availability, error: availError } = await supabaseAdmin
+    .rpc('get_geo_cell_availability', { p_geo_cell_id: cellId, p_service_id: serviceId, p_business_category: businessCategory });
 
   if (availError || !availability || availability.length === 0) {
     // No limit configured for this service in this cell - allow
@@ -199,7 +200,8 @@ async function reserveGeoCellSlot(
   serviceId: string,
   merchantId: string,
   purchaseId: string | null,
-  timeWindowDays: number
+  timeWindowDays: number,
+  businessCategory: string | null
 ) {
   const expiresAt = new Date(Date.now() + timeWindowDays * 24 * 60 * 60 * 1000).toISOString();
 
@@ -210,6 +212,7 @@ async function reserveGeoCellSlot(
     purchase_id: purchaseId,
     expires_at: expiresAt,
     is_active: true,
+    business_category: businessCategory,
   });
 
   if (error) {
@@ -281,7 +284,7 @@ serve(async (req) => {
     // ========================================
     // GEO-CELL SCARCITY CHECK (before payment)
     // ========================================
-    const scarcityResult = await checkGeoCellScarcity(supabaseAdmin, merchant.id, serviceId, billingPeriod);
+    const scarcityResult = await checkGeoCellScarcity(supabaseAdmin, merchant.id, serviceId, billingPeriod, merchant.business_type || null);
 
     if (!scarcityResult.allowed) {
       logStep('Purchase blocked by geo-cell scarcity', { reason: scarcityResult.reason });
@@ -375,7 +378,8 @@ serve(async (req) => {
           serviceId,
           merchant.id,
           purchaseData?.id || null,
-          slotTimeWindowDays
+          slotTimeWindowDays,
+          merchant.business_type || null
         );
       }
 
@@ -444,6 +448,7 @@ serve(async (req) => {
         purchase_type: 'market_service',
         geo_cell_id: scarcityResult.geoCellId || '',
         slot_time_window_days: slotTimeWindowDays.toString(),
+        business_category: merchant.business_type || '',
       },
     });
 
