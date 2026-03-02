@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { ServicePurchaseDialog } from "@/components/merchant/ServicePurchaseDialog";
+import { cn } from "@/lib/utils";
 import { ConsultationScheduleDialog } from "@/components/merchant/ConsultationScheduleDialog";
 import { toast } from "sonner";
 import {
@@ -40,6 +41,8 @@ import {
   Award,
   CheckCircle2,
   Loader2,
+  AlertTriangle,
+  MapPin,
 } from "lucide-react";
 
 type ServiceCategory = "visibility" | "analytics" | "growth" | "premium";
@@ -57,6 +60,14 @@ type Service = {
   popular?: boolean;
   newService?: boolean;
   billingPeriod?: "one_time" | "monthly" | "quarterly" | "yearly";
+};
+
+type GeoCellAvailability = {
+  serviceId: string;
+  maxSlots: number;
+  usedSlots: number;
+  availableSlots: number;
+  cellName: string;
 };
 
 // Icon mapping for dynamic rendering
@@ -126,6 +137,7 @@ const MerchantMarket = () => {
   const [loading, setLoading] = useState(true);
   const [services, setServices] = useState<Service[]>([]);
   const [expandedBenefits, setExpandedBenefits] = useState<Set<string>>(new Set());
+  const [scarcityMap, setScarcityMap] = useState<Record<string, GeoCellAvailability>>({});
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -169,6 +181,65 @@ const MerchantMarket = () => {
       loadServices();
     }
   }, [user, navigate]);
+
+  // Load geo-cell scarcity data for visibility services
+  useEffect(() => {
+    const loadScarcity = async () => {
+      if (!merchant) return;
+      
+      try {
+        // Find the merchant's geo cell
+        const { data: cellId } = await supabase.rpc('get_merchant_geo_cell', { p_merchant_id: merchant.id });
+        
+        if (!cellId) return; // No geo cell = no scarcity limits
+        
+        // Get the cell name
+        const { data: cellData } = await supabase
+          .from('geo_cells')
+          .select('name')
+          .eq('id', cellId)
+          .single();
+        
+        const cellName = cellData?.name || 'your area';
+        
+        // Get all limits for this cell
+        const { data: limits } = await supabase
+          .from('geo_cell_service_limits')
+          .select('service_id, max_slots')
+          .eq('geo_cell_id', cellId)
+          .eq('is_active', true);
+        
+        if (!limits || limits.length === 0) return;
+        
+        // Get active reservations for this cell
+        const { data: reservations } = await supabase
+          .from('geo_cell_slot_reservations')
+          .select('service_id')
+          .eq('geo_cell_id', cellId)
+          .eq('is_active', true)
+          .gt('expires_at', new Date().toISOString());
+        
+        // Build the scarcity map
+        const map: Record<string, GeoCellAvailability> = {};
+        for (const limit of limits) {
+          const usedSlots = (reservations || []).filter(r => r.service_id === limit.service_id).length;
+          map[limit.service_id] = {
+            serviceId: limit.service_id,
+            maxSlots: limit.max_slots,
+            usedSlots,
+            availableSlots: Math.max(0, limit.max_slots - usedSlots),
+            cellName,
+          };
+        }
+        
+        setScarcityMap(map);
+      } catch (error) {
+        console.error('Error loading scarcity data:', error);
+      }
+    };
+    
+    loadScarcity();
+  }, [merchant]);
 
   // Load services from database
   const loadServices = async () => {
@@ -369,7 +440,21 @@ const MerchantMarket = () => {
                   <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
                     {service.icon && iconMap[service.icon] ? iconMap[service.icon] : <Sparkles className="w-6 h-6" />}
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
+                    {scarcityMap[service.id] && (
+                      <Badge 
+                        variant={scarcityMap[service.id].availableSlots === 0 ? "destructive" : "secondary"}
+                        className={cn(
+                          "text-xs font-medium",
+                          scarcityMap[service.id].availableSlots <= 1 && scarcityMap[service.id].availableSlots > 0 && "bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30"
+                        )}
+                      >
+                        <MapPin className="w-3 h-3 mr-1" />
+                        {scarcityMap[service.id].availableSlots === 0
+                          ? "Sold Out"
+                          : `${scarcityMap[service.id].availableSlots} of ${scarcityMap[service.id].maxSlots} left`}
+                      </Badge>
+                    )}
                     {service.popular && (
                       <Badge variant="default" className="bg-primary/90">
                         Popular
@@ -437,13 +522,28 @@ const MerchantMarket = () => {
                     <span className="ml-1 capitalize">{service.category}</span>
                   </Badge>
                 </div>
-                <Button 
-                  className="w-full group-hover:bg-primary group-hover:text-primary-foreground"
-                  onClick={() => handlePurchase(service)}
-                >
-                  Get Started
-                  <ChevronRight className="w-4 h-4 ml-1" />
-                </Button>
+                {(() => {
+                  const isSoldOut = scarcityMap[service.id]?.availableSlots === 0;
+                  return (
+                    <Button 
+                      className="w-full group-hover:bg-primary group-hover:text-primary-foreground"
+                      onClick={() => handlePurchase(service)}
+                      disabled={isSoldOut}
+                    >
+                      {isSoldOut ? (
+                        <>
+                          <AlertTriangle className="w-4 h-4 mr-1" />
+                          Sold Out in Your Zone
+                        </>
+                      ) : (
+                        <>
+                          Get Started
+                          <ChevronRight className="w-4 h-4 ml-1" />
+                        </>
+                      )}
+                    </Button>
+                  );
+                })()}
               </div>
             </GradientCard>
           ))}
