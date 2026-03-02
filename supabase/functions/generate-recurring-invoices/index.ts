@@ -184,7 +184,7 @@ Deno.serve(async (req) => {
         invoice_items:invoice_items(*)
       `)
       .eq("is_recurring", true)
-      .lte("next_invoice_date", today)
+      .eq("next_invoice_date", today)
       .or("recurring_end_date.is.null,recurring_end_date.gte." + today)
       .in("status", ["sent", "paid", "partial"]);
 
