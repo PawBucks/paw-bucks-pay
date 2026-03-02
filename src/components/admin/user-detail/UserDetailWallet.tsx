@@ -90,7 +90,7 @@ export function UserDetailWallet({ userId }: { userId: string }) {
         <SummaryCard
           icon={<TrendingDown className="w-5 h-5 text-red-500" />}
           label="Total Spent"
-          value={`$${((wallet?.total_spent ?? 0) * PAWBUCKS_CONVERSION.PAWBUCKS_USD_VALUE).toFixed(2)}`}
+          value={`$${(wallet?.total_spent ?? 0).toFixed(2)}`}
         />
         <SummaryCard
           icon={<Award className="w-5 h-5 text-amber-500" />}
