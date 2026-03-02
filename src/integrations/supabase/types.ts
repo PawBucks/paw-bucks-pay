@@ -1677,7 +1677,9 @@ export type Database = {
           merchant_id: string
           purchase_id: string | null
           reserved_at: string
+          rotation_week: number | null
           service_id: string
+          waitlist_id: string | null
         }
         Insert: {
           business_category?: string | null
@@ -1689,7 +1691,9 @@ export type Database = {
           merchant_id: string
           purchase_id?: string | null
           reserved_at?: string
+          rotation_week?: number | null
           service_id: string
+          waitlist_id?: string | null
         }
         Update: {
           business_category?: string | null
@@ -1701,7 +1705,9 @@ export type Database = {
           merchant_id?: string
           purchase_id?: string | null
           reserved_at?: string
+          rotation_week?: number | null
           service_id?: string
+          waitlist_id?: string | null
         }
         Relationships: [
           {
@@ -1734,6 +1740,103 @@ export type Database = {
           },
           {
             foreignKeyName: "geo_cell_slot_reservations_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_market_services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "geo_cell_slot_reservations_waitlist_id_fkey"
+            columns: ["waitlist_id"]
+            isOneToOne: false
+            referencedRelation: "geo_cell_waitlist"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      geo_cell_waitlist: {
+        Row: {
+          activated_at: string | null
+          business_category: string
+          created_at: string
+          deactivated_at: string | null
+          geo_cell_id: string
+          id: string
+          joined_at: string
+          merchant_id: string
+          position: number
+          purchase_id: string | null
+          rotation_window_end: string | null
+          rotation_window_start: string | null
+          service_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          activated_at?: string | null
+          business_category: string
+          created_at?: string
+          deactivated_at?: string | null
+          geo_cell_id: string
+          id?: string
+          joined_at?: string
+          merchant_id: string
+          position?: number
+          purchase_id?: string | null
+          rotation_window_end?: string | null
+          rotation_window_start?: string | null
+          service_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          activated_at?: string | null
+          business_category?: string
+          created_at?: string
+          deactivated_at?: string | null
+          geo_cell_id?: string
+          id?: string
+          joined_at?: string
+          merchant_id?: string
+          position?: number
+          purchase_id?: string | null
+          rotation_window_end?: string | null
+          rotation_window_start?: string | null
+          service_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "geo_cell_waitlist_geo_cell_id_fkey"
+            columns: ["geo_cell_id"]
+            isOneToOne: false
+            referencedRelation: "geo_cells"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "geo_cell_waitlist_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "geo_cell_waitlist_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "geo_cell_waitlist_purchase_id_fkey"
+            columns: ["purchase_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_service_purchases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "geo_cell_waitlist_service_id_fkey"
             columns: ["service_id"]
             isOneToOne: false
             referencedRelation: "merchant_market_services"
