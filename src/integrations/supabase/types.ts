@@ -1615,6 +1615,162 @@ export type Database = {
           },
         ]
       }
+      geo_cell_service_limits: {
+        Row: {
+          created_at: string
+          geo_cell_id: string
+          id: string
+          is_active: boolean
+          max_slots: number
+          service_id: string
+          time_window_days: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          geo_cell_id: string
+          id?: string
+          is_active?: boolean
+          max_slots?: number
+          service_id: string
+          time_window_days?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          geo_cell_id?: string
+          id?: string
+          is_active?: boolean
+          max_slots?: number
+          service_id?: string
+          time_window_days?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "geo_cell_service_limits_geo_cell_id_fkey"
+            columns: ["geo_cell_id"]
+            isOneToOne: false
+            referencedRelation: "geo_cells"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "geo_cell_service_limits_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_market_services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      geo_cell_slot_reservations: {
+        Row: {
+          created_at: string
+          expires_at: string
+          geo_cell_id: string
+          id: string
+          is_active: boolean
+          merchant_id: string
+          purchase_id: string | null
+          reserved_at: string
+          service_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          geo_cell_id: string
+          id?: string
+          is_active?: boolean
+          merchant_id: string
+          purchase_id?: string | null
+          reserved_at?: string
+          service_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          geo_cell_id?: string
+          id?: string
+          is_active?: boolean
+          merchant_id?: string
+          purchase_id?: string | null
+          reserved_at?: string
+          service_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "geo_cell_slot_reservations_geo_cell_id_fkey"
+            columns: ["geo_cell_id"]
+            isOneToOne: false
+            referencedRelation: "geo_cells"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "geo_cell_slot_reservations_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "geo_cell_slot_reservations_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "geo_cell_slot_reservations_purchase_id_fkey"
+            columns: ["purchase_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_service_purchases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "geo_cell_slot_reservations_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_market_services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      geo_cells: {
+        Row: {
+          center_latitude: number
+          center_longitude: number
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          radius_miles: number
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          center_latitude: number
+          center_longitude: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          radius_miles?: number
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          center_latitude?: number
+          center_longitude?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          radius_miles?: number
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       guilt_badge_definitions: {
         Row: {
           badge_key: string
@@ -10887,6 +11043,15 @@ export type Database = {
         }[]
       }
       get_current_user_email: { Args: never; Returns: string }
+      get_geo_cell_availability: {
+        Args: { p_geo_cell_id: string; p_service_id: string }
+        Returns: {
+          available_slots: number
+          max_slots: number
+          time_window_days: number
+          used_slots: number
+        }[]
+      }
       get_locked_pawbucks: {
         Args: { p_user_id: string }
         Returns: {
@@ -10907,6 +11072,10 @@ export type Database = {
           total_sales: number
           transaction_count: number
         }[]
+      }
+      get_merchant_geo_cell: {
+        Args: { p_merchant_id: string }
+        Returns: string
       }
       get_monthly_non_partner_pawbucks: {
         Args: { p_user_id: string }
