@@ -85,7 +85,7 @@ export function UserDetailWallet({ userId }: { userId: string }) {
         <SummaryCard
           icon={<Wallet className="w-5 h-5 text-emerald-600" />}
           label="Cashback Balance"
-          value={`$${((wallet?.balance ?? 0) * PAWBUCKS_CONVERSION.PAWBUCKS_USD_VALUE).toFixed(2)}`}
+          value={`$${((pawbucksWallet?.balance ?? 0) * PAWBUCKS_CONVERSION.PAWBUCKS_USD_VALUE).toFixed(2)}`}
         />
         <SummaryCard
           icon={<TrendingDown className="w-5 h-5 text-red-500" />}
