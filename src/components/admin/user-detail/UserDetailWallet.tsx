@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Coins, Wallet, TrendingUp, TrendingDown, Award } from "lucide-react";
+import { PAWBUCKS_CONVERSION } from "@/lib/constants";
 
 type WalletData = {
   balance: number;
@@ -84,12 +85,12 @@ export function UserDetailWallet({ userId }: { userId: string }) {
         <SummaryCard
           icon={<Wallet className="w-5 h-5 text-emerald-600" />}
           label="Cashback Balance"
-          value={`$${(wallet?.balance ?? 0).toFixed(2)}`}
+          value={`$${((wallet?.balance ?? 0) * PAWBUCKS_CONVERSION.PAWBUCKS_USD_VALUE).toFixed(2)}`}
         />
         <SummaryCard
           icon={<TrendingDown className="w-5 h-5 text-red-500" />}
           label="Total Spent"
-          value={`$${(wallet?.total_spent ?? 0).toFixed(2)}`}
+          value={`$${((wallet?.total_spent ?? 0) * PAWBUCKS_CONVERSION.PAWBUCKS_USD_VALUE).toFixed(2)}`}
         />
         <SummaryCard
           icon={<Award className="w-5 h-5 text-amber-500" />}
