@@ -17,6 +17,7 @@ const purchaseSchema = z.object({
   pricePawBucks: z.number().positive({ message: "PawBucks price must be greater than 0" }),
   payWithPawBucks: z.boolean().default(false),
   billingPeriod: z.enum(['one_time', 'one-time', 'monthly', 'quarterly', 'yearly', 'annual']).optional(),
+  joinWaitlist: z.boolean().default(false),
 });
 
 const PAWBUCKS_TO_USD = 0.001;
@@ -259,9 +260,9 @@ serve(async (req) => {
       );
     }
 
-    const { serviceId, serviceName, priceUSD, pricePawBucks, payWithPawBucks, billingPeriod } = validation.data;
+    const { serviceId, serviceName, priceUSD, pricePawBucks, payWithPawBucks, billingPeriod, joinWaitlist } = validation.data;
 
-    logStep('Validated request', { serviceId, priceUSD, pricePawBucks, payWithPawBucks, billingPeriod });
+    logStep('Validated request', { serviceId, priceUSD, pricePawBucks, payWithPawBucks, billingPeriod, joinWaitlist });
 
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -287,9 +288,81 @@ serve(async (req) => {
     const scarcityResult = await checkGeoCellScarcity(supabaseAdmin, merchant.id, serviceId, billingPeriod, merchant.business_type || null);
 
     if (!scarcityResult.allowed) {
+      // If merchant wants to join waitlist and pay upfront
+      if (joinWaitlist) {
+        logStep('Slots full — adding merchant to waitlist', { merchantId: merchant.id, businessCategory: merchant.business_type });
+
+        // Get current max position
+        const { data: maxPosData } = await supabaseAdmin
+          .from('geo_cell_waitlist')
+          .select('position')
+          .eq('geo_cell_id', scarcityResult.geoCellId)
+          .eq('service_id', serviceId)
+          .eq('business_category', merchant.business_type || 'Other')
+          .order('position', { ascending: false })
+          .limit(1)
+          .single();
+
+        const nextPosition = (maxPosData?.position || 0) + 1;
+
+        // Process payment first (PawBucks or Stripe), then add to waitlist
+        // For now, add to waitlist without payment — payment happens when activated
+        const { data: waitlistEntry, error: waitlistError } = await supabaseAdmin
+          .from('geo_cell_waitlist')
+          .upsert({
+            geo_cell_id: scarcityResult.geoCellId,
+            service_id: serviceId,
+            merchant_id: merchant.id,
+            business_category: merchant.business_type || 'Other',
+            position: nextPosition,
+            status: 'waiting',
+          }, { onConflict: 'geo_cell_id,service_id,merchant_id,business_category' })
+          .select('id, position')
+          .single();
+
+        if (waitlistError) {
+          logStep('Failed to add to waitlist', { error: waitlistError.message });
+          throw new Error('Failed to join waitlist');
+        }
+
+        // Get waitlist count ahead
+        const { count: aheadCount } = await supabaseAdmin
+          .from('geo_cell_waitlist')
+          .select('id', { count: 'exact', head: true })
+          .eq('geo_cell_id', scarcityResult.geoCellId)
+          .eq('service_id', serviceId)
+          .eq('business_category', merchant.business_type || 'Other')
+          .eq('status', 'waiting')
+          .lt('position', nextPosition);
+
+        // Notify merchant
+        await supabaseAdmin.from('notifications').insert({
+          user_id: user.id,
+          title: '📋 Added to Premium Ad Waitlist',
+          message: `You're #${(aheadCount || 0) + 1} in line for ${serviceName} in your zone. We rotate slots weekly — you'll be notified when your turn comes!`,
+          category: 'transactional',
+        });
+
+        return new Response(
+          JSON.stringify({
+            success: true,
+            waitlisted: true,
+            position: nextPosition,
+            queueAhead: aheadCount || 0,
+            message: `You're #${(aheadCount || 0) + 1} on the waitlist. Slots rotate weekly.`,
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
+        );
+      }
+
       logStep('Purchase blocked by geo-cell scarcity', { reason: scarcityResult.reason });
       return new Response(
-        JSON.stringify({ error: scarcityResult.reason, scarcityBlocked: true }),
+        JSON.stringify({ 
+          error: scarcityResult.reason, 
+          scarcityBlocked: true,
+          canJoinWaitlist: true,
+          geoCellId: scarcityResult.geoCellId,
+        }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 409 }
       );
     }
