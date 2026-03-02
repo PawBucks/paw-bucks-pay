@@ -118,7 +118,7 @@ export function UserDetailTransactions({ userId }: { userId: string }) {
                       ) : "—"}
                     </TableCell>
                     <TableCell className="text-right text-sm">${(t.application_fee ?? 0).toFixed(2)}</TableCell>
-                    <TableCell className="text-right text-sm">{t.cashback_earned > 0 ? `$${t.cashback_earned.toFixed(2)}` : "—"}</TableCell>
+                    <TableCell className="text-right text-sm">{t.cashback_earned > 0 ? `$${(t.cashback_earned * 0.001).toFixed(2)}` : "—"}</TableCell>
                     <TableCell className="text-sm">{t.payment_method || "Card"}</TableCell>
                     <TableCell>
                       <Badge variant={t.status === "completed" ? "default" : t.status === "refunded" ? "destructive" : "secondary"}>
