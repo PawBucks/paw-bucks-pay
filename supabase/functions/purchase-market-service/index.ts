@@ -135,6 +135,127 @@ const sendAdminNotification = async (merchant: MerchantInfo, purchase: ServicePu
   }
 };
 
+// "Attention" product IDs — visibility services that compete for consumer eyeballs
+const ATTENTION_SERVICE_IDS = [
+  'b26b7362-34f6-4160-a786-7f8a4f113808', // Premium Ad Placement
+  '20f9322b-185b-4e85-bf9e-a5ee15821293', // Featured Partner Status
+  '138d2d3a-1664-4163-b7db-c2532acc640f', // Sponsored Merchant Placement
+  '7552d9f2-5360-4141-9b86-d19ad04266b0', // Merchant Spotlight Feature
+  'b7bf2a30-dccd-4a55-adf4-e4319171665b', // Search Ranking Booster
+];
+
+const PREMIUM_AD_ID = 'b26b7362-34f6-4160-a786-7f8a4f113808';
+const FEATURED_PARTNER_ID = '20f9322b-185b-4e85-bf9e-a5ee15821293';
+const MAX_ATTENTION_PER_MERCHANT_PER_CELL = 2;
+const COOLDOWN_WEEKS_AFTER_CONSECUTIVE = 4; // 4 consecutive weeks triggers 1-week cooldown
+
+/**
+ * Anti-monopoly checks run BEFORE scarcity checks.
+ * Returns { allowed: true } or { allowed: false, reason: string }
+ */
+async function checkAntiMonopoly(
+  supabaseAdmin: ReturnType<typeof createClient>,
+  merchantId: string,
+  serviceId: string,
+  geoCellId: string | null,
+) {
+  if (!geoCellId) return { allowed: true };
+
+  // RULE 1: Cannot hold Premium + Featured Partner simultaneously in same geo cell
+  if (serviceId === PREMIUM_AD_ID || serviceId === FEATURED_PARTNER_ID) {
+    const conflictServiceId = serviceId === PREMIUM_AD_ID ? FEATURED_PARTNER_ID : PREMIUM_AD_ID;
+    const conflictName = serviceId === PREMIUM_AD_ID ? 'Featured Partner' : 'Premium Ad Placement';
+
+    const { count: conflictCount } = await supabaseAdmin
+      .from('geo_cell_slot_reservations')
+      .select('id', { count: 'exact', head: true })
+      .eq('geo_cell_id', geoCellId)
+      .eq('merchant_id', merchantId)
+      .eq('service_id', conflictServiceId)
+      .eq('is_active', true)
+      .gt('expires_at', new Date().toISOString());
+
+    if ((conflictCount || 0) > 0) {
+      logStep('Anti-monopoly: Premium/Featured conflict', { merchantId, serviceId, conflictServiceId });
+      return {
+        allowed: false,
+        reason: `You already hold ${conflictName} in this zone. A merchant cannot hold both Premium Ad Placement and Featured Partner Status simultaneously to keep the playing field fair.`,
+      };
+    }
+  }
+
+  // RULE 2: Premium cooldown — if held 4+ consecutive weeks and someone is waitlisted → 1 week cooldown
+  if (serviceId === PREMIUM_AD_ID) {
+    const fourWeeksAgo = new Date(Date.now() - COOLDOWN_WEEKS_AFTER_CONSECUTIVE * 7 * 24 * 60 * 60 * 1000).toISOString();
+
+    const { data: consecutiveSlot } = await supabaseAdmin
+      .from('geo_cell_slot_reservations')
+      .select('id, reserved_at')
+      .eq('geo_cell_id', geoCellId)
+      .eq('merchant_id', merchantId)
+      .eq('service_id', PREMIUM_AD_ID)
+      .eq('is_active', false) // previously held
+      .lte('reserved_at', fourWeeksAgo)
+      .order('expires_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (consecutiveSlot) {
+      // Check if there are waitlisted merchants
+      const { count: waitlistCount } = await supabaseAdmin
+        .from('geo_cell_waitlist')
+        .select('id', { count: 'exact', head: true })
+        .eq('geo_cell_id', geoCellId)
+        .eq('service_id', PREMIUM_AD_ID)
+        .eq('status', 'waiting');
+
+      if ((waitlistCount || 0) > 0) {
+        // Check if cooldown period (1 week) has passed since last slot expired
+        const { data: lastSlot } = await supabaseAdmin
+          .from('geo_cell_slot_reservations')
+          .select('expires_at')
+          .eq('geo_cell_id', geoCellId)
+          .eq('merchant_id', merchantId)
+          .eq('service_id', PREMIUM_AD_ID)
+          .order('expires_at', { ascending: false })
+          .limit(1)
+          .single();
+
+        if (lastSlot) {
+          const cooldownEnd = new Date(new Date(lastSlot.expires_at).getTime() + 7 * 24 * 60 * 60 * 1000);
+          if (new Date() < cooldownEnd) {
+            logStep('Anti-monopoly: Premium cooldown active', { merchantId, cooldownEnd: cooldownEnd.toISOString() });
+            return {
+              allowed: false,
+              reason: `You held Premium Ad Placement for 4+ consecutive weeks while others are waiting. A 1-week cooldown is in effect until ${cooldownEnd.toLocaleDateString()}. This ensures fair rotation.`,
+            };
+          }
+        }
+      }
+    }
+  }
+
+  // RULE 3: Max 2 active "attention" products per merchant per geo cell
+  const { count: attentionCount } = await supabaseAdmin
+    .from('geo_cell_slot_reservations')
+    .select('id', { count: 'exact', head: true })
+    .eq('geo_cell_id', geoCellId)
+    .eq('merchant_id', merchantId)
+    .in('service_id', ATTENTION_SERVICE_IDS)
+    .eq('is_active', true)
+    .gt('expires_at', new Date().toISOString());
+
+  if ((attentionCount || 0) >= MAX_ATTENTION_PER_MERCHANT_PER_CELL) {
+    logStep('Anti-monopoly: attention product limit', { merchantId, attentionCount });
+    return {
+      allowed: false,
+      reason: `You already have ${MAX_ATTENTION_PER_MERCHANT_PER_CELL} active visibility services in this zone. To maintain a fair marketplace, merchants are limited to ${MAX_ATTENTION_PER_MERCHANT_PER_CELL} attention products per zone at a time.`,
+    };
+  }
+
+  return { allowed: true };
+}
+
 /**
  * Check geo-cell scarcity for a visibility service.
  * Returns { allowed: true } or { allowed: false, reason: string }
@@ -369,6 +490,24 @@ serve(async (req) => {
     }
 
     logStep('Merchant verified', { merchantId: merchant.id, businessName: merchant.business_name });
+
+    // ========================================
+    // ANTI-MONOPOLY CHECKS (before scarcity)
+    // ========================================
+    // Get merchant's geo cell first for anti-monopoly checks
+    const { data: merchantCellId } = await supabaseAdmin
+      .rpc('get_merchant_geo_cell', { p_merchant_id: merchant.id });
+
+    if (merchantCellId && ATTENTION_SERVICE_IDS.includes(serviceId)) {
+      const monopolyResult = await checkAntiMonopoly(supabaseAdmin, merchant.id, serviceId, merchantCellId);
+      if (!monopolyResult.allowed) {
+        logStep('Purchase blocked by anti-monopoly rule', { reason: monopolyResult.reason });
+        return new Response(
+          JSON.stringify({ error: monopolyResult.reason, monopolyBlocked: true }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 409 }
+        );
+      }
+    }
 
     // ========================================
     // GEO-CELL SCARCITY CHECK (before payment)
