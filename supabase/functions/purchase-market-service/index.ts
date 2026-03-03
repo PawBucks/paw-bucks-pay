@@ -189,6 +189,42 @@ async function checkGeoCellScarcity(
     };
   }
 
+  // 3. Cross-category total cap check (e.g., Featured Partner: max 3 total per cell)
+  const { data: totalCap } = await supabaseAdmin
+    .from('geo_cell_service_total_caps')
+    .select('max_total_slots')
+    .eq('geo_cell_id', cellId)
+    .eq('service_id', serviceId)
+    .single();
+
+  if (totalCap) {
+    // Count ALL active reservations for this service in this cell, across all categories
+    const { count: totalUsed } = await supabaseAdmin
+      .from('geo_cell_slot_reservations')
+      .select('id', { count: 'exact', head: true })
+      .eq('geo_cell_id', cellId)
+      .eq('service_id', serviceId)
+      .eq('is_active', true)
+      .gt('expires_at', new Date().toISOString());
+
+    logStep('Cross-category total cap check', { cellId, serviceId, maxTotal: totalCap.max_total_slots, totalUsed });
+
+    if ((totalUsed || 0) >= totalCap.max_total_slots) {
+      const { data: cellData } = await supabaseAdmin
+        .from('geo_cells')
+        .select('name')
+        .eq('id', cellId)
+        .single();
+
+      const cellName = cellData?.name || 'your area';
+      return {
+        allowed: false,
+        reason: `All ${totalCap.max_total_slots} Featured Partner slots are taken in ${cellName} (across all categories). This ultra-premium tier is limited to maintain maximum exclusivity.`,
+        geoCellId: cellId,
+      };
+    }
+  }
+
   return { allowed: true, geoCellId: cellId };
 }
 
