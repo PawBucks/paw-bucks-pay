@@ -7588,6 +7588,47 @@ export type Database = {
           },
         ]
       }
+      search_boost_config: {
+        Row: {
+          created_at: string
+          id: string
+          impression_window_days: number
+          max_boosted_in_top_n: number
+          max_impression_share_pct: number
+          service_id: string
+          top_n_results: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          impression_window_days?: number
+          max_boosted_in_top_n?: number
+          max_impression_share_pct?: number
+          service_id: string
+          top_n_results?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          impression_window_days?: number
+          max_boosted_in_top_n?: number
+          max_impression_share_pct?: number
+          service_id?: string
+          top_n_results?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "search_boost_config_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: true
+            referencedRelation: "merchant_market_services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       search_ranking_analytics: {
         Row: {
           category_match: boolean | null
@@ -7946,6 +7987,44 @@ export type Database = {
             columns: ["merchant_id"]
             isOneToOne: false
             referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_global_caps: {
+        Row: {
+          created_at: string
+          enforce_per_category_max: number | null
+          id: string
+          max_total_slots: number
+          service_id: string
+          time_window_days: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          enforce_per_category_max?: number | null
+          id?: string
+          max_total_slots: number
+          service_id: string
+          time_window_days?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          enforce_per_category_max?: number | null
+          id?: string
+          max_total_slots?: number
+          service_id?: string
+          time_window_days?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_global_caps_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: true
+            referencedRelation: "merchant_market_services"
             referencedColumns: ["id"]
           },
         ]

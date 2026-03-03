@@ -225,6 +225,58 @@ async function checkGeoCellScarcity(
     }
   }
 
+  // 4. Global cap check (e.g., Spotlight: 4 total across ALL geo cells, max 1 per category)
+  const { data: globalCap } = await supabaseAdmin
+    .from('service_global_caps')
+    .select('max_total_slots, time_window_days, enforce_per_category_max')
+    .eq('service_id', serviceId)
+    .single();
+
+  if (globalCap) {
+    const windowStart = new Date(Date.now() - globalCap.time_window_days * 24 * 60 * 60 * 1000).toISOString();
+
+    // Check global total across all cells
+    const { count: globalUsed } = await supabaseAdmin
+      .from('geo_cell_slot_reservations')
+      .select('id', { count: 'exact', head: true })
+      .eq('service_id', serviceId)
+      .eq('is_active', true)
+      .gt('expires_at', new Date().toISOString())
+      .gt('reserved_at', windowStart);
+
+    logStep('Global cap check', { serviceId, maxTotal: globalCap.max_total_slots, globalUsed });
+
+    if ((globalUsed || 0) >= globalCap.max_total_slots) {
+      return {
+        allowed: false,
+        reason: `All ${globalCap.max_total_slots} Spotlight slots are taken this month across the entire launch zone. Only ${globalCap.max_total_slots} merchants are featured per month to maintain prestige.`,
+        geoCellId: cellId,
+      };
+    }
+
+    // Check per-category uniqueness within global window
+    if (globalCap.enforce_per_category_max && businessCategory) {
+      const { count: categoryUsed } = await supabaseAdmin
+        .from('geo_cell_slot_reservations')
+        .select('id', { count: 'exact', head: true })
+        .eq('service_id', serviceId)
+        .eq('business_category', businessCategory)
+        .eq('is_active', true)
+        .gt('expires_at', new Date().toISOString())
+        .gt('reserved_at', windowStart);
+
+      logStep('Global per-category cap check', { serviceId, businessCategory, maxPerCategory: globalCap.enforce_per_category_max, categoryUsed });
+
+      if ((categoryUsed || 0) >= globalCap.enforce_per_category_max) {
+        return {
+          allowed: false,
+          reason: `A ${businessCategory} merchant already holds the Spotlight this month. Only ${globalCap.enforce_per_category_max} per category to ensure diversity.`,
+          geoCellId: cellId,
+        };
+      }
+    }
+  }
+
   return { allowed: true, geoCellId: cellId };
 }
 
