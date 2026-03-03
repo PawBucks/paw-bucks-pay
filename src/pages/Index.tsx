@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,6 +21,18 @@ import familyLifestyleFooter from "@/assets/family-lifestyle-footer.png";
 const Index = () => {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
+  const [welcomeCreditEnabled, setWelcomeCreditEnabled] = useState(false);
+
+  useEffect(() => {
+    supabase
+      .from('platform_settings')
+      .select('value')
+      .eq('key', 'welcome_credit_enabled')
+      .maybeSingle()
+      .then(({ data }) => {
+        setWelcomeCreditEnabled(!data ? true : data.value === true || data.value === 'true');
+      });
+  }, []);
 
   useEffect(() => {
     // Skip the async admin check if no user - faster redirect
@@ -102,7 +114,7 @@ const Index = () => {
         </section>
 
         {/* Welcome Credit Banner */}
-        <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10" aria-label="Welcome Credit Offer">
+        {welcomeCreditEnabled && <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10" aria-label="Welcome Credit Offer">
           <div className="relative max-w-4xl mx-auto">
             <div className="relative rounded-2xl overflow-hidden border-2 border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-yellow-500/10 p-6 sm:p-8 shadow-xl">
               {/* Sparkle decorations */}
@@ -144,7 +156,7 @@ const Index = () => {
               </div>
             </div>
           </div>
-        </section>
+        </section>}
 
         {/* Lifestyle Hero Image Section */}
         <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
