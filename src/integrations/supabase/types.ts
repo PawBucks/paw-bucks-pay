@@ -1666,6 +1666,48 @@ export type Database = {
           },
         ]
       }
+      geo_cell_service_total_caps: {
+        Row: {
+          created_at: string
+          geo_cell_id: string
+          id: string
+          max_total_slots: number
+          service_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          geo_cell_id: string
+          id?: string
+          max_total_slots?: number
+          service_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          geo_cell_id?: string
+          id?: string
+          max_total_slots?: number
+          service_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "geo_cell_service_total_caps_geo_cell_id_fkey"
+            columns: ["geo_cell_id"]
+            isOneToOne: false
+            referencedRelation: "geo_cells"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "geo_cell_service_total_caps_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_market_services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       geo_cell_slot_reservations: {
         Row: {
           business_category: string | null
