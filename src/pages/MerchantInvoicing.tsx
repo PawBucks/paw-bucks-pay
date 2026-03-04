@@ -7,7 +7,7 @@ import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Plus, Users, Settings, FileText, LayoutTemplate, Package } from "lucide-react";
+import { ArrowLeft, Plus, Users, Settings, FileText, LayoutTemplate, Package, CalendarClock } from "lucide-react";
 import { toast } from "sonner";
 import { InvoiceList, InvoiceEditor, InvoicePreview, ClientManager, InvoiceSettingsComponent, CatalogManager, TemplateManager } from "@/components/invoicing";
 import { RecordPaymentDialog } from "@/components/invoicing/RecordPaymentDialog";
