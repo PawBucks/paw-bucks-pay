@@ -896,6 +896,10 @@ const MerchantInvoicing = () => {
             />
           )}
 
+          <TabsContent value="scheduled">
+            <ScheduledInvoices invoices={invoices} loading={loading} />
+          </TabsContent>
+
           <TabsContent value="clients">
             <ClientManager
               clients={clients}
