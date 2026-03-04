@@ -6,6 +6,7 @@ import {
   getVerifiedProMerchants,
   getSearchBoostedMerchants,
   getMerchantsWithAnyService,
+  getMerchantsWithActiveService,
   SERVICE_NAMES,
   type MerchantWithActiveServices,
   type ServiceName
@@ -32,6 +33,28 @@ export function useMerchantActiveServices(merchantId: string | undefined) {
 export function useAdMerchants() {
   return useQuery<MerchantWithActiveServices[]>({
     queryKey: ['ad-merchants'],
+    queryFn: getAdMerchants,
+    staleTime: SERVICE_QUERY_STALE_TIME,
+  });
+}
+
+/**
+ * Hook to get merchants with Featured Partner Status service
+ */
+export function useFeaturedPartnerMerchants() {
+  return useQuery<MerchantWithActiveServices[]>({
+    queryKey: ['featured-partner-merchants'],
+    queryFn: () => getMerchantsWithActiveService(SERVICE_NAMES.FEATURED_PARTNER),
+    staleTime: SERVICE_QUERY_STALE_TIME,
+  });
+}
+
+/**
+ * Hook to get merchants with Premium Ad Placement service
+ */
+export function usePremiumAdMerchants() {
+  return useQuery<MerchantWithActiveServices[]>({
+    queryKey: ['premium-ad-merchants'],
     queryFn: getAdMerchants,
     staleTime: SERVICE_QUERY_STALE_TIME,
   });
