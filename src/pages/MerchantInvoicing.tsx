@@ -897,7 +897,13 @@ const MerchantInvoicing = () => {
           )}
 
           <TabsContent value="scheduled">
-            <ScheduledInvoices invoices={invoices} loading={loading} />
+            <ScheduledInvoices
+              invoices={invoices}
+              loading={loading}
+              onEdit={handleEditInvoice}
+              onDelete={handleDeleteInvoice}
+              onView={handleViewInvoice}
+            />
           </TabsContent>
 
           <TabsContent value="clients">
