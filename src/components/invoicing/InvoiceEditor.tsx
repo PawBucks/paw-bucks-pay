@@ -178,6 +178,52 @@ export function InvoiceEditor({
     name: "items",
   });
 
+  // Reset form when invoice prop changes (e.g. loading a different invoice for editing)
+  useEffect(() => {
+    const newDefaults: InvoiceFormData = {
+      client_id: invoice?.client_id || "",
+      client_name: invoice?.client_name || "",
+      client_email: invoice?.client_email || "",
+      client_phone: invoice?.client_phone || "",
+      client_company: invoice?.client_company || "",
+      client_address: invoice?.client_address || "",
+      title: invoice?.title || "",
+      issue_date: invoice?.issue_date ? parseISO(invoice.issue_date) : new Date(),
+      due_date: invoice?.due_date ? parseISO(invoice.due_date) : addDays(new Date(), settings?.default_payment_terms || 30),
+      payment_terms: invoice?.payment_terms ?? settings?.default_payment_terms ?? 30,
+      discount_type: (invoice?.discount_type as "percentage" | "flat") || undefined,
+      discount_value: invoice?.discount_value || 0,
+      tax_rate: invoice?.tax_rate ?? settings?.default_tax_rate ?? 0,
+      shipping_amount: invoice?.shipping_amount || 0,
+      notes: invoice?.notes || settings?.default_notes || "",
+      footer: invoice?.footer || settings?.default_footer || "",
+      terms_conditions: invoice?.terms_conditions || "",
+      allow_partial_payments: invoice?.allow_partial_payments ?? true,
+      allow_tips: invoice?.allow_tips ?? false,
+      accept_credit_card: invoice?.accept_credit_card ?? true,
+      accept_bank_transfer: invoice?.accept_bank_transfer ?? false,
+      accept_pawbucks: invoice?.accept_pawbucks ?? false,
+      is_recurring: invoice?.is_recurring ?? false,
+      recurring_interval: invoice?.recurring_interval || "monthly",
+      recurring_end_date: invoice?.recurring_end_date ? parseISO(invoice.recurring_end_date) : undefined,
+      items: invoice?.items?.map(item => ({
+        id: item.id,
+        description: item.description,
+        quantity: Number(item.quantity),
+        unit_price: Number(item.unit_price),
+        unit_type: item.unit_type || "unit",
+        discount_type: item.discount_type as "percentage" | "flat" | undefined,
+        discount_value: item.discount_value || 0,
+        tax_rate: item.tax_rate || 0,
+      })) || [
+        { description: "", quantity: 1, unit_price: 0, unit_type: "unit", tax_rate: 0 }
+      ],
+    };
+    form.reset(newDefaults);
+    setAttachments(invoice?.attachment_urls || []);
+    setRecipients(invoice?.recipients || []);
+  }, [invoice?.id]); // Reset when the invoice identity changes
+
   const watchDiscountType = form.watch("discount_type");
   const watchDiscountValue = form.watch("discount_value");
   const watchTaxRate = form.watch("tax_rate");
