@@ -11,10 +11,12 @@ import {
 import { MerchantAnalyticsCards } from "./MerchantAnalyticsCards";
 import { MerchantCharts } from "./MerchantCharts";
 import { MerchantTransactionList } from "./MerchantTransactionList";
+import { ScarcitySignalWidget } from "./ScarcitySignalWidget";
 
 type Merchant = {
   id: string;
   business_name: string;
+  business_type: string;
   stripe_account_id?: string;
   accepts_pawbucks?: boolean;
 };
@@ -157,6 +159,9 @@ export function MerchantOverviewTab({
 
       {/* Analytics Summary Cards */}
       <MerchantAnalyticsCards analytics={analytics} />
+
+      {/* Scarcity Signal - Visibility Slots */}
+      <ScarcitySignalWidget merchantId={merchant.id} businessType={merchant.business_type} />
 
       {/* Repayment Progress */}
       {analytics?.funding_deal_status === 'active' && analytics?.remaining_balance !== undefined && (
