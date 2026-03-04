@@ -1,14 +1,19 @@
 import { useMemo } from "react";
-import { format, parseISO, isPast, isFuture, isToday } from "date-fns";
+import { format, parseISO, isPast, isToday } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { CalendarClock, RefreshCw, Clock, AlertCircle } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { CalendarClock, RefreshCw, Clock, AlertCircle, MoreHorizontal, Edit, Trash2, Eye } from "lucide-react";
 import { type Invoice } from "@/services/api/invoicing.service";
 
 interface ScheduledInvoicesProps {
   invoices: Invoice[];
   loading: boolean;
+  onEdit?: (invoice: Invoice) => void;
+  onDelete?: (invoice: Invoice) => void;
+  onView?: (invoice: Invoice) => void;
 }
 
 function getIntervalLabel(interval: string | null): string {
@@ -37,20 +42,14 @@ function getTimeUntil(dateStr: string): { label: string; urgent: boolean } {
   return { label: `${Math.ceil(diffDays / 30)} months`, urgent: false };
 }
 
-export function ScheduledInvoices({ invoices, loading }: ScheduledInvoicesProps) {
+export function ScheduledInvoices({ invoices, loading, onEdit, onDelete, onView }: ScheduledInvoicesProps) {
   const scheduledInvoices = useMemo(() => {
-    const now = new Date();
-    
     return invoices
       .filter((inv) => {
-        // Recurring invoices with a future next_invoice_date
         if (inv.is_recurring && inv.next_invoice_date) {
-          const nextDate = parseISO(inv.next_invoice_date);
-          // Show if the recurring end date hasn't passed
           if (inv.recurring_end_date && isPast(parseISO(inv.recurring_end_date))) return false;
           return true;
         }
-        // Draft invoices (queued but not yet sent)
         if (inv.status === "draft") return true;
         return false;
       })
@@ -127,6 +126,7 @@ export function ScheduledInvoices({ invoices, loading }: ScheduledInvoicesProps)
                     <TableHead>Type</TableHead>
                     <TableHead>Next Send Date</TableHead>
                     <TableHead>Time Until</TableHead>
+                    <TableHead className="w-[50px]">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -174,6 +174,38 @@ export function ScheduledInvoices({ invoices, loading }: ScheduledInvoicesProps)
                             {timeInfo.urgent && <AlertCircle className="h-3 w-3" />}
                             {timeInfo.label}
                           </span>
+                        </TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              {onView && (
+                                <DropdownMenuItem onClick={() => onView(inv)}>
+                                  <Eye className="h-4 w-4 mr-2" />
+                                  View
+                                </DropdownMenuItem>
+                              )}
+                              {onEdit && (
+                                <DropdownMenuItem onClick={() => onEdit(inv)}>
+                                  <Edit className="h-4 w-4 mr-2" />
+                                  Edit
+                                </DropdownMenuItem>
+                              )}
+                              {onDelete && (
+                                <>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem onClick={() => onDelete(inv)} className="text-destructive">
+                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    Delete
+                                  </DropdownMenuItem>
+                                </>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </TableCell>
                       </TableRow>
                     );
