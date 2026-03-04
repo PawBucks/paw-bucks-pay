@@ -10,3 +10,4 @@ export { TemplateManager } from './TemplateManager';
 export { InvoiceAttachments } from './InvoiceAttachments';
 export { InvoiceRecipients } from './InvoiceRecipients';
 export type { InvoiceRecipient } from './InvoiceRecipients';
+export { ScheduledInvoices } from './ScheduledInvoices';
