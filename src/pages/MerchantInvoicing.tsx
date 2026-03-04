@@ -840,10 +840,14 @@ const MerchantInvoicing = () => {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:inline-grid">
+          <TabsList className="grid w-full grid-cols-6 lg:w-auto lg:inline-grid">
             <TabsTrigger value="invoices" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
               <span className="hidden sm:inline">Invoices</span>
+            </TabsTrigger>
+            <TabsTrigger value="scheduled" className="flex items-center gap-2">
+              <CalendarClock className="h-4 w-4" />
+              <span className="hidden sm:inline">Scheduled</span>
             </TabsTrigger>
             <TabsTrigger value="clients" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
