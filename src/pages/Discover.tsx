@@ -25,10 +25,11 @@ import { toast } from "sonner";
 import { ROUTES, QUERY_STALE_TIMES } from "@/lib/constants";
 import { SEO } from "@/components/SEO";
 import { usePersistentState } from "@/hooks/usePersistentState";
-import { useSponsoredMerchants, useVerifiedProMerchants, useSearchBoostedMerchantSet, SERVICE_NAMES } from "@/hooks/useMerchantServices";
+import { useSponsoredMerchants, useVerifiedProMerchants, useSearchBoostedMerchantSet, useFeaturedPartnerMerchants, usePremiumAdMerchants, SERVICE_NAMES } from "@/hooks/useMerchantServices";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSponsoredTracking } from "@/hooks/useSponsoredTracking";
 import { useSearchRankingTracking } from "@/hooks/useSearchRankingTracking";
+import { FeaturedPartnerCard, PremiumAdCard, SponsoredMerchantCard, OrganicMerchantCard, AttentionLadderFeed } from "@/components/discover";
 
 type MerchantWithRating = {
   id: string;
@@ -332,7 +333,13 @@ const Discover = () => {
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
   const [viewMode, setViewMode] = usePersistentState<'list' | 'map'>('discover-view-mode', 'list');
 
-  // Fetch sponsored merchants from service purchases
+  // Fetch all tiers from service purchases
+  const { data: featuredPartnersList = [] } = useFeaturedPartnerMerchants();
+  const featuredPartnerIds = useMemo(() => new Set(featuredPartnersList.map(m => m.id)), [featuredPartnersList]);
+
+  const { data: premiumAdsList = [] } = usePremiumAdMerchants();
+  const premiumAdIds = useMemo(() => new Set(premiumAdsList.map(m => m.id)), [premiumAdsList]);
+
   const { data: sponsoredMerchantsList = [] } = useSponsoredMerchants();
   const sponsoredMerchantIds = useMemo(() => new Set(sponsoredMerchantsList.map(m => m.id)), [sponsoredMerchantsList]);
 
@@ -451,10 +458,8 @@ const Discover = () => {
 
   const hasActiveFilters = minRating > 0 || selectedPrices.length > 0 || maxDistance > 0;
 
-  // Separate sponsored and regular merchants with distance calculation
-  const { sponsoredMerchants, regularMerchants } = useMemo(() => {
-    const now = new Date().toISOString();
-    
+  // Separate merchants into 5 attention ladder tiers with distance calculation
+  const { featuredPartners, premiumAds, sponsoredMerchants, boostedMerchants, organicMerchants } = useMemo(() => {
     // Calculate distances first
     let filtered = merchantsWithRatings.map(merchant => {
       let distance: number | undefined;
@@ -502,21 +507,11 @@ const Discover = () => {
       filtered = filtered.filter(m => m.distance !== undefined && m.distance <= maxDistance);
     }
 
-    // Sort function based on sortBy, with search boost priority
+    // Sort function for organic/regular merchants
     const sortMerchants = (merchants: typeof filtered) => {
       return [...merchants].sort((a, b) => {
-        // Search boosted merchants get priority (appear higher in results)
-        const aIsBoosted = searchBoostedIds.has(a.id);
-        const bIsBoosted = searchBoostedIds.has(b.id);
-        
-        // If only one is boosted, prioritize the boosted one
-        if (aIsBoosted && !bIsBoosted) return -1;
-        if (!aIsBoosted && bIsBoosted) return 1;
-        
-        // If both boosted or neither boosted, sort by the selected criterion
         switch (sortBy) {
           case 'distance':
-            // Merchants without distance go to the end
             if (a.distance === undefined && b.distance === undefined) return 0;
             if (a.distance === undefined) return 1;
             if (b.distance === undefined) return -1;
@@ -530,17 +525,74 @@ const Discover = () => {
       });
     };
 
-    // Separate sponsored (from service purchases) from regular
+    // 🥇 Level 1 — Featured Partner (max 1 per category shown)
+    const featured = sortMerchants(
+      filtered.filter(m => featuredPartnerIds.has(m.id))
+    ).slice(0, 1); // Max 1 visible at once per spec
+
+    // 🥈 Level 2 — Premium Ad (max 3)
+    const premium = sortMerchants(
+      filtered.filter(m => premiumAdIds.has(m.id) && !featuredPartnerIds.has(m.id))
+    ).slice(0, 3);
+
+    // 🥉 Level 3 — Sponsored (max 5, not grouped together - will be interspersed)
     const sponsored = sortMerchants(
-      filtered.filter(m => sponsoredMerchantIds.has(m.id))
-    );
-    
-    const regular = sortMerchants(
-      filtered.filter(m => !sponsoredMerchantIds.has(m.id))
+      filtered.filter(m => sponsoredMerchantIds.has(m.id) && !featuredPartnerIds.has(m.id) && !premiumAdIds.has(m.id))
+    ).slice(0, 5);
+
+    // ⚡ Level 4 — Boosted (search ranking boost, no badge)
+    const boosted = sortMerchants(
+      filtered.filter(m => 
+        searchBoostedIds.has(m.id) && 
+        !featuredPartnerIds.has(m.id) && 
+        !premiumAdIds.has(m.id) && 
+        !sponsoredMerchantIds.has(m.id)
+      )
     );
 
-    return { sponsoredMerchants: sponsored, regularMerchants: regular };
-  }, [merchantsWithRatings, selectedCategory, debouncedSearch, minRating, selectedPrices, maxDistance, userLocation, sortBy, sponsoredMerchantIds, searchBoostedIds]);
+    // 🌿 Level 5 — Organic (pure ranking)
+    const organic = sortMerchants(
+      filtered.filter(m => 
+        !featuredPartnerIds.has(m.id) && 
+        !premiumAdIds.has(m.id) && 
+        !sponsoredMerchantIds.has(m.id) &&
+        !searchBoostedIds.has(m.id)
+      )
+    );
+
+    return { 
+      featuredPartners: featured, 
+      premiumAds: premium, 
+      sponsoredMerchants: sponsored, 
+      boostedMerchants: boosted,
+      organicMerchants: organic 
+    };
+  }, [merchantsWithRatings, selectedCategory, debouncedSearch, minRating, selectedPrices, maxDistance, userLocation, sortBy, featuredPartnerIds, premiumAdIds, sponsoredMerchantIds, searchBoostedIds]);
+
+  // Intersperse sponsored into first 10 organic results (not grouped)
+  const interspersedResults = useMemo(() => {
+    const combined = [...boostedMerchants, ...organicMerchants];
+    if (sponsoredMerchants.length === 0) return combined;
+    
+    const result: (typeof combined[0] & { _isSponsored?: boolean })[] = [];
+    let sponsoredIndex = 0;
+    // Insert sponsored at positions 2, 5, 8 within first 10
+    const sponsoredPositions = [2, 5, 8, 11, 14];
+    
+    for (let i = 0; i < combined.length; i++) {
+      if (sponsoredIndex < sponsoredMerchants.length && sponsoredPositions.includes(result.length)) {
+        result.push({ ...sponsoredMerchants[sponsoredIndex], _isSponsored: true });
+        sponsoredIndex++;
+      }
+      result.push(combined[i]);
+    }
+    // Append remaining sponsored if not all placed
+    while (sponsoredIndex < sponsoredMerchants.length) {
+      result.push({ ...sponsoredMerchants[sponsoredIndex], _isSponsored: true });
+      sponsoredIndex++;
+    }
+    return result;
+  }, [boostedMerchants, organicMerchants, sponsoredMerchants]);
 
   // Track sponsored impressions when they change
   useEffect(() => {
@@ -554,8 +606,8 @@ const Discover = () => {
 
   // Track search ranking impressions for boosted merchants
   useEffect(() => {
-    const allMerchants = [...sponsoredMerchants, ...regularMerchants];
-    const boostedMerchants = allMerchants
+    const allMerchants = [...featuredPartners, ...premiumAds, ...sponsoredMerchants, ...boostedMerchants, ...organicMerchants];
+    const boosted = allMerchants
       .filter(m => searchBoostedIds.has(m.id))
       .map((m, index) => ({
         id: m.id,
@@ -565,10 +617,10 @@ const Discover = () => {
         localMatch: !!m.distance && m.distance <= 10,
       }));
 
-    if (boostedMerchants.length > 0) {
-      trackBatchImpressions(boostedMerchants, 'discover', debouncedSearch || undefined);
+    if (boosted.length > 0) {
+      trackBatchImpressions(boosted, 'discover', debouncedSearch || undefined);
     }
-  }, [sponsoredMerchants, regularMerchants, searchBoostedIds, trackBatchImpressions, debouncedSearch, selectedCategory]);
+  }, [featuredPartners, premiumAds, sponsoredMerchants, boostedMerchants, organicMerchants, searchBoostedIds, trackBatchImpressions, debouncedSearch, selectedCategory]);
 
   const handleSponsoredMerchantClick = (merchant: MerchantWithRating, position: number) => {
     // Track the sponsored click
@@ -634,7 +686,7 @@ const Discover = () => {
     return <PageLoader message="Finding amazing pet merchants near you..." />;
   }
 
-  const totalMerchants = sponsoredMerchants.length + regularMerchants.length;
+  const totalMerchants = featuredPartners.length + premiumAds.length + interspersedResults.length;
 
   return (
     <>
@@ -887,146 +939,82 @@ const Discover = () => {
             </div>
           ) : (
             <>
-              {/* Desktop Split View */}
-              <div className="hidden lg:flex gap-6 h-[calc(100vh-380px)] min-h-[500px]">
-                {/* List Panel */}
-                <ScrollArea className="flex-1 pr-4">
-                  <div className="space-y-6">
-                    {/* Sponsored Merchants Section */}
-                    {sponsoredMerchants.length > 0 && (
-                      <div>
-                        <div className="flex items-center gap-2 mb-4">
-                          <Sparkles className="w-5 h-5 text-primary" />
-                          <h2 className="text-lg font-semibold">Sponsored Results</h2>
-                        </div>
-                        <div className="space-y-4">
-                          {sponsoredMerchants.map((merchant, index) => (
-                            <DiscoverMerchantCard
-                              key={merchant.id}
-                              merchant={merchant}
-                              onPayClick={() => handleSponsoredMerchantClick(merchant, index + 1)}
-                              onCardClick={() => handleCardClickTracking(merchant.id, index + 1)}
-                              isSponsored
-                              showDistance={!!userLocation}
-                              isVerifiedPro={verifiedProSet.has(merchant.id)}
-                              index={index}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    )}
+              {/* All merchants for map */}
+              {(() => {
+                const allMapMerchants = [...featuredPartners, ...premiumAds, ...interspersedResults];
+                const mapClickHandler = (merchantId: string) => {
+                  if (searchBoostedIds.has(merchantId)) {
+                    trackSearchClick(merchantId, undefined, 'map', {
+                      searchTerm: debouncedSearch || undefined,
+                      isBoosted: true,
+                    });
+                  }
+                  navigate(`/merchant/${merchantId}`);
+                };
 
-                    {/* All Results Section */}
-                    <div>
-                      <h2 className="text-lg font-semibold mb-4">
-                        {sponsoredMerchants.length > 0 ? "All Results" : "Results"}
-                      </h2>
-                      <div className="space-y-4">
-                        {regularMerchants.map((merchant, index) => (
-                          <DiscoverMerchantCard
-                            key={merchant.id}
-                            merchant={merchant}
-                            onPayClick={() => handleMerchantClick(merchant)}
-                            onCardClick={() => handleCardClickTracking(merchant.id, sponsoredMerchants.length + index + 1)}
-                            showDistance={!!userLocation}
-                            isVerifiedPro={verifiedProSet.has(merchant.id)}
-                            index={index}
-                          />
-                        ))}
+                return (
+                  <>
+                    {/* Desktop Split View */}
+                    <div className="hidden lg:flex gap-6 h-[calc(100vh-380px)] min-h-[500px]">
+                      {/* List Panel */}
+                      <ScrollArea className="flex-1 pr-4">
+                        <AttentionLadderFeed
+                          featuredPartners={featuredPartners}
+                          premiumAds={premiumAds}
+                          interspersedResults={interspersedResults}
+                          verifiedProSet={verifiedProSet}
+                          showDistance={!!userLocation}
+                          selectedCategory={selectedCategory}
+                          onPayClick={handleMerchantClick}
+                          onSponsoredClick={handleSponsoredMerchantClick}
+                          onCardClick={handleCardClickTracking}
+                        />
+                      </ScrollArea>
+
+                      {/* Map Panel */}
+                      <div className="w-[45%] flex-shrink-0 rounded-xl overflow-hidden border border-border shadow-sm">
+                        <MerchantMap
+                          merchants={allMapMerchants}
+                          onMerchantClick={mapClickHandler}
+                          featuredIds={featuredPartnerIds}
+                          premiumIds={premiumAdIds}
+                          sponsoredIds={sponsoredMerchantIds}
+                        />
                       </div>
                     </div>
-                  </div>
-                </ScrollArea>
 
-                {/* Map Panel */}
-                <div className="w-[45%] flex-shrink-0 rounded-xl overflow-hidden border border-border shadow-sm">
-                  <MerchantMap
-                    merchants={[...sponsoredMerchants, ...regularMerchants]}
-                    onMerchantClick={(merchantId) => {
-                      // Track search ranking click from map
-                      if (searchBoostedIds.has(merchantId)) {
-                        trackSearchClick(merchantId, undefined, 'map', {
-                          searchTerm: debouncedSearch || undefined,
-                          isBoosted: true,
-                        });
-                      }
-                      navigate(`/merchant/${merchantId}`);
-                    }}
-                  />
-                </div>
-              </div>
-
-              {/* Mobile View */}
-              <div className="lg:hidden">
-                {viewMode === 'map' ? (
-                  /* Map View */
-                  <div className="space-y-4">
-                    <MerchantMap
-                      merchants={[...sponsoredMerchants, ...regularMerchants]}
-                      onMerchantClick={(merchantId) => {
-                        // Track search ranking click from map
-                        if (searchBoostedIds.has(merchantId)) {
-                          trackSearchClick(merchantId, undefined, 'map', {
-                            searchTerm: debouncedSearch || undefined,
-                            isBoosted: true,
-                          });
-                        }
-                        navigate(`/merchant/${merchantId}`);
-                      }}
-                    />
-                    <p className="text-sm text-muted-foreground text-center">
-                      Click on a marker to view merchant details
-                    </p>
-                  </div>
-                ) : (
-                  /* List View */
-                  <div className="space-y-8">
-                    {/* Sponsored Merchants Section */}
-                    {sponsoredMerchants.length > 0 && (
-                      <div>
-                        <div className="flex items-center gap-2 mb-4">
-                          <Sparkles className="w-5 h-5 text-primary" />
-                          <h2 className="text-lg font-semibold">Sponsored Results</h2>
-                        </div>
+                    {/* Mobile View */}
+                    <div className="lg:hidden">
+                      {viewMode === 'map' ? (
                         <div className="space-y-4">
-                          {sponsoredMerchants.map((merchant, index) => (
-                            <DiscoverMerchantCard
-                              key={merchant.id}
-                              merchant={merchant}
-                              onPayClick={() => handleSponsoredMerchantClick(merchant, index + 1)}
-                              onCardClick={() => handleCardClickTracking(merchant.id, index + 1)}
-                              isSponsored
-                              showDistance={!!userLocation}
-                              isVerifiedPro={verifiedProSet.has(merchant.id)}
-                              index={index}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* All Results Section */}
-                    <div>
-                      <h2 className="text-lg font-semibold mb-4">
-                        {sponsoredMerchants.length > 0 ? "All Results" : "Results"}
-                      </h2>
-                      <div className="space-y-4">
-                        {regularMerchants.map((merchant, index) => (
-                          <DiscoverMerchantCard
-                            key={merchant.id}
-                            merchant={merchant}
-                            onPayClick={() => handleMerchantClick(merchant)}
-                            onCardClick={() => handleCardClickTracking(merchant.id, sponsoredMerchants.length + index + 1)}
-                            showDistance={!!userLocation}
-                            isVerifiedPro={verifiedProSet.has(merchant.id)}
-                            index={index}
+                          <MerchantMap
+                            merchants={allMapMerchants}
+                            onMerchantClick={mapClickHandler}
+                            featuredIds={featuredPartnerIds}
+                            premiumIds={premiumAdIds}
+                            sponsoredIds={sponsoredMerchantIds}
                           />
-                        ))}
-                      </div>
+                          <p className="text-sm text-muted-foreground text-center">
+                            Click on a marker to view merchant details
+                          </p>
+                        </div>
+                      ) : (
+                        <AttentionLadderFeed
+                          featuredPartners={featuredPartners}
+                          premiumAds={premiumAds}
+                          interspersedResults={interspersedResults}
+                          verifiedProSet={verifiedProSet}
+                          showDistance={!!userLocation}
+                          selectedCategory={selectedCategory}
+                          onPayClick={handleMerchantClick}
+                          onSponsoredClick={handleSponsoredMerchantClick}
+                          onCardClick={handleCardClickTracking}
+                        />
+                      )}
                     </div>
-                  </div>
-                )}
-              </div>
+                  </>
+                );
+              })()}
             </>
           )}
 
