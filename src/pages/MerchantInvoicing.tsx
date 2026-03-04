@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Plus, Users, Settings, FileText, LayoutTemplate, Package, CalendarClock } from "lucide-react";
 import { toast } from "sonner";
-import { InvoiceList, InvoiceEditor, InvoicePreview, ClientManager, InvoiceSettingsComponent, CatalogManager, TemplateManager } from "@/components/invoicing";
+import { InvoiceList, InvoiceEditor, InvoicePreview, ClientManager, InvoiceSettingsComponent, CatalogManager, TemplateManager, ScheduledInvoices } from "@/components/invoicing";
 import { RecordPaymentDialog } from "@/components/invoicing/RecordPaymentDialog";
 import { invoicingService, type Invoice, type InvoiceItem, type InvoiceClient, type InvoiceSettings, type InvoiceTemplate, type CatalogItem, type InvoicePayment, type InvoiceRecipient } from "@/services/api/invoicing.service";
 
