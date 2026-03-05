@@ -316,6 +316,8 @@ const Discover = () => {
   const { user, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { subscription } = useSubscription();
+  const tier = useMemo(() => getSubscriptionTier(subscription.product_id, subscription.subscription_tier), [subscription.product_id, subscription.subscription_tier]);
   const [searchTerm, setSearchTerm] = usePersistentState<string>('discover-search', "");
   const debouncedSearch = useDebounce(searchTerm, 300);
   const [selectedCategory, setSelectedCategory] = usePersistentState<string>('discover-category', "all");
