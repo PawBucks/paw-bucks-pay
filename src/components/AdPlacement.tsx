@@ -61,6 +61,9 @@ const AdPlacementComponent = ({ position = 'top' }: AdPlacementProps) => {
     return null;
   }
 
+  // PawPass subscribers: show sponsored merchant ads only (no fallback upgrade ads)
+  const isPawPass = tier === 'pawpass';
+
   // Show sponsored merchant ad if available
   if (currentMerchant) {
     return (
