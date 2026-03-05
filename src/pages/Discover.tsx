@@ -969,6 +969,7 @@ const Discover = () => {
                           verifiedProSet={verifiedProSet}
                           showDistance={!!userLocation}
                           selectedCategory={selectedCategory}
+                          subscriptionTier={tier}
                           onPayClick={handleMerchantClick}
                           onSponsoredClick={handleSponsoredMerchantClick}
                           onCardClick={handleCardClickTracking}
