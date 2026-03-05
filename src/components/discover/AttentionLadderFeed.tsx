@@ -111,7 +111,7 @@ const AttentionLadderFeedComponent = ({
             <Gem className="w-4 h-4 text-primary/60" />
             <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Premium</span>
           </div>
-          {premiumAds.map((merchant, index) => {
+          {visiblePremiumAds.map((merchant, index) => {
             positionCounter++;
             const pos = positionCounter;
             return (
