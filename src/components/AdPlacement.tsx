@@ -146,7 +146,12 @@ const AdPlacementComponent = ({ position = 'top' }: AdPlacementProps) => {
     );
   }
 
-  // Fallback ad promoting upgrades when no ad merchants
+  // PawPass subscribers don't see the fallback upgrade ad
+  if (isPawPass) {
+    return null;
+  }
+
+  // Fallback ad promoting upgrades when no ad merchants (free tier only)
   return (
     <Card className={`relative p-4 sm:p-6 bg-gradient-to-r from-primary/10 to-accent/10 border-primary/30 ${position === 'bottom' ? 'mt-8' : 'mb-8'}`}>
       <button
