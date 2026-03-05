@@ -30,6 +30,7 @@ interface AttentionLadderFeedProps {
   verifiedProSet: Set<string>;
   showDistance: boolean;
   selectedCategory: string;
+  subscriptionTier?: 'free' | 'pawpass' | 'pawpass_plus';
   onPayClick: (merchant: MerchantWithRating) => void;
   onSponsoredClick: (merchant: MerchantWithRating, position: number) => void;
   onCardClick: (merchantId: string, position: number) => void;
