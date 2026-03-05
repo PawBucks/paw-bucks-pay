@@ -130,7 +130,7 @@ const AttentionLadderFeedComponent = ({
       )}
 
       {/* 🥉 Level 3+4+5 — Sponsored (interspersed) + Boosted + Organic */}
-      {interspersedResults.length > 0 && (
+      {visibleInterspersed.length > 0 && (
         <div>
           <h2 className="text-lg font-semibold mb-4">
             {(featuredPartners.length > 0 || premiumAds.length > 0) ? "All Results" : "Results"}
