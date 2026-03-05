@@ -103,9 +103,9 @@ const PremiumMerchantsBannerComponent = ({
     ? shuffledMerchants.slice(currentIndex, currentIndex + maxVisible)
     : [shuffledMerchants[currentIndex]];
 
-  // If we're at the end and don't have 3, wrap around
-  if (showMultiple && visibleMerchants.length < 3 && shuffledMerchants.length >= 3) {
-    const remaining = 3 - visibleMerchants.length;
+  // If we're at the end and don't have enough, wrap around
+  if (showMultiple && !isPawPass && visibleMerchants.length < maxVisible && shuffledMerchants.length >= maxVisible) {
+    const remaining = maxVisible - visibleMerchants.length;
     visibleMerchants.push(...shuffledMerchants.slice(0, remaining));
   }
 

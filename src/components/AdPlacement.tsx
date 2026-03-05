@@ -104,9 +104,11 @@ const AdPlacementComponent = ({ position = 'top' }: AdPlacementProps) => {
                 <span>{currentMerchant.address}</span>
               </div>
             )}
+          {!isPawPass && (
             <p className="text-xs text-muted-foreground italic pt-1">
               Upgrade to PawPass+ for 30x points and an ad-free experience!
             </p>
+          )}
           </div>
           <div className="flex flex-col gap-2 sm:items-end">
             <Button

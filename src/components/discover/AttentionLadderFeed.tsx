@@ -136,7 +136,7 @@ const AttentionLadderFeedComponent = ({
             {(featuredPartners.length > 0 || premiumAds.length > 0) ? "All Results" : "Results"}
           </h2>
           <div className="space-y-4">
-            {interspersedResults.map((merchant, index) => {
+            {visibleInterspersed.map((merchant, index) => {
               positionCounter++;
               const pos = positionCounter;
               const isSponsored = !!(merchant as any)._isSponsored;
