@@ -61,6 +61,9 @@ const AdPlacementComponent = ({ position = 'top' }: AdPlacementProps) => {
     return null;
   }
 
+  // PawPass subscribers: show sponsored merchant ads only (no fallback upgrade ads)
+  const isPawPass = tier === 'pawpass';
+
   // Show sponsored merchant ad if available
   if (currentMerchant) {
     return (
@@ -101,9 +104,11 @@ const AdPlacementComponent = ({ position = 'top' }: AdPlacementProps) => {
                 <span>{currentMerchant.address}</span>
               </div>
             )}
+          {!isPawPass && (
             <p className="text-xs text-muted-foreground italic pt-1">
               Upgrade to PawPass+ for 30x points and an ad-free experience!
             </p>
+          )}
           </div>
           <div className="flex flex-col gap-2 sm:items-end">
             <Button
@@ -143,7 +148,12 @@ const AdPlacementComponent = ({ position = 'top' }: AdPlacementProps) => {
     );
   }
 
-  // Fallback ad promoting upgrades when no ad merchants
+  // PawPass subscribers don't see the fallback upgrade ad
+  if (isPawPass) {
+    return null;
+  }
+
+  // Fallback ad promoting upgrades when no ad merchants (free tier only)
   return (
     <Card className={`relative p-4 sm:p-6 bg-gradient-to-r from-primary/10 to-accent/10 border-primary/30 ${position === 'bottom' ? 'mt-8' : 'mb-8'}`}>
       <button

@@ -30,6 +30,7 @@ interface AttentionLadderFeedProps {
   verifiedProSet: Set<string>;
   showDistance: boolean;
   selectedCategory: string;
+  subscriptionTier?: 'free' | 'pawpass' | 'pawpass_plus';
   onPayClick: (merchant: MerchantWithRating) => void;
   onSponsoredClick: (merchant: MerchantWithRating, position: number) => void;
   onCardClick: (merchantId: string, position: number) => void;
@@ -57,11 +58,28 @@ const AttentionLadderFeedComponent = ({
   verifiedProSet,
   showDistance,
   selectedCategory,
+  subscriptionTier = 'free',
   onPayClick,
   onSponsoredClick,
   onCardClick,
 }: AttentionLadderFeedProps) => {
   let positionCounter = 0;
+  const isPawPass = subscriptionTier === 'pawpass';
+
+  // PawPass: show max 1 premium ad instead of all, and reduce sponsored to max 2
+  const visiblePremiumAds = isPawPass ? premiumAds.slice(0, 1) : premiumAds;
+  const visibleInterspersed = isPawPass
+    ? (() => {
+        let sponsoredCount = 0;
+        return interspersedResults.filter((m) => {
+          if ((m as any)._isSponsored) {
+            sponsoredCount++;
+            return sponsoredCount <= 2; // max 2 sponsored for PawPass
+          }
+          return true;
+        });
+      })()
+    : interspersedResults;
 
   return (
     <div className="space-y-6">
@@ -87,13 +105,13 @@ const AttentionLadderFeedComponent = ({
       )}
 
       {/* 🥈 Level 2 — Premium Ad Placement (elevated shadow, "Premium" tag) */}
-      {premiumAds.length > 0 && (
+      {visiblePremiumAds.length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center gap-2">
             <Gem className="w-4 h-4 text-primary/60" />
             <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Premium</span>
           </div>
-          {premiumAds.map((merchant, index) => {
+          {visiblePremiumAds.map((merchant, index) => {
             positionCounter++;
             const pos = positionCounter;
             return (
@@ -112,13 +130,13 @@ const AttentionLadderFeedComponent = ({
       )}
 
       {/* 🥉 Level 3+4+5 — Sponsored (interspersed) + Boosted + Organic */}
-      {interspersedResults.length > 0 && (
+      {visibleInterspersed.length > 0 && (
         <div>
           <h2 className="text-lg font-semibold mb-4">
             {(featuredPartners.length > 0 || premiumAds.length > 0) ? "All Results" : "Results"}
           </h2>
           <div className="space-y-4">
-            {interspersedResults.map((merchant, index) => {
+            {visibleInterspersed.map((merchant, index) => {
               positionCounter++;
               const pos = positionCounter;
               const isSponsored = !!(merchant as any)._isSponsored;

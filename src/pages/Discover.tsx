@@ -2,6 +2,8 @@ import { useState, useMemo, useEffect, useCallback, memo } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
+import { useSubscription } from "@/hooks/useSubscription";
+import { getSubscriptionTier } from "@/lib/constants";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useOptimizedQuery } from "@/hooks/useOptimizedQuery";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
@@ -314,6 +316,8 @@ const Discover = () => {
   const { user, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { subscription } = useSubscription();
+  const tier = useMemo(() => getSubscriptionTier(subscription.product_id, subscription.subscription_tier), [subscription.product_id, subscription.subscription_tier]);
   const [searchTerm, setSearchTerm] = usePersistentState<string>('discover-search', "");
   const debouncedSearch = useDebounce(searchTerm, 300);
   const [selectedCategory, setSelectedCategory] = usePersistentState<string>('discover-category', "all");
@@ -965,6 +969,7 @@ const Discover = () => {
                           verifiedProSet={verifiedProSet}
                           showDistance={!!userLocation}
                           selectedCategory={selectedCategory}
+                          subscriptionTier={tier}
                           onPayClick={handleMerchantClick}
                           onSponsoredClick={handleSponsoredMerchantClick}
                           onCardClick={handleCardClickTracking}
@@ -1006,6 +1011,7 @@ const Discover = () => {
                           verifiedProSet={verifiedProSet}
                           showDistance={!!userLocation}
                           selectedCategory={selectedCategory}
+                          subscriptionTier={tier}
                           onPayClick={handleMerchantClick}
                           onSponsoredClick={handleSponsoredMerchantClick}
                           onCardClick={handleCardClickTracking}
