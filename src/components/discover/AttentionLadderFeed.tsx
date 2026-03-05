@@ -58,11 +58,28 @@ const AttentionLadderFeedComponent = ({
   verifiedProSet,
   showDistance,
   selectedCategory,
+  subscriptionTier = 'free',
   onPayClick,
   onSponsoredClick,
   onCardClick,
 }: AttentionLadderFeedProps) => {
   let positionCounter = 0;
+  const isPawPass = subscriptionTier === 'pawpass';
+
+  // PawPass: show max 1 premium ad instead of all, and reduce sponsored to max 2
+  const visiblePremiumAds = isPawPass ? premiumAds.slice(0, 1) : premiumAds;
+  const visibleInterspersed = isPawPass
+    ? (() => {
+        let sponsoredCount = 0;
+        return interspersedResults.filter((m) => {
+          if ((m as any)._isSponsored) {
+            sponsoredCount++;
+            return sponsoredCount <= 2; // max 2 sponsored for PawPass
+          }
+          return true;
+        });
+      })()
+    : interspersedResults;
 
   return (
     <div className="space-y-6">
