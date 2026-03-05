@@ -105,7 +105,7 @@ const AttentionLadderFeedComponent = ({
       )}
 
       {/* 🥈 Level 2 — Premium Ad Placement (elevated shadow, "Premium" tag) */}
-      {premiumAds.length > 0 && (
+      {visiblePremiumAds.length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center gap-2">
             <Gem className="w-4 h-4 text-primary/60" />
