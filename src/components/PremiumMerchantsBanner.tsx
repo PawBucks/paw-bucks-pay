@@ -68,7 +68,8 @@ const PremiumMerchantsBannerComponent = ({
     setCurrentIndex(pageIndex * 3);
   }, []);
 
-  // PawPass+ users don't see sponsored content - check AFTER all hooks
+  // PawPass+ users don't see sponsored content; PawPass sees max 1
+  const isPawPass = tier === 'pawpass';
   if (tier === 'pawpass_plus') {
     return null;
   }
