@@ -95,9 +95,12 @@ const PremiumMerchantsBannerComponent = ({
     return null;
   }
 
+  // PawPass subscribers see only 1 merchant at a time instead of 3
+  const maxVisible = isPawPass ? 1 : (showMultiple ? 3 : 1);
+  
   // Get visible merchants based on current index
-  const visibleMerchants = showMultiple 
-    ? shuffledMerchants.slice(currentIndex, currentIndex + 3)
+  const visibleMerchants = showMultiple && !isPawPass
+    ? shuffledMerchants.slice(currentIndex, currentIndex + maxVisible)
     : [shuffledMerchants[currentIndex]];
 
   // If we're at the end and don't have 3, wrap around
