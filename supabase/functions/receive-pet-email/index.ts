@@ -143,15 +143,34 @@ serve(async (req) => {
           // JSON format from Resend
           fileName = attachment.filename;
           const content = attachment.content;
-          // Decode base64 content
-          const binaryStr = atob(content);
-          const bytes = new Uint8Array(binaryStr.length);
-          for (let i = 0; i < binaryStr.length; i++) {
-            bytes[i] = binaryStr.charCodeAt(i);
-          }
-          fileBuffer = bytes.buffer;
           fileType = attachment.contentType || "application/octet-stream";
-          fileSize = bytes.length;
+          
+          // Robust base64 decoding: clean whitespace and handle URL-safe base64
+          let cleanContent = content.replace(/[\s\r\n]/g, "");
+          // Convert URL-safe base64 to standard base64
+          cleanContent = cleanContent.replace(/-/g, "+").replace(/_/g, "/");
+          // Add padding if needed
+          const pad = cleanContent.length % 4;
+          if (pad === 2) cleanContent += "==";
+          else if (pad === 3) cleanContent += "=";
+          
+          try {
+            const binaryStr = atob(cleanContent);
+            const bytes = new Uint8Array(binaryStr.length);
+            for (let i = 0; i < binaryStr.length; i++) {
+              bytes[i] = binaryStr.charCodeAt(i);
+            }
+            fileBuffer = bytes.buffer;
+            fileSize = bytes.length;
+          } catch (b64Err) {
+            console.error("Base64 decode failed for", fileName, "- trying raw content. Error:", b64Err);
+            // Fallback: treat content as raw text
+            const encoder = new TextEncoder();
+            const rawBytes = encoder.encode(content);
+            fileBuffer = rawBytes.buffer;
+            fileSize = rawBytes.length;
+            fileType = "application/octet-stream";
+          }
         } else {
           continue;
         }
