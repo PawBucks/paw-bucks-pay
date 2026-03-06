@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useSharedAccount, getEffectiveWalletUserId } from "@/hooks/useSharedAccount";
 import { Header } from "@/components/Header";
@@ -28,6 +28,8 @@ type PetProfile = {
 export default function PetHealth() {
   const navigate = useNavigate();
   const { petId } = useParams<{ petId: string }>();
+  const [searchParams] = useSearchParams();
+  const defaultTab = searchParams.get("tab") || "records";
   const [pet, setPet] = useState<PetProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -154,7 +156,7 @@ export default function PetHealth() {
           <ShareHealthRecordsDialog petId={pet.id} petName={pet.name} />
         </div>
 
-        <Tabs defaultValue="records" className="space-y-4">
+        <Tabs defaultValue={defaultTab} className="space-y-4">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="records" className="flex items-center gap-2">
               <FileHeart className="w-4 h-4" />
