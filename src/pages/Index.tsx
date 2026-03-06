@@ -352,6 +352,24 @@ const Index = () => {
               </ul>
             </Card>
 
+            {/* AI Spending Insights */}
+            <Card className="p-6 space-y-4 hover:shadow-xl transition-all border-2 hover:border-primary/30">
+              <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center">
+                <BarChart3 className="w-7 h-7 text-primary" />
+              </div>
+              <h3 className="text-xl font-bold">AI-Powered Spending Insights</h3>
+              <ul className="space-y-2 text-muted-foreground">
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="w-4 h-4 text-primary mt-1 flex-shrink-0" />
+                  <span>Smart anomaly detection & spending pace alerts</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="w-4 h-4 text-primary mt-1 flex-shrink-0" />
+                  <span>Budget goals, recurring expense tracking, year-over-year comparisons</span>
+                </li>
+              </ul>
+            </Card>
+
             {/* Community */}
             <Card className="p-6 space-y-4 hover:shadow-xl transition-all border-2 hover:border-pink-500/30 relative overflow-hidden">
               <div className="absolute top-3 right-3 px-2 py-1 bg-pink-500/10 text-pink-500 text-xs font-medium rounded-full">
