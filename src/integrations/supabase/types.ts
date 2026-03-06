@@ -11265,9 +11265,12 @@ export type Database = {
       get_admin_analytics: {
         Args: never
         Returns: {
+          pawbucks_spend_rate: number
           platform_revenue: number
           total_gmv: number
           total_merchants: number
+          total_pawbucks_earned: number
+          total_pawbucks_spent: number
           total_refunded_amount: number
           total_refunded_transactions: number
           total_rewards: number
