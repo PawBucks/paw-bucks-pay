@@ -334,7 +334,10 @@ export const PaymentDialogWithPawBucks = ({
   const cashbackPawBucks = stripeAmount > 0 ? Math.round(stripeAmount * cashbackRate) : 0;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={(isOpen) => {
+        if (!isOpen) handleCancel();
+        else onOpenChange(isOpen);
+      }}>
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Pay {merchantName}</DialogTitle>
