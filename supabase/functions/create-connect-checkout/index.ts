@@ -331,7 +331,7 @@ serve(async (req) => {
 
         // Redeem welcome credit if needed
         if (welcomeCreditDeduction > 0 && merchantId) {
-          const totalCents = Math.round(totalAmount * 100);
+          const totalCents = Math.round(totalAmountDollars * 100);
           await supabaseAdmin.rpc('redeem_welcome_credit', {
             p_user_id: user.id,
             p_merchant_id: merchantId,

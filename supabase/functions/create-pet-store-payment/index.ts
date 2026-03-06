@@ -295,16 +295,40 @@ serve(async (req) => {
     const totalAmount = originalPrice - discountAmount;
     const amountInCents = Math.round(totalAmount * 100);
 
-    // Check subscription status for multiplier
+    // Check subscription status for multiplier (3-tier: Free=10x, PawPass=20x, PawPass+=30x)
+    let pawbucksMultiplier = 10;
+    
     const { data: subscription } = await supabaseAdmin
       .from('subscriptions')
-      .select('status')
+      .select('stripe_subscription_id, subscription_tier, is_manual_upgrade, expires_at, status')
       .eq('user_id', user.id)
-      .eq('status', 'active')
+      .in('status', ['active', 'trialing'])
       .maybeSingle();
 
-    const hasActiveSubscription = !!subscription;
-    const pawbucksMultiplier = hasActiveSubscription ? 20 : 10;
+    // Check manual upgrade first
+    if (subscription?.is_manual_upgrade && subscription?.subscription_tier) {
+      const expiresAt = subscription.expires_at ? new Date(subscription.expires_at) : null;
+      if (!expiresAt || expiresAt > new Date()) {
+        if (subscription.subscription_tier === 'pawpass_plus') {
+          pawbucksMultiplier = 30;
+        } else if (subscription.subscription_tier === 'pawpass') {
+          pawbucksMultiplier = 20;
+        }
+      }
+    } else if (subscription?.stripe_subscription_id) {
+      try {
+        const stripeSubscription = await stripe.subscriptions.retrieve(subscription.stripe_subscription_id);
+        const productId = stripeSubscription.items.data[0]?.price?.product;
+        
+        if (productId === 'prod_TQyZjYzt9DwoIK') {
+          pawbucksMultiplier = 30; // PawPass+
+        } else if (productId === 'prod_TJVK9ZhLiJnnpm') {
+          pawbucksMultiplier = 20; // PawPass
+        }
+      } catch (e) {
+        console.error('Error checking subscription tier:', e);
+      }
+    }
     const pawbucksEarned = Math.round(totalAmount * pawbucksMultiplier);
 
     console.log('Creating pet store payment:', {
@@ -320,13 +344,11 @@ serve(async (req) => {
       appliedPromotionId,
     });
 
-    // Create a PaymentIntent
+    // Create a PaymentIntent with explicit card-only for international compatibility
     const paymentIntent = await stripe.paymentIntents.create({
       amount: amountInCents,
       currency: 'usd',
-      automatic_payment_methods: {
-        enabled: true,
-      },
+      payment_method_types: ['card'],
       metadata: {
         user_id: user.id,
         item_id: itemId,
