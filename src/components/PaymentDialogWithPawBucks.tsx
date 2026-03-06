@@ -433,7 +433,7 @@ export const PaymentDialogWithPawBucks = ({
                   onValueChange={([value]) => setPawbucksToUse(value)}
                   max={maxPawbucks}
                   min={0}
-                  step={100}
+                  step={maxPawbucks <= 500 ? 1 : 100}
                   className="w-full"
                 />
 
