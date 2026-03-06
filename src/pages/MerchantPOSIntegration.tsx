@@ -249,15 +249,6 @@ export default function MerchantPOSIntegration() {
     }
   };
 
-  const generateWebhookSecret = () => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let secret = 'whsec_';
-    for (let i = 0; i < 32; i++) {
-      secret += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return secret;
-  };
-
   const handleCreateWebhook = async () => {
     if (!merchant || !newWebhook.url.trim()) {
       toast.error("Please enter a webhook URL");
@@ -265,20 +256,24 @@ export default function MerchantPOSIntegration() {
     }
 
     try {
-      const secret = generateWebhookSecret();
-      const { error } = await supabase
-        .from("merchant_webhooks")
-        .insert({
+      // Create webhook via edge function so secret is encrypted server-side
+      const { data, error } = await supabase.functions.invoke('manage-encrypted-secrets', {
+        body: {
+          action: 'create_webhook',
           merchant_id: merchant.id,
           name: newWebhook.name || "Default Webhook",
           url: newWebhook.url,
-          secret: secret,
           events: newWebhook.events,
-        });
+        },
+      });
 
       if (error) throw error;
-
-      toast.success("Webhook created successfully");
+      if (data?.raw_secret) {
+        // Show the raw secret once so the merchant can copy it
+        toast.success(`Webhook created! Secret: ${data.raw_secret}`, { duration: 15000 });
+      } else {
+        toast.success("Webhook created successfully");
+      }
       setShowCreateWebhookDialog(false);
       setNewWebhook({ name: '', url: '', events: ['transaction.created', 'reward.awarded'] });
       loadData();
