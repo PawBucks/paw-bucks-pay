@@ -45,6 +45,24 @@ async function verifyPmsSignature(
   }
 }
 
+// AES-256-GCM decryption for encrypted webhook secrets
+async function decryptSecret(ciphertext: string): Promise<string> {
+  try {
+    const keyHex = Deno.env.get("SECRETS_ENCRYPTION_KEY");
+    if (!keyHex || keyHex.length < 32) return ciphertext;
+    const encoder = new TextEncoder();
+    const keyData = await crypto.subtle.digest("SHA-256", encoder.encode(keyHex));
+    const cryptoKey = await crypto.subtle.importKey("raw", keyData, { name: "AES-GCM" }, false, ["decrypt"]);
+    const combined = new Uint8Array(atob(ciphertext).split("").map((c) => c.charCodeAt(0)));
+    const iv = combined.slice(0, 12);
+    const data = combined.slice(12);
+    const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, cryptoKey, data);
+    return new TextDecoder().decode(decrypted);
+  } catch {
+    return ciphertext; // Fallback: legacy plain text
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -129,10 +147,13 @@ serve(async (req) => {
       );
     }
 
+    // Decrypt the webhook secret before verification
+    const decryptedWebhookSecret = await decryptSecret(integration.webhook_secret);
+
     const isValidSignature = await verifyPmsSignature(
       rawBody,
       pmsSignature,
-      integration.webhook_secret
+      decryptedWebhookSecret
     );
 
     if (!isValidSignature) {

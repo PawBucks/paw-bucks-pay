@@ -34,6 +34,28 @@ async function hashApiKey(key: string): Promise<string> {
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
+// AES-256-GCM decryption for encrypted webhook secrets
+async function decryptSecret(ciphertext: string): Promise<string> {
+  try {
+    const keyHex = Deno.env.get("SECRETS_ENCRYPTION_KEY");
+    if (!keyHex || keyHex.length < 32) {
+      // Fallback: assume plain text if no key configured
+      return ciphertext;
+    }
+    const encoder = new TextEncoder();
+    const keyData = await crypto.subtle.digest("SHA-256", encoder.encode(keyHex));
+    const cryptoKey = await crypto.subtle.importKey("raw", keyData, { name: "AES-GCM" }, false, ["decrypt"]);
+    const combined = new Uint8Array(atob(ciphertext).split("").map((c) => c.charCodeAt(0)));
+    const iv = combined.slice(0, 12);
+    const data = combined.slice(12);
+    const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, cryptoKey, data);
+    return new TextDecoder().decode(decrypted);
+  } catch {
+    // Fallback: legacy plain text secret
+    return ciphertext;
+  }
+}
+
 // Generate HMAC signature for webhook
 async function generateHmacSignature(payload: string, secret: string): Promise<string> {
   const encoder = new TextEncoder();
@@ -81,7 +103,8 @@ async function triggerWebhooks(
       let responseBody: string | null = null;
 
       try {
-        const signature = await generateHmacSignature(payload, webhook.secret);
+        const decryptedSecret = await decryptSecret(webhook.secret);
+        const signature = await generateHmacSignature(payload, decryptedSecret);
         
         const response = await fetch(webhook.url, {
           method: 'POST',
