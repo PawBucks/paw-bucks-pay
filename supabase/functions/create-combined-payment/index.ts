@@ -459,7 +459,7 @@ serve(async (req) => {
         amount: stripeAmountInCents,
         currency: 'usd',
         application_fee_amount: platformFeeInCents, // 3% platform fee
-        automatic_payment_methods: { enabled: true },
+        payment_method_types: ['card'], // Explicit card-only for international compatibility
         metadata: {
           merchant_id: merchantId,
           user_id: user.id,

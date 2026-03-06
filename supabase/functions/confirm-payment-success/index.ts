@@ -154,21 +154,35 @@ serve(async (req) => {
     try {
       const { data: platformSub } = await supabaseAdmin
         .from('subscriptions')
-        .select('stripe_subscription_id')
+        .select('stripe_subscription_id, subscription_tier, is_manual_upgrade, expires_at')
         .eq('user_id', userId)
         .in('status', ['active', 'trialing'])
         .maybeSingle();
 
-      if (platformSub?.stripe_subscription_id) {
-        const platformSubscription = await stripe.subscriptions.retrieve(platformSub.stripe_subscription_id);
-        const productId = platformSubscription.items.data[0]?.price?.product;
-        
-        if (productId === 'prod_TQyZjYzt9DwoIK') {
-          pawbucksMultiplier = 30; // PawPass+
-          tierName = 'PawPass+';
-        } else if (productId === 'prod_TJVK9ZhLiJnnpm') {
-          pawbucksMultiplier = 20; // PawPass
-          tierName = 'PawPass';
+      if (platformSub) {
+        // Check manual upgrade first
+        if (platformSub.is_manual_upgrade && platformSub.subscription_tier) {
+          const expiresAt = platformSub.expires_at ? new Date(platformSub.expires_at) : null;
+          if (!expiresAt || expiresAt > new Date()) {
+            if (platformSub.subscription_tier === 'pawpass_plus') {
+              pawbucksMultiplier = 30;
+              tierName = 'PawPass+';
+            } else if (platformSub.subscription_tier === 'pawpass') {
+              pawbucksMultiplier = 20;
+              tierName = 'PawPass';
+            }
+          }
+        } else if (platformSub.stripe_subscription_id) {
+          const platformSubscription = await stripe.subscriptions.retrieve(platformSub.stripe_subscription_id);
+          const productId = platformSubscription.items.data[0]?.price?.product;
+          
+          if (productId === 'prod_TQyZjYzt9DwoIK') {
+            pawbucksMultiplier = 30; // PawPass+
+            tierName = 'PawPass+';
+          } else if (productId === 'prod_TJVK9ZhLiJnnpm') {
+            pawbucksMultiplier = 20; // PawPass
+            tierName = 'PawPass';
+          }
         }
       }
       logStep("User subscription tier determined", { tierName, pawbucksMultiplier });

@@ -344,13 +344,11 @@ serve(async (req) => {
       appliedPromotionId,
     });
 
-    // Create a PaymentIntent
+    // Create a PaymentIntent with explicit card-only for international compatibility
     const paymentIntent = await stripe.paymentIntents.create({
       amount: amountInCents,
       currency: 'usd',
-      automatic_payment_methods: {
-        enabled: true,
-      },
+      payment_method_types: ['card'],
       metadata: {
         user_id: user.id,
         item_id: itemId,
