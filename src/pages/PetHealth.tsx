@@ -28,6 +28,8 @@ type PetProfile = {
 export default function PetHealth() {
   const navigate = useNavigate();
   const { petId } = useParams<{ petId: string }>();
+  const [searchParams] = useSearchParams();
+  const defaultTab = searchParams.get("tab") || "records";
   const [pet, setPet] = useState<PetProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
