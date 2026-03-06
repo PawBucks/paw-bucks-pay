@@ -38,6 +38,9 @@ export function OverviewTab() {
           platformRevenue: data[0].platform_revenue || 0, // Accurate fee from application_fee column
           refundedTransactions: data[0].total_refunded_transactions || 0,
           refundedAmount: data[0].total_refunded_amount || 0,
+          totalPawbucksEarned: data[0].total_pawbucks_earned || 0,
+          totalPawbucksSpent: data[0].total_pawbucks_spent || 0,
+          pawbucksSpendRate: data[0].pawbucks_spend_rate || 0,
         });
       }
     } catch (error) {
