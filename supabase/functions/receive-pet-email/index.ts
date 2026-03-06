@@ -219,24 +219,28 @@ serve(async (req) => {
       }
     }
 
-    // If email body exists but no attachments, store the email body as a document too
-    if (documents.length === 0 && (emailData.text || emailData.html)) {
-      const bodyContent = emailData.text || emailData.html || "";
+    // If no attachments were processed, store the email body as a document
+    if (documents.length === 0) {
+      const bodyContent = emailData.text || emailData.html || "(No body content)";
       const bodyBlob = new TextEncoder().encode(bodyContent);
       const bodyPath = `${petEmail.pet_id}/${inboundEmail.id}/email-body.txt`;
 
-      await supabase.storage
+      const { error: bodyUploadError } = await supabase.storage
         .from("pet-email-attachments")
         .upload(bodyPath, bodyBlob, {
           contentType: "text/plain",
           upsert: false,
         });
 
+      if (bodyUploadError) {
+        console.error("Email body upload error:", bodyUploadError);
+      }
+
       const { data: urlData } = await supabase.storage
         .from("pet-email-attachments")
         .createSignedUrl(bodyPath, 60 * 60 * 24 * 365);
 
-      const { data: doc } = await supabase
+      const { data: doc, error: docError } = await supabase
         .from("pet_inbound_documents")
         .insert({
           pet_id: petEmail.pet_id,
@@ -252,6 +256,9 @@ serve(async (req) => {
         .select()
         .single();
 
+      if (docError) {
+        console.error("Email body document insert error:", docError);
+      }
       if (doc) documents.push(doc);
     }
 
