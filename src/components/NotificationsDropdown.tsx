@@ -257,7 +257,13 @@ const NotificationsDropdownComponent = ({ userId }: { userId: string }) => {
       await markAsRead(notification.id);
     }
     setDropdownOpen(false);
-    setSelectedNotification(notification);
+    
+    // If notification has a link, navigate to it instead of showing detail dialog
+    if (notification.link_url) {
+      navigate(notification.link_url);
+    } else {
+      setSelectedNotification(notification);
+    }
   };
 
   const NotificationDetailContent = () => {

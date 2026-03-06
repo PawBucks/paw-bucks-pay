@@ -323,12 +323,13 @@ serve(async (req) => {
       .update({ processing_status: "completed" })
       .eq("id", inboundEmail.id);
 
-    // Notify pet owner
+    // Notify pet owner with link to pet inbox
     await supabase.from("notifications").insert({
       user_id: petEmail.pet_profiles.user_id,
       title: "📧 New Document Received",
       message: `${senderName || senderEmail} sent ${documents.length} document(s) for ${petEmail.pet_profiles.name}${emailData.subject ? `: ${emailData.subject}` : ""}`,
       category: "transactional",
+      link_url: `/pet-health/${petEmail.pet_id}?tab=inbox`,
     });
 
     return new Response(
