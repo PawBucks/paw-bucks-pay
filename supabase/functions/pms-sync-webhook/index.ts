@@ -147,10 +147,13 @@ serve(async (req) => {
       );
     }
 
+    // Decrypt the webhook secret before verification
+    const decryptedWebhookSecret = await decryptSecret(integration.webhook_secret);
+
     const isValidSignature = await verifyPmsSignature(
       rawBody,
       pmsSignature,
-      integration.webhook_secret
+      decryptedWebhookSecret
     );
 
     if (!isValidSignature) {

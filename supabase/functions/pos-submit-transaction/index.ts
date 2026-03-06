@@ -103,7 +103,8 @@ async function triggerWebhooks(
       let responseBody: string | null = null;
 
       try {
-        const signature = await generateHmacSignature(payload, webhook.secret);
+        const decryptedSecret = await decryptSecret(webhook.secret);
+        const signature = await generateHmacSignature(payload, decryptedSecret);
         
         const response = await fetch(webhook.url, {
           method: 'POST',
