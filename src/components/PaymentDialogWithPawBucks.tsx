@@ -133,55 +133,8 @@ const StripePaymentForm = ({
   // Points earned as PawBucks directly (10x of dollar amount = that many PawBucks)
   const cashbackPawBucks = Math.round(stripeAmount * cashbackRate);
 
-  // Show loading state until PaymentElement is ready
-  if (!isReady && !loadError) {
-    return (
-      <div className="space-y-4">
-        <div className="bg-accent/10 border border-accent/20 rounded-lg p-4 space-y-2">
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Total Amount:</span>
-            <span className="font-medium">${totalAmount.toFixed(2)}</span>
-          </div>
-          {pawbucksAmount > 0 && (
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground flex items-center gap-1">
-                <Coins className="w-3 h-3" /> PawBucks Used:
-              </span>
-              <span className="font-medium text-primary">
-                {pawbucksAmount} (−${(pawbucksAmount * PAWBUCKS_TO_USD).toFixed(2)})
-              </span>
-            </div>
-          )}
-          <div className="flex justify-between text-sm border-t pt-2">
-            <span className="text-muted-foreground">Pay with Card:</span>
-            <span className="font-bold">${stripeAmount.toFixed(2)}</span>
-          </div>
-        </div>
-        
-        <div className="flex flex-col items-center justify-center py-8 space-y-4">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          <p className="text-muted-foreground">Loading payment form...</p>
-        </div>
-        
-        {/* Hidden PaymentElement that triggers onReady */}
-        <div className="min-h-[200px]">
-          <PaymentElement 
-            onReady={() => setIsReady(true)} 
-            onLoadError={(error) => setLoadError(error.error.message)}
-          />
-        </div>
-        
-        <div className="flex gap-3">
-          <Button type="button" variant="outline" onClick={onCancel} className="flex-1">
-            Cancel
-          </Button>
-          <Button type="button" className="flex-1" disabled>
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Loading...
-          </Button>
-        </div>
-      </div>
-    );
-  }
+  // Show loading overlay until PaymentElement is ready
+  const showLoadingOverlay = !isReady && !loadError;
 
   if (loadError) {
     return (
@@ -225,8 +178,17 @@ const StripePaymentForm = ({
           <CreditCard className="w-4 h-4" />
           Payment Details
         </Label>
-        <div className="min-h-[200px]">
-          <PaymentElement />
+        <div className="min-h-[200px] relative">
+          {showLoadingOverlay && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/80 z-10 rounded-md">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              <p className="text-sm text-muted-foreground mt-2">Loading payment form...</p>
+            </div>
+          )}
+          <PaymentElement 
+            onReady={() => setIsReady(true)} 
+            onLoadError={(error) => setLoadError(error.error.message)}
+          />
         </div>
       </div>
 
@@ -234,9 +196,11 @@ const StripePaymentForm = ({
         <Button type="button" variant="outline" onClick={onCancel} className="flex-1" disabled={isLoading}>
           Cancel
         </Button>
-        <Button type="submit" className="flex-1" disabled={isLoading || !stripe}>
+        <Button type="submit" className="flex-1" disabled={isLoading || !stripe || !isReady}>
           {isLoading ? (
             <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Processing...</>
+          ) : !isReady ? (
+            <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Loading...</>
           ) : (
             `Pay $${stripeAmount.toFixed(2)}`
           )}
@@ -298,6 +262,10 @@ export const PaymentDialogWithPawBucks = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (totalAmount < 0.50 && pawbucksToUse <= 0) {
+      toast.error("Minimum payment amount is $0.50");
+      return;
+    }
     if (totalAmount <= 0) {
       toast.error("Please enter a valid amount");
       return;
@@ -366,7 +334,10 @@ export const PaymentDialogWithPawBucks = ({
   const cashbackPawBucks = stripeAmount > 0 ? Math.round(stripeAmount * cashbackRate) : 0;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={(isOpen) => {
+        if (!isOpen) handleCancel();
+        else onOpenChange(isOpen);
+      }}>
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Pay {merchantName}</DialogTitle>
@@ -384,6 +355,7 @@ export const PaymentDialogWithPawBucks = ({
                 id="amount"
                 type="number"
                 step="0.01"
+                min="0.01"
                 placeholder="0.00"
                 value={amount}
                 onChange={(e) => {
@@ -391,6 +363,7 @@ export const PaymentDialogWithPawBucks = ({
                   setPawbucksToUse(0); // Reset PawBucks when amount changes
                 }}
                 required
+                autoFocus
               />
             </div>
 
@@ -463,7 +436,7 @@ export const PaymentDialogWithPawBucks = ({
                   onValueChange={([value]) => setPawbucksToUse(value)}
                   max={maxPawbucks}
                   min={0}
-                  step={100}
+                  step={maxPawbucks <= 500 ? 1 : 100}
                   className="w-full"
                 />
 
@@ -539,7 +512,7 @@ export const PaymentDialogWithPawBucks = ({
                 ) : stripeAmount <= 0 && pawbucksToUse > 0 ? (
                   `Pay with PawBucks`
                 ) : (
-                  "Continue"
+                  "Proceed to Payment"
                 )}
               </Button>
             </div>

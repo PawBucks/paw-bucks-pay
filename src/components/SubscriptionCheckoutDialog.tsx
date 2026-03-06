@@ -314,7 +314,7 @@ const CheckoutForm = ({
                 onValueChange={([value]) => setPawbucksToUse(value)}
                 max={maxPawBucks}
                 min={0}
-                step={100}
+                step={maxPawBucks <= 500 ? 1 : 100}
                 className="w-full"
               />
 
