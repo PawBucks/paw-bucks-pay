@@ -133,55 +133,8 @@ const StripePaymentForm = ({
   // Points earned as PawBucks directly (10x of dollar amount = that many PawBucks)
   const cashbackPawBucks = Math.round(stripeAmount * cashbackRate);
 
-  // Show loading state until PaymentElement is ready
-  if (!isReady && !loadError) {
-    return (
-      <div className="space-y-4">
-        <div className="bg-accent/10 border border-accent/20 rounded-lg p-4 space-y-2">
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Total Amount:</span>
-            <span className="font-medium">${totalAmount.toFixed(2)}</span>
-          </div>
-          {pawbucksAmount > 0 && (
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground flex items-center gap-1">
-                <Coins className="w-3 h-3" /> PawBucks Used:
-              </span>
-              <span className="font-medium text-primary">
-                {pawbucksAmount} (−${(pawbucksAmount * PAWBUCKS_TO_USD).toFixed(2)})
-              </span>
-            </div>
-          )}
-          <div className="flex justify-between text-sm border-t pt-2">
-            <span className="text-muted-foreground">Pay with Card:</span>
-            <span className="font-bold">${stripeAmount.toFixed(2)}</span>
-          </div>
-        </div>
-        
-        <div className="flex flex-col items-center justify-center py-8 space-y-4">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          <p className="text-muted-foreground">Loading payment form...</p>
-        </div>
-        
-        {/* Hidden PaymentElement that triggers onReady */}
-        <div className="min-h-[200px]">
-          <PaymentElement 
-            onReady={() => setIsReady(true)} 
-            onLoadError={(error) => setLoadError(error.error.message)}
-          />
-        </div>
-        
-        <div className="flex gap-3">
-          <Button type="button" variant="outline" onClick={onCancel} className="flex-1">
-            Cancel
-          </Button>
-          <Button type="button" className="flex-1" disabled>
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Loading...
-          </Button>
-        </div>
-      </div>
-    );
-  }
+  // Show loading overlay until PaymentElement is ready
+  const showLoadingOverlay = !isReady && !loadError;
 
   if (loadError) {
     return (
