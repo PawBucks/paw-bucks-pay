@@ -509,7 +509,7 @@ export const PaymentDialogWithPawBucks = ({
                 ) : stripeAmount <= 0 && pawbucksToUse > 0 ? (
                   `Pay with PawBucks`
                 ) : (
-                  "Continue"
+                  "Proceed to Payment"
                 )}
               </Button>
             </div>
