@@ -262,6 +262,10 @@ export const PaymentDialogWithPawBucks = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (totalAmount < 0.50 && pawbucksToUse <= 0) {
+      toast.error("Minimum payment amount is $0.50");
+      return;
+    }
     if (totalAmount <= 0) {
       toast.error("Please enter a valid amount");
       return;
