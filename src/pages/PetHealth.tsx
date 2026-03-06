@@ -156,7 +156,7 @@ export default function PetHealth() {
           <ShareHealthRecordsDialog petId={pet.id} petName={pet.name} />
         </div>
 
-        <Tabs defaultValue="records" className="space-y-4">
+        <Tabs defaultValue={defaultTab} className="space-y-4">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="records" className="flex items-center gap-2">
               <FileHeart className="w-4 h-4" />
