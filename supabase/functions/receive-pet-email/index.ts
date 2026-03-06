@@ -134,16 +134,43 @@ serve(async (req) => {
         let fileType: string;
         let fileSize: number;
 
+        // Log attachment keys for debugging
+        if (!(attachment instanceof File)) {
+          console.log("Attachment object keys:", Object.keys(attachment), "filename:", attachment.filename || attachment.name, "has content:", !!attachment.content, "has data:", !!attachment.data);
+        }
+
         if (attachment instanceof File) {
           fileName = attachment.name;
           fileBuffer = await attachment.arrayBuffer();
           fileType = attachment.type;
           fileSize = attachment.size;
-        } else if (attachment.filename) {
-          // JSON format from Resend
-          fileName = attachment.filename;
-          const content = attachment.content;
-          fileType = attachment.contentType || "application/octet-stream";
+        } else if (attachment.filename || attachment.name) {
+          // JSON format from Resend - content may be in 'content' or 'data' field
+          fileName = attachment.filename || attachment.name;
+          const content = attachment.content || attachment.data;
+          fileType = attachment.contentType || attachment.mimeType || attachment.content_type || "application/octet-stream";
+          
+          if (!content) {
+            console.warn("Attachment has no content/data field:", fileName, "- skipping file upload, creating record with email reference");
+            // Still create a document record even without file content
+            const { data: doc } = await supabase
+              .from("pet_inbound_documents")
+              .insert({
+                pet_id: petEmail.pet_id,
+                email_id: inboundEmail.id,
+                file_name: fileName,
+                file_url: null,
+                file_type: fileType,
+                file_size_bytes: 0,
+                category: "uncategorized",
+                sender_email: senderEmail,
+                sender_name: senderName,
+              })
+              .select()
+              .single();
+            if (doc) documents.push(doc);
+            continue;
+          }
           
           // Robust base64 decoding: clean whitespace and handle URL-safe base64
           let cleanContent = content.replace(/[\s\r\n]/g, "");
