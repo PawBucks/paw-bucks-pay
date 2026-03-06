@@ -1,7 +1,9 @@
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, Store, DollarSign, Award, TrendingUp, Activity, RotateCcw } from 'lucide-react';
+import { Users, Store, DollarSign, Award, TrendingUp, Activity, RotateCcw, Gauge } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { cn } from '@/lib/utils';
 
 export function OverviewTab() {
   const [stats, setStats] = useState({
@@ -13,6 +15,9 @@ export function OverviewTab() {
     platformRevenue: 0,
     refundedTransactions: 0,
     refundedAmount: 0,
+    totalPawbucksEarned: 0,
+    totalPawbucksSpent: 0,
+    pawbucksSpendRate: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -33,6 +38,9 @@ export function OverviewTab() {
           platformRevenue: data[0].platform_revenue || 0, // Accurate fee from application_fee column
           refundedTransactions: data[0].total_refunded_transactions || 0,
           refundedAmount: data[0].total_refunded_amount || 0,
+          totalPawbucksEarned: data[0].total_pawbucks_earned || 0,
+          totalPawbucksSpent: data[0].total_pawbucks_spent || 0,
+          pawbucksSpendRate: data[0].pawbucks_spend_rate || 0,
         });
       }
     } catch (error) {
@@ -166,6 +174,109 @@ export function OverviewTab() {
           );
         })}
       </div>
+
+      {/* PawBucks Spend Rate Card */}
+      <Card className="border-2">
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <div>
+            <CardTitle className="text-lg font-bold flex items-center gap-2">
+              <Gauge className="w-5 h-5 text-primary" />
+              PawBucks Spend Rate
+            </CardTitle>
+            <p className="text-sm text-muted-foreground mt-1">
+              Ratio of PawBucks spent vs earned — healthy ecosystems target 70–90%
+            </p>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="flex items-end gap-3">
+            <span className={cn(
+              "text-5xl font-extrabold tracking-tight",
+              stats.pawbucksSpendRate >= 70 && stats.pawbucksSpendRate <= 90 ? "text-emerald-500" :
+              stats.pawbucksSpendRate >= 50 ? "text-amber-500" : "text-destructive"
+            )}>
+              {stats.pawbucksSpendRate}%
+            </span>
+            <span className={cn(
+              "text-sm font-semibold mb-2 px-2 py-0.5 rounded-full",
+              stats.pawbucksSpendRate >= 70 && stats.pawbucksSpendRate <= 90
+                ? "bg-emerald-500/10 text-emerald-600"
+                : stats.pawbucksSpendRate >= 50
+                ? "bg-amber-500/10 text-amber-600"
+                : "bg-destructive/10 text-destructive"
+            )}>
+              {stats.pawbucksSpendRate >= 70 && stats.pawbucksSpendRate <= 90 ? "Healthy" :
+               stats.pawbucksSpendRate >= 50 ? "Moderate" : "Critical"}
+            </span>
+          </div>
+
+          {/* Progress bar with zone markers */}
+          <div className="space-y-2">
+            <div className="relative">
+              <Progress
+                value={Math.min(stats.pawbucksSpendRate, 100)}
+                className={cn(
+                  "h-4 rounded-full",
+                  stats.pawbucksSpendRate >= 70 && stats.pawbucksSpendRate <= 90
+                    ? "[&>div]:bg-emerald-500"
+                    : stats.pawbucksSpendRate >= 50
+                    ? "[&>div]:bg-amber-500"
+                    : "[&>div]:bg-destructive"
+                )}
+              />
+            </div>
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>0%</span>
+              <span className="text-destructive font-medium">50% ⚠️</span>
+              <span className="text-emerald-600 font-medium">70–90% ✓</span>
+              <span>100%</span>
+            </div>
+          </div>
+
+          {/* Breakdown */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2 border-t">
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide">Total Earned</p>
+              <p className="text-xl font-bold">
+                {stats.totalPawbucksEarned.toLocaleString()} <span className="text-sm font-normal text-muted-foreground">PB</span>
+              </p>
+              <p className="text-xs text-muted-foreground">
+                ≈ ${(stats.totalPawbucksEarned * 0.001).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD
+              </p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide">Total Spent</p>
+              <p className="text-xl font-bold">
+                {stats.totalPawbucksSpent.toLocaleString()} <span className="text-sm font-normal text-muted-foreground">PB</span>
+              </p>
+              <p className="text-xs text-muted-foreground">
+                ≈ ${(stats.totalPawbucksSpent * 0.001).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD
+              </p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide">Unspent Balance</p>
+              <p className="text-xl font-bold">
+                {(stats.totalPawbucksEarned - stats.totalPawbucksSpent).toLocaleString()} <span className="text-sm font-normal text-muted-foreground">PB</span>
+              </p>
+              <p className="text-xs text-muted-foreground">
+                ≈ ${((stats.totalPawbucksEarned - stats.totalPawbucksSpent) * 0.001).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD
+              </p>
+            </div>
+          </div>
+
+          {/* Warning message if below threshold */}
+          {stats.pawbucksSpendRate < 50 && stats.totalPawbucksEarned > 0 && (
+            <div className="bg-destructive/5 border border-destructive/20 rounded-lg p-3 text-sm text-destructive">
+              <strong>⚠️ Below 50%:</strong> Merchants may start viewing PawBucks as a loss rather than a benefit. Consider promotions or incentives to boost spending.
+            </div>
+          )}
+          {stats.pawbucksSpendRate >= 50 && stats.pawbucksSpendRate < 70 && stats.totalPawbucksEarned > 0 && (
+            <div className="bg-amber-500/5 border border-amber-500/20 rounded-lg p-3 text-sm text-amber-700">
+              <strong>📊 Moderate:</strong> Spend rate is acceptable but below optimal. Target 70–90% for a healthy ecosystem.
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
