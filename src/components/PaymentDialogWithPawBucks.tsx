@@ -178,8 +178,17 @@ const StripePaymentForm = ({
           <CreditCard className="w-4 h-4" />
           Payment Details
         </Label>
-        <div className="min-h-[200px]">
-          <PaymentElement />
+        <div className="min-h-[200px] relative">
+          {showLoadingOverlay && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/80 z-10 rounded-md">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              <p className="text-sm text-muted-foreground mt-2">Loading payment form...</p>
+            </div>
+          )}
+          <PaymentElement 
+            onReady={() => setIsReady(true)} 
+            onLoadError={(error) => setLoadError(error.error.message)}
+          />
         </div>
       </div>
 
@@ -187,9 +196,11 @@ const StripePaymentForm = ({
         <Button type="button" variant="outline" onClick={onCancel} className="flex-1" disabled={isLoading}>
           Cancel
         </Button>
-        <Button type="submit" className="flex-1" disabled={isLoading || !stripe}>
+        <Button type="submit" className="flex-1" disabled={isLoading || !stripe || !isReady}>
           {isLoading ? (
             <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Processing...</>
+          ) : !isReady ? (
+            <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Loading...</>
           ) : (
             `Pay $${stripeAmount.toFixed(2)}`
           )}
