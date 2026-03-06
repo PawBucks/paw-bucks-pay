@@ -352,6 +352,7 @@ export const PaymentDialogWithPawBucks = ({
                 id="amount"
                 type="number"
                 step="0.01"
+                min="0.01"
                 placeholder="0.00"
                 value={amount}
                 onChange={(e) => {
@@ -359,6 +360,7 @@ export const PaymentDialogWithPawBucks = ({
                   setPawbucksToUse(0); // Reset PawBucks when amount changes
                 }}
                 required
+                autoFocus
               />
             </div>
 
