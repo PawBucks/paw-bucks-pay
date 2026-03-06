@@ -487,6 +487,34 @@ async function handlePaymentSuccess(
     logStep("Platform fee auto-logged to Tax Vault", { subscriptionId: subscription.id });
   }
 
+  // === CREATE TRANSACTION RECORD ===
+  // This ensures subscription renewals appear in both merchant and owner transaction history
+  const platformFeeInDollars = applicationFee / 100;
+  const { data: txRecord, error: txError } = await supabase
+    .from("transactions")
+    .insert({
+      user_id: subscription.user_id,
+      merchant_id: subscription.merchant_id,
+      amount: amountInDollars,
+      stripe_amount: amountInDollars,
+      pawbucks_used: 0,
+      application_fee: platformFeeInDollars,
+      cashback_earned: pawbucksEarned,
+      rewards_earned: pawbucksEarned,
+      description: `${subscription.product_name} subscription renewal`,
+      status: "completed",
+      stripe_payment_intent_id: paymentIntentId,
+      payment_method: "card",
+    })
+    .select()
+    .single();
+
+  if (txError) {
+    logStep("Error creating transaction record", { subscriptionId: subscription.id, error: txError.message });
+  } else {
+    logStep("Transaction record created", { transactionId: txRecord?.id, amount: amountInDollars });
+  }
+
   // Send notification to user about renewal and rewards
   await supabase.from("notifications").insert({
     user_id: subscription.user_id,
