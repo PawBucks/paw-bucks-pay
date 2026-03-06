@@ -15,6 +15,9 @@ export function OverviewTab() {
     platformRevenue: 0,
     refundedTransactions: 0,
     refundedAmount: 0,
+    totalPawbucksEarned: 0,
+    totalPawbucksSpent: 0,
+    pawbucksSpendRate: 0,
   });
   const [loading, setLoading] = useState(true);
 
