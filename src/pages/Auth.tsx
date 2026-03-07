@@ -10,6 +10,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Eye, EyeOff, Home, KeyRound, Users } from "lucide-react";
+import { lovable } from "@/integrations/lovable/index";
+import { Separator } from "@/components/ui/separator";
 import logo from "@/assets/logo.png";
 import { useAuth } from "@/hooks/useAuth";
 import { signUpSchema, signInSchema } from "@/lib/validation";
