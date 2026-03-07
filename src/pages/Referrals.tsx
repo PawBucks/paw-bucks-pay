@@ -65,21 +65,20 @@ const Referrals = () => {
         .eq("referrer_id", user.id)
         .order("created_at", { ascending: false });
 
-      if (referralsData) {
-        const enrichedReferrals = await Promise.all(
-          referralsData.map(async (ref) => {
-            const { data: profile } = await supabase
-              .from("profiles")
-              .select("full_name")
-              .eq("id", ref.referee_id)
-              .single();
-            
-            return {
-              ...ref,
-              profiles: profile,
-            };
-          })
-        );
+      if (referralsData && referralsData.length > 0) {
+        // Batch fetch profile names instead of N+1 queries
+        const refereeIds = referralsData.map(r => r.referee_id);
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, full_name")
+          .in("id", refereeIds);
+
+        const profileMap = new Map(profiles?.map(p => [p.id, p.full_name]) || []);
+
+        const enrichedReferrals = referralsData.map(ref => ({
+          ...ref,
+          profiles: { full_name: profileMap.get(ref.referee_id) || "User" },
+        }));
         setReferrals(enrichedReferrals);
       }
     } catch (error) {
