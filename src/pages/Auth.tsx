@@ -31,7 +31,8 @@ const Auth = () => {
     roleParam === "vet" ? "merchant" : (roleParam || "pet_owner")
   );
   const [signupRole, setSignupRole] = useState<"pet_owner" | "merchant" | "vet" | null>(roleParam);
-  const [referralCode, setReferralCode] = useState("");
+  const refParam = searchParams.get("ref");
+  const [referralCode, setReferralCode] = useState(refParam || "");
   const [showSignInPassword, setShowSignInPassword] = useState(false);
   const [showSignUpPassword, setShowSignUpPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
