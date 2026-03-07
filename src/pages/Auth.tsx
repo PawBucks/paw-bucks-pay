@@ -508,7 +508,7 @@ const Auth = () => {
             </Alert>
           )}
           
-          <Tabs defaultValue={inviteToken ? "signup" : "signin"} className="w-full">
+          <Tabs defaultValue={inviteToken || refParam ? "signup" : "signin"} className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="signin" className="text-sm sm:text-base">Sign In</TabsTrigger>
               <TabsTrigger value="signup" className="text-sm sm:text-base">Sign Up</TabsTrigger>
