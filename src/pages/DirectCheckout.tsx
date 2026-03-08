@@ -237,6 +237,7 @@ export default function DirectCheckout() {
 
       setClientSecret(data.clientSecret);
       setConnectedAccountId(data.connectedAccountId);
+      setPaymentIntentId(data.paymentIntentId);
       setPawbucksEarned(data.pawbucksEarned);
     } catch (error: any) {
       console.error("Error creating payment:", error);
