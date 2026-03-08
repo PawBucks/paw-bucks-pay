@@ -147,12 +147,17 @@ function CheckoutForm({
         type="submit" 
         className="w-full" 
         size="lg"
-        disabled={!stripe || processing}
+        disabled={!stripe || processing || !isReady}
       >
         {processing ? (
           <>
             <Loader2 className="h-4 w-4 animate-spin mr-2" />
             Processing...
+          </>
+        ) : !isReady ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            Loading...
           </>
         ) : (
           <>
