@@ -27,17 +27,22 @@ function CheckoutForm({
   amount, 
   merchantName, 
   pawbucksEarned,
+  paymentIntentId,
+  connectedAccountId,
   onSuccess 
 }: { 
   amount: number; 
   merchantName: string;
   pawbucksEarned: number;
+  paymentIntentId: string;
+  connectedAccountId: string;
   onSuccess: () => void;
 }) {
   const stripe = useStripe();
   const elements = useElements();
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isReady, setIsReady] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,21 +55,57 @@ function CheckoutForm({
       const { error: submitError } = await elements.submit();
       if (submitError) {
         setError(submitError.message || "Payment failed");
+        setProcessing(false);
         return;
       }
 
-      const { error: confirmError } = await stripe.confirmPayment({
+      const { error: confirmError, paymentIntent } = await stripe.confirmPayment({
         elements,
         confirmParams: {
-          return_url: `${window.location.origin}/checkout/success`,
+          return_url: `${window.location.origin}/checkout-success`,
         },
+        redirect: 'if_required',
       });
 
       if (confirmError) {
         setError(confirmError.message || "Payment failed");
+        setProcessing(false);
+        return;
       }
-    } catch (err) {
-      setError("An unexpected error occurred");
+
+      // Payment succeeded — call backend to process rewards/transaction
+      let confirmSuccess = false;
+      let lastError = null;
+
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        const { data, error: backendError } = await supabase.functions.invoke(
+          'confirm-payment-success',
+          { body: { paymentIntentId, connectedAccountId } }
+        );
+
+        if (!backendError && data?.success) {
+          confirmSuccess = true;
+          toast.success(`Payment successful! You earned ${data.pawbucksEarned || pawbucksEarned} PawBucks!`);
+          break;
+        }
+
+        lastError = backendError;
+        if (attempt < 3) {
+          await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+        }
+      }
+
+      if (!confirmSuccess) {
+        console.error('[DIRECT-CHECKOUT] Backend confirmation failed:', lastError);
+        toast.warning("Payment successful! Rewards may take a moment to appear.", {
+          description: "If rewards don't appear within a few minutes, please contact support.",
+          duration: 8000,
+        });
+      }
+
+      onSuccess();
+    } catch (err: any) {
+      setError(err.message || "An unexpected error occurred");
     } finally {
       setProcessing(false);
     }
