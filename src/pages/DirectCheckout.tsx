@@ -401,7 +401,7 @@ export default function DirectCheckout() {
             </div>
           ) : (
             <Elements 
-              stripe={getStripePromise()} 
+              stripe={getStripeForConnectedAccount(connectedAccountId!)} 
               options={{ 
                 clientSecret,
                 appearance: { theme: "stripe" },
@@ -411,6 +411,8 @@ export default function DirectCheckout() {
                 amount={Math.round(parseFloat(amount) * 100)}
                 merchantName={merchant.business_name}
                 pawbucksEarned={pawbucksEarned}
+                paymentIntentId={paymentIntentId!}
+                connectedAccountId={connectedAccountId!}
                 onSuccess={() => setSuccess(true)}
               />
             </Elements>
