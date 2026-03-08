@@ -253,7 +253,7 @@ export default function DirectCheckout() {
         <SEO title="Payment Success" description="Your payment was successful" />
         <Card className="max-w-md w-full">
           <CardContent className="pt-6 text-center">
-            <CheckCircle2 className="h-16 w-16 mx-auto text-green-500 mb-4" />
+            <CheckCircle2 className="h-16 w-16 mx-auto text-primary mb-4" />
             <h1 className="text-2xl font-bold mb-2">Payment Successful!</h1>
             <p className="text-muted-foreground mb-6">
               Thank you for your payment. PawBucks have been added to your wallet.
