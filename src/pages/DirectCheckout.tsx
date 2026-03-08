@@ -11,7 +11,7 @@ import { Loader2, Store, DollarSign, Gift, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { SEO } from "@/components/SEO";
-import { getStripePromise } from "@/lib/stripe";
+import { getStripeForConnectedAccount } from "@/lib/stripe";
 
 interface Merchant {
   id: string;
@@ -27,17 +27,22 @@ function CheckoutForm({
   amount, 
   merchantName, 
   pawbucksEarned,
+  paymentIntentId,
+  connectedAccountId,
   onSuccess 
 }: { 
   amount: number; 
   merchantName: string;
   pawbucksEarned: number;
+  paymentIntentId: string;
+  connectedAccountId: string;
   onSuccess: () => void;
 }) {
   const stripe = useStripe();
   const elements = useElements();
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isReady, setIsReady] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,21 +55,57 @@ function CheckoutForm({
       const { error: submitError } = await elements.submit();
       if (submitError) {
         setError(submitError.message || "Payment failed");
+        setProcessing(false);
         return;
       }
 
-      const { error: confirmError } = await stripe.confirmPayment({
+      const { error: confirmError, paymentIntent } = await stripe.confirmPayment({
         elements,
         confirmParams: {
-          return_url: `${window.location.origin}/checkout/success`,
+          return_url: `${window.location.origin}/checkout-success`,
         },
+        redirect: 'if_required',
       });
 
       if (confirmError) {
         setError(confirmError.message || "Payment failed");
+        setProcessing(false);
+        return;
       }
-    } catch (err) {
-      setError("An unexpected error occurred");
+
+      // Payment succeeded — call backend to process rewards/transaction
+      let confirmSuccess = false;
+      let lastError = null;
+
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        const { data, error: backendError } = await supabase.functions.invoke(
+          'confirm-payment-success',
+          { body: { paymentIntentId, connectedAccountId } }
+        );
+
+        if (!backendError && data?.success) {
+          confirmSuccess = true;
+          toast.success(`Payment successful! You earned ${data.pawbucksEarned || pawbucksEarned} PawBucks!`);
+          break;
+        }
+
+        lastError = backendError;
+        if (attempt < 3) {
+          await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+        }
+      }
+
+      if (!confirmSuccess) {
+        console.error('[DIRECT-CHECKOUT] Backend confirmation failed:', lastError);
+        toast.warning("Payment successful! Rewards may take a moment to appear.", {
+          description: "If rewards don't appear within a few minutes, please contact support.",
+          duration: 8000,
+        });
+      }
+
+      onSuccess();
+    } catch (err: any) {
+      setError(err.message || "An unexpected error occurred");
     } finally {
       setProcessing(false);
     }
@@ -92,7 +133,9 @@ function CheckoutForm({
         </div>
       </div>
 
-      <PaymentElement />
+      <PaymentElement 
+        onReady={() => setIsReady(true)}
+      />
 
       {error && (
         <div className="p-3 bg-destructive/10 text-destructive rounded-lg text-sm">
@@ -104,12 +147,17 @@ function CheckoutForm({
         type="submit" 
         className="w-full" 
         size="lg"
-        disabled={!stripe || processing}
+        disabled={!stripe || processing || !isReady}
       >
         {processing ? (
           <>
             <Loader2 className="h-4 w-4 animate-spin mr-2" />
             Processing...
+          </>
+        ) : !isReady ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            Loading...
           </>
         ) : (
           <>
@@ -131,6 +179,7 @@ export default function DirectCheckout() {
   const [description, setDescription] = useState("");
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [connectedAccountId, setConnectedAccountId] = useState<string | null>(null);
+  const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null);
   const [pawbucksEarned, setPawbucksEarned] = useState(0);
   const [creating, setCreating] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -188,6 +237,7 @@ export default function DirectCheckout() {
 
       setClientSecret(data.clientSecret);
       setConnectedAccountId(data.connectedAccountId);
+      setPaymentIntentId(data.paymentIntentId);
       setPawbucksEarned(data.pawbucksEarned);
     } catch (error: any) {
       console.error("Error creating payment:", error);
@@ -203,7 +253,7 @@ export default function DirectCheckout() {
         <SEO title="Payment Success" description="Your payment was successful" />
         <Card className="max-w-md w-full">
           <CardContent className="pt-6 text-center">
-            <CheckCircle2 className="h-16 w-16 mx-auto text-green-500 mb-4" />
+            <CheckCircle2 className="h-16 w-16 mx-auto text-primary mb-4" />
             <h1 className="text-2xl font-bold mb-2">Payment Successful!</h1>
             <p className="text-muted-foreground mb-6">
               Thank you for your payment. PawBucks have been added to your wallet.
@@ -351,7 +401,7 @@ export default function DirectCheckout() {
             </div>
           ) : (
             <Elements 
-              stripe={getStripePromise()} 
+              stripe={getStripeForConnectedAccount(connectedAccountId!)} 
               options={{ 
                 clientSecret,
                 appearance: { theme: "stripe" },
@@ -361,6 +411,8 @@ export default function DirectCheckout() {
                 amount={Math.round(parseFloat(amount) * 100)}
                 merchantName={merchant.business_name}
                 pawbucksEarned={pawbucksEarned}
+                paymentIntentId={paymentIntentId!}
+                connectedAccountId={connectedAccountId!}
                 onSuccess={() => setSuccess(true)}
               />
             </Elements>
