@@ -179,6 +179,7 @@ export default function DirectCheckout() {
   const [description, setDescription] = useState("");
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [connectedAccountId, setConnectedAccountId] = useState<string | null>(null);
+  const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null);
   const [pawbucksEarned, setPawbucksEarned] = useState(0);
   const [creating, setCreating] = useState(false);
   const [success, setSuccess] = useState(false);
