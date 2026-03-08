@@ -133,7 +133,9 @@ function CheckoutForm({
         </div>
       </div>
 
-      <PaymentElement />
+      <PaymentElement 
+        onReady={() => setIsReady(true)}
+      />
 
       {error && (
         <div className="p-3 bg-destructive/10 text-destructive rounded-lg text-sm">
