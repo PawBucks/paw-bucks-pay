@@ -4,8 +4,7 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
 import { usePawBucksRealtime } from "@/hooks/usePawBucksRealtime";
-import { useSharedAccount, getEffectiveWalletUserId } from "@/hooks/useSharedAccount";
-import { supabase } from "@/integrations/supabase/client";
+import { useDashboardData } from "@/hooks/useDashboardData";
 import { Header } from "@/components/Header";
 import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
@@ -44,147 +43,30 @@ const cardVariants = {
     },
   }),
 };
-type Profile = {
-  user_type: "pet_owner" | "merchant";
-  full_name: string;
-};
-
-type WalletData = {
-  balance: number;
-  rewards_points: number;
-  total_spent: number;
-};
-
-type MedicalRecordSpending = {
-  total: number;
-};
-
-type PawBucksWallet = {
-  balance: number;
-};
-
-type PetProfile = {
-  id: string;
-  name: string;
-  type: "dog" | "cat" | "other";
-  breed?: string;
-  birthday?: string;
-  photo_url?: string;
-  personality_type?: string | null;
-  personality_quiz_completed?: boolean | null;
-};
 
 const Dashboard = () => {
   const { user, signOut, loading: authLoading } = useAuth();
   const { subscription } = useSubscription();
   const navigate = useNavigate();
-  
-  // Check if user is part of a shared account
-  const sharedAccount = useSharedAccount(user?.id);
-  const effectiveWalletUserId = getEffectiveWalletUserId(user?.id, sharedAccount);
-  
-  // Enable realtime updates for PawBucks on pet owner dashboard (use effective user ID)
-  usePawBucksRealtime(effectiveWalletUserId);
-  
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [wallet, setWallet] = useState<WalletData | null>(null);
-  const [pawbucksWallet, setPawbucksWallet] = useState<PawBucksWallet | null>(null);
-  const [pets, setPets] = useState<PetProfile[]>([]);
-  const [medicalSpending, setMedicalSpending] = useState<number>(0);
-  const [dataLoading, setDataLoading] = useState(true);
   const [receiptDialogOpen, setReceiptDialogOpen] = useState(false);
-  
+
+  // TanStack Query-powered data fetching (leverages prefetch cache)
+  const {
+    profile,
+    pawbucksWallet,
+    pets,
+    totalSpent,
+    medicalSpending,
+    dataLoading,
+    sharedAccount,
+    effectiveWalletUserId,
+    refetchAll,
+  } = useDashboardData();
+
+  // Enable realtime updates for PawBucks
+  usePawBucksRealtime(effectiveWalletUserId);
+
   const isPawPassSubscriber = subscription.subscribed;
-
-  // Direct fetch function - optimized with parallel loading
-  const fetchDashboardData = useCallback(async () => {
-    if (!user) {
-      setDataLoading(false);
-      return;
-    }
-    
-    if (sharedAccount.isLoading) {
-      return;
-    }
-
-    setDataLoading(true);
-    
-    // Calculate wallet user ID inside the callback to avoid stale closure
-    const walletUserId = sharedAccount.isSharedMember && sharedAccount.ownerId 
-      ? sharedAccount.ownerId 
-      : user.id;
-    
-    try {
-      // Fetch all data in parallel directly from Supabase - optimized queries
-      const [profileResult, completedTxResult, pawbucksResult, petsResult, medicalResult] = await Promise.all([
-        supabase
-          .from('profiles')
-          .select('user_type, full_name')
-          .eq('id', user.id)
-          .single()
-          .throwOnError(),
-        supabase
-          .from('transactions')
-          .select('amount')
-          .eq('user_id', walletUserId)
-          .eq('status', 'completed'),
-        supabase
-          .from('pawbucks_wallet')
-          .select('balance')
-          .eq('user_id', walletUserId)
-          .maybeSingle(),
-        supabase
-          .from('pet_profiles')
-          .select('id, name, type, breed, birthday, photo_url, personality_type, personality_quiz_completed')
-          .eq('user_id', walletUserId)
-          .order('created_at', { ascending: false })
-          .limit(10),
-        supabase
-          .from('pet_medical_records')
-          .select('price')
-          .eq('user_id', walletUserId)
-          .not('price', 'is', null)
-          .limit(100)
-      ]);
-
-      if (profileResult.data) {
-        setProfile(profileResult.data as Profile);
-      }
-      
-      // Compute total_spent from completed transactions only
-      if (completedTxResult.data) {
-        const totalSpent = completedTxResult.data.reduce((sum, t) => sum + (t.amount || 0), 0);
-        setWallet({ balance: 0, rewards_points: 0, total_spent: totalSpent });
-      }
-
-      if (pawbucksResult.data) {
-        setPawbucksWallet(pawbucksResult.data);
-      }
-      
-      if (petsResult.data) {
-        setPets(petsResult.data as PetProfile[]);
-      }
-
-      // Calculate total medical spending from records with prices
-      if (medicalResult.data) {
-        const totalMedical = medicalResult.data.reduce((sum, record) => {
-          return sum + (record.price || 0);
-        }, 0);
-        setMedicalSpending(totalMedical);
-      }
-    } catch (error) {
-      console.error('[Dashboard] Error fetching data:', error);
-    } finally {
-      setDataLoading(false);
-    }
-  }, [user, sharedAccount.isLoading, sharedAccount.isSharedMember, sharedAccount.ownerId]);
-
-  // Fetch data when user changes or shared account status is determined
-  useEffect(() => {
-    if (user && !authLoading && !sharedAccount.isLoading) {
-      fetchDashboardData();
-    }
-  }, [user, authLoading, sharedAccount.isLoading, fetchDashboardData]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -201,14 +83,13 @@ const Dashboard = () => {
     navigate("/auth");
   }, [signOut, navigate]);
 
-  // Handle refetch when pets are updated
   const handlePetsUpdate = useCallback(() => {
-    fetchDashboardData();
-  }, [fetchDashboardData]);
+    refetchAll();
+  }, [refetchAll]);
 
   // Pull to refresh
   const { containerRef, isRefreshing, pullDistance, progress } = usePullToRefresh({
-    onRefresh: fetchDashboardData,
+    onRefresh: refetchAll,
   });
 
   if (authLoading || dataLoading || !profile) {
@@ -288,7 +169,7 @@ const Dashboard = () => {
                 balance={(pawbucksWallet?.balance || 0) * 0.001} 
                 rewardsPoints={pawbucksWallet?.balance || 0}
                 totalSaved={(pawbucksWallet?.balance || 0) * 0.001}
-                totalSpent={(wallet?.total_spent || 0) + medicalSpending}
+                totalSpent={totalSpent + medicalSpending}
               />
             </motion.div>
             
