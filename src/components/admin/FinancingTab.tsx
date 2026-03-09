@@ -790,13 +790,38 @@ export function FinancingTab() {
       .order('created_at', { ascending: false });
 
     if (loans) {
-      setVetLoans(loans.map((l: any) => ({
-        ...l,
-        ...l.partner_vets,
+      const mappedLoans: VetLoanApplicant[] = loans.map((l: any) => ({
+        id: l.id,
+        user_id: l.user_id,
+        vet_id: l.vet_id,
+        invoice_amount: l.invoice_amount,
+        requested_amount: l.requested_amount,
+        status: l.status,
+        term_months: l.term_months,
+        purpose: l.purpose,
+        invoice_url: l.invoice_url,
+        created_at: l.created_at,
+        // vet data
+        clinic_name: l.partner_vets?.clinic_name ?? null,
+        name: l.partner_vets?.name ?? null,
+        practice_type: l.partner_vets?.practice_type ?? null,
+        license_number: l.partner_vets?.license_number ?? null,
+        license_state: l.partner_vets?.license_state ?? null,
+        npi_number: l.partner_vets?.npi_number ?? null,
+        clinic_phone: l.partner_vets?.clinic_phone ?? null,
+        contact_email: l.partner_vets?.contact_email ?? null,
+        location: l.partner_vets?.location ?? null,
+        is_verified: l.partner_vets?.is_verified ?? false,
+        approval_status: l.partner_vets?.approval_status ?? 'pending',
+        accreditations: l.partner_vets?.accreditations ?? null,
+        services_provided: l.partner_vets?.services_provided ?? null,
+        subscription_tier: l.partner_vets?.subscription_tier ?? null,
+        // patient data
         patient_name: l.profiles?.full_name ?? null,
         patient_email: l.profiles?.email ?? null,
-      })));
-      if (loans.length > 0 && !selectedVetLoan) setSelectedVetLoan(loans[0]);
+      }));
+      setVetLoans(mappedLoans);
+      if (mappedLoans.length > 0 && !selectedVetLoan) setSelectedVetLoan(mappedLoans[0]);
     }
   };
 
