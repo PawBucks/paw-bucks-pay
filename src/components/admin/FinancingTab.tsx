@@ -500,6 +500,9 @@ function MerchantDetailPanel({
         </Card>
       )}
 
+      {/* Underwriting Signals */}
+      <UnderwritingSignalsCard merchantId={applicant.merchant_id} />
+
       {/* Social Presence */}
       {(applicant.linkedin_url || applicant.instagram_url || applicant.facebook_url) && (
         <Card>
