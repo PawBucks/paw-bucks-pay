@@ -104,11 +104,13 @@ export const useDashboardData = () => {
 
   const dataLoading = profileQuery.isLoading || pawbucksQuery.isLoading || petsQuery.isLoading || spendingQuery.isLoading;
 
-  const refetchAll = () => {
-    profileQuery.refetch();
-    pawbucksQuery.refetch();
-    petsQuery.refetch();
-    spendingQuery.refetch();
+  const refetchAll = async () => {
+    await Promise.all([
+      profileQuery.refetch(),
+      pawbucksQuery.refetch(),
+      petsQuery.refetch(),
+      spendingQuery.refetch(),
+    ]);
   };
 
   return {
