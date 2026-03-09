@@ -119,10 +119,10 @@ const Storefront = memo(() => {
           if (!user?.id) return false;
           const { data } = await supabase
             .from('profiles')
-            .select('auto_redeem_pawbucks')
+            .select('auto_redeem_mode')
             .eq('id', user.id)
             .single();
-          return data?.auto_redeem_pawbucks || false;
+          return data?.auto_redeem_mode !== 'off' && data?.auto_redeem_mode !== null;
         },
         staleTime: 1000 * 60 * 5,
         enabled: !!user?.id,

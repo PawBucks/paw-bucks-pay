@@ -22,12 +22,12 @@ export const AutoRedeemEducationCard = ({ userId, pawbucksBalance }: AutoRedeemE
       try {
         const { data, error } = await supabase
           .from("profiles")
-          .select("auto_redeem_pawbucks")
+          .select("auto_redeem_mode")
           .eq("id", userId)
           .single();
 
         if (!error && data) {
-          setAutoRedeemEnabled(data.auto_redeem_pawbucks || false);
+          setAutoRedeemEnabled(data.auto_redeem_mode !== 'off' && data.auto_redeem_mode !== null);
         }
       } catch (error) {
         console.error("Error checking auto-redeem status:", error);

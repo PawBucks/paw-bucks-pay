@@ -7340,6 +7340,9 @@ export type Database = {
       }
       profiles: {
         Row: {
+          auto_redeem_max_apply_pct: number
+          auto_redeem_min_coverage_pct: number
+          auto_redeem_mode: string
           auto_redeem_pawbucks: boolean
           avatar_url: string | null
           created_at: string
@@ -7354,6 +7357,9 @@ export type Database = {
           user_type: Database["public"]["Enums"]["user_type"]
         }
         Insert: {
+          auto_redeem_max_apply_pct?: number
+          auto_redeem_min_coverage_pct?: number
+          auto_redeem_mode?: string
           auto_redeem_pawbucks?: boolean
           avatar_url?: string | null
           created_at?: string
@@ -7368,6 +7374,9 @@ export type Database = {
           user_type: Database["public"]["Enums"]["user_type"]
         }
         Update: {
+          auto_redeem_max_apply_pct?: number
+          auto_redeem_min_coverage_pct?: number
+          auto_redeem_mode?: string
           auto_redeem_pawbucks?: boolean
           avatar_url?: string | null
           created_at?: string
