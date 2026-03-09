@@ -64,11 +64,6 @@ export const ProtectedRoute = ({
     route => location.pathname.startsWith(route)
   );
 
-  // Determine if user has a non-pet-owner role (merchants/vets/admins skip pet check)
-  const hasNonPetOwnerRole = allowedRoles && allowedRoles.some(
-    r => r === 'merchant' || r === 'vet' || r === 'admin' || r === 'superadmin'
-  );
-
   useEffect(() => {
     if (!loading && requireAuth && !user) {
       navigate(redirectTo);
