@@ -11353,6 +11353,23 @@ export type Database = {
         }[]
       }
       get_spendable_pawbucks: { Args: { p_user_id: string }; Returns: number }
+      get_underwriting_signals: {
+        Args: { p_merchant_id: string }
+        Returns: {
+          avg_days_between_tx: number
+          avg_review_score: number
+          customer_repeat_rate_pct: number
+          five_star_pct: number
+          one_time_customers: number
+          redemption_rate_pct: number
+          redemption_velocity_avg_hours: number
+          repeat_customers: number
+          review_count: number
+          total_unique_customers: number
+          tx_frequency_30d: number
+          tx_frequency_90d: number
+        }[]
+      }
       get_user_vet_ids: { Args: { check_user_id: string }; Returns: string[] }
       has_role: {
         Args: {

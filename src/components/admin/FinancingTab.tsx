@@ -17,6 +17,7 @@ import {
   Shield, Star, ArrowRight, ChevronRight, ExternalLink, Activity, CreditCard,
   Landmark, FileText, ShoppingBag, BadgeCheck, CircleDot
 } from 'lucide-react';
+import { UnderwritingSignalsCard } from './UnderwritingSignalsCard';
 import { format, formatDistanceToNow, differenceInDays } from 'date-fns';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -499,6 +500,9 @@ function MerchantDetailPanel({
           </CardContent>
         </Card>
       )}
+
+      {/* Underwriting Signals */}
+      <UnderwritingSignalsCard merchantId={applicant.merchant_id} />
 
       {/* Social Presence */}
       {(applicant.linkedin_url || applicant.instagram_url || applicant.facebook_url) && (
