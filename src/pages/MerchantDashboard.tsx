@@ -718,6 +718,7 @@ const MerchantDashboard = () => {
       case "actions":
         return (
           <MerchantQuickActionsTab
+            merchantId={merchant.id}
             hasStripeAccount={!!merchant.stripe_account_id}
             fundingEligible={analytics?.funding_eligible || false}
             daysActive={analytics?.days_active || 0}
