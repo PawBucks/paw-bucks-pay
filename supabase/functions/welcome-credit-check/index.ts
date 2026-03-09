@@ -23,7 +23,6 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_ANON_KEY') ?? ''
     );
 
-    // Get authenticated user
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
       throw new Error('No authorization header');
@@ -40,13 +39,11 @@ serve(async (req) => {
 
     const { merchantId } = await req.json();
 
-    // Use service role for database operations
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Get user's welcome credit
     const { data: credit, error: creditError } = await supabaseAdmin
       .from('user_welcome_credits')
       .select('*')
@@ -58,9 +55,8 @@ serve(async (req) => {
       throw new Error('Failed to check welcome credit status');
     }
 
-    // If no credit exists, check if user is eligible for one
+    // No credit exists - check eligibility
     if (!credit) {
-      // Check if user has any transactions (would make them ineligible)
       const { count: transactionCount } = await supabaseAdmin
         .from('transactions')
         .select('*', { count: 'exact', head: true })
@@ -77,7 +73,6 @@ serve(async (req) => {
         );
       }
 
-      // User is eligible for a welcome credit but doesn't have one yet
       return new Response(
         JSON.stringify({
           hasCredit: false,
@@ -86,7 +81,9 @@ serve(async (req) => {
           creditAmount: 30000,
           phase1Amount: 30000,
           phase2Amount: 20000,
+          phase1Used: false,
           phase2Unlocked: false,
+          currentPhaseAmount: 30000,
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
@@ -111,7 +108,6 @@ serve(async (req) => {
     }
 
     if (credit.status === 'expired' || expiresAt < now) {
-      // Update status if needed
       if (credit.status !== 'expired') {
         await supabaseAdmin
           .from('user_welcome_credits')
@@ -142,7 +138,23 @@ serve(async (req) => {
       );
     }
 
-    // Credit is active - check merchant eligibility if merchantId provided
+    // Credit is active - determine current phase and spendable amount
+    const phase1Used = credit.phase_1_used ?? false;
+    const phase2Unlocked = credit.phase_2_unlocked ?? false;
+
+    // Determine the currently available credit amount based on phase state
+    let currentPhaseAmount = 0;
+    let currentPhase = 0;
+    if (!phase1Used) {
+      currentPhaseAmount = credit.phase_1_amount;
+      currentPhase = 1;
+    } else if (phase2Unlocked) {
+      currentPhaseAmount = credit.phase_2_amount;
+      currentPhase = 2;
+    }
+    // If phase1 used but phase2 not unlocked, currentPhaseAmount stays 0
+
+    // Check merchant eligibility if merchantId provided
     let merchantEligible = null;
     let merchantName = null;
 
@@ -154,7 +166,6 @@ serve(async (req) => {
         .single();
 
       if (merchant) {
-        // Any merchant that accepts PawBucks automatically accepts Welcome Credit
         merchantEligible = merchant.accepts_pawbucks ?? false;
         merchantName = merchant.business_name;
       }
@@ -162,27 +173,34 @@ serve(async (req) => {
 
     logStep("Credit check complete", {
       creditId: credit.id,
-      amount: credit.credit_amount,
+      phase1Used,
+      phase2Unlocked,
+      currentPhase,
+      currentPhaseAmount,
       daysRemaining,
-      merchantEligible,
     });
 
     return new Response(
       JSON.stringify({
-        hasCredit: true,
+        hasCredit: currentPhaseAmount > 0,
         isEligible: true,
         status: 'active',
         creditId: credit.id,
-        creditAmount: credit.credit_amount,
+        creditAmount: currentPhaseAmount,
+        totalCreditAmount: credit.credit_amount,
         phase1Amount: credit.phase_1_amount,
         phase2Amount: credit.phase_2_amount,
-        phase2Unlocked: credit.phase_2_unlocked,
+        phase1Used,
+        phase1UsedAt: credit.phase_1_used_at,
+        phase2Unlocked,
         phase2UnlockedAt: credit.phase_2_unlocked_at,
+        currentPhase,
+        currentPhaseAmount,
         expiresAt: credit.expires_at,
         daysRemaining,
         merchantEligible,
         merchantName,
-        minimumTransactionCents: 7500, // $75 minimum
+        minimumTransactionCents: 7500,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

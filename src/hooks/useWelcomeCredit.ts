@@ -7,10 +7,15 @@ export interface WelcomeCreditStatus {
   status?: 'active' | 'used' | 'expired' | 'revoked';
   creditId?: string;
   creditAmount?: number;
+  totalCreditAmount?: number;
   phase1Amount?: number;
   phase2Amount?: number;
+  phase1Used?: boolean;
+  phase1UsedAt?: string;
   phase2Unlocked?: boolean;
   phase2UnlockedAt?: string;
+  currentPhase?: number;
+  currentPhaseAmount?: number;
   expiresAt?: string;
   daysRemaining?: number;
   canIssue?: boolean;
@@ -68,7 +73,6 @@ export const useWelcomeCredit = (userId: string | undefined, merchantId?: string
       }
 
       if (data?.success) {
-        // Refresh status
         await checkCredit();
         return true;
       }
@@ -105,14 +109,21 @@ export const useWelcomeCredit = (userId: string | undefined, merchantId?: string
       };
     }
 
-    // Credit cannot exceed transaction total
-    const creditToApply = Math.min(status.creditAmount || 50000, transactionAmountCents);
+    // Use currentPhaseAmount - only the active phase's credit
+    const phaseCredit = status.currentPhaseAmount || 0;
+    if (phaseCredit <= 0) {
+      return { canUse: false, reason: 'No available welcome credit for current phase' };
+    }
+
+    const creditToApply = Math.min(phaseCredit, transactionAmountCents);
 
     return { 
       canUse: true, 
       creditAmount: creditToApply 
     };
   }, [status]);
+
+  const currentPhaseAmount = status?.currentPhaseAmount || 0;
 
   return {
     status,
@@ -122,9 +133,12 @@ export const useWelcomeCredit = (userId: string | undefined, merchantId?: string
     issueCredit,
     canUseWelcomeCredit,
     hasActiveCredit: status?.hasCredit && status?.status === 'active',
-    creditAmountUSD: status?.creditAmount ? status.creditAmount / 1000 : 0,
+    creditAmountUSD: currentPhaseAmount / 1000,
     daysRemaining: status?.daysRemaining,
+    phase1Used: status?.phase1Used ?? false,
     phase2Unlocked: status?.phase2Unlocked ?? false,
     phase2AmountUSD: status?.phase2Amount ? status.phase2Amount / 1000 : 0,
+    currentPhase: status?.currentPhase || 0,
+    currentPhaseAmount,
   };
 };

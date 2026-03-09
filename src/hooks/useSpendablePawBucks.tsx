@@ -15,7 +15,7 @@ interface SpendablePawBucksResult {
 
 /**
  * Hook to get the user's spendable PawBucks balance (excludes locked/pending rewards).
- * Also fetches Welcome Credit balance for new users.
+ * Also fetches Welcome Credit balance for new users - returns only the currently available phase amount.
  * Use this hook in checkout flows to ensure users can only spend available rewards.
  */
 export function useSpendablePawBucks(userId: string | undefined): SpendablePawBucksResult {
@@ -59,7 +59,7 @@ export function useSpendablePawBucks(userId: string | undefined): SpendablePawBu
           .not("slice_id", "is", null),
         supabase
           .from("user_welcome_credits")
-          .select("credit_amount, status, expires_at")
+          .select("credit_amount, status, expires_at, phase_1_amount, phase_2_amount, phase_1_used, phase_2_unlocked")
           .eq("user_id", effectiveUserId)
           .eq("status", "active")
           .maybeSingle(),
@@ -76,14 +76,23 @@ export function useSpendablePawBucks(userId: string | undefined): SpendablePawBu
       const spendable = walletResult.data?.balance || 0;
       const locked = lockedResult.data?.reduce((sum, item) => sum + (item.amount || 0), 0) || 0;
 
-      // Check welcome credit - only valid if not expired
+      // Check welcome credit - determine available phase amount
       let wcBalance = 0;
       let wcActive = false;
       if (welcomeCreditResult.data && welcomeCreditResult.data.status === "active") {
         const expiresAt = new Date(welcomeCreditResult.data.expires_at);
         if (expiresAt > new Date()) {
-          wcBalance = welcomeCreditResult.data.credit_amount || 0;
-          wcActive = true;
+          const phase1Used = welcomeCreditResult.data.phase_1_used ?? false;
+          const phase2Unlocked = welcomeCreditResult.data.phase_2_unlocked ?? false;
+
+          if (!phase1Used) {
+            wcBalance = welcomeCreditResult.data.phase_1_amount || 0;
+            wcActive = true;
+          } else if (phase2Unlocked) {
+            wcBalance = welcomeCreditResult.data.phase_2_amount || 0;
+            wcActive = true;
+          }
+          // If phase1 used but phase2 not unlocked, no credit available yet
         }
       }
 

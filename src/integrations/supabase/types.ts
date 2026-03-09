@@ -9345,6 +9345,10 @@ export type Database = {
           id: string
           ip_address: string | null
           phase_1_amount: number
+          phase_1_used: boolean
+          phase_1_used_at: string | null
+          phase_1_used_in_transaction_id: string | null
+          phase_1_used_with_merchant_id: string | null
           phase_2_amount: number
           phase_2_unlocked: boolean
           phase_2_unlocked_at: string | null
@@ -9365,6 +9369,10 @@ export type Database = {
           id?: string
           ip_address?: string | null
           phase_1_amount?: number
+          phase_1_used?: boolean
+          phase_1_used_at?: string | null
+          phase_1_used_in_transaction_id?: string | null
+          phase_1_used_with_merchant_id?: string | null
           phase_2_amount?: number
           phase_2_unlocked?: boolean
           phase_2_unlocked_at?: string | null
@@ -9385,6 +9393,10 @@ export type Database = {
           id?: string
           ip_address?: string | null
           phase_1_amount?: number
+          phase_1_used?: boolean
+          phase_1_used_at?: string | null
+          phase_1_used_in_transaction_id?: string | null
+          phase_1_used_with_merchant_id?: string | null
           phase_2_amount?: number
           phase_2_unlocked?: boolean
           phase_2_unlocked_at?: string | null
@@ -9398,6 +9410,20 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "user_welcome_credits_phase_1_used_with_merchant_id_fkey"
+            columns: ["phase_1_used_with_merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_welcome_credits_phase_1_used_with_merchant_id_fkey"
+            columns: ["phase_1_used_with_merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "user_welcome_credits_used_with_merchant_id_fkey"
             columns: ["used_with_merchant_id"]
