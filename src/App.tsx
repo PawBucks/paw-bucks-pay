@@ -156,7 +156,7 @@ const AppRoutes = () => {
       <Route path="/pet-health/:petId" element={<ProtectedRoute><PageTransition><PetHealth /></PageTransition></ProtectedRoute>} />
       <Route path="/pawbucks/wallet" element={<ProtectedRoute><PageTransition><PawBucksWallet /></PageTransition></ProtectedRoute>} />
       <Route path="/pawbucks/redeem" element={<ProtectedRoute><PageTransition><PawBucksRedeem /></PageTransition></ProtectedRoute>} />
-      <Route path="/pet-store" element={<ProtectedRoute><PageTransition><PetStore /></PageTransition></ProtectedRoute>} />
+      <Route path="/pet-store" element={<PageTransition><PetStore /></PageTransition>} />
       <Route path="/notification-preferences" element={<ProtectedRoute><PageTransition><NotificationPreferences /></PageTransition></ProtectedRoute>} />
       <Route path="/notifications" element={<ProtectedRoute><PageTransition><NotificationHistory /></PageTransition></ProtectedRoute>} />
       <Route path="/spending-breakdown" element={<ProtectedRoute><PageTransition><SpendingBreakdown /></PageTransition></ProtectedRoute>} />
