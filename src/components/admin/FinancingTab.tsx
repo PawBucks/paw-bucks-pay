@@ -17,6 +17,7 @@ import {
   Shield, Star, ArrowRight, ChevronRight, ExternalLink, Activity, CreditCard,
   Landmark, FileText, ShoppingBag, BadgeCheck, CircleDot
 } from 'lucide-react';
+import { UnderwritingSignalsCard } from './UnderwritingSignalsCard';
 import { format, formatDistanceToNow, differenceInDays } from 'date-fns';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
