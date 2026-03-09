@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import {
@@ -14,8 +15,11 @@ import {
   Receipt,
   RefreshCw,
 } from "lucide-react";
+import { FundingRequestTracker } from "@/components/shared/FundingRequestTracker";
+import { merchantsService } from "@/services/api/merchants.service";
 
 type MerchantQuickActionsTabProps = {
+  merchantId: string;
   hasStripeAccount: boolean;
   fundingEligible: boolean;
   daysActive: number;
@@ -25,6 +29,7 @@ type MerchantQuickActionsTabProps = {
 };
 
 export function MerchantQuickActionsTab({
+  merchantId,
   hasStripeAccount,
   fundingEligible,
   daysActive,
@@ -32,6 +37,18 @@ export function MerchantQuickActionsTab({
   onEditProfile,
   onNavigate,
 }: MerchantQuickActionsTabProps) {
+  const [fundingRequests, setFundingRequests] = useState<any[]>([]);
+  const [loadingRequests, setLoadingRequests] = useState(true);
+
+  useEffect(() => {
+    async function load() {
+      setLoadingRequests(true);
+      const { data } = await merchantsService.getFundingRequests(merchantId);
+      setFundingRequests(data || []);
+      setLoadingRequests(false);
+    }
+    load();
+  }, [merchantId]);
   const daysRemaining = Math.max(0, 90 - daysActive);
   const quickActions = [
     {
