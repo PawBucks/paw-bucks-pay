@@ -72,7 +72,7 @@ const Index = () => {
         keywords={["pet rewards", "pet expenses", "PawBucks", "pet services", "pet spending tracker", "local pet businesses", "lost pet flyer", "pet store"]}
       />
       <Header menuItems={[
-        { label: "Explore Pet Merchants", path: "/discover" },
+        { label: "Explore Pet Merchants", path: "/directory" },
         { label: "Lost Pets", path: "/lost-pets" },
         { label: "Sign In", path: "/auth?role=pet_owner" }
       ]} />
