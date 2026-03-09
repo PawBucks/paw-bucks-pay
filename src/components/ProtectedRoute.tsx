@@ -64,11 +64,6 @@ export const ProtectedRoute = ({
     route => location.pathname.startsWith(route)
   );
 
-  // Determine if user has a non-pet-owner role (merchants/vets/admins skip pet check)
-  const hasNonPetOwnerRole = allowedRoles && allowedRoles.some(
-    r => r === 'merchant' || r === 'vet' || r === 'admin' || r === 'superadmin'
-  );
-
   useEffect(() => {
     if (!loading && requireAuth && !user) {
       navigate(redirectTo);
@@ -136,8 +131,8 @@ export const ProtectedRoute = ({
 
   // Pet onboarding check: ensure pet owners have at least one pet
   useEffect(() => {
-    // Skip if: no user, still loading, exempt route, or non-pet-owner role route
-    if (!user || loading || isExemptRoute || hasNonPetOwnerRole) {
+    // Skip if: no user, still loading, or exempt route
+    if (!user || loading || isExemptRoute) {
       setPetOnboardingChecked(true);
       setHasPets(true);
       return;
@@ -155,17 +150,19 @@ export const ProtectedRoute = ({
 
     const checkPets = async () => {
       try {
-        // First check if user is a merchant or vet (they don't need pets)
-        const [merchantCheck, vetCheck] = await Promise.all([
+        // Check if user is admin/superadmin, merchant, or vet (they don't need pets)
+        const [adminCheck, merchantCheck, vetCheck] = await Promise.all([
+          supabase.from('user_roles').select('role').eq('user_id', user.id).in('role', ['admin', 'superadmin']).limit(1),
           supabase.from('merchants').select('id').eq('user_id', user.id).limit(1),
           supabase.from('partner_vets').select('id').eq('user_id', user.id).limit(1),
         ]);
 
-        const isMerchantOrVet = 
+        const isAdminOrMerchantOrVet = 
+          (adminCheck.data && adminCheck.data.length > 0) ||
           (merchantCheck.data && merchantCheck.data.length > 0) ||
           (vetCheck.data && vetCheck.data.length > 0);
 
-        if (isMerchantOrVet) {
+        if (isAdminOrMerchantOrVet) {
           petOnboardingCache.set(user.id, { hasPets: true, timestamp: Date.now() });
           setHasPets(true);
           setPetOnboardingChecked(true);
@@ -193,7 +190,7 @@ export const ProtectedRoute = ({
     };
 
     checkPets();
-  }, [user, loading, isExemptRoute, hasNonPetOwnerRole]);
+  }, [user, loading, isExemptRoute]);
 
   if (loading || !roleChecked || !petOnboardingChecked) {
     return <PageLoader message="Authenticating..." />;
