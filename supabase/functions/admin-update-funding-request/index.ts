@@ -4,7 +4,7 @@ import { z } from "https://esm.sh/zod@3.22.4";
 
 const updateFundingSchema = z.object({
   requestId: z.string().uuid(),
-  status: z.enum(['pending', 'approved', 'denied']),
+  status: z.enum(['pending', 'in_review', 'approved', 'denied']),
 });
 
 const corsHeaders = {
