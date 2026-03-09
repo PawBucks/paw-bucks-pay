@@ -145,7 +145,14 @@ export function MerchantQuickActionsTab({
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* Funding Request Tracker */}
+      <FundingRequestTracker
+        requests={fundingRequests}
+        loading={loadingRequests}
+        entityType="merchant"
+      />
+
       <div>
         <h2 className="text-3xl font-bold">Quick Actions</h2>
         <p className="text-muted-foreground">Access all merchant tools and features</p>
