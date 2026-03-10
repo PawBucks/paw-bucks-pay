@@ -204,7 +204,7 @@ export function SalesReportGenerator({ entityId, entityType, entityName }: Sales
     const summaryItems = [
       ["Gross Sales", `$${reportData.totalSales.toFixed(2)}`],
       ["Refunds", `- $${reportData.totalRefunds.toFixed(2)} (${reportData.refundCount})`],
-      ["Platform Fees (3%)", `- $${reportData.totalPlatformFees.toFixed(2)}`],
+      ["Network Fees (3%)", `- $${reportData.totalPlatformFees.toFixed(2)}`],
       ["Processing Fees (est.)", `- $${reportData.totalProcessingFees.toFixed(2)}`],
       ["Net Sales", `$${reportData.netSales.toFixed(2)}`],
       ["Total Transactions", `${reportData.totalTransactions}`],
