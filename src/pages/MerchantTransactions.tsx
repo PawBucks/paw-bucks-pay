@@ -422,7 +422,7 @@ const MerchantTransactions = () => {
                           Amount {sortColumn === "amount" && (sortDirection === "asc" ? "↑" : "↓")}
                         </TableHead>
                         <TableHead className="text-right">
-                          Platform Fee
+                          Network Fee
                         </TableHead>
                         <TableHead className="text-right">
                           Repayment

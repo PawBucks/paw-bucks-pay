@@ -59,7 +59,7 @@ export const CATEGORY_DESCRIPTIONS: Record<TaxExpenseCategory, string> = {
   specialized_equipment: 'Grooming tables, high-velocity dryers, kennels, medical equipment',
   professional_services: 'Veterinary consultant fees, insurance premiums, certifications, legal',
   merchant_market: 'PawBucks Merchant Market services (auto-logged with savings)',
-  platform_fees: 'PawBucks 3% platform fee per transaction (auto-logged)',
+  platform_fees: 'PawBucks 3% network fee per transaction (auto-logged)',
   processing_fees: 'Stripe card processing fees per transaction (auto-logged from Stripe)',
   gas_mileage: 'Vehicle fuel, mileage for business trips, travel expenses',
   pet_supplies_treats: 'Supplies and treats for business use',

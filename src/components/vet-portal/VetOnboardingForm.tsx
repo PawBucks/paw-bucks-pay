@@ -166,7 +166,7 @@ PawBucks.app (the "Platform") provides a proprietary "Claim-Splicing" engine des
 In the event that a Carrier denies, partially pays, or "claws back" a claim that has been processed through the Claim-Splicing engine:
 • Primary Responsibility: The Pet Owner remains legally responsible for the full balance of the veterinary invoice.
 • Practice Recourse: The Veterinary Practice agrees that PawBucks.app is not liable for the unpaid balance. PawBucks.app will provide the Practice with automated tools to re-invoice the Pet Owner via the Platform for any shortfall resulting from Carrier denial.
-• Platform Fees: Processing fees and PawBucks reward distributions are calculated based on the total invoice amount and are non-refundable once the initial transaction is successful, regardless of subsequent Carrier adjudication.
+• Network Fees: Processing fees and PawBucks reward distributions are calculated based on the total invoice amount and are non-refundable once the initial transaction is successful, regardless of subsequent Carrier adjudication.
 
 4. Accuracy of Clinical Data
 The Veterinary Practice is solely responsible for the accuracy of the medical codes (ICD/CPT), clinical notes, and invoice totals submitted for splicing. Any discrepancies leading to claim rejection are the responsibility of the Practice to resolve with the Carrier.

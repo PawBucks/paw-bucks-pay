@@ -217,7 +217,7 @@
          <Card className="bg-muted/30">
            <CardContent className="py-4">
              <p className="text-sm text-muted-foreground">
-               <strong>Note:</strong> Total earnings represent your net revenue after platform fees (3% on Stripe-funded portion). 
+               <strong>Note:</strong> Total earnings represent your net revenue after network fees (3% on Stripe-funded portion). 
                This includes all completed transactions from Direct Payments and PawBucks platform transactions. 
                Refunded amounts are tracked separately and excluded from totals.
              </p>

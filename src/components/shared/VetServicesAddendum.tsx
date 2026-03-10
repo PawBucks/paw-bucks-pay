@@ -116,15 +116,15 @@ Veterinary Merchants must:
 
 ⸻
 
-7. FEES, PLATFORM FEES, AND DISCLOSURES
+7. FEES, NETWORK FEES, AND DISCLOSURES
 
-7.1 Platform Fee Disclosure
+7.1 Network Fee Disclosure
 
-Veterinary Merchants acknowledge that PawBucks charges a platform service fee for marketplace access and payment facilitation.
+Veterinary Merchants acknowledge that PawBucks charges a network service fee for marketplace access and payment facilitation.
 
-7.2 Passing Through Platform Fees
+7.2 Passing Through Network Fees
 
-Veterinary Merchants may pass through PawBucks platform fees to clients only if:
+Veterinary Merchants may pass through PawBucks network fees to clients only if:
 • The fee is clearly disclosed prior to payment
 • The fee is described as a platform, marketplace, or service fee
 • The fee is not represented as a medical charge or card processing fee

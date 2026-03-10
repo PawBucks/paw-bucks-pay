@@ -379,7 +379,7 @@ export function SalesReportGenerator({ entityId, entityType, entityName }: Sales
                 <span className="text-right font-medium">${reportData.totalSales.toFixed(2)}</span>
                 <span className="text-muted-foreground">Refunds</span>
                 <span className="text-right text-destructive">-${reportData.totalRefunds.toFixed(2)} ({reportData.refundCount})</span>
-                <span className="text-muted-foreground">Platform Fees (3%)</span>
+                <span className="text-muted-foreground">Network Fees (3%)</span>
                 <span className="text-right text-destructive">-${reportData.totalPlatformFees.toFixed(2)}</span>
                 <span className="text-muted-foreground">Processing Fees (est.)</span>
                 <span className="text-right text-destructive">-${reportData.totalProcessingFees.toFixed(2)}</span>

@@ -29,7 +29,7 @@ function BackfillFeesButton({ onComplete }: { onComplete: () => void }) {
       
       if (total > 0) {
         toast.success(`Synced ${total} fee expense(s) from Stripe`, {
-          description: `${backfilledPlatform} platform fee(s), ${backfilledProcessing} processing fee(s)`,
+          description: `${backfilledPlatform} network fee(s), ${backfilledProcessing} processing fee(s)`,
         });
         onComplete();
       } else {
