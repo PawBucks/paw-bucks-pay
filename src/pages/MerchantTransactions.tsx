@@ -286,7 +286,7 @@ const MerchantTransactions = () => {
           </Card>
           <Card>
             <CardHeader className="pb-3">
-              <CardDescription>Platform Fees</CardDescription>
+              <CardDescription>Network Fees</CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-2xl font-bold text-muted-foreground">${summaryTotals.totalPlatformFees.toFixed(2)}</p>
