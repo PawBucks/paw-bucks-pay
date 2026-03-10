@@ -19,6 +19,8 @@ interface ReceiptEmailParams {
   receiptId: string;
   merchantName: string;
   merchantLocation?: string;
+  merchantDescription?: string;
+  merchantProfileUrl?: string;
   items: ReceiptItem[];
   subtotal: number;
   pawbucksApplied: number;
@@ -28,6 +30,8 @@ interface ReceiptEmailParams {
   cardBrand?: string;
   cardLast4?: string;
   pawbucksEarned?: number;
+  walletBalance?: number;
+  expiringPawBucks?: { amount: number; daysLeft: number };
   // Optional spliced breakdown for insurance claims
   splicedBreakdown?: {
     insuranceCovered?: number;
