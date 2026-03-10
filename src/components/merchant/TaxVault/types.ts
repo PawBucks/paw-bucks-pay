@@ -40,7 +40,7 @@ export const CATEGORY_LABELS: Record<TaxExpenseCategory, string> = {
   specialized_equipment: 'Specialized Equipment',
   professional_services: 'Professional Services',
   merchant_market: 'Merchant Market Services',
-  platform_fees: 'PawBucks Platform Fees',
+  platform_fees: 'PawBucks Network Fees',
   processing_fees: 'Stripe Processing Fees',
   gas_mileage: 'Gas & Mileage',
   pet_supplies_treats: 'Pet Supplies & Treats',
