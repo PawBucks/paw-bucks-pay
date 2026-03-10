@@ -109,7 +109,7 @@
                <div className="p-4 rounded-lg bg-background border">
                  <div className="flex items-center gap-2 mb-2">
                    <DollarSign className="h-4 w-4 text-muted-foreground" />
-                   <span className="text-sm text-muted-foreground">Platform Fees</span>
+                   <span className="text-sm text-muted-foreground">Network Fees</span>
                  </div>
                  <p className="text-2xl font-bold">${summary.totalFees.toFixed(2)}</p>
                </div>
