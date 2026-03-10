@@ -1286,9 +1286,9 @@ serve(async (req) => {
       console.log('✅ Wallet updated via database trigger');
       console.log('✅ Wallet activity logged');
 
-      // Auto-log platform fee as Tax Vault expense
+      // Auto-log network fee as Tax Vault expense
       if (merchant_id) {
-        const platformFee = amount * 0.03; // 3% platform fee
+        const platformFee = amount * 0.03; // 3% network fee
         if (platformFee > 0) {
           const expenseDate = new Date().toISOString().split('T')[0];
           const taxYear = new Date().getFullYear();
@@ -1299,8 +1299,8 @@ serve(async (req) => {
               merchant_id: merchant_id,
               category: 'platform_fees',
               amount: platformFee,
-              description: `Platform/Processing Fee (3%) on $${amount.toFixed(2)} sale`,
-              vendor_name: 'PawBucks Platform',
+              description: `PawBucks Network Fee (3%) on $${amount.toFixed(2)} sale`,
+              vendor_name: 'PawBucks Network',
               expense_date: expenseDate,
               tax_year: taxYear,
               is_auto_logged: true,
@@ -1308,9 +1308,9 @@ serve(async (req) => {
             });
 
           if (expenseError) {
-            console.error('Error auto-logging platform fee expense:', expenseError);
+            console.error('Error auto-logging network fee expense:', expenseError);
           } else {
-            console.log(`✅ Platform fee ($${platformFee.toFixed(2)}) auto-logged to Tax Vault`);
+            console.log(`✅ Network fee ($${platformFee.toFixed(2)}) auto-logged to Tax Vault`);
           }
         }
       }

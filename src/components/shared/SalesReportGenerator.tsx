@@ -204,7 +204,7 @@ export function SalesReportGenerator({ entityId, entityType, entityName }: Sales
     const summaryItems = [
       ["Gross Sales", `$${reportData.totalSales.toFixed(2)}`],
       ["Refunds", `- $${reportData.totalRefunds.toFixed(2)} (${reportData.refundCount})`],
-      ["Platform Fees (3%)", `- $${reportData.totalPlatformFees.toFixed(2)}`],
+      ["Network Fees (3%)", `- $${reportData.totalPlatformFees.toFixed(2)}`],
       ["Processing Fees (est.)", `- $${reportData.totalProcessingFees.toFixed(2)}`],
       ["Net Sales", `$${reportData.netSales.toFixed(2)}`],
       ["Total Transactions", `${reportData.totalTransactions}`],
@@ -379,7 +379,7 @@ export function SalesReportGenerator({ entityId, entityType, entityName }: Sales
                 <span className="text-right font-medium">${reportData.totalSales.toFixed(2)}</span>
                 <span className="text-muted-foreground">Refunds</span>
                 <span className="text-right text-destructive">-${reportData.totalRefunds.toFixed(2)} ({reportData.refundCount})</span>
-                <span className="text-muted-foreground">Platform Fees (3%)</span>
+                <span className="text-muted-foreground">Network Fees (3%)</span>
                 <span className="text-right text-destructive">-${reportData.totalPlatformFees.toFixed(2)}</span>
                 <span className="text-muted-foreground">Processing Fees (est.)</span>
                 <span className="text-right text-destructive">-${reportData.totalProcessingFees.toFixed(2)}</span>

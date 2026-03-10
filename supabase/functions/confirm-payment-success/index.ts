@@ -430,14 +430,14 @@ serve(async (req) => {
 
       const expenseRows = [];
 
-      // Log PawBucks Platform Fee (3%)
+      // Log PawBucks Network Fee (3%)
       if (platformFee > 0) {
         expenseRows.push({
           merchant_id: merchantId,
           category: "platform_fees" as const,
           amount: platformFee,
-          description: `PawBucks Platform Fee (3%) on $${amountInDollars.toFixed(2)} sale`,
-          vendor_name: "PawBucks Platform",
+          description: `PawBucks Network Fee (3%) on $${amountInDollars.toFixed(2)} sale`,
+          vendor_name: "PawBucks Network",
           expense_date: expenseDate,
           tax_year: taxYear,
           is_auto_logged: true,

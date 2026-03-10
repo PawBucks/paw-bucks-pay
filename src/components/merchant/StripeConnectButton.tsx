@@ -155,7 +155,7 @@ export function StripeConnectButton({ onStatusChange }: StripeConnectButtonProps
         </CardTitle>
         <CardDescription>
           Connect your Stripe account to receive payments directly from customers. 
-          Stripe-hosted onboarding makes setup quick and easy, with a 3% platform fee.
+          Stripe-hosted onboarding makes setup quick and easy, with a 3% network fee.
         </CardDescription>
       </CardHeader>
       <CardContent>

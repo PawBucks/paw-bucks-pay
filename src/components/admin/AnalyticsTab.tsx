@@ -85,7 +85,7 @@ export function AnalyticsTab() {
   const revenueData = [
     { name: 'GMV', value: analytics?.total_gmv || 0 },
     { name: 'Rewards', value: (analytics?.total_rewards || 0) * 0.001 },
-    { name: 'Platform Fee', value: analytics?.platform_revenue || 0 },
+    { name: 'Network Fee', value: analytics?.platform_revenue || 0 },
   ];
 
   return (

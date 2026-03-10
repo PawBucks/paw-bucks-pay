@@ -100,30 +100,30 @@ PawBucks bears no financial liability for your transactions.
 
 ⸻
 
-5. PAWBUCKS PLATFORM FEE
+5. PAWBUCKS NETWORK FEE
 
-5.1 Platform Fee
+5.1 Network Fee
 
-PawBucks charges a platform service fee equal to 3% of the transaction amount ("Platform Fee") for access to marketplace technology and related services.
+PawBucks charges a network service fee equal to 3% of the transaction amount ("Network Fee") for access to marketplace technology and related services.
 
 5.2 Fee Collection
 
-The Platform Fee is collected as a Stripe application fee and deducted from transaction proceeds at the time of payment processing.
+The Network Fee is collected as a Stripe application fee and deducted from transaction proceeds at the time of payment processing.
 
 ⸻
 
-6. PASS-THROUGH OF PLATFORM FEE TO CUSTOMERS
+6. PASS-THROUGH OF NETWORK FEE TO CUSTOMERS
 
 6.1 Permitted Pass-Through
 
-Merchants may pass the Platform Fee through to customers or incorporate it into pricing provided that:
+Merchants may pass the Network Fee through to customers or incorporate it into pricing provided that:
 • The fee is clearly disclosed before payment
 • The fee is described as a platform, marketplace, or service fee
 • The fee is not represented as a credit card or processing fee
 
 6.2 Prohibited Characterization
 
-The Platform Fee must not be described as:
+The Network Fee must not be described as:
 • A credit card fee
 • A processing fee
 • A Stripe fee
@@ -183,7 +183,7 @@ Merchants are solely responsible for:
 You may not:
 • Misrepresent professional credentials
 • Provide unlawful veterinary services
-• Circumvent Platform fees
+• Circumvent Network fees
 • Engage in deceptive or fraudulent conduct
 • Violate Stripe policies or professional regulations
 
@@ -214,7 +214,7 @@ PAWBUCKS SHALL NOT BE LIABLE FOR:
 • TREATMENT OUTCOMES
 • LICENSING VIOLATIONS
 
-TOTAL LIABILITY SHALL NOT EXCEED PLATFORM FEES PAID IN THE PRIOR 12 MONTHS.
+TOTAL LIABILITY SHALL NOT EXCEED NETWORK FEES PAID IN THE PRIOR 12 MONTHS.
 
 ⸻
 
