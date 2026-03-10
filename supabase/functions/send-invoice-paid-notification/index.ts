@@ -1,14 +1,16 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { Resend } from "https://esm.sh/resend@2.0.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.76.1";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
 interface InvoicePaidNotificationParams {
   merchantEmail: string;
   merchantName: string;
+  businessName?: string;
   invoiceNumber: string;
   invoiceTitle?: string;
   clientName: string;
@@ -17,14 +19,16 @@ interface InvoicePaidNotificationParams {
   tipAmount?: number;
   pawbucksUsed?: number;
   paymentMethod: 'credit_card' | 'pawbucks' | 'mixed' | 'manual';
-  paymentMethodDetail?: string; // For manual payments: "Cash", "Check", etc.
+  paymentMethodDetail?: string;
   paymentDate: string;
   invoiceTotal: number;
   amountDue?: number;
-  invoiceId: string;
+  invoiceId?: string;
+  merchantId?: string;
+  platformFee?: number;
+  pawbucksEarned?: number;
 }
 
-// Format timestamp with explicit US timezone
 function formatDate(dateString: string): string {
   const date = new Date(dateString);
   return date.toLocaleString('en-US', {
@@ -37,33 +41,61 @@ function formatDate(dateString: string): string {
   });
 }
 
-// Format date-only strings (YYYY-MM-DD) without timezone shift
-function formatLocalDateOnly(dateString: string): string {
-  const [year, month, day] = dateString.split('-').map(Number);
-  const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-  return `${months[month - 1]} ${day}, ${year}`;
-}
-
 function formatCurrency(amount: number): string {
   return `$${amount.toFixed(2)}`;
 }
 
 function getPaymentMethodLabel(method: string, pawbucksUsed?: number, paymentMethodDetail?: string): string {
   if (method === 'manual' && paymentMethodDetail) {
-    // Capitalize the manual payment method detail
     return paymentMethodDetail.charAt(0).toUpperCase() + paymentMethodDetail.slice(1);
   }
-  if (method === 'pawbucks') {
-    return 'PawBucks';
-  } else if (method === 'mixed' || (pawbucksUsed && pawbucksUsed > 0)) {
-    return 'Credit Card + PawBucks';
-  }
+  if (method === 'pawbucks') return 'PawBucks';
+  if (method === 'mixed' || (pawbucksUsed && pawbucksUsed > 0)) return 'Credit Card + PawBucks';
   return 'Credit Card';
 }
 
-function generateInvoicePaidEmailHtml(params: InvoicePaidNotificationParams): string {
+interface DailySnapshot {
+  transactions: number;
+  revenue: number;
+  pawbucksEarned: number;
+}
+
+async function getMerchantDailySnapshot(merchantId: string): Promise<DailySnapshot | null> {
+  try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    if (!supabaseUrl || !supabaseKey) return null;
+
+    const supabase = createClient(supabaseUrl, supabaseKey);
+    const todayStart = new Date();
+    todayStart.setUTCHours(0, 0, 0, 0);
+
+    const { data: txns } = await supabase
+      .from('transactions')
+      .select('amount, cashback_earned')
+      .eq('merchant_id', merchantId)
+      .eq('status', 'completed')
+      .gte('created_at', todayStart.toISOString());
+
+    if (!txns || txns.length === 0) return { transactions: 1, revenue: 0, pawbucksEarned: 0 };
+
+    return {
+      transactions: txns.length,
+      revenue: txns.reduce((s, t) => s + (t.amount || 0), 0),
+      pawbucksEarned: txns.reduce((s, t) => s + (t.cashback_earned || 0), 0),
+    };
+  } catch {
+    return null;
+  }
+}
+
+function generateInvoicePaidEmailHtml(
+  params: InvoicePaidNotificationParams,
+  snapshot: DailySnapshot | null
+): string {
   const {
     merchantName,
+    businessName,
     invoiceNumber,
     invoiceTitle,
     clientName,
@@ -76,242 +108,301 @@ function generateInvoicePaidEmailHtml(params: InvoicePaidNotificationParams): st
     paymentDate,
     invoiceTotal,
     amountDue = 0,
-    invoiceId,
+    platformFee,
+    pawbucksEarned = 0,
   } = params;
 
-  const logoUrl = "https://pawbucks.app/logo.png";
   const formattedDate = formatDate(paymentDate);
-  const paymentMethodLabel = getPaymentMethodLabel(paymentMethod, pawbucksUsed, paymentMethodDetail);
+  const displayName = businessName || merchantName;
   const isManualPayment = paymentMethod === 'manual';
   const pawbucksValueUSD = pawbucksUsed * 0.001;
-  const totalPaymentReceived = amountPaid + pawbucksValueUSD;
+  const totalPaymentReceived = amountPaid + pawbucksValueUSD + tipAmount;
   const isFullyPaid = amountDue <= 0;
+  const calculatedFee = platformFee ?? (amountPaid > 0 ? Math.round(amountPaid * 0.03 * 100) / 100 : 0);
+  const netDeposited = totalPaymentReceived - calculatedFee;
 
-  // Payment breakdown rows - different for manual payments
-  const paymentBreakdownHtml = isManualPayment ? `
-    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:16px;">
-      <tr>
-        <td style="font-size:14px; color:#374151; padding:8px 0; border-bottom:1px solid #e5e7eb;">
-          ${paymentMethodLabel} Payment
-        </td>
-        <td align="right" style="font-size:14px; color:#374151; padding:8px 0; border-bottom:1px solid #e5e7eb;">
-          ${formatCurrency(amountPaid)}
-        </td>
-      </tr>
-      <tr>
-        <td style="font-size:16px; font-weight:bold; color:#111827; padding:12px 0;">
-          Total Received
-        </td>
-        <td align="right" style="font-size:16px; font-weight:bold; color:#16a34a; padding:12px 0;">
-          ${formatCurrency(amountPaid)}
-        </td>
-      </tr>
-    </table>
-  ` : `
-    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:16px;">
-      ${pawbucksUsed > 0 ? `
-        <tr>
-          <td style="font-size:14px; color:#374151; padding:8px 0; border-bottom:1px solid #e5e7eb;">
-            PawBucks Applied
-          </td>
-          <td align="right" style="font-size:14px; color:#16a34a; padding:8px 0; border-bottom:1px solid #e5e7eb;">
-            ${pawbucksUsed.toLocaleString()} PB (${formatCurrency(pawbucksValueUSD)})
-          </td>
-        </tr>
-      ` : ''}
-      ${amountPaid > 0 ? `
-        <tr>
-          <td style="font-size:14px; color:#374151; padding:8px 0; border-bottom:1px solid #e5e7eb;">
-            Card Payment
-          </td>
-          <td align="right" style="font-size:14px; color:#374151; padding:8px 0; border-bottom:1px solid #e5e7eb;">
-            ${formatCurrency(amountPaid)}
-          </td>
-        </tr>
-      ` : ''}
-      ${tipAmount > 0 ? `
-        <tr>
-          <td style="font-size:14px; color:#374151; padding:8px 0; border-bottom:1px solid #e5e7eb;">
-            Tip Included
-          </td>
-          <td align="right" style="font-size:14px; color:#16a34a; padding:8px 0; border-bottom:1px solid #e5e7eb;">
-            ${formatCurrency(tipAmount)}
-          </td>
-        </tr>
-      ` : ''}
-      <tr>
-        <td style="font-size:16px; font-weight:bold; color:#111827; padding:12px 0;">
-          Total Received
-        </td>
-        <td align="right" style="font-size:16px; font-weight:bold; color:#16a34a; padding:12px 0;">
-          ${formatCurrency(totalPaymentReceived)}
-        </td>
-      </tr>
-    </table>
-  `;
-  // Status badge
-  const statusBadgeHtml = isFullyPaid
-    ? `<span style="display:inline-block; background-color:#dcfce7; color:#166534; padding:6px 16px; border-radius:16px; font-size:14px; font-weight:600;">✓ Fully Paid</span>`
-    : `<span style="display:inline-block; background-color:#fef3c7; color:#92400e; padding:6px 16px; border-radius:16px; font-size:14px; font-weight:600;">Partial Payment</span>`;
+  // Section helper
+  const sectionLabel = (text: string) => `
+    <td style="padding:0 32px 8px;">
+      <p style="margin:0; font-size:11px; font-weight:700; letter-spacing:1.5px; color:#9ca3af; text-transform:uppercase;">${text}</p>
+    </td>`;
 
-  // Remaining balance section (only if not fully paid)
-  const remainingBalanceHtml = !isFullyPaid ? `
+  const divider = `<tr><td style="padding:0 32px;"><div style="border-top:1px solid #e5e7eb; margin:24px 0;"></div></td></tr>`;
+
+  // Payment breakdown rows
+  let breakdownRows = '';
+  if (isManualPayment) {
+    const label = getPaymentMethodLabel(paymentMethod, pawbucksUsed, paymentMethodDetail);
+    breakdownRows = `
+      <tr>
+        <td style="font-size:14px;color:#374151;padding:6px 0;">${label} Payment</td>
+        <td align="right" style="font-size:14px;color:#374151;padding:6px 0;">${formatCurrency(amountPaid)}</td>
+      </tr>`;
+  } else {
+    breakdownRows = `
+      <tr>
+        <td style="font-size:14px;color:#374151;padding:6px 0;">Service Total</td>
+        <td align="right" style="font-size:14px;color:#374151;padding:6px 0;">${formatCurrency(invoiceTotal)}</td>
+      </tr>
+      <tr>
+        <td style="font-size:14px;color:#374151;padding:6px 0;">Customer Payment</td>
+        <td align="right" style="font-size:14px;color:#374151;padding:6px 0;">${formatCurrency(amountPaid)}</td>
+      </tr>`;
+
+    if (pawbucksUsed > 0) {
+      breakdownRows += `
+        <tr>
+          <td style="font-size:14px;color:#374151;padding:6px 0;">PawBucks Applied</td>
+          <td align="right" style="font-size:14px;color:#16a34a;padding:6px 0;">${pawbucksUsed.toLocaleString()} PB (${formatCurrency(pawbucksValueUSD)})</td>
+        </tr>`;
+    }
+    if (tipAmount > 0) {
+      breakdownRows += `
+        <tr>
+          <td style="font-size:14px;color:#374151;padding:6px 0;">Tip Included</td>
+          <td align="right" style="font-size:14px;color:#16a34a;padding:6px 0;">${formatCurrency(tipAmount)}</td>
+        </tr>`;
+    }
+  }
+
+  if (calculatedFee > 0 && !isManualPayment) {
+    breakdownRows += `
+      <tr>
+        <td style="padding:10px 0 6px;">
+          <span style="font-size:13px;color:#6b7280;">PawBucks Network Fee</span><br/>
+          <span style="font-size:11px;color:#9ca3af;">(3% of cash portion)</span>
+        </td>
+        <td align="right" style="font-size:14px;color:#ef4444;padding:10px 0 6px;">-${formatCurrency(calculatedFee)}</td>
+      </tr>`;
+  }
+
+  // Status
+  const statusBadge = isFullyPaid
+    ? `<span style="display:inline-block;background:#dcfce7;color:#166534;padding:4px 14px;border-radius:12px;font-size:12px;font-weight:600;">Approved ✔</span>`
+    : `<span style="display:inline-block;background:#fef3c7;color:#92400e;padding:4px 14px;border-radius:12px;font-size:12px;font-weight:600;">Partial Payment</span>`;
+
+  // Remaining balance card
+  const remainingHtml = !isFullyPaid ? `
+    ${divider}
     <tr>
-      <td style="padding:0 20px 20px;">
-        <table width="100%" cellpadding="16" cellspacing="0" style="background-color:#fef3c7; border-radius:8px;">
+      <td style="padding:0 32px;">
+        <table width="100%" cellpadding="16" cellspacing="0" style="background:#fef3c7;border-radius:12px;">
+          <tr><td>
+            <p style="margin:0 0 4px;font-size:13px;color:#92400e;font-weight:600;">Remaining Balance</p>
+            <p style="margin:0;font-size:24px;font-weight:800;color:#92400e;">${formatCurrency(amountDue)}</p>
+          </td></tr>
+        </table>
+      </td>
+    </tr>` : '';
+
+  // Daily snapshot
+  const snapshotHtml = snapshot ? `
+    ${divider}
+    <tr>${sectionLabel('Today on PawBucks')}</tr>
+    <tr>
+      <td style="padding:0 32px;">
+        <table width="100%" cellpadding="0" cellspacing="0">
           <tr>
-            <td>
-              <p style="margin:0 0 4px 0; font-size:14px; color:#92400e; font-weight:600;">Remaining Balance</p>
-              <p style="margin:0; font-size:24px; font-weight:bold; color:#92400e;">${formatCurrency(amountDue)}</p>
+            <td width="33%" style="padding:12px 8px 12px 0;text-align:center;">
+              <table width="100%" cellpadding="12" cellspacing="0" style="background:#f0fdf4;border-radius:10px;">
+                <tr><td style="text-align:center;">
+                  <p style="margin:0;font-size:22px;font-weight:800;color:#166534;">${snapshot.transactions}</p>
+                  <p style="margin:4px 0 0;font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;">Transactions</p>
+                </td></tr>
+              </table>
+            </td>
+            <td width="33%" style="padding:12px 4px;text-align:center;">
+              <table width="100%" cellpadding="12" cellspacing="0" style="background:#f0fdf4;border-radius:10px;">
+                <tr><td style="text-align:center;">
+                  <p style="margin:0;font-size:22px;font-weight:800;color:#166534;">${formatCurrency(snapshot.revenue)}</p>
+                  <p style="margin:4px 0 0;font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;">Revenue</p>
+                </td></tr>
+              </table>
+            </td>
+            <td width="33%" style="padding:12px 0 12px 8px;text-align:center;">
+              <table width="100%" cellpadding="12" cellspacing="0" style="background:#f0fdf4;border-radius:10px;">
+                <tr><td style="text-align:center;">
+                  <p style="margin:0;font-size:22px;font-weight:800;color:#166534;">${snapshot.pawbucksEarned.toLocaleString()}</p>
+                  <p style="margin:4px 0 0;font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;">PB Earned</p>
+                </td></tr>
+              </table>
             </td>
           </tr>
         </table>
       </td>
-    </tr>
-  ` : '';
+    </tr>` : '';
 
-  return `
-<!DOCTYPE html>
+  // Merchant insight (reward earned by customer)
+  const insightHtml = pawbucksEarned > 0 ? `
+    ${divider}
+    <tr>${sectionLabel('Merchant Insight')}</tr>
+    <tr>
+      <td style="padding:0 32px;">
+        <table width="100%" cellpadding="16" cellspacing="0" style="background:linear-gradient(135deg,#fef9c3 0%,#fde68a 100%);border-radius:12px;">
+          <tr><td style="text-align:center;">
+            <p style="margin:0 0 4px;font-size:13px;color:#78350f;">This customer earned PawBucks from this purchase.</p>
+            <p style="margin:8px 0 0;font-size:11px;color:#92400e;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Reward Earned</p>
+            <p style="margin:4px 0 0;font-size:28px;font-weight:800;color:#78350f;">+${pawbucksEarned.toLocaleString()} PawBucks</p>
+          </td></tr>
+        </table>
+      </td>
+    </tr>` : '';
+
+  return `<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Invoice Payment Received</title>
+  <title>Payment Received</title>
 </head>
-
-<body style="margin:0; padding:0; background-color:#f5f7fa; font-family: Arial, Helvetica, sans-serif;">
-
-  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f5f7fa; padding:20px;">
+<body style="margin:0;padding:0;background-color:#f0f2f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f0f2f5;padding:40px 20px;">
     <tr>
       <td align="center">
+        <table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;">
 
-        <table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff; border-radius:10px; overflow:hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-
-          <!-- Header -->
+          <!-- ===== HEADER ===== -->
           <tr>
-            <td style="padding:24px; text-align:center; background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);">
-              <img 
-                src="${logoUrl}" 
-                alt="PawBucks" 
-                width="120"
-                style="display:block; margin:0 auto 12px; max-width:120px;"
-              />
-              <h1 style="margin:0; font-size:24px; color:#ffffff; font-weight:bold;">
-                💰 Payment Received!
-              </h1>
-              <p style="margin:8px 0 0 0; font-size:14px; color:rgba(255,255,255,0.9);">
-                Invoice #${invoiceNumber}
-              </p>
+            <td style="background:linear-gradient(135deg,#0f172a 0%,#1e293b 50%,#0f172a 100%);padding:40px 32px 32px;text-align:center;border-radius:16px 16px 0 0;">
+              <p style="margin:0 0 8px;font-size:16px;letter-spacing:2px;">🐾</p>
+              <h1 style="margin:0;font-size:32px;font-weight:800;letter-spacing:1px;color:#7DD4D4;text-shadow:0 0 20px rgba(125,212,212,0.4);">PAWBUCKS</h1>
+              <p style="margin:16px 0 0;font-size:20px;font-weight:700;color:#ffffff;">Payment Received</p>
+              <p style="margin:8px 0 0;font-size:14px;color:rgba(255,255,255,0.7);">A customer just completed a purchase.</p>
             </td>
           </tr>
 
-          <!-- Greeting -->
+          <!-- ===== BODY ===== -->
           <tr>
-            <td style="padding:24px 20px 16px;">
-              <p style="margin:0; font-size:16px; color:#374151;">
-                Hi <strong>${merchantName}</strong>,
-              </p>
-              <p style="margin:12px 0 0 0; font-size:16px; color:#374151;">
-                Great news! You've received a payment for your invoice.
-              </p>
-            </td>
-          </tr>
+            <td style="background:#ffffff;padding:0;border-radius:0 0 16px 16px;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+              <table width="100%" cellpadding="0" cellspacing="0">
 
-          <!-- Invoice Info Card -->
-          <tr>
-            <td style="padding:0 20px 20px;">
-              <table width="100%" cellpadding="16" cellspacing="0" style="background-color:#f9fafb; border-radius:8px; border:1px solid #e5e7eb;">
+                <!-- Transaction Summary -->
+                <tr><td style="height:28px;"></td></tr>
+                <tr>${sectionLabel('Transaction Summary')}</tr>
                 <tr>
-                  <td>
-                    <table width="100%">
-                      <tr>
-                        <td>
-                          <p style="margin:0 0 4px 0; font-size:12px; color:#6b7280; text-transform:uppercase;">Invoice</p>
-                          <p style="margin:0; font-size:16px; font-weight:bold; color:#111827;">#${invoiceNumber}</p>
-                          ${invoiceTitle ? `<p style="margin:4px 0 0 0; font-size:14px; color:#6b7280;">${invoiceTitle}</p>` : ''}
-                        </td>
-                        <td align="right">
-                          ${statusBadgeHtml}
-                        </td>
-                      </tr>
+                  <td style="padding:8px 32px 0;">
+                    <table width="100%" cellpadding="14" cellspacing="0" style="background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0;">
+                      <tr><td>
+                        <table width="100%" cellpadding="0" cellspacing="0">
+                          <tr>
+                            <td style="padding:4px 0;">
+                              <span style="font-size:11px;color:#9ca3af;text-transform:uppercase;">Merchant</span><br/>
+                              <span style="font-size:15px;font-weight:700;color:#111827;">${displayName}</span>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td style="padding:10px 0 4px;">
+                              <span style="font-size:11px;color:#9ca3af;text-transform:uppercase;">Customer</span><br/>
+                              <span style="font-size:15px;font-weight:600;color:#111827;">${clientName}</span>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td style="padding:10px 0 4px;">
+                              <span style="font-size:11px;color:#9ca3af;text-transform:uppercase;">Date</span><br/>
+                              <span style="font-size:14px;color:#374151;">${formattedDate}</span>
+                            </td>
+                          </tr>
+                          ${invoiceTitle ? `<tr>
+                            <td style="padding:10px 0 4px;">
+                              <span style="font-size:11px;color:#9ca3af;text-transform:uppercase;">Service</span><br/>
+                              <span style="font-size:14px;color:#374151;">${invoiceTitle}</span>
+                            </td>
+                          </tr>` : ''}
+                          <tr>
+                            <td style="padding:10px 0 0;">
+                              <span style="font-size:11px;color:#9ca3af;text-transform:uppercase;">Receipt ID</span><br/>
+                              <span style="font-size:14px;font-weight:600;color:#374151;font-family:monospace;">${invoiceNumber}</span>
+                            </td>
+                          </tr>
+                        </table>
+                      </td></tr>
                     </table>
                   </td>
                 </tr>
+
+                ${divider}
+
+                <!-- Payment Breakdown -->
+                <tr>${sectionLabel('Payment Breakdown')}</tr>
+                <tr>
+                  <td style="padding:8px 32px 0;">
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                      ${breakdownRows}
+                    </table>
+                  </td>
+                </tr>
+
+                ${divider}
+
+                <!-- Total Deposited -->
+                <tr>
+                  <td style="padding:0 32px;">
+                    <table width="100%" cellpadding="20" cellspacing="0" style="background:linear-gradient(135deg,#f0fdf4 0%,#dcfce7 100%);border-radius:12px;border:1px solid #bbf7d0;">
+                      <tr><td style="text-align:center;">
+                        <p style="margin:0 0 4px;font-size:11px;font-weight:700;letter-spacing:1.5px;color:#166534;text-transform:uppercase;">Total Deposited</p>
+                        <p style="margin:0;font-size:36px;font-weight:800;color:#16a34a;">${formatCurrency(isManualPayment ? amountPaid : netDeposited)}</p>
+                        <p style="margin:8px 0 0;font-size:13px;color:#4ade80;">
+                          ${isManualPayment ? `Recorded as ${getPaymentMethodLabel(paymentMethod, pawbucksUsed, paymentMethodDetail)} payment.` : 'Funds have been sent to your connected Stripe account.'}
+                        </p>
+                        <div style="margin-top:10px;">${statusBadge}</div>
+                      </td></tr>
+                    </table>
+                  </td>
+                </tr>
+
+                ${remainingHtml}
+
+                ${divider}
+
+                <!-- Customer Info -->
+                <tr>${sectionLabel('Customer Info')}</tr>
+                <tr>
+                  <td style="padding:4px 32px 0;">
+                    <p style="margin:0;font-size:15px;font-weight:600;color:#111827;">${clientName}</p>
+                    <p style="margin:4px 0 0;font-size:14px;color:#6b7280;">${clientEmail}</p>
+                  </td>
+                </tr>
+
+                ${insightHtml}
+
+                ${snapshotHtml}
+
+                ${divider}
+
+                <!-- CTA -->
+                <tr>
+                  <td style="padding:0 32px;text-align:center;">
+                    <p style="margin:0 0 6px;font-size:14px;color:#6b7280;">View transaction details and performance metrics.</p>
+                    <a href="https://pawbucks.app/merchant/dashboard" style="display:inline-block;margin-top:12px;background:linear-gradient(135deg,#7DD4D4 0%,#5bb8b8 100%);color:#0f172a;text-decoration:none;padding:14px 36px;border-radius:10px;font-weight:700;font-size:15px;letter-spacing:0.3px;">
+                      Open Merchant Dashboard
+                    </a>
+                  </td>
+                </tr>
+
+                <tr><td style="height:32px;"></td></tr>
+
+                <!-- Footer -->
+                <tr>
+                  <td style="padding:24px 32px;background:#f8fafc;text-align:center;border-radius:0 0 16px 16px;border-top:1px solid #e5e7eb;">
+                    <p style="margin:0 0 8px;font-size:13px;color:#6b7280;">
+                      Need help? <a href="mailto:support@pawbucks.app" style="color:#7DD4D4;text-decoration:none;font-weight:600;">support@pawbucks.app</a>
+                    </p>
+                    <p style="margin:12px 0 0;font-size:11px;color:#9ca3af;">
+                      PawBucks, Inc. &bull; &copy; ${new Date().getFullYear()} PawBucks. All rights reserved.
+                    </p>
+                  </td>
+                </tr>
+
               </table>
-            </td>
-          </tr>
-
-          <!-- Client Info -->
-          <tr>
-            <td style="padding:0 20px 20px;">
-              <p style="margin:0 0 8px 0; font-size:12px; color:#6b7280; text-transform:uppercase;">Paid By</p>
-              <p style="margin:0; font-size:16px; color:#111827; font-weight:600;">${clientName}</p>
-              <p style="margin:4px 0 0 0; font-size:14px; color:#6b7280;">${clientEmail}</p>
-            </td>
-          </tr>
-
-          <!-- Payment Details -->
-          <tr>
-            <td style="padding:0 20px 20px;">
-              <p style="margin:0 0 12px 0; font-size:12px; color:#6b7280; text-transform:uppercase;">Payment Details</p>
-              
-              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:12px;">
-                <tr>
-                  <td style="font-size:14px; color:#6b7280; padding:4px 0;">Payment Method</td>
-                  <td align="right" style="font-size:14px; color:#111827; padding:4px 0;">${paymentMethodLabel}</td>
-                </tr>
-                <tr>
-                  <td style="font-size:14px; color:#6b7280; padding:4px 0;">Date & Time</td>
-                  <td align="right" style="font-size:14px; color:#111827; padding:4px 0;">${formattedDate}</td>
-                </tr>
-                <tr>
-                  <td style="font-size:14px; color:#6b7280; padding:4px 0;">Invoice Total</td>
-                  <td align="right" style="font-size:14px; color:#111827; padding:4px 0;">${formatCurrency(invoiceTotal)}</td>
-                </tr>
-              </table>
-
-              <div style="border-top:2px solid #e5e7eb; padding-top:16px;">
-                ${paymentBreakdownHtml}
-              </div>
-            </td>
-          </tr>
-
-          <!-- Remaining Balance (if any) -->
-          ${remainingBalanceHtml}
-
-          <!-- CTA Button -->
-          <tr>
-            <td style="padding:0 20px 24px; text-align:center;">
-              <a href="https://pawbucks.app/merchant/invoicing" style="display:inline-block; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color:white; text-decoration:none; padding:14px 32px; border-radius:8px; font-weight:600; font-size:16px;">
-                View Invoice Details
-              </a>
-            </td>
-          </tr>
-
-          <!-- Footer -->
-          <tr>
-            <td style="padding:20px; background-color:#f9fafb; text-align:center; border-top:1px solid #e5e7eb;">
-              <p style="margin:0 0 8px 0; font-size:12px; color:#6b7280;">
-                This is an automated notification from PawBucks.
-              </p>
-              <p style="margin:0; font-size:12px; color:#6b7280;">
-                Questions? Contact support@pawbucks.app
-              </p>
-              <p style="margin:12px 0 0 0; font-size:11px; color:#9ca3af;">
-                © ${new Date().getFullYear()} PawBucks. All rights reserved.
-              </p>
             </td>
           </tr>
 
         </table>
-
       </td>
     </tr>
   </table>
-
 </body>
-</html>
-  `;
+</html>`;
 }
 
 serve(async (req) => {
@@ -322,7 +413,7 @@ serve(async (req) => {
   try {
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
     if (!resendApiKey) {
-      console.log("[INVOICE_PAID_NOTIFICATION] RESEND_API_KEY not configured, skipping notification email");
+      console.log("[INVOICE_PAID_NOTIFICATION] RESEND_API_KEY not configured, skipping");
       return new Response(
         JSON.stringify({ success: false, message: "Email service not configured" }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
@@ -332,39 +423,40 @@ serve(async (req) => {
     const resend = new Resend(resendApiKey);
     const params: InvoicePaidNotificationParams = await req.json();
 
-    console.log('[INVOICE_PAID_NOTIFICATION] Sending notification to merchant:', params.merchantEmail);
-    console.log('[INVOICE_PAID_NOTIFICATION] Invoice details:', {
-      invoiceNumber: params.invoiceNumber,
-      clientName: params.clientName,
-      amountPaid: params.amountPaid,
-      paymentMethod: params.paymentMethod,
-    });
+    console.log('[INVOICE_PAID_NOTIFICATION] Sending to:', params.merchantEmail, 'Invoice:', params.invoiceNumber);
 
-    const html = generateInvoicePaidEmailHtml(params);
+    // Fetch daily snapshot if merchantId available
+    let snapshot: DailySnapshot | null = null;
+    if (params.merchantId) {
+      snapshot = await getMerchantDailySnapshot(params.merchantId);
+    }
+
+    const html = generateInvoicePaidEmailHtml(params, snapshot);
+    const totalAmount = params.amountPaid + (params.pawbucksUsed || 0) * 0.001;
 
     const { data, error } = await resend.emails.send({
       from: "PawBucks <noreply@pawbucks.app>",
       to: [params.merchantEmail],
-      subject: `💰 Payment Received - Invoice #${params.invoiceNumber} - ${formatCurrency(params.amountPaid + (params.pawbucksUsed || 0) * 0.001)}`,
+      subject: `💰 Payment Received - ${params.invoiceNumber} - ${formatCurrency(totalAmount)}`,
       html,
     });
 
     if (error) {
-      console.error('[INVOICE_PAID_NOTIFICATION] Failed to send notification email:', error);
+      console.error('[INVOICE_PAID_NOTIFICATION] Send failed:', error);
       return new Response(
         JSON.stringify({ success: false, error: error.message }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
       );
     }
 
-    console.log('[INVOICE_PAID_NOTIFICATION] ✅ Merchant notification email sent successfully:', data);
+    console.log('[INVOICE_PAID_NOTIFICATION] ✅ Sent successfully:', data);
     return new Response(
       JSON.stringify({ success: true, emailId: data?.id }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
     );
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error('[INVOICE_PAID_NOTIFICATION] Error sending notification email:', errorMessage);
+    console.error('[INVOICE_PAID_NOTIFICATION] Error:', errorMessage);
     return new Response(
       JSON.stringify({ success: false, error: errorMessage }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
