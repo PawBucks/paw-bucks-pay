@@ -183,7 +183,7 @@ Merchants are solely responsible for:
 You may not:
 • Misrepresent professional credentials
 • Provide unlawful veterinary services
-• Circumvent Platform fees
+• Circumvent Network fees
 • Engage in deceptive or fraudulent conduct
 • Violate Stripe policies or professional regulations
 
