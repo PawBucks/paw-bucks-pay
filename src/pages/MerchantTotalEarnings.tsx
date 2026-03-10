@@ -93,7 +93,7 @@
                  <CardTitle className="text-3xl text-primary">
                    ${summary.totalEarnings.toFixed(2)}
                  </CardTitle>
-                 <CardDescription>Net earnings after platform fees</CardDescription>
+                 <CardDescription>Net earnings after network fees</CardDescription>
                </div>
              </div>
            </CardHeader>
