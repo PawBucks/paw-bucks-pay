@@ -283,6 +283,98 @@ export function OverviewTab() {
           )}
         </CardContent>
       </Card>
+      {/* Merchant Repeat Redemption Rate Card */}
+      <Card className="border-2">
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <div>
+            <CardTitle className="text-lg font-bold flex items-center gap-2">
+              <Repeat className="w-5 h-5 text-primary" />
+              Merchant Repeat Redemption Rate
+            </CardTitle>
+            <p className="text-sm text-muted-foreground mt-1">
+              % of customers who redeem PawBucks and then return for another purchase
+            </p>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="flex items-end gap-3">
+            <span className={cn(
+              "text-5xl font-extrabold tracking-tight",
+              stats.repeatRedemptionRate >= 60 ? "text-emerald-500" :
+              stats.repeatRedemptionRate >= 35 ? "text-amber-500" : "text-destructive"
+            )}>
+              {stats.repeatRedemptionRate}%
+            </span>
+            <span className={cn(
+              "text-sm font-semibold mb-2 px-2 py-0.5 rounded-full",
+              stats.repeatRedemptionRate >= 60
+                ? "bg-emerald-500/10 text-emerald-600"
+                : stats.repeatRedemptionRate >= 35
+                ? "bg-amber-500/10 text-amber-600"
+                : "bg-destructive/10 text-destructive"
+            )}>
+              {stats.repeatRedemptionRate >= 60 ? "Strong" :
+               stats.repeatRedemptionRate >= 35 ? "Moderate" : "Needs Attention"}
+            </span>
+          </div>
+
+          <div className="space-y-2">
+            <div className="relative">
+              <Progress
+                value={Math.min(stats.repeatRedemptionRate, 100)}
+                className={cn(
+                  "h-4 rounded-full",
+                  stats.repeatRedemptionRate >= 60
+                    ? "[&>div]:bg-emerald-500"
+                    : stats.repeatRedemptionRate >= 35
+                    ? "[&>div]:bg-amber-500"
+                    : "[&>div]:bg-destructive"
+                )}
+              />
+            </div>
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>0%</span>
+              <span className="text-destructive font-medium">35% ⚠️</span>
+              <span className="text-emerald-600 font-medium">60%+ ✓</span>
+              <span>100%</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2 border-t">
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide">Repeat Redeemers</p>
+              <p className="text-xl font-bold">{stats.repeatRedeemers.toLocaleString()}</p>
+              <p className="text-xs text-muted-foreground">Came back after using PawBucks</p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide">Total Redeemers</p>
+              <p className="text-xl font-bold">{stats.totalRedeemers.toLocaleString()}</p>
+              <p className="text-xs text-muted-foreground">All customers who spent PawBucks</p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide">One-Time Only</p>
+              <p className="text-xl font-bold">{(stats.totalRedeemers - stats.repeatRedeemers).toLocaleString()}</p>
+              <p className="text-xs text-muted-foreground">Used PawBucks but didn't return</p>
+            </div>
+          </div>
+
+          {stats.repeatRedemptionRate < 35 && stats.totalRedeemers > 0 && (
+            <div className="bg-destructive/5 border border-destructive/20 rounded-lg p-3 text-sm text-destructive">
+              <strong>⚠️ Below 35%:</strong> PawBucks may only be driving discounted first visits. Consider merchant incentives and follow-up promotions to boost return rates.
+            </div>
+          )}
+          {stats.repeatRedemptionRate >= 35 && stats.repeatRedemptionRate < 60 && stats.totalRedeemers > 0 && (
+            <div className="bg-amber-500/5 border border-amber-500/20 rounded-lg p-3 text-sm text-amber-700">
+              <strong>📊 Moderate:</strong> Some redeemers are returning, but there's room to grow. Target 60%+ for strong merchant confidence in PawBucks.
+            </div>
+          )}
+          {stats.repeatRedemptionRate >= 60 && stats.totalRedeemers > 0 && (
+            <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-lg p-3 text-sm text-emerald-700">
+              <strong>✅ Strong:</strong> PawBucks is successfully driving repeat business. Merchants should see clear value in accepting PawBucks.
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
