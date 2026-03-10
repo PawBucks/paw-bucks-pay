@@ -44,6 +44,9 @@ export function OverviewTab() {
           totalPawbucksEarned: data[0].total_pawbucks_earned || 0,
           totalPawbucksSpent: data[0].total_pawbucks_spent || 0,
           pawbucksSpendRate: data[0].pawbucks_spend_rate || 0,
+          repeatRedemptionRate: data[0].repeat_redemption_rate || 0,
+          repeatRedeemers: data[0].repeat_redeemers || 0,
+          totalRedeemers: data[0].total_redeemers || 0,
         });
       }
     } catch (error) {
