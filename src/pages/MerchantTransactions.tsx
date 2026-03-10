@@ -172,7 +172,7 @@ const MerchantTransactions = () => {
   };
 
   const exportToCSV = () => {
-    const headers = ["Date", "Customer", "Amount", "Platform Fee", "Funding Repayment", "Net Payout", "Payment Method", "Status"];
+    const headers = ["Date", "Customer", "Amount", "Network Fee", "Funding Repayment", "Net Payout", "Payment Method", "Status"];
     const csvData = sortedTransactions.map(t => [
       format(new Date(t.date), "MM/dd/yyyy"),
       t.customer_name,
