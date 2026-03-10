@@ -71,6 +71,8 @@ function generateReceiptHtml(params: ReceiptEmailParams): string {
     receiptId,
     merchantName,
     merchantLocation,
+    merchantDescription,
+    merchantProfileUrl,
     items,
     subtotal,
     pawbucksApplied,
@@ -80,100 +82,209 @@ function generateReceiptHtml(params: ReceiptEmailParams): string {
     cardBrand,
     cardLast4,
     pawbucksEarned,
+    walletBalance,
+    expiringPawBucks,
     splicedBreakdown,
     tierInfo,
   } = params;
 
-  const logoUrl = "https://pawbucks.app/logo.png";
   const formattedDate = formatDate(transactionDate);
-  
-  // Generate items rows
-  const itemsHtml = items.map(item => `
+  const tierText = tierInfo ? ` (${tierInfo.tierName} ${tierInfo.multiplier}x)` : '';
+
+  // Service name from first item
+  const serviceName = items.length > 0 ? items[0].name : 'Purchase';
+
+  // Reward section (only if earned)
+  const rewardSectionHtml = pawbucksEarned && pawbucksEarned > 0 ? `
+    <!-- Reward Earned Card -->
     <tr>
-      <td style="font-size:14px; color:#374151; border-bottom:1px solid #e5e7eb; padding:8px;">
-        ${item.name}
+      <td style="padding:0 24px 24px;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%); border-radius:16px; overflow:hidden;">
+          <tr>
+            <td style="padding:28px 24px; text-align:center;">
+              <p style="margin:0 0 4px; font-size:12px; font-weight:600; letter-spacing:2px; color:rgba(255,255,255,0.85); text-transform:uppercase;">🎉 Reward Earned${tierText}</p>
+              <p style="margin:0 0 6px; font-size:36px; font-weight:800; color:#ffffff; line-height:1.1;">+${pawbucksEarned.toLocaleString()} PawBucks</p>
+              <p style="margin:0; font-size:13px; color:rgba(255,255,255,0.8);">Added to your PawBucks Wallet</p>
+            </td>
+          </tr>
+          ${walletBalance !== undefined ? `
+          <tr>
+            <td style="padding:0 24px 20px; text-align:center;">
+              <table cellpadding="0" cellspacing="0" style="margin:0 auto; background:rgba(255,255,255,0.15); border-radius:10px; backdrop-filter:blur(10px);">
+                <tr>
+                  <td style="padding:10px 20px;">
+                    <p style="margin:0 0 2px; font-size:11px; color:rgba(255,255,255,0.7); text-transform:uppercase; letter-spacing:1px;">Current Balance</p>
+                    <p style="margin:0; font-size:18px; font-weight:700; color:#ffffff;">${walletBalance.toLocaleString()} PawBucks</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          ` : ''}
+        </table>
       </td>
-      <td align="right" style="font-size:14px; color:#374151; border-bottom:1px solid #e5e7eb; padding:8px;">
-        $${item.price.toFixed(2)}
+    </tr>
+  ` : '';
+
+  // Transaction details rows
+  const detailRows = [
+    { label: 'Merchant', value: merchantName },
+    { label: 'Service', value: serviceName },
+    { label: 'Date', value: formattedDate },
+    { label: 'Receipt ID', value: receiptId.substring(0, 12).toUpperCase() },
+  ];
+
+  const detailRowsHtml = detailRows.map((row, i) => `
+    <tr>
+      <td style="padding:14px 0; ${i < detailRows.length - 1 ? 'border-bottom:1px solid #f1f5f9;' : ''}">
+        <p style="margin:0 0 3px; font-size:11px; font-weight:600; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px;">${row.label}</p>
+        <p style="margin:0; font-size:15px; color:#1e293b; font-weight:500;">${row.value}</p>
       </td>
     </tr>
   `).join('');
 
-  // PawBucks applied row (only if > 0)
-  const pawbucksAppliedHtml = pawbucksApplied > 0 ? `
+  // Payment summary rows
+  let paymentRowsHtml = `
     <tr>
-      <td style="font-size:14px; padding:4px 0;">PawBucks Applied</td>
-      <td align="right" style="font-size:14px; color:#16a34a; padding:4px 0;">
-        -$${pawbucksApplied.toFixed(2)}
-      </td>
+      <td style="font-size:14px; color:#475569; padding:8px 0;">Subtotal</td>
+      <td align="right" style="font-size:14px; color:#1e293b; font-weight:500; padding:8px 0;">$${subtotal.toFixed(2)}</td>
     </tr>
-  ` : '';
+  `;
 
-  // Surcharge row (only if > 0)
-  const surchargeHtml = surcharge && surcharge > 0 ? `
+  if (pawbucksApplied > 0) {
+    paymentRowsHtml += `
     <tr>
-      <td style="font-size:14px; padding:4px 0;">Surcharge</td>
-      <td align="right" style="font-size:14px; padding:4px 0;">
-        $${surcharge.toFixed(2)}
-      </td>
-    </tr>
-  ` : '';
+      <td style="font-size:14px; color:#16a34a; padding:8px 0;">PawBucks Applied</td>
+      <td align="right" style="font-size:14px; color:#16a34a; font-weight:600; padding:8px 0;">-$${pawbucksApplied.toFixed(2)}</td>
+    </tr>`;
+  }
 
-  // PawBucks earned section (only if > 0) - includes tier info if provided
-  const tierText = tierInfo ? `(${tierInfo.tierName} ${tierInfo.multiplier}x)` : '';
-  const pawbucksEarnedHtml = pawbucksEarned && pawbucksEarned > 0 ? `
+  if (surcharge && surcharge > 0) {
+    paymentRowsHtml += `
     <tr>
-      <td style="padding:20px;">
-        <table width="100%" cellpadding="16" cellspacing="0" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius:8px;">
-          <tr>
-            <td align="center">
-              <p style="margin:0 0 4px 0; font-size:14px; color:#92400e;">🐾 You Earned ${tierText}</p>
-              <p style="margin:0; font-size:28px; font-weight:bold; color:#92400e;">${pawbucksEarned} PawBucks</p>
-              <p style="margin:4px 0 0 0; font-size:12px; color:#a16207;">Added to your wallet!</p>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-  ` : '';
+      <td style="font-size:14px; color:#475569; padding:8px 0;">Surcharge</td>
+      <td align="right" style="font-size:14px; color:#1e293b; padding:8px 0;">$${surcharge.toFixed(2)}</td>
+    </tr>`;
+  }
 
-  // Spliced breakdown section for insurance claims (only if provided)
-  const splicedBreakdownHtml = splicedBreakdown ? `
+  paymentRowsHtml += `
     <tr>
-      <td style="padding:0 20px 20px;">
-        <table width="100%" style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:8px; padding:12px;">
-          <tr>
-            <td colspan="2" style="font-size:14px; font-weight:bold; color:#0369a1; padding-bottom:8px; border-bottom:1px solid #bae6fd;">
-              📋 Payment Breakdown
-            </td>
-          </tr>
-          ${splicedBreakdown.insuranceCovered ? `
-          <tr>
-            <td style="font-size:13px; color:#0c4a6e; padding:6px 0;">Insurance Covered:</td>
-            <td align="right" style="font-size:13px; color:#0c4a6e; padding:6px 0;">$${splicedBreakdown.insuranceCovered.toFixed(2)}</td>
-          </tr>
-          ` : ''}
-          ${splicedBreakdown.ownerResponsibility ? `
-          <tr>
-            <td style="font-size:13px; color:#0c4a6e; padding:6px 0;">Your Responsibility:</td>
-            <td align="right" style="font-size:13px; color:#0c4a6e; padding:6px 0;">$${splicedBreakdown.ownerResponsibility.toFixed(2)}</td>
-          </tr>
-          ` : ''}
-          ${splicedBreakdown.pendingFromCarrier ? `
-          <tr>
-            <td style="font-size:13px; color:#f59e0b; padding:6px 0;">⏳ Pending from Carrier:</td>
-            <td align="right" style="font-size:13px; color:#f59e0b; padding:6px 0;">$${splicedBreakdown.pendingFromCarrier.toFixed(2)}</td>
-          </tr>
-          ` : ''}
-        </table>
-      </td>
+      <td style="font-size:14px; color:#475569; padding:8px 0;">Card Charged</td>
+      <td align="right" style="font-size:14px; color:#1e293b; font-weight:500; padding:8px 0;">$${cardAmount.toFixed(2)}</td>
     </tr>
-  ` : '';
+  `;
 
   // Payment method display
-  const paymentMethodHtml = cardBrand && cardLast4 
-    ? `Payment Method: ${cardBrand} ending in ${cardLast4}<br/>`
+  const paymentMethodText = cardBrand && cardLast4 
+    ? `${cardBrand} ending in ${cardLast4}` 
     : '';
+
+  // Spliced breakdown for insurance claims
+  const splicedHtml = splicedBreakdown ? `
+    <tr>
+      <td style="padding:0 24px 24px;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:12px;">
+          <tr>
+            <td style="padding:16px;">
+              <p style="margin:0 0 12px; font-size:12px; font-weight:600; color:#0369a1; text-transform:uppercase; letter-spacing:1px;">📋 Payment Breakdown</p>
+              <table width="100%" cellpadding="0" cellspacing="0">
+                ${splicedBreakdown.insuranceCovered ? `
+                <tr>
+                  <td style="font-size:13px; color:#0c4a6e; padding:4px 0;">Insurance Covered</td>
+                  <td align="right" style="font-size:13px; color:#0c4a6e; font-weight:600; padding:4px 0;">$${splicedBreakdown.insuranceCovered.toFixed(2)}</td>
+                </tr>` : ''}
+                ${splicedBreakdown.ownerResponsibility ? `
+                <tr>
+                  <td style="font-size:13px; color:#0c4a6e; padding:4px 0;">Your Responsibility</td>
+                  <td align="right" style="font-size:13px; color:#0c4a6e; font-weight:600; padding:4px 0;">$${splicedBreakdown.ownerResponsibility.toFixed(2)}</td>
+                </tr>` : ''}
+                ${splicedBreakdown.pendingFromCarrier ? `
+                <tr>
+                  <td style="font-size:13px; color:#f59e0b; padding:4px 0;">⏳ Pending from Carrier</td>
+                  <td align="right" style="font-size:13px; color:#f59e0b; font-weight:600; padding:4px 0;">$${splicedBreakdown.pendingFromCarrier.toFixed(2)}</td>
+                </tr>` : ''}
+              </table>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  ` : '';
+
+  // Merchant info section
+  const merchantSectionHtml = `
+    <tr>
+      <td style="padding:0 24px 24px;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc; border-radius:12px; border:1px solid #e2e8f0;">
+          <tr>
+            <td style="padding:20px;">
+              <p style="margin:0 0 10px; font-size:11px; font-weight:600; color:#94a3b8; text-transform:uppercase; letter-spacing:1.5px;">About This Merchant</p>
+              <p style="margin:0 0 4px; font-size:16px; font-weight:700; color:#1e293b;">${merchantName}</p>
+              ${merchantDescription ? `<p style="margin:0 0 4px; font-size:13px; color:#64748b;">${merchantDescription}</p>` : ''}
+              ${merchantLocation ? `<p style="margin:0; font-size:13px; color:#94a3b8;">${merchantLocation}</p>` : ''}
+              ${merchantProfileUrl ? `
+              <table cellpadding="0" cellspacing="0" style="margin-top:14px;">
+                <tr>
+                  <td style="background:#f1f5f9; border-radius:8px; border:1px solid #e2e8f0;">
+                    <a href="${merchantProfileUrl}" style="display:block; padding:10px 20px; font-size:13px; font-weight:600; color:#475569; text-decoration:none;">View Merchant Profile →</a>
+                  </td>
+                </tr>
+              </table>` : ''}
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  `;
+
+  // CTA section
+  const ctaSectionHtml = `
+    <tr>
+      <td style="padding:0 24px 24px;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-radius:12px;">
+          <tr>
+            <td style="padding:24px; text-align:center;">
+              <p style="margin:0 0 6px; font-size:15px; font-weight:600; color:#ffffff;">Use Your PawBucks</p>
+              <p style="margin:0 0 16px; font-size:13px; color:#94a3b8;">Spend PawBucks on pet services from trusted local businesses.</p>
+              <table cellpadding="0" cellspacing="0" style="margin:0 auto;">
+                <tr>
+                  <td style="background:linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius:10px;">
+                    <a href="https://pawbucks.app/explore" style="display:block; padding:14px 32px; font-size:14px; font-weight:700; color:#ffffff; text-decoration:none; letter-spacing:0.3px;">Explore PawBucks Merchants</a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  `;
+
+  // Wallet balance footer strip
+  const walletStripHtml = walletBalance !== undefined ? `
+    <tr>
+      <td style="padding:0 24px 24px;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="background:#fffbeb; border:1px solid #fde68a; border-radius:12px;">
+          <tr>
+            <td style="padding:16px 20px;">
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td>
+                    <p style="margin:0 0 2px; font-size:12px; font-weight:600; color:#92400e; text-transform:uppercase; letter-spacing:0.5px;">🐾 PawBucks Wallet</p>
+                    <p style="margin:0; font-size:16px; font-weight:700; color:#78350f;">Balance: ${walletBalance.toLocaleString()} PawBucks</p>
+                  </td>
+                  ${expiringPawBucks && expiringPawBucks.amount > 0 ? `
+                  <td align="right" valign="top">
+                    <p style="margin:0; font-size:12px; color:#b45309; font-weight:500;">Expiring: ${expiringPawBucks.amount.toLocaleString()} in ${expiringPawBucks.daysLeft} days</p>
+                  </td>` : ''}
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  ` : '';
 
   return `
 <!DOCTYPE html>
@@ -183,138 +294,95 @@ function generateReceiptHtml(params: ReceiptEmailParams): string {
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>PawBucks Receipt</title>
 </head>
+<body style="margin:0; padding:0; background-color:#f1f5f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; -webkit-font-smoothing:antialiased;">
 
-<body style="margin:0; padding:0; background-color:#f5f7fa; font-family: Arial, Helvetica, sans-serif;">
-
-  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f5f7fa; padding:20px;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f1f5f9; padding:32px 16px;">
     <tr>
       <td align="center">
 
-        <table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff; border-radius:10px; overflow:hidden;">
+        <table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff; border-radius:20px; overflow:hidden; box-shadow:0 4px 24px rgba(0,0,0,0.06);">
 
-          <!-- Header / Logo -->
+          <!-- Header -->
           <tr>
-            <td style="padding:24px; text-align:center; background-color:#0f172a;">
-              <img 
-                src="${logoUrl}" 
-                alt="PawBucks" 
-                width="140"
-                style="display:block; margin:0 auto 12px; max-width:140px;"
-              />
-              <p style="margin:0; font-size:14px; color:#e5e7eb;">
-                Purchase Receipt
-              </p>
+            <td style="background:linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #0f172a 100%); padding:40px 24px 36px; text-align:center;">
+              <p style="margin:0 0 8px; font-size:24px; font-weight:800; letter-spacing:2px; color:#7DD4D4;">🐾 PAWBUCKS</p>
+              <p style="margin:0 0 8px; font-size:20px; font-weight:600; color:#ffffff;">Payment Successful</p>
+              <p style="margin:0; font-size:13px; color:#94a3b8;">Thanks for supporting a local pet business!</p>
             </td>
           </tr>
 
-          <!-- Transaction Meta -->
+          ${rewardSectionHtml}
+
+          <!-- Transaction Details -->
           <tr>
-            <td style="padding:20px;">
-              <table width="100%">
+            <td style="padding:0 24px 24px;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff; border-radius:12px; border:1px solid #e2e8f0;">
                 <tr>
-                  <td style="font-size:14px; color:#374151;">
-                    <strong>Date:</strong> ${formattedDate}
-                  </td>
-                  <td align="right" style="font-size:14px; color:#374151;">
-                    <strong>Receipt #:</strong> ${receiptId.substring(0, 12).toUpperCase()}
+                  <td style="padding:20px;">
+                    <p style="margin:0 0 16px; font-size:11px; font-weight:600; color:#94a3b8; text-transform:uppercase; letter-spacing:1.5px;">Transaction Details</p>
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                      ${detailRowsHtml}
+                    </table>
                   </td>
                 </tr>
               </table>
             </td>
           </tr>
 
-          <!-- Merchant Info -->
+          <!-- Payment Summary -->
           <tr>
-            <td style="padding:0 20px 20px;">
-              <p style="margin:0; font-size:14px; color:#374151;">
-                <strong>Merchant:</strong> ${merchantName}<br/>
-                ${merchantLocation ? `<span style="color:#6b7280;">${merchantLocation}</span>` : ''}
-              </p>
-            </td>
-          </tr>
-
-          <!-- Line Items -->
-          <tr>
-            <td style="padding:0 20px 20px;">
-              <table width="100%" cellpadding="8" cellspacing="0" style="border-collapse:collapse;">
-                <tr style="background-color:#f3f4f6;">
-                  <th align="left" style="font-size:13px; color:#111827; border-bottom:1px solid #e5e7eb; padding:8px;">
-                    Item
-                  </th>
-                  <th align="right" style="font-size:13px; color:#111827; border-bottom:1px solid #e5e7eb; padding:8px;">
-                    Amount
-                  </th>
-                </tr>
-                ${itemsHtml}
-              </table>
-            </td>
-          </tr>
-
-          <!-- Totals -->
-          <tr>
-            <td style="padding:0 20px 20px;">
-              <table width="100%">
+            <td style="padding:0 24px 24px;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff; border-radius:12px; border:1px solid #e2e8f0;">
                 <tr>
-                  <td style="font-size:14px; padding:4px 0;">Subtotal</td>
-                  <td align="right" style="font-size:14px; padding:4px 0;">$${subtotal.toFixed(2)}</td>
-                </tr>
-
-                ${pawbucksAppliedHtml}
-
-                ${surchargeHtml}
-
-                <tr>
-                  <td style="font-size:14px; padding:4px 0;">Card Charged</td>
-                  <td align="right" style="font-size:14px; padding:4px 0;">$${cardAmount.toFixed(2)}</td>
-                </tr>
-
-                <tr>
-                  <td style="font-size:16px; font-weight:bold; padding-top:12px; border-top:2px solid #e5e7eb;">
-                    Total Paid
-                  </td>
-                  <td align="right" style="font-size:16px; font-weight:bold; padding-top:12px; border-top:2px solid #e5e7eb;">
-                    $${totalPaid.toFixed(2)}
+                  <td style="padding:20px;">
+                    <p style="margin:0 0 16px; font-size:11px; font-weight:600; color:#94a3b8; text-transform:uppercase; letter-spacing:1.5px;">Payment Summary</p>
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                      ${paymentRowsHtml}
+                      <!-- Divider -->
+                      <tr>
+                        <td colspan="2" style="padding:8px 0;">
+                          <div style="border-top:2px solid #e2e8f0;"></div>
+                        </td>
+                      </tr>
+                      <!-- Total -->
+                      <tr>
+                        <td style="font-size:16px; font-weight:700; color:#0f172a; padding:8px 0;">Total Paid</td>
+                        <td align="right" style="font-size:16px; font-weight:700; color:#0f172a; padding:8px 0;">$${totalPaid.toFixed(2)}</td>
+                      </tr>
+                    </table>
+                    <!-- Status -->
+                    <table cellpadding="0" cellspacing="0" style="margin-top:14px;">
+                      <tr>
+                        <td style="background:#f0fdf4; border-radius:8px; padding:8px 14px;">
+                          <p style="margin:0; font-size:13px; color:#16a34a; font-weight:600;">Status: Approved ✔</p>
+                          ${paymentMethodText ? `<p style="margin:4px 0 0; font-size:12px; color:#4ade80;">${paymentMethodText}</p>` : ''}
+                        </td>
+                      </tr>
+                    </table>
                   </td>
                 </tr>
               </table>
             </td>
           </tr>
 
-          <!-- Spliced Breakdown (for insurance claims) -->
-          ${splicedBreakdownHtml}
+          ${splicedHtml}
 
-          <!-- Payment Details -->
-          <tr>
-            <td style="padding:0 20px 20px;">
-              <p style="margin:0; font-size:13px; color:#6b7280;">
-                ${paymentMethodHtml}
-                Status: <strong style="color:#16a34a;">Approved</strong>
-              </p>
-            </td>
-          </tr>
+          ${merchantSectionHtml}
 
-          <!-- PawBucks Earned -->
-          ${pawbucksEarnedHtml}
+          ${ctaSectionHtml}
 
-          <!-- CTA Button -->
-          <tr>
-            <td style="padding:0 20px 20px; text-align:center;">
-              <a href="https://pawbucks.app/dashboard" style="display:inline-block; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color:white; text-decoration:none; padding:14px 32px; border-radius:8px; font-weight:600; font-size:16px;">
-                View Your Dashboard
-              </a>
-            </td>
-          </tr>
+          ${walletStripHtml}
 
           <!-- Footer -->
           <tr>
-            <td style="padding:20px; background-color:#f9fafb; text-align:center;">
-              <p style="margin:0 0 8px 0; font-size:12px; color:#6b7280;">
-                Questions? Contact support@pawbucks.app
+            <td style="padding:24px; background:#f8fafc; text-align:center; border-top:1px solid #e2e8f0;">
+              <p style="margin:0 0 6px; font-size:12px; color:#64748b;">
+                Questions? <a href="mailto:support@pawbucks.app" style="color:#0ea5e9; text-decoration:none; font-weight:500;">support@pawbucks.app</a>
               </p>
-              <p style="margin:0; font-size:12px; color:#6b7280;">
-                PawBucks, Inc. • This is an electronically generated receipt.
+              <p style="margin:0 0 4px; font-size:12px; color:#94a3b8;">
+                PawBucks, Inc. • Electronically generated receipt
               </p>
-              <p style="margin:8px 0 0 0; font-size:11px; color:#9ca3af;">
+              <p style="margin:0; font-size:11px; color:#cbd5e1;">
                 © ${new Date().getFullYear()} PawBucks. All rights reserved.
               </p>
             </td>
