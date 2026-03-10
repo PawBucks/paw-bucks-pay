@@ -18,6 +18,9 @@ export function OverviewTab() {
     totalPawbucksEarned: 0,
     totalPawbucksSpent: 0,
     pawbucksSpendRate: 0,
+    repeatRedemptionRate: 0,
+    repeatRedeemers: 0,
+    totalRedeemers: 0,
   });
   const [loading, setLoading] = useState(true);
 
