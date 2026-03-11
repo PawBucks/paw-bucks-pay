@@ -86,7 +86,7 @@ const LoyaltyProgramDiscoveryComponent = ({ userId }: LoyaltyProgramDiscoveryPro
         </Badge>
       </div>
       <p className="text-sm text-muted-foreground mb-4">
-        These merchants offer punch-card rewards — keep coming back to earn free services!
+        These merchants offer punch-card rewards. You're automatically enrolled when you make your first purchase — just pay and start collecting punches!
       </p>
       <div className="grid gap-3 sm:grid-cols-2">
         {programs.slice(0, 4).map((program) => (
