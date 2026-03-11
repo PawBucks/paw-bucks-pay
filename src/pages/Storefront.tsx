@@ -14,6 +14,7 @@ import { PawBucksCheckoutDialog } from "@/components/PawBucksCheckoutDialog";
 import { SubscriptionCheckoutDialog } from "@/components/SubscriptionCheckoutDialog";
 import { useQuery, useQueries } from "@tanstack/react-query";
 import { merchantSubscriptionPlansService } from "@/services/api/merchantSubscriptionPlans.service";
+import { AskQuestionButton } from "@/components/storefront/AskQuestionButton";
 
 type Product = {
   id: string;
