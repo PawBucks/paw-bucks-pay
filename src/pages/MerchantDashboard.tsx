@@ -740,6 +740,8 @@ const MerchantDashboard = () => {
             onNavigate={navigate}
           />
         );
+      case "messages":
+        return <MerchantMessagesTab merchantId={merchant.id} />;
       case "support":
         return <SupportTab submitterType="merchant" entityId={merchant.id} />;
       default:
