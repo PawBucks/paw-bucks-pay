@@ -251,6 +251,22 @@ const NotificationPreferences = () => {
           </RadioGroup>
         </GradientCard>
 
+        {/* Manage Subscriptions */}
+        <GradientCard className="mb-6">
+          <h2 className="text-lg font-semibold mb-2">Subscription</h2>
+          <p className="text-sm text-muted-foreground mb-4">
+            View and manage your PawBucks subscription plan.
+          </p>
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={() => navigate("/my-subscriptions")}
+          >
+            <Crown className="w-4 h-4 mr-2" />
+            Manage Subscriptions
+          </Button>
+        </GradientCard>
+
         {/* Save Button */}
         <Button
           className="w-full"
