@@ -9,7 +9,7 @@ import { GradientCard } from "@/components/ui/gradient-card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { ArrowLeft, Bell, ShieldAlert, Megaphone, Receipt, Loader2 } from "lucide-react";
+import { ArrowLeft, Bell, ShieldAlert, Megaphone, Receipt, Loader2, Crown, Settings } from "lucide-react";
 import { toast } from "sonner";
 
 type NotificationPreferences = {
@@ -141,8 +141,8 @@ const NotificationPreferences = () => {
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div className="flex items-center gap-2">
-            <Bell className="w-6 h-6 text-primary" />
-            <h1 className="text-2xl font-bold">Notification Preferences</h1>
+            <Settings className="w-6 h-6 text-primary" />
+            <h1 className="text-2xl font-bold">Settings</h1>
           </div>
         </div>
 
@@ -249,6 +249,22 @@ const NotificationPreferences = () => {
               </div>
             </div>
           </RadioGroup>
+        </GradientCard>
+
+        {/* Manage Subscriptions */}
+        <GradientCard className="mb-6">
+          <h2 className="text-lg font-semibold mb-2">Subscription</h2>
+          <p className="text-sm text-muted-foreground mb-4">
+            View and manage your PawBucks subscription plan.
+          </p>
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={() => navigate("/my-subscriptions")}
+          >
+            <Crown className="w-4 h-4 mr-2" />
+            Manage Subscriptions
+          </Button>
         </GradientCard>
 
         {/* Save Button */}
