@@ -141,8 +141,8 @@ const NotificationPreferences = () => {
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div className="flex items-center gap-2">
-            <Bell className="w-6 h-6 text-primary" />
-            <h1 className="text-2xl font-bold">Notification Preferences</h1>
+            <Settings className="w-6 h-6 text-primary" />
+            <h1 className="text-2xl font-bold">Settings</h1>
           </div>
         </div>
 
