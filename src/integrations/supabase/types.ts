@@ -5274,6 +5274,7 @@ export type Database = {
           license_number: string | null
           license_state: string | null
           location: string
+          logo_url: string | null
           medical_director_name: string | null
           name: string
           npi_number: string | null
@@ -5319,6 +5320,7 @@ export type Database = {
           license_number?: string | null
           license_state?: string | null
           location: string
+          logo_url?: string | null
           medical_director_name?: string | null
           name: string
           npi_number?: string | null
@@ -5364,6 +5366,7 @@ export type Database = {
           license_number?: string | null
           license_state?: string | null
           location?: string
+          logo_url?: string | null
           medical_director_name?: string | null
           name?: string
           npi_number?: string | null
