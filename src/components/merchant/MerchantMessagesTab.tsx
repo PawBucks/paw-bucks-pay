@@ -525,6 +525,7 @@ export const MerchantMessagesTab = ({ merchantId }: MerchantMessagesTabProps) =>
                       </div>
                     </div>
                   </div>
+                </div>
                 ))}
                 <div ref={messagesEndRef} />
               </div>
