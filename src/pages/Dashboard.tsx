@@ -237,6 +237,13 @@ const Dashboard = () => {
               </motion.div>
             )}
             
+            {/* Row 3.7: Discover Merchants with Loyalty Programs */}
+            {user && (
+              <motion.div custom={isPawPassSubscriber ? 4.7 : 3.7} variants={cardVariants} initial="hidden" animate="visible">
+                <LoyaltyProgramDiscovery userId={effectiveWalletUserId || user.id} />
+              </motion.div>
+            )}
+            
             {/* Row 4: Guilt-Free Badges - Gamification hook */}
             {user && (
               <motion.div custom={isPawPassSubscriber ? 5 : 4} variants={cardVariants} initial="hidden" animate="visible">
