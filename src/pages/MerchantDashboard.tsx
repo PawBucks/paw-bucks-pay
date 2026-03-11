@@ -37,6 +37,7 @@ import {
   HelpCircle,
   Stamp,
   LifeBuoy,
+  MessageSquare,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format, startOfMonth, parseISO } from "date-fns";
