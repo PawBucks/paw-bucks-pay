@@ -152,6 +152,17 @@ const NAV_SECTIONS = [
     ],
   },
   {
+    title: "Communication",
+    items: [
+      {
+        id: "messages",
+        label: "Messages",
+        icon: MessageSquare,
+        description: "Communicate with your customers directly",
+      },
+    ],
+  },
+  {
     title: "Support",
     items: [
       {
