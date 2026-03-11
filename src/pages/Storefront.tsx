@@ -415,6 +415,11 @@ const Storefront = memo(() => {
                     <span>Usually responds quickly</span>
                   </div>
                 </div>
+
+                {/* Ask a Question */}
+                {merchantId && (
+                  <AskQuestionButton merchantId={merchantId} merchantName={merchantName || "Store"} />
+                )}
               </div>
             </div>
 

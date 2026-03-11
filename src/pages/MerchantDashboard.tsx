@@ -56,6 +56,7 @@ import { EditMerchantProfileDialog } from "@/components/merchant/EditMerchantPro
 import { FundingRequestDialog } from "@/components/merchant/FundingRequestDialog";
 import { PendingApprovalNotice } from "@/components/PendingApprovalNotice";
 import { SupportTab } from "@/components/support/SupportTab";
+import { MerchantMessagesTab } from "@/components/merchant/MerchantMessagesTab";
 
 type Merchant = {
   id: string;

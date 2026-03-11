@@ -198,6 +198,7 @@ const AppRoutes = () => {
       <Route path="/merchant/available-balance" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantAvailableBalance /></PageTransition></ProtectedRoute>} />
       <Route path="/merchant/pending-balance" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantPendingBalance /></PageTransition></ProtectedRoute>} />
       <Route path="/merchant/total-earnings" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantTotalEarnings /></PageTransition></ProtectedRoute>} />
+      <Route path="/merchant/messages" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantMessages /></PageTransition></ProtectedRoute>} />
 
       {/* Vet routes - requires vet account */}
       <Route path="/vet-onboarding" element={<ProtectedRoute><PageTransition><VetOnboarding /></PageTransition></ProtectedRoute>} />
