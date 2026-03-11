@@ -37,6 +37,7 @@ import {
   HelpCircle,
   Stamp,
   LifeBuoy,
+  MessageSquare,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format, startOfMonth, parseISO } from "date-fns";
@@ -55,6 +56,7 @@ import { EditMerchantProfileDialog } from "@/components/merchant/EditMerchantPro
 import { FundingRequestDialog } from "@/components/merchant/FundingRequestDialog";
 import { PendingApprovalNotice } from "@/components/PendingApprovalNotice";
 import { SupportTab } from "@/components/support/SupportTab";
+import { MerchantMessagesTab } from "@/components/merchant/MerchantMessagesTab";
 
 type Merchant = {
   id: string;
@@ -146,6 +148,17 @@ const NAV_SECTIONS = [
         label: "Quick Actions",
         icon: Zap,
         description: "Access all merchant tools, products, and settings",
+      },
+    ],
+  },
+  {
+    title: "Communication",
+    items: [
+      {
+        id: "messages",
+        label: "Messages",
+        icon: MessageSquare,
+        description: "Communicate with your customers directly",
       },
     ],
   },
@@ -727,6 +740,8 @@ const MerchantDashboard = () => {
             onNavigate={navigate}
           />
         );
+      case "messages":
+        return <MerchantMessagesTab merchantId={merchant.id} />;
       case "support":
         return <SupportTab submitterType="merchant" entityId={merchant.id} />;
       default:

@@ -14,6 +14,7 @@ import { PawBucksCheckoutDialog } from "@/components/PawBucksCheckoutDialog";
 import { SubscriptionCheckoutDialog } from "@/components/SubscriptionCheckoutDialog";
 import { useQuery, useQueries } from "@tanstack/react-query";
 import { merchantSubscriptionPlansService } from "@/services/api/merchantSubscriptionPlans.service";
+import { AskQuestionButton } from "@/components/storefront/AskQuestionButton";
 
 type Product = {
   id: string;
@@ -414,6 +415,11 @@ const Storefront = memo(() => {
                     <span>Usually responds quickly</span>
                   </div>
                 </div>
+
+                {/* Ask a Question */}
+                {merchantId && (
+                  <AskQuestionButton merchantId={merchantId} merchantName={merchantName || "Store"} />
+                )}
               </div>
             </div>
 

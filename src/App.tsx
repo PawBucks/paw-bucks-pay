@@ -96,6 +96,7 @@ const BadgesPage = lazyWithRetry(() => import("./pages/BadgesPage"), "BadgesPage
 const PetPersonalityQuizPage = lazyWithRetry(() => import("./pages/PetPersonalityQuiz"), "PetPersonalityQuiz");
 const LoyaltyPage = lazyWithRetry(() => import("./pages/LoyaltyPage"), "LoyaltyPage");
 const LoyaltyCardsPage = lazyWithRetry(() => import("./pages/LoyaltyCardsPage"), "LoyaltyCardsPage");
+const MerchantMessages = lazyWithRetry(() => import("./pages/MerchantMessages"), "MerchantMessages");
 
 const createQueryClient = () => new QueryClient({
   defaultOptions: {
@@ -197,6 +198,7 @@ const AppRoutes = () => {
       <Route path="/merchant/available-balance" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantAvailableBalance /></PageTransition></ProtectedRoute>} />
       <Route path="/merchant/pending-balance" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantPendingBalance /></PageTransition></ProtectedRoute>} />
       <Route path="/merchant/total-earnings" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantTotalEarnings /></PageTransition></ProtectedRoute>} />
+      <Route path="/merchant/messages" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantMessages /></PageTransition></ProtectedRoute>} />
 
       {/* Vet routes - requires vet account */}
       <Route path="/vet-onboarding" element={<ProtectedRoute><PageTransition><VetOnboarding /></PageTransition></ProtectedRoute>} />
