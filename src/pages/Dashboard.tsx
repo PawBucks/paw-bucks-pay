@@ -28,6 +28,7 @@ import { BadgeTeaser } from "@/components/badges";
 import { PersonalityQuizCTA } from "@/components/dashboard/PersonalityQuizCTA";
 import { LoyaltyDashboardWidget } from "@/components/loyalty";
 import { CustomerLoyaltyCards } from "@/components/dashboard/CustomerLoyaltyCards";
+import { LoyaltyProgramDiscovery } from "@/components/dashboard/LoyaltyProgramDiscovery";
 import { WelcomeCreditCard } from "@/components/dashboard/WelcomeCreditCard";
 import { Store, Users, TrendingUp, Receipt } from "lucide-react";
 
@@ -233,6 +234,13 @@ const Dashboard = () => {
             {user && (
               <motion.div custom={isPawPassSubscriber ? 4.6 : 3.6} variants={cardVariants} initial="hidden" animate="visible">
                 <CustomerLoyaltyCards userId={effectiveWalletUserId || user.id} compact />
+              </motion.div>
+            )}
+            
+            {/* Row 3.7: Discover Merchants with Loyalty Programs */}
+            {user && (
+              <motion.div custom={isPawPassSubscriber ? 4.7 : 3.7} variants={cardVariants} initial="hidden" animate="visible">
+                <LoyaltyProgramDiscovery userId={effectiveWalletUserId || user.id} />
               </motion.div>
             )}
             
