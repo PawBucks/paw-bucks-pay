@@ -1,0 +1,1 @@
+ALTER TABLE public.partner_vets ADD COLUMN logo_url TEXT;
