@@ -96,6 +96,7 @@ const BadgesPage = lazyWithRetry(() => import("./pages/BadgesPage"), "BadgesPage
 const PetPersonalityQuizPage = lazyWithRetry(() => import("./pages/PetPersonalityQuiz"), "PetPersonalityQuiz");
 const LoyaltyPage = lazyWithRetry(() => import("./pages/LoyaltyPage"), "LoyaltyPage");
 const LoyaltyCardsPage = lazyWithRetry(() => import("./pages/LoyaltyCardsPage"), "LoyaltyCardsPage");
+const MerchantMessages = lazyWithRetry(() => import("./pages/MerchantMessages"), "MerchantMessages");
 
 const createQueryClient = () => new QueryClient({
   defaultOptions: {
