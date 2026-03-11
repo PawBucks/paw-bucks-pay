@@ -472,24 +472,6 @@ const Profile = () => {
 
         {/* Action Buttons */}
         <div className="mt-8 space-y-3 mb-6">
-          {profile.user_type === "pet_owner" && (
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => navigate("/my-subscriptions")}
-            >
-              <Crown className="w-4 h-4 mr-2" />
-              Manage Subscriptions
-            </Button>
-          )}
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={() => navigate("/notification-preferences")}
-          >
-            <Bell className="w-4 h-4 mr-2" />
-            Notification Preferences
-          </Button>
           <Button
             variant="outline"
             className="w-full"
