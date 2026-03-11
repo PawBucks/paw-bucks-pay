@@ -258,6 +258,7 @@ export const AskQuestionButton = ({ merchantId, merchantName }: AskQuestionButto
                     </div>
                   </div>
                 </div>
+                </div>
               ))}
               <div ref={messagesEndRef} />
             </div>

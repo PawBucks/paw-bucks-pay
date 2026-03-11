@@ -473,13 +473,17 @@ export const MerchantMessagesTab = ({ merchantId }: MerchantMessagesTabProps) =>
                     key={msg.id}
                     className={`flex ${msg.sender_type === "merchant" ? "justify-end" : "justify-start"}`}
                   >
-                    <div
-                      className={`max-w-[80%] rounded-lg p-3 ${
-                        msg.sender_type === "merchant"
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted"
-                      }`}
-                    >
+                    <div className="max-w-[80%]">
+                      <p className={`text-xs mb-1 font-medium ${msg.sender_type === "merchant" ? "text-right text-muted-foreground" : "text-left text-muted-foreground"}`}>
+                        {msg.sender_type === "merchant" ? "You" : selectedConversation?.customer_name || "Customer"}
+                      </p>
+                      <div
+                        className={`rounded-lg p-3 ${
+                          msg.sender_type === "merchant"
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted"
+                        }`}
+                      >
                       {msg.attachments && msg.attachments.length > 0 && (
                         <div className="mb-2 space-y-2">
                           {msg.attachments.map((att) => (
