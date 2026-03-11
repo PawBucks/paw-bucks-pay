@@ -28,6 +28,7 @@ import { BadgeTeaser } from "@/components/badges";
 import { PersonalityQuizCTA } from "@/components/dashboard/PersonalityQuizCTA";
 import { LoyaltyDashboardWidget } from "@/components/loyalty";
 import { CustomerLoyaltyCards } from "@/components/dashboard/CustomerLoyaltyCards";
+import { LoyaltyProgramDiscovery } from "@/components/dashboard/LoyaltyProgramDiscovery";
 import { WelcomeCreditCard } from "@/components/dashboard/WelcomeCreditCard";
 import { Store, Users, TrendingUp, Receipt } from "lucide-react";
 
