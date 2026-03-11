@@ -164,8 +164,12 @@ export default function VetDashboard() {
       <Header />
       <div className="container max-w-7xl mx-auto px-4 py-8 space-y-6">
         <div>
-          <h1 className="text-3xl font-bold mb-2 flex items-center gap-2">
-            <Stethoscope className="w-8 h-8 text-primary" />
+          <h1 className="text-3xl font-bold mb-2 flex items-center gap-3">
+            {vetInfo.logo_url ? (
+              <img src={vetInfo.logo_url} alt={vetInfo.name} className="w-10 h-10 rounded-xl object-cover shadow-md" />
+            ) : (
+              <Stethoscope className="w-8 h-8 text-primary" />
+            )}
             Veterinary Portal
           </h1>
           <p className="text-muted-foreground">
