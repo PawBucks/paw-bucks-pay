@@ -9,7 +9,7 @@ import { GradientCard } from "@/components/ui/gradient-card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { ArrowLeft, Bell, ShieldAlert, Megaphone, Receipt, Loader2 } from "lucide-react";
+import { ArrowLeft, Bell, ShieldAlert, Megaphone, Receipt, Loader2, Crown, Settings } from "lucide-react";
 import { toast } from "sonner";
 
 type NotificationPreferences = {
