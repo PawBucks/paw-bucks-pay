@@ -241,21 +241,29 @@ export const PaymentDialogWithPawBucks = ({
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [paymentData, setPaymentData] = useState<any>(null);
 
-  // Use the spendable PawBucks hook which includes Welcome Credit
+  // Use the spendable PawBucks hook which includes Pet Fund
   const {
     spendableBalance,
     welcomeCreditBalance,
     hasWelcomeCredit,
+    hasPetFund,
+    petFundBalance,
+    petFundMinTransactionUsd,
     isLoading: loadingBalance,
   } = useSpendablePawBucks(userId);
 
   const totalAmount = parseFloat(amount) || 0;
 
-  // Welcome credit is available only if merchant accepts PawBucks and transaction >= $75
-  const welcomeCreditApplicable = hasWelcomeCredit && acceptsPawbucks && totalAmount >= WELCOME_CREDIT_MIN_USD;
+  // Pet Fund / Welcome credit applicable if merchant accepts PawBucks and meets min transaction
+  const petFundMinUsd = petFundMinTransactionUsd || PET_FUND_MONTHLY_MIN_USD;
+  const petFundApplicable = (hasPetFund || hasWelcomeCredit) && acceptsPawbucks && totalAmount >= petFundMinUsd;
+  const petFundCreditBalance = hasPetFund ? petFundBalance : welcomeCreditBalance;
 
-  // Combined effective balance: wallet PawBucks + welcome credit (if applicable)
-  const pawbucksBalance = spendableBalance + (welcomeCreditApplicable ? welcomeCreditBalance : 0);
+  // For backwards compat, keep these names
+  const welcomeCreditApplicable = petFundApplicable;
+
+  // Combined effective balance: wallet PawBucks + pet fund (if applicable)
+  const pawbucksBalance = spendableBalance + (petFundApplicable ? petFundCreditBalance : 0);
 
   const pawbucksUsdValue = pawbucksToUse * PAWBUCKS_TO_USD;
   const stripeAmount = Math.max(0, totalAmount - pawbucksUsdValue);
