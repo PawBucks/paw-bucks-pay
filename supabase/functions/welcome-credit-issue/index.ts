@@ -23,7 +23,6 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_ANON_KEY') ?? ''
     );
 
-    // Get authenticated user
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
       throw new Error('No authorization header');
@@ -40,13 +39,30 @@ serve(async (req) => {
 
     const { deviceFingerprint, ipAddress } = await req.json();
 
-    // Use service role for database operations
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Check if user already has a credit
+    // Check if user already has a Pet Fund ledger (new system)
+    const { data: existingLedger } = await supabaseAdmin
+      .from('pet_fund_ledgers')
+      .select('id')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (existingLedger) {
+      logStep("User already has Pet Fund", { ledgerId: existingLedger.id });
+      return new Response(
+        JSON.stringify({
+          success: false,
+          message: 'Pet Fund already exists',
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Check if user already has legacy credit
     const { data: existingCredit } = await supabaseAdmin
       .from('user_welcome_credits')
       .select('id, status, credit_amount, expires_at')
@@ -54,7 +70,7 @@ serve(async (req) => {
       .maybeSingle();
 
     if (existingCredit) {
-      logStep("User already has credit", { creditId: existingCredit.id, status: existingCredit.status });
+      logStep("User already has legacy credit", { creditId: existingCredit.id, status: existingCredit.status });
       return new Response(
         JSON.stringify({
           success: false,
@@ -83,11 +99,9 @@ serve(async (req) => {
     }
 
     // === ABUSE PREVENTION ===
-
-    // Check 1: Normalized email alias detection
     const { data: profile } = await supabaseAdmin
       .from('profiles')
-      .select('normalized_email, phone')
+      .select('normalized_email, phone, referred_by')
       .eq('id', user.id)
       .single();
 
@@ -99,15 +113,20 @@ serve(async (req) => {
         .neq('id', user.id);
 
       if (emailAliasMatches && emailAliasMatches.length > 0) {
-        // Check if any of those profiles have a welcome credit
         const aliasUserIds = emailAliasMatches.map(m => m.id);
+        // Check if any of those profiles have a pet fund or welcome credit
+        const { data: aliasLedgers } = await supabaseAdmin
+          .from('pet_fund_ledgers')
+          .select('id')
+          .in('user_id', aliasUserIds);
+
         const { data: aliasCredits } = await supabaseAdmin
           .from('user_welcome_credits')
           .select('id')
           .in('user_id', aliasUserIds)
           .in('status', ['active', 'used']);
 
-        if (aliasCredits && aliasCredits.length > 0) {
+        if ((aliasLedgers && aliasLedgers.length > 0) || (aliasCredits && aliasCredits.length > 0)) {
           logStep("ABUSE BLOCKED: Email alias detected", { normalizedEmail: profile.normalized_email });
           await supabaseAdmin.from('welcome_credit_abuse_signals').insert({
             user_id: user.id,
@@ -123,7 +142,7 @@ serve(async (req) => {
       }
     }
 
-    // Check 2: Phone number reuse
+    // Phone number reuse check
     if (profile?.phone) {
       const { data: phoneMatches } = await supabaseAdmin
         .from('profiles')
@@ -133,13 +152,18 @@ serve(async (req) => {
 
       if (phoneMatches && phoneMatches.length > 0) {
         const phoneUserIds = phoneMatches.map(m => m.id);
+        const { data: phoneLedgers } = await supabaseAdmin
+          .from('pet_fund_ledgers')
+          .select('id')
+          .in('user_id', phoneUserIds);
+
         const { data: phoneCredits } = await supabaseAdmin
           .from('user_welcome_credits')
           .select('id')
           .in('user_id', phoneUserIds)
           .in('status', ['active', 'used']);
 
-        if (phoneCredits && phoneCredits.length > 0) {
+        if ((phoneLedgers && phoneLedgers.length > 0) || (phoneCredits && phoneCredits.length > 0)) {
           logStep("ABUSE BLOCKED: Phone reuse detected", { phone: profile.phone });
           await supabaseAdmin.from('welcome_credit_abuse_signals').insert({
             user_id: user.id,
@@ -155,15 +179,15 @@ serve(async (req) => {
       }
     }
 
-    // Check 3: Device fingerprint
+    // Device fingerprint check
     if (deviceFingerprint) {
-      const { data: fingerprintMatches } = await supabaseAdmin
+      const { data: fingerprintLedgers } = await supabaseAdmin
         .from('user_welcome_credits')
         .select('id')
         .eq('device_fingerprint', deviceFingerprint)
         .in('status', ['active', 'used']);
 
-      if (fingerprintMatches && fingerprintMatches.length > 0) {
+      if (fingerprintLedgers && fingerprintLedgers.length > 0) {
         logStep("ABUSE BLOCKED: Device fingerprint match", { fingerprint: deviceFingerprint });
         await supabaseAdmin.from('welcome_credit_abuse_signals').insert({
           user_id: user.id,
@@ -178,7 +202,7 @@ serve(async (req) => {
       }
     }
 
-    // Check 4: IP rate limiting (max 3 credits from same IP in 30 days)
+    // IP rate limiting
     if (ipAddress) {
       const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
       const { data: ipCredits } = await supabaseAdmin
@@ -222,43 +246,53 @@ serve(async (req) => {
       );
     }
 
-    // Issue the welcome credit - Phase 1: 30k immediately, Phase 2: 20k after first transaction
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 45);
+    // === INITIALIZE PET FUND (New System) ===
+    const referredBy = profile?.referred_by || null;
+    
+    const { data: ledgerId, error: fundError } = await supabaseAdmin.rpc('initialize_pet_fund', {
+      p_user_id: user.id,
+      p_referred_by: referredBy,
+    });
 
-    const { data: newCredit, error: insertError } = await supabaseAdmin
+    if (fundError) {
+      logStep("Error initializing pet fund", { error: fundError.message });
+      throw new Error('Failed to initialize Pet Fund');
+    }
+
+    logStep("Pet Fund initialized", { ledgerId, referredBy });
+
+    // Also create a legacy welcome credit record for backwards compatibility tracking
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 730); // 2 years for pet fund
+
+    await supabaseAdmin
       .from('user_welcome_credits')
       .insert({
         user_id: user.id,
-        credit_amount: 30000,
+        credit_amount: 20000, // Initial available amount
         status: 'active',
         expires_at: expiresAt.toISOString(),
         device_fingerprint: deviceFingerprint || null,
         ip_address: ipAddress || null,
-        phase_1_amount: 30000,
-        phase_2_amount: 20000,
+        phase_1_amount: 20000,
+        phase_2_amount: 230000,
         phase_2_unlocked: false,
       })
       .select()
       .single();
 
-    if (insertError) {
-      console.error('Error issuing credit:', insertError);
-      throw new Error('Failed to issue welcome credit');
-    }
-
     // Log analytics event
     await supabaseAdmin
       .from('welcome_credit_analytics')
       .insert({
-        event_type: 'credit_issued',
+        event_type: 'pet_fund_initialized',
         user_id: user.id,
         event_data: {
-          credit_id: newCredit.id,
-          amount: 30000,
-          phase_1_amount: 30000,
-          phase_2_amount: 20000,
-          expires_at: expiresAt.toISOString(),
+          ledger_id: ledgerId,
+          total_amount: 250000,
+          immediate_release: 20000,
+          escrow: 230000,
+          referred_by: referredBy,
         },
       });
 
@@ -267,30 +301,28 @@ serve(async (req) => {
       .from('notifications')
       .insert({
         user_id: user.id,
-        title: '🎉 30,000 PawBucks Welcome Credit!',
-        message: 'You have $30 toward your first booking! Complete your first transaction to unlock an additional $20 bonus!',
+        title: '🎉 $250 Quarter-Million Pet Fund Activated!',
+        message: 'You have $20 available now! Shop with any merchant and spend $40+ to use your first credit. $10 more unlocks every month for 23 months!',
         category: 'promotional',
       });
 
-    logStep("Welcome credit issued (phase 1)", {
-      creditId: newCredit.id,
-      amount: 30000,
-      phase2Locked: true,
-      expiresAt: expiresAt.toISOString(),
+    logStep("Pet Fund fully initialized", {
+      ledgerId,
+      immediateRelease: 20000,
+      escrow: 230000,
+      months: 24,
     });
 
     return new Response(
       JSON.stringify({
         success: true,
-        message: 'Welcome credit issued successfully',
+        message: 'Quarter-Million Pet Fund activated!',
         credit: {
-          id: newCredit.id,
-          amount: newCredit.credit_amount,
-          phase1Amount: 30000,
-          phase2Amount: 20000,
-          phase2Unlocked: false,
-          expiresAt: newCredit.expires_at,
-          daysRemaining: 45,
+          id: ledgerId,
+          amount: 20000,
+          totalFund: 250000,
+          escrow: 230000,
+          expiresAt: expiresAt.toISOString(),
         },
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
