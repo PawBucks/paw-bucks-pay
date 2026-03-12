@@ -57,6 +57,9 @@ export const PawBucksCheckoutDialog = ({
     lockedBalance, 
     welcomeCreditBalance,
     hasWelcomeCredit,
+    hasPetFund,
+    petFundBalance,
+    petFundMinTransactionUsd,
     isLoading: loadingBalance 
   } = useSpendablePawBucks(userId);
 
