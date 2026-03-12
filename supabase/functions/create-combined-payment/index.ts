@@ -414,6 +414,51 @@ serve(async (req) => {
         });
       }
 
+      // Handle referrer bonus activation on first purchase
+      try {
+        const { count: completedTxCount } = await supabaseAdmin
+          .from('transactions')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', user.id)
+          .eq('status', 'completed');
+
+        if (completedTxCount === 1 && totalAmount >= 40) {
+          const { data: pendingBonus } = await supabaseAdmin
+            .from('pet_fund_referrer_bonuses')
+            .select('id, referrer_id')
+            .eq('referee_id', user.id)
+            .eq('status', 'pending')
+            .maybeSingle();
+
+          if (pendingBonus) {
+            const { data: month2Release } = await supabaseAdmin
+              .from('pet_fund_releases')
+              .select('scheduled_at')
+              .eq('user_id', user.id)
+              .eq('month_number', 2)
+              .maybeSingle();
+
+            const releaseAt = month2Release?.scheduled_at || new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString();
+
+            await supabaseAdmin
+              .from('pet_fund_referrer_bonuses')
+              .update({ status: 'locked', release_at: releaseAt })
+              .eq('id', pendingBonus.id);
+
+            await supabaseAdmin.from('notifications').insert({
+              user_id: pendingBonus.referrer_id,
+              title: '🎉 Referral Bonus Earned!',
+              message: `Your friend made their first purchase! You've earned 10,000 PawBucks ($10) that will unlock soon.`,
+              category: 'promotional',
+            });
+
+            logStep("Referrer bonus activated", { bonusId: pendingBonus.id, referrerId: pendingBonus.referrer_id });
+          }
+        }
+      } catch (refErr) {
+        logStep("Error processing referrer bonus", { error: String(refErr) });
+      }
+
       logStep("Full PawBucks payment completed", { transactionId: transaction?.id });
 
       return new Response(
