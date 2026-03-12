@@ -24,8 +24,8 @@ import { PawBucksInfoTooltip } from "@/components/PawBucksInfoTooltip";
 const PAWBUCKS_TO_USD = 0.001;
 // Minimum Stripe charge for subscriptions
 const MINIMUM_STRIPE_AMOUNT = 0.50;
-// Minimum transaction for Welcome Credit
-const WELCOME_CREDIT_MIN_USD = 75;
+// Minimum transaction for Pet Fund
+const PET_FUND_MIN_USD = 20;
 
 interface SubscriptionCheckoutDialogProps {
   open: boolean;
