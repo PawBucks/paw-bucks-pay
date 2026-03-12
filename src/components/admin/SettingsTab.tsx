@@ -101,8 +101,8 @@ export function SettingsTab() {
               )}
             </CardTitle>
             <CardDescription>
-              Control whether new pet owner signups automatically receive the $50 welcome credit.
-              Existing active credits are not affected.
+              Control whether new pet owner signups receive the $250 Quarter-Million Pet Fund
+              (24-month distribution: $20 immediate + $10/month × 23 months). Existing funds are not affected.
             </CardDescription>
           </CardHeader>
           <CardContent>
