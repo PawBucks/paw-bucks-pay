@@ -150,7 +150,7 @@ const Referrals = () => {
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Referrals</h1>
           <p className="text-muted-foreground">
-            Share your code and earn $10 for each friend who makes their first purchase
+            Gift a friend a $250 Pet Fund and earn $10 when they make their first $40+ purchase
           </p>
         </div>
 
