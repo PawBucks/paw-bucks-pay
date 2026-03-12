@@ -54,8 +54,8 @@ export function SettingsTab() {
       setWelcomeCreditEnabled(enabled);
       toast.success(
         enabled
-          ? '✅ Welcome Credit program restarted — new signups will receive 50,000 PawBucks'
-          : '⏸️ Welcome Credit program paused — new signups will NOT receive credits'
+          ? '✅ Quarter-Million Pet Fund restarted — new signups will receive $250 over 24 months'
+          : '⏸️ Quarter-Million Pet Fund paused — new signups will NOT receive credits'
       );
     } catch (err) {
       console.error('Error toggling welcome credit:', err);
@@ -83,7 +83,7 @@ export function SettingsTab() {
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
               <span className="flex items-center gap-2">
-                50,000 PawBucks Welcome Credit
+                Quarter-Million Sign Up Bonus ($250)
               </span>
               {loading ? (
                 <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
@@ -101,8 +101,8 @@ export function SettingsTab() {
               )}
             </CardTitle>
             <CardDescription>
-              Control whether new pet owner signups automatically receive the $50 welcome credit.
-              Existing active credits are not affected.
+              Control whether new pet owner signups receive the $250 Quarter-Million Pet Fund
+              (24-month distribution: $20 immediate + $10/month × 23 months). Existing funds are not affected.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -113,8 +113,8 @@ export function SettingsTab() {
                 </p>
                 <p className="text-sm text-muted-foreground">
                   {welcomeCreditEnabled
-                    ? 'New pet owners will receive 50,000 PawBucks ($50) on signup.'
-                    : 'New pet owners will NOT receive a welcome credit on signup.'}
+                    ? 'New pet owners receive 250,000 PawBucks ($250) distributed over 24 months.'
+                    : 'New pet owners will NOT receive the Pet Fund on signup.'}
                 </p>
               </div>
               <div className="flex items-center gap-2">

@@ -20,6 +20,7 @@ import { MonthlyComparison } from "@/components/wallet/MonthlyComparison";
 import { BudgetSettings } from "@/components/wallet/BudgetSettings";
 import { YearlySummary } from "@/components/wallet/YearlySummary";
 import { PawBucksBreakdown } from "@/components/wallet/PawBucksBreakdown";
+import { PetFundCard } from "@/components/wallet/PetFundCard";
 import { SpendingInsights } from "@/components/wallet/SpendingInsights";
 import { RecurringExpenses } from "@/components/wallet/RecurringExpenses";
 import { SpendingGoals } from "@/components/wallet/SpendingGoals";
@@ -285,6 +286,13 @@ const Wallet = () => {
             </div>
           </GradientCard>
         </div>
+
+        {/* Quarter-Million Pet Fund */}
+        {effectiveWalletUserId && (
+          <div className="mb-6">
+            <PetFundCard userId={effectiveWalletUserId} />
+          </div>
+        )}
 
         {/* PawBucks Available vs Pending Breakdown */}
         {effectiveWalletUserId && (

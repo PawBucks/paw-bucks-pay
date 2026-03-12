@@ -24,8 +24,8 @@ import { PawBucksInfoTooltip } from "@/components/PawBucksInfoTooltip";
 const PAWBUCKS_TO_USD = 0.001;
 // Minimum Stripe charge for subscriptions
 const MINIMUM_STRIPE_AMOUNT = 0.50;
-// Minimum transaction for Welcome Credit
-const WELCOME_CREDIT_MIN_USD = 75;
+// Minimum transaction for Pet Fund
+const PET_FUND_MIN_USD = 20;
 
 interface SubscriptionCheckoutDialogProps {
   open: boolean;
@@ -80,6 +80,9 @@ const CheckoutForm = ({
     lockedBalance, 
     welcomeCreditBalance,
     hasWelcomeCredit,
+    hasPetFund,
+    petFundBalance,
+    petFundMinTransactionUsd,
     isLoading: loadingBalance 
   } = useSpendablePawBucks(user?.id);
 
@@ -90,9 +93,10 @@ const CheckoutForm = ({
 
   const priceAmount = plan.amount / 100; // Convert cents to dollars
   
-  // Welcome credit applicable if merchant accepts PawBucks and price >= $75
-  const welcomeCreditApplicable = hasWelcomeCredit && merchantAcceptsPawBucks && priceAmount >= WELCOME_CREDIT_MIN_USD;
-  const effectiveBalance = spendableBalance + (welcomeCreditApplicable ? welcomeCreditBalance : 0);
+  const petFundMinUsd = petFundMinTransactionUsd || PET_FUND_MIN_USD;
+  const petFundCreditBalance = hasPetFund ? petFundBalance : welcomeCreditBalance;
+  const welcomeCreditApplicable = (hasPetFund || hasWelcomeCredit) && merchantAcceptsPawBucks && priceAmount >= petFundMinUsd;
+  const effectiveBalance = spendableBalance + (welcomeCreditApplicable ? petFundCreditBalance : 0);
   const pawbucksBalance = effectiveBalance;
 
   // Calculate values
@@ -269,17 +273,22 @@ const CheckoutForm = ({
             </div>
           )}
 
-          {/* Welcome Credit not applicable - below $75 minimum */}
-          {hasWelcomeCredit && merchantAcceptsPawBucks && priceAmount < WELCOME_CREDIT_MIN_USD && (
+          {/* Pet Fund not applicable - below minimum */}
+          {(hasPetFund || hasWelcomeCredit) && merchantAcceptsPawBucks && priceAmount < petFundMinUsd && (
             <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 flex items-start gap-2">
               <Gift className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
               <div>
                 <p className="text-sm font-medium text-amber-700 dark:text-amber-400">
-                  Welcome Credit: ${(welcomeCreditBalance * PAWBUCKS_TO_USD).toFixed(2)} available
+                  Pet Fund: ${(petFundCreditBalance * PAWBUCKS_TO_USD).toFixed(2)} available
                 </p>
                 <p className="text-xs text-amber-600/80 dark:text-amber-400/80 mt-0.5">
-                  Requires a minimum ${WELCOME_CREDIT_MIN_USD} purchase to use.
+                  Add ${(petFundMinUsd - priceAmount).toFixed(2)} more to unlock your Pet Fund credit.
                 </p>
+                <div className="mt-2">
+                  <div className="w-full bg-amber-200/30 rounded-full h-2">
+                    <div className="bg-amber-500 h-2 rounded-full transition-all" style={{ width: `${Math.min(100, (priceAmount / petFundMinUsd) * 100)}%` }} />
+                  </div>
+                </div>
               </div>
             </div>
           )}

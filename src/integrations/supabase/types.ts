@@ -5946,6 +5946,146 @@ export type Database = {
           },
         ]
       }
+      pet_fund_ledgers: {
+        Row: {
+          available_balance: number
+          created_at: string
+          device_fingerprint: string | null
+          escrow_balance: number
+          id: string
+          ip_address: string | null
+          referred_by: string | null
+          status: string
+          total_amount: number
+          total_released: number
+          total_used: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          available_balance?: number
+          created_at?: string
+          device_fingerprint?: string | null
+          escrow_balance?: number
+          id?: string
+          ip_address?: string | null
+          referred_by?: string | null
+          status?: string
+          total_amount?: number
+          total_released?: number
+          total_used?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          available_balance?: number
+          created_at?: string
+          device_fingerprint?: string | null
+          escrow_balance?: number
+          id?: string
+          ip_address?: string | null
+          referred_by?: string | null
+          status?: string
+          total_amount?: number
+          total_released?: number
+          total_used?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      pet_fund_referrer_bonuses: {
+        Row: {
+          amount: number
+          created_at: string
+          first_purchase_at: string | null
+          id: string
+          referee_id: string
+          referrer_id: string
+          release_at: string | null
+          released_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          first_purchase_at?: string | null
+          id?: string
+          referee_id: string
+          referrer_id: string
+          release_at?: string | null
+          released_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          first_purchase_at?: string | null
+          id?: string
+          referee_id?: string
+          referrer_id?: string
+          release_at?: string | null
+          released_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      pet_fund_releases: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          ledger_id: string
+          min_transaction_usd: number
+          month_number: number
+          released_at: string | null
+          scheduled_at: string
+          status: string
+          used_at: string | null
+          used_transaction_id: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          ledger_id: string
+          min_transaction_usd?: number
+          month_number: number
+          released_at?: string | null
+          scheduled_at: string
+          status?: string
+          used_at?: string | null
+          used_transaction_id?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          ledger_id?: string
+          min_transaction_usd?: number
+          month_number?: number
+          released_at?: string | null
+          scheduled_at?: string
+          status?: string
+          used_at?: string | null
+          used_transaction_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pet_fund_releases_ledger_id_fkey"
+            columns: ["ledger_id"]
+            isOneToOne: false
+            referencedRelation: "pet_fund_ledgers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pet_health_access_codes: {
         Row: {
           access_code: string
@@ -11526,6 +11666,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      initialize_pet_fund: {
+        Args: { p_referred_by?: string; p_user_id: string }
+        Returns: string
+      }
       is_offer_valid: { Args: { offer_uuid: string }; Returns: boolean }
       is_shared_member_of: { Args: { owner_user_id: string }; Returns: boolean }
       is_superadmin: { Args: { _user_id: string }; Returns: boolean }
@@ -11566,6 +11710,18 @@ export type Database = {
           message: string
           success: boolean
         }[]
+      }
+      release_pet_fund_installment: {
+        Args: { p_release_id: string }
+        Returns: undefined
+      }
+      release_referrer_bonus: {
+        Args: { p_bonus_id: string }
+        Returns: undefined
+      }
+      use_pet_fund_credit: {
+        Args: { p_amount: number; p_transaction_id?: string; p_user_id: string }
+        Returns: boolean
       }
       user_has_vet_relationship: {
         Args: { check_user_id: string; check_vet_id: string }

@@ -20,8 +20,9 @@ import { getStripeForConnectedAccount } from "@/lib/stripe";
 
 // Pet Owner conversion rate: 1000 PawBucks = $1.00 (1 PawBuck = $0.001)
 const PAWBUCKS_TO_USD = 0.001;
-// Minimum transaction for Welcome Credit
-const WELCOME_CREDIT_MIN_USD = 75;
+// Minimum transaction for Pet Fund credits (dynamic, but defaults)
+const PET_FUND_INITIAL_MIN_USD = 40;
+const PET_FUND_MONTHLY_MIN_USD = 20;
 
 type PaymentFormProps = {
   merchantName: string;
@@ -240,21 +241,29 @@ export const PaymentDialogWithPawBucks = ({
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [paymentData, setPaymentData] = useState<any>(null);
 
-  // Use the spendable PawBucks hook which includes Welcome Credit
+  // Use the spendable PawBucks hook which includes Pet Fund
   const {
     spendableBalance,
     welcomeCreditBalance,
     hasWelcomeCredit,
+    hasPetFund,
+    petFundBalance,
+    petFundMinTransactionUsd,
     isLoading: loadingBalance,
   } = useSpendablePawBucks(userId);
 
   const totalAmount = parseFloat(amount) || 0;
 
-  // Welcome credit is available only if merchant accepts PawBucks and transaction >= $75
-  const welcomeCreditApplicable = hasWelcomeCredit && acceptsPawbucks && totalAmount >= WELCOME_CREDIT_MIN_USD;
+  // Pet Fund / Welcome credit applicable if merchant accepts PawBucks and meets min transaction
+  const petFundMinUsd = petFundMinTransactionUsd || PET_FUND_MONTHLY_MIN_USD;
+  const petFundApplicable = (hasPetFund || hasWelcomeCredit) && acceptsPawbucks && totalAmount >= petFundMinUsd;
+  const petFundCreditBalance = hasPetFund ? petFundBalance : welcomeCreditBalance;
 
-  // Combined effective balance: wallet PawBucks + welcome credit (if applicable)
-  const pawbucksBalance = spendableBalance + (welcomeCreditApplicable ? welcomeCreditBalance : 0);
+  // For backwards compat, keep these names
+  const welcomeCreditApplicable = petFundApplicable;
+
+  // Combined effective balance: wallet PawBucks + pet fund (if applicable)
+  const pawbucksBalance = spendableBalance + (petFundApplicable ? petFundCreditBalance : 0);
 
   const pawbucksUsdValue = pawbucksToUse * PAWBUCKS_TO_USD;
   const stripeAmount = Math.max(0, totalAmount - pawbucksUsdValue);
@@ -377,32 +386,44 @@ export const PaymentDialogWithPawBucks = ({
               />
             </div>
 
-            {/* Welcome Credit Banner */}
-            {welcomeCreditApplicable && totalAmount > 0 && (
+            {/* Pet Fund Credit Banner */}
+            {petFundApplicable && totalAmount > 0 && (
               <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-3 flex items-start gap-2">
                 <Gift className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
-                    🎉 Welcome Credit Available: {welcomeCreditBalance.toLocaleString()} PB (${(welcomeCreditBalance * PAWBUCKS_TO_USD).toFixed(2)})
+                    🎉 Pet Fund Credit Available: {petFundCreditBalance.toLocaleString()} PB (${(petFundCreditBalance * PAWBUCKS_TO_USD).toFixed(2)})
                   </p>
                   <p className="text-xs text-emerald-600/80 dark:text-emerald-400/80 mt-0.5">
-                    Your Welcome Credit is included in your available balance below. Use the slider to apply it!
+                    Your Pet Fund credit is included in your balance below. Use the slider to apply it!
                   </p>
                 </div>
               </div>
             )}
 
-            {/* Welcome Credit not applicable - below $75 minimum */}
-            {hasWelcomeCredit && acceptsPawbucks && totalAmount > 0 && totalAmount < WELCOME_CREDIT_MIN_USD && (
+            {/* Pet Fund not applicable - below minimum */}
+            {(hasPetFund || hasWelcomeCredit) && acceptsPawbucks && totalAmount > 0 && totalAmount < petFundMinUsd && (
               <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 flex items-start gap-2">
                 <Gift className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="text-sm font-medium text-amber-700 dark:text-amber-400">
-                    Welcome Credit: ${(welcomeCreditBalance * PAWBUCKS_TO_USD).toFixed(2)} available
+                    Pet Fund: ${(petFundCreditBalance * PAWBUCKS_TO_USD).toFixed(2)} available
                   </p>
                   <p className="text-xs text-amber-600/80 dark:text-amber-400/80 mt-0.5">
-                    Requires a minimum ${WELCOME_CREDIT_MIN_USD} purchase to use. Add ${(WELCOME_CREDIT_MIN_USD - totalAmount).toFixed(2)} more to qualify.
+                    Add ${(petFundMinUsd - totalAmount).toFixed(2)} more to unlock your Pet Fund credit.
                   </p>
+                  {/* Progress bar */}
+                  <div className="mt-2">
+                    <div className="w-full bg-amber-200/30 rounded-full h-2">
+                      <div
+                        className="bg-amber-500 h-2 rounded-full transition-all"
+                        style={{ width: `${Math.min(100, (totalAmount / petFundMinUsd) * 100)}%` }}
+                      />
+                    </div>
+                    <p className="text-xs mt-1 text-amber-600/70">
+                      ${totalAmount.toFixed(2)} / ${petFundMinUsd.toFixed(2)} minimum
+                    </p>
+                  </div>
                 </div>
               </div>
             )}
