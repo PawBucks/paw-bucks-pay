@@ -6,9 +6,18 @@ export const PAWBUCKS_CONVERSION = {
   PAWBUCKS_USD_VALUE: 0.001, // Direct multiplier: PawBucks × 0.001 = USD
   // Merchant rates (for platform services like marketing/advertising): 1 PawBuck = $0.005 USD
   MERCHANT_TO_USD: 200, // 200 PawBucks = $1 USD when merchants spend on platform
-  WELCOME_CREDIT_PHASE_1: 30000, // 30k PawBucks on signup ($30)
-  WELCOME_CREDIT_PHASE_2: 20000, // 20k PawBucks after first transaction ($20)
-  WELCOME_CREDIT_TOTAL: 50000, // Total welcome credit ($50)
+  // Quarter-Million Sign Up Bonus (Pet Fund)
+  PET_FUND_TOTAL: 250000, // 250k PawBucks total ($250)
+  PET_FUND_IMMEDIATE: 20000, // 20k PawBucks on signup ($20)
+  PET_FUND_MONTHLY: 10000, // 10k PawBucks per month ($10)
+  PET_FUND_ESCROW: 230000, // 230k PawBucks in escrow ($230)
+  PET_FUND_MONTHS: 24, // 24 months total (1 immediate + 23 monthly)
+  PET_FUND_INITIAL_MIN_USD: 40, // $40 min transaction for initial credit
+  PET_FUND_MONTHLY_MIN_USD: 20, // $20 min transaction for monthly credits
+  // Legacy (deprecated)
+  WELCOME_CREDIT_PHASE_1: 30000,
+  WELCOME_CREDIT_PHASE_2: 20000,
+  WELCOME_CREDIT_TOTAL: 50000,
   REWARD_THRESHOLD: 10000, // PawBucks needed for $10 credit (1000 * 10)
 } as const;
 
@@ -38,7 +47,6 @@ export const getSubscriptionTier = (productId: string | null, subscriptionTier?:
   // Then check product_id
   if (!productId) return 'free';
   
-  // Check for PawPass+ (both Stripe and manual)
   if (
     productId === SUBSCRIPTION_TIERS.PAWPASS_PLUS_PRODUCT_ID ||
     productId === SUBSCRIPTION_TIERS.MANUAL_PAWPASS_PLUS_PRODUCT_ID ||
@@ -47,7 +55,6 @@ export const getSubscriptionTier = (productId: string | null, subscriptionTier?:
     return 'pawpass_plus';
   }
   
-  // Check for PawPass (both Stripe and manual)
   if (
     productId === SUBSCRIPTION_TIERS.PAWPASS_PRODUCT_ID ||
     productId === SUBSCRIPTION_TIERS.MANUAL_PAWPASS_PRODUCT_ID ||
