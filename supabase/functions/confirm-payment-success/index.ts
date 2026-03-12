@@ -324,21 +324,39 @@ serve(async (req) => {
 
       const walletBalance = userWallet?.balance || 0;
 
-      // Check for active welcome credit if wallet balance is insufficient
+      // Check for Pet Fund (new system) or legacy welcome credit
       let walletDeduction = Math.min(walletBalance, pawbucksAmount);
+      let petFundDeduction = 0;
       let welcomeCreditDeduction = 0;
 
       if (walletDeduction < pawbucksAmount) {
-        // Check welcome credit
-        const { data: welcomeCredit } = await supabaseAdmin
-          .from('user_welcome_credits')
-          .select('id, credit_amount, status, expires_at')
+        const remaining = pawbucksAmount - walletDeduction;
+
+        // Check Pet Fund first (new system)
+        const { data: petFundLedger } = await supabaseAdmin
+          .from('pet_fund_ledgers')
+          .select('id, available_balance')
           .eq('user_id', userId)
           .eq('status', 'active')
           .maybeSingle();
 
-        if (welcomeCredit && new Date(welcomeCredit.expires_at) > new Date()) {
-          welcomeCreditDeduction = Math.min(pawbucksAmount - walletDeduction, welcomeCredit.credit_amount);
+        if (petFundLedger && petFundLedger.available_balance > 0) {
+          petFundDeduction = Math.min(remaining, petFundLedger.available_balance);
+        }
+
+        // Fall back to legacy welcome credit if pet fund doesn't cover it
+        const stillRemaining = remaining - petFundDeduction;
+        if (stillRemaining > 0) {
+          const { data: welcomeCredit } = await supabaseAdmin
+            .from('user_welcome_credits')
+            .select('id, credit_amount, status, expires_at')
+            .eq('user_id', userId)
+            .eq('status', 'active')
+            .maybeSingle();
+
+          if (welcomeCredit && new Date(welcomeCredit.expires_at) > new Date()) {
+            welcomeCreditDeduction = Math.min(stillRemaining, welcomeCredit.credit_amount);
+          }
         }
       }
 
@@ -349,7 +367,6 @@ serve(async (req) => {
           .update({ balance: walletBalance - walletDeduction })
           .eq('user_id', userId);
 
-        // Log redemption activity
         await supabaseAdmin.from('pawbucks_activity').insert({
           user_id: userId,
           amount: -walletDeduction,
@@ -360,7 +377,66 @@ serve(async (req) => {
         });
       }
 
-      // Redeem welcome credit if needed
+      // Deduct from Pet Fund
+      if (petFundDeduction > 0) {
+        // Find the oldest available (released, unused) release
+        const { data: availableReleases } = await supabaseAdmin
+          .from('pet_fund_releases')
+          .select('id, amount, month_number')
+          .eq('user_id', userId)
+          .eq('status', 'released')
+          .is('used_at', null)
+          .order('month_number', { ascending: true });
+
+        let remainingDeduction = petFundDeduction;
+        for (const release of (availableReleases || [])) {
+          if (remainingDeduction <= 0) break;
+          const deductFromRelease = Math.min(remainingDeduction, release.amount);
+          
+          // Mark release as used
+          await supabaseAdmin
+            .from('pet_fund_releases')
+            .update({ used_at: new Date().toISOString() })
+            .eq('id', release.id);
+          
+          remainingDeduction -= deductFromRelease;
+        }
+
+        // Update ledger balances
+        await supabaseAdmin
+          .from('pet_fund_ledgers')
+          .update({
+            available_balance: supabaseAdmin.rpc ? undefined : 0, // Will be handled below
+            total_used: supabaseAdmin.rpc ? undefined : 0,
+          })
+          .eq('user_id', userId);
+
+        // Use raw SQL update via RPC for atomic balance update
+        await supabaseAdmin.rpc('release_pet_fund_installment', { p_release_id: (availableReleases || [])[0]?.id }).catch(() => {
+          // Fallback: manually update ledger
+        });
+
+        // Manual ledger update
+        const { data: currentLedger } = await supabaseAdmin
+          .from('pet_fund_ledgers')
+          .select('available_balance, total_used')
+          .eq('user_id', userId)
+          .single();
+
+        if (currentLedger) {
+          await supabaseAdmin
+            .from('pet_fund_ledgers')
+            .update({
+              available_balance: Math.max(0, currentLedger.available_balance - petFundDeduction),
+              total_used: currentLedger.total_used + petFundDeduction,
+            })
+            .eq('user_id', userId);
+        }
+
+        logStep("Pet Fund deducted", { amount: petFundDeduction });
+      }
+
+      // Redeem legacy welcome credit if needed
       if (welcomeCreditDeduction > 0) {
         const totalCents = Math.round(amountInDollars * 100);
         await supabaseAdmin.rpc('redeem_welcome_credit', {
@@ -399,7 +475,64 @@ serve(async (req) => {
         description: `Received ${pawbucksAmount} PawBucks from customer`,
       });
 
-      logStep("PawBucks deducted and credited to merchant", { pawbucksAmount, walletDeduction, welcomeCreditDeduction });
+      logStep("PawBucks deducted and credited to merchant", { pawbucksAmount, walletDeduction, petFundDeduction, welcomeCreditDeduction });
+    }
+
+    // 4b. Handle referrer bonus activation on first purchase
+    // If this is the user's first completed transaction AND they were referred, activate the referrer bonus
+    try {
+      const { count: completedTxCount } = await supabaseAdmin
+        .from('transactions')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userId)
+        .eq('status', 'completed');
+
+      if (completedTxCount === 1) {
+        // This is their first completed transaction
+        const transactionTotal = totalAmount > 0 ? totalAmount : amountInDollars;
+        
+        if (transactionTotal >= 40) {
+          // Check for pending referrer bonus
+          const { data: pendingBonus } = await supabaseAdmin
+            .from('pet_fund_referrer_bonuses')
+            .select('id, referrer_id')
+            .eq('referee_id', userId)
+            .eq('status', 'pending')
+            .maybeSingle();
+
+          if (pendingBonus) {
+            // Get the referee's 2nd month release date to set the unlock date
+            const { data: month2Release } = await supabaseAdmin
+              .from('pet_fund_releases')
+              .select('scheduled_at')
+              .eq('user_id', userId)
+              .eq('month_number', 2)
+              .maybeSingle();
+
+            const releaseAt = month2Release?.scheduled_at || new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString();
+
+            await supabaseAdmin
+              .from('pet_fund_referrer_bonuses')
+              .update({
+                status: 'locked',
+                release_at: releaseAt,
+              })
+              .eq('id', pendingBonus.id);
+
+            // Notify referrer
+            await supabaseAdmin.from('notifications').insert({
+              user_id: pendingBonus.referrer_id,
+              title: '🎉 Referral Bonus Earned!',
+              message: `Your friend made their first purchase! You've earned 10,000 PawBucks ($10) that will unlock soon.`,
+              category: 'promotional',
+            });
+
+            logStep("Referrer bonus activated", { bonusId: pendingBonus.id, referrerId: pendingBonus.referrer_id, releaseAt });
+          }
+        }
+      }
+    } catch (refErr) {
+      logStep("Error processing referrer bonus", { error: String(refErr) });
     }
 
     // 5. Auto-log platform fee AND Stripe processing fee as separate Tax Vault expenses
