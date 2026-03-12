@@ -113,8 +113,8 @@ export function SettingsTab() {
                 </p>
                 <p className="text-sm text-muted-foreground">
                   {welcomeCreditEnabled
-                    ? 'New pet owners will receive 50,000 PawBucks ($50) on signup.'
-                    : 'New pet owners will NOT receive a welcome credit on signup.'}
+                    ? 'New pet owners receive 250,000 PawBucks ($250) distributed over 24 months.'
+                    : 'New pet owners will NOT receive the Pet Fund on signup.'}
                 </p>
               </div>
               <div className="flex items-center gap-2">

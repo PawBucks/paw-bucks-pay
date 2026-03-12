@@ -109,7 +109,7 @@ const Referrals = () => {
       try {
         await navigator.share({
           title: "Join PawBucks",
-          text: `Use my referral code ${referralCode} and we both get $10!`,
+          text: `Use my referral code ${referralCode} to get a $250 Pet Fund! I get $10 when you join.`,
           url: shareUrl,
         });
       } catch (error) {

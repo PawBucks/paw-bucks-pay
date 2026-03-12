@@ -287,6 +287,13 @@ const Wallet = () => {
           </GradientCard>
         </div>
 
+        {/* Quarter-Million Pet Fund */}
+        {effectiveWalletUserId && (
+          <div className="mb-6">
+            <PetFundCard userId={effectiveWalletUserId} />
+          </div>
+        )}
+
         {/* PawBucks Available vs Pending Breakdown */}
         {effectiveWalletUserId && (
           <div className="mb-6">
