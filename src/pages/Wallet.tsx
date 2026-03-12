@@ -20,6 +20,7 @@ import { MonthlyComparison } from "@/components/wallet/MonthlyComparison";
 import { BudgetSettings } from "@/components/wallet/BudgetSettings";
 import { YearlySummary } from "@/components/wallet/YearlySummary";
 import { PawBucksBreakdown } from "@/components/wallet/PawBucksBreakdown";
+import { PetFundCard } from "@/components/wallet/PetFundCard";
 import { SpendingInsights } from "@/components/wallet/SpendingInsights";
 import { RecurringExpenses } from "@/components/wallet/RecurringExpenses";
 import { SpendingGoals } from "@/components/wallet/SpendingGoals";
