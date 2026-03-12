@@ -20,8 +20,9 @@ import { getStripeForConnectedAccount } from "@/lib/stripe";
 
 // Pet Owner conversion rate: 1000 PawBucks = $1.00 (1 PawBuck = $0.001)
 const PAWBUCKS_TO_USD = 0.001;
-// Minimum transaction for Welcome Credit
-const WELCOME_CREDIT_MIN_USD = 75;
+// Minimum transaction for Pet Fund credits (dynamic, but defaults)
+const PET_FUND_INITIAL_MIN_USD = 40;
+const PET_FUND_MONTHLY_MIN_USD = 20;
 
 type PaymentFormProps = {
   merchantName: string;
