@@ -153,32 +153,38 @@ export const PawBucksCheckoutDialog = ({
               )}
             </div>
 
-            {/* Welcome Credit Banner */}
+            {/* Pet Fund Credit Banner */}
             {welcomeCreditApplicable && (
               <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-3 flex items-start gap-2">
                 <Gift className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
-                    🎉 Welcome Credit Available: {welcomeCreditBalance.toLocaleString()} PB (${(welcomeCreditBalance * PAWBUCKS_TO_USD).toFixed(2)})
+                    🎉 Pet Fund Credit: {petFundCreditBalance.toLocaleString()} PB (${(petFundCreditBalance * PAWBUCKS_TO_USD).toFixed(2)})
                   </p>
                   <p className="text-xs text-emerald-600/80 dark:text-emerald-400/80 mt-0.5">
-                    Your Welcome Credit is included in your available balance below. Use the slider to apply it!
+                    Included in your available balance below.
                   </p>
                 </div>
               </div>
             )}
 
-            {/* Welcome Credit not applicable - below $75 minimum */}
-            {hasWelcomeCredit && merchantAcceptsPawBucks && priceAmount < WELCOME_CREDIT_MIN_USD && (
+            {/* Pet Fund not applicable - below minimum */}
+            {(hasPetFund || hasWelcomeCredit) && merchantAcceptsPawBucks && priceAmount < petFundMinUsd && (
               <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 flex items-start gap-2">
                 <Gift className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="text-sm font-medium text-amber-700 dark:text-amber-400">
-                    Welcome Credit: ${(welcomeCreditBalance * PAWBUCKS_TO_USD).toFixed(2)} available
+                    Pet Fund: ${(petFundCreditBalance * PAWBUCKS_TO_USD).toFixed(2)} available
                   </p>
                   <p className="text-xs text-amber-600/80 dark:text-amber-400/80 mt-0.5">
-                    Requires a minimum ${WELCOME_CREDIT_MIN_USD} purchase to use. Add ${(WELCOME_CREDIT_MIN_USD - priceAmount).toFixed(2)} more to qualify.
+                    Add ${(petFundMinUsd - priceAmount).toFixed(2)} more to unlock your Pet Fund credit.
                   </p>
+                  <div className="mt-2">
+                    <div className="w-full bg-amber-200/30 rounded-full h-2">
+                      <div className="bg-amber-500 h-2 rounded-full transition-all" style={{ width: `${Math.min(100, (priceAmount / petFundMinUsd) * 100)}%` }} />
+                    </div>
+                    <p className="text-xs mt-1 text-amber-600/70">${priceAmount.toFixed(2)} / ${petFundMinUsd.toFixed(2)} minimum</p>
+                  </div>
                 </div>
               </div>
             )}

@@ -93,9 +93,10 @@ const CheckoutForm = ({
 
   const priceAmount = plan.amount / 100; // Convert cents to dollars
   
-  // Welcome credit applicable if merchant accepts PawBucks and price >= $75
-  const welcomeCreditApplicable = hasWelcomeCredit && merchantAcceptsPawBucks && priceAmount >= WELCOME_CREDIT_MIN_USD;
-  const effectiveBalance = spendableBalance + (welcomeCreditApplicable ? welcomeCreditBalance : 0);
+  const petFundMinUsd = petFundMinTransactionUsd || PET_FUND_MIN_USD;
+  const petFundCreditBalance = hasPetFund ? petFundBalance : welcomeCreditBalance;
+  const welcomeCreditApplicable = (hasPetFund || hasWelcomeCredit) && merchantAcceptsPawBucks && priceAmount >= petFundMinUsd;
+  const effectiveBalance = spendableBalance + (welcomeCreditApplicable ? petFundCreditBalance : 0);
   const pawbucksBalance = effectiveBalance;
 
   // Calculate values
