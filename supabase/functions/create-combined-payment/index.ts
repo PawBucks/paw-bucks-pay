@@ -225,7 +225,12 @@ serve(async (req) => {
         );
       }
 
-      // Deduct from wallet (only the wallet portion)
+      // Determine how much comes from wallet vs pet fund vs legacy welcome credit
+      let actualWalletPawbucks = 0;
+      let petFundPawbucks = 0;
+      let legacyWelcomePawbucks = 0;
+
+      // Deduct from wallet first
       if (walletPawbucks > 0) {
         const { data: currentWallet } = await supabaseAdmin
           .from('pawbucks_wallet')
@@ -233,17 +238,17 @@ serve(async (req) => {
           .eq('user_id', user.id)
           .single();
 
-        const newBalance = (currentWallet?.balance || 0) - walletPawbucks;
+        actualWalletPawbucks = Math.min(currentWallet?.balance || 0, walletPawbucks);
+        const newBalance = (currentWallet?.balance || 0) - actualWalletPawbucks;
         
         await supabaseAdmin
           .from('pawbucks_wallet')
           .update({ balance: newBalance })
           .eq('user_id', user.id);
 
-        // Log the wallet PawBucks activity
         await supabaseAdmin.from('pawbucks_activity').insert({
           user_id: user.id,
-          amount: -walletPawbucks,
+          amount: -actualWalletPawbucks,
           type: 'redemption',
           source: 'merchant_payment',
           description: `Payment to ${merchant.business_name}`,
@@ -251,18 +256,92 @@ serve(async (req) => {
         });
       }
 
-      // Redeem welcome credit portion if applicable
-      if (welcomeCreditPawbucks > 0) {
-        const totalCents = Math.round(totalAmount * 100);
-        const { error: redeemError } = await supabaseAdmin.rpc('redeem_welcome_credit', {
-          p_user_id: user.id,
-          p_merchant_id: merchantId,
-          p_transaction_total_cents: totalCents,
-        });
-        if (redeemError) {
-          logStep("Welcome credit redemption error", { error: redeemError.message });
-        } else {
-          logStep("Welcome credit redeemed", { amount: welcomeCreditPawbucks });
+      // Deduct from Pet Fund if there's a remaining amount
+      const remainingAfterWallet = pawbucksAmount - actualWalletPawbucks;
+      if (remainingAfterWallet > 0) {
+        // Check Pet Fund
+        const { data: petFundLedger } = await supabaseAdmin
+          .from('pet_fund_ledgers')
+          .select('id, available_balance')
+          .eq('user_id', user.id)
+          .eq('status', 'active')
+          .maybeSingle();
+
+        if (petFundLedger && petFundLedger.available_balance > 0) {
+          petFundPawbucks = Math.min(remainingAfterWallet, petFundLedger.available_balance);
+
+          // Mark releases as used
+          const { data: availableReleases } = await supabaseAdmin
+            .from('pet_fund_releases')
+            .select('id, amount, month_number')
+            .eq('user_id', user.id)
+            .eq('status', 'released')
+            .is('used_at', null)
+            .order('month_number', { ascending: true });
+
+          let deductRemaining = petFundPawbucks;
+          for (const release of (availableReleases || [])) {
+            if (deductRemaining <= 0) break;
+            await supabaseAdmin
+              .from('pet_fund_releases')
+              .update({ used_at: new Date().toISOString() })
+              .eq('id', release.id);
+            deductRemaining -= release.amount;
+          }
+
+          // Update ledger
+          await supabaseAdmin
+            .from('pet_fund_ledgers')
+            .update({
+              available_balance: Math.max(0, petFundLedger.available_balance - petFundPawbucks),
+              total_used: petFundLedger.available_balance, // Will be corrected below
+            })
+            .eq('user_id', user.id);
+
+          // Correct total_used
+          const { data: updatedLedger } = await supabaseAdmin
+            .from('pet_fund_ledgers')
+            .select('total_used')
+            .eq('user_id', user.id)
+            .single();
+          
+          if (updatedLedger) {
+            // Re-read the actual value and add our deduction
+            const { data: ledgerForUpdate } = await supabaseAdmin
+              .from('pet_fund_ledgers')
+              .select('available_balance, total_used')
+              .eq('id', petFundLedger.id)
+              .single();
+            
+            if (ledgerForUpdate) {
+              await supabaseAdmin
+                .from('pet_fund_ledgers')
+                .update({
+                  available_balance: Math.max(0, petFundLedger.available_balance - petFundPawbucks),
+                  total_used: (ledgerForUpdate.total_used || 0) + petFundPawbucks,
+                })
+                .eq('id', petFundLedger.id);
+            }
+          }
+
+          logStep("Pet Fund deducted (PawBucks-only)", { amount: petFundPawbucks });
+        }
+
+        // Legacy welcome credit fallback
+        const stillRemaining = remainingAfterWallet - petFundPawbucks;
+        if (stillRemaining > 0) {
+          legacyWelcomePawbucks = stillRemaining;
+          const totalCents = Math.round(totalAmount * 100);
+          const { error: redeemError } = await supabaseAdmin.rpc('redeem_welcome_credit', {
+            p_user_id: user.id,
+            p_merchant_id: merchantId,
+            p_transaction_total_cents: totalCents,
+          });
+          if (redeemError) {
+            logStep("Welcome credit redemption error", { error: redeemError.message });
+          } else {
+            logStep("Legacy welcome credit redeemed", { amount: legacyWelcomePawbucks });
+          }
         }
       }
 
@@ -333,6 +412,51 @@ serve(async (req) => {
           totalPaid: totalAmount,
           pawbucksEarned: 0,
         });
+      }
+
+      // Handle referrer bonus activation on first purchase
+      try {
+        const { count: completedTxCount } = await supabaseAdmin
+          .from('transactions')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', user.id)
+          .eq('status', 'completed');
+
+        if (completedTxCount === 1 && totalAmount >= 40) {
+          const { data: pendingBonus } = await supabaseAdmin
+            .from('pet_fund_referrer_bonuses')
+            .select('id, referrer_id')
+            .eq('referee_id', user.id)
+            .eq('status', 'pending')
+            .maybeSingle();
+
+          if (pendingBonus) {
+            const { data: month2Release } = await supabaseAdmin
+              .from('pet_fund_releases')
+              .select('scheduled_at')
+              .eq('user_id', user.id)
+              .eq('month_number', 2)
+              .maybeSingle();
+
+            const releaseAt = month2Release?.scheduled_at || new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString();
+
+            await supabaseAdmin
+              .from('pet_fund_referrer_bonuses')
+              .update({ status: 'locked', release_at: releaseAt })
+              .eq('id', pendingBonus.id);
+
+            await supabaseAdmin.from('notifications').insert({
+              user_id: pendingBonus.referrer_id,
+              title: '🎉 Referral Bonus Earned!',
+              message: `Your friend made their first purchase! You've earned 10,000 PawBucks ($10) that will unlock soon.`,
+              category: 'promotional',
+            });
+
+            logStep("Referrer bonus activated", { bonusId: pendingBonus.id, referrerId: pendingBonus.referrer_id });
+          }
+        }
+      } catch (refErr) {
+        logStep("Error processing referrer bonus", { error: String(refErr) });
       }
 
       logStep("Full PawBucks payment completed", { transactionId: transaction?.id });
