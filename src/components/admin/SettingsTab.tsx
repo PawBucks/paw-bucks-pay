@@ -83,7 +83,7 @@ export function SettingsTab() {
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
               <span className="flex items-center gap-2">
-                50,000 PawBucks Welcome Credit
+                Quarter-Million Sign Up Bonus ($250)
               </span>
               {loading ? (
                 <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
