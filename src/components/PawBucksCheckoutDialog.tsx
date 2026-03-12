@@ -70,11 +70,11 @@ export const PawBucksCheckoutDialog = ({
     }
   }, [open]);
 
-  // Welcome credit is available only if merchant accepts PawBucks and transaction >= $75
-  const welcomeCreditApplicable = hasWelcomeCredit && merchantAcceptsPawBucks && priceAmount >= WELCOME_CREDIT_MIN_USD;
+  const petFundMinUsd = petFundMinTransactionUsd || PET_FUND_MIN_USD;
+  const petFundCreditBalance = hasPetFund ? petFundBalance : welcomeCreditBalance;
+  const welcomeCreditApplicable = (hasPetFund || hasWelcomeCredit) && merchantAcceptsPawBucks && priceAmount >= petFundMinUsd;
   
-  // Combined effective balance: wallet PawBucks + welcome credit (if applicable)
-  const effectiveBalance = spendableBalance + (welcomeCreditApplicable ? welcomeCreditBalance : 0);
+  const effectiveBalance = spendableBalance + (welcomeCreditApplicable ? petFundCreditBalance : 0);
   const pawbucksBalance = effectiveBalance;
 
   // Calculate values
