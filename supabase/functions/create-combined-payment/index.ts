@@ -225,7 +225,12 @@ serve(async (req) => {
         );
       }
 
-      // Deduct from wallet (only the wallet portion)
+      // Determine how much comes from wallet vs pet fund vs legacy welcome credit
+      let actualWalletPawbucks = 0;
+      let petFundPawbucks = 0;
+      let legacyWelcomePawbucks = 0;
+
+      // Deduct from wallet first
       if (walletPawbucks > 0) {
         const { data: currentWallet } = await supabaseAdmin
           .from('pawbucks_wallet')
@@ -233,17 +238,17 @@ serve(async (req) => {
           .eq('user_id', user.id)
           .single();
 
-        const newBalance = (currentWallet?.balance || 0) - walletPawbucks;
+        actualWalletPawbucks = Math.min(currentWallet?.balance || 0, walletPawbucks);
+        const newBalance = (currentWallet?.balance || 0) - actualWalletPawbucks;
         
         await supabaseAdmin
           .from('pawbucks_wallet')
           .update({ balance: newBalance })
           .eq('user_id', user.id);
 
-        // Log the wallet PawBucks activity
         await supabaseAdmin.from('pawbucks_activity').insert({
           user_id: user.id,
-          amount: -walletPawbucks,
+          amount: -actualWalletPawbucks,
           type: 'redemption',
           source: 'merchant_payment',
           description: `Payment to ${merchant.business_name}`,
@@ -251,18 +256,92 @@ serve(async (req) => {
         });
       }
 
-      // Redeem welcome credit portion if applicable
-      if (welcomeCreditPawbucks > 0) {
-        const totalCents = Math.round(totalAmount * 100);
-        const { error: redeemError } = await supabaseAdmin.rpc('redeem_welcome_credit', {
-          p_user_id: user.id,
-          p_merchant_id: merchantId,
-          p_transaction_total_cents: totalCents,
-        });
-        if (redeemError) {
-          logStep("Welcome credit redemption error", { error: redeemError.message });
-        } else {
-          logStep("Welcome credit redeemed", { amount: welcomeCreditPawbucks });
+      // Deduct from Pet Fund if there's a remaining amount
+      const remainingAfterWallet = pawbucksAmount - actualWalletPawbucks;
+      if (remainingAfterWallet > 0) {
+        // Check Pet Fund
+        const { data: petFundLedger } = await supabaseAdmin
+          .from('pet_fund_ledgers')
+          .select('id, available_balance')
+          .eq('user_id', user.id)
+          .eq('status', 'active')
+          .maybeSingle();
+
+        if (petFundLedger && petFundLedger.available_balance > 0) {
+          petFundPawbucks = Math.min(remainingAfterWallet, petFundLedger.available_balance);
+
+          // Mark releases as used
+          const { data: availableReleases } = await supabaseAdmin
+            .from('pet_fund_releases')
+            .select('id, amount, month_number')
+            .eq('user_id', user.id)
+            .eq('status', 'released')
+            .is('used_at', null)
+            .order('month_number', { ascending: true });
+
+          let deductRemaining = petFundPawbucks;
+          for (const release of (availableReleases || [])) {
+            if (deductRemaining <= 0) break;
+            await supabaseAdmin
+              .from('pet_fund_releases')
+              .update({ used_at: new Date().toISOString() })
+              .eq('id', release.id);
+            deductRemaining -= release.amount;
+          }
+
+          // Update ledger
+          await supabaseAdmin
+            .from('pet_fund_ledgers')
+            .update({
+              available_balance: Math.max(0, petFundLedger.available_balance - petFundPawbucks),
+              total_used: petFundLedger.available_balance, // Will be corrected below
+            })
+            .eq('user_id', user.id);
+
+          // Correct total_used
+          const { data: updatedLedger } = await supabaseAdmin
+            .from('pet_fund_ledgers')
+            .select('total_used')
+            .eq('user_id', user.id)
+            .single();
+          
+          if (updatedLedger) {
+            // Re-read the actual value and add our deduction
+            const { data: ledgerForUpdate } = await supabaseAdmin
+              .from('pet_fund_ledgers')
+              .select('available_balance, total_used')
+              .eq('id', petFundLedger.id)
+              .single();
+            
+            if (ledgerForUpdate) {
+              await supabaseAdmin
+                .from('pet_fund_ledgers')
+                .update({
+                  available_balance: Math.max(0, petFundLedger.available_balance - petFundPawbucks),
+                  total_used: (ledgerForUpdate.total_used || 0) + petFundPawbucks,
+                })
+                .eq('id', petFundLedger.id);
+            }
+          }
+
+          logStep("Pet Fund deducted (PawBucks-only)", { amount: petFundPawbucks });
+        }
+
+        // Legacy welcome credit fallback
+        const stillRemaining = remainingAfterWallet - petFundPawbucks;
+        if (stillRemaining > 0) {
+          legacyWelcomePawbucks = stillRemaining;
+          const totalCents = Math.round(totalAmount * 100);
+          const { error: redeemError } = await supabaseAdmin.rpc('redeem_welcome_credit', {
+            p_user_id: user.id,
+            p_merchant_id: merchantId,
+            p_transaction_total_cents: totalCents,
+          });
+          if (redeemError) {
+            logStep("Welcome credit redemption error", { error: redeemError.message });
+          } else {
+            logStep("Legacy welcome credit redeemed", { amount: legacyWelcomePawbucks });
+          }
         }
       }
 
