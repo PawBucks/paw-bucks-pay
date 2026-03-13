@@ -3,7 +3,10 @@ import { motion } from "framer-motion";
 import { GradientCard } from "@/components/ui/gradient-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, PawPrint, FileHeart, Pencil, Sparkles } from "lucide-react";
+import { Calendar, PawPrint, FileHeart, Pencil, Sparkles, Trash2 } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { petsService } from "@/services/api/pets.service";
+import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { EditPetProfileDialog } from "./EditPetProfileDialog";
 import { usePetPersonality } from "@/hooks/usePersonalityBadges";
@@ -42,6 +45,7 @@ const petTypeColors = {
 const PetProfileCardComponent = ({ pet, onUpdate, index = 0 }: PetProfileCardProps) => {
   const navigate = useNavigate();
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   
   // Fetch personality data
   const { data: personalityData } = usePetPersonality(pet.id);
@@ -73,6 +77,18 @@ const PetProfileCardComponent = ({ pet, onUpdate, index = 0 }: PetProfileCardPro
   const handleQuizClick = useCallback(() => navigate(`/pet-personality-quiz?petId=${pet.id}`), [navigate, pet.id]);
   const handleEditSuccess = useCallback(() => onUpdate?.(), [onUpdate]);
   const handleDialogChange = useCallback((open: boolean) => setEditDialogOpen(open), []);
+
+  const handleDelete = useCallback(async () => {
+    setDeleting(true);
+    const { error } = await petsService.delete(pet.id);
+    setDeleting(false);
+    if (error) {
+      toast({ title: "Error", description: "Failed to delete pet profile.", variant: "destructive" });
+    } else {
+      toast({ title: "Pet removed", description: `${pet.name} has been removed from your profile.` });
+      onUpdate?.();
+    }
+  }, [pet.id, pet.name, onUpdate]);
 
   return (
     <motion.div
@@ -164,6 +180,35 @@ const PetProfileCardComponent = ({ pet, onUpdate, index = 0 }: PetProfileCardPro
             >
               <FileHeart className="w-4 h-4" />
             </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-9 w-9 text-destructive hover:text-destructive"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete {pet.name}?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will permanently remove {pet.name}'s profile, including all medical records and associated data. This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleDelete}
+                    disabled={deleting}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    {deleting ? "Deleting…" : "Delete"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
       </GradientCard>
