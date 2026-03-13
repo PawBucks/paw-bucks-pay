@@ -45,6 +45,7 @@ const petTypeColors = {
 const PetProfileCardComponent = ({ pet, onUpdate, index = 0 }: PetProfileCardProps) => {
   const navigate = useNavigate();
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   
   // Fetch personality data
   const { data: personalityData } = usePetPersonality(pet.id);
@@ -76,6 +77,18 @@ const PetProfileCardComponent = ({ pet, onUpdate, index = 0 }: PetProfileCardPro
   const handleQuizClick = useCallback(() => navigate(`/pet-personality-quiz?petId=${pet.id}`), [navigate, pet.id]);
   const handleEditSuccess = useCallback(() => onUpdate?.(), [onUpdate]);
   const handleDialogChange = useCallback((open: boolean) => setEditDialogOpen(open), []);
+
+  const handleDelete = useCallback(async () => {
+    setDeleting(true);
+    const { error } = await petsService.delete(pet.id);
+    setDeleting(false);
+    if (error) {
+      toast({ title: "Error", description: "Failed to delete pet profile.", variant: "destructive" });
+    } else {
+      toast({ title: "Pet removed", description: `${pet.name} has been removed from your profile.` });
+      onUpdate?.();
+    }
+  }, [pet.id, pet.name, onUpdate]);
 
   return (
     <motion.div
