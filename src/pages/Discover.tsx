@@ -1038,9 +1038,9 @@ const Discover = () => {
                         </div>
                       ) : (
                         <AttentionLadderFeed
-                          featuredPartners={featuredPartners}
-                          premiumAds={premiumAds}
-                          interspersedResults={interspersedResults}
+                          featuredPartners={deferredFeatured}
+                          premiumAds={deferredPremium}
+                          interspersedResults={deferredInterspersed}
                           verifiedProSet={verifiedProSet}
                           showDistance={!!userLocation}
                           selectedCategory={selectedCategory}
