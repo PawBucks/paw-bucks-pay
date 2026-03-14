@@ -64,28 +64,30 @@ export const useDataPrefetch = () => {
     if (!user?.id || prefetchedRef.current.has('user-data')) return;
     prefetchedRef.current.add('user-data');
 
-    // Parallel prefetch of critical user data
-    await Promise.all([
+    // Parallel prefetch of critical user data — all queries fire simultaneously
+    const sharedOpts = { staleTime: 1000 * 60 * 5 };
+    
+    await Promise.allSettled([
       // PawBucks wallet
       queryClient.prefetchQuery({
         queryKey: ['pawbucks-wallet', user.id],
         queryFn: async () => {
           const { data } = await supabase
             .from('pawbucks_wallet')
-            .select('*')
+            .select('balance')
             .eq('user_id', user.id)
-            .single();
+            .maybeSingle();
           return data;
         },
-        staleTime: 1000 * 60 * 5,
+        ...sharedOpts,
       }),
       // User profile
       queryClient.prefetchQuery({
-        queryKey: ['profile', user.id],
+        queryKey: ['dashboard-profile', user.id],
         queryFn: async () => {
           const { data } = await supabase
             .from('profiles')
-            .select('*')
+            .select('user_type, full_name')
             .eq('id', user.id)
             .single();
           return data;
@@ -98,11 +100,13 @@ export const useDataPrefetch = () => {
         queryFn: async () => {
           const { data } = await supabase
             .from('pet_profiles')
-            .select('*')
-            .eq('user_id', user.id);
+            .select('id, name, type, breed, birthday, photo_url, personality_type, personality_quiz_completed')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false })
+            .limit(10);
           return data || [];
         },
-        staleTime: 1000 * 60 * 10,
+        ...sharedOpts,
       }),
       // Unread notifications count
       queryClient.prefetchQuery({
@@ -115,7 +119,7 @@ export const useDataPrefetch = () => {
             .eq('is_read', false);
           return count || 0;
         },
-        staleTime: 1000 * 30, // 30 seconds for notifications
+        staleTime: 1000 * 30,
       }),
     ]);
   }, [queryClient, user?.id]);

@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback, memo } from "react";
+import { useState, useMemo, useEffect, useCallback, memo, useDeferredValue } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
@@ -600,6 +600,10 @@ const Discover = () => {
     };
   }, [merchantsWithRatings, selectedCategory, debouncedSearch, minRating, selectedPrices, maxDistance, userLocation, sortBy, featuredPartnerIds, premiumAdIds, sponsoredMerchantIds, searchBoostedIds]);
 
+  // Defer expensive list rendering so filter interactions stay snappy
+  const deferredFeatured = useDeferredValue(featuredPartners);
+  const deferredPremium = useDeferredValue(premiumAds);
+
   // Intersperse sponsored into first 10 organic results (not grouped)
   const interspersedResults = useMemo(() => {
     const combined = [...boostedMerchants, ...organicMerchants];
@@ -624,6 +628,8 @@ const Discover = () => {
     }
     return result;
   }, [boostedMerchants, organicMerchants, sponsoredMerchants]);
+
+  const deferredInterspersed = useDeferredValue(interspersedResults);
 
   // Track sponsored impressions when they change
   useEffect(() => {
@@ -717,7 +723,7 @@ const Discover = () => {
     return <PageLoader message="Finding amazing pet merchants near you..." />;
   }
 
-  const totalMerchants = featuredPartners.length + premiumAds.length + interspersedResults.length;
+  const totalMerchants = deferredFeatured.length + deferredPremium.length + deferredInterspersed.length;
 
   return (
     <>
@@ -972,7 +978,7 @@ const Discover = () => {
             <>
               {/* All merchants for map */}
               {(() => {
-                const allMapMerchants = [...featuredPartners, ...premiumAds, ...interspersedResults];
+                const allMapMerchants = [...deferredFeatured, ...deferredPremium, ...deferredInterspersed];
                 const mapClickHandler = (merchantId: string) => {
                   if (searchBoostedIds.has(merchantId)) {
                     trackSearchClick(merchantId, undefined, 'map', {
@@ -990,9 +996,9 @@ const Discover = () => {
                       {/* List Panel */}
                       <ScrollArea className="flex-1 pr-4">
                         <AttentionLadderFeed
-                          featuredPartners={featuredPartners}
-                          premiumAds={premiumAds}
-                          interspersedResults={interspersedResults}
+                          featuredPartners={deferredFeatured}
+                          premiumAds={deferredPremium}
+                          interspersedResults={deferredInterspersed}
                           verifiedProSet={verifiedProSet}
                           showDistance={!!userLocation}
                           selectedCategory={selectedCategory}
@@ -1032,9 +1038,9 @@ const Discover = () => {
                         </div>
                       ) : (
                         <AttentionLadderFeed
-                          featuredPartners={featuredPartners}
-                          premiumAds={premiumAds}
-                          interspersedResults={interspersedResults}
+                          featuredPartners={deferredFeatured}
+                          premiumAds={deferredPremium}
+                          interspersedResults={deferredInterspersed}
                           verifiedProSet={verifiedProSet}
                           showDistance={!!userLocation}
                           selectedCategory={selectedCategory}
