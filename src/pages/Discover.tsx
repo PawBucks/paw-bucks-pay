@@ -978,7 +978,7 @@ const Discover = () => {
             <>
               {/* All merchants for map */}
               {(() => {
-                const allMapMerchants = [...featuredPartners, ...premiumAds, ...interspersedResults];
+                const allMapMerchants = [...deferredFeatured, ...deferredPremium, ...deferredInterspersed];
                 const mapClickHandler = (merchantId: string) => {
                   if (searchBoostedIds.has(merchantId)) {
                     trackSearchClick(merchantId, undefined, 'map', {
