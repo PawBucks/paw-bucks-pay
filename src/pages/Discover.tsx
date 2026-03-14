@@ -996,9 +996,9 @@ const Discover = () => {
                       {/* List Panel */}
                       <ScrollArea className="flex-1 pr-4">
                         <AttentionLadderFeed
-                          featuredPartners={featuredPartners}
-                          premiumAds={premiumAds}
-                          interspersedResults={interspersedResults}
+                          featuredPartners={deferredFeatured}
+                          premiumAds={deferredPremium}
+                          interspersedResults={deferredInterspersed}
                           verifiedProSet={verifiedProSet}
                           showDistance={!!userLocation}
                           selectedCategory={selectedCategory}
