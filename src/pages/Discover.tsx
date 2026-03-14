@@ -371,30 +371,55 @@ const Discover = () => {
     setLocationLoading(true);
     setLocationError(null);
 
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setUserLocation({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-        });
-        setLocationLoading(false);
-        toast.success("Location found! Showing nearby merchants.");
-      },
-      (error) => {
-        setLocationLoading(false);
-        let errorMessage = "Unable to get your location";
-        if (error.code === error.PERMISSION_DENIED) {
-          errorMessage = "Location access denied. Please enable location in your browser settings.";
-        } else if (error.code === error.POSITION_UNAVAILABLE) {
-          errorMessage = "Location unavailable. Please try again.";
-        } else if (error.code === error.TIMEOUT) {
-          errorMessage = "Location request timed out. Please try again.";
-        }
-        setLocationError(errorMessage);
-        toast.error(errorMessage);
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
-    );
+    // Try high accuracy first, fall back to low accuracy on failure
+    const onSuccess = (position: GeolocationPosition) => {
+      setUserLocation({
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+      });
+      setLocationLoading(false);
+      toast.success("Location found! Showing nearby merchants.");
+    };
+
+    const onError = (error: GeolocationPositionError) => {
+      // If high accuracy failed with POSITION_UNAVAILABLE, retry without it
+      if (error.code === error.POSITION_UNAVAILABLE) {
+        navigator.geolocation.getCurrentPosition(
+          onSuccess,
+          (retryError) => {
+            setLocationLoading(false);
+            let errorMessage = "Unable to get your location";
+            if (retryError.code === retryError.PERMISSION_DENIED) {
+              errorMessage = "Location access denied. Please enable location in your browser settings.";
+            } else if (retryError.code === retryError.POSITION_UNAVAILABLE) {
+              errorMessage = "Location unavailable. Please check your browser's location settings and try again.";
+            } else if (retryError.code === retryError.TIMEOUT) {
+              errorMessage = "Location request timed out. Please try again.";
+            }
+            setLocationError(errorMessage);
+            toast.error(errorMessage);
+          },
+          { enableHighAccuracy: false, timeout: 15000, maximumAge: 600000 }
+        );
+        return;
+      }
+
+      setLocationLoading(false);
+      let errorMessage = "Unable to get your location";
+      if (error.code === error.PERMISSION_DENIED) {
+        errorMessage = "Location access denied. Please enable location in your browser settings.";
+      } else if (error.code === error.TIMEOUT) {
+        errorMessage = "Location request timed out. Please try again.";
+      }
+      setLocationError(errorMessage);
+      toast.error(errorMessage);
+    };
+
+    navigator.geolocation.getCurrentPosition(onSuccess, onError, {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 300000,
+    });
   }, []);
 
   // Auto-request location if distance filter or sort is selected
