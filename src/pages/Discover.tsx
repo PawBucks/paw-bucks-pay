@@ -723,7 +723,7 @@ const Discover = () => {
     return <PageLoader message="Finding amazing pet merchants near you..." />;
   }
 
-  const totalMerchants = featuredPartners.length + premiumAds.length + interspersedResults.length;
+  const totalMerchants = deferredFeatured.length + deferredPremium.length + deferredInterspersed.length;
 
   return (
     <>
