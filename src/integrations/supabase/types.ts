@@ -9720,6 +9720,83 @@ export type Database = {
           },
         ]
       }
+      verification_answers: {
+        Row: {
+          answer: string
+          answered_by: string
+          created_at: string
+          entity_id: string
+          entity_type: string
+          id: string
+          notes: string | null
+          question_id: string
+          updated_at: string
+        }
+        Insert: {
+          answer: string
+          answered_by: string
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          id?: string
+          notes?: string | null
+          question_id: string
+          updated_at?: string
+        }
+        Update: {
+          answer?: string
+          answered_by?: string
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          notes?: string | null
+          question_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "verification_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "verification_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      verification_questions: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_order: number
+          entity_type: string
+          id: string
+          is_active: boolean
+          question: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          entity_type: string
+          id?: string
+          is_active?: boolean
+          question: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          entity_type?: string
+          id?: string
+          is_active?: boolean
+          question?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       vet_bonus_offers: {
         Row: {
           bonus_amount: number
