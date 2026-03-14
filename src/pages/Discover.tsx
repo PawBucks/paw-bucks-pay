@@ -600,6 +600,10 @@ const Discover = () => {
     };
   }, [merchantsWithRatings, selectedCategory, debouncedSearch, minRating, selectedPrices, maxDistance, userLocation, sortBy, featuredPartnerIds, premiumAdIds, sponsoredMerchantIds, searchBoostedIds]);
 
+  // Defer expensive list rendering so filter interactions stay snappy
+  const deferredFeatured = useDeferredValue(featuredPartners);
+  const deferredPremium = useDeferredValue(premiumAds);
+
   // Intersperse sponsored into first 10 organic results (not grouped)
   const interspersedResults = useMemo(() => {
     const combined = [...boostedMerchants, ...organicMerchants];
@@ -624,6 +628,8 @@ const Discover = () => {
     }
     return result;
   }, [boostedMerchants, organicMerchants, sponsoredMerchants]);
+
+  const deferredInterspersed = useDeferredValue(interspersedResults);
 
   // Track sponsored impressions when they change
   useEffect(() => {
