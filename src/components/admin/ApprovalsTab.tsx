@@ -10,19 +10,10 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { VerificationChecklist } from './VerificationChecklist';
 import { 
-  CheckCircle2, 
-  XCircle, 
-  Clock, 
-  Store, 
-  Stethoscope, 
-  RefreshCw,
-  AlertCircle,
-  Building2,
-  Mail,
-  Phone,
-  MapPin,
-  Calendar
+  CheckCircle2, XCircle, Clock, Store, Stethoscope, RefreshCw,
+  AlertCircle, Mail, Phone, MapPin, Calendar, ClipboardCheck
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -57,7 +48,6 @@ const fetchPendingMerchants = async (): Promise<PendingMerchant[]> => {
     .select('id, business_name, business_type, contact_person, email, phone, address, approval_status, created_at')
     .eq('approval_status', 'pending')
     .order('created_at', { ascending: false });
-
   if (error) throw error;
   return data || [];
 };
@@ -68,18 +58,19 @@ const fetchPendingVets = async (): Promise<PendingVet[]> => {
     .select('id, name, clinic_name, contact_email, clinic_phone, location, practice_type, approval_status, created_at')
     .eq('approval_status', 'pending')
     .order('created_at', { ascending: false });
-
   if (error) throw error;
   return data || [];
 };
 
 export function ApprovalsTab() {
   const queryClient = useQueryClient();
-  const [selectedMerchant, setSelectedMerchant] = useState<PendingMerchant | null>(null);
-  const [selectedVet, setSelectedVet] = useState<PendingVet | null>(null);
+  const [reviewingMerchant, setReviewingMerchant] = useState<PendingMerchant | null>(null);
+  const [reviewingVet, setReviewingVet] = useState<PendingVet | null>(null);
   const [denyDialogOpen, setDenyDialogOpen] = useState(false);
   const [denyReason, setDenyReason] = useState('');
   const [denyingEntity, setDenyingEntity] = useState<{ type: 'merchant' | 'vet'; id: string } | null>(null);
+  const [checklistReady, setChecklistReady] = useState(false);
+  const [checklistHasFailures, setChecklistHasFailures] = useState(false);
 
   const { data: pendingMerchants = [], isLoading: merchantsLoading, refetch: refetchMerchants } = useQuery({
     queryKey: ['pending-merchants'],
@@ -91,43 +82,25 @@ export function ApprovalsTab() {
     queryFn: fetchPendingVets,
   });
 
-  const approveMerchantMutation = useMutation({
-    mutationFn: async (merchantId: string) => {
+  const approveMutation = useMutation({
+    mutationFn: async ({ type, id }: { type: 'merchant' | 'vet'; id: string }) => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('Not authenticated');
-
       const { error } = await supabase.functions.invoke('admin-approve-entity', {
-        body: { entityType: 'merchant', entityId: merchantId, action: 'approve' }
+        body: { entityType: type, entityId: id, action: 'approve' }
       });
       if (error) throw error;
     },
-    onSuccess: () => {
-      toast.success('Merchant approved successfully!');
+    onSuccess: (_, vars) => {
+      toast.success(`${vars.type === 'merchant' ? 'Merchant' : 'Vet'} approved successfully!`);
       queryClient.invalidateQueries({ queryKey: ['pending-merchants'] });
-      setSelectedMerchant(null);
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || 'Failed to approve merchant');
-    },
-  });
-
-  const approveVetMutation = useMutation({
-    mutationFn: async (vetId: string) => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error('Not authenticated');
-
-      const { error } = await supabase.functions.invoke('admin-approve-entity', {
-        body: { entityType: 'vet', entityId: vetId, action: 'approve' }
-      });
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      toast.success('Vet approved successfully!');
       queryClient.invalidateQueries({ queryKey: ['pending-vets'] });
-      setSelectedVet(null);
+      setReviewingMerchant(null);
+      setReviewingVet(null);
+      resetChecklistState();
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Failed to approve vet');
+      toast.error(error.message || 'Failed to approve');
     },
   });
 
@@ -135,7 +108,6 @@ export function ApprovalsTab() {
     mutationFn: async ({ type, id, reason }: { type: 'merchant' | 'vet'; id: string; reason: string }) => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('Not authenticated');
-
       const { error } = await supabase.functions.invoke('admin-approve-entity', {
         body: { entityType: type, entityId: id, action: 'deny', denialReason: reason }
       });
@@ -148,13 +120,29 @@ export function ApprovalsTab() {
       setDenyDialogOpen(false);
       setDenyReason('');
       setDenyingEntity(null);
-      setSelectedMerchant(null);
-      setSelectedVet(null);
+      setReviewingMerchant(null);
+      setReviewingVet(null);
+      resetChecklistState();
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Failed to deny entity');
     },
   });
+
+  const resetChecklistState = () => {
+    setChecklistReady(false);
+    setChecklistHasFailures(false);
+  };
+
+  const handleReviewMerchant = (merchant: PendingMerchant) => {
+    resetChecklistState();
+    setReviewingMerchant(merchant);
+  };
+
+  const handleReviewVet = (vet: PendingVet) => {
+    resetChecklistState();
+    setReviewingVet(vet);
+  };
 
   const handleDeny = useCallback((type: 'merchant' | 'vet', id: string) => {
     setDenyingEntity({ type, id });
@@ -166,11 +154,7 @@ export function ApprovalsTab() {
       toast.error('Please provide a reason for denial');
       return;
     }
-    denyEntityMutation.mutate({
-      type: denyingEntity.type,
-      id: denyingEntity.id,
-      reason: denyReason.trim(),
-    });
+    denyEntityMutation.mutate({ type: denyingEntity.type, id: denyingEntity.id, reason: denyReason.trim() });
   }, [denyingEntity, denyReason, denyEntityMutation]);
 
   const handleRefresh = useCallback(() => {
@@ -178,6 +162,11 @@ export function ApprovalsTab() {
     refetchVets();
     toast.success('Refreshed pending approvals');
   }, [refetchMerchants, refetchVets]);
+
+  const handleChecklistUpdate = useCallback((allAnswered: boolean, hasFailures: boolean) => {
+    setChecklistReady(allAnswered);
+    setChecklistHasFailures(hasFailures);
+  }, []);
 
   const totalPending = pendingMerchants.length + pendingVets.length;
 
@@ -240,7 +229,7 @@ export function ApprovalsTab() {
         </Card>
       </div>
 
-      {/* Tabs for Merchants and Vets */}
+      {/* Tabs */}
       <Tabs defaultValue="merchants" className="space-y-4">
         <TabsList>
           <TabsTrigger value="merchants" className="flex items-center gap-2">
@@ -264,7 +253,7 @@ export function ApprovalsTab() {
           <Card>
             <CardHeader>
               <CardTitle>Pending Merchant Applications</CardTitle>
-              <CardDescription>Review merchant registrations and approve or deny access</CardDescription>
+              <CardDescription>Click "Review" to complete the verification checklist before approving</CardDescription>
             </CardHeader>
             <CardContent>
               {merchantsLoading ? (
@@ -323,25 +312,14 @@ export function ApprovalsTab() {
                           </div>
                         </TableCell>
                         <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <Button
-                              size="sm"
-                              variant="default"
-                              onClick={() => approveMerchantMutation.mutate(merchant.id)}
-                              disabled={approveMerchantMutation.isPending}
-                            >
-                              <CheckCircle2 className="w-4 h-4 mr-1" />
-                              Approve
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              onClick={() => handleDeny('merchant', merchant.id)}
-                            >
-                              <XCircle className="w-4 h-4 mr-1" />
-                              Deny
-                            </Button>
-                          </div>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleReviewMerchant(merchant)}
+                          >
+                            <ClipboardCheck className="w-4 h-4 mr-1" />
+                            Review
+                          </Button>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -357,7 +335,7 @@ export function ApprovalsTab() {
           <Card>
             <CardHeader>
               <CardTitle>Pending Vet Applications</CardTitle>
-              <CardDescription>Review veterinarian registrations and approve or deny access</CardDescription>
+              <CardDescription>Click "Review" to complete the verification checklist before approving</CardDescription>
             </CardHeader>
             <CardContent>
               {vetsLoading ? (
@@ -421,25 +399,14 @@ export function ApprovalsTab() {
                           </div>
                         </TableCell>
                         <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <Button
-                              size="sm"
-                              variant="default"
-                              onClick={() => approveVetMutation.mutate(vet.id)}
-                              disabled={approveVetMutation.isPending}
-                            >
-                              <CheckCircle2 className="w-4 h-4 mr-1" />
-                              Approve
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              onClick={() => handleDeny('vet', vet.id)}
-                            >
-                              <XCircle className="w-4 h-4 mr-1" />
-                              Deny
-                            </Button>
-                          </div>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleReviewVet(vet)}
+                          >
+                            <ClipboardCheck className="w-4 h-4 mr-1" />
+                            Review
+                          </Button>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -450,6 +417,119 @@ export function ApprovalsTab() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Merchant Review Dialog */}
+      <Dialog open={!!reviewingMerchant} onOpenChange={(open) => { if (!open) { setReviewingMerchant(null); resetChecklistState(); } }}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Store className="w-5 h-5" />
+              Review: {reviewingMerchant?.business_name}
+            </DialogTitle>
+            <DialogDescription>
+              Complete the verification checklist below. All questions must be answered before you can approve.
+            </DialogDescription>
+          </DialogHeader>
+
+          {reviewingMerchant && (
+            <>
+              {/* Applicant summary */}
+              <div className="grid grid-cols-2 gap-3 text-sm border rounded-lg p-3 bg-muted/30">
+                <div><span className="text-muted-foreground">Type:</span> {reviewingMerchant.business_type}</div>
+                <div><span className="text-muted-foreground">Contact:</span> {reviewingMerchant.contact_person || '—'}</div>
+                <div><span className="text-muted-foreground">Email:</span> {reviewingMerchant.email || '—'}</div>
+                <div><span className="text-muted-foreground">Phone:</span> {reviewingMerchant.phone || '—'}</div>
+                <div className="col-span-2"><span className="text-muted-foreground">Address:</span> {reviewingMerchant.address || '—'}</div>
+              </div>
+
+              <ScrollArea className="flex-1 min-h-0">
+                <VerificationChecklist
+                  entityType="merchant"
+                  entityId={reviewingMerchant.id}
+                  onChecklistComplete={handleChecklistUpdate}
+                />
+              </ScrollArea>
+
+              <DialogFooter className="gap-2 pt-3 border-t">
+                <Button variant="outline" onClick={() => { setReviewingMerchant(null); resetChecklistState(); }}>
+                  Close
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={() => handleDeny('merchant', reviewingMerchant.id)}
+                >
+                  <XCircle className="w-4 h-4 mr-1" />
+                  Deny
+                </Button>
+                <Button
+                  onClick={() => approveMutation.mutate({ type: 'merchant', id: reviewingMerchant.id })}
+                  disabled={!checklistReady || approveMutation.isPending}
+                  title={!checklistReady ? 'Complete all checklist items first' : checklistHasFailures ? 'Warning: some checks failed' : 'Approve merchant'}
+                >
+                  <CheckCircle2 className="w-4 h-4 mr-1" />
+                  {approveMutation.isPending ? 'Approving...' : 'Approve'}
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Vet Review Dialog */}
+      <Dialog open={!!reviewingVet} onOpenChange={(open) => { if (!open) { setReviewingVet(null); resetChecklistState(); } }}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Stethoscope className="w-5 h-5" />
+              Review: {reviewingVet?.clinic_name || reviewingVet?.name}
+            </DialogTitle>
+            <DialogDescription>
+              Complete the verification checklist below. All questions must be answered before you can approve.
+            </DialogDescription>
+          </DialogHeader>
+
+          {reviewingVet && (
+            <>
+              <div className="grid grid-cols-2 gap-3 text-sm border rounded-lg p-3 bg-muted/30">
+                <div><span className="text-muted-foreground">Vet:</span> {reviewingVet.name}</div>
+                <div><span className="text-muted-foreground">Type:</span> {reviewingVet.practice_type || 'General'}</div>
+                <div><span className="text-muted-foreground">Email:</span> {reviewingVet.contact_email}</div>
+                <div><span className="text-muted-foreground">Phone:</span> {reviewingVet.clinic_phone || '—'}</div>
+                <div className="col-span-2"><span className="text-muted-foreground">Location:</span> {reviewingVet.location}</div>
+              </div>
+
+              <ScrollArea className="flex-1 min-h-0">
+                <VerificationChecklist
+                  entityType="vet"
+                  entityId={reviewingVet.id}
+                  onChecklistComplete={handleChecklistUpdate}
+                />
+              </ScrollArea>
+
+              <DialogFooter className="gap-2 pt-3 border-t">
+                <Button variant="outline" onClick={() => { setReviewingVet(null); resetChecklistState(); }}>
+                  Close
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={() => handleDeny('vet', reviewingVet.id)}
+                >
+                  <XCircle className="w-4 h-4 mr-1" />
+                  Deny
+                </Button>
+                <Button
+                  onClick={() => approveMutation.mutate({ type: 'vet', id: reviewingVet.id })}
+                  disabled={!checklistReady || approveMutation.isPending}
+                  title={!checklistReady ? 'Complete all checklist items first' : checklistHasFailures ? 'Warning: some checks failed' : 'Approve vet'}
+                >
+                  <CheckCircle2 className="w-4 h-4 mr-1" />
+                  {approveMutation.isPending ? 'Approving...' : 'Approve'}
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Deny Confirmation Dialog */}
       <Dialog open={denyDialogOpen} onOpenChange={setDenyDialogOpen}>
