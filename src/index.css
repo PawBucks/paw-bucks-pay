@@ -447,5 +447,41 @@
       color: black !important;
     }
   }
+
+  /* Content visibility for off-screen heavy sections - massive paint savings */
+  .content-auto {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 500px;
+  }
+
+  .content-auto-sm {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 200px;
+  }
+
+  .content-auto-lg {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 800px;
+  }
+
+  /* Reduce motion for low-end devices */
+  .reduce-motion *,
+  .reduce-motion *::before,
+  .reduce-motion *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  /* GPU-accelerated scrolling containers */
+  .scroll-gpu {
+    will-change: scroll-position;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Optimized image rendering */
+  img[loading="lazy"] {
+    content-visibility: auto;
+  }
 }
 
