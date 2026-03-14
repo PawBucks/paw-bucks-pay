@@ -424,7 +424,9 @@ const Discover = () => {
 
   // Auto-request location if distance filter or sort is selected
   useEffect(() => {
-    if ((maxDistance > 0 || sortBy === 'distance') && !userLocation && !locationLoading && !locationError) {
+    if ((maxDistance > 0 || sortBy === 'distance') && !userLocation && !locationLoading) {
+      // Reset previous error so we can retry
+      if (locationError) setLocationError(null);
       requestLocation();
     }
   }, [maxDistance, sortBy, userLocation, locationLoading, locationError, requestLocation]);
