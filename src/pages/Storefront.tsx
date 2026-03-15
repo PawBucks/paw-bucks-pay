@@ -96,7 +96,7 @@ const Storefront = memo(() => {
           // Try to find by merchant ID directly
           const { data: merchantById } = await supabase
             .from('merchants_public')
-            .select('id, business_name, description, cashback_rate, storefront_slug, logo_url, address, business_type, accepts_pawbucks')
+            .select('id, business_name, description, cashback_rate, storefront_slug, logo_url, address, business_type, accepts_pawbucks, tos_url, privacy_policy_url, shipping_returns_policy_url')
             .eq('id', accountId)
             .maybeSingle();
 
