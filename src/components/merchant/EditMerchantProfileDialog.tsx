@@ -47,7 +47,9 @@ export const EditMerchantProfileDialog = ({
   onOpenChange,
   merchant,
   onSubmit,
+  onRefresh,
 }: EditMerchantProfileDialogProps) => {
+  const { user } = useAuth();
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [logoZoom, setLogoZoom] = useState(1);
