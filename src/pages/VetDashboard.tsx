@@ -394,6 +394,22 @@ export default function VetDashboard() {
           <TabsContent value="support">
             <SupportTab submitterType="vet" entityId={vetInfo.id} />
           </TabsContent>
+          <TabsContent value="settings">
+            <Card className="p-6">
+              <h3 className="text-lg font-semibold mb-4">Practice Settings</h3>
+              {user && vetInfo && (
+                <PolicyDocumentUpload
+                  userId={user.id}
+                  entityId={vetInfo.id}
+                  entityType="vet"
+                  tosUrl={vetInfo.tos_url}
+                  privacyPolicyUrl={vetInfo.privacy_policy_url}
+                  shippingReturnsPolicyUrl={vetInfo.shipping_returns_policy_url}
+                  onUpdate={() => loadVetInfo(user.id)}
+                />
+              )}
+            </Card>
+          </TabsContent>
         </Tabs>
       </div>
     </div>
