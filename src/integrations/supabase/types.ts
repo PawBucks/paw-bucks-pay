@@ -4850,11 +4850,14 @@ export type Database = {
           owner_name: string | null
           phone: string | null
           price_range: number | null
+          privacy_policy_url: string | null
+          shipping_returns_policy_url: string | null
           sponsored_until: string | null
           state_of_incorporation: string | null
           storefront_slug: string
           stripe_account_id: string | null
           stripe_account_status: string | null
+          tos_url: string | null
           twitter_url: string | null
           updated_at: string
           user_id: string
@@ -4892,11 +4895,14 @@ export type Database = {
           owner_name?: string | null
           phone?: string | null
           price_range?: number | null
+          privacy_policy_url?: string | null
+          shipping_returns_policy_url?: string | null
           sponsored_until?: string | null
           state_of_incorporation?: string | null
           storefront_slug: string
           stripe_account_id?: string | null
           stripe_account_status?: string | null
+          tos_url?: string | null
           twitter_url?: string | null
           updated_at?: string
           user_id: string
@@ -4934,11 +4940,14 @@ export type Database = {
           owner_name?: string | null
           phone?: string | null
           price_range?: number | null
+          privacy_policy_url?: string | null
+          shipping_returns_policy_url?: string | null
           sponsored_until?: string | null
           state_of_incorporation?: string | null
           storefront_slug?: string
           stripe_account_id?: string | null
           stripe_account_status?: string | null
+          tos_url?: string | null
           twitter_url?: string | null
           updated_at?: string
           user_id?: string
@@ -5281,7 +5290,9 @@ export type Database = {
           pims_software: string | null
           practice_type: string | null
           preferred_referrals: string | null
+          privacy_policy_url: string | null
           services_provided: string[] | null
+          shipping_returns_policy_url: string | null
           sms_enabled: boolean | null
           splicing_fee: number | null
           splicing_preference: string | null
@@ -5289,6 +5300,7 @@ export type Database = {
           stripe_connect_account_id: string | null
           subscription_tier: string | null
           tax_id: string | null
+          tos_url: string | null
           updated_at: string
           user_id: string | null
           website_url: string | null
@@ -5327,7 +5339,9 @@ export type Database = {
           pims_software?: string | null
           practice_type?: string | null
           preferred_referrals?: string | null
+          privacy_policy_url?: string | null
           services_provided?: string[] | null
+          shipping_returns_policy_url?: string | null
           sms_enabled?: boolean | null
           splicing_fee?: number | null
           splicing_preference?: string | null
@@ -5335,6 +5349,7 @@ export type Database = {
           stripe_connect_account_id?: string | null
           subscription_tier?: string | null
           tax_id?: string | null
+          tos_url?: string | null
           updated_at?: string
           user_id?: string | null
           website_url?: string | null
@@ -5373,7 +5388,9 @@ export type Database = {
           pims_software?: string | null
           practice_type?: string | null
           preferred_referrals?: string | null
+          privacy_policy_url?: string | null
           services_provided?: string[] | null
+          shipping_returns_policy_url?: string | null
           sms_enabled?: boolean | null
           splicing_fee?: number | null
           splicing_preference?: string | null
@@ -5381,6 +5398,7 @@ export type Database = {
           stripe_connect_account_id?: string | null
           subscription_tier?: string | null
           tax_id?: string | null
+          tos_url?: string | null
           updated_at?: string
           user_id?: string | null
           website_url?: string | null
@@ -11474,8 +11492,11 @@ export type Database = {
           longitude: number | null
           phone: string | null
           price_range: number | null
+          privacy_policy_url: string | null
+          shipping_returns_policy_url: string | null
           sponsored_until: string | null
           storefront_slug: string | null
+          tos_url: string | null
           twitter_url: string | null
           website_url: string | null
         }
@@ -11496,8 +11517,11 @@ export type Database = {
           longitude?: number | null
           phone?: string | null
           price_range?: number | null
+          privacy_policy_url?: string | null
+          shipping_returns_policy_url?: string | null
           sponsored_until?: string | null
           storefront_slug?: string | null
+          tos_url?: string | null
           twitter_url?: string | null
           website_url?: string | null
         }
@@ -11518,8 +11542,11 @@ export type Database = {
           longitude?: number | null
           phone?: string | null
           price_range?: number | null
+          privacy_policy_url?: string | null
+          shipping_returns_policy_url?: string | null
           sponsored_until?: string | null
           storefront_slug?: string | null
+          tos_url?: string | null
           twitter_url?: string | null
           website_url?: string | null
         }
@@ -11537,6 +11564,9 @@ export type Database = {
           location: string | null
           name: string | null
           practice_type: string | null
+          privacy_policy_url: string | null
+          shipping_returns_policy_url: string | null
+          tos_url: string | null
           website_url: string | null
         }
         Insert: {
@@ -11550,6 +11580,9 @@ export type Database = {
           location?: string | null
           name?: string | null
           practice_type?: string | null
+          privacy_policy_url?: string | null
+          shipping_returns_policy_url?: string | null
+          tos_url?: string | null
           website_url?: string | null
         }
         Update: {
@@ -11563,6 +11596,9 @@ export type Database = {
           location?: string | null
           name?: string | null
           practice_type?: string | null
+          privacy_policy_url?: string | null
+          shipping_returns_policy_url?: string | null
+          tos_url?: string | null
           website_url?: string | null
         }
         Relationships: []

@@ -81,7 +81,7 @@ const Storefront = memo(() => {
           // Lookup merchant by storefront slug from public view
           const { data: merchantBySlug } = await supabase
             .from('merchants_public')
-            .select('id, business_name, description, cashback_rate, storefront_slug, logo_url, address, business_type, accepts_pawbucks')
+            .select('id, business_name, description, cashback_rate, storefront_slug, logo_url, address, business_type, accepts_pawbucks, tos_url, privacy_policy_url, shipping_returns_policy_url')
             .eq('storefront_slug', accountId)
             .maybeSingle();
 
@@ -96,7 +96,7 @@ const Storefront = memo(() => {
           // Try to find by merchant ID directly
           const { data: merchantById } = await supabase
             .from('merchants_public')
-            .select('id, business_name, description, cashback_rate, storefront_slug, logo_url, address, business_type, accepts_pawbucks')
+            .select('id, business_name, description, cashback_rate, storefront_slug, logo_url, address, business_type, accepts_pawbucks, tos_url, privacy_policy_url, shipping_returns_policy_url')
             .eq('id', accountId)
             .maybeSingle();
 
@@ -670,6 +670,27 @@ const Storefront = memo(() => {
                 Powered by PawBucks Marketplace
               </p>
             </div>
+
+            {/* Policy Links */}
+            {(merchantData?.tos_url || merchantData?.privacy_policy_url || merchantData?.shipping_returns_policy_url) && (
+              <div className="flex flex-wrap items-center justify-center gap-4 text-sm">
+                {merchantData.tos_url && (
+                  <a href={merchantData.tos_url} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors underline-offset-4 hover:underline">
+                    Terms of Service
+                  </a>
+                )}
+                {merchantData.privacy_policy_url && (
+                  <a href={merchantData.privacy_policy_url} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors underline-offset-4 hover:underline">
+                    Privacy Policy
+                  </a>
+                )}
+                {merchantData.shipping_returns_policy_url && (
+                  <a href={merchantData.shipping_returns_policy_url} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors underline-offset-4 hover:underline">
+                    Shipping & Returns
+                  </a>
+                )}
+              </div>
+            )}
 
             <div className="flex items-center gap-6 text-sm text-muted-foreground">
               <span className="flex items-center gap-1.5">

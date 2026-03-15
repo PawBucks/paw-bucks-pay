@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,6 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Facebook, Instagram, Twitter, Linkedin, Globe } from "lucide-react";
+import { PolicyDocumentUpload } from "./PolicyDocumentUpload";
 
 type Merchant = {
   id: string;
@@ -27,6 +29,9 @@ type Merchant = {
   twitter_url?: string;
   linkedin_url?: string;
   website_url?: string;
+  tos_url?: string | null;
+  privacy_policy_url?: string | null;
+  shipping_returns_policy_url?: string | null;
 };
 
 type EditMerchantProfileDialogProps = {
@@ -34,6 +39,7 @@ type EditMerchantProfileDialogProps = {
   onOpenChange: (open: boolean) => void;
   merchant: Merchant;
   onSubmit: (formData: FormData, logoFile: File | null) => Promise<void>;
+  onRefresh?: () => void;
 };
 
 export const EditMerchantProfileDialog = ({
@@ -41,7 +47,9 @@ export const EditMerchantProfileDialog = ({
   onOpenChange,
   merchant,
   onSubmit,
+  onRefresh,
 }: EditMerchantProfileDialogProps) => {
+  const { user } = useAuth();
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [logoZoom, setLogoZoom] = useState(1);
@@ -260,8 +268,21 @@ export const EditMerchantProfileDialog = ({
                   />
                 </div>
               </div>
+              </div>
             </div>
-          </div>
+
+            {/* Policy Documents Section */}
+            {user && (
+              <PolicyDocumentUpload
+                userId={user.id}
+                entityId={merchant.id}
+                entityType="merchant"
+                tosUrl={merchant.tos_url}
+                privacyPolicyUrl={merchant.privacy_policy_url}
+                shippingReturnsPolicyUrl={merchant.shipping_returns_policy_url}
+                onUpdate={() => onRefresh?.()}
+              />
+            )}
           <div className="flex gap-3 pt-4 border-t mt-4">
             <Button
               type="button"

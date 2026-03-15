@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { Header } from "@/components/Header";
 import { SEO } from "@/components/SEO";
 import { Card } from "@/components/ui/card";
@@ -44,10 +45,12 @@ import {
   BarChart3,
   Stamp,
   LifeBuoy,
+  Settings,
 } from "lucide-react";
 import { toast } from "sonner";
 import { PendingApprovalNotice } from "@/components/PendingApprovalNotice";
 import { SupportTab } from "@/components/support/SupportTab";
+import { PolicyDocumentUpload } from "@/components/merchant/PolicyDocumentUpload";
 
 type VetInfo = {
   id: string;
@@ -57,10 +60,14 @@ type VetInfo = {
   approval_status?: 'pending' | 'approved' | 'denied';
   denial_reason?: string | null;
   logo_url?: string | null;
+  tos_url?: string | null;
+  privacy_policy_url?: string | null;
+  shipping_returns_policy_url?: string | null;
 };
 
 export default function VetDashboard() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [vetInfo, setVetInfo] = useState<VetInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState({
@@ -314,6 +321,10 @@ export default function VetDashboard() {
               <LifeBuoy className="w-4 h-4" />
               <span className="hidden sm:inline">Support</span>
             </TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center gap-1">
+              <Settings className="w-4 h-4" />
+              <span className="hidden sm:inline">Settings</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="emr">
@@ -382,6 +393,22 @@ export default function VetDashboard() {
 
           <TabsContent value="support">
             <SupportTab submitterType="vet" entityId={vetInfo.id} />
+          </TabsContent>
+          <TabsContent value="settings">
+            <Card className="p-6">
+              <h3 className="text-lg font-semibold mb-4">Practice Settings</h3>
+              {user && vetInfo && (
+                <PolicyDocumentUpload
+                  userId={user.id}
+                  entityId={vetInfo.id}
+                  entityType="vet"
+                  tosUrl={vetInfo.tos_url}
+                  privacyPolicyUrl={vetInfo.privacy_policy_url}
+                  shippingReturnsPolicyUrl={vetInfo.shipping_returns_policy_url}
+                  onUpdate={() => loadVetInfo(user.id)}
+                />
+              )}
+            </Card>
           </TabsContent>
         </Tabs>
       </div>
