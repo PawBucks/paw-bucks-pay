@@ -14,6 +14,7 @@ import { Loader2, Coins, Check, Sparkles, CreditCard, Lock, Info, Gift } from "l
 import { PawBucksInfoTooltip } from "@/components/PawBucksInfoTooltip";
 import { useSpendablePawBucks } from "@/hooks/useSpendablePawBucks";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { PawBucksSourceSelector, type PawBucksSource } from "@/components/checkout/PawBucksSourceSelector";
 
 // Pet Owner conversion rate: 1000 PawBucks = $1.00 (1 PawBuck = $0.001)
 const PAWBUCKS_TO_USD = 0.001;
