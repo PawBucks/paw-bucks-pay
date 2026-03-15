@@ -142,8 +142,8 @@ export const MaximusChat = () => {
           >
             {/* Header */}
             <div className="flex items-center gap-3 bg-primary px-4 py-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-foreground/20">
-                <Dog className="h-5 w-5 text-primary-foreground" />
+              <div className="flex h-9 w-9 items-center justify-center rounded-full overflow-hidden bg-primary-foreground/20">
+                <img src={maximusAvatar} alt="Maximus" className="h-full w-full object-cover" />
               </div>
               <div className="flex-1">
                 <h3 className="text-sm font-semibold text-primary-foreground">Maximus 🐕</h3>
