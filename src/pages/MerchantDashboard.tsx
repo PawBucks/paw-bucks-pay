@@ -982,6 +982,7 @@ const MerchantDashboard = () => {
         onOpenChange={setEditDialogOpen}
         merchant={merchant}
         onSubmit={handleUpdateProfile}
+        onRefresh={loadMerchantData}
       />
 
 
