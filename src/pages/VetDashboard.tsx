@@ -321,6 +321,10 @@ export default function VetDashboard() {
               <LifeBuoy className="w-4 h-4" />
               <span className="hidden sm:inline">Support</span>
             </TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center gap-1">
+              <Settings className="w-4 h-4" />
+              <span className="hidden sm:inline">Settings</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="emr">
