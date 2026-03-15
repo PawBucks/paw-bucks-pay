@@ -67,6 +67,7 @@ type VetInfo = {
 
 export default function VetDashboard() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [vetInfo, setVetInfo] = useState<VetInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState({
