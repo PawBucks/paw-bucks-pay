@@ -12,6 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Facebook, Instagram, Twitter, Linkedin, Globe } from "lucide-react";
+import { PolicyDocumentUpload } from "./PolicyDocumentUpload";
 
 type Merchant = {
   id: string;
