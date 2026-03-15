@@ -224,8 +224,8 @@ export const PawBucksCheckoutDialog = ({
                   </span>
                   <span className="text-sm text-muted-foreground">
                     Balance: {pawbucksBalance.toLocaleString()} PB
-                    {welcomeCreditApplicable && (
-                      <span className="text-emerald-600 ml-1">(incl. credit)</span>
+                    {pawbucksSource === "promotional" && (
+                      <span className="text-emerald-600 ml-1">(credit)</span>
                     )}
                   </span>
                 </div>
