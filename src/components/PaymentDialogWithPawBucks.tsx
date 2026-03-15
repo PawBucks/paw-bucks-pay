@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { Loader2, CreditCard, Coins, Check, AlertCircle, Gift } from "lucide-react";
 import { PawBucksInfoTooltip } from "@/components/PawBucksInfoTooltip";
 import { useSpendablePawBucks } from "@/hooks/useSpendablePawBucks";
+import { PawBucksSourceSelector, type PawBucksSource } from "@/components/checkout/PawBucksSourceSelector";
 import { getStripeForConnectedAccount } from "@/lib/stripe";
 
 // Pet Owner conversion rate: 1000 PawBucks = $1.00 (1 PawBuck = $0.001)
