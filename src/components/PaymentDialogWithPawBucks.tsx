@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { Loader2, CreditCard, Coins, Check, AlertCircle, Gift } from "lucide-react";
 import { PawBucksInfoTooltip } from "@/components/PawBucksInfoTooltip";
 import { useSpendablePawBucks } from "@/hooks/useSpendablePawBucks";
+import { PawBucksSourceSelector, type PawBucksSource } from "@/components/checkout/PawBucksSourceSelector";
 import { getStripeForConnectedAccount } from "@/lib/stripe";
 
 // Pet Owner conversion rate: 1000 PawBucks = $1.00 (1 PawBuck = $0.001)
@@ -235,6 +236,7 @@ export const PaymentDialogWithPawBucks = ({
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const [pawbucksToUse, setPawbucksToUse] = useState(0);
+  const [pawbucksSource, setPawbucksSource] = useState<PawBucksSource>("none");
   const [clientSecret, setClientSecret] = useState("");
   const [connectedAccountId, setConnectedAccountId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -262,8 +264,18 @@ export const PaymentDialogWithPawBucks = ({
   // For backwards compat, keep these names
   const welcomeCreditApplicable = petFundApplicable;
 
-  // Combined effective balance: wallet PawBucks + pet fund (if applicable)
-  const pawbucksBalance = spendableBalance + (petFundApplicable ? petFundCreditBalance : 0);
+  // Both sources available → user must choose one
+  const hasBothSources = spendableBalance > 0 && petFundApplicable && petFundCreditBalance > 0;
+
+  // Determine effective balance based on selected source
+  const pawbucksBalance = hasBothSources
+    ? (pawbucksSource === "earned" ? spendableBalance : pawbucksSource === "promotional" ? petFundCreditBalance : 0)
+    : (spendableBalance + (petFundApplicable ? petFundCreditBalance : 0));
+
+  const handleSourceChange = (source: PawBucksSource) => {
+    setPawbucksSource(source);
+    setPawbucksToUse(0);
+  };
 
   const pawbucksUsdValue = pawbucksToUse * PAWBUCKS_TO_USD;
   const stripeAmount = Math.max(0, totalAmount - pawbucksUsdValue);
@@ -320,6 +332,7 @@ export const PaymentDialogWithPawBucks = ({
     setAmount("");
     setDescription("");
     setPawbucksToUse(0);
+    setPawbucksSource("none");
     setClientSecret("");
     setConnectedAccountId("");
     setShowPaymentForm(false);
@@ -332,6 +345,7 @@ export const PaymentDialogWithPawBucks = ({
     setAmount("");
     setDescription("");
     setPawbucksToUse(0);
+    setPawbucksSource("none");
     setClientSecret("");
     setConnectedAccountId("");
     setShowPaymentForm(false);
@@ -386,8 +400,19 @@ export const PaymentDialogWithPawBucks = ({
               />
             </div>
 
-            {/* Pet Fund Credit Banner */}
-            {petFundApplicable && totalAmount > 0 && (
+            {/* Source Selector - when both earned and promotional are available */}
+            {hasBothSources && totalAmount > 0 && (
+              <PawBucksSourceSelector
+                earnedBalance={spendableBalance}
+                promotionalBalance={petFundCreditBalance}
+                selectedSource={pawbucksSource}
+                onSourceChange={handleSourceChange}
+                promotionalLabel={hasPetFund ? "Pet Fund Credit" : "Welcome Credit"}
+              />
+            )}
+
+            {/* Pet Fund Credit Banner - only when sole source */}
+            {petFundApplicable && !hasBothSources && totalAmount > 0 && (
               <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-3 flex items-start gap-2">
                 <Gift className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
                 <div>
@@ -438,8 +463,8 @@ export const PaymentDialogWithPawBucks = ({
                   </Label>
                   <span className="text-sm text-muted-foreground">
                     Balance: {pawbucksBalance.toLocaleString()} PB
-                    {welcomeCreditApplicable && (
-                      <span className="text-emerald-600 ml-1">(incl. credit)</span>
+                    {pawbucksSource === "promotional" && (
+                      <span className="text-emerald-600 ml-1">(credit)</span>
                     )}
                   </span>
                 </div>

@@ -19,6 +19,7 @@ import { Elements, CardElement, useStripe, useElements } from "@stripe/react-str
 import { useSpendablePawBucks } from "@/hooks/useSpendablePawBucks";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { PawBucksInfoTooltip } from "@/components/PawBucksInfoTooltip";
+import { PawBucksSourceSelector, type PawBucksSource } from "@/components/checkout/PawBucksSourceSelector";
 
 // Pet Owner conversion rate: 1000 PawBucks = $1.00 (1 PawBuck = $0.001)
 const PAWBUCKS_TO_USD = 0.001;
@@ -73,6 +74,7 @@ const CheckoutForm = ({
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pawbucksToUse, setPawbucksToUse] = useState(0);
+  const [pawbucksSource, setPawbucksSource] = useState<PawBucksSource>("none");
 
   // Use the spendable PawBucks hook to get available balance + welcome credit
   const { 
@@ -89,6 +91,7 @@ const CheckoutForm = ({
   // Reset slider when dialog is mounted
   useEffect(() => {
     setPawbucksToUse(0);
+    setPawbucksSource("none");
   }, []);
 
   const priceAmount = plan.amount / 100; // Convert cents to dollars
@@ -96,8 +99,18 @@ const CheckoutForm = ({
   const petFundMinUsd = petFundMinTransactionUsd || PET_FUND_MIN_USD;
   const petFundCreditBalance = hasPetFund ? petFundBalance : welcomeCreditBalance;
   const welcomeCreditApplicable = (hasPetFund || hasWelcomeCredit) && merchantAcceptsPawBucks && priceAmount >= petFundMinUsd;
-  const effectiveBalance = spendableBalance + (welcomeCreditApplicable ? petFundCreditBalance : 0);
-  const pawbucksBalance = effectiveBalance;
+  
+  // Both sources available → user must choose one
+  const hasBothSources = spendableBalance > 0 && welcomeCreditApplicable && petFundCreditBalance > 0;
+
+  const pawbucksBalance = hasBothSources
+    ? (pawbucksSource === "earned" ? spendableBalance : pawbucksSource === "promotional" ? petFundCreditBalance : 0)
+    : (spendableBalance + (welcomeCreditApplicable ? petFundCreditBalance : 0));
+
+  const handleSourceChange = (source: PawBucksSource) => {
+    setPawbucksSource(source);
+    setPawbucksToUse(0);
+  };
 
   // Calculate values
   const pawbucksUsdValue = pawbucksToUse * PAWBUCKS_TO_USD;
@@ -258,8 +271,19 @@ const CheckoutForm = ({
             )}
           </div>
 
-          {/* Welcome Credit Banner */}
-          {welcomeCreditApplicable && (
+          {/* Source Selector - when both earned and promotional are available */}
+          {hasBothSources && (
+            <PawBucksSourceSelector
+              earnedBalance={spendableBalance}
+              promotionalBalance={petFundCreditBalance}
+              selectedSource={pawbucksSource}
+              onSourceChange={handleSourceChange}
+              promotionalLabel={hasPetFund ? "Pet Fund Credit" : "Welcome Credit"}
+            />
+          )}
+
+          {/* Welcome Credit Banner - only when sole source */}
+          {welcomeCreditApplicable && !hasBothSources && (
             <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-3 flex items-start gap-2">
               <Gift className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
               <div>
@@ -304,8 +328,8 @@ const CheckoutForm = ({
                 </span>
                 <span className="text-sm text-muted-foreground">
                   Balance: {pawbucksBalance.toLocaleString()} PB
-                  {welcomeCreditApplicable && (
-                    <span className="text-emerald-600 ml-1">(incl. credit)</span>
+                  {pawbucksSource === "promotional" && (
+                    <span className="text-emerald-600 ml-1">(credit)</span>
                   )}
                 </span>
               </div>
