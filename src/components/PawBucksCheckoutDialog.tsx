@@ -167,8 +167,19 @@ export const PawBucksCheckoutDialog = ({
               )}
             </div>
 
-            {/* Pet Fund Credit Banner */}
-            {welcomeCreditApplicable && (
+            {/* Source Selector - when both earned and promotional are available */}
+            {hasBothSources && (
+              <PawBucksSourceSelector
+                earnedBalance={spendableBalance}
+                promotionalBalance={petFundCreditBalance}
+                selectedSource={pawbucksSource}
+                onSourceChange={handleSourceChange}
+                promotionalLabel={hasPetFund ? "Pet Fund Credit" : "Welcome Credit"}
+              />
+            )}
+
+            {/* Pet Fund Credit Banner - only when it's the sole source */}
+            {welcomeCreditApplicable && !hasBothSources && (
               <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-3 flex items-start gap-2">
                 <Gift className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
                 <div>
