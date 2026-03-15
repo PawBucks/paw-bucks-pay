@@ -15,17 +15,25 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY is not configured');
 
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
-    );
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
+    if (!supabaseUrl || !supabaseAnonKey) throw new Error('Supabase environment is not configured');
 
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) throw new Error('No authorization header');
 
     const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
+    const authClient = createClient(supabaseUrl, supabaseAnonKey);
+    const { data: { user }, error: userError } = await authClient.auth.getUser(token);
     if (userError || !user) throw new Error('User not authenticated');
+
+    const userScopedClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: {
+        headers: {
+          Authorization: authHeader,
+        },
+      },
+    });
 
     const { messages } = await req.json();
     if (!messages || !Array.isArray(messages)) throw new Error('Messages array required');
@@ -41,14 +49,14 @@ serve(async (req) => {
       subscriptionResult,
       petFundResult,
     ] = await Promise.all([
-      supabaseClient.from('profiles').select('full_name, user_type, phone, referral_code, created_at').eq('id', user.id).single(),
-      supabaseClient.from('wallets').select('balance, total_spent, rewards_points, last_updated').eq('user_id', user.id).maybeSingle(),
-      supabaseClient.from('pawbucks_wallet').select('balance, last_updated').eq('user_id', user.id).maybeSingle(),
-      supabaseClient.from('transactions').select('id, amount, status, description, created_at, cashback_earned, rewards_earned, merchants!transactions_merchant_id_fkey(business_name)').eq('user_id', user.id).order('created_at', { ascending: false }).limit(15),
-      supabaseClient.from('pet_profiles').select('name, type, breed, birthday').eq('user_id', user.id),
-      supabaseClient.from('wallet_activity').select('type, amount, description, created_at').eq('user_id', user.id).order('created_at', { ascending: false }).limit(15),
-      supabaseClient.from('subscriptions').select('plan_id, status, current_period_end').eq('user_id', user.id).eq('status', 'active').maybeSingle(),
-      supabaseClient.from('pet_fund_ledgers').select('total_amount, available_balance, escrow_balance, total_released').eq('user_id', user.id).maybeSingle(),
+      userScopedClient.from('profiles').select('full_name, user_type, phone, referral_code, created_at').eq('id', user.id).maybeSingle(),
+      userScopedClient.from('wallets').select('balance, total_spent, rewards_points, last_updated').eq('user_id', user.id).maybeSingle(),
+      userScopedClient.from('pawbucks_wallet').select('balance, last_updated').eq('user_id', user.id).maybeSingle(),
+      userScopedClient.from('transactions').select('id, amount, status, description, created_at, cashback_earned, rewards_earned, merchants!transactions_merchant_id_fkey(business_name)').eq('user_id', user.id).order('created_at', { ascending: false }).limit(15),
+      userScopedClient.from('pet_profiles').select('name, type, breed, birthday').eq('user_id', user.id),
+      userScopedClient.from('wallet_activity').select('type, amount, description, created_at').eq('user_id', user.id).order('created_at', { ascending: false }).limit(15),
+      userScopedClient.from('subscriptions').select('plan_id, status, current_period_end').eq('user_id', user.id).eq('status', 'active').maybeSingle(),
+      userScopedClient.from('pet_fund_ledgers').select('total_amount, available_balance, escrow_balance, total_released').eq('user_id', user.id).maybeSingle(),
     ]);
 
     const profile = profileResult.data;
@@ -77,7 +85,7 @@ Here is the current account data for the user you're helping:
 
 **PawBucks Wallet:**
 - Balance: ${pawbucks?.balance || 0} PawBucks
-- (100 PawBucks = $1.00)
+- (1,000 PawBucks = $1.00)
 
 **Pet Fund Credit:**
 - Total allocated: ${petFund?.total_amount || 0} PawBucks
