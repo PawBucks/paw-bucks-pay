@@ -85,7 +85,7 @@ Here is the current account data for the user you're helping:
 
 **PawBucks Wallet:**
 - Balance: ${pawbucks?.balance || 0} PawBucks
-- (100 PawBucks = $1.00)
+- (1,000 PawBucks = $1.00)
 
 **Pet Fund Credit:**
 - Total allocated: ${petFund?.total_amount || 0} PawBucks
