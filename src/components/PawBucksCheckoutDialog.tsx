@@ -51,6 +51,7 @@ export const PawBucksCheckoutDialog = ({
   isLoading = false,
 }: PawBucksCheckoutDialogProps) => {
   const [pawbucksToUse, setPawbucksToUse] = useState(0);
+  const [pawbucksSource, setPawbucksSource] = useState<PawBucksSource>("none");
 
   // Use the spendable PawBucks hook to get available balance + welcome credit
   const { 
@@ -68,6 +69,7 @@ export const PawBucksCheckoutDialog = ({
   useEffect(() => {
     if (!open) {
       setPawbucksToUse(0);
+      setPawbucksSource("none");
     }
   }, [open]);
 
@@ -75,8 +77,19 @@ export const PawBucksCheckoutDialog = ({
   const petFundCreditBalance = hasPetFund ? petFundBalance : welcomeCreditBalance;
   const welcomeCreditApplicable = (hasPetFund || hasWelcomeCredit) && merchantAcceptsPawBucks && priceAmount >= petFundMinUsd;
   
-  const effectiveBalance = spendableBalance + (welcomeCreditApplicable ? petFundCreditBalance : 0);
-  const pawbucksBalance = effectiveBalance;
+  // Both sources available → user must choose one
+  const hasBothSources = spendableBalance > 0 && welcomeCreditApplicable && petFundCreditBalance > 0;
+
+  // Determine effective balance based on selected source
+  const pawbucksBalance = hasBothSources
+    ? (pawbucksSource === "earned" ? spendableBalance : pawbucksSource === "promotional" ? petFundCreditBalance : 0)
+    : (spendableBalance + (welcomeCreditApplicable ? petFundCreditBalance : 0));
+
+  // Reset slider when source changes
+  const handleSourceChange = (source: PawBucksSource) => {
+    setPawbucksSource(source);
+    setPawbucksToUse(0);
+  };
 
   // Calculate values
   const pawbucksUsdValue = pawbucksToUse * PAWBUCKS_TO_USD;
