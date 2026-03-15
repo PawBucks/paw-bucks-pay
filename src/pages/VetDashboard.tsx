@@ -45,6 +45,7 @@ import {
   BarChart3,
   Stamp,
   LifeBuoy,
+  Settings,
 } from "lucide-react";
 import { toast } from "sonner";
 import { PendingApprovalNotice } from "@/components/PendingApprovalNotice";
