@@ -131,7 +131,7 @@ export const FeedbackButton = () => {
       <DialogTrigger asChild>
         <Button
           size="icon"
-          className="fixed bottom-24 right-4 z-40 rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-110 md:bottom-6"
+          className="fixed bottom-[5.5rem] right-4 z-40 rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-110 md:bottom-[4.5rem]"
           aria-label="Send feedback"
         >
           <MessageSquare className="w-5 h-5" />
