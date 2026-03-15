@@ -122,10 +122,10 @@ export const MaximusChat = () => {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => setIsOpen(true)}
-            className="fixed bottom-20 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg md:bottom-6"
+            className="fixed bottom-20 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full shadow-lg md:bottom-6 overflow-hidden p-0 border-2 border-primary"
             aria-label="Chat with Maximus"
           >
-            <Dog className="h-7 w-7" />
+            <img src={maximusAvatar} alt="Maximus" className="h-full w-full object-cover" />
           </motion.button>
         )}
       </AnimatePresence>
