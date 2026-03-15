@@ -324,22 +324,14 @@ export const PawBucksCheckoutDialog = ({
               {pawbucksToUse > 0 && (
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground flex items-center gap-1">
-                    {welcomeCreditApplicable && pawbucksToUse > spendableBalance ? (
+                    {pawbucksSource === "promotional" ? (
                       <Gift className="w-3 h-3 text-emerald-600" />
                     ) : (
                       <Coins className="w-3 h-3 text-primary" />
                     )}
-                    PawBucks Discount:
+                    {pawbucksSource === "promotional" ? "Credit Discount:" : "PawBucks Discount:"}
                   </span>
                   <span className="text-primary font-medium">−${pawbucksUsdValue.toFixed(2)}</span>
-                </div>
-              )}
-
-              {/* Show welcome credit portion in breakdown */}
-              {pawbucksToUse > 0 && welcomeCreditApplicable && pawbucksToUse > spendableBalance && (
-                <div className="flex justify-between text-xs text-emerald-600 pl-4">
-                  <span>└ includes Welcome Credit</span>
-                  <span>{Math.min(pawbucksToUse - spendableBalance, welcomeCreditBalance).toLocaleString()} PB</span>
                 </div>
               )}
               
