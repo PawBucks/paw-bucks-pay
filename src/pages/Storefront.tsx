@@ -671,6 +671,27 @@ const Storefront = memo(() => {
               </p>
             </div>
 
+            {/* Policy Links */}
+            {(merchantData?.tos_url || merchantData?.privacy_policy_url || merchantData?.shipping_returns_policy_url) && (
+              <div className="flex flex-wrap items-center justify-center gap-4 text-sm">
+                {merchantData.tos_url && (
+                  <a href={merchantData.tos_url} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors underline-offset-4 hover:underline">
+                    Terms of Service
+                  </a>
+                )}
+                {merchantData.privacy_policy_url && (
+                  <a href={merchantData.privacy_policy_url} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors underline-offset-4 hover:underline">
+                    Privacy Policy
+                  </a>
+                )}
+                {merchantData.shipping_returns_policy_url && (
+                  <a href={merchantData.shipping_returns_policy_url} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors underline-offset-4 hover:underline">
+                    Shipping & Returns
+                  </a>
+                )}
+              </div>
+            )}
+
             <div className="flex items-center gap-6 text-sm text-muted-foreground">
               <span className="flex items-center gap-1.5">
                 <Shield className="h-4 w-4 text-green-600" />
