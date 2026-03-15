@@ -30,6 +30,7 @@ import { LoyaltyDashboardWidget } from "@/components/loyalty";
 import { CustomerLoyaltyCards } from "@/components/dashboard/CustomerLoyaltyCards";
 import { LoyaltyProgramDiscovery } from "@/components/dashboard/LoyaltyProgramDiscovery";
 import { WelcomeCreditCard } from "@/components/dashboard/WelcomeCreditCard";
+import { MaximusChat } from "@/components/maximus/MaximusChat";
 import { Store, Users, TrendingUp, Receipt } from "lucide-react";
 
 const cardVariants = {
