@@ -74,6 +74,7 @@ const CheckoutForm = ({
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pawbucksToUse, setPawbucksToUse] = useState(0);
+  const [pawbucksSource, setPawbucksSource] = useState<PawBucksSource>("none");
 
   // Use the spendable PawBucks hook to get available balance + welcome credit
   const { 
@@ -90,6 +91,7 @@ const CheckoutForm = ({
   // Reset slider when dialog is mounted
   useEffect(() => {
     setPawbucksToUse(0);
+    setPawbucksSource("none");
   }, []);
 
   const priceAmount = plan.amount / 100; // Convert cents to dollars
@@ -97,8 +99,18 @@ const CheckoutForm = ({
   const petFundMinUsd = petFundMinTransactionUsd || PET_FUND_MIN_USD;
   const petFundCreditBalance = hasPetFund ? petFundBalance : welcomeCreditBalance;
   const welcomeCreditApplicable = (hasPetFund || hasWelcomeCredit) && merchantAcceptsPawBucks && priceAmount >= petFundMinUsd;
-  const effectiveBalance = spendableBalance + (welcomeCreditApplicable ? petFundCreditBalance : 0);
-  const pawbucksBalance = effectiveBalance;
+  
+  // Both sources available → user must choose one
+  const hasBothSources = spendableBalance > 0 && welcomeCreditApplicable && petFundCreditBalance > 0;
+
+  const pawbucksBalance = hasBothSources
+    ? (pawbucksSource === "earned" ? spendableBalance : pawbucksSource === "promotional" ? petFundCreditBalance : 0)
+    : (spendableBalance + (welcomeCreditApplicable ? petFundCreditBalance : 0));
+
+  const handleSourceChange = (source: PawBucksSource) => {
+    setPawbucksSource(source);
+    setPawbucksToUse(0);
+  };
 
   // Calculate values
   const pawbucksUsdValue = pawbucksToUse * PAWBUCKS_TO_USD;
