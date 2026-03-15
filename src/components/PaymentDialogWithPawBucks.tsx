@@ -236,6 +236,7 @@ export const PaymentDialogWithPawBucks = ({
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const [pawbucksToUse, setPawbucksToUse] = useState(0);
+  const [pawbucksSource, setPawbucksSource] = useState<PawBucksSource>("none");
   const [clientSecret, setClientSecret] = useState("");
   const [connectedAccountId, setConnectedAccountId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -263,8 +264,18 @@ export const PaymentDialogWithPawBucks = ({
   // For backwards compat, keep these names
   const welcomeCreditApplicable = petFundApplicable;
 
-  // Combined effective balance: wallet PawBucks + pet fund (if applicable)
-  const pawbucksBalance = spendableBalance + (petFundApplicable ? petFundCreditBalance : 0);
+  // Both sources available → user must choose one
+  const hasBothSources = spendableBalance > 0 && petFundApplicable && petFundCreditBalance > 0;
+
+  // Determine effective balance based on selected source
+  const pawbucksBalance = hasBothSources
+    ? (pawbucksSource === "earned" ? spendableBalance : pawbucksSource === "promotional" ? petFundCreditBalance : 0)
+    : (spendableBalance + (petFundApplicable ? petFundCreditBalance : 0));
+
+  const handleSourceChange = (source: PawBucksSource) => {
+    setPawbucksSource(source);
+    setPawbucksToUse(0);
+  };
 
   const pawbucksUsdValue = pawbucksToUse * PAWBUCKS_TO_USD;
   const stripeAmount = Math.max(0, totalAmount - pawbucksUsdValue);
