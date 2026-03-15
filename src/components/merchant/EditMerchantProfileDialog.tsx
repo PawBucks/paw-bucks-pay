@@ -268,8 +268,21 @@ export const EditMerchantProfileDialog = ({
                   />
                 </div>
               </div>
+              </div>
             </div>
-          </div>
+
+            {/* Policy Documents Section */}
+            {user && (
+              <PolicyDocumentUpload
+                userId={user.id}
+                entityId={merchant.id}
+                entityType="merchant"
+                tosUrl={merchant.tos_url}
+                privacyPolicyUrl={merchant.privacy_policy_url}
+                shippingReturnsPolicyUrl={merchant.shipping_returns_policy_url}
+                onUpdate={() => onRefresh?.()}
+              />
+            )}
           <div className="flex gap-3 pt-4 border-t mt-4">
             <Button
               type="button"
