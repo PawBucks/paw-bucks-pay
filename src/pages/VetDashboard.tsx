@@ -59,6 +59,9 @@ type VetInfo = {
   approval_status?: 'pending' | 'approved' | 'denied';
   denial_reason?: string | null;
   logo_url?: string | null;
+  tos_url?: string | null;
+  privacy_policy_url?: string | null;
+  shipping_returns_policy_url?: string | null;
 };
 
 export default function VetDashboard() {
