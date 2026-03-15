@@ -356,3 +356,6 @@ verify_jwt = false
 
 [functions.categorize-pet-document]
 verify_jwt = false
+
+[functions.maximus-chat]
+verify_jwt = false

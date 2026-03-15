@@ -345,6 +345,7 @@ const Dashboard = () => {
       </PullToRefresh>
       
       <BottomNav />
+      <MaximusChat />
       
       {/* Receipt Upload Dialog for PawPass+ subscribers */}
       {user && (
