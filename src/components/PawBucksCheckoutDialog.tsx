@@ -115,8 +115,8 @@ export const PawBucksCheckoutDialog = ({
     onOpenChange(false);
   };
 
-  // If merchant doesn't accept PawBucks or user has no balance, show simplified version
-  const showSimpleCheckout = !merchantAcceptsPawBucks || pawbucksBalance === 0;
+  // If merchant doesn't accept PawBucks or user has no balance (and no promo), show simplified version
+  const showSimpleCheckout = !merchantAcceptsPawBucks || (pawbucksBalance === 0 && !hasBothSources);
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
