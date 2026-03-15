@@ -345,6 +345,7 @@ export const PaymentDialogWithPawBucks = ({
     setAmount("");
     setDescription("");
     setPawbucksToUse(0);
+    setPawbucksSource("none");
     setClientSecret("");
     setConnectedAccountId("");
     setShowPaymentForm(false);
