@@ -49,6 +49,7 @@ import {
 import { toast } from "sonner";
 import { PendingApprovalNotice } from "@/components/PendingApprovalNotice";
 import { SupportTab } from "@/components/support/SupportTab";
+import { PolicyDocumentUpload } from "@/components/merchant/PolicyDocumentUpload";
 
 type VetInfo = {
   id: string;
