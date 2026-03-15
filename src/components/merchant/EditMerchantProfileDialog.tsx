@@ -29,6 +29,9 @@ type Merchant = {
   twitter_url?: string;
   linkedin_url?: string;
   website_url?: string;
+  tos_url?: string | null;
+  privacy_policy_url?: string | null;
+  shipping_returns_policy_url?: string | null;
 };
 
 type EditMerchantProfileDialogProps = {
