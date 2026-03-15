@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import ReactMarkdown from "react-markdown";
 import { useToast } from "@/hooks/use-toast";
+import maximusAvatar from "@/assets/maximus-avatar.png";
 
 type Message = { role: "user" | "assistant"; content: string };
 
