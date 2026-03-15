@@ -39,6 +39,7 @@ type EditMerchantProfileDialogProps = {
   onOpenChange: (open: boolean) => void;
   merchant: Merchant;
   onSubmit: (formData: FormData, logoFile: File | null) => Promise<void>;
+  onRefresh?: () => void;
 };
 
 export const EditMerchantProfileDialog = ({
