@@ -228,8 +228,32 @@ serve(async (req) => {
       details: [] as Array<{ subscriptionId: string; status: string; pawbucksEarned?: number; error?: string }>,
     };
 
+    // Deduplicate: group by user_id + merchant_id + stripe_price_id, keep only the oldest
+    const seenKeys = new Set<string>();
+    const deduplicatedSubscriptions: SubscriptionToProcess[] = [];
+    for (const sub of (dueSubscriptions as SubscriptionToProcess[])) {
+      const key = `${sub.user_id}:${sub.merchant_id}:${sub.stripe_price_id}`;
+      if (seenKeys.has(key)) {
+        logStep("SKIPPING DUPLICATE subscription (same user/merchant/price already queued)", {
+          subscriptionId: sub.id,
+          userId: sub.user_id,
+          merchantId: sub.merchant_id,
+        });
+        // Auto-cancel the duplicate
+        await supabaseAdmin
+          .from("merchant_subscriptions")
+          .update({ status: "canceled", canceled_at: new Date().toISOString() })
+          .eq("id", sub.id);
+        results.skipped++;
+        results.details.push({ subscriptionId: sub.id, status: "skipped", error: "Duplicate subscription auto-canceled" });
+        continue;
+      }
+      seenKeys.add(key);
+      deduplicatedSubscriptions.push(sub);
+    }
+
     // Process each subscription
-    for (const subscription of dueSubscriptions as SubscriptionToProcess[]) {
+    for (const subscription of deduplicatedSubscriptions) {
       logStep("Processing subscription", { 
         subscriptionId: subscription.id,
         merchantId: subscription.merchant_id,

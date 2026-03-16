@@ -187,6 +187,36 @@ serve(async (req) => {
       console.log('[REFUND] Transaction status updated to refunded');
     }
 
+    // Auto-cancel any merchant subscription linked to this refunded payment
+    if (transaction.stripe_payment_intent_id && transaction.user_id) {
+      const { data: linkedSubs, error: subError } = await supabaseAdmin
+        .from('merchant_subscriptions')
+        .select('id')
+        .eq('last_payment_intent_id', transaction.stripe_payment_intent_id)
+        .eq('user_id', transaction.user_id)
+        .in('status', ['active', 'past_due']);
+      
+      if (!subError && linkedSubs && linkedSubs.length > 0) {
+        for (const sub of linkedSubs) {
+          await supabaseAdmin
+            .from('merchant_subscriptions')
+            .update({ status: 'canceled', canceled_at: new Date().toISOString() })
+            .eq('id', sub.id);
+          
+          await supabaseAdmin
+            .from('merchant_subscription_events')
+            .insert({
+              subscription_id: sub.id,
+              event_type: 'canceled',
+              amount: 0,
+              metadata: { reason: 'payment_refunded', refunded_transaction_id: transactionId },
+            });
+          
+          console.log('[REFUND] Auto-canceled linked subscription:', sub.id);
+        }
+      }
+    }
+
     // Deduct PawBucks from user if they earned any from this transaction
     const pawbucksEarned = transaction.rewards_earned || 0;
     if (pawbucksEarned > 0 && transaction.user_id) {
