@@ -131,6 +131,17 @@ const NAV_SECTIONS = [
     ],
   },
   {
+    title: "Customers",
+    items: [
+      {
+        id: "subscribers",
+        label: "Subscribers",
+        icon: Users,
+        description: "View all active subscribers and their subscription plans",
+      },
+    ],
+  },
+  {
     title: "Services",
     items: [
       {
