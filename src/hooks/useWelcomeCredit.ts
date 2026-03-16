@@ -5,9 +5,12 @@ export interface WelcomeCreditStatus {
   hasCredit: boolean;
   isEligible: boolean;
   status?: 'active' | 'used' | 'expired' | 'revoked';
+  promotionType?: 'pet_fund' | 'welcome_credit';
+  spotsRemaining?: number;
   creditId?: string;
   creditAmount?: number;
   totalCreditAmount?: number;
+  totalFundAmount?: number;
   phase1Amount?: number;
   phase2Amount?: number;
   phase1Used?: boolean;
