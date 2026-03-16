@@ -3036,6 +3036,39 @@ export type Database = {
         }
         Relationships: []
       }
+      launch_clusters: {
+        Row: {
+          areas: string[]
+          created_at: string
+          id: string
+          is_active: boolean
+          max_pet_fund_spots: number
+          name: string
+          pet_fund_spots_used: number
+          updated_at: string
+        }
+        Insert: {
+          areas?: string[]
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          max_pet_fund_spots?: number
+          name: string
+          pet_fund_spots_used?: number
+          updated_at?: string
+        }
+        Update: {
+          areas?: string[]
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          max_pet_fund_spots?: number
+          name?: string
+          pet_fund_spots_used?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       loan_activity: {
         Row: {
           action: string
@@ -9615,6 +9648,7 @@ export type Database = {
       }
       user_welcome_credits: {
         Row: {
+          cluster_id: string | null
           created_at: string
           credit_amount: number
           device_fingerprint: string | null
@@ -9629,6 +9663,7 @@ export type Database = {
           phase_2_amount: number
           phase_2_unlocked: boolean
           phase_2_unlocked_at: string | null
+          promotion_type: string
           revocation_reason: string | null
           status: string
           transaction_total_cents: number | null
@@ -9639,6 +9674,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          cluster_id?: string | null
           created_at?: string
           credit_amount?: number
           device_fingerprint?: string | null
@@ -9653,6 +9689,7 @@ export type Database = {
           phase_2_amount?: number
           phase_2_unlocked?: boolean
           phase_2_unlocked_at?: string | null
+          promotion_type?: string
           revocation_reason?: string | null
           status?: string
           transaction_total_cents?: number | null
@@ -9663,6 +9700,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          cluster_id?: string | null
           created_at?: string
           credit_amount?: number
           device_fingerprint?: string | null
@@ -9677,6 +9715,7 @@ export type Database = {
           phase_2_amount?: number
           phase_2_unlocked?: boolean
           phase_2_unlocked_at?: string | null
+          promotion_type?: string
           revocation_reason?: string | null
           status?: string
           transaction_total_cents?: number | null
@@ -9687,6 +9726,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "user_welcome_credits_cluster_id_fkey"
+            columns: ["cluster_id"]
+            isOneToOne: false
+            referencedRelation: "launch_clusters"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "user_welcome_credits_phase_1_used_with_merchant_id_fkey"
             columns: ["phase_1_used_with_merchant_id"]
@@ -11647,6 +11693,7 @@ export type Database = {
           reason: string
         }[]
       }
+      claim_pet_fund_spot: { Args: { p_cluster_id: string }; Returns: boolean }
       generate_claim_number: { Args: never; Returns: string }
       generate_invoice_number: {
         Args: { p_merchant_id: string }
@@ -11660,6 +11707,15 @@ export type Database = {
         Returns: string
       }
       generate_ticket_number: { Args: never; Returns: string }
+      get_active_promotion: {
+        Args: { p_cluster_id?: string }
+        Returns: {
+          cluster_id: string
+          cluster_name: string
+          promotion_type: string
+          spots_remaining: number
+        }[]
+      }
       get_admin_analytics: {
         Args: never
         Returns: {
