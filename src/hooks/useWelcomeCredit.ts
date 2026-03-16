@@ -143,5 +143,7 @@ export const useWelcomeCredit = (userId: string | undefined, merchantId?: string
     phase2AmountUSD: status?.phase2Amount ? status.phase2Amount / 1000 : 0,
     currentPhase: status?.currentPhase || 0,
     currentPhaseAmount,
+    promotionType: status?.promotionType || 'pet_fund',
+    spotsRemaining: status?.spotsRemaining,
   };
 };
