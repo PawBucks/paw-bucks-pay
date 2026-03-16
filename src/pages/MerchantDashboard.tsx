@@ -51,6 +51,7 @@ import { MerchantLoyaltyProgramTab } from "@/components/merchant/MerchantLoyalty
 import { MerchantPremiumServicesTab } from "@/components/merchant/MerchantPremiumServicesTab";
 import { MerchantEarningsTab } from "@/components/merchant/MerchantEarningsTab";
 import { SalesReportGenerator } from "@/components/shared/SalesReportGenerator";
+import { MerchantSubscribersTab } from "@/components/merchant/MerchantSubscribersTab";
 
 // Dialogs
 import { EditMerchantProfileDialog } from "@/components/merchant/EditMerchantProfileDialog";
