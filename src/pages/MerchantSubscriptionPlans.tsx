@@ -100,16 +100,32 @@ const MerchantSubscriptionPlans = () => {
 
         setMerchantId(merchant.id);
 
-        // Get plans
-        const { data: plansData, error: plansError } = await merchantSubscriptionPlansService.getMyPlans(merchant.id);
+        // Get plans and subscriber counts in parallel
+        const [plansResult, subsResult] = await Promise.all([
+          merchantSubscriptionPlansService.getMyPlans(merchant.id),
+          supabase
+            .from("merchant_subscriptions")
+            .select("stripe_price_id")
+            .eq("merchant_id", merchant.id)
+            .in("status", ["active", "past_due"]),
+        ]);
         
-        if (plansError) {
-          throw plansError;
+        if (plansResult.error) {
+          throw plansResult.error;
         }
 
-        setPlans((plansData || []).map(p => ({
+        // Count subscribers per price ID
+        const subscriberCounts: Record<string, number> = {};
+        (subsResult.data || []).forEach((sub) => {
+          if (sub.stripe_price_id) {
+            subscriberCounts[sub.stripe_price_id] = (subscriberCounts[sub.stripe_price_id] || 0) + 1;
+          }
+        });
+
+        setPlans((plansResult.data || []).map(p => ({
           ...p,
           features: Array.isArray(p.features) ? p.features as string[] : [],
+          current_subscribers: p.stripe_price_id ? (subscriberCounts[p.stripe_price_id] || 0) : 0,
         })));
       } catch (error) {
         console.error("Error loading plans:", error);
