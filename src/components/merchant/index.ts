@@ -23,4 +23,5 @@ export { MerchantPremiumServicesTab } from "./MerchantPremiumServicesTab";
 export { MerchantEarningsTab } from "./MerchantEarningsTab";
 export { TrainingCourseWidget } from "./TrainingCourseWidget";
 export { ScarcitySignalWidget } from "./ScarcitySignalWidget";
+export { MerchantSubscribersTab } from "./MerchantSubscribersTab";
 
