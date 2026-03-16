@@ -38,6 +38,7 @@ import {
   Stamp,
   LifeBuoy,
   MessageSquare,
+  Users,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format, startOfMonth, parseISO } from "date-fns";
@@ -50,6 +51,7 @@ import { MerchantLoyaltyProgramTab } from "@/components/merchant/MerchantLoyalty
 import { MerchantPremiumServicesTab } from "@/components/merchant/MerchantPremiumServicesTab";
 import { MerchantEarningsTab } from "@/components/merchant/MerchantEarningsTab";
 import { SalesReportGenerator } from "@/components/shared/SalesReportGenerator";
+import { MerchantSubscribersTab } from "@/components/merchant/MerchantSubscribersTab";
 
 // Dialogs
 import { EditMerchantProfileDialog } from "@/components/merchant/EditMerchantProfileDialog";
@@ -125,6 +127,17 @@ const NAV_SECTIONS = [
         label: "Sales Report",
         icon: BarChart3,
         description: "Generate and download detailed sales reports",
+      },
+    ],
+  },
+  {
+    title: "Customers",
+    items: [
+      {
+        id: "subscribers",
+        label: "Subscribers",
+        icon: Users,
+        description: "View all active subscribers and their subscription plans",
       },
     ],
   },
@@ -740,6 +753,8 @@ const MerchantDashboard = () => {
             onNavigate={navigate}
           />
         );
+      case "subscribers":
+        return <MerchantSubscribersTab merchantId={merchant.id} />;
       case "messages":
         return <MerchantMessagesTab merchantId={merchant.id} />;
       case "support":
