@@ -237,6 +237,21 @@ serve(async (req) => {
       }
     }
 
+    // Notify the user about the refund
+    if (transaction.user_id) {
+      try {
+        await supabaseAdmin.from('notifications').insert({
+          user_id: transaction.user_id,
+          title: '💸 Refund Issued',
+          message: `${merchant.business_name} has issued a $${refundAmount.toFixed(2)} refund.${pawbucksEarned > 0 ? ` ${pawbucksEarned} PawBucks were also adjusted.` : ''}`,
+          category: 'transactional',
+        });
+        logStep('User notification created');
+      } catch (notifError) {
+        logStep('Failed to create user notification', { error: String(notifError) });
+      }
+    }
+
     // Log the merchant action in audit_logs
     try {
       await supabaseAdmin.from('audit_logs').insert({

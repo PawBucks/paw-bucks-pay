@@ -260,6 +260,32 @@ serve(async (req) => {
     // Note: PawBucks used in transactions would need to be tracked separately
     // Currently we only handle deducting earned PawBucks on refund
 
+    // Notify the user about the refund
+    if (transaction.user_id) {
+      try {
+        // Get merchant name for the notification
+        let merchantName = 'a merchant';
+        if (transaction.merchant_id) {
+          const { data: merchantData } = await supabaseAdmin
+            .from('merchants')
+            .select('business_name')
+            .eq('id', transaction.merchant_id)
+            .single();
+          if (merchantData?.business_name) merchantName = merchantData.business_name;
+        }
+
+        await supabaseAdmin.from('notifications').insert({
+          user_id: transaction.user_id,
+          title: '💸 Refund Issued',
+          message: `A $${refundAmount.toFixed(2)} refund has been issued for your transaction with ${merchantName}.${pawbucksEarned > 0 ? ` ${pawbucksEarned} PawBucks were also adjusted.` : ''}`,
+          category: 'transactional',
+        });
+        console.log('[REFUND] User notification created');
+      } catch (notifError) {
+        console.error('[REFUND] Failed to create user notification:', notifError);
+      }
+    }
+
     // Log the admin action
     try {
       await supabaseAdmin.rpc('log_admin_action', {
