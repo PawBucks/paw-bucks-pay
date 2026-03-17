@@ -122,7 +122,7 @@ export const MaximusChat = () => {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => setIsOpen(true)}
-            className="fixed bottom-20 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full shadow-lg md:bottom-6 overflow-hidden p-0 border-2 border-primary"
+            className="fixed bottom-20 left-4 z-50 flex h-14 w-14 items-center justify-center rounded-full shadow-lg md:bottom-6 overflow-hidden p-0 border-2 border-primary"
             aria-label="Chat with Maximus"
           >
             <img src={maximusAvatar} alt="Maximus" className="h-full w-full object-cover" />
