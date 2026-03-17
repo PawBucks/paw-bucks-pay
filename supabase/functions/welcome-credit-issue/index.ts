@@ -373,7 +373,7 @@ async function issueWelcomeCredit(
   await supabaseAdmin.from('notifications').insert({
     user_id: userId,
     title: '🎉 $50 Welcome Credit Activated!',
-    message: 'You have $50 in PawBucks available now! Shop with any merchant and spend $20+ to use your credit.',
+    message: 'You have $50 in PawBucks available now! Shop with any merchant and spend $75+ to use your credit.',
     category: 'promotional',
   });
 
