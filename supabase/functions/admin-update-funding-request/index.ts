@@ -5,6 +5,7 @@ import { z } from "https://esm.sh/zod@3.22.4";
 const updateFundingSchema = z.object({
   requestId: z.string().uuid(),
   status: z.enum(['pending', 'in_review', 'approved', 'denied']),
+  entityType: z.enum(['merchant', 'vet']).default('merchant'),
 });
 
 const corsHeaders = {
@@ -45,7 +46,7 @@ serve(async (req) => {
       .from('user_roles')
       .select('role')
       .eq('user_id', user.id)
-      .eq('role', 'admin')
+      .in('role', ['admin', 'superadmin'])
       .maybeSingle();
 
     if (!userRole) {
@@ -65,10 +66,13 @@ serve(async (req) => {
       );
     }
 
-    const { requestId, status } = validationResult.data;
+    const { requestId, status, entityType } = validationResult.data;
+
+    // Determine which table to update based on entity type
+    const tableName = entityType === 'vet' ? 'vet_loans' : 'funding_requests';
 
     const { data, error } = await supabaseAdmin
-      .from('funding_requests')
+      .from(tableName)
       .update({ status })
       .eq('id', requestId)
       .select()
@@ -79,7 +83,69 @@ serve(async (req) => {
       throw new Error('Failed to update funding request. Please try again.');
     }
 
-    console.log('Funding request updated by admin:', user.id, requestId, status);
+    // Send notification to the entity owner
+    let recipientUserId: string | null = null;
+    let entityName = '';
+
+    if (entityType === 'merchant') {
+      // Get merchant user_id via the merchant_id on the funding request
+      const { data: merchant } = await supabaseAdmin
+        .from('merchants')
+        .select('user_id, business_name')
+        .eq('id', data.merchant_id)
+        .single();
+      recipientUserId = merchant?.user_id ?? null;
+      entityName = merchant?.business_name ?? 'your business';
+    } else {
+      // vet_loans has a user_id directly
+      recipientUserId = data.user_id ?? null;
+      // Try to get vet name
+      const { data: vet } = await supabaseAdmin
+        .from('partner_vets')
+        .select('clinic_name, name')
+        .eq('id', data.vet_id)
+        .single();
+      entityName = vet?.clinic_name ?? vet?.name ?? 'your practice';
+    }
+
+    if (recipientUserId && (status === 'approved' || status === 'denied')) {
+      const isApproved = status === 'approved';
+      const amount = data.requested_amount
+        ? `$${Number(data.requested_amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}`
+        : 'your requested amount';
+
+      const notificationTitle = isApproved
+        ? '🎉 Funding Request Approved!'
+        : 'Funding Request Update';
+
+      const notificationMessage = isApproved
+        ? `Great news! Your funding request of ${amount} for ${entityName} has been approved. Funds will be disbursed shortly.`
+        : `Your funding request of ${amount} for ${entityName} was not approved at this time. Please contact support for more details.`;
+
+      await supabaseAdmin
+        .from('notifications')
+        .insert({
+          user_id: recipientUserId,
+          title: notificationTitle,
+          message: notificationMessage,
+          category: 'transactional',
+        });
+
+      console.log(`Notification sent to ${recipientUserId} for ${status} funding request ${requestId}`);
+    }
+
+    // Log admin action
+    await supabaseAdmin
+      .from('audit_logs')
+      .insert({
+        admin_id: user.id,
+        action: `UPDATE_FUNDING_${status.toUpperCase()}`,
+        entity_type: entityType === 'vet' ? 'vet_loan' : 'funding_request',
+        entity_id: requestId,
+        changes: { new_status: status, entity_name: entityName },
+      });
+
+    console.log('Funding request updated by admin:', user.id, requestId, status, entityType);
 
     return new Response(
       JSON.stringify({ success: true, funding_request: data }),
