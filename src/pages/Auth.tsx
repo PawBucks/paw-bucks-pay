@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Eye, EyeOff, Home, KeyRound, Users } from "lucide-react";
+import { Eye, EyeOff, Home, KeyRound, Users, Shield, Lock, CheckCircle2 } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { useAuth } from "@/hooks/useAuth";
 import { signUpSchema, signInSchema } from "@/lib/validation";
@@ -470,33 +470,43 @@ const Auth = () => {
         description="Create your PawBucks account or sign in to manage pet expenses, earn rewards, and discover trusted pet services."
         keywords={["PawBucks login", "pet rewards signup", "pet owner account", "merchant registration"]}
       />
-      <div className="min-h-screen flex items-center justify-center p-4 bg-[var(--gradient-hero)]">
+      <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-background relative">
+      <div className="fixed inset-0 bg-[var(--gradient-hero)] pointer-events-none" />
       <div className="absolute left-4 top-0 pt-safe z-20">
         <Button
-          variant="outline"
+          variant="ghost"
           onClick={() => navigate("/")}
-          className="gap-2"
+          className="gap-2 text-muted-foreground"
         >
           <Home className="h-4 w-4" />
-          Back Home
+          Back
         </Button>
       </div>
       
-      <Card className="w-full max-w-md shadow-lg animate-scale-in">
-        <CardHeader className="space-y-2 text-center">
-          <div className="flex justify-center mb-4">
+      <div className="relative z-10 w-full max-w-md space-y-5">
+        <div className="text-center space-y-3">
+          <div className="flex justify-center">
             <img 
               src={logo} 
               alt="PawBucks Logo" 
-              className="h-24 sm:h-32 w-auto object-contain"
+              className="h-20 sm:h-24 w-auto object-contain"
             />
           </div>
-          <CardTitle className="text-2xl sm:text-3xl font-bold">Welcome to PawBucks</CardTitle>
-          <CardDescription className="text-sm sm:text-base">
-            Connect with pet services or grow your pet business
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+          <div>
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">Welcome to PawBucks</h1>
+            <p className="text-muted-foreground text-sm mt-1">
+              The trusted platform for pet owners &amp; businesses
+            </p>
+          </div>
+          <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1"><Shield className="w-3 h-3 text-primary" />Encrypted</span>
+            <span className="flex items-center gap-1"><Lock className="w-3 h-3 text-primary" />Secure</span>
+            <span className="flex items-center gap-1"><CheckCircle2 className="w-3 h-3 text-primary" />Verified</span>
+          </div>
+        </div>
+
+      <Card className="shadow-[var(--shadow-large)] border-border/50">
+        <CardContent className="pt-6">
           {/* Show invite banner if accessing via invite link */}
           {inviteInfo && (
             <Alert className="mb-4 bg-amber-50 border-amber-200">
@@ -794,8 +804,14 @@ const Auth = () => {
               </form>
             </TabsContent>
           </Tabs>
+          
+          {/* Footer trust text */}
+          <p className="text-xs text-center text-muted-foreground mt-4 pb-2">
+            Your data is protected with bank-grade encryption
+          </p>
         </CardContent>
       </Card>
+      </div>
     </div>
 
     <BiometricEnrollPrompt

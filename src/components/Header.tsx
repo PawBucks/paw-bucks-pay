@@ -45,7 +45,7 @@ const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout, userId,
 
   return (
     <header 
-      className="border-b border-border/50 bg-card/95 backdrop-blur-xl sticky top-0 z-50 shadow-[var(--shadow-soft)]" 
+      className="border-b border-border/40 bg-card/98 backdrop-blur-xl sticky top-0 z-50 shadow-[var(--shadow-soft)]" 
       role="banner"
       style={{
         paddingTop: 'max(0.5rem, env(safe-area-inset-top))',
@@ -53,7 +53,7 @@ const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout, userId,
     >
       <nav className="container mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-3 flex items-center justify-between gap-3" aria-label="Main navigation">
         <div 
-          className="flex items-center gap-3 cursor-pointer hover:opacity-90 transition-all duration-200 active:scale-95 touch-manipulation group"
+          className="flex items-center gap-3 cursor-pointer hover:opacity-90 transition-opacity duration-150 active:scale-[0.98] touch-manipulation group"
           onClick={() => navigate(variant === "merchant" ? "/merchant-dashboard" : "/")}
           role="button"
           tabIndex={0}
@@ -63,9 +63,9 @@ const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout, userId,
           <img 
             src={logo} 
             alt="PawBucks Logo - Return to homepage" 
-            className="h-24 sm:h-32 w-auto object-contain transition-transform duration-200 group-hover:scale-105"
-            width={128}
-            height={128}
+            className="h-16 sm:h-20 w-auto object-contain"
+            width={80}
+            height={80}
             loading="eager"
           />
         </div>
@@ -156,8 +156,8 @@ const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout, userId,
               {userId && <NotificationsDropdown userId={userId} />}
               <Button 
                 onClick={onLogout}
-                variant="outline"
-                className="gap-2 min-h-[44px] touch-manipulation"
+                variant="ghost"
+                className="gap-2 min-h-[44px] touch-manipulation text-muted-foreground hover:text-destructive"
                 aria-label="Logout"
               >
                 <LogOut className="h-4 w-4" />
@@ -169,7 +169,8 @@ const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout, userId,
               <DropdownMenuTrigger asChild>
                 <Button 
                   size="icon"
-                  className="md:hidden shadow-lg hover:shadow-xl transition-all hover:scale-105 min-h-[44px] min-w-[44px] touch-manipulation"
+                  variant="outline"
+                  className="md:hidden min-h-[44px] min-w-[44px] touch-manipulation"
                   aria-label="Open menu"
                 >
                   <Menu className="h-6 w-6" />
