@@ -3,6 +3,8 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, Clock, Search, XCircle, FileText, ArrowRight, DollarSign, CalendarDays } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { useEffect, useRef } from "react";
+import confetti from "canvas-confetti";
 
 type FundingRequest = {
   id: string;
@@ -94,9 +96,39 @@ function StepIndicator({ step, currentIndex, isLast, status }: {
   );
 }
 
+function useApprovalConfetti(status: string) {
+  const hasFired = useRef(false);
+
+  useEffect(() => {
+    if (status === "approved" && !hasFired.current) {
+      hasFired.current = true;
+      // Fire confetti from the left and right
+      const fireConfetti = () => {
+        confetti({
+          particleCount: 80,
+          spread: 70,
+          origin: { x: 0.2, y: 0.6 },
+          colors: ['#10b981', '#34d399', '#6ee7b7', '#059669', '#047857'],
+        });
+        confetti({
+          particleCount: 80,
+          spread: 70,
+          origin: { x: 0.8, y: 0.6 },
+          colors: ['#10b981', '#34d399', '#6ee7b7', '#059669', '#047857'],
+        });
+      };
+      fireConfetti();
+      // Second burst after a short delay for extra celebration
+      setTimeout(fireConfetti, 300);
+    }
+  }, [status]);
+}
+
 function RequestCard({ request, entityType }: { request: FundingRequest; entityType: string }) {
   const currentIndex = getStepIndex(request.status);
   const reason = request.reason || request.purpose || "—";
+
+  useApprovalConfetti(request.status);
 
   return (
     <Card className="hover:shadow-[var(--shadow-medium)] transition-all">
@@ -131,11 +163,17 @@ function RequestCard({ request, entityType }: { request: FundingRequest; entityT
         </div>
 
         {/* Status description */}
-        <div className="bg-muted/50 rounded-lg px-4 py-3">
-          <p className="text-sm text-muted-foreground">
+        <div className={cn(
+          "rounded-lg px-4 py-3",
+          request.status === "approved" ? "bg-emerald-500/10 border border-emerald-500/20" : "bg-muted/50"
+        )}>
+          <p className={cn(
+            "text-sm",
+            request.status === "approved" ? "text-emerald-700 font-medium" : "text-muted-foreground"
+          )}>
             {request.status === "pending" && "Your request has been submitted and is waiting to be reviewed by our team."}
             {request.status === "in_review" && "Our underwriting team is currently evaluating your request. We'll notify you once a decision is made."}
-            {request.status === "approved" && "Congratulations! Your funding request has been approved. Funds will be disbursed shortly."}
+            {request.status === "approved" && "🎉 Congratulations! Your funding request has been approved. Funds will be disbursed shortly."}
             {request.status === "denied" && "Unfortunately, your funding request was not approved at this time. You may reapply in the future."}
           </p>
         </div>
