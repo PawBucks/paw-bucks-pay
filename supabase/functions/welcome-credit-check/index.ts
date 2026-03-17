@@ -175,7 +175,7 @@ serve(async (req) => {
     }
 
     // Minimum transaction: Pet Fund month 0 = $40, otherwise $20; Welcome Credit = $20
-    const minimumTransactionCents = promotionType === 'pet_fund' && !phase1Used ? 4000 : 2000;
+    const minimumTransactionCents = promotionType === 'pet_fund' && !phase1Used ? 4000 : promotionType === 'welcome_credit' ? 7500 : 2000;
 
     logStep("Credit check complete", { creditId: credit.id, promotionType, currentPhase, currentPhaseAmount, daysRemaining });
 
