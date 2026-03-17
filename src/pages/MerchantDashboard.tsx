@@ -768,27 +768,27 @@ const MerchantDashboard = () => {
   const NavigationSidebar = ({ className }: { className?: string }) => (
     <div className={cn("flex flex-col h-full", className)}>
       {/* Logo and Title */}
-      <div className="p-4 border-b">
+      <div className="p-4 border-b border-border/50">
         <div className="flex items-center gap-3">
           {merchant?.logo_url ? (
-            <img src={merchant.logo_url} alt={merchant.business_name} className="w-10 h-10 rounded-xl object-cover shadow-lg" />
+            <img src={merchant.logo_url} alt={merchant.business_name} className="w-9 h-9 rounded-lg object-cover border border-border" />
           ) : (
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg">
-              <PawPrint className="w-5 h-5 text-primary-foreground" />
+            <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
+              <PawPrint className="w-5 h-5 text-primary" />
             </div>
           )}
-          <div>
-            <h1 className="font-bold text-lg truncate">{merchant?.business_name || "Merchant"}</h1>
-            <p className="text-xs text-muted-foreground">Merchant Dashboard</p>
+          <div className="min-w-0">
+            <h1 className="font-semibold text-sm truncate">{merchant?.business_name || "Merchant"}</h1>
+            <p className="text-xs text-muted-foreground">Dashboard</p>
           </div>
         </div>
-        <div className="mt-3 flex items-center gap-2">
-          <Badge variant="secondary" className="text-xs">
+        <div className="mt-2.5 flex items-center gap-1.5">
+          <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-5">
             Merchant
           </Badge>
           {hasPremiumServices && (
-            <Badge variant="default" className="text-xs">
-              <Sparkles className="w-3 h-3 mr-1" />
+            <Badge variant="default" className="text-[10px] px-1.5 py-0 h-5">
+              <Sparkles className="w-2.5 h-2.5 mr-0.5" />
               Premium
             </Badge>
           )}

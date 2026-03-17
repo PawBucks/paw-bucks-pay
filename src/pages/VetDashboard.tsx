@@ -169,19 +169,24 @@ export default function VetDashboard() {
     <div className="min-h-screen bg-background">
       <SEO title="Veterinary Portal" description="Manage your veterinary practice" />
       <Header />
-      <div className="container max-w-7xl mx-auto px-4 py-8 space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold mb-2 flex items-center gap-3">
-            {vetInfo.logo_url ? (
-              <img src={vetInfo.logo_url} alt={vetInfo.name} className="w-10 h-10 rounded-xl object-cover shadow-md" />
-            ) : (
-              <Stethoscope className="w-8 h-8 text-primary" />
-            )}
-            Veterinary Portal
-          </h1>
-          <p className="text-muted-foreground">
-            Welcome back, {vetInfo.name}
-          </p>
+      <div className="container max-w-7xl mx-auto px-4 py-6 space-y-6">
+        {/* Professional Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight flex items-center gap-3">
+              {vetInfo.logo_url ? (
+                <img src={vetInfo.logo_url} alt={vetInfo.name} className="w-9 h-9 rounded-lg object-cover border border-border" />
+              ) : (
+                <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Stethoscope className="w-5 h-5 text-primary" />
+                </div>
+              )}
+              {vetInfo.name}
+            </h1>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Veterinary Practice Management
+            </p>
+          </div>
         </div>
 
         {/* Pending Approval Notice */}
@@ -196,51 +201,52 @@ export default function VetDashboard() {
         {/* Lost Pet Alerts - Always visible at top */}
         <LostPetAlertsWidget vetId={vetInfo.id} />
 
-        <div className="grid gap-6 md:grid-cols-4">
-          <Card className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                <Users className="w-6 h-6 text-primary" />
+        {/* Stats Grid - Clean professional cards */}
+        <div className="grid gap-4 md:grid-cols-4">
+          <Card className="p-5">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-primary/8 flex items-center justify-center">
+                <Users className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Total Patients</p>
-                <p className="text-2xl font-bold">{stats.totalPatients}</p>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Patients</p>
+                <p className="text-xl font-bold tabular-nums">{stats.totalPatients}</p>
               </div>
             </div>
           </Card>
 
-          <Card className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center">
-                <Pill className="w-6 h-6 text-yellow-600" />
+          <Card className="p-5">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-[hsl(var(--warning))]/10 flex items-center justify-center">
+                <Pill className="w-5 h-5 text-[hsl(var(--warning))]" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Pending Refills</p>
-                <p className="text-2xl font-bold">{stats.pendingRefills}</p>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Pending Refills</p>
+                <p className="text-xl font-bold tabular-nums">{stats.pendingRefills}</p>
               </div>
             </div>
           </Card>
 
-          <Card className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                <MessageSquare className="w-6 h-6 text-blue-600" />
+          <Card className="p-5">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-[hsl(var(--info))]/10 flex items-center justify-center">
+                <MessageSquare className="w-5 h-5 text-[hsl(var(--info))]" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Unread Messages</p>
-                <p className="text-2xl font-bold">{stats.unreadMessages}</p>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Unread</p>
+                <p className="text-xl font-bold tabular-nums">{stats.unreadMessages}</p>
               </div>
             </div>
           </Card>
 
-          <Card className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                <FileText className="w-6 h-6 text-green-600" />
+          <Card className="p-5">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-[hsl(var(--success))]/10 flex items-center justify-center">
+                <FileText className="w-5 h-5 text-[hsl(var(--success))]" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Location</p>
-                <p className="text-sm font-medium truncate">{vetInfo.location}</p>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Location</p>
+                <p className="text-sm font-medium truncate max-w-[140px]">{vetInfo.location}</p>
               </div>
             </div>
           </Card>
