@@ -171,7 +171,7 @@ const Index = () => {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8 lg:p-10">
-                <p className="text-lg sm:text-xl lg:text-2xl font-semibold text-foreground max-w-lg">
+                <p className="text-lg sm:text-xl lg:text-2xl font-semibold text-white max-w-lg">
                   Every moment with your pet matters. Make them count — and earn rewards along the way.
                 </p>
               </div>
