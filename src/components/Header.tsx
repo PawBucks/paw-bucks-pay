@@ -156,8 +156,8 @@ const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout, userId,
               {userId && <NotificationsDropdown userId={userId} />}
               <Button 
                 onClick={onLogout}
-                variant="outline"
-                className="gap-2 min-h-[44px] touch-manipulation"
+                variant="ghost"
+                className="gap-2 min-h-[44px] touch-manipulation text-muted-foreground hover:text-destructive"
                 aria-label="Logout"
               >
                 <LogOut className="h-4 w-4" />
