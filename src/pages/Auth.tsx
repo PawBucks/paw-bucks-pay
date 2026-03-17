@@ -804,8 +804,14 @@ const Auth = () => {
               </form>
             </TabsContent>
           </Tabs>
+          
+          {/* Footer trust text */}
+          <p className="text-xs text-center text-muted-foreground mt-4 pb-2">
+            Your data is protected with bank-grade encryption
+          </p>
         </CardContent>
       </Card>
+      </div>
     </div>
 
     <BiometricEnrollPrompt
