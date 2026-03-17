@@ -15,7 +15,7 @@ import {
 import { motion } from "framer-motion";
 import { SocialFollowLinks } from "@/components/SocialFollowLinks";
 import logo from "@/assets/logo.png";
-import familyPetsHero from "@/assets/family-pets-picnic.png";
+import familyPetsHero from "@/assets/family-pets-hero.png";
 import familyLifestyleFooter from "@/assets/family-lifestyle-footer.png";
 
 const Index = () => {
