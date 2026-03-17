@@ -23,7 +23,7 @@ const BottomNavComponent = () => {
 
   return (
     <nav 
-      className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-card/98 backdrop-blur-xl border-t border-border/50 shadow-[0_-2px_16px_rgba(0,0,0,0.08)] will-change-transform"
+      className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-card/98 backdrop-blur-xl border-t border-border/40 shadow-[0_-1px_8px_rgba(0,0,0,0.04)] will-change-transform"
       role="navigation"
       aria-label="Main navigation"
       style={{

@@ -169,7 +169,8 @@ const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout, userId,
               <DropdownMenuTrigger asChild>
                 <Button 
                   size="icon"
-                  className="md:hidden shadow-lg hover:shadow-xl transition-all hover:scale-105 min-h-[44px] min-w-[44px] touch-manipulation"
+                  variant="outline"
+                  className="md:hidden min-h-[44px] min-w-[44px] touch-manipulation"
                   aria-label="Open menu"
                 >
                   <Menu className="h-6 w-6" />
