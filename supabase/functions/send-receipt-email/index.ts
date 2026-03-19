@@ -305,7 +305,7 @@ function generateReceiptHtml(params: ReceiptEmailParams): string {
           <!-- Header -->
           <tr>
             <td style="background:linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #0f172a 100%); padding:40px 24px 36px; text-align:center;">
-              <p style="margin:0 0 8px; font-size:24px; font-weight:800; letter-spacing:2px; color:#7DD4D4;">🐾 PAWBUCKS</p>
+              <img src="https://yxpnkipcoxksmnsvpvwi.supabase.co/storage/v1/object/public/email-assets/pawbucks-logo.png" alt="PawBucks" width="120" height="120" style="display:block;margin:0 auto;width:120px;height:120px;">
               <p style="margin:0 0 8px; font-size:20px; font-weight:600; color:#ffffff;">Payment Successful</p>
               <p style="margin:0; font-size:13px; color:#94a3b8;">Thanks for supporting a local pet business!</p>
             </td>

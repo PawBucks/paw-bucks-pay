@@ -34,7 +34,7 @@ const generatePasswordResetEmail = (
           <!-- Header -->
           <tr>
             <td style="background-color: #ffffff; padding: 32px; text-align: center; border-radius: 12px 12px 0 0;">
-              <h1 style="margin: 0; font-size: 42px; font-weight: 800; letter-spacing: 1px; color: #22d3ee; text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(34, 211, 238, 0.3), 0 0 30px rgba(34, 211, 238, 0.2), 2px 2px 4px rgba(255, 255, 255, 0.9);">PAWBUCKS</h1>
+              <img src="https://yxpnkipcoxksmnsvpvwi.supabase.co/storage/v1/object/public/email-assets/pawbucks-logo.png" alt="PawBucks" width="120" height="120" style="display:block;margin:0 auto;width:120px;height:120px;">
             </td>
           </tr>
           
