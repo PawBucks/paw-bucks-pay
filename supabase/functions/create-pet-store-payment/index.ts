@@ -59,7 +59,7 @@ const sendAdminNotification = async (customer: CustomerInfo, purchase: PurchaseD
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 700px; margin: 0 auto; border: 1px solid #e0e0e0;">
           <div style="background: linear-gradient(135deg, #7DD4D4, #5BC0C0); padding: 25px; text-align: center;">
-            <h1 style="color: white; margin: 0; font-size: 28px; letter-spacing: 2px;">PAWBUCKS</h1>
+            <img src="https://yxpnkipcoxksmnsvpvwi.supabase.co/storage/v1/object/public/email-assets/pawbucks-logo.png" alt="PawBucks" width="120" height="120" style="display:block;margin:0 auto;width:120px;height:120px;">
             <p style="color: white; margin: 5px 0 0 0; font-size: 14px;">Pet Store Purchase Order</p>
           </div>
           

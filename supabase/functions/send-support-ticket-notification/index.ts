@@ -151,7 +151,7 @@ function buildEmailHtml(data: NotificationRequest & { recipientName: string }): 
     <tr><td align="center">
       <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 600px;">
         <tr><td style="padding: 32px; text-align: center; border-radius: 12px 12px 0 0;">
-          <h1 style="margin: 0; font-size: 42px; font-weight: 800; letter-spacing: 1px; color: #7DD4D4; text-shadow: 0 0 10px rgba(255,255,255,0.8), 0 0 20px rgba(125,212,212,0.3);">PAWBUCKS</h1>
+          <img src="https://yxpnkipcoxksmnsvpvwi.supabase.co/storage/v1/object/public/email-assets/pawbucks-logo.png" alt="PawBucks" width="120" height="120" style="display:block;margin:0 auto;width:120px;height:120px;">
         </td></tr>
         <tr><td style="padding: 0 32px;">
           <table width="100%" cellpadding="0" cellspacing="0" style="background: ${bannerColor}; border-radius: 12px;">

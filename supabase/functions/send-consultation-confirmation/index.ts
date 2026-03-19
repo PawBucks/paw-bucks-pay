@@ -126,7 +126,7 @@ const handler = async (req: Request): Promise<Response> => {
       html = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="background-color: #ffffff; padding: 24px; text-align: center; margin: -20px -20px 20px -20px; border-radius: 8px 8px 0 0; border-bottom: 1px solid #e5e7eb;">
-            <h1 style="margin: 0; font-size: 36px; font-weight: 800; letter-spacing: 1px; color: #22d3ee; text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(34, 211, 238, 0.3), 0 0 30px rgba(34, 211, 238, 0.2), 2px 2px 4px rgba(255, 255, 255, 0.9);">PAWBUCKS</h1>
+            <img src="https://yxpnkipcoxksmnsvpvwi.supabase.co/storage/v1/object/public/email-assets/pawbucks-logo.png" alt="PawBucks" width="120" height="120" style="display:block;margin:0 auto;width:120px;height:120px;">
             <p style="margin: 16px 0 0 0; color: #22c55e; font-size: 18px; font-weight: 600;">✓ Consultation Confirmed!</p>
           </div>
           
@@ -160,7 +160,7 @@ const handler = async (req: Request): Promise<Response> => {
       html = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="background-color: #ffffff; padding: 24px; text-align: center; margin: -20px -20px 20px -20px; border-radius: 8px 8px 0 0; border-bottom: 1px solid #e5e7eb;">
-            <h1 style="margin: 0; font-size: 36px; font-weight: 800; letter-spacing: 1px; color: #22d3ee; text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(34, 211, 238, 0.3), 0 0 30px rgba(34, 211, 238, 0.2), 2px 2px 4px rgba(255, 255, 255, 0.9);">PAWBUCKS</h1>
+            <img src="https://yxpnkipcoxksmnsvpvwi.supabase.co/storage/v1/object/public/email-assets/pawbucks-logo.png" alt="PawBucks" width="120" height="120" style="display:block;margin:0 auto;width:120px;height:120px;">
             <p style="margin: 16px 0 0 0; color: #ef4444; font-size: 18px; font-weight: 600;">Consultation Cancelled</p>
           </div>
           
@@ -183,7 +183,7 @@ const handler = async (req: Request): Promise<Response> => {
       html = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="background-color: #ffffff; padding: 24px; text-align: center; margin: -20px -20px 20px -20px; border-radius: 8px 8px 0 0; border-bottom: 1px solid #e5e7eb;">
-            <h1 style="margin: 0; font-size: 36px; font-weight: 800; letter-spacing: 1px; color: #22d3ee; text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(34, 211, 238, 0.3), 0 0 30px rgba(34, 211, 238, 0.2), 2px 2px 4px rgba(255, 255, 255, 0.9);">PAWBUCKS</h1>
+            <img src="https://yxpnkipcoxksmnsvpvwi.supabase.co/storage/v1/object/public/email-assets/pawbucks-logo.png" alt="PawBucks" width="120" height="120" style="display:block;margin:0 auto;width:120px;height:120px;">
             <p style="margin: 16px 0 0 0; color: #f59e0b; font-size: 18px; font-weight: 600;">📅 Consultation Rescheduled</p>
           </div>
           
@@ -223,7 +223,7 @@ const handler = async (req: Request): Promise<Response> => {
       html = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="background-color: #ffffff; padding: 24px; text-align: center; margin: -20px -20px 20px -20px; border-radius: 8px 8px 0 0; border-bottom: 1px solid #e5e7eb;">
-            <h1 style="margin: 0; font-size: 36px; font-weight: 800; letter-spacing: 1px; color: #22d3ee; text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(34, 211, 238, 0.3), 0 0 30px rgba(34, 211, 238, 0.2), 2px 2px 4px rgba(255, 255, 255, 0.9);">PAWBUCKS</h1>
+            <img src="https://yxpnkipcoxksmnsvpvwi.supabase.co/storage/v1/object/public/email-assets/pawbucks-logo.png" alt="PawBucks" width="120" height="120" style="display:block;margin:0 auto;width:120px;height:120px;">
             <p style="margin: 16px 0 0 0; color: #a78bfa; font-size: 18px; font-weight: 600;">📋 New Consultation Request</p>
           </div>
           
