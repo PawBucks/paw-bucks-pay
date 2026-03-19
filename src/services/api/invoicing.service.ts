@@ -309,6 +309,9 @@ export const invoicingService = {
   },
 
   async deleteInvoice(invoiceId: string) {
+    // Nullify any insurance claim references first (FK is SET NULL, but handle explicitly for safety)
+    await supabase.from("insurance_claims").update({ invoice_id: null }).eq("invoice_id", invoiceId);
+
     const { error } = await supabase.from("invoices").delete().eq("id", invoiceId);
     return { data: null, error };
   },
