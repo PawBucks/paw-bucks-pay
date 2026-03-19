@@ -1,0 +1,2 @@
+ALTER TABLE public.insurance_claims DROP CONSTRAINT insurance_claims_invoice_id_fkey;
+ALTER TABLE public.insurance_claims ADD CONSTRAINT insurance_claims_invoice_id_fkey FOREIGN KEY (invoice_id) REFERENCES public.invoices(id) ON DELETE SET NULL;
