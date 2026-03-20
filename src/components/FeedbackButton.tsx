@@ -136,15 +136,9 @@ export const FeedbackButton = ({ open: controlledOpen, onOpenChange, trigger }: 
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button
-          size="icon"
-          className="fixed bottom-[5.5rem] right-4 z-40 rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-110 md:bottom-[4.5rem]"
-          aria-label="Send feedback"
-        >
-          <MessageSquare className="w-5 h-5" />
-        </Button>
-      </DialogTrigger>
+      {trigger ? (
+        <DialogTrigger asChild>{trigger}</DialogTrigger>
+      ) : null}
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Send Feedback</DialogTitle>
