@@ -138,7 +138,7 @@ export const MaximusChat = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 40, scale: 0.95 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="fixed bottom-20 left-4 z-50 flex h-[min(75vh,520px)] w-[min(92vw,380px)] flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl md:bottom-6"
+            className="fixed bottom-20 right-4 z-50 flex h-[min(75vh,520px)] w-[min(92vw,380px)] flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl md:bottom-6"
           >
             {/* Header */}
             <div className="flex items-center gap-3 bg-primary px-4 py-3">

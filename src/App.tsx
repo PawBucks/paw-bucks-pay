@@ -245,7 +245,7 @@ const App = () => {
             <NetworkStatus />
             <UpdatePrompt />
             <PWAInstallBanner />
-            <FeedbackButton />
+            
             <AppContent />
           </BrowserRouter>
         </TooltipProvider>
