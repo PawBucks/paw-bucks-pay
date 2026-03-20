@@ -492,7 +492,7 @@ serve(async (req) => {
                       },
                       body: JSON.stringify({
                         merchantEmail: merchantProfile.email,
-                        merchantName: merchantProfile.full_name || merchantForNotif.business_name || 'Merchant',
+                        merchantName: merchantForNotif.business_name || merchantProfile.full_name || 'Merchant',
                         invoiceNumber: invoiceForNotif?.invoice_number || 'N/A',
                         invoiceTitle: invoiceForNotif?.title || undefined,
                         clientName: invoiceForNotif?.client_name || 'Customer',
@@ -879,7 +879,7 @@ serve(async (req) => {
                       },
                       body: JSON.stringify({
                         merchantEmail: merchantProfile.email,
-                        merchantName: merchantProfile.full_name || merchantForNotif.business_name || 'Merchant',
+                        merchantName: merchantForNotif.business_name || merchantProfile.full_name || 'Merchant',
                         invoiceNumber: `PAY-${(transaction?.id || paymentIntent.id).substring(0, 8).toUpperCase()}`,
                         invoiceTitle: description,
                         clientName: userProfile?.full_name || 'Customer',
