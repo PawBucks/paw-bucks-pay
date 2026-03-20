@@ -489,14 +489,16 @@ const Profile = () => {
           >
             Back to Dashboard
           </Button>
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={() => navigate("/support")}
-          >
-            <MessageSquare className="w-4 h-4 mr-2" />
-            Support & Feedback
-          </Button>
+          <FeedbackButton open={feedbackOpen} onOpenChange={setFeedbackOpen} trigger={
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => setFeedbackOpen(true)}
+            >
+              <MessageSquare className="w-4 h-4 mr-2" />
+              Support & Feedback
+            </Button>
+          } />
           <Button
             variant="ghost"
             className="w-full text-destructive hover:text-destructive hover:bg-destructive/10"
