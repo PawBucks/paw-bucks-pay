@@ -826,7 +826,7 @@ serve(async (req) => {
     if (merchantProfile?.email) {
       await sendMerchantPaymentNotification({
         merchantEmail: merchantProfile.email,
-        merchantName: merchantProfile.full_name || merchant.business_name,
+        merchantName: merchant.business_name || merchantProfile.full_name || 'Merchant',
         customerName: userProfile?.full_name || 'Customer',
         customerEmail: customerEmail || '',
         productName,

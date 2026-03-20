@@ -674,7 +674,7 @@ serve(async (req) => {
                 },
                 body: JSON.stringify({
                   merchantEmail: merchantProfile.email,
-                  merchantName: merchantProfile.full_name || merchantForNotif.business_name || 'Merchant',
+                  merchantName: merchantForNotif.business_name || merchantProfile.full_name || 'Merchant',
                   invoiceNumber: `PAY-${transaction.id.substring(0, 8).toUpperCase()}`,
                   invoiceTitle: description,
                   clientName: userProfile?.full_name || 'Customer',

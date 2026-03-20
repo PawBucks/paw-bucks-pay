@@ -617,7 +617,7 @@ async function handlePaymentSuccess(
           },
           body: JSON.stringify({
             merchantEmail: merchantProfile.email,
-            merchantName: merchantProfile.full_name || merchantData.business_name || 'Merchant',
+            merchantName: merchantData.business_name || merchantProfile.full_name || 'Merchant',
             invoiceNumber: `RENEWAL-${Date.now().toString(36).toUpperCase()}`,
             invoiceTitle: `${subscription.product_name} Subscription Renewal`,
             clientName: userProfile?.full_name || 'Customer',
