@@ -42,6 +42,7 @@ export const FeedbackButton = ({ open: controlledOpen, onOpenChange, trigger }: 
   const [internalOpen, setInternalOpen] = useState(false);
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setOpen = onOpenChange || setInternalOpen;
+  const [feedback, setFeedback] = useState('');
   const [category, setCategory] = useState('general');
   const [subject, setSubject] = useState('');
   const [loading, setLoading] = useState(false);
