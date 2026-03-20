@@ -11,6 +11,7 @@ import { ArrowLeft, Plus, Users, Settings, FileText, LayoutTemplate, Package, Ca
 import { toast } from "sonner";
 import { InvoiceList, InvoiceEditor, InvoicePreview, ClientManager, InvoiceSettingsComponent, CatalogManager, TemplateManager, ScheduledInvoices } from "@/components/invoicing";
 import { RecordPaymentDialog } from "@/components/invoicing/RecordPaymentDialog";
+import { DeleteRecurringInvoiceDialog, type RecurringDeleteChoice } from "@/components/invoicing/DeleteRecurringInvoiceDialog";
 import { invoicingService, type Invoice, type InvoiceItem, type InvoiceClient, type InvoiceSettings, type InvoiceTemplate, type CatalogItem, type InvoicePayment, type InvoiceRecipient } from "@/services/api/invoicing.service";
 
 // Helper function to calculate next invoice date based on interval
@@ -56,6 +57,11 @@ const MerchantInvoicing = () => {
   // Record payment dialog state
   const [recordPaymentInvoice, setRecordPaymentInvoice] = useState<Invoice | null>(null);
   const [recordPaymentOpen, setRecordPaymentOpen] = useState(false);
+
+  // Delete recurring invoice dialog state
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteTargetInvoice, setDeleteTargetInvoice] = useState<Invoice | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -460,15 +466,64 @@ const MerchantInvoicing = () => {
   };
 
   const handleDeleteInvoice = async (invoice: Invoice) => {
+    // If recurring, show the choice dialog
+    if (invoice.is_recurring || invoice.parent_invoice_id) {
+      setDeleteTargetInvoice(invoice);
+      setDeleteDialogOpen(true);
+      return;
+    }
+
+    // Non-recurring: delete directly with confirmation
+    if (!confirm("Are you sure you want to delete this invoice?")) return;
+
     try {
       const { error } = await invoicingService.deleteInvoice(invoice.id);
       if (error) throw error;
-      
       toast.success("Invoice deleted");
       loadData();
     } catch (error) {
       console.error("Error deleting invoice:", error);
       toast.error("Failed to delete invoice");
+    }
+  };
+
+  const handleRecurringDeleteChoice = async (choice: RecurringDeleteChoice) => {
+    if (!choice || !deleteTargetInvoice) {
+      setDeleteDialogOpen(false);
+      setDeleteTargetInvoice(null);
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      if (choice === "this_only") {
+        // Delete only this invoice, detach children first if it's a parent
+        await supabase
+          .from("invoices")
+          .update({ parent_invoice_id: null })
+          .eq("parent_invoice_id", deleteTargetInvoice.id);
+
+        // Nullify insurance claim references
+        await supabase.from("insurance_claims").update({ invoice_id: null }).eq("invoice_id", deleteTargetInvoice.id);
+
+        const { error } = await supabase.from("invoices").delete().eq("id", deleteTargetInvoice.id);
+        if (error) throw error;
+        toast.success("Invoice deleted");
+      } else if (choice === "all_future") {
+        // Delete this invoice and all child recurring invoices
+        const { error } = await invoicingService.deleteInvoice(deleteTargetInvoice.id);
+        if (error) throw error;
+        toast.success("Invoice and all future recurring invoices deleted");
+      }
+
+      loadData();
+    } catch (error) {
+      console.error("Error deleting invoice:", error);
+      toast.error("Failed to delete invoice");
+    } finally {
+      setIsDeleting(false);
+      setDeleteDialogOpen(false);
+      setDeleteTargetInvoice(null);
     }
   };
 
@@ -899,6 +954,18 @@ const MerchantInvoicing = () => {
               onRecordPayment={handleRecordPayment}
             />
           )}
+
+          {/* Delete Recurring Invoice Dialog */}
+          <DeleteRecurringInvoiceDialog
+            open={deleteDialogOpen}
+            onOpenChange={(open) => {
+              setDeleteDialogOpen(open);
+              if (!open) setDeleteTargetInvoice(null);
+            }}
+            onChoice={handleRecurringDeleteChoice}
+            invoiceNumber={deleteTargetInvoice?.invoice_number}
+            isDeleting={isDeleting}
+          />
 
           <TabsContent value="scheduled">
             <ScheduledInvoices
