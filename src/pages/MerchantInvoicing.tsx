@@ -58,6 +58,11 @@ const MerchantInvoicing = () => {
   const [recordPaymentInvoice, setRecordPaymentInvoice] = useState<Invoice | null>(null);
   const [recordPaymentOpen, setRecordPaymentOpen] = useState(false);
 
+  // Delete recurring invoice dialog state
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteTargetInvoice, setDeleteTargetInvoice] = useState<Invoice | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   useEffect(() => {
     if (!authLoading && !user) {
       navigate("/auth");
