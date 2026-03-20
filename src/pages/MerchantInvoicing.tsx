@@ -11,6 +11,7 @@ import { ArrowLeft, Plus, Users, Settings, FileText, LayoutTemplate, Package, Ca
 import { toast } from "sonner";
 import { InvoiceList, InvoiceEditor, InvoicePreview, ClientManager, InvoiceSettingsComponent, CatalogManager, TemplateManager, ScheduledInvoices } from "@/components/invoicing";
 import { RecordPaymentDialog } from "@/components/invoicing/RecordPaymentDialog";
+import { DeleteRecurringInvoiceDialog, type RecurringDeleteChoice } from "@/components/invoicing/DeleteRecurringInvoiceDialog";
 import { invoicingService, type Invoice, type InvoiceItem, type InvoiceClient, type InvoiceSettings, type InvoiceTemplate, type CatalogItem, type InvoicePayment, type InvoiceRecipient } from "@/services/api/invoicing.service";
 
 // Helper function to calculate next invoice date based on interval
