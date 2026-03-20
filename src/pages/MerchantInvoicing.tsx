@@ -955,6 +955,18 @@ const MerchantInvoicing = () => {
             />
           )}
 
+          {/* Delete Recurring Invoice Dialog */}
+          <DeleteRecurringInvoiceDialog
+            open={deleteDialogOpen}
+            onOpenChange={(open) => {
+              setDeleteDialogOpen(open);
+              if (!open) setDeleteTargetInvoice(null);
+            }}
+            onChoice={handleRecurringDeleteChoice}
+            invoiceNumber={deleteTargetInvoice?.invoice_number}
+            isDeleting={isDeleting}
+          />
+
           <TabsContent value="scheduled">
             <ScheduledInvoices
               invoices={invoices}
