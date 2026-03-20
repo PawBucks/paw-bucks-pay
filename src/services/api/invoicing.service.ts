@@ -309,10 +309,10 @@ export const invoicingService = {
   },
 
   async deleteInvoice(invoiceId: string) {
-    // Detach any child recurring invoices first to avoid self-referencing FK failures
+    // Delete any child recurring invoices first
     await supabase
       .from("invoices")
-      .update({ parent_invoice_id: null })
+      .delete()
       .eq("parent_invoice_id", invoiceId);
 
     // Nullify any insurance claim references first (FK is SET NULL, but handle explicitly for safety)
