@@ -29,12 +29,19 @@ const FEEDBACK_CATEGORIES = [
   { value: 'feature_request', label: 'Feature Suggestion', icon: Lightbulb },
 ];
 
+interface FeedbackButtonProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  trigger?: React.ReactNode;
+}
+
 /**
- * Floating feedback button for users to submit feedback
+ * Feedback dialog - can be used as floating button or with custom trigger
  */
-export const FeedbackButton = () => {
-  const [open, setOpen] = useState(false);
-  const [feedback, setFeedback] = useState('');
+export const FeedbackButton = ({ open: controlledOpen, onOpenChange, trigger }: FeedbackButtonProps = {}) => {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setOpen = onOpenChange || setInternalOpen;
   const [category, setCategory] = useState('general');
   const [subject, setSubject] = useState('');
   const [loading, setLoading] = useState(false);
