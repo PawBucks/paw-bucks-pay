@@ -29,11 +29,19 @@ const FEEDBACK_CATEGORIES = [
   { value: 'feature_request', label: 'Feature Suggestion', icon: Lightbulb },
 ];
 
+interface FeedbackButtonProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  trigger?: React.ReactNode;
+}
+
 /**
- * Floating feedback button for users to submit feedback
+ * Feedback dialog - can be used as floating button or with custom trigger
  */
-export const FeedbackButton = () => {
-  const [open, setOpen] = useState(false);
+export const FeedbackButton = ({ open: controlledOpen, onOpenChange, trigger }: FeedbackButtonProps = {}) => {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setOpen = onOpenChange || setInternalOpen;
   const [feedback, setFeedback] = useState('');
   const [category, setCategory] = useState('general');
   const [subject, setSubject] = useState('');
@@ -128,15 +136,9 @@ export const FeedbackButton = () => {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button
-          size="icon"
-          className="fixed bottom-[5.5rem] right-4 z-40 rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-110 md:bottom-[4.5rem]"
-          aria-label="Send feedback"
-        >
-          <MessageSquare className="w-5 h-5" />
-        </Button>
-      </DialogTrigger>
+      {trigger ? (
+        <DialogTrigger asChild>{trigger}</DialogTrigger>
+      ) : null}
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Send Feedback</DialogTitle>

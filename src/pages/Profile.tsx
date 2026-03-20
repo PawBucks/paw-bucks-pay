@@ -13,9 +13,10 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { BottomNav } from "@/components/BottomNav";
 import { AdPlacement } from "@/components/AdPlacement";
+import { FeedbackButton } from "@/components/FeedbackButton";
 import { PullToRefresh } from "@/components/PullToRefresh";
 import { AutoRedeemToggle } from "@/components/AutoRedeemToggle";
-import { LogOut, User, Mail, Calendar, Crown, Sparkles, Settings, Loader2, Info, Bell } from "lucide-react";
+import { LogOut, User, Mail, Calendar, Crown, Sparkles, Settings, Loader2, Info, Bell, MessageSquare } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -35,6 +36,7 @@ const Profile = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSubscribing, setIsSubscribing] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -487,6 +489,16 @@ const Profile = () => {
           >
             Back to Dashboard
           </Button>
+          <FeedbackButton open={feedbackOpen} onOpenChange={setFeedbackOpen} trigger={
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => setFeedbackOpen(true)}
+            >
+              <MessageSquare className="w-4 h-4 mr-2" />
+              Support & Feedback
+            </Button>
+          } />
           <Button
             variant="ghost"
             className="w-full text-destructive hover:text-destructive hover:bg-destructive/10"

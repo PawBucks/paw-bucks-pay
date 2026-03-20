@@ -122,7 +122,7 @@ export const MaximusChat = () => {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => setIsOpen(true)}
-            className="fixed bottom-20 left-4 z-50 flex h-14 w-14 items-center justify-center rounded-full shadow-lg md:bottom-6 overflow-hidden p-0 border-2 border-primary"
+            className="fixed bottom-20 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full shadow-lg md:bottom-6 overflow-hidden p-0 border-2 border-primary"
             aria-label="Chat with Maximus"
           >
             <img src={maximusAvatar} alt="Maximus" className="h-full w-full object-cover" />
@@ -138,7 +138,7 @@ export const MaximusChat = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 40, scale: 0.95 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="fixed bottom-20 left-4 z-50 flex h-[min(75vh,520px)] w-[min(92vw,380px)] flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl md:bottom-6"
+            className="fixed bottom-20 right-4 z-50 flex h-[min(75vh,520px)] w-[min(92vw,380px)] flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl md:bottom-6"
           >
             {/* Header */}
             <div className="flex items-center gap-3 bg-primary px-4 py-3">

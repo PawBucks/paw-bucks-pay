@@ -22,7 +22,7 @@ import { PageTransition } from "@/components/PageTransition";
 import { PWAInstallBanner } from "@/components/PWAInstallBanner";
 import { NetworkStatus } from "@/components/NetworkStatus";
 import { UpdatePrompt } from "@/components/UpdatePrompt";
-import { FeedbackButton } from "@/components/FeedbackButton";
+
 import { lazyWithRetry, clearChunkReloadFlag } from "@/lib/lazyWithRetry";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 
@@ -245,7 +245,7 @@ const App = () => {
             <NetworkStatus />
             <UpdatePrompt />
             <PWAInstallBanner />
-            <FeedbackButton />
+            
             <AppContent />
           </BrowserRouter>
         </TooltipProvider>
