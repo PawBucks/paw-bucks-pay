@@ -64,7 +64,7 @@ serve(async (req: Request) => {
           <!-- Header -->
           <tr>
             <td style="background-color: #7DD4D4; padding: 32px; text-align: center; border-radius: 12px 12px 0 0;">
-              <img src="https://yxpnkipcoxksmnsvpvwi.supabase.co/storage/v1/object/public/email-assets/pawbucks-logo.png" alt="PawBucks" width="120" height="120" style="display:block;margin:0 auto;width:120px;height:120px;">
+              <img src="https://yxpnkipcoxksmnsvpvwi.supabase.co/storage/v1/object/public/email-assets/pawbucks-logo-email.png" alt="PawBucks" width="120" height="120" style="display:block;margin:0 auto;width:120px;height:120px;">
               <p style="margin: 8px 0 0 0; color: #ffffff; font-size: 14px;">Tax Vault Access Invitation</p>
             </td>
           </tr>

@@ -129,7 +129,7 @@ Deno.serve(async (req) => {
           <!-- Header -->
           <tr>
             <td style="background-color: #ffffff; padding: 32px; text-align: center;">
-              <img src="https://yxpnkipcoxksmnsvpvwi.supabase.co/storage/v1/object/public/email-assets/pawbucks-logo.png" alt="PawBucks" width="120" height="120" style="display:block;margin:0 auto;width:120px;height:120px;">
+              <img src="https://yxpnkipcoxksmnsvpvwi.supabase.co/storage/v1/object/public/email-assets/pawbucks-logo-email.png" alt="PawBucks" width="120" height="120" style="display:block;margin:0 auto;width:120px;height:120px;">
               <p style="color: #6b7280; margin: 16px 0 0 0; font-size: 14px;">Lost Pet Flyer Notice</p>
             </td>
           </tr>
