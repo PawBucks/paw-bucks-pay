@@ -79,6 +79,7 @@ type Merchant = {
   longitude?: number;
   approval_status?: 'pending' | 'approved' | 'denied';
   denial_reason?: string | null;
+  is_paused?: boolean;
 };
 
 type Analytics = {
