@@ -39,6 +39,8 @@ import {
   LifeBuoy,
   MessageSquare,
   Users,
+  PauseCircle,
+  Mail,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format, startOfMonth, parseISO } from "date-fns";
