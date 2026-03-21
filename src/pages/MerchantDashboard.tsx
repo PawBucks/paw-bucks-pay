@@ -39,6 +39,8 @@ import {
   LifeBuoy,
   MessageSquare,
   Users,
+  PauseCircle,
+  Mail,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format, startOfMonth, parseISO } from "date-fns";
@@ -77,6 +79,7 @@ type Merchant = {
   longitude?: number;
   approval_status?: 'pending' | 'approved' | 'denied';
   denial_reason?: string | null;
+  is_paused?: boolean;
 };
 
 type Analytics = {
@@ -868,6 +871,43 @@ const MerchantDashboard = () => {
 
   if (!merchant) {
     return null;
+  }
+
+  if (merchant.is_paused) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background px-4">
+        <Card className="max-w-md w-full text-center">
+          <CardContent className="pt-8 pb-8 space-y-6">
+            <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mx-auto">
+              <PauseCircle className="w-8 h-8 text-destructive" />
+            </div>
+            <div className="space-y-2">
+              <h1 className="text-2xl font-bold">Account Paused</h1>
+              <p className="text-muted-foreground">
+                Your merchant account has been temporarily paused. During this time, your business will not be visible to customers on the platform.
+              </p>
+            </div>
+            <Separator />
+            <div className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                If you believe this is an error or would like to resume your account, please contact our support team.
+              </p>
+              <Button
+                className="w-full"
+                onClick={() => window.location.href = 'mailto:support@pawbucks.app?subject=Merchant Account Paused - Request to Resume&body=Merchant: ' + encodeURIComponent(merchant.business_name)}
+              >
+                <Mail className="w-4 h-4 mr-2" />
+                Contact Support
+              </Button>
+              <Button variant="ghost" className="w-full" onClick={() => signOut()}>
+                <LogOut className="w-4 h-4 mr-2" />
+                Sign Out
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (

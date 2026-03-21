@@ -8,7 +8,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Search, Edit, Coins, RefreshCw } from 'lucide-react';
+import { Search, Edit, Coins, RefreshCw, PauseCircle, PlayCircle } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 
 type Merchant = {
@@ -22,6 +24,8 @@ type Merchant = {
   stripe_account_status?: string;
   created_at: string;
   pawbucks_balance?: number;
+  is_paused?: boolean;
+  pause_reason?: string;
 };
 
 // Fetch merchants with their PawBucks balances
@@ -53,6 +57,9 @@ export function MerchantsTab() {
   const [selectedMerchant, setSelectedMerchant] = useState<Merchant | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [pauseDialogOpen, setPauseDialogOpen] = useState(false);
+  const [merchantToPause, setMerchantToPause] = useState<Merchant | null>(null);
+  const [pauseReason, setPauseReason] = useState('');
 
   // Use React Query for merchant data
   const { data: merchants = [], refetch, isLoading } = useQuery({
@@ -152,6 +159,44 @@ export function MerchantsTab() {
     }
   };
 
+  const handleTogglePause = async () => {
+    if (!merchantToPause) return;
+    const isPausing = !merchantToPause.is_paused;
+
+    setLoading(true);
+    try {
+      const updates: any = {
+        is_paused: isPausing,
+        paused_at: isPausing ? new Date().toISOString() : null,
+        pause_reason: isPausing ? (pauseReason || null) : null,
+      };
+
+      const { error } = await supabase
+        .from('merchants')
+        .update(updates)
+        .eq('id', merchantToPause.id);
+
+      if (error) throw error;
+
+      await supabase.rpc('log_admin_action', {
+        _action: isPausing ? 'PAUSE_MERCHANT' : 'UNPAUSE_MERCHANT',
+        _entity_type: 'merchant',
+        _entity_id: merchantToPause.id,
+        _changes: { is_paused: isPausing, pause_reason: isPausing ? pauseReason : null },
+      });
+
+      toast.success(isPausing ? 'Merchant account paused' : 'Merchant account resumed');
+      setPauseDialogOpen(false);
+      setMerchantToPause(null);
+      setPauseReason('');
+      refetch();
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -193,50 +238,79 @@ export function MerchantsTab() {
               <TableHead>PawBucks</TableHead>
               <TableHead>Points Rate</TableHead>
               <TableHead>Stripe Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredMerchants.map((merchant) => (
-              <TableRow key={merchant.id}>
-                <TableCell className="font-medium">{merchant.business_name}</TableCell>
-                <TableCell>
-                  <Badge variant="outline">{merchant.business_type}</Badge>
-                </TableCell>
-                <TableCell>{merchant.contact_person || 'N/A'}</TableCell>
-                <TableCell className="text-muted-foreground">{merchant.phone || 'N/A'}</TableCell>
-                <TableCell className="text-muted-foreground max-w-[180px] truncate" title={merchant.email || ''}>
-                  {merchant.email || 'N/A'}
-                </TableCell>
-                <TableCell>
-                  <span className="flex items-center gap-1 text-primary font-medium">
-                    <Coins className="w-3 h-3" />
-                    {(merchant.pawbucks_balance ?? 0).toLocaleString()}
-                  </span>
-                </TableCell>
-                <TableCell>{merchant.cashback_rate}x</TableCell>
-                <TableCell>
-                  <Badge variant={merchant.stripe_account_status === 'active' ? 'default' : 'secondary'}>
-                    {merchant.stripe_account_status || 'pending'}
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-right">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setSelectedMerchant(merchant);
-                      setEditDialogOpen(true);
-                    }}
-                  >
-                    <Edit className="w-4 h-4" />
-                  </Button>
-                </TableCell>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+            </TableHeader>
+            <TableBody>
+              {filteredMerchants.map((merchant) => (
+                <TableRow key={merchant.id} className={merchant.is_paused ? 'opacity-60' : ''}>
+                  <TableCell className="font-medium">
+                    {merchant.business_name}
+                    {merchant.is_paused && (
+                      <Badge variant="destructive" className="ml-2 text-xs">Paused</Badge>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline">{merchant.business_type}</Badge>
+                  </TableCell>
+                  <TableCell>{merchant.contact_person || 'N/A'}</TableCell>
+                  <TableCell className="text-muted-foreground">{merchant.phone || 'N/A'}</TableCell>
+                  <TableCell className="text-muted-foreground max-w-[180px] truncate" title={merchant.email || ''}>
+                    {merchant.email || 'N/A'}
+                  </TableCell>
+                  <TableCell>
+                    <span className="flex items-center gap-1 text-primary font-medium">
+                      <Coins className="w-3 h-3" />
+                      {(merchant.pawbucks_balance ?? 0).toLocaleString()}
+                    </span>
+                  </TableCell>
+                  <TableCell>{merchant.cashback_rate}x</TableCell>
+                  <TableCell>
+                    <Badge variant={merchant.stripe_account_status === 'active' ? 'default' : 'secondary'}>
+                      {merchant.stripe_account_status || 'pending'}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {merchant.is_paused ? (
+                      <Badge variant="destructive">Paused</Badge>
+                    ) : (
+                      <Badge variant="default">Active</Badge>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-right flex items-center justify-end gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setSelectedMerchant(merchant);
+                        setEditDialogOpen(true);
+                      }}
+                    >
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setMerchantToPause(merchant);
+                        setPauseReason('');
+                        setPauseDialogOpen(true);
+                      }}
+                      title={merchant.is_paused ? 'Resume merchant' : 'Pause merchant'}
+                    >
+                      {merchant.is_paused ? (
+                        <PlayCircle className="w-4 h-4 text-green-600" />
+                      ) : (
+                        <PauseCircle className="w-4 h-4 text-destructive" />
+                      )}
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
 
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent>
@@ -284,6 +358,43 @@ export function MerchantsTab() {
           )}
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={pauseDialogOpen} onOpenChange={setPauseDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {merchantToPause?.is_paused ? 'Resume Merchant Account' : 'Pause Merchant Account'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {merchantToPause?.is_paused
+                ? `Are you sure you want to resume "${merchantToPause?.business_name}"? They will regain access to their dashboard and become visible to pet owners again.`
+                : `Are you sure you want to pause "${merchantToPause?.business_name}"? This will hide them from the platform and block their dashboard access. They will need to contact support to resume.`
+              }
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          {!merchantToPause?.is_paused && (
+            <div className="space-y-2 py-2">
+              <Label>Reason for pausing (optional)</Label>
+              <Textarea
+                placeholder="e.g. Compliance review, customer complaints, etc."
+                value={pauseReason}
+                onChange={(e) => setPauseReason(e.target.value)}
+                rows={3}
+              />
+            </div>
+          )}
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleTogglePause}
+              disabled={loading}
+              className={merchantToPause?.is_paused ? '' : 'bg-destructive text-destructive-foreground hover:bg-destructive/90'}
+            >
+              {loading ? 'Processing...' : merchantToPause?.is_paused ? 'Resume Account' : 'Pause Account'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

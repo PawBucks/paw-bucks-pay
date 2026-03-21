@@ -4874,6 +4874,7 @@ export type Database = {
           funding_status: string | null
           id: string
           instagram_url: string | null
+          is_paused: boolean
           is_sponsored: boolean | null
           latitude: number | null
           linkedin_url: string | null
@@ -4881,6 +4882,9 @@ export type Database = {
           longitude: number | null
           onboarding_complete: boolean | null
           owner_name: string | null
+          pause_reason: string | null
+          paused_at: string | null
+          paused_by: string | null
           phone: string | null
           price_range: number | null
           privacy_policy_url: string | null
@@ -4919,6 +4923,7 @@ export type Database = {
           funding_status?: string | null
           id?: string
           instagram_url?: string | null
+          is_paused?: boolean
           is_sponsored?: boolean | null
           latitude?: number | null
           linkedin_url?: string | null
@@ -4926,6 +4931,9 @@ export type Database = {
           longitude?: number | null
           onboarding_complete?: boolean | null
           owner_name?: string | null
+          pause_reason?: string | null
+          paused_at?: string | null
+          paused_by?: string | null
           phone?: string | null
           price_range?: number | null
           privacy_policy_url?: string | null
@@ -4964,6 +4972,7 @@ export type Database = {
           funding_status?: string | null
           id?: string
           instagram_url?: string | null
+          is_paused?: boolean
           is_sponsored?: boolean | null
           latitude?: number | null
           linkedin_url?: string | null
@@ -4971,6 +4980,9 @@ export type Database = {
           longitude?: number | null
           onboarding_complete?: boolean | null
           owner_name?: string | null
+          pause_reason?: string | null
+          paused_at?: string | null
+          paused_by?: string | null
           phone?: string | null
           price_range?: number | null
           privacy_policy_url?: string | null
