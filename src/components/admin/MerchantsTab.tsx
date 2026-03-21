@@ -24,6 +24,8 @@ type Merchant = {
   stripe_account_status?: string;
   created_at: string;
   pawbucks_balance?: number;
+  is_paused?: boolean;
+  pause_reason?: string;
 };
 
 // Fetch merchants with their PawBucks balances
