@@ -358,6 +358,43 @@ export function MerchantsTab() {
           )}
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={pauseDialogOpen} onOpenChange={setPauseDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {merchantToPause?.is_paused ? 'Resume Merchant Account' : 'Pause Merchant Account'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {merchantToPause?.is_paused
+                ? `Are you sure you want to resume "${merchantToPause?.business_name}"? They will regain access to their dashboard and become visible to pet owners again.`
+                : `Are you sure you want to pause "${merchantToPause?.business_name}"? This will hide them from the platform and block their dashboard access. They will need to contact support to resume.`
+              }
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          {!merchantToPause?.is_paused && (
+            <div className="space-y-2 py-2">
+              <Label>Reason for pausing (optional)</Label>
+              <Textarea
+                placeholder="e.g. Compliance review, customer complaints, etc."
+                value={pauseReason}
+                onChange={(e) => setPauseReason(e.target.value)}
+                rows={3}
+              />
+            </div>
+          )}
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleTogglePause}
+              disabled={loading}
+              className={merchantToPause?.is_paused ? '' : 'bg-destructive text-destructive-foreground hover:bg-destructive/90'}
+            >
+              {loading ? 'Processing...' : merchantToPause?.is_paused ? 'Resume Account' : 'Pause Account'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
