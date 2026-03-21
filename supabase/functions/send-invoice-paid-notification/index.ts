@@ -265,7 +265,7 @@ function generateInvoicePaidEmailHtml(
           <tr>
             <td style="background:linear-gradient(135deg,#0f172a 0%,#1e293b 50%,#0f172a 100%);padding:40px 32px 32px;text-align:center;border-radius:16px 16px 0 0;">
               <p style="margin:0 0 8px;font-size:16px;letter-spacing:2px;">🐾</p>
-              <img src="https://yxpnkipcoxksmnsvpvwi.supabase.co/storage/v1/object/public/email-assets/pawbucks-logo.png" alt="PawBucks" width="120" height="120" style="display:block;margin:0 auto;width:120px;height:120px;">
+              <img src="https://yxpnkipcoxksmnsvpvwi.supabase.co/storage/v1/object/public/email-assets/pawbucks-logo-email.png" alt="PawBucks" width="120" height="120" style="display:block;margin:0 auto;width:120px;height:120px;">
               <p style="margin:16px 0 0;font-size:20px;font-weight:700;color:#ffffff;">Payment Received</p>
               <p style="margin:8px 0 0;font-size:14px;color:rgba(255,255,255,0.7);">A customer just completed a purchase.</p>
             </td>
@@ -373,7 +373,7 @@ function generateInvoicePaidEmailHtml(
                 <tr>
                   <td style="padding:0 32px;text-align:center;">
                     <p style="margin:0 0 6px;font-size:14px;color:#6b7280;">View transaction details and performance metrics.</p>
-                    <a href="https://pawbucks.app/merchant/dashboard" style="display:inline-block;margin-top:12px;background:linear-gradient(135deg,#7DD4D4 0%,#5bb8b8 100%);color:#0f172a;text-decoration:none;padding:14px 36px;border-radius:10px;font-weight:700;font-size:15px;letter-spacing:0.3px;">
+                    <a href="https://paw-bucks-pay.lovable.app/merchant-dashboard" style="display:inline-block;margin-top:12px;background:linear-gradient(135deg,#7DD4D4 0%,#5bb8b8 100%);color:#0f172a;text-decoration:none;padding:14px 36px;border-radius:10px;font-weight:700;font-size:15px;letter-spacing:0.3px;">
                       Open Merchant Dashboard
                     </a>
                   </td>

@@ -99,7 +99,7 @@ serve(async (req) => {
           <div style="background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
               <!-- Header -->
               <div style="background-color: #ffffff; padding: 32px; text-align: center;">
-                <img src="https://yxpnkipcoxksmnsvpvwi.supabase.co/storage/v1/object/public/email-assets/pawbucks-logo.png" alt="PawBucks" width="120" height="120" style="display:block;margin:0 auto;width:120px;height:120px;">
+                <img src="https://yxpnkipcoxksmnsvpvwi.supabase.co/storage/v1/object/public/email-assets/pawbucks-logo-email.png" alt="PawBucks" width="120" height="120" style="display:block;margin:0 auto;width:120px;height:120px;">
                 <p style="margin: 16px 0 0 0; color: #f59e0b; font-size: 16px; font-weight: 600;">🐾 You're Invited!</p>
               </div>
               

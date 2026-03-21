@@ -193,7 +193,7 @@ const handler = async (req: Request): Promise<Response> => {
           html: `
             <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
               <div style="background-color: #ffffff; padding: 24px; text-align: center; margin: -20px -20px 20px -20px; border-radius: 8px 8px 0 0; border-bottom: 1px solid #e5e7eb;">
-                <img src="https://yxpnkipcoxksmnsvpvwi.supabase.co/storage/v1/object/public/email-assets/pawbucks-logo.png" alt="PawBucks" width="120" height="120" style="display:block;margin:0 auto;width:120px;height:120px;">
+                <img src="https://yxpnkipcoxksmnsvpvwi.supabase.co/storage/v1/object/public/email-assets/pawbucks-logo-email.png" alt="PawBucks" width="120" height="120" style="display:block;margin:0 auto;width:120px;height:120px;">
               </div>
               
               <h2 style="color: #333;">Thank you for your feedback${safeName ? `, ${sanitizeForHtml(safeName.split(' ')[0])}` : ''}!</h2>
