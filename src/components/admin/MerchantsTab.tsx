@@ -57,6 +57,9 @@ export function MerchantsTab() {
   const [selectedMerchant, setSelectedMerchant] = useState<Merchant | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [pauseDialogOpen, setPauseDialogOpen] = useState(false);
+  const [merchantToPause, setMerchantToPause] = useState<Merchant | null>(null);
+  const [pauseReason, setPauseReason] = useState('');
 
   // Use React Query for merchant data
   const { data: merchants = [], refetch, isLoading } = useQuery({
