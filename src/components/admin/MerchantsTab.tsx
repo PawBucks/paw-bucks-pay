@@ -238,50 +238,79 @@ export function MerchantsTab() {
               <TableHead>PawBucks</TableHead>
               <TableHead>Points Rate</TableHead>
               <TableHead>Stripe Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredMerchants.map((merchant) => (
-              <TableRow key={merchant.id}>
-                <TableCell className="font-medium">{merchant.business_name}</TableCell>
-                <TableCell>
-                  <Badge variant="outline">{merchant.business_type}</Badge>
-                </TableCell>
-                <TableCell>{merchant.contact_person || 'N/A'}</TableCell>
-                <TableCell className="text-muted-foreground">{merchant.phone || 'N/A'}</TableCell>
-                <TableCell className="text-muted-foreground max-w-[180px] truncate" title={merchant.email || ''}>
-                  {merchant.email || 'N/A'}
-                </TableCell>
-                <TableCell>
-                  <span className="flex items-center gap-1 text-primary font-medium">
-                    <Coins className="w-3 h-3" />
-                    {(merchant.pawbucks_balance ?? 0).toLocaleString()}
-                  </span>
-                </TableCell>
-                <TableCell>{merchant.cashback_rate}x</TableCell>
-                <TableCell>
-                  <Badge variant={merchant.stripe_account_status === 'active' ? 'default' : 'secondary'}>
-                    {merchant.stripe_account_status || 'pending'}
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-right">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setSelectedMerchant(merchant);
-                      setEditDialogOpen(true);
-                    }}
-                  >
-                    <Edit className="w-4 h-4" />
-                  </Button>
-                </TableCell>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+            </TableHeader>
+            <TableBody>
+              {filteredMerchants.map((merchant) => (
+                <TableRow key={merchant.id} className={merchant.is_paused ? 'opacity-60' : ''}>
+                  <TableCell className="font-medium">
+                    {merchant.business_name}
+                    {merchant.is_paused && (
+                      <Badge variant="destructive" className="ml-2 text-xs">Paused</Badge>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline">{merchant.business_type}</Badge>
+                  </TableCell>
+                  <TableCell>{merchant.contact_person || 'N/A'}</TableCell>
+                  <TableCell className="text-muted-foreground">{merchant.phone || 'N/A'}</TableCell>
+                  <TableCell className="text-muted-foreground max-w-[180px] truncate" title={merchant.email || ''}>
+                    {merchant.email || 'N/A'}
+                  </TableCell>
+                  <TableCell>
+                    <span className="flex items-center gap-1 text-primary font-medium">
+                      <Coins className="w-3 h-3" />
+                      {(merchant.pawbucks_balance ?? 0).toLocaleString()}
+                    </span>
+                  </TableCell>
+                  <TableCell>{merchant.cashback_rate}x</TableCell>
+                  <TableCell>
+                    <Badge variant={merchant.stripe_account_status === 'active' ? 'default' : 'secondary'}>
+                      {merchant.stripe_account_status || 'pending'}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {merchant.is_paused ? (
+                      <Badge variant="destructive">Paused</Badge>
+                    ) : (
+                      <Badge variant="default">Active</Badge>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-right flex items-center justify-end gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setSelectedMerchant(merchant);
+                        setEditDialogOpen(true);
+                      }}
+                    >
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setMerchantToPause(merchant);
+                        setPauseReason('');
+                        setPauseDialogOpen(true);
+                      }}
+                      title={merchant.is_paused ? 'Resume merchant' : 'Pause merchant'}
+                    >
+                      {merchant.is_paused ? (
+                        <PlayCircle className="w-4 h-4 text-green-600" />
+                      ) : (
+                        <PauseCircle className="w-4 h-4 text-destructive" />
+                      )}
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
 
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent>
