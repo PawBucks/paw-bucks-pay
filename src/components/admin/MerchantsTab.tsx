@@ -159,6 +159,44 @@ export function MerchantsTab() {
     }
   };
 
+  const handleTogglePause = async () => {
+    if (!merchantToPause) return;
+    const isPausing = !merchantToPause.is_paused;
+
+    setLoading(true);
+    try {
+      const updates: any = {
+        is_paused: isPausing,
+        paused_at: isPausing ? new Date().toISOString() : null,
+        pause_reason: isPausing ? (pauseReason || null) : null,
+      };
+
+      const { error } = await supabase
+        .from('merchants')
+        .update(updates)
+        .eq('id', merchantToPause.id);
+
+      if (error) throw error;
+
+      await supabase.rpc('log_admin_action', {
+        _action: isPausing ? 'PAUSE_MERCHANT' : 'UNPAUSE_MERCHANT',
+        _entity_type: 'merchant',
+        _entity_id: merchantToPause.id,
+        _changes: { is_paused: isPausing, pause_reason: isPausing ? pauseReason : null },
+      });
+
+      toast.success(isPausing ? 'Merchant account paused' : 'Merchant account resumed');
+      setPauseDialogOpen(false);
+      setMerchantToPause(null);
+      setPauseReason('');
+      refetch();
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
