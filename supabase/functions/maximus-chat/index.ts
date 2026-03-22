@@ -6,6 +6,74 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
+function buildMerchantSection(merchants: any[], reviewSummary: Record<string, any>, offers: any[], items: any[], loyalty: any[]): string {
+  const header = '═══════════════════════════════════════\nPLATFORM MERCHANTS (' + merchants.length + ' approved)\n═══════════════════════════════════════';
+  if (merchants.length === 0) return header + '\n- No merchants on platform';
+  const lines = merchants.map((m: any) => {
+    const rs = reviewSummary[m.id];
+    const mOffers = offers.filter((o: any) => o.merchant_id === m.id);
+    const mItems = items.filter((i: any) => i.merchant_id === m.id);
+    const mLoyalty = loyalty.filter((l: any) => l.merchant_id === m.id);
+    const social = [m.facebook_url && 'Facebook', m.instagram_url && 'Instagram', m.twitter_url && 'Twitter/X', m.linkedin_url && 'LinkedIn'].filter(Boolean).join(', ') || 'None';
+    const reviewLine = rs ? rs.count + ' reviews, ' + rs.avg.toFixed(1) + '⭐ avg' : 'No reviews yet';
+    const recentReviews = rs?.reviews?.length ? '\n    Recent reviews: ' + rs.reviews.map((r: any) => r.rating + '⭐' + (r.review_text ? ' "' + r.review_text.slice(0, 80) + '"' : '')).join(' | ') : '';
+    const offerLine = mOffers.length > 0 ? mOffers.map((o: any) => o.title + ' (' + (o.discount_type === 'percentage' ? o.discount_value + '% off' : '$' + o.discount_value + ' off') + ', costs ' + o.coins_required + ' PB)').join('; ') : 'None';
+    const itemLine = mItems.length > 0 ? mItems.slice(0, 5).map((i: any) => i.name + ' (' + i.item_type + ', $' + i.price.toFixed(2) + ' / ' + i.price_pawbucks + ' PB)').join('; ') + (mItems.length > 5 ? ' +' + (mItems.length - 5) + ' more' : '') : 'None listed';
+    const loyaltyLine = mLoyalty.length > 0 ? mLoyalty.map((l: any) => l.program_name + ': ' + l.punches_required + ' punches → ' + l.reward_description).join('; ') : 'None';
+    const priceRange = m.price_range ? '$'.repeat(m.price_range) : 'Not set';
+    return '🏪 ' + m.business_name + ' (' + (m.business_type || 'General') + ')\n' +
+      '  - Address: ' + (m.address || 'Not listed') + '\n' +
+      '  - Phone: ' + (m.phone || 'Not listed') + '\n' +
+      '  - Description: ' + (m.description || 'No description') + '\n' +
+      '  - Cashback rate: ' + (m.cashback_rate || 0) + 'x PawBucks\n' +
+      '  - Accepts PawBucks: ' + (m.accepts_pawbucks ? 'Yes' : 'No') + '\n' +
+      '  - Price range: ' + priceRange + '\n' +
+      '  - Storefront: ' + (m.storefront_slug ? '/store/' + m.storefront_slug : 'No storefront') + '\n' +
+      '  - Website: ' + (m.website_url || 'None') + '\n' +
+      '  - Social: ' + social + '\n' +
+      '  - TOS: ' + (m.tos_url ? 'Available' : 'Not posted') + ' | Privacy Policy: ' + (m.privacy_policy_url ? 'Available' : 'Not posted') + ' | Shipping/Returns: ' + (m.shipping_returns_policy_url ? 'Available' : 'Not posted') + '\n' +
+      '  - Sponsored: ' + (m.is_sponsored ? 'Yes' : 'No') + '\n' +
+      '  - Reviews: ' + reviewLine + recentReviews + '\n' +
+      '  - Active offers: ' + offerLine + '\n' +
+      '  - Products/Services: ' + itemLine + '\n' +
+      '  - Loyalty program: ' + loyaltyLine;
+  });
+  return header + '\n' + lines.join('\n\n');
+}
+
+function buildVetSection(vets: any[]): string {
+  const header = '═══════════════════════════════════════\nPLATFORM VETERINARIANS (' + vets.length + ' approved)\n═══════════════════════════════════════';
+  if (vets.length === 0) return header + '\n- No vets on platform';
+  const lines = vets.map((v: any) => {
+    return '🩺 ' + v.name + (v.clinic_name ? ' — ' + v.clinic_name : '') + '\n' +
+      '  - Location: ' + (v.location || 'Not listed') + '\n' +
+      '  - Phone: ' + (v.clinic_phone || 'Not listed') + '\n' +
+      '  - Email: ' + (v.contact_email || 'Not listed') + '\n' +
+      '  - Practice type: ' + (v.practice_type || 'General') + '\n' +
+      '  - Services: ' + (v.services_provided?.join(', ') || 'Not specified') + '\n' +
+      '  - Accepting new patients: ' + (v.accepting_new_patients ? 'Yes' : 'No') + '\n' +
+      '  - Accreditations: ' + (v.accreditations?.join(', ') || 'None listed') + '\n' +
+      '  - Insurance partners: ' + (v.insurance_partners?.join(', ') || 'None listed') + '\n' +
+      '  - Emergency protocol: ' + (v.emergency_protocol || 'Not specified') + '\n' +
+      '  - Direct pay enabled: ' + (v.direct_pay_enabled ? 'Yes' : 'No') + '\n' +
+      '  - Website: ' + (v.website_url || 'None') + '\n' +
+      '  - TOS: ' + (v.tos_url ? 'Available' : 'Not posted') + ' | Privacy: ' + (v.privacy_policy_url ? 'Available' : 'Not posted');
+  });
+  return header + '\n' + lines.join('\n\n');
+}
+
+function buildStoreCatalog(items: any[], merchants: any[]): string {
+  const header = '═══════════════════════════════════════\nPET STORE CATALOG (' + items.length + ' active items)\n═══════════════════════════════════════';
+  if (items.length === 0) return header + '\n- No items in store';
+  const shown = items.slice(0, 50);
+  const lines = shown.map((i: any) => {
+    const merchantName = merchants.find((m: any) => m.id === i.merchant_id)?.business_name || 'PawBucks Store';
+    return '- ' + i.name + ' (' + i.item_type + ', ' + i.category + ') — $' + i.price.toFixed(2) + ' / ' + i.price_pawbucks + ' PB — by ' + merchantName + (i.stock_quantity <= 5 ? ' ⚠️ Low stock: ' + i.stock_quantity : '');
+  });
+  const extra = items.length > 50 ? '\n... and ' + (items.length - 50) + ' more items' : '';
+  return header + '\n' + lines.join('\n') + extra;
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -17,6 +85,7 @@ serve(async (req) => {
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
     const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
     if (!supabaseUrl || !supabaseAnonKey) throw new Error('Supabase environment is not configured');
 
     const authHeader = req.headers.get('Authorization');
@@ -98,6 +167,44 @@ serve(async (req) => {
       userScopedClient.from('user_welcome_credits').select('credit_amount, status, expires_at, phase_1_used, phase_2_unlocked, phase_2_unlocked_at, created_at').eq('user_id', user.id).maybeSingle(),
       userScopedClient.from('pet_email_addresses').select('pet_id, email_address, is_active').limit(10),
     ]);
+
+    // ═══ PLATFORM-WIDE DATA (using service role to bypass RLS for public info) ═══
+    const platformClient = createClient(supabaseUrl, supabaseServiceKey);
+
+    const [
+      allMerchantsResult,
+      allVetsResult,
+      allStoreItemsResult,
+      allMerchantReviewsResult,
+      allOffersResult,
+      allLoyaltyProgramsResult,
+    ] = await Promise.all([
+      platformClient.from('merchants').select('id, business_name, business_type, description, address, phone, cashback_rate, accepts_pawbucks, price_range, website_url, facebook_url, instagram_url, twitter_url, linkedin_url, tos_url, privacy_policy_url, shipping_returns_policy_url, storefront_slug, is_sponsored, logo_url').eq('approval_status', 'approved').eq('is_paused', false).order('business_name'),
+      platformClient.from('partner_vets').select('id, name, clinic_name, clinic_phone, location, practice_type, services_provided, accepting_new_patients, accreditations, insurance_partners, emergency_protocol, website_url, tos_url, privacy_policy_url, shipping_returns_policy_url, contact_email, logo_url, direct_pay_enabled').eq('approval_status', 'approved').order('name'),
+      platformClient.from('pet_store_items').select('id, name, description, category, item_type, price, price_pawbucks, stock_quantity, is_active, merchant_id').eq('is_active', true).order('name'),
+      platformClient.from('merchant_reviews').select('id, merchant_id, user_id, rating, review_text, created_at').order('created_at', { ascending: false }).limit(200),
+      platformClient.from('partner_offers').select('id, merchant_id, title, description, discount_type, discount_value, coins_required, status, is_active, start_date, end_date, terms_conditions').eq('status', 'active').eq('is_active', true),
+      platformClient.from('merchant_loyalty_programs').select('id, merchant_id, program_name, description, punches_required, reward_description, is_active').eq('is_active', true),
+    ]);
+
+    const allMerchants = allMerchantsResult.data || [];
+    const allVets = allVetsResult.data || [];
+    const allStoreItems = allStoreItemsResult.data || [];
+    const allMerchantReviews = allMerchantReviewsResult.data || [];
+    const allOffers = allOffersResult.data || [];
+    const allLoyaltyPrograms = allLoyaltyProgramsResult.data || [];
+
+    // Build merchant review summary (avg rating, count per merchant)
+    const merchantReviewSummary: Record<string, { count: number; avg: number; reviews: any[] }> = {};
+    allMerchantReviews.forEach((r: any) => {
+      if (!merchantReviewSummary[r.merchant_id]) {
+        merchantReviewSummary[r.merchant_id] = { count: 0, avg: 0, reviews: [] };
+      }
+      const s = merchantReviewSummary[r.merchant_id];
+      s.count++;
+      s.avg = ((s.avg * (s.count - 1)) + r.rating) / s.count;
+      if (s.reviews.length < 3) s.reviews.push(r); // keep top 3 recent
+    });
 
     const profile = profileResult.data;
     const wallet = walletResult.data;
@@ -323,15 +430,34 @@ RECENT NOTIFICATIONS (last 15)
 ═══════════════════════════════════════
 ${notifications.length > 0 ? notifications.map((n: any) => `- ${new Date(n.created_at).toLocaleDateString()}: [${n.category}] ${n.title}${n.is_read ? '' : ' 🔴 Unread'}`).join('\n') : '- No notifications'}
 
+${buildMerchantSection(allMerchants, merchantReviewSummary, allOffers, allStoreItems, allLoyaltyPrograms)}
+
+${buildVetSection(allVets)}
+
+${buildStoreCatalog(allStoreItems, allMerchants)}
+
+═══════════════════════════════════════
+PLATFORM INFO
+═══════════════════════════════════════
+- PawBucks is a pet-owner financial platform with cashback rewards in PawBucks currency (1,000 PB = $1.00)
+- Pet owners earn PawBucks from transactions at partner merchants
+- The Quarter-Million Pet Fund gives new users up to 250,000 PB ($250) released monthly over 24 months
+- Pet Store sells products & services purchasable with USD or PawBucks
+- Merchants set their own cashback rates and may accept PawBucks as payment
+- Vets on the platform offer direct pay, insurance claim splicing, and EMR integration
+- Users can refer friends using their referral code to earn bonuses
+- Consumer tiers reward frequent activity with multipliers and perks
+
 ═══════════════════════════════════════
 RULES
 ═══════════════════════════════════════
-- Only discuss this user's data. Never fabricate numbers.
-- If you don't have data to answer a question, say so honestly.
-- For questions outside of account/PawBucks scope, politely redirect.
+- You have FULL visibility into this pet owner's personal account AND all merchants/vets on the platform.
+- You can answer questions about ANY merchant or vet: their contact info, services, products, prices, reviews, policies, loyalty programs, offers, and storefront.
+- You can recommend merchants or vets based on what the user needs.
+- Never fabricate numbers or data. If you don't have data to answer a question, say so honestly.
 - Be brief but thorough. Use bullet points for clarity.
-- You have FULL visibility into this pet owner's account — financial, pets, medical, insurance, activity, support, and more.
-- When discussing medical data, remind users to consult their vet for professional advice.`;
+- When discussing medical data, remind users to consult their vet for professional advice.
+- For platform-related questions (how PawBucks works, tiers, pet fund, etc.), use the Platform Info section above.`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
