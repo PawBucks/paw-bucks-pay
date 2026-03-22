@@ -457,7 +457,7 @@ RULES
 - Never fabricate numbers or data. If you don't have data to answer a question, say so honestly.
 - Be brief but thorough. Use bullet points for clarity.
 - When discussing medical data, remind users to consult their vet for professional advice.
-- For platform-related questions (how PawBucks works, tiers, pet fund, etc.), use the Platform Info section above.\`;
+- For platform-related questions (how PawBucks works, tiers, pet fund, etc.), use the Platform Info section above.`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
