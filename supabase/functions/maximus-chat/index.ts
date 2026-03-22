@@ -100,6 +100,44 @@ serve(async (req) => {
       userScopedClient.from('pet_email_addresses').select('pet_id, email_address, is_active').limit(10),
     ]);
 
+    // ═══ PLATFORM-WIDE DATA (using service role to bypass RLS for public info) ═══
+    const platformClient = createClient(supabaseUrl, supabaseServiceKey);
+
+    const [
+      allMerchantsResult,
+      allVetsResult,
+      allStoreItemsResult,
+      allMerchantReviewsResult,
+      allOffersResult,
+      allLoyaltyProgramsResult,
+    ] = await Promise.all([
+      platformClient.from('merchants').select('id, business_name, business_type, description, address, phone, cashback_rate, accepts_pawbucks, price_range, website_url, facebook_url, instagram_url, twitter_url, linkedin_url, tos_url, privacy_policy_url, shipping_returns_policy_url, storefront_slug, is_sponsored, logo_url').eq('approval_status', 'approved').eq('is_paused', false).order('business_name'),
+      platformClient.from('partner_vets').select('id, name, clinic_name, clinic_phone, location, practice_type, services_provided, accepting_new_patients, accreditations, insurance_partners, emergency_protocol, website_url, tos_url, privacy_policy_url, shipping_returns_policy_url, contact_email, logo_url, direct_pay_enabled').eq('approval_status', 'approved').order('name'),
+      platformClient.from('pet_store_items').select('id, name, description, category, item_type, price, price_pawbucks, stock_quantity, is_active, merchant_id').eq('is_active', true).order('name'),
+      platformClient.from('merchant_reviews').select('id, merchant_id, user_id, rating, review_text, created_at').order('created_at', { ascending: false }).limit(200),
+      platformClient.from('partner_offers').select('id, merchant_id, title, description, discount_type, discount_value, coins_required, status, is_active, start_date, end_date, terms_conditions').eq('status', 'active').eq('is_active', true),
+      platformClient.from('merchant_loyalty_programs').select('id, merchant_id, program_name, description, punches_required, reward_description, is_active').eq('is_active', true),
+    ]);
+
+    const allMerchants = allMerchantsResult.data || [];
+    const allVets = allVetsResult.data || [];
+    const allStoreItems = allStoreItemsResult.data || [];
+    const allMerchantReviews = allMerchantReviewsResult.data || [];
+    const allOffers = allOffersResult.data || [];
+    const allLoyaltyPrograms = allLoyaltyProgramsResult.data || [];
+
+    // Build merchant review summary (avg rating, count per merchant)
+    const merchantReviewSummary: Record<string, { count: number; avg: number; reviews: any[] }> = {};
+    allMerchantReviews.forEach((r: any) => {
+      if (!merchantReviewSummary[r.merchant_id]) {
+        merchantReviewSummary[r.merchant_id] = { count: 0, avg: 0, reviews: [] };
+      }
+      const s = merchantReviewSummary[r.merchant_id];
+      s.count++;
+      s.avg = ((s.avg * (s.count - 1)) + r.rating) / s.count;
+      if (s.reviews.length < 3) s.reviews.push(r); // keep top 3 recent
+    });
+
     const profile = profileResult.data;
     const wallet = walletResult.data;
     const pawbucks = pawbucksResult.data;
