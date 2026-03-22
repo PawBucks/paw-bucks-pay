@@ -362,56 +362,11 @@ RECENT NOTIFICATIONS (last 15)
 ═══════════════════════════════════════
 ${notifications.length > 0 ? notifications.map((n: any) => `- ${new Date(n.created_at).toLocaleDateString()}: [${n.category}] ${n.title}${n.is_read ? '' : ' 🔴 Unread'}`).join('\n') : '- No notifications'}
 
-═══════════════════════════════════════
-PLATFORM MERCHANTS (${allMerchants.length} approved)
-═══════════════════════════════════════
-${allMerchants.length > 0 ? allMerchants.map((m: any) => {
-  const rs = merchantReviewSummary[m.id];
-  const offers = allOffers.filter((o: any) => o.merchant_id === m.id);
-  const items = allStoreItems.filter((i: any) => i.merchant_id === m.id);
-  const loyalty = allLoyaltyPrograms.filter((l: any) => l.merchant_id === m.id);
-  return \`🏪 \${m.business_name} (\${m.business_type || 'General'})
-  - Address: \${m.address || 'Not listed'}
-  - Phone: \${m.phone || 'Not listed'}
-  - Description: \${m.description || 'No description'}
-  - Cashback rate: \${m.cashback_rate || 0}x PawBucks
-  - Accepts PawBucks: \${m.accepts_pawbucks ? 'Yes' : 'No'}
-  - Price range: \${m.price_range ? '$'.repeat(m.price_range) : 'Not set'}
-  - Storefront: \${m.storefront_slug ? '/store/' + m.storefront_slug : 'No storefront'}
-  - Website: \${m.website_url || 'None'}
-  - Social: \${[m.facebook_url && 'Facebook', m.instagram_url && 'Instagram', m.twitter_url && 'Twitter/X', m.linkedin_url && 'LinkedIn'].filter(Boolean).join(', ') || 'None'}
-  - TOS: \${m.tos_url ? 'Available' : 'Not posted'} | Privacy Policy: \${m.privacy_policy_url ? 'Available' : 'Not posted'} | Shipping/Returns: \${m.shipping_returns_policy_url ? 'Available' : 'Not posted'}
-  - Sponsored: \${m.is_sponsored ? 'Yes' : 'No'}
-  - Reviews: \${rs ? rs.count + ' reviews, ' + rs.avg.toFixed(1) + '⭐ avg' : 'No reviews yet'}\${rs?.reviews?.length ? '\\n    Recent reviews: ' + rs.reviews.map((r: any) => r.rating + '⭐' + (r.review_text ? ' "' + r.review_text.slice(0, 80) + '"' : '')).join(' | ') : ''}
-  - Active offers: \${offers.length > 0 ? offers.map((o: any) => o.title + ' (' + (o.discount_type === 'percentage' ? o.discount_value + '% off' : '$' + o.discount_value + ' off') + ', costs ' + o.coins_required + ' PB)').join('; ') : 'None'}
-  - Products/Services: \${items.length > 0 ? items.slice(0, 5).map((i: any) => i.name + ' (' + i.item_type + ', $' + i.price.toFixed(2) + ' / ' + i.price_pawbucks + ' PB)').join('; ') + (items.length > 5 ? ' +' + (items.length - 5) + ' more' : '') : 'None listed'}
-  - Loyalty program: \${loyalty.length > 0 ? loyalty.map((l: any) => l.program_name + ': ' + l.punches_required + ' punches → ' + l.reward_description).join('; ') : 'None'}\`;
-}).join('\\n\\n') : '- No merchants on platform'}
+${buildMerchantSection(allMerchants, merchantReviewSummary, allOffers, allStoreItems, allLoyaltyPrograms)}
 
-═══════════════════════════════════════
-PLATFORM VETERINARIANS (${allVets.length} approved)
-═══════════════════════════════════════
-${allVets.length > 0 ? allVets.map((v: any) => \`🩺 \${v.name}\${v.clinic_name ? ' — ' + v.clinic_name : ''}
-  - Location: \${v.location || 'Not listed'}
-  - Phone: \${v.clinic_phone || 'Not listed'}
-  - Email: \${v.contact_email || 'Not listed'}
-  - Practice type: \${v.practice_type || 'General'}
-  - Services: \${v.services_provided?.join(', ') || 'Not specified'}
-  - Accepting new patients: \${v.accepting_new_patients ? 'Yes' : 'No'}
-  - Accreditations: \${v.accreditations?.join(', ') || 'None listed'}
-  - Insurance partners: \${v.insurance_partners?.join(', ') || 'None listed'}
-  - Emergency protocol: \${v.emergency_protocol || 'Not specified'}
-  - Direct pay enabled: \${v.direct_pay_enabled ? 'Yes' : 'No'}
-  - Website: \${v.website_url || 'None'}
-  - TOS: \${v.tos_url ? 'Available' : 'Not posted'} | Privacy: \${v.privacy_policy_url ? 'Available' : 'Not posted'}\`).join('\\n\\n') : '- No vets on platform'}
+${buildVetSection(allVets)}
 
-═══════════════════════════════════════
-PET STORE CATALOG (${allStoreItems.length} active items)
-═══════════════════════════════════════
-${allStoreItems.length > 0 ? allStoreItems.slice(0, 50).map((i: any) => {
-  const merchantName = allMerchants.find((m: any) => m.id === i.merchant_id)?.business_name || 'PawBucks Store';
-  return \`- \${i.name} (\${i.item_type}, \${i.category}) — $\${i.price.toFixed(2)} / \${i.price_pawbucks} PB — by \${merchantName}\${i.stock_quantity <= 5 ? ' ⚠️ Low stock: ' + i.stock_quantity : ''}\`;
-}).join('\\n') + (allStoreItems.length > 50 ? '\\n... and ' + (allStoreItems.length - 50) + ' more items' : '') : '- No items in store'}
+${buildStoreCatalog(allStoreItems, allMerchants)}
 
 ═══════════════════════════════════════
 PLATFORM INFO
