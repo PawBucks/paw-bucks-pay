@@ -164,7 +164,7 @@ export function InvoiceEditor({
       discount_value: item.discount_value || 0,
       tax_rate: item.tax_rate || 0,
     })) || [
-      { description: "", quantity: 1, unit_price: 0, unit_type: "unit", tax_rate: 0 }
+      { description: "", quantity: "" as any, unit_price: "" as any, unit_type: "unit", tax_rate: 0 }
     ],
   };
 
