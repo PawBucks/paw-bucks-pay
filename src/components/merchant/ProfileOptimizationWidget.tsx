@@ -459,8 +459,8 @@ export function ProfileOptimizationWidget() {
                       <PolarGrid strokeDasharray="3 3" />
                       <PolarAngleAxis dataKey="subject" tick={{ fontSize: 11 }} />
                       <PolarRadiusAxis angle={30} domain={[0, 100]} />
-                      <Radar name="You" dataKey="You" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.5} />
-                      <Radar name="Average" dataKey="Average" stroke="hsl(var(--muted-foreground))" fill="hsl(var(--muted-foreground))" fillOpacity={0.2} />
+                      <Radar name="You" dataKey="You" stroke="hsl(var(--chart-6))" fill="hsl(var(--chart-6))" fillOpacity={0.5} />
+                      <Radar name="Average" dataKey="Average" stroke="hsl(var(--chart-3))" fill="hsl(var(--chart-3))" fillOpacity={0.2} />
                       <Legend />
                     </RadarChart>
                   </ResponsiveContainer>
