@@ -316,7 +316,7 @@ export function KeywordPerformanceWidget() {
                       <Area 
                         type="monotone" 
                         dataKey="views" 
-                        stroke="hsl(var(--primary))" 
+                        stroke="hsl(var(--chart-6))" 
                         fillOpacity={1} 
                         fill="url(#colorViews)" 
                         name="Views"
