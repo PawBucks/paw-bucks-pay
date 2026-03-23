@@ -580,8 +580,18 @@ export function InvoiceEditor({
                                   type="number" 
                                   step="0.01"
                                   min="0"
+                                  placeholder="0"
                                   {...field}
-                                  onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  value={field.value === 0 && !field.value ? "" : field.value}
+                                  onChange={(e) => {
+                                    const val = e.target.value;
+                                    field.onChange(val === "" ? "" : parseFloat(val));
+                                  }}
+                                  onBlur={(e) => {
+                                    const val = parseFloat(e.target.value);
+                                    if (isNaN(val) || e.target.value === "") field.onChange(0);
+                                    field.onBlur();
+                                  }}
                                 />
                               </FormControl>
                               <FormMessage />
