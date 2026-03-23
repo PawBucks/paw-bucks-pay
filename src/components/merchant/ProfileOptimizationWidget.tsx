@@ -583,9 +583,9 @@ export function ProfileOptimizationWidget() {
                     <Line 
                       type="monotone" 
                       dataKey="score" 
-                      stroke="hsl(var(--primary))" 
+                      stroke="hsl(var(--chart-5))" 
                       strokeWidth={2}
-                      dot={{ fill: 'hsl(var(--primary))' }}
+                      dot={{ fill: 'hsl(var(--chart-5))' }}
                       name="Overall Score"
                     />
                   </LineChart>
