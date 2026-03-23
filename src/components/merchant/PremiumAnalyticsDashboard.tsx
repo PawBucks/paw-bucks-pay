@@ -438,8 +438,8 @@ export function PremiumAnalyticsDashboard() {
                   <Area 
                     type="monotone" 
                     dataKey="revenue" 
-                    stroke="hsl(var(--primary))" 
-                    fill="hsl(var(--primary)/0.2)"
+                    stroke="hsl(var(--chart-6))" 
+                    fill="hsl(var(--chart-6)/0.2)"
                     strokeWidth={2}
                   />
                 </AreaChart>
