@@ -66,6 +66,16 @@
     --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-slow: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 
+    /* Chart Color Palette — vibrant, diverse, accessible */
+    --chart-1: 178 55% 42%;   /* teal (primary) */
+    --chart-2: 262 52% 56%;   /* violet */
+    --chart-3: 24 85% 56%;    /* warm orange */
+    --chart-4: 340 65% 55%;   /* rose / magenta */
+    --chart-5: 152 60% 40%;   /* emerald green */
+    --chart-6: 210 80% 52%;   /* bright blue */
+    --chart-7: 45 93% 50%;    /* golden amber */
+    --chart-8: 290 50% 50%;   /* purple */
+
     /* Mobile Layout Variables */
     --bottom-nav-height: 4rem;
     --header-height: 4rem;
