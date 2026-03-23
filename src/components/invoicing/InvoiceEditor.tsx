@@ -582,7 +582,7 @@ export function InvoiceEditor({
                                   min="0"
                                   placeholder="0"
                                   {...field}
-                                  value={field.value === 0 && !field.value ? "" : field.value}
+                                  value={field.value === "" || field.value === undefined ? "" : field.value}
                                   onChange={(e) => {
                                     const val = e.target.value;
                                     field.onChange(val === "" ? "" : parseFloat(val));
