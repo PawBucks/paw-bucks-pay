@@ -232,12 +232,8 @@ const MerchantInvoicing = () => {
           nextInvoiceDateStr = nextDate.toISOString().split("T")[0];
         }
         
-        // Recalculate amount_due based on new total and existing payments
-        const newAmountDue = Math.max(0, (formattedData.total || 0) - (selectedInvoice.amount_paid || 0));
-        
         const { error: updateError } = await invoicingService.updateInvoice(selectedInvoice.id, {
           ...formattedData,
-          amount_due: newAmountDue,
           next_invoice_date: nextInvoiceDateStr,
         });
         
