@@ -164,7 +164,7 @@ export function InvoiceEditor({
       discount_value: item.discount_value || 0,
       tax_rate: item.tax_rate || 0,
     })) || [
-      { description: "", quantity: 1, unit_price: 0, unit_type: "unit", tax_rate: 0 }
+      { description: "", quantity: "" as any, unit_price: "" as any, unit_type: "unit", tax_rate: 0 }
     ],
   };
 
@@ -216,7 +216,7 @@ export function InvoiceEditor({
         discount_value: item.discount_value || 0,
         tax_rate: item.tax_rate || 0,
       })) || [
-        { description: "", quantity: 1, unit_price: 0, unit_type: "unit", tax_rate: 0 }
+        { description: "", quantity: "" as any, unit_price: "" as any, unit_type: "unit", tax_rate: 0 }
       ],
     };
     form.reset(newDefaults);
@@ -580,8 +580,18 @@ export function InvoiceEditor({
                                   type="number" 
                                   step="0.01"
                                   min="0"
+                                  placeholder="0"
                                   {...field}
-                                  onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  value={(field.value as any) === "" ? "" : field.value}
+                                  onChange={(e) => {
+                                    const val = e.target.value;
+                                    field.onChange(val === "" ? "" : parseFloat(val));
+                                  }}
+                                  onBlur={(e) => {
+                                    const val = parseFloat(e.target.value);
+                                    if (isNaN(val) || e.target.value === "") field.onChange(0);
+                                    field.onBlur();
+                                  }}
                                 />
                               </FormControl>
                               <FormMessage />
@@ -631,8 +641,18 @@ export function InvoiceEditor({
                                     step="0.01"
                                     min="0"
                                     className="pl-7"
+                                    placeholder="0.00"
                                     {...field}
-                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                    value={(field.value as any) === "" ? "" : field.value}
+                                    onChange={(e) => {
+                                      const val = e.target.value;
+                                      field.onChange(val === "" ? "" : parseFloat(val));
+                                    }}
+                                    onBlur={(e) => {
+                                      const val = parseFloat(e.target.value);
+                                      if (isNaN(val) || e.target.value === "") field.onChange(0);
+                                      field.onBlur();
+                                    }}
                                   />
                                 </div>
                               </FormControl>
@@ -665,8 +685,8 @@ export function InvoiceEditor({
                   variant="outline"
                   onClick={() => append({ 
                     description: "", 
-                    quantity: 1, 
-                    unit_price: 0, 
+                    quantity: "" as any, 
+                    unit_price: "" as any, 
                     unit_type: "unit",
                     tax_rate: 0 
                   })}
