@@ -158,41 +158,22 @@ const Index = () => {
           </div>
         </section>}
 
-        {/* Lifestyle Hero Image Section — Stacked, full-width */}
+        {/* Lifestyle Hero Image Section */}
         <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-          <div className="relative max-w-7xl mx-auto flex flex-col gap-5">
-            {/* Dog — top panel */}
+          <div className="relative max-w-7xl mx-auto">
             <div className="relative rounded-2xl overflow-hidden shadow-2xl group aspect-[21/9]">
               <img
-                src={heroDogPark}
-                alt="Golden retriever leaping for a red ball in a sunlit park"
+                src={heroDogsRunning}
+                alt="Four happy dogs running together through a green field"
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 loading="lazy"
                 decoding="async"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/10 to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-8">
-                <span className="inline-block px-3 py-1 rounded-full bg-primary/90 text-primary-foreground text-xs font-bold mb-2 tracking-wide uppercase">Adventure Awaits</span>
+                <span className="inline-block px-3 py-1 rounded-full bg-primary/90 text-primary-foreground text-xs font-bold mb-2 tracking-wide uppercase">Better Together</span>
                 <p className="text-base sm:text-lg lg:text-xl font-semibold text-white max-w-lg leading-snug">
                   Every fetch, every walk, every treat — earn rewards for the moments that matter.
-                </p>
-              </div>
-            </div>
-
-            {/* Cat — bottom panel */}
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl group aspect-[21/9]">
-              <img
-                src={heroCatCozy}
-                alt="Tabby cat relaxing on a cozy blanket at home"
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                loading="lazy"
-                decoding="async"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/10 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-8">
-                <span className="inline-block px-3 py-1 rounded-full bg-accent/90 text-accent-foreground text-xs font-bold mb-2 tracking-wide uppercase">Comfort Zone</span>
-                <p className="text-base sm:text-lg font-semibold text-white max-w-lg leading-snug">
-                  Cozy nights in deserve cashback too.
                 </p>
               </div>
             </div>
