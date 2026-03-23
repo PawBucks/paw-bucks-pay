@@ -341,6 +341,16 @@ export function InvoiceEditor({
   };
 
   const handleSubmit = async (data: InvoiceFormData, sendImmediately: boolean = false) => {
+    // Warn about blank line items
+    const blankItems = data.items.filter(
+      (item) => !item.description && Number(item.quantity) === 0 && Number(item.unit_price) === 0
+    );
+    if (blankItems.length > 0) {
+      toast.warning(
+        `${blankItems.length} line item${blankItems.length > 1 ? "s" : ""} ${blankItems.length > 1 ? "are" : "is"} blank and will be hidden from the customer. Please fill in Description, Qty, and Rate.`
+      );
+    }
+
     const invoiceData = {
       ...data,
       issue_date: format(data.issue_date, "yyyy-MM-dd"),

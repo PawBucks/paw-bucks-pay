@@ -485,12 +485,14 @@ const InvoicePayment = () => {
                       <div className="col-span-2 text-right">Rate</div>
                       <div className="col-span-2 text-right">Amount</div>
                     </div>
-                    {(invoice as any).invoice_items?.map((item: any) => (
+                    {(invoice as any).invoice_items
+                      ?.filter((item: any) => item.description || Number(item.quantity) > 0 || Number(item.unit_price) > 0)
+                      .map((item: any) => (
                       <div
                         key={item.id}
                         className="grid grid-cols-12 gap-2 text-sm py-2 px-2 rounded bg-muted/50"
                       >
-                        <div className="col-span-6">{item.description}</div>
+                        <div className="col-span-6">{item.description || "—"}</div>
                         <div className="col-span-2 text-right">{item.quantity}</div>
                         <div className="col-span-2 text-right">
                           ${Number(item.unit_price).toFixed(2)}
