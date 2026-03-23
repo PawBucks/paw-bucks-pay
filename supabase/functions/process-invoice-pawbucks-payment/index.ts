@@ -216,7 +216,6 @@ serve(async (req) => {
         .from("invoices")
         .update({
           amount_paid: newAmountPaid,
-          amount_due: newAmountDue,
           status: newStatus,
           paid_at: newStatus === "paid" ? new Date().toISOString() : invoice.paid_at,
           updated_at: new Date().toISOString(),
