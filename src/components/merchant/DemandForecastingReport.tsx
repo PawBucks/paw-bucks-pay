@@ -418,7 +418,7 @@ export function DemandForecastingReport() {
                       contentStyle={tooltipStyle}
                       formatter={(value: number) => [`$${value.toLocaleString()}`, 'Total Revenue']}
                     />
-                    <Bar dataKey="totalRevenue" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="totalRevenue" fill="hsl(var(--chart-3))" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
