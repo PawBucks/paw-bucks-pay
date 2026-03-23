@@ -186,8 +186,8 @@ export function SearchRankingBoosterWidget() {
                     <XAxis dataKey="date" fontSize={12} />
                     <YAxis fontSize={12} />
                     <Tooltip />
-                    <Line type="monotone" dataKey="impressions" stroke="hsl(var(--primary))" strokeWidth={2} />
-                    <Line type="monotone" dataKey="clicks" stroke="hsl(var(--chart-2))" strokeWidth={2} />
+                    <Line type="monotone" dataKey="impressions" stroke="hsl(var(--chart-6))" strokeWidth={2} />
+                    <Line type="monotone" dataKey="clicks" stroke="hsl(var(--chart-4))" strokeWidth={2} />
                   </LineChart>
                 </ResponsiveContainer>
               </CardContent>

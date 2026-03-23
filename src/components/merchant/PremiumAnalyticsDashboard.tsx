@@ -438,8 +438,8 @@ export function PremiumAnalyticsDashboard() {
                   <Area 
                     type="monotone" 
                     dataKey="revenue" 
-                    stroke="hsl(var(--primary))" 
-                    fill="hsl(var(--primary)/0.2)"
+                    stroke="hsl(var(--chart-6))" 
+                    fill="hsl(var(--chart-6)/0.2)"
                     strokeWidth={2}
                   />
                 </AreaChart>
@@ -546,7 +546,7 @@ export function PremiumAnalyticsDashboard() {
                     contentStyle={tooltipStyle}
                     formatter={(value: number) => [`$${value.toFixed(2)}`, 'Revenue']}
                   />
-                  <Bar dataKey="revenue" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="revenue" fill="hsl(var(--chart-3))" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
@@ -784,7 +784,7 @@ export function PremiumAnalyticsDashboard() {
                     <XAxis dataKey="day" tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
                     <YAxis tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
                     <Tooltip contentStyle={tooltipStyle} />
-                    <Bar dataKey="transactions" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="transactions" fill="hsl(var(--chart-2))" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>

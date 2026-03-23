@@ -304,8 +304,8 @@ export function DemandForecastingReport() {
                 <AreaChart data={forecast_90_day.weekly}>
                   <defs>
                     <linearGradient id="forecastGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="hsl(var(--chart-6))" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="hsl(var(--chart-6))" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
@@ -321,7 +321,7 @@ export function DemandForecastingReport() {
                   <Area 
                     type="monotone" 
                     dataKey="predicted_revenue" 
-                    stroke="hsl(var(--primary))" 
+                    stroke="hsl(var(--chart-6))" 
                     fill="url(#forecastGradient)"
                     strokeWidth={2}
                   />
@@ -418,7 +418,7 @@ export function DemandForecastingReport() {
                       contentStyle={tooltipStyle}
                       formatter={(value: number) => [`$${value.toLocaleString()}`, 'Total Revenue']}
                     />
-                    <Bar dataKey="totalRevenue" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="totalRevenue" fill="hsl(var(--chart-3))" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
@@ -650,7 +650,7 @@ export function DemandForecastingReport() {
                       yAxisId="left"
                       type="monotone" 
                       dataKey="revenue" 
-                      stroke="hsl(var(--primary))" 
+                      stroke="hsl(var(--chart-3))" 
                       strokeWidth={2}
                       dot={false}
                     />

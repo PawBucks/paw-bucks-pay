@@ -577,7 +577,7 @@ export function ReviewCampaignWidget() {
                   <XAxis dataKey="month" fontSize={12} />
                   <YAxis fontSize={12} />
                   <Tooltip />
-                  <Bar dataKey="reviews" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="reviews" fill="hsl(var(--chart-5))" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>

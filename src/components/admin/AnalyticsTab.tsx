@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Cell } from 'recharts';
 
 export function AnalyticsTab() {
   const [analytics, setAnalytics] = useState<any>(null);
@@ -72,16 +72,22 @@ export function AnalyticsTab() {
     return <div className="text-center py-8">Loading analytics...</div>;
   }
 
-  const chartData = [
-    { name: 'Users', value: analytics?.total_users || 0 },
-    { name: 'Merchants', value: analytics?.total_merchants || 0 },
-    { name: 'Transactions', value: analytics?.total_transactions || 0 },
-    { name: 'Refunds', value: analytics?.total_refunded_transactions || 0 },
+  const CHART_COLORS = [
+    'hsl(var(--chart-1))',
+    'hsl(var(--chart-2))',
+    'hsl(var(--chart-3))',
+    'hsl(var(--chart-4))',
+    'hsl(var(--chart-5))',
+    'hsl(var(--chart-6))',
   ];
 
-  // Use actual values from the RPC function for consistency across dashboards
-  // total_rewards is in PawBucks, convert to USD (1 PawBuck = $0.001)
-  // platform_revenue is the actual sum of application_fee column (only on Stripe portions)
+  const chartData = [
+    { name: 'Users', value: analytics?.total_users || 0, fill: CHART_COLORS[0] },
+    { name: 'Merchants', value: analytics?.total_merchants || 0, fill: CHART_COLORS[1] },
+    { name: 'Transactions', value: analytics?.total_transactions || 0, fill: CHART_COLORS[2] },
+    { name: 'Refunds', value: analytics?.total_refunded_transactions || 0, fill: CHART_COLORS[3] },
+  ];
+
   const revenueData = [
     { name: 'GMV', value: analytics?.total_gmv || 0 },
     { name: 'Rewards', value: (analytics?.total_rewards || 0) * 0.001 },
@@ -107,7 +113,11 @@ export function AnalyticsTab() {
                 <XAxis dataKey="name" />
                 <YAxis />
                 <Tooltip />
-                <Bar dataKey="value" fill="hsl(var(--primary))" />
+                <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                  {chartData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                  ))}
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -124,7 +134,7 @@ export function AnalyticsTab() {
                 <XAxis dataKey="name" />
                 <YAxis />
                 <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
-                <Line type="monotone" dataKey="value" stroke="hsl(var(--primary))" strokeWidth={2} />
+                <Line type="monotone" dataKey="value" stroke="hsl(var(--chart-3))" strokeWidth={2} dot={{ fill: 'hsl(var(--chart-3))' }} />
               </LineChart>
             </ResponsiveContainer>
           </CardContent>

@@ -118,8 +118,8 @@ export const SpendingTrendsChart = memo(({ transactions, medicalRecords = [] }: 
                 <AreaChart data={dailyData}>
                   <defs>
                     <linearGradient id="colorDaily" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="hsl(var(--chart-2))" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="hsl(var(--chart-2))" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
                   <XAxis 
@@ -142,7 +142,7 @@ export const SpendingTrendsChart = memo(({ transactions, medicalRecords = [] }: 
                   <Area 
                     type="monotone" 
                     dataKey="amount" 
-                    stroke="hsl(var(--primary))" 
+                    stroke="hsl(var(--chart-2))" 
                     strokeWidth={2}
                     fill="url(#colorDaily)" 
                   />
@@ -180,7 +180,7 @@ export const SpendingTrendsChart = memo(({ transactions, medicalRecords = [] }: 
                   />
                   <Bar 
                     dataKey="amount" 
-                    fill="hsl(var(--primary))" 
+                    fill="hsl(var(--chart-3))" 
                     radius={[4, 4, 0, 0]}
                   />
                 </BarChart>

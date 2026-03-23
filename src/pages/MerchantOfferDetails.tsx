@@ -366,7 +366,7 @@ export default function MerchantOfferDetails() {
                       <XAxis dataKey="date" />
                       <YAxis />
                       <Tooltip />
-                      <Line type="monotone" dataKey="redemptions" stroke="hsl(var(--primary))" strokeWidth={2} />
+                      <Line type="monotone" dataKey="redemptions" stroke="hsl(var(--chart-5))" strokeWidth={2} />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>

@@ -459,8 +459,8 @@ export function ProfileOptimizationWidget() {
                       <PolarGrid strokeDasharray="3 3" />
                       <PolarAngleAxis dataKey="subject" tick={{ fontSize: 11 }} />
                       <PolarRadiusAxis angle={30} domain={[0, 100]} />
-                      <Radar name="You" dataKey="You" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.5} />
-                      <Radar name="Average" dataKey="Average" stroke="hsl(var(--muted-foreground))" fill="hsl(var(--muted-foreground))" fillOpacity={0.2} />
+                      <Radar name="You" dataKey="You" stroke="hsl(var(--chart-6))" fill="hsl(var(--chart-6))" fillOpacity={0.5} />
+                      <Radar name="Average" dataKey="Average" stroke="hsl(var(--chart-3))" fill="hsl(var(--chart-3))" fillOpacity={0.2} />
                       <Legend />
                     </RadarChart>
                   </ResponsiveContainer>
@@ -583,9 +583,9 @@ export function ProfileOptimizationWidget() {
                     <Line 
                       type="monotone" 
                       dataKey="score" 
-                      stroke="hsl(var(--primary))" 
+                      stroke="hsl(var(--chart-5))" 
                       strokeWidth={2}
-                      dot={{ fill: 'hsl(var(--primary))' }}
+                      dot={{ fill: 'hsl(var(--chart-5))' }}
                       name="Overall Score"
                     />
                   </LineChart>
@@ -616,8 +616,8 @@ export function ProfileOptimizationWidget() {
                         borderRadius: '8px',
                       }} 
                     />
-                    <Bar dataKey="views" fill="hsl(var(--primary))" name="Views" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="clicks" fill="hsl(var(--primary) / 0.5)" name="Clicks" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="views" fill="hsl(var(--chart-6))" name="Views" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="clicks" fill="hsl(var(--chart-4))" name="Clicks" radius={[4, 4, 0, 0]} />
                     <Legend />
                   </BarChart>
                 </ResponsiveContainer>

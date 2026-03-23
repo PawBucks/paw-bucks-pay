@@ -91,7 +91,7 @@ interface KeywordReport {
   seoRecommendations: SEORecommendation[];
 }
 
-const CHART_COLORS = ['hsl(var(--primary))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))'];
+const CHART_COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))', 'hsl(var(--chart-6))', 'hsl(var(--chart-7))', 'hsl(var(--chart-8))'];
 
 export function KeywordPerformanceWidget() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -294,8 +294,8 @@ export function KeywordPerformanceWidget() {
                     <AreaChart data={searchTrends}>
                       <defs>
                         <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                          <stop offset="5%" stopColor="hsl(var(--chart-6))" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="hsl(var(--chart-6))" stopOpacity={0}/>
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
@@ -316,7 +316,7 @@ export function KeywordPerformanceWidget() {
                       <Area 
                         type="monotone" 
                         dataKey="views" 
-                        stroke="hsl(var(--primary))" 
+                        stroke="hsl(var(--chart-6))" 
                         fillOpacity={1} 
                         fill="url(#colorViews)" 
                         name="Views"
@@ -406,8 +406,8 @@ export function KeywordPerformanceWidget() {
                         borderRadius: '8px'
                       }}
                     />
-                    <Bar dataKey="views" fill="hsl(var(--primary))" name="Views" radius={[0, 4, 4, 0]} />
-                    <Bar dataKey="clicks" fill="hsl(var(--chart-2))" name="Clicks" radius={[0, 4, 4, 0]} />
+                    <Bar dataKey="views" fill="hsl(var(--chart-6))" name="Views" radius={[0, 4, 4, 0]} />
+                    <Bar dataKey="clicks" fill="hsl(var(--chart-4))" name="Clicks" radius={[0, 4, 4, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
