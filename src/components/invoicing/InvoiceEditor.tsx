@@ -643,7 +643,7 @@ export function InvoiceEditor({
                                     className="pl-7"
                                     placeholder="0.00"
                                     {...field}
-                                    value={field.value === 0 && !field.value ? "" : field.value}
+                                    value={(field.value as any) === "" ? "" : field.value}
                                     onChange={(e) => {
                                       const val = e.target.value;
                                       field.onChange(val === "" ? "" : parseFloat(val));
