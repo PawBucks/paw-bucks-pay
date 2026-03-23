@@ -616,8 +616,8 @@ export function ProfileOptimizationWidget() {
                         borderRadius: '8px',
                       }} 
                     />
-                    <Bar dataKey="views" fill="hsl(var(--primary))" name="Views" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="clicks" fill="hsl(var(--primary) / 0.5)" name="Clicks" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="views" fill="hsl(var(--chart-6))" name="Views" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="clicks" fill="hsl(var(--chart-4))" name="Clicks" radius={[4, 4, 0, 0]} />
                     <Legend />
                   </BarChart>
                 </ResponsiveContainer>

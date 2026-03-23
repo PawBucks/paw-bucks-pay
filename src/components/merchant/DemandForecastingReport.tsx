@@ -650,7 +650,7 @@ export function DemandForecastingReport() {
                       yAxisId="left"
                       type="monotone" 
                       dataKey="revenue" 
-                      stroke="hsl(var(--primary))" 
+                      stroke="hsl(var(--chart-3))" 
                       strokeWidth={2}
                       dot={false}
                     />

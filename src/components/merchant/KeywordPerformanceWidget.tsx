@@ -406,8 +406,8 @@ export function KeywordPerformanceWidget() {
                         borderRadius: '8px'
                       }}
                     />
-                    <Bar dataKey="views" fill="hsl(var(--primary))" name="Views" radius={[0, 4, 4, 0]} />
-                    <Bar dataKey="clicks" fill="hsl(var(--chart-2))" name="Clicks" radius={[0, 4, 4, 0]} />
+                    <Bar dataKey="views" fill="hsl(var(--chart-6))" name="Views" radius={[0, 4, 4, 0]} />
+                    <Bar dataKey="clicks" fill="hsl(var(--chart-4))" name="Clicks" radius={[0, 4, 4, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (

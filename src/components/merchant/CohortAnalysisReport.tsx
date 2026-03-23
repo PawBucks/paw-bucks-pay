@@ -498,7 +498,7 @@ export function CohortAnalysisReport() {
                         contentStyle={tooltipStyle}
                         formatter={(value: number) => [value, 'Customers']}
                       />
-                      <Bar dataKey="count" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} name="count" />
+                      <Bar dataKey="count" fill="hsl(var(--chart-4))" radius={[0, 4, 4, 0]} name="count" />
                     </BarChart>
                   </ResponsiveContainer>
 

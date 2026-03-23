@@ -56,8 +56,8 @@ export const LoyaltyProgressRing = ({
         />
         <defs>
           <linearGradient id="loyaltyGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="hsl(var(--primary))" />
-            <stop offset="100%" stopColor="hsl(var(--accent))" />
+            <stop offset="0%" stopColor="hsl(var(--chart-2))" />
+            <stop offset="100%" stopColor="hsl(var(--chart-5))" />
           </linearGradient>
         </defs>
       </svg>
