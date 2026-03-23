@@ -65,7 +65,7 @@ const MerchantChartsComponent = ({
               contentStyle={tooltipStyle}
               formatter={barFormatter}
             />
-            <Bar dataKey="amount" fill="hsl(var(--accent))" radius={[8, 8, 0, 0]} />
+            <Bar dataKey="amount" fill="hsl(var(--chart-6))" radius={[8, 8, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </GradientCard>

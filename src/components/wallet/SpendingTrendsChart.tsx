@@ -180,7 +180,7 @@ export const SpendingTrendsChart = memo(({ transactions, medicalRecords = [] }: 
                   />
                   <Bar 
                     dataKey="amount" 
-                    fill="hsl(var(--primary))" 
+                    fill="hsl(var(--chart-3))" 
                     radius={[4, 4, 0, 0]}
                   />
                 </BarChart>
