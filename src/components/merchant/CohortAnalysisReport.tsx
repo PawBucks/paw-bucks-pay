@@ -262,7 +262,7 @@ export function CohortAnalysisReport() {
                       contentStyle={tooltipStyle}
                       formatter={(value: number) => [`$${value.toFixed(2)}`, 'Avg LTV']}
                     />
-                    <Bar dataKey="avg_ltv" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} name="avg_ltv" />
+                    <Bar dataKey="avg_ltv" fill="hsl(var(--chart-2))" radius={[4, 4, 0, 0]} name="avg_ltv" />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
