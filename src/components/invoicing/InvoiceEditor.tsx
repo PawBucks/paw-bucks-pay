@@ -685,8 +685,8 @@ export function InvoiceEditor({
                   variant="outline"
                   onClick={() => append({ 
                     description: "", 
-                    quantity: 1, 
-                    unit_price: 0, 
+                    quantity: "" as any, 
+                    unit_price: "" as any, 
                     unit_type: "unit",
                     tax_rate: 0 
                   })}
