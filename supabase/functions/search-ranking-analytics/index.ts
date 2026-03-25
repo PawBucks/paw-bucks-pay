@@ -310,7 +310,8 @@ async function getKeywordInsights(supabase: any, merchantId: string, merchant: a
 
   const keywordRecommendations = businessTypeKeywords.map(kw => {
     const stats = keywordStats[kw.term] || { views: 0, clicks: 0, conversions: 0, avgPosition: [] };
-    const implemented = merchantDescription.includes(kw.term.toLowerCase()) || 
+    const implemented = savedKeywords.includes(kw.term.toLowerCase()) ||
+                        merchantDescription.includes(kw.term.toLowerCase()) || 
                         merchantName.includes(kw.term.toLowerCase()) ||
                         stats.views > 0;
     
