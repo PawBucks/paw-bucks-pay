@@ -1,4 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,11 +10,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Search, TrendingUp, Loader2, CheckCircle2, XCircle, AlertCircle,
   Target, Lightbulb, Zap, ArrowUpRight, Star, BarChart3, Rocket,
-  MapPin, Tag, Brain, FileText
+  MapPin, Tag, Brain, FileText, Plus, X
 } from "lucide-react";
 import { SERVICE_NAMES, merchantHasActiveService } from "@/services/api/merchantServices.service";
 import { Link } from "react-router-dom";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
+import { toast } from "sonner";
 
 export function SearchRankingBoosterWidget() {
   const { data: merchantData } = useQuery({
