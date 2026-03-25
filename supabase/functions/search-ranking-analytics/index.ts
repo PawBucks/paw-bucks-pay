@@ -830,3 +830,64 @@ function generateProfileOptimizations(merchant: any): Array<{
 
   return optimizations;
 }
+
+async function addKeyword(supabase: any, merchantId: string, params: any) {
+  const { keyword } = params;
+  if (!keyword || typeof keyword !== 'string') {
+    throw new Error('Keyword is required');
+  }
+
+  // Get current keywords
+  const { data: merchant, error: fetchError } = await supabase
+    .from('merchants')
+    .select('search_keywords')
+    .eq('id', merchantId)
+    .single();
+
+  if (fetchError) throw fetchError;
+
+  const currentKeywords: string[] = merchant.search_keywords || [];
+  
+  // Check if already exists
+  if (currentKeywords.includes(keyword.toLowerCase().trim())) {
+    return { success: true, message: 'Keyword already added', keywords: currentKeywords };
+  }
+
+  const updatedKeywords = [...currentKeywords, keyword.toLowerCase().trim()];
+
+  const { error: updateError } = await supabase
+    .from('merchants')
+    .update({ search_keywords: updatedKeywords })
+    .eq('id', merchantId);
+
+  if (updateError) throw updateError;
+
+  return { success: true, message: 'Keyword added successfully', keywords: updatedKeywords };
+}
+
+async function removeKeyword(supabase: any, merchantId: string, params: any) {
+  const { keyword } = params;
+  if (!keyword || typeof keyword !== 'string') {
+    throw new Error('Keyword is required');
+  }
+
+  const { data: merchant, error: fetchError } = await supabase
+    .from('merchants')
+    .select('search_keywords')
+    .eq('id', merchantId)
+    .single();
+
+  if (fetchError) throw fetchError;
+
+  const currentKeywords: string[] = merchant.search_keywords || [];
+  const updatedKeywords = currentKeywords.filter(k => k !== keyword.toLowerCase().trim());
+
+  const { error: updateError } = await supabase
+    .from('merchants')
+    .update({ search_keywords: updatedKeywords })
+    .eq('id', merchantId);
+
+  if (updateError) throw updateError;
+
+  return { success: true, message: 'Keyword removed successfully', keywords: updatedKeywords };
+}
