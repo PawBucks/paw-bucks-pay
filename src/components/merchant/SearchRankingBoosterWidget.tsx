@@ -18,6 +18,9 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { toast } from "sonner";
 
 export function SearchRankingBoosterWidget() {
+  const [addingKeyword, setAddingKeyword] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+
   const { data: merchantData } = useQuery({
     queryKey: ['merchant-for-search-booster'],
     queryFn: async () => {
