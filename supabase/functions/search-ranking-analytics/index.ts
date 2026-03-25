@@ -251,6 +251,14 @@ async function getKeywordInsights(supabase: any, merchantId: string, merchant: a
   const start = startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
   const end = endDate || new Date().toISOString().split('T')[0];
 
+  // Fetch merchant's saved search keywords
+  const { data: merchantFull } = await supabase
+    .from('merchants')
+    .select('search_keywords')
+    .eq('id', merchantId)
+    .single();
+  const savedKeywords: string[] = (merchantFull?.search_keywords || []).map((k: string) => k.toLowerCase());
+
   // Get search analytics
   const { data: searchAnalytics } = await supabase
     .from('merchant_search_analytics')
