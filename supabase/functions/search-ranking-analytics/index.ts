@@ -71,6 +71,12 @@ serve(async (req) => {
       case 'getMonthlyReport':
         result = await getMonthlyReport(supabase, merchantId, merchant);
         break;
+      case 'addKeyword':
+        result = await addKeyword(supabase, merchantId, params);
+        break;
+      case 'removeKeyword':
+        result = await removeKeyword(supabase, merchantId, params);
+        break;
       default:
         return new Response(JSON.stringify({ error: 'Invalid action' }), {
           status: 400,
