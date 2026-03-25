@@ -1,4 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,13 +10,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Search, TrendingUp, Loader2, CheckCircle2, XCircle, AlertCircle,
   Target, Lightbulb, Zap, ArrowUpRight, Star, BarChart3, Rocket,
-  MapPin, Tag, Brain, FileText
+  MapPin, Tag, Brain, FileText, Plus, X
 } from "lucide-react";
 import { SERVICE_NAMES, merchantHasActiveService } from "@/services/api/merchantServices.service";
 import { Link } from "react-router-dom";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
+import { toast } from "sonner";
 
 export function SearchRankingBoosterWidget() {
+  const [addingKeyword, setAddingKeyword] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+
   const { data: merchantData } = useQuery({
     queryKey: ['merchant-for-search-booster'],
     queryFn: async () => {
@@ -82,6 +87,58 @@ export function SearchRankingBoosterWidget() {
     },
     enabled: !!merchantData?.id,
   });
+
+  const handleAddKeyword = async (keyword: string) => {
+    try {
+      setAddingKeyword(keyword);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session || !merchantData?.id) return;
+
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/search-ranking-analytics`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ action: 'addKeyword', merchantId: merchantData.id, keyword }),
+      });
+      const result = await response.json();
+      if (result.error) throw new Error(result.error);
+      
+      toast.success(`Keyword "${keyword}" added successfully!`);
+      queryClient.invalidateQueries({ queryKey: ['search-ranking-keywords'] });
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to add keyword');
+    } finally {
+      setAddingKeyword(null);
+    }
+  };
+
+  const handleRemoveKeyword = async (keyword: string) => {
+    try {
+      setAddingKeyword(keyword);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session || !merchantData?.id) return;
+
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/search-ranking-analytics`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ action: 'removeKeyword', merchantId: merchantData.id, keyword }),
+      });
+      const result = await response.json();
+      if (result.error) throw new Error(result.error);
+      
+      toast.success(`Keyword "${keyword}" removed`);
+      queryClient.invalidateQueries({ queryKey: ['search-ranking-keywords'] });
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to remove keyword');
+    } finally {
+      setAddingKeyword(null);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -234,7 +291,25 @@ export function SearchRankingBoosterWidget() {
                       <p className="text-xs text-muted-foreground">Relevance: {kw.relevance}% • Competition: {kw.competition}</p>
                     </div>
                   </div>
-                  <Badge variant={kw.implemented ? 'default' : 'secondary'}>{kw.implemented ? 'Active' : 'Add'}</Badge>
+                  {kw.implemented ? (
+                    <Badge 
+                      variant="default" 
+                      className="cursor-pointer hover:bg-destructive hover:text-destructive-foreground transition-colors gap-1"
+                      onClick={() => handleRemoveKeyword(kw.keyword)}
+                    >
+                      {addingKeyword === kw.keyword ? <Loader2 className="h-3 w-3 animate-spin" /> : <CheckCircle2 className="h-3 w-3" />}
+                      Active
+                    </Badge>
+                  ) : (
+                    <Badge 
+                      variant="secondary" 
+                      className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors gap-1"
+                      onClick={() => handleAddKeyword(kw.keyword)}
+                    >
+                      {addingKeyword === kw.keyword ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
+                      Add
+                    </Badge>
+                  )}
                 </div>
               ))}
             </CardContent>

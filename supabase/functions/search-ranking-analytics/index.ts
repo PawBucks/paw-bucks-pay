@@ -71,6 +71,12 @@ serve(async (req) => {
       case 'getMonthlyReport':
         result = await getMonthlyReport(supabase, merchantId, merchant);
         break;
+      case 'addKeyword':
+        result = await addKeyword(supabase, merchantId, params);
+        break;
+      case 'removeKeyword':
+        result = await removeKeyword(supabase, merchantId, params);
+        break;
       default:
         return new Response(JSON.stringify({ error: 'Invalid action' }), {
           status: 400,
@@ -245,6 +251,14 @@ async function getKeywordInsights(supabase: any, merchantId: string, merchant: a
   const start = startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
   const end = endDate || new Date().toISOString().split('T')[0];
 
+  // Fetch merchant's saved search keywords
+  const { data: merchantFull } = await supabase
+    .from('merchants')
+    .select('search_keywords')
+    .eq('id', merchantId)
+    .single();
+  const savedKeywords: string[] = (merchantFull?.search_keywords || []).map((k: string) => k.toLowerCase());
+
   // Get search analytics
   const { data: searchAnalytics } = await supabase
     .from('merchant_search_analytics')
@@ -296,7 +310,8 @@ async function getKeywordInsights(supabase: any, merchantId: string, merchant: a
 
   const keywordRecommendations = businessTypeKeywords.map(kw => {
     const stats = keywordStats[kw.term] || { views: 0, clicks: 0, conversions: 0, avgPosition: [] };
-    const implemented = merchantDescription.includes(kw.term.toLowerCase()) || 
+    const implemented = savedKeywords.includes(kw.term.toLowerCase()) ||
+                        merchantDescription.includes(kw.term.toLowerCase()) || 
                         merchantName.includes(kw.term.toLowerCase()) ||
                         stats.views > 0;
     
@@ -823,4 +838,65 @@ function generateProfileOptimizations(merchant: any): Array<{
   });
 
   return optimizations;
+}
+
+async function addKeyword(supabase: any, merchantId: string, params: any) {
+  const { keyword } = params;
+  if (!keyword || typeof keyword !== 'string') {
+    throw new Error('Keyword is required');
+  }
+
+  // Get current keywords
+  const { data: merchant, error: fetchError } = await supabase
+    .from('merchants')
+    .select('search_keywords')
+    .eq('id', merchantId)
+    .single();
+
+  if (fetchError) throw fetchError;
+
+  const currentKeywords: string[] = merchant.search_keywords || [];
+  
+  // Check if already exists
+  if (currentKeywords.includes(keyword.toLowerCase().trim())) {
+    return { success: true, message: 'Keyword already added', keywords: currentKeywords };
+  }
+
+  const updatedKeywords = [...currentKeywords, keyword.toLowerCase().trim()];
+
+  const { error: updateError } = await supabase
+    .from('merchants')
+    .update({ search_keywords: updatedKeywords })
+    .eq('id', merchantId);
+
+  if (updateError) throw updateError;
+
+  return { success: true, message: 'Keyword added successfully', keywords: updatedKeywords };
+}
+
+async function removeKeyword(supabase: any, merchantId: string, params: any) {
+  const { keyword } = params;
+  if (!keyword || typeof keyword !== 'string') {
+    throw new Error('Keyword is required');
+  }
+
+  const { data: merchant, error: fetchError } = await supabase
+    .from('merchants')
+    .select('search_keywords')
+    .eq('id', merchantId)
+    .single();
+
+  if (fetchError) throw fetchError;
+
+  const currentKeywords: string[] = merchant.search_keywords || [];
+  const updatedKeywords = currentKeywords.filter(k => k !== keyword.toLowerCase().trim());
+
+  const { error: updateError } = await supabase
+    .from('merchants')
+    .update({ search_keywords: updatedKeywords })
+    .eq('id', merchantId);
+
+  if (updateError) throw updateError;
+
+  return { success: true, message: 'Keyword removed successfully', keywords: updatedKeywords };
 }

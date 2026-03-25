@@ -4888,6 +4888,7 @@ export type Database = {
           phone: string | null
           price_range: number | null
           privacy_policy_url: string | null
+          search_keywords: string[] | null
           shipping_returns_policy_url: string | null
           sponsored_until: string | null
           state_of_incorporation: string | null
@@ -4937,6 +4938,7 @@ export type Database = {
           phone?: string | null
           price_range?: number | null
           privacy_policy_url?: string | null
+          search_keywords?: string[] | null
           shipping_returns_policy_url?: string | null
           sponsored_until?: string | null
           state_of_incorporation?: string | null
@@ -4986,6 +4988,7 @@ export type Database = {
           phone?: string | null
           price_range?: number | null
           privacy_policy_url?: string | null
+          search_keywords?: string[] | null
           shipping_returns_policy_url?: string | null
           sponsored_until?: string | null
           state_of_incorporation?: string | null
