@@ -88,6 +88,58 @@ export function SearchRankingBoosterWidget() {
     enabled: !!merchantData?.id,
   });
 
+  const handleAddKeyword = async (keyword: string) => {
+    try {
+      setAddingKeyword(keyword);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session || !merchantData?.id) return;
+
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/search-ranking-analytics`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ action: 'addKeyword', merchantId: merchantData.id, keyword }),
+      });
+      const result = await response.json();
+      if (result.error) throw new Error(result.error);
+      
+      toast.success(`Keyword "${keyword}" added successfully!`);
+      queryClient.invalidateQueries({ queryKey: ['search-ranking-keywords'] });
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to add keyword');
+    } finally {
+      setAddingKeyword(null);
+    }
+  };
+
+  const handleRemoveKeyword = async (keyword: string) => {
+    try {
+      setAddingKeyword(keyword);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session || !merchantData?.id) return;
+
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/search-ranking-analytics`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ action: 'removeKeyword', merchantId: merchantData.id, keyword }),
+      });
+      const result = await response.json();
+      if (result.error) throw new Error(result.error);
+      
+      toast.success(`Keyword "${keyword}" removed`);
+      queryClient.invalidateQueries({ queryKey: ['search-ranking-keywords'] });
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to remove keyword');
+    } finally {
+      setAddingKeyword(null);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
