@@ -291,7 +291,25 @@ export function SearchRankingBoosterWidget() {
                       <p className="text-xs text-muted-foreground">Relevance: {kw.relevance}% • Competition: {kw.competition}</p>
                     </div>
                   </div>
-                  <Badge variant={kw.implemented ? 'default' : 'secondary'}>{kw.implemented ? 'Active' : 'Add'}</Badge>
+                  {kw.implemented ? (
+                    <Badge 
+                      variant="default" 
+                      className="cursor-pointer hover:bg-destructive hover:text-destructive-foreground transition-colors gap-1"
+                      onClick={() => handleRemoveKeyword(kw.keyword)}
+                    >
+                      {addingKeyword === kw.keyword ? <Loader2 className="h-3 w-3 animate-spin" /> : <CheckCircle2 className="h-3 w-3" />}
+                      Active
+                    </Badge>
+                  ) : (
+                    <Badge 
+                      variant="secondary" 
+                      className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors gap-1"
+                      onClick={() => handleAddKeyword(kw.keyword)}
+                    >
+                      {addingKeyword === kw.keyword ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
+                      Add
+                    </Badge>
+                  )}
                 </div>
               ))}
             </CardContent>
