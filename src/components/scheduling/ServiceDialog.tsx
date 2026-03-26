@@ -45,6 +45,9 @@ const serviceSchema = z.object({
   max_capacity: z.coerce.number().min(1).max(100),
   requires_pet: z.boolean(),
   is_active: z.boolean(),
+  buffer_minutes: z.coerce.number().min(0).max(120),
+  min_notice_hours: z.coerce.number().min(0).max(168),
+  cancellation_policy_hours: z.coerce.number().min(0).max(168),
 });
 
 type ServiceFormData = z.infer<typeof serviceSchema>;
