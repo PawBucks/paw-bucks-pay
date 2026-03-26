@@ -18,7 +18,7 @@ export default function PublicBookingPage() {
       if (!slug) throw new Error("No slug");
       const { data, error } = await supabase
         .from("merchants")
-        .select("id, business_name, logo_url, address, phone, website, business_type, cashback_rate, storefront_slug")
+        .select("id, business_name, logo_url, address, phone, website_url, business_type, cashback_rate, storefront_slug")
         .eq("storefront_slug", slug)
         .eq("is_active", true)
         .single();
