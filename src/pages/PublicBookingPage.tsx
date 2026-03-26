@@ -132,9 +132,9 @@ export default function PublicBookingPage() {
                 </a>
               </Button>
             )}
-            {merchant.website && (
+            {merchant.website_url && (
               <Button variant="outline" size="sm" asChild>
-                <a href={merchant.website} target="_blank" rel="noopener noreferrer">
+                <a href={merchant.website_url} target="_blank" rel="noopener noreferrer">
                   <Globe className="w-3.5 h-3.5 mr-1" /> Website
                 </a>
               </Button>
