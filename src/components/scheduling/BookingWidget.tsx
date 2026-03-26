@@ -487,7 +487,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
             </div>
             
             {availableSlots.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
+              <div className="text-center py-8 text-muted-foreground space-y-3">
                 <Clock className="w-12 h-12 mx-auto mb-3 opacity-50" />
                 <p>No available slots for this date.</p>
                 <Button variant="link" onClick={() => setStep("date")}>
