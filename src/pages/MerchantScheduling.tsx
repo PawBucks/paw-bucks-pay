@@ -14,6 +14,7 @@ import { AvailabilityManager } from "@/components/scheduling/AvailabilityManager
 import { BookingsCalendar } from "@/components/scheduling/BookingsCalendar";
 import { ServiceDialog } from "@/components/scheduling/ServiceDialog";
 import { FlashSaleDialog } from "@/components/scheduling/FlashSaleDialog";
+import { IntakeQuestionsManager } from "@/components/scheduling/IntakeQuestionsManager";
 import { 
   schedulingService, 
   type MerchantService, 
