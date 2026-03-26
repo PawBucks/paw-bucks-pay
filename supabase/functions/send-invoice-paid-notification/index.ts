@@ -264,7 +264,6 @@ function generateInvoicePaidEmailHtml(
           <!-- ===== HEADER ===== -->
           <tr>
             <td style="background:#ffffff;padding:40px 32px 32px;text-align:center;border-radius:16px 16px 0 0;">
-              <p style="margin:0 0 8px;font-size:16px;letter-spacing:2px;">🐾</p>
               <img src="https://yxpnkipcoxksmnsvpvwi.supabase.co/storage/v1/object/public/email-assets/pawbucks-logo-email.png" alt="PawBucks" width="120" height="120" style="display:block;margin:0 auto;width:120px;height:120px;">
               <p style="margin:16px 0 0;font-size:20px;font-weight:700;color:#1f2937;">Payment Received</p>
               <p style="margin:8px 0 0;font-size:14px;color:#6b7280;">A customer just completed a purchase.</p>
