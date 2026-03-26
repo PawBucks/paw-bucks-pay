@@ -97,6 +97,8 @@ const PetPersonalityQuizPage = lazyWithRetry(() => import("./pages/PetPersonalit
 const LoyaltyPage = lazyWithRetry(() => import("./pages/LoyaltyPage"), "LoyaltyPage");
 const LoyaltyCardsPage = lazyWithRetry(() => import("./pages/LoyaltyCardsPage"), "LoyaltyCardsPage");
 const MerchantMessages = lazyWithRetry(() => import("./pages/MerchantMessages"), "MerchantMessages");
+const MyBookings = lazyWithRetry(() => import("./pages/MyBookings"), "MyBookings");
+const PublicBookingPage = lazyWithRetry(() => import("./pages/PublicBookingPage"), "PublicBookingPage");
 
 const createQueryClient = () => new QueryClient({
   defaultOptions: {
@@ -142,6 +144,7 @@ const AppRoutes = () => {
       <Route path="/invoice/:invoiceId/pay" element={<PageTransition><InvoicePayment /></PageTransition>} />
       <Route path="/invoice/:invoiceId/success" element={<PageTransition><InvoicePaymentSuccess /></PageTransition>} />
       <Route path="/merchant/:merchantId" element={<PageTransition><MerchantProfile /></PageTransition>} />
+      <Route path="/book/:slug" element={<PageTransition><PublicBookingPage /></PageTransition>} />
       <Route path="/lost-pets" element={<PageTransition><LostPets /></PageTransition>} />
       <Route path="/lost-pets/:id" element={<PageTransition><LostPetDetail /></PageTransition>} />
 
@@ -167,6 +170,7 @@ const AppRoutes = () => {
       <Route path="/pet-personality-quiz" element={<ProtectedRoute><PageTransition><PetPersonalityQuizPage /></PageTransition></ProtectedRoute>} />
       <Route path="/loyalty" element={<ProtectedRoute><PageTransition><LoyaltyPage /></PageTransition></ProtectedRoute>} />
       <Route path="/loyalty-cards" element={<ProtectedRoute><PageTransition><LoyaltyCardsPage /></PageTransition></ProtectedRoute>} />
+      <Route path="/my-bookings" element={<ProtectedRoute><PageTransition><MyBookings /></PageTransition></ProtectedRoute>} />
 
       {/* Admin routes - requires admin or superadmin role */}
       <Route path="/admin" element={<PageTransition><AdminLogin /></PageTransition>} />

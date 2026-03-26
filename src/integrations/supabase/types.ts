@@ -493,6 +493,179 @@ export type Database = {
           },
         ]
       }
+      booking_intake_answers: {
+        Row: {
+          answer_text: string | null
+          booking_id: string
+          created_at: string
+          id: string
+          question_id: string
+        }
+        Insert: {
+          answer_text?: string | null
+          booking_id: string
+          created_at?: string
+          id?: string
+          question_id: string
+        }
+        Update: {
+          answer_text?: string | null
+          booking_id?: string
+          created_at?: string
+          id?: string
+          question_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_intake_answers_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "service_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_intake_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "booking_intake_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      booking_intake_questions: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          is_active: boolean
+          is_required: boolean
+          merchant_id: string
+          options: Json | null
+          question_text: string
+          question_type: string
+          service_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          is_required?: boolean
+          merchant_id: string
+          options?: Json | null
+          question_text: string
+          question_type?: string
+          service_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          is_required?: boolean
+          merchant_id?: string
+          options?: Json | null
+          question_text?: string
+          question_type?: string
+          service_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_intake_questions_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_intake_questions_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_intake_questions_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      booking_waitlist: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          merchant_id: string
+          notes: string | null
+          notified_at: string | null
+          preferred_date: string
+          preferred_time_end: string | null
+          preferred_time_start: string | null
+          service_id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          merchant_id: string
+          notes?: string | null
+          notified_at?: string | null
+          preferred_date: string
+          preferred_time_end?: string | null
+          preferred_time_start?: string | null
+          service_id: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          merchant_id?: string
+          notes?: string | null
+          notified_at?: string | null
+          preferred_date?: string
+          preferred_time_end?: string | null
+          preferred_time_start?: string | null
+          service_id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_waitlist_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_waitlist_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_waitlist_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       budget_settings: {
         Row: {
           alert_threshold: number
@@ -4308,6 +4481,9 @@ export type Database = {
       }
       merchant_services: {
         Row: {
+          allow_recurring: boolean
+          buffer_minutes: number
+          cancellation_policy_hours: number
           category: Database["public"]["Enums"]["service_category"]
           created_at: string
           description: string | null
@@ -4320,6 +4496,7 @@ export type Database = {
           is_flash_sale: boolean
           max_capacity: number
           merchant_id: string
+          min_notice_hours: number
           name: string
           payment_type: Database["public"]["Enums"]["payment_type"]
           price: number
@@ -4327,6 +4504,9 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          allow_recurring?: boolean
+          buffer_minutes?: number
+          cancellation_policy_hours?: number
           category?: Database["public"]["Enums"]["service_category"]
           created_at?: string
           description?: string | null
@@ -4339,6 +4519,7 @@ export type Database = {
           is_flash_sale?: boolean
           max_capacity?: number
           merchant_id: string
+          min_notice_hours?: number
           name: string
           payment_type?: Database["public"]["Enums"]["payment_type"]
           price?: number
@@ -4346,6 +4527,9 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          allow_recurring?: boolean
+          buffer_minutes?: number
+          cancellation_policy_hours?: number
           category?: Database["public"]["Enums"]["service_category"]
           created_at?: string
           description?: string | null
@@ -4358,6 +4542,7 @@ export type Database = {
           is_flash_sale?: boolean
           max_capacity?: number
           merchant_id?: string
+          min_notice_hours?: number
           name?: string
           payment_type?: Database["public"]["Enums"]["payment_type"]
           price?: number
@@ -8131,16 +8316,22 @@ export type Database = {
       service_bookings: {
         Row: {
           booking_date: string
+          cancellation_reason: string | null
           created_at: string
           customer_email: string | null
           customer_name: string | null
           customer_phone: string | null
           end_time: string
           id: string
+          is_recurring: boolean
           merchant_id: string
           notes: string | null
           payment_status: string
           pet_id: string | null
+          recurring_end_date: string | null
+          recurring_interval: string | null
+          recurring_parent_id: string | null
+          rescheduled_from_id: string | null
           service_id: string
           start_time: string
           status: Database["public"]["Enums"]["booking_status"]
@@ -8151,16 +8342,22 @@ export type Database = {
         }
         Insert: {
           booking_date: string
+          cancellation_reason?: string | null
           created_at?: string
           customer_email?: string | null
           customer_name?: string | null
           customer_phone?: string | null
           end_time: string
           id?: string
+          is_recurring?: boolean
           merchant_id: string
           notes?: string | null
           payment_status?: string
           pet_id?: string | null
+          recurring_end_date?: string | null
+          recurring_interval?: string | null
+          recurring_parent_id?: string | null
+          rescheduled_from_id?: string | null
           service_id: string
           start_time: string
           status?: Database["public"]["Enums"]["booking_status"]
@@ -8171,16 +8368,22 @@ export type Database = {
         }
         Update: {
           booking_date?: string
+          cancellation_reason?: string | null
           created_at?: string
           customer_email?: string | null
           customer_name?: string | null
           customer_phone?: string | null
           end_time?: string
           id?: string
+          is_recurring?: boolean
           merchant_id?: string
           notes?: string | null
           payment_status?: string
           pet_id?: string | null
+          recurring_end_date?: string | null
+          recurring_interval?: string | null
+          recurring_parent_id?: string | null
+          rescheduled_from_id?: string | null
           service_id?: string
           start_time?: string
           status?: Database["public"]["Enums"]["booking_status"]
@@ -8209,6 +8412,20 @@ export type Database = {
             columns: ["pet_id"]
             isOneToOne: false
             referencedRelation: "pet_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_bookings_recurring_parent_id_fkey"
+            columns: ["recurring_parent_id"]
+            isOneToOne: false
+            referencedRelation: "service_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_bookings_rescheduled_from_id_fkey"
+            columns: ["rescheduled_from_id"]
+            isOneToOne: false
+            referencedRelation: "service_bookings"
             referencedColumns: ["id"]
           },
           {

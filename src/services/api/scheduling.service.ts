@@ -35,6 +35,10 @@ export interface MerchantService {
   max_capacity: number;
   requires_pet: boolean;
   is_active: boolean;
+  buffer_minutes: number;
+  min_notice_hours: number;
+  allow_recurring: boolean;
+  cancellation_policy_hours: number;
   // Flash Sale fields
   is_flash_sale: boolean;
   flash_sale_pawbucks_price?: number | null;

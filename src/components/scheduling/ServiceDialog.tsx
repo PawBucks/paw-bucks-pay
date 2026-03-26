@@ -45,6 +45,9 @@ const serviceSchema = z.object({
   max_capacity: z.coerce.number().min(1).max(100),
   requires_pet: z.boolean(),
   is_active: z.boolean(),
+  buffer_minutes: z.coerce.number().min(0).max(120),
+  min_notice_hours: z.coerce.number().min(0).max(168),
+  cancellation_policy_hours: z.coerce.number().min(0).max(168),
 });
 
 type ServiceFormData = z.infer<typeof serviceSchema>;
@@ -96,6 +99,9 @@ export function ServiceDialog({ open, onOpenChange, service, onSubmit }: Service
       max_capacity: 1,
       requires_pet: true,
       is_active: true,
+      buffer_minutes: 0,
+      min_notice_hours: 2,
+      cancellation_policy_hours: 24,
     },
   });
 
@@ -111,6 +117,9 @@ export function ServiceDialog({ open, onOpenChange, service, onSubmit }: Service
         max_capacity: service.max_capacity,
         requires_pet: service.requires_pet,
         is_active: service.is_active,
+        buffer_minutes: service.buffer_minutes || 0,
+        min_notice_hours: service.min_notice_hours || 2,
+        cancellation_policy_hours: service.cancellation_policy_hours || 24,
       });
     } else {
       form.reset({
@@ -123,6 +132,9 @@ export function ServiceDialog({ open, onOpenChange, service, onSubmit }: Service
         max_capacity: 1,
         requires_pet: true,
         is_active: true,
+        buffer_minutes: 0,
+        min_notice_hours: 2,
+        cancellation_policy_hours: 24,
       });
     }
   }, [service, form]);
@@ -324,6 +336,52 @@ export function ServiceDialog({ open, onOpenChange, service, onSubmit }: Service
                 </FormItem>
               )}
             />
+
+            {/* Smart Scheduling Settings */}
+            <div className="border-t pt-4 mt-2">
+              <p className="text-sm font-medium mb-3">Smart Scheduling</p>
+              <div className="grid grid-cols-3 gap-3">
+                <FormField
+                  control={form.control}
+                  name="buffer_minutes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs">Buffer (min)</FormLabel>
+                      <FormControl>
+                        <Input type="number" min="0" max="120" {...field} />
+                      </FormControl>
+                      <FormDescription className="text-xs">Break between bookings</FormDescription>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="min_notice_hours"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs">Min Notice (hrs)</FormLabel>
+                      <FormControl>
+                        <Input type="number" min="0" max="168" {...field} />
+                      </FormControl>
+                      <FormDescription className="text-xs">Advance booking required</FormDescription>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="cancellation_policy_hours"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs">Cancel Policy (hrs)</FormLabel>
+                      <FormControl>
+                        <Input type="number" min="0" max="168" {...field} />
+                      </FormControl>
+                      <FormDescription className="text-xs">Cancel before deadline</FormDescription>
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
 
             <FormField
               control={form.control}

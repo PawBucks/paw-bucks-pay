@@ -14,6 +14,7 @@ import { AvailabilityManager } from "@/components/scheduling/AvailabilityManager
 import { BookingsCalendar } from "@/components/scheduling/BookingsCalendar";
 import { ServiceDialog } from "@/components/scheduling/ServiceDialog";
 import { FlashSaleDialog } from "@/components/scheduling/FlashSaleDialog";
+import { IntakeQuestionsManager } from "@/components/scheduling/IntakeQuestionsManager";
 import { 
   schedulingService, 
   type MerchantService, 
@@ -258,6 +259,7 @@ const MerchantScheduling = () => {
             <TabsTrigger value="services">Services</TabsTrigger>
             <TabsTrigger value="availability">Availability</TabsTrigger>
             <TabsTrigger value="bookings">Bookings</TabsTrigger>
+            <TabsTrigger value="intake">Intake Forms</TabsTrigger>
           </TabsList>
 
           <TabsContent value="services">
@@ -292,6 +294,15 @@ const MerchantScheduling = () => {
               bookings={bookings}
               onUpdateStatus={handleUpdateBookingStatus}
             />
+          </TabsContent>
+
+          <TabsContent value="intake">
+            {merchantId && (
+              <IntakeQuestionsManager
+                merchantId={merchantId}
+                services={services.map(s => ({ id: s.id, name: s.name }))}
+              />
+            )}
           </TabsContent>
         </Tabs>
       </main>
