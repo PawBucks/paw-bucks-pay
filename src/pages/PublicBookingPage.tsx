@@ -23,7 +23,7 @@ export default function PublicBookingPage() {
         .eq("is_active", true)
         .single();
       if (error) throw error;
-      return data;
+      return data as any;
     },
     enabled: !!slug,
   });
