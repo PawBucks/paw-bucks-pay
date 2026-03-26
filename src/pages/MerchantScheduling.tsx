@@ -295,6 +295,15 @@ const MerchantScheduling = () => {
               onUpdateStatus={handleUpdateBookingStatus}
             />
           </TabsContent>
+
+          <TabsContent value="intake">
+            {merchantId && (
+              <IntakeQuestionsManager
+                merchantId={merchantId}
+                services={services.map(s => ({ id: s.id, name: s.name }))}
+              />
+            )}
+          </TabsContent>
         </Tabs>
       </main>
 
