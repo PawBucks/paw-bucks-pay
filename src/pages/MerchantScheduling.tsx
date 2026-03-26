@@ -259,6 +259,7 @@ const MerchantScheduling = () => {
             <TabsTrigger value="services">Services</TabsTrigger>
             <TabsTrigger value="availability">Availability</TabsTrigger>
             <TabsTrigger value="bookings">Bookings</TabsTrigger>
+            <TabsTrigger value="intake">Intake Forms</TabsTrigger>
           </TabsList>
 
           <TabsContent value="services">
