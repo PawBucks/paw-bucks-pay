@@ -144,6 +144,7 @@ const AppRoutes = () => {
       <Route path="/invoice/:invoiceId/pay" element={<PageTransition><InvoicePayment /></PageTransition>} />
       <Route path="/invoice/:invoiceId/success" element={<PageTransition><InvoicePaymentSuccess /></PageTransition>} />
       <Route path="/merchant/:merchantId" element={<PageTransition><MerchantProfile /></PageTransition>} />
+      <Route path="/book/:slug" element={<PageTransition><PublicBookingPage /></PageTransition>} />
       <Route path="/lost-pets" element={<PageTransition><LostPets /></PageTransition>} />
       <Route path="/lost-pets/:id" element={<PageTransition><LostPetDetail /></PageTransition>} />
 
