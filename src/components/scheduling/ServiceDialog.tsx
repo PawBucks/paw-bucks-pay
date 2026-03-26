@@ -337,6 +337,52 @@ export function ServiceDialog({ open, onOpenChange, service, onSubmit }: Service
               )}
             />
 
+            {/* Smart Scheduling Settings */}
+            <div className="border-t pt-4 mt-2">
+              <p className="text-sm font-medium mb-3">Smart Scheduling</p>
+              <div className="grid grid-cols-3 gap-3">
+                <FormField
+                  control={form.control}
+                  name="buffer_minutes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs">Buffer (min)</FormLabel>
+                      <FormControl>
+                        <Input type="number" min="0" max="120" {...field} />
+                      </FormControl>
+                      <FormDescription className="text-xs">Break between bookings</FormDescription>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="min_notice_hours"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs">Min Notice (hrs)</FormLabel>
+                      <FormControl>
+                        <Input type="number" min="0" max="168" {...field} />
+                      </FormControl>
+                      <FormDescription className="text-xs">Advance booking required</FormDescription>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="cancellation_policy_hours"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs">Cancel Policy (hrs)</FormLabel>
+                      <FormControl>
+                        <Input type="number" min="0" max="168" {...field} />
+                      </FormControl>
+                      <FormDescription className="text-xs">Cancel before deadline</FormDescription>
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
             <FormField
               control={form.control}
               name="requires_pet"
