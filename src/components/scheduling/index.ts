@@ -7,3 +7,6 @@ export { FlashSaleSection } from "./FlashSaleSection";
 export { FlashSalePriceDisplay } from "./FlashSalePriceDisplay";
 export { FlashSaleCard } from "./FlashSaleCard";
 export { FlashSaleDialog } from "./FlashSaleDialog";
+export { IntakeQuestionsForm } from "./IntakeQuestionsForm";
+export { IntakeQuestionsManager } from "./IntakeQuestionsManager";
+export { WaitlistButton } from "./WaitlistButton";
