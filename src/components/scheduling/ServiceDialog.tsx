@@ -117,6 +117,9 @@ export function ServiceDialog({ open, onOpenChange, service, onSubmit }: Service
         max_capacity: service.max_capacity,
         requires_pet: service.requires_pet,
         is_active: service.is_active,
+        buffer_minutes: service.buffer_minutes || 0,
+        min_notice_hours: service.min_notice_hours || 2,
+        cancellation_policy_hours: service.cancellation_policy_hours || 24,
       });
     } else {
       form.reset({
