@@ -132,6 +132,9 @@ export function ServiceDialog({ open, onOpenChange, service, onSubmit }: Service
         max_capacity: 1,
         requires_pet: true,
         is_active: true,
+        buffer_minutes: 0,
+        min_notice_hours: 2,
+        cancellation_policy_hours: 24,
       });
     }
   }, [service, form]);
