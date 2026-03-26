@@ -139,9 +139,21 @@ export default function MyBookings() {
         .eq("user_id", user?.id);
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       toast.success("Booking cancelled successfully");
       queryClient.invalidateQueries({ queryKey: ["my-bookings"] });
+
+      // Send cancellation email (fire-and-forget)
+      if (selectedBooking) {
+        supabase.functions.invoke("send-booking-emails", {
+          body: {
+            type: "cancellation",
+            bookingId: selectedBooking.id,
+            cancellationReason: variables.reason,
+          },
+        }).catch((err) => console.error("Failed to send cancellation email:", err));
+      }
+
       setCancelDialogOpen(false);
       setCancelReason("");
       setSelectedBooking(null);

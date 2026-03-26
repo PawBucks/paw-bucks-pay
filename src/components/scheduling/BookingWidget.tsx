@@ -250,6 +250,31 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
         description: `Your appointment at ${merchantName} has been scheduled.`,
       });
       queryClient.invalidateQueries({ queryKey: ["date-bookings"] });
+
+      // Send confirmation email (fire-and-forget)
+      if (user?.email && selectedDate && selectedSlot && selectedServiceData) {
+        const slotEndMinutes =
+          parseInt(selectedSlot.split(":")[0]) * 60 +
+          parseInt(selectedSlot.split(":")[1]) +
+          selectedServiceData.duration_minutes;
+        const endTime = `${Math.floor(slotEndMinutes / 60).toString().padStart(2, "0")}:${(slotEndMinutes % 60).toString().padStart(2, "0")}:00`;
+
+        supabase.functions.invoke("send-booking-emails", {
+          body: {
+            type: "confirmation",
+            customerEmail: user.email,
+            customerName: user.user_metadata?.full_name || user.email,
+            merchantName,
+            serviceName: selectedServiceData.name,
+            bookingDate: format(selectedDate, "yyyy-MM-dd"),
+            startTime: `${selectedSlot}:00`,
+            endTime,
+            totalPrice: selectedServiceData.price,
+            notes: notes || undefined,
+          },
+        }).catch((err) => console.error("Failed to send confirmation email:", err));
+      }
+
       // Reset form
       setSelectedService(null);
       setSelectedDate(undefined);
