@@ -97,6 +97,8 @@ const PetPersonalityQuizPage = lazyWithRetry(() => import("./pages/PetPersonalit
 const LoyaltyPage = lazyWithRetry(() => import("./pages/LoyaltyPage"), "LoyaltyPage");
 const LoyaltyCardsPage = lazyWithRetry(() => import("./pages/LoyaltyCardsPage"), "LoyaltyCardsPage");
 const MerchantMessages = lazyWithRetry(() => import("./pages/MerchantMessages"), "MerchantMessages");
+const MyBookings = lazyWithRetry(() => import("./pages/MyBookings"), "MyBookings");
+const PublicBookingPage = lazyWithRetry(() => import("./pages/PublicBookingPage"), "PublicBookingPage");
 
 const createQueryClient = () => new QueryClient({
   defaultOptions: {
