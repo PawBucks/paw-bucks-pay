@@ -165,14 +165,25 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
         const slotEndMinutes = currentMinutes + serviceDuration;
         const slotEnd = `${Math.floor(slotEndMinutes / 60).toString().padStart(2, "0")}:${(slotEndMinutes % 60).toString().padStart(2, "0")}`;
         
-        // Check if slot conflicts with existing bookings
+        // Check if slot conflicts with existing bookings (including buffer)
+        const bufferMins = selectedServiceData.buffer_minutes || 0;
         const hasConflict = existingBookings.some((booking) => {
           const bookingStart = booking.start_time;
           const bookingEnd = booking.end_time;
-          return (slotStart < bookingEnd && slotEnd > bookingStart);
+          // Add buffer: booking effectively occupies [start, end + buffer]
+          const [bEndH, bEndM] = bookingEnd.split(":").map(Number);
+          const bufferedEndMins = bEndH * 60 + bEndM + bufferMins;
+          const bufferedEnd = `${Math.floor(bufferedEndMins / 60).toString().padStart(2, "0")}:${(bufferedEndMins % 60).toString().padStart(2, "0")}`;
+          return (slotStart < bufferedEnd && slotEnd > bookingStart);
         });
 
-        if (!hasConflict) {
+        // Check minimum notice period
+        const minNotice = selectedServiceData.min_notice_hours || 2;
+        const now = new Date();
+        const slotDateTime = new Date(`${format(selectedDate, "yyyy-MM-dd")}T${slotStart}:00`);
+        const tooSoon = slotDateTime.getTime() - now.getTime() < minNotice * 60 * 60 * 1000;
+
+        if (!hasConflict && !tooSoon) {
           slots.push(slotStart);
         }
 
