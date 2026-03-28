@@ -84,6 +84,25 @@ const MerchantProfile = memo(() => {
   const { data: activeServices = [] } = useMerchantActiveServices(merchantId);
   const hasVerifiedPro = merchantHasService(activeServices, SERVICE_NAMES.VERIFIED_PRO_BADGE);
   const isSponsored = merchantHasService(activeServices, SERVICE_NAMES.SPONSORED_PLACEMENT);
+  const hasFeaturedPartner = merchantHasService(activeServices, SERVICE_NAMES.FEATURED_PARTNER);
+
+  // Track profile views for service ROI
+  const { trackProfileView } = useServiceConversionTracking();
+  
+  // Fire profile view tracking once per page load for active services
+  useState(() => {
+    if (merchantId) {
+      if (hasVerifiedPro) {
+        trackProfileView(merchantId, SERVICE_NAMES.VERIFIED_PRO_BADGE, 'profile');
+      }
+      if (hasFeaturedPartner) {
+        trackProfileView(merchantId, SERVICE_NAMES.FEATURED_PARTNER, 'profile');
+      }
+      if (isSponsored) {
+        trackProfileView(merchantId, SERVICE_NAMES.SPONSORED_PLACEMENT, 'profile');
+      }
+    }
+  });
 
   // Parallel queries for merchant data, services, and stripe info
   const queryResults = useQueries({
