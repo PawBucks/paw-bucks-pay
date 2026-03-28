@@ -51,8 +51,9 @@ export const LostPetShareDialog = ({ post, children }: LostPetShareDialogProps) 
   const [copied, setCopied] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
-  // Generate share content - link to the dedicated pet detail page
-  const shareUrl = `${window.location.origin}/lost-pets/${post.id}`;
+  // Always use production domain so shared links work for everyone
+  const APP_BASE_URL = 'https://pawbucks.app';
+  const shareUrl = `${APP_BASE_URL}/lost-pets/${post.id}`;
   
   const shareTitle = `🚨 LOST ${post.pet_type.toUpperCase()}: ${post.pet_name}`;
   
