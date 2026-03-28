@@ -11,6 +11,11 @@ import { PrioritySupportWidget } from "./PrioritySupportWidget";
 import { MerchantSpotlightWidget } from "./MerchantSpotlightWidget";
 import { PremiumAnalyticsDashboard } from "./PremiumAnalyticsDashboard";
 import { TrainingCourseWidget } from "./TrainingCourseWidget";
+import { CohortAnalysisReport } from "./CohortAnalysisReport";
+import { DemandForecastingReport } from "./DemandForecastingReport";
+import { KeywordPerformanceWidget } from "./KeywordPerformanceWidget";
+import { StrategyConsultationWidget } from "./StrategyConsultationWidget";
+import { PosApiWidget } from "./PosApiWidget";
 
 type MerchantPremiumServicesTabProps = {
   merchantId: string;
@@ -24,6 +29,11 @@ type MerchantPremiumServicesTabProps = {
   hasSpotlight: boolean;
   hasPremiumAnalytics: boolean;
   hasTrainingCourse: boolean;
+  hasCohortAnalysis: boolean;
+  hasDemandForecasting: boolean;
+  hasKeywordInsights: boolean;
+  hasStrategyConsultation: boolean;
+  hasPosApi: boolean;
   onNavigate: (path: string) => void;
 };
 
@@ -39,9 +49,14 @@ export function MerchantPremiumServicesTab({
   hasSpotlight,
   hasPremiumAnalytics,
   hasTrainingCourse,
+  hasCohortAnalysis,
+  hasDemandForecasting,
+  hasKeywordInsights,
+  hasStrategyConsultation,
+  hasPosApi,
   onNavigate,
 }: MerchantPremiumServicesTabProps) {
-  const hasPremiumServices = hasSponsored || hasPremiumAd || hasFeaturedPartner || hasSearchBooster || hasProfileOptimization || hasReviewCampaign || hasPrioritySupport || hasSpotlight || hasPremiumAnalytics || hasTrainingCourse;
+  const hasPremiumServices = hasSponsored || hasPremiumAd || hasFeaturedPartner || hasSearchBooster || hasProfileOptimization || hasReviewCampaign || hasPrioritySupport || hasSpotlight || hasPremiumAnalytics || hasTrainingCourse || hasCohortAnalysis || hasDemandForecasting || hasKeywordInsights || hasStrategyConsultation || hasPosApi;
 
   if (!hasPremiumServices) {
     return (
@@ -75,6 +90,11 @@ export function MerchantPremiumServicesTab({
     if (hasPremiumAd) return "premium-ad";
     if (hasFeaturedPartner) return "featured";
     if (hasSearchBooster) return "search";
+    if (hasCohortAnalysis) return "cohorts";
+    if (hasDemandForecasting) return "forecasting";
+    if (hasKeywordInsights) return "keywords";
+    if (hasStrategyConsultation) return "strategy";
+    if (hasPosApi) return "pos-api";
     if (hasProfileOptimization) return "profile";
     if (hasReviewCampaign) return "reviews";
     if (hasPrioritySupport) return "support";
@@ -108,6 +128,21 @@ export function MerchantPremiumServicesTab({
           )}
           {hasSearchBooster && (
             <TabsTrigger value="search">Search Booster</TabsTrigger>
+          )}
+          {hasCohortAnalysis && (
+            <TabsTrigger value="cohorts">Cohort Analysis</TabsTrigger>
+          )}
+          {hasDemandForecasting && (
+            <TabsTrigger value="forecasting">Demand Forecasting</TabsTrigger>
+          )}
+          {hasKeywordInsights && (
+            <TabsTrigger value="keywords">Keyword Insights</TabsTrigger>
+          )}
+          {hasStrategyConsultation && (
+            <TabsTrigger value="strategy">Strategy</TabsTrigger>
+          )}
+          {hasPosApi && (
+            <TabsTrigger value="pos-api">POS & API</TabsTrigger>
           )}
           {hasProfileOptimization && (
             <TabsTrigger value="profile">Profile Optimization</TabsTrigger>
@@ -153,6 +188,36 @@ export function MerchantPremiumServicesTab({
         {hasSearchBooster && (
           <TabsContent value="search">
             <SearchRankingBoosterWidget />
+          </TabsContent>
+        )}
+
+        {hasCohortAnalysis && (
+          <TabsContent value="cohorts">
+            <CohortAnalysisReport />
+          </TabsContent>
+        )}
+
+        {hasDemandForecasting && (
+          <TabsContent value="forecasting">
+            <DemandForecastingReport />
+          </TabsContent>
+        )}
+
+        {hasKeywordInsights && (
+          <TabsContent value="keywords">
+            <KeywordPerformanceWidget />
+          </TabsContent>
+        )}
+
+        {hasStrategyConsultation && (
+          <TabsContent value="strategy">
+            <StrategyConsultationWidget />
+          </TabsContent>
+        )}
+
+        {hasPosApi && (
+          <TabsContent value="pos-api">
+            <PosApiWidget />
           </TabsContent>
         )}
         
