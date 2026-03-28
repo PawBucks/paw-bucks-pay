@@ -358,6 +358,9 @@ const Discover = () => {
   // Sponsored placement tracking
   const { trackImpression, trackClick, trackSponsoredImpressions } = useSponsoredTracking("discover");
 
+  // Service conversion tracking for ROI measurement
+  const { trackImpression: trackServiceImpression, trackClick: trackServiceClick, trackProfileView: trackServiceProfileView } = useServiceConversionTracking();
+
   // Search ranking tracking for boosted merchants
   const { trackBatchImpressions, trackSearchClick, trackSearchConversion } = useSearchRankingTracking();
 
