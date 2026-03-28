@@ -502,7 +502,7 @@ const PawBucksWallet = () => {
                       activity.source === 'refund' ? 'text-destructive' :
                       activity.type === 'earn' ? 'text-green-500' : 'text-orange-500'
                     }`}>
-                      {activity.type === 'earn' ? '+' : ''}{Formatters.number(activity.amount)}
+                      {activity.type === 'earn' || activity.type === 'credit' ? '+' : '-'}{Formatters.number(Math.abs(activity.amount))}
                     </p>
                     <p className="text-xs text-muted-foreground capitalize">{activity.source}</p>
                   </div>
