@@ -1,7 +1,8 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Store } from "lucide-react";
+import { Sparkles, Store, TrendingUp } from "lucide-react";
+import { ServicePerformanceDashboard } from "./ServicePerformanceDashboard";
 import { SponsoredPlacementDashboard } from "./SponsoredPlacementDashboard";
 import { FeaturedPartnerWidget } from "./FeaturedPartnerWidget";
 import { SearchRankingBoosterWidget } from "./SearchRankingBoosterWidget";
