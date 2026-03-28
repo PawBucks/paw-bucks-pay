@@ -55,30 +55,12 @@ export const LostPetShareDialog = ({ post, children }: LostPetShareDialogProps) 
   const APP_BASE_URL = 'https://pawbucks.app';
   const shareUrl = `${APP_BASE_URL}/lost-pets/${post.id}`;
   
-  const shareTitle = `🚨 LOST ${post.pet_type.toUpperCase()}: ${post.pet_name}`;
-  
-  const shareText = `🚨 LOST ${post.pet_type.toUpperCase()}: ${post.pet_name}
-
-📍 Last seen: ${post.last_seen_location}
-📅 Date: ${new Date(post.last_seen_date).toLocaleDateString()}
-🐾 Description: ${post.breed ? `${post.breed}, ` : ''}${post.color_markings}
-${post.reward_amount ? `💰 Reward: $${post.reward_amount}` : ''}
-
-📞 Contact: ${post.contact_phone}
-${post.contact_email ? `📧 Email: ${post.contact_email}` : ''}
-
-Please share to help bring ${post.pet_name} home! 🙏`;
-
-  const shortShareText = `🚨 LOST ${post.pet_type.toUpperCase()}: ${post.pet_name} - Last seen: ${post.last_seen_location}. Contact: ${post.contact_phone}. Please help!`;
-
   // Check if Web Share API is available (mainly for mobile)
   const canNativeShare = typeof navigator !== 'undefined' && navigator.share;
 
   const handleNativeShare = async () => {
     try {
       await navigator.share({
-        title: shareTitle,
-        text: shareText,
         url: shareUrl,
       });
       toast({ title: "Shared successfully!" });
@@ -92,9 +74,9 @@ Please share to help bring ${post.pet_name} home! 🙏`;
 
   const handleCopyLink = async () => {
     try {
-      await navigator.clipboard.writeText(`${shareTitle}\n\n${shareText}\n\n${shareUrl}`);
+      await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
-      toast({ title: "Copied to clipboard!" });
+      toast({ title: "Link copied to clipboard!" });
       setTimeout(() => setCopied(false), 2000);
     } catch {
       toast({ title: "Failed to copy", variant: "destructive" });
@@ -102,22 +84,7 @@ Please share to help bring ${post.pet_name} home! 🙏`;
   };
 
   const handleSMSShare = () => {
-    // Build detailed SMS message format
-    const smsText = `🚨 LOST ${post.pet_type.toUpperCase()}: ${post.pet_name}
-
-📍 Last seen: ${post.last_seen_location}
-📅 Date: ${new Date(post.last_seen_date).toLocaleDateString()}
-🐾 Description: ${post.breed ? `${post.breed}, ` : ''}${post.color_markings}${post.reward_amount ? `
-💰 Reward: $${post.reward_amount}` : ''}
-
-📞 Contact: ${post.contact_phone}${post.contact_email ? `
-📧 Email: ${post.contact_email}` : ''}
-
-Please share to help bring ${post.pet_name} home! 🙏
-
-${shareUrl}`;
-    
-    const smsBody = encodeURIComponent(smsText);
+    const smsBody = encodeURIComponent(shareUrl);
     // Use different SMS URI schemes for different devices
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
     const smsUrl = isIOS ? `sms:&body=${smsBody}` : `sms:?body=${smsBody}`;
@@ -125,36 +92,31 @@ ${shareUrl}`;
   };
 
   const handleEmailShare = () => {
-    const subject = encodeURIComponent(shareTitle);
-    const body = encodeURIComponent(`${shareText}\n\nView flyer: ${shareUrl}`);
-    window.open(`mailto:?subject=${subject}&body=${body}`, '_blank');
+    const body = encodeURIComponent(shareUrl);
+    window.open(`mailto:?body=${body}`, '_blank');
   };
 
   const handleWhatsAppShare = () => {
-    const text = encodeURIComponent(`${shareText}\n\n${shareUrl}`);
+    const text = encodeURIComponent(shareUrl);
     window.open(`https://wa.me/?text=${text}`, '_blank');
   };
 
   const handleFacebookShare = () => {
     const url = encodeURIComponent(shareUrl);
-    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${encodeURIComponent(shortShareText)}`, '_blank', 'width=600,height=400');
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank', 'width=600,height=400');
   };
 
   const handleTwitterShare = () => {
-    const text = encodeURIComponent(shortShareText);
     const url = encodeURIComponent(shareUrl);
-    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank', 'width=600,height=400');
+    window.open(`https://twitter.com/intent/tweet?url=${url}`, '_blank', 'width=600,height=400');
   };
 
   const handleNextdoorShare = () => {
-    // Nextdoor doesn't have a direct share API, but we can guide users
-    const text = encodeURIComponent(shareText);
     window.open(`https://nextdoor.com/`, '_blank');
-    // Copy content for easy pasting
-    navigator.clipboard.writeText(`${shareText}\n\n${shareUrl}`);
+    navigator.clipboard.writeText(shareUrl);
     toast({ 
-      title: "Content copied!", 
-      description: "Paste this on your Nextdoor neighborhood page" 
+      title: "Link copied!", 
+      description: "Paste the flyer URL on your Nextdoor neighborhood page" 
     });
   };
 
@@ -323,7 +285,7 @@ ${shareUrl}`;
             {/* Share Preview */}
             <div className="p-3 bg-muted rounded-lg">
               <p className="text-xs text-muted-foreground mb-1.5 font-medium">Preview:</p>
-              <p className="text-xs sm:text-sm line-clamp-3">{shortShareText}</p>
+              <p className="text-xs sm:text-sm break-all">{shareUrl}</p>
             </div>
 
             {/* Direct Link */}
