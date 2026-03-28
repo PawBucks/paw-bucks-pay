@@ -90,8 +90,8 @@ const MerchantProfile = memo(() => {
   const { trackProfileView } = useServiceConversionTracking();
   
   // Fire profile view tracking once per page load for active services
-  useState(() => {
-    if (merchantId) {
+  useEffect(() => {
+    if (merchantId && activeServices.length > 0) {
       if (hasVerifiedPro) {
         trackProfileView(merchantId, SERVICE_NAMES.VERIFIED_PRO_BADGE, 'profile');
       }
@@ -102,7 +102,7 @@ const MerchantProfile = memo(() => {
         trackProfileView(merchantId, SERVICE_NAMES.SPONSORED_PLACEMENT, 'profile');
       }
     }
-  });
+  }, [merchantId, activeServices, hasVerifiedPro, hasFeaturedPartner, isSponsored, trackProfileView]);
 
   // Parallel queries for merchant data, services, and stripe info
   const queryResults = useQueries({
