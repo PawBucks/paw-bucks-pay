@@ -113,8 +113,12 @@ export function MerchantPremiumServicesTab({
         </div>
       </div>
 
-      <Tabs defaultValue={getDefaultTab()} className="w-full">
+      <Tabs defaultValue="roi" className="w-full">
         <TabsList className="mb-4 flex-wrap h-auto gap-1">
+          <TabsTrigger value="roi">
+            <TrendingUp className="h-4 w-4 mr-1" />
+            ROI Overview
+          </TabsTrigger>
           {hasPremiumAnalytics && (
             <TabsTrigger value="analytics">Premium Analytics</TabsTrigger>
           )}
