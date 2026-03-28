@@ -710,13 +710,23 @@ const Discover = () => {
     setPaymentDialogOpen(true);
   };
 
-  // Handle card click for search ranking tracking
+  // Handle card click for search ranking tracking + service conversion tracking
   const handleCardClickTracking = (merchantId: string, position: number) => {
     if (searchBoostedIds.has(merchantId)) {
       trackSearchClick(merchantId, position, 'discover', {
         searchTerm: debouncedSearch || undefined,
         isBoosted: true,
       });
+    }
+    // Track service clicks for ROI
+    if (verifiedProSet.has(merchantId)) {
+      trackServiceClick(merchantId, SERVICE_NAMES.VERIFIED_PRO_BADGE, 'discover');
+    }
+    if (featuredPartnerIds.has(merchantId)) {
+      trackServiceClick(merchantId, SERVICE_NAMES.FEATURED_PARTNER, 'discover');
+    }
+    if (premiumAdIds.has(merchantId)) {
+      trackServiceClick(merchantId, SERVICE_NAMES.PREMIUM_AD, 'discover');
     }
   };
 
