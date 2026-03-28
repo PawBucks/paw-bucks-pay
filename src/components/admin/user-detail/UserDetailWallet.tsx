@@ -160,8 +160,8 @@ export function UserDetailWallet({ userId }: { userId: string }) {
                           </Badge>
                         )}
                       </TableCell>
-                      <TableCell className={`text-right font-medium ${a.type === "credit" ? "text-emerald-600" : "text-red-600"}`}>
-                        {a.type === "credit" ? "+" : "-"}{Math.abs(a.amount).toLocaleString()}
+                      <TableCell className={`text-right font-medium ${a.type === "credit" || a.type === "earn" ? "text-emerald-600" : "text-red-600"}`}>
+                        {a.type === "credit" || a.type === "earn" ? "+" : "-"}{Math.abs(a.amount).toLocaleString()}
                       </TableCell>
                     </TableRow>
                   ))}
