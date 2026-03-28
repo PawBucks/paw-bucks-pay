@@ -227,8 +227,13 @@ const MerchantDashboard = () => {
   const hasSpotlight = activeServices.includes(SERVICE_NAMES.MERCHANT_SPOTLIGHT);
   const hasPremiumAnalytics = activeServices.includes(SERVICE_NAMES.PREMIUM_ANALYTICS);
   const hasTrainingCourse = activeServices.includes(SERVICE_NAMES.TRAINING_COURSE);
+  const hasCohortAnalysis = activeServices.includes(SERVICE_NAMES.COHORT_ANALYSIS);
+  const hasDemandForecasting = activeServices.includes(SERVICE_NAMES.DEMAND_FORECASTING);
+  const hasKeywordInsights = activeServices.includes(SERVICE_NAMES.KEYWORD_INSIGHTS);
+  const hasStrategyConsultation = activeServices.includes(SERVICE_NAMES.STRATEGY_CONSULTATION);
+  const hasPosApi = activeServices.includes(SERVICE_NAMES.POS_API_INTEGRATION);
   
-  const hasPremiumServices = hasSponsored || hasPremiumAd || hasFeaturedPartner || hasSearchBooster || hasProfileOptimization || hasReviewCampaign || hasPrioritySupport || hasSpotlight || hasPremiumAnalytics || hasTrainingCourse;
+  const hasPremiumServices = hasSponsored || hasPremiumAd || hasFeaturedPartner || hasSearchBooster || hasProfileOptimization || hasReviewCampaign || hasPrioritySupport || hasSpotlight || hasPremiumAnalytics || hasTrainingCourse || hasCohortAnalysis || hasDemandForecasting || hasKeywordInsights || hasStrategyConsultation || hasPosApi;
 
   useEffect(() => {
     if (!authLoading && !user) {
