@@ -227,8 +227,13 @@ const MerchantDashboard = () => {
   const hasSpotlight = activeServices.includes(SERVICE_NAMES.MERCHANT_SPOTLIGHT);
   const hasPremiumAnalytics = activeServices.includes(SERVICE_NAMES.PREMIUM_ANALYTICS);
   const hasTrainingCourse = activeServices.includes(SERVICE_NAMES.TRAINING_COURSE);
+  const hasCohortAnalysis = activeServices.includes(SERVICE_NAMES.COHORT_ANALYSIS);
+  const hasDemandForecasting = activeServices.includes(SERVICE_NAMES.DEMAND_FORECASTING);
+  const hasKeywordInsights = activeServices.includes(SERVICE_NAMES.KEYWORD_INSIGHTS);
+  const hasStrategyConsultation = activeServices.includes(SERVICE_NAMES.STRATEGY_CONSULTATION);
+  const hasPosApi = activeServices.includes(SERVICE_NAMES.POS_API_INTEGRATION);
   
-  const hasPremiumServices = hasSponsored || hasPremiumAd || hasFeaturedPartner || hasSearchBooster || hasProfileOptimization || hasReviewCampaign || hasPrioritySupport || hasSpotlight || hasPremiumAnalytics || hasTrainingCourse;
+  const hasPremiumServices = hasSponsored || hasPremiumAd || hasFeaturedPartner || hasSearchBooster || hasProfileOptimization || hasReviewCampaign || hasPrioritySupport || hasSpotlight || hasPremiumAnalytics || hasTrainingCourse || hasCohortAnalysis || hasDemandForecasting || hasKeywordInsights || hasStrategyConsultation || hasPosApi;
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -741,6 +746,11 @@ const MerchantDashboard = () => {
             hasSpotlight={hasSpotlight}
             hasPremiumAnalytics={hasPremiumAnalytics}
             hasTrainingCourse={hasTrainingCourse}
+            hasCohortAnalysis={hasCohortAnalysis}
+            hasDemandForecasting={hasDemandForecasting}
+            hasKeywordInsights={hasKeywordInsights}
+            hasStrategyConsultation={hasStrategyConsultation}
+            hasPosApi={hasPosApi}
             onNavigate={navigate}
           />
         );
@@ -765,7 +775,7 @@ const MerchantDashboard = () => {
       default:
         return null;
     }
-  }, [activeTab, merchant, analytics, transactions, getMonthlySalesData, getCashbackDistribution, connectingStripe, togglingPawbucks, hasSponsored, hasPremiumAd, hasFeaturedPartner, hasSearchBooster, hasProfileOptimization, hasReviewCampaign, hasPrioritySupport, hasSpotlight, navigate]);
+  }, [activeTab, merchant, analytics, transactions, getMonthlySalesData, getCashbackDistribution, connectingStripe, togglingPawbucks, hasSponsored, hasPremiumAd, hasFeaturedPartner, hasSearchBooster, hasProfileOptimization, hasReviewCampaign, hasPrioritySupport, hasSpotlight, hasCohortAnalysis, hasDemandForecasting, hasKeywordInsights, hasStrategyConsultation, hasPosApi, navigate]);
 
   // Navigation sidebar component
   const NavigationSidebar = ({ className }: { className?: string }) => (
