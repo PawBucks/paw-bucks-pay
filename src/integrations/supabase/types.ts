@@ -8437,6 +8437,57 @@ export type Database = {
           },
         ]
       }
+      service_conversion_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          merchant_id: string
+          metadata: Json | null
+          service_name: string
+          session_id: string | null
+          source_page: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          merchant_id: string
+          metadata?: Json | null
+          service_name: string
+          session_id?: string | null
+          source_page?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          merchant_id?: string
+          metadata?: Json | null
+          service_name?: string
+          session_id?: string | null
+          source_page?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_conversion_events_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_conversion_events_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       service_credit_usage: {
         Row: {
           amount_used: number
@@ -8570,6 +8621,69 @@ export type Database = {
             columns: ["service_id"]
             isOneToOne: true
             referencedRelation: "merchant_market_services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_performance_daily: {
+        Row: {
+          bookings: number | null
+          clicks: number | null
+          created_at: string
+          date: string
+          id: string
+          impressions: number | null
+          merchant_id: string
+          profile_views: number | null
+          reviews: number | null
+          service_name: string
+          transaction_revenue: number | null
+          transactions: number | null
+          updated_at: string
+        }
+        Insert: {
+          bookings?: number | null
+          clicks?: number | null
+          created_at?: string
+          date?: string
+          id?: string
+          impressions?: number | null
+          merchant_id: string
+          profile_views?: number | null
+          reviews?: number | null
+          service_name: string
+          transaction_revenue?: number | null
+          transactions?: number | null
+          updated_at?: string
+        }
+        Update: {
+          bookings?: number | null
+          clicks?: number | null
+          created_at?: string
+          date?: string
+          id?: string
+          impressions?: number | null
+          merchant_id?: string
+          profile_views?: number | null
+          reviews?: number | null
+          service_name?: string
+          transaction_revenue?: number | null
+          transactions?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_performance_daily_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_performance_daily_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
             referencedColumns: ["id"]
           },
         ]
@@ -11902,6 +12016,10 @@ export type Database = {
     }
     Functions: {
       aggregate_search_ranking_stats: {
+        Args: { target_date?: string }
+        Returns: undefined
+      }
+      aggregate_service_performance: {
         Args: { target_date?: string }
         Returns: undefined
       }

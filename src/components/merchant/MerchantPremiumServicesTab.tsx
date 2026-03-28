@@ -1,7 +1,8 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Store } from "lucide-react";
+import { Sparkles, Store, TrendingUp } from "lucide-react";
+import { ServicePerformanceDashboard } from "./ServicePerformanceDashboard";
 import { SponsoredPlacementDashboard } from "./SponsoredPlacementDashboard";
 import { FeaturedPartnerWidget } from "./FeaturedPartnerWidget";
 import { SearchRankingBoosterWidget } from "./SearchRankingBoosterWidget";
@@ -112,8 +113,12 @@ export function MerchantPremiumServicesTab({
         </div>
       </div>
 
-      <Tabs defaultValue={getDefaultTab()} className="w-full">
+      <Tabs defaultValue="roi" className="w-full">
         <TabsList className="mb-4 flex-wrap h-auto gap-1">
+          <TabsTrigger value="roi">
+            <TrendingUp className="h-4 w-4 mr-1" />
+            ROI Overview
+          </TabsTrigger>
           {hasPremiumAnalytics && (
             <TabsTrigger value="analytics">Premium Analytics</TabsTrigger>
           )}
@@ -161,6 +166,11 @@ export function MerchantPremiumServicesTab({
           )}
         </TabsList>
         
+        {/* ROI Overview - always first */}
+        <TabsContent value="roi">
+          <ServicePerformanceDashboard merchantId={merchantId} />
+        </TabsContent>
+
         {hasPremiumAnalytics && (
           <TabsContent value="analytics">
             <PremiumAnalyticsDashboard />

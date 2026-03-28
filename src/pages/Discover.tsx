@@ -31,6 +31,7 @@ import { useSponsoredMerchants, useVerifiedProMerchants, useSearchBoostedMerchan
 import { useQueryClient } from "@tanstack/react-query";
 import { useSponsoredTracking } from "@/hooks/useSponsoredTracking";
 import { useSearchRankingTracking } from "@/hooks/useSearchRankingTracking";
+import { useServiceConversionTracking } from "@/hooks/useServiceConversionTracking";
 import { FeaturedPartnerCard, PremiumAdCard, SponsoredMerchantCard, OrganicMerchantCard, AttentionLadderFeed } from "@/components/discover";
 
 type MerchantWithRating = {
@@ -357,6 +358,9 @@ const Discover = () => {
   // Sponsored placement tracking
   const { trackImpression, trackClick, trackSponsoredImpressions } = useSponsoredTracking("discover");
 
+  // Service conversion tracking for ROI measurement
+  const { trackImpression: trackServiceImpression, trackClick: trackServiceClick, trackProfileView: trackServiceProfileView } = useServiceConversionTracking();
+
   // Search ranking tracking for boosted merchants
   const { trackBatchImpressions, trackSearchClick, trackSearchConversion } = useSearchRankingTracking();
 
@@ -641,6 +645,22 @@ const Discover = () => {
     }
   }, [sponsoredMerchants, trackSponsoredImpressions, debouncedSearch]);
 
+  // Track service conversion impressions for Featured Partner and Verified Pro
+  useEffect(() => {
+    featuredPartners.forEach(m => {
+      trackServiceImpression(m.id, SERVICE_NAMES.FEATURED_PARTNER, 'discover');
+    });
+    premiumAds.forEach(m => {
+      trackServiceImpression(m.id, SERVICE_NAMES.PREMIUM_AD, 'discover');
+    });
+    // Track Verified Pro impressions for all visible merchants with the badge
+    [...featuredPartners, ...premiumAds, ...sponsoredMerchants, ...boostedMerchants, ...organicMerchants].forEach(m => {
+      if (verifiedProSet.has(m.id)) {
+        trackServiceImpression(m.id, SERVICE_NAMES.VERIFIED_PRO_BADGE, 'discover');
+      }
+    });
+  }, [featuredPartners, premiumAds, sponsoredMerchants, boostedMerchants, organicMerchants, verifiedProSet, trackServiceImpression]);
+
   // Track search ranking impressions for boosted merchants
   useEffect(() => {
     const allMerchants = [...featuredPartners, ...premiumAds, ...sponsoredMerchants, ...boostedMerchants, ...organicMerchants];
@@ -690,13 +710,23 @@ const Discover = () => {
     setPaymentDialogOpen(true);
   };
 
-  // Handle card click for search ranking tracking
+  // Handle card click for search ranking tracking + service conversion tracking
   const handleCardClickTracking = (merchantId: string, position: number) => {
     if (searchBoostedIds.has(merchantId)) {
       trackSearchClick(merchantId, position, 'discover', {
         searchTerm: debouncedSearch || undefined,
         isBoosted: true,
       });
+    }
+    // Track service clicks for ROI
+    if (verifiedProSet.has(merchantId)) {
+      trackServiceClick(merchantId, SERVICE_NAMES.VERIFIED_PRO_BADGE, 'discover');
+    }
+    if (featuredPartnerIds.has(merchantId)) {
+      trackServiceClick(merchantId, SERVICE_NAMES.FEATURED_PARTNER, 'discover');
+    }
+    if (premiumAdIds.has(merchantId)) {
+      trackServiceClick(merchantId, SERVICE_NAMES.PREMIUM_AD, 'discover');
     }
   };
 

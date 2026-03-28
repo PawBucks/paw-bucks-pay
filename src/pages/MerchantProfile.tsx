@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, memo } from "react";
+import { useState, useMemo, useCallback, useEffect, memo } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useOptimizedQuery } from "@/hooks/useOptimizedQuery";
@@ -20,6 +20,7 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { ROUTES } from "@/lib/constants";
 import { useMerchantActiveServices, SERVICE_NAMES, merchantHasService } from "@/hooks/useMerchantServices";
+import { useServiceConversionTracking } from "@/hooks/useServiceConversionTracking";
 import { schedulingService } from "@/services/api/scheduling.service";
 import { useQuery, useQueries } from "@tanstack/react-query";
 import {
@@ -83,6 +84,25 @@ const MerchantProfile = memo(() => {
   const { data: activeServices = [] } = useMerchantActiveServices(merchantId);
   const hasVerifiedPro = merchantHasService(activeServices, SERVICE_NAMES.VERIFIED_PRO_BADGE);
   const isSponsored = merchantHasService(activeServices, SERVICE_NAMES.SPONSORED_PLACEMENT);
+  const hasFeaturedPartner = merchantHasService(activeServices, SERVICE_NAMES.FEATURED_PARTNER);
+
+  // Track profile views for service ROI
+  const { trackProfileView } = useServiceConversionTracking();
+  
+  // Fire profile view tracking once per page load for active services
+  useEffect(() => {
+    if (merchantId && activeServices.length > 0) {
+      if (hasVerifiedPro) {
+        trackProfileView(merchantId, SERVICE_NAMES.VERIFIED_PRO_BADGE, 'profile');
+      }
+      if (hasFeaturedPartner) {
+        trackProfileView(merchantId, SERVICE_NAMES.FEATURED_PARTNER, 'profile');
+      }
+      if (isSponsored) {
+        trackProfileView(merchantId, SERVICE_NAMES.SPONSORED_PLACEMENT, 'profile');
+      }
+    }
+  }, [merchantId, activeServices, hasVerifiedPro, hasFeaturedPartner, isSponsored, trackProfileView]);
 
   // Parallel queries for merchant data, services, and stripe info
   const queryResults = useQueries({
