@@ -143,7 +143,7 @@ export function UserDetailWallet({ userId }: { userId: string }) {
                       <TableCell className="whitespace-nowrap text-sm">{new Date(a.created_at).toLocaleDateString()}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1">
-                          {a.type === "credit" ? (
+                          {a.type === "credit" || a.type === "earn" ? (
                             <TrendingUp className="w-3 h-3 text-emerald-500" />
                           ) : (
                             <TrendingDown className="w-3 h-3 text-red-500" />
