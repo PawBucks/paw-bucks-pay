@@ -166,6 +166,11 @@ export function MerchantPremiumServicesTab({
           )}
         </TabsList>
         
+        {/* ROI Overview - always first */}
+        <TabsContent value="roi">
+          <ServicePerformanceDashboard merchantId={merchantId} />
+        </TabsContent>
+
         {hasPremiumAnalytics && (
           <TabsContent value="analytics">
             <PremiumAnalyticsDashboard />
