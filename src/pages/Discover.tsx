@@ -31,6 +31,7 @@ import { useSponsoredMerchants, useVerifiedProMerchants, useSearchBoostedMerchan
 import { useQueryClient } from "@tanstack/react-query";
 import { useSponsoredTracking } from "@/hooks/useSponsoredTracking";
 import { useSearchRankingTracking } from "@/hooks/useSearchRankingTracking";
+import { useServiceConversionTracking } from "@/hooks/useServiceConversionTracking";
 import { FeaturedPartnerCard, PremiumAdCard, SponsoredMerchantCard, OrganicMerchantCard, AttentionLadderFeed } from "@/components/discover";
 
 type MerchantWithRating = {
