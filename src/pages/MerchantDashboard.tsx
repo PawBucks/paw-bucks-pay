@@ -746,6 +746,11 @@ const MerchantDashboard = () => {
             hasSpotlight={hasSpotlight}
             hasPremiumAnalytics={hasPremiumAnalytics}
             hasTrainingCourse={hasTrainingCourse}
+            hasCohortAnalysis={hasCohortAnalysis}
+            hasDemandForecasting={hasDemandForecasting}
+            hasKeywordInsights={hasKeywordInsights}
+            hasStrategyConsultation={hasStrategyConsultation}
+            hasPosApi={hasPosApi}
             onNavigate={navigate}
           />
         );
