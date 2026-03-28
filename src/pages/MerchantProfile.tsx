@@ -20,6 +20,7 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { ROUTES } from "@/lib/constants";
 import { useMerchantActiveServices, SERVICE_NAMES, merchantHasService } from "@/hooks/useMerchantServices";
+import { useServiceConversionTracking } from "@/hooks/useServiceConversionTracking";
 import { schedulingService } from "@/services/api/scheduling.service";
 import { useQuery, useQueries } from "@tanstack/react-query";
 import {
