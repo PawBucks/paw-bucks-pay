@@ -645,6 +645,22 @@ const Discover = () => {
     }
   }, [sponsoredMerchants, trackSponsoredImpressions, debouncedSearch]);
 
+  // Track service conversion impressions for Featured Partner and Verified Pro
+  useEffect(() => {
+    featuredPartners.forEach(m => {
+      trackServiceImpression(m.id, SERVICE_NAMES.FEATURED_PARTNER, 'discover');
+    });
+    premiumAds.forEach(m => {
+      trackServiceImpression(m.id, SERVICE_NAMES.PREMIUM_AD, 'discover');
+    });
+    // Track Verified Pro impressions for all visible merchants with the badge
+    [...featuredPartners, ...premiumAds, ...sponsoredMerchants, ...boostedMerchants, ...organicMerchants].forEach(m => {
+      if (verifiedProSet.has(m.id)) {
+        trackServiceImpression(m.id, SERVICE_NAMES.VERIFIED_PRO_BADGE, 'discover');
+      }
+    });
+  }, [featuredPartners, premiumAds, sponsoredMerchants, boostedMerchants, organicMerchants, verifiedProSet, trackServiceImpression]);
+
   // Track search ranking impressions for boosted merchants
   useEffect(() => {
     const allMerchants = [...featuredPartners, ...premiumAds, ...sponsoredMerchants, ...boostedMerchants, ...organicMerchants];
