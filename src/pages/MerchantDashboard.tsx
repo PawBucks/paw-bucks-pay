@@ -775,7 +775,7 @@ const MerchantDashboard = () => {
       default:
         return null;
     }
-  }, [activeTab, merchant, analytics, transactions, getMonthlySalesData, getCashbackDistribution, connectingStripe, togglingPawbucks, hasSponsored, hasPremiumAd, hasFeaturedPartner, hasSearchBooster, hasProfileOptimization, hasReviewCampaign, hasPrioritySupport, hasSpotlight, navigate]);
+  }, [activeTab, merchant, analytics, transactions, getMonthlySalesData, getCashbackDistribution, connectingStripe, togglingPawbucks, hasSponsored, hasPremiumAd, hasFeaturedPartner, hasSearchBooster, hasProfileOptimization, hasReviewCampaign, hasPrioritySupport, hasSpotlight, hasCohortAnalysis, hasDemandForecasting, hasKeywordInsights, hasStrategyConsultation, hasPosApi, navigate]);
 
   // Navigation sidebar component
   const NavigationSidebar = ({ className }: { className?: string }) => (
