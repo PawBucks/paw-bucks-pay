@@ -452,6 +452,61 @@ serve(async (req) => {
               logStep("PawBucks credited to merchant from invoice payment", { merchantId, pawbucksUsed });
             }
 
+            // ========================================
+            // DEDUCT PAWBUCKS FROM USER WALLET (when customer uses PawBucks for invoice)
+            // ========================================
+            if (pawbucksUsed > 0 && invoicePayerUserId) {
+              try {
+                const { data: userWallet } = await supabaseAdmin
+                  .from('pawbucks_wallet')
+                  .select('balance')
+                  .eq('user_id', invoicePayerUserId)
+                  .single();
+
+                if (userWallet) {
+                  const newBalance = Math.max(userWallet.balance - pawbucksUsed, 0);
+                  const { error: deductError } = await supabaseAdmin
+                    .from('pawbucks_wallet')
+                    .update({ balance: newBalance })
+                    .eq('user_id', invoicePayerUserId);
+
+                  if (deductError) {
+                    logStep("Error deducting PawBucks from user wallet", { error: deductError.message });
+                  } else {
+                    logStep("PawBucks deducted from user wallet", { 
+                      userId: invoicePayerUserId, 
+                      previousBalance: userWallet.balance, 
+                      deducted: pawbucksUsed, 
+                      newBalance 
+                    });
+                  }
+                } else {
+                  logStep("User wallet not found for PawBucks deduction", { userId: invoicePayerUserId });
+                }
+
+                // Record debit activity
+                const { data: invoiceForDebit } = await supabaseAdmin
+                  .from('invoices')
+                  .select('invoice_number')
+                  .eq('id', invoiceId)
+                  .single();
+
+                await supabaseAdmin.from('pawbucks_activity').insert({
+                  user_id: invoicePayerUserId,
+                  type: 'redeem',
+                  amount: -pawbucksUsed,
+                  source: 'invoice_payment',
+                  description: `Used ${pawbucksUsed} PawBucks on Invoice #${invoiceForDebit?.invoice_number || 'Payment'}`,
+                  partner_id: merchantId || null,
+                  pawbucks_status: 'available',
+                });
+
+                logStep("PawBucks debit activity recorded", { pawbucksUsed });
+              } catch (deductionError) {
+                logStep("Error in PawBucks deduction flow", { error: String(deductionError) });
+              }
+            }
+
             // NOTE: Merchants only earn PawBucks when customers USE PawBucks in payment
             // No commission on card-only payments
 
