@@ -83,7 +83,7 @@ export function SettingsTab() {
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
               <span className="flex items-center gap-2">
-                Quarter-Million Sign Up Bonus ($250)
+                Welcome Credit Program
               </span>
               {loading ? (
                 <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
@@ -101,8 +101,9 @@ export function SettingsTab() {
               )}
             </CardTitle>
             <CardDescription>
-              Control whether new pet owner signups receive the $250 Quarter-Million Pet Fund
-              (24-month distribution: $20 immediate + $10/month × 23 months). Existing funds are not affected.
+              Control whether new pet owner signups receive welcome credits. Tiers: Series A ($250, first 500),
+              Series B ($150, next 1,000), Series C ($75, next 2,500), Standard ($50, unlimited).
+              Credits expire monthly if unused. Existing funds are not affected.
             </CardDescription>
           </CardHeader>
           <CardContent>
