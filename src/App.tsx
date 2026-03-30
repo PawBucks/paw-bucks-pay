@@ -1,8 +1,8 @@
 /**
  * Main App component with routing and providers
- * Cache bust: 2026-03-30T17:00:00Z
+ * Cache bust: 2026-03-30T17:15:00Z
  */
-import { Suspense, useState, useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -91,38 +91,45 @@ const MerchantSubscriptionPlans = lazyWithRetry(() => import("./pages/MerchantSu
 const MerchantAvailableBalance = lazyWithRetry(() => import("./pages/MerchantAvailableBalance"), "MerchantAvailableBalance");
 const MerchantPendingBalance = lazyWithRetry(() => import("./pages/MerchantPendingBalance"), "MerchantPendingBalance");
 const MerchantTotalEarnings = lazyWithRetry(() => import("./pages/MerchantTotalEarnings"), "MerchantTotalEarnings");
+const MerchantMessages = lazyWithRetry(() => import("./pages/MerchantMessages"), "MerchantMessages");
+const MyBookings = lazyWithRetry(() => import("./pages/MyBookings"), "MyBookings");
+const PublicBookingPage = lazyWithRetry(() => import("./pages/PublicBookingPage"), "PublicBookingPage");
 const PetTimelinePage = lazyWithRetry(() => import("./pages/PetTimelinePage"), "PetTimelinePage");
 const BadgesPage = lazyWithRetry(() => import("./pages/BadgesPage"), "BadgesPage");
 const PetPersonalityQuizPage = lazyWithRetry(() => import("./pages/PetPersonalityQuiz"), "PetPersonalityQuiz");
 const LoyaltyPage = lazyWithRetry(() => import("./pages/LoyaltyPage"), "LoyaltyPage");
 const LoyaltyCardsPage = lazyWithRetry(() => import("./pages/LoyaltyCardsPage"), "LoyaltyCardsPage");
-const MerchantMessages = lazyWithRetry(() => import("./pages/MerchantMessages"), "MerchantMessages");
-const MyBookings = lazyWithRetry(() => import("./pages/MyBookings"), "MyBookings");
-const PublicBookingPage = lazyWithRetry(() => import("./pages/PublicBookingPage"), "PublicBookingPage");
 
 const createQueryClient = () => new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 1000 * 60 * 5, // 5 minutes - data considered fresh
       gcTime: 1000 * 60 * 30, // 30 minutes garbage collection
-      retry: (failureCount, error: any) => {
+      retry: (failureCount, error: unknown) => {
+        const maybeStatus =
+          typeof error === "object" && error !== null && "status" in error
+            ? Number((error as { status?: unknown }).status)
+            : undefined;
+
         // Don't retry on 4xx errors
-        if (error?.status >= 400 && error?.status < 500) return false;
+        if (typeof maybeStatus === "number" && maybeStatus >= 400 && maybeStatus < 500) return false;
         return failureCount < 1; // Single retry for faster failure
       },
       refetchOnWindowFocus: false,
-      refetchOnReconnect: 'always',
-      networkMode: 'offlineFirst', // Use cached data first for instant loading
+      refetchOnReconnect: "always",
+      networkMode: "offlineFirst", // Use cached data first for instant loading
       structuralSharing: true, // Optimize re-renders
       // Reduce unnecessary refetches
       refetchOnMount: false,
     },
     mutations: {
       retry: 1,
-      networkMode: 'online',
+      networkMode: "online",
     },
   },
 });
+
+const queryClient = createQueryClient();
 
 const AppRoutes = () => {
   return (
@@ -236,9 +243,6 @@ const AppContent = () => {
 };
 
 const App = () => {
-  // Initialize QueryClient inside component to ensure proper React lifecycle
-  const [queryClient] = useState(() => createQueryClient());
-  
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
@@ -249,13 +253,13 @@ const App = () => {
             <NetworkStatus />
             <UpdatePrompt />
             <PWAInstallBanner />
-            
+
             <AppContent />
           </BrowserRouter>
         </TooltipProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   );
-}
+};
 
 export default App;
