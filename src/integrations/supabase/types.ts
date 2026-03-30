@@ -3218,6 +3218,12 @@ export type Database = {
           max_pet_fund_spots: number
           name: string
           pet_fund_spots_used: number
+          series_a_max: number
+          series_a_used: number
+          series_b_max: number
+          series_b_used: number
+          series_c_max: number
+          series_c_used: number
           updated_at: string
         }
         Insert: {
@@ -3228,6 +3234,12 @@ export type Database = {
           max_pet_fund_spots?: number
           name: string
           pet_fund_spots_used?: number
+          series_a_max?: number
+          series_a_used?: number
+          series_b_max?: number
+          series_b_used?: number
+          series_c_max?: number
+          series_c_used?: number
           updated_at?: string
         }
         Update: {
@@ -3238,6 +3250,12 @@ export type Database = {
           max_pet_fund_spots?: number
           name?: string
           pet_fund_spots_used?: number
+          series_a_max?: number
+          series_a_used?: number
+          series_b_max?: number
+          series_b_used?: number
+          series_c_max?: number
+          series_c_used?: number
           updated_at?: string
         }
         Relationships: []
@@ -6200,12 +6218,14 @@ export type Database = {
       pet_fund_ledgers: {
         Row: {
           available_balance: number
+          cluster_id: string | null
           created_at: string
           device_fingerprint: string | null
           escrow_balance: number
           id: string
           ip_address: string | null
           referred_by: string | null
+          series_tier: string
           status: string
           total_amount: number
           total_released: number
@@ -6215,12 +6235,14 @@ export type Database = {
         }
         Insert: {
           available_balance?: number
+          cluster_id?: string | null
           created_at?: string
           device_fingerprint?: string | null
           escrow_balance?: number
           id?: string
           ip_address?: string | null
           referred_by?: string | null
+          series_tier?: string
           status?: string
           total_amount?: number
           total_released?: number
@@ -6230,12 +6252,14 @@ export type Database = {
         }
         Update: {
           available_balance?: number
+          cluster_id?: string | null
           created_at?: string
           device_fingerprint?: string | null
           escrow_balance?: number
           id?: string
           ip_address?: string | null
           referred_by?: string | null
+          series_tier?: string
           status?: string
           total_amount?: number
           total_released?: number
@@ -6288,6 +6312,7 @@ export type Database = {
         Row: {
           amount: number
           created_at: string
+          expires_at: string | null
           id: string
           ledger_id: string
           min_transaction_usd: number
@@ -6302,6 +6327,7 @@ export type Database = {
         Insert: {
           amount: number
           created_at?: string
+          expires_at?: string | null
           id?: string
           ledger_id: string
           min_transaction_usd?: number
@@ -6316,6 +6342,7 @@ export type Database = {
         Update: {
           amount?: number
           created_at?: string
+          expires_at?: string | null
           id?: string
           ledger_id?: string
           min_transaction_usd?: number
@@ -12043,7 +12070,8 @@ export type Database = {
           reason: string
         }[]
       }
-      claim_pet_fund_spot: { Args: { p_cluster_id: string }; Returns: boolean }
+      claim_pet_fund_spot: { Args: { p_cluster_id: string }; Returns: string }
+      expire_unused_pet_fund_credits: { Args: never; Returns: number }
       generate_claim_number: { Args: never; Returns: string }
       generate_invoice_number: {
         Args: { p_merchant_id: string }
@@ -12063,6 +12091,7 @@ export type Database = {
           cluster_id: string
           cluster_name: string
           promotion_type: string
+          series_tier: string
           spots_remaining: number
         }[]
       }
@@ -12185,10 +12214,20 @@ export type Database = {
         }
         Returns: boolean
       }
-      initialize_pet_fund: {
-        Args: { p_referred_by?: string; p_user_id: string }
-        Returns: string
-      }
+      initialize_pet_fund:
+        | {
+            Args: { p_referred_by?: string; p_user_id: string }
+            Returns: string
+          }
+        | {
+            Args: {
+              p_cluster_id?: string
+              p_referred_by?: string
+              p_series_tier?: string
+              p_user_id: string
+            }
+            Returns: string
+          }
       is_offer_valid: { Args: { offer_uuid: string }; Returns: boolean }
       is_shared_member_of: { Args: { owner_user_id: string }; Returns: boolean }
       is_superadmin: { Args: { _user_id: string }; Returns: boolean }
