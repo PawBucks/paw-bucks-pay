@@ -206,7 +206,7 @@ export const PetFundCard = ({ userId }: PetFundCardProps) => {
               <Sparkles className="w-4 h-4 text-accent" />
             </p>
             <p className="text-sm text-muted-foreground">
-              Gift a friend a $250 Pet Fund and get $10 when they join!
+              Gift a friend up to $250 in credits and get $10 when they join!
             </p>
           </div>
           <ChevronDown className="w-5 h-5 text-muted-foreground -rotate-90" />

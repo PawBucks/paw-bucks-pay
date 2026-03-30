@@ -130,15 +130,15 @@ const Index = () => {
                 <div className="flex-1 text-center sm:text-left space-y-2">
                   <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
                     <h2 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-foreground">
-                      🎉 Get 50,000 PawBucks Free
+                      🎉 Up to $250 in Free PawBucks
                     </h2>
                     <span className="inline-flex items-center px-3 py-1 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 text-xs font-semibold">
-                      New Members Only
+                      Limited Spots
                     </span>
                   </div>
                   <p className="text-muted-foreground text-base sm:text-lg">
-                    That's <span className="font-bold text-amber-600 dark:text-amber-400">$50 toward your first booking</span> with a participating partner. 
-                    Sign up, claim your credit, and try PawBucks risk-free.
+                    New members receive <span className="font-bold text-amber-600 dark:text-amber-400">$50–$250 in welcome credits</span> released monthly.
+                    Early adopters get the biggest rewards — sign up today before spots fill up!
                   </p>
                   <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
                     <Button
@@ -150,7 +150,7 @@ const Index = () => {
                       Claim Your Welcome Credit
                       <ArrowRight className="w-4 h-4 ml-2" />
                     </Button>
-                    <span className="text-xs text-muted-foreground">One-time use • Expires in 45 days • No credit card needed</span>
+                    <span className="text-xs text-muted-foreground">Monthly credits • Use or lose each month • No credit card needed</span>
                   </div>
                 </div>
               </div>
