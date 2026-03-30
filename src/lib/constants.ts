@@ -50,10 +50,10 @@ export const PET_FUND_TIERS = {
     totalUsd: 75,
     upfrontPb: 15000,
     upfrontUsd: 15,
-    monthlyPb: 12000,
-    monthlyUsd: 12,
-    totalMonths: 6,    // 1 upfront + 5 monthly
-    monthlyCount: 5,
+    monthlyPb: 10000,
+    monthlyUsd: 10,
+    totalMonths: 7,    // 1 upfront + 6 monthly
+    monthlyCount: 6,
     minFirstUsd: 30,
     minMonthlyUsd: 20,
   },

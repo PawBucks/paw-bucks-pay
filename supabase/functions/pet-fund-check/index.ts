@@ -9,7 +9,7 @@ const corsHeaders = {
 const TIER_INFO: Record<string, { label: string; totalUsd: number; upfrontUsd: number; monthlyUsd: number; months: number }> = {
   series_a: { label: 'Series A', totalUsd: 250, upfrontUsd: 20, monthlyUsd: 10, months: 24 },
   series_b: { label: 'Series B', totalUsd: 150, upfrontUsd: 15, monthlyUsd: 15, months: 10 },
-  series_c: { label: 'Series C', totalUsd: 75, upfrontUsd: 15, monthlyUsd: 12, months: 6 },
+  series_c: { label: 'Series C', totalUsd: 75, upfrontUsd: 15, monthlyUsd: 10, months: 7 },
   standard: { label: 'Standard', totalUsd: 50, upfrontUsd: 10, monthlyUsd: 10, months: 5 },
 };
 
