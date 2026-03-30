@@ -131,7 +131,7 @@ const MerchantLanding = () => {
               
               <Card className="p-8 sm:p-10 border-2 border-accent/20 shadow-xl mb-8">
                 <p className="text-lg text-muted-foreground leading-relaxed mb-6">
-                  Every new PawBucks user joins with <span className="font-bold text-foreground">$50 in PawBucks</span>, redeemable only on purchases of $75 or more at PawBucks partner businesses.
+                  Every new PawBucks user joins with <span className="font-bold text-foreground">up to $250 in Welcome Credits</span>, released monthly and redeemable only on qualifying purchases (starting at $20+) at PawBucks partner businesses. Credits expire each month if unused — so customers are motivated to spend now, not later.
                 </p>
                 <p className="text-xl font-semibold text-accent">
                   That means customers come in ready to buy, not browse.
@@ -160,11 +160,11 @@ const MerchantLanding = () => {
               <div className="space-y-4 mb-8">
                 <div className="flex items-start gap-4 p-4 rounded-xl bg-muted/30">
                   <ShoppingBag className="w-6 h-6 text-primary flex-shrink-0 mt-0.5" />
-                  <p className="text-foreground">A PawBucks customer spends <span className="font-bold">$75</span></p>
+                  <p className="text-foreground">A PawBucks customer spends <span className="font-bold">$40</span></p>
                 </div>
                 <div className="flex items-start gap-4 p-4 rounded-xl bg-muted/30">
                   <Sparkles className="w-6 h-6 text-accent flex-shrink-0 mt-0.5" />
-                  <p className="text-foreground">They apply <span className="font-bold">$50 PawBucks</span></p>
+                  <p className="text-foreground">They apply <span className="font-bold">$20 in Welcome Credits</span> (their monthly release)</p>
                 </div>
                 <div className="flex items-start gap-4 p-4 rounded-xl bg-accent/10 border border-accent/20">
                   <DollarSign className="w-6 h-6 text-accent flex-shrink-0 mt-0.5" />
@@ -173,11 +173,11 @@ const MerchantLanding = () => {
                     <ul className="space-y-2 text-muted-foreground">
                       <li className="flex items-center gap-2">
                         <CheckCircle className="w-4 h-4 text-accent flex-shrink-0" />
-                        <span><span className="font-bold text-foreground">$24.25 USD</span> (withdrawable cash)</span>
+                        <span><span className="font-bold text-foreground">$19.40 USD</span> (withdrawable cash)</span>
                       </li>
                       <li className="flex items-center gap-2">
                         <CheckCircle className="w-4 h-4 text-accent flex-shrink-0" />
-                        <span><span className="font-bold text-foreground">$50 PawBucks</span> you can use on PawBucks Merchant Market services</span>
+                        <span><span className="font-bold text-foreground">$20 PawBucks</span> you can use on PawBucks Merchant Market services</span>
                       </li>
                     </ul>
                   </div>
