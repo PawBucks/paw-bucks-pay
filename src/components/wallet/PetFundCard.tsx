@@ -80,7 +80,7 @@ export const PetFundCard = ({ userId }: PetFundCardProps) => {
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
                 <Gift className="w-4 h-4 text-primary-foreground" />
               </div>
-              Quarter-Million Pet Fund
+              Welcome Credit Fund
             </span>
             <Badge variant="outline" className="bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30">
               Active
