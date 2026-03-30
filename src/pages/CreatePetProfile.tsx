@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { petsService } from "@/services/api/pets.service";
-import { clearPetOnboardingCache } from "@/components/ProtectedRoute";
+import { clearPetOnboardingCache } from "@/lib/protectedRouteCache";
 import type { Database } from "@/integrations/supabase/types";
 import { Header } from "@/components/Header";
 import { SEO } from "@/components/SEO";
