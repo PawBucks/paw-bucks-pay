@@ -12214,20 +12214,15 @@ export type Database = {
         }
         Returns: boolean
       }
-      initialize_pet_fund:
-        | {
-            Args: { p_referred_by?: string; p_user_id: string }
-            Returns: string
-          }
-        | {
-            Args: {
-              p_cluster_id?: string
-              p_referred_by?: string
-              p_series_tier?: string
-              p_user_id: string
-            }
-            Returns: string
-          }
+      initialize_pet_fund: {
+        Args: {
+          p_cluster_id?: string
+          p_referred_by?: string
+          p_series_tier?: string
+          p_user_id: string
+        }
+        Returns: string
+      }
       is_offer_valid: { Args: { offer_uuid: string }; Returns: boolean }
       is_shared_member_of: { Args: { owner_user_id: string }; Returns: boolean }
       is_superadmin: { Args: { _user_id: string }; Returns: boolean }
