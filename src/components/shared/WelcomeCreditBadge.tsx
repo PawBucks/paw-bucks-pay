@@ -51,7 +51,7 @@ export const WelcomeCreditBadge = ({
         </TooltipTrigger>
         <TooltipContent className="max-w-xs">
           <p className="text-sm">
-            New PawBucks members can use their <strong>$50 Welcome Credit</strong> toward their first booking here!
+            New PawBucks members can use their <strong>Welcome Credit (up to $250)</strong> toward bookings here!
           </p>
         </TooltipContent>
       </Tooltip>

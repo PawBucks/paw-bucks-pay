@@ -80,7 +80,7 @@ export const PetFundCard = ({ userId }: PetFundCardProps) => {
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
                 <Gift className="w-4 h-4 text-primary-foreground" />
               </div>
-              Quarter-Million Pet Fund
+              Welcome Credit Fund
             </span>
             <Badge variant="outline" className="bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30">
               Active
@@ -206,7 +206,7 @@ export const PetFundCard = ({ userId }: PetFundCardProps) => {
               <Sparkles className="w-4 h-4 text-accent" />
             </p>
             <p className="text-sm text-muted-foreground">
-              Gift a friend a $250 Pet Fund and get $10 when they join!
+              Gift a friend up to $250 in credits and get $10 when they join!
             </p>
           </div>
           <ChevronDown className="w-5 h-5 text-muted-foreground -rotate-90" />

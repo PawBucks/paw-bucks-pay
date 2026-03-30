@@ -18,7 +18,7 @@ interface SpendablePawBucksResult {
 
 /**
  * Hook to get the user's spendable PawBucks balance (excludes locked/pending rewards).
- * Also fetches Pet Fund balance (Quarter-Million Sign Up Bonus).
+ * Also fetches Pet Fund balance (tiered welcome credit: Series A/B/C/Standard).
  * Falls back to legacy welcome credits for existing users.
  */
 export function useSpendablePawBucks(userId: string | undefined): SpendablePawBucksResult {
