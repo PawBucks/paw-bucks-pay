@@ -6,6 +6,13 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
+const TIER_INFO: Record<string, { label: string; totalUsd: number; upfrontUsd: number; monthlyUsd: number; months: number }> = {
+  series_a: { label: 'Series A', totalUsd: 250, upfrontUsd: 20, monthlyUsd: 10, months: 24 },
+  series_b: { label: 'Series B', totalUsd: 150, upfrontUsd: 15, monthlyUsd: 15, months: 10 },
+  series_c: { label: 'Series C', totalUsd: 75, upfrontUsd: 15, monthlyUsd: 12, months: 6 },
+  standard: { label: 'Standard', totalUsd: 50, upfrontUsd: 10, monthlyUsd: 10, months: 5 },
+};
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -37,7 +44,6 @@ serve(async (req) => {
       .maybeSingle();
 
     if (!ledger) {
-      // Check for legacy welcome credit
       const { data: legacyCredit } = await supabaseAdmin
         .from('user_welcome_credits')
         .select('*')
@@ -52,6 +58,9 @@ serve(async (req) => {
       }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
+    const seriesTier = ledger.series_tier || 'series_a';
+    const tierInfo = TIER_INFO[seriesTier] || TIER_INFO.standard;
+
     // Get releases
     const { data: releases } = await supabaseAdmin
       .from('pet_fund_releases')
@@ -59,22 +68,27 @@ serve(async (req) => {
       .eq('ledger_id', ledger.id)
       .order('month_number', { ascending: true });
 
-    // Get referrer bonuses for this user
+    // Get referrer bonuses
     const { data: referrerBonuses } = await supabaseAdmin
       .from('pet_fund_referrer_bonuses')
       .select('*')
       .eq('referrer_id', user.id);
 
+    const now = new Date();
     const nextRelease = releases?.find(r => r.status === 'pending');
-    const availableReleases = releases?.filter(r => r.status === 'released' && r.used_at === null) || [];
+    const availableReleases = releases?.filter(r => 
+      r.status === 'released' && r.used_at === null &&
+      (!r.expires_at || new Date(r.expires_at) > now)
+    ) || [];
 
-    // Determine min transaction: if month 0 is still available (not used), $40; otherwise $20
-    const month0 = releases?.find(r => r.month_number === 0);
-    const month0Used = month0?.used_at !== null;
-    const currentMinTransactionUsd = !month0Used && availableReleases.some(r => r.month_number === 0) ? 40 : 20;
+    // Current min transaction based on oldest available release
+    const oldestAvailable = availableReleases[0];
+    const currentMinTransactionUsd = oldestAvailable ? Number(oldestAvailable.min_transaction_usd) : tierInfo.upfrontUsd >= 15 ? 30 : 20;
 
     return new Response(JSON.stringify({
       hasPetFund: true,
+      seriesTier,
+      tierInfo,
       ledger: {
         id: ledger.id,
         totalAmount: ledger.total_amount,
@@ -90,10 +104,11 @@ serve(async (req) => {
         monthNumber: r.month_number,
         amount: r.amount,
         minTransactionUsd: Number(r.min_transaction_usd),
-        status: r.used_at ? 'used' : r.status,
+        status: r.used_at ? 'used' : (r.expires_at && new Date(r.expires_at) <= now && r.status === 'released') ? 'expired' : r.status,
         scheduledAt: r.scheduled_at,
         releasedAt: r.released_at,
         usedAt: r.used_at,
+        expiresAt: r.expires_at,
       })) || [],
       nextRelease: nextRelease ? {
         monthNumber: nextRelease.month_number,

@@ -6,20 +6,74 @@ export const PAWBUCKS_CONVERSION = {
   PAWBUCKS_USD_VALUE: 0.001, // Direct multiplier: PawBucks × 0.001 = USD
   // Merchant rates (for platform services like marketing/advertising): 1 PawBuck = $0.005 USD
   MERCHANT_TO_USD: 200, // 200 PawBucks = $1 USD when merchants spend on platform
-  // Quarter-Million Sign Up Bonus (Pet Fund)
-  PET_FUND_TOTAL: 250000, // 250k PawBucks total ($250)
-  PET_FUND_IMMEDIATE: 20000, // 20k PawBucks on signup ($20)
-  PET_FUND_MONTHLY: 10000, // 10k PawBucks per month ($10)
-  PET_FUND_ESCROW: 230000, // 230k PawBucks in escrow ($230)
-  PET_FUND_MONTHS: 24, // 24 months total (1 immediate + 23 monthly)
-  PET_FUND_INITIAL_MIN_USD: 40, // $40 min transaction for initial credit
-  PET_FUND_MONTHLY_MIN_USD: 20, // $20 min transaction for monthly credits
   // Legacy (deprecated)
   WELCOME_CREDIT_PHASE_1: 30000,
   WELCOME_CREDIT_PHASE_2: 20000,
   WELCOME_CREDIT_TOTAL: 50000,
   REWARD_THRESHOLD: 10000, // PawBucks needed for $10 credit (1000 * 10)
 } as const;
+
+// Tiered Welcome Credit / Pet Fund configuration
+export const PET_FUND_TIERS = {
+  series_a: {
+    label: 'Series A',
+    spots: 500,
+    totalPb: 250000,
+    totalUsd: 250,
+    upfrontPb: 20000,
+    upfrontUsd: 20,
+    monthlyPb: 10000,
+    monthlyUsd: 10,
+    totalMonths: 24,   // 1 upfront + 23 monthly
+    monthlyCount: 23,
+    minFirstUsd: 40,
+    minMonthlyUsd: 20,
+  },
+  series_b: {
+    label: 'Series B',
+    spots: 1000,
+    totalPb: 150000,
+    totalUsd: 150,
+    upfrontPb: 15000,
+    upfrontUsd: 15,
+    monthlyPb: 15000,
+    monthlyUsd: 15,
+    totalMonths: 10,   // 1 upfront + 9 monthly
+    monthlyCount: 9,
+    minFirstUsd: 30,
+    minMonthlyUsd: 30,
+  },
+  series_c: {
+    label: 'Series C',
+    spots: 2500,
+    totalPb: 75000,
+    totalUsd: 75,
+    upfrontPb: 15000,
+    upfrontUsd: 15,
+    monthlyPb: 12000,
+    monthlyUsd: 12,
+    totalMonths: 6,    // 1 upfront + 5 monthly
+    monthlyCount: 5,
+    minFirstUsd: 30,
+    minMonthlyUsd: 20,
+  },
+  standard: {
+    label: 'Standard',
+    spots: null, // unlimited
+    totalPb: 50000,
+    totalUsd: 50,
+    upfrontPb: 10000,
+    upfrontUsd: 10,
+    monthlyPb: 10000,
+    monthlyUsd: 10,
+    totalMonths: 5,    // 1 upfront + 4 monthly
+    monthlyCount: 4,
+    minFirstUsd: 20,
+    minMonthlyUsd: 20,
+  },
+} as const;
+
+export type PetFundTier = keyof typeof PET_FUND_TIERS;
 
 export const POINTS_MULTIPLIER = {
   FREE: 10, // 10x points in PawBucks for free accounts
