@@ -33,9 +33,9 @@ const ROUTES_TO_PRERENDER: RouteContent[] = [
       <p>Get new paying customers — pay only when PawBucks delivers them.</p>
       <p>PawBucks is a pet-focused payments and rewards platform that helps pet businesses acquire customers without discounts, ads, or upfront spend.</p>
       <h2>Why PawBucks Is Different</h2>
-      <p>Every new PawBucks user joins with $50 in PawBucks, redeemable only on purchases of $75 or more at PawBucks partner businesses. That means customers come in ready to buy, not browse.</p>
+      <p>Every new PawBucks user joins with up to $250 in Welcome Credits, released monthly and redeemable only on qualifying purchases (starting at $20+) at PawBucks partner businesses. Credits expire each month if unused, so customers are motivated to spend now. That means customers come in ready to buy, not browse.</p>
       <h2>How a PawBucks Transaction Works</h2>
-      <p>A PawBucks customer spends $75. They apply $50 PawBucks. You receive $24.25 USD (withdrawable cash) and $50 PawBucks you can use on Merchant Market services.</p>
+      <p>A PawBucks customer spends $40. They apply $20 in Welcome Credits. You receive $19.40 USD (withdrawable cash) and $20 PawBucks you can use on Merchant Market services.</p>
       <p>PawBucks earns a 3% performance commission on the cash portion only — and only because we delivered the customer. No customers = no commission.</p>
       <h2>Turn Customer Spend Into Marketing</h2>
       <p>Your earned PawBucks are prepaid marketing dollars you can use on any of our 16 Merchant Market services, including featured placement, sponsored visibility, premium analytics, and customer acquisition tools.</p>
