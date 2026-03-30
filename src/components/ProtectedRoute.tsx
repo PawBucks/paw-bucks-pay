@@ -4,6 +4,12 @@ import { useAuth } from '@/hooks/useAuth';
 import { PageLoader } from '@/components/PageLoader';
 import { ROUTES } from '@/lib/constants';
 import { supabase } from '@/integrations/supabase/client';
+import {
+  roleCache,
+  petOnboardingCache,
+  ROLE_CACHE_TTL,
+  PET_CACHE_TTL,
+} from '@/lib/protectedRouteCache';
 
 type AllowedRole = 'admin' | 'superadmin' | 'merchant' | 'vet' | 'pet_owner';
 
@@ -14,14 +20,6 @@ interface ProtectedRouteProps {
   allowedRoles?: AllowedRole[];
   skipPetOnboarding?: boolean;
 }
-
-// Module-level cache for role checks - survives across route navigations
-const roleCache = new Map<string, { authorized: boolean; timestamp: number }>();
-const ROLE_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-
-// Module-level cache for pet onboarding check
-const petOnboardingCache = new Map<string, { hasPets: boolean; timestamp: number }>();
-const PET_CACHE_TTL = 2 * 60 * 1000; // 2 minutes
 
 function getCacheKey(userId: string, roles: AllowedRole[]): string {
   return `${userId}:${roles.sort().join(',')}`;
@@ -110,10 +108,10 @@ export const ProtectedRoute = ({
 
         const [systemResult, merchantResult, vetResult, profileResult] = checks;
 
-        if (systemResult.data && (systemResult.data as any[]).length > 0) hasAccess = true;
-        if (!hasAccess && merchantResult.data && (merchantResult.data as any[]).length > 0) hasAccess = true;
-        if (!hasAccess && vetResult.data && (vetResult.data as any[]).length > 0) hasAccess = true;
-        if (!hasAccess && profileResult.data && (profileResult.data as any).user_type === 'pet_owner') hasAccess = true;
+        if (systemResult.data && systemResult.data.length > 0) hasAccess = true;
+        if (!hasAccess && merchantResult.data && merchantResult.data.length > 0) hasAccess = true;
+        if (!hasAccess && vetResult.data && vetResult.data.length > 0) hasAccess = true;
+        if (!hasAccess && profileResult.data?.user_type === 'pet_owner') hasAccess = true;
 
         roleCache.set(cacheKey, { authorized: hasAccess, timestamp: Date.now() });
         setAuthorized(hasAccess);
@@ -214,11 +212,3 @@ export const ProtectedRoute = ({
   return <>{children}</>;
 };
 
-// Clear role cache on sign out
-export const clearRoleCache = () => {
-  roleCache.clear();
-  petOnboardingCache.clear();
-};
-
-// Clear pet onboarding cache (call after creating first pet)
-export const clearPetOnboardingCache = () => petOnboardingCache.clear();
