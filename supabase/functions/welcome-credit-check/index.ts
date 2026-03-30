@@ -9,7 +9,7 @@ const corsHeaders = {
 const TIER_CONFIG: Record<string, { totalPb: number; upfrontPb: number; totalUsd: number; upfrontUsd: number; minFirstUsd: number }> = {
   series_a: { totalPb: 250000, upfrontPb: 20000, totalUsd: 250, upfrontUsd: 20, minFirstUsd: 40 },
   series_b: { totalPb: 150000, upfrontPb: 15000, totalUsd: 150, upfrontUsd: 15, minFirstUsd: 30 },
-  series_c: { totalPb: 75000, upfrontPb: 15000, totalUsd: 75, upfrontUsd: 15, minFirstUsd: 30 },
+  series_c: { totalPb: 75000, upfrontPb: 15000, totalUsd: 75, upfrontUsd: 15, minFirstUsd: 30, monthlyUsd: 10 },
   standard: { totalPb: 50000, upfrontPb: 10000, totalUsd: 50, upfrontUsd: 10, minFirstUsd: 20 },
 };
 
