@@ -131,7 +131,7 @@ const MerchantLanding = () => {
               
               <Card className="p-8 sm:p-10 border-2 border-accent/20 shadow-xl mb-8">
                 <p className="text-lg text-muted-foreground leading-relaxed mb-6">
-                  Every new PawBucks user joins with <span className="font-bold text-foreground">$50 in PawBucks</span>, redeemable only on purchases of $75 or more at PawBucks partner businesses.
+                  Every new PawBucks user joins with <span className="font-bold text-foreground">up to $250 in Welcome Credits</span>, released monthly and redeemable only on qualifying purchases (starting at $20+) at PawBucks partner businesses. Credits expire each month if unused — so customers are motivated to spend now, not later.
                 </p>
                 <p className="text-xl font-semibold text-accent">
                   That means customers come in ready to buy, not browse.
