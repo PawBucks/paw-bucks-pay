@@ -442,13 +442,13 @@ export function ApprovalsTab() {
                 <div className="col-span-2"><span className="text-muted-foreground">Address:</span> {reviewingMerchant.address || '—'}</div>
               </div>
 
-              <ScrollArea className="flex-1 min-h-0">
+              <div className="flex-1 min-h-0 overflow-y-auto pr-1">
                 <VerificationChecklist
                   entityType="merchant"
                   entityId={reviewingMerchant.id}
                   onChecklistComplete={handleChecklistUpdate}
                 />
-              </ScrollArea>
+              </div>
 
               <DialogFooter className="gap-2 pt-3 border-t">
                 <Button variant="outline" onClick={() => { setReviewingMerchant(null); resetChecklistState(); }}>
