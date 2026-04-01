@@ -40,10 +40,38 @@ serve(async (req) => {
     if (!user?.email) throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { userId: user.id, email: user.email });
 
+    // Check if user is a shared account member - if so, use owner's data
+    const { data: sharedMembership } = await supabaseClient
+      .from("shared_account_members")
+      .select("owner_id")
+      .eq("member_id", user.id)
+      .eq("status", "accepted")
+      .maybeSingle();
+
+    const effectiveUserId = sharedMembership?.owner_id || user.id;
+    const isSharedMember = !!sharedMembership?.owner_id;
+
+    let effectiveEmail = user.email;
+    if (isSharedMember) {
+      const supabaseAdminForEmail = createClient(
+        Deno.env.get("SUPABASE_URL") ?? "",
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+      );
+      const { data: ownerProfile } = await supabaseAdminForEmail
+        .from("profiles")
+        .select("email")
+        .eq("id", effectiveUserId)
+        .single();
+      if (ownerProfile?.email) {
+        effectiveEmail = ownerProfile.email;
+      }
+      logStep("Shared account member detected", { ownerId: effectiveUserId, ownerEmail: effectiveEmail });
+    }
+
     const stripe = new Stripe(stripeKey, { apiVersion: "2024-12-18.acacia" });
 
-    // Find customer in platform account
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+    // Find customer in platform account using effective email
+    const customers = await stripe.customers.list({ email: effectiveEmail, limit: 1 });
     
     const subscriptions: any[] = [];
 
