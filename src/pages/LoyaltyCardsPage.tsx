@@ -27,7 +27,7 @@ export default function LoyaltyCardsPage() {
             Track your punch cards and redeem rewards from your favorite merchants
           </p>
         </div>
-        <CustomerLoyaltyCards userId={user.id} />
+        <CustomerLoyaltyCards userId={effectiveUserId || user.id} />
       </div>
       <BottomNav />
     </div>

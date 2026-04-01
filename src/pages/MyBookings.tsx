@@ -101,6 +101,8 @@ export default function MyBookings() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const sharedAccount = useSharedAccount(user?.id);
+  const effectiveUserId = getEffectiveWalletUserId(user?.id, sharedAccount);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
@@ -108,10 +110,12 @@ export default function MyBookings() {
   const [rescheduleDate, setRescheduleDate] = useState<Date | undefined>();
   const [rescheduleSlot, setRescheduleSlot] = useState<string | null>(null);
 
+  const queryUserId = effectiveUserId || user?.id;
+
   const { data: bookings = [], isLoading } = useQuery({
-    queryKey: ["my-bookings", user?.id],
+    queryKey: ["my-bookings", queryUserId],
     queryFn: async () => {
-      if (!user) return [];
+      if (!queryUserId) return [];
       const { data, error } = await supabase
         .from("service_bookings")
         .select(`
@@ -122,13 +126,13 @@ export default function MyBookings() {
           ),
           pet_profiles (id, name, type)
         `)
-        .eq("user_id", user.id)
+        .eq("user_id", queryUserId)
         .order("booking_date", { ascending: false })
         .order("start_time", { ascending: false });
       if (error) throw error;
       return data || [];
     },
-    enabled: !!user,
+    enabled: !!queryUserId && !sharedAccount.isLoading,
   });
 
   const cancelBooking = useMutation({
