@@ -170,8 +170,7 @@ export const ProtectedRoute = ({
           (adminCheck.data && adminCheck.data.length > 0) ||
           (merchantCheck.data && merchantCheck.data.length > 0) ||
           (vetCheck.data && vetCheck.data.length > 0) ||
-          profileUserType === 'merchant' ||
-          profileUserType === 'vet';
+          profileUserType === 'merchant';
 
         if (isAdminOrMerchantOrVet) {
           petOnboardingCache.set(user.id, { hasPets: true, timestamp: Date.now() });
