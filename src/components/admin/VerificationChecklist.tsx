@@ -296,8 +296,7 @@ export function VerificationChecklist({ entityType, entityId, onChecklistComplet
                 </div>
               );
             })}
-          </div>
-        </ScrollArea>
+        </div>
       </CardContent>
     </Card>
   );
