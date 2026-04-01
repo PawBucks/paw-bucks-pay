@@ -39,6 +39,8 @@ interface UserBadge {
 
 const BadgesPage = () => {
   const { user, signOut, loading: authLoading } = useAuth();
+  const sharedAccount = useSharedAccount(user?.id);
+  const effectiveUserId = getEffectiveWalletUserId(user?.id, sharedAccount);
   const navigate = useNavigate();
   const [selectedBadge, setSelectedBadge] = useState<BadgeDefinition | null>(null);
   const [selectedEarned, setSelectedEarned] = useState<UserBadge | null>(null);
