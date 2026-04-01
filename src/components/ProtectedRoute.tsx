@@ -107,7 +107,7 @@ export const ProtectedRoute = ({
         ]);
 
         const [systemResult, merchantResult, vetResult, profileResult] = checks;
-        const userType = profileResult.data?.user_type;
+        const userType = profileResult.data?.user_type as string | undefined;
 
         if (systemResult.data && systemResult.data.length > 0) hasAccess = true;
         // Check merchants table first, then fallback to profile user_type
