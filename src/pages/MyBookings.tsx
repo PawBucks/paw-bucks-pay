@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useSharedAccount, getEffectiveWalletUserId } from "@/hooks/useSharedAccount";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format, isPast, isToday, addHours, parseISO } from "date-fns";

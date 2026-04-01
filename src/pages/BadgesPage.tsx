@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
+import { useSharedAccount, getEffectiveWalletUserId } from "@/hooks/useSharedAccount";
 import { Header } from "@/components/Header";
 import { SEO } from "@/components/SEO";
 import { BottomNav } from "@/components/BottomNav";

@@ -1,4 +1,5 @@
 import { useAuth } from "@/hooks/useAuth";
+import { useSharedAccount, getEffectiveWalletUserId } from "@/hooks/useSharedAccount";
 import { Header } from "@/components/Header";
 import { SEO } from "@/components/SEO";
 import { BottomNav } from "@/components/BottomNav";
@@ -7,6 +8,8 @@ import { Stamp } from "lucide-react";
 
 export default function LoyaltyCardsPage() {
   const { user } = useAuth();
+  const sharedAccount = useSharedAccount(user?.id);
+  const effectiveUserId = getEffectiveWalletUserId(user?.id, sharedAccount);
 
   if (!user) return null;
 
