@@ -10,9 +10,28 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Users, Loader2, RefreshCw, AlertCircle } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Users, Loader2, RefreshCw, AlertCircle, MoreVertical, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { format } from "date-fns";
+import { toast } from "sonner";
 
 type Subscriber = {
   id: string;
@@ -52,6 +71,13 @@ export function MerchantSubscribersTab({ merchantId }: MerchantSubscribersTabPro
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [cancelDialog, setCancelDialog] = useState<{
+    open: boolean;
+    subscriber: Subscriber | null;
+    immediately: boolean;
+  }>({ open: false, subscriber: null, immediately: false });
+  const [cancelReason, setCancelReason] = useState("");
+  const [canceling, setCanceling] = useState(false);
 
   const fetchSubscribers = async () => {
     setLoading(true);
@@ -77,6 +103,39 @@ export function MerchantSubscribersTab({ merchantId }: MerchantSubscribersTabPro
   useEffect(() => {
     fetchSubscribers();
   }, [merchantId]);
+
+  const handleCancelSubscription = async () => {
+    if (!cancelDialog.subscriber) return;
+
+    setCanceling(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("merchant-cancel-subscription", {
+        body: {
+          subscriptionId: cancelDialog.subscriber.id,
+          cancelImmediately: cancelDialog.immediately,
+          reason: cancelReason.trim() || undefined,
+        },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      toast.success(
+        cancelDialog.immediately
+          ? "Subscription canceled immediately"
+          : "Subscription will cancel at end of billing period"
+      );
+
+      setCancelDialog({ open: false, subscriber: null, immediately: false });
+      setCancelReason("");
+      await fetchSubscribers();
+    } catch (err: any) {
+      console.error("Error canceling subscription:", err);
+      toast.error(err.message || "Failed to cancel subscription");
+    } finally {
+      setCanceling(false);
+    }
+  };
 
   const activeCount = subscribers.filter((s) => s.status === "active").length;
   const pastDueCount = subscribers.filter((s) => s.status === "past_due").length;
@@ -167,6 +226,7 @@ export function MerchantSubscribersTab({ merchantId }: MerchantSubscribersTabPro
                 <TableHead>Status</TableHead>
                 <TableHead>Next Billing</TableHead>
                 <TableHead>Since</TableHead>
+                <TableHead className="w-12"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -207,12 +267,97 @@ export function MerchantSubscribersTab({ merchantId }: MerchantSubscribersTabPro
                   <TableCell className="text-sm text-muted-foreground">
                     {format(new Date(sub.created_at), "MMM d, yyyy")}
                   </TableCell>
+                  <TableCell>
+                    {!sub.cancel_at_period_end && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={() =>
+                              setCancelDialog({ open: true, subscriber: sub, immediately: false })
+                            }
+                          >
+                            <XCircle className="h-4 w-4 mr-2" />
+                            Cancel at Period End
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className="text-destructive"
+                            onClick={() =>
+                              setCancelDialog({ open: true, subscriber: sub, immediately: true })
+                            }
+                          >
+                            <XCircle className="h-4 w-4 mr-2" />
+                            Cancel Immediately
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </GradientCard>
       )}
+
+      {/* Cancel confirmation dialog */}
+      <AlertDialog
+        open={cancelDialog.open}
+        onOpenChange={(open) => {
+          if (!open) {
+            setCancelDialog({ open: false, subscriber: null, immediately: false });
+            setCancelReason("");
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Cancel Subscription{cancelDialog.immediately ? " Immediately" : ""}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {cancelDialog.immediately
+                ? `This will immediately cancel ${cancelDialog.subscriber?.profiles?.full_name || "this subscriber"}'s subscription to ${cancelDialog.subscriber?.product_name}. They will lose access right away.`
+                : `${cancelDialog.subscriber?.profiles?.full_name || "This subscriber"}'s subscription to ${cancelDialog.subscriber?.product_name} will be canceled at the end of their current billing period. They will retain access until then.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <div className="space-y-2">
+            <Label htmlFor="cancel-reason">Reason (optional)</Label>
+            <Textarea
+              id="cancel-reason"
+              placeholder="Provide a reason for cancellation..."
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value)}
+              rows={3}
+            />
+          </div>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={canceling}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleCancelSubscription}
+              disabled={canceling}
+              className={cancelDialog.immediately ? "bg-destructive text-destructive-foreground hover:bg-destructive/90" : ""}
+            >
+              {canceling ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Processing...
+                </>
+              ) : cancelDialog.immediately ? (
+                "Cancel Immediately"
+              ) : (
+                "Cancel at Period End"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
