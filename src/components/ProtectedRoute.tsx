@@ -91,6 +91,8 @@ export const ProtectedRoute = ({
         const systemRoles = allowedRoles.filter(r => r === 'admin' || r === 'superadmin');
         const profileRoles = allowedRoles.filter(r => r !== 'admin' && r !== 'superadmin');
 
+        // Always fetch profile to check user_type as fallback for merchants/vets
+        // who haven't completed onboarding yet (no merchants/partner_vets row)
         const checks = await Promise.all([
           systemRoles.length > 0
             ? supabase.from('user_roles').select('role').eq('user_id', user.id).in('role', systemRoles)
@@ -101,17 +103,23 @@ export const ProtectedRoute = ({
           profileRoles.includes('vet')
             ? supabase.from('partner_vets').select('id').eq('user_id', user.id).limit(1)
             : Promise.resolve({ data: null }),
-          profileRoles.includes('pet_owner')
-            ? supabase.from('profiles').select('user_type').eq('id', user.id).single()
-            : Promise.resolve({ data: null }),
+          supabase.from('profiles').select('user_type').eq('id', user.id).single(),
         ]);
 
         const [systemResult, merchantResult, vetResult, profileResult] = checks;
+        const userType = profileResult.data?.user_type;
 
         if (systemResult.data && systemResult.data.length > 0) hasAccess = true;
-        if (!hasAccess && merchantResult.data && merchantResult.data.length > 0) hasAccess = true;
-        if (!hasAccess && vetResult.data && vetResult.data.length > 0) hasAccess = true;
-        if (!hasAccess && profileResult.data?.user_type === 'pet_owner') hasAccess = true;
+        // Check merchants table first, then fallback to profile user_type
+        if (!hasAccess && profileRoles.includes('merchant')) {
+          if (merchantResult.data && merchantResult.data.length > 0) hasAccess = true;
+          else if (userType === 'merchant') hasAccess = true;
+        }
+        if (!hasAccess && profileRoles.includes('vet')) {
+          if (vetResult.data && vetResult.data.length > 0) hasAccess = true;
+          else if (userType === 'vet') hasAccess = true;
+        }
+        if (!hasAccess && profileRoles.includes('pet_owner') && userType === 'pet_owner') hasAccess = true;
 
         roleCache.set(cacheKey, { authorized: hasAccess, timestamp: Date.now() });
         setAuthorized(hasAccess);
