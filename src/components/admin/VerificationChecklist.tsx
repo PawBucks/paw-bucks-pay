@@ -240,8 +240,7 @@ export function VerificationChecklist({ entityType, entityId, onChecklistComplet
       <Separator />
 
       <CardContent className="p-0">
-        <ScrollArea className="max-h-[420px]">
-          <div className="divide-y divide-border">
+        <div className="divide-y divide-border">
             {questions.map((q, idx) => {
               const existing = answerMap[q.id];
               return (
@@ -297,8 +296,7 @@ export function VerificationChecklist({ entityType, entityId, onChecklistComplet
                 </div>
               );
             })}
-          </div>
-        </ScrollArea>
+        </div>
       </CardContent>
     </Card>
   );
