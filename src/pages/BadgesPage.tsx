@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
+import { useSharedAccount, getEffectiveWalletUserId } from "@/hooks/useSharedAccount";
 import { Header } from "@/components/Header";
 import { SEO } from "@/components/SEO";
 import { BottomNav } from "@/components/BottomNav";
@@ -38,6 +39,8 @@ interface UserBadge {
 
 const BadgesPage = () => {
   const { user, signOut, loading: authLoading } = useAuth();
+  const sharedAccount = useSharedAccount(user?.id);
+  const effectiveUserId = getEffectiveWalletUserId(user?.id, sharedAccount);
   const navigate = useNavigate();
   const [selectedBadge, setSelectedBadge] = useState<BadgeDefinition | null>(null);
   const [selectedEarned, setSelectedEarned] = useState<UserBadge | null>(null);
@@ -172,7 +175,7 @@ const BadgesPage = () => {
           </motion.div>
 
           {/* Badge Collection */}
-          <BadgeCollection userId={user.id} onBadgeClick={handleBadgeClick} />
+          <BadgeCollection userId={effectiveUserId || user.id} onBadgeClick={handleBadgeClick} />
         </main>
         
         <BottomNav />
