@@ -358,7 +358,7 @@ serve(async (req) => {
         connected_account_id,
         merchants(business_name, logo_url)
       `)
-      .eq("user_id", user.id)
+      .eq("user_id", effectiveUserId)
       .in("status", ["active", "past_due", "trialing"]);
 
     if (dbSubError) {
