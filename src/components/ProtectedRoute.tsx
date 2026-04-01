@@ -149,16 +149,20 @@ export const ProtectedRoute = ({
     const checkPets = async () => {
       try {
         // Check if user is admin/superadmin, merchant, or vet (they don't need pets)
-        const [adminCheck, merchantCheck, vetCheck] = await Promise.all([
+        // Also check profiles.user_type to catch merchants/vets who haven't completed onboarding yet
+        const [adminCheck, merchantCheck, vetCheck, profileCheck] = await Promise.all([
           supabase.from('user_roles').select('role').eq('user_id', user.id).in('role', ['admin', 'superadmin']).limit(1),
           supabase.from('merchants').select('id').eq('user_id', user.id).limit(1),
           supabase.from('partner_vets').select('id').eq('user_id', user.id).limit(1),
+          supabase.from('profiles').select('user_type').eq('id', user.id).single(),
         ]);
 
+        const profileUserType = profileCheck.data?.user_type;
         const isAdminOrMerchantOrVet = 
           (adminCheck.data && adminCheck.data.length > 0) ||
           (merchantCheck.data && merchantCheck.data.length > 0) ||
-          (vetCheck.data && vetCheck.data.length > 0);
+          (vetCheck.data && vetCheck.data.length > 0) ||
+          profileUserType === 'merchant';
 
         if (isAdminOrMerchantOrVet) {
           petOnboardingCache.set(user.id, { hasPets: true, timestamp: Date.now() });
