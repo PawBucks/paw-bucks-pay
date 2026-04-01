@@ -208,7 +208,7 @@ serve(async (req) => {
         try {
           // Search for customer in connected account
           const connectedCustomers = await stripe.customers.list(
-            { email: user.email, limit: 1 },
+            { email: effectiveEmail, limit: 1 },
             { stripeAccount: merchant.stripe_account_id }
           );
 
