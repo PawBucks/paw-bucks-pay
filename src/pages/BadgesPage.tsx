@@ -175,7 +175,7 @@ const BadgesPage = () => {
           </motion.div>
 
           {/* Badge Collection */}
-          <BadgeCollection userId={user.id} onBadgeClick={handleBadgeClick} />
+          <BadgeCollection userId={effectiveUserId || user.id} onBadgeClick={handleBadgeClick} />
         </main>
         
         <BottomNav />
