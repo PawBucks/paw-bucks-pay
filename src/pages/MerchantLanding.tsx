@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { CreditCard, TrendingUp, Shield, BarChart3, CheckCircle, ArrowRight, DollarSign, Sparkles, UserPlus, Settings, Percent, Zap, Store, ShoppingBag, Eye, LineChart, Target } from "lucide-react";
+import { CreditCard, TrendingUp, Shield, BarChart3, CheckCircle, ArrowRight, DollarSign, Sparkles, UserPlus, Settings, Percent, Zap, Store, ShoppingBag, Eye, LineChart, Target, Coins } from "lucide-react";
 import { SocialFollowLinks } from "@/components/SocialFollowLinks";
 import logo from "@/assets/logo.png";
 import merchantGroomingHero from "@/assets/merchant-grooming-hero.png";
