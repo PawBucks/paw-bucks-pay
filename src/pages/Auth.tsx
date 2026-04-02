@@ -147,7 +147,19 @@ const Auth = () => {
     // If we have a user type override (from signup), use it
     if (userTypeOverride) {
       if (userTypeOverride === "merchant") {
-        navigate(ROUTES.MERCHANT_DASHBOARD);
+        // Check if they already have a merchant record (returning merchant)
+        const { data: merchantData } = await supabase
+          .from("merchants")
+          .select("id")
+          .eq("user_id", userId)
+          .maybeSingle();
+
+        if (merchantData) {
+          navigate(ROUTES.MERCHANT_DASHBOARD);
+        } else {
+          // New merchant — send to onboarding first
+          navigate("/merchant-onboarding");
+        }
       } else {
         // Invited users skip pet profile creation - go straight to dashboard
         if (inviteToken) {
@@ -168,7 +180,18 @@ const Auth = () => {
       .single();
 
     if (profile?.user_type === "merchant") {
-      navigate(ROUTES.MERCHANT_DASHBOARD);
+      // Check if they have a merchant record
+      const { data: merchantData } = await supabase
+        .from("merchants")
+        .select("id")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      if (merchantData) {
+        navigate(ROUTES.MERCHANT_DASHBOARD);
+      } else {
+        navigate("/merchant-onboarding");
+      }
     } else {
       navigate(ROUTES.DASHBOARD);
     }
