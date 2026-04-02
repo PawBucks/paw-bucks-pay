@@ -152,6 +152,66 @@ serve(async (req) => {
         });
     }
 
+    // Notify all pet owners about the new approved merchant/vet
+    if (action === 'approve') {
+      // Get merchant slug or vet id for the profile link
+      let profilePath = '';
+      if (entityType === 'merchant') {
+        const { data: merchantSlug } = await serviceClient
+          .from('merchants')
+          .select('storefront_slug')
+          .eq('id', entityId)
+          .single();
+        profilePath = merchantSlug?.storefront_slug 
+          ? `/storefront/${merchantSlug.storefront_slug}` 
+          : `/merchant/${entityId}`;
+      } else {
+        profilePath = `/vet/${entityId}`;
+      }
+
+      // Get all user IDs that are NOT merchants or vets (i.e. pet owners)
+      const { data: allProfiles } = await serviceClient
+        .from('profiles')
+        .select('id');
+
+      const { data: merchantUserIds } = await serviceClient
+        .from('merchants')
+        .select('user_id');
+
+      const { data: vetUserIds } = await serviceClient
+        .from('partner_vets')
+        .select('user_id');
+
+      const excludeIds = new Set([
+        ...(merchantUserIds?.map(m => m.user_id) || []),
+        ...(vetUserIds?.map(v => v.user_id) || []),
+        entityUserId, // already notified above
+      ]);
+
+      const petOwnerIds = (allProfiles || [])
+        .map(p => p.id)
+        .filter(id => !excludeIds.has(id));
+
+      if (petOwnerIds.length > 0) {
+        const entityLabel = entityType === 'merchant' ? 'merchant' : 'vet';
+        const notifications = petOwnerIds.map(userId => ({
+          user_id: userId,
+          title: `🎉 New ${entityLabel} just joined PawBucks!`,
+          message: `Check out "${entityName}" — now available on PawBucks! Visit their profile to explore their services and start earning rewards. [View Profile](${profilePath})`,
+          category: 'promotional',
+        }));
+
+        // Insert in batches of 500 to avoid payload limits
+        for (let i = 0; i < notifications.length; i += 500) {
+          await serviceClient
+            .from('notifications')
+            .insert(notifications.slice(i, i + 500));
+        }
+
+        console.log(`[Admin Approve] Sent new ${entityLabel} notifications to ${petOwnerIds.length} pet owners`);
+      }
+    }
+
     // Log the admin action
     await serviceClient
       .from('audit_logs')
