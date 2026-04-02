@@ -474,7 +474,7 @@ serve(async (req) => {
 
     // CASE 2 & 3: Stripe payment (full or partial with PawBucks)
     if (!merchant.stripe_account_id) {
-      throw new Error('Payment processing is not available for this merchant.');
+      throw new Error('This merchant has not set up payment processing yet. Please contact the business directly.');
     }
 
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {

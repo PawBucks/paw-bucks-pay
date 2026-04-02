@@ -304,7 +304,19 @@ export const PaymentDialogWithPawBucks = ({
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        // Extract the actual error message from the edge function response
+        const errorBody = typeof error === 'object' && error?.context?.body ? error.context.body : null;
+        if (errorBody) {
+          try {
+            const parsed = typeof errorBody === 'string' ? JSON.parse(errorBody) : errorBody;
+            if (parsed?.error) throw new Error(parsed.error);
+          } catch (parseErr) {
+            // If parsing fails, fall through to generic error
+          }
+        }
+        throw new Error(error.message || "Payment failed. Please try again.");
+      }
       if (data?.error) throw new Error(data.error);
 
       setPaymentData(data);
