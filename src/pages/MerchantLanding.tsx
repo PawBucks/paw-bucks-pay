@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { CreditCard, TrendingUp, Shield, BarChart3, CheckCircle, ArrowRight, DollarSign, Sparkles, UserPlus, Settings, Percent, Zap, Store, ShoppingBag, Eye, LineChart, Target } from "lucide-react";
+import { CreditCard, TrendingUp, Shield, BarChart3, CheckCircle, ArrowRight, DollarSign, Sparkles, UserPlus, Settings, Percent, Zap, Store, ShoppingBag, Eye, LineChart, Target, Coins } from "lucide-react";
 import { SocialFollowLinks } from "@/components/SocialFollowLinks";
 import logo from "@/assets/logo.png";
 import merchantGroomingHero from "@/assets/merchant-grooming-hero.png";
@@ -190,6 +190,53 @@ const MerchantLanding = () => {
                 </p>
                 <p className="text-lg font-semibold text-accent">
                   No customers = no commission.
+                </p>
+              </div>
+            </Card>
+
+            <Card className="p-8 sm:p-10 border-2 border-accent/20 shadow-xl">
+              <p className="text-lg font-semibold text-foreground mb-2">Example: Returning Customer Using Earned PawBucks</p>
+              <p className="text-sm text-muted-foreground mb-6">
+                Pet owners earn PawBucks on every purchase. Here's what happens when they spend them at your business.
+              </p>
+              
+              <div className="space-y-4 mb-8">
+                <div className="flex items-start gap-4 p-4 rounded-xl bg-muted/30">
+                  <ShoppingBag className="w-6 h-6 text-primary flex-shrink-0 mt-0.5" />
+                  <p className="text-foreground">A returning customer purchases <span className="font-bold">$60</span> in services</p>
+                </div>
+                <div className="flex items-start gap-4 p-4 rounded-xl bg-muted/30">
+                  <Coins className="w-6 h-6 text-primary flex-shrink-0 mt-0.5" />
+                  <p className="text-foreground">They apply <span className="font-bold">$15 in earned PawBucks</span> from previous purchases</p>
+                </div>
+                <div className="flex items-start gap-4 p-4 rounded-xl bg-muted/30">
+                  <CreditCard className="w-6 h-6 text-muted-foreground flex-shrink-0 mt-0.5" />
+                  <p className="text-foreground">Their card is charged <span className="font-bold">$45</span> (the remaining balance)</p>
+                </div>
+                <div className="flex items-start gap-4 p-4 rounded-xl bg-accent/10 border border-accent/20">
+                  <DollarSign className="w-6 h-6 text-accent flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-foreground font-semibold mb-2">You receive:</p>
+                    <ul className="space-y-2 text-muted-foreground">
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="w-4 h-4 text-accent flex-shrink-0" />
+                        <span><span className="font-bold text-foreground">$43.65 USD</span> from card payment (after 3% commission on $45)</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="w-4 h-4 text-accent flex-shrink-0" />
+                        <span><span className="font-bold text-foreground">$15 PawBucks</span> credited to your Merchant Wallet for marketing services</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t border-border pt-6 space-y-3">
+                <p className="text-muted-foreground leading-relaxed">
+                  The customer saves money, you still collect the <span className="font-bold text-foreground">full service value</span> — split between withdrawable cash and marketing credit.
+                </p>
+                <p className="text-lg font-semibold text-accent">
+                  Every repeat customer fuels your next marketing campaign.
                 </p>
               </div>
             </Card>
