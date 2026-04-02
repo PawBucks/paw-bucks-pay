@@ -208,37 +208,16 @@ const MerchantOnboarding = () => {
 
     try {
       const formData = new FormData(e.currentTarget);
-      const businessName = formData.get("businessName") as string;
-      const contactPerson = formData.get("contactPerson") as string;
-      const phone = formData.get("phone") as string;
-      const streetAddress = formData.get("streetAddress") as string;
-      const city = formData.get("city") as string;
-      const state = formData.get("state") as string;
-      const zipCode = formData.get("zipCode") as string;
-      const description = formData.get("description") as string;
+      const businessName = (formData.get("businessName") as string).trim();
+      const contactPerson = (formData.get("contactPerson") as string).trim();
+      const phone = (formData.get("phone") as string).trim();
+      const streetAddress = (formData.get("streetAddress") as string).trim();
+      const city = (formData.get("city") as string).trim();
+      const state = (formData.get("state") as string).trim();
+      const zipCode = (formData.get("zipCode") as string).trim();
+      const description = (formData.get("description") as string)?.trim() || "";
 
-      // Upload logo if provided
-      let logoUrl: string | null = null;
-      if (logoFile) {
-        const fileExt = logoFile.name.split('.').pop();
-        const filePath = `${user.id}/${Date.now()}.${fileExt}`;
-        
-        const { error: uploadError } = await supabase.storage
-          .from('merchant-logos')
-          .upload(filePath, logoFile);
-
-        if (uploadError) {
-          throw new Error("Failed to upload logo");
-        }
-
-        const { data: urlData } = supabase.storage
-          .from('merchant-logos')
-          .getPublicUrl(filePath);
-        
-        logoUrl = urlData.publicUrl;
-      }
-
-      // Validate input
+      // Validate input first (before any DB calls)
       const validatedData = merchantOnboardingSchema.parse({
         businessName,
         contactPerson,
@@ -252,9 +231,46 @@ const MerchantOnboarding = () => {
         city,
         state,
         zipCode,
-        description: description || "",
-        cashbackRate: 10.0, // Default rate, not user-configurable
+        description,
+        cashbackRate: 10.0,
       });
+
+      // Check if merchant already exists for this user (prevent duplicates)
+      const { data: existingMerchant } = await supabase
+        .from("merchants")
+        .select("id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (existingMerchant) {
+        toast.info("Your merchant profile already exists!");
+        navigate("/merchant-dashboard");
+        return;
+      }
+
+      // Upload logo if provided (non-blocking failure)
+      let logoUrl: string | null = null;
+      if (logoFile) {
+        try {
+          const fileExt = logoFile.name.split('.').pop();
+          const filePath = `${user.id}/${Date.now()}.${fileExt}`;
+          
+          const { error: uploadError } = await supabase.storage
+            .from('merchant-logos')
+            .upload(filePath, logoFile);
+
+          if (!uploadError) {
+            const { data: urlData } = supabase.storage
+              .from('merchant-logos')
+              .getPublicUrl(filePath);
+            logoUrl = urlData.publicUrl;
+          } else {
+            console.warn("Logo upload failed (continuing without logo):", uploadError);
+          }
+        } catch (logoErr) {
+          console.warn("Logo upload error (continuing without logo):", logoErr);
+        }
+      }
 
       // Combine address fields into full address
       const fullAddress = `${validatedData.streetAddress}, ${validatedData.city}, ${validatedData.state} ${validatedData.zipCode}`;
@@ -268,16 +284,17 @@ const MerchantOnboarding = () => {
 
         if (profileError) {
           console.error("Error updating profile:", profileError);
-          throw new Error("Failed to update account type");
+          throw new Error("Failed to update account type. Please try again.");
         }
       }
 
-      // Generate storefront slug from business name
-      const storefrontSlug = validatedData.businessName
-        .toLowerCase()
-        .replace(/[^a-z0-9]/g, '');
+      // Generate storefront slug using the DB function to avoid collisions
+      const { data: slugData } = await supabase.rpc('generate_storefront_slug', {
+        business_name: validatedData.businessName,
+      });
+      const storefrontSlug = slugData || validatedData.businessName.toLowerCase().replace(/[^a-z0-9]/g, '');
 
-      // Create merchant profile with smart onboarding data
+      // Create merchant profile
       const { data: merchantData, error: merchantError } = await supabase.from("merchants").insert({
         user_id: user.id,
         business_name: validatedData.businessName,
@@ -297,30 +314,30 @@ const MerchantOnboarding = () => {
 
       if (merchantError) {
         console.error("Error creating merchant:", merchantError);
-        throw new Error("Failed to create merchant profile");
+        if (merchantError.code === '23505') {
+          throw new Error("A merchant profile already exists for this account.");
+        }
+        throw new Error("Failed to create merchant profile. Please try again.");
       }
 
-      // Geocode the address and update merchant with coordinates
+      // Geocode the address in the background (don't block navigation)
       if (merchantData?.id) {
-        geocodeAddress(fullAddress, merchantData.id).then(result => {
-          if (result.latitude && result.longitude) {
-            console.log(`Merchant geocoded: lat=${result.latitude}, lng=${result.longitude}`);
-          } else {
-            console.warn("Could not geocode merchant address:", result.error);
-          }
-        }).catch(err => {
-          console.error("Geocoding error:", err);
+        geocodeAddress(fullAddress, merchantData.id).catch(err => {
+          console.warn("Geocoding error (non-critical):", err);
         });
       }
 
-      toast.success("Merchant profile created successfully!");
+      toast.success("Merchant profile created! Your account is pending admin approval.", {
+        description: "You can explore the dashboard while we review your application.",
+        duration: 6000,
+      });
       navigate("/merchant-dashboard");
     } catch (error: any) {
       if (error.errors) {
-        // Zod validation error
-        toast.error(error.errors[0]?.message || "Invalid input");
+        const messages = error.errors.map((e: any) => e.message).filter(Boolean);
+        toast.error(messages[0] || "Please check your input and try again.");
       } else {
-        toast.error("Failed to create merchant profile. Please try again.");
+        toast.error(error.message || "Failed to create merchant profile. Please try again.");
       }
       console.error("Error creating merchant profile:", error);
     } finally {
