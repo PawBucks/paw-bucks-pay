@@ -3902,6 +3902,60 @@ export type Database = {
           },
         ]
       }
+      merchant_daily_summaries: {
+        Row: {
+          created_at: string
+          email_sent: boolean
+          id: string
+          merchant_id: string
+          summary_date: string
+          total_pawbucks_credits: number
+          total_sales: number
+          total_usd_processed: number
+          transaction_count: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email_sent?: boolean
+          id?: string
+          merchant_id: string
+          summary_date: string
+          total_pawbucks_credits?: number
+          total_sales?: number
+          total_usd_processed?: number
+          transaction_count?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email_sent?: boolean
+          id?: string
+          merchant_id?: string
+          summary_date?: string
+          total_pawbucks_credits?: number
+          total_sales?: number
+          total_usd_processed?: number
+          transaction_count?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_daily_summaries_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_daily_summaries_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       merchant_loyalty_programs: {
         Row: {
           created_at: string
