@@ -254,7 +254,7 @@ export const MerchantDailySummaryTab = ({ merchantId, merchantName }: MerchantDa
                         <TableCell className="text-right text-success font-semibold">
                           {formatCurrency(Number(row.total_usd_processed))}
                         </TableCell>
-                        <TableCell className="text-right text-purple-600 dark:text-purple-400 font-semibold">
+                        <TableCell className="text-right text-accent font-semibold">
                           {formatPawBucks(row.total_pawbucks_credits)}
                         </TableCell>
                         <TableCell className="text-right">
