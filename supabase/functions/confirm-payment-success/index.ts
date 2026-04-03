@@ -241,6 +241,19 @@ serve(async (req) => {
       .single();
 
     if (txError) {
+      // Handle duplicate key violation (race condition: two calls for same payment intent)
+      if (txError.code === '23505' && txError.message?.includes('idx_transactions_unique_stripe_pi')) {
+        logStep("Duplicate transaction blocked by unique constraint, fetching existing", { paymentIntentId });
+        const { data: existingTx2 } = await supabaseAdmin
+          .from('transactions')
+          .select('id')
+          .eq('stripe_payment_intent_id', paymentIntentId)
+          .single();
+        return new Response(
+          JSON.stringify({ success: true, message: "Already processed", transactionId: existingTx2?.id }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
+        );
+      }
       logStep("Error creating transaction", { error: txError.message });
       throw new Error("Failed to create transaction record");
     }
