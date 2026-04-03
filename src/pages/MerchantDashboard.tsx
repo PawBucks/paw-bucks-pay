@@ -133,6 +133,12 @@ const NAV_SECTIONS = [
         icon: BarChart3,
         description: "Generate and download detailed sales reports",
       },
+      {
+        id: "history",
+        label: "Daily History",
+        icon: History,
+        description: "View daily settlement summaries for reconciliation and tax purposes",
+      },
     ],
   },
   {
