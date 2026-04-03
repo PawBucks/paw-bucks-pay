@@ -12,6 +12,7 @@ import { ArrowLeft, Bell, Calendar as CalendarIcon, Filter, Check, X } from "luc
 import { useNavigate } from "react-router-dom";
 import { format, subDays, startOfDay, endOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
+import { renderMessageLinks } from "@/lib/renderMessageLinks";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import {

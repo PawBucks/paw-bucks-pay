@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, memo } from "react";
 import { useNavigate } from "react-router-dom";
+import { renderMessageLinks } from "@/lib/renderMessageLinks";
 import { Bell, BellRing, Settings, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
