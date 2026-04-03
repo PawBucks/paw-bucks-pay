@@ -55,6 +55,7 @@ import { MerchantPremiumServicesTab } from "@/components/merchant/MerchantPremiu
 import { MerchantEarningsTab } from "@/components/merchant/MerchantEarningsTab";
 import { SalesReportGenerator } from "@/components/shared/SalesReportGenerator";
 import { MerchantSubscribersTab } from "@/components/merchant/MerchantSubscribersTab";
+import { MerchantDailySummaryTab } from "@/components/merchant/MerchantDailySummaryTab";
 
 // Dialogs
 import { EditMerchantProfileDialog } from "@/components/merchant/EditMerchantProfileDialog";
