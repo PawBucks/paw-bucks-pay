@@ -1305,13 +1305,6 @@ export type Database = {
             foreignKeyName: "direct_payments_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "merchant_customer_contacts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "direct_payments_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -4114,13 +4107,6 @@ export type Database = {
             foreignKeyName: "merchant_messages_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "merchant_customer_contacts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "merchant_messages_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -4804,13 +4790,6 @@ export type Database = {
             foreignKeyName: "merchant_subscriptions_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "merchant_customer_contacts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "merchant_subscriptions_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -5207,13 +5186,6 @@ export type Database = {
           working_style?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "merchants_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "merchant_customer_contacts"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "merchants_user_id_fkey"
             columns: ["user_id"]
@@ -6126,13 +6098,6 @@ export type Database = {
           vet_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "pet_consent_requests_owner_id_fkey"
-            columns: ["owner_id"]
-            isOneToOne: false
-            referencedRelation: "merchant_customer_contacts"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "pet_consent_requests_owner_id_fkey"
             columns: ["owner_id"]
@@ -7063,13 +7028,6 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "pet_profiles_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "merchant_customer_contacts"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "pet_profiles_user_id_fkey"
             columns: ["user_id"]
@@ -8052,13 +8010,6 @@ export type Database = {
             foreignKeyName: "referrals_referee_id_fkey"
             columns: ["referee_id"]
             isOneToOne: true
-            referencedRelation: "merchant_customer_contacts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "referrals_referee_id_fkey"
-            columns: ["referee_id"]
-            isOneToOne: true
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -8067,13 +8018,6 @@ export type Database = {
             columns: ["referee_id"]
             isOneToOne: true
             referencedRelation: "reviewer_profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "referrals_referrer_id_fkey"
-            columns: ["referrer_id"]
-            isOneToOne: false
-            referencedRelation: "merchant_customer_contacts"
             referencedColumns: ["id"]
           },
           {
@@ -9249,13 +9193,6 @@ export type Database = {
             foreignKeyName: "symptom_triage_assessments_owner_id_fkey"
             columns: ["owner_id"]
             isOneToOne: false
-            referencedRelation: "merchant_customer_contacts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "symptom_triage_assessments_owner_id_fkey"
-            columns: ["owner_id"]
-            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -9570,13 +9507,6 @@ export type Database = {
             columns: ["merchant_id"]
             isOneToOne: false
             referencedRelation: "merchants_public"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "transactions_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "merchant_customer_contacts"
             referencedColumns: ["id"]
           },
           {
@@ -10138,13 +10068,6 @@ export type Database = {
             foreignKeyName: "user_welcome_credits_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: true
-            referencedRelation: "merchant_customer_contacts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_welcome_credits_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -10283,13 +10206,6 @@ export type Database = {
             columns: ["pet_id"]
             isOneToOne: false
             referencedRelation: "pet_profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "vet_bonus_offers_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "merchant_customer_contacts"
             referencedColumns: ["id"]
           },
           {
@@ -10958,13 +10874,6 @@ export type Database = {
             foreignKeyName: "vet_prescription_fulfillments_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "merchant_customer_contacts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "vet_prescription_fulfillments_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -11247,13 +11156,6 @@ export type Database = {
             foreignKeyName: "wallets_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: true
-            referencedRelation: "merchant_customer_contacts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "wallets_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -11367,13 +11269,6 @@ export type Database = {
             foreignKeyName: "welcome_credit_abuse_signals_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "merchant_customer_contacts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "welcome_credit_abuse_signals_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -11424,13 +11319,6 @@ export type Database = {
             columns: ["merchant_id"]
             isOneToOne: false
             referencedRelation: "merchants_public"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "welcome_credit_analytics_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "merchant_customer_contacts"
             referencedColumns: ["id"]
           },
           {
@@ -11593,13 +11481,6 @@ export type Database = {
             columns: ["plan_id"]
             isOneToOne: false
             referencedRelation: "vet_wellness_plans"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "wellness_plan_purchases_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "merchant_customer_contacts"
             referencedColumns: ["id"]
           },
           {
@@ -11835,32 +11716,6 @@ export type Database = {
             columns: ["service_id"]
             isOneToOne: false
             referencedRelation: "merchant_market_services"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      merchant_customer_contacts: {
-        Row: {
-          email: string | null
-          full_name: string | null
-          id: string | null
-          merchant_id: string | null
-          phone: string | null
-          stripe_customer_id: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "transactions_merchant_id_fkey"
-            columns: ["merchant_id"]
-            isOneToOne: false
-            referencedRelation: "merchants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "transactions_merchant_id_fkey"
-            columns: ["merchant_id"]
-            isOneToOne: false
-            referencedRelation: "merchants_public"
             referencedColumns: ["id"]
           },
         ]
@@ -12157,6 +12012,21 @@ export type Database = {
           total_earnings: number
           total_fees: number
           total_sales: number
+          transaction_count: number
+        }[]
+      }
+      get_merchant_customer_contacts: {
+        Args: { p_merchant_id: string }
+        Returns: {
+          avatar_url: string
+          email: string
+          full_name: string
+          id: string
+          last_transaction_at: string
+          merchant_id: string
+          phone: string
+          stripe_customer_id: string
+          total_spent: number
           transaction_count: number
         }[]
       }

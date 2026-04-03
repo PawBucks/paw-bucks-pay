@@ -33,53 +33,43 @@ serve(async (req) => {
 
     // STEP 3: Get the merchantId from body (stripe_account_id is resolved server-side)
     let merchantId: string | null = null;
-    let accountId: string | null = null;
     
     if (req.method === 'GET') {
       const url = new URL(req.url);
       merchantId = url.searchParams.get('merchantId');
-      accountId = url.searchParams.get('accountId'); // Legacy fallback
     } else {
       const body = await req.json();
       merchantId = body.merchantId;
-      accountId = body.accountId; // Legacy fallback
+    }
+
+    if (!merchantId) {
+      throw new Error('merchantId is required');
     }
 
     // Resolve stripe_account_id from merchantId (secure server-side lookup)
-    let stripeAccountId: string | null = null;
+    const { data: merchant, error: merchantError } = await supabaseAdmin
+      .from('merchants')
+      .select('stripe_account_id')
+      .eq('id', merchantId)
+      .eq('approval_status', 'approved')
+      .single();
 
-    if (merchantId) {
-      const { data: merchant, error: merchantError } = await supabaseAdmin
-        .from('merchants')
-        .select('stripe_account_id')
-        .eq('id', merchantId)
-        .eq('approval_status', 'approved')
-        .single();
-
-      if (merchantError || !merchant?.stripe_account_id) {
-        console.log('Merchant not found or no stripe account:', merchantId);
-        return new Response(
-          JSON.stringify({ 
-            success: true, 
-            products: [],
-            message: 'Merchant not found or not connected to Stripe'
-          }),
-          {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            status: 200,
-          }
-        );
-      }
-
-      stripeAccountId = merchant.stripe_account_id;
-    } else if (accountId) {
-      // Legacy fallback: accountId provided directly (for backward compatibility)
-      stripeAccountId = accountId;
+    if (merchantError || !merchant?.stripe_account_id) {
+      console.log('Merchant not found or no stripe account:', merchantId);
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          products: [],
+          message: 'Merchant not found or not connected to Stripe'
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
+        }
+      );
     }
 
-    if (!stripeAccountId) {
-      throw new Error('merchantId is required');
-    }
+    const stripeAccountId = merchant.stripe_account_id;
 
     console.log('Listing products for merchant:', merchantId, 'stripe account:', stripeAccountId.substring(0, 10) + '...');
 
