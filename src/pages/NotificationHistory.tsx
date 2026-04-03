@@ -182,7 +182,7 @@ export default function NotificationHistory() {
         </div>
         <div className="prose prose-sm dark:prose-invert max-w-none">
           <p className="text-foreground whitespace-pre-wrap leading-relaxed">
-            {selectedNotification.message}
+            {renderMessageLinks(selectedNotification.message)}
           </p>
         </div>
       </div>
