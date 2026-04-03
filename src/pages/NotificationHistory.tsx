@@ -357,7 +357,7 @@ export default function NotificationHistory() {
                             </Badge>
                           </div>
                           <p className="text-sm text-muted-foreground line-clamp-2">
-                            {notification.message}
+                            {renderMessageLinks(notification.message)}
                           </p>
                           <p className="text-xs text-muted-foreground mt-2">
                             {format(

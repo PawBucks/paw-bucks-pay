@@ -361,7 +361,7 @@ const NotificationsDropdownComponent = ({ userId }: { userId: string }) => {
                   <span className="h-2 w-2 rounded-full bg-primary flex-shrink-0 mt-1" />
                 )}
               </div>
-              <p className="text-xs text-muted-foreground line-clamp-2">{notification.message}</p>
+              <p className="text-xs text-muted-foreground line-clamp-2">{renderMessageLinks(notification.message)}</p>
               <span className="text-xs text-muted-foreground/70">
                 {formatDistanceToNow(new Date(notification.created_at!), { addSuffix: true })}
               </span>
