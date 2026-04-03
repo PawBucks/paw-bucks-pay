@@ -1,0 +1,1 @@
+UPDATE public.merchants SET latitude = 33.98105, longitude = -118.46396 WHERE id = '55d4ae05-173b-4986-b894-08be7308bc2c' AND latitude IS NULL;
