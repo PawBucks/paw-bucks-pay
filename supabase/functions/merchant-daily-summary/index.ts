@@ -38,7 +38,16 @@ serve(async (req: Request) => {
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Calculate "today" in EST/PST (America/New_York)
+    // Check if a specific merchant_id was provided (on-demand trigger)
+    let singleMerchantId: string | null = null;
+    try {
+      const body = await req.json();
+      singleMerchantId = body?.merchant_id || null;
+    } catch {
+      // No body or invalid JSON — run for all merchants (cron mode)
+    }
+
+    // Calculate "today" in EST (America/New_York)
     const now = new Date();
     const estFormatter = new Intl.DateTimeFormat("en-CA", {
       timeZone: "America/New_York",
@@ -48,15 +57,21 @@ serve(async (req: Request) => {
     });
     const todayEST = estFormatter.format(now); // YYYY-MM-DD
 
-    console.log(`[Daily Summary] Running for date: ${todayEST}`);
+    console.log(`[Daily Summary] Running for date: ${todayEST}${singleMerchantId ? ` (merchant: ${singleMerchantId})` : " (all merchants)"}`);
 
-    // Fetch all active (approved, not paused) merchants with email
-    const { data: merchants, error: merchantsError } = await supabase
+    // Fetch merchants
+    let merchantQuery = supabase
       .from("merchants")
       .select("id, business_name, email, user_id")
       .eq("approval_status", "approved")
       .eq("is_paused", false)
       .not("email", "is", null);
+
+    if (singleMerchantId) {
+      merchantQuery = merchantQuery.eq("id", singleMerchantId);
+    }
+
+    const { data: merchants, error: merchantsError } = await merchantQuery;
 
     if (merchantsError) {
       throw new Error(`Failed to fetch merchants: ${merchantsError.message}`);

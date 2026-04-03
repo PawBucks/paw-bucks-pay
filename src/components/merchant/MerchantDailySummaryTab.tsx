@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -20,7 +20,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Calendar, Download, Mail, MailX, TrendingUp, DollarSign, CreditCard, Users } from "lucide-react";
+import { Calendar, Download, Mail, MailX, TrendingUp, DollarSign, CreditCard, Users, RefreshCw } from "lucide-react";
+import { toast } from "sonner";
 import { format, subDays, startOfMonth, endOfMonth, subMonths, parseISO } from "date-fns";
 import jsPDF from "jspdf";
 
@@ -55,7 +56,25 @@ const parseLocalDate = (dateStr: string) => {
 
 export const MerchantDailySummaryTab = ({ merchantId, merchantName }: MerchantDailySummaryTabProps) => {
   const [timeRange, setTimeRange] = useState("30");
+  const [isGenerating, setIsGenerating] = useState(false);
+  const queryClient = useQueryClient();
 
+  const handleGenerateNow = async () => {
+    setIsGenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("merchant-daily-summary", {
+        body: { merchant_id: merchantId },
+      });
+      if (error) throw error;
+      toast.success("Daily summary generated successfully!");
+      queryClient.invalidateQueries({ queryKey: ["merchant-daily-summaries", merchantId] });
+    } catch (err) {
+      console.error("Failed to generate summary:", err);
+      toast.error("Failed to generate summary. Please try again.");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
   const { data: summaries = [], isLoading } = useQuery({
     queryKey: ["merchant-daily-summaries", merchantId, timeRange],
     queryFn: async () => {
@@ -149,7 +168,11 @@ export const MerchantDailySummaryTab = ({ merchantId, merchantName }: MerchantDa
             Review past daily reconciliation summaries for tax and accounting purposes
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <Button variant="default" size="sm" onClick={handleGenerateNow} disabled={isGenerating}>
+            <RefreshCw className={`h-4 w-4 mr-2 ${isGenerating ? "animate-spin" : ""}`} />
+            {isGenerating ? "Generating..." : "Run Summary Now"}
+          </Button>
           <Select value={timeRange} onValueChange={setTimeRange}>
             <SelectTrigger className="w-[140px]">
               <SelectValue />
