@@ -41,6 +41,7 @@ import {
   Users,
   PauseCircle,
   Mail,
+  History,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format, startOfMonth, parseISO } from "date-fns";
@@ -54,6 +55,7 @@ import { MerchantPremiumServicesTab } from "@/components/merchant/MerchantPremiu
 import { MerchantEarningsTab } from "@/components/merchant/MerchantEarningsTab";
 import { SalesReportGenerator } from "@/components/shared/SalesReportGenerator";
 import { MerchantSubscribersTab } from "@/components/merchant/MerchantSubscribersTab";
+import { MerchantDailySummaryTab } from "@/components/merchant/MerchantDailySummaryTab";
 
 // Dialogs
 import { EditMerchantProfileDialog } from "@/components/merchant/EditMerchantProfileDialog";
@@ -130,6 +132,12 @@ const NAV_SECTIONS = [
         label: "Sales Report",
         icon: BarChart3,
         description: "Generate and download detailed sales reports",
+      },
+      {
+        id: "history",
+        label: "Daily History",
+        icon: History,
+        description: "View daily settlement summaries for reconciliation and tax purposes",
       },
     ],
   },
@@ -728,6 +736,13 @@ const MerchantDashboard = () => {
             entityId={merchant.id}
             entityType="merchant"
             entityName={merchant.business_name}
+          />
+         );
+      case "history":
+        return (
+          <MerchantDailySummaryTab
+            merchantId={merchant.id}
+            merchantName={merchant.business_name}
           />
         );
       case "loyalty":
