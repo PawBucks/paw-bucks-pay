@@ -1798,17 +1798,23 @@ serve(async (req) => {
       });
 
       // Update merchant status in database
+      const isComplete = account.charges_enabled && account.payouts_enabled;
+      const hasPendingRequirements = 
+        (account.requirements?.currently_due?.length || 0) > 0 ||
+        (account.requirements?.past_due?.length || 0) > 0;
+
       const { error: updateError } = await supabaseAdmin
         .from('merchants')
         .update({
-          stripe_account_status: account.charges_enabled ? 'active' : 'pending',
+          stripe_account_status: isComplete ? 'active' : 'pending',
+          onboarding_complete: isComplete && !hasPendingRequirements,
         })
         .eq('stripe_account_id', account.id);
 
       if (updateError) {
         console.error('Error updating merchant status:', updateError);
       } else {
-        console.log('✅ Merchant status updated');
+        console.log('✅ Merchant status updated:', { isComplete, hasPendingRequirements });
       }
     }
 
