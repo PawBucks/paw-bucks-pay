@@ -737,6 +737,13 @@ const MerchantDashboard = () => {
             entityType="merchant"
             entityName={merchant.business_name}
           />
+         );
+      case "history":
+        return (
+          <MerchantDailySummaryTab
+            merchantId={merchant.id}
+            merchantName={merchant.business_name}
+          />
         );
       case "loyalty":
         return <MerchantLoyaltyProgramTab merchantId={merchant.id} />;
