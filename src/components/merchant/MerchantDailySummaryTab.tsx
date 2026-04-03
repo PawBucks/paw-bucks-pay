@@ -168,7 +168,11 @@ export const MerchantDailySummaryTab = ({ merchantId, merchantName }: MerchantDa
             Review past daily reconciliation summaries for tax and accounting purposes
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <Button variant="default" size="sm" onClick={handleGenerateNow} disabled={isGenerating}>
+            <RefreshCw className={`h-4 w-4 mr-2 ${isGenerating ? "animate-spin" : ""}`} />
+            {isGenerating ? "Generating..." : "Run Summary Now"}
+          </Button>
           <Select value={timeRange} onValueChange={setTimeRange}>
             <SelectTrigger className="w-[140px]">
               <SelectValue />
