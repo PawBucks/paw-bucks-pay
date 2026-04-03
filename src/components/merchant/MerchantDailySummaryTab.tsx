@@ -56,7 +56,25 @@ const parseLocalDate = (dateStr: string) => {
 
 export const MerchantDailySummaryTab = ({ merchantId, merchantName }: MerchantDailySummaryTabProps) => {
   const [timeRange, setTimeRange] = useState("30");
+  const [isGenerating, setIsGenerating] = useState(false);
+  const queryClient = useQueryClient();
 
+  const handleGenerateNow = async () => {
+    setIsGenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("merchant-daily-summary", {
+        body: { merchant_id: merchantId },
+      });
+      if (error) throw error;
+      toast.success("Daily summary generated successfully!");
+      queryClient.invalidateQueries({ queryKey: ["merchant-daily-summaries", merchantId] });
+    } catch (err) {
+      console.error("Failed to generate summary:", err);
+      toast.error("Failed to generate summary. Please try again.");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
   const { data: summaries = [], isLoading } = useQuery({
     queryKey: ["merchant-daily-summaries", merchantId, timeRange],
     queryFn: async () => {
