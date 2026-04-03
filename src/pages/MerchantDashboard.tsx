@@ -41,6 +41,7 @@ import {
   Users,
   PauseCircle,
   Mail,
+  History,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format, startOfMonth, parseISO } from "date-fns";
