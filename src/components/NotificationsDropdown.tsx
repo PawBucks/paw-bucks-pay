@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, memo } from "react";
 import { useNavigate } from "react-router-dom";
+import { renderMessageLinks } from "@/lib/renderMessageLinks";
 import { Bell, BellRing, Settings, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -286,7 +287,7 @@ const NotificationsDropdownComponent = ({ userId }: { userId: string }) => {
         </div>
         <div className="prose prose-sm dark:prose-invert max-w-none">
           <p className="text-foreground whitespace-pre-wrap leading-relaxed">
-            {selectedNotification.message}
+            {renderMessageLinks(selectedNotification.message)}
           </p>
         </div>
       </div>
@@ -361,7 +362,7 @@ const NotificationsDropdownComponent = ({ userId }: { userId: string }) => {
                   <span className="h-2 w-2 rounded-full bg-primary flex-shrink-0 mt-1" />
                 )}
               </div>
-              <p className="text-xs text-muted-foreground line-clamp-2">{notification.message}</p>
+              <p className="text-xs text-muted-foreground line-clamp-2">{renderMessageLinks(notification.message)}</p>
               <span className="text-xs text-muted-foreground/70">
                 {formatDistanceToNow(new Date(notification.created_at!), { addSuffix: true })}
               </span>

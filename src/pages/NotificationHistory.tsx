@@ -12,6 +12,7 @@ import { ArrowLeft, Bell, Calendar as CalendarIcon, Filter, Check, X } from "luc
 import { useNavigate } from "react-router-dom";
 import { format, subDays, startOfDay, endOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
+import { renderMessageLinks } from "@/lib/renderMessageLinks";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import {
@@ -182,7 +183,7 @@ export default function NotificationHistory() {
         </div>
         <div className="prose prose-sm dark:prose-invert max-w-none">
           <p className="text-foreground whitespace-pre-wrap leading-relaxed">
-            {selectedNotification.message}
+            {renderMessageLinks(selectedNotification.message)}
           </p>
         </div>
       </div>
@@ -357,7 +358,7 @@ export default function NotificationHistory() {
                             </Badge>
                           </div>
                           <p className="text-sm text-muted-foreground line-clamp-2">
-                            {notification.message}
+                            {renderMessageLinks(notification.message)}
                           </p>
                           <p className="text-xs text-muted-foreground mt-2">
                             {format(
