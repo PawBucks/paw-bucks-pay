@@ -33,7 +33,6 @@ serve(async (req) => {
 
     // STEP 3: Get the merchantId from body (stripe_account_id is resolved server-side)
     let merchantId: string | null = null;
-    let accountId: string | null = null;
     
     if (req.method === 'GET') {
       const url = new URL(req.url);
