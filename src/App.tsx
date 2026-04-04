@@ -92,6 +92,7 @@ const MerchantAvailableBalance = lazyWithRetry(() => import("./pages/MerchantAva
 const MerchantPendingBalance = lazyWithRetry(() => import("./pages/MerchantPendingBalance"), "MerchantPendingBalance");
 const MerchantTotalEarnings = lazyWithRetry(() => import("./pages/MerchantTotalEarnings"), "MerchantTotalEarnings");
 const MerchantMessages = lazyWithRetry(() => import("./pages/MerchantMessages"), "MerchantMessages");
+const MerchantCampaigns = lazyWithRetry(() => import("./pages/MerchantCampaigns"), "MerchantCampaigns");
 const MyBookings = lazyWithRetry(() => import("./pages/MyBookings"), "MyBookings");
 const PublicBookingPage = lazyWithRetry(() => import("./pages/PublicBookingPage"), "PublicBookingPage");
 const PetTimelinePage = lazyWithRetry(() => import("./pages/PetTimelinePage"), "PetTimelinePage");
