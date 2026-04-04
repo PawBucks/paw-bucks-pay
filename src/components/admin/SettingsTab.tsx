@@ -11,9 +11,11 @@ import { useAuth } from '@/hooks/useAuth';
 import { PlatformConfigSection } from './platform-config/PlatformConfigSection';
 
 export function SettingsTab() {
+  const { user } = useAuth();
   const [welcomeCreditEnabled, setWelcomeCreditEnabled] = useState(true);
   const [loading, setLoading] = useState(true);
   const [toggling, setToggling] = useState(false);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
 
   useEffect(() => {
     loadWelcomeCreditSetting();
