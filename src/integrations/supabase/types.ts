@@ -3839,6 +3839,113 @@ export type Database = {
           },
         ]
       }
+      merchant_campaign_recipients: {
+        Row: {
+          campaign_id: string
+          created_at: string
+          email: string | null
+          error_message: string | null
+          id: string
+          phone: string | null
+          sent_at: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string
+          email?: string | null
+          error_message?: string | null
+          id?: string
+          phone?: string | null
+          sent_at?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string
+          email?: string | null
+          error_message?: string | null
+          id?: string
+          phone?: string | null
+          sent_at?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_campaign_recipients_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      merchant_campaigns: {
+        Row: {
+          channel: string
+          created_at: string
+          failed_count: number
+          id: string
+          merchant_id: string
+          message: string
+          recipient_count: number
+          recipient_type: string
+          sent_at: string | null
+          sent_count: number
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          channel: string
+          created_at?: string
+          failed_count?: number
+          id?: string
+          merchant_id: string
+          message: string
+          recipient_count?: number
+          recipient_type?: string
+          sent_at?: string | null
+          sent_count?: number
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          channel?: string
+          created_at?: string
+          failed_count?: number
+          id?: string
+          merchant_id?: string
+          message?: string
+          recipient_count?: number
+          recipient_type?: string
+          sent_at?: string | null
+          sent_count?: number
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_campaigns_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_campaigns_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       merchant_customer_analytics: {
         Row: {
           average_order_value: number | null
@@ -4972,6 +5079,54 @@ export type Database = {
             foreignKeyName: "merchant_training_progress_merchant_id_fkey"
             columns: ["merchant_id"]
             isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      merchant_twilio_settings: {
+        Row: {
+          created_at: string
+          id: string
+          is_verified: boolean
+          merchant_id: string
+          twilio_account_sid: string
+          twilio_auth_token: string
+          twilio_phone_number: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_verified?: boolean
+          merchant_id: string
+          twilio_account_sid: string
+          twilio_auth_token: string
+          twilio_phone_number: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_verified?: boolean
+          merchant_id?: string
+          twilio_account_sid?: string
+          twilio_auth_token?: string
+          twilio_phone_number?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_twilio_settings_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: true
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_twilio_settings_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: true
             referencedRelation: "merchants_public"
             referencedColumns: ["id"]
           },
