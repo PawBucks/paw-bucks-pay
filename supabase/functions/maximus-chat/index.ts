@@ -86,7 +86,7 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
     const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
-    if (!supabaseUrl || !supabaseAnonKey) throw new Error('Supabase environment is not configured');
+    if (!supabaseUrl || !supabaseAnonKey || !supabaseServiceKey) throw new Error('Supabase environment is not configured');
 
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) throw new Error('No authorization header');
@@ -96,19 +96,24 @@ serve(async (req) => {
     const { data: { user }, error: userError } = await authClient.auth.getUser(token);
     if (userError || !user) throw new Error('User not authenticated');
 
-    const userScopedClient = createClient(supabaseUrl, supabaseAnonKey, {
-      global: {
-        headers: {
-          Authorization: authHeader,
-        },
-      },
-    });
+    const platformClient = createClient(supabaseUrl, supabaseServiceKey);
 
     const { messages } = await req.json();
     if (!messages || !Array.isArray(messages)) throw new Error('Messages array required');
 
-    // Fetch ALL user account data in parallel for comprehensive context
+    const { data: sharedMembership } = await platformClient
+      .from('shared_account_members')
+      .select('owner_id')
+      .eq('member_id', user.id)
+      .eq('status', 'accepted')
+      .maybeSingle();
+
+    const effectiveUserId = sharedMembership?.owner_id || user.id;
+    const isSharedMember = effectiveUserId !== user.id;
+
+    // Fetch account-scoped data from the mirrored owner context for shared members
     const [
+      requesterProfileResult,
       profileResult,
       walletResult,
       pawbucksResult,
@@ -118,10 +123,6 @@ serve(async (req) => {
       subscriptionResult,
       petFundResult,
       pawbucksActivityResult,
-      medicalRecordsResult,
-      vaccinationsResult,
-      labResultsResult,
-      insurancePoliciesResult,
       supportTicketsResult,
       referralsAsReferrerResult,
       referralsAsRefereeResult,
@@ -136,40 +137,67 @@ serve(async (req) => {
       badgesResult,
       tierStatusResult,
       welcomeCreditResult,
-      petEmailsResult,
     ] = await Promise.all([
-      userScopedClient.from('profiles').select('full_name, user_type, phone, referral_code, created_at, email, avatar_url').eq('id', user.id).maybeSingle(),
-      userScopedClient.from('wallets').select('balance, total_spent, rewards_points, last_updated').eq('user_id', user.id).maybeSingle(),
-      userScopedClient.from('pawbucks_wallet').select('balance, last_updated').eq('user_id', user.id).maybeSingle(),
-      userScopedClient.from('transactions').select('id, amount, status, description, created_at, cashback_earned, rewards_earned, merchants!transactions_merchant_id_fkey(business_name)').eq('user_id', user.id).order('created_at', { ascending: false }).limit(25),
-      userScopedClient.from('pet_profiles').select('id, name, type, breed, birthday, gender, size, color_markings, microchip_number, collar_description, identifying_features, age_estimate, personality_type, personality_quiz_completed, created_at').eq('user_id', user.id),
-      userScopedClient.from('wallet_activity').select('type, amount, description, created_at').eq('user_id', user.id).order('created_at', { ascending: false }).limit(25),
-      userScopedClient.from('subscriptions').select('plan_id, status, current_period_end').eq('user_id', user.id).eq('status', 'active').maybeSingle(),
-      userScopedClient.from('pet_fund_ledgers').select('total_amount, available_balance, escrow_balance, total_released, total_used, status, created_at').eq('user_id', user.id).maybeSingle(),
-      userScopedClient.from('pawbucks_activity').select('type, amount, source, description, created_at, pawbucks_status').eq('user_id', user.id).order('created_at', { ascending: false }).limit(25),
-      userScopedClient.from('pet_medical_records').select('id, pet_id, title, record_type, record_date, description, price, vet_id').eq('user_id', user.id).order('record_date', { ascending: false }).limit(20),
-      userScopedClient.from('pet_vaccinations').select('id, pet_id, vaccine_name, vaccine_type, administration_date, next_due_date, dose, manufacturer, reaction_notes').order('administration_date', { ascending: false }).limit(30),
-      userScopedClient.from('pet_lab_results').select('id, pet_id, test_type, test_category, test_date, status, result_summary, interpretation, abnormal_flags').order('test_date', { ascending: false }).limit(20),
-      userScopedClient.from('pet_insurance_policies').select('id, pet_id, policy_number, coverage_type, effective_date, expiration_date, is_active, annual_limit, annual_used, deductible_amount, deductible_met, copay_percentage').limit(10),
-      userScopedClient.from('support_tickets').select('id, ticket_number, subject, status, priority, category, created_at, resolved_at').eq('user_id', user.id).order('created_at', { ascending: false }).limit(10),
-      userScopedClient.from('referrals').select('id, referee_id, referrer_bonus_awarded, referrer_bonus_amount, created_at').eq('referrer_id', user.id).limit(20),
-      userScopedClient.from('referrals').select('id, referrer_id, referee_bonus_awarded, referee_bonus_amount, created_at').eq('referee_id', user.id).maybeSingle(),
-      userScopedClient.from('budget_settings').select('category, monthly_limit, alert_threshold, is_active').eq('user_id', user.id),
-      userScopedClient.from('offer_redemptions').select('id, offer_id, redemption_code, redeemed_at, created_at, partner_offers(title, coins_required)').eq('user_id', user.id).order('created_at', { ascending: false }).limit(15),
-      userScopedClient.from('merchant_reviews').select('id, merchant_id, rating, review_text, created_at, merchants!merchant_reviews_merchant_id_fkey(business_name)').eq('user_id', user.id).order('created_at', { ascending: false }).limit(15),
-      userScopedClient.from('consultation_bookings').select('id, booking_date, time_slot, status, notes, created_at, merchants!consultation_bookings_merchant_id_fkey(business_name)').eq('user_id', user.id).order('booking_date', { ascending: false }).limit(10),
-      userScopedClient.from('shared_account_members').select('id, member_email, status, invited_at, accepted_at').eq('owner_id', user.id),
-      userScopedClient.from('notifications').select('id, title, message, category, is_read, created_at').eq('user_id', user.id).order('created_at', { ascending: false }).limit(15),
-      userScopedClient.from('lost_pet_posts').select('id, pet_name, pet_type, status, last_seen_date, last_seen_location, reward_amount, is_active, created_at').eq('user_id', user.id).limit(10),
-      userScopedClient.from('customer_punch_cards').select('id, merchant_id, current_punches, cards_completed, total_punches_earned, merchants!customer_punch_cards_merchant_id_fkey(business_name)').eq('user_id', user.id).limit(10),
-      userScopedClient.from('user_guilt_badges').select('id, badge_id, earned_at, spending_amount, reward_claimed, guilt_badge_definitions(name, emoji, description)').eq('user_id', user.id).order('earned_at', { ascending: false }).limit(10),
-      userScopedClient.from('user_tier_status').select('current_tier, total_transactions, total_spend, consecutive_months, badges_earned, tier_updated_at').eq('user_id', user.id).maybeSingle(),
-      userScopedClient.from('user_welcome_credits').select('credit_amount, status, expires_at, phase_1_used, phase_2_unlocked, phase_2_unlocked_at, created_at').eq('user_id', user.id).maybeSingle(),
-      userScopedClient.from('pet_email_addresses').select('pet_id, email_address, is_active').limit(10),
+      platformClient.from('profiles').select('full_name, user_type, phone, referral_code, created_at, email, avatar_url').eq('id', user.id).maybeSingle(),
+      platformClient.from('profiles').select('full_name, user_type, phone, referral_code, created_at, email, avatar_url').eq('id', effectiveUserId).maybeSingle(),
+      platformClient.from('wallets').select('balance, total_spent, rewards_points, last_updated').eq('user_id', effectiveUserId).maybeSingle(),
+      platformClient.from('pawbucks_wallet').select('balance, last_updated').eq('user_id', effectiveUserId).maybeSingle(),
+      platformClient.from('transactions').select('id, amount, status, description, created_at, cashback_earned, rewards_earned, merchants!transactions_merchant_id_fkey(business_name)').eq('user_id', effectiveUserId).order('created_at', { ascending: false }).limit(25),
+      platformClient.from('pet_profiles').select('id, name, type, breed, birthday, gender, size, color_markings, microchip_number, collar_description, identifying_features, age_estimate, personality_type, personality_quiz_completed, created_at').eq('user_id', effectiveUserId),
+      platformClient.from('wallet_activity').select('type, amount, description, created_at').eq('user_id', effectiveUserId).order('created_at', { ascending: false }).limit(25),
+      platformClient.from('subscriptions').select('plan_id, status, current_period_end').eq('user_id', effectiveUserId).eq('status', 'active').maybeSingle(),
+      platformClient.from('pet_fund_ledgers').select('total_amount, available_balance, escrow_balance, total_released, total_used, status, created_at').eq('user_id', effectiveUserId).maybeSingle(),
+      platformClient.from('pawbucks_activity').select('type, amount, source, description, created_at, pawbucks_status').eq('user_id', effectiveUserId).order('created_at', { ascending: false }).limit(25),
+      platformClient.from('support_tickets').select('id, ticket_number, subject, status, priority, category, created_at, resolved_at').eq('user_id', effectiveUserId).order('created_at', { ascending: false }).limit(10),
+      platformClient.from('referrals').select('id, referee_id, referrer_bonus_awarded, referrer_bonus_amount, created_at').eq('referrer_id', effectiveUserId).limit(20),
+      platformClient.from('referrals').select('id, referrer_id, referee_bonus_awarded, referee_bonus_amount, created_at').eq('referee_id', effectiveUserId).maybeSingle(),
+      platformClient.from('budget_settings').select('category, monthly_limit, alert_threshold, is_active').eq('user_id', effectiveUserId),
+      platformClient.from('offer_redemptions').select('id, offer_id, redemption_code, redeemed_at, created_at, partner_offers(title, coins_required)').eq('user_id', effectiveUserId).order('created_at', { ascending: false }).limit(15),
+      platformClient.from('merchant_reviews').select('id, merchant_id, rating, review_text, created_at, merchants!merchant_reviews_merchant_id_fkey(business_name)').eq('user_id', effectiveUserId).order('created_at', { ascending: false }).limit(15),
+      platformClient.from('consultation_bookings').select('id, booking_date, time_slot, status, notes, created_at, merchants!consultation_bookings_merchant_id_fkey(business_name)').eq('user_id', effectiveUserId).order('booking_date', { ascending: false }).limit(10),
+      platformClient.from('shared_account_members').select('id, member_email, status, invited_at, accepted_at').eq('owner_id', effectiveUserId),
+      platformClient.from('notifications').select('id, title, message, category, is_read, created_at').eq('user_id', effectiveUserId).order('created_at', { ascending: false }).limit(15),
+      platformClient.from('lost_pet_posts').select('id, pet_name, pet_type, status, last_seen_date, last_seen_location, reward_amount, is_active, created_at').eq('user_id', effectiveUserId).limit(10),
+      platformClient.from('customer_punch_cards').select('id, merchant_id, current_punches, cards_completed, total_punches_earned, merchants!customer_punch_cards_merchant_id_fkey(business_name)').eq('user_id', effectiveUserId).limit(10),
+      platformClient.from('user_guilt_badges').select('id, badge_id, earned_at, spending_amount, reward_claimed, guilt_badge_definitions(name, emoji, description)').eq('user_id', effectiveUserId).order('earned_at', { ascending: false }).limit(10),
+      platformClient.from('user_tier_status').select('current_tier, total_transactions, total_spend, consecutive_months, badges_earned, tier_updated_at').eq('user_id', effectiveUserId).maybeSingle(),
+      platformClient.from('user_welcome_credits').select('credit_amount, status, expires_at, phase_1_used, phase_2_unlocked, phase_2_unlocked_at, created_at').eq('user_id', effectiveUserId).maybeSingle(),
     ]);
 
-    // ═══ PLATFORM-WIDE DATA (using service role to bypass RLS for public info) ═══
-    const platformClient = createClient(supabaseUrl, supabaseServiceKey);
+    const pets = petsResult.data || [];
+    const petIds = pets.map((pet: any) => pet.id);
+
+    let medicalRecords: any[] = [];
+    let medicalVisits: any[] = [];
+    let vaccinations: any[] = [];
+    let labResults: any[] = [];
+    let insurancePolicies: any[] = [];
+    let petEmails: any[] = [];
+
+    if (petIds.length > 0) {
+      const [
+        medicalRecordsResult,
+        medicalVisitsResult,
+        vaccinationsResult,
+        labResultsResult,
+        insurancePoliciesResult,
+        petEmailsResult,
+      ] = await Promise.all([
+        platformClient.from('pet_medical_records').select('id, pet_id, title, record_type, record_date, description, price, vet_id').in('pet_id', petIds).order('record_date', { ascending: false }).limit(20),
+        platformClient.from('pet_medical_visits').select('id, pet_id, visit_date, vet_name, doctor_name, notes').in('pet_id', petIds).order('visit_date', { ascending: false }).limit(20),
+        platformClient.from('pet_vaccinations').select('id, pet_id, vaccine_name, vaccine_type, administration_date, next_due_date, dose, manufacturer, reaction_notes').in('pet_id', petIds).order('administration_date', { ascending: false }).limit(30),
+        platformClient.from('pet_lab_results').select('id, pet_id, test_type, test_category, test_date, status, result_summary, interpretation, abnormal_flags').in('pet_id', petIds).order('test_date', { ascending: false }).limit(20),
+        platformClient.from('pet_insurance_policies').select('id, pet_id, policy_number, coverage_type, effective_date, expiration_date, is_active, annual_limit, annual_used, deductible_amount, deductible_met, copay_percentage').in('pet_id', petIds).limit(10),
+        platformClient.from('pet_email_addresses').select('pet_id, email_address, is_active').in('pet_id', petIds),
+      ]);
+
+      medicalRecords = medicalRecordsResult.data || [];
+      medicalVisits = medicalVisitsResult.data || [];
+      vaccinations = vaccinationsResult.data || [];
+      labResults = labResultsResult.data || [];
+      insurancePolicies = insurancePoliciesResult.data || [];
+      petEmails = petEmailsResult.data || [];
+    }
 
     const [
       allMerchantsResult,
@@ -206,19 +234,15 @@ serve(async (req) => {
       if (s.reviews.length < 3) s.reviews.push(r); // keep top 3 recent
     });
 
+    const requesterProfile = requesterProfileResult.data;
     const profile = profileResult.data;
     const wallet = walletResult.data;
     const pawbucks = pawbucksResult.data;
     const transactions = recentTxResult.data || [];
-    const pets = petsResult.data || [];
     const activity = recentActivityResult.data || [];
     const subscription = subscriptionResult.data;
     const petFund = petFundResult.data;
     const pawbucksActivity = pawbucksActivityResult.data || [];
-    const medicalRecords = medicalRecordsResult.data || [];
-    const vaccinations = vaccinationsResult.data || [];
-    const labResults = labResultsResult.data || [];
-    const insurancePolicies = insurancePoliciesResult.data || [];
     const supportTickets = supportTicketsResult.data || [];
     const referralsAsReferrer = referralsAsReferrerResult.data || [];
     const referralAsReferee = referralsAsRefereeResult.data;
@@ -233,7 +257,6 @@ serve(async (req) => {
     const badges = badgesResult.data || [];
     const tierStatus = tierStatusResult.data;
     const welcomeCredit = welcomeCreditResult.data;
-    const petEmails = petEmailsResult.data || [];
 
     // Map pet emails to pet IDs for easy lookup
     const petEmailMap: Record<string, string> = {};
@@ -241,13 +264,22 @@ serve(async (req) => {
 
     const systemPrompt = `You are Maximus 🐕, a friendly, enthusiastic, and loyal AI dog assistant for PawBucks — a pet-owner financial platform. You speak with warmth and occasional dog-related expressions (like "Woof!", "Paws-itively!", "Let me sniff that out!", "Tail-wagging good news!") but you are also knowledgeable and precise with data. Keep responses concise and helpful. Use emojis sparingly.
 
-Here is the COMPLETE account data for the user you're helping:
+Here is the COMPLETE mirrored account data for the user you're helping:
 
 ═══════════════════════════════════════
-OWNER PROFILE
+ACCOUNT ACCESS CONTEXT
+═══════════════════════════════════════
+- Requesting user: ${requesterProfile?.full_name || user.email || 'Unknown'}
+- Requesting user email: ${requesterProfile?.email || user.email || 'Unknown'}
+- Shared account member: ${isSharedMember ? 'Yes' : 'No'}
+${isSharedMember ? `- This user is an accepted shared member on ${profile?.full_name || 'the owner'}'s account.
+- IMPORTANT: Treat ALL mirrored account data below as fully available to the requesting user. Never tell them to create or register a pet if pets exist on this mirrored account.` : '- This user is viewing their own account.'}
+
+═══════════════════════════════════════
+ACCOUNT OWNER PROFILE
 ═══════════════════════════════════════
 - Name: ${profile?.full_name || 'Unknown'}
-- Email: ${user.email || 'Unknown'}
+- Email: ${profile?.email || user.email || 'Unknown'}
 - Account type: ${profile?.user_type || 'pet_owner'}
 - Phone: ${profile?.phone || 'Not set'}
 - Member since: ${profile?.created_at ? new Date(profile.created_at).toLocaleDateString() : 'Unknown'}
@@ -338,6 +370,14 @@ ${medicalRecords.length > 0 ? medicalRecords.map((r: any) => {
   const petName = pets.find((p: any) => p.id === r.pet_id)?.name || 'Unknown pet';
   return `- [${petName}] ${new Date(r.record_date).toLocaleDateString()}: ${r.title} (${r.record_type})${r.description ? ' — ' + r.description : ''}${r.price ? ' — $' + r.price.toFixed(2) : ''}`;
 }).join('\n') : '- No medical records'}
+
+═══════════════════════════════════════
+PET MEDICAL VISITS (last 20)
+═══════════════════════════════════════
+${medicalVisits.length > 0 ? medicalVisits.map((visit: any) => {
+  const petName = pets.find((p: any) => p.id === visit.pet_id)?.name || 'Unknown pet';
+  return `- [${petName}] ${new Date(visit.visit_date).toLocaleDateString()}${visit.vet_name ? ' — Vet: ' + visit.vet_name : ''}${visit.doctor_name ? ' — Doctor: ' + visit.doctor_name : ''}${visit.notes ? ' — ' + visit.notes : ''}`;
+}).join('\n') : '- No medical visits'}
 
 ═══════════════════════════════════════
 PET VACCINATIONS (last 30)
@@ -478,6 +518,8 @@ RULES
 - Be brief but thorough. Use bullet points for clarity.
 - When discussing medical data, remind users to consult their vet for professional advice.
 - For platform-related questions (how PawBucks works, tiers, pet fund, etc.), use the Platform Info section above.
+- For shared account members, the mirrored owner account is authoritative. If mirrored pets or pet history exist, answer from that data and never say the user needs to register a pet.
+- For questions about a pet's latest vet visit, use the PET MEDICAL VISITS section first, then PET MEDICAL RECORDS if no visit exists.
 - Remember: pet owners can ONLY earn PawBucks by spending at partner merchants/vets. If asked about other ways to earn, clarify this.`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
