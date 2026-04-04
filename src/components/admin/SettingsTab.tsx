@@ -1,12 +1,13 @@
-import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Settings, Shield, Gift, Loader2 } from 'lucide-react';
+import { Shield, Gift, Loader2 } from 'lucide-react';
 import { TwoFactorSetup } from './TwoFactorSetup';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useState, useEffect } from 'react';
+import { PlatformConfigSection } from './platform-config/PlatformConfigSection';
 
 export function SettingsTab() {
   const [welcomeCreditEnabled, setWelcomeCreditEnabled] = useState(true);
@@ -28,7 +29,6 @@ export function SettingsTab() {
       if (data) {
         setWelcomeCreditEnabled(data.value === true || data.value === 'true');
       } else {
-        // Default to enabled if no setting exists
         setWelcomeCreditEnabled(true);
       }
     } catch (err) {
@@ -158,7 +158,7 @@ export function SettingsTab() {
                     Sessions expire after 15 minutes of inactivity
                   </p>
                 </div>
-                <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full dark:bg-green-900/30 dark:text-green-400">
+                <span className="px-2 py-1 bg-emerald-500/10 text-emerald-700 text-xs rounded-full dark:text-emerald-400">
                   Enabled
                 </span>
               </div>
@@ -170,7 +170,7 @@ export function SettingsTab() {
                     Server-side role checks on all admin actions
                   </p>
                 </div>
-                <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full dark:bg-green-900/30 dark:text-green-400">
+                <span className="px-2 py-1 bg-emerald-500/10 text-emerald-700 text-xs rounded-full dark:text-emerald-400">
                   Enabled
                 </span>
               </div>
@@ -181,23 +181,8 @@ export function SettingsTab() {
 
       <Separator />
 
-      {/* Platform Configuration Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Settings className="w-5 h-5" />
-            Platform Configuration
-          </CardTitle>
-          <CardDescription>
-            Manage Stripe keys, payout schedules, and feature toggles
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">
-            Settings management interface coming soon. For now, configure settings through the backend.
-          </p>
-        </CardContent>
-      </Card>
+      {/* Platform Configuration Section - Fully Built Out */}
+      <PlatformConfigSection />
     </div>
   );
 }
