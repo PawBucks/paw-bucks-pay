@@ -194,10 +194,13 @@ export function SettingsTab() {
         </div>
       </div>
 
-      <Separator />
-
-      {/* Platform Configuration Section - Fully Built Out */}
-      <PlatformConfigSection />
+      {/* Platform Configuration Section - SuperAdmin Only */}
+      {isSuperAdmin && (
+        <>
+          <Separator />
+          <PlatformConfigSection />
+        </>
+      )}
     </div>
   );
 }
