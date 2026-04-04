@@ -19,6 +19,7 @@ export function SettingsTab() {
 
   useEffect(() => {
     loadWelcomeCreditSetting();
+    checkSuperAdmin();
   }, []);
 
   const loadWelcomeCreditSetting = async () => {
