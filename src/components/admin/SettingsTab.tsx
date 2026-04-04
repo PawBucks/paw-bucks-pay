@@ -7,16 +7,31 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 import { PlatformConfigSection } from './platform-config/PlatformConfigSection';
 
 export function SettingsTab() {
+  const { user } = useAuth();
   const [welcomeCreditEnabled, setWelcomeCreditEnabled] = useState(true);
   const [loading, setLoading] = useState(true);
   const [toggling, setToggling] = useState(false);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
 
   useEffect(() => {
     loadWelcomeCreditSetting();
+    checkSuperAdmin();
   }, []);
+
+  const checkSuperAdmin = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .eq('role', 'superadmin')
+      .maybeSingle();
+    setIsSuperAdmin(!!data);
+  };
 
   const loadWelcomeCreditSetting = async () => {
     try {
@@ -179,10 +194,13 @@ export function SettingsTab() {
         </div>
       </div>
 
-      <Separator />
-
-      {/* Platform Configuration Section - Fully Built Out */}
-      <PlatformConfigSection />
+      {/* Platform Configuration Section - SuperAdmin Only */}
+      {isSuperAdmin && (
+        <>
+          <Separator />
+          <PlatformConfigSection />
+        </>
+      )}
     </div>
   );
 }
