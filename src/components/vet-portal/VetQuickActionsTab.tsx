@@ -10,6 +10,7 @@ import {
   ArrowRight,
   Receipt,
   Wallet,
+  Megaphone,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -83,6 +84,14 @@ export function VetQuickActionsTab({
       onClick: () => navigate("/merchant/transactions"),
       color: "text-blue-500",
       bgColor: "bg-blue-500/10",
+    },
+    {
+      title: "Campaigns",
+      description: "Send push, email & text campaigns",
+      icon: Megaphone,
+      onClick: () => navigate("/merchant/campaigns"),
+      color: "text-rose-500",
+      bgColor: "bg-rose-500/10",
     },
     ...(onEditProfile ? [{
       title: "Edit Practice Profile",

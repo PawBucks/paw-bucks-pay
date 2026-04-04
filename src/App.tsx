@@ -92,6 +92,7 @@ const MerchantAvailableBalance = lazyWithRetry(() => import("./pages/MerchantAva
 const MerchantPendingBalance = lazyWithRetry(() => import("./pages/MerchantPendingBalance"), "MerchantPendingBalance");
 const MerchantTotalEarnings = lazyWithRetry(() => import("./pages/MerchantTotalEarnings"), "MerchantTotalEarnings");
 const MerchantMessages = lazyWithRetry(() => import("./pages/MerchantMessages"), "MerchantMessages");
+const MerchantCampaigns = lazyWithRetry(() => import("./pages/MerchantCampaigns"), "MerchantCampaigns");
 const MyBookings = lazyWithRetry(() => import("./pages/MyBookings"), "MyBookings");
 const PublicBookingPage = lazyWithRetry(() => import("./pages/PublicBookingPage"), "PublicBookingPage");
 const PetTimelinePage = lazyWithRetry(() => import("./pages/PetTimelinePage"), "PetTimelinePage");
@@ -210,6 +211,7 @@ const AppRoutes = () => {
       <Route path="/merchant/pending-balance" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantPendingBalance /></PageTransition></ProtectedRoute>} />
       <Route path="/merchant/total-earnings" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantTotalEarnings /></PageTransition></ProtectedRoute>} />
       <Route path="/merchant/messages" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantMessages /></PageTransition></ProtectedRoute>} />
+      <Route path="/merchant/campaigns" element={<ProtectedRoute allowedRoles={['merchant', 'vet']}><PageTransition><MerchantCampaigns /></PageTransition></ProtectedRoute>} />
 
       {/* Vet routes - requires vet account */}
       <Route path="/vet-onboarding" element={<ProtectedRoute><PageTransition><VetOnboarding /></PageTransition></ProtectedRoute>} />

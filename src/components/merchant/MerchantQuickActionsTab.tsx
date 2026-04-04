@@ -14,6 +14,7 @@ import {
   ArrowRight,
   Receipt,
   RefreshCw,
+  Megaphone,
 } from "lucide-react";
 import { FundingRequestTracker } from "@/components/shared/FundingRequestTracker";
 import { merchantsService } from "@/services/api/merchants.service";
@@ -141,6 +142,14 @@ export function MerchantQuickActionsTab({
       onClick: () => onNavigate("/merchant/invoicing"),
       color: "text-indigo-500",
       bgColor: "bg-indigo-500/10",
+    },
+    {
+      title: "Campaigns",
+      description: "Send push, email & text campaigns",
+      icon: Megaphone,
+      onClick: () => onNavigate("/merchant/campaigns"),
+      color: "text-rose-500",
+      bgColor: "bg-rose-500/10",
     },
   ];
 
