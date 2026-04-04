@@ -131,13 +131,13 @@ const AdPlacementComponent = ({ position = 'top' }: AdPlacementProps) => {
         
         {/* Ad rotation indicator */}
         {adMerchants.length > 1 && (
-          <div className="flex justify-center gap-1 mt-4">
+          <div className="flex justify-center gap-2 mt-4">
             {adMerchants.map((_, idx) => (
               <button
                 key={idx}
                 onClick={() => setCurrentAdIndex(idx)}
-                className={`w-2 h-2 rounded-full transition-colors ${
-                  idx === currentAdIndex ? 'bg-primary' : 'bg-muted-foreground/30'
+                className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
+                  idx === currentAdIndex ? 'bg-primary scale-125' : 'bg-muted-foreground/30'
                 }`}
                 aria-label={`View ad ${idx + 1}`}
               />
