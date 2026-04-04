@@ -143,6 +143,14 @@ export function MerchantQuickActionsTab({
       color: "text-indigo-500",
       bgColor: "bg-indigo-500/10",
     },
+    {
+      title: "Campaigns",
+      description: "Send push, email & text campaigns",
+      icon: Megaphone,
+      onClick: () => onNavigate("/merchant/campaigns"),
+      color: "text-rose-500",
+      bgColor: "bg-rose-500/10",
+    },
   ];
 
   return (
