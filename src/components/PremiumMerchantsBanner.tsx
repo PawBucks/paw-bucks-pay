@@ -17,7 +17,7 @@ interface PremiumMerchantsBannerProps {
 
 const PremiumMerchantsBannerComponent = ({ 
   title = "Featured Premium Merchants",
-  rotationInterval = 5000,
+  rotationInterval = 15000,
   showMultiple = true
 }: PremiumMerchantsBannerProps) => {
   const navigate = useNavigate();
