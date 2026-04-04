@@ -14,6 +14,7 @@ import {
   ArrowRight,
   Receipt,
   RefreshCw,
+  Megaphone,
 } from "lucide-react";
 import { FundingRequestTracker } from "@/components/shared/FundingRequestTracker";
 import { merchantsService } from "@/services/api/merchants.service";
