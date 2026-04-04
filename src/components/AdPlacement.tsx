@@ -36,7 +36,7 @@ const AdPlacementComponent = ({ position = 'top' }: AdPlacementProps) => {
     
     const interval = setInterval(() => {
       setCurrentAdIndex(prev => (prev + 1) % adMerchants.length);
-    }, 30000);
+    }, 5000);
 
     return () => clearInterval(interval);
   }, [adMerchants.length]);
