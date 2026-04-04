@@ -22,6 +22,17 @@ export function SettingsTab() {
     checkSuperAdmin();
   }, []);
 
+  const checkSuperAdmin = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .eq('role', 'superadmin')
+      .maybeSingle();
+    setIsSuperAdmin(!!data);
+  };
+
   const loadWelcomeCreditSetting = async () => {
     try {
       const { data } = await supabase
