@@ -180,14 +180,32 @@ export const ProtectedRoute = ({
           return;
         }
 
-        // Check if pet owner has any pets
-        const { data, error } = await supabase
-          .from('pet_profiles')
-          .select('id')
-          .eq('user_id', user.id)
-          .limit(1);
+        // Check if pet owner has any pets (own or via shared account)
+        const [ownPetsResult, sharedMemberResult] = await Promise.all([
+          supabase
+            .from('pet_profiles')
+            .select('id')
+            .eq('user_id', user.id)
+            .limit(1),
+          supabase
+            .from('shared_account_members')
+            .select('owner_id')
+            .eq('member_id', user.id)
+            .eq('status', 'accepted')
+            .maybeSingle(),
+        ]);
 
-        const ownerHasPets = !error && !!data && data.length > 0;
+        let ownerHasPets = !ownPetsResult.error && !!ownPetsResult.data && ownPetsResult.data.length > 0;
+
+        // If user is a shared account member, check owner's pets
+        if (!ownerHasPets && sharedMemberResult.data?.owner_id) {
+          const { data: ownerPets, error: ownerPetsError } = await supabase
+            .from('pet_profiles')
+            .select('id')
+            .eq('user_id', sharedMemberResult.data.owner_id)
+            .limit(1);
+          ownerHasPets = !ownerPetsError && !!ownerPets && ownerPets.length > 0;
+        }
         petOnboardingCache.set(user.id, { hasPets: ownerHasPets, timestamp: Date.now() });
         setHasPets(ownerHasPets);
       } catch (error) {
