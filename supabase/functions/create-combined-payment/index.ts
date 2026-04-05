@@ -184,6 +184,8 @@ serve(async (req) => {
 
     logStep('Payment breakdown', {
       totalAmount,
+      baseAmount,
+      tipAmount,
       pawbucksAmount,
       walletPawbucks,
       welcomeCreditPawbucks,
