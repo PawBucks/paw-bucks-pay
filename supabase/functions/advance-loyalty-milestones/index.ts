@@ -259,11 +259,11 @@ Deno.serve(async (req) => {
       const today = now.toISOString().split("T")[0];
 
       if (!lastDate || streak.last_earned_date !== today) {
-        const lastMonth = lastDate ? `${lastDate.getFullYear()}-${String(lastDate.getMonth() + 1).padStart(2, "0")}` : null;
+        const currentYearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+        const lastYearMonth = lastDate ? `${lastDate.getFullYear()}-${String(lastDate.getMonth() + 1).padStart(2, "0")}` : null;
         
-        if (lastMonth && lastMonth !== currentMonth) {
-          const [ly, lm] = lastMonth.split("-").map(Number);
-          const prevDate = new Date(ly, lm - 1);
+        if (lastYearMonth && lastYearMonth !== currentYearMonth) {
+          const prevDate = new Date(lastDate!.getFullYear(), lastDate!.getMonth());
           const diffM = (now.getFullYear() - prevDate.getFullYear()) * 12 + (now.getMonth() - prevDate.getMonth());
 
           if (diffM === 1) {
