@@ -225,6 +225,7 @@ export const PaymentDialog = ({
   const handleSuccess = () => {
     setAmount("");
     setDescription("");
+    setTipAmount(0);
     setClientSecret("");
     setConnectedAccountId("");
     setShowPaymentForm(false);
