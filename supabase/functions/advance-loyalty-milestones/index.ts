@@ -49,7 +49,7 @@ Deno.serve(async (req) => {
         current_tier: "silver",
         tier_start_date: now.toISOString(),
         consecutive_active_months: 1,
-        last_active_month: currentMonth,
+        last_active_month: currentMonthDate,
         badges_earned_this_year: 0,
         transactions_this_year: 1,
       });
