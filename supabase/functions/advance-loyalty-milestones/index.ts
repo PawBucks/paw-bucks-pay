@@ -75,7 +75,7 @@ Deno.serve(async (req) => {
             updates.consecutive_active_months = 1;
           }
         }
-        updates.last_active_month = currentMonth;
+        updates.last_active_month = currentMonthDate;
       }
 
       // Check for tier upgrade
