@@ -361,6 +361,7 @@ export const PaymentDialogWithPawBucks = ({
   const handleCancel = () => {
     setAmount("");
     setDescription("");
+    setTipAmount(0);
     setPawbucksToUse(0);
     setPawbucksSource("none");
     setClientSecret("");
