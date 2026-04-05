@@ -161,6 +161,7 @@ export const PaymentDialog = ({
 }: PaymentDialogProps) => {
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
+  const [tipAmount, setTipAmount] = useState(0);
   const [clientSecret, setClientSecret] = useState("");
   const [connectedAccountId, setConnectedAccountId] = useState("");
   const [isCreatingIntent, setIsCreatingIntent] = useState(false);
