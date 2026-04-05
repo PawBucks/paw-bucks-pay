@@ -113,10 +113,10 @@ Deno.serve(async (req) => {
     }
 
     // ─── 2. ADVANCE LOYALTY MILESTONES ───
-    // Only count if cash_amount >= $25 (minimum qualifying amount)
+    // Only count if cash_amount >= $20 (minimum qualifying amount)
     const qualifyingAmount = cash_amount || 0;
-    if (qualifyingAmount < 25) {
-      logStep("Transaction below $25 minimum, skipping milestone advancement", { cash_amount: qualifyingAmount });
+    if (qualifyingAmount < 20) {
+      logStep("Transaction below $20 minimum, skipping milestone advancement", { cash_amount: qualifyingAmount });
       return new Response(
         JSON.stringify({ success: true, milestone_advanced: false, reason: "below_minimum" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
