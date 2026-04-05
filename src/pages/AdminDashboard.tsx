@@ -27,6 +27,7 @@ import { SettingsTab } from "@/components/admin/SettingsTab";
 import { OverviewTab } from "@/components/admin/OverviewTab";
 import { AnalyticsTab } from "@/components/admin/AnalyticsTab";
 import { AuditLogsTab } from "@/components/admin/AuditLogsTab";
+import { AdminInvoicingTab } from "@/components/admin/AdminInvoicingTab";
 import { ApprovalsTab } from "@/components/admin/ApprovalsTab";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -145,6 +146,12 @@ const NAV_SECTIONS = [
         label: "Financing & Loans",
         icon: Banknote,
         description: "Approve or deny merchant funding requests and consumer vet loans",
+      },
+      {
+        id: "invoicing",
+        label: "Invoicing",
+        icon: Receipt,
+        description: "Create and manage invoices for billing merchants and vets",
       },
     ],
   },
@@ -361,6 +368,8 @@ const AdminDashboard = () => {
         return <RewardsTab />;
       case "financing":
         return <FinancingTab />;
+      case "invoicing":
+        return <AdminInvoicingTab />;
       case "receipts":
         return <NonPartnerReceiptVerificationTab />;
       case "consultations":

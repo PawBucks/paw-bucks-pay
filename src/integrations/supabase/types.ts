@@ -183,6 +183,181 @@ export type Database = {
           },
         ]
       }
+      admin_invoice_items: {
+        Row: {
+          amount: number | null
+          created_at: string
+          description: string
+          display_order: number
+          id: string
+          invoice_id: string
+          quantity: number
+          unit_price: number
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string
+          description: string
+          display_order?: number
+          id?: string
+          invoice_id: string
+          quantity?: number
+          unit_price?: number
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string
+          description?: string
+          display_order?: number
+          id?: string
+          invoice_id?: string
+          quantity?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_invoice_items_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "admin_invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      admin_invoice_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          invoice_id: string
+          notes: string | null
+          paid_at: string
+          payment_method: string
+          recorded_by: string
+          reference_number: string | null
+          stripe_payment_id: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          invoice_id: string
+          notes?: string | null
+          paid_at?: string
+          payment_method?: string
+          recorded_by: string
+          reference_number?: string | null
+          stripe_payment_id?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          invoice_id?: string
+          notes?: string | null
+          paid_at?: string
+          payment_method?: string
+          recorded_by?: string
+          reference_number?: string | null
+          stripe_payment_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_invoice_payments_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "admin_invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      admin_invoices: {
+        Row: {
+          amount_due: number | null
+          amount_paid: number
+          created_at: string
+          created_by: string
+          currency: string
+          description: string | null
+          discount_amount: number | null
+          due_date: string
+          id: string
+          invoice_number: string
+          invoice_type: string | null
+          issue_date: string
+          notes: string | null
+          paid_at: string | null
+          recipient_email: string | null
+          recipient_id: string
+          recipient_name: string
+          recipient_type: string
+          status: string
+          subtotal: number
+          tax_amount: number | null
+          tax_rate: number | null
+          terms_conditions: string | null
+          title: string | null
+          total: number
+          updated_at: string
+        }
+        Insert: {
+          amount_due?: number | null
+          amount_paid?: number
+          created_at?: string
+          created_by: string
+          currency?: string
+          description?: string | null
+          discount_amount?: number | null
+          due_date?: string
+          id?: string
+          invoice_number: string
+          invoice_type?: string | null
+          issue_date?: string
+          notes?: string | null
+          paid_at?: string | null
+          recipient_email?: string | null
+          recipient_id: string
+          recipient_name: string
+          recipient_type: string
+          status?: string
+          subtotal?: number
+          tax_amount?: number | null
+          tax_rate?: number | null
+          terms_conditions?: string | null
+          title?: string | null
+          total?: number
+          updated_at?: string
+        }
+        Update: {
+          amount_due?: number | null
+          amount_paid?: number
+          created_at?: string
+          created_by?: string
+          currency?: string
+          description?: string | null
+          discount_amount?: number | null
+          due_date?: string
+          id?: string
+          invoice_number?: string
+          invoice_type?: string | null
+          issue_date?: string
+          notes?: string | null
+          paid_at?: string | null
+          recipient_email?: string | null
+          recipient_id?: string
+          recipient_name?: string
+          recipient_type?: string
+          status?: string
+          subtotal?: number
+          tax_amount?: number | null
+          tax_rate?: number | null
+          terms_conditions?: string | null
+          title?: string | null
+          total?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ai_soap_drafts: {
         Row: {
           ai_objective: string | null
@@ -12163,6 +12338,7 @@ export type Database = {
       }
       claim_pet_fund_spot: { Args: { p_cluster_id: string }; Returns: string }
       expire_unused_pet_fund_credits: { Args: never; Returns: number }
+      generate_admin_invoice_number: { Args: never; Returns: string }
       generate_claim_number: { Args: never; Returns: string }
       generate_invoice_number: {
         Args: { p_merchant_id: string }
