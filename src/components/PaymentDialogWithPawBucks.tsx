@@ -280,8 +280,9 @@ export const PaymentDialogWithPawBucks = ({
   };
 
   const pawbucksUsdValue = pawbucksToUse * PAWBUCKS_TO_USD;
-  const stripeAmount = Math.max(0, totalAmount - pawbucksUsdValue);
-  const maxPawbucks = Math.min(pawbucksBalance, Math.ceil(totalAmount / PAWBUCKS_TO_USD));
+  // PawBucks only apply to the base amount; tip always goes to card
+  const stripeAmount = Math.max(0, totalAmount - pawbucksUsdValue) + tipAmount;
+  const maxPawbucks = Math.min(pawbucksBalance, Math.ceil(totalAmount / PAWBUCKS_TO_USD)); // Max based on base amount only
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
