@@ -33,7 +33,7 @@ Deno.serve(async (req) => {
 
     // ─── 1. UPSERT USER TIER STATUS ───
     const now = new Date();
-    const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+    const currentMonthDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`; // First of month as date
 
     const { data: existingTier } = await supabaseAdmin
       .from("user_tier_status")
