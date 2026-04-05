@@ -646,6 +646,7 @@ serve(async (req) => {
         paymentIntentId: paymentIntent.id,
         connectedAccountId: merchant.stripe_account_id, // Frontend needs this for Stripe.js
         stripeAmount,
+        tipAmount,
         pawbucksAmount,
         pawbucksUsdValue,
         pawbucksEarned,
