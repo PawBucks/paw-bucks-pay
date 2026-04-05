@@ -18,6 +18,7 @@ import { PawBucksInfoTooltip } from "@/components/PawBucksInfoTooltip";
 import { useSpendablePawBucks } from "@/hooks/useSpendablePawBucks";
 import { PawBucksSourceSelector, type PawBucksSource } from "@/components/checkout/PawBucksSourceSelector";
 import { getStripeForConnectedAccount } from "@/lib/stripe";
+import { TipSelector } from "@/components/checkout/TipSelector";
 
 // Pet Owner conversion rate: 1000 PawBucks = $1.00 (1 PawBuck = $0.001)
 const PAWBUCKS_TO_USD = 0.001;
@@ -235,6 +236,7 @@ export const PaymentDialogWithPawBucks = ({
 }: PaymentDialogWithPawBucksProps) => {
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
+  const [tipAmount, setTipAmount] = useState(0);
   const [pawbucksToUse, setPawbucksToUse] = useState(0);
   const [pawbucksSource, setPawbucksSource] = useState<PawBucksSource>("none");
   const [clientSecret, setClientSecret] = useState("");
@@ -278,8 +280,9 @@ export const PaymentDialogWithPawBucks = ({
   };
 
   const pawbucksUsdValue = pawbucksToUse * PAWBUCKS_TO_USD;
-  const stripeAmount = Math.max(0, totalAmount - pawbucksUsdValue);
-  const maxPawbucks = Math.min(pawbucksBalance, Math.ceil(totalAmount / PAWBUCKS_TO_USD));
+  // PawBucks only apply to the base amount; tip always goes to card
+  const stripeAmount = Math.max(0, totalAmount - pawbucksUsdValue) + tipAmount;
+  const maxPawbucks = Math.min(pawbucksBalance, Math.ceil(totalAmount / PAWBUCKS_TO_USD)); // Max based on base amount only
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -297,8 +300,9 @@ export const PaymentDialogWithPawBucks = ({
     try {
       const { data, error } = await supabase.functions.invoke('create-combined-payment', {
         body: {
-          totalAmount,
+          totalAmount: totalAmount + tipAmount, // Total including tip
           pawbucksAmount: pawbucksToUse,
+          tipAmount,
           merchantId,
           description: description || `Payment to ${merchantName}`,
         },
@@ -343,6 +347,7 @@ export const PaymentDialogWithPawBucks = ({
   const handleSuccess = () => {
     setAmount("");
     setDescription("");
+    setTipAmount(0);
     setPawbucksToUse(0);
     setPawbucksSource("none");
     setClientSecret("");
@@ -356,6 +361,7 @@ export const PaymentDialogWithPawBucks = ({
   const handleCancel = () => {
     setAmount("");
     setDescription("");
+    setTipAmount(0);
     setPawbucksToUse(0);
     setPawbucksSource("none");
     setClientSecret("");
@@ -411,6 +417,15 @@ export const PaymentDialogWithPawBucks = ({
                 onChange={(e) => setDescription(e.target.value)}
               />
             </div>
+
+            {/* Tip Selector - Tips are always in USD, never PawBucks */}
+            {totalAmount > 0 && (
+              <TipSelector
+                baseAmount={totalAmount}
+                tipAmount={tipAmount}
+                onTipChange={setTipAmount}
+              />
+            )}
 
             {/* Source Selector - when both earned and promotional are available */}
             {hasBothSources && totalAmount > 0 && (
@@ -531,9 +546,15 @@ export const PaymentDialogWithPawBucks = ({
             {totalAmount > 0 && (
               <div className="bg-accent/10 border border-accent/20 rounded-lg p-4 space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Total:</span>
+                  <span className="text-muted-foreground">Subtotal:</span>
                   <span className="font-medium">${totalAmount.toFixed(2)}</span>
                 </div>
+                {tipAmount > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Tip (USD):</span>
+                    <span className="font-medium">${tipAmount.toFixed(2)}</span>
+                  </div>
+                )}
                 {pawbucksToUse > 0 && (
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">PawBucks:</span>
@@ -552,7 +573,7 @@ export const PaymentDialogWithPawBucks = ({
                     </div>
                   </>
                 )}
-                {stripeAmount <= 0 && pawbucksToUse > 0 && (
+                {stripeAmount <= 0 && pawbucksToUse > 0 && tipAmount <= 0 && (
                   <div className="text-sm text-center text-accent font-medium pt-2 border-t">
                     No card payment needed!
                   </div>

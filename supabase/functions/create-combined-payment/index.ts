@@ -12,6 +12,7 @@ const corsHeaders = {
 const combinedPaymentSchema = z.object({
   totalAmount: z.number().positive({ message: "Amount must be greater than 0" }),
   pawbucksAmount: z.number().min(0).default(0),
+  tipAmount: z.number().min(0).default(0), // Tip in USD, always charged to card
   merchantId: z.string().uuid({ message: "Invalid merchant ID" }),
   description: z.string().max(500).optional(),
 });
@@ -107,7 +108,7 @@ serve(async (req) => {
       );
     }
 
-    const { totalAmount, pawbucksAmount, merchantId, description } = validation.data;
+    const { totalAmount, pawbucksAmount, tipAmount, merchantId, description } = validation.data;
 
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -130,9 +131,10 @@ serve(async (req) => {
       throw new Error('This merchant does not accept PawBucks');
     }
 
-    // Calculate USD value of PawBucks
+    // Calculate USD value of PawBucks - PawBucks apply to base amount ONLY, not tip
+    const baseAmount = totalAmount - tipAmount; // Base amount excluding tip
     const pawbucksUsdValue = pawbucksAmount * PAWBUCKS_TO_USD;
-    const stripeAmount = Math.max(0, totalAmount - pawbucksUsdValue);
+    const stripeAmount = Math.max(0, baseAmount - pawbucksUsdValue) + tipAmount; // Tip always goes to card
 
     // Determine how much comes from wallet vs welcome credit
     let walletPawbucks = 0;
@@ -182,6 +184,8 @@ serve(async (req) => {
 
     logStep('Payment breakdown', {
       totalAmount,
+      baseAmount,
+      tipAmount,
       pawbucksAmount,
       walletPawbucks,
       welcomeCreditPawbucks,
@@ -593,6 +597,7 @@ serve(async (req) => {
           subscription_tier: subscriptionTier,
           pawbucks_amount: pawbucksAmount.toString(),
           total_amount: totalAmount.toString(),
+          tip_amount: tipAmount.toString(),
           pawbucks_earned: String(pawbucksEarned),
           platform: "pawbucks",
           charge_type: "direct",
@@ -641,6 +646,7 @@ serve(async (req) => {
         paymentIntentId: paymentIntent.id,
         connectedAccountId: merchant.stripe_account_id, // Frontend needs this for Stripe.js
         stripeAmount,
+        tipAmount,
         pawbucksAmount,
         pawbucksUsdValue,
         pawbucksEarned,

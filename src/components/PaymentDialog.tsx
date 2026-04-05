@@ -14,6 +14,7 @@ import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-
 import { toast } from "sonner";
 import { Loader2, CreditCard } from "lucide-react";
 import { getStripeForConnectedAccount } from "@/lib/stripe";
+import { TipSelector } from "@/components/checkout/TipSelector";
 
 type PaymentFormProps = {
   merchantId: string;
@@ -160,6 +161,7 @@ export const PaymentDialog = ({
 }: PaymentDialogProps) => {
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
+  const [tipAmount, setTipAmount] = useState(0);
   const [clientSecret, setClientSecret] = useState("");
   const [connectedAccountId, setConnectedAccountId] = useState("");
   const [isCreatingIntent, setIsCreatingIntent] = useState(false);
@@ -175,13 +177,17 @@ export const PaymentDialog = ({
         throw new Error("Please enter a valid amount");
       }
 
-      // Call edge function to create payment intent
-      const { data, error } = await supabase.functions.invoke('create-payment-intent', {
+      const totalWithTip = paymentAmount + tipAmount;
+
+      // Call edge function to create payment intent (tip included in amount)
+      const { data, error } = await supabase.functions.invoke('create-direct-charge', {
         body: {
-          amount: paymentAmount,
+          amount: Math.round(totalWithTip * 100), // cents
           merchantId,
-          userId,
           description: description || `Payment to ${merchantName}`,
+          metadata: {
+            tip_amount: tipAmount.toString(),
+          },
         },
       });
 
@@ -219,6 +225,7 @@ export const PaymentDialog = ({
   const handleSuccess = () => {
     setAmount("");
     setDescription("");
+    setTipAmount(0);
     setClientSecret("");
     setConnectedAccountId("");
     setShowPaymentForm(false);
@@ -229,6 +236,7 @@ export const PaymentDialog = ({
   const handleCancel = () => {
     setAmount("");
     setDescription("");
+    setTipAmount(0);
     setClientSecret("");
     setConnectedAccountId("");
     setShowPaymentForm(false);
@@ -272,12 +280,34 @@ export const PaymentDialog = ({
                 onChange={(e) => setDescription(e.target.value)}
               />
             </div>
+
+            {/* Tip Selector */}
+            {parseFloat(amount) > 0 && (
+              <TipSelector
+                baseAmount={parseFloat(amount) || 0}
+                tipAmount={tipAmount}
+                onTipChange={setTipAmount}
+              />
+            )}
+
             {amount && (
               <div className="bg-accent/10 border border-accent/20 rounded-lg p-4">
                 <div className="flex justify-between text-sm mb-2">
                   <span className="text-muted-foreground">Amount:</span>
                   <span className="font-medium">${parseFloat(amount).toFixed(2)}</span>
                 </div>
+                {tipAmount > 0 && (
+                  <div className="flex justify-between text-sm mb-2">
+                    <span className="text-muted-foreground">Tip:</span>
+                    <span className="font-medium">${tipAmount.toFixed(2)}</span>
+                  </div>
+                )}
+                {tipAmount > 0 && (
+                  <div className="flex justify-between text-sm mb-2 border-t pt-2">
+                    <span className="text-muted-foreground">Total:</span>
+                    <span className="font-bold">${(parseFloat(amount) + tipAmount).toFixed(2)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Points Earned ({cashbackRate}x):</span>
                   <span className="font-bold text-accent">+{cashbackPreview} PawBucks</span>

@@ -206,12 +206,15 @@ const InvoicePayment = () => {
     loadPawbucksBalance();
   }, [user, invoice]);
 
-  const totalPayment = parseFloat(paymentAmount || "0") + parseFloat(tipAmount || "0");
+  const basePaymentAmount = parseFloat(paymentAmount || "0");
+  const tipValue = parseFloat(tipAmount || "0");
+  const totalPayment = basePaymentAmount + tipValue;
   const pawbucksValueUSD = pawbucksToUse * PAWBUCKS_TO_USD;
-  const stripeAmount = Math.max(0, totalPayment - pawbucksValueUSD);
+  // PawBucks can only cover the base amount, NOT the tip
+  const stripeAmount = Math.max(0, basePaymentAmount - pawbucksValueUSD) + tipValue;
   const maxPawbucksCanUse = Math.min(
     pawbucksBalance,
-    Math.floor(totalPayment / PAWBUCKS_TO_USD)
+    Math.floor(basePaymentAmount / PAWBUCKS_TO_USD) // Based on base amount only, excluding tip
   );
 
   const handlePayment = async () => {
