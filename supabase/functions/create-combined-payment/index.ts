@@ -131,9 +131,10 @@ serve(async (req) => {
       throw new Error('This merchant does not accept PawBucks');
     }
 
-    // Calculate USD value of PawBucks
+    // Calculate USD value of PawBucks - PawBucks apply to base amount ONLY, not tip
+    const baseAmount = totalAmount - tipAmount; // Base amount excluding tip
     const pawbucksUsdValue = pawbucksAmount * PAWBUCKS_TO_USD;
-    const stripeAmount = Math.max(0, totalAmount - pawbucksUsdValue);
+    const stripeAmount = Math.max(0, baseAmount - pawbucksUsdValue) + tipAmount; // Tip always goes to card
 
     // Determine how much comes from wallet vs welcome credit
     let walletPawbucks = 0;
