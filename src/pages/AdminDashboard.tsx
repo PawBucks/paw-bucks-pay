@@ -147,6 +147,12 @@ const NAV_SECTIONS = [
         icon: Banknote,
         description: "Approve or deny merchant funding requests and consumer vet loans",
       },
+      {
+        id: "invoicing",
+        label: "Invoicing",
+        icon: Receipt,
+        description: "Create and manage invoices for billing merchants and vets",
+      },
     ],
   },
   {
