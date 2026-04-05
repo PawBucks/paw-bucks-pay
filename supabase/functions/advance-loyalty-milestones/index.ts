@@ -61,7 +61,7 @@ Deno.serve(async (req) => {
       };
 
       // Track consecutive months
-      if (existingTier.last_active_month !== currentMonth) {
+      if (!existingTier.last_active_month || existingTier.last_active_month !== currentMonthDate) {
         const lastMonth = existingTier.last_active_month;
         if (lastMonth) {
           const [ly, lm] = lastMonth.split("-").map(Number);
