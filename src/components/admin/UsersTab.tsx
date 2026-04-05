@@ -276,18 +276,15 @@ export function UsersTab() {
 
     setLoading(true);
     try {
-      // First, remove existing role
-      await supabase
-        .from('user_roles')
-        .delete()
-        .eq('user_id', selectedUser.id);
-
-      // Then add new role
-      const { error } = await supabase
-        .from('user_roles')
-        .insert([{ user_id: selectedUser.id, role: selectedRole as 'admin' | 'user' }]);
+      const { data, error } = await supabase.functions.invoke('admin-update-user-role', {
+        body: {
+          user_id: selectedUser.id,
+          role: selectedRole,
+        },
+      });
 
       if (error) throw error;
+      if (data?.error) throw new Error(data.error);
 
       // Log admin action
       await supabase.rpc('log_admin_action', {
@@ -301,7 +298,7 @@ export function UsersTab() {
       setRoleDialogOpen(false);
       refetch();
     } catch (error: any) {
-      toast.error(error.message);
+      toast.error(error.message || 'Failed to update role');
     } finally {
       setLoading(false);
     }
