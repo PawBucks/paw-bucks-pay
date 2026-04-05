@@ -27,6 +27,7 @@ import { SettingsTab } from "@/components/admin/SettingsTab";
 import { OverviewTab } from "@/components/admin/OverviewTab";
 import { AnalyticsTab } from "@/components/admin/AnalyticsTab";
 import { AuditLogsTab } from "@/components/admin/AuditLogsTab";
+import { AdminInvoicingTab } from "@/components/admin/AdminInvoicingTab";
 import { ApprovalsTab } from "@/components/admin/ApprovalsTab";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
