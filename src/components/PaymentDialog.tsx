@@ -236,6 +236,7 @@ export const PaymentDialog = ({
   const handleCancel = () => {
     setAmount("");
     setDescription("");
+    setTipAmount(0);
     setClientSecret("");
     setConnectedAccountId("");
     setShowPaymentForm(false);
