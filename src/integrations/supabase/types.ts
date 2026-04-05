@@ -12480,7 +12480,7 @@ export type Database = {
         | "resolved"
         | "closed"
       ticket_submitter_type: "pet_owner" | "merchant" | "vet"
-      user_type: "pet_owner" | "merchant"
+      user_type: "pet_owner" | "merchant" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -12686,7 +12686,7 @@ export const Constants = {
         "closed",
       ],
       ticket_submitter_type: ["pet_owner", "merchant", "vet"],
-      user_type: ["pet_owner", "merchant"],
+      user_type: ["pet_owner", "merchant", "admin"],
     },
   },
 } as const

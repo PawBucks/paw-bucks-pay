@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSharedAccount, getEffectiveWalletUserId } from "@/hooks/useSharedAccount";
 
 type Profile = {
-  user_type: "pet_owner" | "merchant";
+  user_type: "pet_owner" | "merchant" | "admin";
   full_name: string;
 };
 
