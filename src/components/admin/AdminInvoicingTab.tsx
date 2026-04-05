@@ -46,13 +46,22 @@ export function AdminInvoicingTab() {
   };
 
   const handleSend = async (inv: AdminInvoice) => {
-    const { error } = await supabase
-      .from("admin_invoices")
-      .update({ status: "sent" })
-      .eq("id", inv.id);
-    if (error) { toast.error("Failed to send"); return; }
-    toast.success("Invoice sent!");
-    loadInvoices();
+    if (!inv.recipient_email) {
+      toast.error("Recipient has no email address on file");
+      return;
+    }
+    const toastId = toast.loading("Sending invoice...");
+    try {
+      const { data, error } = await supabase.functions.invoke("send-admin-invoice-email", {
+        body: { invoiceId: inv.id },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success("Invoice sent!", { id: toastId });
+      loadInvoices();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to send invoice", { id: toastId });
+    }
   };
 
   const handleDelete = async () => {

@@ -68,14 +68,27 @@ export function AdminInvoiceDetail({ invoice, onBack, onEdit, onRefresh }: Props
     setLoading(false);
   };
 
+  const [sending, setSending] = useState(false);
+
   const handleSendInvoice = async () => {
-    const { error } = await supabase
-      .from("admin_invoices")
-      .update({ status: "sent" })
-      .eq("id", invoice.id);
-    if (error) { toast.error("Failed to send"); return; }
-    toast.success("Invoice marked as sent!");
-    onRefresh();
+    if (!invoice.recipient_email) {
+      toast.error("Recipient has no email address on file");
+      return;
+    }
+    setSending(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("send-admin-invoice-email", {
+        body: { invoiceId: invoice.id },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success("Invoice sent successfully!");
+      onRefresh();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to send invoice");
+    } finally {
+      setSending(false);
+    }
   };
 
   const handleRecordPayment = async () => {
@@ -133,7 +146,9 @@ export function AdminInvoiceDetail({ invoice, onBack, onEdit, onRefresh }: Props
           {invoice.status === "draft" && (
             <>
               <Button variant="outline" size="sm" onClick={onEdit}><Edit className="w-4 h-4 mr-1" /> Edit</Button>
-              <Button size="sm" onClick={handleSendInvoice}><Send className="w-4 h-4 mr-1" /> Send</Button>
+              <Button size="sm" onClick={handleSendInvoice} disabled={sending}>
+                {sending ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Send className="w-4 h-4 mr-1" />} Send
+              </Button>
             </>
           )}
           {["sent", "partially_paid", "overdue"].includes(invoice.status) && (
