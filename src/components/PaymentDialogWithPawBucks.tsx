@@ -300,8 +300,9 @@ export const PaymentDialogWithPawBucks = ({
     try {
       const { data, error } = await supabase.functions.invoke('create-combined-payment', {
         body: {
-          totalAmount,
+          totalAmount: totalAmount + tipAmount, // Total including tip
           pawbucksAmount: pawbucksToUse,
+          tipAmount,
           merchantId,
           description: description || `Payment to ${merchantName}`,
         },
