@@ -368,6 +368,8 @@ const AdminDashboard = () => {
         return <RewardsTab />;
       case "financing":
         return <FinancingTab />;
+      case "invoicing":
+        return <AdminInvoicingTab />;
       case "receipts":
         return <NonPartnerReceiptVerificationTab />;
       case "consultations":
