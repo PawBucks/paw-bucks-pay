@@ -287,7 +287,7 @@ Deno.serve(async (req) => {
               })
               .eq("id", streak.id);
           }
-        } else if (!lastMonth) {
+        } else if (!lastYearMonth) {
           await supabaseAdmin
             .from("user_badge_streaks")
             .update({ last_earned_date: today, updated_at: now.toISOString() })
