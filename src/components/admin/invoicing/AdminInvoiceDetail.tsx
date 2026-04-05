@@ -146,7 +146,9 @@ export function AdminInvoiceDetail({ invoice, onBack, onEdit, onRefresh }: Props
           {invoice.status === "draft" && (
             <>
               <Button variant="outline" size="sm" onClick={onEdit}><Edit className="w-4 h-4 mr-1" /> Edit</Button>
-              <Button size="sm" onClick={handleSendInvoice}><Send className="w-4 h-4 mr-1" /> Send</Button>
+              <Button size="sm" onClick={handleSendInvoice} disabled={sending}>
+                {sending ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Send className="w-4 h-4 mr-1" />} Send
+              </Button>
             </>
           )}
           {["sent", "partially_paid", "overdue"].includes(invoice.status) && (
