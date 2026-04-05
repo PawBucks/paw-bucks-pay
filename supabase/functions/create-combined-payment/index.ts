@@ -108,7 +108,7 @@ serve(async (req) => {
       );
     }
 
-    const { totalAmount, pawbucksAmount, merchantId, description } = validation.data;
+    const { totalAmount, pawbucksAmount, tipAmount, merchantId, description } = validation.data;
 
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
