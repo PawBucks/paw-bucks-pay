@@ -126,10 +126,10 @@ export function AdminInvoiceForm({ invoice, onSave, onCancel }: Props) {
       return;
     }
 
+    let invoiceReadyForSend = false;
     setSaving(true);
     try {
       let invoiceId = invoice?.id;
-      let invoiceReadyForSend = false;
 
       if (isEdit) {
         const { error } = await supabase
