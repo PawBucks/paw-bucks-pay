@@ -597,6 +597,7 @@ serve(async (req) => {
           subscription_tier: subscriptionTier,
           pawbucks_amount: pawbucksAmount.toString(),
           total_amount: totalAmount.toString(),
+          tip_amount: tipAmount.toString(),
           pawbucks_earned: String(pawbucksEarned),
           platform: "pawbucks",
           charge_type: "direct",
