@@ -177,13 +177,17 @@ export const PaymentDialog = ({
         throw new Error("Please enter a valid amount");
       }
 
-      // Call edge function to create payment intent
-      const { data, error } = await supabase.functions.invoke('create-payment-intent', {
+      const totalWithTip = paymentAmount + tipAmount;
+
+      // Call edge function to create payment intent (tip included in amount)
+      const { data, error } = await supabase.functions.invoke('create-direct-charge', {
         body: {
-          amount: paymentAmount,
+          amount: Math.round(totalWithTip * 100), // cents
           merchantId,
-          userId,
           description: description || `Payment to ${merchantName}`,
+          metadata: {
+            tip_amount: tipAmount.toString(),
+          },
         },
       });
 
