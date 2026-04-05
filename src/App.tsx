@@ -100,6 +100,8 @@ const BadgesPage = lazyWithRetry(() => import("./pages/BadgesPage"), "BadgesPage
 const PetPersonalityQuizPage = lazyWithRetry(() => import("./pages/PetPersonalityQuiz"), "PetPersonalityQuiz");
 const LoyaltyPage = lazyWithRetry(() => import("./pages/LoyaltyPage"), "LoyaltyPage");
 const LoyaltyCardsPage = lazyWithRetry(() => import("./pages/LoyaltyCardsPage"), "LoyaltyCardsPage");
+const AdminInvoicePayment = lazyWithRetry(() => import("./pages/AdminInvoicePayment"), "AdminInvoicePayment");
+const AdminInvoicePaymentSuccess = lazyWithRetry(() => import("./pages/AdminInvoicePaymentSuccess"), "AdminInvoicePaymentSuccess");
 
 const createQueryClient = () => new QueryClient({
   defaultOptions: {
