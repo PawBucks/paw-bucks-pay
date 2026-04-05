@@ -14,6 +14,7 @@ import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-
 import { toast } from "sonner";
 import { Loader2, CreditCard } from "lucide-react";
 import { getStripeForConnectedAccount } from "@/lib/stripe";
+import { TipSelector } from "@/components/checkout/TipSelector";
 
 type PaymentFormProps = {
   merchantId: string;
