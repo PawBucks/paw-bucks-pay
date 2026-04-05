@@ -347,6 +347,7 @@ export const PaymentDialogWithPawBucks = ({
   const handleSuccess = () => {
     setAmount("");
     setDescription("");
+    setTipAmount(0);
     setPawbucksToUse(0);
     setPawbucksSource("none");
     setClientSecret("");
