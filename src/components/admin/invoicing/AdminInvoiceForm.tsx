@@ -117,11 +117,16 @@ export function AdminInvoiceForm({ invoice, onSave, onCancel }: Props) {
       toast.error("Please select a recipient");
       return;
     }
+    if (!asDraft && !recipientEmail) {
+      toast.error("Recipient has no email address on file");
+      return;
+    }
     if (items.every(it => !it.description && !it.unit_price)) {
       toast.error("Please add at least one line item");
       return;
     }
 
+    let invoiceReadyForSend = false;
     setSaving(true);
     try {
       let invoiceId = invoice?.id;
@@ -141,7 +146,7 @@ export function AdminInvoiceForm({ invoice, onSave, onCancel }: Props) {
             discount_amount: discount,
             notes: notes || null,
             terms_conditions: termsConditions || null,
-            status: asDraft ? "draft" : "sent",
+            status: "draft",
           })
           .eq("id", invoiceId);
         if (error) throw error;
@@ -169,7 +174,7 @@ export function AdminInvoiceForm({ invoice, onSave, onCancel }: Props) {
             discount_amount: discount,
             notes: notes || null,
             terms_conditions: termsConditions || null,
-            status: asDraft ? "draft" : "sent",
+            status: "draft",
             created_by: user?.id || "",
           })
           .select("id")
@@ -193,9 +198,29 @@ export function AdminInvoiceForm({ invoice, onSave, onCancel }: Props) {
         if (itemsError) throw itemsError;
       }
 
-      toast.success(isEdit ? "Invoice updated!" : asDraft ? "Invoice saved as draft!" : "Invoice created and sent!");
+      invoiceReadyForSend = true;
+
+      if (!asDraft) {
+        const { data, error } = await supabase.functions.invoke("send-admin-invoice-email", {
+          body: { invoiceId },
+        });
+
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
+      }
+
+      toast.success(
+        asDraft
+          ? isEdit ? "Invoice updated!" : "Invoice saved as draft!"
+          : isEdit ? "Invoice updated and sent!" : "Invoice created and sent!"
+      );
       onSave();
     } catch (err: any) {
+      if (!asDraft && invoiceReadyForSend) {
+        toast.error(err.message || "Invoice was saved as draft, but the email could not be sent");
+        onSave();
+        return;
+      }
       toast.error(err.message || "Failed to save invoice");
     } finally {
       setSaving(false);
