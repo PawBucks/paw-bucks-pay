@@ -64,8 +64,7 @@ Deno.serve(async (req) => {
       if (!existingTier.last_active_month || existingTier.last_active_month !== currentMonthDate) {
         const lastMonth = existingTier.last_active_month;
         if (lastMonth) {
-          const [ly, lm] = lastMonth.split("-").map(Number);
-          const lastDate = new Date(ly, lm - 1);
+          const lastDate = new Date(lastMonth);
           const thisDate = new Date(now.getFullYear(), now.getMonth());
           const diffMonths = (thisDate.getFullYear() - lastDate.getFullYear()) * 12 + (thisDate.getMonth() - lastDate.getMonth());
 
