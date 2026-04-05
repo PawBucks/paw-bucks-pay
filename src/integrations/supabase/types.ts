@@ -273,6 +273,7 @@ export type Database = {
       }
       admin_invoices: {
         Row: {
+          access_token: string
           amount_due: number | null
           amount_paid: number
           created_at: string
@@ -301,6 +302,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          access_token?: string
           amount_due?: number | null
           amount_paid?: number
           created_at?: string
@@ -329,6 +331,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          access_token?: string
           amount_due?: number | null
           amount_paid?: number
           created_at?: string

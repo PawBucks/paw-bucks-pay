@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
@@ -61,126 +61,195 @@ serve(async (req) => {
       .sort((a: any, b: any) => a.display_order - b.display_order)
       .map((item: any) => `
         <tr>
-          <td style="padding: 12px; border-bottom: 1px solid #eee;">${item.description}</td>
-          <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
-          <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right;">$${Number(item.unit_price).toFixed(2)}</td>
-          <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right;">$${Number(item.amount).toFixed(2)}</td>
+          <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; font-size: 14px; color: #374151;">${item.description}</td>
+          <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center; font-size: 14px; color: #374151;">${item.quantity}</td>
+          <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right; font-size: 14px; color: #374151;">$${Number(item.unit_price).toFixed(2)}</td>
+          <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right; font-size: 14px; color: #374151;">$${Number(item.amount).toFixed(2)}</td>
         </tr>
       `).join("");
 
+    const logoUrl = "https://pawbucks.app/logo.png";
+    const appUrl = Deno.env.get("APP_URL") || req.headers.get("origin") || "https://pawbucks.app";
+    const paymentUrl = `${appUrl}/admin-invoice/${invoiceId}/pay?token=${invoice.access_token}`;
+    const amountDue = Number(invoice.amount_due ?? invoice.total);
+    const isPaid = invoice.status === "paid" || amountDue <= 0;
+
     const emailHtml = `
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Invoice ${invoice.invoice_number} from PawBucks</title>
 </head>
-<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; background-color: #f5f5f5;">
-  <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-    <div style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
-      <!-- Header -->
-      <div style="background: linear-gradient(135deg, #2a9d8f 0%, #1a7a6e 100%); padding: 30px; text-align: center;">
-        <h1 style="color: white; margin: 0; font-size: 24px;">PawBucks</h1>
-        <p style="color: rgba(255,255,255,0.9); margin: 8px 0 0; font-size: 14px;">Platform Invoice</p>
-      </div>
+<body style="margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; background-color: #f5f7fa;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f7fa; padding: 20px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 10px; overflow: hidden;">
 
-      <!-- Invoice Info -->
-      <div style="padding: 30px;">
-        <div style="text-align: center; margin-bottom: 30px;">
-          <h2 style="margin: 0 0 5px; color: #333;">Invoice ${invoice.invoice_number}</h2>
-          ${invoice.title ? `<p style="margin: 0; color: #666;">${invoice.title}</p>` : ""}
-        </div>
+          <!-- Header with Logo -->
+          <tr>
+            <td style="padding: 24px; text-align: center; background-color: #ffffff; border-bottom: 1px solid #e5e7eb;">
+              <img 
+                src="${logoUrl}" 
+                alt="PawBucks" 
+                width="120"
+                style="display: block; margin: 0 auto; max-width: 120px;"
+              />
+            </td>
+          </tr>
 
-        <div style="display: flex; justify-content: space-between; margin-bottom: 25px; padding: 15px; background: #f9f9f9; border-radius: 8px;">
-          <div>
-            <p style="margin: 0; font-size: 12px; color: #999; text-transform: uppercase;">Issue Date</p>
-            <p style="margin: 5px 0 0; font-weight: 600;">${formatDateOnly(invoice.issue_date)}</p>
-          </div>
-          <div style="text-align: right;">
-            <p style="margin: 0; font-size: 12px; color: #999; text-transform: uppercase;">Due Date</p>
-            <p style="margin: 5px 0 0; font-weight: 600;">${formatDateOnly(invoice.due_date)}</p>
-          </div>
-        </div>
+          <!-- Invoice Title -->
+          <tr>
+            <td style="padding: 30px 30px 10px; text-align: center;">
+              <p style="margin: 0 0 4px; font-size: 13px; color: #6b7280; text-transform: uppercase; letter-spacing: 1px;">Platform Invoice</p>
+              <h1 style="margin: 0; font-size: 22px; color: #111827; font-weight: 700;">${invoice.invoice_number}</h1>
+              ${invoice.title ? `<p style="margin: 8px 0 0; font-size: 15px; color: #6b7280;">${invoice.title}</p>` : ""}
+            </td>
+          </tr>
 
-        <!-- Bill To -->
-        <div style="margin-bottom: 25px;">
-          <p style="margin: 0; font-size: 12px; color: #999; text-transform: uppercase;">Bill To</p>
-          <p style="margin: 5px 0 0; font-weight: 600;">${invoice.recipient_name}</p>
-          <p style="margin: 2px 0 0; color: #666; text-transform: capitalize;">${invoice.recipient_type}</p>
-          <p style="margin: 2px 0 0; color: #666;">${invoice.recipient_email}</p>
-        </div>
+          <!-- Dates -->
+          <tr>
+            <td style="padding: 20px 30px;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="background: #f9fafb; border-radius: 8px;">
+                <tr>
+                  <td style="padding: 14px 16px;">
+                    <p style="margin: 0; font-size: 11px; color: #9ca3af; text-transform: uppercase;">Issue Date</p>
+                    <p style="margin: 4px 0 0; font-weight: 600; font-size: 14px; color: #111827;">${formatDateOnly(invoice.issue_date)}</p>
+                  </td>
+                  <td align="right" style="padding: 14px 16px;">
+                    <p style="margin: 0; font-size: 11px; color: #9ca3af; text-transform: uppercase;">Due Date</p>
+                    <p style="margin: 4px 0 0; font-weight: 600; font-size: 14px; color: #111827;">${formatDateOnly(invoice.due_date)}</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
 
-        ${invoice.description ? `
-        <div style="margin-bottom: 25px;">
-          <p style="margin: 0; font-size: 12px; color: #999; text-transform: uppercase;">Description</p>
-          <p style="margin: 5px 0 0; color: #333;">${invoice.description}</p>
-        </div>
-        ` : ""}
+          <!-- Bill To -->
+          <tr>
+            <td style="padding: 0 30px 20px;">
+              <p style="margin: 0; font-size: 11px; color: #9ca3af; text-transform: uppercase;">Bill To</p>
+              <p style="margin: 4px 0 0; font-weight: 600; font-size: 14px; color: #111827;">${invoice.recipient_name}</p>
+              <p style="margin: 2px 0 0; font-size: 13px; color: #6b7280; text-transform: capitalize;">${invoice.recipient_type}</p>
+              <p style="margin: 2px 0 0; font-size: 13px; color: #6b7280;">${invoice.recipient_email}</p>
+            </td>
+          </tr>
 
-        <!-- Items -->
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px;">
-          <thead>
-            <tr style="background: #f5f5f5;">
-              <th style="padding: 12px; text-align: left; font-size: 12px; text-transform: uppercase; color: #666;">Description</th>
-              <th style="padding: 12px; text-align: center; font-size: 12px; text-transform: uppercase; color: #666;">Qty</th>
-              <th style="padding: 12px; text-align: right; font-size: 12px; text-transform: uppercase; color: #666;">Rate</th>
-              <th style="padding: 12px; text-align: right; font-size: 12px; text-transform: uppercase; color: #666;">Amount</th>
-            </tr>
-          </thead>
-          <tbody>${itemsHtml}</tbody>
+          ${invoice.description ? `
+          <tr>
+            <td style="padding: 0 30px 20px;">
+              <p style="margin: 0; font-size: 11px; color: #9ca3af; text-transform: uppercase;">Description</p>
+              <p style="margin: 4px 0 0; font-size: 14px; color: #374151;">${invoice.description}</p>
+            </td>
+          </tr>
+          ` : ""}
+
+          <!-- Items -->
+          <tr>
+            <td style="padding: 0 30px 20px;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
+                <thead>
+                  <tr style="background: #f9fafb;">
+                    <th style="padding: 10px 12px; text-align: left; font-size: 11px; text-transform: uppercase; color: #6b7280; font-weight: 600;">Description</th>
+                    <th style="padding: 10px 12px; text-align: center; font-size: 11px; text-transform: uppercase; color: #6b7280; font-weight: 600;">Qty</th>
+                    <th style="padding: 10px 12px; text-align: right; font-size: 11px; text-transform: uppercase; color: #6b7280; font-weight: 600;">Rate</th>
+                    <th style="padding: 10px 12px; text-align: right; font-size: 11px; text-transform: uppercase; color: #6b7280; font-weight: 600;">Amount</th>
+                  </tr>
+                </thead>
+                <tbody>${itemsHtml}</tbody>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Totals -->
+          <tr>
+            <td style="padding: 0 30px 20px;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="border-top: 2px solid #e5e7eb;">
+                <tr>
+                  <td style="padding: 8px 0; font-size: 14px; color: #6b7280;">Subtotal</td>
+                  <td align="right" style="padding: 8px 0; font-size: 14px; color: #374151;">$${Number(invoice.subtotal).toFixed(2)}</td>
+                </tr>
+                ${Number(invoice.discount_amount) > 0 ? `
+                <tr>
+                  <td style="padding: 4px 0; font-size: 14px; color: #16a34a;">Discount</td>
+                  <td align="right" style="padding: 4px 0; font-size: 14px; color: #16a34a;">-$${Number(invoice.discount_amount).toFixed(2)}</td>
+                </tr>
+                ` : ""}
+                ${Number(invoice.tax_amount) > 0 ? `
+                <tr>
+                  <td style="padding: 4px 0; font-size: 14px; color: #6b7280;">Tax${invoice.tax_rate ? ` (${invoice.tax_rate}%)` : ""}</td>
+                  <td align="right" style="padding: 4px 0; font-size: 14px; color: #374151;">$${Number(invoice.tax_amount).toFixed(2)}</td>
+                </tr>
+                ` : ""}
+                <tr>
+                  <td style="padding: 14px 0 4px; font-size: 20px; font-weight: 700; color: #111827; border-top: 1px solid #e5e7eb;">Amount Due</td>
+                  <td align="right" style="padding: 14px 0 4px; font-size: 20px; font-weight: 700; color: #2a9d8f; border-top: 1px solid #e5e7eb;">$${amountDue.toFixed(2)}</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          ${!isPaid ? `
+          <!-- Pay Now Button -->
+          <tr>
+            <td style="padding: 0 30px 30px; text-align: center;">
+              <a href="${paymentUrl}" 
+                style="display: inline-block; padding: 14px 48px; background-color: #2a9d8f; color: #ffffff; font-size: 16px; font-weight: 700; text-decoration: none; border-radius: 8px; letter-spacing: 0.5px;">
+                Pay Invoice
+              </a>
+              <p style="margin: 10px 0 0; font-size: 12px; color: #9ca3af;">Click above to pay securely online</p>
+            </td>
+          </tr>
+          ` : ""}
+
+          ${invoice.notes ? `
+          <tr>
+            <td style="padding: 0 30px 20px;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="background: #f9fafb; border-radius: 8px;">
+                <tr>
+                  <td style="padding: 14px 16px;">
+                    <p style="margin: 0 0 4px; font-weight: 600; font-size: 13px; color: #374151;">Notes</p>
+                    <p style="margin: 0; font-size: 13px; color: #6b7280; white-space: pre-wrap;">${invoice.notes}</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          ` : ""}
+
+          ${invoice.terms_conditions ? `
+          <tr>
+            <td style="padding: 0 30px 20px;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="background: #f9fafb; border-radius: 8px;">
+                <tr>
+                  <td style="padding: 14px 16px;">
+                    <p style="margin: 0 0 4px; font-weight: 600; font-size: 13px; color: #374151;">Terms & Conditions</p>
+                    <p style="margin: 0; font-size: 13px; color: #6b7280; white-space: pre-wrap;">${invoice.terms_conditions}</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          ` : ""}
+
+          <!-- Footer -->
+          <tr>
+            <td style="background: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
+              <p style="margin: 0; color: #9ca3af; font-size: 12px;">
+                If you have questions about this invoice, please contact the PawBucks team.
+              </p>
+              <p style="margin: 10px 0 0; color: #9ca3af; font-size: 11px;">
+                Powered by PawBucks
+              </p>
+            </td>
+          </tr>
+
         </table>
-
-        <!-- Totals -->
-        <div style="border-top: 2px solid #eee; padding-top: 15px;">
-          <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-            <span style="color: #666;">Subtotal</span>
-            <span>$${Number(invoice.subtotal).toFixed(2)}</span>
-          </div>
-          ${Number(invoice.discount_amount) > 0 ? `
-          <div style="display: flex; justify-content: space-between; margin-bottom: 8px; color: #16a34a;">
-            <span>Discount</span>
-            <span>-$${Number(invoice.discount_amount).toFixed(2)}</span>
-          </div>
-          ` : ""}
-          ${Number(invoice.tax_amount) > 0 ? `
-          <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-            <span style="color: #666;">Tax${invoice.tax_rate ? ` (${invoice.tax_rate}%)` : ""}</span>
-            <span>$${Number(invoice.tax_amount).toFixed(2)}</span>
-          </div>
-          ` : ""}
-          <div style="display: flex; justify-content: space-between; font-size: 20px; font-weight: 700; padding-top: 10px; border-top: 1px solid #eee;">
-            <span>Amount Due</span>
-            <span style="color: #2a9d8f;">$${Number(invoice.amount_due ?? invoice.total).toFixed(2)}</span>
-          </div>
-        </div>
-
-        ${invoice.notes ? `
-        <div style="margin-top: 30px; padding: 15px; background: #f9f9f9; border-radius: 8px;">
-          <p style="margin: 0 0 5px; font-weight: 600; font-size: 14px;">Notes</p>
-          <p style="margin: 0; color: #666; font-size: 14px; white-space: pre-wrap;">${invoice.notes}</p>
-        </div>
-        ` : ""}
-
-        ${invoice.terms_conditions ? `
-        <div style="margin-top: 15px; padding: 15px; background: #f9f9f9; border-radius: 8px;">
-          <p style="margin: 0 0 5px; font-weight: 600; font-size: 14px;">Terms & Conditions</p>
-          <p style="margin: 0; color: #666; font-size: 14px; white-space: pre-wrap;">${invoice.terms_conditions}</p>
-        </div>
-        ` : ""}
-      </div>
-
-      <!-- Footer -->
-      <div style="background: #f9f9f9; padding: 20px; text-align: center; border-top: 1px solid #eee;">
-        <p style="margin: 0; color: #999; font-size: 12px;">
-          If you have questions about this invoice, please contact the PawBucks team.
-        </p>
-        <p style="margin: 10px 0 0; color: #999; font-size: 11px;">
-          Powered by PawBucks
-        </p>
-      </div>
-    </div>
-  </div>
+      </td>
+    </tr>
+  </table>
 </body>
 </html>
     `;

@@ -100,6 +100,8 @@ const BadgesPage = lazyWithRetry(() => import("./pages/BadgesPage"), "BadgesPage
 const PetPersonalityQuizPage = lazyWithRetry(() => import("./pages/PetPersonalityQuiz"), "PetPersonalityQuiz");
 const LoyaltyPage = lazyWithRetry(() => import("./pages/LoyaltyPage"), "LoyaltyPage");
 const LoyaltyCardsPage = lazyWithRetry(() => import("./pages/LoyaltyCardsPage"), "LoyaltyCardsPage");
+const AdminInvoicePayment = lazyWithRetry(() => import("./pages/AdminInvoicePayment"), "AdminInvoicePayment");
+const AdminInvoicePaymentSuccess = lazyWithRetry(() => import("./pages/AdminInvoicePaymentSuccess"), "AdminInvoicePaymentSuccess");
 
 const createQueryClient = () => new QueryClient({
   defaultOptions: {
@@ -155,6 +157,8 @@ const AppRoutes = () => {
       <Route path="/book/:slug" element={<PageTransition><PublicBookingPage /></PageTransition>} />
       <Route path="/lost-pets" element={<PageTransition><LostPets /></PageTransition>} />
       <Route path="/lost-pets/:id" element={<PageTransition><LostPetDetail /></PageTransition>} />
+      <Route path="/admin-invoice/:invoiceId/pay" element={<PageTransition><AdminInvoicePayment /></PageTransition>} />
+      <Route path="/admin-invoice/:invoiceId/success" element={<PageTransition><AdminInvoicePaymentSuccess /></PageTransition>} />
 
       {/* Authenticated pet owner routes */}
       <Route path="/dashboard" element={<ProtectedRoute><PageTransition><Dashboard /></PageTransition></ProtectedRoute>} />
