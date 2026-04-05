@@ -236,6 +236,7 @@ export const PaymentDialogWithPawBucks = ({
 }: PaymentDialogWithPawBucksProps) => {
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
+  const [tipAmount, setTipAmount] = useState(0);
   const [pawbucksToUse, setPawbucksToUse] = useState(0);
   const [pawbucksSource, setPawbucksSource] = useState<PawBucksSource>("none");
   const [clientSecret, setClientSecret] = useState("");
