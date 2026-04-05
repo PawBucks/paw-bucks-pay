@@ -585,6 +585,21 @@ serve(async (req) => {
                 merchant_id: merchantId,
               }),
             }).catch(err => logStep("Loyalty punch error", { error: String(err) }));
+
+            // Trigger loyalty milestone advancement for invoice payment
+            fetch(`${supabaseUrl}/functions/v1/advance-loyalty-milestones`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+              },
+              body: JSON.stringify({
+                transaction_id: transaction.id,
+                user_id: invoicePayerUserId,
+                merchant_id: merchantId,
+                cash_amount: paymentIntent.amount / 100,
+              }),
+            }).catch(err => logStep("Loyalty milestone error", { error: String(err) }));
           }
 
           logStep("Invoice payment processing complete");
@@ -970,6 +985,21 @@ serve(async (req) => {
                 merchant_id: merchantId,
               }),
             }).catch(err => logStep("Loyalty punch error", { error: String(err) }));
+
+            // Trigger loyalty milestone advancement for direct charge
+            fetch(`${supabaseUrlForLoyalty}/functions/v1/advance-loyalty-milestones`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+              },
+              body: JSON.stringify({
+                transaction_id: transaction.id,
+                user_id: userId,
+                merchant_id: merchantId,
+                cash_amount: paymentIntent.amount / 100,
+              }),
+            }).catch(err => logStep("Loyalty milestone error", { error: String(err) }));
           }
 
           // Generate Pet Timeline moment for this transaction

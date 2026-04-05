@@ -362,6 +362,21 @@ serve(async (req) => {
             merchant_id: integration.merchant_id,
           }),
         }).catch(err => console.error("[POS-SUBMIT] Loyalty punch error:", err));
+
+        // Trigger loyalty milestone advancement
+        fetch(`${supabaseUrlForLoyalty}/functions/v1/advance-loyalty-milestones`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+          },
+          body: JSON.stringify({
+            transaction_id: posTransaction.id,
+            user_id: matchedUser.id,
+            merchant_id: integration.merchant_id,
+            cash_amount: amount,
+          }),
+        }).catch(err => console.error("[POS-SUBMIT] Loyalty milestone error:", err));
       }
 
       // Trigger webhooks for reward.awarded event

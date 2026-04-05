@@ -723,6 +723,21 @@ serve(async (req) => {
           merchant_id: merchantId,
         }),
       }).catch(err => logStep("Loyalty punch error", { error: String(err) }));
+
+      // Trigger loyalty milestone advancement (Your Rewards system)
+      fetch(`${supabaseUrl}/functions/v1/advance-loyalty-milestones`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+        },
+        body: JSON.stringify({
+          transaction_id: transaction.id,
+          user_id: userId,
+          merchant_id: merchantId,
+          cash_amount: amountInDollars,
+        }),
+      }).catch(err => logStep("Loyalty milestone error", { error: String(err) }));
     }
 
     logStep("Payment processing complete", { 
