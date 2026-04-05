@@ -280,12 +280,34 @@ export const PaymentDialog = ({
                 onChange={(e) => setDescription(e.target.value)}
               />
             </div>
+
+            {/* Tip Selector */}
+            {parseFloat(amount) > 0 && (
+              <TipSelector
+                baseAmount={parseFloat(amount) || 0}
+                tipAmount={tipAmount}
+                onTipChange={setTipAmount}
+              />
+            )}
+
             {amount && (
               <div className="bg-accent/10 border border-accent/20 rounded-lg p-4">
                 <div className="flex justify-between text-sm mb-2">
                   <span className="text-muted-foreground">Amount:</span>
                   <span className="font-medium">${parseFloat(amount).toFixed(2)}</span>
                 </div>
+                {tipAmount > 0 && (
+                  <div className="flex justify-between text-sm mb-2">
+                    <span className="text-muted-foreground">Tip:</span>
+                    <span className="font-medium">${tipAmount.toFixed(2)}</span>
+                  </div>
+                )}
+                {tipAmount > 0 && (
+                  <div className="flex justify-between text-sm mb-2 border-t pt-2">
+                    <span className="text-muted-foreground">Total:</span>
+                    <span className="font-bold">${(parseFloat(amount) + tipAmount).toFixed(2)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Points Earned ({cashbackRate}x):</span>
                   <span className="font-bold text-accent">+{cashbackPreview} PawBucks</span>
