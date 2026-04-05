@@ -311,6 +311,21 @@ serve(async (req) => {
       }).catch(err => console.error("[ADMIN-ADD-TRANSACTION] Badge check error:", err));
 
       console.log(`Badge check triggered for user: ${user_id}`);
+
+      // Trigger loyalty milestone advancement
+      fetch(`${supabaseUrl}/functions/v1/advance-loyalty-milestones`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+        },
+        body: JSON.stringify({
+          transaction_id: transaction.id,
+          user_id,
+          merchant_id: merchant_id,
+          cash_amount: amount,
+        }),
+      }).catch(err => console.error("[ADMIN-ADD-TRANSACTION] Loyalty milestone error:", err));
     } catch (badgeError) {
       console.error('[ADMIN-ADD-TRANSACTION] Error triggering badge check:', badgeError);
     }
