@@ -211,17 +211,17 @@ export function AdminInvoiceList({ invoices, loading, onCreateNew, onView, onEdi
                           <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onView(inv); }}>
                             <Eye className="w-4 h-4 mr-2" /> View
                           </DropdownMenuItem>
-                          {inv.status === "draft" && (
-                            <>
-                              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onEdit(inv); }}>
-                                <Edit className="w-4 h-4 mr-2" /> Edit
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onSend(inv); }}>
-                                <Send className="w-4 h-4 mr-2" /> Send
-                              </DropdownMenuItem>
-                            </>
+                          {!["paid", "void"].includes(inv.status) && (
+                            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onEdit(inv); }}>
+                              <Edit className="w-4 h-4 mr-2" /> Edit
+                            </DropdownMenuItem>
                           )}
-                          {["draft", "cancelled"].includes(inv.status) && (
+                          {!["paid", "void"].includes(inv.status) && (
+                            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onSend(inv); }}>
+                              <Send className="w-4 h-4 mr-2" /> {inv.status === "draft" ? "Send" : "Resend"}
+                            </DropdownMenuItem>
+                          )}
+                          {!["paid"].includes(inv.status) && (
                             <DropdownMenuItem className="text-destructive" onClick={(e) => { e.stopPropagation(); onDelete(inv); }}>
                               <Trash2 className="w-4 h-4 mr-2" /> Delete
                             </DropdownMenuItem>

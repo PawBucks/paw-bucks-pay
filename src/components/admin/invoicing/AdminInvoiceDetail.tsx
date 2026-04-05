@@ -143,11 +143,12 @@ export function AdminInvoiceDetail({ invoice, onBack, onEdit, onRefresh }: Props
           <Badge className={`${statusColors[invoice.status]} capitalize`}>{invoice.status.replace("_", " ")}</Badge>
         </div>
         <div className="flex gap-2">
-          {invoice.status === "draft" && (
+          {!["paid", "void"].includes(invoice.status) && (
             <>
               <Button variant="outline" size="sm" onClick={onEdit}><Edit className="w-4 h-4 mr-1" /> Edit</Button>
               <Button size="sm" onClick={handleSendInvoice} disabled={sending}>
-                {sending ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Send className="w-4 h-4 mr-1" />} Send
+                {sending ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Send className="w-4 h-4 mr-1" />}
+                {invoice.status === "draft" ? "Send" : "Resend"}
               </Button>
             </>
           )}
