@@ -12,6 +12,7 @@ const corsHeaders = {
 const combinedPaymentSchema = z.object({
   totalAmount: z.number().positive({ message: "Amount must be greater than 0" }),
   pawbucksAmount: z.number().min(0).default(0),
+  tipAmount: z.number().min(0).default(0), // Tip in USD, always charged to card
   merchantId: z.string().uuid({ message: "Invalid merchant ID" }),
   description: z.string().max(500).optional(),
 });
