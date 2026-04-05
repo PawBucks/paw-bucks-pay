@@ -418,6 +418,15 @@ export const PaymentDialogWithPawBucks = ({
               />
             </div>
 
+            {/* Tip Selector - Tips are always in USD, never PawBucks */}
+            {totalAmount > 0 && (
+              <TipSelector
+                baseAmount={totalAmount}
+                tipAmount={tipAmount}
+                onTipChange={setTipAmount}
+              />
+            )}
+
             {/* Source Selector - when both earned and promotional are available */}
             {hasBothSources && totalAmount > 0 && (
               <PawBucksSourceSelector
