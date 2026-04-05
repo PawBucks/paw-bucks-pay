@@ -172,14 +172,19 @@ const Auth = () => {
       return;
     }
 
-    // Otherwise, fetch the user's profile to determine their type
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("user_type")
-      .eq("id", userId)
-      .single();
+    // Otherwise, fetch the user's profile and roles to determine their type
+    const [profileResult, rolesResult] = await Promise.all([
+      supabase.from("profiles").select("user_type").eq("id", userId).single(),
+      supabase.from("user_roles").select("role").eq("user_id", userId).in("role", ["admin", "superadmin"]).limit(1),
+    ]);
 
-    if (profile?.user_type === "merchant") {
+    const profile = profileResult.data;
+    const hasAdminRole = rolesResult.data && rolesResult.data.length > 0;
+
+    // Admin/SuperAdmin users go straight to admin dashboard
+    if (hasAdminRole || profile?.user_type === "admin") {
+      navigate(ROUTES.ADMIN);
+    } else if (profile?.user_type === "merchant") {
       // Check if they have a merchant record
       const { data: merchantData } = await supabase
         .from("merchants")

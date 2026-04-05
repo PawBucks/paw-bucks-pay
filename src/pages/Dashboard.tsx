@@ -76,6 +76,8 @@ const Dashboard = () => {
     } else if (!authLoading && user && profile) {
       if (profile.user_type === "merchant") {
         navigate("/merchant-dashboard");
+      } else if (profile.user_type === "admin") {
+        navigate("/admin");
       }
     }
   }, [user, authLoading, profile, navigate]);
