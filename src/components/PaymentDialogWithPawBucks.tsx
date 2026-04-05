@@ -546,9 +546,15 @@ export const PaymentDialogWithPawBucks = ({
             {totalAmount > 0 && (
               <div className="bg-accent/10 border border-accent/20 rounded-lg p-4 space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Total:</span>
+                  <span className="text-muted-foreground">Subtotal:</span>
                   <span className="font-medium">${totalAmount.toFixed(2)}</span>
                 </div>
+                {tipAmount > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Tip (USD):</span>
+                    <span className="font-medium">${tipAmount.toFixed(2)}</span>
+                  </div>
+                )}
                 {pawbucksToUse > 0 && (
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">PawBucks:</span>
@@ -567,7 +573,7 @@ export const PaymentDialogWithPawBucks = ({
                     </div>
                   </>
                 )}
-                {stripeAmount <= 0 && pawbucksToUse > 0 && (
+                {stripeAmount <= 0 && pawbucksToUse > 0 && tipAmount <= 0 && (
                   <div className="text-sm text-center text-accent font-medium pt-2 border-t">
                     No card payment needed!
                   </div>
