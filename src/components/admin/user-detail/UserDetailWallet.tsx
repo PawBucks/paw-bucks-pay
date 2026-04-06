@@ -62,26 +62,23 @@ export function UserDetailWallet({ userId }: { userId: string }) {
       const isMerchantUser = !!merchantData;
       setIsMerchant(isMerchantUser);
 
-      const queries: Promise<any>[] = [
+      const [walletRes, pbWalletRes, activityRes, badgesRes] = await Promise.all([
         supabase.from("wallets").select("balance, total_spent, rewards_points").eq("user_id", userId).maybeSingle(),
-        // Fetch pet owner PawBucks wallet
         supabase.from("pawbucks_wallet").select("balance").eq("user_id", userId).maybeSingle(),
         supabase.from("pawbucks_activity").select("id, amount, type, source, description, pawbucks_status, created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(100),
         supabase.from("user_guilt_badges").select("id, earned_at, badge:guilt_badge_definitions(name, emoji, category)").eq("user_id", userId).order("earned_at", { ascending: false }),
-      ];
+      ]);
 
       // Also fetch merchant PawBucks wallet if applicable
-      let merchantWalletPromise: Promise<any> | null = null;
+      let merchantWalletData = null;
       if (isMerchantUser && merchantData) {
-        merchantWalletPromise = supabase
+        const { data } = await supabase
           .from("merchant_pawbucks_wallet")
           .select("balance")
           .eq("merchant_id", merchantData.id)
           .maybeSingle();
+        merchantWalletData = data;
       }
-
-      const [walletRes, pbWalletRes, activityRes, badgesRes] = await Promise.all(queries);
-      const merchantWalletRes = merchantWalletPromise ? await merchantWalletPromise : null;
 
       if (walletRes.data) setWallet(walletRes.data);
       
