@@ -499,6 +499,7 @@ export function UsersTab() {
               <SelectContent>
                 <SelectItem value="user">User</SelectItem>
                 <SelectItem value="admin">Admin</SelectItem>
+                <SelectItem value="superadmin">SuperAdmin</SelectItem>
               </SelectContent>
             </Select>
             <Button onClick={handleUpdateRole} disabled={loading} className="w-full">
