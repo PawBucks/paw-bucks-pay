@@ -421,8 +421,15 @@ export function UsersTab() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => {
+                    onClick={async () => {
                       setSelectedUser(user);
+                      // Load the user's current role before opening dialog
+                      const { data: roleData } = await supabase
+                        .from('user_roles')
+                        .select('role')
+                        .eq('user_id', user.id);
+                      const currentRole = roleData?.[0]?.role || 'user';
+                      setSelectedRole(currentRole);
                       setRoleDialogOpen(true);
                     }}
                   >
