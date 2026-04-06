@@ -71,6 +71,8 @@ const Dashboard = () => {
   usePawBucksRealtime(effectiveWalletUserId);
 
   const isPawPassSubscriber = subscription.subscribed;
+  const currentTier = getSubscriptionTier(subscription.product_id, subscription.subscription_tier);
+  const isPawPassPlus = subscription.subscribed && currentTier === 'pawpass_plus';
 
   useEffect(() => {
     if (!authLoading && !user) {
