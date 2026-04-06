@@ -280,6 +280,7 @@ const PawBucksWallet = () => {
   const { user, signOut, loading: authLoading } = useAuth();
   const { subscription } = useSubscription();
   const navigate = useNavigate();
+  const [receiptDialogOpen, setReceiptDialogOpen] = useState(false);
   
   // Use centralized tier detection
   const currentTier = getSubscriptionTier(subscription.product_id, subscription.subscription_tier);
