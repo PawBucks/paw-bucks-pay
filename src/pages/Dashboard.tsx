@@ -182,26 +182,51 @@ const Dashboard = () => {
               />
             </motion.div>
             
-            {/* Receipt Upload Card - Available for ALL pet owners */}
+            {/* Receipt Submission Cards */}
             <motion.div custom={isPawPassSubscriber ? 2 : 2} variants={cardVariants} initial="hidden" animate="visible">
-              <GradientCard className="bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20">
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-                      <Receipt className="w-6 h-6 text-primary" />
+              <div className="space-y-3">
+                {/* Partner Receipt Card */}
+                <GradientCard className="bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                        <Store className="w-6 h-6 text-primary" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold">Partner Receipt</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Submit receipts from PawBucks partners
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-semibold">Submit Receipt, Earn PawBucks</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Upload receipts from any pet purchase to earn rewards
-                      </p>
-                    </div>
+                    <Button onClick={() => setPartnerReceiptOpen(true)}>
+                      Upload
+                    </Button>
                   </div>
-                  <Button onClick={() => setReceiptDialogOpen(true)}>
-                    Upload
-                  </Button>
-                </div>
-              </GradientCard>
+                </GradientCard>
+
+                {/* Non-Partner Receipt Card - PawPass+ Only */}
+                {isPawPassPlus && (
+                  <GradientCard className="bg-gradient-to-r from-accent/10 to-primary/10 border-accent/20">
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center">
+                          <Receipt className="w-6 h-6 text-accent-foreground" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold">Other Pet Store</h3>
+                          <p className="text-sm text-muted-foreground">
+                            Earn 5 PB/$1 at any pet store
+                          </p>
+                        </div>
+                      </div>
+                      <Button variant="secondary" onClick={() => setNonPartnerReceiptOpen(true)}>
+                        Upload
+                      </Button>
+                    </div>
+                  </GradientCard>
+                )}
+              </div>
             </motion.div>
             
             {/* Row 2: My Pets - Full Width */}
