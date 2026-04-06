@@ -437,7 +437,7 @@ serve(async (req) => {
     const { data, error } = await resend.emails.send({
       from: "PawBucks <noreply@pawbucks.app>",
       to: [params.merchantEmail],
-      subject: `💰 Payment Received - ${params.invoiceNumber} - ${formatCurrency(totalAmount)}`,
+      subject: `💰 Payment Received - ${params.invoiceNumber} - ${formatCurrency(subjectAmount)}`,
       html,
     });
 
