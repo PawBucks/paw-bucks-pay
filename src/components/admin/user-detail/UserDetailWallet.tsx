@@ -43,6 +43,7 @@ export function UserDetailWallet({ userId }: { userId: string }) {
   const [activity, setActivity] = useState<PawBucksActivity[]>([]);
   const [badges, setBadges] = useState<BadgeData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isMerchant, setIsMerchant] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -51,6 +52,16 @@ export function UserDetailWallet({ userId }: { userId: string }) {
   const loadData = async () => {
     setLoading(true);
     try {
+      // Check if user is a merchant
+      const { data: merchantData } = await supabase
+        .from("merchants")
+        .select("id")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      const isMerchantUser = !!merchantData;
+      setIsMerchant(isMerchantUser);
+
       const [walletRes, pbWalletRes, activityRes, badgesRes] = await Promise.all([
         supabase.from("wallets").select("balance, total_spent, rewards_points").eq("user_id", userId).maybeSingle(),
         supabase.from("pawbucks_wallet").select("balance").eq("user_id", userId).maybeSingle(),
@@ -58,8 +69,26 @@ export function UserDetailWallet({ userId }: { userId: string }) {
         supabase.from("user_guilt_badges").select("id, earned_at, badge:guilt_badge_definitions(name, emoji, category)").eq("user_id", userId).order("earned_at", { ascending: false }),
       ]);
 
+      // Also fetch merchant PawBucks wallet if applicable
+      let merchantWalletData = null;
+      if (isMerchantUser && merchantData) {
+        const { data } = await supabase
+          .from("merchant_pawbucks_wallet")
+          .select("balance")
+          .eq("merchant_id", merchantData.id)
+          .maybeSingle();
+        merchantWalletData = data;
+      }
+
       if (walletRes.data) setWallet(walletRes.data);
-      if (pbWalletRes.data) setPawbucksWallet(pbWalletRes.data);
+      
+      // Use merchant wallet if available, fall back to pet owner wallet
+      if (isMerchantUser && merchantWalletData) {
+        setPawbucksWallet(merchantWalletData);
+      } else if (pbWalletRes.data) {
+        setPawbucksWallet(pbWalletRes.data);
+      }
+      
       if (activityRes.data) setActivity(activityRes.data as PawBucksActivity[]);
       if (badgesRes.data) setBadges(badgesRes.data as unknown as BadgeData[]);
     } catch (err) {
@@ -89,7 +118,7 @@ export function UserDetailWallet({ userId }: { userId: string }) {
         />
         <SummaryCard
           icon={<TrendingDown className="w-5 h-5 text-red-500" />}
-          label="Total Spent"
+          label={isMerchant ? "Total Revenue" : "Total Spent"}
           value={`$${(wallet?.total_spent ?? 0).toFixed(2)}`}
         />
         <SummaryCard
