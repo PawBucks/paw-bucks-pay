@@ -55,7 +55,7 @@ serve(async (req) => {
     }
 
     const amountInCents = Math.round(amountDue * 100);
-    const appUrl = Deno.env.get("APP_URL") || req.headers.get("origin") || "https://pawbucks.app";
+    const appUrl = Deno.env.get("APP_URL") || "https://paw-bucks-pay.lovable.app";
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],

@@ -69,7 +69,7 @@ serve(async (req) => {
       `).join("");
 
     const logoUrl = "https://pawbucks.app/logo.png";
-    const appUrl = Deno.env.get("APP_URL") || req.headers.get("origin") || "https://pawbucks.app";
+    const appUrl = Deno.env.get("APP_URL") || "https://paw-bucks-pay.lovable.app";
     const paymentUrl = `${appUrl}/admin-invoice/${invoiceId}/pay?token=${invoice.access_token}`;
     const amountDue = Number(invoice.amount_due ?? invoice.total);
     const isPaid = invoice.status === "paid" || amountDue <= 0;
