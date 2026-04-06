@@ -271,7 +271,7 @@ export const ReceiptUploadDialog = ({ open, onOpenChange, userId }: ReceiptUploa
           {/* Submission Type Toggle */}
           <div className="space-y-2">
             <Label>Where did you shop?</Label>
-            <div className="grid grid-cols-2 gap-2">
+          <div className={cn("grid gap-2", currentTier === 'pawpass_plus' ? "grid-cols-2" : "grid-cols-1")}>
               <Button
                 type="button"
                 variant={submissionType === "partner" ? "default" : "outline"}
@@ -282,16 +282,18 @@ export const ReceiptUploadDialog = ({ open, onOpenChange, userId }: ReceiptUploa
                 <Store className="w-4 h-4 mr-1" />
                 PawBucks Partner
               </Button>
-              <Button
-                type="button"
-                variant={submissionType === "non_partner" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSubmissionType("non_partner")}
-                className="w-full"
-              >
-                <Receipt className="w-4 h-4 mr-1" />
-                Other Pet Store
-              </Button>
+              {currentTier === 'pawpass_plus' && (
+                <Button
+                  type="button"
+                  variant={submissionType === "non_partner" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSubmissionType("non_partner")}
+                  className="w-full"
+                >
+                  <Receipt className="w-4 h-4 mr-1" />
+                  Other Pet Store
+                </Button>
+              )}
             </div>
           </div>
 
