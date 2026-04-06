@@ -83,8 +83,8 @@ export function UserDetailWallet({ userId }: { userId: string }) {
       if (walletRes.data) setWallet(walletRes.data);
       
       // Use merchant wallet if available, fall back to pet owner wallet
-      if (isMerchantUser && merchantWalletRes?.data) {
-        setPawbucksWallet(merchantWalletRes.data);
+      if (isMerchantUser && merchantWalletData) {
+        setPawbucksWallet(merchantWalletData);
       } else if (pbWalletRes.data) {
         setPawbucksWallet(pbWalletRes.data);
       }
