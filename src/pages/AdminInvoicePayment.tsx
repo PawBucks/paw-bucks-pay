@@ -30,18 +30,17 @@ export default function AdminInvoicePayment() {
       return;
     }
 
-    const { data, error: fetchError } = await supabase
-      .from("admin_invoices")
-      .select("*, admin_invoice_items(*)")
-      .eq("id", invoiceId)
-      .eq("access_token", token)
-      .single();
+    const { data, error: fetchError } = await supabase.functions.invoke("get-public-admin-invoice", {
+      body: { invoiceId, token },
+    });
 
-    if (fetchError || !data) {
+    if (fetchError || !data?.invoice) {
       setError("Invoice not found or link has expired");
       setLoading(false);
       return;
     }
+
+    const invoiceData = data.invoice;
 
     setInvoice(data);
     setItems((data.admin_invoice_items || []).sort((a: any, b: any) => a.display_order - b.display_order));
