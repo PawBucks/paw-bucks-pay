@@ -116,10 +116,10 @@ function generateInvoicePaidEmailHtml(
   const displayName = businessName || merchantName;
   const isManualPayment = paymentMethod === 'manual';
   const pawbucksValueUSD = pawbucksUsed * 0.001;
-  const totalPaymentReceived = amountPaid + pawbucksValueUSD + tipAmount;
+  const cashPortion = Math.max(amountPaid - pawbucksValueUSD, 0);
   const isFullyPaid = amountDue <= 0;
-  const calculatedFee = platformFee ?? (amountPaid > 0 ? Math.round(amountPaid * 0.03 * 100) / 100 : 0);
-  const netDeposited = totalPaymentReceived - calculatedFee;
+  const calculatedFee = platformFee ?? (cashPortion > 0 ? Math.round(cashPortion * 0.03 * 100) / 100 : 0);
+  const netDeposited = cashPortion - calculatedFee + tipAmount;
 
   // Section helper
   const sectionLabel = (text: string) => `
