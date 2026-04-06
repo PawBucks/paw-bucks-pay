@@ -12266,6 +12266,54 @@ export type Database = {
           },
         ]
       }
+      merchant_twilio_settings_safe: {
+        Row: {
+          created_at: string | null
+          id: string | null
+          is_verified: boolean | null
+          merchant_id: string | null
+          twilio_account_sid: string | null
+          twilio_auth_token: string | null
+          twilio_phone_number: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string | null
+          is_verified?: boolean | null
+          merchant_id?: string | null
+          twilio_account_sid?: string | null
+          twilio_auth_token?: never
+          twilio_phone_number?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string | null
+          is_verified?: boolean | null
+          merchant_id?: string | null
+          twilio_account_sid?: string | null
+          twilio_auth_token?: never
+          twilio_phone_number?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_twilio_settings_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: true
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_twilio_settings_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: true
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       merchants_public: {
         Row: {
           accepts_pawbucks: boolean | null
