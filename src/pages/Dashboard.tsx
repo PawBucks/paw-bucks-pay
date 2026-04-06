@@ -18,6 +18,7 @@ import { PetProfilesSection } from "@/components/dashboard/PetProfilesSection";
 import { DiscoverServicesCard } from "@/components/dashboard/DiscoverServicesCard";
 import { AutoRedeemEducationCard } from "@/components/dashboard/AutoRedeemEducationCard";
 import { PetOwnerInvoices } from "@/components/dashboard/PetOwnerInvoices";
+import { getSubscriptionTier } from "@/lib/constants";
 import { ActionRequiredSlices } from "@/components/dashboard/ActionRequiredSlices";
 import { BottomNav } from "@/components/BottomNav";
 import { PullToRefresh } from "@/components/PullToRefresh";
