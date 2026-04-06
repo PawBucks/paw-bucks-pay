@@ -791,6 +791,8 @@ const MerchantDashboard = () => {
         );
       case "subscribers":
         return <MerchantSubscribersTab merchantId={merchant.id} />;
+      case "confirmations":
+        return <MerchantSaleConfirmationsTab merchantId={merchant.id} />;
       case "messages":
         return <MerchantMessagesTab merchantId={merchant.id} />;
       case "support":
