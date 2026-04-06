@@ -17,9 +17,9 @@ interface NonPartnerReceiptDialogProps {
   userId: string;
 }
 
-const PB_PER_DOLLAR = 5;
+const PB_PER_DOLLAR = 10;
 const MONTHLY_DOLLAR_CAP = 20; // $20/month in receipts
-const MONTHLY_PB_CAP = MONTHLY_DOLLAR_CAP * PB_PER_DOLLAR; // 100 PB/month
+const MONTHLY_PB_CAP = MONTHLY_DOLLAR_CAP * PB_PER_DOLLAR; // 20,000 PB/month
 
 export const NonPartnerReceiptDialog = ({ open, onOpenChange, userId }: NonPartnerReceiptDialogProps) => {
   const [receiptImage, setReceiptImage] = useState<File | null>(null);
