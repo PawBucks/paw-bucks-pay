@@ -549,6 +549,14 @@ const PawBucksWallet = () => {
       </main>
 
       <BottomNav />
+      
+      {user && (
+        <ReceiptUploadDialog
+          open={receiptDialogOpen}
+          onOpenChange={setReceiptDialogOpen}
+          userId={user.id}
+        />
+      )}
     </div>
     </>
   );

@@ -64,6 +64,7 @@ import { FundingRequestDialog } from "@/components/merchant/FundingRequestDialog
 import { PendingApprovalNotice } from "@/components/PendingApprovalNotice";
 import { SupportTab } from "@/components/support/SupportTab";
 import { MerchantMessagesTab } from "@/components/merchant/MerchantMessagesTab";
+import { MerchantSaleConfirmationsTab } from "@/components/merchant/MerchantSaleConfirmationsTab";
 
 type Merchant = {
   id: string;
