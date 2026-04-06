@@ -377,13 +377,12 @@ const Dashboard = () => {
       <BottomNav />
       <MaximusChat />
       
-      {/* Receipt Upload Dialog - Available for all pet owners */}
+      {/* Receipt Dialogs */}
       {user && (
-        <ReceiptUploadDialog
-          open={receiptDialogOpen}
-          onOpenChange={setReceiptDialogOpen}
-          userId={user.id}
-        />
+        <>
+          <PartnerReceiptDialog open={partnerReceiptOpen} onOpenChange={setPartnerReceiptOpen} userId={user.id} />
+          <NonPartnerReceiptDialog open={nonPartnerReceiptOpen} onOpenChange={setNonPartnerReceiptOpen} userId={user.id} />
+        </>
       )}
     </div>
     </>
