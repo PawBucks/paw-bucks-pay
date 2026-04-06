@@ -30,7 +30,7 @@ const Index = () => {
       .eq('key', 'welcome_credit_enabled')
       .maybeSingle()
       .then(({ data }) => {
-        setWelcomeCreditEnabled(!data ? true : data.value === true || data.value === 'true');
+        setWelcomeCreditEnabled(!data ? false : data.value === true || data.value === 'true');
       });
   }, []);
 
