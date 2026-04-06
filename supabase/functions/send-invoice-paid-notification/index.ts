@@ -116,10 +116,10 @@ function generateInvoicePaidEmailHtml(
   const displayName = businessName || merchantName;
   const isManualPayment = paymentMethod === 'manual';
   const pawbucksValueUSD = pawbucksUsed * 0.001;
-  const totalPaymentReceived = amountPaid + pawbucksValueUSD + tipAmount;
+  const cashPortion = Math.max(amountPaid - pawbucksValueUSD, 0);
   const isFullyPaid = amountDue <= 0;
-  const calculatedFee = platformFee ?? (amountPaid > 0 ? Math.round(amountPaid * 0.03 * 100) / 100 : 0);
-  const netDeposited = totalPaymentReceived - calculatedFee;
+  const calculatedFee = platformFee ?? (cashPortion > 0 ? Math.round(cashPortion * 0.03 * 100) / 100 : 0);
+  const netDeposited = cashPortion - calculatedFee + tipAmount;
 
   // Section helper
   const sectionLabel = (text: string) => `
@@ -146,7 +146,7 @@ function generateInvoicePaidEmailHtml(
       </tr>
       <tr>
         <td style="font-size:14px;color:#374151;padding:6px 0;">Customer Payment</td>
-        <td align="right" style="font-size:14px;color:#374151;padding:6px 0;">${formatCurrency(amountPaid)}</td>
+        <td align="right" style="font-size:14px;color:#374151;padding:6px 0;">${formatCurrency(cashPortion)}</td>
       </tr>`;
 
     if (pawbucksUsed > 0) {
@@ -431,12 +431,13 @@ serve(async (req) => {
     }
 
     const html = generateInvoicePaidEmailHtml(params, snapshot);
-    const totalAmount = params.amountPaid + (params.pawbucksUsed || 0) * 0.001;
+    const pawbucksVal = (params.pawbucksUsed || 0) * 0.001;
+    const subjectAmount = params.amountPaid - pawbucksVal + (params.tipAmount || 0);
 
     const { data, error } = await resend.emails.send({
       from: "PawBucks <noreply@pawbucks.app>",
       to: [params.merchantEmail],
-      subject: `💰 Payment Received - ${params.invoiceNumber} - ${formatCurrency(totalAmount)}`,
+      subject: `💰 Payment Received - ${params.invoiceNumber} - ${formatCurrency(subjectAmount)}`,
       html,
     });
 
