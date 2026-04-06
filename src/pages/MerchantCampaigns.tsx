@@ -118,7 +118,7 @@ export default function MerchantCampaigns() {
 
   async function loadTwilioSettings() {
     const { data } = await supabase
-      .from("merchant_twilio_settings")
+      .from("merchant_twilio_settings_safe" as any)
       .select("*")
       .eq("merchant_id", merchantId!)
       .maybeSingle();
