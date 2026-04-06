@@ -146,7 +146,7 @@ function generateInvoicePaidEmailHtml(
       </tr>
       <tr>
         <td style="font-size:14px;color:#374151;padding:6px 0;">Customer Payment</td>
-        <td align="right" style="font-size:14px;color:#374151;padding:6px 0;">${formatCurrency(amountPaid)}</td>
+        <td align="right" style="font-size:14px;color:#374151;padding:6px 0;">${formatCurrency(cashPortion)}</td>
       </tr>`;
 
     if (pawbucksUsed > 0) {
