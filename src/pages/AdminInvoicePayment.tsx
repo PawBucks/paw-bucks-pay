@@ -42,8 +42,8 @@ export default function AdminInvoicePayment() {
 
     const invoiceData = data.invoice;
 
-    setInvoice(data);
-    setItems((data.admin_invoice_items || []).sort((a: any, b: any) => a.display_order - b.display_order));
+    setInvoice(invoiceData);
+    setItems((invoiceData.admin_invoice_items || []).sort((a: any, b: any) => a.display_order - b.display_order));
     setLoading(false);
   };
 
