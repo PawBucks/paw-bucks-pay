@@ -448,6 +448,24 @@ const PawBucksWallet = () => {
           />
         )}
 
+        {/* Earn More: Submit Receipt CTA */}
+        <GradientCard className="mb-8 bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                <Receipt className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-sm">Earn More PawBucks</h3>
+                <p className="text-xs text-muted-foreground">Submit receipts from any pet purchase</p>
+              </div>
+            </div>
+            <Button size="sm" onClick={() => setReceiptDialogOpen(true)}>
+              Submit Receipt
+            </Button>
+          </div>
+        </GradientCard>
+
         {/* CTA Buttons */}
         <div className="mb-8 flex justify-center">
           <Button 
