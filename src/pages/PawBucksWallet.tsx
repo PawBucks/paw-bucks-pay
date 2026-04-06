@@ -21,7 +21,8 @@ import { PAWBUCKS_CONVERSION, ROUTES, CASHBACK_RATES, getSubscriptionTier } from
 import { Progress } from "@/components/ui/progress";
 import { LockedRewardsCard } from "@/components/wallet/LockedRewardsCard";
 import { useSpendablePawBucks } from "@/hooks/useSpendablePawBucks";
-import { ReceiptUploadDialog } from "@/components/ReceiptUploadDialog";
+import { PartnerReceiptDialog } from "@/components/receipts/PartnerReceiptDialog";
+import { NonPartnerReceiptDialog } from "@/components/receipts/NonPartnerReceiptDialog";
 
 type PawBucksWallet = {
   id: string;
