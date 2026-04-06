@@ -22,7 +22,8 @@ import { ActionRequiredSlices } from "@/components/dashboard/ActionRequiredSlice
 import { BottomNav } from "@/components/BottomNav";
 import { PullToRefresh } from "@/components/PullToRefresh";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
-import { ReceiptUploadDialog } from "@/components/ReceiptUploadDialog";
+import { PartnerReceiptDialog } from "@/components/receipts/PartnerReceiptDialog";
+import { NonPartnerReceiptDialog } from "@/components/receipts/NonPartnerReceiptDialog";
 import { TimelineTeaser } from "@/components/timeline";
 import { BadgeTeaser } from "@/components/badges";
 import { PersonalityQuizCTA } from "@/components/dashboard/PersonalityQuizCTA";
