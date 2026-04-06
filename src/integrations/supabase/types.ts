@@ -4713,6 +4713,73 @@ export type Database = {
           },
         ]
       }
+      merchant_sale_confirmations: {
+        Row: {
+          amount: number
+          confirmation_code: string
+          confirmed_by: string | null
+          created_at: string
+          customer_email: string
+          customer_name: string | null
+          id: string
+          merchant_id: string
+          notes: string | null
+          receipt_submission_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          confirmation_code?: string
+          confirmed_by?: string | null
+          created_at?: string
+          customer_email: string
+          customer_name?: string | null
+          id?: string
+          merchant_id: string
+          notes?: string | null
+          receipt_submission_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          confirmation_code?: string
+          confirmed_by?: string | null
+          created_at?: string
+          customer_email?: string
+          customer_name?: string | null
+          id?: string
+          merchant_id?: string
+          notes?: string | null
+          receipt_submission_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_sale_confirmations_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_sale_confirmations_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_sale_confirmations_receipt_submission_id_fkey"
+            columns: ["receipt_submission_id"]
+            isOneToOne: false
+            referencedRelation: "receipt_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       merchant_search_analytics: {
         Row: {
           clicks: number | null
@@ -8337,9 +8404,12 @@ export type Database = {
       receipt_submissions: {
         Row: {
           admin_notes: string | null
+          confirmation_id: string | null
           created_at: string
+          credit_rate_percent: number | null
           decision_reason: string | null
           id: string
+          merchant_id: string | null
           merchant_name: string
           pawbucks_awarded: number | null
           purchase_amount: number
@@ -8348,14 +8418,19 @@ export type Database = {
           reviewed_at: string | null
           reviewed_by: string | null
           status: string
+          submission_type: string
+          subscription_tier: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           admin_notes?: string | null
+          confirmation_id?: string | null
           created_at?: string
+          credit_rate_percent?: number | null
           decision_reason?: string | null
           id?: string
+          merchant_id?: string | null
           merchant_name: string
           pawbucks_awarded?: number | null
           purchase_amount: number
@@ -8364,14 +8439,19 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string
+          submission_type?: string
+          subscription_tier?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           admin_notes?: string | null
+          confirmation_id?: string | null
           created_at?: string
+          credit_rate_percent?: number | null
           decision_reason?: string | null
           id?: string
+          merchant_id?: string | null
           merchant_name?: string
           pawbucks_awarded?: number | null
           purchase_amount?: number
@@ -8380,10 +8460,34 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string
+          submission_type?: string
+          subscription_tier?: string | null
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "receipt_submissions_confirmation_id_fkey"
+            columns: ["confirmation_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_sale_confirmations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receipt_submissions_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receipt_submissions_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       referrals: {
         Row: {

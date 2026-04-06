@@ -42,6 +42,7 @@ import {
   PauseCircle,
   Mail,
   History,
+  ClipboardCheck,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format, startOfMonth, parseISO } from "date-fns";
@@ -63,6 +64,7 @@ import { FundingRequestDialog } from "@/components/merchant/FundingRequestDialog
 import { PendingApprovalNotice } from "@/components/PendingApprovalNotice";
 import { SupportTab } from "@/components/support/SupportTab";
 import { MerchantMessagesTab } from "@/components/merchant/MerchantMessagesTab";
+import { MerchantSaleConfirmationsTab } from "@/components/merchant/MerchantSaleConfirmationsTab";
 
 type Merchant = {
   id: string;
@@ -144,6 +146,12 @@ const NAV_SECTIONS = [
   {
     title: "Customers",
     items: [
+      {
+        id: "confirmations",
+        label: "Sale Confirmations",
+        icon: ClipboardCheck,
+        description: "Confirm PawBucks customer sales for faster reward crediting",
+      },
       {
         id: "subscribers",
         label: "Subscribers",
@@ -783,6 +791,8 @@ const MerchantDashboard = () => {
         );
       case "subscribers":
         return <MerchantSubscribersTab merchantId={merchant.id} />;
+      case "confirmations":
+        return <MerchantSaleConfirmationsTab merchantId={merchant.id} />;
       case "messages":
         return <MerchantMessagesTab merchantId={merchant.id} />;
       case "support":

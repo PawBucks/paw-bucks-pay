@@ -15,12 +15,13 @@ import { AdPlacement } from "@/components/AdPlacement";
 import { PageLoader } from "@/components/PageLoader";
 import { EmptyState } from "@/components/EmptyState";
 import { PawBucksInfoTooltip } from "@/components/PawBucksInfoTooltip";
-import { Coins, TrendingUp, Gift, ArrowUpRight, ArrowDownRight, Sparkles, Zap, Crown, Lock, Unlock } from "lucide-react";
+import { Coins, TrendingUp, Gift, ArrowUpRight, ArrowDownRight, Sparkles, Zap, Crown, Lock, Unlock, Receipt } from "lucide-react";
 import { Formatters } from "@/utils/formatters";
 import { PAWBUCKS_CONVERSION, ROUTES, CASHBACK_RATES, getSubscriptionTier } from "@/lib/constants";
 import { Progress } from "@/components/ui/progress";
 import { LockedRewardsCard } from "@/components/wallet/LockedRewardsCard";
 import { useSpendablePawBucks } from "@/hooks/useSpendablePawBucks";
+import { ReceiptUploadDialog } from "@/components/ReceiptUploadDialog";
 
 type PawBucksWallet = {
   id: string;
@@ -280,6 +281,7 @@ const PawBucksWallet = () => {
   const { user, signOut, loading: authLoading } = useAuth();
   const { subscription } = useSubscription();
   const navigate = useNavigate();
+  const [receiptDialogOpen, setReceiptDialogOpen] = useState(false);
   
   // Use centralized tier detection
   const currentTier = getSubscriptionTier(subscription.product_id, subscription.subscription_tier);
@@ -448,6 +450,24 @@ const PawBucksWallet = () => {
           />
         )}
 
+        {/* Earn More: Submit Receipt CTA */}
+        <GradientCard className="mb-8 bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                <Receipt className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-sm">Earn More PawBucks</h3>
+                <p className="text-xs text-muted-foreground">Submit receipts from any pet purchase</p>
+              </div>
+            </div>
+            <Button size="sm" onClick={() => setReceiptDialogOpen(true)}>
+              Submit Receipt
+            </Button>
+          </div>
+        </GradientCard>
+
         {/* CTA Buttons */}
         <div className="mb-8 flex justify-center">
           <Button 
@@ -529,6 +549,14 @@ const PawBucksWallet = () => {
       </main>
 
       <BottomNav />
+      
+      {user && (
+        <ReceiptUploadDialog
+          open={receiptDialogOpen}
+          onOpenChange={setReceiptDialogOpen}
+          userId={user.id}
+        />
+      )}
     </div>
     </>
   );
