@@ -490,7 +490,6 @@ const PawBucksWallet = () => {
             </GradientCard>
           )}
         </div>
-        </GradientCard>
 
         {/* CTA Buttons */}
         <div className="mb-8 flex justify-center">
