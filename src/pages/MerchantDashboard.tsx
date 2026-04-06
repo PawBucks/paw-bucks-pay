@@ -147,6 +147,12 @@ const NAV_SECTIONS = [
     title: "Customers",
     items: [
       {
+        id: "confirmations",
+        label: "Sale Confirmations",
+        icon: ClipboardCheck,
+        description: "Confirm PawBucks customer sales for faster reward crediting",
+      },
+      {
         id: "subscribers",
         label: "Subscribers",
         icon: Users,
