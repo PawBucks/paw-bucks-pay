@@ -15,13 +15,14 @@ import { AdPlacement } from "@/components/AdPlacement";
 import { PageLoader } from "@/components/PageLoader";
 import { EmptyState } from "@/components/EmptyState";
 import { PawBucksInfoTooltip } from "@/components/PawBucksInfoTooltip";
-import { Coins, TrendingUp, Gift, ArrowUpRight, ArrowDownRight, Sparkles, Zap, Crown, Lock, Unlock, Receipt } from "lucide-react";
+import { Coins, TrendingUp, Gift, ArrowUpRight, ArrowDownRight, Sparkles, Zap, Crown, Lock, Unlock, Receipt, Store } from "lucide-react";
 import { Formatters } from "@/utils/formatters";
 import { PAWBUCKS_CONVERSION, ROUTES, CASHBACK_RATES, getSubscriptionTier } from "@/lib/constants";
 import { Progress } from "@/components/ui/progress";
 import { LockedRewardsCard } from "@/components/wallet/LockedRewardsCard";
 import { useSpendablePawBucks } from "@/hooks/useSpendablePawBucks";
-import { ReceiptUploadDialog } from "@/components/ReceiptUploadDialog";
+import { PartnerReceiptDialog } from "@/components/receipts/PartnerReceiptDialog";
+import { NonPartnerReceiptDialog } from "@/components/receipts/NonPartnerReceiptDialog";
 
 type PawBucksWallet = {
   id: string;
@@ -281,7 +282,8 @@ const PawBucksWallet = () => {
   const { user, signOut, loading: authLoading } = useAuth();
   const { subscription } = useSubscription();
   const navigate = useNavigate();
-  const [receiptDialogOpen, setReceiptDialogOpen] = useState(false);
+  const [partnerReceiptOpen, setPartnerReceiptOpen] = useState(false);
+  const [nonPartnerReceiptOpen, setNonPartnerReceiptOpen] = useState(false);
   
   // Use centralized tier detection
   const currentTier = getSubscriptionTier(subscription.product_id, subscription.subscription_tier);
@@ -450,23 +452,44 @@ const PawBucksWallet = () => {
           />
         )}
 
-        {/* Earn More: Submit Receipt CTA */}
-        <GradientCard className="mb-8 bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-                <Receipt className="w-5 h-5 text-primary" />
+        {/* Earn More: Submit Receipt CTAs */}
+        <div className="mb-8 space-y-3">
+          <GradientCard className="bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                  <Store className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-sm">Partner Receipt</h3>
+                  <p className="text-xs text-muted-foreground">Submit receipts from PawBucks partners</p>
+                </div>
               </div>
-              <div>
-                <h3 className="font-semibold text-sm">Earn More PawBucks</h3>
-                <p className="text-xs text-muted-foreground">Submit receipts from any pet purchase</p>
-              </div>
+              <Button size="sm" onClick={() => setPartnerReceiptOpen(true)}>
+                Submit
+              </Button>
             </div>
-            <Button size="sm" onClick={() => setReceiptDialogOpen(true)}>
-              Submit Receipt
-            </Button>
-          </div>
-        </GradientCard>
+          </GradientCard>
+
+          {isPawPassPlusSubscriber && (
+            <GradientCard className="bg-gradient-to-r from-accent/10 to-primary/10 border-accent/20">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center">
+                    <Receipt className="w-5 h-5 text-accent-foreground" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-sm">Other Pet Store</h3>
+                    <p className="text-xs text-muted-foreground">Earn 5 PB/$1 at any pet store</p>
+                  </div>
+                </div>
+                <Button size="sm" variant="secondary" onClick={() => setNonPartnerReceiptOpen(true)}>
+                  Submit
+                </Button>
+              </div>
+            </GradientCard>
+          )}
+        </div>
 
         {/* CTA Buttons */}
         <div className="mb-8 flex justify-center">
@@ -551,11 +574,10 @@ const PawBucksWallet = () => {
       <BottomNav />
       
       {user && (
-        <ReceiptUploadDialog
-          open={receiptDialogOpen}
-          onOpenChange={setReceiptDialogOpen}
-          userId={user.id}
-        />
+        <>
+          <PartnerReceiptDialog open={partnerReceiptOpen} onOpenChange={setPartnerReceiptOpen} userId={user.id} />
+          <NonPartnerReceiptDialog open={nonPartnerReceiptOpen} onOpenChange={setNonPartnerReceiptOpen} userId={user.id} />
+        </>
       )}
     </div>
     </>
