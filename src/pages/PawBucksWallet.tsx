@@ -575,11 +575,10 @@ const PawBucksWallet = () => {
       <BottomNav />
       
       {user && (
-        <ReceiptUploadDialog
-          open={receiptDialogOpen}
-          onOpenChange={setReceiptDialogOpen}
-          userId={user.id}
-        />
+        <>
+          <PartnerReceiptDialog open={partnerReceiptOpen} onOpenChange={setPartnerReceiptOpen} userId={user.id} />
+          <NonPartnerReceiptDialog open={nonPartnerReceiptOpen} onOpenChange={setNonPartnerReceiptOpen} userId={user.id} />
+        </>
       )}
     </div>
     </>
