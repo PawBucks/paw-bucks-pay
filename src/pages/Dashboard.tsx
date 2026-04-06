@@ -347,7 +347,7 @@ const Dashboard = () => {
       <BottomNav />
       <MaximusChat />
       
-      {/* Receipt Upload Dialog for PawPass+ subscribers */}
+      {/* Receipt Upload Dialog - Available for all pet owners */}
       {user && (
         <ReceiptUploadDialog
           open={receiptDialogOpen}
