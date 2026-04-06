@@ -51,7 +51,8 @@ const Dashboard = () => {
   const { user, signOut, loading: authLoading } = useAuth();
   const { subscription } = useSubscription();
   const navigate = useNavigate();
-  const [receiptDialogOpen, setReceiptDialogOpen] = useState(false);
+  const [partnerReceiptOpen, setPartnerReceiptOpen] = useState(false);
+  const [nonPartnerReceiptOpen, setNonPartnerReceiptOpen] = useState(false);
 
   // TanStack Query-powered data fetching (leverages prefetch cache)
   const {
