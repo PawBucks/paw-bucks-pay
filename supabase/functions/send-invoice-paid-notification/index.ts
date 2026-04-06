@@ -431,7 +431,8 @@ serve(async (req) => {
     }
 
     const html = generateInvoicePaidEmailHtml(params, snapshot);
-    const totalAmount = params.amountPaid + (params.pawbucksUsed || 0) * 0.001;
+    const pawbucksVal = (params.pawbucksUsed || 0) * 0.001;
+    const subjectAmount = params.amountPaid - pawbucksVal + (params.tipAmount || 0);
 
     const { data, error } = await resend.emails.send({
       from: "PawBucks <noreply@pawbucks.app>",
