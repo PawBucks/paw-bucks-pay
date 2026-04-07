@@ -10,7 +10,7 @@ import { SecurityMonitoringTab } from "@/components/admin/SecurityMonitoringTab"
 import { ConsultationBookingsTab } from "@/components/admin/ConsultationBookingsTab";
 import FeedbackTab from "@/components/admin/FeedbackTab";
 import { SupportTicketsTab } from "@/components/admin/SupportTicketsTab";
-import { NonPartnerReceiptVerificationTab } from "@/components/admin/NonPartnerReceiptVerificationTab";
+import { ReceiptsTab } from "@/components/admin/ReceiptsTab";
 import { EmailTab } from "@/components/admin/EmailTab";
 import { TextCampaignsTab } from "@/components/admin/TextCampaignsTab";
 import { UsersTab } from "@/components/admin/UsersTab";
