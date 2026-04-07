@@ -160,7 +160,7 @@ export const PartnerReceiptDialog = ({ open, onOpenChange, userId }: PartnerRece
         category: "transactional",
       });
 
-      // Send confirmation email (fire-and-forget)
+      // Send confirmation email to pet owner (fire-and-forget)
       supabase.functions.invoke("send-receipt-confirmation", {
         body: {
           merchantName,
@@ -172,6 +172,18 @@ export const PartnerReceiptDialog = ({ open, onOpenChange, userId }: PartnerRece
           submissionType: "partner",
         },
       }).catch((err) => console.error("Receipt confirmation email failed:", err));
+
+      // Notify merchant about the new receipt submission (fire-and-forget)
+      if (selectedMerchantId) {
+        supabase.functions.invoke("notify-merchant-receipt", {
+          body: {
+            merchantId: selectedMerchantId,
+            merchantName,
+            purchaseAmount: amount,
+            receiptDate: format(receiptDate, "PPP"),
+          },
+        }).catch((err) => console.error("Merchant notification email failed:", err));
+      }
 
       toast.success(`Receipt submitted! ~${estimatedPB.toLocaleString()} PawBucks estimated at your ${tierLabel} rate.`);
       handleClose();
