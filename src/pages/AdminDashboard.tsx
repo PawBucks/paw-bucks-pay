@@ -10,7 +10,7 @@ import { SecurityMonitoringTab } from "@/components/admin/SecurityMonitoringTab"
 import { ConsultationBookingsTab } from "@/components/admin/ConsultationBookingsTab";
 import FeedbackTab from "@/components/admin/FeedbackTab";
 import { SupportTicketsTab } from "@/components/admin/SupportTicketsTab";
-import { NonPartnerReceiptVerificationTab } from "@/components/admin/NonPartnerReceiptVerificationTab";
+import { ReceiptsTab } from "@/components/admin/ReceiptsTab";
 import { EmailTab } from "@/components/admin/EmailTab";
 import { TextCampaignsTab } from "@/components/admin/TextCampaignsTab";
 import { UsersTab } from "@/components/admin/UsersTab";
@@ -162,7 +162,7 @@ const NAV_SECTIONS = [
         id: "receipts",
         label: "Receipt Verification",
         icon: Receipt,
-        description: "Review and approve non-partner receipt submissions for PawBucks",
+        description: "Review and approve partner and non-partner receipt submissions for PawBucks",
       },
       {
         id: "consultations",
@@ -371,7 +371,7 @@ const AdminDashboard = () => {
       case "invoicing":
         return <AdminInvoicingTab />;
       case "receipts":
-        return <NonPartnerReceiptVerificationTab />;
+        return <ReceiptsTab />;
       case "consultations":
         return <ConsultationBookingsTab />;
       case "feedback":
