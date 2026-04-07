@@ -328,6 +328,12 @@ function CheckInList({ checkins, loading, emptyMessage }: { checkins: CheckIn[];
                   {checkin.profile?.full_name || "Pet Owner"}
                 </p>
                 <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                  {checkin.profile?.email && (
+                    <span className="flex items-center gap-1">
+                      <Mail className="w-3 h-3" />
+                      {checkin.profile.email}
+                    </span>
+                  )}
                   {checkin.profile?.phone && (
                     <span className="flex items-center gap-1">
                       <Phone className="w-3 h-3" />
