@@ -151,30 +151,35 @@ serve(async (req: Request) => {
       );
     }
 
-    // Get the merchant's owner email
+    // Get the merchant's account user and direct business email
     const { data: merchant } = await supabase
       .from("merchants")
-      .select("owner_id")
+      .select("user_id, email")
       .eq("id", body.merchantId)
       .single();
 
-    if (!merchant?.owner_id) {
-      console.log("No merchant owner found for id:", body.merchantId);
+    if (!merchant) {
+      console.log("No merchant found for id:", body.merchantId);
       return new Response(
-        JSON.stringify({ success: true, skipped: true, reason: "No merchant owner found" }),
+        JSON.stringify({ success: true, skipped: true, reason: "Merchant not found" }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const { data: ownerProfile } = await supabase
-      .from("profiles")
-      .select("email, full_name")
-      .eq("id", merchant.owner_id)
-      .single();
+    const { data: ownerProfile } = merchant.user_id
+      ? await supabase
+          .from("profiles")
+          .select("email, full_name")
+          .eq("id", merchant.user_id)
+          .single()
+      : { data: null };
 
-    const recipientEmail = ownerProfile?.email;
+    const recipientEmail = ownerProfile?.email || merchant.email;
     if (!recipientEmail) {
-      console.log("No email found for merchant owner:", merchant.owner_id);
+      console.log("No email found for merchant:", {
+        merchantId: body.merchantId,
+        merchantUserId: merchant.user_id,
+      });
       return new Response(
         JSON.stringify({ success: true, skipped: true, reason: "No merchant email found" }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
