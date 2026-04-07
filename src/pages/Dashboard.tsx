@@ -228,6 +228,26 @@ const Dashboard = () => {
                     </div>
                   </GradientCard>
                 )}
+
+                {/* QR Check-In Card */}
+                <GradientCard className="bg-gradient-to-r from-secondary/10 to-primary/10 border-secondary/20">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-full bg-secondary/20 flex items-center justify-center">
+                        <QrCode className="w-6 h-6 text-secondary-foreground" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold">Check In</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Scan a QR code at any partner location
+                        </p>
+                      </div>
+                    </div>
+                    <Button variant="secondary" onClick={() => setQrScannerOpen(true)}>
+                      Scan
+                    </Button>
+                  </div>
+                </GradientCard>
               </div>
             </motion.div>
             
