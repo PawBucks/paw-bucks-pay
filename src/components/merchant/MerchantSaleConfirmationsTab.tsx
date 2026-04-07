@@ -14,6 +14,8 @@ import {
 import { Check, Loader2, Plus, RefreshCw, Receipt, Users } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { MerchantPendingReceipts } from "./MerchantPendingReceipts";
+import { Separator } from "@/components/ui/separator";
 
 type Confirmation = {
   id: string;
@@ -120,13 +122,18 @@ export const MerchantSaleConfirmationsTab = ({ merchantId }: MerchantSaleConfirm
             <div>
               <h3 className="font-semibold text-sm">Confirm Customer Sales</h3>
               <p className="text-xs text-muted-foreground mt-1">
-                When a customer pays and mentions they use PawBucks, confirm the sale here.
-                This gets matched with their receipt submission for faster PawBucks crediting.
+                Review customer receipt submissions and confirm sales manually.
+                Confirmed receipts get matched faster for PawBucks crediting.
               </p>
             </div>
           </div>
         </CardContent>
       </Card>
+
+      {/* Pending Customer Receipts */}
+      <MerchantPendingReceipts merchantId={merchantId} />
+
+      <Separator />
 
       {/* Actions */}
       <div className="flex items-center justify-between">
