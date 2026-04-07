@@ -162,7 +162,7 @@ const NAV_SECTIONS = [
         id: "receipts",
         label: "Receipt Verification",
         icon: Receipt,
-        description: "Review and approve non-partner receipt submissions for PawBucks",
+        description: "Review and approve partner and non-partner receipt submissions for PawBucks",
       },
       {
         id: "consultations",
