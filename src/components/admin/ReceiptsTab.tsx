@@ -153,6 +153,25 @@ export const ReceiptsTab = () => {
             pawbucks_status: isNonPartner ? "pending" : "available",
             vest_date: isNonPartner ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() : null,
           });
+
+          // Create a transaction record so it appears in all dashboards
+          const transactionData: Record<string, any> = {
+            user_id: selectedReceipt.user_id,
+            amount: selectedReceipt.purchase_amount,
+            cashback_earned: pbAmount,
+            rewards_earned: pbAmount,
+            status: "completed",
+            description: `Receipt submission: ${selectedReceipt.merchant_name}`,
+          };
+          if (selectedReceipt.merchant_id) {
+            transactionData.merchant_id = selectedReceipt.merchant_id;
+          }
+          const { error: txError } = await supabase
+            .from("transactions")
+            .insert(transactionData);
+          if (txError) {
+            console.error("Failed to create transaction record:", txError);
+          }
         }
 
         await supabase.from("notifications").insert({
