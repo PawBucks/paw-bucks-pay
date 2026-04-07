@@ -55,6 +55,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [partnerReceiptOpen, setPartnerReceiptOpen] = useState(false);
   const [nonPartnerReceiptOpen, setNonPartnerReceiptOpen] = useState(false);
+  const [qrScannerOpen, setQrScannerOpen] = useState(false);
 
   // TanStack Query-powered data fetching (leverages prefetch cache)
   const {
