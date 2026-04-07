@@ -160,6 +160,7 @@ const AppRoutes = () => {
       <Route path="/lost-pets/:id" element={<PageTransition><LostPetDetail /></PageTransition>} />
       <Route path="/admin-invoice/:invoiceId/pay" element={<PageTransition><AdminInvoicePayment /></PageTransition>} />
       <Route path="/admin-invoice/:invoiceId/success" element={<PageTransition><AdminInvoicePaymentSuccess /></PageTransition>} />
+      <Route path="/checkin" element={<PageTransition><CheckInPage /></PageTransition>} />
 
       {/* Authenticated pet owner routes */}
       <Route path="/dashboard" element={<ProtectedRoute><PageTransition><Dashboard /></PageTransition></ProtectedRoute>} />
