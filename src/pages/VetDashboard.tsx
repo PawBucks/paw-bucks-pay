@@ -255,7 +255,7 @@ export default function VetDashboard() {
         </div>
 
         <Tabs defaultValue="emr" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-8 lg:grid-cols-15">
+          <TabsList className="grid w-full grid-cols-8 lg:grid-cols-16">
             <TabsTrigger value="emr" className="flex items-center gap-1">
               <FileText className="w-4 h-4" />
               <span className="hidden sm:inline">EMR</span>
