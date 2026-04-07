@@ -132,7 +132,8 @@ export function CheckInDashboard({ entityId, entityType, entityName }: CheckInDa
     const q = searchQuery.toLowerCase();
     return list.filter(c =>
       c.profile?.full_name?.toLowerCase().includes(q) ||
-      c.profile?.phone?.toLowerCase().includes(q)
+      c.profile?.phone?.toLowerCase().includes(q) ||
+      c.profile?.email?.toLowerCase().includes(q)
     );
   };
 
