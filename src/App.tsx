@@ -61,6 +61,7 @@ const Storefront = lazyWithRetry(() => import("./pages/Storefront"), "Storefront
 const CheckoutSuccess = lazyWithRetry(() => import("./pages/CheckoutSuccess"), "CheckoutSuccess");
 const Install = lazyWithRetry(() => import("./pages/Install"), "Install");
 const NotFound = lazyWithRetry(() => import("./pages/NotFound"), "NotFound");
+const CheckInPage = lazyWithRetry(() => import("./pages/CheckInPage"), "CheckInPage");
 const MerchantOffers = lazyWithRetry(() => import("./pages/MerchantOffers"), "MerchantOffers");
 const MerchantOfferEditor = lazyWithRetry(() => import("./pages/MerchantOfferEditor"), "MerchantOfferEditor");
 const MerchantOfferDetails = lazyWithRetry(() => import("./pages/MerchantOfferDetails"), "MerchantOfferDetails");
