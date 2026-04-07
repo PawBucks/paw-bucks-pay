@@ -1,8 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.76.1";
-import { Resend } from "https://esm.sh/resend@2.0.0";
 
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -45,22 +44,17 @@ function buildMerchantNotificationHtml(data: MerchantReceiptNotificationRequest)
     <tr>
       <td align="center">
         <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); max-width: 600px;">
-          <!-- Header -->
           <tr>
             <td style="background-color: #ffffff; padding: 32px; text-align: center; border-radius: 12px 12px 0 0;">
               <img src="${LOGO_URL}" alt="PawBucks" width="120" height="120" style="display:block;margin:0 auto;width:120px;height:120px;">
             </td>
           </tr>
-          
-          <!-- Content -->
           <tr>
             <td style="padding: 0 32px 40px 32px;">
               <h1 style="margin: 0 0 8px 0; font-size: 22px; font-weight: 700; color: #1f2937; text-align: center;">New Receipt Submitted</h1>
               <p style="margin: 0 0 24px 0; font-size: 14px; color: #6b7280; text-align: center; line-height: 1.5;">
                 ${customerDisplay} just submitted a purchase receipt for <strong>${escapeHtml(data.merchantName)}</strong>.
               </p>
-
-              <!-- Summary Card -->
               <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb; margin-bottom: 24px;">
                 <tr>
                   <td style="padding: 12px 16px; font-size: 14px; color: #6b7280; border-bottom: 1px solid #f3f4f6;">Purchase Amount</td>
@@ -75,16 +69,12 @@ function buildMerchantNotificationHtml(data: MerchantReceiptNotificationRequest)
                   <td style="padding: 12px 16px; font-size: 14px; font-weight: 600; color: #1f2937; text-align: right;">${customerDisplay}</td>
                 </tr>
               </table>
-
-              <!-- Info -->
               <div style="background-color: #f0fdfa; border: 1px solid #99f6e4; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
                 <p style="margin: 0 0 4px 0; font-size: 13px; font-weight: 600; color: ${primaryColor};">📋 Action Required</p>
                 <p style="margin: 0; font-size: 13px; color: #374151; line-height: 1.5;">
                   Please review and confirm this sale on your dashboard. Confirming helps the customer receive their PawBucks faster.
                 </p>
               </div>
-
-              <!-- CTA Button -->
               <table width="100%" cellpadding="0" cellspacing="0">
                 <tr>
                   <td align="center">
@@ -94,14 +84,11 @@ function buildMerchantNotificationHtml(data: MerchantReceiptNotificationRequest)
                   </td>
                 </tr>
               </table>
-
               <p style="margin: 24px 0 0 0; font-size: 12px; color: #9ca3af; text-align: center; line-height: 1.5;">
                 You can also view all pending receipts on your Merchant Dashboard under Sale Confirmations.
               </p>
             </td>
           </tr>
-          
-          <!-- Footer -->
           <tr>
             <td style="background-color: #f9fafb; padding: 24px 32px; text-align: center; border-radius: 0 0 12px 12px; border-top: 1px solid #e5e7eb;">
               <p style="color: #9ca3af; font-size: 12px; margin: 0;">
@@ -125,7 +112,17 @@ serve(async (req: Request) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
+    const resendApiKey = Deno.env.get("RESEND_API_KEY");
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    if (!lovableApiKey || !resendApiKey) {
+      console.error("Missing LOVABLE_API_KEY or RESEND_API_KEY");
+      return new Response(
+        JSON.stringify({ error: "Email service not configured" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     // Verify user auth
     const authHeader = req.headers.get("Authorization");
@@ -154,7 +151,7 @@ serve(async (req: Request) => {
       );
     }
 
-    // Get the merchant's owner email from profiles via the merchants table
+    // Get the merchant's owner email
     const { data: merchant } = await supabase
       .from("merchants")
       .select("owner_id")
@@ -184,7 +181,7 @@ serve(async (req: Request) => {
       );
     }
 
-    // Get customer name for the email
+    // Get customer name
     const { data: customerProfile } = await supabase
       .from("profiles")
       .select("full_name")
@@ -198,17 +195,28 @@ serve(async (req: Request) => {
 
     const html = buildMerchantNotificationHtml(dataWithCustomer);
 
-    const { error: sendError } = await resend.emails.send({
-      from: "PawBucks <noreply@pawbucks.app>",
-      to: [recipientEmail],
-      subject: `New Receipt Submission — $${body.purchaseAmount.toFixed(2)} at ${body.merchantName}`,
-      html,
+    // Send via Resend gateway
+    const response = await fetch(`${GATEWAY_URL}/emails`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${lovableApiKey}`,
+        "X-Connection-Api-Key": resendApiKey,
+      },
+      body: JSON.stringify({
+        from: "PawBucks <noreply@pawbucks.app>",
+        to: [recipientEmail],
+        subject: `New Receipt Submission — $${body.purchaseAmount.toFixed(2)} at ${body.merchantName}`,
+        html,
+      }),
     });
 
-    if (sendError) {
-      console.error("Failed to send merchant notification:", sendError);
+    const result = await response.json();
+
+    if (!response.ok) {
+      console.error("Failed to send merchant notification:", result);
       return new Response(
-        JSON.stringify({ error: sendError.message }),
+        JSON.stringify({ error: result.message || "Email send failed" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
