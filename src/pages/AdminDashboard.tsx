@@ -371,7 +371,7 @@ const AdminDashboard = () => {
       case "invoicing":
         return <AdminInvoicingTab />;
       case "receipts":
-        return <NonPartnerReceiptVerificationTab />;
+        return <ReceiptsTab />;
       case "consultations":
         return <ConsultationBookingsTab />;
       case "feedback":
