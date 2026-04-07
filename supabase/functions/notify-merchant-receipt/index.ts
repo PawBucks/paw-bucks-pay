@@ -8,7 +8,7 @@ const corsHeaders = {
 };
 
 const LOGO_URL = "https://yxpnkipcoxksmnsvpvwi.supabase.co/storage/v1/object/public/email-assets/pawbucks-logo-email.png";
-const APP_URL = "https://paw-bucks-pay.lovable.app";
+const APP_URL = "https://pawbucks.app";
 
 interface MerchantReceiptNotificationRequest {
   merchantId: string;
