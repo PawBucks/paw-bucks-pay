@@ -159,6 +159,11 @@ const Dashboard = () => {
               <WelcomeCreditCard userId={user.id} />
             )}
             
+            {/* Check-In Follow-up Banners */}
+            {user && (
+              <CheckInFollowupBanner userId={user.id} />
+            )}
+
             {/* Action Required - Denied insurance claims needing resolution */}
             {user && (
               <ActionRequiredSlices userId={user.id} />
