@@ -147,9 +147,23 @@ export const NonPartnerReceiptDialog = ({ open, onOpenChange, userId }: NonPartn
       await supabase.from("notifications").insert({
         user_id: userId,
         title: "Non-Partner Receipt Submitted",
-        message: `Receipt from ${merchantName.trim()} for $${amount.toFixed(2)} received. You'll earn ~${estimatedPB.toLocaleString()} PawBucks (5 PB/$1). These vest after 30 days. Review takes 24-72 hours.`,
+        message: `Receipt from ${merchantName.trim()} for $${amount.toFixed(2)} received. You'll earn ~${estimatedPB.toLocaleString()} PawBucks (${PB_PER_DOLLAR} PB/$1). These vest after 30 days. Review takes 24-72 hours.`,
         category: "transactional",
       });
+
+      // Send confirmation email (fire-and-forget)
+      supabase.functions.invoke("send-receipt-confirmation", {
+        body: {
+          merchantName: merchantName.trim(),
+          purchaseAmount: amount,
+          receiptDate: format(receiptDate, "PPP"),
+          estimatedPawBucks: estimatedPB,
+          pbPerDollar: PB_PER_DOLLAR,
+          tierLabel: "PawPass+",
+          submissionType: "non_partner",
+          vestingDays: 30,
+        },
+      }).catch((err) => console.error("Receipt confirmation email failed:", err));
 
       toast.success(`Receipt submitted! ~${estimatedPB.toLocaleString()} PawBucks (vests after 30 days).`);
       handleClose();

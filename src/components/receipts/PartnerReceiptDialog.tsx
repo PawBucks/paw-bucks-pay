@@ -160,6 +160,19 @@ export const PartnerReceiptDialog = ({ open, onOpenChange, userId }: PartnerRece
         category: "transactional",
       });
 
+      // Send confirmation email (fire-and-forget)
+      supabase.functions.invoke("send-receipt-confirmation", {
+        body: {
+          merchantName,
+          purchaseAmount: amount,
+          receiptDate: format(receiptDate, "PPP"),
+          estimatedPawBucks: estimatedPB,
+          pbPerDollar,
+          tierLabel,
+          submissionType: "partner",
+        },
+      }).catch((err) => console.error("Receipt confirmation email failed:", err));
+
       toast.success(`Receipt submitted! ~${estimatedPB.toLocaleString()} PawBucks estimated at your ${tierLabel} rate.`);
       handleClose();
     } catch (error) {
