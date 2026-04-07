@@ -329,6 +329,10 @@ export default function VetDashboard() {
               <LifeBuoy className="w-4 h-4" />
               <span className="hidden sm:inline">Support</span>
             </TabsTrigger>
+            <TabsTrigger value="checkins" className="flex items-center gap-1">
+              <QrCode className="w-4 h-4" />
+              <span className="hidden sm:inline">Check-Ins</span>
+            </TabsTrigger>
             <TabsTrigger value="settings" className="flex items-center gap-1">
               <Settings className="w-4 h-4" />
               <span className="hidden sm:inline">Settings</span>
