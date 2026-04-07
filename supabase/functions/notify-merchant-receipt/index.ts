@@ -1,7 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.76.1";
-
-const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
+import { Resend } from "https://esm.sh/resend@2.0.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -112,12 +111,12 @@ serve(async (req: Request) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const resend = new Resend(resendApiKey);
 
-    if (!lovableApiKey || !resendApiKey) {
-      console.error("Missing LOVABLE_API_KEY or RESEND_API_KEY");
+    if (!resendApiKey) {
+      console.error("Missing RESEND_API_KEY");
       return new Response(
         JSON.stringify({ error: "Email service not configured" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -200,28 +199,17 @@ serve(async (req: Request) => {
 
     const html = buildMerchantNotificationHtml(dataWithCustomer);
 
-    // Send via Resend gateway
-    const response = await fetch(`${GATEWAY_URL}/emails`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${lovableApiKey}`,
-        "X-Connection-Api-Key": resendApiKey,
-      },
-      body: JSON.stringify({
-        from: "PawBucks <noreply@pawbucks.app>",
-        to: [recipientEmail],
-        subject: `New Receipt Submission — $${body.purchaseAmount.toFixed(2)} at ${body.merchantName}`,
-        html,
-      }),
+    const { error: sendError } = await resend.emails.send({
+      from: "PawBucks <noreply@pawbucks.app>",
+      to: [recipientEmail],
+      subject: `New Receipt Submission — $${body.purchaseAmount.toFixed(2)} at ${body.merchantName}`,
+      html,
     });
 
-    const result = await response.json();
-
-    if (!response.ok) {
-      console.error("Failed to send merchant notification:", result);
+    if (sendError) {
+      console.error("Failed to send merchant notification:", sendError);
       return new Response(
-        JSON.stringify({ error: result.message || "Email send failed" }),
+        JSON.stringify({ error: sendError.message || "Email send failed" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
