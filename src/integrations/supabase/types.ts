@@ -12602,6 +12602,17 @@ export type Database = {
           total_users: number
         }[]
       }
+      get_checkin_user_emails: {
+        Args: {
+          p_entity_id: string
+          p_entity_type: string
+          p_user_ids: string[]
+        }
+        Returns: {
+          email: string
+          user_id: string
+        }[]
+      }
       get_current_user_email: { Args: never; Returns: string }
       get_geo_cell_availability:
         | {

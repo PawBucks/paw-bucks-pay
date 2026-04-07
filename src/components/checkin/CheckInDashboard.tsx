@@ -69,23 +69,35 @@ export function CheckInDashboard({ entityId, entityType, entityName }: CheckInDa
       // Fetch profiles for all unique user_ids
       if (data && data.length > 0) {
         const userIds = [...new Set(data.map(c => c.user_id))];
-        const { data: profiles } = await supabase
-          .from("profiles")
-          .select("id, full_name, phone, avatar_url")
-          .in("id", userIds);
+        
+        // Fetch profiles and emails in parallel
+        const [profilesResult, emailsResult] = await Promise.all([
+          supabase
+            .from("profiles")
+            .select("id, full_name, phone, avatar_url")
+            .in("id", userIds),
+          supabase.rpc("get_checkin_user_emails", {
+            p_user_ids: userIds,
+            p_entity_id: entityId,
+            p_entity_type: entityType,
+          }),
+        ]);
 
-        // Get emails via a helper - we'll use the profile data we have
         const profileMap = new Map(
-          (profiles || []).map(p => [p.id, p])
+          (profilesResult.data || []).map(p => [p.id, p])
+        );
+        const emailMap = new Map(
+          (emailsResult.data || []).map((e: any) => [e.user_id, e.email])
         );
 
         const enriched = data.map(c => ({
           ...c,
-          profile: profileMap.get(c.user_id) ? {
-            full_name: profileMap.get(c.user_id)!.full_name,
-            phone: profileMap.get(c.user_id)!.phone,
-            avatar_url: profileMap.get(c.user_id)!.avatar_url,
-          } : undefined,
+          profile: {
+            full_name: profileMap.get(c.user_id)?.full_name ?? null,
+            phone: profileMap.get(c.user_id)?.phone ?? null,
+            avatar_url: profileMap.get(c.user_id)?.avatar_url ?? null,
+            email: emailMap.get(c.user_id) ?? null,
+          },
         }));
 
         setCheckins(enriched);
@@ -120,7 +132,8 @@ export function CheckInDashboard({ entityId, entityType, entityName }: CheckInDa
     const q = searchQuery.toLowerCase();
     return list.filter(c =>
       c.profile?.full_name?.toLowerCase().includes(q) ||
-      c.profile?.phone?.toLowerCase().includes(q)
+      c.profile?.phone?.toLowerCase().includes(q) ||
+      c.profile?.email?.toLowerCase().includes(q)
     );
   };
 
@@ -315,6 +328,12 @@ function CheckInList({ checkins, loading, emptyMessage }: { checkins: CheckIn[];
                   {checkin.profile?.full_name || "Pet Owner"}
                 </p>
                 <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                  {checkin.profile?.email && (
+                    <span className="flex items-center gap-1">
+                      <Mail className="w-3 h-3" />
+                      {checkin.profile.email}
+                    </span>
+                  )}
                   {checkin.profile?.phone && (
                     <span className="flex items-center gap-1">
                       <Phone className="w-3 h-3" />
