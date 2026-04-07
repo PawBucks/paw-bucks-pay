@@ -25,6 +25,7 @@ import {
 } from "@/components/vet-portal";
 import { SalesReportGenerator } from "@/components/shared/SalesReportGenerator";
 import { MerchantLoyaltyProgramTab } from "@/components/merchant/MerchantLoyaltyProgramTab";
+import { CheckInDashboard } from "@/components/checkin";
 import {
   Stethoscope,
   Users,
