@@ -14,6 +14,8 @@ import {
 import { Check, Loader2, Plus, RefreshCw, Receipt, Users } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { MerchantPendingReceipts } from "./MerchantPendingReceipts";
+import { Separator } from "@/components/ui/separator";
 
 type Confirmation = {
   id: string;
