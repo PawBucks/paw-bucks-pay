@@ -209,7 +209,7 @@ export const NonPartnerReceiptVerificationTab = () => {
         const { error: activityError } = await supabase.from("pawbucks_activity").insert({
           user_id: selectedReceipt.user_id,
           amount: pawbucks,
-          type: "credit",
+          type: "earn",
           source: "non-partner",
           description: `Non-partner PawBucks from ${selectedReceipt.merchant_name} (vesting in 30 days)`,
           pawbucks_status: "pending",
