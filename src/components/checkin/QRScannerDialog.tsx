@@ -155,7 +155,7 @@ export function QRScannerDialog({ open, onOpenChange }: QRScannerDialogProps) {
           .order("business_name"),
         supabase
           .from("partner_vets")
-          .select("id, clinic_name, latitude, longitude, checkin_qr_token")
+          .select("id, clinic_name, checkin_qr_token")
           .eq("is_verified", true)
           .not("checkin_qr_token", "is", null)
           .order("clinic_name"),
@@ -178,15 +178,11 @@ export function QRScannerDialog({ open, onOpenChange }: QRScannerDialogProps) {
       }
 
       for (const v of vetsRes.data || []) {
-        const dist =
-          lat != null && lng != null && (v as any).latitude && (v as any).longitude
-            ? getDistance(lat, lng, (v as any).latitude, (v as any).longitude)
-            : null;
         entities.push({
           id: v.id,
-          name: v.clinic_name,
+          name: v.clinic_name || "Veterinary Clinic",
           type: "vet",
-          distance: dist,
+          distance: null,
           checkin_qr_token: v.checkin_qr_token!,
         });
       }
