@@ -406,6 +406,9 @@ export default function VetDashboard() {
           <TabsContent value="support">
             <SupportTab submitterType="vet" entityId={vetInfo.id} />
           </TabsContent>
+          <TabsContent value="checkins">
+            <CheckInDashboard entityId={vetInfo.id} entityType="vet" entityName={vetInfo.name} />
+          </TabsContent>
           <TabsContent value="settings">
             <Card className="p-6">
               <h3 className="text-lg font-semibold mb-4">Practice Settings</h3>
