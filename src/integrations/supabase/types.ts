@@ -877,6 +877,96 @@ export type Database = {
         }
         Relationships: []
       }
+      checkin_followups: {
+        Row: {
+          answered_at: string | null
+          attempt_number: number
+          checkin_id: string
+          created_at: string
+          entity_name: string
+          id: string
+          merchant_id: string | null
+          notified_at: string | null
+          notify_at: string
+          response: string | null
+          status: string
+          updated_at: string
+          user_id: string
+          vet_id: string | null
+          visit_purpose: string | null
+        }
+        Insert: {
+          answered_at?: string | null
+          attempt_number?: number
+          checkin_id: string
+          created_at?: string
+          entity_name: string
+          id?: string
+          merchant_id?: string | null
+          notified_at?: string | null
+          notify_at: string
+          response?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+          vet_id?: string | null
+          visit_purpose?: string | null
+        }
+        Update: {
+          answered_at?: string | null
+          attempt_number?: number
+          checkin_id?: string
+          created_at?: string
+          entity_name?: string
+          id?: string
+          merchant_id?: string | null
+          notified_at?: string | null
+          notify_at?: string
+          response?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          vet_id?: string | null
+          visit_purpose?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "checkin_followups_checkin_id_fkey"
+            columns: ["checkin_id"]
+            isOneToOne: false
+            referencedRelation: "checkins"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "checkin_followups_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "checkin_followups_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "checkin_followups_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "checkin_followups_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       checkins: {
         Row: {
           checked_in_at: string
