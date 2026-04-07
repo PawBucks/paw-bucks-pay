@@ -147,7 +147,7 @@ export const ReceiptsTab = () => {
           await supabase.from("pawbucks_activity").insert({
             user_id: selectedReceipt.user_id,
             amount: pbAmount,
-            type: "credit",
+            type: "earn",
             source: isNonPartner ? "non-partner" : "receipt_submission",
             description: `PawBucks earned from receipt at ${selectedReceipt.merchant_name} (${selectedReceipt.credit_rate_percent || 1}% rate)`,
             pawbucks_status: isNonPartner ? "pending" : "available",
