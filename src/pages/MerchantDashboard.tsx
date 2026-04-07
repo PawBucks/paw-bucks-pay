@@ -155,6 +155,12 @@ const NAV_SECTIONS = [
         description: "Confirm PawBucks customer sales for faster reward crediting",
       },
       {
+        id: "checkins",
+        label: "Check-Ins",
+        icon: QrCode,
+        description: "View customer check-ins and manage your QR code",
+      },
+      {
         id: "subscribers",
         label: "Subscribers",
         icon: Users,
