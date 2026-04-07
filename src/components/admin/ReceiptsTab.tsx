@@ -155,20 +155,17 @@ export const ReceiptsTab = () => {
           });
 
           // Create a transaction record so it appears in all dashboards
-          const transactionData: Record<string, any> = {
-            user_id: selectedReceipt.user_id,
-            amount: selectedReceipt.purchase_amount,
-            cashback_earned: pbAmount,
-            rewards_earned: pbAmount,
-            status: "completed",
-            description: `Receipt submission: ${selectedReceipt.merchant_name}`,
-          };
-          if (selectedReceipt.merchant_id) {
-            transactionData.merchant_id = selectedReceipt.merchant_id;
-          }
           const { error: txError } = await supabase
             .from("transactions")
-            .insert(transactionData);
+            .insert({
+              user_id: selectedReceipt.user_id,
+              merchant_id: selectedReceipt.merchant_id || undefined,
+              amount: selectedReceipt.purchase_amount,
+              cashback_earned: pbAmount,
+              rewards_earned: pbAmount,
+              status: "completed" as const,
+              description: `Receipt submission: ${selectedReceipt.merchant_name}`,
+            });
           if (txError) {
             console.error("Failed to create transaction record:", txError);
           }
