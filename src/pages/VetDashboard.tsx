@@ -25,6 +25,7 @@ import {
 } from "@/components/vet-portal";
 import { SalesReportGenerator } from "@/components/shared/SalesReportGenerator";
 import { MerchantLoyaltyProgramTab } from "@/components/merchant/MerchantLoyaltyProgramTab";
+import { CheckInDashboard } from "@/components/checkin";
 import {
   Stethoscope,
   Users,
@@ -46,6 +47,7 @@ import {
   Stamp,
   LifeBuoy,
   Settings,
+  QrCode,
 } from "lucide-react";
 import { toast } from "sonner";
 import { PendingApprovalNotice } from "@/components/PendingApprovalNotice";
@@ -253,7 +255,7 @@ export default function VetDashboard() {
         </div>
 
         <Tabs defaultValue="emr" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-8 lg:grid-cols-15">
+          <TabsList className="grid w-full grid-cols-8 lg:grid-cols-16">
             <TabsTrigger value="emr" className="flex items-center gap-1">
               <FileText className="w-4 h-4" />
               <span className="hidden sm:inline">EMR</span>
@@ -327,6 +329,10 @@ export default function VetDashboard() {
               <LifeBuoy className="w-4 h-4" />
               <span className="hidden sm:inline">Support</span>
             </TabsTrigger>
+            <TabsTrigger value="checkins" className="flex items-center gap-1">
+              <QrCode className="w-4 h-4" />
+              <span className="hidden sm:inline">Check-Ins</span>
+            </TabsTrigger>
             <TabsTrigger value="settings" className="flex items-center gap-1">
               <Settings className="w-4 h-4" />
               <span className="hidden sm:inline">Settings</span>
@@ -399,6 +405,9 @@ export default function VetDashboard() {
 
           <TabsContent value="support">
             <SupportTab submitterType="vet" entityId={vetInfo.id} />
+          </TabsContent>
+          <TabsContent value="checkins">
+            <CheckInDashboard entityId={vetInfo.id} entityType="vet" entityName={vetInfo.name} />
           </TabsContent>
           <TabsContent value="settings">
             <Card className="p-6">

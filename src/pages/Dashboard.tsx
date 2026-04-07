@@ -33,7 +33,8 @@ import { CustomerLoyaltyCards } from "@/components/dashboard/CustomerLoyaltyCard
 import { LoyaltyProgramDiscovery } from "@/components/dashboard/LoyaltyProgramDiscovery";
 import { WelcomeCreditCard } from "@/components/dashboard/WelcomeCreditCard";
 import { MaximusChat } from "@/components/maximus/MaximusChat";
-import { Store, Users, TrendingUp, Receipt } from "lucide-react";
+import { QRScannerDialog } from "@/components/checkin";
+import { Store, Users, TrendingUp, Receipt, QrCode } from "lucide-react";
 
 const cardVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -54,6 +55,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [partnerReceiptOpen, setPartnerReceiptOpen] = useState(false);
   const [nonPartnerReceiptOpen, setNonPartnerReceiptOpen] = useState(false);
+  const [qrScannerOpen, setQrScannerOpen] = useState(false);
 
   // TanStack Query-powered data fetching (leverages prefetch cache)
   const {
@@ -226,6 +228,26 @@ const Dashboard = () => {
                     </div>
                   </GradientCard>
                 )}
+
+                {/* QR Check-In Card */}
+                <GradientCard className="bg-gradient-to-r from-secondary/10 to-primary/10 border-secondary/20">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-full bg-secondary/20 flex items-center justify-center">
+                        <QrCode className="w-6 h-6 text-secondary-foreground" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold">Check In</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Scan a QR code at any partner location
+                        </p>
+                      </div>
+                    </div>
+                    <Button variant="secondary" onClick={() => setQrScannerOpen(true)}>
+                      Scan
+                    </Button>
+                  </div>
+                </GradientCard>
               </div>
             </motion.div>
             
@@ -382,6 +404,7 @@ const Dashboard = () => {
         <>
           <PartnerReceiptDialog open={partnerReceiptOpen} onOpenChange={setPartnerReceiptOpen} userId={user.id} />
           <NonPartnerReceiptDialog open={nonPartnerReceiptOpen} onOpenChange={setNonPartnerReceiptOpen} userId={user.id} />
+          <QRScannerDialog open={qrScannerOpen} onOpenChange={setQrScannerOpen} />
         </>
       )}
     </div>

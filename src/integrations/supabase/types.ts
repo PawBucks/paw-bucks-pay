@@ -877,6 +877,65 @@ export type Database = {
         }
         Relationships: []
       }
+      checkins: {
+        Row: {
+          checked_in_at: string
+          checkin_token: string
+          created_at: string
+          id: string
+          merchant_id: string | null
+          user_id: string
+          vet_id: string | null
+        }
+        Insert: {
+          checked_in_at?: string
+          checkin_token: string
+          created_at?: string
+          id?: string
+          merchant_id?: string | null
+          user_id: string
+          vet_id?: string | null
+        }
+        Update: {
+          checked_in_at?: string
+          checkin_token?: string
+          created_at?: string
+          id?: string
+          merchant_id?: string | null
+          user_id?: string
+          vet_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "checkins_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "checkins_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "checkins_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "checkins_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       claim_payment_plans: {
         Row: {
           created_at: string | null
@@ -5499,6 +5558,7 @@ export type Database = {
           business_name: string
           business_type: string
           cashback_rate: number
+          checkin_qr_token: string | null
           contact_person: string | null
           country: string | null
           created_at: string
@@ -5549,6 +5609,7 @@ export type Database = {
           business_name: string
           business_type: string
           cashback_rate?: number
+          checkin_qr_token?: string | null
           contact_person?: string | null
           country?: string | null
           created_at?: string
@@ -5599,6 +5660,7 @@ export type Database = {
           business_name?: string
           business_type?: string
           cashback_rate?: number
+          checkin_qr_token?: string | null
           contact_person?: string | null
           country?: string | null
           created_at?: string
@@ -5943,6 +6005,7 @@ export type Database = {
           approval_status: Database["public"]["Enums"]["approval_status"]
           approved_at: string | null
           approved_by: string | null
+          checkin_qr_token: string | null
           clinic_bio: string | null
           clinic_name: string | null
           clinic_phone: string | null
@@ -5992,6 +6055,7 @@ export type Database = {
           approval_status?: Database["public"]["Enums"]["approval_status"]
           approved_at?: string | null
           approved_by?: string | null
+          checkin_qr_token?: string | null
           clinic_bio?: string | null
           clinic_name?: string | null
           clinic_phone?: string | null
@@ -6041,6 +6105,7 @@ export type Database = {
           approval_status?: Database["public"]["Enums"]["approval_status"]
           approved_at?: string | null
           approved_by?: string | null
+          checkin_qr_token?: string | null
           clinic_bio?: string | null
           clinic_name?: string | null
           clinic_phone?: string | null
@@ -12494,6 +12559,7 @@ export type Database = {
       claim_pet_fund_spot: { Args: { p_cluster_id: string }; Returns: string }
       expire_unused_pet_fund_credits: { Args: never; Returns: number }
       generate_admin_invoice_number: { Args: never; Returns: string }
+      generate_checkin_qr_token: { Args: never; Returns: string }
       generate_claim_number: { Args: never; Returns: string }
       generate_invoice_number: {
         Args: { p_merchant_id: string }
@@ -12688,6 +12754,15 @@ export type Database = {
         Returns: undefined
       }
       normalize_email: { Args: { raw_email: string }; Returns: string }
+      process_checkin: {
+        Args: { p_token: string; p_user_id: string }
+        Returns: {
+          entity_name: string
+          entity_type: string
+          message: string
+          success: boolean
+        }[]
+      }
       redeem_welcome_credit: {
         Args: {
           p_merchant_id: string

@@ -43,6 +43,7 @@ import {
   Mail,
   History,
   ClipboardCheck,
+  QrCode,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format, startOfMonth, parseISO } from "date-fns";
@@ -57,6 +58,7 @@ import { MerchantEarningsTab } from "@/components/merchant/MerchantEarningsTab";
 import { SalesReportGenerator } from "@/components/shared/SalesReportGenerator";
 import { MerchantSubscribersTab } from "@/components/merchant/MerchantSubscribersTab";
 import { MerchantDailySummaryTab } from "@/components/merchant/MerchantDailySummaryTab";
+import { CheckInDashboard } from "@/components/checkin";
 
 // Dialogs
 import { EditMerchantProfileDialog } from "@/components/merchant/EditMerchantProfileDialog";
@@ -151,6 +153,12 @@ const NAV_SECTIONS = [
         label: "Sale Confirmations",
         icon: ClipboardCheck,
         description: "Confirm PawBucks customer sales for faster reward crediting",
+      },
+      {
+        id: "checkins",
+        label: "Check-Ins",
+        icon: QrCode,
+        description: "View customer check-ins and manage your QR code",
       },
       {
         id: "subscribers",
@@ -816,6 +824,8 @@ const MerchantDashboard = () => {
         return <MerchantSubscribersTab merchantId={merchant.id} />;
       case "confirmations":
         return <MerchantSaleConfirmationsTab merchantId={merchant.id} />;
+      case "checkins":
+        return <CheckInDashboard entityId={merchant.id} entityType="merchant" entityName={merchant.business_name} />;
       case "messages":
         return <MerchantMessagesTab merchantId={merchant.id} />;
       case "support":
