@@ -11,6 +11,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { Gift, Copy, Check, Users, DollarSign } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { buildAppUrl } from "@/lib/url";
 
 type Referral = {
   id: string;
@@ -102,7 +103,7 @@ const Referrals = () => {
     }
   };
 
-  const shareUrl = `${window.location.origin}/auth?ref=${referralCode}`;
+  const shareUrl = buildAppUrl(`/auth?ref=${referralCode}`);
 
   const handleShare = async () => {
     if (navigator.share) {

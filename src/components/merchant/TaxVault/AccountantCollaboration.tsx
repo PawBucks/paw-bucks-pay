@@ -29,6 +29,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { buildAppUrl } from '@/lib/url';
 
 interface AccountantCollaborationProps {
   merchantId: string;
@@ -206,7 +207,7 @@ export function AccountantCollaboration({ merchantId, businessName }: Accountant
   });
 
   const copyPortalLink = (token: string) => {
-    const link = `${window.location.origin}/accountant-portal/${token}`;
+    const link = buildAppUrl(`/accountant-portal/${token}`);
     navigator.clipboard.writeText(link);
     toast.success('Portal link copied to clipboard');
   };

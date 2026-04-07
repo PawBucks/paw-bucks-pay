@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Gift, Copy, Check, Users } from "lucide-react";
 import { toast } from "sonner";
+import { buildAppUrl } from "@/lib/url";
 
 type Referral = {
   id: string;
@@ -87,7 +88,7 @@ const ReferralCardComponent = () => {
     }
   }, [referralCode]);
 
-  const shareUrl = `${window.location.origin}/auth?ref=${referralCode}`;
+  const shareUrl = buildAppUrl(`/auth?ref=${referralCode}`);
 
   const handleShare = useCallback(async () => {
     if (navigator.share) {

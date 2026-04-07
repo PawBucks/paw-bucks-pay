@@ -8,6 +8,7 @@ import { Invoice, InvoiceItem, InvoicePayment, InvoiceRecipient } from "@/servic
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { buildAppUrl } from "@/lib/url";
 
 interface InvoicePreviewProps {
   invoice: Invoice;
@@ -59,7 +60,7 @@ export function InvoicePreview({
 
   const copyPaymentLink = () => {
     // Use correct route: /invoice/:invoiceId/pay?token=accessToken
-    const link = `${window.location.origin}/invoice/${invoice.id}/pay?token=${invoice.access_token}`;
+    const link = buildAppUrl(`/invoice/${invoice.id}/pay?token=${invoice.access_token}`);
     navigator.clipboard.writeText(link);
     toast.success("Payment link copied to clipboard!");
   };

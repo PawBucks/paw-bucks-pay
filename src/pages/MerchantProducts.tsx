@@ -32,6 +32,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { SEO } from "@/components/SEO";
 import { Badge } from "@/components/ui/badge";
 import { merchantSubscriptionPlansService } from "@/services/api/merchantSubscriptionPlans.service";
+import { buildAppUrl } from "@/lib/url";
 
 type Product = {
   id: string;
@@ -270,7 +271,7 @@ const MerchantProducts = () => {
 
   const getStorefrontUrl = () => {
     if (!merchant?.storefront_slug) return "";
-    return `${window.location.origin}/storefront/${merchant.storefront_slug}`;
+    return buildAppUrl(`/storefront/${merchant.storefront_slug}`);
   };
 
   const handleDeleteProduct = async () => {

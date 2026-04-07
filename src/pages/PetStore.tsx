@@ -37,6 +37,7 @@ import { PullToRefresh } from "@/components/PullToRefresh";
 import { PromotionalBadge } from "@/components/pet-store/PromotionalBadge";
 import { usePromotionalItems } from "@/hooks/usePromotionalItems";
 import { getStripePromise } from "@/lib/stripe";
+import { buildAppUrl } from "@/lib/url";
 
 const CATEGORIES = ["All", "Food", "Treats", "Toys", "Bedding", "Accessories", "Healthcare", "Grooming"];
 const ITEM_TYPES = ["All", "Product", "Service"] as const;
@@ -79,7 +80,7 @@ const PetStorePaymentForm = ({
       const { error } = await stripe.confirmPayment({
         elements,
         confirmParams: {
-          return_url: `${window.location.origin}/pet-store`,
+          return_url: buildAppUrl("/pet-store"),
         },
         redirect: 'if_required',
       });

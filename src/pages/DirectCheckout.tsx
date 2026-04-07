@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { SEO } from "@/components/SEO";
 import { getStripeForConnectedAccount } from "@/lib/stripe";
+import { buildAppUrl } from "@/lib/url";
 
 interface Merchant {
   id: string;
@@ -62,7 +63,7 @@ function CheckoutForm({
       const { error: confirmError, paymentIntent } = await stripe.confirmPayment({
         elements,
         confirmParams: {
-          return_url: `${window.location.origin}/checkout-success`,
+          return_url: buildAppUrl("/checkout-success"),
         },
         redirect: 'if_required',
       });

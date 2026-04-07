@@ -27,6 +27,7 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { getStripePromise } from "@/lib/stripe";
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
+import { buildAppUrl } from "@/lib/url";
 
 interface ActionRequiredSlice {
   id: string;
@@ -84,7 +85,7 @@ function PaymentForm({
       const { error } = await stripe.confirmPayment({
         elements,
         confirmParams: {
-          return_url: `${window.location.origin}/dashboard?payment=success`,
+          return_url: buildAppUrl("/dashboard?payment=success"),
         },
         redirect: "if_required",
       });

@@ -15,6 +15,7 @@ import { SubscriptionCheckoutDialog } from "@/components/SubscriptionCheckoutDia
 import { useQuery, useQueries } from "@tanstack/react-query";
 import { merchantSubscriptionPlansService } from "@/services/api/merchantSubscriptionPlans.service";
 import { AskQuestionButton } from "@/components/storefront/AskQuestionButton";
+import { buildAppUrl } from "@/lib/url";
 
 type Product = {
   id: string;
@@ -260,8 +261,8 @@ const Storefront = memo(() => {
           priceId: product.price.id,
           quantity: 1,
           productName: product.name,
-          successUrl: `${window.location.origin}/checkout-success?store=${accountId}`,
-          cancelUrl: window.location.href,
+          successUrl: buildAppUrl(`/checkout-success?store=${accountId}`),
+          cancelUrl: buildAppUrl(`/storefront/${accountId}`),
           pawbucksToUse: isAutoRedeem ? undefined : pawbucksToUse,
         },
       });
