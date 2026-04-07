@@ -1,6 +1,7 @@
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Printer } from "lucide-react";
+import { buildAppUrl } from "@/lib/url";
 
 interface LostPetData {
   pet_name: string;
@@ -426,7 +427,7 @@ export const HighReadabilityFlyer = ({ post, shareUrl }: HighReadabilityFlyerPro
   const { toast } = useToast();
   
   const handlePrint = () => {
-    const url = shareUrl || `${window.location.origin}/lost-pets/preview`;
+    const url = shareUrl || buildAppUrl("/lost-pets/preview");
     const printWindow = window.open('', '_blank');
     
     if (!printWindow) {

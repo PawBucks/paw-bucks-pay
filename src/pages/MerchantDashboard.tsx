@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useGeocoding } from "@/hooks/useGeocoding";
 import { useMerchantActiveServices, SERVICE_NAMES } from "@/hooks/useMerchantServices";
@@ -211,12 +211,13 @@ const MerchantDashboard = () => {
   const { user, signOut, loading: authLoading } = useAuth();
   const { geocodeAddress } = useGeocoding();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [merchant, setMerchant] = useState<Merchant | null>(null);
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [allTransactions, setAllTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState(searchParams.get("tab") || "overview");
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   // Dialog states
@@ -672,10 +673,32 @@ const MerchantDashboard = () => {
     navigate("/auth");
   }, [signOut, navigate]);
 
+  useEffect(() => {
+    const tabParam = searchParams.get("tab");
+    if (!tabParam) return;
+
+    const validTab = NAV_SECTIONS.some((section) =>
+      section.items.some((item) => item.id === tabParam)
+    );
+
+    if (validTab && tabParam !== activeTab) {
+      setActiveTab(tabParam);
+    }
+  }, [activeTab, searchParams]);
+
   const handleTabChange = useCallback((tabId: string) => {
     setActiveTab(tabId);
     setMobileNavOpen(false);
-  }, []);
+
+    const nextParams = new URLSearchParams(searchParams);
+    if (tabId === "overview") {
+      nextParams.delete("tab");
+    } else {
+      nextParams.set("tab", tabId);
+    }
+
+    setSearchParams(nextParams, { replace: true });
+  }, [searchParams, setSearchParams]);
 
   const getMonthlySalesData = useMemo(() => {
     const monthlyData: { [key: string]: number } = {};

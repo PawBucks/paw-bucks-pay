@@ -55,6 +55,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Invoice } from "@/services/api/invoicing.service";
 import { cn } from "@/lib/utils";
+import { buildAppUrl } from "@/lib/url";
 
 interface InvoiceListProps {
   invoices: Invoice[];
@@ -449,7 +450,7 @@ export function InvoiceList({
                           </DropdownMenuItem>
                           {invoice.status !== 'draft' && (
                             <DropdownMenuItem onClick={() => {
-                              const shareUrl = `${window.location.origin}/invoice/${invoice.id}/pay?token=${invoice.access_token}`;
+                              const shareUrl = buildAppUrl(`/invoice/${invoice.id}/pay?token=${invoice.access_token}`);
                               navigator.clipboard.writeText(shareUrl);
                               toast.success("Share link copied to clipboard");
                             }}>

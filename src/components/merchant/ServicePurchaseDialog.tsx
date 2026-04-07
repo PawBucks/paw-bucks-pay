@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { useSharedAccount, getEffectiveWalletUserId } from "@/hooks/useSharedAccount";
 import { getStripePromise } from "@/lib/stripe";
+import { buildAppUrl } from "@/lib/url";
 
 // Merchant PawBucks conversion: 1000 PawBucks = $1.00
 const PAWBUCKS_TO_USD = 0.001;
@@ -76,7 +77,7 @@ const StripePaymentForm = ({
       const { error } = await stripe.confirmPayment({
         elements,
         confirmParams: {
-          return_url: `${window.location.origin}/merchant/market?purchase=success`,
+          return_url: buildAppUrl("/merchant/market?purchase=success"),
         },
         redirect: 'if_required',
       });

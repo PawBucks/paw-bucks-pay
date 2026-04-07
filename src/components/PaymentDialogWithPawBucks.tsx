@@ -19,6 +19,7 @@ import { useSpendablePawBucks } from "@/hooks/useSpendablePawBucks";
 import { PawBucksSourceSelector, type PawBucksSource } from "@/components/checkout/PawBucksSourceSelector";
 import { getStripeForConnectedAccount } from "@/lib/stripe";
 import { TipSelector } from "@/components/checkout/TipSelector";
+import { buildAppUrl } from "@/lib/url";
 
 // Pet Owner conversion rate: 1000 PawBucks = $1.00 (1 PawBuck = $0.001)
 const PAWBUCKS_TO_USD = 0.001;
@@ -65,7 +66,7 @@ const StripePaymentForm = ({
       const { error, paymentIntent } = await stripe.confirmPayment({
         elements,
         confirmParams: {
-          return_url: `${window.location.origin}/wallet`,
+          return_url: buildAppUrl("/wallet"),
         },
         redirect: 'if_required',
       });

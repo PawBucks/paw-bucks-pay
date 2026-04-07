@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { Loader2, CreditCard } from "lucide-react";
 import { getStripeForConnectedAccount } from "@/lib/stripe";
 import { TipSelector } from "@/components/checkout/TipSelector";
+import { buildAppUrl } from "@/lib/url";
 
 type PaymentFormProps = {
   merchantId: string;
@@ -55,7 +56,7 @@ const PaymentForm = ({
       const { error } = await stripe.confirmPayment({
         elements,
         confirmParams: {
-          return_url: `${window.location.origin}/wallet`,
+          return_url: buildAppUrl("/wallet"),
         },
         redirect: 'if_required',
       });

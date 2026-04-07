@@ -14,6 +14,7 @@ import logo from "@/assets/logo.png";
 import { useAuth } from "@/hooks/useAuth";
 import { signUpSchema, signInSchema } from "@/lib/validation";
 import { ROUTES } from "@/lib/constants";
+import { buildAppUrl } from "@/lib/url";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { BiometricLoginButton } from "@/components/BiometricLoginButton";
 import { BiometricEnrollPrompt } from "@/components/BiometricEnrollPrompt";
@@ -236,7 +237,7 @@ const Auth = () => {
         referralCode: referralCode || "",
       });
 
-      const redirectUrl = `${window.location.origin}/`;
+      const redirectUrl = buildAppUrl("/");
       
       const { data, error } = await supabase.auth.signUp({
         email: validatedData.email,
@@ -460,7 +461,7 @@ const Auth = () => {
 
     try {
       // Use our custom edge function to send password reset email with proper link
-      const redirectUrl = `${window.location.origin}/auth/callback?type=recovery`;
+      const redirectUrl = buildAppUrl("/auth/callback?type=recovery");
       
       console.log("Requesting password reset for:", trimmedEmail, "redirectTo:", redirectUrl);
       
