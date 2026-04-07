@@ -33,7 +33,7 @@ import { CustomerLoyaltyCards } from "@/components/dashboard/CustomerLoyaltyCard
 import { LoyaltyProgramDiscovery } from "@/components/dashboard/LoyaltyProgramDiscovery";
 import { WelcomeCreditCard } from "@/components/dashboard/WelcomeCreditCard";
 import { MaximusChat } from "@/components/maximus/MaximusChat";
-import { QRScannerDialog } from "@/components/checkin";
+import { QRScannerDialog, CheckInFollowupBanner } from "@/components/checkin";
 import { Store, Users, TrendingUp, Receipt, QrCode } from "lucide-react";
 
 const cardVariants = {
