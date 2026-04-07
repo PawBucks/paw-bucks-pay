@@ -404,6 +404,7 @@ const Dashboard = () => {
         <>
           <PartnerReceiptDialog open={partnerReceiptOpen} onOpenChange={setPartnerReceiptOpen} userId={user.id} />
           <NonPartnerReceiptDialog open={nonPartnerReceiptOpen} onOpenChange={setNonPartnerReceiptOpen} userId={user.id} />
+          <QRScannerDialog open={qrScannerOpen} onOpenChange={setQrScannerOpen} />
         </>
       )}
     </div>
