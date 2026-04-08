@@ -406,6 +406,9 @@ const Storefront = memo(() => {
                         {merchantBusinessType.replace(/_/g, ' ')}
                       </Badge>
                     )}
+                    {merchantIdForProducts && (
+                      <Founding50Badge entityType="merchant" entityId={merchantIdForProducts} size="md" />
+                    )}
                   </div>
                   <p className="text-muted-foreground mt-1">
                     Official Storefront
