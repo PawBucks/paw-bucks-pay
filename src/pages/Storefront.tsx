@@ -118,13 +118,14 @@ const Storefront = memo(() => {
       {
         queryKey: ["auto-redeem-preference", user?.id],
         queryFn: async () => {
-          if (!user?.id) return false;
+          if (!user?.id) return { enabled: false, mode: 'off' };
           const { data } = await supabase
             .from('profiles')
             .select('auto_redeem_mode')
             .eq('id', user.id)
             .single();
-          return data?.auto_redeem_mode !== 'off' && data?.auto_redeem_mode !== null;
+          const mode = data?.auto_redeem_mode || 'off';
+          return { enabled: mode !== 'off', mode };
         },
         staleTime: 1000 * 60 * 5,
         enabled: !!user?.id,
@@ -134,7 +135,9 @@ const Storefront = memo(() => {
 
   const merchantData = queryResults[0].data;
   const merchantLoading = queryResults[0].isLoading;
-  const autoRedeemEnabled = queryResults[1].data ?? false;
+  const autoRedeemData = queryResults[1].data ?? { enabled: false, mode: 'off' };
+  const autoRedeemEnabled = autoRedeemData.enabled;
+  const autoRedeemMode = autoRedeemData.mode;
 
   // Products query depends on merchant data - uses merchantId, stripe_account_id resolved server-side
   const merchantIdForProducts = merchantData?.id;
@@ -237,15 +240,24 @@ const Storefront = memo(() => {
     setSelectedProduct(product);
     setIsRecurringProduct(isRecurring);
 
-    // For subscriptions with auto-redeem enabled, skip the dialog and proceed directly
-    if (isRecurring && autoRedeemEnabled) {
+    // Auto-redeem: skip PawBucks dialog when enabled
+    // - "always" mode: auto-redeem on all purchases
+    // - "smart" mode: auto-redeem on all purchases (server calculates thresholds)
+    // - "subscriptions_only" mode: auto-redeem only on recurring
+    const shouldAutoRedeem = autoRedeemEnabled && (
+      autoRedeemMode === 'always' || 
+      autoRedeemMode === 'smart' || 
+      (autoRedeemMode === 'subscriptions_only' && isRecurring)
+    );
+
+    if (shouldAutoRedeem) {
       proceedToCheckout(product, 0, true);
       return;
     }
 
     // Show PawBucks dialog for user to choose how many to use
     setShowPawBucksDialog(true);
-  }, [merchantIdForProducts, user, navigate, autoRedeemEnabled]);
+  }, [merchantIdForProducts, user, navigate, autoRedeemEnabled, autoRedeemMode]);
 
   // Proceeds to Stripe checkout with optional PawBucks
   const proceedToCheckout = useCallback(async (product: Product, pawbucksToUse: number, isAutoRedeem: boolean = false) => {
@@ -263,7 +275,9 @@ const Storefront = memo(() => {
           productName: product.name,
           successUrl: buildAppUrl(`/checkout-success?store=${accountId}`),
           cancelUrl: buildAppUrl(`/storefront/${accountId}`),
-          pawbucksToUse: isAutoRedeem ? undefined : pawbucksToUse,
+          ...(isAutoRedeem 
+            ? { autoRedeem: true } 
+            : { pawbucksToUse: pawbucksToUse }),
         },
       });
 
