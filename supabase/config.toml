@@ -359,3 +359,6 @@ verify_jwt = false
 
 [functions.maximus-chat]
 verify_jwt = false
+
+[functions.clover-pos-webhook]
+verify_jwt = false
