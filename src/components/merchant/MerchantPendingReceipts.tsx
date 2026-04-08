@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { SignedReceiptImage } from "@/components/shared/SignedReceiptImage";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
