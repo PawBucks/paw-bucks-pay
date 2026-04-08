@@ -23,6 +23,7 @@ import { useMerchantActiveServices, SERVICE_NAMES, merchantHasService } from "@/
 import { useServiceConversionTracking } from "@/hooks/useServiceConversionTracking";
 import { schedulingService } from "@/services/api/scheduling.service";
 import { useQuery, useQueries } from "@tanstack/react-query";
+import { Founding50Badge } from "@/components/shared/Founding50Badge";
 import {
   Star,
   MapPin,
@@ -336,9 +337,12 @@ const MerchantProfile = memo(() => {
                         )}
                         {isSponsored && (
                           <Badge variant="secondary" className="gap-1 bg-primary/10 text-primary">
-                            <Sparkles className="w-4 h-4" />
+                         <Sparkles className="w-4 h-4" />
                             Sponsored
                           </Badge>
+                        )}
+                        {merchantId && (
+                          <Founding50Badge entityType="merchant" entityId={merchantId} size="md" />
                         )}
                       </div>
                       <p className="text-muted-foreground capitalize">
