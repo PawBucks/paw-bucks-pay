@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { GradientCard } from "@/components/ui/gradient-card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ShoppingBag, Clock, X, Receipt, DollarSign, Upload, Check, Eye, Search, Tag, Info } from "lucide-react";
+import { ShoppingBag, Clock, X, Receipt, DollarSign, Upload, Check, Eye, Search, Tag, Info, Coins } from "lucide-react";
 import { toast } from "sonner";
 import { PartnerReceiptDialog } from "@/components/receipts/PartnerReceiptDialog";
 import { NonPartnerReceiptDialog } from "@/components/receipts/NonPartnerReceiptDialog";
@@ -36,6 +36,7 @@ export const CheckInFollowupBanner = ({ userId }: CheckInFollowupBannerProps) =>
   const [respondingTo, setRespondingTo] = useState<string | null>(null);
   const [showSpendInput, setShowSpendInput] = useState<string | null>(null);
   const [spendAmount, setSpendAmount] = useState("");
+  const [pawbucksUsed, setPawbucksUsed] = useState("");
   const [showNoPurchase, setShowNoPurchase] = useState<string | null>(null);
   const [showReceiptUpload, setShowReceiptUpload] = useState(false);
   const [activeFollowupForReceipt, setActiveFollowupForReceipt] = useState<Followup | null>(null);
@@ -96,15 +97,18 @@ export const CheckInFollowupBanner = ({ userId }: CheckInFollowupBannerProps) =>
       .update({ status: "answered", response: "yes", answered_at: new Date().toISOString() })
       .eq("id", followupId);
 
+    const pbUsedAmount = pawbucksUsed ? parseInt(pawbucksUsed, 10) : 0;
+    const pbUsedLabel = pbUsedAmount > 0 ? ` | ${pbUsedAmount.toLocaleString()} PB redeemed` : "";
+
     // Issue provisional credit instantly
     const { error: creditError } = await supabase.from("pawbucks_activity").insert({
       user_id: userId,
       type: "earn",
       amount: estimatedPB,
       source: "checkin_provisional",
-      description: `Provisional credit — ${followup?.entity_name} ($${amount.toFixed(2)})`,
+      description: `Provisional credit — ${followup?.entity_name} ($${amount.toFixed(2)}${pbUsedLabel})`,
       pawbucks_status: "pending",
-      vest_date: new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString(), // 72hr admin review window
+      vest_date: new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString(),
     });
 
     if (creditError) {
@@ -120,6 +124,7 @@ export const CheckInFollowupBanner = ({ userId }: CheckInFollowupBannerProps) =>
     setFollowups((prev) => prev.filter((f) => f.id !== followupId));
     setShowSpendInput(null);
     setSpendAmount("");
+    setPawbucksUsed("");
     setSubmitting(false);
 
     toast.success(`🎉 +${estimatedPB.toLocaleString()} PawBucks credited provisionally!`);
@@ -260,6 +265,19 @@ export const CheckInFollowupBanner = ({ userId }: CheckInFollowupBannerProps) =>
                   autoFocus
                 />
               </div>
+              <Label className="text-sm font-medium">How many PawBucks did you use?</Label>
+              <div className="relative">
+                <Coins className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  type="number"
+                  step="1"
+                  min="0"
+                  placeholder="0 (optional)"
+                  value={pawbucksUsed}
+                  onChange={(e) => setPawbucksUsed(e.target.value)}
+                  className="pl-8"
+                />
+              </div>
               {estimatedPB > 0 && (
                 <div className="bg-primary/10 rounded-lg px-3 py-2 flex items-center justify-between">
                   <span className="text-xs text-muted-foreground">Estimated PawBucks ({getTierLabel()} • {getPBPerDollar()} PB/$1)</span>
@@ -273,6 +291,7 @@ export const CheckInFollowupBanner = ({ userId }: CheckInFollowupBannerProps) =>
                   onClick={() => {
                     setShowSpendInput(null);
                     setSpendAmount("");
+                    setPawbucksUsed("");
                   }}
                 >
                   Cancel
