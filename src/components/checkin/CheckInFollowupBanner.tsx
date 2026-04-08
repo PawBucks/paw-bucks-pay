@@ -204,31 +204,18 @@ export const CheckInFollowupBanner = ({ userId }: CheckInFollowupBannerProps) =>
                 +{creditedFollowup.pawbucks.toLocaleString()} PawBucks credited! 🎉
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                Provisional credit for ${creditedFollowup.amount.toFixed(2)} • Admin will verify within 72 hours
+                Provisional credit for ${creditedFollowup.amount.toFixed(2)} • Receipt required to verify
               </p>
             </div>
           </div>
-          <div className="flex gap-2">
-            <Button
-              size="sm"
-              onClick={() => setShowReceiptUpload(true)}
-              className="flex-1"
-            >
-              <Upload className="w-3.5 h-3.5 mr-1" />
-              Upload Receipt (Recommended)
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => {
-                setCreditedFollowup(null);
-                setActiveFollowupForReceipt(null);
-              }}
-              className="flex-1"
-            >
-              Skip for Now
-            </Button>
-          </div>
+          <Button
+            size="sm"
+            onClick={() => setShowReceiptUpload(true)}
+            className="w-full"
+          >
+            <Upload className="w-3.5 h-3.5 mr-1" />
+            Upload Receipt
+          </Button>
         </GradientCard>
       )}
 
