@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,6 +15,7 @@ export default function CheckInPage() {
   const token = searchParams.get("token");
   const [processing, setProcessing] = useState(false);
   const [result, setResult] = useState<{ success: boolean; entityName: string | null; message: string } | null>(null);
+  const checkinAttempted = useRef(false);
 
   useEffect(() => {
     if (authLoading) return;
@@ -32,6 +33,8 @@ export default function CheckInPage() {
 
     // Process check-in
     const doCheckin = async () => {
+      if (checkinAttempted.current) return;
+      checkinAttempted.current = true;
       setProcessing(true);
       try {
         const { data, error } = await supabase.rpc("process_checkin", {
