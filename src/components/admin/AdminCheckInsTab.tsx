@@ -104,16 +104,9 @@ export function AdminCheckInsTab() {
       const merchantMap = new Map((merchantsRes.data || []).map(m => [m.id, m.business_name]));
       const vetMap = new Map((vetsRes.data || []).map(v => [v.id, v.clinic_name]));
 
-      // Get emails via auth lookup (admin RPC)
-      let emailMap = new Map<string, string>();
-      try {
-        const { data: emailData } = await supabase.rpc("admin_get_user_emails", { p_user_ids: userIds });
-        if (emailData) {
-          emailMap = new Map((emailData as any[]).map((e: any) => [e.user_id, e.email]));
-        }
-      } catch {
-        // Fallback: no emails
-      }
+      // For admin, emails aren't directly available from profiles
+      // We'll show what we have from profiles (name, phone)
+      const emailMap = new Map<string, string>();
 
       const enriched: AdminCheckIn[] = data.map(c => ({
         ...c,
