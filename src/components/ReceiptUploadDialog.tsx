@@ -188,9 +188,6 @@ export const ReceiptUploadDialog = ({ open, onOpenChange, userId }: ReceiptUploa
 
       if (uploadError) throw uploadError;
 
-      const { data: urlData } = supabase.storage
-        .from("receipts")
-        .getPublicUrl(fileName);
 
       // Get merchant name for partner submissions
       let finalMerchantName = merchantName.trim();
