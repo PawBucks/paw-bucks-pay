@@ -12646,6 +12646,7 @@ export type Database = {
           reason: string
         }[]
       }
+      checkin_date: { Args: { ts: string }; Returns: string }
       claim_pet_fund_spot: { Args: { p_cluster_id: string }; Returns: string }
       expire_unused_pet_fund_credits: { Args: never; Returns: number }
       generate_admin_invoice_number: { Args: never; Returns: string }
