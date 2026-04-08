@@ -160,6 +160,12 @@ const NAV_SECTIONS = [
     title: "Operations",
     items: [
       {
+        id: "checkins",
+        label: "Check-Ins",
+        icon: MapPin,
+        description: "View all pet owner check-ins across merchants and vets",
+      },
+      {
         id: "receipts",
         label: "Receipt Verification",
         icon: Receipt,
