@@ -275,7 +275,9 @@ const Storefront = memo(() => {
           productName: product.name,
           successUrl: buildAppUrl(`/checkout-success?store=${accountId}`),
           cancelUrl: buildAppUrl(`/storefront/${accountId}`),
-          pawbucksToUse: isAutoRedeem ? undefined : pawbucksToUse,
+          ...(isAutoRedeem 
+            ? { autoRedeem: true } 
+            : { pawbucksToUse: pawbucksToUse }),
         },
       });
 
