@@ -240,15 +240,24 @@ const Storefront = memo(() => {
     setSelectedProduct(product);
     setIsRecurringProduct(isRecurring);
 
-    // For subscriptions with auto-redeem enabled, skip the dialog and proceed directly
-    if (isRecurring && autoRedeemEnabled) {
+    // Auto-redeem: skip PawBucks dialog when enabled
+    // - "always" mode: auto-redeem on all purchases
+    // - "smart" mode: auto-redeem on all purchases (server calculates thresholds)
+    // - "subscriptions_only" mode: auto-redeem only on recurring
+    const shouldAutoRedeem = autoRedeemEnabled && (
+      autoRedeemMode === 'always' || 
+      autoRedeemMode === 'smart' || 
+      (autoRedeemMode === 'subscriptions_only' && isRecurring)
+    );
+
+    if (shouldAutoRedeem) {
       proceedToCheckout(product, 0, true);
       return;
     }
 
     // Show PawBucks dialog for user to choose how many to use
     setShowPawBucksDialog(true);
-  }, [merchantIdForProducts, user, navigate, autoRedeemEnabled]);
+  }, [merchantIdForProducts, user, navigate, autoRedeemEnabled, autoRedeemMode]);
 
   // Proceeds to Stripe checkout with optional PawBucks
   const proceedToCheckout = useCallback(async (product: Product, pawbucksToUse: number, isAutoRedeem: boolean = false) => {
