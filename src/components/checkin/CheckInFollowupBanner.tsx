@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { PartnerReceiptDialog } from "@/components/receipts/PartnerReceiptDialog";
 import { NonPartnerReceiptDialog } from "@/components/receipts/NonPartnerReceiptDialog";
 import { useSubscription } from "@/hooks/useSubscription";
-import { getSubscriptionTier } from "@/utils/subscriptionUtils";
+import { getSubscriptionTier } from "@/lib/constants";
 
 interface Followup {
   id: string;
