@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { GradientCard } from "@/components/ui/gradient-card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ShoppingBag, Clock, X, Receipt, DollarSign, Upload, Check, Eye, Search, Tag, Info } from "lucide-react";
+import { ShoppingBag, Clock, X, Receipt, DollarSign, Upload, Check, Eye, Search, Tag, Info, Coins } from "lucide-react";
 import { toast } from "sonner";
 import { PartnerReceiptDialog } from "@/components/receipts/PartnerReceiptDialog";
 import { NonPartnerReceiptDialog } from "@/components/receipts/NonPartnerReceiptDialog";
