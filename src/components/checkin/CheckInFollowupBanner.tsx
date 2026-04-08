@@ -265,6 +265,19 @@ export const CheckInFollowupBanner = ({ userId }: CheckInFollowupBannerProps) =>
                   autoFocus
                 />
               </div>
+              <Label className="text-sm font-medium">How many PawBucks did you use?</Label>
+              <div className="relative">
+                <Coins className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  type="number"
+                  step="1"
+                  min="0"
+                  placeholder="0 (optional)"
+                  value={pawbucksUsed}
+                  onChange={(e) => setPawbucksUsed(e.target.value)}
+                  className="pl-8"
+                />
+              </div>
               {estimatedPB > 0 && (
                 <div className="bg-primary/10 rounded-lg px-3 py-2 flex items-center justify-between">
                   <span className="text-xs text-muted-foreground">Estimated PawBucks ({getTierLabel()} • {getPBPerDollar()} PB/$1)</span>
