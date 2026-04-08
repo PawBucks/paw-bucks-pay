@@ -15,6 +15,7 @@ export default function CheckInPage() {
   const token = searchParams.get("token");
   const [processing, setProcessing] = useState(false);
   const [result, setResult] = useState<{ success: boolean; entityName: string | null; message: string } | null>(null);
+  const checkinAttempted = useRef(false);
 
   useEffect(() => {
     if (authLoading) return;
