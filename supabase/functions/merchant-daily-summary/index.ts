@@ -106,8 +106,8 @@ serve(async (req: Request) => {
     for (const merchant of merchants) {
       try {
         // Get today's completed transactions for this merchant
-        const startOfDay = `${todayEST}T00:00:00-05:00`;
-        const endOfDay = `${todayEST}T23:59:59-05:00`;
+        const startOfDay = `${todayEST}T00:00:00${offsetStr}`;
+        const endOfDay = `${todayEST}T23:59:59${offsetStr}`;
 
         const { data: transactions, error: txError } = await supabase
           .from("transactions")
