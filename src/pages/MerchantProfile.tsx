@@ -337,9 +337,12 @@ const MerchantProfile = memo(() => {
                         )}
                         {isSponsored && (
                           <Badge variant="secondary" className="gap-1 bg-primary/10 text-primary">
-                            <Sparkles className="w-4 h-4" />
+                         <Sparkles className="w-4 h-4" />
                             Sponsored
                           </Badge>
+                        )}
+                        {merchantId && (
+                          <Founding50Badge entityType="merchant" entityId={merchantId} size="md" />
                         )}
                       </div>
                       <p className="text-muted-foreground capitalize">
