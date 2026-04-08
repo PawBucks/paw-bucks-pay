@@ -133,7 +133,6 @@ export const PartnerReceiptDialog = ({ open, onOpenChange, userId }: PartnerRece
       const { error: uploadError } = await supabase.storage.from("receipts").upload(fileName, receiptImage);
       if (uploadError) throw uploadError;
 
-      const { data: urlData } = supabase.storage.from("receipts").getPublicUrl(fileName);
       const selected = platformMerchants.find((m) => m.id === selectedMerchantId);
       const merchantName = selected?.business_name || "Platform Merchant";
       const amount = parseFloat(purchaseAmount);
@@ -141,7 +140,7 @@ export const PartnerReceiptDialog = ({ open, onOpenChange, userId }: PartnerRece
 
       const { error: insertError } = await supabase.from("receipt_submissions").insert({
         user_id: userId,
-        receipt_image_url: urlData.publicUrl,
+        receipt_image_url: fileName,
         purchase_amount: amount,
         merchant_name: merchantName,
         receipt_date: format(receiptDate, "yyyy-MM-dd"),

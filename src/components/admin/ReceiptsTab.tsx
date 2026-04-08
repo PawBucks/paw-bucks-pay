@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { SignedReceiptImage } from "@/components/shared/SignedReceiptImage";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -388,7 +389,7 @@ export const ReceiptsTab = () => {
           {selectedReceipt && (
             <div className="space-y-4">
               <div className="aspect-[3/4] max-h-[400px] overflow-hidden rounded-lg border bg-muted">
-                <img src={selectedReceipt.receipt_image_url} alt="Receipt" className="w-full h-full object-contain" />
+                <SignedReceiptImage receiptPath={selectedReceipt.receipt_image_url} />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>

@@ -127,12 +127,11 @@ export const NonPartnerReceiptDialog = ({ open, onOpenChange, userId }: NonPartn
       const { error: uploadError } = await supabase.storage.from("receipts").upload(fileName, receiptImage);
       if (uploadError) throw uploadError;
 
-      const { data: urlData } = supabase.storage.from("receipts").getPublicUrl(fileName);
       const estimatedPB = Math.round(amount * PB_PER_DOLLAR);
 
       const { error: insertError } = await supabase.from("receipt_submissions").insert({
         user_id: userId,
-        receipt_image_url: urlData.publicUrl,
+        receipt_image_url: fileName,
         purchase_amount: amount,
         merchant_name: merchantName.trim(),
         receipt_date: format(receiptDate, "yyyy-MM-dd"),
