@@ -47,7 +47,7 @@ serve(async (req: Request) => {
       // No body or invalid JSON — run for all merchants (cron mode)
     }
 
-    // Calculate "today" in EST (America/New_York)
+    // Calculate "today" in Eastern Time (America/New_York) with correct offset
     const now = new Date();
     const estFormatter = new Intl.DateTimeFormat("en-CA", {
       timeZone: "America/New_York",
@@ -56,6 +56,18 @@ serve(async (req: Request) => {
       day: "2-digit",
     });
     const todayEST = estFormatter.format(now); // YYYY-MM-DD
+
+    // Dynamically determine the correct UTC offset for America/New_York (EST=-05, EDT=-04)
+    const offsetFormatter = new Intl.DateTimeFormat("en-US", {
+      timeZone: "America/New_York",
+      timeZoneName: "shortOffset",
+    });
+    const offsetParts = offsetFormatter.formatToParts(now);
+    const tzPart = offsetParts.find((p) => p.type === "timeZoneName")?.value || "GMT-5";
+    // tzPart is like "GMT-5" or "GMT-4"; convert to "-05:00" or "-04:00"
+    const offsetMatch = tzPart.match(/GMT([+-]?\d+)/);
+    const offsetHours = offsetMatch ? parseInt(offsetMatch[1], 10) : -5;
+    const offsetStr = `${offsetHours < 0 ? "-" : "+"}${String(Math.abs(offsetHours)).padStart(2, "0")}:00`;
 
     console.log(`[Daily Summary] Running for date: ${todayEST}${singleMerchantId ? ` (merchant: ${singleMerchantId})` : " (all merchants)"}`);
 
@@ -94,8 +106,8 @@ serve(async (req: Request) => {
     for (const merchant of merchants) {
       try {
         // Get today's completed transactions for this merchant
-        const startOfDay = `${todayEST}T00:00:00-05:00`;
-        const endOfDay = `${todayEST}T23:59:59-05:00`;
+        const startOfDay = `${todayEST}T00:00:00${offsetStr}`;
+        const endOfDay = `${todayEST}T23:59:59${offsetStr}`;
 
         const { data: transactions, error: txError } = await supabase
           .from("transactions")
