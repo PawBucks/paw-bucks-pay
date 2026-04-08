@@ -135,7 +135,9 @@ const Storefront = memo(() => {
 
   const merchantData = queryResults[0].data;
   const merchantLoading = queryResults[0].isLoading;
-  const autoRedeemEnabled = queryResults[1].data ?? false;
+  const autoRedeemData = queryResults[1].data ?? { enabled: false, mode: 'off' };
+  const autoRedeemEnabled = autoRedeemData.enabled;
+  const autoRedeemMode = autoRedeemData.mode;
 
   // Products query depends on merchant data - uses merchantId, stripe_account_id resolved server-side
   const merchantIdForProducts = merchantData?.id;
