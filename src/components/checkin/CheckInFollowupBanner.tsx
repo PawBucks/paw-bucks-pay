@@ -124,6 +124,7 @@ export const CheckInFollowupBanner = ({ userId }: CheckInFollowupBannerProps) =>
     setFollowups((prev) => prev.filter((f) => f.id !== followupId));
     setShowSpendInput(null);
     setSpendAmount("");
+    setPawbucksUsed("");
     setSubmitting(false);
 
     toast.success(`🎉 +${estimatedPB.toLocaleString()} PawBucks credited provisionally!`);
