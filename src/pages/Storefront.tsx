@@ -16,6 +16,7 @@ import { useQuery, useQueries } from "@tanstack/react-query";
 import { merchantSubscriptionPlansService } from "@/services/api/merchantSubscriptionPlans.service";
 import { AskQuestionButton } from "@/components/storefront/AskQuestionButton";
 import { buildAppUrl } from "@/lib/url";
+import { Founding50Badge } from "@/components/shared/Founding50Badge";
 
 type Product = {
   id: string;
