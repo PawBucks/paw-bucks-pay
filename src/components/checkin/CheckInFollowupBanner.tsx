@@ -36,6 +36,7 @@ export const CheckInFollowupBanner = ({ userId }: CheckInFollowupBannerProps) =>
   const [respondingTo, setRespondingTo] = useState<string | null>(null);
   const [showSpendInput, setShowSpendInput] = useState<string | null>(null);
   const [spendAmount, setSpendAmount] = useState("");
+  const [pawbucksUsed, setPawbucksUsed] = useState("");
   const [showNoPurchase, setShowNoPurchase] = useState<string | null>(null);
   const [showReceiptUpload, setShowReceiptUpload] = useState(false);
   const [activeFollowupForReceipt, setActiveFollowupForReceipt] = useState<Followup | null>(null);
