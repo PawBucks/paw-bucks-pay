@@ -194,6 +194,7 @@ serve(async (req) => {
       const availablePawBucks = pawbucksWallet?.balance || 0;
 
       if (hasManualPawBucks) {
+        // Manual PawBucks selection
         pawbucksUsed = Math.min(manualPawbucksToUse, availablePawBucks);
         pawbucksUsdValue = pawbucksUsed / PAWBUCKS_TO_USD;
         
@@ -204,12 +205,67 @@ serve(async (req) => {
         
         finalStripeAmountCents = Math.round((totalAmountDollars - pawbucksUsdValue) * 100);
         
-        logStep('PawBucks applied', {
+        logStep('PawBucks applied (manual)', {
           requested: manualPawbucksToUse,
           applied: pawbucksUsed,
           usdValue: `$${pawbucksUsdValue.toFixed(2)}`,
           remainingStripe: `$${(finalStripeAmountCents / 100).toFixed(2)}`,
         });
+      } else if (requestAutoRedeem && availablePawBucks > 0) {
+        // Auto-redeem: look up user's preferences from profile
+        const { data: profile } = await supabaseAdmin
+          .from('profiles')
+          .select('auto_redeem_mode, auto_redeem_min_coverage_pct, auto_redeem_max_apply_pct')
+          .eq('id', user.id)
+          .single();
+
+        const autoRedeemMode = profile?.auto_redeem_mode || 'off';
+        const minCoveragePct = profile?.auto_redeem_min_coverage_pct ?? 20;
+        const maxApplyPct = profile?.auto_redeem_max_apply_pct ?? 50;
+
+        logStep('Auto-redeem check', { autoRedeemMode, minCoveragePct, maxApplyPct, availablePawBucks, isRecurringPrice });
+
+        let shouldAutoRedeem = false;
+        let maxPawBucksToApply = availablePawBucks;
+
+        if (autoRedeemMode === 'always') {
+          shouldAutoRedeem = true;
+        } else if (autoRedeemMode === 'subscriptions_only') {
+          // Only auto-redeem for recurring/subscription purchases
+          shouldAutoRedeem = isRecurringPrice;
+        } else if (autoRedeemMode === 'smart') {
+          // Smart mode: check coverage thresholds
+          const availableUsd = availablePawBucks / PAWBUCKS_TO_USD;
+          const coveragePct = (availableUsd / totalAmountDollars) * 100;
+
+          if (coveragePct >= minCoveragePct) {
+            shouldAutoRedeem = true;
+            // Cap at maxApplyPct of purchase value
+            const maxUsd = totalAmountDollars * (maxApplyPct / 100);
+            maxPawBucksToApply = Math.min(availablePawBucks, Math.floor(maxUsd * PAWBUCKS_TO_USD));
+          }
+
+          logStep('Smart auto-redeem evaluation', { coveragePct: coveragePct.toFixed(1), minCoveragePct, maxApplyPct, shouldAutoRedeem });
+        }
+
+        if (shouldAutoRedeem && maxPawBucksToApply > 0) {
+          pawbucksUsed = maxPawBucksToApply;
+          pawbucksUsdValue = pawbucksUsed / PAWBUCKS_TO_USD;
+
+          if (pawbucksUsdValue > totalAmountDollars) {
+            pawbucksUsdValue = totalAmountDollars;
+            pawbucksUsed = Math.floor(pawbucksUsdValue * PAWBUCKS_TO_USD);
+          }
+
+          finalStripeAmountCents = Math.round((totalAmountDollars - pawbucksUsdValue) * 100);
+
+          logStep('PawBucks applied (auto-redeem)', {
+            mode: autoRedeemMode,
+            applied: pawbucksUsed,
+            usdValue: `$${pawbucksUsdValue.toFixed(2)}`,
+            remainingStripe: `$${(finalStripeAmountCents / 100).toFixed(2)}`,
+          });
+        }
       }
     }
 
