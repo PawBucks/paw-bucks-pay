@@ -2009,6 +2009,33 @@ export type Database = {
           },
         ]
       }
+      founding_50_badges: {
+        Row: {
+          awarded_at: string
+          badge_number: number
+          entity_id: string
+          entity_type: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          awarded_at?: string
+          badge_number: number
+          entity_id: string
+          entity_type: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          awarded_at?: string
+          badge_number?: number
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       funding_deals: {
         Row: {
           amount_funded: number
