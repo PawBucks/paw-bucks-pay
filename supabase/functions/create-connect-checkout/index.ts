@@ -67,7 +67,8 @@ serve(async (req) => {
       successUrl, 
       cancelUrl, 
       productName, 
-      pawbucksToUse: manualPawbucksToUse 
+      pawbucksToUse: manualPawbucksToUse,
+      autoRedeem: requestAutoRedeem,
     } = body;
 
     // Create admin client for secure lookups
