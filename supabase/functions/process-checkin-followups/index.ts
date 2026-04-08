@@ -56,8 +56,8 @@ Deno.serve(async (req) => {
         .gte("created_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
         .limit(1);
 
-      if (recentTx && recentTx.length > 0) {
-        // Purchase found — mark as answered automatically
+      if ((recentTx && recentTx.length > 0) || (provisionalCredit && provisionalCredit.length > 0)) {
+        // Purchase or provisional credit found — mark as answered automatically
         await supabase
           .from("checkin_followups")
           .update({ status: "answered", response: "yes", answered_at: new Date().toISOString() })
