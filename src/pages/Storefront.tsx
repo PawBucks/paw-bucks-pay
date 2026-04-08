@@ -118,13 +118,14 @@ const Storefront = memo(() => {
       {
         queryKey: ["auto-redeem-preference", user?.id],
         queryFn: async () => {
-          if (!user?.id) return false;
+          if (!user?.id) return { enabled: false, mode: 'off' };
           const { data } = await supabase
             .from('profiles')
             .select('auto_redeem_mode')
             .eq('id', user.id)
             .single();
-          return data?.auto_redeem_mode !== 'off' && data?.auto_redeem_mode !== null;
+          const mode = data?.auto_redeem_mode || 'off';
+          return { enabled: mode !== 'off', mode };
         },
         staleTime: 1000 * 60 * 5,
         enabled: !!user?.id,
