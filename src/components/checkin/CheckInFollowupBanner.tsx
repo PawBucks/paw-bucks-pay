@@ -97,15 +97,18 @@ export const CheckInFollowupBanner = ({ userId }: CheckInFollowupBannerProps) =>
       .update({ status: "answered", response: "yes", answered_at: new Date().toISOString() })
       .eq("id", followupId);
 
+    const pbUsedAmount = pawbucksUsed ? parseInt(pawbucksUsed, 10) : 0;
+    const pbUsedLabel = pbUsedAmount > 0 ? ` | ${pbUsedAmount.toLocaleString()} PB redeemed` : "";
+
     // Issue provisional credit instantly
     const { error: creditError } = await supabase.from("pawbucks_activity").insert({
       user_id: userId,
       type: "earn",
       amount: estimatedPB,
       source: "checkin_provisional",
-      description: `Provisional credit — ${followup?.entity_name} ($${amount.toFixed(2)})`,
+      description: `Provisional credit — ${followup?.entity_name} ($${amount.toFixed(2)}${pbUsedLabel})`,
       pawbucks_status: "pending",
-      vest_date: new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString(), // 72hr admin review window
+      vest_date: new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString(),
     });
 
     if (creditError) {
