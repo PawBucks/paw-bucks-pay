@@ -291,6 +291,7 @@ export const CheckInFollowupBanner = ({ userId }: CheckInFollowupBannerProps) =>
                   onClick={() => {
                     setShowSpendInput(null);
                     setSpendAmount("");
+                    setPawbucksUsed("");
                   }}
                 >
                   Cancel
