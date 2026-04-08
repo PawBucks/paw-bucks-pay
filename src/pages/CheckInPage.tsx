@@ -33,6 +33,8 @@ export default function CheckInPage() {
 
     // Process check-in
     const doCheckin = async () => {
+      if (checkinAttempted.current) return;
+      checkinAttempted.current = true;
       setProcessing(true);
       try {
         const { data, error } = await supabase.rpc("process_checkin", {
