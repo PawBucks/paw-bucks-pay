@@ -86,11 +86,7 @@ export function ExpenseEntryDialog({ open, onOpenChange, merchantId, onExpenseAd
 
         if (uploadError) throw uploadError;
 
-        const { data: urlData } = supabase.storage
-          .from('receipts')
-          .getPublicUrl(fileName);
-        
-        receiptUrl = urlData.publicUrl;
+        receiptUrl = fileName;
       }
 
       const { error } = await supabase

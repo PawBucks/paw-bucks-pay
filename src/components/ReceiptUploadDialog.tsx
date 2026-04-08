@@ -207,7 +207,7 @@ export const ReceiptUploadDialog = ({ open, onOpenChange, userId }: ReceiptUploa
         .from("receipt_submissions")
         .insert({
           user_id: userId,
-          receipt_image_url: urlData.publicUrl,
+          receipt_image_url: fileName,
           purchase_amount: amount,
           merchant_name: finalMerchantName,
           receipt_date: format(receiptDate, "yyyy-MM-dd"),
