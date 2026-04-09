@@ -36,6 +36,7 @@ interface Notification {
   category: string;
   is_read: boolean;
   created_at: string;
+  link_url: string | null;
 }
 const CATEGORIES = [
   { value: "all", label: "All Categories" },
