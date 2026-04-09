@@ -42,6 +42,7 @@ export const CheckInFollowupBanner = ({ userId }: CheckInFollowupBannerProps) =>
   const [activeFollowupForReceipt, setActiveFollowupForReceipt] = useState<Followup | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [creditedFollowup, setCreditedFollowup] = useState<{ id: string; amount: number; pawbucks: number } | null>(null);
+  const [receiptUploaded, setReceiptUploaded] = useState(false);
   const { subscription } = useSubscription();
 
   const currentTier = getSubscriptionTier(subscription.product_id, subscription.subscription_tier);
@@ -194,27 +195,58 @@ export const CheckInFollowupBanner = ({ userId }: CheckInFollowupBannerProps) =>
 
   return (
     <>
-      {/* Post-credit receipt prompt */}
-      {creditedFollowup && !showReceiptUpload && (
-        <GradientCard className="p-4 space-y-3">
-          <div className="flex items-start gap-3">
-            <Check className="w-5 h-5 text-primary mt-0.5 shrink-0" />
-            <div className="flex-1">
-              <p className="text-sm font-semibold text-primary">
-                +{creditedFollowup.pawbucks.toLocaleString()} PawBucks credited! 🎉
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Provisional credit for ${creditedFollowup.amount.toFixed(2)} • Receipt required to verify
-              </p>
-            </div>
+      {/* Post-credit reward screen */}
+      {creditedFollowup && !showReceiptUpload && !receiptUploaded && (
+        <GradientCard className="p-6 space-y-4 text-center">
+          <div className="text-4xl">🎉</div>
+          <div>
+            <p className="text-lg font-bold text-primary">
+              You've earned +{creditedFollowup.pawbucks.toLocaleString()} PawBucks!
+            </p>
+            <p className="text-sm text-muted-foreground mt-2">
+              👉 Upload your receipt to unlock it
+            </p>
           </div>
           <Button
-            size="sm"
             onClick={() => setShowReceiptUpload(true)}
             className="w-full"
           >
-            <Upload className="w-3.5 h-3.5 mr-1" />
-            Upload Receipt
+            <Upload className="w-4 h-4 mr-2" />
+            Upload Receipt (Takes 5 seconds)
+          </Button>
+          <p className="text-xs text-muted-foreground">
+            Pending: +{creditedFollowup.pawbucks.toLocaleString()} PB
+          </p>
+        </GradientCard>
+      )}
+
+      {/* Post-upload confirmation */}
+      {receiptUploaded && (
+        <GradientCard className="p-6 space-y-3 text-center">
+          <div className="text-4xl">✅</div>
+          <div>
+            <p className="text-lg font-bold">You're all set!</p>
+            <p className="text-sm text-muted-foreground mt-2">
+              Your PawBucks will be approved within 24–48 hours
+            </p>
+          </div>
+          {creditedFollowup && (
+            <div className="bg-primary/10 rounded-lg px-4 py-2">
+              <span className="text-sm font-semibold text-primary">
+                Pending: +{creditedFollowup.pawbucks.toLocaleString()} PawBucks
+              </span>
+            </div>
+          )}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setReceiptUploaded(false);
+              setCreditedFollowup(null);
+            }}
+            className="w-full"
+          >
+            Done
           </Button>
         </GradientCard>
       )}
