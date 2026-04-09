@@ -85,7 +85,69 @@ Deno.serve(async (req) => {
       processed++;
     }
 
-    return new Response(JSON.stringify({ processed }), {
+    // --- 24-hour receipt reminder for answered "yes" followups ---
+    let reminders = 0;
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const fortyEightHoursAgo = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
+
+    // Find followups answered "yes" 24-48h ago that have provisional credit but no receipt
+    const { data: unverifiedFollowups } = await supabase
+      .from("checkin_followups")
+      .select("id, user_id, entity_name")
+      .eq("status", "answered")
+      .eq("response", "yes")
+      .lte("answered_at", twentyFourHoursAgo)
+      .gte("answered_at", fortyEightHoursAgo);
+
+    if (unverifiedFollowups && unverifiedFollowups.length > 0) {
+      for (const fu of unverifiedFollowups) {
+        // Check if a receipt was already submitted for this user in the last 48h
+        const { data: receipts } = await supabase
+          .from("receipt_submissions")
+          .select("id")
+          .eq("user_id", fu.user_id)
+          .gte("created_at", fortyEightHoursAgo)
+          .limit(1);
+
+        if (receipts && receipts.length > 0) continue;
+
+        // Check if we already sent a receipt reminder for this followup
+        const { data: existingReminder } = await supabase
+          .from("notifications")
+          .select("id")
+          .eq("user_id", fu.user_id)
+          .like("title", "%receipt to unlock%")
+          .gte("created_at", fortyEightHoursAgo)
+          .limit(1);
+
+        if (existingReminder && existingReminder.length > 0) continue;
+
+        // Get the provisional PB amount
+        const { data: provisionalPB } = await supabase
+          .from("pawbucks_activity")
+          .select("amount")
+          .eq("user_id", fu.user_id)
+          .eq("source", "checkin_provisional")
+          .eq("pawbucks_status", "pending")
+          .gte("created_at", fortyEightHoursAgo)
+          .limit(1)
+          .single();
+
+        const pbAmount = provisionalPB?.amount ?? 0;
+
+        await supabase.from("notifications").insert({
+          user_id: fu.user_id,
+          title: `Upload your receipt to unlock +${pbAmount.toLocaleString()} PawBucks`,
+          message: `You've got ${pbAmount.toLocaleString()} PawBucks waiting from ${fu.entity_name} — upload your receipt to unlock it before it expires.`,
+          category: "transactional",
+          link_url: "/dashboard",
+        });
+
+        reminders++;
+      }
+    }
+
+    return new Response(JSON.stringify({ processed, reminders }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
