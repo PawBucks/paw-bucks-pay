@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Search, Users, Calendar, MapPin, Clock, ChevronLeft, ChevronRight, User, Store } from "lucide-react";
-import { format, subMonths, startOfDay, endOfDay, startOfMonth, endOfMonth } from "date-fns";
+import { format, parse, subMonths, startOfDay, endOfDay, startOfMonth, endOfMonth } from "date-fns";
 import { toast } from "sonner";
 
 type AdminCheckIn = {
@@ -40,6 +40,9 @@ type AdminCheckIn = {
 
 const PAGE_SIZE = 50;
 
+const parseSelectedMonth = (selectedMonth: string) =>
+  parse(`${selectedMonth}-01`, "yyyy-MM-dd", new Date());
+
 export function AdminCheckInsTab() {
   const [checkins, setCheckins] = useState<AdminCheckIn[]>([]);
   const [loading, setLoading] = useState(true);
@@ -54,7 +57,7 @@ export function AdminCheckInsTab() {
   const loadCheckins = useCallback(async () => {
     setLoading(true);
     try {
-      const monthDate = new Date(selectedMonth + "-01");
+      const monthDate = parseSelectedMonth(selectedMonth);
       const rangeStart = startOfMonth(monthDate).toISOString();
       const rangeEnd = endOfMonth(monthDate).toISOString();
 
@@ -134,6 +137,7 @@ export function AdminCheckInsTab() {
   const loadStats = useCallback(async () => {
     try {
       const today = new Date();
+      const monthDate = parseSelectedMonth(selectedMonth);
       const [todayRes, monthRes] = await Promise.all([
         supabase
           .from("checkins")
@@ -143,8 +147,8 @@ export function AdminCheckInsTab() {
         supabase
           .from("checkins")
           .select("id", { count: "exact", head: true })
-          .gte("checked_in_at", startOfMonth(new Date(selectedMonth + "-01")).toISOString())
-          .lte("checked_in_at", endOfMonth(new Date(selectedMonth + "-01")).toISOString()),
+          .gte("checked_in_at", startOfMonth(monthDate).toISOString())
+          .lte("checked_in_at", endOfMonth(monthDate).toISOString()),
       ]);
       setTodayCount(todayRes.count || 0);
       setMonthCount(monthRes.count || 0);
