@@ -191,7 +191,7 @@ export const CheckInFollowupBanner = ({ userId }: CheckInFollowupBannerProps) =>
 
   const estimatedPB = spendAmount ? Math.floor(parseFloat(spendAmount || "0") * getPBPerDollar()) : 0;
 
-  if (followups.length === 0 && !showReceiptUpload && !creditedFollowup) return null;
+  if (followups.length === 0 && !showReceiptUpload && !creditedFollowup && !receiptUploaded) return null;
 
   return (
     <>
