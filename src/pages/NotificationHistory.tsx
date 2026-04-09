@@ -36,6 +36,7 @@ interface Notification {
   category: string;
   is_read: boolean;
   created_at: string;
+  link_url: string | null;
 }
 const CATEGORIES = [
   { value: "all", label: "All Categories" },
@@ -153,9 +154,14 @@ export default function NotificationHistory() {
   };
 
   const handleNotificationClick = async (notification: Notification) => {
-    setSelectedNotification(notification);
     if (!notification.is_read) {
       await handleMarkAsRead(notification.id);
+    }
+    // If notification has a link, navigate to it
+    if (notification.link_url) {
+      navigate(notification.link_url);
+    } else {
+      setSelectedNotification(notification);
     }
   };
 
