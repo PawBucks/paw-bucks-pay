@@ -73,6 +73,7 @@ Deno.serve(async (req) => {
         title: `Did you make a purchase at ${followup.entity_name}?`,
         message: `We noticed you checked in at ${followup.entity_name} today. Did you make a purchase?${attemptLabel}`,
         category: "transactional",
+        link_url: "/dashboard",
       });
 
       // Mark as notified
