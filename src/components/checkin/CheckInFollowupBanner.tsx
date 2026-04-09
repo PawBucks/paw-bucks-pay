@@ -398,8 +398,8 @@ export const CheckInFollowupBanner = ({ userId }: CheckInFollowupBannerProps) =>
           onOpenChange={(open) => {
             setShowReceiptUpload(open);
             if (!open) {
+              setReceiptUploaded(true);
               setActiveFollowupForReceipt(null);
-              setCreditedFollowup(null);
             }
           }}
           userId={userId}
@@ -411,8 +411,8 @@ export const CheckInFollowupBanner = ({ userId }: CheckInFollowupBannerProps) =>
           onOpenChange={(open) => {
             setShowReceiptUpload(open);
             if (!open) {
+              setReceiptUploaded(true);
               setActiveFollowupForReceipt(null);
-              setCreditedFollowup(null);
             }
           }}
           userId={userId}
