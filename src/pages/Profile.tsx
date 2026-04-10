@@ -150,7 +150,7 @@ const Profile = () => {
         progress={progress}
         className="flex-1 overflow-auto"
       >
-        <div className="container mx-auto px-4 pt-4 pb-24 md:pb-8 max-w-4xl">
+        <div className="container mx-auto px-4 pt-4 pb-24 md:pb-8 max-w-4xl lg:max-w-5xl">
           {/* Ad Placement for Free Users */}
           <div className="mb-4 sm:mb-6">
             <AdPlacement />
