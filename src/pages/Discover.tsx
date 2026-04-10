@@ -763,7 +763,7 @@ const Discover = () => {
         keywords={["pet merchants", "pet stores", "pet services", "PawBucks", "rewards"]}
       />
       <Header isAuthenticated={!!user} onLogout={user ? handleLogout : undefined} />
-      <div className="min-h-[100dvh] bg-gradient-to-b from-background to-muted/20 flex flex-col">
+      <div className="min-h-[100dvh] bg-background flex flex-col">
         <PullToRefresh
           ref={containerRef}
           isRefreshing={isRefreshing}
@@ -771,74 +771,80 @@ const Discover = () => {
           progress={progress}
           className="flex-1"
         >
-        <div className="container mx-auto px-4 pt-3 max-w-4xl lg:max-w-6xl">
-          {/* Top Ad Placement */}
-          <div className="mb-4">
-            <AdPlacement position="top" />
-          </div>
-        </div>
 
-        {/* Hero Section */}
-        <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-background border-b">
-          <div className="container mx-auto px-4 py-4 sm:py-6 max-w-4xl lg:max-w-6xl">
-            <h1 className="text-2xl sm:text-3xl font-bold mb-1 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-              Discover Pet Merchants
-            </h1>
-            <p className="text-sm text-muted-foreground mb-4">
-              Find trusted pet services and earn rewards on every purchase
-            </p>
+        {/* ── Hero Section ── */}
+        <div className="border-b bg-card">
+          <div className="container mx-auto px-4 py-5 sm:py-8 max-w-4xl lg:max-w-7xl">
+            <div className="max-w-2xl">
+              <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight mb-1.5">
+                Find the best pet services
+              </h1>
+              <p className="text-sm sm:text-base text-muted-foreground mb-5">
+                Trusted merchants · Earn rewards on every visit
+              </p>
+            </div>
 
-            {/* Search Bar */}
-            <div className="flex flex-col sm:flex-row gap-4">
+            {/* Search Bar — Yelp-style prominent */}
+            <div className="flex gap-2 sm:gap-3">
               <div className="relative flex-1">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-muted-foreground" />
                 <Input
-                  placeholder="Search for pet stores, groomers, vets..."
+                  placeholder="Groomers, vets, pet stores..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-12 pr-4 h-12 bg-background border-border shadow-sm"
+                  className="pl-10 pr-4 h-11 sm:h-12 bg-background border-border shadow-sm text-sm sm:text-base rounded-lg"
                 />
               </div>
-              <Button asChild variant="outline" className="h-12 gap-2">
+              <Button asChild variant="outline" className="h-11 sm:h-12 gap-2 rounded-lg">
                 <Link to="/directory">
                   <BookOpen className="w-4 h-4" />
-                  Browse Directory
+                  <span className="hidden sm:inline">Directory</span>
                 </Link>
               </Button>
             </div>
           </div>
         </div>
 
-        <div className="container mx-auto px-4 py-6 max-w-4xl lg:max-w-6xl">
-          {/* Category Filters */}
-          <div className="flex gap-2 mb-4 overflow-x-auto pb-2 scrollbar-hide">
+        {/* ── Top Ad ── */}
+        <div className="container mx-auto px-4 pt-3 max-w-4xl lg:max-w-7xl">
+          <AdPlacement position="top" />
+        </div>
+
+        {/* ── Main Content ── */}
+        <div className="container mx-auto px-4 py-4 max-w-4xl lg:max-w-7xl">
+
+          {/* Category Chips — horizontal scroll */}
+          <div className="flex gap-1.5 mb-3 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
             {businessTypes.map((type) => {
               const Icon = type.icon;
               const isSelected = selectedCategory === type.value;
               return (
-                <Button
+                <button
                   key={type.value}
-                  variant={isSelected ? "default" : "outline"}
-                  size="sm"
                   onClick={() => setSelectedCategory(type.value)}
-                  className="flex-shrink-0 gap-2"
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all border ${
+                    isSelected
+                      ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                      : "bg-card text-muted-foreground border-border hover:border-primary/40 hover:text-foreground"
+                  }`}
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon className="w-3.5 h-3.5" />
                   {type.label}
-                </Button>
+                </button>
               );
             })}
           </div>
 
-          {/* Rating & Price Filters */}
-          <div className="flex flex-wrap items-center gap-2 mb-6">
-            {/* Rating Filter Dropdown */}
+          {/* Filter Row — compact pills */}
+          <div className="flex flex-wrap items-center gap-1.5 mb-4">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <Star className="w-4 h-4" />
-                  {minRating > 0 ? `${minRating}+ Stars` : "Rating"}
-                </Button>
+                <button className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border transition-colors ${
+                  minRating > 0 ? 'bg-primary/10 border-primary/30 text-primary' : 'bg-card border-border text-muted-foreground hover:text-foreground'
+                }`}>
+                  <Star className="w-3 h-3" />
+                  {minRating > 0 ? `${minRating}+` : "Rating"}
+                </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start">
                 <DropdownMenuLabel>Minimum Rating</DropdownMenuLabel>
@@ -855,15 +861,14 @@ const Discover = () => {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* Price Filter Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <SlidersHorizontal className="w-4 h-4" />
-                  {selectedPrices.length > 0 
-                    ? selectedPrices.sort().map(p => '$'.repeat(p)).join(', ')
-                    : "Price"}
-                </Button>
+                <button className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border transition-colors ${
+                  selectedPrices.length > 0 ? 'bg-primary/10 border-primary/30 text-primary' : 'bg-card border-border text-muted-foreground hover:text-foreground'
+                }`}>
+                  <SlidersHorizontal className="w-3 h-3" />
+                  {selectedPrices.length > 0 ? selectedPrices.sort().map(p => '$'.repeat(p)).join(' ') : "Price"}
+                </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start">
                 <DropdownMenuLabel>Price Range</DropdownMenuLabel>
@@ -880,18 +885,17 @@ const Discover = () => {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* Distance Filter Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className={`gap-2 ${maxDistance > 0 && !userLocation ? 'animate-pulse' : ''}`}
+                <button
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border transition-colors ${
+                    maxDistance > 0 ? 'bg-primary/10 border-primary/30 text-primary' : 'bg-card border-border text-muted-foreground hover:text-foreground'
+                  } ${locationLoading ? 'opacity-60' : ''}`}
                   disabled={locationLoading}
                 >
-                  <Navigation className={`w-4 h-4 ${locationLoading ? 'animate-spin' : ''}`} />
-                  {locationLoading ? 'Locating...' : maxDistance > 0 ? `Within ${maxDistance} mi` : "Near Me"}
-                </Button>
+                  <Navigation className={`w-3 h-3 ${locationLoading ? 'animate-spin' : ''}`} />
+                  {locationLoading ? 'Locating...' : maxDistance > 0 ? `${maxDistance} mi` : "Near Me"}
+                </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start">
                 <DropdownMenuLabel>Maximum Distance</DropdownMenuLabel>
@@ -908,15 +912,8 @@ const Discover = () => {
                 {locationError && (
                   <>
                     <DropdownMenuSeparator />
-                    <div className="px-2 py-1.5 text-xs text-destructive">
-                      {locationError}
-                    </div>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="w-full justify-start text-xs"
-                      onClick={requestLocation}
-                    >
+                    <div className="px-2 py-1.5 text-xs text-destructive">{locationError}</div>
+                    <Button variant="ghost" size="sm" className="w-full justify-start text-xs" onClick={requestLocation}>
                       Retry location
                     </Button>
                   </>
@@ -924,89 +921,76 @@ const Discover = () => {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* Sort Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <ArrowUpDown className="w-4 h-4" />
-                  Sort: {sortBy === 'rating' ? 'Rating' : sortBy === 'distance' ? 'Distance' : 'Name'}
-                </Button>
+                <button className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border bg-card border-border text-muted-foreground hover:text-foreground transition-colors">
+                  <ArrowUpDown className="w-3 h-3" />
+                  {sortBy === 'rating' ? 'Top Rated' : sortBy === 'distance' ? 'Nearest' : 'A-Z'}
+                </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start">
                 <DropdownMenuLabel>Sort By</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuRadioGroup value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
-                  <DropdownMenuRadioItem value="rating">Highest Rating</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="rating">Top Rated</DropdownMenuRadioItem>
                   <DropdownMenuRadioItem value="distance" disabled={!userLocation && !locationLoading}>
-                    Nearest First {!userLocation && '(enable location)'}
+                    Nearest {!userLocation && '(enable location)'}
                   </DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="name">Name (A-Z)</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="name">A-Z</DropdownMenuRadioItem>
                 </DropdownMenuRadioGroup>
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* Clear Filters */}
             {hasActiveFilters && (
-              <Button 
-                variant="ghost" 
-                size="sm" 
+              <button
                 onClick={clearFilters}
-                className="gap-1 text-muted-foreground hover:text-foreground"
+                className="flex items-center gap-1 px-2 py-1 rounded-md text-xs text-muted-foreground hover:text-foreground transition-colors"
               >
                 <X className="w-3 h-3" />
-                Clear filters
-              </Button>
+                Clear
+              </button>
             )}
 
-            {/* View Toggle - Mobile Only */}
+            {/* View Toggle — mobile */}
             <div className="ml-auto flex lg:hidden items-center border rounded-lg overflow-hidden">
-              <Button
-                variant={viewMode === 'list' ? 'default' : 'ghost'}
-                size="sm"
+              <button
                 onClick={() => setViewMode('list')}
-                className="rounded-none gap-1.5"
+                className={`flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                  viewMode === 'list' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
+                }`}
               >
-                <List className="w-4 h-4" />
+                <List className="w-3.5 h-3.5" />
                 List
-              </Button>
-              <Button
-                variant={viewMode === 'map' ? 'default' : 'ghost'}
-                size="sm"
+              </button>
+              <button
                 onClick={() => setViewMode('map')}
-                className="rounded-none gap-1.5"
+                className={`flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                  viewMode === 'map' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
+                }`}
               >
-                <Map className="w-4 h-4" />
+                <Map className="w-3.5 h-3.5" />
                 Map
-              </Button>
-            </div>
-
-            {/* Split View Indicator - Desktop */}
-            <div className="ml-auto hidden lg:flex items-center gap-2 text-sm text-muted-foreground">
-              <LayoutGrid className="w-4 h-4" />
-              Split View
+              </button>
             </div>
           </div>
 
-          {/* Results Count */}
-          <div className="mb-6">
-            <p className="text-sm text-muted-foreground">
-              {totalMerchants} {totalMerchants === 1 ? "result" : "results"} • Sorted by {sortBy === 'rating' ? 'highest rating' : sortBy === 'distance' ? 'nearest first' : 'name'}
-              {userLocation && <span className="ml-1">• Location enabled</span>}
+          {/* Results summary */}
+          <div className="mb-3">
+            <p className="text-xs text-muted-foreground">
+              {totalMerchants} {totalMerchants === 1 ? "result" : "results"}
+              {userLocation && " · Using your location"}
             </p>
           </div>
 
-          {/* No Results */}
+          {/* ── Results Area ── */}
           {totalMerchants === 0 ? (
-            <div className="text-center py-16">
-              <Store className="w-16 h-16 mx-auto text-muted-foreground/40 mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No merchants found</h3>
-              <p className="text-muted-foreground">
-                Try adjusting your search or filters
-              </p>
+            <div className="text-center py-20">
+              <Store className="w-12 h-12 mx-auto text-muted-foreground/30 mb-3" />
+              <h3 className="text-base font-semibold mb-1">No merchants found</h3>
+              <p className="text-sm text-muted-foreground">Try adjusting your search or filters</p>
             </div>
           ) : (
             <>
-              {/* All merchants for map */}
               {(() => {
                 const allMapMerchants = [...deferredFeatured, ...deferredPremium, ...deferredInterspersed];
                 const mapClickHandler = (merchantId: string) => {
@@ -1021,10 +1005,9 @@ const Discover = () => {
 
                 return (
                   <>
-                    {/* Desktop Split View */}
-                    <div className="hidden lg:flex gap-6 h-[calc(100vh-380px)] min-h-[500px]">
-                      {/* List Panel */}
-                      <ScrollArea className="flex-1 pr-4">
+                    {/* Desktop: Split View */}
+                    <div className="hidden lg:flex gap-5 h-[calc(100vh-340px)] min-h-[520px]">
+                      <ScrollArea className="flex-1 pr-3">
                         <AttentionLadderFeed
                           featuredPartners={deferredFeatured}
                           premiumAds={deferredPremium}
@@ -1039,8 +1022,7 @@ const Discover = () => {
                         />
                       </ScrollArea>
 
-                      {/* Map Panel */}
-                      <div className="w-[45%] flex-shrink-0 rounded-xl overflow-hidden border border-border shadow-sm">
+                      <div className="w-[42%] flex-shrink-0 rounded-xl overflow-hidden border border-border shadow-sm">
                         <MerchantMap
                           merchants={allMapMerchants}
                           onMerchantClick={mapClickHandler}
@@ -1051,10 +1033,10 @@ const Discover = () => {
                       </div>
                     </div>
 
-                    {/* Mobile View */}
+                    {/* Mobile: Toggle */}
                     <div className="lg:hidden">
                       {viewMode === 'map' ? (
-                        <div className="space-y-4">
+                        <div className="space-y-3">
                           <MerchantMap
                             merchants={allMapMerchants}
                             onMerchantClick={mapClickHandler}
@@ -1062,8 +1044,8 @@ const Discover = () => {
                             premiumIds={premiumAdIds}
                             sponsoredIds={sponsoredMerchantIds}
                           />
-                          <p className="text-sm text-muted-foreground text-center">
-                            Click on a marker to view merchant details
+                          <p className="text-xs text-muted-foreground text-center">
+                            Tap a pin to view details
                           </p>
                         </div>
                       ) : (
@@ -1087,7 +1069,7 @@ const Discover = () => {
             </>
           )}
 
-          {/* Bottom Ad Placement */}
+          {/* Bottom Ad */}
           <div className="mt-8 mb-6 pb-24 md:pb-12">
             <AdPlacement position="bottom" />
           </div>
