@@ -162,7 +162,7 @@ const MerchantPawBucksWallet = () => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-6 pb-24 max-w-2xl">
+      <main className="container mx-auto px-4 py-6 pb-24 max-w-4xl lg:max-w-5xl">
         {/* Main Balance Card */}
         <GradientCard gradient className="mb-6">
           <div className="text-center">

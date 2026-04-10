@@ -146,7 +146,7 @@ const Referrals = () => {
       />
       <div className="min-h-screen bg-[var(--gradient-hero)] pb-24">
         <Header isAuthenticated={true} onLogout={handleSignOut} />
-      <div className="container mx-auto px-4 py-8 max-w-2xl">
+      <div className="container mx-auto px-4 py-8 max-w-4xl lg:max-w-5xl">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Referrals</h1>

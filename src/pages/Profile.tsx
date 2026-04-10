@@ -150,7 +150,7 @@ const Profile = () => {
         progress={progress}
         className="flex-1 overflow-auto"
       >
-        <div className="container mx-auto px-4 pt-4 pb-24 md:pb-8 max-w-4xl">
+        <div className="container mx-auto px-4 pt-4 pb-24 md:pb-8 max-w-4xl lg:max-w-5xl">
           {/* Ad Placement for Free Users */}
           <div className="mb-4 sm:mb-6">
             <AdPlacement />
@@ -425,7 +425,7 @@ const Profile = () => {
         )}
 
         {/* Information Cards */}
-        <div className="space-y-4">
+        <div className="space-y-4 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
           <GradientCard>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">

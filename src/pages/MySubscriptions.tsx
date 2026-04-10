@@ -182,7 +182,7 @@ const MySubscriptions = () => {
       />
       <div className="min-h-[100dvh] bg-[var(--gradient-hero)] flex flex-col">
         <Header isAuthenticated={true} onLogout={signOut} />
-        <div className="flex-1 container mx-auto px-4 pt-4 pb-24 md:pb-8 max-w-2xl">
+        <div className="flex-1 container mx-auto px-4 pt-4 pb-24 md:pb-8 max-w-4xl lg:max-w-5xl">
           {/* Header */}
           <div className="flex items-center gap-3 mb-6">
             <Button
