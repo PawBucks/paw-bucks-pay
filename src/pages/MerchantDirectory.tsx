@@ -188,7 +188,7 @@ const MerchantDirectory = () => {
       filtered = filtered.filter(
         (m) =>
           m.business_name.toLowerCase().includes(searchLower) ||
-          m.business_type.toLowerCase().includes(searchLower) ||
+          searchMatchesCategory(debouncedSearch, m.business_type) ||
           m.description?.toLowerCase().includes(searchLower)
       );
     }
