@@ -227,6 +227,9 @@ serve(async (req) => {
       allMerchantReviewsResult,
       allOffersResult,
       allLoyaltyProgramsResult,
+      allMerchantServicesResult,
+      allMerchantHoursResult,
+      allVetHoursResult,
     ] = await Promise.all([
       platformClient.from('merchants').select('id, business_name, business_type, description, address, phone, cashback_rate, accepts_pawbucks, price_range, website_url, facebook_url, instagram_url, twitter_url, linkedin_url, tos_url, privacy_policy_url, shipping_returns_policy_url, storefront_slug, is_sponsored, logo_url').eq('approval_status', 'approved').eq('is_paused', false).order('business_name'),
       platformClient.from('partner_vets').select('id, name, clinic_name, clinic_phone, location, practice_type, services_provided, accepting_new_patients, accreditations, insurance_partners, emergency_protocol, website_url, tos_url, privacy_policy_url, shipping_returns_policy_url, contact_email, logo_url, direct_pay_enabled').eq('approval_status', 'approved').order('name'),
@@ -234,6 +237,9 @@ serve(async (req) => {
       platformClient.from('merchant_reviews').select('id, merchant_id, user_id, rating, review_text, created_at').order('created_at', { ascending: false }).limit(200),
       platformClient.from('partner_offers').select('id, merchant_id, title, description, discount_type, discount_value, coins_required, status, is_active, start_date, end_date, terms_conditions').eq('status', 'active').eq('is_active', true),
       platformClient.from('merchant_loyalty_programs').select('id, merchant_id, program_name, description, punches_required, reward_description, is_active').eq('is_active', true),
+      platformClient.from('merchant_services').select('id, merchant_id, name, description, category, duration_minutes, price, payment_type, is_active').eq('is_active', true),
+      platformClient.from('merchant_business_hours').select('merchant_id, day_of_week, open_time, close_time, is_closed'),
+      platformClient.from('vet_business_hours').select('vet_id, day_of_week, open_time, close_time, is_closed'),
     ]);
 
     const allMerchants = allMerchantsResult.data || [];
@@ -242,6 +248,9 @@ serve(async (req) => {
     const allMerchantReviews = allMerchantReviewsResult.data || [];
     const allOffers = allOffersResult.data || [];
     const allLoyaltyPrograms = allLoyaltyProgramsResult.data || [];
+    const allMerchantServices = allMerchantServicesResult.data || [];
+    const allMerchantHours = allMerchantHoursResult.data || [];
+    const allVetHours = allVetHoursResult.data || [];
 
     // Build merchant review summary (avg rating, count per merchant)
     const merchantReviewSummary: Record<string, { count: number; avg: number; reviews: any[] }> = {};
