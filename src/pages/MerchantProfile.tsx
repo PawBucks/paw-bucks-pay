@@ -263,7 +263,7 @@ const MerchantProfile = memo(() => {
       <Header isAuthenticated={!!user} onLogout={user ? handleLogout : undefined} />
       
       <div className="min-h-screen bg-background pb-24 md:pb-12">
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-4xl lg:max-w-5xl mx-auto">
           {/* Top Ad */}
           <div className="px-4 pt-4">
             <AdPlacement position="top" />
