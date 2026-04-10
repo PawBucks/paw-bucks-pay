@@ -394,21 +394,28 @@ const MerchantDirectory = () => {
               </button>
             </div>
 
-            {/* View toggle (desktop only) */}
-            <div className="hidden sm:flex items-center border border-border/60 rounded-lg overflow-hidden">
+            {/* View toggle */}
+            <div className="flex items-center border border-border/60 rounded-lg overflow-hidden">
               <button
-                onClick={() => setViewMode("list")}
-                className={`p-1.5 transition-colors ${viewMode === "list" ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                onClick={() => { setViewMode("list"); setShowMobileMap(false); }}
+                className={`p-1.5 transition-colors ${viewMode === "list" && !showMobileMap ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground"}`}
                 aria-label="List view"
               >
                 <LayoutList className="w-4 h-4" />
               </button>
               <button
-                onClick={() => setViewMode("grid")}
-                className={`p-1.5 transition-colors ${viewMode === "grid" ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                onClick={() => { setViewMode("grid"); setShowMobileMap(false); }}
+                className={`p-1.5 transition-colors hidden sm:block ${viewMode === "grid" && !showMobileMap ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground"}`}
                 aria-label="Grid view"
               >
                 <LayoutGrid className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => { setViewMode("map"); setShowMobileMap(true); }}
+                className={`p-1.5 transition-colors ${viewMode === "map" || showMobileMap ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                aria-label="Map view"
+              >
+                <Map className="w-4 h-4" />
               </button>
             </div>
           </div>
@@ -451,7 +458,61 @@ const MerchantDirectory = () => {
                 Clear All Filters
               </Button>
             </div>
+          ) : viewMode === "map" || showMobileMap ? (
+            /* ── Full Map View ── */
+            <div className="flex flex-col lg:flex-row gap-4">
+              {/* Map panel */}
+              <div className="w-full lg:w-1/2 lg:sticky lg:top-16 lg:self-start">
+                <div className="rounded-xl overflow-hidden border border-border/60 shadow-sm" style={{ height: "min(70vh, 600px)" }}>
+                  <MerchantMap
+                    merchants={mapMerchants}
+                    onMerchantClick={handleMapMerchantClick}
+                    sponsoredIds={sponsoredIdSet}
+                  />
+                </div>
+                {/* Mobile: show list button */}
+                <div className="lg:hidden mt-3 text-center">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-2"
+                    onClick={() => { setViewMode("list"); setShowMobileMap(false); }}
+                  >
+                    <LayoutList className="w-4 h-4" />
+                    Show List
+                  </Button>
+                </div>
+              </div>
+              {/* Desktop: scrollable list beside map */}
+              <div className="hidden lg:flex flex-col gap-3 flex-1 min-w-0">
+                {filteredMerchants.map((merchant, index) => {
+                  const Icon = getBusinessIcon(merchant.business_type);
+                  const merchantIsVerified = isVerifiedPro(merchant.id, verifiedProIds);
+                  const merchantIsSponsored = isSponsored(merchant.id, sponsoredMerchantsList);
+                  const merchantIsBoosted = searchBoostedIds.has(merchant.id);
+
+                  const handleCardClick = () => {
+                    if (merchantIsSponsored) trackClick(merchant.id, index + 1, debouncedSearch || undefined);
+                    if (merchantIsBoosted) trackSearchClick(merchant.id, index + 1, "directory", { searchTerm: debouncedSearch || undefined, isBoosted: true });
+                  };
+
+                  return (
+                    <DirectoryMerchantCard
+                      key={merchant.id}
+                      merchant={merchant}
+                      index={index}
+                      isVerified={merchantIsVerified}
+                      isSponsored={merchantIsSponsored}
+                      isBoosted={merchantIsBoosted}
+                      onClick={handleCardClick}
+                      Icon={Icon}
+                    />
+                  );
+                })}
+              </div>
+            </div>
           ) : (
+            /* ── List / Grid View ── */
             <div className={
               viewMode === "grid"
                 ? "grid grid-cols-1 sm:grid-cols-2 gap-4"
@@ -496,6 +557,17 @@ const MerchantDirectory = () => {
             <AdPlacement position="bottom" />
           </div>
         </div>
+
+        {/* Mobile Map FAB (only in list/grid mode) */}
+        {!showMobileMap && viewMode !== "map" && filteredMerchants.length > 0 && (
+          <button
+            onClick={() => { setViewMode("map"); setShowMobileMap(true); }}
+            className="sm:hidden fixed bottom-24 left-1/2 -translate-x-1/2 z-30 bg-foreground text-background px-4 py-2.5 rounded-full shadow-lg flex items-center gap-2 text-sm font-medium hover:scale-105 transition-transform"
+          >
+            <Map className="w-4 h-4" />
+            Map
+          </button>
+        )}
 
         {user && <BottomNav />}
       </PullToRefresh>
