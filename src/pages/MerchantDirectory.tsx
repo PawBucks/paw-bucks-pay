@@ -4,7 +4,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useOptimizedQuery } from "@/hooks/useOptimizedQuery";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
-import { DataLoader } from "@/lib/dataLoader";
 import { Header } from "@/components/Header";
 import { BottomNav } from "@/components/BottomNav";
 import { PageLoader } from "@/components/PageLoader";
@@ -13,8 +12,8 @@ import { SEO } from "@/components/SEO";
 import { PullToRefresh } from "@/components/PullToRefresh";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { ROUTES, QUERY_STALE_TIMES } from "@/lib/constants";
 import { usePersistentState } from "@/hooks/usePersistentState";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,6 +21,7 @@ import { useVerifiedProMerchants, useSponsoredMerchants, useSearchBoostedMerchan
 import { useQueryClient } from "@tanstack/react-query";
 import { useSponsoredTracking } from "@/hooks/useSponsoredTracking";
 import { useSearchRankingTracking } from "@/hooks/useSearchRankingTracking";
+import { DirectoryMerchantCard } from "@/components/directory/DirectoryMerchantCard";
 import {
   Search,
   Store,
@@ -30,20 +30,17 @@ import {
   Stethoscope,
   Footprints,
   Bone,
-  ArrowUpDown,
   Coins,
-  CreditCard,
-  Star,
-  MapPin,
-  ChevronRight,
-  Filter,
-  BadgeCheck,
-  Sparkles,
+  SlidersHorizontal,
   Mountain,
   Zap,
   Hand,
   Brain,
   MoreHorizontal,
+  MapPin,
+  X,
+  LayoutGrid,
+  LayoutList,
 } from "lucide-react";
 
 type MerchantWithRating = {
@@ -55,6 +52,7 @@ type MerchantWithRating = {
   cashback_rate: number;
   logo_url?: string;
   accepts_pawbucks?: boolean;
+  price_range?: number;
   average_rating: number;
   review_count: number;
 };
@@ -90,6 +88,13 @@ const getBusinessIcon = (type: string) => {
   return Store;
 };
 
+const sortOptions = [
+  { value: "rating", label: "Top Rated" },
+  { value: "reviews", label: "Most Reviewed" },
+  { value: "cashback", label: "Best Rewards" },
+  { value: "name", label: "A – Z" },
+];
+
 const MerchantDirectory = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -99,6 +104,7 @@ const MerchantDirectory = () => {
   const [selectedCategory, setSelectedCategory] = usePersistentState<string>("directory-category", "all");
   const [sortBy, setSortBy] = usePersistentState<string>("directory-sort", "rating");
   const [pawbucksOnly, setPawbucksOnly] = usePersistentState<boolean>("directory-pawbucks", false);
+  const [viewMode, setViewMode] = usePersistentState<"list" | "grid">("directory-view", "list");
 
   // Fetch verified and sponsored merchants for badge display
   const { data: verifiedProIds = [] } = useVerifiedProMerchants();
@@ -124,15 +130,13 @@ const MerchantDirectory = () => {
   const { data: merchants = [], isLoading } = useOptimizedQuery<MerchantWithRating[]>(
     ["merchants-with-ratings"],
     async () => {
-      // Fetch merchants from public view (RLS-safe)
       const { data: merchantData, error: merchantError } = await supabase
         .from("merchants_public")
-        .select("id, business_name, business_type, description, address, cashback_rate, logo_url, accepts_pawbucks")
+        .select("id, business_name, business_type, description, address, cashback_rate, logo_url, accepts_pawbucks, price_range")
         .order("business_name");
 
       if (merchantError) throw merchantError;
 
-      // Fetch review stats for each merchant
       const merchantsWithRatings = await Promise.all(
         (merchantData || []).map(async (merchant) => {
           const { data: reviews } = await supabase
@@ -162,19 +166,16 @@ const MerchantDirectory = () => {
   const filteredMerchants = useMemo(() => {
     let filtered = merchants;
 
-    // Filter by category
     if (selectedCategory !== "all") {
       filtered = filtered.filter((m) =>
         m.business_type.toLowerCase().includes(selectedCategory.toLowerCase())
       );
     }
 
-    // Filter by PawBucks acceptance
     if (pawbucksOnly) {
       filtered = filtered.filter((m) => m.accepts_pawbucks);
     }
 
-    // Filter by search
     if (debouncedSearch) {
       const searchLower = debouncedSearch.toLowerCase();
       filtered = filtered.filter(
@@ -185,17 +186,12 @@ const MerchantDirectory = () => {
       );
     }
 
-    // Sort with boosted merchants getting priority
     const sorted = [...filtered].sort((a, b) => {
-      // Search boosted merchants get priority (appear higher in results)
       const aIsBoosted = searchBoostedIds.has(a.id);
       const bIsBoosted = searchBoostedIds.has(b.id);
-      
-      // If only one is boosted, prioritize the boosted one
       if (aIsBoosted && !bIsBoosted) return -1;
       if (!aIsBoosted && bIsBoosted) return 1;
-      
-      // If both boosted or neither boosted, sort by the selected criterion
+
       switch (sortBy) {
         case "rating":
           return b.average_rating - a.average_rating;
@@ -221,12 +217,12 @@ const MerchantDirectory = () => {
           id: m.id,
           position: index + 1,
           isBoosted: true,
-          categoryMatch: selectedCategory !== 'all' && m.business_type.toLowerCase().includes(selectedCategory.toLowerCase()),
+          categoryMatch: selectedCategory !== "all" && m.business_type.toLowerCase().includes(selectedCategory.toLowerCase()),
           localMatch: false,
         }));
 
       if (boostedMerchants.length > 0) {
-        trackBatchImpressions(boostedMerchants, 'directory', debouncedSearch || undefined);
+        trackBatchImpressions(boostedMerchants, "directory", debouncedSearch || undefined);
       }
     }
   }, [filteredMerchants, searchBoostedIds, trackBatchImpressions, debouncedSearch, selectedCategory]);
@@ -236,7 +232,6 @@ const MerchantDirectory = () => {
     navigate(ROUTES.AUTH);
   };
 
-  // Pull to refresh
   const handleRefresh = useCallback(async () => {
     await queryClient.invalidateQueries({ queryKey: ["merchants-with-ratings"] });
   }, [queryClient]);
@@ -244,6 +239,12 @@ const MerchantDirectory = () => {
   const { containerRef, isRefreshing, pullDistance, progress } = usePullToRefresh({
     onRefresh: handleRefresh,
   });
+
+  const activeFilterCount = [
+    selectedCategory !== "all",
+    pawbucksOnly,
+    !!debouncedSearch,
+  ].filter(Boolean).length;
 
   if (isLoading) {
     return <PageLoader message="Loading merchant directory..." />;
@@ -263,232 +264,196 @@ const MerchantDirectory = () => {
         isRefreshing={isRefreshing}
         pullDistance={pullDistance}
         progress={progress}
-        className="min-h-screen bg-gradient-to-b from-background to-muted/20 pb-24 md:pb-12 overflow-auto"
+        className="min-h-screen bg-background pb-24 md:pb-12 overflow-auto"
       >
-        {/* Top Ad */}
-        <div className="container mx-auto px-4 pt-4 max-w-7xl">
-          <AdPlacement position="top" />
-        </div>
-
-        {/* Hero Section */}
-        <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-background border-b mt-4">
-          <div className="container mx-auto px-4 py-8">
-            <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-              Merchant Directory
-            </h1>
-            <p className="text-muted-foreground mb-6">
-              Browse all pet merchants, read reviews, and find the perfect service
+        {/* ── Hero + Search ── */}
+        <div className="bg-gradient-to-b from-primary/8 via-primary/4 to-transparent border-b border-border/40">
+          <div className="container mx-auto px-4 pt-6 pb-5 max-w-4xl">
+            <div className="flex items-center gap-3 mb-1">
+              <MapPin className="w-6 h-6 text-primary" />
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+                Find Pet Services
+              </h1>
+            </div>
+            <p className="text-sm text-muted-foreground mb-4 ml-9">
+              {merchants.length} merchants · Reviews · Rewards
             </p>
 
             {/* Search Bar */}
-            <div className="relative max-w-2xl">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            <div className="relative max-w-2xl ml-0">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Search merchants by name, type, or description..."
+                placeholder="Search by name, service, or location…"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-12 pr-4 h-12 bg-background border-border shadow-sm"
+                className="pl-10 pr-10 h-11 bg-background/80 backdrop-blur-sm border-border/60 shadow-sm rounded-xl focus-visible:ring-primary/30"
               />
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-muted transition-colors"
+                  aria-label="Clear search"
+                >
+                  <X className="w-4 h-4 text-muted-foreground" />
+                </button>
+              )}
             </div>
           </div>
         </div>
 
-        <div className="container mx-auto px-4 py-6 max-w-7xl">
-          {/* Filters Row */}
-          <div className="flex flex-col lg:flex-row gap-4 mb-6">
-            {/* Category Filters */}
-            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide flex-1">
+        {/* ── Category Pills ── */}
+        <div className="border-b border-border/30 bg-background/80 backdrop-blur-sm sticky top-0 z-20">
+          <div className="container mx-auto px-4 max-w-4xl">
+            <div className="flex gap-1.5 overflow-x-auto py-3 scrollbar-hide -mx-1 px-1">
               {businessTypes.map((type) => {
                 const Icon = type.icon;
                 const isSelected = selectedCategory === type.value;
                 return (
-                  <Button
+                  <button
                     key={type.value}
-                    variant={isSelected ? "default" : "outline"}
-                    size="sm"
                     onClick={() => setSelectedCategory(type.value)}
-                    className="flex-shrink-0 gap-2"
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all flex-shrink-0 ${
+                      isSelected
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground"
+                    }`}
                   >
-                    <Icon className="w-4 h-4" />
+                    <Icon className="w-3.5 h-3.5" />
                     {type.label}
-                  </Button>
+                  </button>
                 );
               })}
             </div>
+          </div>
+        </div>
 
-            {/* Additional Filters */}
-            <div className="flex gap-2 flex-shrink-0">
-              <Button
-                variant={pawbucksOnly ? "default" : "outline"}
-                size="sm"
+        <div className="container mx-auto px-4 py-4 max-w-4xl">
+          {/* Top Ad */}
+          <AdPlacement position="top" />
+
+          {/* ── Toolbar: Sort, Filters, View Toggle ── */}
+          <div className="flex items-center justify-between gap-3 mb-4 mt-2">
+            <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide flex-1">
+              {/* Sort pills */}
+              {sortOptions.map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => setSortBy(opt.value)}
+                  className={`text-xs font-medium px-2.5 py-1 rounded-md whitespace-nowrap transition-colors ${
+                    sortBy === opt.value
+                      ? "bg-foreground text-background"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+              <Separator orientation="vertical" className="h-4 mx-1" />
+              <button
                 onClick={() => setPawbucksOnly(!pawbucksOnly)}
-                className="gap-2"
+                className={`flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-md whitespace-nowrap transition-colors ${
+                  pawbucksOnly
+                    ? "bg-primary/10 text-primary border border-primary/20"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                }`}
               >
-                <Coins className="w-4 h-4" />
-                PawBucks Only
+                <Coins className="w-3 h-3" />
+                PawBucks
+              </button>
+            </div>
+
+            {/* View toggle (desktop only) */}
+            <div className="hidden sm:flex items-center border border-border/60 rounded-lg overflow-hidden">
+              <button
+                onClick={() => setViewMode("list")}
+                className={`p-1.5 transition-colors ${viewMode === "list" ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                aria-label="List view"
+              >
+                <LayoutList className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setViewMode("grid")}
+                className={`p-1.5 transition-colors ${viewMode === "grid" ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                aria-label="Grid view"
+              >
+                <LayoutGrid className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* Active filters summary */}
+          {activeFilterCount > 0 && (
+            <div className="flex items-center gap-2 mb-4 text-xs text-muted-foreground">
+              <SlidersHorizontal className="w-3.5 h-3.5" />
+              <span>{filteredMerchants.length} result{filteredMerchants.length !== 1 ? "s" : ""}</span>
+              {selectedCategory !== "all" && (
+                <Badge variant="secondary" className="text-[10px] h-5 gap-1 cursor-pointer" onClick={() => setSelectedCategory("all")}>
+                  {selectedCategory.replace(/_/g, " ")}
+                  <X className="w-2.5 h-2.5" />
+                </Badge>
+              )}
+              {pawbucksOnly && (
+                <Badge variant="secondary" className="text-[10px] h-5 gap-1 cursor-pointer" onClick={() => setPawbucksOnly(false)}>
+                  PawBucks
+                  <X className="w-2.5 h-2.5" />
+                </Badge>
+              )}
+              {debouncedSearch && (
+                <Badge variant="secondary" className="text-[10px] h-5 gap-1 cursor-pointer" onClick={() => setSearchTerm("")}>
+                  "{debouncedSearch}"
+                  <X className="w-2.5 h-2.5" />
+                </Badge>
+              )}
+            </div>
+          )}
+
+          {/* ── Results ── */}
+          {filteredMerchants.length === 0 ? (
+            <div className="text-center py-20">
+              <div className="w-16 h-16 rounded-full bg-muted/50 mx-auto flex items-center justify-center mb-4">
+                <Store className="w-8 h-8 text-muted-foreground/40" />
+              </div>
+              <h3 className="text-lg font-semibold mb-1">No merchants found</h3>
+              <p className="text-sm text-muted-foreground mb-4">Try adjusting your search or filters</p>
+              <Button variant="outline" size="sm" onClick={() => { setSearchTerm(""); setSelectedCategory("all"); setPawbucksOnly(false); }}>
+                Clear All Filters
               </Button>
             </div>
-          </div>
-
-          {/* Sort & Count */}
-          <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
-            <p className="text-sm text-muted-foreground">
-              {filteredMerchants.length} {filteredMerchants.length === 1 ? "merchant" : "merchants"} found
-            </p>
-            <div className="flex gap-2">
-              {["rating", "cashback", "reviews", "name"].map((option) => (
-                <Button
-                  key={option}
-                  variant={sortBy === option ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSortBy(option)}
-                >
-                  {option === "rating" && "Top Rated"}
-                  {option === "cashback" && "Best Rewards"}
-                  {option === "reviews" && "Most Reviews"}
-                  {option === "name" && "A-Z"}
-                </Button>
-              ))}
-            </div>
-          </div>
-
-          {/* Merchants Grid */}
-          {filteredMerchants.length === 0 ? (
-            <div className="text-center py-16">
-              <Store className="w-16 h-16 mx-auto text-muted-foreground/40 mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No merchants found</h3>
-              <p className="text-muted-foreground">Try adjusting your search or filters</p>
-            </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+            <div className={
+              viewMode === "grid"
+                ? "grid grid-cols-1 sm:grid-cols-2 gap-4"
+                : "flex flex-col gap-3"
+            }>
               {filteredMerchants.map((merchant, index) => {
                 const Icon = getBusinessIcon(merchant.business_type);
                 const merchantIsVerified = isVerifiedPro(merchant.id, verifiedProIds);
                 const merchantIsSponsored = isSponsored(merchant.id, sponsoredMerchantsList);
                 const merchantIsBoosted = searchBoostedIds.has(merchant.id);
-                
+
                 const handleCardClick = () => {
-                  // Track sponsored click
                   if (merchantIsSponsored) {
                     trackClick(merchant.id, index + 1, debouncedSearch || undefined);
                   }
-                  // Track search ranking click for boosted merchants
                   if (merchantIsBoosted) {
-                    trackSearchClick(merchant.id, index + 1, 'directory', {
+                    trackSearchClick(merchant.id, index + 1, "directory", {
                       searchTerm: debouncedSearch || undefined,
                       isBoosted: true,
                     });
                   }
                 };
-                
+
                 return (
-                  <Link key={merchant.id} to={`/merchant/${merchant.id}`} onClick={handleCardClick}>
-                    <Card className={`group hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden h-full ${
-                      merchantIsSponsored 
-                        ? 'border-primary/30 bg-primary/5' 
-                        : 'border-border hover:border-primary/50'
-                    }`}>
-                      <CardContent className="p-0">
-                        {/* Logo/Icon Header */}
-                        <div className="bg-gradient-to-br from-primary/10 to-primary/5 p-6 flex items-center justify-center relative">
-                          {merchantIsSponsored && (
-                            <Badge className="absolute top-2 right-2 bg-primary/20 text-primary border-primary/30 gap-1">
-                              <Sparkles className="w-3 h-3" />
-                              Sponsored
-                            </Badge>
-                          )}
-                          {merchant.logo_url ? (
-                            <div className="w-24 h-24 rounded-full overflow-hidden bg-background group-hover:scale-105 transition-transform shadow-md border-2 border-border">
-                              <img
-                                src={merchant.logo_url}
-                                alt={`${merchant.business_name} logo`}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                          ) : (
-                            <div className="w-24 h-24 rounded-full bg-background flex items-center justify-center group-hover:scale-105 transition-transform border-2 border-border/50 shadow-md">
-                              <Icon className="w-12 h-12 text-primary" />
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Content */}
-                        <div className="p-5">
-                          <div className="flex items-start justify-between mb-2 gap-2">
-                            <div className="flex items-center gap-2 min-w-0 flex-1">
-                              <h3 className="font-semibold text-lg line-clamp-1 group-hover:text-primary transition-colors">
-                                {merchant.business_name}
-                              </h3>
-                              {merchantIsVerified && (
-                                <Badge className="flex-shrink-0 gap-1 bg-blue-500/10 text-blue-600 border-blue-500/20 text-xs">
-                                  <BadgeCheck className="w-3 h-3" />
-                                  Verified
-                                </Badge>
-                              )}
-                            </div>
-                            <Badge className="bg-primary/10 text-primary border-primary/20 flex-shrink-0">
-                              {merchant.cashback_rate}x
-                            </Badge>
-                          </div>
-
-                          {/* Rating */}
-                          <div className="flex items-center gap-2 mb-2">
-                            <div className="flex items-center gap-1">
-                              <Star
-                                className={`w-4 h-4 ${
-                                  merchant.average_rating > 0
-                                    ? "fill-yellow-400 text-yellow-400"
-                                    : "text-muted-foreground/30"
-                                }`}
-                              />
-                              <span className="text-sm font-medium">
-                                {merchant.average_rating > 0 ? merchant.average_rating.toFixed(1) : "New"}
-                              </span>
-                            </div>
-                            <span className="text-sm text-muted-foreground">
-                              ({merchant.review_count} {merchant.review_count === 1 ? "review" : "reviews"})
-                            </span>
-                          </div>
-
-                          {/* Payment Methods */}
-                          <div className="flex items-center gap-2 mb-3">
-                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                              <CreditCard className="w-3 h-3" />
-                              <span>Card</span>
-                            </div>
-                            {merchant.accepts_pawbucks && (
-                              <div className="flex items-center gap-1 text-xs text-primary">
-                                <Coins className="w-3 h-3" />
-                                <span>PawBucks</span>
-                              </div>
-                            )}
-                          </div>
-
-                          <p className="text-sm text-muted-foreground capitalize mb-2">
-                            {merchant.business_type.replace(/_/g, " ")}
-                          </p>
-
-                          {merchant.description && (
-                            <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-                              {merchant.description}
-                            </p>
-                          )}
-
-                          {merchant.address && (
-                            <div className="flex items-center gap-1 text-xs text-muted-foreground mb-3">
-                              <MapPin className="w-3 h-3 flex-shrink-0" />
-                              <span className="line-clamp-1">{merchant.address}</span>
-                            </div>
-                          )}
-
-                          <div className="flex items-center justify-between pt-3 border-t">
-                            <span className="text-sm text-primary font-medium">View Profile</span>
-                            <ChevronRight className="w-4 h-4 text-primary group-hover:translate-x-1 transition-transform" />
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
+                  <DirectoryMerchantCard
+                    key={merchant.id}
+                    merchant={merchant}
+                    index={index}
+                    isVerified={merchantIsVerified}
+                    isSponsored={merchantIsSponsored}
+                    isBoosted={merchantIsBoosted}
+                    onClick={handleCardClick}
+                    Icon={Icon}
+                  />
                 );
               })}
             </div>
