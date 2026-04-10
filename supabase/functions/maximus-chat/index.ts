@@ -550,7 +550,9 @@ RULES
 - For platform-related questions (how PawBucks works, tiers, pet fund, etc.), use the Platform Info section above.
 - For shared account members, the mirrored owner account is authoritative. If mirrored pets or pet history exist, answer from that data and never say the user needs to register a pet.
 - For questions about a pet's latest vet visit, use the PET MEDICAL VISITS section first, then PET MEDICAL RECORDS if no visit exists.
-- Remember: pet owners can ONLY earn PawBucks by spending at partner merchants/vets. If asked about other ways to earn, clarify this.`;
+- Remember: pet owners can ONLY earn PawBucks by spending at partner merchants/vets. If asked about other ways to earn, clarify this.
+- IMPORTANT: Whenever you share a phone number, ALWAYS format it as a clickable markdown link like [phone-number](tel:phone-number). For example: [(555) 123-4567](tel:5551234567). This makes it easy for users to tap and call directly.
+- When sharing hours of operation, present them in a clear, readable format (e.g., a list by day).`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
