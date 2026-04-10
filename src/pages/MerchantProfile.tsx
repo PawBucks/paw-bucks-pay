@@ -12,6 +12,7 @@ import { PaymentDialogWithPawBucks } from "@/components/PaymentDialogWithPawBuck
 import { WriteReviewDialog } from "@/components/merchant/WriteReviewDialog";
 import { ReviewCard } from "@/components/merchant/ReviewCard";
 import { BookingWidget } from "@/components/scheduling/BookingWidget";
+import { BusinessHoursDisplay } from "@/components/scheduling/BusinessHoursDisplay";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -550,6 +551,10 @@ const MerchantProfile = memo(() => {
                       </div>
                     </>
                   )}
+
+                  {/* Hours of Operation */}
+                  <Separator className="my-4" />
+                  <BusinessHoursDisplay merchantId={merchant.id} />
 
                   {/* Social Media Links */}
                   {(merchant.facebook_url || merchant.instagram_url || merchant.twitter_url || merchant.linkedin_url) && (
