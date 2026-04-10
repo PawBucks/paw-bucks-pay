@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Facebook, Instagram, Twitter, Linkedin, Globe } from "lucide-react";
 import { PolicyDocumentUpload } from "./PolicyDocumentUpload";
+import { BusinessHoursEditor } from "./BusinessHoursEditor";
 
 type Merchant = {
   id: string;
@@ -270,6 +271,9 @@ export const EditMerchantProfileDialog = ({
               </div>
               </div>
             </div>
+
+            {/* Hours of Operation */}
+            <BusinessHoursEditor merchantId={merchant.id} />
 
             {/* Policy Documents Section */}
             {user && (
