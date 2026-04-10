@@ -500,9 +500,9 @@ RECENT NOTIFICATIONS (last 15)
 ═══════════════════════════════════════
 ${notifications.length > 0 ? notifications.map((n: any) => `- ${new Date(n.created_at).toLocaleDateString()}: [${n.category}] ${n.title}${n.is_read ? '' : ' 🔴 Unread'}`).join('\n') : '- No notifications'}
 
-${buildMerchantSection(allMerchants, merchantReviewSummary, allOffers, allStoreItems, allLoyaltyPrograms)}
+${buildMerchantSection(allMerchants, merchantReviewSummary, allOffers, allStoreItems, allLoyaltyPrograms, allMerchantServices, allMerchantHours)}
 
-${buildVetSection(allVets)}
+${buildVetSection(allVets, allVetHours)}
 
 ${buildStoreCatalog(allStoreItems, allMerchants)}
 
