@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft, MapPin, Star, Clock, Phone, Globe, Share2 } from "lucide-react";
+import { BusinessHoursDisplay } from "@/components/scheduling/BusinessHoursDisplay";
 import { toast } from "sonner";
 
 export default function PublicBookingPage() {
@@ -140,6 +141,11 @@ export default function PublicBookingPage() {
               </Button>
             )}
           </div>
+        </div>
+
+        {/* Hours of Operation */}
+        <div className="mb-6">
+          <BusinessHoursDisplay merchantId={merchant.id} />
         </div>
 
         {/* Booking Widget */}
