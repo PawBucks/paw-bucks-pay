@@ -13,19 +13,6 @@ export function PhotoGallery({ merchantId }: Props) {
   const { data: photos = [] } = useQuery({
     queryKey: ["merchant-photos", merchantId],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("review_photos")
-        .select("id, photo_url, review_id")
-        .in(
-          "review_id",
-          supabase
-            .from("merchant_reviews")
-            .select("id")
-            .eq("merchant_id", merchantId)
-            .then(r => (r.data || []).map(d => d.id))
-        );
-
-      // Fallback: fetch review IDs first, then photos
       const { data: reviews } = await supabase
         .from("merchant_reviews")
         .select("id")
