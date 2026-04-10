@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MapPin, Star, Navigation, CreditCard, Coins, BadgeCheck, Gem, ChevronRight } from "lucide-react";
+import { MapPin, Star, Navigation, Coins, BadgeCheck, Gem, ChevronRight } from "lucide-react";
 import { PawBucksInfoTooltip } from "@/components/PawBucksInfoTooltip";
 
 type MerchantWithRating = {
@@ -59,130 +59,121 @@ const PremiumAdCardComponent = ({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05, duration: 0.3, ease: "easeOut" }}
     >
-      <Card className="group overflow-hidden border-border/80 bg-card shadow-[0_2px_16px_-4px_hsl(var(--primary)/0.1)] hover:shadow-[0_6px_24px_-4px_hsl(var(--primary)/0.18)] transition-all duration-300 hover:border-primary/40">
+      <Card className="group overflow-hidden border-border/60 bg-card shadow-[0_2px_12px_-4px_hsl(var(--primary)/0.08)] hover:shadow-[0_8px_24px_-6px_hsl(var(--primary)/0.15)] transition-all duration-200 hover:border-primary/30">
         <CardContent className="p-0">
           <Link to={`/merchant/${merchant.id}`} className="block" onClick={onCardClick}>
-            <div className="flex gap-4 p-4">
+            <div className="flex gap-3 sm:gap-4 p-3 sm:p-4">
               {/* Logo */}
               <div className="flex-shrink-0">
                 {merchant.logo_url ? (
-                  <div className="w-24 h-24 rounded-lg overflow-hidden bg-background shadow-sm border border-border">
+                  <div className="w-[88px] h-[88px] sm:w-24 sm:h-24 rounded-lg overflow-hidden bg-muted shadow-sm">
                     <img
                       src={merchant.logo_url}
-                      alt={`${merchant.business_name} logo`}
+                      alt={merchant.business_name}
                       width={96}
                       height={96}
                       className="w-full h-full object-cover"
+                      loading="lazy"
                     />
                   </div>
                 ) : (
-                  <div className="w-24 h-24 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center border border-border/50">
-                    <FallbackIcon className="w-10 h-10 text-primary" />
+                  <div className="w-[88px] h-[88px] sm:w-24 sm:h-24 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
+                    <FallbackIcon className="w-9 h-9 text-primary/50" />
                   </div>
                 )}
               </div>
 
               {/* Content */}
-              <div className="flex-1 min-w-0">
-                <div className="mb-1">
-                  <div className="flex items-center gap-2 flex-wrap mb-1">
-                    <Badge className="gap-1 bg-primary/10 text-primary border-primary/20 text-xs font-medium">
-                      <Gem className="w-3 h-3" />
-                      Premium
-                    </Badge>
-                    {isVerifiedPro && (
-                      <Badge className="gap-1 bg-blue-500/10 text-blue-600 border-blue-500/20 text-xs">
-                        <BadgeCheck className="w-3 h-3" />
-                        Verified Pro
-                      </Badge>
-                    )}
-                  </div>
-                  <h3 className="font-semibold text-lg line-clamp-1 group-hover:text-primary transition-colors">
+              <div className="flex-1 min-w-0 py-0.5">
+                {/* Premium label */}
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <Gem className="w-3 h-3 text-primary/60" />
+                  <span className="text-[10px] text-primary/60 uppercase tracking-widest font-medium">Premium</span>
+                </div>
+
+                {/* Name + Verified */}
+                <div className="flex items-start gap-1.5 mb-1">
+                  <h3 className="font-semibold text-base sm:text-lg leading-tight line-clamp-1 group-hover:text-primary transition-colors">
                     {merchant.business_name}
                   </h3>
+                  {isVerifiedPro && (
+                    <BadgeCheck className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5" />
+                  )}
                 </div>
 
                 {/* Rating */}
-                <div className="flex items-center gap-1.5 mb-2">
-                  <div className="flex items-center">
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <div className="flex items-center gap-px">
                     {[...Array(5)].map((_, i) => (
                       <Star
                         key={i}
-                        className={`w-4 h-4 ${
+                        className={`w-3.5 h-3.5 ${
                           i < fullStars
                             ? "text-yellow-500 fill-yellow-500"
                             : i === fullStars && hasHalfStar
                             ? "text-yellow-500 fill-yellow-500/50"
-                            : "text-muted-foreground/30"
+                            : "text-muted-foreground/20"
                         }`}
                       />
                     ))}
                   </div>
-                  <span className="text-sm font-medium">{safeRating.toFixed(1)}</span>
-                  <span className="text-sm text-muted-foreground">({merchant.review_count ?? 0})</span>
-                </div>
-
-                {/* Type + Price + Cashback */}
-                <div className="flex items-center gap-2 mb-2 flex-wrap">
-                  <Badge variant="outline" className="text-xs capitalize">
-                    {merchant.business_type.replace(/_/g, " ")}
-                  </Badge>
-                  <span className="text-sm font-medium text-muted-foreground">
+                  <span className="text-xs font-semibold">{safeRating.toFixed(1)}</span>
+                  <span className="text-xs text-muted-foreground">({merchant.review_count ?? 0})</span>
+                  <span className="text-muted-foreground/40">·</span>
+                  <span className="text-xs text-muted-foreground font-medium">
                     {getPriceRange(merchant.price_range)}
                   </span>
-                  <span className="text-muted-foreground/50">•</span>
-                  <Badge className="bg-green-500/10 text-green-600 border-green-500/20 text-xs gap-1">
+                </div>
+
+                {/* Meta */}
+                <div className="flex items-center gap-1.5 mb-1.5 flex-wrap">
+                  <span className="text-xs text-muted-foreground capitalize">
+                    {merchant.business_type.replace(/_/g, " ")}
+                  </span>
+                  <span className="text-muted-foreground/40">·</span>
+                  <span className="text-xs text-green-600 font-medium">
                     {(merchant.cashback_rate ?? 0).toFixed(0)}x points
-                    <PawBucksInfoTooltip variant="multiplier" className="ml-0.5" />
-                  </Badge>
+                  </span>
+                  {merchant.accepts_pawbucks && (
+                    <>
+                      <span className="text-muted-foreground/40">·</span>
+                      <Coins className="w-3 h-3 text-primary" />
+                    </>
+                  )}
                 </div>
 
                 {merchant.description && (
-                  <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
+                  <p className="text-xs text-muted-foreground/80 line-clamp-1 mb-1.5">
                     {merchant.description}
                   </p>
                 )}
 
-                {/* Address + Distance */}
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2 min-w-0 flex-1">
-                    {merchant.address && (
-                      <p className="text-xs text-muted-foreground line-clamp-1 flex items-center gap-1">
-                        <MapPin className="w-3 h-3 flex-shrink-0" />
-                        {merchant.address}
-                      </p>
-                    )}
-                    {showDistance && merchant.distance !== undefined && (
-                      <Badge variant="outline" className="text-xs flex-shrink-0 gap-1">
-                        <Navigation className="w-3 h-3" />
-                        {formatDistance(merchant.distance)}
-                      </Badge>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <CreditCard className="w-3.5 h-3.5 text-muted-foreground" />
-                    {merchant.accepts_pawbucks && (
-                      <Coins className="w-3.5 h-3.5 text-primary" />
-                    )}
-                  </div>
+                {/* Address */}
+                <div className="flex items-center gap-2">
+                  {merchant.address && (
+                    <p className="text-[11px] text-muted-foreground/70 line-clamp-1 flex items-center gap-1">
+                      <MapPin className="w-2.5 h-2.5 flex-shrink-0" />
+                      {merchant.address}
+                    </p>
+                  )}
+                  {showDistance && merchant.distance !== undefined && (
+                    <span className="text-[11px] text-muted-foreground/70 flex items-center gap-0.5 flex-shrink-0">
+                      <Navigation className="w-2.5 h-2.5" />
+                      {formatDistance(merchant.distance)}
+                    </span>
+                  )}
                 </div>
               </div>
 
               <div className="flex-shrink-0 self-center">
-                <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                <ChevronRight className="w-4 h-4 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
               </div>
             </div>
           </Link>
-
-          <div className="px-4 pb-4">
-            <Button className="w-full" onClick={onPayClick}>
-              Pay & Earn Points
-            </Button>
-          </div>
         </CardContent>
       </Card>
     </motion.div>
