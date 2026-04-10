@@ -251,6 +251,33 @@ const MerchantDirectory = () => {
     !!debouncedSearch,
   ].filter(Boolean).length;
 
+  // Map data: transform to MerchantMarker shape
+  const mapMerchants = useMemo(() => {
+    return filteredMerchants
+      .filter((m) => m.latitude && m.longitude)
+      .map((m) => ({
+        id: m.id,
+        business_name: m.business_name,
+        business_type: m.business_type,
+        latitude: m.latitude,
+        longitude: m.longitude,
+        address: m.address,
+        cashback_rate: m.cashback_rate,
+        avg_rating: m.average_rating,
+        review_count: m.review_count,
+      }));
+  }, [filteredMerchants]);
+
+  const sponsoredIdSet = useMemo(
+    () => new Set(sponsoredMerchantsList.map((m) => m.id)),
+    [sponsoredMerchantsList]
+  );
+
+  const handleMapMerchantClick = useCallback(
+    (merchantId: string) => navigate(`/merchant/${merchantId}`),
+    [navigate]
+  );
+
   if (isLoading) {
     return <PageLoader message="Loading merchant directory..." />;
   }
