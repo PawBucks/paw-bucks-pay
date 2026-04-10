@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect, memo } from "react";
+import { useState, useMemo, useCallback, useEffect, memo, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useOptimizedQuery } from "@/hooks/useOptimizedQuery";
@@ -13,10 +13,13 @@ import { WriteReviewDialog } from "@/components/merchant/WriteReviewDialog";
 import { ReviewCard } from "@/components/merchant/ReviewCard";
 import { BookingWidget } from "@/components/scheduling/BookingWidget";
 import { BusinessHoursDisplay } from "@/components/scheduling/BusinessHoursDisplay";
+import { OpenStatusBadge } from "@/components/merchant/OpenStatusBadge";
+import { QuickActions } from "@/components/merchant/QuickActions";
+import { PhotoGallery } from "@/components/merchant/PhotoGallery";
+import { PriceRangeDisplay } from "@/components/merchant/PriceRangeDisplay";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { ROUTES } from "@/lib/constants";
@@ -29,9 +32,7 @@ import {
   Star,
   MapPin,
   Phone,
-  Mail,
   Globe,
-  Clock,
   Coins,
   CreditCard,
   Store,
@@ -52,6 +53,7 @@ import {
   Instagram,
   Twitter,
   Linkedin,
+  ThumbsUp,
 } from "lucide-react";
 
 const getBusinessIcon = (type: string) => {
@@ -81,6 +83,8 @@ const MerchantProfile = memo(() => {
   const { user, signOut } = useAuth();
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState<string>("overview");
+  const bookingRef = useRef<HTMLDivElement>(null);
 
   // Fetch merchant active services
   const { data: activeServices = [] } = useMerchantActiveServices(merchantId);
@@ -91,25 +95,17 @@ const MerchantProfile = memo(() => {
   // Track profile views for service ROI
   const { trackProfileView } = useServiceConversionTracking();
   
-  // Fire profile view tracking once per page load for active services
   useEffect(() => {
     if (merchantId && activeServices.length > 0) {
-      if (hasVerifiedPro) {
-        trackProfileView(merchantId, SERVICE_NAMES.VERIFIED_PRO_BADGE, 'profile');
-      }
-      if (hasFeaturedPartner) {
-        trackProfileView(merchantId, SERVICE_NAMES.FEATURED_PARTNER, 'profile');
-      }
-      if (isSponsored) {
-        trackProfileView(merchantId, SERVICE_NAMES.SPONSORED_PLACEMENT, 'profile');
-      }
+      if (hasVerifiedPro) trackProfileView(merchantId, SERVICE_NAMES.VERIFIED_PRO_BADGE, 'profile');
+      if (hasFeaturedPartner) trackProfileView(merchantId, SERVICE_NAMES.FEATURED_PARTNER, 'profile');
+      if (isSponsored) trackProfileView(merchantId, SERVICE_NAMES.SPONSORED_PLACEMENT, 'profile');
     }
   }, [merchantId, activeServices, hasVerifiedPro, hasFeaturedPartner, isSponsored, trackProfileView]);
 
-  // Parallel queries for merchant data, services, and stripe info
+  // Parallel queries
   const queryResults = useQueries({
     queries: [
-      // Merchant data from public view
       {
         queryKey: ["merchant", merchantId],
         queryFn: async () => {
@@ -124,14 +120,12 @@ const MerchantProfile = memo(() => {
         staleTime: 1000 * 60 * 5,
         enabled: !!merchantId,
       },
-      // Merchant services for scheduling
       {
         queryKey: ["merchant-services-public", merchantId],
         queryFn: () => schedulingService.getActiveServices(merchantId!),
         staleTime: 1000 * 60 * 5,
         enabled: !!merchantId,
       },
-      // Stripe account info (only if authenticated)
       {
         queryKey: ["merchant-stripe", merchantId],
         queryFn: async () => {
@@ -154,11 +148,10 @@ const MerchantProfile = memo(() => {
   const stripeAccountId = merchantStripeInfo?.accountId;
   const hasBookableServices = merchantServices.length > 0;
 
-  // Optimized reviews query - batch fetch photos and profiles
+  // Reviews query
   const { data: reviews = [], isLoading: reviewsLoading, refetch: refetchReviews } = useOptimizedQuery<Review[]>(
     ["merchant-reviews", merchantId],
     async () => {
-      // Get reviews first
       const { data: reviewData, error: reviewError } = await supabase
         .from("merchant_reviews")
         .select("id, user_id, rating, review_text, created_at")
@@ -172,19 +165,11 @@ const MerchantProfile = memo(() => {
       const reviewIds = reviewData.map(r => r.id);
       const userIds = [...new Set(reviewData.map(r => r.user_id))];
 
-       // Parallel batch queries for photos and reviewer profiles (public view)
-       const [photosResult, profilesResult] = await Promise.all([
-         supabase
-           .from("review_photos")
-           .select("id, photo_url, review_id")
-           .in("review_id", reviewIds),
-         supabase
-           .from("reviewer_profiles")
-           .select("id, full_name")
-           .in("id", userIds),
-       ]);
+      const [photosResult, profilesResult] = await Promise.all([
+        supabase.from("review_photos").select("id, photo_url, review_id").in("review_id", reviewIds),
+        supabase.from("reviewer_profiles").select("id, full_name").in("id", userIds),
+      ]);
 
-      // Create lookup maps
       const photosByReview = new Map<string, { id: string; photo_url: string }[]>();
       (photosResult.data || []).forEach(photo => {
         const existing = photosByReview.get(photo.review_id) || [];
@@ -197,7 +182,6 @@ const MerchantProfile = memo(() => {
         profilesByUser.set(profile.id, profile.full_name || "Anonymous");
       });
 
-      // Combine data
       return reviewData.map(review => ({
         ...review,
         photos: photosByReview.get(review.id) || [],
@@ -207,30 +191,24 @@ const MerchantProfile = memo(() => {
     { staleTime: 1000 * 60 * 2, enabled: !!merchantId }
   );
 
-  // Calculate rating stats
+  // Rating stats
   const ratingStats = useMemo(() => {
     if (!reviews.length) return { average: 0, total: 0, distribution: [0, 0, 0, 0, 0] };
-    
     const distribution = [0, 0, 0, 0, 0];
     let sum = 0;
-    
-    reviews.forEach((r) => {
-      sum += r.rating;
-      distribution[r.rating - 1]++;
-    });
-    
-    return {
-      average: sum / reviews.length,
-      total: reviews.length,
-      distribution,
-    };
+    reviews.forEach((r) => { sum += r.rating; distribution[r.rating - 1]++; });
+    return { average: sum / reviews.length, total: reviews.length, distribution };
   }, [reviews]);
 
-  // Check if user has already reviewed
   const userHasReviewed = useMemo(() => {
     if (!user) return false;
     return reviews.some((r) => r.user_id === user.id);
   }, [reviews, user]);
+
+  // Featured review (highest rated with text)
+  const featuredReview = useMemo(() => {
+    return reviews.find(r => r.review_text && r.review_text.length > 20 && r.rating >= 4);
+  }, [reviews]);
 
   const handlePaymentSuccess = useCallback(() => {
     toast.success("Redirecting to wallet...");
@@ -251,13 +229,12 @@ const MerchantProfile = memo(() => {
     setPaymentDialogOpen(true);
   }, [user, navigate, merchantId]);
 
-  const handleOpenReviewDialog = useCallback(() => {
-    setReviewDialogOpen(true);
-  }, []);
+  const handleOpenReviewDialog = useCallback(() => setReviewDialogOpen(true), []);
+  const handleReviewSuccess = useCallback(() => refetchReviews(), [refetchReviews]);
 
-  const handleReviewSuccess = useCallback(() => {
-    refetchReviews();
-  }, [refetchReviews]);
+  const scrollToBooking = useCallback(() => {
+    bookingRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, []);
 
   if (merchantLoading || reviewsLoading) {
     return <PageLoader message="Loading merchant profile..." />;
@@ -285,239 +262,247 @@ const MerchantProfile = memo(() => {
       />
       <Header isAuthenticated={!!user} onLogout={user ? handleLogout : undefined} />
       
-      <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 pb-24 md:pb-12">
-        <div className="container mx-auto px-4 pt-4 max-w-4xl">
+      <div className="min-h-screen bg-background pb-24 md:pb-12">
+        <div className="max-w-2xl mx-auto">
           {/* Top Ad */}
-          <div className="mb-4">
+          <div className="px-4 pt-4">
             <AdPlacement position="top" />
           </div>
 
           {/* Back Button */}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate(-1)}
-            className="mb-4"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
-          </Button>
+          <div className="px-4 pt-3">
+            <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="gap-2 text-muted-foreground hover:text-foreground -ml-2">
+              <ArrowLeft className="w-4 h-4" />
+              Back
+            </Button>
+          </div>
 
-          {/* Hero Header */}
-          <Card className="overflow-hidden mb-6">
-            <div className="bg-gradient-to-br from-primary/20 via-primary/10 to-background p-8">
-              <div className="flex flex-col md:flex-row gap-6 items-start">
-                {/* Logo */}
-                <div className="flex-shrink-0">
-                  {merchant.logo_url ? (
-                    <div className="w-28 h-28 rounded-2xl overflow-hidden bg-background shadow-lg border-2 border-border">
-                      <img
-                        src={merchant.logo_url}
-                        alt={merchant.business_name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  ) : (
-                    <div className="w-28 h-28 rounded-2xl bg-background flex items-center justify-center shadow-lg border-2 border-border">
-                      <Icon className="w-14 h-14 text-primary" />
-                    </div>
+          {/* ═══════════════ HERO SECTION ═══════════════ */}
+          <div className="px-4 pt-2 pb-4">
+            {/* Logo + Name Row */}
+            <div className="flex gap-4 items-start">
+              {/* Logo */}
+              <div className="flex-shrink-0">
+                {merchant.logo_url ? (
+                  <div className="w-24 h-24 rounded-2xl overflow-hidden shadow-lg border-2 border-border ring-2 ring-primary/10">
+                    <img src={merchant.logo_url} alt={merchant.business_name} className="w-full h-full object-cover" />
+                  </div>
+                ) : (
+                  <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shadow-lg border-2 border-border">
+                    <Icon className="w-12 h-12 text-primary" />
+                  </div>
+                )}
+              </div>
+
+              {/* Name & Meta */}
+              <div className="flex-1 min-w-0 pt-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h1 className="text-2xl font-bold tracking-tight leading-tight">{merchant.business_name}</h1>
+                  {hasVerifiedPro && (
+                    <BadgeCheck className="w-6 h-6 text-blue-500 flex-shrink-0" />
+                  )}
+                  {merchantId && (
+                    <Founding50Badge entityType="merchant" entityId={merchantId} size="md" />
                   )}
                 </div>
 
-                {/* Info */}
-                <div className="flex-1">
-                  <div className="flex items-start justify-between flex-wrap gap-4">
-                    <div>
-                      <div className="flex items-center gap-2 flex-wrap mb-1">
-                        <h1 className="text-3xl font-bold">{merchant.business_name}</h1>
-                        {hasVerifiedPro && (
-                          <Badge className="bg-blue-500/10 text-blue-600 border-blue-500/20 gap-1">
-                            <BadgeCheck className="w-4 h-4" />
-                            Verified Pro
-                          </Badge>
-                        )}
-                        {isSponsored && (
-                          <Badge variant="secondary" className="gap-1 bg-primary/10 text-primary">
-                         <Sparkles className="w-4 h-4" />
-                            Sponsored
-                          </Badge>
-                        )}
-                        {merchantId && (
-                          <Founding50Badge entityType="merchant" entityId={merchantId} size="md" />
-                        )}
-                      </div>
-                      <p className="text-muted-foreground capitalize">
-                        {merchant.business_type.replace(/_/g, " ")}
-                      </p>
-                    </div>
-                    <Badge className="bg-primary text-primary-foreground text-lg px-4 py-2">
-                      {merchant.cashback_rate}x Points
+                {/* Category + Price */}
+                <div className="flex items-center gap-2 mt-1 flex-wrap">
+                  <span className="text-sm text-muted-foreground capitalize">
+                    {merchant.business_type.replace(/_/g, " ")}
+                  </span>
+                  <PriceRangeDisplay priceRange={merchant.price_range} />
+                </div>
+
+                {/* Badges Row */}
+                <div className="flex items-center gap-2 mt-2 flex-wrap">
+                  <OpenStatusBadge merchantId={merchant.id} />
+                  {isSponsored && (
+                    <Badge variant="secondary" className="gap-1 bg-primary/10 text-primary text-xs">
+                      <Sparkles className="w-3 h-3" /> Sponsored
                     </Badge>
-                  </div>
-
-                  {/* Rating */}
-                  <div className="flex items-center gap-3 mt-4">
-                    <div className="flex items-center gap-1">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <Star
-                          key={star}
-                          className={`w-5 h-5 ${
-                            star <= Math.round(ratingStats.average)
-                              ? "fill-yellow-400 text-yellow-400"
-                              : "text-muted-foreground/30"
-                          }`}
-                        />
-                      ))}
-                    </div>
-                    <span className="font-semibold">{ratingStats.average.toFixed(1)}</span>
-                    <span className="text-muted-foreground">
-                      ({ratingStats.total} {ratingStats.total === 1 ? "review" : "reviews"})
-                    </span>
-                  </div>
-
-                  {/* Payment Methods */}
-                  <div className="flex items-center gap-4 mt-4">
-                    <div className="flex items-center gap-2 text-sm">
-                      <CreditCard className="w-4 h-4 text-muted-foreground" />
-                      <span>Card Payments</span>
-                    </div>
-                    {merchant.accepts_pawbucks && (
-                      <div className="flex items-center gap-2 text-sm text-primary font-medium">
-                        <Coins className="w-4 h-4" />
-                        <span>Accepts PawBucks</span>
-                      </div>
-                    )}
-                  </div>
+                  )}
+                  {merchant.accepts_pawbucks && (
+                    <Badge variant="outline" className="gap-1 text-xs bg-amber-500/10 text-amber-600 border-amber-500/30 dark:text-amber-400">
+                      <Coins className="w-3 h-3" /> PawBucks
+                    </Badge>
+                  )}
                 </div>
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="p-4 bg-muted/30 flex flex-wrap gap-3">
-              <Button
-                size="lg"
-                className="flex-1 min-w-[200px]"
-                onClick={handleOpenPaymentDialog}
+            {/* ═══ Rating Summary Bar ═══ */}
+            <div className="flex items-center gap-3 mt-4 px-1">
+              <div className="flex items-center gap-1.5">
+                <span className="text-2xl font-bold text-foreground">{ratingStats.average.toFixed(1)}</span>
+                <div className="flex items-center">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Star
+                      key={star}
+                      className={`w-4 h-4 ${
+                        star <= Math.round(ratingStats.average)
+                          ? "fill-amber-400 text-amber-400"
+                          : "text-muted-foreground/20"
+                      }`}
+                    />
+                  ))}
+                </div>
+              </div>
+              <button
+                onClick={() => setActiveSection("reviews")}
+                className="text-sm text-primary hover:underline font-medium bg-transparent border-none p-0 cursor-pointer"
               >
-                <ShoppingBag className="w-4 h-4 mr-2" />
+                {ratingStats.total} {ratingStats.total === 1 ? "review" : "reviews"}
+              </button>
+              <span className="text-muted-foreground">·</span>
+              <Badge className="bg-primary text-primary-foreground text-xs font-semibold">
+                {merchant.cashback_rate}x Points
+              </Badge>
+            </div>
+
+            {/* ═══ Quick Actions ═══ */}
+            <div className="mt-4">
+              <QuickActions
+                phone={merchant.phone}
+                address={merchant.address}
+                websiteUrl={merchant.website_url}
+                businessName={merchant.business_name}
+                storefrontSlug={merchant.storefront_slug}
+                hasBookableServices={hasBookableServices}
+                onBookClick={scrollToBooking}
+              />
+            </div>
+
+            {/* ═══ Primary CTA ═══ */}
+            <div className="flex gap-2 mt-2">
+              <Button size="lg" className="flex-1 h-12 text-base font-semibold" onClick={handleOpenPaymentDialog}>
+                <ShoppingBag className="w-5 h-5 mr-2" />
                 Pay & Earn PawBucks
               </Button>
-              {merchant?.storefront_slug && (
-                <Button
-                  variant="outline"
-                  size="lg"
-                  asChild
-                >
-                  <Link to={`/storefront/${merchant.storefront_slug}`}>
-                    <Store className="w-4 h-4 mr-2" />
-                    View Storefront
-                  </Link>
-                </Button>
-              )}
               {user && !userHasReviewed && (
-                <Button
-                  variant="outline"
-                  size="lg"
-                  onClick={handleOpenReviewDialog}
-                >
-                  <MessageSquare className="w-4 h-4 mr-2" />
-                  Write a Review
+                <Button variant="outline" size="lg" className="h-12" onClick={handleOpenReviewDialog}>
+                  <Camera className="w-5 h-5 mr-1" />
+                  Review
                 </Button>
               )}
             </div>
-          </Card>
-
-          {/* Tabs Content */}
-          <Tabs defaultValue={hasBookableServices ? "services" : "about"} className="mb-6">
-            <TabsList className="w-full justify-start mb-4 flex-wrap h-auto gap-1">
-              {hasBookableServices && (
-                <TabsTrigger value="services" className="gap-1">
-                  <CalendarDays className="w-4 h-4" />
-                  Book
-                </TabsTrigger>
-              )}
-              <TabsTrigger value="about">About</TabsTrigger>
-              <TabsTrigger value="reviews">
-                Reviews ({ratingStats.total})
-              </TabsTrigger>
-              {stripeAccountId && (
-                <TabsTrigger value="products">Products</TabsTrigger>
-              )}
-            </TabsList>
-
-            {/* Services/Booking Tab */}
-            {hasBookableServices && (
-              <TabsContent value="services">
-                <BookingWidget
-                  merchantId={merchant.id}
-                  merchantName={merchant.business_name}
-                  cashbackRate={merchant.cashback_rate}
-                />
-              </TabsContent>
+            {merchant?.storefront_slug && (
+              <Button variant="outline" className="w-full mt-2" asChild>
+                <Link to={`/storefront/${merchant.storefront_slug}`}>
+                  <Store className="w-4 h-4 mr-2" /> View Storefront
+                </Link>
+              </Button>
             )}
+          </div>
 
-            {/* About Tab */}
-            <TabsContent value="about" className="space-y-6">
-              {/* Description */}
-              {merchant.description && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">About</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground whitespace-pre-line">
-                      {merchant.description}
-                    </p>
-                  </CardContent>
-                </Card>
+          <Separator />
+
+          {/* ═══════════════ SCROLLABLE SECTION NAV ═══════════════ */}
+          <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-sm border-b">
+            <div className="flex overflow-x-auto scrollbar-none px-4">
+              {[
+                { id: "overview", label: "Overview" },
+                ...(hasBookableServices ? [{ id: "booking", label: "Book Now" }] : []),
+                { id: "reviews", label: `Reviews (${ratingStats.total})` },
+                { id: "hours", label: "Hours" },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => {
+                    setActiveSection(tab.id);
+                    document.getElementById(`section-${tab.id}`)?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap bg-transparent ${
+                    activeSection === tab.id
+                      ? "border-primary text-primary"
+                      : "border-transparent text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* ═══════════════ CONTENT SECTIONS ═══════════════ */}
+          <div className="px-4 py-6 space-y-8">
+
+            {/* ─── Overview Section ─── */}
+            <section id="section-overview">
+              {/* Featured Review Quote */}
+              {featuredReview && (
+                <div className="bg-muted/50 rounded-xl p-4 mb-6 border border-border/50">
+                  <div className="flex items-start gap-3">
+                    <ThumbsUp className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm italic text-foreground line-clamp-3">
+                        "{featuredReview.review_text}"
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
+                        — {featuredReview.user_name}
+                        <span className="inline-flex items-center gap-0.5 ml-2">
+                          {[1,2,3,4,5].map(s => (
+                            <Star key={s} className={`w-3 h-3 ${s <= featuredReview.rating ? "fill-amber-400 text-amber-400" : "text-muted-foreground/20"}`} />
+                          ))}
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
               )}
 
-              {/* Contact & Location */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Contact & Location</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {/* Phone Number */}
+              {/* Photo Gallery */}
+              {merchantId && <PhotoGallery merchantId={merchantId} />}
+
+              {/* About */}
+              {merchant.description && (
+                <div className="mb-6">
+                  <h2 className="font-semibold text-base mb-2">About the Business</h2>
+                  <p className="text-sm text-muted-foreground whitespace-pre-line leading-relaxed">
+                    {merchant.description}
+                  </p>
+                </div>
+              )}
+
+              {/* Contact & Location Card */}
+              <Card className="mb-6">
+                <CardContent className="p-5 space-y-4">
+                  <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">Location & Contact</h3>
+                  
                   {merchant.phone && (
-                    <div className="flex items-start gap-3">
-                      <Phone className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                      <div>
-                        <p className="font-medium">Phone</p>
-                        <a
-                          href={`tel:${merchant.phone}`}
-                          className="text-primary hover:underline text-lg"
-                        >
-                          {merchant.phone}
-                        </a>
+                    <a href={`tel:${merchant.phone}`} className="flex items-center gap-3 group py-1">
+                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <Phone className="w-4 h-4 text-primary" />
                       </div>
-                    </div>
+                      <div>
+                        <p className="text-sm font-medium group-hover:text-primary transition-colors">{merchant.phone}</p>
+                        <p className="text-xs text-muted-foreground">Tap to call</p>
+                      </div>
+                    </a>
                   )}
 
-                  {/* Address */}
                   {merchant.address && (
                     <>
-                      {merchant.phone && <Separator />}
-                      <div className="flex items-start gap-3">
-                        <MapPin className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                        <div>
-                          <p className="font-medium">Address</p>
-                          <a
-                            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(merchant.address)}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-primary hover:underline"
-                          >
-                            {merchant.address}
-                          </a>
+                      <a
+                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(merchant.address)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 group py-1"
+                      >
+                        <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center flex-shrink-0">
+                          <MapPin className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                         </div>
-                      </div>
-                      {/* Google Maps Embed */}
-                      <div className="rounded-lg overflow-hidden border">
+                        <div>
+                          <p className="text-sm font-medium group-hover:text-primary transition-colors">{merchant.address}</p>
+                          <p className="text-xs text-muted-foreground">Get directions</p>
+                        </div>
+                      </a>
+                      {/* Map */}
+                      <div className="rounded-xl overflow-hidden border">
                         <iframe
                           title={`Map of ${merchant.business_name}`}
                           width="100%"
-                          height="250"
+                          height="200"
                           style={{ border: 0 }}
                           loading="lazy"
                           allowFullScreen
@@ -527,183 +512,160 @@ const MerchantProfile = memo(() => {
                       </div>
                     </>
                   )}
-                  {!merchant.address && !merchant.phone && (
-                    <p className="text-muted-foreground text-sm">
-                      No contact information available.
-                    </p>
-                  )}
 
-                  {/* Website Link */}
                   {merchant.website_url && (
-                    <>
-                      <Separator className="my-4" />
-                      <div className="space-y-2">
-                        <p className="font-medium text-sm text-muted-foreground">Website</p>
-                        <a
-                          href={merchant.website_url.startsWith('http') ? merchant.website_url : `https://${merchant.website_url}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-2 text-primary hover:underline text-sm"
-                        >
-                          <Globe className="w-4 h-4" />
-                          {merchant.website_url.replace(/^https?:\/\//, '')}
-                        </a>
+                    <a
+                      href={merchant.website_url.startsWith("http") ? merchant.website_url : `https://${merchant.website_url}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-3 group py-1"
+                    >
+                      <div className="w-10 h-10 rounded-full bg-purple-500/10 flex items-center justify-center flex-shrink-0">
+                        <Globe className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                       </div>
-                    </>
+                      <div>
+                        <p className="text-sm font-medium group-hover:text-primary transition-colors">
+                          {merchant.website_url.replace(/^https?:\/\//, "")}
+                        </p>
+                        <p className="text-xs text-muted-foreground">Visit website</p>
+                      </div>
+                    </a>
                   )}
+                </CardContent>
+              </Card>
 
-                  {/* Hours of Operation */}
-                  <Separator className="my-4" />
-                  <BusinessHoursDisplay merchantId={merchant.id} />
+              {/* Social Media */}
+              {(merchant.facebook_url || merchant.instagram_url || merchant.twitter_url || merchant.linkedin_url) && (
+                <div className="mb-6">
+                  <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider mb-3">Follow</h3>
+                  <div className="flex items-center gap-3">
+                    {merchant.facebook_url && (
+                      <a href={merchant.facebook_url} target="_blank" rel="noopener noreferrer"
+                        className="w-11 h-11 rounded-full bg-[#1877F2]/10 hover:bg-[#1877F2]/20 flex items-center justify-center text-[#1877F2] transition-all hover:scale-110"
+                        aria-label="Facebook">
+                        <Facebook className="w-5 h-5" />
+                      </a>
+                    )}
+                    {merchant.instagram_url && (
+                      <a href={merchant.instagram_url} target="_blank" rel="noopener noreferrer"
+                        className="w-11 h-11 rounded-full bg-[#E4405F]/10 hover:bg-[#E4405F]/20 flex items-center justify-center text-[#E4405F] transition-all hover:scale-110"
+                        aria-label="Instagram">
+                        <Instagram className="w-5 h-5" />
+                      </a>
+                    )}
+                    {merchant.twitter_url && (
+                      <a href={merchant.twitter_url} target="_blank" rel="noopener noreferrer"
+                        className="w-11 h-11 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center text-foreground transition-all hover:scale-110"
+                        aria-label="X">
+                        <Twitter className="w-5 h-5" />
+                      </a>
+                    )}
+                    {merchant.linkedin_url && (
+                      <a href={merchant.linkedin_url} target="_blank" rel="noopener noreferrer"
+                        className="w-11 h-11 rounded-full bg-[#0A66C2]/10 hover:bg-[#0A66C2]/20 flex items-center justify-center text-[#0A66C2] transition-all hover:scale-110"
+                        aria-label="LinkedIn">
+                        <Linkedin className="w-5 h-5" />
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
 
-                  {/* Social Media Links */}
-                  {(merchant.facebook_url || merchant.instagram_url || merchant.twitter_url || merchant.linkedin_url) && (
-                    <>
-                      <Separator className="my-4" />
-                      <div className="space-y-2">
-                        <p className="font-medium text-sm text-muted-foreground">Follow Us</p>
-                        <div className="flex items-center gap-3">
-                          {merchant.facebook_url && (
-                            <a
-                              href={merchant.facebook_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="w-10 h-10 rounded-full bg-[#1877F2]/10 hover:bg-[#1877F2]/20 flex items-center justify-center text-[#1877F2] transition-all hover:scale-110"
-                              aria-label="Follow on Facebook"
-                            >
-                              <Facebook className="w-5 h-5" />
-                            </a>
-                          )}
-                          {merchant.instagram_url && (
-                            <a
-                              href={merchant.instagram_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="w-10 h-10 rounded-full bg-[#E4405F]/10 hover:bg-[#E4405F]/20 flex items-center justify-center text-[#E4405F] transition-all hover:scale-110"
-                              aria-label="Follow on Instagram"
-                            >
-                              <Instagram className="w-5 h-5" />
-                            </a>
-                          )}
-                          {merchant.twitter_url && (
-                            <a
-                              href={merchant.twitter_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="w-10 h-10 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center text-foreground transition-all hover:scale-110"
-                              aria-label="Follow on X"
-                            >
-                              <Twitter className="w-5 h-5" />
-                            </a>
-                          )}
-                          {merchant.linkedin_url && (
-                            <a
-                              href={merchant.linkedin_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="w-10 h-10 rounded-full bg-[#0A66C2]/10 hover:bg-[#0A66C2]/20 flex items-center justify-center text-[#0A66C2] transition-all hover:scale-110"
-                              aria-label="Follow on LinkedIn"
-                            >
-                              <Linkedin className="w-5 h-5" />
-                            </a>
-                          )}
+              {/* Payment Options */}
+              <Card>
+                <CardContent className="p-5">
+                  <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider mb-3">Payment Options</h3>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between p-3 bg-muted/40 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <CreditCard className="w-5 h-5 text-muted-foreground" />
+                        <span className="text-sm font-medium">Credit/Debit Card</span>
+                      </div>
+                      <Badge variant="outline" className="text-xs">Available</Badge>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-muted/40 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <Coins className="w-5 h-5 text-primary" />
+                        <div>
+                          <span className="text-sm font-medium">PawBucks</span>
+                          <p className="text-xs text-muted-foreground">1000 PawBucks = $1.00</p>
                         </div>
                       </div>
-                    </>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Payment Info */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Payment Options</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <CreditCard className="w-5 h-5 text-muted-foreground" />
-                      <span>Credit/Debit Card</span>
+                      <Badge variant={merchant.accepts_pawbucks ? "default" : "secondary"} className="text-xs">
+                        {merchant.accepts_pawbucks ? "Accepted" : "Not Accepted"}
+                      </Badge>
                     </div>
-                    <Badge variant="outline">Available</Badge>
                   </div>
-                  <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <Coins className="w-5 h-5 text-primary" />
-                      <div>
-                        <span>PawBucks</span>
-                        <p className="text-xs text-muted-foreground">1000 PawBucks = $1.00</p>
-                      </div>
-                    </div>
-                    <Badge variant={merchant.accepts_pawbucks ? "default" : "secondary"}>
-                      {merchant.accepts_pawbucks ? "Accepted" : "Not Accepted"}
-                    </Badge>
-                  </div>
-                  <div className="p-3 bg-primary/10 rounded-lg">
-                    <p className="text-sm text-primary font-medium">
-                      Earn {merchant.cashback_rate}x points in PawBucks on every purchase!
+                  <div className="mt-3 p-3 bg-primary/5 rounded-lg border border-primary/10">
+                    <p className="text-sm text-primary font-medium flex items-center gap-2">
+                      <Sparkles className="w-4 h-4" />
+                      Earn {merchant.cashback_rate}x points on every purchase!
                     </p>
                   </div>
                 </CardContent>
               </Card>
-            </TabsContent>
+            </section>
 
-            {/* Reviews Tab */}
-            <TabsContent value="reviews" className="space-y-6">
-              {/* Rating Summary */}
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex flex-col md:flex-row gap-6">
-                    {/* Overall Rating */}
-                    <div className="text-center md:text-left">
-                      <div className="text-5xl font-bold">{ratingStats.average.toFixed(1)}</div>
-                      <div className="flex items-center justify-center md:justify-start gap-1 mt-2">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <Star
-                            key={star}
-                            className={`w-5 h-5 ${
-                              star <= Math.round(ratingStats.average)
-                                ? "fill-yellow-400 text-yellow-400"
-                                : "text-muted-foreground/30"
-                            }`}
-                          />
+            {/* ─── Booking Section ─── */}
+            {hasBookableServices && (
+              <section id="section-booking" ref={bookingRef}>
+                <h2 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                  <CalendarDays className="w-5 h-5 text-primary" />
+                  Book an Appointment
+                </h2>
+                <BookingWidget
+                  merchantId={merchant.id}
+                  merchantName={merchant.business_name}
+                  cashbackRate={merchant.cashback_rate}
+                />
+              </section>
+            )}
+
+            {/* ─── Reviews Section ─── */}
+            <section id="section-reviews">
+              <h2 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                <Star className="w-5 h-5 text-amber-400 fill-amber-400" />
+                Recommended Reviews
+              </h2>
+
+              {/* Rating Breakdown Card */}
+              <Card className="mb-6">
+                <CardContent className="p-5">
+                  <div className="flex gap-6">
+                    {/* Big number */}
+                    <div className="text-center flex-shrink-0">
+                      <div className="text-5xl font-bold tracking-tight">{ratingStats.average.toFixed(1)}</div>
+                      <div className="flex items-center justify-center gap-0.5 mt-1">
+                        {[1,2,3,4,5].map((star) => (
+                          <Star key={star} className={`w-4 h-4 ${star <= Math.round(ratingStats.average) ? "fill-amber-400 text-amber-400" : "text-muted-foreground/20"}`} />
                         ))}
                       </div>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {ratingStats.total} reviews
-                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">{ratingStats.total} reviews</p>
                     </div>
 
-                    {/* Rating Distribution */}
-                    <div className="flex-1 space-y-2">
+                    {/* Distribution bars */}
+                    <div className="flex-1 space-y-1.5 pt-1">
                       {[5, 4, 3, 2, 1].map((rating) => {
                         const count = ratingStats.distribution[rating - 1];
-                        const percentage = ratingStats.total
-                          ? (count / ratingStats.total) * 100
-                          : 0;
+                        const pct = ratingStats.total ? (count / ratingStats.total) * 100 : 0;
                         return (
                           <div key={rating} className="flex items-center gap-2">
-                            <span className="text-sm w-3">{rating}</span>
-                            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                            <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                            <span className="text-xs w-3 text-muted-foreground">{rating}</span>
+                            <div className="flex-1 h-2.5 bg-muted rounded-full overflow-hidden">
                               <div
-                                className="h-full bg-yellow-400 rounded-full transition-all"
-                                style={{ width: `${percentage}%` }}
+                                className="h-full bg-amber-400 rounded-full transition-all duration-500"
+                                style={{ width: `${pct}%` }}
                               />
                             </div>
-                            <span className="text-sm text-muted-foreground w-8">
-                              {count}
-                            </span>
                           </div>
                         );
                       })}
                     </div>
                   </div>
 
-                  {/* Write Review Button */}
                   {user && !userHasReviewed && (
-                    <div className="mt-6 pt-6 border-t">
-                      <Button onClick={handleOpenReviewDialog} className="w-full md:w-auto">
+                    <div className="mt-5 pt-4 border-t">
+                      <Button onClick={handleOpenReviewDialog} className="w-full">
                         <Camera className="w-4 h-4 mr-2" />
                         Write a Review
                       </Button>
@@ -716,56 +678,31 @@ const MerchantProfile = memo(() => {
               {reviews.length === 0 ? (
                 <Card>
                   <CardContent className="py-12 text-center">
-                    <MessageSquare className="w-12 h-12 mx-auto text-muted-foreground/40 mb-4" />
+                    <MessageSquare className="w-12 h-12 mx-auto text-muted-foreground/30 mb-4" />
                     <h3 className="font-semibold mb-2">No reviews yet</h3>
-                    <p className="text-muted-foreground mb-4">
-                      Be the first to review this merchant!
-                    </p>
+                    <p className="text-sm text-muted-foreground mb-4">Be the first to share your experience!</p>
                     {user && (
-                      <Button onClick={handleOpenReviewDialog}>
-                        Write a Review
-                      </Button>
+                      <Button onClick={handleOpenReviewDialog}>Write a Review</Button>
                     )}
                   </CardContent>
                 </Card>
               ) : (
                 <div className="space-y-4">
                   {reviews.map((review) => (
-                    <ReviewCard
-                      key={review.id}
-                      review={review}
-                      currentUserId={user?.id}
-                      onDelete={handleReviewSuccess}
-                    />
+                    <ReviewCard key={review.id} review={review} currentUserId={user?.id} onDelete={handleReviewSuccess} />
                   ))}
                 </div>
               )}
-            </TabsContent>
+            </section>
 
-          {/* Products Tab */}
-          {stripeAccountId && (
-            <TabsContent value="products">
-              <Card>
-                <CardContent className="py-8 text-center">
-                  <ShoppingBag className="w-12 h-12 mx-auto text-muted-foreground/40 mb-4" />
-                  <h3 className="font-semibold mb-2">View Products</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Check out the products and services offered by this merchant.
-                  </p>
-                  <Button asChild>
-                    <Link to={`/storefront/${merchant?.storefront_slug || stripeAccountId}`}>
-                      View Storefront
-                      <ChevronRight className="w-4 h-4 ml-2" />
-                    </Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          )}
-          </Tabs>
+            {/* ─── Hours Section ─── */}
+            <section id="section-hours">
+              <BusinessHoursDisplay merchantId={merchant.id} />
+            </section>
 
-          {/* Bottom Ad */}
-          <AdPlacement position="bottom" />
+            {/* Bottom Ad */}
+            <AdPlacement position="bottom" />
+          </div>
         </div>
 
         {/* Payment Dialog */}
