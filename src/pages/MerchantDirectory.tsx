@@ -17,7 +17,7 @@ import { Separator } from "@/components/ui/separator";
 import { ROUTES, QUERY_STALE_TIMES } from "@/lib/constants";
 import { usePersistentState } from "@/hooks/usePersistentState";
 import { supabase } from "@/integrations/supabase/client";
-import { useVerifiedProMerchants, useSponsoredMerchants, useSearchBoostedMerchantSet, isVerifiedPro, isSponsored } from "@/hooks/useMerchantServices";
+import { useVerifiedProMerchants, useSponsoredMerchants, useFeaturedPartnerMerchants, usePremiumAdMerchants, useSearchBoostedMerchantSet, isVerifiedPro, isSponsored } from "@/hooks/useMerchantServices";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSponsoredTracking } from "@/hooks/useSponsoredTracking";
 import { useSearchRankingTracking } from "@/hooks/useSearchRankingTracking";
@@ -111,9 +111,11 @@ const MerchantDirectory = () => {
   const [viewMode, setViewMode] = usePersistentState<"list" | "grid" | "map">("directory-view", "list");
   const [showMobileMap, setShowMobileMap] = useState(false);
 
-  // Fetch verified and sponsored merchants for badge display
+  // Fetch verified, sponsored, featured, and premium merchants for badge/pin display
   const { data: verifiedProIds = [] } = useVerifiedProMerchants();
   const { data: sponsoredMerchantsList = [] } = useSponsoredMerchants();
+  const { data: featuredPartnersList = [] } = useFeaturedPartnerMerchants();
+  const { data: premiumAdsList = [] } = usePremiumAdMerchants();
   const { data: searchBoostedIds = new Set<string>() } = useSearchBoostedMerchantSet();
 
   // Sponsored placement tracking
@@ -271,6 +273,16 @@ const MerchantDirectory = () => {
   const sponsoredIdSet = useMemo(
     () => new Set(sponsoredMerchantsList.map((m) => m.id)),
     [sponsoredMerchantsList]
+  );
+
+  const featuredIdSet = useMemo(
+    () => new Set(featuredPartnersList.map((m) => m.id)),
+    [featuredPartnersList]
+  );
+
+  const premiumIdSet = useMemo(
+    () => new Set(premiumAdsList.map((m) => m.id)),
+    [premiumAdsList]
   );
 
   const handleMapMerchantClick = useCallback(
@@ -467,6 +479,8 @@ const MerchantDirectory = () => {
                   <MerchantMap
                     merchants={mapMerchants}
                     onMerchantClick={handleMapMerchantClick}
+                    featuredIds={featuredIdSet}
+                    premiumIds={premiumIdSet}
                     sponsoredIds={sponsoredIdSet}
                   />
                 </div>
