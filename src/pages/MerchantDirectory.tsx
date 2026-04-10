@@ -479,6 +479,8 @@ const MerchantDirectory = () => {
                   <MerchantMap
                     merchants={mapMerchants}
                     onMerchantClick={handleMapMerchantClick}
+                    featuredIds={featuredIdSet}
+                    premiumIds={premiumIdSet}
                     sponsoredIds={sponsoredIdSet}
                   />
                 </div>
