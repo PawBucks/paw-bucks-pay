@@ -7,6 +7,7 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { useOptimizedQuery } from "@/hooks/useOptimizedQuery";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { supabase } from "@/integrations/supabase/client";
+import { searchMatchesCategory } from "@/lib/categoryMapping";
 import { PaymentDialogWithPawBucks } from "@/components/PaymentDialogWithPawBucks";
 import { BottomNav } from "@/components/BottomNav";
 import { PageLoader } from "@/components/PageLoader";
