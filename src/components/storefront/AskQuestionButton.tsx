@@ -162,12 +162,11 @@ export const AskQuestionButton = ({ merchantId, merchantName }: AskQuestionButto
 
       if (error) throw error;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from("merchant-messages")
-        .getPublicUrl(data.path);
+      // Store the path; signed URLs will be generated at display time
+      const storagePath = data.path;
 
       const fileType = file.type.startsWith("image/") ? "image" : "file";
-      await handleSend(publicUrl, file.name, fileType);
+      await handleSend(storagePath, file.name, fileType);
     } catch (error: any) {
       console.error("Error uploading file:", error);
       toast.error(error.message || "Failed to upload file");
