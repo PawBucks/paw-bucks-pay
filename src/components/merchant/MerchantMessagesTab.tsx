@@ -10,6 +10,7 @@ import { MessageSquare, Send, Loader2, Image, Paperclip, Check, CheckCheck, Sear
 import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { SecureAttachment } from "@/components/shared/SecureAttachment";
 
 type Message = {
   id: string;
@@ -486,26 +487,12 @@ export const MerchantMessagesTab = ({ merchantId }: MerchantMessagesTabProps) =>
                       {msg.attachments && msg.attachments.length > 0 && (
                         <div className="mb-2 space-y-2">
                           {msg.attachments.map((att) => (
-                            <a
+                            <SecureAttachment
                               key={att.id}
-                              href={att.file_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="block"
-                            >
-                              {att.file_type === "image" ? (
-                                <img
-                                  src={att.file_url}
-                                  alt={att.file_name || "Attachment"}
-                                  className="max-w-full rounded-md max-h-48 object-cover"
-                                />
-                              ) : (
-                                <div className="flex items-center gap-2 px-3 py-2 rounded-md bg-background/20">
-                                  <Paperclip className="w-4 h-4" />
-                                  <span className="text-sm underline">{att.file_name || "Download file"}</span>
-                                </div>
-                              )}
-                            </a>
+                              fileUrl={att.file_url}
+                              fileType={att.file_type}
+                              fileName={att.file_name}
+                            />
                           ))}
                         </div>
                       )}
