@@ -824,7 +824,7 @@ const MerchantInvoicing = () => {
     return (
       <div className="min-h-screen bg-background">
         <SEO title="Invoice Preview | PawBucks" />
-        <div className="container mx-auto py-6 px-4">
+        <div className="container mx-auto py-6 px-4 max-w-7xl">
           <InvoicePreview
             invoice={previewData.invoice}
             items={previewData.items}
@@ -849,7 +849,7 @@ const MerchantInvoicing = () => {
     return (
       <div className="min-h-screen bg-background">
         <SEO title={`${viewMode === "create" ? "Create" : "Edit"} Invoice | PawBucks`} />
-        <div className="container mx-auto py-6 px-4">
+        <div className="container mx-auto py-6 px-4 max-w-7xl">
           <InvoiceEditor
             invoice={selectedInvoice || undefined}
             invoiceNumber={selectedInvoice?.invoice_number || nextInvoiceNumber}
@@ -876,7 +876,7 @@ const MerchantInvoicing = () => {
     <div className="min-h-screen bg-background">
       <SEO title="Invoicing | PawBucks" description="Manage your business invoices" />
       
-      <div className="container mx-auto py-6 px-4">
+      <div className="container mx-auto py-6 px-4 max-w-7xl">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">

@@ -14,7 +14,7 @@
    if (loading) {
      return (
        <div className="min-h-screen bg-background p-4 md:p-8">
-         <div className="max-w-4xl mx-auto space-y-6">
+         <div className="max-w-4xl lg:max-w-6xl mx-auto space-y-6">
            <Skeleton className="h-8 w-48" />
            <Skeleton className="h-[200px] w-full" />
            <Skeleton className="h-[300px] w-full" />
@@ -26,7 +26,7 @@
    if (!data?.connected) {
      return (
        <div className="min-h-screen bg-background p-4 md:p-8">
-         <div className="max-w-4xl mx-auto">
+         <div className="max-w-4xl lg:max-w-6xl mx-auto">
  <Button variant="ghost" onClick={() => navigate("/merchant-dashboard")} className="mb-6">
              <ArrowLeft className="h-4 w-4 mr-2" /> Back to Dashboard
            </Button>
@@ -47,7 +47,7 @@
  
    return (
      <div className="min-h-screen bg-background p-4 md:p-8">
-       <div className="max-w-4xl mx-auto space-y-6">
+      <div className="max-w-4xl lg:max-w-6xl mx-auto space-y-6">
          {/* Header */}
          <div className="flex items-center justify-between">
            <div className="flex items-center gap-4">
