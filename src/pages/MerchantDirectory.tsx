@@ -22,6 +22,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useSponsoredTracking } from "@/hooks/useSponsoredTracking";
 import { useSearchRankingTracking } from "@/hooks/useSearchRankingTracking";
 import { DirectoryMerchantCard } from "@/components/directory/DirectoryMerchantCard";
+import { MerchantMap } from "@/components/MerchantMap";
 import {
   Search,
   Store,
@@ -41,6 +42,7 @@ import {
   X,
   LayoutGrid,
   LayoutList,
+  Map,
 } from "lucide-react";
 
 type MerchantWithRating = {
@@ -49,6 +51,8 @@ type MerchantWithRating = {
   business_type: string;
   description?: string;
   address?: string;
+  latitude?: number;
+  longitude?: number;
   cashback_rate: number;
   logo_url?: string;
   accepts_pawbucks?: boolean;
@@ -104,7 +108,8 @@ const MerchantDirectory = () => {
   const [selectedCategory, setSelectedCategory] = usePersistentState<string>("directory-category", "all");
   const [sortBy, setSortBy] = usePersistentState<string>("directory-sort", "rating");
   const [pawbucksOnly, setPawbucksOnly] = usePersistentState<boolean>("directory-pawbucks", false);
-  const [viewMode, setViewMode] = usePersistentState<"list" | "grid">("directory-view", "list");
+  const [viewMode, setViewMode] = usePersistentState<"list" | "grid" | "map">("directory-view", "list");
+  const [showMobileMap, setShowMobileMap] = useState(false);
 
   // Fetch verified and sponsored merchants for badge display
   const { data: verifiedProIds = [] } = useVerifiedProMerchants();
@@ -132,7 +137,7 @@ const MerchantDirectory = () => {
     async () => {
       const { data: merchantData, error: merchantError } = await supabase
         .from("merchants_public")
-        .select("id, business_name, business_type, description, address, cashback_rate, logo_url, accepts_pawbucks, price_range")
+        .select("id, business_name, business_type, description, address, latitude, longitude, cashback_rate, logo_url, accepts_pawbucks, price_range")
         .order("business_name");
 
       if (merchantError) throw merchantError;
