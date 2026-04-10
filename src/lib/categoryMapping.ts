@@ -268,3 +268,35 @@ export const getCategoryIcon = (businessType: string | undefined | null): Lucide
   const category = getNormalizedCategory(businessType);
   return CATEGORY_CONFIG[category]?.icon || CATEGORY_CONFIG.other.icon;
 };
+
+/**
+ * Check if a search term matches a merchant's category.
+ * e.g. searching "groomers" will match a merchant with business_type "grooming"
+ */
+export const searchMatchesCategory = (searchTerm: string, businessType: string | undefined | null): boolean => {
+  if (!searchTerm || !businessType) return false;
+  const searchLower = searchTerm.toLowerCase().trim();
+  const businessLower = businessType.toLowerCase().trim();
+  
+  // Direct text match
+  if (businessLower.includes(searchLower) || searchLower.includes(businessLower)) return true;
+  
+  // Both resolve to the same normalized category
+  const searchCategory = BUSINESS_TYPE_MAP[searchLower];
+  const merchantCategory = getNormalizedCategory(businessType);
+  
+  if (searchCategory && searchCategory === merchantCategory) return true;
+  
+  // Check if any key that maps to the merchant's category contains the search term
+  for (const [key, category] of Object.entries(BUSINESS_TYPE_MAP)) {
+    if (category === merchantCategory) {
+      if (key.includes(searchLower) || searchLower.includes(key)) return true;
+    }
+  }
+  
+  // Check if the category label matches
+  const label = CATEGORY_CONFIG[merchantCategory]?.label?.toLowerCase();
+  if (label && (label.includes(searchLower) || searchLower.includes(label))) return true;
+  
+  return false;
+};
