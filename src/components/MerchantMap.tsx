@@ -264,8 +264,8 @@ export const MerchantMap = ({ merchants, onMerchantClick, featuredIds, premiumId
           <p class="text-xs text-muted-foreground capitalize mb-1">${safeType}</p>
           <div class="flex items-center gap-1 text-xs mb-1">
             <span class="text-yellow-500">★</span>
-            <span>${merchant.avg_rating.toFixed(1)}</span>
-            <span class="text-muted-foreground">(${merchant.review_count})</span>
+            <span>${(merchant.avg_rating ?? 0).toFixed(1)}</span>
+            <span class="text-muted-foreground">(${merchant.review_count ?? 0})</span>
           </div>
           <p class="text-xs text-green-600">${merchant.cashback_rate}x points</p>
           ${safeAddress ? `<p class="text-xs text-muted-foreground mt-1 line-clamp-1">${safeAddress}</p>` : ''}
