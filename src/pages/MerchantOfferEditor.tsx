@@ -170,7 +170,7 @@ const handleSignOut = async () => {
       <div className="min-h-screen bg-background">
         <Header isAuthenticated={!!user} onLogout={handleSignOut} userId={user?.id} variant="merchant" />
         
-        <main className="container mx-auto px-4 py-8 pb-24 max-w-4xl">
+        <main className="container mx-auto px-4 py-8 pb-24 max-w-4xl lg:max-w-6xl">
           <Button variant="ghost" onClick={() => navigate("/merchant/offers")} className="mb-4">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Offers

@@ -346,7 +346,7 @@ export default function MerchantPOSIntegration() {
     return (
       <div className="min-h-screen bg-background pb-20">
         <Header />
-        <main className="container max-w-4xl mx-auto px-4 py-6">
+        <main className="container max-w-4xl lg:max-w-6xl mx-auto px-4 py-6">
           <div className="flex items-center gap-3 mb-6">
             <Button variant="ghost" size="icon" onClick={() => navigate("/merchant-dashboard")}>
               <ArrowLeft className="h-5 w-5" />
@@ -416,7 +416,7 @@ export default function MerchantPOSIntegration() {
     <div className="min-h-screen bg-background pb-20">
       <Header variant="merchant" isAuthenticated={true} />
       
-      <main className="container max-w-5xl mx-auto px-4 py-6">
+      <main className="container max-w-5xl lg:max-w-6xl mx-auto px-4 py-6">
         <div className="flex items-center gap-3 mb-6">
           <Button variant="ghost" size="icon" onClick={() => navigate("/merchant-dashboard")}>
             <ArrowLeft className="h-5 w-5" />

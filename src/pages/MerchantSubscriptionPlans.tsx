@@ -287,7 +287,7 @@ const MerchantSubscriptionPlans = () => {
   if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-background">
-        <div className="container max-w-5xl mx-auto px-4 py-6">
+        <div className="container max-w-5xl lg:max-w-6xl mx-auto px-4 py-6">
           <Skeleton className="h-10 w-64 mb-6" />
           <div className="grid gap-4">
             {[1, 2, 3].map(i => (
@@ -309,7 +309,7 @@ const MerchantSubscriptionPlans = () => {
       
       <div className="min-h-screen bg-background">
         <div className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur">
-          <div className="container max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="container max-w-5xl lg:max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Button variant="ghost" size="icon" onClick={() => navigate("/merchant-dashboard")}>
                 <ArrowLeft className="h-5 w-5" />
@@ -326,7 +326,7 @@ const MerchantSubscriptionPlans = () => {
           </div>
         </div>
 
-        <main className="container max-w-5xl mx-auto px-4 py-6">
+        <main className="container max-w-5xl lg:max-w-6xl mx-auto px-4 py-6">
           {plans.length === 0 ? (
             <Card className="border-dashed">
               <CardContent className="flex flex-col items-center justify-center py-16">

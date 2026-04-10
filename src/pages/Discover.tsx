@@ -771,7 +771,7 @@ const Discover = () => {
           progress={progress}
           className="flex-1"
         >
-        <div className="container mx-auto px-4 pt-3 max-w-4xl">
+        <div className="container mx-auto px-4 pt-3 max-w-4xl lg:max-w-6xl">
           {/* Top Ad Placement */}
           <div className="mb-4">
             <AdPlacement position="top" />
@@ -780,7 +780,7 @@ const Discover = () => {
 
         {/* Hero Section */}
         <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-background border-b">
-          <div className="container mx-auto px-4 py-4 sm:py-6 max-w-4xl">
+          <div className="container mx-auto px-4 py-4 sm:py-6 max-w-4xl lg:max-w-6xl">
             <h1 className="text-2xl sm:text-3xl font-bold mb-1 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
               Discover Pet Merchants
             </h1>
@@ -809,7 +809,7 @@ const Discover = () => {
           </div>
         </div>
 
-        <div className="container mx-auto px-4 py-6 max-w-4xl">
+        <div className="container mx-auto px-4 py-6 max-w-4xl lg:max-w-6xl">
           {/* Category Filters */}
           <div className="flex gap-2 mb-4 overflow-x-auto pb-2 scrollbar-hide">
             {businessTypes.map((type) => {

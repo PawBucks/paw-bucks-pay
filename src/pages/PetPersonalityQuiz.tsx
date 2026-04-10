@@ -38,7 +38,7 @@ const PetPersonalityQuizPage = () => {
         description="Discover your pet's unique personality type and earn exclusive badges!"
       />
       <Header />
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 max-w-4xl lg:max-w-6xl">
         <PetPersonalityQuiz petId={petId} onComplete={handleComplete} />
       </div>
     </div>

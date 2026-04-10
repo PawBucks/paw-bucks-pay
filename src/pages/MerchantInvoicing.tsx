@@ -824,7 +824,7 @@ const MerchantInvoicing = () => {
     return (
       <div className="min-h-screen bg-background">
         <SEO title="Invoice Preview | PawBucks" />
-        <div className="container mx-auto py-6 px-4">
+        <div className="container mx-auto py-6 px-4 max-w-7xl">
           <InvoicePreview
             invoice={previewData.invoice}
             items={previewData.items}
