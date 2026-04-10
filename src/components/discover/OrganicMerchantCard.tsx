@@ -59,47 +59,49 @@ const OrganicMerchantCardComponent = ({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.05, duration: 0.3, ease: "easeOut" }}
+      transition={{ delay: index * 0.04, duration: 0.25, ease: "easeOut" }}
     >
-      <Card className="group hover:shadow-md transition-all duration-300 overflow-hidden border-border/60 hover:border-border">
+      <Card className="group hover:shadow-md transition-all duration-200 overflow-hidden border-border/50 hover:border-primary/30 bg-card">
         <CardContent className="p-0">
           <Link to={`/merchant/${merchant.id}`} className="block" onClick={onCardClick}>
-            <div className="flex gap-4 p-4">
+            <div className="flex gap-3 sm:gap-4 p-3 sm:p-4">
+              {/* Photo/Logo - square, prominent */}
               <div className="flex-shrink-0">
                 {merchant.logo_url ? (
-                  <div className="w-20 h-20 rounded-lg overflow-hidden bg-background shadow-sm border border-border/50">
+                  <div className="w-[72px] h-[72px] sm:w-20 sm:h-20 rounded-lg overflow-hidden bg-muted">
                     <img
                       src={merchant.logo_url}
-                      alt={`${merchant.business_name} logo`}
+                      alt={merchant.business_name}
                       width={80}
                       height={80}
                       className="w-full h-full object-cover"
+                      loading="lazy"
                     />
                   </div>
                 ) : (
-                  <div className="w-20 h-20 rounded-lg bg-muted/50 flex items-center justify-center border border-border/30">
-                    <FallbackIcon className="w-8 h-8 text-muted-foreground" />
+                  <div className="w-[72px] h-[72px] sm:w-20 sm:h-20 rounded-lg bg-muted/60 flex items-center justify-center">
+                    <FallbackIcon className="w-7 h-7 text-muted-foreground/60" />
                   </div>
                 )}
               </div>
 
-              <div className="flex-1 min-w-0">
-                <div className="mb-1">
-                  {isVerifiedPro && (
-                    <Badge className="gap-1 bg-blue-500/10 text-blue-600 border-blue-500/20 text-xs mb-1">
-                      <BadgeCheck className="w-3 h-3" />
-                      Verified Pro
-                    </Badge>
-                  )}
-                  <h3 className="font-semibold text-base line-clamp-1 group-hover:text-primary transition-colors">
+              {/* Content */}
+              <div className="flex-1 min-w-0 py-0.5">
+                {/* Row 1: Name + Verified */}
+                <div className="flex items-start gap-1.5 mb-0.5">
+                  <h3 className="font-semibold text-[15px] leading-tight line-clamp-1 group-hover:text-primary transition-colors">
                     {merchant.business_name}
                   </h3>
+                  {isVerifiedPro && (
+                    <BadgeCheck className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5" />
+                  )}
                 </div>
 
+                {/* Row 2: Stars + Rating + Reviews + Price */}
                 <div className="flex items-center gap-1.5 mb-1.5">
-                  <div className="flex items-center">
+                  <div className="flex items-center gap-px">
                     {[...Array(5)].map((_, i) => (
                       <Star
                         key={i}
@@ -108,63 +110,59 @@ const OrganicMerchantCardComponent = ({
                             ? "text-yellow-500 fill-yellow-500"
                             : i === fullStars && hasHalfStar
                             ? "text-yellow-500 fill-yellow-500/50"
-                            : "text-muted-foreground/30"
+                            : "text-muted-foreground/20"
                         }`}
                       />
                     ))}
                   </div>
-                  <span className="text-xs font-medium">{safeRating.toFixed(1)}</span>
+                  <span className="text-xs font-semibold text-foreground">{safeRating.toFixed(1)}</span>
                   <span className="text-xs text-muted-foreground">({merchant.review_count ?? 0})</span>
-                </div>
-
-                <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                  <Badge variant="outline" className="text-xs capitalize">
-                    {merchant.business_type.replace(/_/g, " ")}
-                  </Badge>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-muted-foreground/40">·</span>
+                  <span className="text-xs text-muted-foreground font-medium">
                     {getPriceRange(merchant.price_range)}
                   </span>
-                  <Badge className="bg-green-500/10 text-green-600 border-green-500/20 text-[10px] gap-0.5">
-                    {(merchant.cashback_rate ?? 0).toFixed(0)}x
-                    <PawBucksInfoTooltip variant="multiplier" className="ml-0.5" />
-                  </Badge>
                 </div>
 
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2 min-w-0 flex-1">
-                    {merchant.address && (
-                      <p className="text-xs text-muted-foreground line-clamp-1 flex items-center gap-1">
-                        <MapPin className="w-3 h-3 flex-shrink-0" />
-                        {merchant.address}
-                      </p>
-                    )}
-                    {showDistance && merchant.distance !== undefined && (
-                      <Badge variant="outline" className="text-xs flex-shrink-0 gap-1">
-                        <Navigation className="w-3 h-3" />
-                        {formatDistance(merchant.distance)}
-                      </Badge>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-1.5 flex-shrink-0">
-                    <CreditCard className="w-3 h-3 text-muted-foreground" />
-                    {merchant.accepts_pawbucks && (
+                {/* Row 3: Category + Cashback */}
+                <div className="flex items-center gap-1.5 mb-1.5 flex-wrap">
+                  <span className="text-xs text-muted-foreground capitalize">
+                    {merchant.business_type.replace(/_/g, " ")}
+                  </span>
+                  <span className="text-muted-foreground/40">·</span>
+                  <span className="text-xs text-green-600 font-medium">
+                    {(merchant.cashback_rate ?? 0).toFixed(0)}x points
+                  </span>
+                  {merchant.accepts_pawbucks && (
+                    <>
+                      <span className="text-muted-foreground/40">·</span>
                       <Coins className="w-3 h-3 text-primary" />
-                    )}
-                  </div>
+                    </>
+                  )}
+                </div>
+
+                {/* Row 4: Address + Distance */}
+                <div className="flex items-center gap-2">
+                  {merchant.address && (
+                    <p className="text-[11px] text-muted-foreground/70 line-clamp-1 flex items-center gap-1">
+                      <MapPin className="w-2.5 h-2.5 flex-shrink-0" />
+                      {merchant.address}
+                    </p>
+                  )}
+                  {showDistance && merchant.distance !== undefined && (
+                    <span className="text-[11px] text-muted-foreground/70 flex items-center gap-0.5 flex-shrink-0">
+                      <Navigation className="w-2.5 h-2.5" />
+                      {formatDistance(merchant.distance)}
+                    </span>
+                  )}
                 </div>
               </div>
 
+              {/* Arrow */}
               <div className="flex-shrink-0 self-center">
-                <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                <ChevronRight className="w-4 h-4 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
               </div>
             </div>
           </Link>
-
-          <div className="px-4 pb-3">
-            <Button className="w-full" variant="ghost" size="sm" onClick={onPayClick}>
-              Pay & Earn Points
-            </Button>
-          </div>
         </CardContent>
       </Card>
     </motion.div>

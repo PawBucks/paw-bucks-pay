@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Crown, MapPin, Star, Navigation, CreditCard, Coins, BadgeCheck } from "lucide-react";
+import { Crown, MapPin, Star, Navigation, Coins, BadgeCheck } from "lucide-react";
 import { PawBucksInfoTooltip } from "@/components/PawBucksInfoTooltip";
 
 type MerchantWithRating = {
@@ -56,126 +56,120 @@ const FeaturedPartnerCardComponent = ({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 24 }}
+      initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
     >
-      <Card className="relative overflow-hidden border-2 border-yellow-500/40 bg-gradient-to-br from-yellow-500/5 via-amber-500/5 to-background shadow-[0_4px_24px_-4px_hsl(var(--primary)/0.15)] hover:shadow-[0_8px_32px_-4px_hsl(var(--primary)/0.25)] transition-all duration-300">
-        {/* Gold accent line */}
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-yellow-400 via-amber-500 to-yellow-400" />
+      <Card className="relative overflow-hidden border-2 border-yellow-500/30 bg-gradient-to-br from-yellow-500/[0.04] via-amber-500/[0.02] to-transparent shadow-lg hover:shadow-xl transition-all duration-300">
+        {/* Gold accent */}
+        <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-yellow-400 via-amber-500 to-yellow-400" />
         
         <CardContent className="p-0">
           <Link to={`/merchant/${merchant.id}`} className="block" onClick={onCardClick}>
-            <div className="flex gap-5 p-5 sm:p-6">
-              {/* Larger logo for Featured Partner */}
-              <div className="flex-shrink-0">
-                {merchant.logo_url ? (
-                  <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-xl overflow-hidden bg-background shadow-md border-2 border-yellow-500/20">
-                    <img
-                      src={merchant.logo_url}
-                      alt={`${merchant.business_name} logo`}
-                      width={128}
-                      height={128}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                ) : (
-                  <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-xl bg-gradient-to-br from-yellow-500/15 to-amber-500/10 flex items-center justify-center border-2 border-yellow-500/20">
-                    <Crown className="w-12 h-12 text-yellow-600" />
-                  </div>
+            <div className="p-4 sm:p-5">
+              {/* Top badges row */}
+              <div className="flex items-center gap-2 mb-3">
+                <Badge className="gap-1 bg-gradient-to-r from-yellow-500/15 to-amber-500/15 text-yellow-700 dark:text-yellow-400 border-yellow-500/25 text-[10px] font-semibold uppercase tracking-wider">
+                  <Crown className="w-3 h-3" />
+                  Featured Partner
+                </Badge>
+                {isVerifiedPro && (
+                  <BadgeCheck className="w-4 h-4 text-blue-500" />
                 )}
               </div>
 
-              {/* Content */}
-              <div className="flex-1 min-w-0">
-                {/* Badges row */}
-                <div className="flex items-center gap-2 flex-wrap mb-2">
-                  <Badge className="gap-1 bg-gradient-to-r from-yellow-500/20 to-amber-500/20 text-yellow-700 dark:text-yellow-400 border-yellow-500/30 text-xs font-semibold">
-                    <Crown className="w-3 h-3" />
-                    Featured Partner
-                  </Badge>
-                  {isVerifiedPro && (
-                    <Badge className="gap-1 bg-blue-500/10 text-blue-600 border-blue-500/20 text-xs">
-                      <BadgeCheck className="w-3 h-3" />
-                      Verified Pro
-                    </Badge>
+              <div className="flex gap-4">
+                {/* Large photo */}
+                <div className="flex-shrink-0">
+                  {merchant.logo_url ? (
+                    <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden bg-muted shadow-md border border-yellow-500/20">
+                      <img
+                        src={merchant.logo_url}
+                        alt={merchant.business_name}
+                        width={112}
+                        height={112}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl bg-gradient-to-br from-yellow-500/10 to-amber-500/5 flex items-center justify-center border border-yellow-500/20">
+                      <Crown className="w-10 h-10 text-yellow-600/60" />
+                    </div>
                   )}
                 </div>
 
-                {/* Headline */}
-                {headline && (
-                  <p className="text-xs font-medium text-yellow-700 dark:text-yellow-400 mb-1 tracking-wide uppercase">
-                    {headline}
-                  </p>
-                )}
+                {/* Info */}
+                <div className="flex-1 min-w-0">
+                  {headline && (
+                    <p className="text-[10px] font-medium text-yellow-700/80 dark:text-yellow-400/80 mb-0.5 uppercase tracking-wider">
+                      {headline}
+                    </p>
+                  )}
 
-                {/* Name */}
-                <h3 className="font-bold text-xl sm:text-2xl line-clamp-1 mb-2">
-                  {merchant.business_name}
-                </h3>
+                  <h3 className="font-bold text-lg sm:text-xl leading-tight line-clamp-1 mb-1.5">
+                    {merchant.business_name}
+                  </h3>
 
-                {/* Rating */}
-                <div className="flex items-center gap-1.5 mb-2">
-                  <div className="flex items-center">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`w-4 h-4 ${
-                          i < fullStars
-                            ? "text-yellow-500 fill-yellow-500"
-                            : i === fullStars && hasHalfStar
-                            ? "text-yellow-500 fill-yellow-500/50"
-                            : "text-muted-foreground/30"
-                        }`}
-                      />
-                    ))}
+                  {/* Rating row */}
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <div className="flex items-center gap-px">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          className={`w-4 h-4 ${
+                            i < fullStars
+                              ? "text-yellow-500 fill-yellow-500"
+                              : i === fullStars && hasHalfStar
+                              ? "text-yellow-500 fill-yellow-500/50"
+                              : "text-muted-foreground/20"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-sm font-semibold">{safeRating.toFixed(1)}</span>
+                    <span className="text-sm text-muted-foreground">({merchant.review_count ?? 0})</span>
                   </div>
-                  <span className="text-sm font-semibold">{safeRating.toFixed(1)}</span>
-                  <span className="text-sm text-muted-foreground">({merchant.review_count ?? 0})</span>
-                </div>
 
-                {/* Type + Price + Cashback */}
-                <div className="flex items-center gap-2 mb-2 flex-wrap">
-                  <Badge variant="outline" className="text-xs capitalize">
-                    {merchant.business_type.replace(/_/g, " ")}
-                  </Badge>
-                  <span className="text-sm font-medium text-muted-foreground">
-                    {getPriceRange(merchant.price_range)}
-                  </span>
-                  <span className="text-muted-foreground/50">•</span>
-                  <Badge className="bg-green-500/10 text-green-600 border-green-500/20 text-xs gap-1">
-                    {(merchant.cashback_rate ?? 0).toFixed(0)}x points
-                    <PawBucksInfoTooltip variant="multiplier" className="ml-0.5" />
-                  </Badge>
-                </div>
+                  {/* Meta row */}
+                  <div className="flex items-center gap-1.5 flex-wrap mb-2">
+                    <span className="text-xs text-muted-foreground capitalize">
+                      {merchant.business_type.replace(/_/g, " ")}
+                    </span>
+                    <span className="text-muted-foreground/40">·</span>
+                    <span className="text-xs text-muted-foreground font-medium">
+                      {getPriceRange(merchant.price_range)}
+                    </span>
+                    <span className="text-muted-foreground/40">·</span>
+                    <span className="text-xs text-green-600 font-semibold">
+                      {(merchant.cashback_rate ?? 0).toFixed(0)}x points
+                    </span>
+                    {merchant.accepts_pawbucks && (
+                      <>
+                        <span className="text-muted-foreground/40">·</span>
+                        <Coins className="w-3 h-3 text-primary" />
+                      </>
+                    )}
+                  </div>
 
-                {/* Description */}
-                {merchant.description && (
-                  <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
-                    {merchant.description}
-                  </p>
-                )}
+                  {merchant.description && (
+                    <p className="text-xs text-muted-foreground/80 line-clamp-2 mb-2">
+                      {merchant.description}
+                    </p>
+                  )}
 
-                {/* Address + Distance */}
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                  {/* Address */}
+                  <div className="flex items-center gap-2">
                     {merchant.address && (
-                      <p className="text-xs text-muted-foreground line-clamp-1 flex items-center gap-1">
-                        <MapPin className="w-3 h-3 flex-shrink-0" />
+                      <p className="text-[11px] text-muted-foreground/60 line-clamp-1 flex items-center gap-1">
+                        <MapPin className="w-2.5 h-2.5 flex-shrink-0" />
                         {merchant.address}
                       </p>
                     )}
                     {showDistance && merchant.distance !== undefined && (
-                      <Badge variant="outline" className="text-xs flex-shrink-0 gap-1">
-                        <Navigation className="w-3 h-3" />
+                      <span className="text-[11px] text-muted-foreground/60 flex items-center gap-0.5 flex-shrink-0">
+                        <Navigation className="w-2.5 h-2.5" />
                         {formatDistance(merchant.distance)}
-                      </Badge>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <CreditCard className="w-3.5 h-3.5 text-muted-foreground" />
-                    {merchant.accepts_pawbucks && (
-                      <Coins className="w-3.5 h-3.5 text-primary" />
+                      </span>
                     )}
                   </div>
                 </div>
@@ -183,9 +177,12 @@ const FeaturedPartnerCardComponent = ({
             </div>
           </Link>
 
-          {/* Pay Button */}
-          <div className="px-5 pb-5 sm:px-6 sm:pb-6">
-            <Button className="w-full bg-gradient-to-r from-yellow-600 to-amber-600 hover:from-yellow-700 hover:to-amber-700 text-white shadow-md" onClick={onPayClick}>
+          {/* CTA */}
+          <div className="px-4 pb-4 sm:px-5 sm:pb-5">
+            <Button
+              className="w-full bg-gradient-to-r from-yellow-600 to-amber-600 hover:from-yellow-700 hover:to-amber-700 text-white shadow-sm"
+              onClick={onPayClick}
+            >
               <Crown className="w-4 h-4 mr-2" />
               Pay & Earn Points
             </Button>

@@ -1,4 +1,4 @@
-import { memo, useMemo } from "react";
+import { memo } from "react";
 import { Crown, Gem } from "lucide-react";
 import { FeaturedPartnerCard } from "./FeaturedPartnerCard";
 import { PremiumAdCard } from "./PremiumAdCard";
@@ -36,18 +36,12 @@ interface AttentionLadderFeedProps {
   onCardClick: (merchantId: string, position: number) => void;
 }
 
-/** Generates a human-friendly headline like "Top-Rated Groomer in Venice" */
 const generateHeadline = (merchant: MerchantWithRating, category: string): string => {
   const type = merchant.business_type.replace(/_/g, ' ');
   const capitalizedType = type.charAt(0).toUpperCase() + type.slice(1);
-  
-  // Try to extract city from address
   const addressParts = merchant.address?.split(',').map(s => s.trim()) || [];
   const city = addressParts.length >= 2 ? addressParts[addressParts.length - 2] : null;
-  
-  if (city) {
-    return `Top-Rated ${capitalizedType} in ${city}`;
-  }
+  if (city) return `Top-Rated ${capitalizedType} in ${city}`;
   return `Top-Rated ${capitalizedType}`;
 };
 
@@ -66,7 +60,6 @@ const AttentionLadderFeedComponent = ({
   let positionCounter = 0;
   const isPawPass = subscriptionTier === 'pawpass';
 
-  // PawPass: show max 1 premium ad instead of all, and reduce sponsored to max 2
   const visiblePremiumAds = isPawPass ? premiumAds.slice(0, 1) : premiumAds;
   const visibleInterspersed = isPawPass
     ? (() => {
@@ -74,7 +67,7 @@ const AttentionLadderFeedComponent = ({
         return interspersedResults.filter((m) => {
           if ((m as any)._isSponsored) {
             sponsoredCount++;
-            return sponsoredCount <= 2; // max 2 sponsored for PawPass
+            return sponsoredCount <= 2;
           }
           return true;
         });
@@ -82,10 +75,10 @@ const AttentionLadderFeedComponent = ({
     : interspersedResults;
 
   return (
-    <div className="space-y-6">
-      {/* 🥇 Level 1 — Featured Partner (full-width, gold, ultra rare) */}
+    <div className="space-y-3">
+      {/* Featured Partner */}
       {featuredPartners.length > 0 && (
-        <div className="space-y-4">
+        <div className="space-y-3">
           {featuredPartners.map((merchant) => {
             positionCounter++;
             const pos = positionCounter;
@@ -104,13 +97,9 @@ const AttentionLadderFeedComponent = ({
         </div>
       )}
 
-      {/* 🥈 Level 2 — Premium Ad Placement (elevated shadow, "Premium" tag) */}
+      {/* Premium Ads */}
       {visiblePremiumAds.length > 0 && (
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <Gem className="w-4 h-4 text-primary/60" />
-            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Premium</span>
-          </div>
+        <div className="space-y-3">
           {visiblePremiumAds.map((merchant, index) => {
             positionCounter++;
             const pos = positionCounter;
@@ -129,45 +118,40 @@ const AttentionLadderFeedComponent = ({
         </div>
       )}
 
-      {/* 🥉 Level 3+4+5 — Sponsored (interspersed) + Boosted + Organic */}
+      {/* All Results — Sponsored interspersed + Boosted + Organic */}
       {visibleInterspersed.length > 0 && (
-        <div>
-          <h2 className="text-lg font-semibold mb-4">
-            {(featuredPartners.length > 0 || premiumAds.length > 0) ? "All Results" : "Results"}
-          </h2>
-          <div className="space-y-4">
-            {visibleInterspersed.map((merchant, index) => {
-              positionCounter++;
-              const pos = positionCounter;
-              const isSponsored = !!(merchant as any)._isSponsored;
+        <div className="space-y-2">
+          {visibleInterspersed.map((merchant, index) => {
+            positionCounter++;
+            const pos = positionCounter;
+            const isSponsored = !!(merchant as any)._isSponsored;
 
-              if (isSponsored) {
-                return (
-                  <SponsoredMerchantCard
-                    key={`sponsored-${merchant.id}`}
-                    merchant={merchant}
-                    onPayClick={() => onSponsoredClick(merchant, pos)}
-                    onCardClick={() => onCardClick(merchant.id, pos)}
-                    showDistance={showDistance}
-                    isVerifiedPro={verifiedProSet.has(merchant.id)}
-                    index={index}
-                  />
-                );
-              }
-
+            if (isSponsored) {
               return (
-                <OrganicMerchantCard
-                  key={merchant.id}
+                <SponsoredMerchantCard
+                  key={`sponsored-${merchant.id}`}
                   merchant={merchant}
-                  onPayClick={() => onPayClick(merchant)}
+                  onPayClick={() => onSponsoredClick(merchant, pos)}
                   onCardClick={() => onCardClick(merchant.id, pos)}
                   showDistance={showDistance}
                   isVerifiedPro={verifiedProSet.has(merchant.id)}
                   index={index}
                 />
               );
-            })}
-          </div>
+            }
+
+            return (
+              <OrganicMerchantCard
+                key={merchant.id}
+                merchant={merchant}
+                onPayClick={() => onPayClick(merchant)}
+                onCardClick={() => onCardClick(merchant.id, pos)}
+                showDistance={showDistance}
+                isVerifiedPro={verifiedProSet.has(merchant.id)}
+                index={index}
+              />
+            );
+          })}
         </div>
       )}
     </div>
