@@ -59,14 +59,17 @@ function buildMerchantSection(merchants: any[], reviewSummary: Record<string, an
   return header + '\n' + lines.join('\n\n');
 }
 
-function buildVetSection(vets: any[]): string {
+function buildVetSection(vets: any[], vetHours: any[]): string {
   const header = '═══════════════════════════════════════\nPLATFORM VETERINARIANS (' + vets.length + ' approved)\n═══════════════════════════════════════';
   if (vets.length === 0) return header + '\n- No vets on platform';
   const lines = vets.map((v: any) => {
+    const vHours = vetHours.filter((h: any) => h.vet_id === v.id);
+    const hoursLine = formatHours(vHours);
     return '🩺 ' + v.name + (v.clinic_name ? ' — ' + v.clinic_name : '') + '\n' +
       '  - Location: ' + (v.location || 'Not listed') + '\n' +
       '  - Phone: ' + (v.clinic_phone || 'Not listed') + '\n' +
       '  - Email: ' + (v.contact_email || 'Not listed') + '\n' +
+      '  - Hours: ' + hoursLine + '\n' +
       '  - Practice type: ' + (v.practice_type || 'General') + '\n' +
       '  - Services: ' + (v.services_provided?.join(', ') || 'Not specified') + '\n' +
       '  - Accepting new patients: ' + (v.accepting_new_patients ? 'Yes' : 'No') + '\n' +
