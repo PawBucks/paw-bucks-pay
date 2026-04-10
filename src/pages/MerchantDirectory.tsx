@@ -359,7 +359,7 @@ const MerchantDirectory = () => {
           </div>
         </div>
 
-        <div className="container mx-auto px-4 py-4 max-w-4xl">
+        <div className={`container mx-auto px-4 py-4 ${viewMode === "map" || showMobileMap ? "max-w-7xl" : "max-w-4xl"}`}>
           {/* Top Ad */}
           <AdPlacement position="top" />
 
