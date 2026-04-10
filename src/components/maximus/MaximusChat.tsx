@@ -173,7 +173,22 @@ export const MaximusChat = () => {
                   }`}>
                     {msg.role === "assistant" ? (
                       <div className="prose prose-sm max-w-none dark:prose-invert [&>p]:my-1 [&>ul]:my-1 [&>ol]:my-1">
-                        <ReactMarkdown>{msg.content}</ReactMarkdown>
+                        <ReactMarkdown
+                          urlTransform={(url) => url}
+                          components={{
+                            a: ({ href, children, ...props }) => (
+                              <a
+                                href={href}
+                                {...props}
+                                target={href?.startsWith("tel:") ? undefined : "_blank"}
+                                rel={href?.startsWith("tel:") ? undefined : "noopener noreferrer"}
+                                className="text-primary underline hover:text-primary/80"
+                              >
+                                {children}
+                              </a>
+                            ),
+                          }}
+                        >{msg.content}</ReactMarkdown>
                       </div>
                     ) : (
                       msg.content

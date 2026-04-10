@@ -6,7 +6,19 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
-function buildMerchantSection(merchants: any[], reviewSummary: Record<string, any>, offers: any[], items: any[], loyalty: any[]): string {
+const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+function formatHours(hours: any[]): string {
+  if (!hours || hours.length === 0) return 'Not listed';
+  const sorted = [...hours].sort((a, b) => a.day_of_week - b.day_of_week);
+  return sorted.map((h: any) => {
+    const day = DAYS[h.day_of_week] || `Day ${h.day_of_week}`;
+    if (h.is_closed) return `${day}: Closed`;
+    return `${day}: ${h.open_time?.slice(0, 5) || '?'} - ${h.close_time?.slice(0, 5) || '?'}`;
+  }).join(', ');
+}
+
+function buildMerchantSection(merchants: any[], reviewSummary: Record<string, any>, offers: any[], items: any[], loyalty: any[], services: any[], businessHours: any[]): string {
   const header = '═══════════════════════════════════════\nPLATFORM MERCHANTS (' + merchants.length + ' approved)\n═══════════════════════════════════════';
   if (merchants.length === 0) return header + '\n- No merchants on platform';
   const lines = merchants.map((m: any) => {
@@ -14,17 +26,22 @@ function buildMerchantSection(merchants: any[], reviewSummary: Record<string, an
     const mOffers = offers.filter((o: any) => o.merchant_id === m.id);
     const mItems = items.filter((i: any) => i.merchant_id === m.id);
     const mLoyalty = loyalty.filter((l: any) => l.merchant_id === m.id);
+    const mServices = services.filter((s: any) => s.merchant_id === m.id);
+    const mHours = businessHours.filter((h: any) => h.merchant_id === m.id);
     const social = [m.facebook_url && 'Facebook', m.instagram_url && 'Instagram', m.twitter_url && 'Twitter/X', m.linkedin_url && 'LinkedIn'].filter(Boolean).join(', ') || 'None';
     const reviewLine = rs ? rs.count + ' reviews, ' + rs.avg.toFixed(1) + '⭐ avg' : 'No reviews yet';
     const recentReviews = rs?.reviews?.length ? '\n    Recent reviews: ' + rs.reviews.map((r: any) => r.rating + '⭐' + (r.review_text ? ' "' + r.review_text.slice(0, 80) + '"' : '')).join(' | ') : '';
     const offerLine = mOffers.length > 0 ? mOffers.map((o: any) => o.title + ' (' + (o.discount_type === 'percentage' ? o.discount_value + '% off' : '$' + o.discount_value + ' off') + ', costs ' + o.coins_required + ' PB)').join('; ') : 'None';
     const itemLine = mItems.length > 0 ? mItems.slice(0, 5).map((i: any) => i.name + ' (' + i.item_type + ', $' + i.price.toFixed(2) + ' / ' + i.price_pawbucks + ' PB)').join('; ') + (mItems.length > 5 ? ' +' + (mItems.length - 5) + ' more' : '') : 'None listed';
     const loyaltyLine = mLoyalty.length > 0 ? mLoyalty.map((l: any) => l.program_name + ': ' + l.punches_required + ' punches → ' + l.reward_description).join('; ') : 'None';
+    const serviceLine = mServices.length > 0 ? mServices.map((s: any) => s.name + (s.duration_minutes ? ' (' + s.duration_minutes + 'min)' : '') + (s.price ? ' $' + s.price.toFixed(2) : '') + (s.payment_type ? ' [' + s.payment_type + ']' : '')).join('; ') : 'None listed';
+    const hoursLine = formatHours(mHours);
     const priceRange = m.price_range ? '$'.repeat(m.price_range) : 'Not set';
     return '🏪 ' + m.business_name + ' (' + (m.business_type || 'General') + ')\n' +
       '  - Address: ' + (m.address || 'Not listed') + '\n' +
       '  - Phone: ' + (m.phone || 'Not listed') + '\n' +
       '  - Description: ' + (m.description || 'No description') + '\n' +
+      '  - Hours: ' + hoursLine + '\n' +
       '  - Cashback rate: ' + (m.cashback_rate || 0) + 'x PawBucks\n' +
       '  - Accepts PawBucks: ' + (m.accepts_pawbucks ? 'Yes' : 'No') + '\n' +
       '  - Price range: ' + priceRange + '\n' +
@@ -35,20 +52,24 @@ function buildMerchantSection(merchants: any[], reviewSummary: Record<string, an
       '  - Sponsored: ' + (m.is_sponsored ? 'Yes' : 'No') + '\n' +
       '  - Reviews: ' + reviewLine + recentReviews + '\n' +
       '  - Active offers: ' + offerLine + '\n' +
+      '  - Bookable services: ' + serviceLine + '\n' +
       '  - Products/Services: ' + itemLine + '\n' +
       '  - Loyalty program: ' + loyaltyLine;
   });
   return header + '\n' + lines.join('\n\n');
 }
 
-function buildVetSection(vets: any[]): string {
+function buildVetSection(vets: any[], vetHours: any[]): string {
   const header = '═══════════════════════════════════════\nPLATFORM VETERINARIANS (' + vets.length + ' approved)\n═══════════════════════════════════════';
   if (vets.length === 0) return header + '\n- No vets on platform';
   const lines = vets.map((v: any) => {
+    const vHours = vetHours.filter((h: any) => h.vet_id === v.id);
+    const hoursLine = formatHours(vHours);
     return '🩺 ' + v.name + (v.clinic_name ? ' — ' + v.clinic_name : '') + '\n' +
       '  - Location: ' + (v.location || 'Not listed') + '\n' +
       '  - Phone: ' + (v.clinic_phone || 'Not listed') + '\n' +
       '  - Email: ' + (v.contact_email || 'Not listed') + '\n' +
+      '  - Hours: ' + hoursLine + '\n' +
       '  - Practice type: ' + (v.practice_type || 'General') + '\n' +
       '  - Services: ' + (v.services_provided?.join(', ') || 'Not specified') + '\n' +
       '  - Accepting new patients: ' + (v.accepting_new_patients ? 'Yes' : 'No') + '\n' +
@@ -206,6 +227,9 @@ serve(async (req) => {
       allMerchantReviewsResult,
       allOffersResult,
       allLoyaltyProgramsResult,
+      allMerchantServicesResult,
+      allMerchantHoursResult,
+      allVetHoursResult,
     ] = await Promise.all([
       platformClient.from('merchants').select('id, business_name, business_type, description, address, phone, cashback_rate, accepts_pawbucks, price_range, website_url, facebook_url, instagram_url, twitter_url, linkedin_url, tos_url, privacy_policy_url, shipping_returns_policy_url, storefront_slug, is_sponsored, logo_url').eq('approval_status', 'approved').eq('is_paused', false).order('business_name'),
       platformClient.from('partner_vets').select('id, name, clinic_name, clinic_phone, location, practice_type, services_provided, accepting_new_patients, accreditations, insurance_partners, emergency_protocol, website_url, tos_url, privacy_policy_url, shipping_returns_policy_url, contact_email, logo_url, direct_pay_enabled').eq('approval_status', 'approved').order('name'),
@@ -213,6 +237,9 @@ serve(async (req) => {
       platformClient.from('merchant_reviews').select('id, merchant_id, user_id, rating, review_text, created_at').order('created_at', { ascending: false }).limit(200),
       platformClient.from('partner_offers').select('id, merchant_id, title, description, discount_type, discount_value, coins_required, status, is_active, start_date, end_date, terms_conditions').eq('status', 'active').eq('is_active', true),
       platformClient.from('merchant_loyalty_programs').select('id, merchant_id, program_name, description, punches_required, reward_description, is_active').eq('is_active', true),
+      platformClient.from('merchant_services').select('id, merchant_id, name, description, category, duration_minutes, price, payment_type, is_active').eq('is_active', true),
+      platformClient.from('merchant_business_hours').select('merchant_id, day_of_week, open_time, close_time, is_closed'),
+      platformClient.from('vet_business_hours').select('vet_id, day_of_week, open_time, close_time, is_closed'),
     ]);
 
     const allMerchants = allMerchantsResult.data || [];
@@ -221,6 +248,9 @@ serve(async (req) => {
     const allMerchantReviews = allMerchantReviewsResult.data || [];
     const allOffers = allOffersResult.data || [];
     const allLoyaltyPrograms = allLoyaltyProgramsResult.data || [];
+    const allMerchantServices = allMerchantServicesResult.data || [];
+    const allMerchantHours = allMerchantHoursResult.data || [];
+    const allVetHours = allVetHoursResult.data || [];
 
     // Build merchant review summary (avg rating, count per merchant)
     const merchantReviewSummary: Record<string, { count: number; avg: number; reviews: any[] }> = {};
@@ -470,9 +500,9 @@ RECENT NOTIFICATIONS (last 15)
 ═══════════════════════════════════════
 ${notifications.length > 0 ? notifications.map((n: any) => `- ${new Date(n.created_at).toLocaleDateString()}: [${n.category}] ${n.title}${n.is_read ? '' : ' 🔴 Unread'}`).join('\n') : '- No notifications'}
 
-${buildMerchantSection(allMerchants, merchantReviewSummary, allOffers, allStoreItems, allLoyaltyPrograms)}
+${buildMerchantSection(allMerchants, merchantReviewSummary, allOffers, allStoreItems, allLoyaltyPrograms, allMerchantServices, allMerchantHours)}
 
-${buildVetSection(allVets)}
+${buildVetSection(allVets, allVetHours)}
 
 ${buildStoreCatalog(allStoreItems, allMerchants)}
 
@@ -520,7 +550,9 @@ RULES
 - For platform-related questions (how PawBucks works, tiers, pet fund, etc.), use the Platform Info section above.
 - For shared account members, the mirrored owner account is authoritative. If mirrored pets or pet history exist, answer from that data and never say the user needs to register a pet.
 - For questions about a pet's latest vet visit, use the PET MEDICAL VISITS section first, then PET MEDICAL RECORDS if no visit exists.
-- Remember: pet owners can ONLY earn PawBucks by spending at partner merchants/vets. If asked about other ways to earn, clarify this.`;
+- Remember: pet owners can ONLY earn PawBucks by spending at partner merchants/vets. If asked about other ways to earn, clarify this.
+- IMPORTANT: Whenever you share a phone number, ALWAYS format it as a clickable markdown link like [phone-number](tel:phone-number). For example: [(555) 123-4567](tel:5551234567). This makes it easy for users to tap and call directly.
+- When sharing hours of operation, present them in a clear, readable format (e.g., a list by day).`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
