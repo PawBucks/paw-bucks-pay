@@ -7,6 +7,7 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { useOptimizedQuery } from "@/hooks/useOptimizedQuery";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { supabase } from "@/integrations/supabase/client";
+import { searchMatchesCategory } from "@/lib/categoryMapping";
 import { PaymentDialogWithPawBucks } from "@/components/PaymentDialogWithPawBucks";
 import { BottomNav } from "@/components/BottomNav";
 import { PageLoader } from "@/components/PageLoader";
@@ -350,7 +351,7 @@ const Discover = () => {
       filtered = filtered.filter(
         (m) =>
           m.business_name.toLowerCase().includes(searchLower) ||
-          m.business_type.toLowerCase().includes(searchLower) ||
+          searchMatchesCategory(debouncedSearch, m.business_type) ||
           m.description?.toLowerCase().includes(searchLower)
       );
     }

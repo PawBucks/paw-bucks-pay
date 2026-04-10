@@ -17,6 +17,7 @@ import { Separator } from "@/components/ui/separator";
 import { ROUTES, QUERY_STALE_TIMES } from "@/lib/constants";
 import { usePersistentState } from "@/hooks/usePersistentState";
 import { supabase } from "@/integrations/supabase/client";
+import { searchMatchesCategory } from "@/lib/categoryMapping";
 import { useVerifiedProMerchants, useSponsoredMerchants, useFeaturedPartnerMerchants, usePremiumAdMerchants, useSearchBoostedMerchantSet, isVerifiedPro, isSponsored } from "@/hooks/useMerchantServices";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSponsoredTracking } from "@/hooks/useSponsoredTracking";
@@ -188,7 +189,7 @@ const MerchantDirectory = () => {
       filtered = filtered.filter(
         (m) =>
           m.business_name.toLowerCase().includes(searchLower) ||
-          m.business_type.toLowerCase().includes(searchLower) ||
+          searchMatchesCategory(debouncedSearch, m.business_type) ||
           m.description?.toLowerCase().includes(searchLower)
       );
     }
