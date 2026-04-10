@@ -24,7 +24,7 @@
    if (loading) {
      return (
        <div className="min-h-screen bg-background p-4 md:p-8">
-         <div className="max-w-4xl mx-auto space-y-6">
+         <div className="max-w-4xl lg:max-w-6xl mx-auto space-y-6">
            <Skeleton className="h-8 w-48" />
            <Skeleton className="h-[200px] w-full" />
            <Skeleton className="h-[300px] w-full" />
