@@ -131,6 +131,9 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
   });
 
   const selectedServiceData = services.find((s) => s.id === selectedService);
+  const isGroomingService = selectedServiceData?.category === "grooming";
+  const effectiveDuration = isGroomingService && groomingData.adjustedDuration ? groomingData.adjustedDuration : selectedServiceData?.duration_minutes || 0;
+  const effectivePrice = isGroomingService && groomingData.adjustedPrice ? Number(groomingData.adjustedPrice) : selectedServiceData?.price || 0;
 
   // Calculate available time slots for selected date
   const availableSlots = useMemo(() => {
