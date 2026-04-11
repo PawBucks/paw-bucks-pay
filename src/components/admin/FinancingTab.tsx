@@ -917,7 +917,41 @@ export function FinancingTab() {
     finally { setLoading(false); }
   };
 
-  const pendingMerchants = fundingApplicants.filter(a => a.status === 'pending');
+  const handleMarkFundedMerchant = async () => {
+    if (!selectedMerchant) return;
+    setLoading(true);
+    try {
+      await supabase.from('funding_requests').update({ status: 'funded' }).eq('id', selectedMerchant.id);
+      await supabase.rpc('log_admin_action', {
+        _action: 'MARK_FUNDED',
+        _entity_type: 'funding_request',
+        _entity_id: selectedMerchant.id,
+        _changes: { amount: selectedMerchant.requested_amount },
+      });
+      toast.success('Merchant marked as funded');
+      setSelectedMerchant(null);
+      loadData();
+    } catch (e: any) { toast.error(e.message); }
+    finally { setLoading(false); }
+  };
+
+  const handleMarkFundedVetLoan = async () => {
+    if (!selectedVetLoan) return;
+    setLoading(true);
+    try {
+      await supabase.from('vet_loans').update({ status: 'funded' }).eq('id', selectedVetLoan.id);
+      await supabase.rpc('log_admin_action', {
+        _action: 'MARK_FUNDED',
+        _entity_type: 'vet_loan',
+        _entity_id: selectedVetLoan.id,
+        _changes: { amount: selectedVetLoan.requested_amount },
+      });
+      toast.success('Vet loan marked as funded');
+      loadData();
+    } catch (e: any) { toast.error(e.message); }
+    finally { setLoading(false); }
+  };
+
   const reviewedMerchants = fundingApplicants.filter(a => a.status !== 'pending');
   const pendingVetLoans = vetLoans.filter(l => l.status === 'pending');
 
