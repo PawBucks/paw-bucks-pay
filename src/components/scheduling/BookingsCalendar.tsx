@@ -28,10 +28,15 @@ import {
   PawPrint,
   Calendar as CalendarIcon,
   AlertCircle,
+  CreditCard,
+  Loader2,
+  DollarSign,
 } from "lucide-react";
 import { type BookingWithDetails, type BookingStatus } from "@/services/api/scheduling.service";
 import { GroomingReportCardForm } from "./GroomingReportCardForm";
 import { FileText } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface BookingsCalendarProps {
   bookings: BookingWithDetails[];
@@ -54,6 +59,68 @@ const STATUS_LABELS: Record<BookingStatus, string> = {
   completed: 'Completed',
   no_show: 'No Show',
 };
+
+// No-Show Fee Charge Button
+function NoShowChargeButton({ booking, onCharged }: { booking: BookingWithDetails; onCharged: () => void }) {
+  const [charging, setCharging] = useState(false);
+  const [charged, setCharged] = useState(false);
+
+  const feeAmount = (booking.merchant_services as any)?.no_show_fee_amount || (booking as any).deposit_amount || 0;
+
+  const handleCharge = async () => {
+    if (!window.confirm(`Charge $${feeAmount.toFixed(2)} no-show fee to this client's card on file?`)) return;
+    
+    setCharging(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("charge-no-show-fee", {
+        body: { bookingId: booking.id, reason: "Client did not show up for appointment" },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      toast.success(`No-show fee of $${data.chargeAmount.toFixed(2)} charged successfully`);
+      setCharged(true);
+      onCharged();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to charge no-show fee");
+    } finally {
+      setCharging(false);
+    }
+  };
+
+  if (charged) {
+    return (
+      <div className="pt-4 border-t">
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-green-500/10 text-green-700 text-sm">
+          <CheckCircle className="w-4 h-4" />
+          <span>No-show fee charged successfully</span>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="pt-4 border-t space-y-2">
+      <div className="flex items-center gap-2 p-2 rounded-lg bg-amber-500/10 text-amber-700 text-xs">
+        <CreditCard className="w-3.5 h-3.5 flex-shrink-0" />
+        <span>Card on file available — charge no-show fee</span>
+      </div>
+      <Button
+        variant="destructive"
+        className="w-full gap-2"
+        onClick={handleCharge}
+        disabled={charging || feeAmount <= 0}
+      >
+        {charging ? (
+          <><Loader2 className="w-4 h-4 animate-spin" /> Charging...</>
+        ) : (
+          <><DollarSign className="w-4 h-4" /> Charge ${feeAmount.toFixed(2)} No-Show Fee</>
+        )}
+      </Button>
+    </div>
+  );
+}
 
 export function BookingsCalendar({ bookings, merchantId, onUpdateStatus }: BookingsCalendarProps) {
   const [selectedDate, setSelectedDate] = useState<Date>(startOfToday());
@@ -308,28 +375,48 @@ export function BookingsCalendar({ bookings, merchantId, onUpdateStatus }: Booki
               )}
 
               {selectedBooking.status === 'confirmed' && (
-                <div className="flex gap-2 pt-4 border-t">
-                  <Button 
-                    variant="outline" 
-                    className="flex-1"
-                    onClick={() => {
-                      onUpdateStatus(selectedBooking.id, 'no_show');
-                      setSelectedBooking(null);
-                    }}
-                  >
-                    <AlertCircle className="w-4 h-4 mr-2" />
-                    No Show
-                  </Button>
-                  <Button 
-                    className="flex-1"
-                    onClick={() => {
-                      onUpdateStatus(selectedBooking.id, 'completed');
-                      setSelectedBooking(null);
-                    }}
-                  >
-                    <CheckCircle className="w-4 h-4 mr-2" />
-                    Complete
-                  </Button>
+                <div className="space-y-2 pt-4 border-t">
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      className="flex-1"
+                      onClick={() => {
+                        onUpdateStatus(selectedBooking.id, 'no_show');
+                        setSelectedBooking(null);
+                      }}
+                    >
+                      <AlertCircle className="w-4 h-4 mr-2" />
+                      No Show
+                    </Button>
+                    <Button 
+                      className="flex-1"
+                      onClick={() => {
+                        onUpdateStatus(selectedBooking.id, 'completed');
+                        setSelectedBooking(null);
+                      }}
+                    >
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      Complete
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* No-Show Fee Charge Button */}
+              {selectedBooking.status === 'no_show' && (selectedBooking as any).stripe_payment_method_id && (
+                <NoShowChargeButton
+                  booking={selectedBooking}
+                  onCharged={() => {
+                    setSelectedBooking(null);
+                  }}
+                />
+              )}
+
+              {selectedBooking.status === 'no_show' && !(selectedBooking as any).stripe_payment_method_id && (
+                <div className="pt-4 border-t">
+                  <p className="text-sm text-muted-foreground text-center">
+                    No card on file — cannot charge no-show fee.
+                  </p>
                 </div>
               )}
 

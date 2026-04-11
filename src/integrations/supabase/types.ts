@@ -5412,6 +5412,7 @@ export type Database = {
           cancellation_policy_hours: number
           category: Database["public"]["Enums"]["service_category"]
           created_at: string
+          deposit_amount: number | null
           description: string | null
           duration_minutes: number
           flash_sale_end_at: string | null
@@ -5424,8 +5425,10 @@ export type Database = {
           merchant_id: string
           min_notice_hours: number
           name: string
+          no_show_fee_amount: number | null
           payment_type: Database["public"]["Enums"]["payment_type"]
           price: number
+          require_deposit: boolean | null
           requires_pet: boolean
           updated_at: string
         }
@@ -5435,6 +5438,7 @@ export type Database = {
           cancellation_policy_hours?: number
           category?: Database["public"]["Enums"]["service_category"]
           created_at?: string
+          deposit_amount?: number | null
           description?: string | null
           duration_minutes?: number
           flash_sale_end_at?: string | null
@@ -5447,8 +5451,10 @@ export type Database = {
           merchant_id: string
           min_notice_hours?: number
           name: string
+          no_show_fee_amount?: number | null
           payment_type?: Database["public"]["Enums"]["payment_type"]
           price?: number
+          require_deposit?: boolean | null
           requires_pet?: boolean
           updated_at?: string
         }
@@ -5458,6 +5464,7 @@ export type Database = {
           cancellation_policy_hours?: number
           category?: Database["public"]["Enums"]["service_category"]
           created_at?: string
+          deposit_amount?: number | null
           description?: string | null
           duration_minutes?: number
           flash_sale_end_at?: string | null
@@ -5470,8 +5477,10 @@ export type Database = {
           merchant_id?: string
           min_notice_hours?: number
           name?: string
+          no_show_fee_amount?: number | null
           payment_type?: Database["public"]["Enums"]["payment_type"]
           price?: number
+          require_deposit?: boolean | null
           requires_pet?: boolean
           updated_at?: string
         }
@@ -6213,6 +6222,70 @@ export type Database = {
             columns: ["transaction_id"]
             isOneToOne: false
             referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      no_show_charges: {
+        Row: {
+          amount: number
+          booking_id: string
+          charged_by: string | null
+          created_at: string
+          id: string
+          merchant_id: string
+          reason: string | null
+          status: string
+          stripe_payment_intent_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          booking_id: string
+          charged_by?: string | null
+          created_at?: string
+          id?: string
+          merchant_id: string
+          reason?: string | null
+          status?: string
+          stripe_payment_intent_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          booking_id?: string
+          charged_by?: string | null
+          created_at?: string
+          id?: string
+          merchant_id?: string
+          reason?: string | null
+          status?: string
+          stripe_payment_intent_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "no_show_charges_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "service_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "no_show_charges_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "no_show_charges_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
             referencedColumns: ["id"]
           },
         ]
@@ -9332,6 +9405,8 @@ export type Database = {
           customer_email: string | null
           customer_name: string | null
           customer_phone: string | null
+          deposit_amount: number | null
+          deposit_status: string | null
           end_time: string
           id: string
           is_recurring: boolean
@@ -9349,6 +9424,8 @@ export type Database = {
           start_time: string
           status: Database["public"]["Enums"]["booking_status"]
           stripe_payment_intent_id: string | null
+          stripe_payment_method_id: string | null
+          stripe_setup_intent_id: string | null
           total_price: number
           updated_at: string
           user_id: string
@@ -9360,6 +9437,8 @@ export type Database = {
           customer_email?: string | null
           customer_name?: string | null
           customer_phone?: string | null
+          deposit_amount?: number | null
+          deposit_status?: string | null
           end_time: string
           id?: string
           is_recurring?: boolean
@@ -9377,6 +9456,8 @@ export type Database = {
           start_time: string
           status?: Database["public"]["Enums"]["booking_status"]
           stripe_payment_intent_id?: string | null
+          stripe_payment_method_id?: string | null
+          stripe_setup_intent_id?: string | null
           total_price?: number
           updated_at?: string
           user_id: string
@@ -9388,6 +9469,8 @@ export type Database = {
           customer_email?: string | null
           customer_name?: string | null
           customer_phone?: string | null
+          deposit_amount?: number | null
+          deposit_status?: string | null
           end_time?: string
           id?: string
           is_recurring?: boolean
@@ -9405,6 +9488,8 @@ export type Database = {
           start_time?: string
           status?: Database["public"]["Enums"]["booking_status"]
           stripe_payment_intent_id?: string | null
+          stripe_payment_method_id?: string | null
+          stripe_setup_intent_id?: string | null
           total_price?: number
           updated_at?: string
           user_id?: string

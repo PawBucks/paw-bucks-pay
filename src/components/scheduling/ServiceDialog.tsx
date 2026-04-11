@@ -48,6 +48,9 @@ const serviceSchema = z.object({
   buffer_minutes: z.coerce.number().min(0).max(120),
   min_notice_hours: z.coerce.number().min(0).max(168),
   cancellation_policy_hours: z.coerce.number().min(0).max(168),
+  require_deposit: z.boolean(),
+  deposit_amount: z.coerce.number().min(0).max(10000),
+  no_show_fee_amount: z.coerce.number().min(0).max(10000),
 });
 
 type ServiceFormData = z.infer<typeof serviceSchema>;
@@ -102,6 +105,9 @@ export function ServiceDialog({ open, onOpenChange, service, onSubmit }: Service
       buffer_minutes: 0,
       min_notice_hours: 2,
       cancellation_policy_hours: 24,
+      require_deposit: false,
+      deposit_amount: 0,
+      no_show_fee_amount: 0,
     },
   });
 
@@ -120,6 +126,9 @@ export function ServiceDialog({ open, onOpenChange, service, onSubmit }: Service
         buffer_minutes: service.buffer_minutes || 0,
         min_notice_hours: service.min_notice_hours || 2,
         cancellation_policy_hours: service.cancellation_policy_hours || 24,
+        require_deposit: (service as any).require_deposit || false,
+        deposit_amount: (service as any).deposit_amount || 0,
+        no_show_fee_amount: (service as any).no_show_fee_amount || 0,
       });
     } else {
       form.reset({
@@ -381,6 +390,65 @@ export function ServiceDialog({ open, onOpenChange, service, onSubmit }: Service
                   )}
                 />
               </div>
+            </div>
+
+            {/* No-Show Protection Section */}
+            <div className="space-y-3 rounded-lg border p-4 bg-muted/30">
+              <h4 className="font-medium text-sm flex items-center gap-2">
+                🛡️ No-Show Protection
+              </h4>
+              <FormField
+                control={form.control}
+                name="require_deposit"
+                render={({ field }) => (
+                  <FormItem className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <FormLabel>Require Card on File</FormLabel>
+                      <FormDescription>
+                        Clients must save a card to book. Enables no-show fee charging.
+                      </FormDescription>
+                    </div>
+                    <FormControl>
+                      <Switch checked={field.value} onCheckedChange={field.onChange} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              {form.watch("require_deposit") && (
+                <div className="grid grid-cols-2 gap-3 pt-2">
+                  <FormField
+                    control={form.control}
+                    name="deposit_amount"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Deposit Amount ($)</FormLabel>
+                        <FormControl>
+                          <Input type="number" step="0.01" min="0" {...field} />
+                        </FormControl>
+                        <FormDescription className="text-xs">
+                          0 = card saved only, no upfront charge
+                        </FormDescription>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="no_show_fee_amount"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>No-Show Fee ($)</FormLabel>
+                        <FormControl>
+                          <Input type="number" step="0.01" min="0" {...field} />
+                        </FormControl>
+                        <FormDescription className="text-xs">
+                          Charged to saved card if client doesn't show
+                        </FormDescription>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              )}
             </div>
 
             <FormField

@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { GroomingPetSelector, createDefaultGroomingData, type GroomingPetData } from "./GroomingPetSelector";
+import { DepositCardForm } from "./DepositCardForm";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -29,7 +30,8 @@ import {
   ArrowRight,
   Timer,
   Users,
-  Zap
+  Zap,
+  CreditCard
 } from "lucide-react";
 
 // Flash Sale Countdown component for service listings
@@ -91,8 +93,10 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [notes, setNotes] = useState("");
-  const [step, setStep] = useState<"service" | "date" | "time" | "confirm">("service");
+  const [step, setStep] = useState<"service" | "date" | "time" | "confirm" | "deposit">("service");
   const [groomingData, setGroomingData] = useState<GroomingPetData>(createDefaultGroomingData());
+  const [savedPaymentMethodId, setSavedPaymentMethodId] = useState<string | null>(null);
+  const [savedSetupIntentId, setSavedSetupIntentId] = useState<string | null>(null);
 
   // Fetch only active services for public booking
   const { data: services = [], isLoading: servicesLoading } = useQuery({
@@ -235,7 +239,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
         bookingDuration;
       const endTime = `${Math.floor(slotEndMinutes / 60).toString().padStart(2, "0")}:${(slotEndMinutes % 60).toString().padStart(2, "0")}:00`;
 
-      const bookingData = {
+      const bookingData: any = {
         merchant_id: merchantId,
         service_id: selectedService,
         user_id: user.id,
@@ -253,6 +257,14 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
         customer_phone: profile?.phone || undefined,
         customer_email: user.email || undefined,
       };
+
+      // Attach saved payment method if deposit was collected
+      if (savedPaymentMethodId) {
+        bookingData.stripe_payment_method_id = savedPaymentMethodId;
+        bookingData.stripe_setup_intent_id = savedSetupIntentId;
+        bookingData.deposit_amount = (selectedServiceData as any).deposit_amount || 0;
+        bookingData.deposit_status = "collected";
+      }
 
       const booking = await schedulingService.createBooking(bookingData);
 
@@ -337,6 +349,8 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
       setNotes("");
       setStep("service");
       setGroomingData(createDefaultGroomingData());
+      setSavedPaymentMethodId(null);
+      setSavedSetupIntentId(null);
     },
     onError: (error) => {
       toast.error("Failed to create booking", {
@@ -671,18 +685,42 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
               />
             </div>
 
+            {/* Deposit Notice */}
+            {(selectedServiceData as any).require_deposit && (
+              <div className="flex items-start gap-2 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20 text-sm">
+                <CreditCard className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                <p className="text-blue-700 dark:text-blue-400">
+                  This service requires a <strong>card on file</strong> to book.
+                  {(selectedServiceData as any).no_show_fee_amount > 0 && (
+                    <> A ${Number((selectedServiceData as any).no_show_fee_amount).toFixed(2)} no-show fee applies if you miss your appointment.</>
+                  )}
+                </p>
+              </div>
+            )}
+
             {/* Book Button */}
             {user ? (
               <Button
                 className="w-full"
                 size="lg"
-                onClick={() => createBooking.mutate()}
+                onClick={() => {
+                  if ((selectedServiceData as any).require_deposit && !savedPaymentMethodId) {
+                    setStep("deposit");
+                  } else {
+                    createBooking.mutate();
+                  }
+                }}
                 disabled={createBooking.isPending || (isGroomingService && groomingData.hasBlockingVaccineIssue)}
               >
                 {createBooking.isPending ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                     Booking...
+                  </>
+                ) : (selectedServiceData as any).require_deposit && !savedPaymentMethodId ? (
+                  <>
+                    Continue to Card Setup
+                    <ArrowRight className="w-4 h-4 ml-2" />
                   </>
                 ) : (
                   <>
@@ -701,6 +739,31 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             )}
+          </div>
+        )}
+
+        {/* Step 5: Deposit Card Collection */}
+        {step === "deposit" && selectedServiceData && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-medium text-sm text-muted-foreground">Save Card on File</h3>
+              <Button variant="ghost" size="sm" onClick={() => setStep("confirm")}>
+                Back
+              </Button>
+            </div>
+            <DepositCardForm
+              merchantId={merchantId}
+              serviceId={selectedServiceData.id}
+              depositAmount={(selectedServiceData as any).deposit_amount || 0}
+              noShowFeeAmount={(selectedServiceData as any).no_show_fee_amount || 0}
+              onCardSaved={(paymentMethodId, setupIntentId) => {
+                setSavedPaymentMethodId(paymentMethodId);
+                setSavedSetupIntentId(setupIntentId);
+                // Immediately submit the booking
+                createBooking.mutate();
+              }}
+              onCancel={() => setStep("confirm")}
+            />
           </div>
         )}
       </CardContent>
