@@ -30,9 +30,12 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { type BookingWithDetails, type BookingStatus } from "@/services/api/scheduling.service";
+import { GroomingReportCardForm } from "./GroomingReportCardForm";
+import { FileText } from "lucide-react";
 
 interface BookingsCalendarProps {
   bookings: BookingWithDetails[];
+  merchantId?: string;
   onUpdateStatus: (id: string, status: 'confirmed' | 'cancelled' | 'completed' | 'no_show') => void;
 }
 
