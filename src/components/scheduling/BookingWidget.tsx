@@ -499,6 +499,12 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
                         <Badge variant="secondary" className="text-xs capitalize">
                           {service.category.replace(/_/g, " ")}
                         </Badge>
+                        {(service as any).is_mobile_service && (
+                          <Badge variant="outline" className="text-xs gap-0.5">
+                            <MapPin className="w-3 h-3" />
+                            Mobile
+                          </Badge>
+                        )}
                         {hasFlashSale && (
                           <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 text-xs gap-0.5">
                             <Zap className="w-3 h-3" />
