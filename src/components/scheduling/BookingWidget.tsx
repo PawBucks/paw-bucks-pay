@@ -31,8 +31,10 @@ import {
   Timer,
   Users,
   Zap,
-  CreditCard
+  CreditCard,
+  MapPin
 } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 // Flash Sale Countdown component for service listings
 function FlashSaleCountdown({ endAt }: { endAt: string }) {
@@ -97,6 +99,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
   const [groomingData, setGroomingData] = useState<GroomingPetData>(createDefaultGroomingData());
   const [savedPaymentMethodId, setSavedPaymentMethodId] = useState<string | null>(null);
   const [savedSetupIntentId, setSavedSetupIntentId] = useState<string | null>(null);
+  const [serviceAddress, setServiceAddress] = useState("");
 
   // Fetch only active services for public booking
   const { data: services = [], isLoading: servicesLoading } = useQuery({
