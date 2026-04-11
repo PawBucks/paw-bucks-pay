@@ -617,6 +617,14 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
               </div>
             </div>
 
+            {/* Pending approval notice */}
+            <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-sm">
+              <Clock className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
+              <p className="text-amber-700 dark:text-amber-400">
+                Your booking will be submitted as a <strong>request</strong>. {merchantName} will review and confirm it fits their schedule and location.
+              </p>
+            </div>
+
             {/* Grooming Pet Selector - only for grooming services */}
             {isGroomingService && (
               <GroomingPetSelector
