@@ -346,6 +346,7 @@ const MerchantScheduling = () => {
           <TabsContent value="bookings">
             <BookingsCalendar
               bookings={bookings}
+              merchantId={merchantId || undefined}
               onUpdateStatus={handleUpdateBookingStatus}
             />
           </TabsContent>

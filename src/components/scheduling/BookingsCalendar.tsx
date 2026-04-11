@@ -30,9 +30,12 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { type BookingWithDetails, type BookingStatus } from "@/services/api/scheduling.service";
+import { GroomingReportCardForm } from "./GroomingReportCardForm";
+import { FileText } from "lucide-react";
 
 interface BookingsCalendarProps {
   bookings: BookingWithDetails[];
+  merchantId?: string;
   onUpdateStatus: (id: string, status: 'confirmed' | 'cancelled' | 'completed' | 'no_show') => void;
 }
 
@@ -52,10 +55,11 @@ const STATUS_LABELS: Record<BookingStatus, string> = {
   no_show: 'No Show',
 };
 
-export function BookingsCalendar({ bookings, onUpdateStatus }: BookingsCalendarProps) {
+export function BookingsCalendar({ bookings, merchantId, onUpdateStatus }: BookingsCalendarProps) {
   const [selectedDate, setSelectedDate] = useState<Date>(startOfToday());
   const [statusFilter, setStatusFilter] = useState<BookingStatus | 'all'>('all');
   const [selectedBooking, setSelectedBooking] = useState<BookingWithDetails | null>(null);
+  const [reportCardBooking, setReportCardBooking] = useState<BookingWithDetails | null>(null);
 
   // Get dates that have bookings
   const datesWithBookings = useMemo(() => {
@@ -328,7 +332,44 @@ export function BookingsCalendar({ bookings, onUpdateStatus }: BookingsCalendarP
                   </Button>
                 </div>
               )}
+
+              {selectedBooking.status === 'completed' && merchantId && (
+                <div className="pt-4 border-t">
+                  <Button
+                    variant="outline"
+                    className="w-full gap-2"
+                    onClick={() => {
+                      setReportCardBooking(selectedBooking);
+                      setSelectedBooking(null);
+                    }}
+                  >
+                    <FileText className="w-4 h-4" />
+                    Grooming Report Card
+                  </Button>
+                </div>
+              )}
             </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Grooming Report Card Dialog */}
+      <Dialog open={!!reportCardBooking} onOpenChange={() => setReportCardBooking(null)}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Grooming Report Card</DialogTitle>
+          </DialogHeader>
+          {reportCardBooking && merchantId && (
+            <GroomingReportCardForm
+              bookingId={reportCardBooking.id}
+              merchantId={merchantId}
+              petId={(reportCardBooking as any).pet_id || null}
+              petName={(reportCardBooking as any).pet_profiles?.name || null}
+              customerUserId={(reportCardBooking as any).user_id}
+              customerName={reportCardBooking.customer_name || undefined}
+              serviceName={reportCardBooking.merchant_services?.name || undefined}
+              onClose={() => setReportCardBooking(null)}
+            />
           )}
         </DialogContent>
       </Dialog>
