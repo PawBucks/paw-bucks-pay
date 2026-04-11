@@ -952,6 +952,7 @@ export function FinancingTab() {
     finally { setLoading(false); }
   };
 
+  const pendingMerchants = fundingApplicants.filter(a => a.status === 'pending');
   const reviewedMerchants = fundingApplicants.filter(a => a.status !== 'pending');
   const pendingVetLoans = vetLoans.filter(l => l.status === 'pending');
 
