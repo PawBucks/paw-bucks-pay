@@ -474,6 +474,24 @@ export function ServiceDialog({ open, onOpenChange, service, onSubmit }: Service
 
             <FormField
               control={form.control}
+              name="is_mobile_service"
+              render={({ field }) => (
+                <FormItem className="flex items-center justify-between rounded-lg border p-3">
+                  <div className="space-y-0.5">
+                    <FormLabel>🚗 Mobile Service</FormLabel>
+                    <FormDescription>
+                      You travel to the client's location
+                    </FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
               name="is_active"
               render={({ field }) => (
                 <FormItem className="flex items-center justify-between rounded-lg border p-3">
