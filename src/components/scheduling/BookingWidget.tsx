@@ -694,6 +694,25 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
               />
             )}
 
+            {/* Mobile Service Address */}
+            {isMobileService && (
+              <div className="space-y-2">
+                <Label htmlFor="service-address" className="flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5" />
+                  Your Address (Required)
+                </Label>
+                <Input
+                  id="service-address"
+                  placeholder="Enter the address where you'd like the service..."
+                  value={serviceAddress}
+                  onChange={(e) => setServiceAddress(e.target.value)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  The provider will travel to this location
+                </p>
+              </div>
+            )}
+
             {/* Notes */}
             <div className="space-y-2">
               <Label htmlFor="notes">Special Requests (Optional)</Label>
