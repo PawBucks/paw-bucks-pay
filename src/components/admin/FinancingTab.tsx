@@ -140,6 +140,7 @@ function StatusBadge({ status }: { status: string }) {
   const map: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
     pending: { label: 'Pending Review', variant: 'secondary' },
     approved: { label: 'Approved', variant: 'default' },
+    funded: { label: 'Funded', variant: 'default' },
     denied: { label: 'Denied', variant: 'destructive' },
     active: { label: 'Active', variant: 'default' },
   };
@@ -217,10 +218,12 @@ function MerchantDetailPanel({
   applicant,
   onApprove,
   onDeny,
+  onMarkFunded,
 }: {
   applicant: FundingApplicant;
   onApprove: () => void;
   onDeny: () => void;
+  onMarkFunded: () => void;
 }) {
   const risk = getRiskScore(applicant);
   const projection = getRepaymentProjection(applicant.requested_amount, applicant.revenue_30d);
@@ -551,6 +554,13 @@ function MerchantDetailPanel({
           </Button>
         </div>
       )}
+      {applicant.status === 'approved' && (
+        <div className="flex gap-3 pt-2">
+          <Button className="flex-1 gap-2 bg-blue-600 hover:bg-blue-700 text-white" onClick={onMarkFunded}>
+            <DollarSign className="w-4 h-4" /> Mark as Funded
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
@@ -561,10 +571,12 @@ function VetLoanDetailPanel({
   loan,
   onApprove,
   onDeny,
+  onMarkFunded,
 }: {
   loan: VetLoanApplicant;
   onApprove: () => void;
   onDeny: () => void;
+  onMarkFunded: () => void;
 }) {
   return (
     <div className="space-y-6">
@@ -698,6 +710,13 @@ function VetLoanDetailPanel({
           </Button>
           <Button variant="destructive" className="flex-1 gap-2" onClick={onDeny}>
             <XCircle className="w-4 h-4" /> Deny Loan
+          </Button>
+        </div>
+      )}
+      {loan.status === 'approved' && (
+        <div className="flex gap-3 pt-2">
+          <Button className="flex-1 gap-2 bg-blue-600 hover:bg-blue-700 text-white" onClick={onMarkFunded}>
+            <DollarSign className="w-4 h-4" /> Mark as Funded
           </Button>
         </div>
       )}
@@ -898,6 +917,41 @@ export function FinancingTab() {
     finally { setLoading(false); }
   };
 
+  const handleMarkFundedMerchant = async () => {
+    if (!selectedMerchant) return;
+    setLoading(true);
+    try {
+      await supabase.from('funding_requests').update({ status: 'funded' }).eq('id', selectedMerchant.id);
+      await supabase.rpc('log_admin_action', {
+        _action: 'MARK_FUNDED',
+        _entity_type: 'funding_request',
+        _entity_id: selectedMerchant.id,
+        _changes: { amount: selectedMerchant.requested_amount },
+      });
+      toast.success('Merchant marked as funded');
+      setSelectedMerchant(null);
+      loadData();
+    } catch (e: any) { toast.error(e.message); }
+    finally { setLoading(false); }
+  };
+
+  const handleMarkFundedVetLoan = async () => {
+    if (!selectedVetLoan) return;
+    setLoading(true);
+    try {
+      await supabase.from('vet_loans').update({ status: 'funded' }).eq('id', selectedVetLoan.id);
+      await supabase.rpc('log_admin_action', {
+        _action: 'MARK_FUNDED',
+        _entity_type: 'vet_loan',
+        _entity_id: selectedVetLoan.id,
+        _changes: { amount: selectedVetLoan.requested_amount },
+      });
+      toast.success('Vet loan marked as funded');
+      loadData();
+    } catch (e: any) { toast.error(e.message); }
+    finally { setLoading(false); }
+  };
+
   const pendingMerchants = fundingApplicants.filter(a => a.status === 'pending');
   const reviewedMerchants = fundingApplicants.filter(a => a.status !== 'pending');
   const pendingVetLoans = vetLoans.filter(l => l.status === 'pending');
@@ -982,6 +1036,7 @@ export function FinancingTab() {
                       setApproveDialogOpen(true);
                     }}
                     onDeny={() => setDenyDialogOpen(true)}
+                    onMarkFunded={handleMarkFundedMerchant}
                   />
                 ) : (
                   <Card className="p-12 text-center h-full flex items-center justify-center">
@@ -1042,6 +1097,7 @@ export function FinancingTab() {
                     loan={selectedVetLoan}
                     onApprove={() => setApproveDialogOpen(true)}
                     onDeny={() => setDenyDialogOpen(true)}
+                    onMarkFunded={handleMarkFundedVetLoan}
                   />
                 ) : (
                   <Card className="p-12 text-center h-full flex items-center justify-center">
