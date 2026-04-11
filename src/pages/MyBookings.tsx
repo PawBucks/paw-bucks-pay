@@ -46,6 +46,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { GroomingReportCardView } from "@/components/scheduling/GroomingReportCardView";
 
 type BookingStatus = "pending" | "confirmed" | "cancelled" | "completed" | "no_show";
 
@@ -289,6 +290,13 @@ export default function MyBookings() {
               </Button>
             )}
           </div>
+
+          {/* Grooming Report Card for completed bookings */}
+          {status === "completed" && (
+            <div className="mt-3">
+              <GroomingReportCardView bookingId={booking.id} />
+            </div>
+          )}
         </CardContent>
       </Card>
     );
