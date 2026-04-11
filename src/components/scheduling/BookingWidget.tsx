@@ -139,6 +139,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
 
   const selectedServiceData = services.find((s) => s.id === selectedService);
   const isGroomingService = selectedServiceData?.category === "grooming";
+  const isMobileService = (selectedServiceData as any)?.is_mobile_service === true;
   const effectiveDuration = isGroomingService && groomingData.adjustedDuration ? groomingData.adjustedDuration : selectedServiceData?.duration_minutes || 0;
   const effectivePrice = isGroomingService && groomingData.adjustedPrice ? Number(groomingData.adjustedPrice) : selectedServiceData?.price || 0;
 
