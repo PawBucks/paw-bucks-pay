@@ -2616,6 +2616,135 @@ export type Database = {
           },
         ]
       }
+      grooming_rebook_log: {
+        Row: {
+          created_at: string
+          id: string
+          last_booking_id: string | null
+          merchant_id: string
+          message_sent_at: string
+          pet_id: string | null
+          rebook_booking_id: string | null
+          reminder_number: number
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_booking_id?: string | null
+          merchant_id: string
+          message_sent_at?: string
+          pet_id?: string | null
+          rebook_booking_id?: string | null
+          reminder_number?: number
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_booking_id?: string | null
+          merchant_id?: string
+          message_sent_at?: string
+          pet_id?: string | null
+          rebook_booking_id?: string | null
+          reminder_number?: number
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grooming_rebook_log_last_booking_id_fkey"
+            columns: ["last_booking_id"]
+            isOneToOne: false
+            referencedRelation: "service_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grooming_rebook_log_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grooming_rebook_log_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grooming_rebook_log_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "pet_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grooming_rebook_log_rebook_booking_id_fkey"
+            columns: ["rebook_booking_id"]
+            isOneToOne: false
+            referencedRelation: "service_bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      grooming_rebook_settings: {
+        Row: {
+          created_at: string
+          id: string
+          is_enabled: boolean
+          max_reminders_per_cycle: number
+          merchant_id: string
+          message_template: string
+          rebook_interval_days: number
+          reminder_channels: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          max_reminders_per_cycle?: number
+          merchant_id: string
+          message_template?: string
+          rebook_interval_days?: number
+          reminder_channels?: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          max_reminders_per_cycle?: number
+          merchant_id?: string
+          message_template?: string
+          rebook_interval_days?: number
+          reminder_channels?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grooming_rebook_settings_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: true
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grooming_rebook_settings_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: true
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       grooming_report_cards: {
         Row: {
           behavior_notes: string | null
