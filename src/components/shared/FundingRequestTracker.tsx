@@ -26,12 +26,14 @@ const STEPS = [
   { key: "pending", label: "Submitted", icon: FileText, description: "Your request has been received" },
   { key: "in_review", label: "In Review", icon: Search, description: "Our team is evaluating your request" },
   { key: "decision", label: "Decision", icon: CheckCircle2, description: "A decision has been made" },
+  { key: "funded", label: "Funded", icon: DollarSign, description: "Funds have been disbursed" },
 ] as const;
 
 function getStepIndex(status: string): number {
   if (status === "pending") return 0;
   if (status === "in_review") return 1;
   if (status === "approved" || status === "denied") return 2;
+  if (status === "funded") return 3;
   return 0;
 }
 
@@ -43,6 +45,8 @@ function getStatusBadge(status: string) {
       return <Badge className="gap-1 bg-amber-500/15 text-amber-600 border-amber-500/30 hover:bg-amber-500/20"><Search className="w-3 h-3" /> In Review</Badge>;
     case "approved":
       return <Badge className="gap-1 bg-emerald-500/15 text-emerald-600 border-emerald-500/30 hover:bg-emerald-500/20"><CheckCircle2 className="w-3 h-3" /> Approved</Badge>;
+    case "funded":
+      return <Badge className="gap-1 bg-blue-500/15 text-blue-600 border-blue-500/30 hover:bg-blue-500/20"><DollarSign className="w-3 h-3" /> Funded</Badge>;
     case "denied":
       return <Badge variant="destructive" className="gap-1"><XCircle className="w-3 h-3" /> Denied</Badge>;
     default:
