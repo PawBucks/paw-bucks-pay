@@ -4,7 +4,7 @@ import { z } from "https://esm.sh/zod@3.22.4";
 
 const updateFundingSchema = z.object({
   requestId: z.string().uuid(),
-  status: z.enum(['pending', 'in_review', 'approved', 'denied']),
+  status: z.enum(['pending', 'in_review', 'approved', 'denied', 'funded']),
   entityType: z.enum(['merchant', 'vet']).default('merchant'),
 });
 
@@ -108,19 +108,24 @@ serve(async (req) => {
       entityName = vet?.clinic_name ?? vet?.name ?? 'your practice';
     }
 
-    if (recipientUserId && (status === 'approved' || status === 'denied')) {
+    if (recipientUserId && (status === 'approved' || status === 'denied' || status === 'funded')) {
       const isApproved = status === 'approved';
+      const isFunded = status === 'funded';
       const amount = data.requested_amount
         ? `$${Number(data.requested_amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}`
         : 'your requested amount';
 
-      const notificationTitle = isApproved
-        ? '🎉 Funding Request Approved!'
-        : 'Funding Request Update';
+      const notificationTitle = isFunded
+        ? '💰 Funds Disbursed!'
+        : isApproved
+          ? '🎉 Funding Request Approved!'
+          : 'Funding Request Update';
 
-      const notificationMessage = isApproved
-        ? `Great news! Your funding request of ${amount} for ${entityName} has been approved. Funds will be disbursed shortly.`
-        : `Your funding request of ${amount} for ${entityName} was not approved at this time. Please contact support for more details.`;
+      const notificationMessage = isFunded
+        ? `Great news! Your funding of ${amount} for ${entityName} has been disbursed. Check your account for the deposited funds.`
+        : isApproved
+          ? `Great news! Your funding request of ${amount} for ${entityName} has been approved. Funds will be disbursed shortly.`
+          : `Your funding request of ${amount} for ${entityName} was not approved at this time. Please contact support for more details.`;
 
       await supabaseAdmin
         .from('notifications')
