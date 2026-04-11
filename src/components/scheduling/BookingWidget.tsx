@@ -278,8 +278,8 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
       return booking;
     },
     onSuccess: () => {
-      toast.success("Booking confirmed!", {
-        description: `Your appointment at ${merchantName} has been scheduled.`,
+      toast.success("Booking request submitted!", {
+        description: `${merchantName} will review and confirm your appointment shortly.`,
       });
       queryClient.invalidateQueries({ queryKey: ["date-bookings"] });
 
@@ -577,7 +577,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
         {step === "confirm" && selectedServiceData && selectedDate && selectedSlot && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="font-medium text-sm text-muted-foreground">Confirm Booking</h3>
+              <h3 className="font-medium text-sm text-muted-foreground">Review & Submit</h3>
               <Button variant="ghost" size="sm" onClick={() => setStep("time")}>
                 Change Time
               </Button>
@@ -655,7 +655,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
                   </>
                 ) : (
                   <>
-                    Confirm Booking
+                    Submit Booking Request
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </>
                 )}
