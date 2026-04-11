@@ -140,6 +140,7 @@ function StatusBadge({ status }: { status: string }) {
   const map: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
     pending: { label: 'Pending Review', variant: 'secondary' },
     approved: { label: 'Approved', variant: 'default' },
+    funded: { label: 'Funded', variant: 'default' },
     denied: { label: 'Denied', variant: 'destructive' },
     active: { label: 'Active', variant: 'default' },
   };
