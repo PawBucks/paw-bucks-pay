@@ -2442,6 +2442,180 @@ export type Database = {
         }
         Relationships: []
       }
+      groomer_vaccine_requirements: {
+        Row: {
+          created_at: string
+          description: string | null
+          enforcement_level: string
+          id: string
+          is_active: boolean
+          max_age_months: number
+          merchant_id: string
+          updated_at: string
+          vaccine_name: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          enforcement_level?: string
+          id?: string
+          is_active?: boolean
+          max_age_months?: number
+          merchant_id: string
+          updated_at?: string
+          vaccine_name: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          enforcement_level?: string
+          id?: string
+          is_active?: boolean
+          max_age_months?: number
+          merchant_id?: string
+          updated_at?: string
+          vaccine_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "groomer_vaccine_requirements_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "groomer_vaccine_requirements_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      grooming_breed_profiles: {
+        Row: {
+          breed_name: string
+          coat_type: string
+          created_at: string
+          duration_minutes_override: number | null
+          grooming_notes: string | null
+          id: string
+          is_active: boolean
+          merchant_id: string
+          price_override: number | null
+          size_category: string
+          updated_at: string
+        }
+        Insert: {
+          breed_name: string
+          coat_type?: string
+          created_at?: string
+          duration_minutes_override?: number | null
+          grooming_notes?: string | null
+          id?: string
+          is_active?: boolean
+          merchant_id: string
+          price_override?: number | null
+          size_category?: string
+          updated_at?: string
+        }
+        Update: {
+          breed_name?: string
+          coat_type?: string
+          created_at?: string
+          duration_minutes_override?: number | null
+          grooming_notes?: string | null
+          id?: string
+          is_active?: boolean
+          merchant_id?: string
+          price_override?: number | null
+          size_category?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grooming_breed_profiles_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grooming_breed_profiles_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      grooming_pet_details: {
+        Row: {
+          adjusted_duration_minutes: number | null
+          adjusted_price: number | null
+          booking_id: string
+          breed: string | null
+          coat_condition: string | null
+          coat_type: string | null
+          created_at: string
+          id: string
+          pet_id: string | null
+          special_instructions: string | null
+          temperament_notes: string | null
+          updated_at: string
+          vaccine_status: Json | null
+          weight_lbs: number | null
+        }
+        Insert: {
+          adjusted_duration_minutes?: number | null
+          adjusted_price?: number | null
+          booking_id: string
+          breed?: string | null
+          coat_condition?: string | null
+          coat_type?: string | null
+          created_at?: string
+          id?: string
+          pet_id?: string | null
+          special_instructions?: string | null
+          temperament_notes?: string | null
+          updated_at?: string
+          vaccine_status?: Json | null
+          weight_lbs?: number | null
+        }
+        Update: {
+          adjusted_duration_minutes?: number | null
+          adjusted_price?: number | null
+          booking_id?: string
+          breed?: string | null
+          coat_condition?: string | null
+          coat_type?: string | null
+          created_at?: string
+          id?: string
+          pet_id?: string | null
+          special_instructions?: string | null
+          temperament_notes?: string | null
+          updated_at?: string
+          vaccine_status?: Json | null
+          weight_lbs?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grooming_pet_details_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: true
+            referencedRelation: "service_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grooming_pet_details_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "pet_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       guilt_badge_definitions: {
         Row: {
           badge_key: string

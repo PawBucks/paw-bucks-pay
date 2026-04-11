@@ -2,12 +2,13 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { getNormalizedCategory } from "@/lib/categoryMapping";
 import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { GradientCard } from "@/components/ui/gradient-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, ArrowLeft, Plus, Calendar, Clock, Settings, Users, Zap } from "lucide-react";
+import { Loader2, ArrowLeft, Plus, Calendar, Clock, Settings, Users, Zap, Dog } from "lucide-react";
 import { toast } from "sonner";
 import { ServicesList } from "@/components/scheduling/ServicesList";
 import { AvailabilityManager } from "@/components/scheduling/AvailabilityManager";
@@ -15,6 +16,7 @@ import { BookingsCalendar } from "@/components/scheduling/BookingsCalendar";
 import { ServiceDialog } from "@/components/scheduling/ServiceDialog";
 import { FlashSaleDialog } from "@/components/scheduling/FlashSaleDialog";
 import { IntakeQuestionsManager } from "@/components/scheduling/IntakeQuestionsManager";
+import { GroomingSettingsTab } from "@/components/scheduling/GroomingSettingsTab";
 import { 
   schedulingService, 
   type MerchantService, 
@@ -28,6 +30,7 @@ const MerchantScheduling = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [merchantId, setMerchantId] = useState<string | null>(null);
+  const [businessType, setBusinessType] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [services, setServices] = useState<MerchantService[]>([]);
   const [availability, setAvailability] = useState<MerchantAvailability[]>([]);
@@ -52,7 +55,7 @@ const MerchantScheduling = () => {
       // Get merchant ID
       const { data: merchant, error: merchantError } = await supabase
         .from("merchants")
-        .select("id")
+        .select("id, business_type")
         .eq("user_id", user.id)
         .single();
 
@@ -65,6 +68,7 @@ const MerchantScheduling = () => {
       }
 
       setMerchantId(merchant.id);
+      setBusinessType(merchant.business_type || "");
 
       // Load all scheduling data in parallel
       const [servicesData, availabilityData, overridesData, bookingsData] = await Promise.all([
@@ -255,11 +259,17 @@ const MerchantScheduling = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="mb-6">
+          <TabsList className="mb-6 flex-wrap">
             <TabsTrigger value="services">Services</TabsTrigger>
             <TabsTrigger value="availability">Availability</TabsTrigger>
             <TabsTrigger value="bookings">Bookings</TabsTrigger>
             <TabsTrigger value="intake">Intake Forms</TabsTrigger>
+            {getNormalizedCategory(businessType) === 'grooming' && (
+              <TabsTrigger value="grooming" className="gap-1">
+                <Dog className="w-3.5 h-3.5" />
+                Grooming
+              </TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="services">
@@ -304,6 +314,12 @@ const MerchantScheduling = () => {
               />
             )}
           </TabsContent>
+
+          {getNormalizedCategory(businessType) === 'grooming' && merchantId && (
+            <TabsContent value="grooming">
+              <GroomingSettingsTab merchantId={merchantId} />
+            </TabsContent>
+          )}
         </Tabs>
       </main>
 
