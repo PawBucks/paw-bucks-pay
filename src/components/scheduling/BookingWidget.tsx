@@ -262,6 +262,23 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
         customer_email: user.email || undefined,
       };
 
+      // Attach service address for mobile services
+      if (isMobileService && serviceAddress) {
+        bookingData.service_address = serviceAddress;
+        // Geocode the address for route optimization
+        try {
+          const { data: geocode } = await supabase.functions.invoke("geocode-address", {
+            body: { address: serviceAddress },
+          });
+          if (geocode?.latitude) {
+            bookingData.service_latitude = geocode.latitude;
+            bookingData.service_longitude = geocode.longitude;
+          }
+        } catch (e) {
+          console.error("Failed to geocode service address:", e);
+        }
+      }
+
       // Attach saved payment method if deposit was collected
       if (savedPaymentMethodId) {
         bookingData.stripe_payment_method_id = savedPaymentMethodId;
