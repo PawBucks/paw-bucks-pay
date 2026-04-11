@@ -313,6 +313,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
       setSelectedSlot(null);
       setNotes("");
       setStep("service");
+      setGroomingData(createDefaultGroomingData());
     },
     onError: (error) => {
       toast.error("Failed to create booking", {
