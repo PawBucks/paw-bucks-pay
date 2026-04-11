@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { GradientCard } from "@/components/ui/gradient-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, ArrowLeft, Plus, Calendar, Clock, Settings, Users, Zap } from "lucide-react";
+import { Loader2, ArrowLeft, Plus, Calendar, Clock, Settings, Users, Zap, Dog } from "lucide-react";
 import { toast } from "sonner";
 import { ServicesList } from "@/components/scheduling/ServicesList";
 import { AvailabilityManager } from "@/components/scheduling/AvailabilityManager";
@@ -15,6 +15,7 @@ import { BookingsCalendar } from "@/components/scheduling/BookingsCalendar";
 import { ServiceDialog } from "@/components/scheduling/ServiceDialog";
 import { FlashSaleDialog } from "@/components/scheduling/FlashSaleDialog";
 import { IntakeQuestionsManager } from "@/components/scheduling/IntakeQuestionsManager";
+import { GroomingSettingsTab } from "@/components/scheduling/GroomingSettingsTab";
 import { 
   schedulingService, 
   type MerchantService, 
