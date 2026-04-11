@@ -176,7 +176,7 @@ const MerchantScheduling = () => {
               type: status === 'confirmed' ? 'confirmation' : 'cancellation',
               customerEmail: booking.customer_email,
               customerName: booking.customer_name || booking.customer_email,
-              merchantName: booking.merchant_services?.merchants?.business_name || 'the business',
+              merchantName: (booking as any).merchant_services?.merchants?.business_name || 'the business',
               serviceName,
               bookingDate,
               startTime: booking.start_time,
