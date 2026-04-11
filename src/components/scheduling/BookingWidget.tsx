@@ -750,7 +750,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
                     createBooking.mutate();
                   }
                 }}
-                disabled={createBooking.isPending || (isGroomingService && groomingData.hasBlockingVaccineIssue)}
+                disabled={createBooking.isPending || (isGroomingService && groomingData.hasBlockingVaccineIssue) || (isMobileService && !serviceAddress.trim())}
               >
                 {createBooking.isPending ? (
                   <>
