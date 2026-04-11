@@ -307,6 +307,29 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
         }).catch((err) => console.error("Failed to send confirmation email:", err));
       }
 
+      // Notify merchant of new booking request (fire-and-forget)
+      if (selectedDate && selectedSlot && selectedServiceData) {
+        // Get merchant owner user_id to send notification
+        supabase
+          .from("merchants")
+          .select("user_id")
+          .eq("id", merchantId)
+          .single()
+          .then(({ data: merchantData }) => {
+            if (merchantData?.user_id) {
+              supabase.from("notifications").insert({
+                user_id: merchantData.user_id,
+                title: "📋 New Booking Request",
+                message: `${user?.user_metadata?.full_name || user?.email || "A customer"} requested ${selectedServiceData.name} on ${format(selectedDate, "MMM d")} at ${selectedSlot.slice(0, 5)}.`,
+                category: "transactional",
+                is_read: false,
+              }).then(({ error }) => {
+                if (error) console.error("Failed to notify merchant:", error);
+              });
+            }
+          });
+      }
+
       // Reset form
       setSelectedService(null);
       setSelectedDate(undefined);
