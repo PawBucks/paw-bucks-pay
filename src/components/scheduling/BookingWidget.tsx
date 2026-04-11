@@ -92,6 +92,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [notes, setNotes] = useState("");
   const [step, setStep] = useState<"service" | "date" | "time" | "confirm">("service");
+  const [groomingData, setGroomingData] = useState<GroomingPetData>(createDefaultGroomingData());
 
   // Fetch only active services for public booking
   const { data: services = [], isLoading: servicesLoading } = useQuery({
