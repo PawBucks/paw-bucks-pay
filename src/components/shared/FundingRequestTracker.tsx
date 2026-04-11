@@ -76,9 +76,9 @@ function StepIndicator({ step, currentIndex, isLast, status }: {
           className={cn(
             "w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all",
             isCompleted && "bg-primary border-primary text-primary-foreground",
-            isCurrent && !isDenied && "border-primary bg-primary/10 text-primary ring-4 ring-primary/20",
+            isCurrent && !isDenied && !isFunded && "border-primary bg-primary/10 text-primary ring-4 ring-primary/20",
             isCurrent && isDenied && "border-destructive bg-destructive/10 text-destructive ring-4 ring-destructive/20",
-            isCurrent && isApproved && "border-emerald-500 bg-emerald-500/10 text-emerald-600 ring-4 ring-emerald-500/20",
+            isCurrent && (isApproved || isFunded) && "border-emerald-500 bg-emerald-500/10 text-emerald-600 ring-4 ring-emerald-500/20",
             !isCompleted && !isCurrent && "border-muted-foreground/30 text-muted-foreground/50"
           )}
         >
@@ -88,7 +88,7 @@ function StepIndicator({ step, currentIndex, isLast, status }: {
           "text-xs font-medium text-center whitespace-nowrap",
           (isCompleted || isCurrent) ? "text-foreground" : "text-muted-foreground"
         )}>
-          {isDenied ? "Denied" : isApproved ? "Approved" : step.label}
+          {isDenied ? "Denied" : isFunded ? "Funded" : isApproved ? "Approved" : step.label}
         </span>
       </div>
       {!isLast && (
