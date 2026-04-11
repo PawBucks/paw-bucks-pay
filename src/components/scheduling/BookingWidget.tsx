@@ -30,7 +30,8 @@ import {
   ArrowRight,
   Timer,
   Users,
-  Zap
+  Zap,
+  CreditCard
 } from "lucide-react";
 
 // Flash Sale Countdown component for service listings
