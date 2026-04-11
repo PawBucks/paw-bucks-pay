@@ -240,6 +240,14 @@ export default function MyBookings() {
             )}
           </div>
 
+          {/* Pending approval notice */}
+          {status === "pending" && isUpcoming && (
+            <div className="flex items-center gap-2 p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs text-amber-700 dark:text-amber-400 mb-3">
+              <Clock className="w-3.5 h-3.5 flex-shrink-0" />
+              <span>Awaiting confirmation from {merchant?.business_name || 'the business'}</span>
+            </div>
+          )}
+
           <div className="flex items-center justify-between pt-3 border-t">
             <span className="font-semibold text-primary">${booking.total_price.toFixed(2)}</span>
             {isUpcoming && status !== "cancelled" && (

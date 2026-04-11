@@ -144,7 +144,51 @@ const MerchantScheduling = () => {
   const handleUpdateBookingStatus = async (bookingId: string, status: 'confirmed' | 'cancelled' | 'completed' | 'no_show') => {
     try {
       await schedulingService.updateBookingStatus(bookingId, status);
-      toast.success(`Booking ${status}!`);
+
+      // Find the booking to notify the customer
+      const booking = bookings.find(b => b.id === bookingId);
+      if (booking && (status === 'confirmed' || status === 'cancelled')) {
+        const serviceName = booking.merchant_services?.name || 'your service';
+        const bookingDate = booking.booking_date;
+
+        // Create in-app notification for customer
+        const title = status === 'confirmed'
+          ? '✅ Booking Confirmed!'
+          : '❌ Booking Declined';
+        const message = status === 'confirmed'
+          ? `Your ${serviceName} appointment on ${bookingDate} has been confirmed!`
+          : `Your ${serviceName} appointment request for ${bookingDate} was declined. Please try a different time or contact the business.`;
+
+        await supabase.from("notifications").insert({
+          user_id: booking.user_id,
+          title,
+          message,
+          category: 'transactional',
+          is_read: false,
+        }).then(({ error }) => {
+          if (error) console.error("Failed to create customer notification:", error);
+        });
+
+        // Send email notification to customer
+        if (booking.customer_email) {
+          supabase.functions.invoke("send-booking-emails", {
+            body: {
+              type: status === 'confirmed' ? 'confirmation' : 'cancellation',
+              customerEmail: booking.customer_email,
+              customerName: booking.customer_name || booking.customer_email,
+              merchantName: (booking as any).merchant_services?.merchants?.business_name || 'the business',
+              serviceName,
+              bookingDate,
+              startTime: booking.start_time,
+              endTime: booking.end_time,
+              totalPrice: booking.total_price,
+              ...(status === 'cancelled' ? { cancellationReason: 'Declined by business' } : {}),
+            },
+          }).catch((err) => console.error("Failed to send status email:", err));
+        }
+      }
+
+      toast.success(`Booking ${status === 'confirmed' ? 'accepted' : status}!`);
       loadData();
     } catch (error) {
       console.error("Error updating booking:", error);

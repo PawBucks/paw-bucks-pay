@@ -278,8 +278,8 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
       return booking;
     },
     onSuccess: () => {
-      toast.success("Booking confirmed!", {
-        description: `Your appointment at ${merchantName} has been scheduled.`,
+      toast.success("Booking request submitted!", {
+        description: `${merchantName} will review and confirm your appointment shortly.`,
       });
       queryClient.invalidateQueries({ queryKey: ["date-bookings"] });
 
@@ -305,6 +305,29 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
             notes: notes || undefined,
           },
         }).catch((err) => console.error("Failed to send confirmation email:", err));
+      }
+
+      // Notify merchant of new booking request (fire-and-forget)
+      if (selectedDate && selectedSlot && selectedServiceData) {
+        // Get merchant owner user_id to send notification
+        supabase
+          .from("merchants")
+          .select("user_id")
+          .eq("id", merchantId)
+          .single()
+          .then(({ data: merchantData }) => {
+            if (merchantData?.user_id) {
+              supabase.from("notifications").insert({
+                user_id: merchantData.user_id,
+                title: "📋 New Booking Request",
+                message: `${user?.user_metadata?.full_name || user?.email || "A customer"} requested ${selectedServiceData.name} on ${format(selectedDate, "MMM d")} at ${selectedSlot.slice(0, 5)}.`,
+                category: "transactional",
+                is_read: false,
+              }).then(({ error }) => {
+                if (error) console.error("Failed to notify merchant:", error);
+              });
+            }
+          });
       }
 
       // Reset form
@@ -577,7 +600,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
         {step === "confirm" && selectedServiceData && selectedDate && selectedSlot && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="font-medium text-sm text-muted-foreground">Confirm Booking</h3>
+              <h3 className="font-medium text-sm text-muted-foreground">Review & Submit</h3>
               <Button variant="ghost" size="sm" onClick={() => setStep("time")}>
                 Change Time
               </Button>
@@ -615,6 +638,14 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
                   )}
                 </div>
               </div>
+            </div>
+
+            {/* Pending approval notice */}
+            <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-sm">
+              <Clock className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
+              <p className="text-amber-700 dark:text-amber-400">
+                Your booking will be submitted as a <strong>request</strong>. {merchantName} will review and confirm it fits their schedule and location.
+              </p>
             </div>
 
             {/* Grooming Pet Selector - only for grooming services */}
@@ -655,7 +686,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
                   </>
                 ) : (
                   <>
-                    Confirm Booking
+                    Submit Booking Request
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </>
                 )}

@@ -298,7 +298,7 @@ export function BookingsCalendar({ bookings, onUpdateStatus }: BookingsCalendarP
                     }}
                   >
                     <CheckCircle className="w-4 h-4 mr-2" />
-                    Confirm
+                    Accept
                   </Button>
                 </div>
               )}
