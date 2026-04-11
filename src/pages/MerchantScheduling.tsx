@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { getNormalizedCategory } from "@/lib/categoryMapping";
 import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { GradientCard } from "@/components/ui/gradient-card";
@@ -258,11 +259,17 @@ const MerchantScheduling = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="mb-6">
+          <TabsList className="mb-6 flex-wrap">
             <TabsTrigger value="services">Services</TabsTrigger>
             <TabsTrigger value="availability">Availability</TabsTrigger>
             <TabsTrigger value="bookings">Bookings</TabsTrigger>
             <TabsTrigger value="intake">Intake Forms</TabsTrigger>
+            {getNormalizedCategory(businessType) === 'grooming' && (
+              <TabsTrigger value="grooming" className="gap-1">
+                <Dog className="w-3.5 h-3.5" />
+                Grooming
+              </TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="services">
