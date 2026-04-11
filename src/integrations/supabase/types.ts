@@ -2616,6 +2616,124 @@ export type Database = {
           },
         ]
       }
+      grooming_report_cards: {
+        Row: {
+          behavior_notes: string | null
+          booking_id: string | null
+          created_at: string
+          customer_user_id: string
+          id: string
+          merchant_id: string
+          overall_notes: string | null
+          pet_id: string | null
+          pet_name: string | null
+          recommendations: string | null
+          sent_at: string | null
+          services_performed: string[] | null
+          skin_coat_notes: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          behavior_notes?: string | null
+          booking_id?: string | null
+          created_at?: string
+          customer_user_id: string
+          id?: string
+          merchant_id: string
+          overall_notes?: string | null
+          pet_id?: string | null
+          pet_name?: string | null
+          recommendations?: string | null
+          sent_at?: string | null
+          services_performed?: string[] | null
+          skin_coat_notes?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          behavior_notes?: string | null
+          booking_id?: string | null
+          created_at?: string
+          customer_user_id?: string
+          id?: string
+          merchant_id?: string
+          overall_notes?: string | null
+          pet_id?: string | null
+          pet_name?: string | null
+          recommendations?: string | null
+          sent_at?: string | null
+          services_performed?: string[] | null
+          skin_coat_notes?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grooming_report_cards_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "service_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grooming_report_cards_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grooming_report_cards_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grooming_report_cards_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "pet_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      grooming_report_photos: {
+        Row: {
+          caption: string | null
+          created_at: string
+          display_order: number
+          id: string
+          photo_url: string
+          report_id: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          display_order?: number
+          id?: string
+          photo_url: string
+          report_id: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          display_order?: number
+          id?: string
+          photo_url?: string
+          report_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grooming_report_photos_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "grooming_report_cards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       guilt_badge_definitions: {
         Row: {
           badge_key: string
@@ -9224,6 +9342,8 @@ export type Database = {
           recurring_end_date: string | null
           recurring_interval: string | null
           recurring_parent_id: string | null
+          reminder_1h_sent: boolean
+          reminder_24h_sent: boolean
           rescheduled_from_id: string | null
           service_id: string
           start_time: string
@@ -9250,6 +9370,8 @@ export type Database = {
           recurring_end_date?: string | null
           recurring_interval?: string | null
           recurring_parent_id?: string | null
+          reminder_1h_sent?: boolean
+          reminder_24h_sent?: boolean
           rescheduled_from_id?: string | null
           service_id: string
           start_time: string
@@ -9276,6 +9398,8 @@ export type Database = {
           recurring_end_date?: string | null
           recurring_interval?: string | null
           recurring_parent_id?: string | null
+          reminder_1h_sent?: boolean
+          reminder_24h_sent?: boolean
           rescheduled_from_id?: string | null
           service_id?: string
           start_time?: string
