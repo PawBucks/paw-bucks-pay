@@ -51,6 +51,7 @@ const serviceSchema = z.object({
   require_deposit: z.boolean(),
   deposit_amount: z.coerce.number().min(0).max(10000),
   no_show_fee_amount: z.coerce.number().min(0).max(10000),
+  is_mobile_service: z.boolean(),
 });
 
 type ServiceFormData = z.infer<typeof serviceSchema>;
@@ -108,6 +109,7 @@ export function ServiceDialog({ open, onOpenChange, service, onSubmit }: Service
       require_deposit: false,
       deposit_amount: 0,
       no_show_fee_amount: 0,
+      is_mobile_service: false,
     },
   });
 
@@ -129,6 +131,7 @@ export function ServiceDialog({ open, onOpenChange, service, onSubmit }: Service
         require_deposit: (service as any).require_deposit || false,
         deposit_amount: (service as any).deposit_amount || 0,
         no_show_fee_amount: (service as any).no_show_fee_amount || 0,
+        is_mobile_service: (service as any).is_mobile_service || false,
       });
     } else {
       form.reset({
