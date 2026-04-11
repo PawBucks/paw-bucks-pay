@@ -599,13 +599,13 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Duration</span>
-                <span className="font-medium">{formatDuration(selectedServiceData.duration_minutes, selectedServiceData.category)}</span>
+                <span className="font-medium">{formatDuration(effectiveDuration, selectedServiceData.category)}</span>
               </div>
               <div className="border-t pt-3 flex items-center justify-between">
                 <span className="font-medium">Total</span>
                 <div className="text-right">
                   <span className="text-xl font-bold text-primary">
-                    ${selectedServiceData.price.toFixed(2)}
+                    ${effectivePrice.toFixed(2)}
                   </span>
                   {selectedServiceData.payment_type === "pay_at_booking" && (
                     <p className="text-xs text-muted-foreground">Due at booking</p>
@@ -616,6 +616,17 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
                 </div>
               </div>
             </div>
+
+            {/* Grooming Pet Selector - only for grooming services */}
+            {isGroomingService && (
+              <GroomingPetSelector
+                merchantId={merchantId}
+                baseDuration={selectedServiceData.duration_minutes}
+                basePrice={selectedServiceData.price}
+                groomingData={groomingData}
+                onGroomingDataChange={setGroomingData}
+              />
+            )}
 
             {/* Notes */}
             <div className="space-y-2">
