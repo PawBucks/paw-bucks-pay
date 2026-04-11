@@ -226,29 +226,56 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
         .eq("id", user.id)
         .single();
 
+      const bookingDuration = isGroomingService && groomingData.adjustedDuration ? groomingData.adjustedDuration : selectedServiceData.duration_minutes;
+      const bookingPrice = isGroomingService && groomingData.adjustedPrice ? Number(groomingData.adjustedPrice) : selectedServiceData.price;
+
       const slotEndMinutes = 
         parseInt(selectedSlot.split(":")[0]) * 60 + 
         parseInt(selectedSlot.split(":")[1]) + 
-        selectedServiceData.duration_minutes;
+        bookingDuration;
       const endTime = `${Math.floor(slotEndMinutes / 60).toString().padStart(2, "0")}:${(slotEndMinutes % 60).toString().padStart(2, "0")}:00`;
 
       const bookingData = {
         merchant_id: merchantId,
         service_id: selectedService,
         user_id: user.id,
+        pet_id: groomingData.petId || undefined,
         booking_date: format(selectedDate, "yyyy-MM-dd"),
         start_time: `${selectedSlot}:00`,
         end_time: endTime,
         status: "pending" as const,
         payment_status: selectedServiceData.payment_type === "pay_at_service" ? "pending" : "pending",
-        total_price: selectedServiceData.price,
-        notes: notes || undefined,
+        total_price: bookingPrice,
+        notes: isGroomingService && groomingData.specialInstructions
+          ? [notes, groomingData.specialInstructions].filter(Boolean).join(" | ")
+          : notes || undefined,
         customer_name: profile?.full_name || undefined,
         customer_phone: profile?.phone || undefined,
         customer_email: user.email || undefined,
       };
 
-      return schedulingService.createBooking(bookingData);
+      const booking = await schedulingService.createBooking(bookingData);
+
+      // Save grooming pet details if applicable
+      if (isGroomingService && groomingData.petId && booking?.id) {
+        await supabase.from("grooming_pet_details").insert({
+          booking_id: booking.id,
+          pet_id: groomingData.petId,
+          breed: groomingData.breed || null,
+          weight_lbs: groomingData.weightLbs ? parseFloat(groomingData.weightLbs) : null,
+          coat_type: groomingData.coatType || null,
+          coat_condition: groomingData.coatCondition,
+          temperament_notes: groomingData.temperamentNotes || null,
+          special_instructions: groomingData.specialInstructions || null,
+          vaccine_status: groomingData.vaccineStatus,
+          adjusted_duration_minutes: groomingData.adjustedDuration,
+          adjusted_price: groomingData.adjustedPrice,
+        }).then(({ error }) => {
+          if (error) console.error("Failed to save grooming details:", error);
+        });
+      }
+
+      return booking;
     },
     onSuccess: () => {
       toast.success("Booking confirmed!", {
