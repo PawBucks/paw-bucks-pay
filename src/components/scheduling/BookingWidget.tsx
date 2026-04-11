@@ -646,7 +646,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
                 className="w-full"
                 size="lg"
                 onClick={() => createBooking.mutate()}
-                disabled={createBooking.isPending}
+                disabled={createBooking.isPending || (isGroomingService && groomingData.hasBlockingVaccineIssue)}
               >
                 {createBooking.isPending ? (
                   <>
