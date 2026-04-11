@@ -218,10 +218,12 @@ function MerchantDetailPanel({
   applicant,
   onApprove,
   onDeny,
+  onMarkFunded,
 }: {
   applicant: FundingApplicant;
   onApprove: () => void;
   onDeny: () => void;
+  onMarkFunded: () => void;
 }) {
   const risk = getRiskScore(applicant);
   const projection = getRepaymentProjection(applicant.requested_amount, applicant.revenue_30d);
@@ -549,6 +551,13 @@ function MerchantDetailPanel({
           </Button>
           <Button variant="destructive" className="flex-1 gap-2" onClick={onDeny}>
             <XCircle className="w-4 h-4" /> Deny Request
+          </Button>
+        </div>
+      )}
+      {applicant.status === 'approved' && (
+        <div className="flex gap-3 pt-2">
+          <Button className="flex-1 gap-2 bg-blue-600 hover:bg-blue-700 text-white" onClick={onMarkFunded}>
+            <DollarSign className="w-4 h-4" /> Mark as Funded
           </Button>
         </div>
       )}
