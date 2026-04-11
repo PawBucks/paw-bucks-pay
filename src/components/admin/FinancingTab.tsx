@@ -1036,6 +1036,7 @@ export function FinancingTab() {
                       setApproveDialogOpen(true);
                     }}
                     onDeny={() => setDenyDialogOpen(true)}
+                    onMarkFunded={handleMarkFundedMerchant}
                   />
                 ) : (
                   <Card className="p-12 text-center h-full flex items-center justify-center">
@@ -1096,6 +1097,7 @@ export function FinancingTab() {
                     loan={selectedVetLoan}
                     onApprove={() => setApproveDialogOpen(true)}
                     onDeny={() => setDenyDialogOpen(true)}
+                    onMarkFunded={handleMarkFundedVetLoan}
                   />
                 ) : (
                   <Card className="p-12 text-center h-full flex items-center justify-center">
