@@ -64,9 +64,10 @@ function StepIndicator({ step, currentIndex, isLast, status }: {
   const isCompleted = stepIdx < currentIndex;
   const isCurrent = stepIdx === currentIndex;
   const isDenied = status === "denied" && step.key === "decision";
-  const isApproved = status === "approved" && step.key === "decision";
+  const isApproved = (status === "approved" || status === "funded") && step.key === "decision";
+  const isFunded = status === "funded" && step.key === "funded";
 
-  const Icon = isDenied ? XCircle : isApproved ? CheckCircle2 : step.icon;
+  const Icon = isDenied ? XCircle : (isApproved || isFunded) ? CheckCircle2 : step.icon;
 
   return (
     <div className="flex items-center flex-1 min-w-0">
