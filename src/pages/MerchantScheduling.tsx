@@ -314,6 +314,12 @@ const MerchantScheduling = () => {
               />
             )}
           </TabsContent>
+
+          {getNormalizedCategory(businessType) === 'grooming' && merchantId && (
+            <TabsContent value="grooming">
+              <GroomingSettingsTab merchantId={merchantId} />
+            </TabsContent>
+          )}
         </Tabs>
       </main>
 
