@@ -238,7 +238,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
         bookingDuration;
       const endTime = `${Math.floor(slotEndMinutes / 60).toString().padStart(2, "0")}:${(slotEndMinutes % 60).toString().padStart(2, "0")}:00`;
 
-      const bookingData = {
+      const bookingData: any = {
         merchant_id: merchantId,
         service_id: selectedService,
         user_id: user.id,
@@ -256,6 +256,14 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
         customer_phone: profile?.phone || undefined,
         customer_email: user.email || undefined,
       };
+
+      // Attach saved payment method if deposit was collected
+      if (savedPaymentMethodId) {
+        bookingData.stripe_payment_method_id = savedPaymentMethodId;
+        bookingData.stripe_setup_intent_id = savedSetupIntentId;
+        bookingData.deposit_amount = (selectedServiceData as any).deposit_amount || 0;
+        bookingData.deposit_status = "collected";
+      }
 
       const booking = await schedulingService.createBooking(bookingData);
 
