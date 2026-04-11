@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { GradientCard } from "@/components/ui/gradient-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, ArrowLeft, Plus, Calendar, Clock, Settings, Users, Zap, Dog } from "lucide-react";
+import { Loader2, ArrowLeft, Plus, Calendar, Clock, Settings, Users, Zap, Dog, Navigation } from "lucide-react";
 import { toast } from "sonner";
 import { ServicesList } from "@/components/scheduling/ServicesList";
 import { AvailabilityManager } from "@/components/scheduling/AvailabilityManager";
@@ -17,6 +17,7 @@ import { ServiceDialog } from "@/components/scheduling/ServiceDialog";
 import { FlashSaleDialog } from "@/components/scheduling/FlashSaleDialog";
 import { IntakeQuestionsManager } from "@/components/scheduling/IntakeQuestionsManager";
 import { GroomingSettingsTab } from "@/components/scheduling/GroomingSettingsTab";
+import { SmartScheduleTab } from "@/components/scheduling/SmartScheduleTab";
 import { 
   schedulingService, 
   type MerchantService, 
@@ -307,6 +308,10 @@ const MerchantScheduling = () => {
             <TabsTrigger value="services">Services</TabsTrigger>
             <TabsTrigger value="availability">Availability</TabsTrigger>
             <TabsTrigger value="bookings">Bookings</TabsTrigger>
+            <TabsTrigger value="routes" className="gap-1">
+              <Navigation className="w-3.5 h-3.5" />
+              Routes
+            </TabsTrigger>
             <TabsTrigger value="intake">Intake Forms</TabsTrigger>
             {getNormalizedCategory(businessType) === 'grooming' && (
               <TabsTrigger value="grooming" className="gap-1">
@@ -357,6 +362,12 @@ const MerchantScheduling = () => {
                 merchantId={merchantId}
                 services={services.map(s => ({ id: s.id, name: s.name }))}
               />
+            )}
+          </TabsContent>
+
+          <TabsContent value="routes">
+            {merchantId && (
+              <SmartScheduleTab merchantId={merchantId} />
             )}
           </TabsContent>
 
