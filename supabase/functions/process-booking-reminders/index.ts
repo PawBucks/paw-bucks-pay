@@ -49,41 +49,32 @@ serve(async (req: Request) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Get current time in PT (America/Los_Angeles)
     const now = new Date();
-    // We work with UTC and compare against booking times stored as PT
     const today = now.toISOString().split("T")[0];
     const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString().split("T")[0];
 
-    // Current PT hour approximation (UTC - 8, rough)
     const ptHour = (now.getUTCHours() - 8 + 24) % 24;
     const ptMinute = now.getUTCMinutes();
-    const currentPTTime = `${String(ptHour).padStart(2, "0")}:${String(ptMinute).padStart(2, "0")}:00`;
 
-    // 1 hour from now in PT
     const oneHourLaterHour = (ptHour + 1) % 24;
-    const oneHourLaterDate = oneHourLaterHour < ptHour ? tomorrow : today; // rolled past midnight
-    const oneHourLaterTime = `${String(oneHourLaterHour).padStart(2, "0")}:${String(ptMinute).padStart(2, "0")}:00`;
 
     let sent24h = 0;
     let sent1h = 0;
 
     // === 24-HOUR REMINDERS ===
-    // Find bookings for tomorrow that haven't received a 24h reminder
     const { data: bookings24h, error: err24 } = await supabase
       .from("service_bookings")
       .select(`
-        id, booking_date, start_time, end_time, customer_email, customer_name, notes, total_price,
+        id, booking_date, start_time, end_time, customer_email, customer_name, notes, total_price, user_id,
         merchant_services(name),
         merchants(business_name)
       `)
       .eq("booking_date", tomorrow)
       .in("status", ["confirmed", "pending"])
+      .eq("reminder_24h_sent", false)
       .not("customer_email", "is", null);
 
-    if (err24) {
-      console.error("Error fetching 24h bookings:", err24);
-    }
+    if (err24) console.error("Error fetching 24h bookings:", err24);
 
     for (const booking of bookings24h || []) {
       if (!booking.customer_email) continue;
@@ -93,6 +84,18 @@ serve(async (req: Request) => {
       const timeFormatted = formatTime12(booking.start_time);
       const dateFormatted = formatDateReadable(booking.booking_date);
 
+      // Send in-app notification
+      if (booking.user_id) {
+        await supabase.from("notifications").insert({
+          user_id: booking.user_id,
+          title: `⏰ Appointment Tomorrow: ${serviceName}`,
+          message: `Your ${serviceName} appointment at ${merchantName} is tomorrow at ${timeFormatted} PT.`,
+          category: "transactional",
+          link_url: "/my-bookings",
+        });
+      }
+
+      // Send email
       const html = `
         <div style="text-align:center;margin-bottom:24px;">
           <div style="display:inline-block;background:#fef3c7;border-radius:50%;padding:16px;margin-bottom:12px;">
@@ -119,34 +122,37 @@ serve(async (req: Request) => {
           subject: `Reminder: ${serviceName} Tomorrow at ${timeFormatted}`,
           html: wrapTemplate(html),
         });
-        if (!emailErr) sent24h++;
-        else console.error(`24h reminder failed for ${booking.id}:`, emailErr);
+        if (!emailErr) {
+          sent24h++;
+          // Mark as sent to prevent duplicates
+          await supabase.from("service_bookings").update({ reminder_24h_sent: true }).eq("id", booking.id);
+        } else {
+          console.error(`24h reminder failed for ${booking.id}:`, emailErr);
+        }
       } catch (e) {
         console.error(`24h reminder error for ${booking.id}:`, e);
       }
     }
 
     // === 1-HOUR REMINDERS ===
-    // Find bookings for today starting in ~1 hour window (±15 min)
     const windowStart = `${String(oneHourLaterHour).padStart(2, "0")}:${String(Math.max(0, ptMinute - 15)).padStart(2, "0")}:00`;
     const windowEnd = `${String(oneHourLaterHour).padStart(2, "0")}:${String(Math.min(59, ptMinute + 15)).padStart(2, "0")}:00`;
 
     const { data: bookings1h, error: err1h } = await supabase
       .from("service_bookings")
       .select(`
-        id, booking_date, start_time, end_time, customer_email, customer_name,
+        id, booking_date, start_time, end_time, customer_email, customer_name, user_id,
         merchant_services(name),
         merchants(business_name)
       `)
       .eq("booking_date", today)
       .in("status", ["confirmed", "pending"])
+      .eq("reminder_1h_sent", false)
       .gte("start_time", windowStart)
       .lte("start_time", windowEnd)
       .not("customer_email", "is", null);
 
-    if (err1h) {
-      console.error("Error fetching 1h bookings:", err1h);
-    }
+    if (err1h) console.error("Error fetching 1h bookings:", err1h);
 
     for (const booking of bookings1h || []) {
       if (!booking.customer_email) continue;
@@ -155,6 +161,18 @@ serve(async (req: Request) => {
       const merchantName = (booking as any).merchants?.business_name || "Your Provider";
       const timeFormatted = formatTime12(booking.start_time);
 
+      // Send in-app notification
+      if (booking.user_id) {
+        await supabase.from("notifications").insert({
+          user_id: booking.user_id,
+          title: `🔔 Starting Soon: ${serviceName}`,
+          message: `Your ${serviceName} appointment at ${merchantName} starts in about 1 hour at ${timeFormatted} PT.`,
+          category: "transactional",
+          link_url: "/my-bookings",
+        });
+      }
+
+      // Send email
       const html = `
         <div style="text-align:center;margin-bottom:24px;">
           <div style="display:inline-block;background:#dbeafe;border-radius:50%;padding:16px;margin-bottom:12px;">
@@ -180,8 +198,12 @@ serve(async (req: Request) => {
           subject: `Starting Soon: ${serviceName} in 1 Hour`,
           html: wrapTemplate(html),
         });
-        if (!emailErr) sent1h++;
-        else console.error(`1h reminder failed for ${booking.id}:`, emailErr);
+        if (!emailErr) {
+          sent1h++;
+          await supabase.from("service_bookings").update({ reminder_1h_sent: true }).eq("id", booking.id);
+        } else {
+          console.error(`1h reminder failed for ${booking.id}:`, emailErr);
+        }
       } catch (e) {
         console.error(`1h reminder error for ${booking.id}:`, e);
       }
