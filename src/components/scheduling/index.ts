@@ -11,3 +11,4 @@ export { IntakeQuestionsForm } from "./IntakeQuestionsForm";
 export { IntakeQuestionsManager } from "./IntakeQuestionsManager";
 export { WaitlistButton } from "./WaitlistButton";
 export { DepositCardForm } from "./DepositCardForm";
+export { SmartScheduleTab } from "./SmartScheduleTab";

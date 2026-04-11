@@ -5229,6 +5229,72 @@ export type Database = {
           },
         ]
       }
+      merchant_route_plans: {
+        Row: {
+          created_at: string | null
+          estimated_savings_minutes: number | null
+          id: string
+          mapbox_route_geometry: string | null
+          merchant_id: string
+          optimized_order: Json | null
+          route_date: string
+          start_address: string | null
+          start_latitude: number | null
+          start_longitude: number | null
+          status: string
+          total_distance_miles: number | null
+          total_duration_minutes: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          estimated_savings_minutes?: number | null
+          id?: string
+          mapbox_route_geometry?: string | null
+          merchant_id: string
+          optimized_order?: Json | null
+          route_date: string
+          start_address?: string | null
+          start_latitude?: number | null
+          start_longitude?: number | null
+          status?: string
+          total_distance_miles?: number | null
+          total_duration_minutes?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          estimated_savings_minutes?: number | null
+          id?: string
+          mapbox_route_geometry?: string | null
+          merchant_id?: string
+          optimized_order?: Json | null
+          route_date?: string
+          start_address?: string | null
+          start_latitude?: number | null
+          start_longitude?: number | null
+          status?: string
+          total_distance_miles?: number | null
+          total_duration_minutes?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_route_plans_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_route_plans_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       merchant_sale_confirmations: {
         Row: {
           amount: number
@@ -5421,6 +5487,7 @@ export type Database = {
           id: string
           is_active: boolean
           is_flash_sale: boolean
+          is_mobile_service: boolean | null
           max_capacity: number
           merchant_id: string
           min_notice_hours: number
@@ -5447,6 +5514,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           is_flash_sale?: boolean
+          is_mobile_service?: boolean | null
           max_capacity?: number
           merchant_id: string
           min_notice_hours?: number
@@ -5473,6 +5541,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           is_flash_sale?: boolean
+          is_mobile_service?: boolean | null
           max_capacity?: number
           merchant_id?: string
           min_notice_hours?: number
@@ -6051,6 +6120,7 @@ export type Database = {
           price_range: number | null
           privacy_policy_url: string | null
           search_keywords: string[] | null
+          service_area_radius_miles: number | null
           shipping_returns_policy_url: string | null
           sponsored_until: string | null
           state_of_incorporation: string | null
@@ -6102,6 +6172,7 @@ export type Database = {
           price_range?: number | null
           privacy_policy_url?: string | null
           search_keywords?: string[] | null
+          service_area_radius_miles?: number | null
           shipping_returns_policy_url?: string | null
           sponsored_until?: string | null
           state_of_incorporation?: string | null
@@ -6153,6 +6224,7 @@ export type Database = {
           price_range?: number | null
           privacy_policy_url?: string | null
           search_keywords?: string[] | null
+          service_area_radius_miles?: number | null
           shipping_returns_policy_url?: string | null
           sponsored_until?: string | null
           state_of_incorporation?: string | null
@@ -9185,6 +9257,78 @@ export type Database = {
           },
         ]
       }
+      route_stops: {
+        Row: {
+          address: string
+          booking_id: string | null
+          created_at: string | null
+          customer_name: string | null
+          drive_distance_miles: number | null
+          drive_duration_minutes: number | null
+          estimated_arrival: string | null
+          estimated_departure: string | null
+          id: string
+          latitude: number
+          longitude: number
+          route_plan_id: string
+          service_name: string | null
+          status: string
+          stop_order: number
+          updated_at: string | null
+        }
+        Insert: {
+          address: string
+          booking_id?: string | null
+          created_at?: string | null
+          customer_name?: string | null
+          drive_distance_miles?: number | null
+          drive_duration_minutes?: number | null
+          estimated_arrival?: string | null
+          estimated_departure?: string | null
+          id?: string
+          latitude: number
+          longitude: number
+          route_plan_id: string
+          service_name?: string | null
+          status?: string
+          stop_order: number
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string
+          booking_id?: string | null
+          created_at?: string | null
+          customer_name?: string | null
+          drive_distance_miles?: number | null
+          drive_duration_minutes?: number | null
+          estimated_arrival?: string | null
+          estimated_departure?: string | null
+          id?: string
+          latitude?: number
+          longitude?: number
+          route_plan_id?: string
+          service_name?: string | null
+          status?: string
+          stop_order?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "route_stops_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "service_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "route_stops_route_plan_id_fkey"
+            columns: ["route_plan_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_route_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       search_boost_config: {
         Row: {
           created_at: string
@@ -9410,6 +9554,7 @@ export type Database = {
           end_time: string
           id: string
           is_recurring: boolean
+          location_notes: string | null
           merchant_id: string
           notes: string | null
           payment_status: string
@@ -9420,7 +9565,10 @@ export type Database = {
           reminder_1h_sent: boolean
           reminder_24h_sent: boolean
           rescheduled_from_id: string | null
+          service_address: string | null
           service_id: string
+          service_latitude: number | null
+          service_longitude: number | null
           start_time: string
           status: Database["public"]["Enums"]["booking_status"]
           stripe_payment_intent_id: string | null
@@ -9442,6 +9590,7 @@ export type Database = {
           end_time: string
           id?: string
           is_recurring?: boolean
+          location_notes?: string | null
           merchant_id: string
           notes?: string | null
           payment_status?: string
@@ -9452,7 +9601,10 @@ export type Database = {
           reminder_1h_sent?: boolean
           reminder_24h_sent?: boolean
           rescheduled_from_id?: string | null
+          service_address?: string | null
           service_id: string
+          service_latitude?: number | null
+          service_longitude?: number | null
           start_time: string
           status?: Database["public"]["Enums"]["booking_status"]
           stripe_payment_intent_id?: string | null
@@ -9474,6 +9626,7 @@ export type Database = {
           end_time?: string
           id?: string
           is_recurring?: boolean
+          location_notes?: string | null
           merchant_id?: string
           notes?: string | null
           payment_status?: string
@@ -9484,7 +9637,10 @@ export type Database = {
           reminder_1h_sent?: boolean
           reminder_24h_sent?: boolean
           rescheduled_from_id?: string | null
+          service_address?: string | null
           service_id?: string
+          service_latitude?: number | null
+          service_longitude?: number | null
           start_time?: string
           status?: Database["public"]["Enums"]["booking_status"]
           stripe_payment_intent_id?: string | null

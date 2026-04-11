@@ -31,8 +31,10 @@ import {
   Timer,
   Users,
   Zap,
-  CreditCard
+  CreditCard,
+  MapPin
 } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 // Flash Sale Countdown component for service listings
 function FlashSaleCountdown({ endAt }: { endAt: string }) {
@@ -97,6 +99,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
   const [groomingData, setGroomingData] = useState<GroomingPetData>(createDefaultGroomingData());
   const [savedPaymentMethodId, setSavedPaymentMethodId] = useState<string | null>(null);
   const [savedSetupIntentId, setSavedSetupIntentId] = useState<string | null>(null);
+  const [serviceAddress, setServiceAddress] = useState("");
 
   // Fetch only active services for public booking
   const { data: services = [], isLoading: servicesLoading } = useQuery({
@@ -136,6 +139,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
 
   const selectedServiceData = services.find((s) => s.id === selectedService);
   const isGroomingService = selectedServiceData?.category === "grooming";
+  const isMobileService = (selectedServiceData as any)?.is_mobile_service === true;
   const effectiveDuration = isGroomingService && groomingData.adjustedDuration ? groomingData.adjustedDuration : selectedServiceData?.duration_minutes || 0;
   const effectivePrice = isGroomingService && groomingData.adjustedPrice ? Number(groomingData.adjustedPrice) : selectedServiceData?.price || 0;
 
@@ -257,6 +261,23 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
         customer_phone: profile?.phone || undefined,
         customer_email: user.email || undefined,
       };
+
+      // Attach service address for mobile services
+      if (isMobileService && serviceAddress) {
+        bookingData.service_address = serviceAddress;
+        // Geocode the address for route optimization
+        try {
+          const { data: geocode } = await supabase.functions.invoke("geocode-address", {
+            body: { address: serviceAddress },
+          });
+          if (geocode?.latitude) {
+            bookingData.service_latitude = geocode.latitude;
+            bookingData.service_longitude = geocode.longitude;
+          }
+        } catch (e) {
+          console.error("Failed to geocode service address:", e);
+        }
+      }
 
       // Attach saved payment method if deposit was collected
       if (savedPaymentMethodId) {
@@ -478,6 +499,12 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
                         <Badge variant="secondary" className="text-xs capitalize">
                           {service.category.replace(/_/g, " ")}
                         </Badge>
+                        {(service as any).is_mobile_service && (
+                          <Badge variant="outline" className="text-xs gap-0.5">
+                            <MapPin className="w-3 h-3" />
+                            Mobile
+                          </Badge>
+                        )}
                         {hasFlashSale && (
                           <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 text-xs gap-0.5">
                             <Zap className="w-3 h-3" />
@@ -673,6 +700,25 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
               />
             )}
 
+            {/* Mobile Service Address */}
+            {isMobileService && (
+              <div className="space-y-2">
+                <Label htmlFor="service-address" className="flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5" />
+                  Your Address (Required)
+                </Label>
+                <Input
+                  id="service-address"
+                  placeholder="Enter the address where you'd like the service..."
+                  value={serviceAddress}
+                  onChange={(e) => setServiceAddress(e.target.value)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  The provider will travel to this location
+                </p>
+              </div>
+            )}
+
             {/* Notes */}
             <div className="space-y-2">
               <Label htmlFor="notes">Special Requests (Optional)</Label>
@@ -710,7 +756,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
                     createBooking.mutate();
                   }
                 }}
-                disabled={createBooking.isPending || (isGroomingService && groomingData.hasBlockingVaccineIssue)}
+                disabled={createBooking.isPending || (isGroomingService && groomingData.hasBlockingVaccineIssue) || (isMobileService && !serviceAddress.trim())}
               >
                 {createBooking.isPending ? (
                   <>
