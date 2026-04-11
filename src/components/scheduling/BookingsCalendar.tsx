@@ -28,10 +28,15 @@ import {
   PawPrint,
   Calendar as CalendarIcon,
   AlertCircle,
+  CreditCard,
+  Loader2,
+  DollarSign,
 } from "lucide-react";
 import { type BookingWithDetails, type BookingStatus } from "@/services/api/scheduling.service";
 import { GroomingReportCardForm } from "./GroomingReportCardForm";
 import { FileText } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface BookingsCalendarProps {
   bookings: BookingWithDetails[];
@@ -308,28 +313,48 @@ export function BookingsCalendar({ bookings, merchantId, onUpdateStatus }: Booki
               )}
 
               {selectedBooking.status === 'confirmed' && (
-                <div className="flex gap-2 pt-4 border-t">
-                  <Button 
-                    variant="outline" 
-                    className="flex-1"
-                    onClick={() => {
-                      onUpdateStatus(selectedBooking.id, 'no_show');
-                      setSelectedBooking(null);
-                    }}
-                  >
-                    <AlertCircle className="w-4 h-4 mr-2" />
-                    No Show
-                  </Button>
-                  <Button 
-                    className="flex-1"
-                    onClick={() => {
-                      onUpdateStatus(selectedBooking.id, 'completed');
-                      setSelectedBooking(null);
-                    }}
-                  >
-                    <CheckCircle className="w-4 h-4 mr-2" />
-                    Complete
-                  </Button>
+                <div className="space-y-2 pt-4 border-t">
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      className="flex-1"
+                      onClick={() => {
+                        onUpdateStatus(selectedBooking.id, 'no_show');
+                        setSelectedBooking(null);
+                      }}
+                    >
+                      <AlertCircle className="w-4 h-4 mr-2" />
+                      No Show
+                    </Button>
+                    <Button 
+                      className="flex-1"
+                      onClick={() => {
+                        onUpdateStatus(selectedBooking.id, 'completed');
+                        setSelectedBooking(null);
+                      }}
+                    >
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      Complete
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* No-Show Fee Charge Button */}
+              {selectedBooking.status === 'no_show' && (selectedBooking as any).stripe_payment_method_id && (
+                <NoShowChargeButton
+                  booking={selectedBooking}
+                  onCharged={() => {
+                    setSelectedBooking(null);
+                  }}
+                />
+              )}
+
+              {selectedBooking.status === 'no_show' && !(selectedBooking as any).stripe_payment_method_id && (
+                <div className="pt-4 border-t">
+                  <p className="text-sm text-muted-foreground text-center">
+                    No card on file — cannot charge no-show fee.
+                  </p>
                 </div>
               )}
 
