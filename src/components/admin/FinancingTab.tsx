@@ -571,10 +571,12 @@ function VetLoanDetailPanel({
   loan,
   onApprove,
   onDeny,
+  onMarkFunded,
 }: {
   loan: VetLoanApplicant;
   onApprove: () => void;
   onDeny: () => void;
+  onMarkFunded: () => void;
 }) {
   return (
     <div className="space-y-6">
@@ -708,6 +710,13 @@ function VetLoanDetailPanel({
           </Button>
           <Button variant="destructive" className="flex-1 gap-2" onClick={onDeny}>
             <XCircle className="w-4 h-4" /> Deny Loan
+          </Button>
+        </div>
+      )}
+      {loan.status === 'approved' && (
+        <div className="flex gap-3 pt-2">
+          <Button className="flex-1 gap-2 bg-blue-600 hover:bg-blue-700 text-white" onClick={onMarkFunded}>
+            <DollarSign className="w-4 h-4" /> Mark as Funded
           </Button>
         </div>
       )}
