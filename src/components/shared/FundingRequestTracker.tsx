@@ -105,7 +105,7 @@ function useApprovalConfetti(status: string) {
   const hasFired = useRef(false);
 
   useEffect(() => {
-    if (status === "approved" && !hasFired.current) {
+    if ((status === "approved" || status === "funded") && !hasFired.current) {
       hasFired.current = true;
       // Fire confetti from the left and right
       const fireConfetti = () => {
@@ -170,15 +170,16 @@ function RequestCard({ request, entityType }: { request: FundingRequest; entityT
         {/* Status description */}
         <div className={cn(
           "rounded-lg px-4 py-3",
-          request.status === "approved" ? "bg-emerald-500/10 border border-emerald-500/20" : "bg-muted/50"
+          (request.status === "approved" || request.status === "funded") ? "bg-emerald-500/10 border border-emerald-500/20" : "bg-muted/50"
         )}>
           <p className={cn(
             "text-sm",
-            request.status === "approved" ? "text-emerald-700 font-medium" : "text-muted-foreground"
+            (request.status === "approved" || request.status === "funded") ? "text-emerald-700 font-medium" : "text-muted-foreground"
           )}>
             {request.status === "pending" && "Your request has been submitted and is waiting to be reviewed by our team."}
             {request.status === "in_review" && "Our underwriting team is currently evaluating your request. We'll notify you once a decision is made."}
             {request.status === "approved" && "🎉 Congratulations! Your funding request has been approved. Funds will be disbursed shortly."}
+            {request.status === "funded" && "💰 Your funds have been disbursed! Check your account for the deposited amount."}
             {request.status === "denied" && "Unfortunately, your funding request was not approved at this time. You may reapply in the future."}
           </p>
         </div>
