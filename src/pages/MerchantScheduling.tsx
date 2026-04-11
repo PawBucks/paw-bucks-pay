@@ -67,6 +67,7 @@ const MerchantScheduling = () => {
       }
 
       setMerchantId(merchant.id);
+      setBusinessType(merchant.business_type || "");
 
       // Load all scheduling data in parallel
       const [servicesData, availabilityData, overridesData, bookingsData] = await Promise.all([
