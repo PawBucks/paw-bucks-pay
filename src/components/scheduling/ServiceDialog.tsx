@@ -48,6 +48,9 @@ const serviceSchema = z.object({
   buffer_minutes: z.coerce.number().min(0).max(120),
   min_notice_hours: z.coerce.number().min(0).max(168),
   cancellation_policy_hours: z.coerce.number().min(0).max(168),
+  require_deposit: z.boolean(),
+  deposit_amount: z.coerce.number().min(0).max(10000),
+  no_show_fee_amount: z.coerce.number().min(0).max(10000),
 });
 
 type ServiceFormData = z.infer<typeof serviceSchema>;
@@ -102,6 +105,9 @@ export function ServiceDialog({ open, onOpenChange, service, onSubmit }: Service
       buffer_minutes: 0,
       min_notice_hours: 2,
       cancellation_policy_hours: 24,
+      require_deposit: false,
+      deposit_amount: 0,
+      no_show_fee_amount: 0,
     },
   });
 
@@ -120,6 +126,9 @@ export function ServiceDialog({ open, onOpenChange, service, onSubmit }: Service
         buffer_minutes: service.buffer_minutes || 0,
         min_notice_hours: service.min_notice_hours || 2,
         cancellation_policy_hours: service.cancellation_policy_hours || 24,
+        require_deposit: (service as any).require_deposit || false,
+        deposit_amount: (service as any).deposit_amount || 0,
+        no_show_fee_amount: (service as any).no_show_fee_amount || 0,
       });
     } else {
       form.reset({
