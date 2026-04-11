@@ -392,6 +392,65 @@ export function ServiceDialog({ open, onOpenChange, service, onSubmit }: Service
               </div>
             </div>
 
+            {/* No-Show Protection Section */}
+            <div className="space-y-3 rounded-lg border p-4 bg-muted/30">
+              <h4 className="font-medium text-sm flex items-center gap-2">
+                🛡️ No-Show Protection
+              </h4>
+              <FormField
+                control={form.control}
+                name="require_deposit"
+                render={({ field }) => (
+                  <FormItem className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <FormLabel>Require Card on File</FormLabel>
+                      <FormDescription>
+                        Clients must save a card to book. Enables no-show fee charging.
+                      </FormDescription>
+                    </div>
+                    <FormControl>
+                      <Switch checked={field.value} onCheckedChange={field.onChange} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              {form.watch("require_deposit") && (
+                <div className="grid grid-cols-2 gap-3 pt-2">
+                  <FormField
+                    control={form.control}
+                    name="deposit_amount"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Deposit Amount ($)</FormLabel>
+                        <FormControl>
+                          <Input type="number" step="0.01" min="0" {...field} />
+                        </FormControl>
+                        <FormDescription className="text-xs">
+                          0 = card saved only, no upfront charge
+                        </FormDescription>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="no_show_fee_amount"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>No-Show Fee ($)</FormLabel>
+                        <FormControl>
+                          <Input type="number" step="0.01" min="0" {...field} />
+                        </FormControl>
+                        <FormDescription className="text-xs">
+                          Charged to saved card if client doesn't show
+                        </FormDescription>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              )}
+            </div>
+
             <FormField
               control={form.control}
               name="requires_pet"
