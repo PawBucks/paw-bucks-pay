@@ -29,6 +29,7 @@ const MerchantScheduling = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [merchantId, setMerchantId] = useState<string | null>(null);
+  const [businessType, setBusinessType] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [services, setServices] = useState<MerchantService[]>([]);
   const [availability, setAvailability] = useState<MerchantAvailability[]>([]);
@@ -53,7 +54,7 @@ const MerchantScheduling = () => {
       // Get merchant ID
       const { data: merchant, error: merchantError } = await supabase
         .from("merchants")
-        .select("id")
+        .select("id, business_type")
         .eq("user_id", user.id)
         .single();
 
