@@ -92,8 +92,10 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [notes, setNotes] = useState("");
-  const [step, setStep] = useState<"service" | "date" | "time" | "confirm">("service");
+  const [step, setStep] = useState<"service" | "date" | "time" | "confirm" | "deposit">("service");
   const [groomingData, setGroomingData] = useState<GroomingPetData>(createDefaultGroomingData());
+  const [savedPaymentMethodId, setSavedPaymentMethodId] = useState<string | null>(null);
+  const [savedSetupIntentId, setSavedSetupIntentId] = useState<string | null>(null);
 
   // Fetch only active services for public booking
   const { data: services = [], isLoading: servicesLoading } = useQuery({
