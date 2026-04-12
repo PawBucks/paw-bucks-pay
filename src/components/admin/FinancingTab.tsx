@@ -921,14 +921,12 @@ export function FinancingTab() {
     if (!selectedMerchant) return;
     setLoading(true);
     try {
-      await supabase.from('funding_requests').update({ status: 'funded' }).eq('id', selectedMerchant.id);
-      await supabase.rpc('log_admin_action', {
-        _action: 'MARK_FUNDED',
-        _entity_type: 'funding_request',
-        _entity_id: selectedMerchant.id,
-        _changes: { amount: selectedMerchant.requested_amount },
+      const { data, error } = await supabase.functions.invoke('admin-update-funding-request', {
+        body: { requestId: selectedMerchant.id, status: 'funded', entityType: 'merchant' },
       });
-      toast.success('Merchant marked as funded');
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success('Merchant marked as funded — notification sent');
       setSelectedMerchant(null);
       loadData();
     } catch (e: any) { toast.error(e.message); }
@@ -939,14 +937,12 @@ export function FinancingTab() {
     if (!selectedVetLoan) return;
     setLoading(true);
     try {
-      await supabase.from('vet_loans').update({ status: 'funded' }).eq('id', selectedVetLoan.id);
-      await supabase.rpc('log_admin_action', {
-        _action: 'MARK_FUNDED',
-        _entity_type: 'vet_loan',
-        _entity_id: selectedVetLoan.id,
-        _changes: { amount: selectedVetLoan.requested_amount },
+      const { data, error } = await supabase.functions.invoke('admin-update-funding-request', {
+        body: { requestId: selectedVetLoan.id, status: 'funded', entityType: 'vet' },
       });
-      toast.success('Vet loan marked as funded');
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success('Vet loan marked as funded — notification sent');
       loadData();
     } catch (e: any) { toast.error(e.message); }
     finally { setLoading(false); }
