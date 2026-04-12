@@ -30,6 +30,7 @@ import { AuditLogsTab } from "@/components/admin/AuditLogsTab";
 import { AdminInvoicingTab } from "@/components/admin/AdminInvoicingTab";
 import { ApprovalsTab } from "@/components/admin/ApprovalsTab";
 import { AdminCheckInsTab } from "@/components/admin/AdminCheckInsTab";
+import { CheckInFeedbackTab } from "@/components/admin/CheckInFeedbackTab";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -76,6 +77,7 @@ import {
   Gift,
   UserSearch,
   MapPin,
+  ThumbsDown,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -177,6 +179,12 @@ const NAV_SECTIONS = [
         label: "Consultations",
         icon: CalendarDays,
         description: "View and manage scheduled consultation bookings",
+      },
+      {
+        id: "checkin-feedback",
+        label: "Check-In Feedback",
+        icon: ThumbsDown,
+        description: "View reasons why pet owners didn't make a purchase after checking in",
       },
       {
         id: "feedback",
@@ -382,6 +390,8 @@ const AdminDashboard = () => {
         return <ReceiptsTab />;
       case "checkins":
         return <AdminCheckInsTab />;
+      case "checkin-feedback":
+        return <CheckInFeedbackTab />;
       case "consultations":
         return <ConsultationBookingsTab />;
       case "feedback":
