@@ -30,6 +30,7 @@ import { AuditLogsTab } from "@/components/admin/AuditLogsTab";
 import { AdminInvoicingTab } from "@/components/admin/AdminInvoicingTab";
 import { ApprovalsTab } from "@/components/admin/ApprovalsTab";
 import { AdminCheckInsTab } from "@/components/admin/AdminCheckInsTab";
+import { CheckInFeedbackTab } from "@/components/admin/CheckInFeedbackTab";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -177,6 +178,12 @@ const NAV_SECTIONS = [
         label: "Consultations",
         icon: CalendarDays,
         description: "View and manage scheduled consultation bookings",
+      },
+      {
+        id: "checkin-feedback",
+        label: "Check-In Feedback",
+        icon: ThumbsDown,
+        description: "View reasons why pet owners didn't make a purchase after checking in",
       },
       {
         id: "feedback",
