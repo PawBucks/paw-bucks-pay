@@ -390,6 +390,8 @@ const AdminDashboard = () => {
         return <ReceiptsTab />;
       case "checkins":
         return <AdminCheckInsTab />;
+      case "checkin-feedback":
+        return <CheckInFeedbackTab />;
       case "consultations":
         return <ConsultationBookingsTab />;
       case "feedback":
