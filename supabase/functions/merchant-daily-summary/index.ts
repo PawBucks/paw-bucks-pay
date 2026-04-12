@@ -7,11 +7,12 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Format timestamp with explicit US timezone
+// Format a YYYY-MM-DD date string for display, avoiding UTC-shift bug
 function formatDate(dateString: string): string {
-  const date = new Date(dateString);
+  // Parse as local date parts to avoid new Date("YYYY-MM-DD") UTC midnight shift
+  const [y, m, d] = dateString.split("-").map(Number);
+  const date = new Date(y, m - 1, d); // local midnight — no timezone shift
   return date.toLocaleDateString("en-US", {
-    timeZone: "America/New_York",
     weekday: "long",
     year: "numeric",
     month: "long",
