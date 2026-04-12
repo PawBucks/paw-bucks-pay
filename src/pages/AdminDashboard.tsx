@@ -77,6 +77,7 @@ import {
   Gift,
   UserSearch,
   MapPin,
+  ThumbsDown,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
