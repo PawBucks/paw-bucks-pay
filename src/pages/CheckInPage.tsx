@@ -53,13 +53,14 @@ export default function CheckInPage() {
           });
           if (row.success) {
             toast.success(`Checked in at ${row.entity_name}!`);
-            // Distribute branded PawBucks if merchant has active campaigns
-            if (row.merchant_id || row.vet_id) {
+            // Distribute branded PawBucks if applicable
+            const merchantOrVetId = (row as any).merchant_id || (row as any).vet_id;
+            if (merchantOrVetId) {
               supabase.functions.invoke("distribute-branded-pawbucks", {
                 body: {
                   user_id: user.id,
-                  merchant_id: row.merchant_id || row.vet_id,
-                  checkin_id: row.checkin_id,
+                  merchant_id: merchantOrVetId,
+                  checkin_id: (row as any).checkin_id,
                 },
               }).then(({ data: brandedData }) => {
                 if (brandedData?.distributed && brandedData.campaigns?.length > 0) {
