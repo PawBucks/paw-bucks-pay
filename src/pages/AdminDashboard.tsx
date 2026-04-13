@@ -158,6 +158,12 @@ const NAV_SECTIONS = [
         icon: Receipt,
         description: "Create and manage invoices for billing merchants and vets",
       },
+      {
+        id: "brand-campaigns",
+        label: "Brand Campaigns",
+        icon: Megaphone,
+        description: "Manage brand/manufacturer funded PawBucks campaigns",
+      },
     ],
   },
   {
