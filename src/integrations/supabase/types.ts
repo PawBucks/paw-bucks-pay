@@ -844,6 +844,290 @@ export type Database = {
           },
         ]
       }
+      brand_accounts: {
+        Row: {
+          brand_name: string
+          contact_email: string | null
+          contact_name: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          logo_url: string | null
+          status: string
+          updated_at: string
+          user_id: string
+          website_url: string | null
+        }
+        Insert: {
+          brand_name: string
+          contact_email?: string | null
+          contact_name?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          logo_url?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+          website_url?: string | null
+        }
+        Update: {
+          brand_name?: string
+          contact_email?: string | null
+          contact_name?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          logo_url?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          website_url?: string | null
+        }
+        Relationships: []
+      }
+      brand_campaign_merchants: {
+        Row: {
+          campaign_id: string
+          created_at: string
+          id: string
+          joined_at: string | null
+          merchant_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string
+          id?: string
+          joined_at?: string | null
+          merchant_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string
+          id?: string
+          joined_at?: string | null
+          merchant_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "brand_campaign_merchants_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "brand_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "brand_campaign_merchants_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "brand_campaign_merchants_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      brand_campaigns: {
+        Row: {
+          admin_invoice_id: string | null
+          brand_id: string
+          budget_usd: number
+          campaign_color: string | null
+          campaign_logo_url: string | null
+          created_at: string
+          description: string | null
+          end_date: string | null
+          id: string
+          name: string
+          pawbucks_per_checkin: number
+          pawbucks_pool: number
+          start_date: string | null
+          status: string
+          targeting_notes: string | null
+          total_checkins: number
+          total_distributed: number
+          total_redeemed: number
+          updated_at: string
+        }
+        Insert: {
+          admin_invoice_id?: string | null
+          brand_id: string
+          budget_usd?: number
+          campaign_color?: string | null
+          campaign_logo_url?: string | null
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          name: string
+          pawbucks_per_checkin?: number
+          pawbucks_pool?: number
+          start_date?: string | null
+          status?: string
+          targeting_notes?: string | null
+          total_checkins?: number
+          total_distributed?: number
+          total_redeemed?: number
+          updated_at?: string
+        }
+        Update: {
+          admin_invoice_id?: string | null
+          brand_id?: string
+          budget_usd?: number
+          campaign_color?: string | null
+          campaign_logo_url?: string | null
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          name?: string
+          pawbucks_per_checkin?: number
+          pawbucks_pool?: number
+          start_date?: string | null
+          status?: string
+          targeting_notes?: string | null
+          total_checkins?: number
+          total_distributed?: number
+          total_redeemed?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "brand_campaigns_admin_invoice_id_fkey"
+            columns: ["admin_invoice_id"]
+            isOneToOne: false
+            referencedRelation: "admin_invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "brand_campaigns_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brand_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      branded_pawbucks_activity: {
+        Row: {
+          amount: number
+          campaign_id: string
+          checkin_id: string | null
+          created_at: string
+          description: string | null
+          id: string
+          merchant_id: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          campaign_id: string
+          checkin_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          merchant_id?: string | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          campaign_id?: string
+          checkin_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          merchant_id?: string | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "branded_pawbucks_activity_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "brand_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "branded_pawbucks_activity_checkin_id_fkey"
+            columns: ["checkin_id"]
+            isOneToOne: false
+            referencedRelation: "checkins"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "branded_pawbucks_activity_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "branded_pawbucks_activity_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      branded_pawbucks_ledger: {
+        Row: {
+          balance: number
+          campaign_id: string
+          created_at: string
+          id: string
+          total_earned: number
+          total_spent: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          campaign_id: string
+          created_at?: string
+          id?: string
+          total_earned?: number
+          total_spent?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          campaign_id?: string
+          created_at?: string
+          id?: string
+          total_earned?: number
+          total_spent?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "branded_pawbucks_ledger_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "brand_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       budget_settings: {
         Row: {
           alert_threshold: number
