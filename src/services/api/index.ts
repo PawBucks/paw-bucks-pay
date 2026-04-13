@@ -13,3 +13,4 @@ export * from './invoicing.service';
 export * from './merchantSubscriptions.service';
 export * from './merchantSubscriptionPlans.service';
 export * from './loyalty.service';
+export * from './brandCampaigns.service';

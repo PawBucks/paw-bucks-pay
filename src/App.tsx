@@ -103,6 +103,7 @@ const LoyaltyPage = lazyWithRetry(() => import("./pages/LoyaltyPage"), "LoyaltyP
 const LoyaltyCardsPage = lazyWithRetry(() => import("./pages/LoyaltyCardsPage"), "LoyaltyCardsPage");
 const AdminInvoicePayment = lazyWithRetry(() => import("./pages/AdminInvoicePayment"), "AdminInvoicePayment");
 const AdminInvoicePaymentSuccess = lazyWithRetry(() => import("./pages/AdminInvoicePaymentSuccess"), "AdminInvoicePaymentSuccess");
+const BrandDashboard = lazyWithRetry(() => import("./pages/BrandDashboard"), "BrandDashboard");
 
 const createQueryClient = () => new QueryClient({
   defaultOptions: {
@@ -222,6 +223,9 @@ const AppRoutes = () => {
       {/* Vet routes - requires vet account */}
       <Route path="/vet-onboarding" element={<ProtectedRoute><PageTransition><VetOnboarding /></PageTransition></ProtectedRoute>} />
       <Route path="/vet-dashboard" element={<ProtectedRoute allowedRoles={['vet']}><PageTransition><VetDashboard /></PageTransition></ProtectedRoute>} />
+
+      {/* Brand routes */}
+      <Route path="/brand-dashboard" element={<ProtectedRoute><PageTransition><BrandDashboard /></PageTransition></ProtectedRoute>} />
 
       <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
     </Routes>

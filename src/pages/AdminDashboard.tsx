@@ -31,6 +31,7 @@ import { AdminInvoicingTab } from "@/components/admin/AdminInvoicingTab";
 import { ApprovalsTab } from "@/components/admin/ApprovalsTab";
 import { AdminCheckInsTab } from "@/components/admin/AdminCheckInsTab";
 import { CheckInFeedbackTab } from "@/components/admin/CheckInFeedbackTab";
+import { BrandCampaignsTab } from "@/components/admin/BrandCampaignsTab";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -78,6 +79,7 @@ import {
   UserSearch,
   MapPin,
   ThumbsDown,
+  Megaphone,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -156,6 +158,12 @@ const NAV_SECTIONS = [
         label: "Invoicing",
         icon: Receipt,
         description: "Create and manage invoices for billing merchants and vets",
+      },
+      {
+        id: "brand-campaigns",
+        label: "Brand Campaigns",
+        icon: Megaphone,
+        description: "Manage brand/manufacturer funded PawBucks campaigns",
       },
     ],
   },
@@ -386,6 +394,8 @@ const AdminDashboard = () => {
         return <FinancingTab />;
       case "invoicing":
         return <AdminInvoicingTab />;
+      case "brand-campaigns":
+        return <BrandCampaignsTab />;
       case "receipts":
         return <ReceiptsTab />;
       case "checkins":
