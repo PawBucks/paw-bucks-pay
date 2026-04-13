@@ -53,6 +53,22 @@ export default function CheckInPage() {
           });
           if (row.success) {
             toast.success(`Checked in at ${row.entity_name}!`);
+            // Distribute branded PawBucks if merchant has active campaigns
+            if (row.merchant_id || row.vet_id) {
+              supabase.functions.invoke("distribute-branded-pawbucks", {
+                body: {
+                  user_id: user.id,
+                  merchant_id: row.merchant_id || row.vet_id,
+                  checkin_id: row.checkin_id,
+                },
+              }).then(({ data: brandedData }) => {
+                if (brandedData?.distributed && brandedData.campaigns?.length > 0) {
+                  const total = brandedData.total_amount;
+                  const brandNames = brandedData.campaigns.map((c: any) => c.brand_name).join(", ");
+                  toast.success(`🎁 You received ${total.toLocaleString()} branded PawBucks from ${brandNames}!`, { duration: 5000 });
+                }
+              }).catch(() => { /* silent - branded PB is a bonus */ });
+            }
           }
         }
       } catch (error) {
