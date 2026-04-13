@@ -103,6 +103,7 @@ const LoyaltyPage = lazyWithRetry(() => import("./pages/LoyaltyPage"), "LoyaltyP
 const LoyaltyCardsPage = lazyWithRetry(() => import("./pages/LoyaltyCardsPage"), "LoyaltyCardsPage");
 const AdminInvoicePayment = lazyWithRetry(() => import("./pages/AdminInvoicePayment"), "AdminInvoicePayment");
 const AdminInvoicePaymentSuccess = lazyWithRetry(() => import("./pages/AdminInvoicePaymentSuccess"), "AdminInvoicePaymentSuccess");
+const BrandDashboard = lazyWithRetry(() => import("./pages/BrandDashboard"), "BrandDashboard");
 
 const createQueryClient = () => new QueryClient({
   defaultOptions: {
