@@ -31,6 +31,7 @@ import { AdminInvoicingTab } from "@/components/admin/AdminInvoicingTab";
 import { ApprovalsTab } from "@/components/admin/ApprovalsTab";
 import { AdminCheckInsTab } from "@/components/admin/AdminCheckInsTab";
 import { CheckInFeedbackTab } from "@/components/admin/CheckInFeedbackTab";
+import { BrandCampaignsTab } from "@/components/admin/BrandCampaignsTab";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
