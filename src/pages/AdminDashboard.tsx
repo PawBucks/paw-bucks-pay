@@ -394,6 +394,8 @@ const AdminDashboard = () => {
         return <FinancingTab />;
       case "invoicing":
         return <AdminInvoicingTab />;
+      case "brand-campaigns":
+        return <BrandCampaignsTab />;
       case "receipts":
         return <ReceiptsTab />;
       case "checkins":
