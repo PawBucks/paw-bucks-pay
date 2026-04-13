@@ -36,7 +36,7 @@ export interface BrandCampaign {
   targeting_notes: string | null;
   created_at: string;
   updated_at: string;
-  brand_accounts?: BrandAccount;
+  brand_accounts?: { brand_name: string; logo_url: string | null };
 }
 
 export interface BrandCampaignMerchant {
