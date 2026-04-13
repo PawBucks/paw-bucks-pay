@@ -683,16 +683,19 @@ const MerchantDashboard = () => {
 
   useEffect(() => {
     const tabParam = searchParams.get("tab");
-    if (!tabParam) return;
+    if (!tabParam) {
+      setActiveTab("overview");
+      return;
+    }
 
     const validTab = NAV_SECTIONS.some((section) =>
       section.items.some((item) => item.id === tabParam)
     );
 
-    if (validTab && tabParam !== activeTab) {
+    if (validTab) {
       setActiveTab(tabParam);
     }
-  }, [activeTab, searchParams]);
+  }, [searchParams]);
 
   const handleTabChange = useCallback((tabId: string) => {
     setActiveTab(tabId);
