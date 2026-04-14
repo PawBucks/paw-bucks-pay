@@ -500,50 +500,71 @@ serve(async (req) => {
     // - Chargebacks are the merchant's responsibility
     // ============================================================
 
+    const itemNames = lineItemsToProcess.map(li => li.name).filter(Boolean).join(', ');
     const metadata = {
       connected_account_id: accountId,
       platform_fee_percentage: (PLATFORM_FEE_PERCENTAGE * 100).toString(),
       user_id: user.id,
       merchant_id: merchantId || '',
       source: 'merchant_storefront',
-      product_name: productName || merchantName,
+      product_name: itemNames || productName || merchantName,
       description: `Purchase from ${merchantName}`,
       original_amount_cents: totalAmountCents.toString(),
       pawbucks_used: pawbucksUsed.toString(),
       pawbucks_usd_value: pawbucksUsdValue.toFixed(2),
       charge_type: 'direct',
+      item_count: lineItemsToProcess.length.toString(),
     };
+
+    // Build Stripe line_items
+    // If PawBucks discount applies, use a single combined line item (Stripe doesn't support negative line items)
+    let stripeLineItems;
+    if (pawbucksUsed > 0) {
+      stripeLineItems = [
+        {
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: lineItemsToProcess.length === 1
+                ? (lineItemsToProcess[0].name || `Purchase from ${merchantName}`)
+                : `Order from ${merchantName} (${lineItemsToProcess.length} items)`,
+              description: `Original: $${totalAmountDollars.toFixed(2)} - PawBucks: $${pawbucksUsdValue.toFixed(2)}`,
+            },
+            unit_amount: finalStripeAmountCents,
+          },
+          quantity: 1,
+        },
+      ];
+    } else {
+      // No PawBucks - show individual line items for better UX
+      stripeLineItems = lineItemsToProcess.map(li => ({
+        price_data: {
+          currency: li.currency || 'usd',
+          product_data: {
+            name: li.name || `Product from ${merchantName}`,
+          },
+          unit_amount: li.unitAmount,
+        },
+        quantity: li.quantity,
+      }));
+    }
 
     // Create Checkout Session ON the connected account (Direct Charge)
     const session = await stripe.checkout.sessions.create(
       {
-        line_items: [
-          {
-            price_data: {
-              currency: 'usd',
-              product_data: {
-                name: productName || `Purchase from ${merchantName}`,
-                description: pawbucksUsed > 0 
-                  ? `Original: $${totalAmountDollars.toFixed(2)} - PawBucks: $${pawbucksUsdValue.toFixed(2)}`
-                  : undefined,
-              },
-              unit_amount: finalStripeAmountCents,
-            },
-            quantity: 1,
-          },
-        ],
+        line_items: stripeLineItems,
         mode: 'payment',
         success_url: successUrl || `${req.headers.get('origin')}/checkout-success?session_id={CHECKOUT_SESSION_ID}&store=${accountId}`,
         cancel_url: cancelUrl || `${req.headers.get('origin')}/checkout-canceled`,
         customer_email: user.email,
         metadata,
         payment_intent_data: {
-          application_fee_amount: applicationFeeAmount, // 3% platform fee
+          application_fee_amount: applicationFeeAmount,
           metadata,
         },
       },
       {
-        stripeAccount: accountId, // DIRECT CHARGE: Session on connected account
+        stripeAccount: accountId,
       }
     );
 
