@@ -69,6 +69,7 @@ serve(async (req) => {
       productName, 
       pawbucksToUse: manualPawbucksToUse,
       autoRedeem: requestAutoRedeem,
+      items: cartItems, // Multi-item support: Array<{ priceId, quantity, name? }>
     } = body;
 
     // Create admin client for secure lookups
