@@ -3,13 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { PageLoader } from '@/components/PageLoader';
 import { ROUTES } from '@/lib/constants';
-import { supabase } from '@/integrations/supabase/client';
-import {
-  roleCache,
-  petOnboardingCache,
-  ROLE_CACHE_TTL,
-  PET_CACHE_TTL,
-} from '@/lib/protectedRouteCache';
+import { getUserAccessInfo, type UserAccessInfo } from '@/lib/userAccessCache';
 
 type AllowedRole = 'admin' | 'superadmin' | 'merchant' | 'vet' | 'pet_owner';
 
@@ -21,11 +15,7 @@ interface ProtectedRouteProps {
   skipPetOnboarding?: boolean;
 }
 
-function getCacheKey(userId: string, roles: AllowedRole[]): string {
-  return `${userId}:${roles.sort().join(',')}`;
-}
-
-// Routes that should NOT enforce pet onboarding (to avoid redirect loops)
+// Routes that should NOT enforce pet onboarding
 const PET_ONBOARDING_EXEMPT_ROUTES = [
   ROUTES.CREATE_PET_PROFILE,
   '/pet-personality-quiz',
@@ -34,12 +24,46 @@ const PET_ONBOARDING_EXEMPT_ROUTES = [
   '/profile',
 ];
 
+/**
+ * Check if user has the required role based on unified access info.
+ */
+function checkRoleAccess(info: UserAccessInfo, allowedRoles: AllowedRole[]): boolean {
+  for (const role of allowedRoles) {
+    if (role === 'admin' || role === 'superadmin') {
+      if (info.system_roles.includes(role)) return true;
+    } else if (role === 'merchant') {
+      if (info.is_merchant || info.user_type === 'merchant') return true;
+    } else if (role === 'vet') {
+      if (info.is_vet || info.user_type === 'vet') return true;
+    } else if (role === 'pet_owner') {
+      if (info.user_type === 'pet_owner') return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Check if user needs pet onboarding.
+ */
+function needsPetOnboarding(info: UserAccessInfo): boolean {
+  // Non-pet-owners never need pet onboarding
+  if (
+    info.system_roles.includes('admin') ||
+    info.system_roles.includes('superadmin') ||
+    info.is_merchant ||
+    info.is_vet ||
+    info.user_type === 'merchant' ||
+    info.user_type === 'admin'
+  ) {
+    return false;
+  }
+  return !info.has_pets && !info.has_shared_pets;
+}
+
 // SECURITY: This is a UX-level check only for routing/navigation purposes.
-// All sensitive data operations MUST be validated server-side via edge functions
-// that verify auth.uid() and user_roles. Never trust client-supplied role claims
-// for authorization of data access or mutations.
-export const ProtectedRoute = ({ 
-  children, 
+// All sensitive data operations MUST be validated server-side.
+export const ProtectedRoute = ({
+  children,
   requireAuth = true,
   redirectTo = ROUTES.AUTH,
   allowedRoles,
@@ -48,16 +72,11 @@ export const ProtectedRoute = ({
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [roleChecked, setRoleChecked] = useState(!allowedRoles);
+  const [checkDone, setCheckDone] = useState(false);
   const [authorized, setAuthorized] = useState(false);
+  const [hasPets, setHasPets] = useState(true);
   const checkingRef = useRef(false);
-  
-  // Pet onboarding state
-  const [petOnboardingChecked, setPetOnboardingChecked] = useState(false);
-  const [hasPets, setHasPets] = useState(true); // default true to avoid flash
-  const petCheckingRef = useRef(false);
 
-  // Determine if this route is exempt from pet onboarding
   const isExemptRoute = skipPetOnboarding || PET_ONBOARDING_EXEMPT_ROUTES.some(
     route => location.pathname.startsWith(route)
   );
@@ -68,160 +87,46 @@ export const ProtectedRoute = ({
     }
   }, [user, loading, requireAuth, redirectTo, navigate]);
 
-  // Role-based check with caching
+  // Single unified access check
   useEffect(() => {
-    if (!user || !allowedRoles || loading) return;
+    if (!user || loading) return;
     if (checkingRef.current) return;
 
-    const cacheKey = getCacheKey(user.id, allowedRoles);
-    const cached = roleCache.get(cacheKey);
-    
-    if (cached && Date.now() - cached.timestamp < ROLE_CACHE_TTL) {
-      setAuthorized(cached.authorized);
-      setRoleChecked(true);
+    // If no role check and exempt from pet check, skip everything
+    if (!allowedRoles && isExemptRoute) {
+      setAuthorized(true);
+      setHasPets(true);
+      setCheckDone(true);
       return;
     }
 
     checkingRef.current = true;
 
-    const checkRoles = async () => {
-      try {
-        let hasAccess = false;
+    getUserAccessInfo(user.id)
+      .then((info) => {
+        // Role check
+        const roleOk = allowedRoles ? checkRoleAccess(info, allowedRoles) : true;
+        setAuthorized(roleOk);
 
-        const systemRoles = allowedRoles.filter(r => r === 'admin' || r === 'superadmin');
-        const profileRoles = allowedRoles.filter(r => r !== 'admin' && r !== 'superadmin');
-
-        // Always fetch profile to check user_type as fallback for merchants/vets
-        // who haven't completed onboarding yet (no merchants/partner_vets row)
-        const checks = await Promise.all([
-          systemRoles.length > 0
-            ? supabase.from('user_roles').select('role').eq('user_id', user.id).in('role', systemRoles)
-            : Promise.resolve({ data: null }),
-          profileRoles.includes('merchant')
-            ? supabase.from('merchants').select('id').eq('user_id', user.id).limit(1)
-            : Promise.resolve({ data: null }),
-          profileRoles.includes('vet')
-            ? supabase.from('partner_vets').select('id').eq('user_id', user.id).limit(1)
-            : Promise.resolve({ data: null }),
-          supabase.from('profiles').select('user_type').eq('id', user.id).single(),
-        ]);
-
-        const [systemResult, merchantResult, vetResult, profileResult] = checks;
-        const userType = profileResult.data?.user_type as string | undefined;
-
-        if (systemResult.data && systemResult.data.length > 0) hasAccess = true;
-        // Check merchants table first, then fallback to profile user_type
-        if (!hasAccess && profileRoles.includes('merchant')) {
-          if (merchantResult.data && merchantResult.data.length > 0) hasAccess = true;
-          else if (userType === 'merchant') hasAccess = true;
-        }
-        if (!hasAccess && profileRoles.includes('vet')) {
-          if (vetResult.data && vetResult.data.length > 0) hasAccess = true;
-          else if (userType === 'vet') hasAccess = true;
-        }
-        if (!hasAccess && profileRoles.includes('pet_owner') && userType === 'pet_owner') hasAccess = true;
-
-        roleCache.set(cacheKey, { authorized: hasAccess, timestamp: Date.now() });
-        setAuthorized(hasAccess);
-      } catch (error) {
-        console.error('Role check failed:', error);
-        setAuthorized(false);
-      } finally {
-        setRoleChecked(true);
-        checkingRef.current = false;
-      }
-    };
-
-    checkRoles();
-  }, [user, allowedRoles, loading]);
-
-  // Pet onboarding check: ensure pet owners have at least one pet
-  useEffect(() => {
-    // Skip if: no user, still loading, or exempt route
-    if (!user || loading || isExemptRoute) {
-      setPetOnboardingChecked(true);
-      setHasPets(true);
-      return;
-    }
-    if (petCheckingRef.current) return;
-
-    const cached = petOnboardingCache.get(user.id);
-    if (cached && Date.now() - cached.timestamp < PET_CACHE_TTL) {
-      setHasPets(cached.hasPets);
-      setPetOnboardingChecked(true);
-      return;
-    }
-
-    petCheckingRef.current = true;
-
-    const checkPets = async () => {
-      try {
-        // Check if user is admin/superadmin, merchant, or vet (they don't need pets)
-        // Also check profiles.user_type to catch merchants/vets who haven't completed onboarding yet
-        const [adminCheck, merchantCheck, vetCheck, profileCheck] = await Promise.all([
-          supabase.from('user_roles').select('role').eq('user_id', user.id).in('role', ['admin', 'superadmin']).limit(1),
-          supabase.from('merchants').select('id').eq('user_id', user.id).limit(1),
-          supabase.from('partner_vets').select('id').eq('user_id', user.id).limit(1),
-          supabase.from('profiles').select('user_type').eq('id', user.id).single(),
-        ]);
-
-        const profileUserType = profileCheck.data?.user_type;
-        const isAdminOrMerchantOrVet = 
-          (adminCheck.data && adminCheck.data.length > 0) ||
-          (merchantCheck.data && merchantCheck.data.length > 0) ||
-          (vetCheck.data && vetCheck.data.length > 0) ||
-          profileUserType === 'merchant' ||
-          profileUserType === 'admin';
-
-        if (isAdminOrMerchantOrVet) {
-          petOnboardingCache.set(user.id, { hasPets: true, timestamp: Date.now() });
+        // Pet onboarding check
+        if (isExemptRoute) {
           setHasPets(true);
-          setPetOnboardingChecked(true);
-          petCheckingRef.current = false;
-          return;
+        } else {
+          setHasPets(!needsPetOnboarding(info));
         }
+      })
+      .catch((err) => {
+        console.error('Access check failed:', err);
+        setAuthorized(!allowedRoles); // fail open for non-role routes
+        setHasPets(true);
+      })
+      .finally(() => {
+        setCheckDone(true);
+        checkingRef.current = false;
+      });
+  }, [user, loading, allowedRoles, isExemptRoute]);
 
-        // Check if pet owner has any pets (own or via shared account)
-        const [ownPetsResult, sharedMemberResult] = await Promise.all([
-          supabase
-            .from('pet_profiles')
-            .select('id')
-            .eq('user_id', user.id)
-            .limit(1),
-          supabase
-            .from('shared_account_members')
-            .select('owner_id')
-            .eq('member_id', user.id)
-            .eq('status', 'accepted')
-            .maybeSingle(),
-        ]);
-
-        let ownerHasPets = !ownPetsResult.error && !!ownPetsResult.data && ownPetsResult.data.length > 0;
-
-        // If user is a shared account member, check owner's pets
-        if (!ownerHasPets && sharedMemberResult.data?.owner_id) {
-          const { data: ownerPets, error: ownerPetsError } = await supabase
-            .from('pet_profiles')
-            .select('id')
-            .eq('user_id', sharedMemberResult.data.owner_id)
-            .limit(1);
-          ownerHasPets = !ownerPetsError && !!ownerPets && ownerPets.length > 0;
-        }
-        petOnboardingCache.set(user.id, { hasPets: ownerHasPets, timestamp: Date.now() });
-        setHasPets(ownerHasPets);
-      } catch (error) {
-        console.error('Pet onboarding check failed:', error);
-        setHasPets(true); // fail open to avoid blocking
-      } finally {
-        setPetOnboardingChecked(true);
-        petCheckingRef.current = false;
-      }
-    };
-
-    checkPets();
-  }, [user, loading, isExemptRoute]);
-
-  if (loading || !roleChecked || !petOnboardingChecked) {
+  if (loading || !checkDone) {
     return <PageLoader message="Authenticating..." />;
   }
 
@@ -234,7 +139,6 @@ export const ProtectedRoute = ({
     return null;
   }
 
-  // Redirect pet owners without pets to create-pet-profile
   if (!hasPets && !isExemptRoute) {
     navigate(ROUTES.CREATE_PET_PROFILE, { replace: true });
     return null;
@@ -242,4 +146,3 @@ export const ProtectedRoute = ({
 
   return <>{children}</>;
 };
-
