@@ -323,10 +323,16 @@ export default function PetStore() {
     }
   };
 
-  const handleCartCheckoutWithCard = async () => {
+  const handleCartCheckout = async (params: CartCheckoutParams) => {
     if (!user || cartItems.length === 0) return;
-    // For card checkout, use the first item for now (multi-item card checkout can be enhanced)
-    // Create a payment intent for the total
+
+    if (params.mode === "pawbucks") {
+      // Full PawBucks purchase
+      cartPawbucksPurchase.mutate();
+      return;
+    }
+
+    // Card or split — create payment intent
     const firstItem = cartItems[0];
     setSelectedItem({ ...firstItem.item, price: totalUsd });
     setIsCreatingIntent(true);
@@ -335,7 +341,11 @@ export default function PetStore() {
 
     try {
       const { data, error } = await supabase.functions.invoke('create-pet-store-payment', {
-        body: { itemId: firstItem.item.id, quantity: firstItem.quantity },
+        body: {
+          itemId: firstItem.item.id,
+          quantity: firstItem.quantity,
+          pawbucksAmount: params.pawbucksAmount || 0,
+        },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
