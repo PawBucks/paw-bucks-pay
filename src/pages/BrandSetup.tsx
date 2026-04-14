@@ -85,11 +85,8 @@ const BrandSetup = () => {
         return;
       }
 
-      // Update user profile to brand type
-      await supabase
-        .from("profiles")
-        .update({ user_type: "brand" })
-        .eq("id", user.id);
+      // Note: brand users use the existing profile type system
+      // They'll access their brand dashboard from the main dashboard
 
       toast.success("Brand account claimed successfully! Welcome aboard.");
       navigate("/dashboard");
