@@ -135,46 +135,68 @@ serve(async (req) => {
       );
     }
 
-    // Validate required fields
-    if (!priceId || typeof priceId !== 'string') {
-      return new Response(
-        JSON.stringify({ error: 'priceId is required and must be a string' }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
-      );
-    }
-    if (!quantity || typeof quantity !== 'number' || quantity < 1 || quantity > 100) {
-      return new Response(
-        JSON.stringify({ error: 'quantity must be a number between 1 and 100' }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
-      );
+    // Build line items array - support both single-item (legacy) and multi-item
+    type LineItemInfo = { priceId: string; quantity: number; name?: string; unitAmount: number; currency: string };
+    const lineItemsToProcess: LineItemInfo[] = [];
+
+    if (Array.isArray(cartItems) && cartItems.length > 0) {
+      // Multi-item cart checkout
+      for (const ci of cartItems) {
+        if (!ci.priceId || typeof ci.priceId !== 'string') {
+          return new Response(
+            JSON.stringify({ error: 'Each cart item must have a valid priceId' }),
+            { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
+          );
+        }
+        const qty = typeof ci.quantity === 'number' && ci.quantity >= 1 && ci.quantity <= 100 ? ci.quantity : 1;
+        const connectedPrice = await stripe.prices.retrieve(ci.priceId, { stripeAccount: accountId });
+        if (connectedPrice.type === 'recurring') {
+          return new Response(
+            JSON.stringify({ error: 'Subscription items cannot be added to cart. Please subscribe separately.', error_code: 'subscription_not_supported' }),
+            { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
+          );
+        }
+        lineItemsToProcess.push({
+          priceId: ci.priceId,
+          quantity: qty,
+          name: ci.name || undefined,
+          unitAmount: connectedPrice.unit_amount || 0,
+          currency: connectedPrice.currency || 'usd',
+        });
+      }
+    } else {
+      // Legacy single-item checkout
+      if (!priceId || typeof priceId !== 'string') {
+        return new Response(
+          JSON.stringify({ error: 'priceId is required and must be a string' }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
+        );
+      }
+      if (!quantity || typeof quantity !== 'number' || quantity < 1 || quantity > 100) {
+        return new Response(
+          JSON.stringify({ error: 'quantity must be a number between 1 and 100' }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
+        );
+      }
+
+      const connectedPrice = await stripe.prices.retrieve(priceId, { stripeAccount: accountId });
+      if (connectedPrice.type === 'recurring') {
+        return new Response(
+          JSON.stringify({ error: 'Subscription purchases through merchant storefronts are not yet supported. Please contact the merchant directly.', error_code: 'subscription_not_supported' }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
+        );
+      }
+      lineItemsToProcess.push({
+        priceId,
+        quantity,
+        name: productName || undefined,
+        unitAmount: connectedPrice.unit_amount || 0,
+        currency: connectedPrice.currency || 'usd',
+      });
     }
 
-    logStep('Request validated', { merchantId, priceId, quantity, merchantAcceptsPawBucks });
-
-    // Get the price details from connected account
-    const connectedPrice = await stripe.prices.retrieve(priceId, {
-      stripeAccount: accountId,
-    });
-
-    const isRecurringPrice = connectedPrice.type === 'recurring';
-    
-    // NOTE: Direct Charges with subscriptions require special handling
-    // For now, we only support one-time payments with Direct Charges
-    if (isRecurringPrice) {
-      return new Response(
-        JSON.stringify({ 
-          error: 'Subscription purchases through merchant storefronts are not yet supported. Please contact the merchant directly.',
-          error_code: 'subscription_not_supported'
-        }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
-      );
-    }
-
-    // Calculate total amount in cents
-    let totalAmountCents = 0;
-    if (connectedPrice.unit_amount) {
-      totalAmountCents = connectedPrice.unit_amount * quantity;
-    }
+    // Calculate total amount in cents from all items
+    let totalAmountCents = lineItemsToProcess.reduce((sum, li) => sum + li.unitAmount * li.quantity, 0);
 
     const totalAmountDollars = totalAmountCents / 100;
 
