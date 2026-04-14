@@ -14,6 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      abandoned_cart_notifications: {
+        Row: {
+          cart_id: string
+          id: string
+          items_snapshot: Json | null
+          notification_type: string
+          sent_at: string
+          total_value_pawbucks: number | null
+          total_value_usd: number | null
+          user_id: string
+        }
+        Insert: {
+          cart_id: string
+          id?: string
+          items_snapshot?: Json | null
+          notification_type?: string
+          sent_at?: string
+          total_value_pawbucks?: number | null
+          total_value_usd?: number | null
+          user_id: string
+        }
+        Update: {
+          cart_id?: string
+          id?: string
+          items_snapshot?: Json | null
+          notification_type?: string
+          sent_at?: string
+          total_value_pawbucks?: number | null
+          total_value_usd?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "abandoned_cart_notifications_cart_id_fkey"
+            columns: ["cart_id"]
+            isOneToOne: false
+            referencedRelation: "shopping_carts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       accountant_activity_log: {
         Row: {
           action: string
@@ -10395,6 +10436,81 @@ export type Database = {
           owner_id?: string
           status?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      shopping_cart_items: {
+        Row: {
+          added_at: string
+          cart_id: string
+          id: string
+          item_id: string
+          quantity: number
+          updated_at: string
+        }
+        Insert: {
+          added_at?: string
+          cart_id: string
+          id?: string
+          item_id: string
+          quantity?: number
+          updated_at?: string
+        }
+        Update: {
+          added_at?: string
+          cart_id?: string
+          id?: string
+          item_id?: string
+          quantity?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shopping_cart_items_cart_id_fkey"
+            columns: ["cart_id"]
+            isOneToOne: false
+            referencedRelation: "shopping_carts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shopping_cart_items_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "pet_store_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shopping_carts: {
+        Row: {
+          abandoned_at: string | null
+          converted_at: string | null
+          created_at: string
+          id: string
+          last_activity_at: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          abandoned_at?: string | null
+          converted_at?: string | null
+          created_at?: string
+          id?: string
+          last_activity_at?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          abandoned_at?: string | null
+          converted_at?: string | null
+          created_at?: string
+          id?: string
+          last_activity_at?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
