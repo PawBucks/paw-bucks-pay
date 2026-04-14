@@ -418,15 +418,10 @@ export const BrandCampaignsTab = () => {
               <DialogTitle>Create Brand Account</DialogTitle>
               <DialogDescription>Set up a new brand/manufacturer account for funded PawBucks campaigns.</DialogDescription>
             </DialogHeader>
-            <div className="space-y-4">
+             <div className="space-y-4">
               <div className="space-y-2">
                 <Label>Brand Name *</Label>
                 <Input value={brandForm.brand_name} onChange={(e) => setBrandForm(f => ({ ...f, brand_name: e.target.value }))} placeholder="Acme Pet Products" />
-              </div>
-              <div className="space-y-2">
-                <Label>User Account Email *</Label>
-                <Input type="email" value={brandForm.user_email} onChange={(e) => setBrandForm(f => ({ ...f, user_email: e.target.value }))} placeholder="brand@example.com" />
-                <p className="text-xs text-muted-foreground">The user must already have a PawBucks account</p>
               </div>
               <div className="space-y-2">
                 <Label>Contact Name</Label>
@@ -435,6 +430,7 @@ export const BrandCampaignsTab = () => {
               <div className="space-y-2">
                 <Label>Contact Email</Label>
                 <Input type="email" value={brandForm.contact_email} onChange={(e) => setBrandForm(f => ({ ...f, contact_email: e.target.value }))} placeholder="contact@brand.com" />
+                <p className="text-xs text-muted-foreground">An invitation link will be generated for the brand to complete setup</p>
               </div>
               <div className="space-y-2">
                 <Label>Description</Label>
@@ -447,10 +443,10 @@ export const BrandCampaignsTab = () => {
               <Button
                 className="w-full"
                 onClick={() => createBrandMutation.mutate()}
-                disabled={!brandForm.brand_name || !brandForm.user_email || createBrandMutation.isPending}
+                disabled={!brandForm.brand_name || createBrandMutation.isPending}
               >
                 {createBrandMutation.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
-                Create Brand Account
+                Create Brand Account & Copy Invite Link
               </Button>
             </div>
           </DialogContent>
