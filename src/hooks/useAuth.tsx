@@ -1,10 +1,13 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { getPreHydratedSession } from "@/lib/authPreHydrate";
+import { clearUserAccessCache } from "@/lib/userAccessCache";
 
-// Cache session to avoid redundant checks
-let cachedSession: Session | null = null;
-let sessionChecked = false;
+// Pre-hydrate from localStorage synchronously — instant first render
+const preHydrated = getPreHydratedSession();
+let cachedSession: Session | null = preHydrated;
+let sessionChecked = !!preHydrated;
 
 export const useAuth = () => {
   const [user, setUser] = useState<User | null>(() => cachedSession?.user ?? null);
@@ -23,7 +26,7 @@ export const useAuth = () => {
       }
     );
 
-    // Only check session if not already cached
+    // Only check session if not already cached (includes pre-hydration)
     if (!sessionChecked) {
       supabase.auth.getSession().then(({ data: { session: existingSession } }) => {
         cachedSession = existingSession;
@@ -48,10 +51,11 @@ export const useAuth = () => {
     } finally {
       cachedSession = null;
       sessionChecked = false;
+      clearUserAccessCache();
       setUser(null);
       setSession(null);
 
-      // Hard clear any persisted auth token in case the backend session is already gone
+      // Hard clear any persisted auth token
       try {
         const projectRef = import.meta.env.VITE_SUPABASE_PROJECT_ID;
         if (typeof window !== "undefined" && projectRef) {
@@ -65,6 +69,5 @@ export const useAuth = () => {
     }
   }, []);
 
-  // Memoize return object to prevent unnecessary re-renders
   return useMemo(() => ({ user, session, loading, signOut }), [user, session, loading, signOut]);
 };
