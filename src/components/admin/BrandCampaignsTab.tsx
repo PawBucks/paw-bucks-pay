@@ -113,20 +113,9 @@ export const BrandCampaignsTab = () => {
 
   const createBrandMutation = useMutation({
     mutationFn: async () => {
-      // First find or create user account for the brand
-      // For now, admin creates the brand and associates with email
-      const { data: existingProfile } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("email", brandForm.user_email)
-        .maybeSingle();
-
-      if (!existingProfile) {
-        throw new Error("No user found with that email. The brand representative must have an account first.");
-      }
-
+      // Admin creates brand account without requiring an existing user
+      // The brand rep will be invited via email to claim the account
       return createBrandAccount({
-        user_id: existingProfile.id,
         brand_name: brandForm.brand_name,
         contact_name: brandForm.contact_name || undefined,
         contact_email: brandForm.contact_email || undefined,
@@ -135,14 +124,21 @@ export const BrandCampaignsTab = () => {
         created_by: user!.id,
       });
     },
-    onSuccess: (result) => {
+    onSuccess: async (result) => {
       if (result.error) {
         toast.error("Failed to create brand account");
         return;
       }
-      toast.success("Brand account created successfully!");
+      // Copy invitation link to clipboard
+      const inviteUrl = `${window.location.origin}/brand-setup/${result.data?.invitation_token}`;
+      try {
+        await navigator.clipboard.writeText(inviteUrl);
+        toast.success("Brand account created! Invitation link copied to clipboard.");
+      } catch {
+        toast.success(`Brand account created! Share this link: ${inviteUrl}`);
+      }
       setShowCreateBrand(false);
-      setBrandForm({ brand_name: "", contact_name: "", contact_email: "", description: "", website_url: "", user_email: "" });
+      setBrandForm({ brand_name: "", contact_name: "", contact_email: "", description: "", website_url: "" });
       queryClient.invalidateQueries({ queryKey: ["admin-brand-accounts"] });
     },
     onError: (error: Error) => {
