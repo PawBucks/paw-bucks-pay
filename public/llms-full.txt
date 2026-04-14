@@ -1,0 +1,133 @@
+# PawBucks — Complete Platform Documentation
+
+> PawBucks is an all-in-one pet ecosystem and digital payment platform connecting pet owners with trusted local merchants while rewarding every purchase.
+
+## Platform Overview
+
+PawBucks serves three primary user groups: pet owners (consumers), pet merchants (businesses), and veterinarians. The platform creates a closed-loop economy where pet spending generates rewards that can be redeemed across the network.
+
+### For Pet Owners
+
+Pet owners use PawBucks to:
+- **Discover** local pet businesses (stores, groomers, trainers, vets, boarding)
+- **Pay** at partner merchants using the digital wallet
+- **Earn** PawBucks rewards on every transaction (10x-30x per dollar based on tier)
+- **Redeem** PawBucks for discounts on future purchases
+- **Track** all pet-related spending with detailed category breakdowns
+- **Manage** pet profiles including health records, vaccinations, and medications
+- **Report** lost pets with community-powered flyer alerts
+- **Shop** the PawBucks Pet Store for products from verified merchants
+- **Book** services like grooming, training, and vet appointments
+- **Refer** friends and earn bonus PawBucks
+
+### Membership Tiers
+
+| Tier | Earning Rate | Monthly Cost | Benefits |
+|------|-------------|--------------|----------|
+| Free | 10x PawBucks/$ | $0 | Basic rewards, merchant discovery |
+| PawPass | 20x PawBucks/$ | Paid | Enhanced rewards, exclusive deals |
+| PawPass+ | 30x PawBucks/$ | Paid | Maximum rewards, priority support, premium perks |
+
+1,000 PawBucks = $1 in redeemable value.
+
+### Welcome Credit System
+
+New users receive a Welcome Credit (up to $250 across 4 tiers) to try the platform. The credit is applied as PawBucks and can be used at any partner merchant.
+
+### Pet Profiles
+
+Each pet owner can create detailed pet profiles including:
+- Species, breed, age, weight
+- Vaccination records
+- Medication tracking
+- Allergy information
+- Vet visit history
+- Health timeline
+
+### Lost Pet System
+
+PawBucks features a community-powered lost pet alert system:
+- Create digital lost pet flyers with photos and details
+- Geo-targeted notifications to nearby users
+- Status tracking (lost, found, reunited)
+- Share flyers on social media
+
+## For Pet Merchants
+
+### Getting Started
+Merchants sign up, create a business profile, and set up their digital storefront. PawBucks provides all the tools needed to run a pet business online and in-store.
+
+### Merchant Features
+
+- **Digital Storefront**: Customizable online store with product listings
+- **Point of Sale (POS)**: In-store payment processing
+- **Booking System**: Appointment scheduling with intake forms and waitlists
+- **Loyalty Programs**: Digital punch cards and custom reward programs
+- **Customer Insights**: Analytics on customer behavior and spending patterns
+- **Search Ranking**: SEO tools with booster keywords for platform visibility
+- **Brand Campaigns**: Partner with pet brands for co-marketing campaigns
+- **Tax & Accounting**: Expense tracking, tax reports, and accountant access
+- **Invoicing**: Create and send professional invoices
+
+### Merchant Categories
+- Pet Stores
+- Dog Groomers
+- Cat Groomers
+- Pet Trainers
+- Pet Boarding & Daycare
+- Pet Sitters & Dog Walkers
+- Pet Bakeries
+- Pet Photographers
+- Pet Insurance
+- Other Pet Services
+
+## For Veterinarians
+
+### Veterinary Practice Management
+PawBucks provides a complete veterinary EMR and practice management suite:
+
+- **SOAP Notes**: AI-assisted clinical documentation
+- **Patient Records**: Complete medical history with timeline view
+- **Lab Integration**: Connect with external lab services for results
+- **Imaging**: DICOM-compatible imaging records and AI analysis
+- **Prescriptions**: Digital prescription management
+- **Insurance Claims**: PawProtect insurance claim processing
+- **Compliance**: Automated vaccination and compliance reminders
+- **Telemedicine**: Video consultation capabilities
+
+### AI Clinical Tools
+- AI-powered SOAP note drafting from voice recordings
+- Diagnostic image analysis with anomaly detection
+- Lab result interpretation and trending
+- Clinical decision support
+
+## Technical Details
+
+### Platform Type
+- Progressive Web App (PWA)
+- Available on web browsers, installable on iOS and Android
+- Responsive design for mobile and desktop
+
+### Security
+- End-to-end encryption for payment data
+- HIPAA-compliant veterinary records
+- Row-level security for data isolation
+- Two-factor authentication support
+
+### Payments
+- Stripe-powered payment processing
+- Direct merchant payments with application fees
+- PawBucks digital currency system
+- Subscription billing for membership tiers
+
+## Links
+
+- Homepage: https://pawbucks.app
+- Sign Up: https://pawbucks.app/auth
+- Discover Merchants: https://pawbucks.app/discover
+- Merchant Directory: https://pawbucks.app/directory
+- Pet Store: https://pawbucks.app/pet-store
+- Lost Pets: https://pawbucks.app/lost-pets
+- For Merchants: https://pawbucks.app/merchants
+- Install App: https://pawbucks.app/install
+- Referral Program: https://pawbucks.app/referrals

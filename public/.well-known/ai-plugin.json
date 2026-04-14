@@ -1,0 +1,13 @@
+{
+  "schema_version": "v1",
+  "name_for_human": "PawBucks",
+  "name_for_model": "pawbucks",
+  "description_for_human": "A local pet rewards and services platform connecting pet owners with trusted businesses while rewarding everyday pet spending.",
+  "description_for_model": "PawBucks is an all-in-one pet ecosystem and digital payment platform. Pet owners discover local pet merchants (stores, groomers, trainers, vets), make payments, and earn PawBucks rewards (10x-30x per dollar). Features include digital wallet, pet store marketplace, lost pet alerts, pet health records, and merchant discovery. 1,000 PawBucks = $1. Free to use with premium PawPass tiers available.",
+  "auth": {
+    "type": "none"
+  },
+  "logo_url": "https://pawbucks.app/logo.png",
+  "contact_email": "support@pawbucks.app",
+  "legal_info_url": "https://pawbucks.app"
+}

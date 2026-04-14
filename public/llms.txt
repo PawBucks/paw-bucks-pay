@@ -1,0 +1,60 @@
+# PawBucks
+
+> PawBucks is an all-in-one pet ecosystem and digital payment platform that connects pet owners with trusted local pet merchants while rewarding every purchase with cashback PawBucks points.
+
+## What is PawBucks?
+
+PawBucks is a local pet rewards and services platform. Pet owners discover trusted pet businesses — stores, groomers, trainers, veterinarians, boarding facilities — make payments, and earn PawBucks rewards on every transaction. 1,000 PawBucks = $1 in rewards value.
+
+## Key Features
+
+- **Digital Wallet**: Track and manage all pet-related expenses in one place
+- **Merchant Discovery**: Find trusted pet businesses near you with ratings and reviews
+- **PawBucks Rewards**: Earn 10x-30x PawBucks per dollar spent depending on membership tier
+- **Pet Store**: Shop pet products online from verified merchants with rewards on every purchase
+- **Lost Pet Alerts**: Community-powered lost pet flyer system with instant notifications
+- **Pet Health Records**: Digital pet profiles with vaccination and health tracking
+- **Spending Breakdown**: Detailed analytics on pet care spending by category
+- **Referral Program**: Earn bonus PawBucks by referring friends and merchants
+
+## Membership Tiers
+
+- **Free Tier**: Earn 10x PawBucks per dollar spent at partner merchants
+- **PawPass**: Earn 20x PawBucks per dollar spent plus exclusive deals
+- **PawPass+**: Earn 30x PawBucks per dollar spent plus premium perks and priority support
+
+## For Pet Merchants
+
+PawBucks helps pet businesses grow by providing:
+- Digital storefront with online ordering
+- Point-of-sale (POS) integration
+- Customer loyalty and punch card programs
+- Booking and scheduling tools
+- Search ranking analytics and booster keywords
+- Brand campaign partnerships
+
+## For Veterinarians
+
+PawBucks offers a complete veterinary practice management suite:
+- Electronic Medical Records (EMR) with SOAP notes
+- AI-powered clinical decision support
+- Lab and imaging integration
+- Insurance claim management with PawProtect
+- Compliance reminders and vaccination tracking
+- Prescription management
+
+## How Rewards Work
+
+1. **Discover** — Find trusted pet businesses on the platform
+2. **Pay** — Make purchases at partner merchants
+3. **Earn** — Receive 10x-30x PawBucks per dollar spent
+4. **Redeem** — Use PawBucks for discounts on future purchases at any partner merchant
+
+## Links
+
+- Website: https://pawbucks.app
+- Sign Up: https://pawbucks.app/auth
+- Discover Merchants: https://pawbucks.app/discover
+- Pet Store: https://pawbucks.app/pet-store
+- For Merchants: https://pawbucks.app/merchants
+- Lost Pets: https://pawbucks.app/lost-pets
