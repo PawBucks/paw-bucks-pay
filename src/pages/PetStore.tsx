@@ -36,7 +36,7 @@ import { SEO } from "@/components/SEO";
 import { PullToRefresh } from "@/components/PullToRefresh";
 import { PromotionalBadge } from "@/components/pet-store/PromotionalBadge";
 import { CartIcon } from "@/components/pet-store/CartIcon";
-import { CartDrawer } from "@/components/pet-store/CartDrawer";
+import { CartDrawer, type CartCheckoutParams } from "@/components/pet-store/CartDrawer";
 import { usePromotionalItems } from "@/hooks/usePromotionalItems";
 import { useShoppingCart } from "@/hooks/useShoppingCart";
 import { getStripePromise } from "@/lib/stripe";
@@ -323,10 +323,16 @@ export default function PetStore() {
     }
   };
 
-  const handleCartCheckoutWithCard = async () => {
+  const handleCartCheckout = async (params: CartCheckoutParams) => {
     if (!user || cartItems.length === 0) return;
-    // For card checkout, use the first item for now (multi-item card checkout can be enhanced)
-    // Create a payment intent for the total
+
+    if (params.mode === "pawbucks") {
+      // Full PawBucks purchase
+      cartPawbucksPurchase.mutate();
+      return;
+    }
+
+    // Card or split — create payment intent
     const firstItem = cartItems[0];
     setSelectedItem({ ...firstItem.item, price: totalUsd });
     setIsCreatingIntent(true);
@@ -335,7 +341,11 @@ export default function PetStore() {
 
     try {
       const { data, error } = await supabase.functions.invoke('create-pet-store-payment', {
-        body: { itemId: firstItem.item.id, quantity: firstItem.quantity },
+        body: {
+          itemId: firstItem.item.id,
+          quantity: firstItem.quantity,
+          pawbucksAmount: params.pawbucksAmount || 0,
+        },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
@@ -646,9 +656,9 @@ export default function PetStore() {
           }
           onRemoveItem={(cartItemId) => removeFromCart.mutate(cartItemId)}
           onClearCart={() => clearCart.mutate()}
-          onCheckoutWithCard={handleCartCheckoutWithCard}
-          onCheckoutWithPawbucks={() => cartPawbucksPurchase.mutate()}
-          isUpdating={updateQuantity.isPending || removeFromCart.isPending || clearCart.isPending || cartPawbucksPurchase.isPending}
+          onCheckout={handleCartCheckout}
+          isUpdating={updateQuantity.isPending || removeFromCart.isPending || clearCart.isPending}
+          isCheckingOut={cartPawbucksPurchase.isPending}
           pawbucksBalance={wallet?.balance || 0}
         />
 
