@@ -6,14 +6,7 @@ import { useSharedAccount, getEffectiveWalletUserId } from "@/hooks/useSharedAcc
 import { supabase } from "@/integrations/supabase/client";
 import { Formatters } from "@/utils/formatters";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -23,8 +16,9 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { ShoppingCart, Coins, CreditCard, Store, Plus } from "lucide-react";
+import { Coins, CreditCard, Store, Search, SlidersHorizontal, Grid3X3, LayoutList, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
@@ -34,9 +28,9 @@ import { AdPlacement } from "@/components/AdPlacement";
 import { Header } from "@/components/Header";
 import { SEO } from "@/components/SEO";
 import { PullToRefresh } from "@/components/PullToRefresh";
-import { PromotionalBadge } from "@/components/pet-store/PromotionalBadge";
 import { CartIcon } from "@/components/pet-store/CartIcon";
 import { CartDrawer, type CartCheckoutParams } from "@/components/pet-store/CartDrawer";
+import { ProductCard } from "@/components/pet-store/ProductCard";
 import { usePromotionalItems } from "@/hooks/usePromotionalItems";
 import { useShoppingCart } from "@/hooks/useShoppingCart";
 import { getStripePromise } from "@/lib/stripe";
@@ -44,6 +38,15 @@ import { buildAppUrl } from "@/lib/url";
 
 const CATEGORIES = ["All", "Food", "Treats", "Toys", "Bedding", "Accessories", "Healthcare", "Grooming"];
 const ITEM_TYPES = ["All", "Product", "Service"] as const;
+const SORT_OPTIONS = [
+  { value: "featured", label: "Featured" },
+  { value: "price-low", label: "Price: Low to High" },
+  { value: "price-high", label: "Price: High to Low" },
+  { value: "rating", label: "Avg. Customer Review" },
+  { value: "newest", label: "Newest Arrivals" },
+] as const;
+
+type SortOption = (typeof SORT_OPTIONS)[number]["value"];
 
 type PetStorePaymentFormProps = {
   itemId: string;
@@ -70,22 +73,15 @@ const PetStorePaymentForm = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!stripe || !elements) return;
-
     setIsLoading(true);
-
     try {
       const { error } = await stripe.confirmPayment({
         elements,
-        confirmParams: {
-          return_url: buildAppUrl("/pet-store"),
-        },
+        confirmParams: { return_url: buildAppUrl("/pet-store") },
         redirect: 'if_required',
       });
-
       if (error) throw error;
-
       const pawbucksEarned = Math.round(totalAmount * cashbackRate);
       toast.success(`Payment successful! You earned ${pawbucksEarned} PawBucks!`);
       onSuccess();
@@ -118,28 +114,11 @@ const PetStorePaymentForm = ({
           </span>
         </div>
       </div>
-
       <PaymentElement />
-
       <div className="flex gap-3">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onCancel}
-          className="flex-1"
-          disabled={isLoading}
-        >
-          Cancel
-        </Button>
+        <Button type="button" variant="outline" onClick={onCancel} className="flex-1" disabled={isLoading}>Cancel</Button>
         <Button type="submit" className="flex-1" disabled={isLoading || !stripe}>
-          {isLoading ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Processing...
-            </>
-          ) : (
-            "Pay Now"
-          )}
+          {isLoading ? (<><Loader2 className="w-4 h-4 mr-2 animate-spin" />Processing...</>) : "Pay Now"}
         </Button>
       </div>
     </form>
@@ -155,11 +134,13 @@ export default function PetStore() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedType, setSelectedType] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState<SortOption>("featured");
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [clientSecret, setClientSecret] = useState("");
   const [isCreatingIntent, setIsCreatingIntent] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
 
   // Shopping cart
   const {
@@ -174,7 +155,7 @@ export default function PetStore() {
     markConverted,
   } = useShoppingCart();
 
-  // Fetch user's PawBucks balance
+  // PawBucks wallet
   const { data: wallet } = useQuery({
     queryKey: ["pawbucks-wallet", effectiveUserId],
     queryFn: async () => {
@@ -206,17 +187,19 @@ export default function PetStore() {
     enabled: !!user,
   });
 
-  const cashbackRate = subscription ? 20 : 10;
+  const isSubscriber = !!subscription;
+  const cashbackRate = isSubscriber ? 20 : 10;
 
   const { data: promotionalData } = usePromotionalItems(user?.id);
   const promotionalItemMap = promotionalData?.itemMap || new Map();
 
+  // Fetch items with merchant info
   const { data: items, isLoading } = useQuery({
     queryKey: ["pet-store-items"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("pet_store_items")
-        .select("*")
+        .select("*, merchants:merchant_id(id, business_name, storefront_slug)")
         .eq("is_active", true)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -230,13 +213,9 @@ export default function PetStore() {
       if (!user || !effectiveUserId) throw new Error("Must be logged in");
       if (!wallet || wallet.balance < totalPawbucks) throw new Error("Insufficient PawBucks balance");
 
-      // Process each cart item
       for (const cartItem of cartItems) {
         const item = cartItem.item;
-        if (item.stock_quantity < cartItem.quantity) {
-          throw new Error(`Not enough stock for ${item.name}`);
-        }
-
+        if (item.stock_quantity < cartItem.quantity) throw new Error(`Not enough stock for ${item.name}`);
         const totalCost = item.price_pawbucks * cartItem.quantity;
 
         const { data: order, error: orderError } = await supabase
@@ -247,33 +226,23 @@ export default function PetStore() {
         if (orderError) throw orderError;
 
         await supabase.from("pet_store_order_items").insert([{
-          order_id: order.id,
-          item_id: item.id,
-          quantity: cartItem.quantity,
-          price_per_item: item.price_pawbucks,
+          order_id: order.id, item_id: item.id, quantity: cartItem.quantity, price_per_item: item.price_pawbucks,
         }]);
 
         await supabase.from("pawbucks_activity").insert([{
-          user_id: effectiveUserId,
-          type: "debit",
-          amount: totalCost,
-          source: "pet_store",
+          user_id: effectiveUserId, type: "debit", amount: totalCost, source: "pet_store",
           description: `Purchased ${cartItem.quantity}x ${item.name}`,
         }]);
 
-        await supabase
-          .from("pet_store_items")
+        await supabase.from("pet_store_items")
           .update({ stock_quantity: item.stock_quantity - cartItem.quantity })
           .eq("id", item.id);
       }
 
-      // Deduct total PawBucks
-      await supabase
-        .from("pawbucks_wallet")
+      await supabase.from("pawbucks_wallet")
         .update({ balance: wallet.balance - totalPawbucks })
         .eq("user_id", effectiveUserId);
 
-      // Mark cart as converted
       await markConverted();
     },
     onSuccess: () => {
@@ -282,31 +251,19 @@ export default function PetStore() {
       setCartOpen(false);
       toast.success("Purchase successful! 🎉");
     },
-    onError: (error: any) => {
-      toast.error(error.message || "Purchase failed");
-    },
+    onError: (error: any) => toast.error(error.message || "Purchase failed"),
   });
 
   const handleAddToCart = (itemId: string) => {
-    if (!user) {
-      navigate("/auth");
-      return;
-    }
-    addToCart.mutate({ itemId }, {
-      onSuccess: () => toast.success("Added to cart! 🛒"),
-    });
+    if (!user) { navigate("/auth"); return; }
+    addToCart.mutate({ itemId }, { onSuccess: () => toast.success("Added to cart! 🛒") });
   };
 
   const handlePurchaseWithCard = async (item: any) => {
-    if (!user) {
-      navigate("/auth");
-      return;
-    }
-
+    if (!user) { navigate("/auth"); return; }
     setSelectedItem(item);
     setIsCreatingIntent(true);
     setPaymentDialogOpen(true);
-
     try {
       const { data, error } = await supabase.functions.invoke('create-pet-store-payment', {
         body: { itemId: item.id, quantity: 1 },
@@ -315,7 +272,6 @@ export default function PetStore() {
       if (data?.error) throw new Error(data.error);
       setClientSecret(data.clientSecret);
     } catch (error: any) {
-      console.error("Error creating payment intent:", error);
       toast.error(error.message || "Failed to initialize payment");
       setPaymentDialogOpen(false);
     } finally {
@@ -325,33 +281,21 @@ export default function PetStore() {
 
   const handleCartCheckout = async (params: CartCheckoutParams) => {
     if (!user || cartItems.length === 0) return;
+    if (params.mode === "pawbucks") { cartPawbucksPurchase.mutate(); return; }
 
-    if (params.mode === "pawbucks") {
-      // Full PawBucks purchase
-      cartPawbucksPurchase.mutate();
-      return;
-    }
-
-    // Card or split — create payment intent
     const firstItem = cartItems[0];
     setSelectedItem({ ...firstItem.item, price: totalUsd });
     setIsCreatingIntent(true);
     setPaymentDialogOpen(true);
     setCartOpen(false);
-
     try {
       const { data, error } = await supabase.functions.invoke('create-pet-store-payment', {
-        body: {
-          itemId: firstItem.item.id,
-          quantity: firstItem.quantity,
-          pawbucksAmount: params.pawbucksAmount || 0,
-        },
+        body: { itemId: firstItem.item.id, quantity: firstItem.quantity, pawbucksAmount: params.pawbucksAmount || 0 },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
       setClientSecret(data.clientSecret);
     } catch (error: any) {
-      console.error("Error creating payment intent:", error);
       toast.error(error.message || "Failed to initialize payment");
       setPaymentDialogOpen(false);
     } finally {
@@ -384,30 +328,63 @@ export default function PetStore() {
     await queryClient.invalidateQueries({ queryKey: ["pawbucks-wallet"] });
   }, [queryClient]);
 
-  const { containerRef, isRefreshing, pullDistance, progress } = usePullToRefresh({
-    onRefresh: handleRefresh,
-  });
+  const { containerRef, isRefreshing, pullDistance, progress } = usePullToRefresh({ onRefresh: handleRefresh });
 
-  const filteredItems = useMemo(() => items?.filter(item => {
-    const matchesCategory = selectedCategory === "All" || item.category === selectedCategory;
-    const matchesType = selectedType === "All" || 
-      (selectedType === "Product" && (item.item_type === "product" || !item.item_type)) ||
-      (selectedType === "Service" && item.item_type === "service");
-    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         item.description?.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesType && matchesSearch;
-  }), [items, selectedCategory, selectedType, searchQuery]);
+  // Filter & sort
+  const filteredItems = useMemo(() => {
+    let result = items?.filter(item => {
+      const matchesCategory = selectedCategory === "All" || item.category === selectedCategory;
+      const matchesType = selectedType === "All" ||
+        (selectedType === "Product" && (item.item_type === "product" || !item.item_type)) ||
+        (selectedType === "Service" && item.item_type === "service");
+      const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.description?.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesCategory && matchesType && matchesSearch;
+    }) || [];
+
+    // Sort
+    switch (sortBy) {
+      case "price-low":
+        result = [...result].sort((a, b) => a.price - b.price);
+        break;
+      case "price-high":
+        result = [...result].sort((a, b) => b.price - a.price);
+        break;
+      case "rating":
+        result = [...result].sort((a, b) => (b.rating_avg ?? 0) - (a.rating_avg ?? 0));
+        break;
+      case "newest":
+        result = [...result].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        break;
+      case "featured":
+      default:
+        // Featured: prioritize items with promos, then high rating, then newest
+        result = [...result].sort((a, b) => {
+          const aPromo = promotionalItemMap.has(a.id) ? 1 : 0;
+          const bPromo = promotionalItemMap.has(b.id) ? 1 : 0;
+          if (aPromo !== bPromo) return bPromo - aPromo;
+          const aRating = (a.rating_avg ?? 0) * (a.rating_count ?? 0);
+          const bRating = (b.rating_avg ?? 0) * (b.rating_count ?? 0);
+          return bRating - aRating;
+        });
+        break;
+    }
+    return result;
+  }, [items, selectedCategory, selectedType, searchQuery, sortBy, promotionalItemMap]);
+
+  const activeFilterCount = (selectedCategory !== "All" ? 1 : 0) + (selectedType !== "All" ? 1 : 0);
+  const totalResults = filteredItems.length;
 
   return (
     <>
-      <SEO 
+      <SEO
         title="Pet Store - Shop for Pet Supplies | PawBucks"
         description="Browse our selection of pet supplies including food, treats, toys, and more. Earn PawBucks rewards on every purchase."
         keywords={["pet store", "pet supplies", "pet food", "pet toys", "pet treats", "earn rewards"]}
       />
       <div className="min-h-[100dvh] bg-background flex flex-col">
         <Header isAuthenticated={!!user} onLogout={handleSignOut} />
-        
+
         <PullToRefresh
           ref={containerRef}
           isRefreshing={isRefreshing}
@@ -420,67 +397,151 @@ export default function PetStore() {
               <AdPlacement />
             </div>
 
-            <div className="mb-6">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-3">
-                <h1 className="text-2xl sm:text-3xl font-bold">Pet Store</h1>
-                <div className="flex items-center gap-3">
+            {/* Top bar: Title + wallet + cart */}
+            <div className="mb-4">
+              <div className="flex justify-between items-center gap-3 mb-1">
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">PawBucks Pet Store</h1>
+                <div className="flex items-center gap-2">
                   {user && wallet && (
-                    <div className="flex items-center gap-2 bg-primary/10 px-3 py-1.5 rounded-lg">
-                      <Coins className="h-4 w-4 text-primary" />
-                      <span className="text-sm font-semibold">{Formatters.number(wallet.balance)} PawBucks</span>
+                    <div className="flex items-center gap-1.5 bg-primary/10 px-2.5 py-1 rounded-lg">
+                      <Coins className="h-3.5 w-3.5 text-primary" />
+                      <span className="text-xs font-semibold">{Formatters.number(wallet.balance)} PB</span>
                     </div>
                   )}
-                  {user && (
-                    <CartIcon itemCount={itemCount} onClick={() => setCartOpen(true)} />
-                  )}
+                  {user && <CartIcon itemCount={itemCount} onClick={() => setCartOpen(true)} />}
                 </div>
               </div>
-              <p className="text-sm text-muted-foreground">Shop for your furry friends with PawBucks!</p>
+              <p className="text-sm text-muted-foreground">
+                Shop for your furry friends — earn PawBucks on every purchase!
+              </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 mb-6">
-              <Input
-                placeholder="Search items..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="sm:w-96"
-              />
-              <Select value={selectedType} onValueChange={setSelectedType}>
-                <SelectTrigger className="sm:w-40">
-                  <SelectValue placeholder="Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {ITEM_TYPES.map((type) => (
-                    <SelectItem key={type} value={type}>{type}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger className="sm:w-48">
-                  <SelectValue placeholder="Category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {CATEGORIES.map((cat) => (
-                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            {/* Search + Filter Bar (Amazon-style) */}
+            <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b pb-3 mb-4 -mx-4 px-4">
+              <div className="flex gap-2 items-center">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search pet supplies..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-9 pr-8 h-10"
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery("")}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+                <Button
+                  variant={showFilters || activeFilterCount > 0 ? "default" : "outline"}
+                  size="icon"
+                  className="h-10 w-10 flex-shrink-0"
+                  onClick={() => setShowFilters(!showFilters)}
+                >
+                  <SlidersHorizontal className="h-4 w-4" />
+                  {activeFilterCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full h-4 w-4 text-[10px] flex items-center justify-center">
+                      {activeFilterCount}
+                    </span>
+                  )}
+                </Button>
+              </div>
+
+              {/* Collapsible filters */}
+              {showFilters && (
+                <div className="flex flex-wrap gap-2 mt-3 animate-fade-in">
+                  <Select value={selectedType} onValueChange={setSelectedType}>
+                    <SelectTrigger className="w-28 h-8 text-xs">
+                      <SelectValue placeholder="Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ITEM_TYPES.map((type) => (
+                        <SelectItem key={type} value={type}>{type}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                    <SelectTrigger className="w-36 h-8 text-xs">
+                      <SelectValue placeholder="Category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {CATEGORIES.map((cat) => (
+                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {activeFilterCount > 0 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 text-xs text-muted-foreground"
+                      onClick={() => { setSelectedCategory("All"); setSelectedType("All"); }}
+                    >
+                      Clear filters
+                    </Button>
+                  )}
+                </div>
+              )}
+
+              {/* Results bar */}
+              <div className="flex items-center justify-between mt-3">
+                <p className="text-xs text-muted-foreground">
+                  {searchQuery ? (
+                    <>Showing <span className="font-semibold text-foreground">{totalResults}</span> results for "<span className="font-medium">{searchQuery}</span>"</>
+                  ) : (
+                    <><span className="font-semibold text-foreground">{totalResults}</span> results</>
+                  )}
+                </p>
+                <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
+                  <SelectTrigger className="w-44 h-8 text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SORT_OPTIONS.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
+            {/* Category pills (horizontal scroll) */}
+            <div className="flex gap-2 overflow-x-auto pb-3 mb-4 scrollbar-hide -mx-1 px-1">
+              {CATEGORIES.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                    selectedCategory === cat
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "bg-muted/60 text-muted-foreground hover:bg-muted"
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+
+            {/* Product Grid */}
             {isLoading ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4" role="status" aria-label="Loading products">
-                {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4" role="status" aria-label="Loading products">
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
                   <Card key={i} className="flex flex-col">
-                    <div className="w-full h-48 bg-muted rounded-t-lg skeleton-pulse" />
-                    <CardContent className="pt-4 space-y-2">
-                      <div className="h-5 w-3/4 bg-muted rounded skeleton-pulse" />
-                      <div className="h-4 w-full bg-muted rounded skeleton-pulse" />
-                      <div className="h-4 w-1/2 bg-muted rounded skeleton-pulse" />
+                    <div className="w-full aspect-square bg-muted rounded-t-lg skeleton-pulse" />
+                    <CardContent className="pt-3 space-y-2">
+                      <div className="h-4 w-3/4 bg-muted rounded skeleton-pulse" />
+                      <div className="h-3 w-1/2 bg-muted rounded skeleton-pulse" />
+                      <div className="h-5 w-1/3 bg-muted rounded skeleton-pulse" />
+                      <div className="h-8 w-full bg-muted rounded skeleton-pulse" />
                     </CardContent>
                   </Card>
                 ))}
               </div>
-            ) : filteredItems?.length === 0 ? (
+            ) : filteredItems.length === 0 ? (
               <div className="text-center py-16 px-4">
                 <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4">
                   <Store className="w-8 h-8 text-muted-foreground" />
@@ -492,122 +553,26 @@ export default function PetStore() {
                 </Button>
               </div>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-                {filteredItems?.map((item) => {
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
+                {filteredItems.map((item) => {
                   const promo = promotionalItemMap.get(item.id);
-                  const hasPromo = !!promo;
-                  const discountedPrice = hasPromo 
-                    ? Math.round(item.price * (1 - promo.discountPercentage / 100))
-                    : item.price;
                   const inCart = cartItems.find((ci) => ci.item_id === item.id);
-                  
+                  const merchant = (item as any).merchants;
+
                   return (
-                    <Card key={item.id} className={`flex flex-col relative ${hasPromo ? 'ring-2 ring-primary/50' : ''}`}>
-                      <CardHeader className="p-0 relative">
-                        {hasPromo && (
-                          <PromotionalBadge
-                            discountPercentage={promo.discountPercentage}
-                            badgeEmoji={promo.badgeEmoji}
-                            badgeName={promo.badgeName}
-                            expiresAt={promo.expiresAt}
-                            variant="overlay"
-                          />
-                        )}
-                        {item.image_url ? (
-                          <img
-                            src={item.image_url}
-                            alt={item.name}
-                            className="w-full h-48 object-cover rounded-t-lg"
-                          />
-                        ) : (
-                          <div className="w-full h-48 bg-muted rounded-t-lg flex items-center justify-center">
-                            <span className="text-muted-foreground">No image</span>
-                          </div>
-                        )}
-                      </CardHeader>
-                      <CardContent className="flex-1 pt-4">
-                        <div className="flex items-start justify-between mb-2">
-                          <CardTitle className="text-lg">{item.name}</CardTitle>
-                          <div className="flex gap-1 flex-shrink-0">
-                            <Badge variant={item.item_type === 'service' ? 'default' : 'outline'} className="text-xs">
-                              {item.item_type === 'service' ? 'Service' : 'Product'}
-                            </Badge>
-                            <Badge variant="secondary">{item.category}</Badge>
-                          </div>
-                        </div>
-                        {item.description && (
-                          <CardDescription className="line-clamp-2 mb-3">
-                            {item.description}
-                          </CardDescription>
-                        )}
-                        <div className="space-y-2 mb-3">
-                          <div className="flex items-center gap-2">
-                            <CreditCard className="h-4 w-4 text-muted-foreground" />
-                            {hasPromo ? (
-                              <div className="flex items-center gap-2">
-                                <span className="text-lg font-bold text-primary">
-                                  ${(discountedPrice / 100).toFixed(2)}
-                                </span>
-                                <span className="text-sm text-muted-foreground line-through">
-                                  ${(item.price / 100).toFixed(2)}
-                                </span>
-                              </div>
-                            ) : (
-                              <span className="text-lg font-bold">${(item.price / 100).toFixed(2)}</span>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Coins className="h-4 w-4 text-primary" />
-                            <span className="text-lg font-bold text-primary">
-                              {Formatters.number(item.price_pawbucks)} PawBucks
-                            </span>
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            {item.stock_quantity} in stock
-                          </div>
-                        </div>
-                      </CardContent>
-                      <CardFooter className="flex-col gap-2">
-                        {user ? (
-                          <>
-                            <Button
-                              className="w-full"
-                              variant={inCart ? "secondary" : "default"}
-                              onClick={() => handleAddToCart(item.id)}
-                              disabled={item.stock_quantity === 0 || addToCart.isPending}
-                            >
-                              {item.stock_quantity === 0 ? (
-                                "Out of Stock"
-                              ) : inCart ? (
-                                <>
-                                  <Plus className="mr-1 h-4 w-4" />
-                                  Add More ({inCart.quantity} in cart)
-                                </>
-                              ) : (
-                                <>
-                                  <ShoppingCart className="mr-2 h-4 w-4" />
-                                  Add to Cart
-                                </>
-                              )}
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="w-full"
-                              onClick={() => handlePurchaseWithCard({ ...item, price: discountedPrice })}
-                              disabled={item.stock_quantity === 0}
-                            >
-                              <CreditCard className="mr-1 h-3 w-3" />
-                              Buy Now ${(discountedPrice / 100).toFixed(2)}
-                            </Button>
-                          </>
-                        ) : (
-                          <Button className="w-full" onClick={() => navigate("/auth")}>
-                            Sign in to Shop
-                          </Button>
-                        )}
-                      </CardFooter>
-                    </Card>
+                    <ProductCard
+                      key={item.id}
+                      item={item}
+                      merchantName={merchant?.business_name || null}
+                      merchantSlug={merchant?.storefront_slug || null}
+                      promo={promo || null}
+                      inCartQuantity={inCart?.quantity}
+                      isSubscriber={isSubscriber}
+                      isAuthenticated={!!user}
+                      onAddToCart={handleAddToCart}
+                      onBuyNow={handlePurchaseWithCard}
+                      isAdding={addToCart.isPending}
+                    />
                   );
                 })}
               </div>
@@ -651,9 +616,7 @@ export default function PetStore() {
           items={cartItems}
           totalUsd={totalUsd}
           totalPawbucks={totalPawbucks}
-          onUpdateQuantity={(cartItemId, qty) =>
-            updateQuantity.mutate({ cartItemId, quantity: qty })
-          }
+          onUpdateQuantity={(cartItemId, qty) => updateQuantity.mutate({ cartItemId, quantity: qty })}
           onRemoveItem={(cartItemId) => removeFromCart.mutate(cartItemId)}
           onClearCart={() => clearCart.mutate()}
           onCheckout={handleCartCheckout}
