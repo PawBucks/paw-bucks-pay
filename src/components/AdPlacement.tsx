@@ -96,7 +96,7 @@ const AdPlacementComponent = ({ position = 'top' }: AdPlacementProps) => {
             </div>
             <p className="text-sm text-muted-foreground font-medium">{currentMerchant.business_type}</p>
             {currentMerchant.description && (
-              <p className="text-sm text-muted-foreground">{currentMerchant.description}</p>
+              <p className="text-sm text-muted-foreground line-clamp-2">{currentMerchant.description}</p>
             )}
             {currentMerchant.address && (
               <div className="flex items-center gap-1 text-sm text-muted-foreground">
