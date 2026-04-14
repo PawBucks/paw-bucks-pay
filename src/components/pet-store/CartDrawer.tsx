@@ -1,26 +1,37 @@
-import { useState } from "react";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet";
+import { useState, useEffect } from "react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Slider } from "@/components/ui/slider";
 import { Minus, Plus, Trash2, ShoppingCart, Coins, CreditCard, Loader2, Package } from "lucide-react";
 import { CartItem } from "@/hooks/useShoppingCart";
 import { Formatters } from "@/utils/formatters";
 import { motion, AnimatePresence } from "framer-motion";
 
+const PAWBUCKS_TO_USD = 0.001;
+
+export type CartCheckoutMode = "card" | "pawbucks" | "split";
+
+export interface CartCheckoutParams {
+  mode: CartCheckoutMode;
+  pawbucksAmount: number; // PawBucks to spend
+  cardAmountCents: number; // USD cents to charge on card
+}
+
 interface CartDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   items: CartItem[];
-  totalUsd: number;
+  totalUsd: number; // cents
   totalPawbucks: number;
   onUpdateQuantity: (cartItemId: string, quantity: number) => void;
   onRemoveItem: (cartItemId: string) => void;
   onClearCart: () => void;
-  onCheckoutWithCard: () => void;
-  onCheckoutWithPawbucks: () => void;
+  onCheckout: (params: CartCheckoutParams) => void;
   isUpdating?: boolean;
   pawbucksBalance?: number;
+  isCheckingOut?: boolean;
 }
 
 export function CartDrawer({
@@ -32,13 +43,64 @@ export function CartDrawer({
   onUpdateQuantity,
   onRemoveItem,
   onClearCart,
-  onCheckoutWithCard,
-  onCheckoutWithPawbucks,
+  onCheckout,
   isUpdating,
   pawbucksBalance = 0,
+  isCheckingOut = false,
 }: CartDrawerProps) {
-  const canAffordPawbucks = pawbucksBalance >= totalPawbucks;
   const hasOutOfStock = items.some((item) => item.quantity > item.item.stock_quantity);
+
+  // Split payment slider state: percentage of total paid with PawBucks (0-100)
+  const [pawbucksPercent, setPawbucksPercent] = useState(0);
+
+  // Max PawBucks the user can apply (capped by balance and total)
+  const totalUsdDollars = totalUsd / 100;
+  const maxPawbucksForTotal = Math.floor(totalUsdDollars / PAWBUCKS_TO_USD);
+  const maxApplicablePawbucks = Math.min(pawbucksBalance, maxPawbucksForTotal);
+  const maxPercent = maxPawbucksForTotal > 0
+    ? Math.floor((maxApplicablePawbucks / maxPawbucksForTotal) * 100)
+    : 0;
+
+  // Derived amounts
+  const pawbucksToSpend = Math.floor((pawbucksPercent / 100) * maxPawbucksForTotal);
+  const actualPawbucks = Math.min(pawbucksToSpend, maxApplicablePawbucks);
+  const pawbucksUsdValue = actualPawbucks * PAWBUCKS_TO_USD;
+  const cardAmountDollars = Math.max(totalUsdDollars - pawbucksUsdValue, 0);
+  const cardAmountCents = Math.round(cardAmountDollars * 100);
+
+  // Minimum Stripe charge is $0.50
+  const MIN_STRIPE_CENTS = 50;
+  const needsMinStripe = cardAmountCents > 0 && cardAmountCents < MIN_STRIPE_CENTS;
+
+  // Determine checkout mode
+  const getMode = (): CartCheckoutMode => {
+    if (actualPawbucks === 0) return "card";
+    if (cardAmountCents === 0) return "pawbucks";
+    return "split";
+  };
+
+  // Reset slider when cart changes
+  useEffect(() => {
+    setPawbucksPercent(0);
+  }, [totalUsd, totalPawbucks]);
+
+  const canCheckout =
+    items.length > 0 &&
+    !hasOutOfStock &&
+    !isUpdating &&
+    !isCheckingOut &&
+    !needsMinStripe;
+
+  // Full PawBucks checkout possible?
+  const canAffordFullPawbucks = pawbucksBalance >= maxPawbucksForTotal && maxPawbucksForTotal > 0;
+
+  const handleCheckout = () => {
+    onCheckout({
+      mode: getMode(),
+      pawbucksAmount: actualPawbucks,
+      cardAmountCents,
+    });
+  };
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -165,46 +227,114 @@ export function CartDrawer({
             </div>
 
             <div className="border-t pt-4 space-y-3">
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-muted-foreground">Subtotal (USD)</span>
-                <span className="font-bold text-lg">${(totalUsd / 100).toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-muted-foreground">Subtotal (PawBucks)</span>
-                <span className="font-bold text-lg text-primary flex items-center gap-1">
-                  <Coins className="h-4 w-4" />
-                  {Formatters.number(totalPawbucks)}
-                </span>
+              {/* Order total */}
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Order Total</span>
+                <span className="font-bold text-lg">${totalUsdDollars.toFixed(2)}</span>
               </div>
 
+              {/* PawBucks slider — only show if user has PawBucks */}
               {pawbucksBalance > 0 && (
-                <div className="flex justify-between items-center text-xs text-muted-foreground">
-                  <span>Your PawBucks balance</span>
-                  <span>{Formatters.number(pawbucksBalance)}</span>
+                <div className="bg-muted/50 border border-border rounded-lg p-3 space-y-3">
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="font-medium flex items-center gap-1.5">
+                      <Coins className="h-4 w-4 text-primary" />
+                      Use PawBucks
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      Balance: {Formatters.number(pawbucksBalance)} PB
+                    </span>
+                  </div>
+
+                  <Slider
+                    value={[pawbucksPercent]}
+                    onValueChange={([val]) => setPawbucksPercent(Math.min(val, maxPercent))}
+                    max={100}
+                    step={1}
+                    className="w-full"
+                  />
+
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-muted-foreground">
+                      {actualPawbucks > 0
+                        ? `${Formatters.number(actualPawbucks)} PB ($${pawbucksUsdValue.toFixed(2)})`
+                        : "No PawBucks applied"}
+                    </span>
+                    {canAffordFullPawbucks && (
+                      <Button
+                        variant="link"
+                        size="sm"
+                        className="h-auto p-0 text-xs text-primary"
+                        onClick={() => setPawbucksPercent(maxPercent)}
+                      >
+                        Use max
+                      </Button>
+                    )}
+                  </div>
+
+                  {needsMinStripe && (
+                    <p className="text-xs text-destructive">
+                      Card portion must be at least $0.50 or use PawBucks for the full amount.
+                    </p>
+                  )}
                 </div>
               )}
 
               <Separator />
 
-              <div className="space-y-2">
-                <Button
-                  className="w-full"
-                  onClick={onCheckoutWithCard}
-                  disabled={hasOutOfStock || isUpdating}
-                >
-                  <CreditCard className="mr-2 h-4 w-4" />
-                  Pay ${(totalUsd / 100).toFixed(2)} with Card
-                </Button>
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={onCheckoutWithPawbucks}
-                  disabled={!canAffordPawbucks || hasOutOfStock || isUpdating}
-                >
-                  <Coins className="mr-2 h-4 w-4" />
-                  Pay {Formatters.number(totalPawbucks)} PawBucks
-                </Button>
+              {/* Payment breakdown */}
+              <div className="space-y-1.5 text-sm">
+                {actualPawbucks > 0 && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground flex items-center gap-1">
+                      <Coins className="h-3.5 w-3.5" /> PawBucks
+                    </span>
+                    <span className="font-medium text-primary">
+                      {Formatters.number(actualPawbucks)} PB (−${pawbucksUsdValue.toFixed(2)})
+                    </span>
+                  </div>
+                )}
+                {cardAmountCents > 0 && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground flex items-center gap-1">
+                      <CreditCard className="h-3.5 w-3.5" /> Card
+                    </span>
+                    <span className="font-medium">
+                      ${cardAmountDollars.toFixed(2)}
+                    </span>
+                  </div>
+                )}
               </div>
+
+              {/* Checkout button */}
+              <Button
+                className="w-full"
+                size="lg"
+                onClick={handleCheckout}
+                disabled={!canCheckout}
+              >
+                {isCheckingOut ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Processing...
+                  </>
+                ) : getMode() === "pawbucks" ? (
+                  <>
+                    <Coins className="mr-2 h-4 w-4" />
+                    Pay with PawBucks
+                  </>
+                ) : getMode() === "split" ? (
+                  <>
+                    <CreditCard className="mr-2 h-4 w-4" />
+                    Pay ${cardAmountDollars.toFixed(2)} + {Formatters.number(actualPawbucks)} PB
+                  </>
+                ) : (
+                  <>
+                    <CreditCard className="mr-2 h-4 w-4" />
+                    Pay ${totalUsdDollars.toFixed(2)} with Card
+                  </>
+                )}
+              </Button>
 
               <Button
                 variant="ghost"
