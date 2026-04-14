@@ -55,7 +55,6 @@ export const BrandCampaignsTab = () => {
     contact_email: "",
     description: "",
     website_url: "",
-    user_email: "",
   });
 
   const { data: brands = [], isLoading: brandsLoading } = useQuery({
