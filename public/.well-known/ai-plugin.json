@@ -4,6 +4,14 @@
   "name_for_model": "pawbucks",
   "description_for_human": "A local pet rewards and services platform connecting pet owners with trusted businesses while rewarding everyday pet spending.",
   "description_for_model": "PawBucks is an all-in-one pet ecosystem and digital payment platform. Pet owners discover local pet merchants (stores, groomers, trainers, vets), make payments, and earn PawBucks rewards (10x-30x per dollar). Features include digital wallet, pet store marketplace, lost pet alerts, pet health records, and merchant discovery. 1,000 PawBucks = $1. Free to use with premium PawPass tiers available.",
+  "description_for_voice": "PawBucks is a pet rewards app. Say find pet stores near me to discover local pet businesses. Say how do I earn PawBucks to learn about rewards. Say report a lost pet to create a lost pet alert. Say shop the pet store to browse pet products with cashback rewards.",
+  "voice_actions": [
+    {"phrase": "Find pet stores near me", "url": "https://pawbucks.app/discover"},
+    {"phrase": "Shop the PawBucks pet store", "url": "https://pawbucks.app/pet-store"},
+    {"phrase": "Report a lost pet", "url": "https://pawbucks.app/lost-pets"},
+    {"phrase": "Sign up for PawBucks", "url": "https://pawbucks.app/auth"},
+    {"phrase": "How do I earn PawBucks", "url": "https://pawbucks.app/#how-it-works"}
+  ],
   "auth": {
     "type": "none"
   },

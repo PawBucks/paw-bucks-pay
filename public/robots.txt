@@ -113,5 +113,27 @@ Allow: /llms.txt
 User-agent: Applebot-Extended
 Allow: /
 
+# Apple Siri / Spotlight
+User-agent: Applebot
+Allow: /
+
+# Amazon Alexa
+User-agent: ia_archiver
+Allow: /
+
+User-agent: Alexa
+Allow: /
+
+# Samsung Bixby
+User-agent: BixbyBot
+Allow: /
+
+# Microsoft Cortana / Copilot
+User-agent: bingbot
+Allow: /
+
+User-agent: MicrosoftPreview
+Allow: /
+
 User-agent: Meta-ExternalAgent
 Allow: /
