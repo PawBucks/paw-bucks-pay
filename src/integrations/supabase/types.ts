@@ -8750,6 +8750,8 @@ export type Database = {
           name: string
           price: number
           price_pawbucks: number
+          rating_avg: number | null
+          rating_count: number | null
           stock_quantity: number
           updated_at: string
         }
@@ -8765,6 +8767,8 @@ export type Database = {
           name: string
           price: number
           price_pawbucks?: number
+          rating_avg?: number | null
+          rating_count?: number | null
           stock_quantity?: number
           updated_at?: string
         }
@@ -8780,6 +8784,8 @@ export type Database = {
           name?: string
           price?: number
           price_pawbucks?: number
+          rating_avg?: number | null
+          rating_count?: number | null
           stock_quantity?: number
           updated_at?: string
         }
@@ -8868,6 +8874,53 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      pet_store_reviews: {
+        Row: {
+          body: string | null
+          created_at: string
+          helpful_count: number
+          id: string
+          is_verified_purchase: boolean
+          item_id: string
+          rating: number
+          title: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          helpful_count?: number
+          id?: string
+          is_verified_purchase?: boolean
+          item_id: string
+          rating: number
+          title?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          helpful_count?: number
+          id?: string
+          is_verified_purchase?: boolean
+          item_id?: string
+          rating?: number
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pet_store_reviews_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "pet_store_items"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       pet_surgical_notes: {
         Row: {
