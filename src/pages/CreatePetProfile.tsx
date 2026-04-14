@@ -114,7 +114,7 @@ const CreatePetProfile = () => {
       toast.success(`${formData.name}'s profile created! Now let's discover their personality! 🐾`);
       
       // Clear the pet onboarding cache so ProtectedRoute knows we have a pet now
-      clearPetOnboardingCache();
+      invalidatePetCache(user!.id);
       
       // Navigate to personality quiz with the new pet's ID
       navigate(`/pet-personality-quiz?petId=${newPet.id}`);
