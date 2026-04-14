@@ -236,6 +236,103 @@
       }
     }
     </script>
+
+    <!-- Voice Assistant Optimization: Speakable Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "PawBucks - Local Pet Rewards & Services Platform",
+      "url": "https://pawbucks.app",
+      "speakable": {
+        "@type": "SpeakableSpecification",
+        "cssSelector": [
+          "h1",
+          "meta[name='description']",
+          "#prerender-content p"
+        ]
+      },
+      "mainEntity": {
+        "@type": "WebApplication",
+        "name": "PawBucks",
+        "url": "https://pawbucks.app",
+        "description": "PawBucks is a pet rewards platform. Earn cashback on every pet purchase at trusted local stores, groomers, and vets.",
+        "potentialAction": [
+          {
+            "@type": "SearchAction",
+            "target": {
+              "@type": "EntryPoint",
+              "urlTemplate": "https://pawbucks.app/discover?search={query}"
+            },
+            "query-input": "required name=query"
+          },
+          {
+            "@type": "ViewAction",
+            "name": "Find pet stores near me",
+            "target": "https://pawbucks.app/discover"
+          },
+          {
+            "@type": "ViewAction",
+            "name": "Shop the PawBucks pet store",
+            "target": "https://pawbucks.app/pet-store"
+          },
+          {
+            "@type": "ViewAction",
+            "name": "Report a lost pet",
+            "target": "https://pawbucks.app/lost-pets"
+          },
+          {
+            "@type": "RegisterAction",
+            "name": "Sign up for PawBucks",
+            "target": "https://pawbucks.app/auth"
+          }
+        ]
+      }
+    }
+    </script>
+
+    <!-- Voice-Optimized HowTo for Assistants -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "HowTo",
+      "name": "How to earn PawBucks rewards on pet purchases",
+      "description": "Earn cashback rewards every time you spend on your pet using PawBucks.",
+      "step": [
+        {
+          "@type": "HowToStep",
+          "position": 1,
+          "name": "Sign up free",
+          "text": "Create a free PawBucks account at pawbucks.app.",
+          "url": "https://pawbucks.app/auth"
+        },
+        {
+          "@type": "HowToStep",
+          "position": 2,
+          "name": "Discover pet businesses",
+          "text": "Browse trusted pet stores, groomers, trainers, and vets near you.",
+          "url": "https://pawbucks.app/discover"
+        },
+        {
+          "@type": "HowToStep",
+          "position": 3,
+          "name": "Make a purchase",
+          "text": "Pay at any partner merchant using PawBucks."
+        },
+        {
+          "@type": "HowToStep",
+          "position": 4,
+          "name": "Earn rewards",
+          "text": "Get 10 to 30 PawBucks per dollar spent. One thousand PawBucks equals one dollar in rewards."
+        }
+      ]
+    }
+    </script>
+
+    <!-- Voice Assistant Action Links (Siri Shortcuts / Google Actions) -->
+    <link rel="alternate" href="https://pawbucks.app/discover" title="Find pet stores near me" />
+    <link rel="alternate" href="https://pawbucks.app/pet-store" title="Shop the PawBucks pet store" />
+    <link rel="alternate" href="https://pawbucks.app/lost-pets" title="Report a lost pet on PawBucks" />
     
   
   
