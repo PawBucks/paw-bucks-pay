@@ -3,7 +3,7 @@ import { supabase, handleError, ServiceResult, ServiceListResult } from "./base.
 // Types
 export interface BrandAccount {
   id: string;
-  user_id: string;
+  user_id: string | null;
   brand_name: string;
   logo_url: string | null;
   contact_name: string | null;
@@ -14,6 +14,10 @@ export interface BrandAccount {
   created_by: string;
   created_at: string;
   updated_at: string;
+  invitation_token: string | null;
+  invitation_email: string | null;
+  invitation_sent_at: string | null;
+  invitation_claimed_at: string | null;
 }
 
 export interface BrandCampaign {
@@ -90,7 +94,7 @@ export const getAllBrandAccounts = async (): Promise<ServiceListResult<BrandAcco
 };
 
 export const createBrandAccount = async (account: {
-  user_id: string;
+  user_id?: string;
   brand_name: string;
   contact_name?: string;
   contact_email?: string;
@@ -101,7 +105,10 @@ export const createBrandAccount = async (account: {
   try {
     const { data, error } = await supabase
       .from("brand_accounts")
-      .insert(account)
+      .insert({
+        ...account,
+        invitation_email: account.contact_email || undefined,
+      })
       .select()
       .single();
     return { data, error };
