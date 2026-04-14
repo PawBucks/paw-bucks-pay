@@ -198,6 +198,9 @@ serve(async (req) => {
     // Calculate total amount in cents from all items
     let totalAmountCents = lineItemsToProcess.reduce((sum, li) => sum + li.unitAmount * li.quantity, 0);
 
+    // Recurring prices are rejected above, so this is always false for cart checkouts
+    const isRecurringPrice = false;
+
     const totalAmountDollars = totalAmountCents / 100;
 
     // Handle PawBucks
