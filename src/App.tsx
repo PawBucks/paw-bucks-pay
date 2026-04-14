@@ -61,6 +61,7 @@ const Storefront = lazyWithRetry(() => import("./pages/Storefront"), "Storefront
 const CheckoutSuccess = lazyWithRetry(() => import("./pages/CheckoutSuccess"), "CheckoutSuccess");
 const Install = lazyWithRetry(() => import("./pages/Install"), "Install");
 const NotFound = lazyWithRetry(() => import("./pages/NotFound"), "NotFound");
+const BrandSetup = lazyWithRetry(() => import("./pages/BrandSetup"), "BrandSetup");
 const CheckInPage = lazyWithRetry(() => import("./pages/CheckInPage"), "CheckInPage");
 const MerchantOffers = lazyWithRetry(() => import("./pages/MerchantOffers"), "MerchantOffers");
 const MerchantOfferEditor = lazyWithRetry(() => import("./pages/MerchantOfferEditor"), "MerchantOfferEditor");
@@ -162,6 +163,7 @@ const AppRoutes = () => {
       <Route path="/admin-invoice/:invoiceId/pay" element={<PageTransition><AdminInvoicePayment /></PageTransition>} />
       <Route path="/admin-invoice/:invoiceId/success" element={<PageTransition><AdminInvoicePaymentSuccess /></PageTransition>} />
       <Route path="/checkin" element={<PageTransition><CheckInPage /></PageTransition>} />
+      <Route path="/brand-setup/:token" element={<PageTransition><BrandSetup /></PageTransition>} />
 
       {/* Authenticated pet owner routes */}
       <Route path="/dashboard" element={<ProtectedRoute><PageTransition><Dashboard /></PageTransition></ProtectedRoute>} />
