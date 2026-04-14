@@ -894,10 +894,14 @@ export type Database = {
           created_by: string
           description: string | null
           id: string
+          invitation_claimed_at: string | null
+          invitation_email: string | null
+          invitation_sent_at: string | null
+          invitation_token: string | null
           logo_url: string | null
           status: string
           updated_at: string
-          user_id: string
+          user_id: string | null
           website_url: string | null
         }
         Insert: {
@@ -908,10 +912,14 @@ export type Database = {
           created_by: string
           description?: string | null
           id?: string
+          invitation_claimed_at?: string | null
+          invitation_email?: string | null
+          invitation_sent_at?: string | null
+          invitation_token?: string | null
           logo_url?: string | null
           status?: string
           updated_at?: string
-          user_id: string
+          user_id?: string | null
           website_url?: string | null
         }
         Update: {
@@ -922,10 +930,14 @@ export type Database = {
           created_by?: string
           description?: string | null
           id?: string
+          invitation_claimed_at?: string | null
+          invitation_email?: string | null
+          invitation_sent_at?: string | null
+          invitation_token?: string | null
           logo_url?: string | null
           status?: string
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
           website_url?: string | null
         }
         Relationships: []
