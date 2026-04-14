@@ -24,7 +24,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { ShoppingCart, Coins, CreditCard, Store } from "lucide-react";
+import { ShoppingCart, Coins, CreditCard, Store, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
@@ -35,14 +35,15 @@ import { Header } from "@/components/Header";
 import { SEO } from "@/components/SEO";
 import { PullToRefresh } from "@/components/PullToRefresh";
 import { PromotionalBadge } from "@/components/pet-store/PromotionalBadge";
+import { CartIcon } from "@/components/pet-store/CartIcon";
+import { CartDrawer } from "@/components/pet-store/CartDrawer";
 import { usePromotionalItems } from "@/hooks/usePromotionalItems";
+import { useShoppingCart } from "@/hooks/useShoppingCart";
 import { getStripePromise } from "@/lib/stripe";
 import { buildAppUrl } from "@/lib/url";
 
 const CATEGORIES = ["All", "Food", "Treats", "Toys", "Bedding", "Accessories", "Healthcare", "Grooming"];
 const ITEM_TYPES = ["All", "Product", "Service"] as const;
-
-type PaymentMethod = "pawbucks" | "credit_card";
 
 type PetStorePaymentFormProps = {
   itemId: string;
@@ -70,9 +71,7 @@ const PetStorePaymentForm = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!stripe || !elements) {
-      return;
-    }
+    if (!stripe || !elements) return;
 
     setIsLoading(true);
 
@@ -85,17 +84,10 @@ const PetStorePaymentForm = ({
         redirect: 'if_required',
       });
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
-      // PawBucks earned = amount × multiplier (10x, 20x, or 30x based on subscription)
       const pawbucksEarned = Math.round(totalAmount * cashbackRate);
-
-      toast.success(
-        `Payment successful! You earned ${pawbucksEarned} PawBucks!`
-      );
-      
+      toast.success(`Payment successful! You earned ${pawbucksEarned} PawBucks!`);
       onSuccess();
     } catch (error: any) {
       console.error("Payment error:", error);
@@ -105,7 +97,6 @@ const PetStorePaymentForm = ({
     }
   };
 
-  // PawBucks earned = amount × multiplier (10x, 20x, or 30x based on subscription)
   const pawbucksEarned = Math.round(totalAmount * cashbackRate);
 
   return (
@@ -168,8 +159,22 @@ export default function PetStore() {
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [clientSecret, setClientSecret] = useState("");
   const [isCreatingIntent, setIsCreatingIntent] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
 
-  // Fetch user's PawBucks balance (using effective user ID for shared accounts)
+  // Shopping cart
+  const {
+    cartItems,
+    itemCount,
+    totalUsd,
+    totalPawbucks,
+    addToCart,
+    updateQuantity,
+    removeFromCart,
+    clearCart,
+    markConverted,
+  } = useShoppingCart();
+
+  // Fetch user's PawBucks balance
   const { data: wallet } = useQuery({
     queryKey: ["pawbucks-wallet", effectiveUserId],
     queryFn: async () => {
@@ -179,14 +184,12 @@ export default function PetStore() {
         .select("*")
         .eq("user_id", effectiveUserId)
         .single();
-      
       if (error) throw error;
       return data;
     },
     enabled: !!effectiveUserId && !sharedAccount.isLoading,
   });
 
-  // Check user's subscription for cashback rate
   const { data: subscription } = useQuery({
     queryKey: ["subscription", user?.id],
     queryFn: async () => {
@@ -197,20 +200,17 @@ export default function PetStore() {
         .eq("user_id", user.id)
         .eq("status", "active")
         .maybeSingle();
-      
       if (error) throw error;
       return data;
     },
     enabled: !!user,
   });
 
-  const cashbackRate = subscription ? 20 : 10; // 10x for free, 20x for subscribers (simplified)
+  const cashbackRate = subscription ? 20 : 10;
 
-  // Fetch user's active promotions
   const { data: promotionalData } = usePromotionalItems(user?.id);
   const promotionalItemMap = promotionalData?.itemMap || new Map();
 
-  // Fetch active items
   const { data: items, isLoading } = useQuery({
     queryKey: ["pet-store-items"],
     queryFn: async () => {
@@ -219,103 +219,82 @@ export default function PetStore() {
         .select("*")
         .eq("is_active", true)
         .order("created_at", { ascending: false });
-      
       if (error) throw error;
       return data;
     },
   });
 
-  const purchaseMutation = useMutation({
-    mutationFn: async ({ itemId, quantity }: { itemId: string; quantity: number }) => {
+  // PawBucks purchase for entire cart
+  const cartPawbucksPurchase = useMutation({
+    mutationFn: async () => {
       if (!user || !effectiveUserId) throw new Error("Must be logged in");
+      if (!wallet || wallet.balance < totalPawbucks) throw new Error("Insufficient PawBucks balance");
 
-      const item = items?.find(i => i.id === itemId);
-      if (!item) throw new Error("Item not found");
+      // Process each cart item
+      for (const cartItem of cartItems) {
+        const item = cartItem.item;
+        if (item.stock_quantity < cartItem.quantity) {
+          throw new Error(`Not enough stock for ${item.name}`);
+        }
 
-      const totalCost = item.price_pawbucks * quantity;
+        const totalCost = item.price_pawbucks * cartItem.quantity;
 
-      // Check balance
-      if (!wallet || wallet.balance < totalCost) {
-        throw new Error("Insufficient PawBucks balance");
-      }
+        const { data: order, error: orderError } = await supabase
+          .from("pet_store_orders")
+          .insert([{ user_id: user.id, total_amount: totalCost, status: "completed" }])
+          .select()
+          .single();
+        if (orderError) throw orderError;
 
-      // Check stock
-      if (item.stock_quantity < quantity) {
-        throw new Error("Not enough stock available");
-      }
-
-      // Create order (use actual user.id for ownership)
-      const { data: order, error: orderError } = await supabase
-        .from("pet_store_orders")
-        .insert([{
-          user_id: user.id,
-          total_amount: totalCost,
-          status: "completed",
-        }])
-        .select()
-        .single();
-
-      if (orderError) throw orderError;
-
-      // Create order item
-      const { error: orderItemError } = await supabase
-        .from("pet_store_order_items")
-        .insert([{
+        await supabase.from("pet_store_order_items").insert([{
           order_id: order.id,
-          item_id: itemId,
-          quantity: quantity,
+          item_id: item.id,
+          quantity: cartItem.quantity,
           price_per_item: item.price_pawbucks,
         }]);
 
-      if (orderItemError) throw orderItemError;
-
-      // Deduct PawBucks from effective user's wallet (owner's wallet for shared accounts)
-      const { error: walletError } = await supabase
-        .from("pawbucks_wallet")
-        .update({ balance: wallet.balance - totalCost })
-        .eq("user_id", effectiveUserId);
-
-      if (walletError) throw walletError;
-
-      // Log activity on the effective user's account (owner's for shared accounts)
-      const { error: activityError } = await supabase
-        .from("pawbucks_activity")
-        .insert([{
+        await supabase.from("pawbucks_activity").insert([{
           user_id: effectiveUserId,
           type: "debit",
           amount: totalCost,
           source: "pet_store",
-          description: `Purchased ${quantity}x ${item.name}`,
+          description: `Purchased ${cartItem.quantity}x ${item.name}`,
         }]);
 
-      if (activityError) throw activityError;
+        await supabase
+          .from("pet_store_items")
+          .update({ stock_quantity: item.stock_quantity - cartItem.quantity })
+          .eq("id", item.id);
+      }
 
-      // Update stock
-      const { error: stockError } = await supabase
-        .from("pet_store_items")
-        .update({ stock_quantity: item.stock_quantity - quantity })
-        .eq("id", itemId);
+      // Deduct total PawBucks
+      await supabase
+        .from("pawbucks_wallet")
+        .update({ balance: wallet.balance - totalPawbucks })
+        .eq("user_id", effectiveUserId);
 
-      if (stockError) throw stockError;
-
-      return order;
+      // Mark cart as converted
+      await markConverted();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["pawbucks-wallet"] });
       queryClient.invalidateQueries({ queryKey: ["pet-store-items"] });
-      toast.success("Purchase successful!");
+      setCartOpen(false);
+      toast.success("Purchase successful! 🎉");
     },
     onError: (error: any) => {
       toast.error(error.message || "Purchase failed");
     },
   });
 
-  const handlePurchaseWithPawBucks = (itemId: string) => {
+  const handleAddToCart = (itemId: string) => {
     if (!user) {
       navigate("/auth");
       return;
     }
-    purchaseMutation.mutate({ itemId, quantity: 1 });
+    addToCart.mutate({ itemId }, {
+      onSuccess: () => toast.success("Added to cart! 🛒"),
+    });
   };
 
   const handlePurchaseWithCard = async (item: any) => {
@@ -330,15 +309,36 @@ export default function PetStore() {
 
     try {
       const { data, error } = await supabase.functions.invoke('create-pet-store-payment', {
-        body: {
-          itemId: item.id,
-          quantity: 1,
-        },
+        body: { itemId: item.id, quantity: 1 },
       });
-
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
+      setClientSecret(data.clientSecret);
+    } catch (error: any) {
+      console.error("Error creating payment intent:", error);
+      toast.error(error.message || "Failed to initialize payment");
+      setPaymentDialogOpen(false);
+    } finally {
+      setIsCreatingIntent(false);
+    }
+  };
 
+  const handleCartCheckoutWithCard = async () => {
+    if (!user || cartItems.length === 0) return;
+    // For card checkout, use the first item for now (multi-item card checkout can be enhanced)
+    // Create a payment intent for the total
+    const firstItem = cartItems[0];
+    setSelectedItem({ ...firstItem.item, price: totalUsd });
+    setIsCreatingIntent(true);
+    setPaymentDialogOpen(true);
+    setCartOpen(false);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('create-pet-store-payment', {
+        body: { itemId: firstItem.item.id, quantity: firstItem.quantity },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
       setClientSecret(data.clientSecret);
     } catch (error: any) {
       console.error("Error creating payment intent:", error);
@@ -353,6 +353,7 @@ export default function PetStore() {
     setPaymentDialogOpen(false);
     setSelectedItem(null);
     setClientSecret("");
+    markConverted();
     queryClient.invalidateQueries({ queryKey: ["pawbucks-wallet"] });
     queryClient.invalidateQueries({ queryKey: ["pet-store-items"] });
   };
@@ -368,7 +369,6 @@ export default function PetStore() {
     navigate("/auth");
   };
 
-  // Pull to refresh
   const handleRefresh = useCallback(async () => {
     await queryClient.invalidateQueries({ queryKey: ["pet-store-items"] });
     await queryClient.invalidateQueries({ queryKey: ["pawbucks-wallet"] });
@@ -406,208 +406,252 @@ export default function PetStore() {
           className="flex-1"
         >
           <main className="container mx-auto px-4 pt-4 pb-24 md:pb-8 max-w-7xl">
-            {/* Ad Placement for Free Users */}
             <div className="mb-4 sm:mb-6">
               <AdPlacement />
-          </div>
-
-          <div className="mb-6">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-3">
-              <h1 className="text-2xl sm:text-3xl font-bold">Pet Store</h1>
-              {user && wallet && (
-                <div className="flex items-center gap-2 bg-primary/10 px-3 py-1.5 rounded-lg">
-                  <Coins className="h-4 w-4 text-primary" />
-                  <span className="text-sm font-semibold">{wallet.balance} PawBucks</span>
-                </div>
-              )}
             </div>
-            <p className="text-sm text-muted-foreground">Shop for your furry friends with PawBucks!</p>
-          </div>
 
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
-        <Input
-          placeholder="Search items..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="sm:w-96"
-        />
-        <Select value={selectedType} onValueChange={setSelectedType}>
-          <SelectTrigger className="sm:w-40">
-            <SelectValue placeholder="Type" />
-          </SelectTrigger>
-          <SelectContent>
-            {ITEM_TYPES.map((type) => (
-              <SelectItem key={type} value={type}>{type}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-          <SelectTrigger className="sm:w-48">
-            <SelectValue placeholder="Category" />
-          </SelectTrigger>
-          <SelectContent>
-            {CATEGORIES.map((cat) => (
-              <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {isLoading ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4" role="status" aria-label="Loading products">
-          {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-            <Card key={i} className="flex flex-col">
-              <div className="w-full h-48 bg-muted rounded-t-lg skeleton-pulse" />
-              <CardContent className="pt-4 space-y-2">
-                <div className="h-5 w-3/4 bg-muted rounded skeleton-pulse" />
-                <div className="h-4 w-full bg-muted rounded skeleton-pulse" />
-                <div className="h-4 w-1/2 bg-muted rounded skeleton-pulse" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      ) : filteredItems?.length === 0 ? (
-        <div className="text-center py-16 px-4">
-          <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4">
-            <Store className="w-8 h-8 text-muted-foreground" />
-          </div>
-          <h3 className="text-xl font-semibold mb-2">No items found</h3>
-          <p className="text-muted-foreground mb-4">Try adjusting your search or filters.</p>
-          <Button variant="outline" onClick={() => { setSearchQuery(""); setSelectedCategory("All"); setSelectedType("All"); }}>
-            Clear Filters
-          </Button>
-        </div>
-      ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-            {filteredItems?.map((item) => {
-              const promo = promotionalItemMap.get(item.id);
-              const hasPromo = !!promo;
-              const discountedPrice = hasPromo 
-                ? Math.round(item.price * (1 - promo.discountPercentage / 100))
-                : item.price;
-              
-              return (
-                <Card key={item.id} className={`flex flex-col relative ${hasPromo ? 'ring-2 ring-primary/50' : ''}`}>
-                  <CardHeader className="p-0 relative">
-                    {hasPromo && (
-                      <PromotionalBadge
-                        discountPercentage={promo.discountPercentage}
-                        badgeEmoji={promo.badgeEmoji}
-                        badgeName={promo.badgeName}
-                        expiresAt={promo.expiresAt}
-                        variant="overlay"
-                      />
-                    )}
-                    {item.image_url ? (
-                      <img
-                        src={item.image_url}
-                        alt={item.name}
-                        className="w-full h-48 object-cover rounded-t-lg"
-                      />
-                    ) : (
-                      <div className="w-full h-48 bg-muted rounded-t-lg flex items-center justify-center">
-                        <span className="text-muted-foreground">No image</span>
-                      </div>
-                    )}
-                  </CardHeader>
-                  <CardContent className="flex-1 pt-4">
-                    <div className="flex items-start justify-between mb-2">
-                      <CardTitle className="text-lg">{item.name}</CardTitle>
-                      <div className="flex gap-1 flex-shrink-0">
-                        <Badge variant={item.item_type === 'service' ? 'default' : 'outline'} className="text-xs">
-                          {item.item_type === 'service' ? 'Service' : 'Product'}
-                        </Badge>
-                        <Badge variant="secondary">{item.category}</Badge>
-                      </div>
+            <div className="mb-6">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-3">
+                <h1 className="text-2xl sm:text-3xl font-bold">Pet Store</h1>
+                <div className="flex items-center gap-3">
+                  {user && wallet && (
+                    <div className="flex items-center gap-2 bg-primary/10 px-3 py-1.5 rounded-lg">
+                      <Coins className="h-4 w-4 text-primary" />
+                      <span className="text-sm font-semibold">{Formatters.number(wallet.balance)} PawBucks</span>
                     </div>
-                    {item.description && (
-                      <CardDescription className="line-clamp-2 mb-3">
-                        {item.description}
-                      </CardDescription>
-                    )}
-                    <div className="space-y-2 mb-3">
-                      <div className="flex items-center gap-2">
-                        <CreditCard className="h-4 w-4 text-muted-foreground" />
-                        {hasPromo ? (
+                  )}
+                  {user && (
+                    <CartIcon itemCount={itemCount} onClick={() => setCartOpen(true)} />
+                  )}
+                </div>
+              </div>
+              <p className="text-sm text-muted-foreground">Shop for your furry friends with PawBucks!</p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4 mb-6">
+              <Input
+                placeholder="Search items..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="sm:w-96"
+              />
+              <Select value={selectedType} onValueChange={setSelectedType}>
+                <SelectTrigger className="sm:w-40">
+                  <SelectValue placeholder="Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {ITEM_TYPES.map((type) => (
+                    <SelectItem key={type} value={type}>{type}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <SelectTrigger className="sm:w-48">
+                  <SelectValue placeholder="Category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {CATEGORIES.map((cat) => (
+                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {isLoading ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4" role="status" aria-label="Loading products">
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                  <Card key={i} className="flex flex-col">
+                    <div className="w-full h-48 bg-muted rounded-t-lg skeleton-pulse" />
+                    <CardContent className="pt-4 space-y-2">
+                      <div className="h-5 w-3/4 bg-muted rounded skeleton-pulse" />
+                      <div className="h-4 w-full bg-muted rounded skeleton-pulse" />
+                      <div className="h-4 w-1/2 bg-muted rounded skeleton-pulse" />
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : filteredItems?.length === 0 ? (
+              <div className="text-center py-16 px-4">
+                <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4">
+                  <Store className="w-8 h-8 text-muted-foreground" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">No items found</h3>
+                <p className="text-muted-foreground mb-4">Try adjusting your search or filters.</p>
+                <Button variant="outline" onClick={() => { setSearchQuery(""); setSelectedCategory("All"); setSelectedType("All"); }}>
+                  Clear Filters
+                </Button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+                {filteredItems?.map((item) => {
+                  const promo = promotionalItemMap.get(item.id);
+                  const hasPromo = !!promo;
+                  const discountedPrice = hasPromo 
+                    ? Math.round(item.price * (1 - promo.discountPercentage / 100))
+                    : item.price;
+                  const inCart = cartItems.find((ci) => ci.item_id === item.id);
+                  
+                  return (
+                    <Card key={item.id} className={`flex flex-col relative ${hasPromo ? 'ring-2 ring-primary/50' : ''}`}>
+                      <CardHeader className="p-0 relative">
+                        {hasPromo && (
+                          <PromotionalBadge
+                            discountPercentage={promo.discountPercentage}
+                            badgeEmoji={promo.badgeEmoji}
+                            badgeName={promo.badgeName}
+                            expiresAt={promo.expiresAt}
+                            variant="overlay"
+                          />
+                        )}
+                        {item.image_url ? (
+                          <img
+                            src={item.image_url}
+                            alt={item.name}
+                            className="w-full h-48 object-cover rounded-t-lg"
+                          />
+                        ) : (
+                          <div className="w-full h-48 bg-muted rounded-t-lg flex items-center justify-center">
+                            <span className="text-muted-foreground">No image</span>
+                          </div>
+                        )}
+                      </CardHeader>
+                      <CardContent className="flex-1 pt-4">
+                        <div className="flex items-start justify-between mb-2">
+                          <CardTitle className="text-lg">{item.name}</CardTitle>
+                          <div className="flex gap-1 flex-shrink-0">
+                            <Badge variant={item.item_type === 'service' ? 'default' : 'outline'} className="text-xs">
+                              {item.item_type === 'service' ? 'Service' : 'Product'}
+                            </Badge>
+                            <Badge variant="secondary">{item.category}</Badge>
+                          </div>
+                        </div>
+                        {item.description && (
+                          <CardDescription className="line-clamp-2 mb-3">
+                            {item.description}
+                          </CardDescription>
+                        )}
+                        <div className="space-y-2 mb-3">
                           <div className="flex items-center gap-2">
+                            <CreditCard className="h-4 w-4 text-muted-foreground" />
+                            {hasPromo ? (
+                              <div className="flex items-center gap-2">
+                                <span className="text-lg font-bold text-primary">
+                                  ${(discountedPrice / 100).toFixed(2)}
+                                </span>
+                                <span className="text-sm text-muted-foreground line-through">
+                                  ${(item.price / 100).toFixed(2)}
+                                </span>
+                              </div>
+                            ) : (
+                              <span className="text-lg font-bold">${(item.price / 100).toFixed(2)}</span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Coins className="h-4 w-4 text-primary" />
                             <span className="text-lg font-bold text-primary">
-                              ${(discountedPrice / 100).toFixed(2)}
-                            </span>
-                            <span className="text-sm text-muted-foreground line-through">
-                              ${(item.price / 100).toFixed(2)}
+                              {Formatters.number(item.price_pawbucks)} PawBucks
                             </span>
                           </div>
+                          <div className="text-xs text-muted-foreground">
+                            {item.stock_quantity} in stock
+                          </div>
+                        </div>
+                      </CardContent>
+                      <CardFooter className="flex-col gap-2">
+                        {user ? (
+                          <>
+                            <Button
+                              className="w-full"
+                              variant={inCart ? "secondary" : "default"}
+                              onClick={() => handleAddToCart(item.id)}
+                              disabled={item.stock_quantity === 0 || addToCart.isPending}
+                            >
+                              {item.stock_quantity === 0 ? (
+                                "Out of Stock"
+                              ) : inCart ? (
+                                <>
+                                  <Plus className="mr-1 h-4 w-4" />
+                                  Add More ({inCart.quantity} in cart)
+                                </>
+                              ) : (
+                                <>
+                                  <ShoppingCart className="mr-2 h-4 w-4" />
+                                  Add to Cart
+                                </>
+                              )}
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="w-full"
+                              onClick={() => handlePurchaseWithCard({ ...item, price: discountedPrice })}
+                              disabled={item.stock_quantity === 0}
+                            >
+                              <CreditCard className="mr-1 h-3 w-3" />
+                              Buy Now ${(discountedPrice / 100).toFixed(2)}
+                            </Button>
+                          </>
                         ) : (
-                          <span className="text-lg font-bold">${(item.price / 100).toFixed(2)}</span>
+                          <Button className="w-full" onClick={() => navigate("/auth")}>
+                            Sign in to Shop
+                          </Button>
                         )}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Coins className="h-4 w-4 text-primary" />
-                        <span className="text-lg font-bold text-primary">
-                          {Formatters.number(item.price_pawbucks)} PawBucks
-                        </span>
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {item.stock_quantity} in stock
-                      </div>
-                    </div>
-                  </CardContent>
-                  <CardFooter className="flex-col gap-2">
-                    <Button
-                      className="w-full"
-                      onClick={() => handlePurchaseWithCard({ ...item, price: discountedPrice })}
-                      disabled={!user || item.stock_quantity === 0}
-                    >
-                      <CreditCard className="mr-2 h-4 w-4" />
-                      {item.stock_quantity === 0 ? "Out of Stock" : `Pay $${(discountedPrice / 100).toFixed(2)}`}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="w-full"
-                      onClick={() => handlePurchaseWithPawBucks(item.id)}
-                      disabled={!user || item.stock_quantity === 0 || purchaseMutation.isPending || (wallet?.balance || 0) < item.price_pawbucks}
-                    >
-                      <Coins className="mr-2 h-4 w-4" />
-                      {item.stock_quantity === 0 ? "Out of Stock" : `Pay ${Formatters.number(item.price_pawbucks)} PawBucks`}
-                    </Button>
-                  </CardFooter>
-                </Card>
-              );
-            })}
-        </div>
-      )}
+                      </CardFooter>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
 
-      <Dialog open={paymentDialogOpen} onOpenChange={setPaymentDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Pay with Credit Card</DialogTitle>
-          </DialogHeader>
-          {isCreatingIntent ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            <Dialog open={paymentDialogOpen} onOpenChange={setPaymentDialogOpen}>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Pay with Credit Card</DialogTitle>
+                </DialogHeader>
+                {isCreatingIntent ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                  </div>
+                ) : clientSecret && selectedItem ? (
+                  <Elements stripe={getStripePromise()} options={{ clientSecret }}>
+                    <PetStorePaymentForm
+                      itemId={selectedItem.id}
+                      itemName={selectedItem.name}
+                      quantity={1}
+                      totalAmount={selectedItem.price}
+                      cashbackRate={cashbackRate}
+                      onSuccess={handlePaymentSuccess}
+                      onCancel={handlePaymentCancel}
+                    />
+                  </Elements>
+                ) : null}
+              </DialogContent>
+            </Dialog>
+
+            <div className="mt-8 mb-6">
+              <AdPlacement position="bottom" />
             </div>
-          ) : clientSecret && selectedItem ? (
-            <Elements stripe={getStripePromise()} options={{ clientSecret }}>
-              <PetStorePaymentForm
-                itemId={selectedItem.id}
-                itemName={selectedItem.name}
-                quantity={1}
-                totalAmount={selectedItem.price}
-                cashbackRate={cashbackRate}
-                onSuccess={handlePaymentSuccess}
-                onCancel={handlePaymentCancel}
-              />
-            </Elements>
-          ) : null}
-        </DialogContent>
-      </Dialog>
-
-      {/* Bottom Ad Placement */}
-      <div className="mt-8 mb-6">
-        <AdPlacement position="bottom" />
-      </div>
-        </main>
+          </main>
         </PullToRefresh>
+
+        {/* Cart Drawer */}
+        <CartDrawer
+          open={cartOpen}
+          onOpenChange={setCartOpen}
+          items={cartItems}
+          totalUsd={totalUsd}
+          totalPawbucks={totalPawbucks}
+          onUpdateQuantity={(cartItemId, qty) =>
+            updateQuantity.mutate({ cartItemId, quantity: qty })
+          }
+          onRemoveItem={(cartItemId) => removeFromCart.mutate(cartItemId)}
+          onClearCart={() => clearCart.mutate()}
+          onCheckoutWithCard={handleCartCheckoutWithCard}
+          onCheckoutWithPawbucks={() => cartPawbucksPurchase.mutate()}
+          isUpdating={updateQuantity.isPending || removeFromCart.isPending || clearCart.isPending || cartPawbucksPurchase.isPending}
+          pawbucksBalance={wallet?.balance || 0}
+        />
+
         {user && <BottomNav />}
       </div>
     </>

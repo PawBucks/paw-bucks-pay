@@ -1,4 +1,3 @@
-// @ts-expect-error - jest-dom types
 import "@testing-library/jest-dom";
 
 Object.defineProperty(window, "matchMedia", {
