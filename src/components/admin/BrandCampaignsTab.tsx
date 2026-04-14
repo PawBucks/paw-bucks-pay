@@ -55,7 +55,6 @@ export const BrandCampaignsTab = () => {
     contact_email: "",
     description: "",
     website_url: "",
-    user_email: "",
   });
 
   const { data: brands = [], isLoading: brandsLoading } = useQuery({
@@ -114,20 +113,9 @@ export const BrandCampaignsTab = () => {
 
   const createBrandMutation = useMutation({
     mutationFn: async () => {
-      // First find or create user account for the brand
-      // For now, admin creates the brand and associates with email
-      const { data: existingProfile } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("email", brandForm.user_email)
-        .maybeSingle();
-
-      if (!existingProfile) {
-        throw new Error("No user found with that email. The brand representative must have an account first.");
-      }
-
+      // Admin creates brand account without requiring an existing user
+      // The brand rep will be invited via email to claim the account
       return createBrandAccount({
-        user_id: existingProfile.id,
         brand_name: brandForm.brand_name,
         contact_name: brandForm.contact_name || undefined,
         contact_email: brandForm.contact_email || undefined,
@@ -136,14 +124,21 @@ export const BrandCampaignsTab = () => {
         created_by: user!.id,
       });
     },
-    onSuccess: (result) => {
+    onSuccess: async (result) => {
       if (result.error) {
         toast.error("Failed to create brand account");
         return;
       }
-      toast.success("Brand account created successfully!");
+      // Copy invitation link to clipboard
+      const inviteUrl = `${window.location.origin}/brand-setup/${result.data?.invitation_token}`;
+      try {
+        await navigator.clipboard.writeText(inviteUrl);
+        toast.success("Brand account created! Invitation link copied to clipboard.");
+      } catch {
+        toast.success(`Brand account created! Share this link: ${inviteUrl}`);
+      }
       setShowCreateBrand(false);
-      setBrandForm({ brand_name: "", contact_name: "", contact_email: "", description: "", website_url: "", user_email: "" });
+      setBrandForm({ brand_name: "", contact_name: "", contact_email: "", description: "", website_url: "" });
       queryClient.invalidateQueries({ queryKey: ["admin-brand-accounts"] });
     },
     onError: (error: Error) => {
@@ -423,15 +418,10 @@ export const BrandCampaignsTab = () => {
               <DialogTitle>Create Brand Account</DialogTitle>
               <DialogDescription>Set up a new brand/manufacturer account for funded PawBucks campaigns.</DialogDescription>
             </DialogHeader>
-            <div className="space-y-4">
+             <div className="space-y-4">
               <div className="space-y-2">
                 <Label>Brand Name *</Label>
                 <Input value={brandForm.brand_name} onChange={(e) => setBrandForm(f => ({ ...f, brand_name: e.target.value }))} placeholder="Acme Pet Products" />
-              </div>
-              <div className="space-y-2">
-                <Label>User Account Email *</Label>
-                <Input type="email" value={brandForm.user_email} onChange={(e) => setBrandForm(f => ({ ...f, user_email: e.target.value }))} placeholder="brand@example.com" />
-                <p className="text-xs text-muted-foreground">The user must already have a PawBucks account</p>
               </div>
               <div className="space-y-2">
                 <Label>Contact Name</Label>
@@ -440,6 +430,7 @@ export const BrandCampaignsTab = () => {
               <div className="space-y-2">
                 <Label>Contact Email</Label>
                 <Input type="email" value={brandForm.contact_email} onChange={(e) => setBrandForm(f => ({ ...f, contact_email: e.target.value }))} placeholder="contact@brand.com" />
+                <p className="text-xs text-muted-foreground">An invitation link will be generated for the brand to complete setup</p>
               </div>
               <div className="space-y-2">
                 <Label>Description</Label>
@@ -452,10 +443,10 @@ export const BrandCampaignsTab = () => {
               <Button
                 className="w-full"
                 onClick={() => createBrandMutation.mutate()}
-                disabled={!brandForm.brand_name || !brandForm.user_email || createBrandMutation.isPending}
+                disabled={!brandForm.brand_name || createBrandMutation.isPending}
               >
                 {createBrandMutation.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
-                Create Brand Account
+                Create Brand Account & Copy Invite Link
               </Button>
             </div>
           </DialogContent>
