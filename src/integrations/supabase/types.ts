@@ -14055,6 +14055,7 @@ export type Database = {
           tx_frequency_90d: number
         }[]
       }
+      get_user_access_info: { Args: { p_user_id: string }; Returns: Json }
       get_user_vet_ids: { Args: { check_user_id: string }; Returns: string[] }
       has_role: {
         Args: {
