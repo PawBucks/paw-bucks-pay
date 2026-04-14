@@ -36,7 +36,7 @@ import { SEO } from "@/components/SEO";
 import { PullToRefresh } from "@/components/PullToRefresh";
 import { PromotionalBadge } from "@/components/pet-store/PromotionalBadge";
 import { CartIcon } from "@/components/pet-store/CartIcon";
-import { CartDrawer } from "@/components/pet-store/CartDrawer";
+import { CartDrawer, type CartCheckoutParams } from "@/components/pet-store/CartDrawer";
 import { usePromotionalItems } from "@/hooks/usePromotionalItems";
 import { useShoppingCart } from "@/hooks/useShoppingCart";
 import { getStripePromise } from "@/lib/stripe";
