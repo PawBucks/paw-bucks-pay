@@ -5,18 +5,20 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { ShoppingCart, Loader2, Store, ArrowLeft, Sparkles, Shield, CreditCard, Package, Star, MapPin, Clock, RefreshCw, Check } from "lucide-react";
+import { ShoppingCart, Loader2, Store, ArrowLeft, Sparkles, Shield, CreditCard, Package, Star, MapPin, Clock, RefreshCw, Check, Plus } from "lucide-react";
 import { SEO } from "@/components/SEO";
 import { useAuth } from "@/hooks/useAuth";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { PawBucksCheckoutDialog } from "@/components/PawBucksCheckoutDialog";
 import { SubscriptionCheckoutDialog } from "@/components/SubscriptionCheckoutDialog";
 import { useQuery, useQueries } from "@tanstack/react-query";
 import { merchantSubscriptionPlansService } from "@/services/api/merchantSubscriptionPlans.service";
 import { AskQuestionButton } from "@/components/storefront/AskQuestionButton";
 import { buildAppUrl } from "@/lib/url";
 import { Founding50Badge } from "@/components/shared/Founding50Badge";
+import { useStorefrontCart } from "@/hooks/useStorefrontCart";
+import { StorefrontCartDrawer, type StorefrontCheckoutParams } from "@/components/storefront/StorefrontCartDrawer";
+import { CartIcon } from "@/components/pet-store/CartIcon";
 
 type Product = {
   id: string;
@@ -65,22 +67,28 @@ const Storefront = memo(() => {
   const { user, loading: authLoading } = useAuth();
   
   const [purchasingProductId, setPurchasingProductId] = useState<string | null>(null);
-  
-  // PawBucks checkout dialog state
-  const [showPawBucksDialog, setShowPawBucksDialog] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [isRecurringProduct, setIsRecurringProduct] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
+
+  // Shopping cart
+  const {
+    items: cartItems,
+    itemCount,
+    totalCents,
+    addToCart,
+    updateQuantity,
+    removeItem,
+    clearCart,
+  } = useStorefrontCart(accountId);
 
   // Parallel queries for merchant data, products, and auto-redeem preference
   const queryResults = useQueries({
     queries: [
-      // Merchant data lookup by slug (stripe_account_id is resolved server-side for security)
+      // Merchant data lookup by slug
       {
         queryKey: ["storefront-merchant", accountId],
         queryFn: async () => {
           if (!accountId) return null;
-          
-          // Lookup merchant by storefront slug from public view
           const { data: merchantBySlug } = await supabase
             .from('merchants_public')
             .select('id, business_name, description, cashback_rate, storefront_slug, logo_url, address, business_type, accepts_pawbucks, tos_url, privacy_policy_url, shipping_returns_policy_url')
@@ -88,14 +96,9 @@ const Storefront = memo(() => {
             .maybeSingle();
 
           if (merchantBySlug) {
-            return {
-              ...merchantBySlug,
-              acceptsPawBucks: merchantBySlug.accepts_pawbucks ?? false,
-              foundBySlug: true,
-            };
+            return { ...merchantBySlug, acceptsPawBucks: merchantBySlug.accepts_pawbucks ?? false, foundBySlug: true };
           }
 
-          // Try to find by merchant ID directly
           const { data: merchantById } = await supabase
             .from('merchants_public')
             .select('id, business_name, description, cashback_rate, storefront_slug, logo_url, address, business_type, accepts_pawbucks, tos_url, privacy_policy_url, shipping_returns_policy_url')
@@ -103,28 +106,19 @@ const Storefront = memo(() => {
             .maybeSingle();
 
           if (merchantById) {
-            return {
-              ...merchantById,
-              acceptsPawBucks: merchantById.accepts_pawbucks ?? false,
-              foundBySlug: false,
-            };
+            return { ...merchantById, acceptsPawBucks: merchantById.accepts_pawbucks ?? false, foundBySlug: false };
           }
-
           return null;
         },
         staleTime: 1000 * 60 * 10,
         enabled: !!accountId,
       },
-      // Auto-redeem preference (only for authenticated users)
+      // Auto-redeem preference
       {
         queryKey: ["auto-redeem-preference", user?.id],
         queryFn: async () => {
           if (!user?.id) return { enabled: false, mode: 'off' };
-          const { data } = await supabase
-            .from('profiles')
-            .select('auto_redeem_mode')
-            .eq('id', user.id)
-            .single();
+          const { data } = await supabase.from('profiles').select('auto_redeem_mode').eq('id', user.id).single();
           const mode = data?.auto_redeem_mode || 'off';
           return { enabled: mode !== 'off', mode };
         },
@@ -136,11 +130,7 @@ const Storefront = memo(() => {
 
   const merchantData = queryResults[0].data;
   const merchantLoading = queryResults[0].isLoading;
-  const autoRedeemData = queryResults[1].data ?? { enabled: false, mode: 'off' };
-  const autoRedeemEnabled = autoRedeemData.enabled;
-  const autoRedeemMode = autoRedeemData.mode;
 
-  // Products query depends on merchant data - uses merchantId, stripe_account_id resolved server-side
   const merchantIdForProducts = merchantData?.id;
   const { data: productsData, isLoading: productsLoading } = useQuery({
     queryKey: ["storefront-products", merchantIdForProducts],
@@ -150,29 +140,22 @@ const Storefront = memo(() => {
         body: { merchantId: merchantIdForProducts },
       });
       if (error) throw error;
-      return {
-        products: data.products || [],
-        connectedAccountId: data.connectedAccountId || null,
-      };
+      return { products: data.products || [], connectedAccountId: data.connectedAccountId || null };
     },
     staleTime: 1000 * 60 * 5,
     enabled: !!merchantIdForProducts,
   });
 
-  // Extract products and connectedAccountId from query response
   const products = productsData?.products || [];
   const merchantConnectedAccountId = productsData?.connectedAccountId || null;
 
-  // Subscription plans query
+  // Subscription plans
   const { data: subscriptionPlans = [] } = useQuery({
     queryKey: ["storefront-subscription-plans", merchantIdForProducts],
     queryFn: async () => {
       if (!merchantIdForProducts) return [];
       const { data } = await merchantSubscriptionPlansService.getPublishedPlans(merchantIdForProducts);
-      return (data || []).map(p => ({
-        ...p,
-        features: Array.isArray(p.features) ? p.features as string[] : [],
-      }));
+      return (data || []).map(p => ({ ...p, features: Array.isArray(p.features) ? p.features as string[] : [] }));
     },
     staleTime: 1000 * 60 * 5,
     enabled: !!merchantIdForProducts,
@@ -183,14 +166,23 @@ const Storefront = memo(() => {
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
   const [connectedAccountId, setConnectedAccountId] = useState<string | null>(null);
 
+  // PawBucks wallet balance
+  const { data: walletData } = useQuery({
+    queryKey: ["pawbucks-wallet", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data } = await supabase.from("pawbucks_wallet").select("balance").eq("user_id", user.id).single();
+      return data;
+    },
+    staleTime: 1000 * 60 * 2,
+    enabled: !!user?.id,
+  });
+
   const handleSubscribe = useCallback(async (plan: SubscriptionPlan) => {
     if (!user) {
-      toast.error("Please sign in to subscribe", {
-        action: { label: "Sign In", onClick: () => navigate("/auth") },
-      });
+      toast.error("Please sign in to subscribe", { action: { label: "Sign In", onClick: () => navigate("/auth") } });
       return;
     }
-    // Use pre-fetched connectedAccountId from server-side lookup
     if (!merchantConnectedAccountId) {
       toast.error("This merchant hasn't completed payment setup.");
       return;
@@ -212,122 +204,95 @@ const Storefront = memo(() => {
 
   const loading = merchantLoading || productsLoading;
 
-  // Calculate estimated PawBucks for a product
-  const getEstimatedPawBucks = useCallback((price: number) => {
-    return Math.floor(price * cashbackRate);
-  }, [cashbackRate]);
+  const getEstimatedPawBucks = useCallback((price: number) => Math.floor(price * cashbackRate), [cashbackRate]);
 
-  // Initiates purchase - shows PawBucks dialog if applicable
-  const handlePurchase = useCallback((product: Product) => {
-    if (!product.price?.id || !merchantIdForProducts) return;
-
-    // Check if user is authenticated
+  // Add product to cart
+  const handleAddToCart = useCallback((product: Product) => {
     if (!user) {
-      toast.error("Please sign in to make a purchase", {
-        action: {
-          label: "Sign In",
-          onClick: () => navigate("/auth"),
-        },
-      });
+      toast.error("Please sign in to shop", { action: { label: "Sign In", onClick: () => navigate("/auth") } });
+      return;
+    }
+    if (!product.price?.id || product.price.unit_amount == null) return;
+
+    addToCart({
+      productId: product.id,
+      priceId: product.price.id,
+      name: product.name,
+      description: product.description,
+      image: product.images?.[0] || null,
+      unitAmount: product.price.unit_amount,
+      currency: product.price.currency,
+      formatted: product.price.formatted,
+    });
+    toast.success("Added to cart! 🛒");
+  }, [user, navigate, addToCart]);
+
+  // Cart checkout
+  const handleCartCheckout = useCallback(async (params: StorefrontCheckoutParams) => {
+    if (!user || cartItems.length === 0 || !merchantIdForProducts) return;
+
+    // Full PawBucks checkout
+    if (params.mode === "pawbucks") {
+      setIsCheckingOut(true);
+      try {
+        const { data, error } = await supabase.functions.invoke("create-connect-checkout", {
+          body: {
+            merchantId: merchantIdForProducts,
+            items: cartItems.map(ci => ({ priceId: ci.priceId, quantity: ci.quantity, name: ci.name })),
+            pawbucksToUse: params.pawbucksAmount,
+            successUrl: buildAppUrl(`/checkout-success?store=${accountId}`),
+            cancelUrl: buildAppUrl(`/storefront/${accountId}`),
+          },
+        });
+        if (error) throw error;
+        if (data.paid_with_pawbucks) {
+          toast.success(data.message || "Purchase completed with PawBucks!");
+          clearCart();
+          if (data.redirect_url) window.location.href = data.redirect_url;
+          return;
+        }
+        if (data.checkout_url) {
+          clearCart();
+          window.location.href = data.checkout_url;
+        }
+      } catch (error: any) {
+        toast.error(error?.message || "Checkout failed");
+      } finally {
+        setIsCheckingOut(false);
+      }
       return;
     }
 
-    // Determine if product is recurring (subscription)
-    const priceFormatted = product.price.formatted || "";
-    const isRecurring = priceFormatted.includes('/') || 
-                        priceFormatted.toLowerCase().includes('month') ||
-                        priceFormatted.toLowerCase().includes('year');
-    
-    setSelectedProduct(product);
-    setIsRecurringProduct(isRecurring);
-
-    // Auto-redeem: skip PawBucks dialog when enabled
-    // - "always" mode: auto-redeem on all purchases
-    // - "smart" mode: auto-redeem on all purchases (server calculates thresholds)
-    // - "subscriptions_only" mode: auto-redeem only on recurring
-    const shouldAutoRedeem = autoRedeemEnabled && (
-      autoRedeemMode === 'always' || 
-      autoRedeemMode === 'smart' || 
-      (autoRedeemMode === 'subscriptions_only' && isRecurring)
-    );
-
-    if (shouldAutoRedeem) {
-      proceedToCheckout(product, 0, true);
-      return;
-    }
-
-    // Show PawBucks dialog for user to choose how many to use
-    setShowPawBucksDialog(true);
-  }, [merchantIdForProducts, user, navigate, autoRedeemEnabled, autoRedeemMode]);
-
-  // Proceeds to Stripe checkout with optional PawBucks
-  const proceedToCheckout = useCallback(async (product: Product, pawbucksToUse: number, isAutoRedeem: boolean = false) => {
-    if (!product.price?.id || !merchantIdForProducts) return;
-
+    // Card or split
+    setIsCheckingOut(true);
+    setCartOpen(false);
     try {
-      setPurchasingProductId(product.id);
-      setShowPawBucksDialog(false);
-
       const { data, error } = await supabase.functions.invoke("create-connect-checkout", {
         body: {
-          merchantId: merchantIdForProducts, // Pass merchantId, stripe_account_id resolved server-side
-          priceId: product.price.id,
-          quantity: 1,
-          productName: product.name,
+          merchantId: merchantIdForProducts,
+          items: cartItems.map(ci => ({ priceId: ci.priceId, quantity: ci.quantity, name: ci.name })),
+          pawbucksToUse: params.pawbucksAmount || 0,
           successUrl: buildAppUrl(`/checkout-success?store=${accountId}`),
           cancelUrl: buildAppUrl(`/storefront/${accountId}`),
-          ...(isAutoRedeem 
-            ? { autoRedeem: true } 
-            : { pawbucksToUse: pawbucksToUse }),
         },
       });
-
       if (error) throw error;
 
-      // Handle full PawBucks payment (no Stripe needed)
-      if (data.paid_with_pawbucks) {
-        toast.success(data.message || `Purchase completed with PawBucks!`);
-        if (data.redirect_url) {
-          window.location.href = data.redirect_url;
-        }
-        setPurchasingProductId(null);
-        return;
+      if (data.pawbucks_applied) {
+        toast.success(`Applied ${data.pawbucks_applied.formatted}`, { duration: 2000 });
       }
-
       if (data.checkout_url) {
-        let message = "";
-        if (data.pawbucks_applied) {
-          message = `Applied ${data.pawbucks_applied.formatted}. `;
-        }
-        if (data.rewards?.estimated_pawbucks > 0) {
-          message += `You'll earn ${data.rewards.formatted} on this purchase!`;
-        }
-        if (message) {
-          toast.success(message, { duration: 2000 });
-        }
-        
-        setTimeout(() => {
-          window.location.href = data.checkout_url;
-        }, 500);
+        clearCart();
+        setTimeout(() => { window.location.href = data.checkout_url; }, 500);
       } else {
         throw new Error("No checkout URL returned");
       }
     } catch (error: any) {
-      console.error("Error creating checkout:", error);
-      const errorMessage = error?.message || 
-                          error?.error || 
-                          (typeof error === 'string' ? error : 'Failed to start checkout');
-      toast.error(errorMessage);
-      setPurchasingProductId(null);
+      toast.error(error?.message || "Failed to start checkout");
+    } finally {
+      setIsCheckingOut(false);
     }
-  }, [merchantIdForProducts, accountId]);
-
-  // Handler for PawBucks dialog confirmation
-  const handlePawBucksDialogProceed = useCallback((pawbucksToUse: number) => {
-    if (selectedProduct) {
-      proceedToCheckout(selectedProduct, pawbucksToUse);
-    }
-  }, [selectedProduct, proceedToCheckout]);
+  }, [user, cartItems, merchantIdForProducts, accountId, clearCart]);
 
   if (loading || authLoading) {
     return (
@@ -348,9 +313,7 @@ const Storefront = memo(() => {
         </div>
         <div className="container py-10">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {[1, 2, 3, 4].map((i) => (
-              <ProductSkeleton key={i} />
-            ))}
+            {[1, 2, 3, 4].map((i) => <ProductSkeleton key={i} />)}
           </div>
         </div>
       </div>
@@ -366,7 +329,6 @@ const Storefront = memo(() => {
 
       {/* Hero Header */}
       <div className="relative overflow-hidden border-b">
-        {/* Background Pattern */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent" />
         
@@ -383,13 +345,8 @@ const Storefront = memo(() => {
           <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8">
             {/* Left: Store Info */}
             <div className="flex flex-col sm:flex-row gap-6 items-start">
-              {/* Store Logo */}
               <Avatar className="h-24 w-24 rounded-2xl border-4 border-background shadow-xl ring-2 ring-primary/20">
-                <AvatarImage 
-                  src={merchantLogo || undefined} 
-                  alt={merchantName}
-                  className="object-cover"
-                />
+                <AvatarImage src={merchantLogo || undefined} alt={merchantName} className="object-cover" />
                 <AvatarFallback className="rounded-2xl bg-gradient-to-br from-primary to-primary/70 text-primary-foreground text-3xl font-bold">
                   {merchantName?.charAt(0) || <Store className="h-10 w-10" />}
                 </AvatarFallback>
@@ -402,26 +359,19 @@ const Storefront = memo(() => {
                       {merchantName || "Store"}
                     </h1>
                     {merchantBusinessType && (
-                      <Badge variant="secondary" className="capitalize">
-                        {merchantBusinessType.replace(/_/g, ' ')}
-                      </Badge>
+                      <Badge variant="secondary" className="capitalize">{merchantBusinessType.replace(/_/g, ' ')}</Badge>
                     )}
                     {merchantIdForProducts && (
                       <Founding50Badge entityType="merchant" entityId={merchantIdForProducts} size="md" />
                     )}
                   </div>
-                  <p className="text-muted-foreground mt-1">
-                    Official Storefront
-                  </p>
+                  <p className="text-muted-foreground mt-1">Official Storefront</p>
                 </div>
 
                 {merchantDescription && (
-                  <p className="text-muted-foreground max-w-xl leading-relaxed">
-                    {merchantDescription}
-                  </p>
+                  <p className="text-muted-foreground max-w-xl leading-relaxed">{merchantDescription}</p>
                 )}
 
-                {/* Store Meta */}
                 <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                   {merchantAddress && (
                     <div className="flex items-center gap-1.5">
@@ -435,15 +385,19 @@ const Storefront = memo(() => {
                   </div>
                 </div>
 
-                {/* Ask a Question */}
                 {merchantId && (
                   <AskQuestionButton merchantId={merchantId} merchantName={merchantName || "Store"} />
                 )}
               </div>
             </div>
 
-            {/* Right: Rewards & Trust */}
+            {/* Right: Rewards & Trust + Cart */}
             <div className="flex flex-col gap-4 sm:items-end">
+              {/* Cart Icon */}
+              {user && (
+                <CartIcon itemCount={itemCount} onClick={() => setCartOpen(true)} />
+              )}
+
               {/* Rewards Badge */}
               <div className="inline-flex items-center gap-3 px-5 py-3 rounded-xl bg-gradient-to-r from-amber-500/15 to-orange-500/15 border border-amber-500/30">
                 <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg">
@@ -451,25 +405,20 @@ const Storefront = memo(() => {
                 </div>
                 <div>
                   <p className="text-sm font-medium text-foreground">Earn Rewards</p>
-                  <p className="text-lg font-bold text-amber-600 dark:text-amber-400">
-                    Up to {cashbackRate * 3}x PawBucks
-                  </p>
+                  <p className="text-lg font-bold text-amber-600 dark:text-amber-400">Up to {cashbackRate * 3}x PawBucks</p>
                 </div>
               </div>
 
               {/* Trust Indicators */}
               <div className="flex flex-wrap gap-3">
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-500/10 text-green-700 dark:text-green-400 text-sm">
-                  <Shield className="h-4 w-4" />
-                  Secure
+                  <Shield className="h-4 w-4" /> Secure
                 </div>
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 text-blue-700 dark:text-blue-400 text-sm">
-                  <CreditCard className="h-4 w-4" />
-                  Stripe
+                  <CreditCard className="h-4 w-4" /> Stripe
                 </div>
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-400 text-sm">
-                  <Star className="h-4 w-4" />
-                  Verified
+                  <Star className="h-4 w-4" /> Verified
                 </div>
               </div>
             </div>
@@ -492,8 +441,7 @@ const Storefront = memo(() => {
               {merchantId && (
                 <Link to={`/merchant/${merchantId}`}>
                   <Button variant="outline" size="lg">
-                    <ArrowLeft className="h-4 w-4 mr-2" />
-                    View Merchant Profile
+                    <ArrowLeft className="h-4 w-4 mr-2" /> View Merchant Profile
                   </Button>
                 </Link>
               )}
@@ -501,7 +449,6 @@ const Storefront = memo(() => {
           </Card>
         ) : (
           <>
-            {/* Section Header */}
             <div className="flex items-center justify-between mb-8">
               <div>
                 <h2 className="text-2xl font-bold">Shop Products</h2>
@@ -511,7 +458,6 @@ const Storefront = memo(() => {
               </div>
             </div>
 
-            {/* Products Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {/* Subscription Plans */}
               {subscriptionPlans.map((plan) => {
@@ -525,13 +471,11 @@ const Storefront = memo(() => {
                     key={`plan-${plan.id}`}
                     className="group overflow-hidden hover:shadow-2xl transition-all duration-300 hover:border-primary/40 hover:-translate-y-1.5 bg-card/80 backdrop-blur-sm border-primary/20"
                   >
-                    {/* Plan Header with Badge */}
                     <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
                       <RefreshCw className="h-16 w-16 text-primary/40" />
                       <div className="absolute top-3 left-3">
                         <Badge className="bg-primary text-primary-foreground border-0">
-                          <RefreshCw className="h-3 w-3 mr-1" />
-                          Subscription
+                          <RefreshCw className="h-3 w-3 mr-1" /> Subscription
                         </Badge>
                       </div>
                       {plan.trial_days > 0 && (
@@ -544,24 +488,16 @@ const Storefront = memo(() => {
                     </div>
 
                     <CardHeader className="pb-2 pt-4">
-                      <CardTitle className="line-clamp-1 text-lg group-hover:text-primary transition-colors">
-                        {plan.name}
-                      </CardTitle>
-                      {plan.description && (
-                        <CardDescription className="line-clamp-2 text-sm">
-                          {plan.description}
-                        </CardDescription>
-                      )}
+                      <CardTitle className="line-clamp-1 text-lg group-hover:text-primary transition-colors">{plan.name}</CardTitle>
+                      {plan.description && <CardDescription className="line-clamp-2 text-sm">{plan.description}</CardDescription>}
                     </CardHeader>
 
                     <CardContent className="space-y-4 pt-2">
-                      {/* Price */}
                       <div className="flex items-baseline gap-1">
                         <span className="text-2xl font-bold text-foreground">{formattedPrice}</span>
                         <span className="text-muted-foreground">/ {intervalLabel}</span>
                       </div>
 
-                      {/* Features */}
                       {plan.features.length > 0 && (
                         <ul className="space-y-1">
                           {plan.features.slice(0, 3).map((feature, i) => (
@@ -573,14 +509,8 @@ const Storefront = memo(() => {
                         </ul>
                       )}
 
-                      {/* Subscribe Button */}
-                      <Button
-                        onClick={() => handleSubscribe(plan)}
-                        className="w-full group/btn shadow-lg shadow-primary/20"
-                        size="lg"
-                      >
-                        <CreditCard className="h-4 w-4 mr-2 group-hover/btn:scale-110 transition-transform" />
-                        Subscribe
+                      <Button onClick={() => handleSubscribe(plan)} className="w-full group/btn shadow-lg shadow-primary/20" size="lg">
+                        <CreditCard className="h-4 w-4 mr-2 group-hover/btn:scale-110 transition-transform" /> Subscribe
                       </Button>
                     </CardContent>
                   </Card>
@@ -592,6 +522,7 @@ const Storefront = memo(() => {
                 const estimatedPawBucks = product.price?.unit_amount 
                   ? getEstimatedPawBucks(product.price.unit_amount / 100)
                   : 0;
+                const inCart = cartItems.find((ci) => ci.priceId === product.price?.id);
 
                 return (
                   <Card 
@@ -601,66 +532,57 @@ const Storefront = memo(() => {
                     {/* Product Image */}
                     <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-muted to-muted/50">
                       {product.images && product.images.length > 0 ? (
-                        <img
-                          src={product.images[0]}
-                          alt={product.name}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                          width={400}
-                          height={400}
-                        />
+                        <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" width={400} height={400} />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
                           <Package className="h-16 w-16 text-muted-foreground/50" />
                         </div>
                       )}
-                      
-                      {/* Rewards Badge Overlay */}
                       {estimatedPawBucks > 0 && (
                         <div className="absolute top-3 right-3">
                           <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 shadow-lg">
-                            <Sparkles className="h-3 w-3 mr-1" />
-                            +{estimatedPawBucks} PB
+                            <Sparkles className="h-3 w-3 mr-1" /> +{estimatedPawBucks} PB
                           </Badge>
                         </div>
                       )}
                     </div>
 
                     <CardHeader className="pb-2 pt-4">
-                      <CardTitle className="line-clamp-1 text-lg group-hover:text-primary transition-colors">
-                        {product.name}
-                      </CardTitle>
-                      {product.description && (
-                        <CardDescription className="line-clamp-2 text-sm">
-                          {product.description}
-                        </CardDescription>
-                      )}
+                      <CardTitle className="line-clamp-1 text-lg group-hover:text-primary transition-colors">{product.name}</CardTitle>
+                      {product.description && <CardDescription className="line-clamp-2 text-sm">{product.description}</CardDescription>}
                     </CardHeader>
 
                     <CardContent className="space-y-4 pt-2">
-                      {/* Price */}
-                      <div className="text-2xl font-bold text-foreground">
-                        {product.price?.formatted || "N/A"}
-                      </div>
+                      <div className="text-2xl font-bold text-foreground">{product.price?.formatted || "N/A"}</div>
 
-                      {/* Buy Button */}
-                      <Button
-                        onClick={() => handlePurchase(product)}
-                        disabled={!product.price || purchasingProductId === product.id}
-                        className="w-full group/btn shadow-lg shadow-primary/20"
-                        size="lg"
-                      >
-                        {purchasingProductId === product.id ? (
-                          <>
-                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                            Processing...
-                          </>
-                        ) : (
-                          <>
-                            <ShoppingCart className="h-4 w-4 mr-2 group-hover/btn:scale-110 transition-transform" />
-                            Buy Now
-                          </>
-                        )}
-                      </Button>
+                      {/* Add to Cart / In Cart buttons */}
+                      {user ? (
+                        <div className="space-y-2">
+                          <Button
+                            onClick={() => handleAddToCart(product)}
+                            disabled={!product.price}
+                            className="w-full group/btn shadow-lg shadow-primary/20"
+                            variant={inCart ? "secondary" : "default"}
+                            size="lg"
+                          >
+                            {inCart ? (
+                              <>
+                                <Plus className="h-4 w-4 mr-2" />
+                                Add More ({inCart.quantity} in cart)
+                              </>
+                            ) : (
+                              <>
+                                <ShoppingCart className="h-4 w-4 mr-2 group-hover/btn:scale-110 transition-transform" />
+                                Add to Cart
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      ) : (
+                        <Button onClick={() => navigate("/auth")} className="w-full" size="lg">
+                          Sign in to Shop
+                        </Button>
+                      )}
                     </CardContent>
                   </Card>
                 );
@@ -674,74 +596,55 @@ const Storefront = memo(() => {
       <div className="border-t bg-gradient-to-b from-card/80 to-card py-10 mt-16">
         <div className="container">
           <div className="flex flex-col items-center gap-6">
-            {/* Store Logo in Footer */}
             <Avatar className="h-12 w-12 rounded-xl border-2 border-primary/20">
               <AvatarImage src={merchantLogo || undefined} alt={merchantName} />
-              <AvatarFallback className="rounded-xl bg-primary/10 text-primary font-bold">
-                {merchantName?.charAt(0) || "S"}
-              </AvatarFallback>
+              <AvatarFallback className="rounded-xl bg-primary/10 text-primary font-bold">{merchantName?.charAt(0) || "S"}</AvatarFallback>
             </Avatar>
             
             <div className="flex flex-col items-center gap-2 text-center">
               <p className="font-medium text-foreground">{merchantName}</p>
               <p className="text-sm text-muted-foreground flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-primary" />
-                Powered by PawBucks Marketplace
+                <Sparkles className="h-4 w-4 text-primary" /> Powered by PawBucks Marketplace
               </p>
             </div>
 
-            {/* Policy Links */}
             {(merchantData?.tos_url || merchantData?.privacy_policy_url || merchantData?.shipping_returns_policy_url) && (
               <div className="flex flex-wrap items-center justify-center gap-4 text-sm">
                 {merchantData.tos_url && (
-                  <a href={merchantData.tos_url} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors underline-offset-4 hover:underline">
-                    Terms of Service
-                  </a>
+                  <a href={merchantData.tos_url} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors underline-offset-4 hover:underline">Terms of Service</a>
                 )}
                 {merchantData.privacy_policy_url && (
-                  <a href={merchantData.privacy_policy_url} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors underline-offset-4 hover:underline">
-                    Privacy Policy
-                  </a>
+                  <a href={merchantData.privacy_policy_url} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors underline-offset-4 hover:underline">Privacy Policy</a>
                 )}
                 {merchantData.shipping_returns_policy_url && (
-                  <a href={merchantData.shipping_returns_policy_url} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors underline-offset-4 hover:underline">
-                    Shipping & Returns
-                  </a>
+                  <a href={merchantData.shipping_returns_policy_url} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors underline-offset-4 hover:underline">Shipping & Returns</a>
                 )}
               </div>
             )}
 
             <div className="flex items-center gap-6 text-sm text-muted-foreground">
-              <span className="flex items-center gap-1.5">
-                <Shield className="h-4 w-4 text-green-600" />
-                Secure Payments
-              </span>
+              <span className="flex items-center gap-1.5"><Shield className="h-4 w-4 text-green-600" /> Secure Payments</span>
               <span className="text-border">•</span>
-              <span className="flex items-center gap-1.5">
-                <CreditCard className="h-4 w-4 text-blue-600" />
-                Powered by Stripe
-              </span>
+              <span className="flex items-center gap-1.5"><CreditCard className="h-4 w-4 text-blue-600" /> Powered by Stripe</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* PawBucks Checkout Dialog */}
-      {selectedProduct && user && (
-        <PawBucksCheckoutDialog
-          open={showPawBucksDialog}
-          onOpenChange={setShowPawBucksDialog}
-          productName={selectedProduct.name}
-          priceAmount={(selectedProduct.price?.unit_amount || 0) / 100}
-          isRecurring={isRecurringProduct}
-          merchantName={merchantName}
-          merchantAcceptsPawBucks={merchantAcceptsPawBucks}
-          cashbackRate={cashbackRate}
-          userId={user.id}
-          onProceed={handlePawBucksDialogProceed}
-          isLoading={purchasingProductId === selectedProduct.id}
-        />
-      )}
+      {/* Cart Drawer */}
+      <StorefrontCartDrawer
+        open={cartOpen}
+        onOpenChange={setCartOpen}
+        items={cartItems}
+        totalCents={totalCents}
+        onUpdateQuantity={updateQuantity}
+        onRemoveItem={removeItem}
+        onClearCart={clearCart}
+        onCheckout={handleCartCheckout}
+        isCheckingOut={isCheckingOut}
+        pawbucksBalance={walletData?.balance || 0}
+        merchantAcceptsPawBucks={merchantAcceptsPawBucks}
+      />
 
       {/* Subscription Checkout Dialog */}
       {selectedPlan && connectedAccountId && merchantId && (
@@ -754,10 +657,7 @@ const Storefront = memo(() => {
           connectedAccountId={connectedAccountId}
           merchantAcceptsPawBucks={merchantData?.acceptsPawBucks ?? false}
           cashbackRate={merchantData?.cashback_rate ?? 10}
-          onSuccess={() => {
-            setShowSubDialog(false);
-            setSelectedPlan(null);
-          }}
+          onSuccess={() => { setShowSubDialog(false); setSelectedPlan(null); }}
         />
       )}
     </div>
