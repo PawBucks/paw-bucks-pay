@@ -656,9 +656,9 @@ export default function PetStore() {
           }
           onRemoveItem={(cartItemId) => removeFromCart.mutate(cartItemId)}
           onClearCart={() => clearCart.mutate()}
-          onCheckoutWithCard={handleCartCheckoutWithCard}
-          onCheckoutWithPawbucks={() => cartPawbucksPurchase.mutate()}
-          isUpdating={updateQuantity.isPending || removeFromCart.isPending || clearCart.isPending || cartPawbucksPurchase.isPending}
+          onCheckout={handleCartCheckout}
+          isUpdating={updateQuantity.isPending || removeFromCart.isPending || clearCart.isPending}
+          isCheckingOut={cartPawbucksPurchase.isPending}
           pawbucksBalance={wallet?.balance || 0}
         />
 
