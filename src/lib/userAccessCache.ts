@@ -43,13 +43,15 @@ export async function getUserAccessInfo(userId: string): Promise<UserAccessInfo>
 
       if (error) throw error;
 
+      const d = data as Record<string, unknown> | null;
+
       const info: UserAccessInfo = {
-        user_type: data?.user_type ?? null,
-        system_roles: Array.isArray(data?.system_roles) ? data.system_roles : [],
-        is_merchant: !!data?.is_merchant,
-        is_vet: !!data?.is_vet,
-        has_pets: !!data?.has_pets,
-        has_shared_pets: !!data?.has_shared_pets,
+        user_type: (d?.user_type as string) ?? null,
+        system_roles: Array.isArray(d?.system_roles) ? (d.system_roles as string[]) : [],
+        is_merchant: !!d?.is_merchant,
+        is_vet: !!d?.is_vet,
+        has_pets: !!d?.has_pets,
+        has_shared_pets: !!d?.has_shared_pets,
       };
 
       cache.set(userId, { data: info, timestamp: Date.now() });
