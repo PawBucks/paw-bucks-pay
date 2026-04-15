@@ -7,6 +7,18 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// Map document categories to medical_record_type enum values
+const CATEGORY_TO_RECORD_TYPE: Record<string, string> = {
+  vaccine: "vaccination",
+  lab_result: "lab_results",
+  prescription: "prescription",
+  imaging: "other",
+  surgical: "surgery",
+  dental: "dental",
+  wellness: "checkup",
+  // invoice and insurance don't create medical records
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -32,7 +44,7 @@ serve(async (req) => {
     // Get pet info for context
     const { data: pet } = await supabase
       .from("pet_profiles")
-      .select("name, type, breed")
+      .select("name, type, breed, user_id")
       .eq("id", pet_id)
       .single();
 
@@ -40,7 +52,7 @@ serve(async (req) => {
 
     for (const doc of documents) {
       try {
-        const prompt = `You are a veterinary document classifier. Classify the following document sent to a pet's health email inbox.
+        const prompt = `You are a veterinary document classifier and medical record extractor. Analyze the following document sent to a pet's health email inbox.
 
 Pet: ${pet?.name || "Unknown"} (${pet?.type || "unknown"} ${pet?.breed ? `- ${pet.breed}` : ""})
 
@@ -52,7 +64,7 @@ Document details:
 - Email subject: ${doc.email_subject || "none"}
 - Email body snippet: ${doc.email_body_snippet || "none"}
 
-Classify this document into exactly ONE category and provide a brief summary.`;
+Classify this document AND extract any medical record information from the email body/subject.`;
 
         const response = await fetch(
           "https://ai.gateway.lovable.dev/v1/chat/completions",
@@ -67,7 +79,7 @@ Classify this document into exactly ONE category and provide a brief summary.`;
               messages: [
                 {
                   role: "system",
-                  content: "You are a veterinary document classifier. Always respond using the classify_document tool.",
+                  content: "You are a veterinary document classifier and medical data extractor. Always respond using the classify_and_extract tool.",
                 },
                 { role: "user", content: prompt },
               ],
@@ -75,8 +87,8 @@ Classify this document into exactly ONE category and provide a brief summary.`;
                 {
                   type: "function",
                   function: {
-                    name: "classify_document",
-                    description: "Classify a veterinary document into a category",
+                    name: "classify_and_extract",
+                    description: "Classify a veterinary document and extract medical record data",
                     parameters: {
                       type: "object",
                       properties: {
@@ -104,11 +116,57 @@ Classify this document into exactly ONE category and provide a brief summary.`;
                         },
                         summary: {
                           type: "string",
-                          description:
-                            "Brief 1-2 sentence summary of the document",
+                          description: "Brief 1-2 sentence summary of the document",
                         },
+                        is_medical: {
+                          type: "boolean",
+                          description: "Whether this contains actionable medical information that should be added to health records"
+                        },
+                        medical_records: {
+                          type: "array",
+                          description: "Extracted medical record line items (empty if not medical)",
+                          items: {
+                            type: "object",
+                            properties: {
+                              title: {
+                                type: "string",
+                                description: "Name of procedure, medication, test, vaccination, etc."
+                              },
+                              record_type: {
+                                type: "string",
+                                enum: ["vaccination", "checkup", "surgery", "lab_results", "prescription", "dental", "emergency", "other"],
+                                description: "Type of medical record"
+                              },
+                              description: {
+                                type: "string",
+                                description: "Additional details, dosage, instructions, results, etc."
+                              },
+                              price: {
+                                type: "number",
+                                description: "Cost if mentioned, or null"
+                              },
+                              record_date: {
+                                type: "string",
+                                description: "Date of the procedure/record in YYYY-MM-DD format if found"
+                              }
+                            },
+                            required: ["title", "record_type"]
+                          }
+                        },
+                        visit_date: {
+                          type: "string",
+                          description: "Visit date in YYYY-MM-DD format if found in the document"
+                        },
+                        vet_name: {
+                          type: "string",
+                          description: "Vet clinic name if identifiable from sender"
+                        },
+                        doctor_name: {
+                          type: "string",
+                          description: "Doctor name if found"
+                        }
                       },
-                      required: ["category", "confidence", "summary"],
+                      required: ["category", "confidence", "summary", "is_medical"],
                       additionalProperties: false,
                     },
                   },
@@ -116,7 +174,7 @@ Classify this document into exactly ONE category and provide a brief summary.`;
               ],
               tool_choice: {
                 type: "function",
-                function: { name: "classify_document" },
+                function: { name: "classify_and_extract" },
               },
             }),
           }
@@ -152,11 +210,63 @@ Classify this document into exactly ONE category and provide a brief summary.`;
             })
             .eq("id", doc.id);
 
+          // Auto-create medical records if this is medical content
+          if (classification.is_medical && classification.medical_records?.length > 0 && pet?.user_id) {
+            try {
+              const visitDate = classification.visit_date || new Date().toISOString().split("T")[0];
+
+              // Create a medical visit
+              const { data: visit } = await supabase
+                .from("pet_medical_visits")
+                .insert({
+                  pet_id: pet_id,
+                  user_id: pet.user_id,
+                  visit_date: visitDate,
+                  notes: `Auto-created from email: ${doc.email_subject || doc.file_name}`,
+                  vet_name: classification.vet_name || doc.sender_name || null,
+                  doctor_name: classification.doctor_name || null,
+                })
+                .select()
+                .single();
+
+              if (visit) {
+                for (const record of classification.medical_records) {
+                  await supabase
+                    .from("pet_medical_records")
+                    .insert({
+                      visit_id: visit.id,
+                      pet_id: pet_id,
+                      user_id: pet.user_id,
+                      record_type: record.record_type || "other",
+                      title: record.title,
+                      record_date: record.record_date || visitDate,
+                      description: record.description || null,
+                      price: record.price != null ? parseFloat(record.price) : null,
+                      file_url: doc.file_url || null,
+                    });
+                }
+
+                // Notify the pet owner
+                await supabase.from("notifications").insert({
+                  user_id: pet.user_id,
+                  title: "📋 Medical Records Auto-Added",
+                  message: `${classification.medical_records.length} record(s) from ${classification.vet_name || doc.sender_name || "your vet"} have been added to ${pet.name}'s health history.`,
+                  category: "transactional",
+                  link_url: `/pet-health/${pet_id}?tab=records`,
+                });
+              }
+            } catch (medErr) {
+              console.error("Error creating medical records from email:", medErr);
+              // Non-blocking - categorization still succeeded
+            }
+          }
+
           results.push({
             documentId: doc.id,
             category: classification.category,
             confidence: classification.confidence,
             summary: classification.summary,
+            medicalRecordsCreated: classification.medical_records?.length || 0,
           });
         }
       } catch (docErr) {

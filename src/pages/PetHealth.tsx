@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MedicalRecordUpload } from "@/components/MedicalRecordUpload";
 import { MedicalRecordsList } from "@/components/MedicalRecordsList";
+import { ScanVetPaperwork } from "@/components/ScanVetPaperwork";
 import { VetCommunication } from "@/components/VetCommunication";
 import { PetProfileCard } from "@/components/PetProfileCard";
 import { ShareHealthRecordsDialog } from "@/components/ShareHealthRecordsDialog";
@@ -173,7 +174,14 @@ export default function PetHealth() {
           </TabsList>
 
           <TabsContent value="records" className="space-y-4">
-            <div className="flex justify-end">
+            <div className="flex justify-end gap-2 flex-wrap">
+              <ScanVetPaperwork
+                petId={pet.id}
+                petName={pet.name}
+                petType={pet.type}
+                petBreed={pet.breed}
+                onSuccess={() => setRefreshTrigger((prev) => prev + 1)}
+              />
               <MedicalRecordUpload
                 petId={pet.id}
                 onSuccess={() => setRefreshTrigger((prev) => prev + 1)}
