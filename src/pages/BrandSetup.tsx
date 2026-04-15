@@ -69,14 +69,8 @@ const BrandSetup = () => {
     if (!user || !brand) return;
     setClaiming(true);
     try {
-      const { error } = await supabase
-        .from("brand_accounts")
-        .update({
-          user_id: user.id,
-          invitation_claimed_at: new Date().toISOString(),
-        })
-        .eq("id", brand.id)
-        .eq("invitation_token", token);
+      const { data, error } = await supabase
+        .rpc("claim_brand_account", { p_token: token || "" });
 
       if (error) {
         toast.error("Failed to claim brand account. Please try again.");
@@ -84,8 +78,10 @@ const BrandSetup = () => {
         return;
       }
 
-      // Note: brand users use the existing profile type system
-      // They'll access their brand dashboard from the main dashboard
+      if (data && !data.success) {
+        toast.error(data.error || "Failed to claim brand account.");
+        return;
+      }
 
       toast.success("Brand account claimed successfully! Welcome aboard.");
       navigate("/dashboard");
