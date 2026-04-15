@@ -6,6 +6,26 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+/**
+ * Get the current midnight boundary in a user's timezone, returned as a UTC ISO string.
+ * This ensures vesting happens at midnight in the user's local time, not UTC.
+ */
+function getMidnightInTz(tz: string): string {
+  const now = new Date();
+  // Get today's date in user's timezone
+  const formatter = new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' });
+  const dateStr = formatter.format(now); // YYYY-MM-DD
+  // Tomorrow midnight in user's tz
+  const [y, m, d] = dateStr.split('-').map(Number);
+  // Create "today at midnight" in user's tz and convert to UTC
+  const utcStr = new Date(`${dateStr}T00:00:00Z`).toLocaleString('en-US', { timeZone: 'UTC' });
+  const tzStr = new Date(`${dateStr}T00:00:00Z`).toLocaleString('en-US', { timeZone: tz });
+  const offset = new Date(utcStr).getTime() - new Date(tzStr).getTime();
+  // End of today (start of tomorrow) in user's tz
+  const tomorrowMidnight = new Date(new Date(`${y}-${String(m).padStart(2,'0')}-${String(d+1).padStart(2,'0')}T00:00:00Z`).getTime() + offset);
+  return tomorrowMidnight.toISOString();
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -14,16 +34,17 @@ serve(async (req) => {
   try {
     console.log("Starting vesting scheduler...");
 
-    // Create service role client for database operations
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
     // Get all pending PawBucks that should be vested
+    // We fetch all that have vest_date <= now, then for each user we check
+    // if it's past midnight in their local timezone
     const { data: pendingActivities, error: fetchError } = await supabaseAdmin
       .from("pawbucks_activity")
-      .select("id, user_id, amount, description")
+      .select("id, user_id, amount, description, vest_date")
       .eq("pawbucks_status", "pending")
       .lte("vest_date", new Date().toISOString());
 
@@ -42,9 +63,33 @@ serve(async (req) => {
 
     console.log(`Found ${pendingActivities.length} pending activities to vest`);
 
+    // Get unique user IDs to fetch their timezones
+    const uniqueUserIds = [...new Set(pendingActivities.map(a => a.user_id))];
+    const { data: profiles } = await supabaseAdmin
+      .from("profiles")
+      .select("id, timezone")
+      .in("id", uniqueUserIds);
+
+    const userTzMap = new Map<string, string>();
+    for (const p of profiles || []) {
+      userTzMap.set(p.id, p.timezone || 'America/New_York');
+    }
+
+    // Filter: only vest if it's past midnight in the user's local timezone on the vest_date
+    const now = new Date();
+    const eligibleActivities = pendingActivities.filter(activity => {
+      const tz = userTzMap.get(activity.user_id) || 'America/New_York';
+      // Get "now" in user's timezone as a date string
+      const nowInTz = new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' })
+        .format(now);
+      const vestDate = activity.vest_date?.split('T')[0];
+      // Vest if the user's local date is >= vest_date
+      return !vestDate || nowInTz >= vestDate;
+    });
+
     // Group activities by user
     const userActivities = new Map<string, { amount: number; ids: string[] }>();
-    for (const activity of pendingActivities) {
+    for (const activity of eligibleActivities) {
       const current = userActivities.get(activity.user_id) || { amount: 0, ids: [] };
       current.amount += activity.amount;
       current.ids.push(activity.id);
@@ -54,10 +99,8 @@ serve(async (req) => {
     let vestedCount = 0;
     const errors: string[] = [];
 
-    // Process each user
     for (const [userId, { amount, ids }] of userActivities) {
       try {
-        // Update activity status to available
         const { error: updateError } = await supabaseAdmin
           .from("pawbucks_activity")
           .update({ pawbucks_status: "available" })
@@ -69,7 +112,6 @@ serve(async (req) => {
           continue;
         }
 
-        // Update user's wallet balance
         const { data: wallet, error: walletError } = await supabaseAdmin
           .from("pawbucks_wallet")
           .select("balance")
@@ -97,7 +139,6 @@ serve(async (req) => {
           continue;
         }
 
-        // Send notification to user
         await supabaseAdmin.from("notifications").insert({
           user_id: userId,
           title: "PawBucks Now Available! 🎉",

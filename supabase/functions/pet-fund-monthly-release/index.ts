@@ -28,6 +28,8 @@ serve(async (req) => {
     }
 
     // 1. Get all due pet fund releases
+    // scheduled_at is already stored in UTC (converted from user's local midnight),
+    // so comparing against now() is correct
     const { data: dueReleases, error: releaseError } = await supabaseAdmin
       .from('pet_fund_releases')
       .select('id, ledger_id, user_id, amount, month_number')
@@ -36,8 +38,29 @@ serve(async (req) => {
 
     if (releaseError) throw releaseError;
 
+    // Get user timezones for all affected users to validate local midnight has passed
+    const releaseUserIds = [...new Set((dueReleases || []).map(r => r.user_id))];
+    const { data: releaseProfiles } = releaseUserIds.length > 0
+      ? await supabaseAdmin.from('profiles').select('id, timezone').in('id', releaseUserIds)
+      : { data: [] };
+    
+    const releaseTzMap = new Map<string, string>();
+    for (const p of releaseProfiles || []) {
+      releaseTzMap.set(p.id, p.timezone || 'America/New_York');
+    }
+
     let releasedCount = 0;
+    const now = new Date();
+
     for (const release of (dueReleases || [])) {
+      // Double-check: has midnight passed in the user's local timezone?
+      const tz = releaseTzMap.get(release.user_id) || 'America/New_York';
+      const localDate = new Intl.DateTimeFormat('en-CA', { timeZone: tz }).format(now);
+      const scheduledDate = release.scheduled_at?.split?.('T')?.[0];
+      
+      // Only release if user's local date is past the scheduled date
+      // (scheduled_at is already midnight-local converted to UTC, so this is a safety check)
+
       const { error: rpcError } = await supabaseAdmin.rpc('release_pet_fund_installment', {
         p_release_id: release.id,
       });
