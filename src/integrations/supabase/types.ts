@@ -13903,6 +13903,7 @@ export type Database = {
         }[]
       }
       checkin_date: { Args: { ts: string }; Returns: string }
+      claim_brand_account: { Args: { p_token: string }; Returns: Json }
       claim_pet_fund_spot: { Args: { p_cluster_id: string }; Returns: string }
       expire_unused_pet_fund_credits: { Args: never; Returns: number }
       generate_admin_invoice_number: { Args: never; Returns: string }
@@ -13947,6 +13948,15 @@ export type Database = {
           total_rewards: number
           total_transactions: number
           total_users: number
+        }[]
+      }
+      get_brand_by_invitation_token: {
+        Args: { p_token: string }
+        Returns: {
+          brand_name: string
+          id: string
+          invitation_claimed_at: string
+          invitation_email: string
         }[]
       }
       get_checkin_user_emails: {

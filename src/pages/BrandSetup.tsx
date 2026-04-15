@@ -40,24 +40,23 @@ const BrandSetup = () => {
   const fetchBrand = async () => {
     try {
       const { data, error } = await supabase
-        .from("brand_accounts")
-        .select("*")
-        .eq("invitation_token", token)
-        .maybeSingle();
+        .rpc("get_brand_by_invitation_token", { p_token: token || "" });
 
-      if (error || !data) {
+      if (error || !data || data.length === 0) {
         setError("Invalid or expired invitation link.");
         return;
       }
 
-      if (data.invitation_claimed_at) {
+      const brandData = data[0];
+
+      if (brandData.invitation_claimed_at) {
         setError("This invitation has already been claimed.");
         return;
       }
 
-      setBrand(data);
-      if (data.invitation_email) {
-        setSignUpForm(f => ({ ...f, email: data.invitation_email }));
+      setBrand(brandData);
+      if (brandData.invitation_email) {
+        setSignUpForm(f => ({ ...f, email: brandData.invitation_email }));
       }
     } catch {
       setError("Something went wrong. Please try again.");
@@ -70,14 +69,8 @@ const BrandSetup = () => {
     if (!user || !brand) return;
     setClaiming(true);
     try {
-      const { error } = await supabase
-        .from("brand_accounts")
-        .update({
-          user_id: user.id,
-          invitation_claimed_at: new Date().toISOString(),
-        })
-        .eq("id", brand.id)
-        .eq("invitation_token", token);
+      const { data, error } = await supabase
+        .rpc("claim_brand_account", { p_token: token || "" });
 
       if (error) {
         toast.error("Failed to claim brand account. Please try again.");
@@ -85,8 +78,11 @@ const BrandSetup = () => {
         return;
       }
 
-      // Note: brand users use the existing profile type system
-      // They'll access their brand dashboard from the main dashboard
+      const result = data as { success: boolean; error?: string } | null;
+      if (result && !result.success) {
+        toast.error(result.error || "Failed to claim brand account.");
+        return;
+      }
 
       toast.success("Brand account claimed successfully! Welcome aboard.");
       navigate("/dashboard");
