@@ -7220,6 +7220,8 @@ export type Database = {
           amount: number
           created_at: string | null
           description: string | null
+          expires_at: string | null
+          expiry_reminder_sent_days: number[] | null
           id: string
           partner_id: string | null
           pawbucks_status: string | null
@@ -7237,6 +7239,8 @@ export type Database = {
           amount: number
           created_at?: string | null
           description?: string | null
+          expires_at?: string | null
+          expiry_reminder_sent_days?: number[] | null
           id?: string
           partner_id?: string | null
           pawbucks_status?: string | null
@@ -7254,6 +7258,8 @@ export type Database = {
           amount?: number
           created_at?: string | null
           description?: string | null
+          expires_at?: string | null
+          expiry_reminder_sent_days?: number[] | null
           id?: string
           partner_id?: string | null
           pawbucks_status?: string | null
@@ -13905,6 +13911,7 @@ export type Database = {
       checkin_date: { Args: { ts: string }; Returns: string }
       claim_brand_account: { Args: { p_token: string }; Returns: Json }
       claim_pet_fund_spot: { Args: { p_cluster_id: string }; Returns: string }
+      expire_pawbucks: { Args: never; Returns: number }
       expire_unused_pet_fund_credits: { Args: never; Returns: number }
       generate_admin_invoice_number: { Args: never; Returns: string }
       generate_checkin_qr_token: { Args: never; Returns: string }
@@ -14153,6 +14160,7 @@ export type Database = {
         Args: { p_bonus_id: string }
         Returns: undefined
       }
+      send_pawbucks_expiry_reminders: { Args: never; Returns: number }
       use_pet_fund_credit: {
         Args: { p_amount: number; p_transaction_id?: string; p_user_id: string }
         Returns: boolean
