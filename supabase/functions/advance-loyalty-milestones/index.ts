@@ -9,6 +9,18 @@ const logStep = (step: string, details?: Record<string, unknown>) => {
   console.log(`[ADVANCE-LOYALTY] ${step}`, details ? JSON.stringify(details) : "");
 };
 
+/**
+ * Get the current date parts in the user's local timezone.
+ */
+function getLocalDateParts(tz: string): { year: number; month: number; day: number; dateStr: string; monthDate: string } {
+  const now = new Date();
+  const formatter = new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' });
+  const dateStr = formatter.format(now); // YYYY-MM-DD
+  const [year, month, day] = dateStr.split('-').map(Number);
+  const monthDate = `${year}-${String(month).padStart(2, '0')}-01`;
+  return { year, month, day, dateStr, monthDate };
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -31,9 +43,18 @@ Deno.serve(async (req) => {
 
     logStep("Processing loyalty advancement", { user_id, merchant_id, transaction_id, cash_amount });
 
+    // Get user's timezone
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('timezone')
+      .eq('id', user_id)
+      .maybeSingle();
+    const userTz = profile?.timezone || 'America/New_York';
+
     // ─── 1. UPSERT USER TIER STATUS ───
     const now = new Date();
-    const currentMonthDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`; // First of month as date
+    const local = getLocalDateParts(userTz);
+    const currentMonthDate = local.monthDate;
 
     const { data: existingTier } = await supabaseAdmin
       .from("user_tier_status")
@@ -42,7 +63,6 @@ Deno.serve(async (req) => {
       .maybeSingle();
 
     if (!existingTier) {
-      // Create initial tier status
       logStep("Creating initial tier status");
       await supabaseAdmin.from("user_tier_status").insert({
         user_id,
@@ -54,24 +74,21 @@ Deno.serve(async (req) => {
         transactions_this_year: 1,
       });
     } else {
-      // Update existing tier status
       const updates: Record<string, unknown> = {
         transactions_this_year: existingTier.transactions_this_year + 1,
         updated_at: now.toISOString(),
       };
 
-      // Track consecutive months
+      // Track consecutive months using user's local month
       if (!existingTier.last_active_month || existingTier.last_active_month !== currentMonthDate) {
         const lastMonth = existingTier.last_active_month;
         if (lastMonth) {
-          const lastDate = new Date(lastMonth);
-          const thisDate = new Date(now.getFullYear(), now.getMonth());
-          const diffMonths = (thisDate.getFullYear() - lastDate.getFullYear()) * 12 + (thisDate.getMonth() - lastDate.getMonth());
+          const [lastY, lastM] = lastMonth.split('-').map(Number);
+          const diffMonths = (local.year - lastY) * 12 + (local.month - lastM);
 
           if (diffMonths === 1) {
             updates.consecutive_active_months = existingTier.consecutive_active_months + 1;
           } else if (diffMonths > 1) {
-            // Streak broken
             updates.consecutive_active_months = 1;
           }
         }
@@ -113,7 +130,6 @@ Deno.serve(async (req) => {
     }
 
     // ─── 2. ADVANCE LOYALTY MILESTONES ───
-    // Only count if cash_amount >= $25 (minimum qualifying amount)
     const qualifyingAmount = cash_amount || 0;
     if (qualifyingAmount < 25) {
       logStep("Transaction below $25 minimum, skipping milestone advancement", { cash_amount: qualifyingAmount });
@@ -123,9 +139,9 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Find or create active milestone for this user
-    const periodStart = new Date(now.getFullYear(), now.getMonth(), 1);
-    const periodEnd = new Date(now.getFullYear(), now.getMonth() + 12, 0); // ~12 months from start of current month
+    // Use user's local month for period boundaries
+    const periodStart = new Date(Date.UTC(local.year, local.month - 1, 1));
+    const periodEnd = new Date(Date.UTC(local.year, local.month - 1 + 12, 0));
 
     let { data: activeMilestone } = await supabaseAdmin
       .from("loyalty_milestones")
@@ -137,13 +153,12 @@ Deno.serve(async (req) => {
       .maybeSingle();
 
     if (!activeMilestone) {
-      // Create new milestone — 12 visits = $50 free credit (Loyal Pet Parent Guarantee)
       logStep("Creating new milestone");
       const { data: newMilestone } = await supabaseAdmin
         .from("loyalty_milestones")
         .insert({
           user_id,
-          merchant_id: null, // Any merchant counts
+          merchant_id: null,
           milestone_type: "visit_count",
           target_count: 12,
           current_count: 0,
@@ -168,7 +183,6 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Advance the milestone
     const newCount = activeMilestone.current_count + 1;
     const isCompleted = newCount >= activeMilestone.target_count;
 
@@ -188,7 +202,6 @@ Deno.serve(async (req) => {
       .update(milestoneUpdate)
       .eq("id", activeMilestone.id);
 
-    // Track the transaction against the milestone
     if (transaction_id) {
       await supabaseAdmin.from("milestone_transactions").insert({
         milestone_id: activeMilestone.id,
@@ -201,7 +214,7 @@ Deno.serve(async (req) => {
     // ─── 3. AWARD SERVICE CREDIT ON COMPLETION ───
     if (isCompleted) {
       const creditExpiry = new Date(now);
-      creditExpiry.setMonth(creditExpiry.getMonth() + 6); // 6 month expiry
+      creditExpiry.setMonth(creditExpiry.getMonth() + 6);
 
       await supabaseAdmin.from("service_credits").insert({
         user_id,
@@ -217,7 +230,6 @@ Deno.serve(async (req) => {
 
       logStep("Service credit awarded", { value: activeMilestone.credit_value });
 
-      // Create a warning/notification for the user
       await supabaseAdmin.from("loyalty_warnings").insert({
         user_id,
         warning_type: "milestone_completed",
@@ -230,23 +242,24 @@ Deno.serve(async (req) => {
     }
 
     // ─── 4. UPDATE BADGE STREAK ───
+    const today = local.dateStr;
+
     await supabaseAdmin
       .from("user_badge_streaks")
       .upsert(
         {
           user_id,
           streak_type: "monthly",
-          current_streak: 1, // Will be properly calculated below
+          current_streak: 1,
           longest_streak: 1,
-          last_earned_date: now.toISOString().split("T")[0],
-          streak_start_date: now.toISOString().split("T")[0],
+          last_earned_date: today,
+          streak_start_date: today,
         },
         { onConflict: "user_id,streak_type", ignoreDuplicates: true }
       )
       .then(() => {})
       .catch(() => {});
 
-    // Update streak properly
     const { data: streak } = await supabaseAdmin
       .from("user_badge_streaks")
       .select("*")
@@ -255,16 +268,19 @@ Deno.serve(async (req) => {
       .maybeSingle();
 
     if (streak) {
-      const lastDate = streak.last_earned_date ? new Date(streak.last_earned_date) : null;
-      const today = now.toISOString().split("T")[0];
+      const lastDateStr = streak.last_earned_date;
 
-      if (!lastDate || streak.last_earned_date !== today) {
-        const currentYearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-        const lastYearMonth = lastDate ? `${lastDate.getFullYear()}-${String(lastDate.getMonth() + 1).padStart(2, "0")}` : null;
+      if (!lastDateStr || lastDateStr !== today) {
+        const currentYearMonth = `${local.year}-${String(local.month).padStart(2, '0')}`;
+        let lastYearMonth: string | null = null;
+        if (lastDateStr) {
+          const [ly, lm] = lastDateStr.split('-').map(Number);
+          lastYearMonth = `${ly}-${String(lm).padStart(2, '0')}`;
+        }
         
         if (lastYearMonth && lastYearMonth !== currentYearMonth) {
-          const prevDate = new Date(lastDate!.getFullYear(), lastDate!.getMonth());
-          const diffM = (now.getFullYear() - prevDate.getFullYear()) * 12 + (now.getMonth() - prevDate.getMonth());
+          const [ly, lm] = lastDateStr!.split('-').map(Number);
+          const diffM = (local.year - ly) * 12 + (local.month - lm);
 
           if (diffM === 1) {
             await supabaseAdmin

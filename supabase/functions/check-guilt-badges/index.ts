@@ -20,34 +20,73 @@ const categoryMappings: Record<string, string[]> = {
   'food': ['food', 'treats', 'bakery', 'pet food'],
 };
 
-// Get period boundaries
-function getPeriodBoundaries(period: string): { start: Date; end: Date } {
+/**
+ * Get period boundaries in the user's local timezone.
+ * Falls back to America/New_York if no timezone provided.
+ */
+function getPeriodBoundaries(period: string, userTimezone: string): { start: Date; end: Date } {
+  const tz = userTimezone || 'America/New_York';
+  
+  // Get current date parts in user's timezone
   const now = new Date();
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: tz,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    weekday: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
+  const parts = formatter.formatToParts(now);
+  const year = parseInt(parts.find(p => p.type === 'year')!.value);
+  const month = parseInt(parts.find(p => p.type === 'month')!.value) - 1; // 0-indexed
+  const day = parseInt(parts.find(p => p.type === 'day')!.value);
+  const weekday = parts.find(p => p.type === 'weekday')!.value;
+
+  // Map weekday string to number (Sun=0, Mon=1, ...)
+  const weekdayMap: Record<string, number> = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+  const dayOfWeek = weekdayMap[weekday] ?? 0;
+
+  // Helper: create a Date at midnight in the user's timezone
+  // We use the Intl approach to get the UTC offset, then construct properly
+  function midnightInTz(y: number, m: number, d: number): Date {
+    // Create a date string and parse it in the target timezone
+    const dateStr = `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}T00:00:00`;
+    // Get UTC offset for this date in this timezone
+    const tempDate = new Date(dateStr + 'Z');
+    const utcStr = tempDate.toLocaleString('en-US', { timeZone: 'UTC' });
+    const tzStr = tempDate.toLocaleString('en-US', { timeZone: tz });
+    const utcTime = new Date(utcStr).getTime();
+    const tzTime = new Date(tzStr).getTime();
+    const offset = utcTime - tzTime;
+    
+    // Midnight in user's tz = midnight UTC + offset
+    return new Date(new Date(dateStr + 'Z').getTime() + offset);
+  }
+
   let start: Date;
   let end: Date;
 
   switch (period) {
     case 'day':
-      start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      end = new Date(start);
-      end.setDate(end.getDate() + 1);
+      start = midnightInTz(year, month, day);
+      end = midnightInTz(year, month, day + 1);
       break;
-    case 'week':
-      // Start from Monday
-      const dayOfWeek = now.getDay();
+    case 'week': {
       const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-      start = new Date(now.getFullYear(), now.getMonth(), now.getDate() + mondayOffset);
-      end = new Date(start);
-      end.setDate(end.getDate() + 7);
+      start = midnightInTz(year, month, day + mondayOffset);
+      end = midnightInTz(year, month, day + mondayOffset + 7);
       break;
+    }
     case 'month':
-      start = new Date(now.getFullYear(), now.getMonth(), 1);
-      end = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+      start = midnightInTz(year, month, 1);
+      end = midnightInTz(year, month + 1, 1);
       break;
     default:
-      start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      end = new Date(start);
-      end.setDate(end.getDate() + 1);
+      start = midnightInTz(year, month, day);
+      end = midnightInTz(year, month, day + 1);
   }
 
   return { start, end };
@@ -76,6 +115,14 @@ serve(async (req) => {
       );
     }
 
+    // Get user's timezone
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('timezone')
+      .eq('id', userId)
+      .maybeSingle();
+    const userTimezone = profile?.timezone || 'America/New_York';
+
     // Get active badge definitions
     const { data: badges, error: badgeError } = await supabaseAdmin
       .from('guilt_badge_definitions')
@@ -92,7 +139,6 @@ serve(async (req) => {
     const normalizedCategory = (merchantCategory || '').toLowerCase();
 
     for (const badge of badges || []) {
-      // Check if this transaction's category matches the badge category
       const matchingCategories = categoryMappings[badge.category] || [badge.category];
       const categoryMatches = matchingCategories.some(cat => 
         normalizedCategory.includes(cat) || cat.includes(normalizedCategory)
@@ -102,9 +148,9 @@ serve(async (req) => {
         continue;
       }
 
-      const { start, end } = getPeriodBoundaries(badge.threshold_period);
+      // Use user's timezone for period boundaries
+      const { start, end } = getPeriodBoundaries(badge.threshold_period, userTimezone);
 
-      // Check if already earned this badge in this period
       const { data: existingBadge } = await supabaseAdmin
         .from('user_guilt_badges')
         .select('id')
@@ -119,7 +165,6 @@ serve(async (req) => {
         continue;
       }
 
-      // Get or create progress tracking
       const { data: progress } = await supabaseAdmin
         .from('guilt_badge_progress')
         .select('*')
@@ -130,7 +175,6 @@ serve(async (req) => {
 
       const currentAmount = (progress?.current_amount || 0) + transactionAmount;
 
-      // Update or create progress
       if (progress) {
         await supabaseAdmin
           .from('guilt_badge_progress')
@@ -157,9 +201,7 @@ serve(async (req) => {
         threshold: badge.threshold_amount 
       });
 
-      // Check if threshold met
       if (currentAmount >= badge.threshold_amount) {
-        // Award the badge!
         const rewardExpiresAt = new Date();
         rewardExpiresAt.setHours(rewardExpiresAt.getHours() + (badge.reward_duration_hours || 48));
 
@@ -184,7 +226,6 @@ serve(async (req) => {
 
         logStep("Badge awarded!", { badgeKey: badge.badge_key, badgeId: newBadge.id });
 
-        // Create the reward
         if (badge.reward_type) {
           const { data: reward } = await supabaseAdmin
             .from('guilt_badge_rewards')
@@ -202,11 +243,9 @@ serve(async (req) => {
 
           logStep("Reward created", { rewardId: reward?.id });
 
-          // If it's a PawBucks bonus, auto-claim it
           if (badge.reward_type === 'pawbucks_bonus' && badge.reward_value) {
             const pawbucksAmount = Math.floor(badge.reward_value);
             
-            // Get or create wallet
             let { data: wallet } = await supabaseAdmin
               .from('pawbucks_wallet')
               .select('balance')
@@ -237,7 +276,6 @@ serve(async (req) => {
                 pawbucks_status: 'available',
               });
 
-              // Mark reward as used
               if (reward) {
                 await supabaseAdmin
                   .from('guilt_badge_rewards')
@@ -250,7 +288,6 @@ serve(async (req) => {
           }
         }
 
-        // Activate any promotions linked to this badge
         const { data: promotions } = await supabaseAdmin
           .from('badge_promotions')
           .select('id, duration_hours')
@@ -271,7 +308,6 @@ serve(async (req) => {
           logStep("Promotion activated for user", { promotionId: promo.id, expiresAt: promoExpiresAt.toISOString() });
         }
 
-        // Create notification for the user
         await supabaseAdmin.from('notifications').insert({
           user_id: userId,
           title: `${badge.emoji} ${badge.name} Badge Unlocked!`,
