@@ -78,8 +78,9 @@ const BrandSetup = () => {
         return;
       }
 
-      if (data && !data.success) {
-        toast.error(data.error || "Failed to claim brand account.");
+      const result = data as { success: boolean; error?: string } | null;
+      if (result && !result.success) {
+        toast.error(result.error || "Failed to claim brand account.");
         return;
       }
 
