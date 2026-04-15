@@ -16,20 +16,6 @@ Deno.serve(async (req) => {
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceKey);
 
-    // Use Eastern Time for expiration checks (midnight ET)
-    const now = new Date();
-    const etFormatter = new Intl.DateTimeFormat("en-US", {
-      timeZone: "America/New_York",
-      year: "numeric", month: "2-digit", day: "2-digit",
-      hour: "2-digit", minute: "2-digit", hour12: false,
-    });
-    const etParts = etFormatter.formatToParts(now);
-    const etHour = parseInt(etParts.find(p => p.type === "hour")!.value);
-    
-    // Only run expiration logic if it's around midnight ET (0-1 AM ET window)
-    // Reminders can run anytime
-    const isExpirationWindow = etHour >= 0 && etHour < 2;
-
     // 1. Send expiry reminders first (before expiring)
     const { data: reminderResult, error: reminderError } = await supabase.rpc(
       "send_pawbucks_expiry_reminders"
@@ -41,7 +27,7 @@ Deno.serve(async (req) => {
       console.log(`Sent ${reminderResult} expiry reminders`);
     }
 
-    // 2. Expire PawBucks that have passed their expiration date
+    // 2. Expire PawBucks that have passed their midnight-local-time expiration
     const { data: expireResult, error: expireError } = await supabase.rpc(
       "expire_pawbucks"
     );
