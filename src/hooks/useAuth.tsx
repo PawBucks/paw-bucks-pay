@@ -23,6 +23,18 @@ export const useAuth = () => {
         setSession(newSession);
         setUser(newSession?.user ?? null);
         setLoading(false);
+
+        // Auto-detect and save user's timezone on sign in
+        if (newSession?.user && (_event === 'SIGNED_IN' || _event === 'TOKEN_REFRESHED')) {
+          const detectedTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+          if (detectedTz) {
+            supabase
+              .from('profiles')
+              .update({ timezone: detectedTz })
+              .eq('id', newSession.user.id)
+              .then(() => {});
+          }
+        }
       }
     );
 
