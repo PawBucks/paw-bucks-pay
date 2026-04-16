@@ -18,6 +18,7 @@ export interface CartItem {
     category: string | null;
     item_type: string | null;
     stock_quantity: number;
+    merchant_id: string | null;
   };
 }
 
@@ -67,7 +68,7 @@ export function useShoppingCart() {
           id, item_id, quantity, added_at,
           pet_store_items:item_id (
             id, name, description, price, price_pawbucks, 
-            image_url, category, item_type, stock_quantity
+            image_url, category, item_type, stock_quantity, merchant_id
           )
         `)
         .eq("cart_id", cart.id)
