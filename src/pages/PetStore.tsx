@@ -286,7 +286,7 @@ export default function PetStore() {
     setPaymentDialogOpen(true);
     try {
       const { data, error } = await supabase.functions.invoke('create-pet-store-payment', {
-        body: { itemId: item.id, quantity: 1 },
+        body: { itemId: item.id, quantity: 1, autoRedeem: autoRedeemPref?.enabled ?? false },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
@@ -317,7 +317,7 @@ export default function PetStore() {
     try {
       const items = cartItems.map(ci => ({ itemId: ci.item.id, quantity: ci.quantity }));
       const { data, error } = await supabase.functions.invoke('create-pet-store-payment', {
-        body: { items, pawbucksAmount: params.pawbucksAmount || 0, cartId: cart?.id },
+        body: { items, pawbucksAmount: params.pawbucksAmount || 0, cartId: cart?.id, autoRedeem: autoRedeemPref?.enabled ?? false },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
