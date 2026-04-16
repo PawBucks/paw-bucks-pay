@@ -51,6 +51,7 @@ export default function PetStoreAdmin() {
     price_pawbucks: "",
     stock_quantity: "",
     image_url: "",
+    image_urls: [] as string[],
     is_active: true,
   });
 

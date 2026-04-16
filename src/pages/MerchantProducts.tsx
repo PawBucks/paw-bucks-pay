@@ -220,7 +220,7 @@ const MerchantProducts = () => {
           description: productDescription,
           priceInCents,
           currency: "usd",
-          imageUrl: productImageUrl || undefined,
+          imageUrl: productImageUrls[0] || undefined,
         },
       });
 
@@ -262,7 +262,7 @@ const MerchantProducts = () => {
         setProductItemType("product");
         setListInPetStore(false);
         setPawbucksPrice("");
-        setProductImageUrl(null);
+        setProductImageUrls([]);
         await loadProducts(merchant.stripe_account_id);
       } else {
         throw new Error(data.error || "Failed to create product");
