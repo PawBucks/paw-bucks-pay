@@ -319,7 +319,7 @@ serve(async (req) => {
 
         await resend.emails.send({
           from: "PawBucks <noreply@pawbucks.app>",
-          to: ["support@pawbucks.app"],
+          to: ["admin@pawbucks.app"],
           subject: `✅ Pet Store Purchase Confirmed — Order #${orderNumber}: ${itemName}`,
           html: `<!DOCTYPE html>
 <html lang="en">
