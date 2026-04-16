@@ -113,7 +113,7 @@ serve(async (req) => {
     // Get item details
     const { data: item } = await supabaseAdmin
       .from('pet_store_items')
-      .select('id, name, description, price, category, stock_quantity')
+      .select('id, name, description, price, category, stock_quantity, merchant_id')
       .eq('id', itemId)
       .single();
 
@@ -151,15 +151,20 @@ serve(async (req) => {
     }
 
     // 2. Create transaction record
+    const pawbucksUsedInSplit = parseInt(metadata.pawbucks_amount || '0', 10);
+    const paymentMethod = pawbucksUsedInSplit > 0 ? 'split' : 'card';
+    
     const { data: transaction, error: txError } = await supabaseAdmin
       .from('transactions')
       .insert({
         user_id: userId,
+        merchant_id: item?.merchant_id || null,
         amount: amountInDollars,
         stripe_amount: amountInDollars,
-        pawbucks_used: 0,
+        pawbucks_used: pawbucksUsedInSplit,
         application_fee: 0,
         status: 'completed',
+        payment_method: paymentMethod,
         rewards_earned: pawbucksEarned,
         cashback_earned: pawbucksEarned,
         stripe_payment_intent_id: paymentIntentId,
@@ -183,7 +188,35 @@ serve(async (req) => {
       throw new Error("Failed to create transaction record");
     }
 
-    logStep("Transaction created", { transactionId: transaction.id });
+    logStep("Transaction created", { transactionId: transaction.id, paymentMethod, pawbucksUsed: pawbucksUsedInSplit });
+
+    // 2b. Deduct PawBucks if split payment
+    if (pawbucksUsedInSplit > 0) {
+      const pawbucksUsdValue = pawbucksUsedInSplit * 0.001;
+      
+      await supabaseAdmin.from('pawbucks_activity').insert({
+        user_id: userId,
+        amount: pawbucksUsedInSplit,
+        type: 'debit',
+        source: 'pet_store',
+        description: `Used ${pawbucksUsedInSplit} PawBucks ($${pawbucksUsdValue.toFixed(2)}) for Pet Store purchase: ${itemName}`,
+        transaction_id: transaction.id,
+      });
+
+      const { data: currentWallet } = await supabaseAdmin
+        .from('pawbucks_wallet')
+        .select('balance')
+        .eq('user_id', userId)
+        .single();
+
+      if (currentWallet) {
+        await supabaseAdmin
+          .from('pawbucks_wallet')
+          .update({ balance: Math.max(currentWallet.balance - pawbucksUsedInSplit, 0) })
+          .eq('user_id', userId);
+        logStep("PawBucks deducted for split payment", { amount: pawbucksUsedInSplit, newBalance: currentWallet.balance - pawbucksUsedInSplit });
+      }
+    }
 
     // 3. Award PawBucks
     if (pawbucksEarned > 0) {
