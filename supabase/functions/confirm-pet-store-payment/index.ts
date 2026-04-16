@@ -318,7 +318,7 @@ serve(async (req) => {
             <tr>
               <td style="padding:10px 0;font-size:14px;color:#1e293b;font-weight:500;border-bottom:1px solid #f1f5f9;">${itemName}</td>
               <td style="padding:10px 0;font-size:14px;color:#64748b;text-align:center;border-bottom:1px solid #f1f5f9;">x${quantity}</td>
-              <td style="padding:10px 0;font-size:14px;color:#1e293b;font-weight:600;text-align:right;border-bottom:1px solid #f1f5f9;">$${(item?.price || amountInDollars).toFixed(2)}</td>
+              <td style="padding:10px 0;font-size:14px;color:#1e293b;font-weight:600;text-align:right;border-bottom:1px solid #f1f5f9;">$${(item?.price ? (item.price / 100) : amountInDollars).toFixed(2)}</td>
             </tr>
             <tr>
               <td colspan="2" style="padding:12px 0;font-size:15px;font-weight:700;color:#0f172a;">Total Paid</td>
