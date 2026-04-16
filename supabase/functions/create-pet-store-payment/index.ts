@@ -118,7 +118,7 @@ const sendAdminNotification = async (customer: CustomerInfo, purchase: PurchaseD
                       <br><span style="color: #999; font-size: 11px;">Item ID: ${purchase.item.id}</span>
                     </td>
                     <td style="padding: 15px 12px; text-align: center; border-bottom: 1px solid #e0e0e0; color: #333; font-weight: bold;">${purchase.quantity}</td>
-                    <td style="padding: 15px 12px; text-align: right; border-bottom: 1px solid #e0e0e0; color: #666;">$${purchase.item.price.toFixed(2)}</td>
+                    <td style="padding: 15px 12px; text-align: right; border-bottom: 1px solid #e0e0e0; color: #666;">$${(purchase.item.price / 100).toFixed(2)}</td>
                     <td style="padding: 15px 12px; text-align: right; border-bottom: 1px solid #e0e0e0;">
                       <strong style="color: #333;">$${purchase.totalAmount.toFixed(2)}</strong>
                     </td>
@@ -205,9 +205,14 @@ serve(async (req) => {
       throw new Error('User not authenticated');
     }
 
-    const { itemId, quantity } = await req.json();
+    const body = await req.json();
+    
+    // Support both single item (itemId, quantity) and multi-item (items array)
+    const cartItems: { itemId: string; quantity: number }[] = body.items
+      ? body.items
+      : [{ itemId: body.itemId, quantity: body.quantity }];
 
-    if (!itemId || !quantity || quantity <= 0) {
+    if (!cartItems.length || cartItems.some(ci => !ci.itemId || !ci.quantity || ci.quantity <= 0)) {
       throw new Error('Invalid item or quantity');
     }
 
@@ -216,27 +221,27 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Get item details
-    const { data: item, error: itemError } = await supabaseAdmin
+    // Get all item details and validate stock
+    const itemIds = cartItems.map(ci => ci.itemId);
+    const { data: dbItems, error: itemError } = await supabaseAdmin
       .from('pet_store_items')
-      .select('id, name, description, price, category')
-      .eq('id', itemId)
-      .single();
+      .select('id, name, description, price, category, stock_quantity')
+      .in('id', itemIds);
 
-    if (itemError || !item) {
-      throw new Error('Item not found');
+    if (itemError || !dbItems || dbItems.length !== itemIds.length) {
+      throw new Error('One or more items not found');
     }
 
-    // Get stock separately to check availability
-    const { data: stockItem, error: stockError } = await supabaseAdmin
-      .from('pet_store_items')
-      .select('stock_quantity')
-      .eq('id', itemId)
-      .single();
-
-    if (stockError || !stockItem || stockItem.stock_quantity < quantity) {
-      throw new Error('Not enough stock available');
+    // Validate stock for all items
+    for (const ci of cartItems) {
+      const dbItem = dbItems.find(i => i.id === ci.itemId);
+      if (!dbItem || dbItem.stock_quantity < ci.quantity) {
+        throw new Error(`Not enough stock for ${dbItem?.name || ci.itemId}`);
+      }
     }
+
+    // Use first item as primary for backward compat
+    const item = dbItems[0];
 
     // Fetch customer profile for detailed email
     const { data: profile } = await supabaseAdmin
@@ -274,13 +279,14 @@ serve(async (req) => {
       .eq('is_used', false)
       .gt('expires_at', new Date().toISOString());
 
-    // Find the best promotion for this item
+    // Find the best promotion for first item (backward compat)
+    const firstItemId = cartItems[0].itemId;
     for (const up of userPromos || []) {
       const promo = up.badge_promotions as any;
       if (!promo) continue;
       
-      const items = promo.badge_promotion_items || [];
-      const itemIncluded = items.some((i: any) => i.item_id === itemId);
+      const promoItems = promo.badge_promotion_items || [];
+      const itemIncluded = promoItems.some((i: any) => i.item_id === firstItemId);
       
       if (itemIncluded && promo.discount_percentage > discountPercentage) {
         discountPercentage = promo.discount_percentage;
@@ -289,11 +295,23 @@ serve(async (req) => {
       }
     }
 
-    // Calculate final price with discount
-    const originalPrice = item.price * quantity;
-    const discountAmount = discountPercentage > 0 ? Math.round(originalPrice * (discountPercentage / 100)) : 0;
-    const totalAmount = originalPrice - discountAmount;
-    const amountInCents = Math.round(totalAmount * 100);
+    // Calculate total price across all cart items (prices are in cents)
+    let originalPriceCents = 0;
+    for (const ci of cartItems) {
+      const dbItem = dbItems.find(i => i.id === ci.itemId)!;
+      originalPriceCents += dbItem.price * ci.quantity;
+    }
+    const discountAmount = discountPercentage > 0 ? Math.round(originalPriceCents * (discountPercentage / 100)) : 0;
+    const totalAmountCents = originalPriceCents - discountAmount;
+    const amountInCents = totalAmountCents;
+    const totalAmount = totalAmountCents / 100; // dollars for display/emails
+
+    // Build item names for metadata
+    const allItemNames = cartItems.map(ci => {
+      const dbItem = dbItems.find(i => i.id === ci.itemId)!;
+      return `${dbItem.name} x${ci.quantity}`;
+    }).join(', ');
+    const totalQuantity = cartItems.reduce((sum, ci) => sum + ci.quantity, 0);
 
     // Check subscription status for multiplier (3-tier: Free=10x, PawPass=20x, PawPass+=30x)
     let pawbucksMultiplier = 10;
@@ -332,17 +350,19 @@ serve(async (req) => {
     const pawbucksEarned = Math.round(totalAmount * pawbucksMultiplier);
 
     console.log('Creating pet store payment:', {
-      itemId,
-      itemName: item.name,
-      quantity,
-      originalPrice,
-      discountPercentage,
-      discountAmount,
-      totalAmount,
+      cartItems: cartItems.map(ci => ({ itemId: ci.itemId, quantity: ci.quantity })),
+      originalPriceCents,
+      totalAmountCents,
+      totalAmountDollars: totalAmount,
       pawbucksMultiplier,
       pawbucksEarned,
-      appliedPromotionId,
     });
+
+    // Serialize cart items for metadata (Stripe metadata values are strings, max 500 chars)
+    const cartItemsJson = JSON.stringify(cartItems.map(ci => {
+      const dbItem = dbItems.find(i => i.id === ci.itemId)!;
+      return { id: ci.itemId, qty: ci.quantity, name: dbItem.name, priceCents: dbItem.price };
+    }));
 
     // Create a PaymentIntent with explicit card-only for international compatibility
     const paymentIntent = await stripe.paymentIntents.create({
@@ -351,14 +371,15 @@ serve(async (req) => {
       payment_method_types: ['card'],
       metadata: {
         user_id: user.id,
-        item_id: itemId,
-        item_name: item.name,
-        quantity: quantity.toString(),
+        item_id: firstItemId,
+        item_name: allItemNames,
+        quantity: totalQuantity.toString(),
+        cart_items: cartItemsJson.substring(0, 500),
         source: 'pet_store',
         pawbucks_earned: pawbucksEarned.toString(),
         pawbucks_multiplier: pawbucksMultiplier.toString(),
         discount_percentage: discountPercentage.toString(),
-        original_price: originalPrice.toString(),
+        original_price: (originalPriceCents / 100).toString(),
         promotion_id: appliedPromotionId || '',
         user_badge_promotion_id: userBadgePromotionId || '',
       },
@@ -400,7 +421,7 @@ serve(async (req) => {
         pawbucksMultiplier,
         discountApplied: discountPercentage > 0,
         discountPercentage,
-        originalPrice,
+        originalPrice: originalPriceCents / 100,
         finalPrice: totalAmount,
       }),
       { 

@@ -117,8 +117,32 @@ serve(async (req) => {
       .eq('id', itemId)
       .single();
 
-    // 1. Deduct stock
-    if (item && item.stock_quantity >= quantity) {
+    // 1. Deduct stock for all cart items
+    let cartItemsParsed: { id: string; qty: number; name: string; priceCents: number }[] = [];
+    try {
+      if (metadata.cart_items) {
+        cartItemsParsed = JSON.parse(metadata.cart_items);
+      }
+    } catch { /* fallback to single item */ }
+
+    if (cartItemsParsed.length > 0) {
+      // Multi-item cart
+      for (const ci of cartItemsParsed) {
+        const { data: stockItem } = await supabaseAdmin
+          .from('pet_store_items')
+          .select('stock_quantity')
+          .eq('id', ci.id)
+          .single();
+        if (stockItem && stockItem.stock_quantity >= ci.qty) {
+          await supabaseAdmin
+            .from('pet_store_items')
+            .update({ stock_quantity: stockItem.stock_quantity - ci.qty })
+            .eq('id', ci.id);
+          logStep("Stock deducted", { itemId: ci.id, remaining: stockItem.stock_quantity - ci.qty });
+        }
+      }
+    } else if (item && item.stock_quantity >= quantity) {
+      // Single item fallback
       await supabaseAdmin
         .from('pet_store_items')
         .update({ stock_quantity: item.stock_quantity - quantity })
@@ -318,7 +342,7 @@ serve(async (req) => {
             <tr>
               <td style="padding:10px 0;font-size:14px;color:#1e293b;font-weight:500;border-bottom:1px solid #f1f5f9;">${itemName}</td>
               <td style="padding:10px 0;font-size:14px;color:#64748b;text-align:center;border-bottom:1px solid #f1f5f9;">x${quantity}</td>
-              <td style="padding:10px 0;font-size:14px;color:#1e293b;font-weight:600;text-align:right;border-bottom:1px solid #f1f5f9;">$${(item?.price || amountInDollars).toFixed(2)}</td>
+              <td style="padding:10px 0;font-size:14px;color:#1e293b;font-weight:600;text-align:right;border-bottom:1px solid #f1f5f9;">$${(item?.price ? (item.price / 100) : amountInDollars).toFixed(2)}</td>
             </tr>
             <tr>
               <td colspan="2" style="padding:12px 0;font-size:15px;font-weight:700;color:#0f172a;">Total Paid</td>
