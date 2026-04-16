@@ -8762,6 +8762,7 @@ export type Database = {
           description: string | null
           id: string
           image_url: string | null
+          image_urls: string[] | null
           is_active: boolean
           item_type: string
           merchant_id: string | null
@@ -8779,6 +8780,7 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
+          image_urls?: string[] | null
           is_active?: boolean
           item_type?: string
           merchant_id?: string | null
@@ -8796,6 +8798,7 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
+          image_urls?: string[] | null
           is_active?: boolean
           item_type?: string
           merchant_id?: string | null

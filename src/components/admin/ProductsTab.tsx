@@ -24,6 +24,7 @@ type Product = {
   stock_quantity: number;
   is_active: boolean;
   image_url?: string | null;
+  image_urls?: string[];
   created_at: string;
 };
 
@@ -90,7 +91,8 @@ export function ProductsTab() {
             item_type: selectedProduct.item_type,
             stock_quantity: selectedProduct.stock_quantity,
             is_active: selectedProduct.is_active,
-            image_url: selectedProduct.image_url || null,
+            image_url: (selectedProduct.image_urls?.[0]) || selectedProduct.image_url || null,
+            image_urls: selectedProduct.image_urls || [],
           })
           .eq('id', selectedProduct.id);
 
@@ -115,7 +117,8 @@ export function ProductsTab() {
             item_type: selectedProduct.item_type,
             stock_quantity: selectedProduct.stock_quantity,
             is_active: selectedProduct.is_active,
-            image_url: selectedProduct.image_url || null,
+            image_url: (selectedProduct.image_urls?.[0]) || selectedProduct.image_url || null,
+            image_urls: selectedProduct.image_urls || [],
           }]);
 
         if (error) throw error;
@@ -175,6 +178,7 @@ export function ProductsTab() {
       stock_quantity: 0,
       is_active: true,
       image_url: null,
+      image_urls: [],
       created_at: new Date().toISOString(),
     });
     setEditDialogOpen(true);
@@ -336,8 +340,8 @@ export function ProductsTab() {
               <div className="space-y-2">
                 <Label>Product Image</Label>
                 <ProductImageUpload
-                  imageUrl={selectedProduct.image_url || null}
-                  onChange={(url) => setSelectedProduct({ ...selectedProduct, image_url: url })}
+                  imageUrls={selectedProduct.image_urls || (selectedProduct.image_url ? [selectedProduct.image_url] : [])}
+                  onChange={(urls) => setSelectedProduct({ ...selectedProduct, image_urls: urls, image_url: urls[0] || null })}
                   folder="admin"
                 />
               </div>
