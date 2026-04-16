@@ -290,11 +290,21 @@ export default function PetStore() {
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
+      
+      // Auto-redeem may have fully covered the purchase
+      if (data?.paid_with_pawbucks) {
+        toast.success(data.message || "Purchase completed with PawBucks!");
+        setPaymentDialogOpen(false);
+        queryClient.invalidateQueries({ queryKey: ["pawbucks-wallet"] });
+        queryClient.invalidateQueries({ queryKey: ["pet-store-items"] });
+        return;
+      }
+      
       setSelectedItem({
         id: item.id,
         name: data?.orderSummary || item.name,
         quantity: data?.totalQuantity || 1,
-        priceDollars: data?.cardAmount ?? (item.price / 100),
+        priceDollars: data?.cardAmount ?? data?.finalPrice ?? (item.price / 100),
       });
       setClientSecret(data.clientSecret);
     } catch (error: any) {
