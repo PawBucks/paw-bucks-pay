@@ -125,7 +125,7 @@ serve(async (req) => {
       // Log PawBucks activity
       await supabaseAdmin.from('pawbucks_activity').insert({
         user_id: effectiveUserId,
-        type: 'debit',
+        type: 'redeem',
         amount: cost,
         source: 'pet_store',
         description: `Purchased ${quantity}x ${dbItem.name}`,
@@ -142,9 +142,16 @@ serve(async (req) => {
       .update({ balance: wallet.balance - totalPawbucksCost })
       .eq('user_id', effectiveUserId);
 
+    // Get user profile for notifications
+    const { data: userProfile } = await supabaseAdmin
+      .from('profiles')
+      .select('email, full_name, phone')
+      .eq('id', user.id)
+      .single();
+
     // Create transaction record
     const description = `Pet Store: ${itemNames.join(', ')}`;
-    await supabaseAdmin.from('transactions').insert({
+    const { data: txRecord } = await supabaseAdmin.from('transactions').insert({
       user_id: user.id,
       merchant_id: validatedItems[0]?.dbItem?.merchant_id || null,
       amount: totalUsdEquivalent,
@@ -156,7 +163,7 @@ serve(async (req) => {
       rewards_earned: 0,
       cashback_earned: 0,
       description,
-    });
+    }).select('id').single();
 
     // Mark cart as converted if cartId provided
     if (cartId) {
@@ -169,76 +176,156 @@ serve(async (req) => {
         .eq('cart_id', cartId);
     }
 
-    // Send receipt email
+    // In-app notification
+    const totalUsdFormatted = totalUsdEquivalent.toFixed(2);
+    await supabaseAdmin.from('notifications').insert({
+      user_id: user.id,
+      title: '🛍️ Purchase Confirmed',
+      message: `Your Pet Store order for ${itemNames.join(', ')} (${totalPawbucksCost.toLocaleString()} PawBucks / $${totalUsdFormatted}) is confirmed!`,
+      category: 'transactional',
+    });
+
+    // Send receipt & admin notification emails
     try {
       const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
-      if (RESEND_API_KEY && user.email) {
+      if (RESEND_API_KEY) {
+        const orderNumber = `PS-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+        const purchaseDate = new Date().toLocaleString('en-US', {
+          timeZone: 'America/New_York',
+          weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+          hour: '2-digit', minute: '2-digit',
+        });
+        const customerName = userProfile?.full_name || 'N/A';
+        const customerEmail = userProfile?.email || user.email || 'N/A';
+        const customerPhone = userProfile?.phone || 'N/A';
+
         const itemsHtml = validatedItems.map(({ dbItem, quantity }) => `
           <tr>
-            <td style="padding:8px 12px;border-bottom:1px solid #eee;">${dbItem.name}</td>
-            <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;">${quantity}</td>
-            <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;">${(dbItem.price_pawbucks * quantity).toLocaleString()} PB</td>
+            <td style="padding:10px 12px;border-bottom:1px solid #f1f5f9;font-size:14px;color:#1e293b;">${dbItem.name}</td>
+            <td style="padding:10px 12px;border-bottom:1px solid #f1f5f9;text-align:center;font-size:14px;color:#64748b;">${quantity}</td>
+            <td style="padding:10px 12px;border-bottom:1px solid #f1f5f9;text-align:right;font-size:14px;color:#1e293b;font-weight:600;">${(dbItem.price_pawbucks * quantity).toLocaleString()} PB</td>
+            <td style="padding:10px 12px;border-bottom:1px solid #f1f5f9;text-align:right;font-size:14px;color:#64748b;">$${((dbItem.price / 100) * quantity).toFixed(2)}</td>
           </tr>
         `).join('');
 
-        const emailHtml = `
-          <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
-            <div style="background:#0d9488;padding:24px;text-align:center;">
-              <img src="https://paw-bucks-pay.lovable.app/lovable-uploads/be67ba1e-0474-4e30-8bac-0faa4b9aab5e.png" alt="PawBucks" style="height:48px;" />
-            </div>
-            <div style="padding:24px;background:#fff;">
-              <h2 style="color:#0d9488;margin:0 0 16px;">Purchase Receipt</h2>
-              <p>Thank you for your purchase!</p>
-              <table style="width:100%;border-collapse:collapse;margin:16px 0;">
-                <thead>
-                  <tr style="background:#f9fafb;">
-                    <th style="padding:8px 12px;text-align:left;">Item</th>
-                    <th style="padding:8px 12px;text-align:center;">Qty</th>
-                    <th style="padding:8px 12px;text-align:right;">PawBucks</th>
-                  </tr>
-                </thead>
-                <tbody>${itemsHtml}</tbody>
-                <tfoot>
-                  <tr>
-                    <td colspan="2" style="padding:12px;font-weight:bold;">Total</td>
-                    <td style="padding:12px;text-align:right;font-weight:bold;">${totalPawbucksCost.toLocaleString()} PB</td>
-                  </tr>
-                </tfoot>
-              </table>
-              <p style="color:#666;font-size:14px;">Payment Method: PawBucks</p>
-              <p style="color:#666;font-size:14px;">USD Equivalent: $${totalUsdEquivalent.toFixed(2)}</p>
-            </div>
-            <div style="padding:16px;text-align:center;color:#999;font-size:12px;">
-              © ${new Date().getFullYear()} PawBucks · support@pawbucks.app
-            </div>
-          </div>
-        `;
+        // Customer receipt email
+        if (user.email) {
+          const supabaseUrl = Deno.env.get('SUPABASE_URL');
+          const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
+          if (supabaseUrl && supabaseAnonKey) {
+            await fetch(`${supabaseUrl}/functions/v1/send-receipt-email`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${supabaseAnonKey}`,
+              },
+              body: JSON.stringify({
+                email: customerEmail,
+                customerName,
+                transactionDate: new Date().toISOString(),
+                receiptId: txRecord?.id || orderNumber,
+                merchantName: 'PawBucks Pet Store',
+                merchantDescription: 'Your one-stop shop for pet supplies, treats, and more!',
+                merchantProfileUrl: 'https://pawbucks.app/pet-store',
+                items: validatedItems.map(({ dbItem, quantity }) => ({
+                  name: `${dbItem.name} x${quantity}`,
+                  price: (dbItem.price / 100) * quantity,
+                })),
+                subtotal: totalUsdEquivalent,
+                pawbucksApplied: totalPawbucksCost,
+                cardAmount: 0,
+                totalPaid: totalUsdEquivalent,
+                pawbucksEarned: 0,
+                walletBalance: wallet.balance - totalPawbucksCost,
+                tierInfo: { tierName: 'PawBucks Payment', multiplier: 0 },
+              }),
+            });
+            logStep("Customer receipt sent", { email: customerEmail });
+          }
+        }
 
-        // Send customer receipt
+        // Admin purchase order notification to admin@pawbucks.app
         await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({
             from: 'PawBucks <noreply@pawbucks.app>',
-            to: [user.email],
-            subject: `PawBucks Pet Store Receipt - ${itemNames.join(', ')}`,
-            html: emailHtml,
+            to: ['admin@pawbucks.app'],
+            subject: `Pet Store PawBucks Purchase Order #${orderNumber}: ${itemNames.join(', ')}`,
+            html: `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background-color:#f1f5f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f1f5f9;padding:32px 16px;">
+<tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.06);">
+  <tr>
+    <td style="background:linear-gradient(135deg,#0f172a 0%,#1e293b 60%,#0f172a 100%);padding:40px 24px 36px;text-align:center;">
+      <img src="https://yxpnkipcoxksmnsvpvwi.supabase.co/storage/v1/object/public/email-assets/pawbucks-logo-email.png" alt="PawBucks" width="120" height="120" style="display:block;margin:0 auto;width:120px;height:120px;">
+      <p style="margin:0 0 8px;font-size:20px;font-weight:600;color:#ffffff;">Pet Store Purchase — PawBucks Payment ✔</p>
+      <p style="margin:0;font-size:13px;color:#94a3b8;">Order #${orderNumber}</p>
+    </td>
+  </tr>
+  <tr>
+    <td style="padding:24px 24px 0;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0;">
+        <tr><td style="padding:20px;">
+          <p style="margin:0 0 16px;font-size:11px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:1.5px;">Customer Information</p>
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr><td style="padding:8px 0;font-size:13px;color:#64748b;width:120px;">Name</td><td style="padding:8px 0;font-size:14px;color:#1e293b;font-weight:500;">${customerName}</td></tr>
+            <tr><td style="padding:8px 0;font-size:13px;color:#64748b;">Email</td><td style="padding:8px 0;font-size:14px;color:#1e293b;font-weight:500;">${customerEmail}</td></tr>
+            <tr><td style="padding:8px 0;font-size:13px;color:#64748b;">Phone</td><td style="padding:8px 0;font-size:14px;color:#1e293b;font-weight:500;">${customerPhone}</td></tr>
+            <tr><td style="padding:8px 0;font-size:13px;color:#64748b;">User ID</td><td style="padding:8px 0;font-size:12px;color:#94a3b8;">${user.id}</td></tr>
+          </table>
+        </td></tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td style="padding:24px 24px 0;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;border:1px solid #e2e8f0;">
+        <tr><td style="padding:20px;">
+          <p style="margin:0 0 16px;font-size:11px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:1.5px;">Order Details</p>
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr style="background:#f8fafc;">
+              <th style="padding:10px 12px;text-align:left;font-size:12px;color:#64748b;">Item</th>
+              <th style="padding:10px 12px;text-align:center;font-size:12px;color:#64748b;">Qty</th>
+              <th style="padding:10px 12px;text-align:right;font-size:12px;color:#64748b;">PawBucks</th>
+              <th style="padding:10px 12px;text-align:right;font-size:12px;color:#64748b;">USD Equiv</th>
+            </tr>
+            ${itemsHtml}
+            <tr>
+              <td colspan="2" style="padding:12px;font-size:15px;font-weight:700;color:#0f172a;">Total</td>
+              <td style="padding:12px;text-align:right;font-size:15px;font-weight:700;color:#0f172a;">${totalPawbucksCost.toLocaleString()} PB</td>
+              <td style="padding:12px;text-align:right;font-size:15px;font-weight:700;color:#0f172a;">$${totalUsdFormatted}</td>
+            </tr>
+          </table>
+          <table cellpadding="0" cellspacing="0" style="margin-top:12px;">
+            <tr><td style="background:#eff6ff;border-radius:8px;padding:8px 14px;">
+              <p style="margin:0;font-size:13px;color:#2563eb;font-weight:600;">Payment: 100% PawBucks ✔</p>
+            </td></tr>
+          </table>
+        </td></tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td style="padding:24px;text-align:center;">
+      <p style="margin:0;font-size:13px;color:#94a3b8;">Purchase Date: ${purchaseDate} EST</p>
+    </td>
+  </tr>
+  <tr>
+    <td style="padding:24px;background:#f8fafc;text-align:center;border-top:1px solid #e2e8f0;">
+      <p style="margin:0 0 4px;font-size:12px;color:#94a3b8;">PawBucks Admin Notification • Pet Store PawBucks Purchase</p>
+      <p style="margin:0;font-size:11px;color:#cbd5e1;">© ${new Date().getFullYear()} PawBucks. All rights reserved.</p>
+    </td>
+  </tr>
+</table>
+</td></tr></table>
+</body></html>`,
           }),
         });
-
-        // Notify support
-        await fetch('https://api.resend.com/emails', {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            from: 'PawBucks <noreply@pawbucks.app>',
-            to: ['support@pawbucks.app'],
-            subject: `[Pet Store] PawBucks Purchase by ${user.email}`,
-            html: `<p><strong>${user.email}</strong> purchased: ${itemNames.join(', ')}</p>
-                   <p>Total: ${totalPawbucksCost.toLocaleString()} PB ($${totalUsdEquivalent.toFixed(2)} equiv)</p>
-                   <p>Payment: PawBucks only</p>`,
-          }),
-        });
+        logStep("Admin notification sent to admin@pawbucks.app");
       }
     } catch (emailErr) {
       logStep("Email send failed (non-fatal)", { error: String(emailErr) });
