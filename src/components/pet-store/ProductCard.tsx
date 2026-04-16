@@ -62,7 +62,9 @@ export const ProductCard = memo(({
   const outOfStock = item.stock_quantity === 0;
 
   return (
-    <Card className={`group flex flex-col overflow-hidden hover:shadow-lg transition-all duration-200 ${hasPromo ? 'ring-2 ring-primary/40' : ''} ${outOfStock ? 'opacity-70' : ''}`}>
+    <Card className={`group flex flex-col overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer ${hasPromo ? 'ring-2 ring-primary/40' : ''} ${outOfStock ? 'opacity-70' : ''}`}
+      onClick={() => navigate(`/pet-store/${item.id}`)}
+    >
       {/* Image */}
       <div className="relative aspect-square overflow-hidden bg-muted/30">
         {hasPromo && (
