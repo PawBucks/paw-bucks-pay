@@ -118,7 +118,7 @@ const sendAdminNotification = async (customer: CustomerInfo, purchase: PurchaseD
                       <br><span style="color: #999; font-size: 11px;">Item ID: ${purchase.item.id}</span>
                     </td>
                     <td style="padding: 15px 12px; text-align: center; border-bottom: 1px solid #e0e0e0; color: #333; font-weight: bold;">${purchase.quantity}</td>
-                    <td style="padding: 15px 12px; text-align: right; border-bottom: 1px solid #e0e0e0; color: #666;">$${purchase.item.price.toFixed(2)}</td>
+                    <td style="padding: 15px 12px; text-align: right; border-bottom: 1px solid #e0e0e0; color: #666;">$${(purchase.item.price / 100).toFixed(2)}</td>
                     <td style="padding: 15px 12px; text-align: right; border-bottom: 1px solid #e0e0e0;">
                       <strong style="color: #333;">$${purchase.totalAmount.toFixed(2)}</strong>
                     </td>
