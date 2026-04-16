@@ -206,6 +206,7 @@ serve(async (req) => {
     }
 
     const body = await req.json();
+    const pawbucksAmount = parseInt(body.pawbucksAmount || '0', 10);
     
     // Support both single item (itemId, quantity) and multi-item (items array)
     const cartItems: { itemId: string; quantity: number }[] = body.items
@@ -382,6 +383,7 @@ serve(async (req) => {
         original_price: (originalPriceCents / 100).toString(),
         promotion_id: appliedPromotionId || '',
         user_badge_promotion_id: userBadgePromotionId || '',
+        pawbucks_amount: pawbucksAmount.toString(),
       },
     });
 
