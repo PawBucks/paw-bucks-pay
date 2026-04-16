@@ -566,7 +566,15 @@ serve(async (req) => {
         discountApplied: discountPercentage > 0,
         discountPercentage,
         originalPrice: originalPriceCents / 100,
-        finalPrice: totalAmount,
+        finalPrice: amountInCents / 100,
+        cardAmount: amountInCents / 100,
+        orderSummary: allItemNames,
+        totalQuantity,
+        pawbucksApplied: pawbucksUsed > 0 ? {
+          amount: pawbucksUsed,
+          usdValue: pawbucksUsdValue,
+          formatted: `${pawbucksUsed.toLocaleString()} PB ($${pawbucksUsdValue.toFixed(2)})`,
+        } : null,
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
