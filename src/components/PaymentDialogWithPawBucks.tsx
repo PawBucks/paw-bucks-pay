@@ -20,6 +20,7 @@ import { PawBucksSourceSelector, type PawBucksSource } from "@/components/checko
 import { getStripeForConnectedAccount } from "@/lib/stripe";
 import { TipSelector } from "@/components/checkout/TipSelector";
 import { buildAppUrl } from "@/lib/url";
+import { useQuery } from "@tanstack/react-query";
 
 // Pet Owner conversion rate: 1000 PawBucks = $1.00 (1 PawBuck = $0.001)
 const PAWBUCKS_TO_USD = 0.001;
@@ -257,6 +258,18 @@ export const PaymentDialogWithPawBucks = ({
     isLoading: loadingBalance,
   } = useSpendablePawBucks(userId);
 
+  // Auto-redeem preference
+  const { data: autoRedeemPref } = useQuery({
+    queryKey: ["auto-redeem-preference", userId],
+    queryFn: async () => {
+      const { data } = await supabase.from('profiles').select('auto_redeem_mode').eq('id', userId).single();
+      const mode = data?.auto_redeem_mode || 'off';
+      return { enabled: mode !== 'off', mode };
+    },
+    staleTime: 1000 * 60 * 5,
+    enabled: !!userId,
+  });
+
   const totalAmount = parseFloat(amount) || 0;
 
   // Pet Fund / Welcome credit applicable if merchant accepts PawBucks and meets min transaction
@@ -306,6 +319,7 @@ export const PaymentDialogWithPawBucks = ({
           tipAmount,
           merchantId,
           description: description || `Payment to ${merchantName}`,
+          autoRedeem: autoRedeemPref?.enabled ?? false,
         },
       });
 

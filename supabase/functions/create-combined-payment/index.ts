@@ -15,6 +15,7 @@ const combinedPaymentSchema = z.object({
   tipAmount: z.number().min(0).default(0), // Tip in USD, always charged to card
   merchantId: z.string().uuid({ message: "Invalid merchant ID" }),
   description: z.string().max(500).optional(),
+  autoRedeem: z.boolean().optional().default(false),
 });
 
 // PawBucks conversion for pet owners: 1000 PawBucks = $1.00 (1 PawBuck = $0.001)
@@ -108,7 +109,7 @@ serve(async (req) => {
       );
     }
 
-    const { totalAmount, pawbucksAmount, tipAmount, merchantId, description } = validation.data;
+    const { totalAmount, pawbucksAmount: manualPawbucksAmount, tipAmount, merchantId, description, autoRedeem: requestAutoRedeem } = validation.data;
 
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -127,12 +128,69 @@ serve(async (req) => {
     }
 
     // Validate PawBucks usage
-    if (pawbucksAmount > 0 && !merchant.accepts_pawbucks) {
+    if (manualPawbucksAmount > 0 && !merchant.accepts_pawbucks) {
       throw new Error('This merchant does not accept PawBucks');
     }
 
-    // Calculate USD value of PawBucks - PawBucks apply to base amount ONLY, not tip
+    // --- Auto-Redeem Logic ---
+    let pawbucksAmount = manualPawbucksAmount;
     const baseAmount = totalAmount - tipAmount; // Base amount excluding tip
+
+    if (requestAutoRedeem && pawbucksAmount === 0 && merchant.accepts_pawbucks && baseAmount > 0) {
+      // Fetch user's auto-redeem preferences
+      const { data: arProfile } = await supabaseAdmin
+        .from('profiles')
+        .select('auto_redeem_mode, auto_redeem_min_coverage_pct, auto_redeem_max_apply_pct')
+        .eq('id', user.id)
+        .single();
+
+      const autoRedeemMode = arProfile?.auto_redeem_mode || 'off';
+      const minCoveragePct = arProfile?.auto_redeem_min_coverage_pct ?? 20;
+      const maxApplyPct = arProfile?.auto_redeem_max_apply_pct ?? 50;
+
+      // Fetch wallet balance for auto-redeem calculation
+      const { data: arWallet } = await supabaseAdmin
+        .from('pawbucks_wallet')
+        .select('balance')
+        .eq('user_id', user.id)
+        .single();
+
+      const arAvailable = arWallet?.balance || 0;
+
+      logStep('Auto-redeem check (combined)', { autoRedeemMode, minCoveragePct, maxApplyPct, arAvailable, baseAmount });
+
+      if (arAvailable > 0) {
+        let shouldAutoRedeem = false;
+        let maxPBToApply = arAvailable;
+
+        if (autoRedeemMode === 'always') {
+          shouldAutoRedeem = true;
+        } else if (autoRedeemMode === 'smart') {
+          const availableUsd = arAvailable * PAWBUCKS_TO_USD;
+          const coveragePct = (availableUsd / baseAmount) * 100;
+          if (coveragePct >= minCoveragePct) {
+            shouldAutoRedeem = true;
+            const maxUsd = baseAmount * (maxApplyPct / 100);
+            maxPBToApply = Math.min(arAvailable, Math.floor(maxUsd / PAWBUCKS_TO_USD));
+          }
+          logStep('Smart auto-redeem eval (combined)', { coveragePct: coveragePct.toFixed(1), shouldAutoRedeem });
+        }
+        // subscriptions_only: not applicable for merchant payments
+
+        if (shouldAutoRedeem && maxPBToApply > 0) {
+          // Cap so PawBucks USD value doesn't exceed baseAmount
+          let autoUsd = maxPBToApply * PAWBUCKS_TO_USD;
+          if (autoUsd > baseAmount) {
+            autoUsd = baseAmount;
+            maxPBToApply = Math.floor(autoUsd / PAWBUCKS_TO_USD);
+          }
+          pawbucksAmount = maxPBToApply;
+          logStep('Auto-redeem applied (combined)', { pawbucksAmount, usdValue: autoUsd.toFixed(2) });
+        }
+      }
+    }
+
+    // Calculate USD value of PawBucks - PawBucks apply to base amount ONLY, not tip
     const pawbucksUsdValue = pawbucksAmount * PAWBUCKS_TO_USD;
     const stripeAmount = Math.max(0, baseAmount - pawbucksUsdValue) + tipAmount; // Tip always goes to card
 
