@@ -224,71 +224,37 @@ export default function PetStore() {
     },
   });
 
-  // PawBucks purchase for entire cart
+  // PawBucks purchase for entire cart (server-side via edge function)
   const cartPawbucksPurchase = useMutation({
     mutationFn: async () => {
       if (!user || !effectiveUserId) throw new Error("Must be logged in");
       if (!wallet || wallet.balance < totalPawbucks) throw new Error("Insufficient PawBucks balance");
 
-      const itemNames: string[] = [];
-      let totalPawbucksCost = 0;
-      let totalUsdEquivalent = 0;
+      const items = cartItems.map(ci => ({ itemId: ci.item.id, quantity: ci.quantity }));
+      const cartId = cartItems[0] ? undefined : undefined;
 
-      for (const cartItem of cartItems) {
-        const item = cartItem.item;
-        if (item.stock_quantity < cartItem.quantity) throw new Error(`Not enough stock for ${item.name}`);
-        const totalCost = item.price_pawbucks * cartItem.quantity;
-        totalPawbucksCost += totalCost;
-        totalUsdEquivalent += (item.price / 100) * cartItem.quantity; // price is in cents
+      // Get cart ID from the shopping cart hook
+      const { data: cartData } = await supabase
+        .from("shopping_carts")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("status", "active")
+        .maybeSingle();
 
-        const { data: order, error: orderError } = await supabase
-          .from("pet_store_orders")
-          .insert([{ user_id: user.id, total_amount: totalCost, status: "completed" }])
-          .select()
-          .single();
-        if (orderError) throw orderError;
+      const { data, error } = await supabase.functions.invoke('pet-store-pawbucks-purchase', {
+        body: { items, cartId: cartData?.id },
+      });
 
-        await supabase.from("pet_store_order_items").insert([{
-          order_id: order.id, item_id: item.id, quantity: cartItem.quantity, price_per_item: item.price_pawbucks,
-        }]);
+      if (error) throw new Error(error.message || "Purchase failed");
+      if (data?.error) throw new Error(data.error);
 
-        await supabase.from("pawbucks_activity").insert([{
-          user_id: effectiveUserId, type: "debit", amount: totalCost, source: "pet_store",
-          description: `Purchased ${cartItem.quantity}x ${item.name}`,
-        }]);
-
-        await supabase.from("pet_store_items")
-          .update({ stock_quantity: item.stock_quantity - cartItem.quantity })
-          .eq("id", item.id);
-
-        itemNames.push(`${item.name} x${cartItem.quantity}`);
-      }
-
-      await supabase.from("pawbucks_wallet")
-        .update({ balance: wallet.balance - totalPawbucks })
-        .eq("user_id", effectiveUserId);
-
-      // Create transaction record for visibility in Recent Transactions & Admin Dashboard
-      const description = `Pet Store: ${itemNames.join(', ')}`;
-      await supabase.from("transactions").insert([{
-        user_id: user.id,
-        merchant_id: cartItems[0]?.item?.merchant_id || null,
-        amount: totalUsdEquivalent,
-        stripe_amount: 0,
-        pawbucks_used: totalPawbucksCost,
-        application_fee: 0,
-        status: "completed",
-        payment_method: "pawbucks",
-        rewards_earned: 0,
-        cashback_earned: 0,
-        description,
-      }]);
-
-      await markConverted();
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["pawbucks-wallet"] });
       queryClient.invalidateQueries({ queryKey: ["pet-store-items"] });
+      queryClient.invalidateQueries({ queryKey: ["shopping-cart"] });
+      queryClient.invalidateQueries({ queryKey: ["shopping-cart-items"] });
       setCartOpen(false);
       toast.success("Purchase successful! 🎉");
     },
