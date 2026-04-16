@@ -1,28 +1,37 @@
 import { useState, useRef } from "react";
-import { Camera, Upload, X, Loader2, ImageIcon } from "lucide-react";
+import { Camera, Upload, X, Loader2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 interface ProductImageUploadProps {
-  /** Current image URL (signed or public) */
-  imageUrl: string | null;
-  /** Called with the storage path after upload, or null on remove */
-  onChange: (storagePath: string | null) => void;
+  /** Array of current image URLs */
+  imageUrls: string[];
+  /** Called with updated array of URLs after upload or remove */
+  onChange: (urls: string[]) => void;
   /** Folder prefix in the bucket, e.g. "admin" or merchant ID */
   folder: string;
+  /** Maximum number of images allowed (default 5) */
+  maxImages?: number;
   className?: string;
 }
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
-export function ProductImageUpload({ imageUrl, onChange, folder, className }: ProductImageUploadProps) {
+export function ProductImageUpload({
+  imageUrls,
+  onChange,
+  folder,
+  maxImages = 5,
+  className,
+}: ProductImageUploadProps) {
   const [uploading, setUploading] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+
+  const canAddMore = imageUrls.length < maxImages;
 
   const handleFile = async (file: File) => {
     if (!ALLOWED_TYPES.includes(file.type)) {
@@ -33,10 +42,12 @@ export function ProductImageUpload({ imageUrl, onChange, folder, className }: Pr
       toast.error("Image must be under 5MB.");
       return;
     }
+    if (!canAddMore) {
+      toast.error(`Maximum ${maxImages} images allowed.`);
+      return;
+    }
 
     setUploading(true);
-    const localPreview = URL.createObjectURL(file);
-    setPreviewUrl(localPreview);
 
     try {
       const ext = file.name.split(".").pop() || "jpg";
@@ -53,28 +64,25 @@ export function ProductImageUpload({ imageUrl, onChange, folder, className }: Pr
         .from("product-images")
         .getPublicUrl(filePath);
 
-      onChange(data.publicUrl);
+      onChange([...imageUrls, data.publicUrl]);
       toast.success("Image uploaded!");
     } catch (error) {
       console.error("Upload error:", error);
       toast.error("Failed to upload image");
-      setPreviewUrl(null);
     } finally {
       setUploading(false);
     }
   };
 
-  const handleRemove = () => {
-    setPreviewUrl(null);
-    onChange(null);
+  const handleRemove = (index: number) => {
+    const updated = imageUrls.filter((_, i) => i !== index);
+    onChange(updated);
     if (fileInputRef.current) fileInputRef.current.value = "";
     if (cameraInputRef.current) cameraInputRef.current.value = "";
   };
 
-  const displayUrl = previewUrl || imageUrl;
-
   return (
-    <div className={cn("space-y-2", className)}>
+    <div className={cn("space-y-3", className)}>
       {/* Hidden inputs */}
       <input
         ref={fileInputRef}
@@ -100,38 +108,79 @@ export function ProductImageUpload({ imageUrl, onChange, folder, className }: Pr
         className="hidden"
       />
 
-      {displayUrl ? (
-        <div className="relative group rounded-lg overflow-hidden border border-border bg-muted/30 aspect-square max-w-[200px]">
-          <img
-            src={displayUrl}
-            alt="Product"
-            className="w-full h-full object-cover"
-          />
-          {uploading && (
-            <div className="absolute inset-0 bg-background/60 flex items-center justify-center">
-              <Loader2 className="h-6 w-6 animate-spin text-primary" />
-            </div>
-          )}
-          {!uploading && (
+      {/* Image grid */}
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+        {imageUrls.map((url, index) => (
+          <div
+            key={`${url}-${index}`}
+            className="relative group rounded-lg overflow-hidden border border-border bg-muted/30 aspect-square"
+          >
+            <img
+              src={url}
+              alt={`Product image ${index + 1}`}
+              className="w-full h-full object-cover"
+            />
             <Button
               type="button"
               variant="destructive"
               size="icon"
-              className="absolute top-1 right-1 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
-              onClick={handleRemove}
+              className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+              onClick={() => handleRemove(index)}
             >
-              <X className="h-4 w-4" />
+              <X className="h-3 w-3" />
             </Button>
-          )}
-        </div>
-      ) : (
+            {index === 0 && (
+              <span className="absolute bottom-1 left-1 text-[10px] bg-primary text-primary-foreground px-1.5 py-0.5 rounded font-medium">
+                Main
+              </span>
+            )}
+          </div>
+        ))}
+
+        {/* Add more button */}
+        {canAddMore && !uploading && (
+          <div className="aspect-square rounded-lg border-2 border-dashed border-muted-foreground/25 flex flex-col items-center justify-center gap-1 hover:border-muted-foreground/50 transition-colors">
+            <div className="flex gap-1">
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <Upload className="h-4 w-4" />
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => cameraInputRef.current?.click()}
+              >
+                <Camera className="h-4 w-4" />
+              </Button>
+            </div>
+            <span className="text-[10px] text-muted-foreground">
+              {imageUrls.length}/{maxImages}
+            </span>
+          </div>
+        )}
+
+        {/* Uploading indicator */}
+        {uploading && (
+          <div className="aspect-square rounded-lg border border-border bg-muted/30 flex items-center justify-center">
+            <Loader2 className="h-5 w-5 animate-spin text-primary" />
+          </div>
+        )}
+      </div>
+
+      {imageUrls.length === 0 && !uploading && (
         <div className="flex items-center gap-2">
           <Button
             type="button"
             variant="outline"
             size="sm"
             onClick={() => fileInputRef.current?.click()}
-            disabled={uploading}
           >
             <Upload className="h-4 w-4 mr-1.5" />
             Upload
@@ -141,7 +190,6 @@ export function ProductImageUpload({ imageUrl, onChange, folder, className }: Pr
             variant="outline"
             size="sm"
             onClick={() => cameraInputRef.current?.click()}
-            disabled={uploading}
           >
             <Camera className="h-4 w-4 mr-1.5" />
             Camera
@@ -149,11 +197,9 @@ export function ProductImageUpload({ imageUrl, onChange, folder, className }: Pr
         </div>
       )}
 
-      {!displayUrl && (
-        <p className="text-xs text-muted-foreground">
-          JPG, PNG, or WebP up to 5MB
-        </p>
-      )}
+      <p className="text-xs text-muted-foreground">
+        JPG, PNG, or WebP up to 5MB · {imageUrls.length}/{maxImages} images
+      </p>
     </div>
   );
 }
