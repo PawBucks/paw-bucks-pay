@@ -230,10 +230,16 @@ export default function PetStore() {
       if (!user || !effectiveUserId) throw new Error("Must be logged in");
       if (!wallet || wallet.balance < totalPawbucks) throw new Error("Insufficient PawBucks balance");
 
+      const itemNames: string[] = [];
+      let totalPawbucksCost = 0;
+      let totalUsdEquivalent = 0;
+
       for (const cartItem of cartItems) {
         const item = cartItem.item;
         if (item.stock_quantity < cartItem.quantity) throw new Error(`Not enough stock for ${item.name}`);
         const totalCost = item.price_pawbucks * cartItem.quantity;
+        totalPawbucksCost += totalCost;
+        totalUsdEquivalent += (item.price / 100) * cartItem.quantity; // price is in cents
 
         const { data: order, error: orderError } = await supabase
           .from("pet_store_orders")
@@ -254,11 +260,29 @@ export default function PetStore() {
         await supabase.from("pet_store_items")
           .update({ stock_quantity: item.stock_quantity - cartItem.quantity })
           .eq("id", item.id);
+
+        itemNames.push(`${item.name} x${cartItem.quantity}`);
       }
 
       await supabase.from("pawbucks_wallet")
         .update({ balance: wallet.balance - totalPawbucks })
         .eq("user_id", effectiveUserId);
+
+      // Create transaction record for visibility in Recent Transactions & Admin Dashboard
+      const description = `Pet Store: ${itemNames.join(', ')}`;
+      await supabase.from("transactions").insert([{
+        user_id: user.id,
+        merchant_id: cartItems[0]?.item?.merchant_id || null,
+        amount: totalUsdEquivalent,
+        stripe_amount: 0,
+        pawbucks_used: totalPawbucksCost,
+        application_fee: 0,
+        status: "completed",
+        payment_method: "pawbucks",
+        rewards_earned: 0,
+        cashback_earned: 0,
+        description,
+      }]);
 
       await markConverted();
     },
