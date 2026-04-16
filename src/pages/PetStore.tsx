@@ -76,14 +76,31 @@ const PetStorePaymentForm = ({
     if (!stripe || !elements) return;
     setIsLoading(true);
     try {
-      const { error } = await stripe.confirmPayment({
+      const result = await stripe.confirmPayment({
         elements,
         confirmParams: { return_url: buildAppUrl("/pet-store") },
         redirect: 'if_required',
       });
-      if (error) throw error;
-      const pawbucksEarned = Math.round(totalAmount * cashbackRate);
-      toast.success(`Payment successful! You earned ${pawbucksEarned} PawBucks!`);
+      if (result.error) throw result.error;
+
+      // Call backend to confirm, deduct stock, award PawBucks, and send receipt
+      const paymentIntentId = result.paymentIntent?.id;
+      if (paymentIntentId) {
+        const { data: confirmData, error: confirmError } = await supabase.functions.invoke(
+          'confirm-pet-store-payment',
+          { body: { paymentIntentId } }
+        );
+        if (confirmError) {
+          console.error("Confirmation error:", confirmError);
+        } else {
+          console.log("[PET-STORE] Payment confirmed:", confirmData);
+        }
+        const earned = confirmData?.pawbucksEarned || Math.round(totalAmount * cashbackRate);
+        toast.success(`Payment successful! You earned ${earned.toLocaleString()} PawBucks!`);
+      } else {
+        const pawbucksEarned = Math.round(totalAmount * cashbackRate);
+        toast.success(`Payment successful! You earned ${pawbucksEarned} PawBucks!`);
+      }
       onSuccess();
     } catch (error: any) {
       console.error("Payment error:", error);
