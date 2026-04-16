@@ -527,6 +527,14 @@ const MerchantProducts = () => {
               </Select>
             </div>
             <div>
+              <Label>Product Image</Label>
+              <ProductImageUpload
+                imageUrl={productImageUrl}
+                onChange={setProductImageUrl}
+                folder={merchant?.id || "merchant"}
+              />
+            </div>
+            <div>
               <Label htmlFor="description">Description</Label>
               <Textarea
                 id="description"
