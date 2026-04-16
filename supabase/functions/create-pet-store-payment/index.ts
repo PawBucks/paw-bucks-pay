@@ -279,13 +279,14 @@ serve(async (req) => {
       .eq('is_used', false)
       .gt('expires_at', new Date().toISOString());
 
-    // Find the best promotion for this item
+    // Find the best promotion for first item (backward compat)
+    const firstItemId = cartItems[0].itemId;
     for (const up of userPromos || []) {
       const promo = up.badge_promotions as any;
       if (!promo) continue;
       
-      const items = promo.badge_promotion_items || [];
-      const itemIncluded = items.some((i: any) => i.item_id === itemId);
+      const promoItems = promo.badge_promotion_items || [];
+      const itemIncluded = promoItems.some((i: any) => i.item_id === firstItemId);
       
       if (itemIncluded && promo.discount_percentage > discountPercentage) {
         discountPercentage = promo.discount_percentage;
@@ -294,13 +295,23 @@ serve(async (req) => {
       }
     }
 
-    // Calculate final price with discount
-    // item.price is stored in cents (e.g. 700 = $7.00)
-    const originalPriceCents = item.price * quantity;
+    // Calculate total price across all cart items (prices are in cents)
+    let originalPriceCents = 0;
+    for (const ci of cartItems) {
+      const dbItem = dbItems.find(i => i.id === ci.itemId)!;
+      originalPriceCents += dbItem.price * ci.quantity;
+    }
     const discountAmount = discountPercentage > 0 ? Math.round(originalPriceCents * (discountPercentage / 100)) : 0;
     const totalAmountCents = originalPriceCents - discountAmount;
     const amountInCents = totalAmountCents;
     const totalAmount = totalAmountCents / 100; // dollars for display/emails
+
+    // Build item names for metadata
+    const allItemNames = cartItems.map(ci => {
+      const dbItem = dbItems.find(i => i.id === ci.itemId)!;
+      return `${dbItem.name} x${ci.quantity}`;
+    }).join(', ');
+    const totalQuantity = cartItems.reduce((sum, ci) => sum + ci.quantity, 0);
 
     // Check subscription status for multiplier (3-tier: Free=10x, PawPass=20x, PawPass+=30x)
     let pawbucksMultiplier = 10;
