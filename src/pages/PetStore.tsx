@@ -331,11 +331,23 @@ export default function PetStore() {
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
+      
+      // Auto-redeem may have fully covered the purchase
+      if (data?.paid_with_pawbucks) {
+        toast.success(data.message || "Purchase completed with PawBucks!");
+        setPaymentDialogOpen(false);
+        await markConverted();
+        queryClient.invalidateQueries({ queryKey: ["pawbucks-wallet"] });
+        queryClient.invalidateQueries({ queryKey: ["pet-store-items"] });
+        queryClient.invalidateQueries({ queryKey: ["shopping-cart-items"] });
+        return;
+      }
+      
       setSelectedItem({
         id: firstItem.item.id,
         name: data?.orderSummary || `${cartItems.length} item order`,
         quantity: data?.totalQuantity || cartItems.reduce((sum, item) => sum + item.quantity, 0),
-        priceDollars: data?.cardAmount ?? (params.cardAmountCents / 100),
+        priceDollars: data?.cardAmount ?? data?.finalPrice ?? (params.cardAmountCents / 100),
       });
       setClientSecret(data.clientSecret);
     } catch (error: any) {
