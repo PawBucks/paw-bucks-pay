@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo, memo } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -64,6 +64,7 @@ ProductSkeleton.displayName = "ProductSkeleton";
 const Storefront = memo(() => {
   const { accountId } = useParams<{ accountId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, loading: authLoading } = useAuth();
   
   const [purchasingProductId, setPurchasingProductId] = useState<string | null>(null);
@@ -181,7 +182,7 @@ const Storefront = memo(() => {
 
   const handleSubscribe = useCallback(async (plan: SubscriptionPlan) => {
     if (!user) {
-      toast.error("Please sign in to subscribe", { action: { label: "Sign In", onClick: () => navigate("/auth") } });
+      toast.error("Please sign in to subscribe", { action: { label: "Sign In", onClick: () => navigate(`/auth?redirect=${encodeURIComponent(location.pathname)}`) } });
       return;
     }
     if (!merchantConnectedAccountId) {
@@ -210,7 +211,7 @@ const Storefront = memo(() => {
   // Add product to cart
   const handleAddToCart = useCallback((product: Product) => {
     if (!user) {
-      toast.error("Please sign in to shop", { action: { label: "Sign In", onClick: () => navigate("/auth") } });
+      toast.error("Please sign in to shop", { action: { label: "Sign In", onClick: () => navigate(`/auth?redirect=${encodeURIComponent(location.pathname)}`) } });
       return;
     }
     if (!product.price?.id || product.price.unit_amount == null) return;
@@ -582,7 +583,7 @@ const Storefront = memo(() => {
                           </Button>
                         </div>
                       ) : (
-                        <Button onClick={() => navigate("/auth")} className="w-full" size="lg">
+                        <Button onClick={() => navigate(`/auth?redirect=${encodeURIComponent(location.pathname)}`)} className="w-full" size="lg">
                           Sign in to Shop
                         </Button>
                       )}

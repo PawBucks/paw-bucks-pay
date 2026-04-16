@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import { GroomingPetSelector, createDefaultGroomingData, type GroomingPetData } from "./GroomingPetSelector";
 import { DepositCardForm } from "./DepositCardForm";
 import { useAuth } from "@/hooks/useAuth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { 
   schedulingService,
@@ -89,6 +89,7 @@ type Props = {
 export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: Props) => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
   
   const [selectedService, setSelectedService] = useState<string | null>(null);
@@ -779,7 +780,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
               <Button
                 className="w-full"
                 size="lg"
-                onClick={() => navigate("/auth")}
+                onClick={() => navigate(`/auth?redirect=${encodeURIComponent(location.pathname)}`)}
               >
                 Sign in to Book
                 <ArrowRight className="w-4 h-4 ml-2" />

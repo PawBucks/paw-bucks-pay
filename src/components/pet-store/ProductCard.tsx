@@ -224,7 +224,7 @@ export const ProductCard = memo(({
             </Button>
           </>
         ) : (
-          <Button className="w-full h-9 text-sm" onClick={() => navigate("/auth")} size="sm">
+          <Button className="w-full h-9 text-sm" onClick={() => navigate(`/auth?redirect=${encodeURIComponent(`/pet-store/${item.id}`)}`)} size="sm">
             Sign in to Shop
           </Button>
         )}

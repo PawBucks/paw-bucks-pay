@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSharedAccount, getEffectiveWalletUserId } from "@/hooks/useSharedAccount";
@@ -28,6 +28,7 @@ import { useShoppingCart } from "@/hooks/useShoppingCart";
 export default function PetStoreProduct() {
   const { itemId } = useParams<{ itemId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const sharedAccount = useSharedAccount(user?.id);
@@ -114,7 +115,7 @@ export default function PetStoreProduct() {
   const pawbucksEarned = Math.round((discountedPrice / 100) * cashbackRate);
 
   const handleAddToCart = () => {
-    if (!user) { navigate("/auth"); return; }
+    if (!user) { navigate(`/auth?redirect=${encodeURIComponent(location.pathname)}`); return; }
     addToCart.mutate({ itemId: itemId! }, { onSuccess: () => toast.success("Added to cart! 🛒") });
   };
 
@@ -350,7 +351,7 @@ export default function PetStoreProduct() {
                     </Button>
                   </>
                 ) : (
-                  <Button className="w-full h-12 text-base" onClick={() => navigate("/auth")}>
+                  <Button className="w-full h-12 text-base" onClick={() => navigate(`/auth?redirect=${encodeURIComponent(location.pathname)}`)}>
                     Sign in to Shop
                   </Button>
                 )}

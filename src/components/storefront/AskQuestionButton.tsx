@@ -9,7 +9,7 @@ import { SecureAttachment } from "@/components/shared/SecureAttachment";
 import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 type Message = {
   id: string;
@@ -28,6 +28,7 @@ type AskQuestionButtonProps = {
 export const AskQuestionButton = ({ merchantId, merchantName }: AskQuestionButtonProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
@@ -105,7 +106,7 @@ export const AskQuestionButton = ({ merchantId, merchantName }: AskQuestionButto
 
   const handleSend = async (attachmentUrl?: string, attachmentName?: string, attachmentType?: string) => {
     if (!user) {
-      navigate("/auth");
+      navigate(`/auth?redirect=${encodeURIComponent(location.pathname)}`);
       return;
     }
     if (!newMessage.trim() && !attachmentUrl) return;
@@ -180,7 +181,7 @@ export const AskQuestionButton = ({ merchantId, merchantName }: AskQuestionButto
   const handleOpenChange = (isOpen: boolean) => {
     if (isOpen && !user) {
       toast.info("Please sign in to message this merchant");
-      navigate("/auth");
+      navigate(`/auth?redirect=${encodeURIComponent(location.pathname)}`);
       return;
     }
     setOpen(isOpen);
