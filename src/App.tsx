@@ -55,6 +55,7 @@ const VetOnboarding = lazyWithRetry(() => import("./pages/VetOnboarding"), "VetO
 const PawBucksWallet = lazyWithRetry(() => import("./pages/PawBucksWallet"), "PawBucksWallet");
 const PawBucksRedeem = lazyWithRetry(() => import("./pages/PawBucksRedeem"), "PawBucksRedeem");
 const PetStore = lazyWithRetry(() => import("./pages/PetStore"), "PetStore");
+const PetStoreProduct = lazyWithRetry(() => import("./pages/PetStoreProduct"), "PetStoreProduct");
 const PetStoreAdmin = lazyWithRetry(() => import("./pages/PetStoreAdmin"), "PetStoreAdmin");
 const MerchantProducts = lazyWithRetry(() => import("./pages/MerchantProducts"), "MerchantProducts");
 const Storefront = lazyWithRetry(() => import("./pages/Storefront"), "Storefront");
@@ -178,6 +179,7 @@ const AppRoutes = () => {
       <Route path="/pawbucks/wallet" element={<ProtectedRoute><PageTransition><PawBucksWallet /></PageTransition></ProtectedRoute>} />
       <Route path="/pawbucks/redeem" element={<ProtectedRoute><PageTransition><PawBucksRedeem /></PageTransition></ProtectedRoute>} />
       <Route path="/pet-store" element={<PageTransition><PetStore /></PageTransition>} />
+      <Route path="/pet-store/:itemId" element={<PageTransition><PetStoreProduct /></PageTransition>} />
       <Route path="/notification-preferences" element={<ProtectedRoute><PageTransition><NotificationPreferences /></PageTransition></ProtectedRoute>} />
       <Route path="/notifications" element={<ProtectedRoute><PageTransition><NotificationHistory /></PageTransition></ProtectedRoute>} />
       <Route path="/spending-breakdown" element={<ProtectedRoute><PageTransition><SpendingBreakdown /></PageTransition></ProtectedRoute>} />
