@@ -9,7 +9,7 @@ import { SecureAttachment } from "@/components/shared/SecureAttachment";
 import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 type Message = {
   id: string;

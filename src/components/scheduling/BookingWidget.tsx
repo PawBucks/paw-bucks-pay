@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import { GroomingPetSelector, createDefaultGroomingData, type GroomingPetData } from "./GroomingPetSelector";
 import { DepositCardForm } from "./DepositCardForm";
 import { useAuth } from "@/hooks/useAuth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { 
   schedulingService,
