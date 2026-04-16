@@ -456,13 +456,6 @@ serve(async (req) => {
 
     const amountInCents = finalAmountCents;
 
-    // Build item names for metadata
-    const allItemNames = cartItems.map(ci => {
-      const dbItem = dbItems.find(i => i.id === ci.itemId)!;
-      return `${dbItem.name} x${ci.quantity}`;
-    }).join(', ');
-    const totalQuantity = cartItems.reduce((sum, ci) => sum + ci.quantity, 0);
-
     // Check subscription status for multiplier (3-tier: Free=10x, PawPass=20x, PawPass+=30x)
     let pawbucksMultiplier = 10;
     
