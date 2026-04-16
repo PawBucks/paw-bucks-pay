@@ -125,7 +125,7 @@ serve(async (req) => {
       // Log PawBucks activity
       await supabaseAdmin.from('pawbucks_activity').insert({
         user_id: effectiveUserId,
-        type: 'debit',
+        type: 'redeem',
         amount: cost,
         source: 'pet_store',
         description: `Purchased ${quantity}x ${dbItem.name}`,

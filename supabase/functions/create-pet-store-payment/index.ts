@@ -247,7 +247,7 @@ serve(async (req) => {
     // Fetch customer profile for detailed email
     const { data: profile } = await supabaseAdmin
       .from('profiles')
-      .select('id, full_name, phone, address')
+      .select('id, full_name, phone')
       .eq('id', user.id)
       .single();
 
@@ -256,7 +256,7 @@ serve(async (req) => {
       email: user.email || 'Unknown',
       full_name: profile?.full_name || null,
       phone: profile?.phone || null,
-      address: profile?.address || null,
+      address: null,
     };
 
     // Check for active promotional discounts for this item

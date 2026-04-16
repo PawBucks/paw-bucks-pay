@@ -106,7 +106,7 @@ serve(async (req) => {
     // Get user profile
     const { data: userProfile } = await supabaseAdmin
       .from('profiles')
-      .select('email, full_name, phone, address')
+      .select('email, full_name, phone')
       .eq('id', user.id)
       .single();
 
@@ -197,7 +197,7 @@ serve(async (req) => {
       await supabaseAdmin.from('pawbucks_activity').insert({
         user_id: userId,
         amount: pawbucksUsedInSplit,
-        type: 'debit',
+        type: 'redeem',
         source: 'pet_store',
         description: `Used ${pawbucksUsedInSplit} PawBucks ($${pawbucksUsdValue.toFixed(2)}) for Pet Store purchase: ${itemName}`,
         transaction_id: transaction.id,
