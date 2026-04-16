@@ -206,7 +206,8 @@ serve(async (req) => {
     }
 
     const body = await req.json();
-    const pawbucksAmount = parseInt(body.pawbucksAmount || '0', 10);
+    let pawbucksAmount = parseInt(body.pawbucksAmount || '0', 10);
+    const requestAutoRedeem = body.autoRedeem === true;
     
     // Support both single item (itemId, quantity) and multi-item (items array)
     const cartItems: { itemId: string; quantity: number }[] = body.items
