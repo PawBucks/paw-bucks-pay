@@ -409,7 +409,7 @@ serve(async (req) => {
     // Send enhanced admin notification email
     await sendAdminNotification(customerInfo, {
       item: item as ItemInfo,
-      quantity,
+      quantity: totalQuantity,
       totalAmount,
       pawbucksEarned,
       pawbucksMultiplier,

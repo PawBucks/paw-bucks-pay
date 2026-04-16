@@ -256,7 +256,7 @@ function generateReceiptHtml(params: ReceiptEmailParams): string {
               <table cellpadding="0" cellspacing="0" style="margin:0 auto;">
                 <tr>
                   <td style="background:linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius:10px;">
-                    <a href="https://pawbucks.app/explore" style="display:block; padding:14px 32px; font-size:14px; font-weight:700; color:#ffffff; text-decoration:none; letter-spacing:0.3px;">Explore PawBucks Merchants</a>
+                    <a href="https://pawbucks.app/discover" style="display:block; padding:14px 32px; font-size:14px; font-weight:700; color:#ffffff; text-decoration:none; letter-spacing:0.3px;">Explore PawBucks Merchants</a>
                   </td>
                 </tr>
               </table>
