@@ -322,7 +322,7 @@ serve(async (req) => {
 
     // Get user's PawBucks balance
     const { data: walletData } = await supabaseAdmin
-      .from('pawbucks_wallets')
+      .from('pawbucks_wallet')
       .select('balance')
       .eq('user_id', user.id)
       .single();
