@@ -130,6 +130,7 @@ const Storefront = memo(() => {
 
   const merchantData = queryResults[0].data;
   const merchantLoading = queryResults[0].isLoading;
+  const autoRedeemPref = queryResults[1].data as { enabled: boolean; mode: string } | undefined;
 
   const merchantIdForProducts = merchantData?.id;
   const { data: productsData, isLoading: productsLoading } = useQuery({
@@ -240,6 +241,7 @@ const Storefront = memo(() => {
             merchantId: merchantIdForProducts,
             items: cartItems.map(ci => ({ priceId: ci.priceId, quantity: ci.quantity, name: ci.name })),
             pawbucksToUse: params.pawbucksAmount,
+            autoRedeem: autoRedeemPref?.enabled ?? false,
             successUrl: buildAppUrl(`/checkout-success?store=${accountId}`),
             cancelUrl: buildAppUrl(`/storefront/${accountId}`),
           },
@@ -272,6 +274,7 @@ const Storefront = memo(() => {
           merchantId: merchantIdForProducts,
           items: cartItems.map(ci => ({ priceId: ci.priceId, quantity: ci.quantity, name: ci.name })),
           pawbucksToUse: params.pawbucksAmount || 0,
+          autoRedeem: autoRedeemPref?.enabled ?? false,
           successUrl: buildAppUrl(`/checkout-success?store=${accountId}`),
           cancelUrl: buildAppUrl(`/storefront/${accountId}`),
         },
