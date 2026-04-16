@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { ArrowLeft, Save } from "lucide-react";
+import { ProductImageUpload } from "@/components/shared/ProductImageUpload";
 import { toast } from "sonner";
 import { ErrorHandler } from "@/utils/errorHandler";
 
@@ -235,12 +236,11 @@ const handleSignOut = async () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="image_url">Image URL</Label>
-                  <Input
-                    id="image_url"
-                    value={formData.image_url}
-                    onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                    placeholder="https://example.com/image.jpg"
+                  <Label>Offer Image</Label>
+                  <ProductImageUpload
+                    imageUrl={formData.image_url || null}
+                    onChange={(url) => setFormData({ ...formData, image_url: url || '' })}
+                    folder="offers"
                   />
                 </div>
 
