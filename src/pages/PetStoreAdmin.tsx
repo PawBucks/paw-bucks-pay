@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ProductImageUpload } from "@/components/shared/ProductImageUpload";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -337,14 +338,12 @@ export default function PetStoreAdmin() {
                     />
                   </div>
 
-                  <div>
-                    <Label htmlFor="image">Image URL</Label>
-                    <Input
-                      id="image"
-                      type="url"
-                      value={formData.image_url}
-                      onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                      placeholder="https://example.com/image.jpg"
+                   <div>
+                    <Label>Product Image</Label>
+                    <ProductImageUpload
+                      imageUrl={formData.image_url || null}
+                      onChange={(url) => setFormData({ ...formData, image_url: url || '' })}
+                      folder="admin"
                     />
                   </div>
 
