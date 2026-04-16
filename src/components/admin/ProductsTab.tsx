@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search, Plus, Edit, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { ProductImageUpload } from '@/components/shared/ProductImageUpload';
 
 type Product = {
   id: string;
@@ -22,6 +23,7 @@ type Product = {
   item_type: 'product' | 'service';
   stock_quantity: number;
   is_active: boolean;
+  image_url?: string | null;
   created_at: string;
 };
 
@@ -88,6 +90,7 @@ export function ProductsTab() {
             item_type: selectedProduct.item_type,
             stock_quantity: selectedProduct.stock_quantity,
             is_active: selectedProduct.is_active,
+            image_url: selectedProduct.image_url || null,
           })
           .eq('id', selectedProduct.id);
 
@@ -112,6 +115,7 @@ export function ProductsTab() {
             item_type: selectedProduct.item_type,
             stock_quantity: selectedProduct.stock_quantity,
             is_active: selectedProduct.is_active,
+            image_url: selectedProduct.image_url || null,
           }]);
 
         if (error) throw error;
@@ -170,6 +174,7 @@ export function ProductsTab() {
       item_type: 'product',
       stock_quantity: 0,
       is_active: true,
+      image_url: null,
       created_at: new Date().toISOString(),
     });
     setEditDialogOpen(true);
@@ -327,6 +332,14 @@ export function ProductsTab() {
                     required
                   />
                 </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Product Image</Label>
+                <ProductImageUpload
+                  imageUrl={selectedProduct.image_url || null}
+                  onChange={(url) => setSelectedProduct({ ...selectedProduct, image_url: url })}
+                  folder="admin"
+                />
               </div>
               <div className="space-y-2">
                 <Label>Description</Label>
