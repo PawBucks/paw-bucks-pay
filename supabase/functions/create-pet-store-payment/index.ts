@@ -206,7 +206,8 @@ serve(async (req) => {
     }
 
     const body = await req.json();
-    const pawbucksAmount = parseInt(body.pawbucksAmount || '0', 10);
+    let pawbucksAmount = parseInt(body.pawbucksAmount || '0', 10);
+    const requestAutoRedeem = body.autoRedeem === true;
     
     // Support both single item (itemId, quantity) and multi-item (items array)
     const cartItems: { itemId: string; quantity: number }[] = body.items
@@ -304,15 +305,159 @@ serve(async (req) => {
     }
     const discountAmount = discountPercentage > 0 ? Math.round(originalPriceCents * (discountPercentage / 100)) : 0;
     const totalAmountCents = originalPriceCents - discountAmount;
-    const amountInCents = totalAmountCents;
+    let finalAmountCents = totalAmountCents;
     const totalAmount = totalAmountCents / 100; // dollars for display/emails
 
-    // Build item names for metadata
+    // Build item names for metadata (needed early for auto-redeem descriptions)
     const allItemNames = cartItems.map(ci => {
       const dbItem = dbItems.find(i => i.id === ci.itemId)!;
       return `${dbItem.name} x${ci.quantity}`;
     }).join(', ');
     const totalQuantity = cartItems.reduce((sum, ci) => sum + ci.quantity, 0);
+
+    // --- Auto-Redeem PawBucks Logic ---
+    const PAWBUCKS_TO_USD = 1000; // 1000 PB = $1
+    let pawbucksUsed = 0;
+    let pawbucksUsdValue = 0;
+
+    // Get user's PawBucks balance
+    const { data: walletData } = await supabaseAdmin
+      .from('pawbucks_wallets')
+      .select('balance')
+      .eq('user_id', user.id)
+      .single();
+    const availablePawBucks = walletData?.balance || 0;
+
+    if (pawbucksAmount > 0 && availablePawBucks > 0) {
+      // Manual PawBucks specified by user
+      pawbucksUsed = Math.min(pawbucksAmount, availablePawBucks);
+      pawbucksUsdValue = pawbucksUsed / PAWBUCKS_TO_USD;
+      if (pawbucksUsdValue > totalAmount) {
+        pawbucksUsdValue = totalAmount;
+        pawbucksUsed = Math.floor(pawbucksUsdValue * PAWBUCKS_TO_USD);
+      }
+      finalAmountCents = Math.round((totalAmount - pawbucksUsdValue) * 100);
+      console.log('PawBucks applied (manual)', { pawbucksUsed, pawbucksUsdValue, finalAmountCents });
+    } else if (requestAutoRedeem && pawbucksAmount === 0 && availablePawBucks > 0) {
+      // Auto-redeem: check user's profile preferences
+      const { data: autoRedeemProfile } = await supabaseAdmin
+        .from('profiles')
+        .select('auto_redeem_mode, auto_redeem_min_coverage_pct, auto_redeem_max_apply_pct')
+        .eq('id', user.id)
+        .single();
+
+      const autoRedeemMode = autoRedeemProfile?.auto_redeem_mode || 'off';
+      const minCoveragePct = autoRedeemProfile?.auto_redeem_min_coverage_pct ?? 20;
+      const maxApplyPct = autoRedeemProfile?.auto_redeem_max_apply_pct ?? 50;
+
+      console.log('Auto-redeem check', { autoRedeemMode, minCoveragePct, maxApplyPct, availablePawBucks });
+
+      let shouldAutoRedeem = false;
+      let maxPawBucksToApply = availablePawBucks;
+
+      if (autoRedeemMode === 'always') {
+        shouldAutoRedeem = true;
+      } else if (autoRedeemMode === 'subscriptions_only') {
+        shouldAutoRedeem = false; // Pet store is not a subscription
+      } else if (autoRedeemMode === 'smart') {
+        const availableUsd = availablePawBucks / PAWBUCKS_TO_USD;
+        const coveragePct = (availableUsd / totalAmount) * 100;
+        if (coveragePct >= minCoveragePct) {
+          shouldAutoRedeem = true;
+          const maxUsd = totalAmount * (maxApplyPct / 100);
+          maxPawBucksToApply = Math.min(availablePawBucks, Math.floor(maxUsd * PAWBUCKS_TO_USD));
+        }
+        console.log('Smart auto-redeem evaluation', { coveragePct: coveragePct.toFixed(1), shouldAutoRedeem });
+      }
+
+      if (shouldAutoRedeem && maxPawBucksToApply > 0) {
+        pawbucksUsed = maxPawBucksToApply;
+        pawbucksUsdValue = pawbucksUsed / PAWBUCKS_TO_USD;
+        if (pawbucksUsdValue > totalAmount) {
+          pawbucksUsdValue = totalAmount;
+          pawbucksUsed = Math.floor(pawbucksUsdValue * PAWBUCKS_TO_USD);
+        }
+        finalAmountCents = Math.round((totalAmount - pawbucksUsdValue) * 100);
+        console.log('PawBucks applied (auto-redeem)', { mode: autoRedeemMode, pawbucksUsed, pawbucksUsdValue, finalAmountCents });
+      }
+    }
+
+    // If PawBucks cover the full amount, handle as full PawBucks purchase
+    if (pawbucksUsed > 0 && finalAmountCents <= 0) {
+      // Deduct PawBucks from wallet
+      const newBalance = availablePawBucks - pawbucksUsed;
+      await supabaseAdmin.from('pawbucks_wallet').update({ balance: newBalance }).eq('user_id', user.id);
+      
+      // Record activity
+      await supabaseAdmin.from('pawbucks_activity').insert({
+        user_id: user.id,
+        type: 'redeem',
+        amount: pawbucksUsed,
+        source: 'pet_store',
+        description: `Purchased ${allItemNames} (auto-redeem)`,
+      });
+
+      // Decrement stock
+      for (const ci of cartItems) {
+        const dbItem = dbItems.find(i => i.id === ci.itemId)!;
+        await supabaseAdmin.from('pet_store_items').update({ stock_quantity: dbItem.stock_quantity - ci.quantity }).eq('id', ci.itemId);
+      }
+
+      // Mark cart converted if cartId provided
+      if (body.cartId) {
+        await supabaseAdmin.from('shopping_carts').update({ status: 'converted', converted_at: new Date().toISOString() }).eq('id', body.cartId);
+        await supabaseAdmin.from('shopping_cart_items').delete().eq('cart_id', body.cartId);
+      }
+
+      // Send notifications
+      await sendAdminNotification(customerInfo, { item: item as ItemInfo, quantity: totalQuantity, totalAmount, pawbucksEarned: 0, pawbucksMultiplier: 0 });
+
+      // Send receipt email
+      try {
+        const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+        await resend.emails.send({
+          from: "PawBucks <noreply@pawbucks.app>",
+          to: [user.email || ''],
+          subject: `PawBucks Pet Store Receipt - ${allItemNames}`,
+          html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;">
+            <h2>🐾 Purchase Confirmed!</h2>
+            <p>You paid <strong>${pawbucksUsed.toLocaleString()} PawBucks</strong> ($${pawbucksUsdValue.toFixed(2)}) for <strong>${allItemNames}</strong>.</p>
+            <p>Thank you for shopping at the PawBucks Pet Store!</p>
+          </div>`,
+        });
+      } catch (e) { console.error('Receipt email failed', e); }
+
+      // Create notification
+      await supabaseAdmin.from('notifications').insert({
+        user_id: user.id,
+        title: 'Pet Store Purchase Complete',
+        message: `You purchased ${allItemNames} using ${pawbucksUsed.toLocaleString()} PawBucks.`,
+        type: 'purchase',
+      });
+
+      return new Response(JSON.stringify({
+        paid_with_pawbucks: true,
+        pawbucksUsed,
+        pawbucksUsdValue,
+        message: `Purchased with ${pawbucksUsed.toLocaleString()} PawBucks!`,
+      }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 });
+    }
+
+    // If PawBucks partially cover, deduct now and charge the remainder via Stripe
+    if (pawbucksUsed > 0 && finalAmountCents > 0) {
+      const newBalance = availablePawBucks - pawbucksUsed;
+      await supabaseAdmin.from('pawbucks_wallet').update({ balance: newBalance }).eq('user_id', user.id);
+      await supabaseAdmin.from('pawbucks_activity').insert({
+        user_id: user.id,
+        type: 'redeem',
+        amount: pawbucksUsed,
+        source: 'pet_store',
+        description: `Applied ${pawbucksUsed.toLocaleString()} PB toward ${allItemNames}`,
+      });
+      console.log('PawBucks deducted for split payment', { pawbucksUsed, remainingCents: finalAmountCents });
+    }
+
+    const amountInCents = finalAmountCents;
 
     // Check subscription status for multiplier (3-tier: Free=10x, PawPass=20x, PawPass+=30x)
     let pawbucksMultiplier = 10;
@@ -424,7 +569,15 @@ serve(async (req) => {
         discountApplied: discountPercentage > 0,
         discountPercentage,
         originalPrice: originalPriceCents / 100,
-        finalPrice: totalAmount,
+        finalPrice: amountInCents / 100,
+        cardAmount: amountInCents / 100,
+        orderSummary: allItemNames,
+        totalQuantity,
+        pawbucksApplied: pawbucksUsed > 0 ? {
+          amount: pawbucksUsed,
+          usdValue: pawbucksUsdValue,
+          formatted: `${pawbucksUsed.toLocaleString()} PB ($${pawbucksUsdValue.toFixed(2)})`,
+        } : null,
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

@@ -210,6 +210,19 @@ export default function PetStore() {
   const { data: promotionalData } = usePromotionalItems(user?.id);
   const promotionalItemMap = promotionalData?.itemMap || new Map();
 
+  // Auto-redeem preference
+  const { data: autoRedeemPref } = useQuery({
+    queryKey: ["auto-redeem-preference", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return { enabled: false, mode: 'off' };
+      const { data } = await supabase.from('profiles').select('auto_redeem_mode').eq('id', user.id).single();
+      const mode = data?.auto_redeem_mode || 'off';
+      return { enabled: mode !== 'off', mode };
+    },
+    staleTime: 1000 * 60 * 5,
+    enabled: !!user?.id,
+  });
+
   // Fetch items with merchant info
   const { data: items, isLoading } = useQuery({
     queryKey: ["pet-store-items"],
@@ -273,15 +286,25 @@ export default function PetStore() {
     setPaymentDialogOpen(true);
     try {
       const { data, error } = await supabase.functions.invoke('create-pet-store-payment', {
-        body: { itemId: item.id, quantity: 1 },
+        body: { itemId: item.id, quantity: 1, autoRedeem: autoRedeemPref?.enabled ?? false },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
+      
+      // Auto-redeem may have fully covered the purchase
+      if (data?.paid_with_pawbucks) {
+        toast.success(data.message || "Purchase completed with PawBucks!");
+        setPaymentDialogOpen(false);
+        queryClient.invalidateQueries({ queryKey: ["pawbucks-wallet"] });
+        queryClient.invalidateQueries({ queryKey: ["pet-store-items"] });
+        return;
+      }
+      
       setSelectedItem({
         id: item.id,
         name: data?.orderSummary || item.name,
         quantity: data?.totalQuantity || 1,
-        priceDollars: data?.cardAmount ?? (item.price / 100),
+        priceDollars: data?.cardAmount ?? data?.finalPrice ?? (item.price / 100),
       });
       setClientSecret(data.clientSecret);
     } catch (error: any) {
@@ -304,15 +327,27 @@ export default function PetStore() {
     try {
       const items = cartItems.map(ci => ({ itemId: ci.item.id, quantity: ci.quantity }));
       const { data, error } = await supabase.functions.invoke('create-pet-store-payment', {
-        body: { items, pawbucksAmount: params.pawbucksAmount || 0, cartId: cart?.id },
+        body: { items, pawbucksAmount: params.pawbucksAmount || 0, cartId: cart?.id, autoRedeem: autoRedeemPref?.enabled ?? false },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
+      
+      // Auto-redeem may have fully covered the purchase
+      if (data?.paid_with_pawbucks) {
+        toast.success(data.message || "Purchase completed with PawBucks!");
+        setPaymentDialogOpen(false);
+        await markConverted();
+        queryClient.invalidateQueries({ queryKey: ["pawbucks-wallet"] });
+        queryClient.invalidateQueries({ queryKey: ["pet-store-items"] });
+        queryClient.invalidateQueries({ queryKey: ["shopping-cart-items"] });
+        return;
+      }
+      
       setSelectedItem({
         id: firstItem.item.id,
         name: data?.orderSummary || `${cartItems.length} item order`,
         quantity: data?.totalQuantity || cartItems.reduce((sum, item) => sum + item.quantity, 0),
-        priceDollars: data?.cardAmount ?? (params.cardAmountCents / 100),
+        priceDollars: data?.cardAmount ?? data?.finalPrice ?? (params.cardAmountCents / 100),
       });
       setClientSecret(data.clientSecret);
     } catch (error: any) {
