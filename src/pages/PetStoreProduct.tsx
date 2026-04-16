@@ -28,6 +28,7 @@ import { useShoppingCart } from "@/hooks/useShoppingCart";
 export default function PetStoreProduct() {
   const { itemId } = useParams<{ itemId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const sharedAccount = useSharedAccount(user?.id);

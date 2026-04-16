@@ -89,6 +89,7 @@ type Props = {
 export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: Props) => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
   
   const [selectedService, setSelectedService] = useState<string | null>(null);

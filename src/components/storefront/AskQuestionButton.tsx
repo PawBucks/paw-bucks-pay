@@ -28,6 +28,7 @@ type AskQuestionButtonProps = {
 export const AskQuestionButton = ({ merchantId, merchantName }: AskQuestionButtonProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");

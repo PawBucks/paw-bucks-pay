@@ -64,6 +64,7 @@ ProductSkeleton.displayName = "ProductSkeleton";
 const Storefront = memo(() => {
   const { accountId } = useParams<{ accountId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, loading: authLoading } = useAuth();
   
   const [purchasingProductId, setPurchasingProductId] = useState<string | null>(null);
