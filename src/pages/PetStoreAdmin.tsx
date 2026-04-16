@@ -194,6 +194,7 @@ export default function PetStoreAdmin() {
       price_pawbucks: item.price_pawbucks.toString(),
       stock_quantity: item.stock_quantity.toString(),
       image_url: item.image_url || "",
+      image_urls: item.image_urls || (item.image_url ? [item.image_url] : []),
       is_active: item.is_active,
     });
     setIsDialogOpen(true);
