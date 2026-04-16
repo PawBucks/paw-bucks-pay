@@ -113,7 +113,7 @@ serve(async (req) => {
     // Get item details
     const { data: item } = await supabaseAdmin
       .from('pet_store_items')
-      .select('id, name, description, price, category, stock_quantity')
+      .select('id, name, description, price, category, stock_quantity, merchant_id')
       .eq('id', itemId)
       .single();
 
