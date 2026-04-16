@@ -779,7 +779,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
               <Button
                 className="w-full"
                 size="lg"
-                onClick={() => navigate("/auth")}
+                onClick={() => navigate(`/auth?redirect=${encodeURIComponent(location.pathname)}`)}
               >
                 Sign in to Book
                 <ArrowRight className="w-4 h-4 ml-2" />

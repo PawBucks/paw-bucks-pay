@@ -114,7 +114,7 @@ export default function PetStoreProduct() {
   const pawbucksEarned = Math.round((discountedPrice / 100) * cashbackRate);
 
   const handleAddToCart = () => {
-    if (!user) { navigate("/auth"); return; }
+    if (!user) { navigate(`/auth?redirect=${encodeURIComponent(location.pathname)}`); return; }
     addToCart.mutate({ itemId: itemId! }, { onSuccess: () => toast.success("Added to cart! 🛒") });
   };
 
@@ -350,7 +350,7 @@ export default function PetStoreProduct() {
                     </Button>
                   </>
                 ) : (
-                  <Button className="w-full h-12 text-base" onClick={() => navigate("/auth")}>
+                  <Button className="w-full h-12 text-base" onClick={() => navigate(`/auth?redirect=${encodeURIComponent(location.pathname)}`)}>
                     Sign in to Shop
                   </Button>
                 )}
