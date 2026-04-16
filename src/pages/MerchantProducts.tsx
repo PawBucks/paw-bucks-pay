@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { Package, Plus, ExternalLink, Loader2, ArrowLeft, DollarSign, Store, Coins, RefreshCw, Trash2 } from "lucide-react";
+import { ProductImageUpload } from "@/components/shared/ProductImageUpload";
 import { PricingCalculator } from "@/components/merchant/PricingCalculator";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -87,6 +88,7 @@ const MerchantProducts = () => {
   const [productItemType, setProductItemType] = useState<"product" | "service">("product");
   const [listInPetStore, setListInPetStore] = useState(false);
   const [pawbucksPrice, setPawbucksPrice] = useState("");
+  const [productImageUrl, setProductImageUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -218,6 +220,7 @@ const MerchantProducts = () => {
           description: productDescription,
           priceInCents,
           currency: "usd",
+          imageUrl: productImageUrl || undefined,
         },
       });
 
@@ -228,7 +231,7 @@ const MerchantProducts = () => {
         if (listInPetStore) {
           const { error: petStoreError } = await supabase
             .from("pet_store_items")
-            .insert({
+              .insert({
               name: productName,
               description: productDescription || null,
               category: "Merchant Products",
@@ -238,6 +241,7 @@ const MerchantProducts = () => {
               merchant_id: merchant.id,
               is_active: true,
               stock_quantity: 999,
+              image_url: productImageUrl || null,
             });
 
           if (petStoreError) {
@@ -257,6 +261,7 @@ const MerchantProducts = () => {
         setProductItemType("product");
         setListInPetStore(false);
         setPawbucksPrice("");
+        setProductImageUrl(null);
         await loadProducts(merchant.stripe_account_id);
       } else {
         throw new Error(data.error || "Failed to create product");
@@ -520,6 +525,14 @@ const MerchantProducts = () => {
                   <SelectItem value="service">Service</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+            <div>
+              <Label>Product Image</Label>
+              <ProductImageUpload
+                imageUrl={productImageUrl}
+                onChange={setProductImageUrl}
+                folder={merchant?.id || "merchant"}
+              />
             </div>
             <div>
               <Label htmlFor="description">Description</Label>
