@@ -384,8 +384,9 @@ serve(async (req) => {
 
     // If PawBucks cover the full amount, handle as full PawBucks purchase
     if (pawbucksUsed > 0 && finalAmountCents <= 0) {
-      // Deduct PawBucks
-      await supabaseAdmin.rpc('increment_wallet_balance', { p_user_id: user.id, p_amount: -pawbucksUsed });
+      // Deduct PawBucks from wallet
+      const newBalance = availablePawBucks - pawbucksUsed;
+      await supabaseAdmin.from('pawbucks_wallet').update({ balance: newBalance }).eq('user_id', user.id);
       
       // Record activity
       await supabaseAdmin.from('pawbucks_activity').insert({
@@ -398,7 +399,8 @@ serve(async (req) => {
 
       // Decrement stock
       for (const ci of cartItems) {
-        await supabaseAdmin.rpc('decrement_stock', { p_item_id: ci.itemId, p_quantity: ci.quantity });
+        const dbItem = dbItems.find(i => i.id === ci.itemId)!;
+        await supabaseAdmin.from('pet_store_items').update({ stock_quantity: dbItem.stock_quantity - ci.quantity }).eq('id', ci.itemId);
       }
 
       // Mark cart converted if cartId provided
@@ -443,7 +445,8 @@ serve(async (req) => {
 
     // If PawBucks partially cover, deduct now and charge the remainder via Stripe
     if (pawbucksUsed > 0 && finalAmountCents > 0) {
-      await supabaseAdmin.rpc('increment_wallet_balance', { p_user_id: user.id, p_amount: -pawbucksUsed });
+      const newBalance = availablePawBucks - pawbucksUsed;
+      await supabaseAdmin.from('pawbucks_wallet').update({ balance: newBalance }).eq('user_id', user.id);
       await supabaseAdmin.from('pawbucks_activity').insert({
         user_id: user.id,
         type: 'redeem',
