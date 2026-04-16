@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
+import { useQuery } from '@tanstack/react-query';
 
 type SubscriptionStatus = {
   subscribed: boolean;
@@ -69,11 +70,24 @@ export const useSubscription = () => {
     }
   }, [user, session?.access_token, checkSubscription]);
 
+  // Auto-redeem preference
+  const { data: autoRedeemPref } = useQuery({
+    queryKey: ["auto-redeem-preference-sub", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return { enabled: false };
+      const { data } = await supabase.from('profiles').select('auto_redeem_mode').eq('id', user.id).single();
+      const mode = data?.auto_redeem_mode || 'off';
+      return { enabled: mode !== 'off' };
+    },
+    staleTime: 1000 * 60 * 5,
+    enabled: !!user?.id,
+  });
+
   const createCheckout = async (tier: 'basic' | 'plus' = 'basic'): Promise<string | null> => {
     try {
       console.log('[useSubscription] Creating checkout session for tier:', tier);
       const { data, error } = await supabase.functions.invoke('create-subscription-checkout', {
-        body: { tier }
+        body: { tier, autoRedeem: autoRedeemPref?.enabled ?? false }
       });
 
       if (error) throw error;
