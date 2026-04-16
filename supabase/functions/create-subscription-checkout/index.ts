@@ -22,8 +22,8 @@ serve(async (req) => {
     console.log('Creating subscription checkout session');
 
     // Parse request body for tier selection
-    const { tier = 'basic' } = await req.json();
-    console.log('Selected tier:', tier);
+    const { tier = 'basic', autoRedeem = false } = await req.json();
+    console.log('Selected tier:', tier, 'autoRedeem:', autoRedeem);
 
     // Validate tier
     if (!['basic', 'plus'].includes(tier)) {
@@ -68,6 +68,118 @@ serve(async (req) => {
       console.log('Creating new Stripe customer');
     }
 
+    // --- Auto-Redeem PawBucks for Subscriptions ---
+    const PAWBUCKS_TO_USD_RATE = 1000; // 1000 PB = $1
+    let pawbucksUsed = 0;
+    let couponId: string | undefined;
+    const subscriptionPriceCents = tier === 'plus' ? 2000 : 1000; // $10 or $20
+
+    if (autoRedeem) {
+      const supabaseAdmin = createClient(
+        Deno.env.get('SUPABASE_URL') ?? '',
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+      );
+
+      const { data: arProfile } = await supabaseAdmin
+        .from('profiles')
+        .select('auto_redeem_mode, auto_redeem_min_coverage_pct, auto_redeem_max_apply_pct')
+        .eq('id', user.id)
+        .single();
+
+      const autoRedeemMode = arProfile?.auto_redeem_mode || 'off';
+      const minCoveragePct = arProfile?.auto_redeem_min_coverage_pct ?? 20;
+      const maxApplyPct = arProfile?.auto_redeem_max_apply_pct ?? 50;
+
+      console.log('Auto-redeem check (subscription)', { autoRedeemMode, minCoveragePct, maxApplyPct });
+
+      if (autoRedeemMode === 'subscriptions_only' || autoRedeemMode === 'always' || autoRedeemMode === 'smart') {
+        const { data: walletData } = await supabaseAdmin
+          .from('pawbucks_wallet')
+          .select('balance')
+          .eq('user_id', user.id)
+          .single();
+
+        const availablePB = walletData?.balance || 0;
+        const subscriptionPriceUsd = subscriptionPriceCents / 100;
+
+        if (availablePB > 0) {
+          let shouldApply = false;
+          let maxPBToApply = availablePB;
+
+          if (autoRedeemMode === 'always' || autoRedeemMode === 'subscriptions_only') {
+            shouldApply = true;
+          } else if (autoRedeemMode === 'smart') {
+            const availableUsd = availablePB / PAWBUCKS_TO_USD_RATE;
+            const coveragePct = (availableUsd / subscriptionPriceUsd) * 100;
+            if (coveragePct >= minCoveragePct) {
+              shouldApply = true;
+              const maxUsd = subscriptionPriceUsd * (maxApplyPct / 100);
+              maxPBToApply = Math.min(availablePB, Math.floor(maxUsd * PAWBUCKS_TO_USD_RATE));
+            }
+          }
+
+          if (shouldApply && maxPBToApply > 0) {
+            // Cap at subscription price
+            let pbUsd = maxPBToApply / PAWBUCKS_TO_USD_RATE;
+            if (pbUsd > subscriptionPriceUsd) {
+              pbUsd = subscriptionPriceUsd;
+              maxPBToApply = Math.floor(pbUsd * PAWBUCKS_TO_USD_RATE);
+            }
+
+            const discountCents = Math.round(pbUsd * 100);
+
+            if (discountCents > 0 && discountCents < subscriptionPriceCents) {
+              // Create a one-time Stripe coupon for this subscription
+              const coupon = await stripe.coupons.create({
+                amount_off: discountCents,
+                currency: 'usd',
+                duration: 'once',
+                name: `PawBucks Auto-Redeem (${maxPBToApply.toLocaleString()} PB)`,
+                max_redemptions: 1,
+              });
+              couponId = coupon.id;
+              pawbucksUsed = maxPBToApply;
+
+              // Deduct PawBucks now
+              const newBalance = availablePB - pawbucksUsed;
+              await supabaseAdmin.from('pawbucks_wallet').update({ balance: newBalance }).eq('user_id', user.id);
+              await supabaseAdmin.from('pawbucks_activity').insert({
+                user_id: user.id,
+                type: 'redeem',
+                amount: pawbucksUsed,
+                source: 'subscription',
+                description: `Applied ${pawbucksUsed.toLocaleString()} PB toward ${tier === 'plus' ? 'PawPass+' : 'PawPass'} subscription`,
+              });
+
+              console.log('Auto-redeem applied to subscription', { pawbucksUsed, discountCents, couponId });
+            } else if (discountCents >= subscriptionPriceCents) {
+              // Full coverage - create coupon for 100% off first month
+              const coupon = await stripe.coupons.create({
+                percent_off: 100,
+                duration: 'once',
+                name: `PawBucks Auto-Redeem (Full Month)`,
+                max_redemptions: 1,
+              });
+              couponId = coupon.id;
+              pawbucksUsed = Math.floor(subscriptionPriceUsd * PAWBUCKS_TO_USD_RATE);
+
+              const newBalance = availablePB - pawbucksUsed;
+              await supabaseAdmin.from('pawbucks_wallet').update({ balance: newBalance }).eq('user_id', user.id);
+              await supabaseAdmin.from('pawbucks_activity').insert({
+                user_id: user.id,
+                type: 'redeem',
+                amount: pawbucksUsed,
+                source: 'subscription',
+                description: `Applied ${pawbucksUsed.toLocaleString()} PB to cover first month of ${tier === 'plus' ? 'PawPass+' : 'PawPass'}`,
+              });
+
+              console.log('Full month covered by auto-redeem', { pawbucksUsed, couponId });
+            }
+          }
+        }
+      }
+    }
+
     // Create Checkout session with 7-day trial
     // Using explicit payment methods for better international support
     const session = await stripe.checkout.sessions.create({
@@ -84,11 +196,13 @@ serve(async (req) => {
       payment_method_types: ['card'],
       // Collect billing address for international tax compliance
       billing_address_collection: 'auto',
+      ...(couponId ? { discounts: [{ coupon: couponId }] } : {}),
       subscription_data: {
         trial_period_days: 7,
         metadata: {
           user_id: user.id,
           tier: tier,
+          pawbucks_used: pawbucksUsed.toString(),
         },
       },
       success_url: `${req.headers.get('origin')}/subscription-success`,
@@ -96,6 +210,7 @@ serve(async (req) => {
       metadata: {
         user_id: user.id,
         tier: tier,
+        pawbucks_used: pawbucksUsed.toString(),
       },
     });
 
