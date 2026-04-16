@@ -306,8 +306,9 @@ export default function PetStore() {
     setPaymentDialogOpen(true);
     setCartOpen(false);
     try {
+      const items = cartItems.map(ci => ({ itemId: ci.item.id, quantity: ci.quantity }));
       const { data, error } = await supabase.functions.invoke('create-pet-store-payment', {
-        body: { itemId: firstItem.item.id, quantity: firstItem.quantity, pawbucksAmount: params.pawbucksAmount || 0 },
+        body: { items, pawbucksAmount: params.pawbucksAmount || 0 },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
