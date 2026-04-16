@@ -52,7 +52,7 @@ type PetStorePaymentFormProps = {
   itemId: string;
   itemName: string;
   quantity: number;
-  totalAmount: number;
+  totalAmountDollars: number;
   cashbackRate: number;
   onSuccess: () => void;
   onCancel: () => void;
@@ -62,7 +62,7 @@ const PetStorePaymentForm = ({
   itemId,
   itemName,
   quantity,
-  totalAmount,
+  totalAmountDollars,
   cashbackRate,
   onSuccess,
   onCancel,
@@ -90,15 +90,14 @@ const PetStorePaymentForm = ({
           'confirm-pet-store-payment',
           { body: { paymentIntentId } }
         );
-        if (confirmError) {
-          console.error("Confirmation error:", confirmError);
-        } else {
-          console.log("[PET-STORE] Payment confirmed:", confirmData);
+        if (confirmError || confirmData?.error || !confirmData?.success) {
+          throw new Error(confirmError?.message || confirmData?.error || "Payment succeeded, but order finalization failed");
         }
-        const earned = confirmData?.pawbucksEarned || Math.round(totalAmount * cashbackRate);
+        console.log("[PET-STORE] Payment confirmed:", confirmData);
+        const earned = confirmData?.pawbucksEarned || Math.round(totalAmountDollars * cashbackRate);
         toast.success(`Payment successful! You earned ${earned.toLocaleString()} PawBucks!`);
       } else {
-        const pawbucksEarned = Math.round(totalAmount * cashbackRate);
+        const pawbucksEarned = Math.round(totalAmountDollars * cashbackRate);
         toast.success(`Payment successful! You earned ${pawbucksEarned} PawBucks!`);
       }
       onSuccess();
@@ -110,7 +109,7 @@ const PetStorePaymentForm = ({
     }
   };
 
-  const pawbucksEarned = Math.round(totalAmount * cashbackRate);
+  const pawbucksEarned = Math.round(totalAmountDollars * cashbackRate);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -121,7 +120,7 @@ const PetStorePaymentForm = ({
         </div>
         <div className="flex justify-between text-sm mb-2">
           <span className="text-muted-foreground">Amount:</span>
-          <span className="font-medium">${totalAmount.toFixed(2)}</span>
+          <span className="font-medium">${totalAmountDollars.toFixed(2)}</span>
         </div>
         <div className="flex justify-between text-sm">
           <span className="text-muted-foreground">You'll earn ({cashbackRate}x):</span>
@@ -161,6 +160,7 @@ export default function PetStore() {
 
   // Shopping cart
   const {
+    cart,
     cartItems,
     itemCount,
     totalUsd,
@@ -268,7 +268,7 @@ export default function PetStore() {
 
   const handlePurchaseWithCard = async (item: any) => {
     if (!user) { navigate("/auth"); return; }
-    setSelectedItem(item);
+    setSelectedItem(null);
     setIsCreatingIntent(true);
     setPaymentDialogOpen(true);
     try {
@@ -277,6 +277,12 @@ export default function PetStore() {
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
+      setSelectedItem({
+        id: item.id,
+        name: data?.orderSummary || item.name,
+        quantity: data?.totalQuantity || 1,
+        priceDollars: data?.cardAmount ?? (item.price / 100),
+      });
       setClientSecret(data.clientSecret);
     } catch (error: any) {
       toast.error(error.message || "Failed to initialize payment");
@@ -291,17 +297,23 @@ export default function PetStore() {
     if (params.mode === "pawbucks") { cartPawbucksPurchase.mutate(); return; }
 
     const firstItem = cartItems[0];
-    setSelectedItem({ ...firstItem.item, price: totalUsd });
+    setSelectedItem(null);
     setIsCreatingIntent(true);
     setPaymentDialogOpen(true);
     setCartOpen(false);
     try {
       const items = cartItems.map(ci => ({ itemId: ci.item.id, quantity: ci.quantity }));
       const { data, error } = await supabase.functions.invoke('create-pet-store-payment', {
-        body: { items, pawbucksAmount: params.pawbucksAmount || 0 },
+        body: { items, pawbucksAmount: params.pawbucksAmount || 0, cartId: cart?.id },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
+      setSelectedItem({
+        id: firstItem.item.id,
+        name: data?.orderSummary || `${cartItems.length} item order`,
+        quantity: data?.totalQuantity || cartItems.reduce((sum, item) => sum + item.quantity, 0),
+        priceDollars: data?.cardAmount ?? (params.cardAmountCents / 100),
+      });
       setClientSecret(data.clientSecret);
     } catch (error: any) {
       toast.error(error.message || "Failed to initialize payment");
@@ -318,6 +330,8 @@ export default function PetStore() {
     markConverted();
     queryClient.invalidateQueries({ queryKey: ["pawbucks-wallet"] });
     queryClient.invalidateQueries({ queryKey: ["pet-store-items"] });
+    queryClient.invalidateQueries({ queryKey: ["shopping-cart"] });
+    queryClient.invalidateQueries({ queryKey: ["shopping-cart-items"] });
   };
 
   const handlePaymentCancel = () => {
@@ -600,8 +614,8 @@ export default function PetStore() {
                     <PetStorePaymentForm
                       itemId={selectedItem.id}
                       itemName={selectedItem.name}
-                      quantity={1}
-                      totalAmount={selectedItem.price}
+                      quantity={selectedItem.quantity ?? 1}
+                      totalAmountDollars={selectedItem.priceDollars}
                       cashbackRate={cashbackRate}
                       onSuccess={handlePaymentSuccess}
                       onCancel={handlePaymentCancel}
