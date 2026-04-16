@@ -188,7 +188,7 @@ export const ProductCard = memo(({
       </CardContent>
 
       {/* Actions */}
-      <CardFooter className="px-3 pb-3 pt-0 flex-col gap-1.5">
+      <CardFooter className="px-3 pb-3 pt-0 flex-col gap-1.5" onClick={(e) => e.stopPropagation()}>
         {isAuthenticated ? (
           <>
             <Button
