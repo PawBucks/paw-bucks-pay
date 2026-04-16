@@ -205,9 +205,14 @@ serve(async (req) => {
       throw new Error('User not authenticated');
     }
 
-    const { itemId, quantity } = await req.json();
+    const body = await req.json();
+    
+    // Support both single item (itemId, quantity) and multi-item (items array)
+    const cartItems: { itemId: string; quantity: number }[] = body.items
+      ? body.items
+      : [{ itemId: body.itemId, quantity: body.quantity }];
 
-    if (!itemId || !quantity || quantity <= 0) {
+    if (!cartItems.length || cartItems.some(ci => !ci.itemId || !ci.quantity || ci.quantity <= 0)) {
       throw new Error('Invalid item or quantity');
     }
 
@@ -216,27 +221,27 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Get item details
-    const { data: item, error: itemError } = await supabaseAdmin
+    // Get all item details and validate stock
+    const itemIds = cartItems.map(ci => ci.itemId);
+    const { data: dbItems, error: itemError } = await supabaseAdmin
       .from('pet_store_items')
-      .select('id, name, description, price, category')
-      .eq('id', itemId)
-      .single();
+      .select('id, name, description, price, category, stock_quantity')
+      .in('id', itemIds);
 
-    if (itemError || !item) {
-      throw new Error('Item not found');
+    if (itemError || !dbItems || dbItems.length !== itemIds.length) {
+      throw new Error('One or more items not found');
     }
 
-    // Get stock separately to check availability
-    const { data: stockItem, error: stockError } = await supabaseAdmin
-      .from('pet_store_items')
-      .select('stock_quantity')
-      .eq('id', itemId)
-      .single();
-
-    if (stockError || !stockItem || stockItem.stock_quantity < quantity) {
-      throw new Error('Not enough stock available');
+    // Validate stock for all items
+    for (const ci of cartItems) {
+      const dbItem = dbItems.find(i => i.id === ci.itemId);
+      if (!dbItem || dbItem.stock_quantity < ci.quantity) {
+        throw new Error(`Not enough stock for ${dbItem?.name || ci.itemId}`);
+      }
     }
+
+    // Use first item as primary for backward compat
+    const item = dbItems[0];
 
     // Fetch customer profile for detailed email
     const { data: profile } = await supabaseAdmin
