@@ -350,18 +350,19 @@ serve(async (req) => {
     const pawbucksEarned = Math.round(totalAmount * pawbucksMultiplier);
 
     console.log('Creating pet store payment:', {
-      itemId,
-      itemName: item.name,
-      quantity,
+      cartItems: cartItems.map(ci => ({ itemId: ci.itemId, quantity: ci.quantity })),
       originalPriceCents,
-      discountPercentage,
-      discountAmount,
       totalAmountCents,
       totalAmountDollars: totalAmount,
       pawbucksMultiplier,
       pawbucksEarned,
-      appliedPromotionId,
     });
+
+    // Serialize cart items for metadata (Stripe metadata values are strings, max 500 chars)
+    const cartItemsJson = JSON.stringify(cartItems.map(ci => {
+      const dbItem = dbItems.find(i => i.id === ci.itemId)!;
+      return { id: ci.itemId, qty: ci.quantity, name: dbItem.name, priceCents: dbItem.price };
+    }));
 
     // Create a PaymentIntent with explicit card-only for international compatibility
     const paymentIntent = await stripe.paymentIntents.create({
@@ -370,9 +371,10 @@ serve(async (req) => {
       payment_method_types: ['card'],
       metadata: {
         user_id: user.id,
-        item_id: itemId,
-        item_name: item.name,
-        quantity: quantity.toString(),
+        item_id: firstItemId,
+        item_name: allItemNames,
+        quantity: totalQuantity.toString(),
+        cart_items: cartItemsJson.substring(0, 500),
         source: 'pet_store',
         pawbucks_earned: pawbucksEarned.toString(),
         pawbucks_multiplier: pawbucksMultiplier.toString(),
