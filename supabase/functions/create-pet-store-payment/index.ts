@@ -290,10 +290,12 @@ serve(async (req) => {
     }
 
     // Calculate final price with discount
-    const originalPrice = item.price * quantity;
-    const discountAmount = discountPercentage > 0 ? Math.round(originalPrice * (discountPercentage / 100)) : 0;
-    const totalAmount = originalPrice - discountAmount;
-    const amountInCents = Math.round(totalAmount * 100);
+    // item.price is stored in cents (e.g. 700 = $7.00)
+    const originalPriceCents = item.price * quantity;
+    const discountAmount = discountPercentage > 0 ? Math.round(originalPriceCents * (discountPercentage / 100)) : 0;
+    const totalAmountCents = originalPriceCents - discountAmount;
+    const amountInCents = totalAmountCents;
+    const totalAmount = totalAmountCents / 100; // dollars for display/emails
 
     // Check subscription status for multiplier (3-tier: Free=10x, PawPass=20x, PawPass+=30x)
     let pawbucksMultiplier = 10;
