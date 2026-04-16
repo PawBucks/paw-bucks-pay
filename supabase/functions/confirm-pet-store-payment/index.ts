@@ -151,15 +151,20 @@ serve(async (req) => {
     }
 
     // 2. Create transaction record
+    const pawbucksUsedInSplit = parseInt(metadata.pawbucks_amount || '0', 10);
+    const paymentMethod = pawbucksUsedInSplit > 0 ? 'split' : 'card';
+    
     const { data: transaction, error: txError } = await supabaseAdmin
       .from('transactions')
       .insert({
         user_id: userId,
+        merchant_id: item?.merchant_id || null,
         amount: amountInDollars,
         stripe_amount: amountInDollars,
-        pawbucks_used: 0,
+        pawbucks_used: pawbucksUsedInSplit,
         application_fee: 0,
         status: 'completed',
+        payment_method: paymentMethod,
         rewards_earned: pawbucksEarned,
         cashback_earned: pawbucksEarned,
         stripe_payment_intent_id: paymentIntentId,
