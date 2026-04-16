@@ -11343,7 +11343,7 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
-          merchant_id: string
+          merchant_id: string | null
           pawbucks_used: number | null
           payment_method: string | null
           rewards_earned: number
@@ -11360,7 +11360,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
-          merchant_id: string
+          merchant_id?: string | null
           pawbucks_used?: number | null
           payment_method?: string | null
           rewards_earned?: number
@@ -11377,7 +11377,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
-          merchant_id?: string
+          merchant_id?: string | null
           pawbucks_used?: number | null
           payment_method?: string | null
           rewards_earned?: number
