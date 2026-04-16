@@ -308,6 +308,13 @@ serve(async (req) => {
     let finalAmountCents = totalAmountCents;
     const totalAmount = totalAmountCents / 100; // dollars for display/emails
 
+    // Build item names for metadata (needed early for auto-redeem descriptions)
+    const allItemNames = cartItems.map(ci => {
+      const dbItem = dbItems.find(i => i.id === ci.itemId)!;
+      return `${dbItem.name} x${ci.quantity}`;
+    }).join(', ');
+    const totalQuantity = cartItems.reduce((sum, ci) => sum + ci.quantity, 0);
+
     // --- Auto-Redeem PawBucks Logic ---
     const PAWBUCKS_TO_USD = 1000; // 1000 PB = $1
     let pawbucksUsed = 0;
