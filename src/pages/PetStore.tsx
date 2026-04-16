@@ -210,6 +210,19 @@ export default function PetStore() {
   const { data: promotionalData } = usePromotionalItems(user?.id);
   const promotionalItemMap = promotionalData?.itemMap || new Map();
 
+  // Auto-redeem preference
+  const { data: autoRedeemPref } = useQuery({
+    queryKey: ["auto-redeem-preference", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return { enabled: false, mode: 'off' };
+      const { data } = await supabase.from('profiles').select('auto_redeem_mode').eq('id', user.id).single();
+      const mode = data?.auto_redeem_mode || 'off';
+      return { enabled: mode !== 'off', mode };
+    },
+    staleTime: 1000 * 60 * 5,
+    enabled: !!user?.id,
+  });
+
   // Fetch items with merchant info
   const { data: items, isLoading } = useQuery({
     queryKey: ["pet-store-items"],
