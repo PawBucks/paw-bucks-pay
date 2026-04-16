@@ -88,7 +88,7 @@ const MerchantProducts = () => {
   const [productItemType, setProductItemType] = useState<"product" | "service">("product");
   const [listInPetStore, setListInPetStore] = useState(false);
   const [pawbucksPrice, setPawbucksPrice] = useState("");
-  const [productImageUrl, setProductImageUrl] = useState<string | null>(null);
+  const [productImageUrls, setProductImageUrls] = useState<string[]>([]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -241,7 +241,8 @@ const MerchantProducts = () => {
               merchant_id: merchant.id,
               is_active: true,
               stock_quantity: 999,
-              image_url: productImageUrl || null,
+              image_url: productImageUrls[0] || null,
+              image_urls: productImageUrls,
             });
 
           if (petStoreError) {
@@ -529,8 +530,8 @@ const MerchantProducts = () => {
             <div>
               <Label>Product Image</Label>
               <ProductImageUpload
-                imageUrl={productImageUrl}
-                onChange={setProductImageUrl}
+                imageUrls={productImageUrls}
+                onChange={setProductImageUrls}
                 folder={merchant?.id || "merchant"}
               />
             </div>

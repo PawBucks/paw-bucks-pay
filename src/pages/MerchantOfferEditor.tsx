@@ -238,9 +238,10 @@ const handleSignOut = async () => {
                 <div className="space-y-2">
                   <Label>Offer Image</Label>
                   <ProductImageUpload
-                    imageUrl={formData.image_url || null}
-                    onChange={(url) => setFormData({ ...formData, image_url: url || '' })}
+                    imageUrls={formData.image_url ? [formData.image_url] : []}
+                    onChange={(urls) => setFormData({ ...formData, image_url: urls[0] || '' })}
                     folder="offers"
+                    maxImages={1}
                   />
                 </div>
 

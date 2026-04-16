@@ -154,6 +154,7 @@ export default function PetStoreAdmin() {
       price_pawbucks: "",
       stock_quantity: "",
       image_url: "",
+      image_urls: [] as string[],
       is_active: true,
     });
   };
@@ -169,7 +170,8 @@ export default function PetStoreAdmin() {
       price: parseFloat(formData.price) * 100,
       price_pawbucks: parseInt(formData.price_pawbucks),
       stock_quantity: parseInt(formData.stock_quantity),
-      image_url: formData.image_url || null,
+      image_url: formData.image_urls?.[0] || formData.image_url || null,
+      image_urls: formData.image_urls || [],
       is_active: formData.is_active,
     };
 
@@ -341,8 +343,8 @@ export default function PetStoreAdmin() {
                    <div>
                     <Label>Product Image</Label>
                     <ProductImageUpload
-                      imageUrl={formData.image_url || null}
-                      onChange={(url) => setFormData({ ...formData, image_url: url || '' })}
+                      imageUrls={formData.image_urls || (formData.image_url ? [formData.image_url] : [])}
+                      onChange={(urls) => setFormData({ ...formData, image_urls: urls, image_url: urls[0] || '' })}
                       folder="admin"
                     />
                   </div>
