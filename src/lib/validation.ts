@@ -71,6 +71,10 @@ export const merchantOnboardingSchema = z.object({
   businessType: z.enum(PET_BUSINESS_TYPES, {
     errorMap: () => ({ message: "Please select a business type" }),
   }),
+  businessCategories: z.array(z.enum(PET_BUSINESS_TYPES))
+    .min(1, { message: "Please select at least one business category" })
+    .max(10, { message: "You can select up to 10 categories" })
+    .optional(),
   entityType: z.enum(ENTITY_TYPES, {
     errorMap: () => ({ message: "Please select an entity type" }),
   }).optional(),

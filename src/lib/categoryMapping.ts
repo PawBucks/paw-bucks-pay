@@ -270,6 +270,39 @@ export const getCategoryIcon = (businessType: string | undefined | null): Lucide
 };
 
 /**
+ * Check if a category filter (e.g. "grooming") matches any of a merchant's categories.
+ * Looks at the merchant's full business_categories array first, falling back to business_type.
+ */
+export const merchantMatchesCategory = (
+  filterCategory: string,
+  businessType: string | undefined | null,
+  businessCategories?: string[] | null
+): boolean => {
+  if (!filterCategory || filterCategory === "all") return true;
+  const filterLower = filterCategory.toLowerCase();
+  const cats = (businessCategories && businessCategories.length > 0)
+    ? businessCategories
+    : (businessType ? [businessType] : []);
+  return cats.some((c) => (c || "").toLowerCase().includes(filterLower));
+};
+
+/**
+ * Check if a free-text search term matches any of a merchant's categories
+ * (uses synonym mapping). Falls back to single business_type when no array.
+ */
+export const searchMatchesAnyCategory = (
+  searchTerm: string,
+  businessType: string | undefined | null,
+  businessCategories?: string[] | null
+): boolean => {
+  if (!searchTerm) return false;
+  const cats = (businessCategories && businessCategories.length > 0)
+    ? businessCategories
+    : (businessType ? [businessType] : []);
+  return cats.some((c) => searchMatchesCategory(searchTerm, c));
+};
+
+/**
  * Check if a search term matches a merchant's category.
  * e.g. searching "groomers" will match a merchant with business_type "grooming"
  */
