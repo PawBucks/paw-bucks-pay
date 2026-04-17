@@ -105,7 +105,36 @@ serve(async (req) => {
         `)
         .eq("cart_id", cart.id);
 
-      if (!cartItems || cartItems.length === 0) continue;
+      // Skip empty carts and mark them expired (purchased via another flow or cleared)
+      if (!cartItems || cartItems.length === 0) {
+        await supabaseAdmin
+          .from("shopping_carts")
+          .update({ status: "expired" })
+          .eq("id", cart.id);
+        continue;
+      }
+
+      // Skip if user has made any pet store purchase since last cart activity
+      const { data: recentPurchase } = await supabaseAdmin
+        .from("pet_store_orders")
+        .select("id")
+        .eq("user_id", cart.user_id)
+        .gte("created_at", cart.last_activity_at)
+        .limit(1)
+        .maybeSingle();
+
+      if (recentPurchase) {
+        await supabaseAdmin
+          .from("shopping_carts")
+          .update({ status: "converted", converted_at: now.toISOString() })
+          .eq("id", cart.id);
+        await supabaseAdmin
+          .from("shopping_cart_items")
+          .delete()
+          .eq("cart_id", cart.id);
+        continue;
+      }
+
 
       // Check which notifications already sent
       const { data: sentNotifs } = await supabaseAdmin
