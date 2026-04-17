@@ -489,19 +489,22 @@ const MerchantOnboarding = () => {
                 <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground text-sm flex items-center justify-center">2</span>
                 What Type of Pet Business?
               </CardTitle>
-              <CardDescription>Select the category that best describes your services</CardDescription>
+              <CardDescription>
+                Select <strong>all categories</strong> that apply. The first one becomes your primary category.
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                 {Object.entries(BUSINESS_TYPE_CONFIG).map(([key, config]) => {
                   const Icon = config.icon;
-                  const isSelected = businessType === key;
+                  const isSelected = businessCategories.includes(key);
+                  const isPrimary = businessType === key && businessCategories.length > 1;
                   return (
                     <button
                       key={key}
                       type="button"
-                      onClick={() => setBusinessType(key)}
-                      className={`p-3 rounded-lg border-2 transition-all text-left ${
+                      onClick={() => toggleCategory(key)}
+                      className={`relative p-3 rounded-lg border-2 transition-all text-left ${
                         isSelected 
                           ? 'border-primary bg-primary/10' 
                           : 'border-border hover:border-primary/50 hover:bg-muted/50'
@@ -509,15 +512,27 @@ const MerchantOnboarding = () => {
                     >
                       <Icon className={`w-5 h-5 mb-1 ${isSelected ? 'text-primary' : 'text-muted-foreground'}`} />
                       <div className="text-sm font-medium truncate">{config.label}</div>
+                      {isPrimary && (
+                        <Badge className="absolute -top-2 -right-2 text-[10px] px-1.5 py-0 h-4">Primary</Badge>
+                      )}
                     </button>
                   );
                 })}
               </div>
-              {businessType && BUSINESS_TYPE_CONFIG[businessType] && (
-                <p className="text-sm text-muted-foreground mt-3 flex items-center gap-2">
-                  <Info className="w-4 h-4" />
-                  {BUSINESS_TYPE_CONFIG[businessType].description}
-                </p>
+              {businessCategories.length > 0 && (
+                <div className="mt-3 space-y-2">
+                  <p className="text-sm text-muted-foreground flex items-center gap-2">
+                    <Info className="w-4 h-4" />
+                    {businessCategories.length} {businessCategories.length === 1 ? 'category' : 'categories'} selected
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {businessCategories.map((key) => (
+                      <Badge key={key} variant="secondary" className="text-xs">
+                        {BUSINESS_TYPE_CONFIG[key]?.label || key}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
               )}
             </CardContent>
           </Card>
