@@ -11,6 +11,7 @@ type MerchantWithRating = {
   id: string;
   business_name: string;
   business_type: string;
+  business_categories?: string[] | null;
   description?: string;
   address?: string;
   latitude?: number;
@@ -123,11 +124,30 @@ const OrganicMerchantCardComponent = ({
                   </span>
                 </div>
 
-                {/* Row 3: Category + Cashback */}
+                {/* Row 3: Categories + Cashback */}
                 <div className="flex items-center gap-1.5 mb-1.5 flex-wrap">
-                  <span className="text-xs text-muted-foreground capitalize">
-                    {merchant.business_type.replace(/_/g, " ")}
-                  </span>
+                  {(() => {
+                    const cats = (merchant.business_categories && merchant.business_categories.length > 0)
+                      ? merchant.business_categories
+                      : [merchant.business_type];
+                    const visible = cats.slice(0, 3);
+                    const extra = cats.length - visible.length;
+                    return (
+                      <>
+                        {visible.map((cat, i) => (
+                          <span key={`${cat}-${i}`} className="text-xs text-muted-foreground capitalize">
+                            {(cat || "").replace(/_/g, " ")}
+                            {i < visible.length - 1 && <span className="text-muted-foreground/40 ml-1.5">·</span>}
+                          </span>
+                        ))}
+                        {extra > 0 && (
+                          <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4">
+                            +{extra}
+                          </Badge>
+                        )}
+                      </>
+                    );
+                  })()}
                   <span className="text-muted-foreground/40">·</span>
                   <span className="text-xs text-green-600 font-medium">
                     {(merchant.cashback_rate ?? 0).toFixed(0)}x points

@@ -6556,6 +6556,7 @@ export type Database = {
           approval_status: Database["public"]["Enums"]["approval_status"]
           approved_at: string | null
           approved_by: string | null
+          business_categories: string[]
           business_name: string
           business_type: string
           cashback_rate: number
@@ -6608,6 +6609,7 @@ export type Database = {
           approval_status?: Database["public"]["Enums"]["approval_status"]
           approved_at?: string | null
           approved_by?: string | null
+          business_categories?: string[]
           business_name: string
           business_type: string
           cashback_rate?: number
@@ -6660,6 +6662,7 @@ export type Database = {
           approval_status?: Database["public"]["Enums"]["approval_status"]
           approved_at?: string | null
           approved_by?: string | null
+          business_categories?: string[]
           business_name?: string
           business_type?: string
           cashback_rate?: number
@@ -13741,6 +13744,7 @@ export type Database = {
         Row: {
           accepts_pawbucks: boolean | null
           address: string | null
+          business_categories: string[] | null
           business_name: string | null
           business_type: string | null
           cashback_rate: number | null
@@ -13766,6 +13770,7 @@ export type Database = {
         Insert: {
           accepts_pawbucks?: boolean | null
           address?: string | null
+          business_categories?: string[] | null
           business_name?: string | null
           business_type?: string | null
           cashback_rate?: number | null
@@ -13791,6 +13796,7 @@ export type Database = {
         Update: {
           accepts_pawbucks?: boolean | null
           address?: string | null
+          business_categories?: string[] | null
           business_name?: string | null
           business_type?: string | null
           cashback_rate?: number | null

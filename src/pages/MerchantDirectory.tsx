@@ -17,7 +17,7 @@ import { Separator } from "@/components/ui/separator";
 import { ROUTES, QUERY_STALE_TIMES } from "@/lib/constants";
 import { usePersistentState } from "@/hooks/usePersistentState";
 import { supabase } from "@/integrations/supabase/client";
-import { searchMatchesCategory } from "@/lib/categoryMapping";
+import { searchMatchesCategory, searchMatchesAnyCategory, merchantMatchesCategory } from "@/lib/categoryMapping";
 import { useVerifiedProMerchants, useSponsoredMerchants, useFeaturedPartnerMerchants, usePremiumAdMerchants, useSearchBoostedMerchantSet, isVerifiedPro, isSponsored } from "@/hooks/useMerchantServices";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSponsoredTracking } from "@/hooks/useSponsoredTracking";
@@ -140,7 +140,7 @@ const MerchantDirectory = () => {
     async () => {
       const { data: merchantData, error: merchantError } = await supabase
         .from("merchants_public")
-        .select("id, business_name, business_type, description, address, latitude, longitude, cashback_rate, logo_url, accepts_pawbucks, price_range")
+        .select("id, business_name, business_type, business_categories, description, address, latitude, longitude, cashback_rate, logo_url, accepts_pawbucks, price_range")
         .order("business_name");
 
       if (merchantError) throw merchantError;
@@ -176,7 +176,7 @@ const MerchantDirectory = () => {
 
     if (selectedCategory !== "all") {
       filtered = filtered.filter((m) =>
-        m.business_type.toLowerCase().includes(selectedCategory.toLowerCase())
+        merchantMatchesCategory(selectedCategory, m.business_type, (m as any).business_categories)
       );
     }
 
@@ -189,7 +189,7 @@ const MerchantDirectory = () => {
       filtered = filtered.filter(
         (m) =>
           m.business_name.toLowerCase().includes(searchLower) ||
-          searchMatchesCategory(debouncedSearch, m.business_type) ||
+          searchMatchesAnyCategory(debouncedSearch, m.business_type, (m as any).business_categories) ||
           m.description?.toLowerCase().includes(searchLower)
       );
     }
