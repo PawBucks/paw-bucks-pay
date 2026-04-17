@@ -140,7 +140,7 @@ const MerchantDirectory = () => {
     async () => {
       const { data: merchantData, error: merchantError } = await supabase
         .from("merchants_public")
-        .select("id, business_name, business_type, description, address, latitude, longitude, cashback_rate, logo_url, accepts_pawbucks, price_range")
+        .select("id, business_name, business_type, business_categories, description, address, latitude, longitude, cashback_rate, logo_url, accepts_pawbucks, price_range")
         .order("business_name");
 
       if (merchantError) throw merchantError;
@@ -176,7 +176,7 @@ const MerchantDirectory = () => {
 
     if (selectedCategory !== "all") {
       filtered = filtered.filter((m) =>
-        m.business_type.toLowerCase().includes(selectedCategory.toLowerCase())
+        merchantMatchesCategory(selectedCategory, m.business_type, (m as any).business_categories)
       );
     }
 
@@ -189,7 +189,7 @@ const MerchantDirectory = () => {
       filtered = filtered.filter(
         (m) =>
           m.business_name.toLowerCase().includes(searchLower) ||
-          searchMatchesCategory(debouncedSearch, m.business_type) ||
+          searchMatchesAnyCategory(debouncedSearch, m.business_type, (m as any).business_categories) ||
           m.description?.toLowerCase().includes(searchLower)
       );
     }
