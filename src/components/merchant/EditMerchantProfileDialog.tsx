@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -11,9 +12,32 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Facebook, Instagram, Twitter, Linkedin, Globe } from "lucide-react";
+import { Facebook, Instagram, Twitter, Linkedin, Globe, Info } from "lucide-react";
 import { PolicyDocumentUpload } from "./PolicyDocumentUpload";
 import { BusinessHoursEditor } from "./BusinessHoursEditor";
+
+const BUSINESS_TYPE_OPTIONS: { key: string; label: string }[] = [
+  { key: "veterinary", label: "Veterinary" },
+  { key: "grooming", label: "Grooming" },
+  { key: "mobile_groomer", label: "Mobile Groomer" },
+  { key: "pet_store", label: "Pet Store" },
+  { key: "food", label: "Food & Treats" },
+  { key: "boarding", label: "Boarding" },
+  { key: "training", label: "Training" },
+  { key: "walker", label: "Walker" },
+  { key: "daycare", label: "Daycare" },
+  { key: "sitter", label: "Pet Sitter" },
+  { key: "photography", label: "Photography" },
+  { key: "insurance", label: "Insurance" },
+  { key: "delivery", label: "Delivery" },
+  { key: "hiker", label: "Hiker" },
+  { key: "runner", label: "Runner" },
+  { key: "masseuse", label: "Masseuse" },
+  { key: "behaviorist", label: "Behaviorist" },
+  { key: "breeder", label: "Breeder" },
+  { key: "rescue_nonprofit", label: "Rescue / Nonprofit" },
+  { key: "other", label: "Other" },
+];
 
 type Merchant = {
   id: string;
@@ -21,6 +45,7 @@ type Merchant = {
   contact_person: string;
   phone?: string;
   business_type: string;
+  business_categories?: string[] | null;
   address?: string;
   description?: string;
   cashback_rate: number;
@@ -39,7 +64,7 @@ type EditMerchantProfileDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   merchant: Merchant;
-  onSubmit: (formData: FormData, logoFile: File | null) => Promise<void>;
+  onSubmit: (formData: FormData, logoFile: File | null, businessCategories: string[]) => Promise<void>;
   onRefresh?: () => void;
 };
 
@@ -54,6 +79,22 @@ export const EditMerchantProfileDialog = ({
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [logoZoom, setLogoZoom] = useState(1);
+  const [categories, setCategories] = useState<string[]>([]);
+
+  useEffect(() => {
+    const initial = (merchant.business_categories && merchant.business_categories.length > 0)
+      ? merchant.business_categories
+      : (merchant.business_type ? [merchant.business_type] : []);
+    setCategories(initial);
+  }, [merchant.business_categories, merchant.business_type, open]);
+
+  const toggleCategory = (key: string) => {
+    setCategories((prev) =>
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+    );
+  };
+
+  const primary = categories[0] || merchant.business_type;
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -70,7 +111,9 @@ export const EditMerchantProfileDialog = ({
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    await onSubmit(formData, logoFile);
+    // Use the first selected category as the primary business_type
+    if (primary) formData.set("businessType", primary);
+    await onSubmit(formData, logoFile, categories);
     setLogoFile(null);
     setLogoPreview(null);
   };
@@ -112,33 +155,47 @@ export const EditMerchantProfileDialog = ({
                 defaultValue={merchant.phone || ""}
               />
             </div>
+
             <div className="space-y-2">
-              <Label htmlFor="businessType">Business Type</Label>
-              <select
-                id="businessType"
-                name="businessType"
-                defaultValue={merchant.business_type}
-                className="w-full p-3 rounded-lg border bg-background"
-                required
-              >
-                <option value="veterinary">Veterinary</option>
-                <option value="grooming">Grooming</option>
-                <option value="pet_store">Pet Store</option>
-                <option value="food">Food & Treats</option>
-                <option value="boarding">Boarding</option>
-                <option value="training">Training</option>
-                <option value="walker">Walker</option>
-                <option value="daycare">Daycare</option>
-                <option value="photography">Photography</option>
-                <option value="insurance">Insurance</option>
-                <option value="delivery">Delivery</option>
-                <option value="hiker">Hiker</option>
-                <option value="runner">Runner</option>
-                <option value="masseuse">Masseuse</option>
-                <option value="behaviorist">Behaviorist</option>
-                <option value="other">Other</option>
-              </select>
+              <Label>Business Categories</Label>
+              <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                <Info className="w-3.5 h-3.5" />
+                Select all that apply. The first selected becomes your primary category.
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {BUSINESS_TYPE_OPTIONS.map(({ key, label }) => {
+                  const isSelected = categories.includes(key);
+                  const isPrimary = primary === key && categories.length > 1;
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => toggleCategory(key)}
+                      className={`relative px-3 py-2 rounded-lg border-2 text-sm text-left transition-all ${
+                        isSelected
+                          ? "border-primary bg-primary/10 text-foreground"
+                          : "border-border hover:border-primary/50 hover:bg-muted/50 text-muted-foreground"
+                      }`}
+                    >
+                      {label}
+                      {isPrimary && (
+                        <Badge className="absolute -top-2 -right-2 text-[10px] px-1.5 py-0 h-4">
+                          Primary
+                        </Badge>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+              {categories.length > 0 && (
+                <p className="text-xs text-muted-foreground">
+                  {categories.length} {categories.length === 1 ? "category" : "categories"} selected
+                </p>
+              )}
+              {/* Hidden input to keep backward-compat with form consumers */}
+              <input type="hidden" name="businessType" value={primary || ""} />
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="logo">Business Logo</Label>
               <div className="flex flex-col gap-4">
@@ -296,7 +353,7 @@ export const EditMerchantProfileDialog = ({
             >
               Cancel
             </Button>
-            <Button type="submit" className="flex-1">
+            <Button type="submit" className="flex-1" disabled={categories.length === 0}>
               Save Changes
             </Button>
           </div>
