@@ -272,7 +272,7 @@ const Discover = () => {
       const [merchantsResult, reviewsResult] = await Promise.all([
         supabase
           .from('merchants_public')
-          .select('id, business_name, business_type, description, address, latitude, longitude, cashback_rate, logo_url, accepts_pawbucks, is_sponsored, sponsored_until, price_range')
+          .select('id, business_name, business_type, business_categories, description, address, latitude, longitude, cashback_rate, logo_url, accepts_pawbucks, is_sponsored, sponsored_until, price_range')
           .order('business_name'),
         supabase
           .from('merchant_reviews')
