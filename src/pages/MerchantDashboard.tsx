@@ -559,7 +559,11 @@ const MerchantDashboard = () => {
     }
   };
 
-  const handleUpdateProfile = async (formData: FormData, logoFile: File | null) => {
+  const handleUpdateProfile = async (
+    formData: FormData,
+    logoFile: File | null,
+    businessCategories: string[] = []
+  ) => {
     if (!merchant || !user) return;
 
     try {
@@ -586,11 +590,15 @@ const MerchantDashboard = () => {
       const newAddress = formData.get("address") as string;
       const addressChanged = newAddress !== merchant.address;
 
+      const primaryType = formData.get("businessType") as string;
+      const cats = businessCategories.length > 0 ? businessCategories : [primaryType];
+
       const updates = {
         business_name: formData.get("businessName") as string,
         contact_person: formData.get("contactPerson") as string,
         phone: formData.get("phone") as string || null,
-        business_type: formData.get("businessType") as string,
+        business_type: primaryType,
+        business_categories: cats,
         address: newAddress,
         description: formData.get("description") as string,
         logo_url: logoUrl,
