@@ -38,13 +38,54 @@ serve(async (req) => {
       .eq("status", "active")
       .lt("last_activity_at", sevenDaysAgo);
 
-    // Mark as abandoned if idle > 1 hour
-    const { data: abandonedCarts } = await supabaseAdmin
+    // Cleanup: auto-convert any active/abandoned carts that have NO items
+    // (user purchased through a different flow or cleared cart manually).
+    const { data: emptyCarts } = await supabaseAdmin
       .from("shopping_carts")
-      .update({ status: "abandoned", abandoned_at: now.toISOString() })
+      .select("id")
+      .in("status", ["active", "abandoned"]);
+
+    if (emptyCarts && emptyCarts.length > 0) {
+      const cartIds = emptyCarts.map((c) => c.id);
+      const { data: cartItemCounts } = await supabaseAdmin
+        .from("shopping_cart_items")
+        .select("cart_id")
+        .in("cart_id", cartIds);
+      const cartsWithItems = new Set((cartItemCounts || []).map((ci: any) => ci.cart_id));
+      const emptyCartIds = cartIds.filter((id) => !cartsWithItems.has(id));
+      if (emptyCartIds.length > 0) {
+        await supabaseAdmin
+          .from("shopping_carts")
+          .update({ status: "expired" })
+          .in("id", emptyCartIds);
+      }
+    }
+
+    // Mark as abandoned if idle > 1 hour AND has items
+    const { data: candidateCarts } = await supabaseAdmin
+      .from("shopping_carts")
+      .select("id, user_id")
       .eq("status", "active")
-      .lt("last_activity_at", oneHourAgo)
-      .select("id, user_id");
+      .lt("last_activity_at", oneHourAgo);
+
+    const cartsToAbandon: string[] = [];
+    for (const cart of candidateCarts || []) {
+      const { count } = await supabaseAdmin
+        .from("shopping_cart_items")
+        .select("id", { count: "exact", head: true })
+        .eq("cart_id", cart.id);
+      if ((count || 0) > 0) cartsToAbandon.push(cart.id);
+    }
+
+    let abandonedCarts: { id: string; user_id: string }[] = [];
+    if (cartsToAbandon.length > 0) {
+      const { data } = await supabaseAdmin
+        .from("shopping_carts")
+        .update({ status: "abandoned", abandoned_at: now.toISOString() })
+        .in("id", cartsToAbandon)
+        .select("id, user_id");
+      abandonedCarts = data || [];
+    }
 
     // Also check existing abandoned carts for follow-up reminders
     const { data: allAbandonedCarts } = await supabaseAdmin
