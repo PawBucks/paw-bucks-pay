@@ -112,6 +112,20 @@ const MerchantOnboarding = () => {
   const { geocodeAddress } = useGeocoding();
   const [isLoading, setIsLoading] = useState(false);
   const [businessType, setBusinessType] = useState<string>("");
+  const [businessCategories, setBusinessCategories] = useState<string[]>([]);
+
+  const toggleCategory = (key: string) => {
+    setBusinessCategories((prev) => {
+      const next = prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key];
+      // Keep primary business_type as the first selected category for backward compat
+      if (next.length > 0) {
+        setBusinessType(next[0]);
+      } else {
+        setBusinessType("");
+      }
+      return next;
+    });
+  };
   const [entityType, setEntityType] = useState<string>("");
   const [workingStyle, setWorkingStyle] = useState<string>("");
   const [country, setCountry] = useState("US");
@@ -301,6 +315,7 @@ const MerchantOnboarding = () => {
         contact_person: validatedData.contactPerson,
         phone: validatedData.phone,
         business_type: validatedData.businessType,
+        business_categories: businessCategories.length > 0 ? businessCategories : [validatedData.businessType],
         entity_type: validatedData.entityType || null,
         country: validatedData.country,
         state_of_incorporation: validatedData.stateOfIncorporation || null,
