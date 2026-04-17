@@ -7,7 +7,7 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { useOptimizedQuery } from "@/hooks/useOptimizedQuery";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { supabase } from "@/integrations/supabase/client";
-import { searchMatchesCategory } from "@/lib/categoryMapping";
+import { searchMatchesCategory, searchMatchesAnyCategory, merchantMatchesCategory } from "@/lib/categoryMapping";
 import { PaymentDialogWithPawBucks } from "@/components/PaymentDialogWithPawBucks";
 import { BottomNav } from "@/components/BottomNav";
 import { PageLoader } from "@/components/PageLoader";
@@ -341,7 +341,7 @@ const Discover = () => {
     // Filter by category
     if (selectedCategory !== "all") {
       filtered = filtered.filter((m) =>
-        m.business_type.toLowerCase().includes(selectedCategory.toLowerCase())
+        merchantMatchesCategory(selectedCategory, m.business_type, (m as any).business_categories)
       );
     }
 
@@ -351,7 +351,7 @@ const Discover = () => {
       filtered = filtered.filter(
         (m) =>
           m.business_name.toLowerCase().includes(searchLower) ||
-          searchMatchesCategory(debouncedSearch, m.business_type) ||
+          searchMatchesAnyCategory(debouncedSearch, m.business_type, (m as any).business_categories) ||
           m.description?.toLowerCase().includes(searchLower)
       );
     }
@@ -499,7 +499,7 @@ const Discover = () => {
         id: m.id,
         position: index + 1,
         isBoosted: true,
-        categoryMatch: selectedCategory !== 'all' && m.business_type.toLowerCase().includes(selectedCategory.toLowerCase()),
+        categoryMatch: selectedCategory !== 'all' && merchantMatchesCategory(selectedCategory, m.business_type, (m as any).business_categories),
         localMatch: !!m.distance && m.distance <= 10,
       }));
 

@@ -17,7 +17,7 @@ import { Separator } from "@/components/ui/separator";
 import { ROUTES, QUERY_STALE_TIMES } from "@/lib/constants";
 import { usePersistentState } from "@/hooks/usePersistentState";
 import { supabase } from "@/integrations/supabase/client";
-import { searchMatchesCategory } from "@/lib/categoryMapping";
+import { searchMatchesCategory, searchMatchesAnyCategory, merchantMatchesCategory } from "@/lib/categoryMapping";
 import { useVerifiedProMerchants, useSponsoredMerchants, useFeaturedPartnerMerchants, usePremiumAdMerchants, useSearchBoostedMerchantSet, isVerifiedPro, isSponsored } from "@/hooks/useMerchantServices";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSponsoredTracking } from "@/hooks/useSponsoredTracking";
