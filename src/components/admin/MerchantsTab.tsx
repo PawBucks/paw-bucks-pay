@@ -275,6 +275,12 @@ export function MerchantsTab() {
                   <TableCell>
                     {merchant.is_paused ? (
                       <Badge variant="destructive">Paused</Badge>
+                    ) : merchant.approval_status === 'pending' ? (
+                      <Badge variant="secondary" className="bg-amber-500/15 text-amber-700 border-amber-500/30">
+                        Pending
+                      </Badge>
+                    ) : merchant.approval_status === 'denied' ? (
+                      <Badge variant="destructive">Denied</Badge>
                     ) : (
                       <Badge variant="default">Active</Badge>
                     )}
