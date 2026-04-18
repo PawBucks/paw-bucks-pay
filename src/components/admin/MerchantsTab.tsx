@@ -26,6 +26,7 @@ type Merchant = {
   pawbucks_balance?: number;
   is_paused?: boolean;
   pause_reason?: string;
+  approval_status?: 'pending' | 'approved' | 'denied' | null;
 };
 
 // Fetch merchants with their PawBucks balances
