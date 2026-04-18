@@ -106,82 +106,104 @@ export function UserDetailProfile({ userId }: { userId: string }) {
     );
   }
 
+  const isProtected = roles.some(r => r.role === "admin" || r.role === "superadmin");
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-3 text-2xl">
-          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-            <User className="w-6 h-6 text-primary" />
-          </div>
-          <div>
-            <div>{profile.full_name || "Unnamed User"}</div>
-            <div className="text-sm font-normal text-muted-foreground">{profile.email}</div>
-          </div>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <InfoItem icon={<Calendar className="w-4 h-4" />} label="Joined" value={new Date(profile.created_at).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })} />
-          <InfoItem icon={<Phone className="w-4 h-4" />} label="Phone" value={profile.phone || "N/A"} />
-          <InfoItem icon={<Shield className="w-4 h-4" />} label="User Type">
-            <Badge variant={profile.user_type === "merchant" ? "default" : "secondary"}>
-              {profile.user_type}
-            </Badge>
-          </InfoItem>
-          <InfoItem icon={<Crown className="w-4 h-4" />} label="Roles">
-            <div className="flex gap-1 flex-wrap">
-              {roles.length > 0
-                ? roles.map(r => <Badge key={r.role} variant="outline">{r.role}</Badge>)
-                : <span className="text-muted-foreground text-sm">user</span>}
+    <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-3 text-2xl">
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+              <User className="w-6 h-6 text-primary" />
             </div>
-          </InfoItem>
-
-          {profile.subscription_tier && (
-            <InfoItem icon={<Crown className="w-4 h-4" />} label="Subscription" value={profile.subscription_tier} />
-          )}
-
-          {profile.referral_code && (
-            <InfoItem icon={<Mail className="w-4 h-4" />} label="Referral Code" value={profile.referral_code} />
-          )}
-
-          {welcomeCredit && (
-            <InfoItem icon={<Gift className="w-4 h-4" />} label="Welcome Credit">
-              <div className="space-y-1">
-                <Badge variant="outline" className={
-                  welcomeCredit.status === "active"
-                    ? "bg-emerald-500/10 text-emerald-700 border-emerald-500/30"
-                    : welcomeCredit.status === "used"
-                    ? "bg-blue-500/10 text-blue-700 border-blue-500/30"
-                    : "bg-muted text-muted-foreground"
-                }>
-                  {welcomeCredit.status} — ${(welcomeCredit.credit_amount / 1000).toFixed(0)}
-                </Badge>
-                {welcomeCredit.status === "active" && (
-                  <p className="text-xs text-muted-foreground">
-                    Exp {new Date(welcomeCredit.expires_at).toLocaleDateString()}
-                    {!welcomeCredit.phase_2_unlocked && " · Phase 2 locked"}
-                  </p>
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <span>{profile.full_name || "Unnamed User"}</span>
+                {profile.is_banned && (
+                  <Badge variant="destructive" className="gap-1">
+                    <Ban className="w-3 h-3" />
+                    Banned
+                  </Badge>
                 )}
               </div>
+              <div className="text-sm font-normal text-muted-foreground">{profile.email}</div>
+            </div>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <InfoItem icon={<Calendar className="w-4 h-4" />} label="Joined" value={new Date(profile.created_at).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })} />
+            <InfoItem icon={<Phone className="w-4 h-4" />} label="Phone" value={profile.phone || "N/A"} />
+            <InfoItem icon={<Shield className="w-4 h-4" />} label="User Type">
+              <Badge variant={profile.user_type === "merchant" ? "default" : "secondary"}>
+                {profile.user_type}
+              </Badge>
             </InfoItem>
-          )}
-
-          {sharedWith && (
-            <InfoItem icon={<Users className="w-4 h-4" />} label="Shared With Owner" value={sharedWith} />
-          )}
-
-          {sharedMembers.length > 0 && (
-            <InfoItem icon={<Users className="w-4 h-4" />} label="Shared Members">
-              <div className="space-y-0.5">
-                {sharedMembers.map(email => (
-                  <p key={email} className="text-sm">{email}</p>
-                ))}
+            <InfoItem icon={<Crown className="w-4 h-4" />} label="Roles">
+              <div className="flex gap-1 flex-wrap">
+                {roles.length > 0
+                  ? roles.map(r => <Badge key={r.role} variant="outline">{r.role}</Badge>)
+                  : <span className="text-muted-foreground text-sm">user</span>}
               </div>
             </InfoItem>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+
+            {profile.subscription_tier && (
+              <InfoItem icon={<Crown className="w-4 h-4" />} label="Subscription" value={profile.subscription_tier} />
+            )}
+
+            {profile.referral_code && (
+              <InfoItem icon={<Mail className="w-4 h-4" />} label="Referral Code" value={profile.referral_code} />
+            )}
+
+            {welcomeCredit && (
+              <InfoItem icon={<Gift className="w-4 h-4" />} label="Welcome Credit">
+                <div className="space-y-1">
+                  <Badge variant="outline" className={
+                    welcomeCredit.status === "active"
+                      ? "bg-emerald-500/10 text-emerald-700 border-emerald-500/30"
+                      : welcomeCredit.status === "used"
+                      ? "bg-blue-500/10 text-blue-700 border-blue-500/30"
+                      : "bg-muted text-muted-foreground"
+                  }>
+                    {welcomeCredit.status} — ${(welcomeCredit.credit_amount / 1000).toFixed(0)}
+                  </Badge>
+                  {welcomeCredit.status === "active" && (
+                    <p className="text-xs text-muted-foreground">
+                      Exp {new Date(welcomeCredit.expires_at).toLocaleDateString()}
+                      {!welcomeCredit.phase_2_unlocked && " · Phase 2 locked"}
+                    </p>
+                  )}
+                </div>
+              </InfoItem>
+            )}
+
+            {sharedWith && (
+              <InfoItem icon={<Users className="w-4 h-4" />} label="Shared With Owner" value={sharedWith} />
+            )}
+
+            {sharedMembers.length > 0 && (
+              <InfoItem icon={<Users className="w-4 h-4" />} label="Shared Members">
+                <div className="space-y-0.5">
+                  {sharedMembers.map(email => (
+                    <p key={email} className="text-sm">{email}</p>
+                  ))}
+                </div>
+              </InfoItem>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {!isProtected && (
+        <BanUserCard
+          userId={profile.id}
+          isBanned={!!profile.is_banned}
+          bannedAt={profile.banned_at ?? null}
+          bannedReason={profile.banned_reason ?? null}
+          onChange={loadProfile}
+        />
+      )}
+    </div>
   );
 }
 
