@@ -36,7 +36,7 @@ export default defineConfig(({ mode }) => ({
   },
   // Optimize dependencies
   optimizeDeps: {
-    include: ['react', 'react-dom', 'react-router-dom', '@tanstack/react-query'],
+    include: ['react', 'react-dom', 'react-dom/client', 'react/jsx-runtime', 'react-router-dom', '@tanstack/react-query'],
   },
   plugins: [
     react(),
