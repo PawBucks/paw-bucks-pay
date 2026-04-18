@@ -9510,10 +9510,14 @@ export type Database = {
           auto_redeem_mode: string
           auto_redeem_pawbucks: boolean
           avatar_url: string | null
+          banned_at: string | null
+          banned_by: string | null
+          banned_reason: string | null
           created_at: string
           email: string
           full_name: string
           id: string
+          is_banned: boolean
           normalized_email: string | null
           phone: string | null
           referral_code: string | null
@@ -9528,10 +9532,14 @@ export type Database = {
           auto_redeem_mode?: string
           auto_redeem_pawbucks?: boolean
           avatar_url?: string | null
+          banned_at?: string | null
+          banned_by?: string | null
+          banned_reason?: string | null
           created_at?: string
           email: string
           full_name: string
           id: string
+          is_banned?: boolean
           normalized_email?: string | null
           phone?: string | null
           referral_code?: string | null
@@ -9546,10 +9554,14 @@ export type Database = {
           auto_redeem_mode?: string
           auto_redeem_pawbucks?: boolean
           avatar_url?: string | null
+          banned_at?: string | null
+          banned_by?: string | null
+          banned_reason?: string | null
           created_at?: string
           email?: string
           full_name?: string
           id?: string
+          is_banned?: boolean
           normalized_email?: string | null
           phone?: string | null
           referral_code?: string | null
@@ -13892,6 +13904,10 @@ export type Database = {
       }
     }
     Functions: {
+      admin_set_user_ban: {
+        Args: { _banned: boolean; _reason?: string; _target_user_id: string }
+        Returns: Json
+      }
       aggregate_search_ranking_stats: {
         Args: { target_date?: string }
         Returns: undefined
@@ -14117,6 +14133,7 @@ export type Database = {
       is_offer_valid: { Args: { offer_uuid: string }; Returns: boolean }
       is_shared_member_of: { Args: { owner_user_id: string }; Returns: boolean }
       is_superadmin: { Args: { _user_id: string }; Returns: boolean }
+      is_user_banned: { Args: { _user_id: string }; Returns: boolean }
       issue_welcome_credit: {
         Args: {
           p_device_fingerprint?: string
