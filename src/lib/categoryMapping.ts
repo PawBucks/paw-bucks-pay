@@ -279,11 +279,21 @@ export const merchantMatchesCategory = (
   businessCategories?: string[] | null
 ): boolean => {
   if (!filterCategory || filterCategory === "all") return true;
-  const filterLower = filterCategory.toLowerCase();
+  const filterLower = filterCategory.toLowerCase().trim();
+  // Normalize the filter to a canonical category key (e.g. "groomer" -> "grooming")
+  const filterNormalized = getNormalizedCategory(filterLower);
   const cats = (businessCategories && businessCategories.length > 0)
     ? businessCategories
     : (businessType ? [businessType] : []);
-  return cats.some((c) => (c || "").toLowerCase().includes(filterLower));
+  return cats.some((c) => {
+    const catLower = (c || "").toLowerCase().trim();
+    if (!catLower) return false;
+    // Direct substring match (either direction)
+    if (catLower.includes(filterLower) || filterLower.includes(catLower)) return true;
+    // Canonical category match (handles synonyms like groomer/grooming, vet/veterinary)
+    const catNormalized = getNormalizedCategory(catLower);
+    return catNormalized === filterNormalized && filterNormalized !== 'other';
+  });
 };
 
 /**

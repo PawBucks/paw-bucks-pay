@@ -14,7 +14,7 @@ import { PageLoader } from "@/components/PageLoader";
 import { Header } from "@/components/Header";
 import { AdPlacement } from "@/components/AdPlacement";
 import { PullToRefresh } from "@/components/PullToRefresh";
-import { Search, Store, Scissors, Home, Stethoscope, Footprints, Bone, BookOpen, Star, MapPin, SlidersHorizontal, X, List, Map, Navigation, ArrowUpDown, Mountain, Zap, Hand, Brain, MoreHorizontal } from "lucide-react";
+import { Search, Store, Scissors, Home, Stethoscope, Footprints, Bone, BookOpen, Star, MapPin, SlidersHorizontal, X, List, Map, Navigation, ArrowUpDown, Mountain, Zap, Hand, Brain, MoreHorizontal, Sun, Camera, Shield, Truck, Dog, Sparkles, ShoppingBag } from "lucide-react";
 import { MerchantMap } from "@/components/MerchantMap";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -89,16 +89,24 @@ const formatDistance = (distance?: number): string => {
 
 const businessTypes = [
   { label: "All", value: "all", icon: Store },
-  { label: "Pet Stores", value: "pet_store", icon: Store },
-  { label: "Groomers", value: "groomer", icon: Scissors },
-  { label: "Sitters", value: "sitter", icon: Home },
-  { label: "Vets", value: "vet", icon: Stethoscope },
+  { label: "Vets", value: "veterinary", icon: Stethoscope },
+  { label: "Groomers", value: "grooming", icon: Scissors },
+  { label: "Mobile Groomers", value: "mobile_groomer", icon: Scissors },
+  { label: "Pet Stores", value: "pet_store", icon: ShoppingBag },
+  { label: "Food & Treats", value: "food", icon: Bone },
+  { label: "Boarding", value: "boarding", icon: Home },
+  { label: "Daycare", value: "daycare", icon: Sun },
+  { label: "Trainers", value: "training", icon: Sparkles },
   { label: "Walkers", value: "walker", icon: Footprints },
-  { label: "Trainers", value: "trainer", icon: Bone },
   { label: "Hikers", value: "hiker", icon: Mountain },
   { label: "Runners", value: "runner", icon: Zap },
   { label: "Masseuses", value: "masseuse", icon: Hand },
   { label: "Behaviorists", value: "behaviorist", icon: Brain },
+  { label: "Photographers", value: "photography", icon: Camera },
+  { label: "Insurance", value: "insurance", icon: Shield },
+  { label: "Delivery", value: "delivery", icon: Truck },
+  { label: "Breeders", value: "breeder", icon: Dog },
+  { label: "Rescue / Nonprofit", value: "rescue_nonprofit", icon: Shield },
   { label: "Other", value: "other", icon: MoreHorizontal },
 ];
 
