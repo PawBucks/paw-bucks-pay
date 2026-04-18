@@ -45,7 +45,14 @@ const Auth = () => {
     open: false, email: "", password: "",
   });
 
-  // Load invite info if there's a token
+  // Show banned notice if redirected here after a forced sign-out
+  useEffect(() => {
+    if (searchParams.get("banned") === "1") {
+      toast.error("Your account has been restricted. Contact support for assistance.");
+    }
+  }, [searchParams]);
+
+
   useEffect(() => {
     const loadInviteInfo = async () => {
       if (!inviteToken) return;
