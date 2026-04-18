@@ -3,7 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { User, Mail, Phone, Calendar, Shield, Crown, Gift, Users } from "lucide-react";
+import { User, Mail, Phone, Calendar, Shield, Crown, Gift, Users, Ban } from "lucide-react";
+import { BanUserCard } from "./BanUserCard";
 
 type ProfileData = {
   id: string;
@@ -15,6 +16,9 @@ type ProfileData = {
   avatar_url: string | null;
   referral_code: string | null;
   subscription_tier?: string | null;
+  is_banned?: boolean | null;
+  banned_at?: string | null;
+  banned_reason?: string | null;
 };
 
 type RoleData = { role: string };
