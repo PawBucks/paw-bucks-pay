@@ -14181,12 +14181,20 @@ export type Database = {
         Args: { check_user_id: string; check_vet_id: string }
         Returns: boolean
       }
+      user_owns_brand_campaign: {
+        Args: { _campaign_id: string; _user_id: string }
+        Returns: boolean
+      }
       user_owns_merchant: {
         Args: { check_merchant_id: string }
         Returns: boolean
       }
       user_owns_vet: {
         Args: { check_user_id: string; vet_user_id: string }
+        Returns: boolean
+      }
+      user_participates_in_campaign: {
+        Args: { _campaign_id: string; _user_id: string }
         Returns: boolean
       }
       validate_accountant_access_token: {
