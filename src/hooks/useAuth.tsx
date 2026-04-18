@@ -24,7 +24,7 @@ export const useAuth = () => {
         setUser(newSession?.user ?? null);
         setLoading(false);
 
-        // Auto-detect and save user's timezone on sign in
+        // Auto-detect timezone + enforce ban check on sign-in / refresh
         if (newSession?.user && (_event === 'SIGNED_IN' || _event === 'TOKEN_REFRESHED')) {
           const detectedTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
           if (detectedTz) {
@@ -34,6 +34,23 @@ export const useAuth = () => {
               .eq('id', newSession.user.id)
               .then(() => {});
           }
+
+          // Defer ban check to avoid blocking auth callback
+          setTimeout(async () => {
+            try {
+              const { data: banned } = await supabase.rpc('is_user_banned', {
+                _user_id: newSession.user.id,
+              });
+              if (banned === true) {
+                await supabase.auth.signOut();
+                if (typeof window !== 'undefined') {
+                  window.location.href = '/auth?banned=1';
+                }
+              }
+            } catch (err) {
+              console.error('Ban check failed:', err);
+            }
+          }, 0);
         }
       }
     );
