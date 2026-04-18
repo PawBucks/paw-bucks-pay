@@ -34,7 +34,7 @@ import { toast } from "sonner";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-const CATEGORIES = ["Food", "Treats", "Toys", "Bedding", "Accessories", "Healthcare", "Grooming"];
+const CATEGORIES = ["Food", "Treats", "Toys", "Bedding", "Accessories", "Healthcare", "Grooming", "Sanitation"];
 
 export default function PetStoreAdmin() {
   const { user } = useAuth();

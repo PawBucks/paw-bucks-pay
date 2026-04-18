@@ -36,7 +36,7 @@ import { useShoppingCart } from "@/hooks/useShoppingCart";
 import { getStripePromise } from "@/lib/stripe";
 import { buildAppUrl } from "@/lib/url";
 
-const CATEGORIES = ["All", "Food", "Treats", "Toys", "Bedding", "Accessories", "Healthcare", "Grooming"];
+const CATEGORIES = ["All", "Food", "Treats", "Toys", "Bedding", "Accessories", "Healthcare", "Grooming", "Sanitation"];
 const ITEM_TYPES = ["All", "Product", "Service"] as const;
 const SORT_OPTIONS = [
   { value: "featured", label: "Featured" },
