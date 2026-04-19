@@ -171,9 +171,6 @@ export function CartDrawer({
                           <span className="text-sm font-semibold">
                             ${(item.item.price / 100).toFixed(2)}
                           </span>
-                          <span className="text-xs text-primary font-medium">
-                            {Formatters.number(item.item.price_pawbucks)} PB
-                          </span>
                         </div>
                         {outOfStock && (
                           <span className="text-xs text-destructive font-medium">
@@ -237,8 +234,8 @@ export function CartDrawer({
                 <span className="font-bold text-lg">${totalUsdDollars.toFixed(2)}</span>
               </div>
 
-              {/* PawBucks slider — only show if user has PawBucks */}
-              {pawbucksBalance > 0 && (
+              {/* PawBucks slider — only show if user has PawBucks AND order meets $25 min */}
+              {pawbucksBalance > 0 && meetsMinOrder && (
                 <div className="bg-muted/50 border border-border rounded-lg p-3 space-y-3">
                   <div className="flex justify-between items-center text-sm">
                     <span className="font-medium flex items-center gap-1.5">
@@ -249,6 +246,10 @@ export function CartDrawer({
                       Balance: {Formatters.number(pawbucksBalance)} PB
                     </span>
                   </div>
+
+                  <p className="text-[11px] text-muted-foreground">
+                    PawBucks may cover up to 33% of your order (max ${maxCoverageUsd.toFixed(2)}).
+                  </p>
 
                   <Slider
                     value={[pawbucksPercent]}
@@ -264,23 +265,33 @@ export function CartDrawer({
                         ? `${Formatters.number(actualPawbucks)} PB ($${pawbucksUsdValue.toFixed(2)})`
                         : "No PawBucks applied"}
                     </span>
-                    {canAffordFullPawbucks && (
+                    {maxApplicablePawbucks > 0 && (
                       <Button
                         variant="link"
                         size="sm"
                         className="h-auto p-0 text-xs text-primary"
                         onClick={() => setPawbucksPercent(maxPercent)}
                       >
-                        Use max
+                        Use max (33%)
                       </Button>
                     )}
                   </div>
 
                   {needsMinStripe && (
                     <p className="text-xs text-destructive">
-                      Card portion must be at least $0.50 or use PawBucks for the full amount.
+                      Card portion must be at least $0.50.
                     </p>
                   )}
+                </div>
+              )}
+
+              {pawbucksBalance > 0 && !meetsMinOrder && (
+                <div className="bg-muted/40 border border-dashed border-border rounded-lg p-3 text-xs text-muted-foreground flex items-start gap-2">
+                  <Coins className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
+                  <span>
+                    Add ${(MIN_ORDER_USD_FOR_PAWBUCKS - totalUsdDollars).toFixed(2)} more to use PawBucks. PawBucks
+                    are available on orders of ${MIN_ORDER_USD_FOR_PAWBUCKS}+ and may cover up to 33% of the total.
+                  </span>
                 </div>
               )}
 
