@@ -17,7 +17,7 @@ import { Progress } from "@/components/ui/progress";
 import {
   Megaphone, DollarSign, TrendingUp, Users, Store, Plus, ArrowRight,
   Calendar, CheckCircle2, Clock, Loader2, LogOut, Building2, BarChart3,
-  Target, Zap, PieChart,
+  Target, Zap, PieChart, LayoutDashboard,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -30,6 +30,7 @@ import {
   calculateEstimatedReach,
   type BrandCampaign,
 } from "@/services/api/brandCampaigns.service";
+import { CommandCenter } from "@/components/brand/CommandCenter";
 
 const statusConfig: Record<string, { color: string; label: string; emoji: string }> = {
   draft: { color: "bg-muted text-muted-foreground", label: "Draft", emoji: "📝" },
