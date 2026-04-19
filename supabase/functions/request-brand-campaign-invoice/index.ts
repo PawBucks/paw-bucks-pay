@@ -64,7 +64,6 @@ Deno.serve(async (req) => {
       currency: "usd",
       subtotal: Number(campaign.budget_usd),
       total: Number(campaign.budget_usd),
-      amount_due: Number(campaign.budget_usd),
       amount_paid: 0,
       status: "sent",
       due_date: dueDate.toISOString().slice(0, 10),
