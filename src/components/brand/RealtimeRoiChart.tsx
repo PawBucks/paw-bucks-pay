@@ -77,8 +77,8 @@ export function RealtimeRoiChart({ brandId }: RealtimeRoiChartProps) {
               <Activity className="h-4 w-4 text-primary" />
               Real-Time ROI (Last 24h)
               <span className="relative flex h-2 w-2 ml-1">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
               </span>
             </CardTitle>
             <CardDescription>Hourly check-ins vs spend across all live campaigns</CardDescription>
