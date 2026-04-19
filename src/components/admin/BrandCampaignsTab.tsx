@@ -126,17 +126,21 @@ export const BrandCampaignsTab = () => {
       });
     },
     onSuccess: async (result) => {
-      if (result.error) {
+      if (result.error || !result.data) {
         toast.error("Failed to create brand account");
         return;
       }
-      // Copy invitation link to clipboard
-      const inviteUrl = `${window.location.origin}/brand-setup/${result.data?.invitation_token}`;
-      try {
-        await navigator.clipboard.writeText(inviteUrl);
-        toast.success("Brand account created! Invitation link copied to clipboard.");
-      } catch {
-        toast.success(`Brand account created! Share this link: ${inviteUrl}`);
+      const brandId = result.data.id;
+      const inviteUrl = `${window.location.origin}/brand-setup/${result.data.invitation_token}`;
+      // Try to email the brand contact
+      const { data: sendData, error: sendErr } = await supabase.functions.invoke("send-brand-invitation", {
+        body: { brandId },
+      });
+      if (sendErr || (sendData && (sendData as any).error)) {
+        try { await navigator.clipboard.writeText(inviteUrl); } catch { /* noop */ }
+        toast.success("Brand created. Invite link copied (email send failed — share manually).");
+      } else {
+        toast.success(`Brand created — invitation emailed to ${(sendData as any)?.sent_to || result.data.contact_email}`);
       }
       setShowCreateBrand(false);
       setBrandForm({ brand_name: "", contact_name: "", contact_email: "", description: "", website_url: "" });
@@ -145,6 +149,33 @@ export const BrandCampaignsTab = () => {
     onError: (error: Error) => {
       toast.error(error.message);
     },
+  });
+
+  const resendInvitationMutation = useMutation({
+    mutationFn: async (brandId: string) => {
+      const { data, error } = await supabase.functions.invoke("send-brand-invitation", { body: { brandId } });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      return data;
+    },
+    onSuccess: (data: any) => toast.success(`Invitation re-sent to ${data?.sent_to}`),
+    onError: (e: Error) => toast.error(`Failed to resend: ${e.message}`),
+  });
+
+  const deleteBrandMutation = useMutation({
+    mutationFn: async (brandId: string) => {
+      const { data, error } = await supabase.rpc("admin_delete_brand_account", { p_brand_id: brandId });
+      if (error) throw error;
+      const r = data as { success: boolean; error?: string } | null;
+      if (r && !r.success) throw new Error(r.error || "Delete failed");
+      return r;
+    },
+    onSuccess: () => {
+      toast.success("Brand account deleted");
+      queryClient.invalidateQueries({ queryKey: ["admin-brand-accounts"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-brand-campaigns"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
   });
 
   const updateStatusMutation = useMutation({
