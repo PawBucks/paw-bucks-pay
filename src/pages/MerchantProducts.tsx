@@ -541,18 +541,46 @@ const MerchantProducts = () => {
           {subscriptionPlans.map((plan) => (
             <Card key={`plan-${plan.id}`} className="overflow-hidden hover:shadow-lg transition-shadow border-primary/20">
               <CardHeader className="pb-4">
-                <div className="flex items-center gap-2 mb-1">
-                  <Badge variant="outline" className="gap-1 text-xs">
-                    <RefreshCw className="h-3 w-3" />
-                    Subscription
-                  </Badge>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Badge variant="outline" className="gap-1 text-xs">
+                        <RefreshCw className="h-3 w-3" />
+                        Subscription
+                      </Badge>
+                    </div>
+                    <CardTitle className="line-clamp-1">{plan.name}</CardTitle>
+                    {plan.description && (
+                      <CardDescription className="line-clamp-2">
+                        {plan.description}
+                      </CardDescription>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 gap-1 border-primary/30 text-primary hover:bg-primary hover:text-primary-foreground"
+                      onClick={() => openEditPlanDialog(plan)}
+                      aria-label="Edit plan"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                      <span className="text-xs font-medium">Edit</span>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                      onClick={() => {
+                        setPlanToDelete(plan);
+                        setDeletePlanDialogOpen(true);
+                      }}
+                      aria-label="Delete plan"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
-                <CardTitle className="line-clamp-1">{plan.name}</CardTitle>
-                {plan.description && (
-                  <CardDescription className="line-clamp-2">
-                    {plan.description}
-                  </CardDescription>
-                )}
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between">
