@@ -187,7 +187,7 @@ const BrandSetup = () => {
       const result = data as { success: boolean; error?: string } | null;
       if (result && !result.success) { toast.error(result.error || "Setup failed."); return; }
       toast.success("🎉 Brand setup complete! Welcome to PawBucks.");
-      navigate("/brand/dashboard");
+      navigate("/brand-dashboard");
     } catch {
       toast.error("Failed to save setup.");
     } finally { setSaving(false); }
