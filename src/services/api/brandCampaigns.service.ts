@@ -1,6 +1,8 @@
 import { supabase, handleError, ServiceResult, ServiceListResult } from "./base.service";
 
+// ============================================================
 // Types
+// ============================================================
 export interface BrandAccount {
   id: string;
   user_id: string | null;
@@ -18,6 +20,16 @@ export interface BrandAccount {
   invitation_email: string | null;
   invitation_sent_at: string | null;
   invitation_claimed_at: string | null;
+}
+
+export interface TargetingRules {
+  species?: string[];
+  breeds?: string[];
+  zip_codes?: string[];
+  zip_radius_miles?: number;
+  center_zip?: string;
+  consumer_tiers?: string[];
+  min_purchases?: number;
 }
 
 export interface BrandCampaign {
@@ -38,6 +50,16 @@ export interface BrandCampaign {
   campaign_color: string | null;
   campaign_logo_url: string | null;
   targeting_notes: string | null;
+  daily_spend_cap: number | null;
+  auto_pause_threshold_pct: number | null;
+  auto_replenish_enabled: boolean;
+  auto_replenish_threshold: number | null;
+  auto_replenish_amount_usd: number | null;
+  targeting_rules: TargetingRules;
+  funding_method: "invoice" | "self_serve";
+  stripe_payment_intent_id: string | null;
+  stripe_customer_id: string | null;
+  funded_at: string | null;
   created_at: string;
   updated_at: string;
   brand_accounts?: { brand_name: string; logo_url: string | null };
@@ -67,7 +89,47 @@ export interface BrandedPawbucksActivity {
   profiles?: { full_name: string } | null;
 }
 
-// Brand Account functions
+export interface BrandCampaignDailyStat {
+  id: string;
+  campaign_id: string;
+  date: string;
+  checkins: number;
+  redemptions: number;
+  pawbucks_distributed: number;
+  pawbucks_redeemed: number;
+  spend_usd: number;
+  unique_users: number;
+  unique_merchants: number;
+}
+
+export interface MerchantLeaderboardEntry {
+  merchant_id: string;
+  business_name: string;
+  logo_url: string | null;
+  checkins: number;
+  pawbucks_distributed: number;
+  unique_users: number;
+}
+
+export interface CommandCenterSummary {
+  total_budget_usd: number;
+  total_spent_usd: number;
+  total_pool: number;
+  total_distributed: number;
+  total_redeemed: number;
+  total_checkins: number;
+  active_campaigns: number;
+  unique_users_reached: number;
+  cost_per_checkin: number;
+  cost_per_redemption: number;
+  redemption_rate_pct: number;
+  burn_rate_per_day_usd: number;
+  days_until_depletion: number | null;
+}
+
+// ============================================================
+// Brand Account
+// ============================================================
 export const getBrandAccountForUser = async (userId: string): Promise<ServiceResult<BrandAccount>> => {
   try {
     const { data, error } = await supabase
@@ -117,7 +179,9 @@ export const createBrandAccount = async (account: {
   }
 };
 
-// Campaign functions
+// ============================================================
+// Campaigns
+// ============================================================
 export const getBrandCampaigns = async (brandId: string): Promise<ServiceListResult<BrandCampaign>> => {
   try {
     const { data, error } = await supabase
@@ -125,7 +189,7 @@ export const getBrandCampaigns = async (brandId: string): Promise<ServiceListRes
       .select("*")
       .eq("brand_id", brandId)
       .order("created_at", { ascending: false });
-    return { data: data || [], error };
+    return { data: (data || []) as unknown as BrandCampaign[], error };
   } catch (error) {
     return { data: [], error: handleError(error) };
   }
@@ -137,7 +201,7 @@ export const getAllBrandCampaigns = async (): Promise<ServiceListResult<BrandCam
       .from("brand_campaigns")
       .select("*, brand_accounts(brand_name, logo_url)")
       .order("created_at", { ascending: false });
-    return { data: data || [], error };
+    return { data: (data || []) as unknown as BrandCampaign[], error };
   } catch (error) {
     return { data: [], error: handleError(error) };
   }
@@ -154,14 +218,24 @@ export const createBrandCampaign = async (campaign: {
   end_date?: string;
   campaign_color?: string;
   targeting_notes?: string;
+  targeting_rules?: TargetingRules;
+  daily_spend_cap?: number;
+  auto_pause_threshold_pct?: number;
+  auto_replenish_enabled?: boolean;
+  auto_replenish_threshold?: number;
+  auto_replenish_amount_usd?: number;
+  funding_method?: "invoice" | "self_serve";
 }): Promise<ServiceResult<BrandCampaign>> => {
   try {
+    const { targeting_rules, ...rest } = campaign;
+    const insertPayload: Record<string, unknown> = { ...rest };
+    if (targeting_rules) insertPayload.targeting_rules = targeting_rules as unknown;
     const { data, error } = await supabase
       .from("brand_campaigns")
-      .insert(campaign)
+      .insert(insertPayload as never)
       .select()
       .single();
-    return { data, error };
+    return { data: data as unknown as BrandCampaign | null, error };
   } catch (error) {
     return { data: null, error: handleError(error) };
   }
@@ -178,13 +252,15 @@ export const updateBrandCampaignStatus = async (
       .eq("id", campaignId)
       .select()
       .single();
-    return { data, error };
+    return { data: data as unknown as BrandCampaign | null, error };
   } catch (error) {
     return { data: null, error: handleError(error) };
   }
 };
 
+// ============================================================
 // Campaign merchants
+// ============================================================
 export const getCampaignMerchants = async (campaignId: string): Promise<ServiceListResult<BrandCampaignMerchant>> => {
   try {
     const { data, error } = await supabase
@@ -214,7 +290,9 @@ export const addMerchantToCampaign = async (
   }
 };
 
-// Campaign activity
+// ============================================================
+// Activity
+// ============================================================
 export const getCampaignActivity = async (campaignId: string): Promise<ServiceListResult<BrandedPawbucksActivity>> => {
   try {
     const { data, error } = await supabase
@@ -229,7 +307,235 @@ export const getCampaignActivity = async (campaignId: string): Promise<ServiceLi
   }
 };
 
-// Budget calculator helper
+// Activity for ALL campaigns of a brand (for live activity feed)
+export const getBrandRecentActivity = async (
+  brandId: string,
+  limit: number = 25
+): Promise<ServiceListResult<BrandedPawbucksActivity>> => {
+  try {
+    const { data: campaigns } = await supabase
+      .from("brand_campaigns")
+      .select("id")
+      .eq("brand_id", brandId);
+    const ids = (campaigns || []).map((c: { id: string }) => c.id);
+    if (ids.length === 0) return { data: [], error: null };
+
+    const { data, error } = await supabase
+      .from("branded_pawbucks_activity")
+      .select("*, merchants(business_name)")
+      .in("campaign_id", ids)
+      .order("created_at", { ascending: false })
+      .limit(limit);
+    return { data: data || [], error };
+  } catch (error) {
+    return { data: [], error: handleError(error) };
+  }
+};
+
+// ============================================================
+// Daily Stats (for charts)
+// ============================================================
+export const getCampaignDailyStats = async (
+  campaignId: string,
+  days: number = 30
+): Promise<ServiceListResult<BrandCampaignDailyStat>> => {
+  try {
+    const since = new Date();
+    since.setDate(since.getDate() - days);
+    const { data, error } = await supabase
+      .from("brand_campaign_daily_stats")
+      .select("*")
+      .eq("campaign_id", campaignId)
+      .gte("date", since.toISOString().slice(0, 10))
+      .order("date", { ascending: true });
+    return { data: (data || []) as unknown as BrandCampaignDailyStat[], error };
+  } catch (error) {
+    return { data: [], error: handleError(error) };
+  }
+};
+
+export const getBrandDailyStats = async (
+  brandId: string,
+  days: number = 30
+): Promise<ServiceListResult<BrandCampaignDailyStat>> => {
+  try {
+    const { data: campaigns } = await supabase
+      .from("brand_campaigns")
+      .select("id")
+      .eq("brand_id", brandId);
+    const ids = (campaigns || []).map((c: { id: string }) => c.id);
+    if (ids.length === 0) return { data: [], error: null };
+
+    const since = new Date();
+    since.setDate(since.getDate() - days);
+
+    const { data, error } = await supabase
+      .from("brand_campaign_daily_stats")
+      .select("*")
+      .in("campaign_id", ids)
+      .gte("date", since.toISOString().slice(0, 10))
+      .order("date", { ascending: true });
+    return { data: (data || []) as unknown as BrandCampaignDailyStat[], error };
+  } catch (error) {
+    return { data: [], error: handleError(error) };
+  }
+};
+
+// ============================================================
+// Merchant Leaderboard (computed from activity)
+// ============================================================
+export const getBrandMerchantLeaderboard = async (
+  brandId: string,
+  limit: number = 10
+): Promise<ServiceListResult<MerchantLeaderboardEntry>> => {
+  try {
+    const { data: campaigns } = await supabase
+      .from("brand_campaigns")
+      .select("id")
+      .eq("brand_id", brandId);
+    const ids = (campaigns || []).map((c: { id: string }) => c.id);
+    if (ids.length === 0) return { data: [], error: null };
+
+    const { data, error } = await supabase
+      .from("branded_pawbucks_activity")
+      .select("merchant_id, amount, type, user_id, merchants(business_name, logo_url)")
+      .in("campaign_id", ids)
+      .eq("type", "earn")
+      .not("merchant_id", "is", null)
+      .limit(5000);
+
+    if (error) return { data: [], error };
+
+    // Aggregate in memory
+    const map = new Map<string, MerchantLeaderboardEntry & { _users: Set<string> }>();
+    for (const row of (data || []) as Array<{
+      merchant_id: string;
+      amount: number;
+      user_id: string;
+      merchants: { business_name: string; logo_url: string | null } | null;
+    }>) {
+      const mid = row.merchant_id;
+      if (!mid) continue;
+      const existing = map.get(mid);
+      if (existing) {
+        existing.checkins += 1;
+        existing.pawbucks_distributed += row.amount;
+        existing._users.add(row.user_id);
+      } else {
+        const users = new Set<string>();
+        users.add(row.user_id);
+        map.set(mid, {
+          merchant_id: mid,
+          business_name: row.merchants?.business_name || "Unknown Merchant",
+          logo_url: row.merchants?.logo_url || null,
+          checkins: 1,
+          pawbucks_distributed: row.amount,
+          unique_users: 0,
+          _users: users,
+        });
+      }
+    }
+
+    const result: MerchantLeaderboardEntry[] = Array.from(map.values())
+      .map(({ _users, ...rest }) => ({ ...rest, unique_users: _users.size }))
+      .sort((a, b) => b.checkins - a.checkins)
+      .slice(0, limit);
+
+    return { data: result, error: null };
+  } catch (error) {
+    return { data: [], error: handleError(error) };
+  }
+};
+
+// ============================================================
+// Command Center Summary (computed)
+// ============================================================
+export const getCommandCenterSummary = async (
+  brandId: string
+): Promise<ServiceResult<CommandCenterSummary>> => {
+  try {
+    const { data: campaigns, error } = await supabase
+      .from("brand_campaigns")
+      .select("budget_usd, pawbucks_pool, pawbucks_per_checkin, total_distributed, total_redeemed, total_checkins, status, funded_at")
+      .eq("brand_id", brandId);
+
+    if (error) return { data: null, error };
+
+    const list = (campaigns || []) as Array<{
+      budget_usd: number;
+      pawbucks_pool: number;
+      pawbucks_per_checkin: number;
+      total_distributed: number;
+      total_redeemed: number;
+      total_checkins: number;
+      status: string;
+      funded_at: string | null;
+    }>;
+
+    const total_budget_usd = list.reduce((s, c) => s + Number(c.budget_usd || 0), 0);
+    const total_pool = list.reduce((s, c) => s + Number(c.pawbucks_pool || 0), 0);
+    const total_distributed = list.reduce((s, c) => s + Number(c.total_distributed || 0), 0);
+    const total_redeemed = list.reduce((s, c) => s + Number(c.total_redeemed || 0), 0);
+    const total_checkins = list.reduce((s, c) => s + Number(c.total_checkins || 0), 0);
+    const active_campaigns = list.filter((c) => c.status === "active").length;
+    const total_spent_usd = total_distributed / 1000; // 1 PB = $0.001
+
+    // Unique users reached — query branded ledger
+    const { data: campaignIds } = await supabase
+      .from("brand_campaigns")
+      .select("id")
+      .eq("brand_id", brandId);
+    const ids = (campaignIds || []).map((c: { id: string }) => c.id);
+    let unique_users_reached = 0;
+    if (ids.length > 0) {
+      const { count } = await supabase
+        .from("branded_pawbucks_ledger")
+        .select("user_id", { count: "exact", head: true })
+        .in("campaign_id", ids);
+      unique_users_reached = count || 0;
+    }
+
+    const cost_per_checkin = total_checkins > 0 ? total_spent_usd / total_checkins : 0;
+    const cost_per_redemption = total_redeemed > 0 ? total_spent_usd / (total_redeemed / 1000) : 0;
+    const redemption_rate_pct = total_distributed > 0 ? (total_redeemed / total_distributed) * 100 : 0;
+
+    // Burn rate based on active campaigns funded in the last 30d
+    const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
+    const recentSpend = list
+      .filter((c) => c.funded_at && new Date(c.funded_at).getTime() >= thirtyDaysAgo)
+      .reduce((s, c) => s + Number(c.total_distributed || 0), 0) / 1000;
+    const burn_rate_per_day_usd = recentSpend / 30;
+    const remainingPool = Math.max(total_pool - total_distributed, 0);
+    const remainingUsd = remainingPool / 1000;
+    const days_until_depletion =
+      burn_rate_per_day_usd > 0 ? Math.floor(remainingUsd / burn_rate_per_day_usd) : null;
+
+    return {
+      data: {
+        total_budget_usd,
+        total_spent_usd,
+        total_pool,
+        total_distributed,
+        total_redeemed,
+        total_checkins,
+        active_campaigns,
+        unique_users_reached,
+        cost_per_checkin,
+        cost_per_redemption,
+        redemption_rate_pct,
+        burn_rate_per_day_usd,
+        days_until_depletion,
+      },
+      error: null,
+    };
+  } catch (error) {
+    return { data: null, error: handleError(error) };
+  }
+};
+
+// ============================================================
+// Helpers
+// ============================================================
 export const calculatePawbucksFromBudget = (budgetUsd: number): number => {
   // 1 PB = $0.001, so $1 = 1000 PB
   return Math.floor(budgetUsd * 1000);
