@@ -192,6 +192,9 @@ const Auth = () => {
     // Admin/SuperAdmin users go straight to admin dashboard
     if (hasAdminRole || profile?.user_type === "admin") {
       navigate(ROUTES.ADMIN);
+    } else if (profile?.user_type === "brand") {
+      // Brand users always go to brand dashboard
+      navigate("/brand-dashboard");
     } else if (profile?.user_type === "merchant") {
       // Check if they have a merchant record
       const { data: merchantData } = await supabase
