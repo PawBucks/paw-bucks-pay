@@ -25,7 +25,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Package, Plus, ExternalLink, Loader2, ArrowLeft, DollarSign, Store, Coins, RefreshCw, Trash2 } from "lucide-react";
+import { Package, Plus, ExternalLink, Loader2, ArrowLeft, DollarSign, Store, Coins, RefreshCw, Trash2, Pencil } from "lucide-react";
 import { ProductImageUpload } from "@/components/shared/ProductImageUpload";
 import { PricingCalculator } from "@/components/merchant/PricingCalculator";
 import { Switch } from "@/components/ui/switch";
@@ -80,6 +80,13 @@ const MerchantProducts = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editPrice, setEditPrice] = useState("");
+  const [editActive, setEditActive] = useState(true);
+  const [updating, setUpdating] = useState(false);
 
   // Form state
   const [productName, setProductName] = useState("");
@@ -263,7 +270,7 @@ const MerchantProducts = () => {
         setListInPetStore(false);
         setPawbucksPrice("");
         setProductImageUrls([]);
-        await loadProducts(merchant.stripe_account_id);
+        await loadProducts(merchant.id);
       } else {
         throw new Error(data.error || "Failed to create product");
       }
@@ -307,6 +314,55 @@ const MerchantProducts = () => {
       setDeleting(false);
       setDeleteDialogOpen(false);
       setProductToDelete(null);
+    }
+  };
+
+  const openEditDialog = (product: Product) => {
+    setEditingProduct(product);
+    setEditName(product.name);
+    setEditDescription(product.description || "");
+    setEditPrice(product.price?.unit_amount ? (product.price.unit_amount / 100).toFixed(2) : "");
+    setEditActive(product.active);
+    setEditDialogOpen(true);
+  };
+
+  const handleUpdateProduct = async () => {
+    if (!editingProduct || !merchant?.stripe_account_id) return;
+    if (!editName.trim()) {
+      toast.error("Product name is required");
+      return;
+    }
+    const priceInCents = editPrice ? Math.round(parseFloat(editPrice) * 100) : null;
+    if (priceInCents !== null && (isNaN(priceInCents) || priceInCents < 50)) {
+      toast.error("Price must be at least $0.50");
+      return;
+    }
+    const priceChanged = priceInCents !== null && priceInCents !== (editingProduct.price?.unit_amount ?? null);
+
+    setUpdating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("update-connect-product", {
+        body: {
+          productId: editingProduct.id,
+          accountId: merchant.stripe_account_id,
+          name: editName.trim(),
+          description: editDescription.trim(),
+          active: editActive,
+          ...(priceChanged ? { priceInCents, currency: editingProduct.price?.currency || "usd" } : {}),
+        },
+      });
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || "Failed to update product");
+
+      toast.success("Product updated successfully");
+      setEditDialogOpen(false);
+      setEditingProduct(null);
+      await loadProducts(merchant.id);
+    } catch (error) {
+      console.error("Error updating product:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to update product");
+    } finally {
+      setUpdating(false);
     }
   };
 
@@ -463,17 +519,27 @@ const MerchantProducts = () => {
                       </CardDescription>
                     )}
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-muted-foreground hover:text-destructive flex-shrink-0"
-                    onClick={() => {
-                      setProductToDelete(product);
-                      setDeleteDialogOpen(true);
-                    }}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-muted-foreground hover:text-primary"
+                      onClick={() => openEditDialog(product)}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                      onClick={() => {
+                        setProductToDelete(product);
+                        setDeleteDialogOpen(true);
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>
@@ -628,6 +694,71 @@ const MerchantProducts = () => {
                   </>
                 ) : (
                   "Create Product"
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Product Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Product</DialogTitle>
+            <DialogDescription>Update your product details</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div>
+              <Label htmlFor="edit-name">Name *</Label>
+              <Input
+                id="edit-name"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-description">Description</Label>
+              <Textarea
+                id="edit-description"
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+                rows={3}
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-price">Price (USD)</Label>
+              <Input
+                id="edit-price"
+                type="number"
+                step="0.01"
+                min="0.50"
+                value={editPrice}
+                onChange={(e) => setEditPrice(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Changing price creates a new Stripe price (existing checkouts unaffected). Minimum $0.50.
+              </p>
+            </div>
+            <div className="flex items-center justify-between border rounded-lg p-3">
+              <div>
+                <Label htmlFor="edit-active" className="font-medium">Active</Label>
+                <p className="text-xs text-muted-foreground">Inactive products are hidden from your storefront</p>
+              </div>
+              <Switch id="edit-active" checked={editActive} onCheckedChange={setEditActive} />
+            </div>
+            <div className="flex justify-end gap-2 mt-6">
+              <Button variant="outline" onClick={() => setEditDialogOpen(false)} disabled={updating}>
+                Cancel
+              </Button>
+              <Button onClick={handleUpdateProduct} disabled={updating}>
+                {updating ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save Changes"
                 )}
               </Button>
             </div>
