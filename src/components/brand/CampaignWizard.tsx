@@ -424,7 +424,7 @@ export function CampaignWizard({ open, onOpenChange, brandId, brandName, brandLo
                   </div>
                   <div className="p-3 rounded-lg bg-background border text-center">
                     <p className="text-xs text-muted-foreground">Est. Check-ins</p>
-                    <p className="text-xl font-bold text-emerald-600">{estimatedReach.toLocaleString()}</p>
+                    <p className="text-xl font-bold text-primary">{estimatedReach.toLocaleString()}</p>
                   </div>
                 </div>
               </div>
