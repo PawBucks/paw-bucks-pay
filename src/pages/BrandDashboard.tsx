@@ -134,22 +134,81 @@ const BrandDashboard = () => {
         end_date: form.end_date || undefined,
         campaign_color: form.campaign_color,
         targeting_notes: form.targeting_notes || undefined,
+        targeting_rules: form.targeting_rules,
+        daily_spend_cap: form.daily_spend_cap > 0 ? form.daily_spend_cap : undefined,
+        auto_replenish_enabled: form.auto_replenish_enabled,
+        auto_replenish_threshold: form.auto_replenish_threshold,
+        auto_replenish_amount_usd: form.auto_replenish_amount_usd,
       });
     },
     onSuccess: (result) => {
-      if (result.error) {
+      if (result.error || !result.data) {
         toast.error("Failed to create campaign");
         return;
       }
-      toast.success("Campaign created! Submit for payment when ready.");
+      toast.success("Campaign created! Choose how to fund it.");
       setShowCreate(false);
-      setForm({ name: "", description: "", budget_usd: 500, pawbucks_per_checkin: 500, start_date: "", end_date: "", campaign_color: "#6366f1", targeting_notes: "" });
+      setFundingCampaign(result.data);
+      setForm({
+        name: "", description: "", budget_usd: 500, pawbucks_per_checkin: 500,
+        start_date: "", end_date: "", campaign_color: "#6366f1", targeting_notes: "",
+        daily_spend_cap: 0, auto_replenish_enabled: false, auto_replenish_threshold: 10,
+        auto_replenish_amount_usd: 250, targeting_rules: {},
+      });
       queryClient.invalidateQueries({ queryKey: ["brand-campaigns"] });
     },
     onError: (error: Error) => {
       toast.error(error.message);
     },
   });
+
+  // Funding actions
+  const handleFundWithCard = useCallback(async (campaignId: string) => {
+    setFundingAction("card");
+    try {
+      const { data, error } = await startBrandCampaignCheckout(campaignId);
+      if (error || !(data as { url?: string })?.url) throw new Error((error as Error)?.message || "Could not start checkout");
+      window.location.href = (data as { url: string }).url;
+    } catch (e) {
+      toast.error((e as Error).message);
+      setFundingAction(null);
+    }
+  }, []);
+
+  const handleRequestInvoice = useCallback(async (campaignId: string) => {
+    setFundingAction("invoice");
+    try {
+      const { data, error } = await requestBrandCampaignInvoice(campaignId);
+      if (error) throw new Error((error as Error).message);
+      toast.success(`Invoice ${(data as { invoice_number?: string })?.invoice_number || ""} issued. Campaign activates upon payment.`);
+      setFundingCampaign(null);
+      queryClient.invalidateQueries({ queryKey: ["brand-campaigns"] });
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setFundingAction(null);
+    }
+  }, [queryClient]);
+
+  // Handle return from Stripe Checkout
+  useEffect(() => {
+    const fundedId = searchParams.get("funded");
+    const cancelledId = searchParams.get("cancelled");
+    if (fundedId) {
+      verifyBrandCampaignPayment(fundedId).then(({ data }) => {
+        if ((data as { funded?: boolean })?.funded) {
+          toast.success("🚀 Campaign funded and live!");
+          queryClient.invalidateQueries({ queryKey: ["brand-campaigns"] });
+        }
+      });
+      searchParams.delete("funded");
+      setSearchParams(searchParams, { replace: true });
+    } else if (cancelledId) {
+      toast.info("Funding cancelled. Your campaign remains in draft.");
+      searchParams.delete("cancelled");
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams, queryClient]);
 
   if (brandLoading) {
     return (
