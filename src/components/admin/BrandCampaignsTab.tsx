@@ -506,23 +506,65 @@ export const BrandCampaignsTab = () => {
                 <Card key={brand.id}>
                   <CardContent className="pt-4">
                     <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <h4 className="font-bold">{brand.brand_name}</h4>
-                        <p className="text-xs text-muted-foreground">{brand.contact_email || brand.contact_name}</p>
+                      <div className="min-w-0">
+                        <h4 className="font-bold truncate">{brand.brand_name}</h4>
+                        <p className="text-xs text-muted-foreground truncate">{brand.contact_email || brand.contact_name}</p>
                       </div>
-                      <Badge variant={brand.status === "active" ? "default" : "secondary"}>
-                        {brand.status}
-                      </Badge>
+                      <div className="flex flex-col items-end gap-1">
+                        <Badge variant={brand.status === "active" ? "default" : "secondary"}>{brand.status}</Badge>
+                        {(brand as any).setup_completed_at ? (
+                          <Badge variant="outline" className="text-xs"><CheckCircle2 className="h-3 w-3 mr-1" />Setup done</Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-xs"><Clock className="h-3 w-3 mr-1" />Setup pending</Badge>
+                        )}
+                      </div>
                     </div>
                     {brand.description && (
                       <p className="text-sm text-muted-foreground mb-2 line-clamp-2">{brand.description}</p>
                     )}
-                    <div className="flex items-center gap-2 text-sm">
+                    <div className="flex items-center gap-2 text-sm mb-3">
                       <Megaphone className="h-4 w-4 text-muted-foreground" />
                       <span>{brandCampaigns.length} campaign{brandCampaigns.length !== 1 ? "s" : ""}</span>
                       {activeCampaigns.length > 0 && (
                         <Badge variant="outline" className="text-emerald-600">{activeCampaigns.length} active</Badge>
                       )}
+                    </div>
+                    <div className="flex gap-2 pt-2 border-t">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="flex-1"
+                        disabled={!brand.contact_email || resendInvitationMutation.isPending}
+                        onClick={() => resendInvitationMutation.mutate(brand.id)}
+                      >
+                        <Mail className="h-3 w-3 mr-1" />
+                        {(brand as any).setup_completed_at ? "Resend" : "Send Invite"}
+                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button size="sm" variant="outline" className="text-destructive hover:text-destructive">
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete {brand.brand_name}?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This permanently removes the brand account and ALL of its campaigns ({brandCampaigns.length}).
+                              This cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              onClick={() => deleteBrandMutation.mutate(brand.id)}
+                            >
+                              Delete Brand
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   </CardContent>
                 </Card>
