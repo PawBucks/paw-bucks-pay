@@ -157,13 +157,8 @@ export const ProductCard = memo(({
             </span>
           )}
 
-          <div className="flex items-center gap-1.5">
-            <Coins className="h-3.5 w-3.5 text-primary" />
-            <span className="text-sm font-semibold text-primary">
-              {Formatters.number(item.price_pawbucks)} PB
-            </span>
-          </div>
         </div>
+
 
         {/* Type + Category badges */}
         <div className="flex gap-1 flex-wrap">

@@ -290,12 +290,8 @@ export default function PetStoreProduct() {
                   <span className="text-3xl font-bold text-foreground">${(item.price / 100).toFixed(2)}</span>
                 )}
 
-                <div className="flex items-center gap-2 bg-primary/10 px-3 py-2 rounded-lg w-fit">
-                  <Coins className="h-4 w-4 text-primary" />
-                  <span className="text-base font-semibold text-primary">
-                    {Formatters.number(item.price_pawbucks)} PawBucks
-                  </span>
-                </div>
+
+
 
                 <p className="text-xs text-muted-foreground flex items-center gap-1">
                   <Sparkles className="h-3 w-3" />
