@@ -53,7 +53,8 @@ function needsPetOnboarding(info: UserAccessInfo): boolean {
     info.is_merchant ||
     info.is_vet ||
     info.user_type === 'merchant' ||
-    info.user_type === 'admin'
+    info.user_type === 'admin' ||
+    info.user_type === 'brand'
   ) {
     return false;
   }
