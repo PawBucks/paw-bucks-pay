@@ -942,6 +942,164 @@ export type Database = {
         }
         Relationships: []
       }
+      brand_campaign_auto_enroll_rules: {
+        Row: {
+          business_category: string | null
+          campaign_id: string
+          center_zip: string | null
+          created_at: string
+          enrolled_count: number
+          id: string
+          is_active: boolean
+          max_merchants: number | null
+          updated_at: string
+          zip_radius_miles: number | null
+        }
+        Insert: {
+          business_category?: string | null
+          campaign_id: string
+          center_zip?: string | null
+          created_at?: string
+          enrolled_count?: number
+          id?: string
+          is_active?: boolean
+          max_merchants?: number | null
+          updated_at?: string
+          zip_radius_miles?: number | null
+        }
+        Update: {
+          business_category?: string | null
+          campaign_id?: string
+          center_zip?: string | null
+          created_at?: string
+          enrolled_count?: number
+          id?: string
+          is_active?: boolean
+          max_merchants?: number | null
+          updated_at?: string
+          zip_radius_miles?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "brand_campaign_auto_enroll_rules_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "brand_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      brand_campaign_daily_stats: {
+        Row: {
+          campaign_id: string
+          checkins: number
+          created_at: string
+          date: string
+          id: string
+          pawbucks_distributed: number
+          pawbucks_redeemed: number
+          redemptions: number
+          spend_usd: number
+          unique_merchants: number
+          unique_users: number
+          updated_at: string
+        }
+        Insert: {
+          campaign_id: string
+          checkins?: number
+          created_at?: string
+          date: string
+          id?: string
+          pawbucks_distributed?: number
+          pawbucks_redeemed?: number
+          redemptions?: number
+          spend_usd?: number
+          unique_merchants?: number
+          unique_users?: number
+          updated_at?: string
+        }
+        Update: {
+          campaign_id?: string
+          checkins?: number
+          created_at?: string
+          date?: string
+          id?: string
+          pawbucks_distributed?: number
+          pawbucks_redeemed?: number
+          redemptions?: number
+          spend_usd?: number
+          unique_merchants?: number
+          unique_users?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "brand_campaign_daily_stats_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "brand_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      brand_campaign_invitations: {
+        Row: {
+          campaign_id: string
+          created_at: string
+          id: string
+          invited_at: string
+          merchant_id: string
+          message: string | null
+          responded_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string
+          id?: string
+          invited_at?: string
+          merchant_id: string
+          message?: string | null
+          responded_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string
+          id?: string
+          invited_at?: string
+          merchant_id?: string
+          message?: string | null
+          responded_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "brand_campaign_invitations_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "brand_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "brand_campaign_invitations_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "brand_campaign_invitations_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       brand_campaign_merchants: {
         Row: {
           campaign_id: string
@@ -997,20 +1155,30 @@ export type Database = {
       brand_campaigns: {
         Row: {
           admin_invoice_id: string | null
+          auto_pause_threshold_pct: number | null
+          auto_replenish_amount_usd: number | null
+          auto_replenish_enabled: boolean
+          auto_replenish_threshold: number | null
           brand_id: string
           budget_usd: number
           campaign_color: string | null
           campaign_logo_url: string | null
           created_at: string
+          daily_spend_cap: number | null
           description: string | null
           end_date: string | null
+          funded_at: string | null
+          funding_method: string
           id: string
           name: string
           pawbucks_per_checkin: number
           pawbucks_pool: number
           start_date: string | null
           status: string
+          stripe_customer_id: string | null
+          stripe_payment_intent_id: string | null
           targeting_notes: string | null
+          targeting_rules: Json
           total_checkins: number
           total_distributed: number
           total_redeemed: number
@@ -1018,20 +1186,30 @@ export type Database = {
         }
         Insert: {
           admin_invoice_id?: string | null
+          auto_pause_threshold_pct?: number | null
+          auto_replenish_amount_usd?: number | null
+          auto_replenish_enabled?: boolean
+          auto_replenish_threshold?: number | null
           brand_id: string
           budget_usd?: number
           campaign_color?: string | null
           campaign_logo_url?: string | null
           created_at?: string
+          daily_spend_cap?: number | null
           description?: string | null
           end_date?: string | null
+          funded_at?: string | null
+          funding_method?: string
           id?: string
           name: string
           pawbucks_per_checkin?: number
           pawbucks_pool?: number
           start_date?: string | null
           status?: string
+          stripe_customer_id?: string | null
+          stripe_payment_intent_id?: string | null
           targeting_notes?: string | null
+          targeting_rules?: Json
           total_checkins?: number
           total_distributed?: number
           total_redeemed?: number
@@ -1039,20 +1217,30 @@ export type Database = {
         }
         Update: {
           admin_invoice_id?: string | null
+          auto_pause_threshold_pct?: number | null
+          auto_replenish_amount_usd?: number | null
+          auto_replenish_enabled?: boolean
+          auto_replenish_threshold?: number | null
           brand_id?: string
           budget_usd?: number
           campaign_color?: string | null
           campaign_logo_url?: string | null
           created_at?: string
+          daily_spend_cap?: number | null
           description?: string | null
           end_date?: string | null
+          funded_at?: string | null
+          funding_method?: string
           id?: string
           name?: string
           pawbucks_per_checkin?: number
           pawbucks_pool?: number
           start_date?: string | null
           status?: string
+          stripe_customer_id?: string | null
+          stripe_payment_intent_id?: string | null
           targeting_notes?: string | null
+          targeting_rules?: Json
           total_checkins?: number
           total_distributed?: number
           total_redeemed?: number
@@ -13907,6 +14095,10 @@ export type Database = {
       admin_set_user_ban: {
         Args: { _banned: boolean; _reason?: string; _target_user_id: string }
         Returns: Json
+      }
+      aggregate_brand_campaign_daily_stats: {
+        Args: { target_date?: string }
+        Returns: undefined
       }
       aggregate_search_ranking_stats: {
         Args: { target_date?: string }

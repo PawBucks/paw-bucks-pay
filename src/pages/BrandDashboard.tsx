@@ -17,7 +17,7 @@ import { Progress } from "@/components/ui/progress";
 import {
   Megaphone, DollarSign, TrendingUp, Users, Store, Plus, ArrowRight,
   Calendar, CheckCircle2, Clock, Loader2, LogOut, Building2, BarChart3,
-  Target, Zap, PieChart,
+  Target, Zap, PieChart, LayoutDashboard,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -30,6 +30,7 @@ import {
   calculateEstimatedReach,
   type BrandCampaign,
 } from "@/services/api/brandCampaigns.service";
+import { CommandCenter } from "@/components/brand/CommandCenter";
 
 const statusConfig: Record<string, { color: string; label: string; emoji: string }> = {
   draft: { color: "bg-muted text-muted-foreground", label: "Draft", emoji: "📝" },
@@ -356,37 +357,56 @@ const BrandDashboard = () => {
       </header>
 
       <main className="max-w-5xl mx-auto p-4 space-y-6">
-        {/* Summary stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <Card>
-            <CardContent className="pt-4 pb-3">
-              <p className="text-xs text-muted-foreground">Active Campaigns</p>
-              <p className="text-2xl font-bold">{activeCampaigns.length}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4 pb-3">
-              <p className="text-xs text-muted-foreground">Total Budget</p>
-              <p className="text-2xl font-bold">${totalBudget.toLocaleString()}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4 pb-3">
-              <p className="text-xs text-muted-foreground">PB Distributed</p>
-              <p className="text-2xl font-bold">{totalDistributed.toLocaleString()}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4 pb-3">
-              <p className="text-xs text-muted-foreground">PB Redeemed</p>
-              <p className="text-2xl font-bold">{totalRedeemed.toLocaleString()}</p>
-            </CardContent>
-          </Card>
-        </div>
+        <Tabs defaultValue="command-center" className="space-y-5">
+          <TabsList className="w-full justify-start">
+            <TabsTrigger value="command-center" className="gap-1.5">
+              <LayoutDashboard className="h-4 w-4" />
+              Command Center
+            </TabsTrigger>
+            <TabsTrigger value="campaigns" className="gap-1.5">
+              <Megaphone className="h-4 w-4" />
+              Campaigns ({campaigns.length})
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Create campaign */}
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold">Your Campaigns</h2>
+          {/* Command Center tab — the WOW moment */}
+          <TabsContent value="command-center" className="mt-0">
+            <CommandCenter brandId={brandAccount.id} />
+          </TabsContent>
+
+          {/* Campaigns tab — original campaign list & creation */}
+          <TabsContent value="campaigns" className="mt-0 space-y-6">
+            {/* Summary stats */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <Card>
+                <CardContent className="pt-4 pb-3">
+                  <p className="text-xs text-muted-foreground">Active Campaigns</p>
+                  <p className="text-2xl font-bold">{activeCampaigns.length}</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-4 pb-3">
+                  <p className="text-xs text-muted-foreground">Total Budget</p>
+                  <p className="text-2xl font-bold">${totalBudget.toLocaleString()}</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-4 pb-3">
+                  <p className="text-xs text-muted-foreground">PB Distributed</p>
+                  <p className="text-2xl font-bold">{totalDistributed.toLocaleString()}</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-4 pb-3">
+                  <p className="text-xs text-muted-foreground">PB Redeemed</p>
+                  <p className="text-2xl font-bold">{totalRedeemed.toLocaleString()}</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Create campaign */}
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold">Your Campaigns</h2>
           <Dialog open={showCreate} onOpenChange={setShowCreate}>
             <DialogTrigger asChild>
               <Button><Plus className="h-4 w-4 mr-2" /> New Campaign</Button>
@@ -573,6 +593,8 @@ const BrandDashboard = () => {
             })}
           </div>
         )}
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );
