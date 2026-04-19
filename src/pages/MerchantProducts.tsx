@@ -88,6 +88,77 @@ const MerchantProducts = () => {
   const [editActive, setEditActive] = useState(true);
   const [updating, setUpdating] = useState(false);
 
+  // Subscription plan edit/delete state
+  const [editPlanDialogOpen, setEditPlanDialogOpen] = useState(false);
+  const [editingPlan, setEditingPlan] = useState<SubscriptionPlan | null>(null);
+  const [planName, setPlanName] = useState("");
+  const [planDescription, setPlanDescription] = useState("");
+  const [planPrice, setPlanPrice] = useState("");
+  const [planActive, setPlanActive] = useState(true);
+  const [updatingPlan, setUpdatingPlan] = useState(false);
+  const [deletePlanDialogOpen, setDeletePlanDialogOpen] = useState(false);
+  const [planToDelete, setPlanToDelete] = useState<SubscriptionPlan | null>(null);
+  const [deletingPlan, setDeletingPlan] = useState(false);
+
+  const openEditPlanDialog = (plan: SubscriptionPlan) => {
+    setEditingPlan(plan);
+    setPlanName(plan.name);
+    setPlanDescription(plan.description || "");
+    setPlanPrice((plan.amount / 100).toFixed(2));
+    setPlanActive(plan.is_active);
+    setEditPlanDialogOpen(true);
+  };
+
+  const handleUpdatePlan = async () => {
+    if (!editingPlan || !merchant) return;
+    if (!planName.trim()) {
+      toast.error("Plan name is required");
+      return;
+    }
+    const amountCents = Math.round(parseFloat(planPrice) * 100);
+    if (isNaN(amountCents) || amountCents < 50) {
+      toast.error("Price must be at least $0.50");
+      return;
+    }
+    setUpdatingPlan(true);
+    try {
+      const { error } = await merchantSubscriptionPlansService.update(editingPlan.id, {
+        name: planName.trim(),
+        description: planDescription.trim(),
+        amount: amountCents,
+        isActive: planActive,
+      });
+      if (error) throw error;
+      toast.success("Subscription plan updated");
+      setEditPlanDialogOpen(false);
+      setEditingPlan(null);
+      await loadSubscriptionPlans(merchant.id);
+    } catch (error) {
+      console.error("Error updating plan:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to update plan");
+    } finally {
+      setUpdatingPlan(false);
+    }
+  };
+
+  const handleDeletePlan = async () => {
+    if (!planToDelete || !merchant) return;
+    setDeletingPlan(true);
+    try {
+      const { error } = await merchantSubscriptionPlansService.delete(planToDelete.id);
+      if (error) throw error;
+      toast.success("Subscription plan deleted");
+      setSubscriptionPlans(subscriptionPlans.filter((p) => p.id !== planToDelete.id));
+    } catch (error) {
+      console.error("Error deleting plan:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to delete plan");
+    } finally {
+      setDeletingPlan(false);
+      setDeletePlanDialogOpen(false);
+      setPlanToDelete(null);
+    }
+  };
+
   // Form state
   const [productName, setProductName] = useState("");
   const [productDescription, setProductDescription] = useState("");
