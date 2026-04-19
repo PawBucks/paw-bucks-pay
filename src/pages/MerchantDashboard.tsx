@@ -60,6 +60,7 @@ import { MerchantSubscribersTab } from "@/components/merchant/MerchantSubscriber
 import { MerchantDailySummaryTab } from "@/components/merchant/MerchantDailySummaryTab";
 import { CheckInDashboard } from "@/components/checkin";
 import { MerchantCampaignLeaderboardCard } from "@/components/merchant/MerchantCampaignLeaderboardCard";
+import { MerchantBrandCampaignInbox } from "@/components/merchant/MerchantBrandCampaignInbox";
 
 // Dialogs
 import { EditMerchantProfileDialog } from "@/components/merchant/EditMerchantProfileDialog";
@@ -779,6 +780,7 @@ const MerchantDashboard = () => {
               togglingPawbucks={togglingPawbucks}
               onViewWallet={() => navigate('/merchant/pawbucks')}
             />
+            <MerchantBrandCampaignInbox merchantId={merchant.id} />
             <MerchantCampaignLeaderboardCard merchantId={merchant.id} />
           </div>
         );

@@ -593,8 +593,26 @@ const BrandDashboard = () => {
           </div>
         )}
           </TabsContent>
+
+          {/* Marketplace tab — browse merchants & invite */}
+          <TabsContent value="marketplace" className="mt-0">
+            <MerchantMarketplace brandId={brandAccount.id} campaigns={campaigns} />
+          </TabsContent>
         </Tabs>
       </main>
+
+      {/* Campaign Wizard (Builder 2.0) */}
+      <CampaignWizard
+        open={showCreate}
+        onOpenChange={setShowCreate}
+        brandId={brandAccount.id}
+        brandName={brandAccount.brand_name}
+        brandLogoUrl={(brandAccount as { logo_url?: string | null }).logo_url || null}
+        onCreated={(campaign) => {
+          setFundingCampaign(campaign);
+          queryClient.invalidateQueries({ queryKey: ["brand-campaigns"] });
+        }}
+      />
 
       {/* Funding choice dialog */}
       <Dialog open={!!fundingCampaign} onOpenChange={(o) => !o && setFundingCampaign(null)}>
