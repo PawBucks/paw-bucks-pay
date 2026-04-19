@@ -868,6 +868,89 @@ const MerchantProducts = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Edit Subscription Plan Dialog */}
+      <Dialog open={editPlanDialogOpen} onOpenChange={setEditPlanDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Subscription Plan</DialogTitle>
+            <DialogDescription>Update your plan details. Billing interval cannot be changed after publishing.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div>
+              <Label htmlFor="edit-plan-name">Name *</Label>
+              <Input id="edit-plan-name" value={planName} onChange={(e) => setPlanName(e.target.value)} />
+            </div>
+            <div>
+              <Label htmlFor="edit-plan-description">Description</Label>
+              <Textarea id="edit-plan-description" value={planDescription} onChange={(e) => setPlanDescription(e.target.value)} rows={3} />
+            </div>
+            <div>
+              <Label htmlFor="edit-plan-price">Price (USD) *</Label>
+              <Input
+                id="edit-plan-price"
+                type="number"
+                step="0.01"
+                min="0.50"
+                value={planPrice}
+                onChange={(e) => setPlanPrice(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground mt-1">Minimum $0.50. New subscribers will be charged the new price.</p>
+            </div>
+            <div className="flex items-center justify-between border rounded-lg p-3">
+              <div>
+                <Label htmlFor="edit-plan-active" className="font-medium">Active</Label>
+                <p className="text-xs text-muted-foreground">Inactive plans are hidden from your storefront</p>
+              </div>
+              <Switch id="edit-plan-active" checked={planActive} onCheckedChange={setPlanActive} />
+            </div>
+            <div className="flex justify-end gap-2 mt-6">
+              <Button variant="outline" onClick={() => setEditPlanDialogOpen(false)} disabled={updatingPlan}>
+                Cancel
+              </Button>
+              <Button onClick={handleUpdatePlan} disabled={updatingPlan}>
+                {updatingPlan ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save Changes"
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Subscription Plan Dialog */}
+      <AlertDialog open={deletePlanDialogOpen} onOpenChange={setDeletePlanDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Subscription Plan?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete "{planToDelete?.name}". Active subscribers will not be affected, but no new sign-ups will be allowed. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deletingPlan}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeletePlan}
+              disabled={deletingPlan}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deletingPlan ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
