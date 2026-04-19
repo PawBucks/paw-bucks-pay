@@ -52,6 +52,9 @@ const BrandDashboard = () => {
   const queryClient = useQueryClient();
   const [showCreate, setShowCreate] = useState(false);
   const [selectedCampaign, setSelectedCampaign] = useState<BrandCampaign | null>(null);
+  const [fundingCampaign, setFundingCampaign] = useState<BrandCampaign | null>(null);
+  const [fundingAction, setFundingAction] = useState<"card" | "invoice" | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
 
   // Campaign form
   const [form, setForm] = useState({
@@ -63,6 +66,11 @@ const BrandDashboard = () => {
     end_date: "",
     campaign_color: "#6366f1",
     targeting_notes: "",
+    daily_spend_cap: 0,
+    auto_replenish_enabled: false,
+    auto_replenish_threshold: 10,
+    auto_replenish_amount_usd: 250,
+    targeting_rules: {} as TargetingRules,
   });
 
   const pawbucksPool = useMemo(() => calculatePawbucksFromBudget(form.budget_usd), [form.budget_usd]);
