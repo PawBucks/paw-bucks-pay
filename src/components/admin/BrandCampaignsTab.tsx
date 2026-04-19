@@ -16,6 +16,7 @@ import { Plus, Building2, Megaphone, Users, DollarSign, TrendingUp, Store, Eye, 
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { CampaignBriefCard } from "./CampaignBriefCard";
 import {
   getAllBrandAccounts,
   getAllBrandCampaigns,
