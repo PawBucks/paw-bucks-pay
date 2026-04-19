@@ -571,3 +571,104 @@ export const calculateEstimatedReach = (pawbucksPool: number, perCheckin: number
   if (perCheckin <= 0) return 0;
   return Math.floor(pawbucksPool / perCheckin);
 };
+
+// ============================================================
+// Marketplace (Phase 3)
+// ============================================================
+export interface MarketplaceMerchant {
+  id: string;
+  business_name: string;
+  business_type: string | null;
+  business_categories: string[] | null;
+  logo_url: string | null;
+  address: string | null;
+  description: string | null;
+  cashback_rate: number | null;
+  accepts_pawbucks: boolean;
+}
+
+export interface BrandCampaignInvitation {
+  id: string;
+  campaign_id: string;
+  merchant_id: string;
+  status: string;
+  message: string | null;
+  invited_at: string;
+  responded_at: string | null;
+  merchants?: { business_name: string; logo_url: string | null } | null;
+  brand_campaigns?: { name: string; campaign_color: string | null } | null;
+  brand_accounts?: { brand_name: string; logo_url: string | null } | null;
+}
+
+export const getMarketplaceMerchants = async (
+  search?: string,
+  category?: string,
+  limit: number = 100,
+): Promise<ServiceListResult<MarketplaceMerchant>> => {
+  try {
+    const { data, error } = await supabase.rpc("get_marketplace_merchants", {
+      p_search: search ?? null,
+      p_category: category ?? null,
+      p_limit: limit,
+    } as never);
+    return { data: (data || []) as unknown as MarketplaceMerchant[], error };
+  } catch (error) {
+    return { data: [], error: handleError(error) };
+  }
+};
+
+export const getCampaignInvitations = async (
+  brandId: string,
+): Promise<ServiceListResult<BrandCampaignInvitation>> => {
+  try {
+    const { data: campaigns } = await supabase
+      .from("brand_campaigns")
+      .select("id")
+      .eq("brand_id", brandId);
+    const ids = (campaigns || []).map((c: { id: string }) => c.id);
+    if (ids.length === 0) return { data: [], error: null };
+
+    const { data, error } = await supabase
+      .from("brand_campaign_invitations")
+      .select("*, merchants(business_name, logo_url), brand_campaigns(name, campaign_color)")
+      .in("campaign_id", ids)
+      .order("invited_at", { ascending: false });
+    return { data: (data || []) as unknown as BrandCampaignInvitation[], error };
+  } catch (error) {
+    return { data: [], error: handleError(error) };
+  }
+};
+
+export const getMerchantInvitations = async (
+  merchantId: string,
+): Promise<ServiceListResult<BrandCampaignInvitation>> => {
+  try {
+    const { data, error } = await supabase
+      .from("brand_campaign_invitations")
+      .select("*, brand_campaigns(name, campaign_color, brand_accounts(brand_name, logo_url))")
+      .eq("merchant_id", merchantId)
+      .order("invited_at", { ascending: false });
+    return { data: (data || []) as unknown as BrandCampaignInvitation[], error };
+  } catch (error) {
+    return { data: [], error: handleError(error) };
+  }
+};
+
+export const inviteMerchantsToCampaign = async (
+  campaignId: string,
+  merchantIds: string[],
+  message?: string,
+) => {
+  const { data, error } = await supabase.functions.invoke("invite-merchant-to-campaign", {
+    body: { campaign_id: campaignId, merchant_ids: merchantIds, message },
+  });
+  return { data, error };
+};
+
+export const respondToCampaignInvitation = async (invitationId: string, accept: boolean) => {
+  const { data, error } = await supabase.rpc("respond_to_brand_campaign_invitation", {
+    p_invitation_id: invitationId,
+    p_accept: accept,
+  } as never);
+  return { data, error };
+};

@@ -36,6 +36,8 @@ import {
 } from "@/services/api/brandCampaigns.service";
 import { CommandCenter } from "@/components/brand/CommandCenter";
 import { TargetingRulesEditor } from "@/components/brand/TargetingRulesEditor";
+import { CampaignWizard } from "@/components/brand/CampaignWizard";
+import { MerchantMarketplace } from "@/components/brand/MerchantMarketplace";
 
 const statusConfig: Record<string, { color: string; label: string; emoji: string }> = {
   draft: { color: "bg-muted text-muted-foreground", label: "Draft", emoji: "📝" },
