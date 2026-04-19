@@ -129,7 +129,7 @@ const MerchantProducts = () => {
 
       // Load products and subscription plans in parallel
       await Promise.all([
-        loadProducts(merchantData.stripe_account_id),
+        loadProducts(merchantData.id),
         loadSubscriptionPlans(merchantData.id),
       ]);
     } catch (error) {
