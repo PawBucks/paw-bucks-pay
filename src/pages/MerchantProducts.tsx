@@ -270,7 +270,7 @@ const MerchantProducts = () => {
         setListInPetStore(false);
         setPawbucksPrice("");
         setProductImageUrls([]);
-        await loadProducts(merchant.stripe_account_id);
+        await loadProducts(merchant.id);
       } else {
         throw new Error(data.error || "Failed to create product");
       }
@@ -314,6 +314,55 @@ const MerchantProducts = () => {
       setDeleting(false);
       setDeleteDialogOpen(false);
       setProductToDelete(null);
+    }
+  };
+
+  const openEditDialog = (product: Product) => {
+    setEditingProduct(product);
+    setEditName(product.name);
+    setEditDescription(product.description || "");
+    setEditPrice(product.price?.unit_amount ? (product.price.unit_amount / 100).toFixed(2) : "");
+    setEditActive(product.active);
+    setEditDialogOpen(true);
+  };
+
+  const handleUpdateProduct = async () => {
+    if (!editingProduct || !merchant?.stripe_account_id) return;
+    if (!editName.trim()) {
+      toast.error("Product name is required");
+      return;
+    }
+    const priceInCents = editPrice ? Math.round(parseFloat(editPrice) * 100) : null;
+    if (priceInCents !== null && (isNaN(priceInCents) || priceInCents < 50)) {
+      toast.error("Price must be at least $0.50");
+      return;
+    }
+    const priceChanged = priceInCents !== null && priceInCents !== (editingProduct.price?.unit_amount ?? null);
+
+    setUpdating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("update-connect-product", {
+        body: {
+          productId: editingProduct.id,
+          accountId: merchant.stripe_account_id,
+          name: editName.trim(),
+          description: editDescription.trim(),
+          active: editActive,
+          ...(priceChanged ? { priceInCents, currency: editingProduct.price?.currency || "usd" } : {}),
+        },
+      });
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || "Failed to update product");
+
+      toast.success("Product updated successfully");
+      setEditDialogOpen(false);
+      setEditingProduct(null);
+      await loadProducts(merchant.id);
+    } catch (error) {
+      console.error("Error updating product:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to update product");
+    } finally {
+      setUpdating(false);
     }
   };
 
@@ -470,17 +519,27 @@ const MerchantProducts = () => {
                       </CardDescription>
                     )}
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-muted-foreground hover:text-destructive flex-shrink-0"
-                    onClick={() => {
-                      setProductToDelete(product);
-                      setDeleteDialogOpen(true);
-                    }}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-muted-foreground hover:text-primary"
+                      onClick={() => openEditDialog(product)}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                      onClick={() => {
+                        setProductToDelete(product);
+                        setDeleteDialogOpen(true);
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>
