@@ -14425,6 +14425,20 @@ export type Database = {
           total_locked: number
         }[]
       }
+      get_marketplace_merchants: {
+        Args: { p_category?: string; p_limit?: number; p_search?: string }
+        Returns: {
+          accepts_pawbucks: boolean
+          address: string
+          business_categories: string[]
+          business_name: string
+          business_type: string
+          cashback_rate: number
+          description: string
+          id: string
+          logo_url: string
+        }[]
+      }
       get_merchant_analytics: {
         Args: { p_merchant_id: string }
         Returns: {
@@ -14576,6 +14590,10 @@ export type Database = {
       release_referrer_bonus: {
         Args: { p_bonus_id: string }
         Returns: undefined
+      }
+      respond_to_brand_campaign_invitation: {
+        Args: { p_accept: boolean; p_invitation_id: string }
+        Returns: Json
       }
       send_pawbucks_expiry_reminders: { Args: never; Returns: number }
       use_pet_fund_credit: {
