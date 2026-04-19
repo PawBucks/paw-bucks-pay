@@ -470,6 +470,10 @@ const BrandDashboard = () => {
               <Megaphone className="h-4 w-4" />
               Campaigns ({campaigns.length})
             </TabsTrigger>
+            <TabsTrigger value="marketplace" className="gap-1.5">
+              <Store className="h-4 w-4" />
+              Marketplace
+            </TabsTrigger>
           </TabsList>
 
           {/* Command Center tab — the WOW moment */}
@@ -510,183 +514,10 @@ const BrandDashboard = () => {
             {/* Create campaign */}
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-bold">Your Campaigns</h2>
-          <Dialog open={showCreate} onOpenChange={setShowCreate}>
-            <DialogTrigger asChild>
-              <Button><Plus className="h-4 w-4 mr-2" /> New Campaign</Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Create Funded PawBucks Campaign</DialogTitle>
-                <DialogDescription>Set your budget and parameters. An invoice will be sent for payment before activation.</DialogDescription>
-              </DialogHeader>
-              <div className="space-y-5 pt-2">
-                <div className="space-y-2">
-                  <Label>Campaign Name *</Label>
-                  <Input value={form.name} onChange={(e) => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Spring 2026 Promotion" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Description</Label>
-                  <Textarea value={form.description} onChange={(e) => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Describe your campaign goals..." rows={2} />
-                </div>
-
-                <Separator />
-
-                {/* Budget calculator */}
-                <div className="space-y-4 p-4 rounded-lg bg-muted/50 border">
-                  <h3 className="font-semibold flex items-center gap-2">
-                    <DollarSign className="h-4 w-4" /> Budget Calculator
-                  </h3>
-                  <div className="space-y-2">
-                    <Label>Campaign Budget (USD)</Label>
-                    <div className="flex items-center gap-3">
-                      <span className="text-muted-foreground">$</span>
-                      <Input
-                        type="number"
-                        min={100}
-                        step={100}
-                        value={form.budget_usd}
-                        onChange={(e) => setForm(f => ({ ...f, budget_usd: Math.max(100, Number(e.target.value)) }))}
-                      />
-                    </div>
-                    <Slider
-                      value={[form.budget_usd]}
-                      onValueChange={([v]) => setForm(f => ({ ...f, budget_usd: v }))}
-                      min={100}
-                      max={50000}
-                      step={100}
-                      className="mt-2"
-                    />
-                    <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>$100</span>
-                      <span>$50,000</span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>PawBucks Per Check-in</Label>
-                    <Input
-                      type="number"
-                      min={100}
-                      step={100}
-                      value={form.pawbucks_per_checkin}
-                      onChange={(e) => setForm(f => ({ ...f, pawbucks_per_checkin: Math.max(100, Number(e.target.value)) }))}
-                    />
-                    <p className="text-xs text-muted-foreground">How many branded PawBucks each pet owner receives per check-in</p>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3 pt-2">
-                    <div className="p-3 rounded-lg bg-background border text-center">
-                      <p className="text-xs text-muted-foreground">Total PawBucks Pool</p>
-                      <p className="text-xl font-bold text-primary">{pawbucksPool.toLocaleString()}</p>
-                      <p className="text-xs text-muted-foreground">PB</p>
-                    </div>
-                    <div className="p-3 rounded-lg bg-background border text-center">
-                      <p className="text-xs text-muted-foreground">Est. Pet Owners Reached</p>
-                      <p className="text-xl font-bold text-emerald-600">{estimatedReach.toLocaleString()}</p>
-                      <p className="text-xs text-muted-foreground">check-ins</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <Label>Start Date</Label>
-                    <Input type="date" value={form.start_date} onChange={(e) => setForm(f => ({ ...f, start_date: e.target.value }))} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>End Date</Label>
-                    <Input type="date" value={form.end_date} onChange={(e) => setForm(f => ({ ...f, end_date: e.target.value }))} />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Campaign Color</Label>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="color"
-                      value={form.campaign_color}
-                      onChange={(e) => setForm(f => ({ ...f, campaign_color: e.target.value }))}
-                      className="w-10 h-10 rounded cursor-pointer border"
-                    />
-                    <span className="text-sm text-muted-foreground">{form.campaign_color}</span>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Targeting Notes (free-form, optional)</Label>
-                  <Textarea value={form.targeting_notes} onChange={(e) => setForm(f => ({ ...f, targeting_notes: e.target.value }))} placeholder="Any specific targeting preferences..." rows={2} />
-                </div>
-
-                <Separator />
-
-                {/* Audience targeting */}
-                <TargetingRulesEditor
-                  value={form.targeting_rules}
-                  onChange={(rules) => setForm(f => ({ ...f, targeting_rules: rules }))}
-                />
-
-                <Separator />
-
-                {/* Guardrails */}
-                <div className="space-y-3 p-4 rounded-lg bg-muted/50 border">
-                  <h3 className="font-semibold flex items-center gap-2">
-                    <Zap className="h-4 w-4" /> Budget Guardrails
-                  </h3>
-                  <div className="space-y-2">
-                    <Label>Daily Spend Cap (USD, 0 = none)</Label>
-                    <Input
-                      type="number"
-                      min={0}
-                      value={form.daily_spend_cap}
-                      onChange={(e) => setForm(f => ({ ...f, daily_spend_cap: Math.max(0, Number(e.target.value)) }))}
-                    />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      id="auto-replenish"
-                      checked={form.auto_replenish_enabled}
-                      onChange={(e) => setForm(f => ({ ...f, auto_replenish_enabled: e.target.checked }))}
-                    />
-                    <Label htmlFor="auto-replenish" className="cursor-pointer">Auto-replenish when pool nearly empty</Label>
-                  </div>
-                  {form.auto_replenish_enabled && (
-                    <div className="grid grid-cols-2 gap-2 pl-6">
-                      <div>
-                        <Label className="text-xs">Trigger %</Label>
-                        <Input
-                          type="number"
-                          min={1}
-                          max={50}
-                          value={form.auto_replenish_threshold}
-                          onChange={(e) => setForm(f => ({ ...f, auto_replenish_threshold: Number(e.target.value) }))}
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-xs">Top-up amount ($)</Label>
-                        <Input
-                          type="number"
-                          min={50}
-                          value={form.auto_replenish_amount_usd}
-                          onChange={(e) => setForm(f => ({ ...f, auto_replenish_amount_usd: Number(e.target.value) }))}
-                        />
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <Button
-                  className="w-full"
-                  onClick={() => createCampaignMutation.mutate()}
-                  disabled={!form.name || form.budget_usd < 100 || createCampaignMutation.isPending}
-                >
-                  {createCampaignMutation.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Megaphone className="h-4 w-4 mr-2" />}
-                  Create Campaign
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </div>
+              <Button onClick={() => setShowCreate(true)}>
+                <Plus className="h-4 w-4 mr-2" /> New Campaign
+              </Button>
+            </div>
 
         {/* Campaigns list */}
         {campaignsLoading ? (
