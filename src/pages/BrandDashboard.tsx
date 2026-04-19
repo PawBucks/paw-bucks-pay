@@ -167,6 +167,30 @@ const BrandDashboard = () => {
     );
   }
 
+  if (!(brandAccount as any).setup_completed_at) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <Card className="max-w-md w-full">
+          <CardHeader className="text-center">
+            <Building2 className="h-12 w-12 mx-auto text-primary mb-2" />
+            <CardTitle>Finish Brand Setup</CardTitle>
+            <CardDescription>
+              Complete your brand profile to unlock campaign funding, audience targeting, and the Brand Command Center.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-2">
+            <Button onClick={() => navigate(`/brand-setup/${(brandAccount as any).invitation_token}`)}>
+              Complete Setup
+            </Button>
+            <Button variant="outline" onClick={() => { signOut(); navigate("/"); }}>
+              <LogOut className="h-4 w-4 mr-2" /> Sign Out
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   // Campaign detail view
   if (selectedCampaign) {
     const distributionPct = selectedCampaign.pawbucks_pool > 0

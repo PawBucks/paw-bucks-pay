@@ -12,7 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Building2, Megaphone, Users, DollarSign, TrendingUp, Store, Eye, CheckCircle2, Clock, Loader2 } from "lucide-react";
+import { Plus, Building2, Megaphone, Users, DollarSign, TrendingUp, Store, Eye, CheckCircle2, Clock, Loader2, Mail, Trash2 } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -125,17 +126,21 @@ export const BrandCampaignsTab = () => {
       });
     },
     onSuccess: async (result) => {
-      if (result.error) {
+      if (result.error || !result.data) {
         toast.error("Failed to create brand account");
         return;
       }
-      // Copy invitation link to clipboard
-      const inviteUrl = `${window.location.origin}/brand-setup/${result.data?.invitation_token}`;
-      try {
-        await navigator.clipboard.writeText(inviteUrl);
-        toast.success("Brand account created! Invitation link copied to clipboard.");
-      } catch {
-        toast.success(`Brand account created! Share this link: ${inviteUrl}`);
+      const brandId = result.data.id;
+      const inviteUrl = `${window.location.origin}/brand-setup/${result.data.invitation_token}`;
+      // Try to email the brand contact
+      const { data: sendData, error: sendErr } = await supabase.functions.invoke("send-brand-invitation", {
+        body: { brandId },
+      });
+      if (sendErr || (sendData && (sendData as any).error)) {
+        try { await navigator.clipboard.writeText(inviteUrl); } catch { /* noop */ }
+        toast.success("Brand created. Invite link copied (email send failed — share manually).");
+      } else {
+        toast.success(`Brand created — invitation emailed to ${(sendData as any)?.sent_to || result.data.contact_email}`);
       }
       setShowCreateBrand(false);
       setBrandForm({ brand_name: "", contact_name: "", contact_email: "", description: "", website_url: "" });
@@ -144,6 +149,33 @@ export const BrandCampaignsTab = () => {
     onError: (error: Error) => {
       toast.error(error.message);
     },
+  });
+
+  const resendInvitationMutation = useMutation({
+    mutationFn: async (brandId: string) => {
+      const { data, error } = await supabase.functions.invoke("send-brand-invitation", { body: { brandId } });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      return data;
+    },
+    onSuccess: (data: any) => toast.success(`Invitation re-sent to ${data?.sent_to}`),
+    onError: (e: Error) => toast.error(`Failed to resend: ${e.message}`),
+  });
+
+  const deleteBrandMutation = useMutation({
+    mutationFn: async (brandId: string) => {
+      const { data, error } = await supabase.rpc("admin_delete_brand_account", { p_brand_id: brandId });
+      if (error) throw error;
+      const r = data as { success: boolean; error?: string } | null;
+      if (r && !r.success) throw new Error(r.error || "Delete failed");
+      return r;
+    },
+    onSuccess: () => {
+      toast.success("Brand account deleted");
+      queryClient.invalidateQueries({ queryKey: ["admin-brand-accounts"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-brand-campaigns"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
   });
 
   const updateStatusMutation = useMutation({
@@ -474,23 +506,65 @@ export const BrandCampaignsTab = () => {
                 <Card key={brand.id}>
                   <CardContent className="pt-4">
                     <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <h4 className="font-bold">{brand.brand_name}</h4>
-                        <p className="text-xs text-muted-foreground">{brand.contact_email || brand.contact_name}</p>
+                      <div className="min-w-0">
+                        <h4 className="font-bold truncate">{brand.brand_name}</h4>
+                        <p className="text-xs text-muted-foreground truncate">{brand.contact_email || brand.contact_name}</p>
                       </div>
-                      <Badge variant={brand.status === "active" ? "default" : "secondary"}>
-                        {brand.status}
-                      </Badge>
+                      <div className="flex flex-col items-end gap-1">
+                        <Badge variant={brand.status === "active" ? "default" : "secondary"}>{brand.status}</Badge>
+                        {(brand as any).setup_completed_at ? (
+                          <Badge variant="outline" className="text-xs"><CheckCircle2 className="h-3 w-3 mr-1" />Setup done</Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-xs"><Clock className="h-3 w-3 mr-1" />Setup pending</Badge>
+                        )}
+                      </div>
                     </div>
                     {brand.description && (
                       <p className="text-sm text-muted-foreground mb-2 line-clamp-2">{brand.description}</p>
                     )}
-                    <div className="flex items-center gap-2 text-sm">
+                    <div className="flex items-center gap-2 text-sm mb-3">
                       <Megaphone className="h-4 w-4 text-muted-foreground" />
                       <span>{brandCampaigns.length} campaign{brandCampaigns.length !== 1 ? "s" : ""}</span>
                       {activeCampaigns.length > 0 && (
                         <Badge variant="outline" className="text-emerald-600">{activeCampaigns.length} active</Badge>
                       )}
+                    </div>
+                    <div className="flex gap-2 pt-2 border-t">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="flex-1"
+                        disabled={!brand.contact_email || resendInvitationMutation.isPending}
+                        onClick={() => resendInvitationMutation.mutate(brand.id)}
+                      >
+                        <Mail className="h-3 w-3 mr-1" />
+                        {(brand as any).setup_completed_at ? "Resend" : "Send Invite"}
+                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button size="sm" variant="outline" className="text-destructive hover:text-destructive">
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete {brand.brand_name}?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This permanently removes the brand account and ALL of its campaigns ({brandCampaigns.length}).
+                              This cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              onClick={() => deleteBrandMutation.mutate(brand.id)}
+                            >
+                              Delete Brand
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   </CardContent>
                 </Card>
