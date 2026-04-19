@@ -593,6 +593,8 @@ const BrandDashboard = () => {
             })}
           </div>
         )}
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );
