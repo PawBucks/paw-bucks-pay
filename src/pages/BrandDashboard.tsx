@@ -180,7 +180,12 @@ const BrandDashboard = () => {
     try {
       const { data, error } = await requestBrandCampaignInvoice(campaignId);
       if (error) throw new Error((error as Error).message);
-      toast.success(`Invoice ${(data as { invoice_number?: string })?.invoice_number || ""} issued. Campaign activates upon payment.`);
+      const invoiceData = data as { invoice_number?: string; already?: boolean; resent?: boolean } | null;
+      toast.success(
+        invoiceData?.already || invoiceData?.resent
+          ? `Invoice ${invoiceData?.invoice_number || ""} re-sent to your billing email.`
+          : `Invoice ${invoiceData?.invoice_number || ""} issued. Campaign activates upon payment.`
+      );
       setFundingCampaign(null);
       queryClient.invalidateQueries({ queryKey: ["brand-campaigns"] });
     } catch (e) {
