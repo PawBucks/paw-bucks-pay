@@ -5,6 +5,83 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+interface TargetingRules {
+  species?: string[];
+  breeds?: string[];
+  age_min_years?: number;
+  age_max_years?: number;
+  zip_codes?: string[];
+  consumer_tiers?: string[];
+  subscription_tiers?: string[];
+  min_purchases?: number;
+}
+
+async function userMatchesTargeting(
+  supabase: ReturnType<typeof createClient>,
+  userId: string,
+  rules: TargetingRules,
+): Promise<boolean> {
+  if (!rules || Object.keys(rules).length === 0) return true;
+
+  // Profile-level checks (subscription tier, zip)
+  if (rules.subscription_tiers?.length || rules.zip_codes?.length) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("subscription_tier, zip_code")
+      .eq("id", userId)
+      .maybeSingle();
+    if (!profile) return false;
+    if (rules.subscription_tiers?.length && !rules.subscription_tiers.includes((profile as any).subscription_tier || "free")) return false;
+    if (rules.zip_codes?.length && !rules.zip_codes.includes((profile as any).zip_code || "")) return false;
+  }
+
+  // Pet-level checks
+  if (rules.species?.length || rules.breeds?.length || rules.age_min_years || rules.age_max_years) {
+    const { data: pets } = await supabase
+      .from("pet_profiles")
+      .select("species, breed, birth_date")
+      .eq("user_id", userId);
+
+    const petList = pets || [];
+    if (petList.length === 0) return false;
+
+    const matches = petList.some((p: any) => {
+      if (rules.species?.length && !rules.species.includes(p.species)) return false;
+      if (rules.breeds?.length && p.breed && !rules.breeds.includes(p.breed)) return false;
+      if (rules.age_min_years || rules.age_max_years) {
+        if (!p.birth_date) return false;
+        const ageYears = (Date.now() - new Date(p.birth_date).getTime()) / (365.25 * 24 * 60 * 60 * 1000);
+        if (rules.age_min_years && ageYears < rules.age_min_years) return false;
+        if (rules.age_max_years && ageYears > rules.age_max_years) return false;
+      }
+      return true;
+    });
+    if (!matches) return false;
+  }
+
+  // Consumer tier check
+  if (rules.consumer_tiers?.length) {
+    const { data: tier } = await supabase
+      .from("user_tier_status")
+      .select("current_tier")
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (!tier || !rules.consumer_tiers.includes((tier as any).current_tier)) return false;
+  }
+
+  // Min purchases
+  if (rules.min_purchases && rules.min_purchases > 0) {
+    const { count } = await supabase
+      .from("transactions")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .eq("status", "completed");
+    if ((count || 0) < rules.min_purchases) return false;
+  }
+
+  return true;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -24,13 +101,13 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Find active campaigns where this merchant participates
     const { data: activeCampaignMerchants, error: campaignError } = await supabase
       .from("brand_campaign_merchants")
       .select(`
         campaign_id,
         brand_campaigns!inner(
-          id, name, pawbucks_per_checkin, pawbucks_pool, total_distributed, status,
+          id, name, pawbucks_per_checkin, pawbucks_pool, total_distributed,
+          total_checkins, status, daily_spend_cap, targeting_rules,
           brand_accounts!inner(brand_name, logo_url)
         )
       `)
@@ -53,23 +130,43 @@ Deno.serve(async (req) => {
     }
 
     const results: any[] = [];
+    const today = new Date(); today.setHours(0, 0, 0, 0);
 
     for (const cm of activeCampaignMerchants) {
-      const campaign = cm.brand_campaigns as any;
-      
-      // Skip if campaign is not active
+      const campaign = (cm as any).brand_campaigns;
       if (campaign.status !== "active") continue;
 
-      // Check if pool has remaining budget
       const remaining = campaign.pawbucks_pool - campaign.total_distributed;
       if (remaining < campaign.pawbucks_per_checkin) {
         console.log(`Campaign ${campaign.id} pool exhausted`);
         continue;
       }
 
-      // Check if user already got branded PB from this campaign today (prevent double-dipping)
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+      // Daily cap enforcement
+      if (campaign.daily_spend_cap && Number(campaign.daily_spend_cap) > 0) {
+        const { data: todayStats } = await supabase
+          .from("brand_campaign_daily_stats")
+          .select("pawbucks_distributed")
+          .eq("campaign_id", campaign.id)
+          .eq("date", today.toISOString().slice(0, 10))
+          .maybeSingle();
+        const todayPB = Number(todayStats?.pawbucks_distributed ?? 0);
+        const capPB = Number(campaign.daily_spend_cap) * 1000;
+        if (todayPB + campaign.pawbucks_per_checkin > capPB) {
+          console.log(`Campaign ${campaign.id} daily cap reached`);
+          continue;
+        }
+      }
+
+      // Targeting enforcement
+      const rules = (campaign.targeting_rules || {}) as TargetingRules;
+      const matches = await userMatchesTargeting(supabase, user_id, rules);
+      if (!matches) {
+        console.log(`User ${user_id} does not match targeting for campaign ${campaign.id}`);
+        continue;
+      }
+
+      // Once-per-day per campaign per merchant
       const { data: existingToday } = await supabase
         .from("branded_pawbucks_activity")
         .select("id")
@@ -80,15 +177,11 @@ Deno.serve(async (req) => {
         .gte("created_at", today.toISOString())
         .limit(1);
 
-      if (existingToday && existingToday.length > 0) {
-        console.log(`User ${user_id} already received branded PB from campaign ${campaign.id} today`);
-        continue;
-      }
+      if (existingToday && existingToday.length > 0) continue;
 
       const amount = campaign.pawbucks_per_checkin;
       const brandName = campaign.brand_accounts?.brand_name || "Brand";
 
-      // Record the activity
       const { error: activityError } = await supabase
         .from("branded_pawbucks_activity")
         .insert({
@@ -106,7 +199,6 @@ Deno.serve(async (req) => {
         continue;
       }
 
-      // Upsert ledger balance
       const { data: existingLedger } = await supabase
         .from("branded_pawbucks_ledger")
         .select("id, balance, total_earned")
@@ -133,12 +225,11 @@ Deno.serve(async (req) => {
           });
       }
 
-      // Update campaign totals
       await supabase
         .from("brand_campaigns")
         .update({
           total_distributed: campaign.total_distributed + amount,
-          total_checkins: (campaign as any).total_checkins ? (campaign as any).total_checkins + 1 : 1,
+          total_checkins: (campaign.total_checkins || 0) + 1,
         })
         .eq("id", campaign.id);
 
@@ -148,30 +239,24 @@ Deno.serve(async (req) => {
         amount,
         brand_logo: campaign.brand_accounts?.logo_url,
       });
-
-      console.log(`Distributed ${amount} branded PB from campaign ${campaign.id} to user ${user_id}`);
     }
 
-    // Send notification if any branded PB were distributed
     if (results.length > 0) {
       const totalAmount = results.reduce((sum: number, r: any) => sum + r.amount, 0);
       const brandNames = results.map((r: any) => r.brand_name).join(", ");
-
-      await supabase
-        .from("notifications")
-        .insert({
-          user_id,
-          title: "🎁 Branded PawBucks Received!",
-          message: `You earned ${totalAmount.toLocaleString()} branded PawBucks from ${brandNames}! These special PawBucks can be redeemed at participating merchants.`,
-          category: "promotional",
-        });
+      await supabase.from("notifications").insert({
+        user_id,
+        title: "🎁 Branded PawBucks Received!",
+        message: `You earned ${totalAmount.toLocaleString()} branded PawBucks from ${brandNames}! Redeem them at participating merchants.`,
+        category: "promotional",
+      });
     }
 
     return new Response(
       JSON.stringify({
         distributed: results.length > 0,
         campaigns: results,
-        total_amount: results.reduce((sum: number, r: any) => sum + r.amount, 0),
+        total_amount: results.reduce((s: number, r: any) => s + r.amount, 0),
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 }
     );
