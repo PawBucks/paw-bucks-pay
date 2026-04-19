@@ -59,6 +59,7 @@ import { SalesReportGenerator } from "@/components/shared/SalesReportGenerator";
 import { MerchantSubscribersTab } from "@/components/merchant/MerchantSubscribersTab";
 import { MerchantDailySummaryTab } from "@/components/merchant/MerchantDailySummaryTab";
 import { CheckInDashboard } from "@/components/checkin";
+import { MerchantCampaignLeaderboardCard } from "@/components/merchant/MerchantCampaignLeaderboardCard";
 
 // Dialogs
 import { EditMerchantProfileDialog } from "@/components/merchant/EditMerchantProfileDialog";
