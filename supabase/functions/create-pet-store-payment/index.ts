@@ -329,15 +329,20 @@ serve(async (req) => {
     const availablePawBucks = walletData?.balance || 0;
 
     if (pawbucksAmount > 0 && availablePawBucks > 0) {
-      // Manual PawBucks specified by user
-      pawbucksUsed = Math.min(pawbucksAmount, availablePawBucks);
-      pawbucksUsdValue = pawbucksUsed / PAWBUCKS_TO_USD;
-      if (pawbucksUsdValue > totalAmount) {
-        pawbucksUsdValue = totalAmount;
-        pawbucksUsed = Math.floor(pawbucksUsdValue * PAWBUCKS_TO_USD);
+      // Pet Store rules: PawBucks only on orders >= $25 and capped at 33% of total
+      const MIN_ORDER_USD_FOR_PAWBUCKS = 25;
+      const MAX_PAWBUCKS_COVERAGE_PCT = 0.33;
+      if (totalAmount < MIN_ORDER_USD_FOR_PAWBUCKS) {
+        throw new Error(`PawBucks can only be applied to orders of $${MIN_ORDER_USD_FOR_PAWBUCKS} or more.`);
       }
+      const maxCoverageUsd = totalAmount * MAX_PAWBUCKS_COVERAGE_PCT;
+      const maxPawbucksAllowed = Math.floor(maxCoverageUsd * PAWBUCKS_TO_USD);
+
+      // Manual PawBucks specified by user (capped by balance + 33% rule)
+      pawbucksUsed = Math.min(pawbucksAmount, availablePawBucks, maxPawbucksAllowed);
+      pawbucksUsdValue = pawbucksUsed / PAWBUCKS_TO_USD;
       finalAmountCents = Math.round((totalAmount - pawbucksUsdValue) * 100);
-      console.log('PawBucks applied (manual)', { pawbucksUsed, pawbucksUsdValue, finalAmountCents });
+      console.log('PawBucks applied (manual)', { pawbucksUsed, pawbucksUsdValue, finalAmountCents, maxPawbucksAllowed });
     } else if (requestAutoRedeem && pawbucksAmount === 0 && availablePawBucks > 0) {
       // Auto-redeem: check user's profile preferences
       const { data: autoRedeemProfile } = await supabaseAdmin
