@@ -95,8 +95,8 @@ export function CartDrawer({
     !isCheckingOut &&
     !needsMinStripe;
 
-  // Full PawBucks checkout possible?
-  const canAffordFullPawbucks = pawbucksBalance >= maxPawbucksForTotal && maxPawbucksForTotal > 0;
+
+
 
   const handleCheckout = () => {
     onCheckout({
