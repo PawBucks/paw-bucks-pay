@@ -606,8 +606,66 @@ const BrandDashboard = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Targeting Notes</Label>
+                  <Label>Targeting Notes (free-form, optional)</Label>
                   <Textarea value={form.targeting_notes} onChange={(e) => setForm(f => ({ ...f, targeting_notes: e.target.value }))} placeholder="Any specific targeting preferences..." rows={2} />
+                </div>
+
+                <Separator />
+
+                {/* Audience targeting */}
+                <TargetingRulesEditor
+                  value={form.targeting_rules}
+                  onChange={(rules) => setForm(f => ({ ...f, targeting_rules: rules }))}
+                />
+
+                <Separator />
+
+                {/* Guardrails */}
+                <div className="space-y-3 p-4 rounded-lg bg-muted/50 border">
+                  <h3 className="font-semibold flex items-center gap-2">
+                    <Zap className="h-4 w-4" /> Budget Guardrails
+                  </h3>
+                  <div className="space-y-2">
+                    <Label>Daily Spend Cap (USD, 0 = none)</Label>
+                    <Input
+                      type="number"
+                      min={0}
+                      value={form.daily_spend_cap}
+                      onChange={(e) => setForm(f => ({ ...f, daily_spend_cap: Math.max(0, Number(e.target.value)) }))}
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="auto-replenish"
+                      checked={form.auto_replenish_enabled}
+                      onChange={(e) => setForm(f => ({ ...f, auto_replenish_enabled: e.target.checked }))}
+                    />
+                    <Label htmlFor="auto-replenish" className="cursor-pointer">Auto-replenish when pool nearly empty</Label>
+                  </div>
+                  {form.auto_replenish_enabled && (
+                    <div className="grid grid-cols-2 gap-2 pl-6">
+                      <div>
+                        <Label className="text-xs">Trigger %</Label>
+                        <Input
+                          type="number"
+                          min={1}
+                          max={50}
+                          value={form.auto_replenish_threshold}
+                          onChange={(e) => setForm(f => ({ ...f, auto_replenish_threshold: Number(e.target.value) }))}
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs">Top-up amount ($)</Label>
+                        <Input
+                          type="number"
+                          min={50}
+                          value={form.auto_replenish_amount_usd}
+                          onChange={(e) => setForm(f => ({ ...f, auto_replenish_amount_usd: Number(e.target.value) }))}
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <Button
