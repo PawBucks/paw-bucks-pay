@@ -701,6 +701,71 @@ const MerchantProducts = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Edit Product Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Product</DialogTitle>
+            <DialogDescription>Update your product details</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div>
+              <Label htmlFor="edit-name">Name *</Label>
+              <Input
+                id="edit-name"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-description">Description</Label>
+              <Textarea
+                id="edit-description"
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+                rows={3}
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-price">Price (USD)</Label>
+              <Input
+                id="edit-price"
+                type="number"
+                step="0.01"
+                min="0.50"
+                value={editPrice}
+                onChange={(e) => setEditPrice(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Changing price creates a new Stripe price (existing checkouts unaffected). Minimum $0.50.
+              </p>
+            </div>
+            <div className="flex items-center justify-between border rounded-lg p-3">
+              <div>
+                <Label htmlFor="edit-active" className="font-medium">Active</Label>
+                <p className="text-xs text-muted-foreground">Inactive products are hidden from your storefront</p>
+              </div>
+              <Switch id="edit-active" checked={editActive} onCheckedChange={setEditActive} />
+            </div>
+            <div className="flex justify-end gap-2 mt-6">
+              <Button variant="outline" onClick={() => setEditDialogOpen(false)} disabled={updating}>
+                Cancel
+              </Button>
+              <Button onClick={handleUpdateProduct} disabled={updating}>
+                {updating ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save Changes"
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
