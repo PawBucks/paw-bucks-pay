@@ -140,7 +140,7 @@ const MerchantProducts = () => {
     }
   };
 
-  const loadProducts = async (accountId: string) => {
+  const loadProducts = async (merchantId: string) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
 
@@ -150,7 +150,7 @@ const MerchantProducts = () => {
       }
 
       const { data, error } = await supabase.functions.invoke("list-connect-products", {
-        body: { accountId },
+        body: { merchantId },
         headers: {
           Authorization: `Bearer ${session.access_token}`,
         },
