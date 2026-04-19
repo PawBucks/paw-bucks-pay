@@ -519,14 +519,16 @@ const MerchantProducts = () => {
                       </CardDescription>
                     )}
                   </div>
-                  <div className="flex items-center gap-1 flex-shrink-0">
+                  <div className="flex items-center gap-1 flex-shrink-0 ml-2">
                     <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-muted-foreground hover:text-primary"
+                      variant="outline"
+                      size="sm"
+                      className="h-8 gap-1 border-primary/30 text-primary hover:bg-primary hover:text-primary-foreground"
                       onClick={() => openEditDialog(product)}
+                      aria-label="Edit product"
                     >
-                      <Pencil className="h-4 w-4" />
+                      <Pencil className="h-3.5 w-3.5" />
+                      <span className="text-xs font-medium">Edit</span>
                     </Button>
                     <Button
                       variant="ghost"
@@ -536,6 +538,7 @@ const MerchantProducts = () => {
                         setProductToDelete(product);
                         setDeleteDialogOpen(true);
                       }}
+                      aria-label="Delete product"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
