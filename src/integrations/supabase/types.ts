@@ -1105,6 +1105,59 @@ export type Database = {
           },
         ]
       }
+      brand_campaign_hourly_stats: {
+        Row: {
+          campaign_id: string
+          checkins: number
+          created_at: string
+          hour_bucket: string
+          id: string
+          pawbucks_distributed: number
+          pawbucks_redeemed: number
+          redemptions: number
+          spend_usd: number
+          unique_merchants: number
+          unique_users: number
+          updated_at: string
+        }
+        Insert: {
+          campaign_id: string
+          checkins?: number
+          created_at?: string
+          hour_bucket: string
+          id?: string
+          pawbucks_distributed?: number
+          pawbucks_redeemed?: number
+          redemptions?: number
+          spend_usd?: number
+          unique_merchants?: number
+          unique_users?: number
+          updated_at?: string
+        }
+        Update: {
+          campaign_id?: string
+          checkins?: number
+          created_at?: string
+          hour_bucket?: string
+          id?: string
+          pawbucks_distributed?: number
+          pawbucks_redeemed?: number
+          redemptions?: number
+          spend_usd?: number
+          unique_merchants?: number
+          unique_users?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "brand_campaign_hourly_stats_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "brand_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       brand_campaign_invitations: {
         Row: {
           campaign_id: string
@@ -1227,13 +1280,19 @@ export type Database = {
           campaign_color: string | null
           campaign_logo_url: string | null
           created_at: string
+          creative_cta: string | null
+          creative_headline: string | null
+          creative_subtext: string | null
           daily_spend_cap: number | null
           description: string | null
           end_date: string | null
           funded_at: string | null
           funding_method: string
           id: string
+          last_auto_replenish_at: string | null
+          last_guardrail_check_at: string | null
           name: string
+          paused_reason: string | null
           pawbucks_per_checkin: number
           pawbucks_pool: number
           start_date: string | null
@@ -1258,13 +1317,19 @@ export type Database = {
           campaign_color?: string | null
           campaign_logo_url?: string | null
           created_at?: string
+          creative_cta?: string | null
+          creative_headline?: string | null
+          creative_subtext?: string | null
           daily_spend_cap?: number | null
           description?: string | null
           end_date?: string | null
           funded_at?: string | null
           funding_method?: string
           id?: string
+          last_auto_replenish_at?: string | null
+          last_guardrail_check_at?: string | null
           name: string
+          paused_reason?: string | null
           pawbucks_per_checkin?: number
           pawbucks_pool?: number
           start_date?: string | null
@@ -1289,13 +1354,19 @@ export type Database = {
           campaign_color?: string | null
           campaign_logo_url?: string | null
           created_at?: string
+          creative_cta?: string | null
+          creative_headline?: string | null
+          creative_subtext?: string | null
           daily_spend_cap?: number | null
           description?: string | null
           end_date?: string | null
           funded_at?: string | null
           funding_method?: string
           id?: string
+          last_auto_replenish_at?: string | null
+          last_guardrail_check_at?: string | null
           name?: string
+          paused_reason?: string | null
           pawbucks_per_checkin?: number
           pawbucks_pool?: number
           start_date?: string | null
@@ -1319,6 +1390,56 @@ export type Database = {
           },
           {
             foreignKeyName: "brand_campaigns_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brand_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      brand_payment_methods: {
+        Row: {
+          brand_id: string
+          card_brand: string | null
+          card_exp_month: number | null
+          card_exp_year: number | null
+          card_last4: string | null
+          created_at: string
+          id: string
+          is_default: boolean
+          stripe_customer_id: string
+          stripe_payment_method_id: string
+          updated_at: string
+        }
+        Insert: {
+          brand_id: string
+          card_brand?: string | null
+          card_exp_month?: number | null
+          card_exp_year?: number | null
+          card_last4?: string | null
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          stripe_customer_id: string
+          stripe_payment_method_id: string
+          updated_at?: string
+        }
+        Update: {
+          brand_id?: string
+          card_brand?: string | null
+          card_exp_month?: number | null
+          card_exp_year?: number | null
+          card_last4?: string | null
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          stripe_customer_id?: string
+          stripe_payment_method_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "brand_payment_methods_brand_id_fkey"
             columns: ["brand_id"]
             isOneToOne: false
             referencedRelation: "brand_accounts"
@@ -14165,6 +14286,10 @@ export type Database = {
       }
       aggregate_brand_campaign_daily_stats: {
         Args: { target_date?: string }
+        Returns: undefined
+      }
+      aggregate_brand_campaign_hourly_stats: {
+        Args: { target_hour?: string }
         Returns: undefined
       }
       aggregate_search_ranking_stats: {

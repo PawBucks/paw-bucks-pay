@@ -25,12 +25,38 @@ export interface BrandAccount {
 export interface TargetingRules {
   species?: string[];
   breeds?: string[];
+  age_min_years?: number;
+  age_max_years?: number;
   zip_codes?: string[];
   zip_radius_miles?: number;
   center_zip?: string;
   consumer_tiers?: string[];
+  subscription_tiers?: string[];
   min_purchases?: number;
+  recent_active_days?: number;
 }
+
+// New funding helpers
+export const startBrandCampaignCheckout = async (campaignId: string) => {
+  const { data, error } = await supabase.functions.invoke("create-brand-campaign-payment", {
+    body: { campaign_id: campaignId },
+  });
+  return { data, error };
+};
+
+export const requestBrandCampaignInvoice = async (campaignId: string) => {
+  const { data, error } = await supabase.functions.invoke("request-brand-campaign-invoice", {
+    body: { campaign_id: campaignId },
+  });
+  return { data, error };
+};
+
+export const verifyBrandCampaignPayment = async (campaignId: string) => {
+  const { data, error } = await supabase.functions.invoke("verify-brand-campaign-payment", {
+    body: { campaign_id: campaignId },
+  });
+  return { data, error };
+};
 
 export interface BrandCampaign {
   id: string;
