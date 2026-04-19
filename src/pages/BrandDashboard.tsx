@@ -741,6 +741,13 @@ const BrandDashboard = () => {
                     </div>
                     <Progress value={poolPct} className="h-1.5 mt-3" />
                     <p className="text-xs text-muted-foreground mt-1">{poolPct.toFixed(0)}% of PawBucks pool distributed</p>
+                    {(campaign.status === "draft" || campaign.status === "pending_payment") && (
+                      <div className="flex gap-2 mt-3" onClick={(e) => e.stopPropagation()}>
+                        <Button size="sm" className="flex-1" onClick={() => setFundingCampaign(campaign)}>
+                          <DollarSign className="h-3.5 w-3.5 mr-1" /> Fund Campaign
+                        </Button>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               );
@@ -750,6 +757,44 @@ const BrandDashboard = () => {
           </TabsContent>
         </Tabs>
       </main>
+
+      {/* Funding choice dialog */}
+      <Dialog open={!!fundingCampaign} onOpenChange={(o) => !o && setFundingCampaign(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Fund "{fundingCampaign?.name}"</DialogTitle>
+            <DialogDescription>
+              ${Number(fundingCampaign?.budget_usd || 0).toLocaleString()} budget · {Number(fundingCampaign?.pawbucks_pool || 0).toLocaleString()} branded PawBucks pool
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 pt-2">
+            <Card className="cursor-pointer hover:border-primary transition-all" onClick={() => fundingCampaign && handleFundWithCard(fundingCampaign.id)}>
+              <CardContent className="py-4 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <DollarSign className="h-5 w-5 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-sm">Pay with Card (Instant)</p>
+                  <p className="text-xs text-muted-foreground">Activate immediately. Card saved for auto-replenish.</p>
+                </div>
+                {fundingAction === "card" ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4 text-muted-foreground" />}
+              </CardContent>
+            </Card>
+            <Card className="cursor-pointer hover:border-primary transition-all" onClick={() => fundingCampaign && handleRequestInvoice(fundingCampaign.id)}>
+              <CardContent className="py-4 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                  <Calendar className="h-5 w-5 text-amber-600" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-sm">Request Invoice (Net 14)</p>
+                  <p className="text-xs text-muted-foreground">Receive an invoice via email. Activates upon payment.</p>
+                </div>
+                {fundingAction === "invoice" ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4 text-muted-foreground" />}
+              </CardContent>
+            </Card>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
