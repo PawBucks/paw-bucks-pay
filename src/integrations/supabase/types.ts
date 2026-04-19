@@ -887,58 +887,121 @@ export type Database = {
       }
       brand_accounts: {
         Row: {
+          address_line1: string | null
+          address_line2: string | null
+          billing_contact_email: string | null
+          billing_contact_name: string | null
+          billing_contact_phone: string | null
           brand_name: string
+          business_type: string | null
+          city: string | null
+          company_size: string | null
           contact_email: string | null
           contact_name: string | null
+          contact_phone: string | null
+          contact_title: string | null
+          country: string | null
           created_at: string
           created_by: string
           description: string | null
           id: string
+          industry_category: string | null
           invitation_claimed_at: string | null
           invitation_email: string | null
           invitation_sent_at: string | null
           invitation_token: string | null
+          legal_business_name: string | null
           logo_url: string | null
+          marketing_preferences: Json | null
+          postal_code: string | null
+          setup_completed_at: string | null
+          social_links: Json | null
+          state: string | null
           status: string
+          tax_id: string | null
+          terms_accepted_at: string | null
           updated_at: string
           user_id: string | null
           website_url: string | null
+          year_founded: number | null
         }
         Insert: {
+          address_line1?: string | null
+          address_line2?: string | null
+          billing_contact_email?: string | null
+          billing_contact_name?: string | null
+          billing_contact_phone?: string | null
           brand_name: string
+          business_type?: string | null
+          city?: string | null
+          company_size?: string | null
           contact_email?: string | null
           contact_name?: string | null
+          contact_phone?: string | null
+          contact_title?: string | null
+          country?: string | null
           created_at?: string
           created_by: string
           description?: string | null
           id?: string
+          industry_category?: string | null
           invitation_claimed_at?: string | null
           invitation_email?: string | null
           invitation_sent_at?: string | null
           invitation_token?: string | null
+          legal_business_name?: string | null
           logo_url?: string | null
+          marketing_preferences?: Json | null
+          postal_code?: string | null
+          setup_completed_at?: string | null
+          social_links?: Json | null
+          state?: string | null
           status?: string
+          tax_id?: string | null
+          terms_accepted_at?: string | null
           updated_at?: string
           user_id?: string | null
           website_url?: string | null
+          year_founded?: number | null
         }
         Update: {
+          address_line1?: string | null
+          address_line2?: string | null
+          billing_contact_email?: string | null
+          billing_contact_name?: string | null
+          billing_contact_phone?: string | null
           brand_name?: string
+          business_type?: string | null
+          city?: string | null
+          company_size?: string | null
           contact_email?: string | null
           contact_name?: string | null
+          contact_phone?: string | null
+          contact_title?: string | null
+          country?: string | null
           created_at?: string
           created_by?: string
           description?: string | null
           id?: string
+          industry_category?: string | null
           invitation_claimed_at?: string | null
           invitation_email?: string | null
           invitation_sent_at?: string | null
           invitation_token?: string | null
+          legal_business_name?: string | null
           logo_url?: string | null
+          marketing_preferences?: Json | null
+          postal_code?: string | null
+          setup_completed_at?: string | null
+          social_links?: Json | null
+          state?: string | null
           status?: string
+          tax_id?: string | null
+          terms_accepted_at?: string | null
           updated_at?: string
           user_id?: string | null
           website_url?: string | null
+          year_founded?: number | null
         }
         Relationships: []
       }
@@ -14092,6 +14155,10 @@ export type Database = {
       }
     }
     Functions: {
+      admin_delete_brand_account: {
+        Args: { p_brand_id: string }
+        Returns: Json
+      }
       admin_set_user_ban: {
         Args: { _banned: boolean; _reason?: string; _target_user_id: string }
         Returns: Json
@@ -14131,6 +14198,10 @@ export type Database = {
       checkin_date: { Args: { ts: string }; Returns: string }
       claim_brand_account: { Args: { p_token: string }; Returns: Json }
       claim_pet_fund_spot: { Args: { p_cluster_id: string }; Returns: string }
+      complete_brand_setup: {
+        Args: { p_brand_id: string; p_payload: Json }
+        Returns: Json
+      }
       expire_pawbucks: { Args: never; Returns: number }
       expire_unused_pet_fund_credits: { Args: never; Returns: number }
       generate_admin_invoice_number: { Args: never; Returns: string }
