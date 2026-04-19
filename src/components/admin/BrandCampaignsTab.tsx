@@ -281,6 +281,9 @@ export const BrandCampaignsTab = () => {
           </Card>
         </div>
 
+        {/* Full Campaign Brief — every captured field from the brand */}
+        <CampaignBriefCard campaign={selectedCampaign} />
+
         {/* Status controls */}
         <Card>
           <CardHeader>
