@@ -88,6 +88,77 @@ const MerchantProducts = () => {
   const [editActive, setEditActive] = useState(true);
   const [updating, setUpdating] = useState(false);
 
+  // Subscription plan edit/delete state
+  const [editPlanDialogOpen, setEditPlanDialogOpen] = useState(false);
+  const [editingPlan, setEditingPlan] = useState<SubscriptionPlan | null>(null);
+  const [planName, setPlanName] = useState("");
+  const [planDescription, setPlanDescription] = useState("");
+  const [planPrice, setPlanPrice] = useState("");
+  const [planActive, setPlanActive] = useState(true);
+  const [updatingPlan, setUpdatingPlan] = useState(false);
+  const [deletePlanDialogOpen, setDeletePlanDialogOpen] = useState(false);
+  const [planToDelete, setPlanToDelete] = useState<SubscriptionPlan | null>(null);
+  const [deletingPlan, setDeletingPlan] = useState(false);
+
+  const openEditPlanDialog = (plan: SubscriptionPlan) => {
+    setEditingPlan(plan);
+    setPlanName(plan.name);
+    setPlanDescription(plan.description || "");
+    setPlanPrice((plan.amount / 100).toFixed(2));
+    setPlanActive(plan.is_active);
+    setEditPlanDialogOpen(true);
+  };
+
+  const handleUpdatePlan = async () => {
+    if (!editingPlan || !merchant) return;
+    if (!planName.trim()) {
+      toast.error("Plan name is required");
+      return;
+    }
+    const amountCents = Math.round(parseFloat(planPrice) * 100);
+    if (isNaN(amountCents) || amountCents < 50) {
+      toast.error("Price must be at least $0.50");
+      return;
+    }
+    setUpdatingPlan(true);
+    try {
+      const { error } = await merchantSubscriptionPlansService.update(editingPlan.id, {
+        name: planName.trim(),
+        description: planDescription.trim(),
+        amount: amountCents,
+        isActive: planActive,
+      });
+      if (error) throw error;
+      toast.success("Subscription plan updated");
+      setEditPlanDialogOpen(false);
+      setEditingPlan(null);
+      await loadSubscriptionPlans(merchant.id);
+    } catch (error) {
+      console.error("Error updating plan:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to update plan");
+    } finally {
+      setUpdatingPlan(false);
+    }
+  };
+
+  const handleDeletePlan = async () => {
+    if (!planToDelete || !merchant) return;
+    setDeletingPlan(true);
+    try {
+      const { error } = await merchantSubscriptionPlansService.delete(planToDelete.id);
+      if (error) throw error;
+      toast.success("Subscription plan deleted");
+      setSubscriptionPlans(subscriptionPlans.filter((p) => p.id !== planToDelete.id));
+    } catch (error) {
+      console.error("Error deleting plan:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to delete plan");
+    } finally {
+      setDeletingPlan(false);
+      setDeletePlanDialogOpen(false);
+      setPlanToDelete(null);
+    }
+  };
+
   // Form state
   const [productName, setProductName] = useState("");
   const [productDescription, setProductDescription] = useState("");
@@ -470,18 +541,46 @@ const MerchantProducts = () => {
           {subscriptionPlans.map((plan) => (
             <Card key={`plan-${plan.id}`} className="overflow-hidden hover:shadow-lg transition-shadow border-primary/20">
               <CardHeader className="pb-4">
-                <div className="flex items-center gap-2 mb-1">
-                  <Badge variant="outline" className="gap-1 text-xs">
-                    <RefreshCw className="h-3 w-3" />
-                    Subscription
-                  </Badge>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Badge variant="outline" className="gap-1 text-xs">
+                        <RefreshCw className="h-3 w-3" />
+                        Subscription
+                      </Badge>
+                    </div>
+                    <CardTitle className="line-clamp-1">{plan.name}</CardTitle>
+                    {plan.description && (
+                      <CardDescription className="line-clamp-2">
+                        {plan.description}
+                      </CardDescription>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 gap-1 border-primary/30 text-primary hover:bg-primary hover:text-primary-foreground"
+                      onClick={() => openEditPlanDialog(plan)}
+                      aria-label="Edit plan"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                      <span className="text-xs font-medium">Edit</span>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                      onClick={() => {
+                        setPlanToDelete(plan);
+                        setDeletePlanDialogOpen(true);
+                      }}
+                      aria-label="Delete plan"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
-                <CardTitle className="line-clamp-1">{plan.name}</CardTitle>
-                {plan.description && (
-                  <CardDescription className="line-clamp-2">
-                    {plan.description}
-                  </CardDescription>
-                )}
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between">
@@ -768,6 +867,89 @@ const MerchantProducts = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Edit Subscription Plan Dialog */}
+      <Dialog open={editPlanDialogOpen} onOpenChange={setEditPlanDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Subscription Plan</DialogTitle>
+            <DialogDescription>Update your plan details. Billing interval cannot be changed after publishing.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div>
+              <Label htmlFor="edit-plan-name">Name *</Label>
+              <Input id="edit-plan-name" value={planName} onChange={(e) => setPlanName(e.target.value)} />
+            </div>
+            <div>
+              <Label htmlFor="edit-plan-description">Description</Label>
+              <Textarea id="edit-plan-description" value={planDescription} onChange={(e) => setPlanDescription(e.target.value)} rows={3} />
+            </div>
+            <div>
+              <Label htmlFor="edit-plan-price">Price (USD) *</Label>
+              <Input
+                id="edit-plan-price"
+                type="number"
+                step="0.01"
+                min="0.50"
+                value={planPrice}
+                onChange={(e) => setPlanPrice(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground mt-1">Minimum $0.50. New subscribers will be charged the new price.</p>
+            </div>
+            <div className="flex items-center justify-between border rounded-lg p-3">
+              <div>
+                <Label htmlFor="edit-plan-active" className="font-medium">Active</Label>
+                <p className="text-xs text-muted-foreground">Inactive plans are hidden from your storefront</p>
+              </div>
+              <Switch id="edit-plan-active" checked={planActive} onCheckedChange={setPlanActive} />
+            </div>
+            <div className="flex justify-end gap-2 mt-6">
+              <Button variant="outline" onClick={() => setEditPlanDialogOpen(false)} disabled={updatingPlan}>
+                Cancel
+              </Button>
+              <Button onClick={handleUpdatePlan} disabled={updatingPlan}>
+                {updatingPlan ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save Changes"
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Subscription Plan Dialog */}
+      <AlertDialog open={deletePlanDialogOpen} onOpenChange={setDeletePlanDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Subscription Plan?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete "{planToDelete?.name}". Active subscribers will not be affected, but no new sign-ups will be allowed. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deletingPlan}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeletePlan}
+              disabled={deletingPlan}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deletingPlan ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
