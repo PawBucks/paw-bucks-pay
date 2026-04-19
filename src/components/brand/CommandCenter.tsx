@@ -11,6 +11,7 @@ import { SpendChart } from "./SpendChart";
 import { MerchantLeaderboard } from "./MerchantLeaderboard";
 import { LiveActivityFeed } from "./LiveActivityFeed";
 import { ConversionFunnel } from "./ConversionFunnel";
+import { RealtimeRoiChart } from "./RealtimeRoiChart";
 
 interface CommandCenterProps {
   brandId: string;
@@ -68,6 +69,8 @@ export function CommandCenter({ brandId }: CommandCenterProps) {
   return (
     <div className="space-y-5">
       <HeroMetrics summary={summary} />
+
+      <RealtimeRoiChart brandId={brandId} />
 
       <div className="grid lg:grid-cols-2 gap-4">
         <SpendChart stats={dailyStats} />
