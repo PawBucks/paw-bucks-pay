@@ -59,6 +59,7 @@ import { SalesReportGenerator } from "@/components/shared/SalesReportGenerator";
 import { MerchantSubscribersTab } from "@/components/merchant/MerchantSubscribersTab";
 import { MerchantDailySummaryTab } from "@/components/merchant/MerchantDailySummaryTab";
 import { CheckInDashboard } from "@/components/checkin";
+import { MerchantCampaignLeaderboardCard } from "@/components/merchant/MerchantCampaignLeaderboardCard";
 
 // Dialogs
 import { EditMerchantProfileDialog } from "@/components/merchant/EditMerchantProfileDialog";
@@ -765,18 +766,21 @@ const MerchantDashboard = () => {
     switch (activeTab) {
       case "overview":
         return (
-          <MerchantOverviewTab
-            merchant={merchant}
-            analytics={analytics}
-            transactions={transactions}
-            monthlySalesData={getMonthlySalesData}
-            cashbackDistribution={getCashbackDistribution}
-            onConnectStripe={handleConnectStripe}
-            onTogglePawbucks={handleTogglePawbucks}
-            connectingStripe={connectingStripe}
-            togglingPawbucks={togglingPawbucks}
-            onViewWallet={() => navigate('/merchant/pawbucks')}
-          />
+          <div className="space-y-4">
+            <MerchantOverviewTab
+              merchant={merchant}
+              analytics={analytics}
+              transactions={transactions}
+              monthlySalesData={getMonthlySalesData}
+              cashbackDistribution={getCashbackDistribution}
+              onConnectStripe={handleConnectStripe}
+              onTogglePawbucks={handleTogglePawbucks}
+              connectingStripe={connectingStripe}
+              togglingPawbucks={togglingPawbucks}
+              onViewWallet={() => navigate('/merchant/pawbucks')}
+            />
+            <MerchantCampaignLeaderboardCard merchantId={merchant.id} />
+          </div>
         );
       case "analytics":
         return <MerchantEarningsTab />;

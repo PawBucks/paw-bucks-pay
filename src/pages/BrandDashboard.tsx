@@ -1,7 +1,7 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,9 +28,14 @@ import {
   getCampaignActivity,
   calculatePawbucksFromBudget,
   calculateEstimatedReach,
+  startBrandCampaignCheckout,
+  requestBrandCampaignInvoice,
+  verifyBrandCampaignPayment,
   type BrandCampaign,
+  type TargetingRules,
 } from "@/services/api/brandCampaigns.service";
 import { CommandCenter } from "@/components/brand/CommandCenter";
+import { TargetingRulesEditor } from "@/components/brand/TargetingRulesEditor";
 
 const statusConfig: Record<string, { color: string; label: string; emoji: string }> = {
   draft: { color: "bg-muted text-muted-foreground", label: "Draft", emoji: "📝" },
@@ -47,6 +52,9 @@ const BrandDashboard = () => {
   const queryClient = useQueryClient();
   const [showCreate, setShowCreate] = useState(false);
   const [selectedCampaign, setSelectedCampaign] = useState<BrandCampaign | null>(null);
+  const [fundingCampaign, setFundingCampaign] = useState<BrandCampaign | null>(null);
+  const [fundingAction, setFundingAction] = useState<"card" | "invoice" | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
 
   // Campaign form
   const [form, setForm] = useState({
@@ -58,6 +66,11 @@ const BrandDashboard = () => {
     end_date: "",
     campaign_color: "#6366f1",
     targeting_notes: "",
+    daily_spend_cap: 0,
+    auto_replenish_enabled: false,
+    auto_replenish_threshold: 10,
+    auto_replenish_amount_usd: 250,
+    targeting_rules: {} as TargetingRules,
   });
 
   const pawbucksPool = useMemo(() => calculatePawbucksFromBudget(form.budget_usd), [form.budget_usd]);
@@ -121,22 +134,81 @@ const BrandDashboard = () => {
         end_date: form.end_date || undefined,
         campaign_color: form.campaign_color,
         targeting_notes: form.targeting_notes || undefined,
+        targeting_rules: form.targeting_rules,
+        daily_spend_cap: form.daily_spend_cap > 0 ? form.daily_spend_cap : undefined,
+        auto_replenish_enabled: form.auto_replenish_enabled,
+        auto_replenish_threshold: form.auto_replenish_threshold,
+        auto_replenish_amount_usd: form.auto_replenish_amount_usd,
       });
     },
     onSuccess: (result) => {
-      if (result.error) {
+      if (result.error || !result.data) {
         toast.error("Failed to create campaign");
         return;
       }
-      toast.success("Campaign created! Submit for payment when ready.");
+      toast.success("Campaign created! Choose how to fund it.");
       setShowCreate(false);
-      setForm({ name: "", description: "", budget_usd: 500, pawbucks_per_checkin: 500, start_date: "", end_date: "", campaign_color: "#6366f1", targeting_notes: "" });
+      setFundingCampaign(result.data);
+      setForm({
+        name: "", description: "", budget_usd: 500, pawbucks_per_checkin: 500,
+        start_date: "", end_date: "", campaign_color: "#6366f1", targeting_notes: "",
+        daily_spend_cap: 0, auto_replenish_enabled: false, auto_replenish_threshold: 10,
+        auto_replenish_amount_usd: 250, targeting_rules: {},
+      });
       queryClient.invalidateQueries({ queryKey: ["brand-campaigns"] });
     },
     onError: (error: Error) => {
       toast.error(error.message);
     },
   });
+
+  // Funding actions
+  const handleFundWithCard = useCallback(async (campaignId: string) => {
+    setFundingAction("card");
+    try {
+      const { data, error } = await startBrandCampaignCheckout(campaignId);
+      if (error || !(data as { url?: string })?.url) throw new Error((error as Error)?.message || "Could not start checkout");
+      window.location.href = (data as { url: string }).url;
+    } catch (e) {
+      toast.error((e as Error).message);
+      setFundingAction(null);
+    }
+  }, []);
+
+  const handleRequestInvoice = useCallback(async (campaignId: string) => {
+    setFundingAction("invoice");
+    try {
+      const { data, error } = await requestBrandCampaignInvoice(campaignId);
+      if (error) throw new Error((error as Error).message);
+      toast.success(`Invoice ${(data as { invoice_number?: string })?.invoice_number || ""} issued. Campaign activates upon payment.`);
+      setFundingCampaign(null);
+      queryClient.invalidateQueries({ queryKey: ["brand-campaigns"] });
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setFundingAction(null);
+    }
+  }, [queryClient]);
+
+  // Handle return from Stripe Checkout
+  useEffect(() => {
+    const fundedId = searchParams.get("funded");
+    const cancelledId = searchParams.get("cancelled");
+    if (fundedId) {
+      verifyBrandCampaignPayment(fundedId).then(({ data }) => {
+        if ((data as { funded?: boolean })?.funded) {
+          toast.success("🚀 Campaign funded and live!");
+          queryClient.invalidateQueries({ queryKey: ["brand-campaigns"] });
+        }
+      });
+      searchParams.delete("funded");
+      setSearchParams(searchParams, { replace: true });
+    } else if (cancelledId) {
+      toast.info("Funding cancelled. Your campaign remains in draft.");
+      searchParams.delete("cancelled");
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams, queryClient]);
 
   if (brandLoading) {
     return (
@@ -534,8 +606,66 @@ const BrandDashboard = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Targeting Notes</Label>
+                  <Label>Targeting Notes (free-form, optional)</Label>
                   <Textarea value={form.targeting_notes} onChange={(e) => setForm(f => ({ ...f, targeting_notes: e.target.value }))} placeholder="Any specific targeting preferences..." rows={2} />
+                </div>
+
+                <Separator />
+
+                {/* Audience targeting */}
+                <TargetingRulesEditor
+                  value={form.targeting_rules}
+                  onChange={(rules) => setForm(f => ({ ...f, targeting_rules: rules }))}
+                />
+
+                <Separator />
+
+                {/* Guardrails */}
+                <div className="space-y-3 p-4 rounded-lg bg-muted/50 border">
+                  <h3 className="font-semibold flex items-center gap-2">
+                    <Zap className="h-4 w-4" /> Budget Guardrails
+                  </h3>
+                  <div className="space-y-2">
+                    <Label>Daily Spend Cap (USD, 0 = none)</Label>
+                    <Input
+                      type="number"
+                      min={0}
+                      value={form.daily_spend_cap}
+                      onChange={(e) => setForm(f => ({ ...f, daily_spend_cap: Math.max(0, Number(e.target.value)) }))}
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="auto-replenish"
+                      checked={form.auto_replenish_enabled}
+                      onChange={(e) => setForm(f => ({ ...f, auto_replenish_enabled: e.target.checked }))}
+                    />
+                    <Label htmlFor="auto-replenish" className="cursor-pointer">Auto-replenish when pool nearly empty</Label>
+                  </div>
+                  {form.auto_replenish_enabled && (
+                    <div className="grid grid-cols-2 gap-2 pl-6">
+                      <div>
+                        <Label className="text-xs">Trigger %</Label>
+                        <Input
+                          type="number"
+                          min={1}
+                          max={50}
+                          value={form.auto_replenish_threshold}
+                          onChange={(e) => setForm(f => ({ ...f, auto_replenish_threshold: Number(e.target.value) }))}
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs">Top-up amount ($)</Label>
+                        <Input
+                          type="number"
+                          min={50}
+                          value={form.auto_replenish_amount_usd}
+                          onChange={(e) => setForm(f => ({ ...f, auto_replenish_amount_usd: Number(e.target.value) }))}
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <Button
@@ -611,6 +741,13 @@ const BrandDashboard = () => {
                     </div>
                     <Progress value={poolPct} className="h-1.5 mt-3" />
                     <p className="text-xs text-muted-foreground mt-1">{poolPct.toFixed(0)}% of PawBucks pool distributed</p>
+                    {(campaign.status === "draft" || campaign.status === "pending_payment") && (
+                      <div className="flex gap-2 mt-3" onClick={(e) => e.stopPropagation()}>
+                        <Button size="sm" className="flex-1" onClick={() => setFundingCampaign(campaign)}>
+                          <DollarSign className="h-3.5 w-3.5 mr-1" /> Fund Campaign
+                        </Button>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               );
@@ -620,6 +757,44 @@ const BrandDashboard = () => {
           </TabsContent>
         </Tabs>
       </main>
+
+      {/* Funding choice dialog */}
+      <Dialog open={!!fundingCampaign} onOpenChange={(o) => !o && setFundingCampaign(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Fund "{fundingCampaign?.name}"</DialogTitle>
+            <DialogDescription>
+              ${Number(fundingCampaign?.budget_usd || 0).toLocaleString()} budget · {Number(fundingCampaign?.pawbucks_pool || 0).toLocaleString()} branded PawBucks pool
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 pt-2">
+            <Card className="cursor-pointer hover:border-primary transition-all" onClick={() => fundingCampaign && handleFundWithCard(fundingCampaign.id)}>
+              <CardContent className="py-4 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <DollarSign className="h-5 w-5 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-sm">Pay with Card (Instant)</p>
+                  <p className="text-xs text-muted-foreground">Activate immediately. Card saved for auto-replenish.</p>
+                </div>
+                {fundingAction === "card" ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4 text-muted-foreground" />}
+              </CardContent>
+            </Card>
+            <Card className="cursor-pointer hover:border-primary transition-all" onClick={() => fundingCampaign && handleRequestInvoice(fundingCampaign.id)}>
+              <CardContent className="py-4 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                  <Calendar className="h-5 w-5 text-amber-600" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-sm">Request Invoice (Net 14)</p>
+                  <p className="text-xs text-muted-foreground">Receive an invoice via email. Activates upon payment.</p>
+                </div>
+                {fundingAction === "invoice" ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4 text-muted-foreground" />}
+              </CardContent>
+            </Card>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
