@@ -10,6 +10,8 @@ import { Formatters } from "@/utils/formatters";
 import { motion, AnimatePresence } from "framer-motion";
 
 const PAWBUCKS_TO_USD = 0.001;
+const MIN_ORDER_USD_FOR_PAWBUCKS = 25; // PawBucks only allowed on orders $25+
+const MAX_PAWBUCKS_COVERAGE_PCT = 0.33; // PawBucks may cover up to 33% of total
 
 export type CartCheckoutMode = "card" | "pawbucks" | "split";
 
@@ -53,9 +55,11 @@ export function CartDrawer({
   // Split payment slider state: percentage of total paid with PawBucks (0-100)
   const [pawbucksPercent, setPawbucksPercent] = useState(0);
 
-  // Max PawBucks the user can apply (capped by balance and total)
+  // Max PawBucks the user can apply (capped by balance, 33% of total, and order min)
   const totalUsdDollars = totalUsd / 100;
-  const maxPawbucksForTotal = Math.floor(totalUsdDollars / PAWBUCKS_TO_USD);
+  const meetsMinOrder = totalUsdDollars >= MIN_ORDER_USD_FOR_PAWBUCKS;
+  const maxCoverageUsd = meetsMinOrder ? totalUsdDollars * MAX_PAWBUCKS_COVERAGE_PCT : 0;
+  const maxPawbucksForTotal = Math.floor(maxCoverageUsd / PAWBUCKS_TO_USD);
   const maxApplicablePawbucks = Math.min(pawbucksBalance, maxPawbucksForTotal);
   const maxPercent = maxPawbucksForTotal > 0
     ? Math.floor((maxApplicablePawbucks / maxPawbucksForTotal) * 100)
