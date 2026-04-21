@@ -203,6 +203,12 @@ const NAV_SECTIONS = [
         icon: MessageSquare,
         description: "Communicate with your customers directly",
       },
+      {
+        id: "brand-campaigns",
+        label: "Brand Campaigns",
+        icon: Megaphone,
+        description: "Review and respond to brand campaign invitations",
+      },
     ],
   },
   {
