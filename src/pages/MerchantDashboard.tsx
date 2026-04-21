@@ -531,6 +531,51 @@ const MerchantDashboard = () => {
     };
   }, [merchant?.id, loadMerchantData]);
 
+  // Pending brand campaign invitation count for sidebar badge
+  const queryClient = useQueryClient();
+  const { data: pendingBrandInvitationsCount = 0 } = useQuery({
+    queryKey: ["merchant-brand-invitations-count", merchant?.id],
+    enabled: !!merchant?.id,
+    refetchInterval: 30000,
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("brand_campaign_invitations")
+        .select("id", { count: "exact", head: true })
+        .eq("merchant_id", merchant!.id)
+        .in("status", ["pending", "sent"]);
+      if (error) throw error;
+      return count ?? 0;
+    },
+  });
+
+  // Realtime updates for invitation badge
+  useEffect(() => {
+    if (!merchant?.id) return;
+    const channel = supabase
+      .channel(`merchant-brand-invitations-${merchant.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "brand_campaign_invitations",
+          filter: `merchant_id=eq.${merchant.id}`,
+        },
+        () => {
+          queryClient.invalidateQueries({
+            queryKey: ["merchant-brand-invitations-count", merchant.id],
+          });
+          queryClient.invalidateQueries({
+            queryKey: ["merchant-brand-invitations", merchant.id],
+          });
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [merchant?.id, queryClient]);
+
   const handleConnectStripe = async () => {
     if (!merchant) return;
 
