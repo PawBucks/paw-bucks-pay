@@ -44,6 +44,7 @@ import {
   History,
   ClipboardCheck,
   QrCode,
+  Megaphone,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format, startOfMonth, parseISO } from "date-fns";
@@ -201,6 +202,12 @@ const NAV_SECTIONS = [
         label: "Messages",
         icon: MessageSquare,
         description: "Communicate with your customers directly",
+      },
+      {
+        id: "brand-campaigns",
+        label: "Brand Campaigns",
+        icon: Megaphone,
+        description: "Review and respond to brand campaign invitations",
       },
     ],
   },
@@ -845,6 +852,8 @@ const MerchantDashboard = () => {
         return <CheckInDashboard entityId={merchant.id} entityType="merchant" entityName={merchant.business_name} />;
       case "messages":
         return <MerchantMessagesTab merchantId={merchant.id} />;
+      case "brand-campaigns":
+        return <MerchantBrandCampaignInbox merchantId={merchant.id} />;
       case "support":
         return <SupportTab submitterType="merchant" entityId={merchant.id} />;
       default:
