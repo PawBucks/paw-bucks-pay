@@ -37,6 +37,18 @@ export const useSubscription = () => {
     }
 
     try {
+      // Short-circuit for admin/superadmin users — they don't have subscriptions
+      const { data: roles } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id);
+      const isAdmin = roles?.some((r: any) => r.role === 'admin' || r.role === 'superadmin');
+      if (isAdmin) {
+        setSubscription(defaultSubscription);
+        setLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase.functions.invoke('check-subscription');
 
       if (error) {
