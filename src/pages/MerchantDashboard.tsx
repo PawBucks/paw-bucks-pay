@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useGeocoding } from "@/hooks/useGeocoding";
 import { useMerchantActiveServices, SERVICE_NAMES } from "@/hooks/useMerchantServices";
@@ -530,6 +531,51 @@ const MerchantDashboard = () => {
     };
   }, [merchant?.id, loadMerchantData]);
 
+  // Pending brand campaign invitation count for sidebar badge
+  const queryClient = useQueryClient();
+  const { data: pendingBrandInvitationsCount = 0 } = useQuery({
+    queryKey: ["merchant-brand-invitations-count", merchant?.id],
+    enabled: !!merchant?.id,
+    refetchInterval: 30000,
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("brand_campaign_invitations")
+        .select("id", { count: "exact", head: true })
+        .eq("merchant_id", merchant!.id)
+        .in("status", ["pending", "sent"]);
+      if (error) throw error;
+      return count ?? 0;
+    },
+  });
+
+  // Realtime updates for invitation badge
+  useEffect(() => {
+    if (!merchant?.id) return;
+    const channel = supabase
+      .channel(`merchant-brand-invitations-${merchant.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "brand_campaign_invitations",
+          filter: `merchant_id=eq.${merchant.id}`,
+        },
+        () => {
+          queryClient.invalidateQueries({
+            queryKey: ["merchant-brand-invitations-count", merchant.id],
+          });
+          queryClient.invalidateQueries({
+            queryKey: ["merchant-brand-invitations", merchant.id],
+          });
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [merchant?.id, queryClient]);
+
   const handleConnectStripe = async () => {
     if (!merchant) return;
 
@@ -904,6 +950,8 @@ const MerchantDashboard = () => {
                 {section.items.map((item) => {
                   const Icon = item.icon;
                   const isActive = activeTab === item.id;
+                  const badgeCount =
+                    item.id === "brand-campaigns" ? pendingBrandInvitationsCount : 0;
                   return (
                     <TooltipProvider key={item.id} delayDuration={300}>
                       <Tooltip>
@@ -919,7 +967,16 @@ const MerchantDashboard = () => {
                           >
                             <Icon className={cn("w-4 h-4 flex-shrink-0", isActive && "text-primary")} />
                             <span className="truncate">{item.label}</span>
-                            {isActive && <ChevronRight className="w-4 h-4 ml-auto" />}
+                            {badgeCount > 0 && (
+                              <Badge
+                                className="ml-auto h-5 min-w-5 px-1.5 text-[10px] bg-primary text-primary-foreground"
+                              >
+                                {badgeCount > 99 ? "99+" : badgeCount}
+                              </Badge>
+                            )}
+                            {isActive && badgeCount === 0 && (
+                              <ChevronRight className="w-4 h-4 ml-auto" />
+                            )}
                           </button>
                         </TooltipTrigger>
                         <TooltipContent side="right" className="max-w-[250px]">
