@@ -5,7 +5,7 @@ import { PageLoader } from '@/components/PageLoader';
 import { ROUTES } from '@/lib/constants';
 import { getUserAccessInfo, type UserAccessInfo } from '@/lib/userAccessCache';
 
-type AllowedRole = 'admin' | 'superadmin' | 'merchant' | 'vet' | 'pet_owner';
+type AllowedRole = 'admin' | 'superadmin' | 'merchant' | 'vet' | 'pet_owner' | 'brand';
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -37,6 +37,8 @@ function checkRoleAccess(info: UserAccessInfo, allowedRoles: AllowedRole[]): boo
       if (info.is_vet || info.user_type === 'vet') return true;
     } else if (role === 'pet_owner') {
       if (info.user_type === 'pet_owner') return true;
+    } else if (role === 'brand') {
+      if (info.user_type === 'brand') return true;
     }
   }
   return false;

@@ -228,8 +228,8 @@ const AppRoutes = () => {
       <Route path="/vet-onboarding" element={<ProtectedRoute><PageTransition><VetOnboarding /></PageTransition></ProtectedRoute>} />
       <Route path="/vet-dashboard" element={<ProtectedRoute allowedRoles={['vet']}><PageTransition><VetDashboard /></PageTransition></ProtectedRoute>} />
 
-      {/* Brand routes */}
-      <Route path="/brand-dashboard" element={<ProtectedRoute><PageTransition><BrandDashboard /></PageTransition></ProtectedRoute>} />
+      {/* Brand routes - requires brand account */}
+      <Route path="/brand-dashboard" element={<ProtectedRoute allowedRoles={['brand']}><PageTransition><BrandDashboard /></PageTransition></ProtectedRoute>} />
 
       <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
     </Routes>
