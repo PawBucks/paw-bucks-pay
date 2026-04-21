@@ -645,7 +645,7 @@ export const getMerchantInvitations = async (
   try {
     const { data, error } = await supabase
       .from("brand_campaign_invitations")
-      .select("*, brand_campaigns(name, campaign_color, brand_accounts(brand_name, logo_url))")
+      .select("*, brand_campaigns(*, brand_accounts(brand_name, logo_url, description, website_url, contact_email, contact_name))")
       .eq("merchant_id", merchantId)
       .order("invited_at", { ascending: false });
     return { data: (data || []) as unknown as BrandCampaignInvitation[], error };
