@@ -852,6 +852,8 @@ const MerchantDashboard = () => {
         return <CheckInDashboard entityId={merchant.id} entityType="merchant" entityName={merchant.business_name} />;
       case "messages":
         return <MerchantMessagesTab merchantId={merchant.id} />;
+      case "brand-campaigns":
+        return <MerchantBrandCampaignInbox merchantId={merchant.id} />;
       case "support":
         return <SupportTab submitterType="merchant" entityId={merchant.id} />;
       default:
