@@ -950,6 +950,8 @@ const MerchantDashboard = () => {
                 {section.items.map((item) => {
                   const Icon = item.icon;
                   const isActive = activeTab === item.id;
+                  const badgeCount =
+                    item.id === "brand-campaigns" ? pendingBrandInvitationsCount : 0;
                   return (
                     <TooltipProvider key={item.id} delayDuration={300}>
                       <Tooltip>
@@ -965,7 +967,16 @@ const MerchantDashboard = () => {
                           >
                             <Icon className={cn("w-4 h-4 flex-shrink-0", isActive && "text-primary")} />
                             <span className="truncate">{item.label}</span>
-                            {isActive && <ChevronRight className="w-4 h-4 ml-auto" />}
+                            {badgeCount > 0 && (
+                              <Badge
+                                className="ml-auto h-5 min-w-5 px-1.5 text-[10px] bg-primary text-primary-foreground"
+                              >
+                                {badgeCount > 99 ? "99+" : badgeCount}
+                              </Badge>
+                            )}
+                            {isActive && badgeCount === 0 && (
+                              <ChevronRight className="w-4 h-4 ml-auto" />
+                            )}
                           </button>
                         </TooltipTrigger>
                         <TooltipContent side="right" className="max-w-[250px]">
