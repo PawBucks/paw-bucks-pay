@@ -79,6 +79,8 @@ export function AdminInvoiceList({ invoices, loading, onCreateNew, onView, onEdi
     return matchesSearch && matchesStatus && matchesType;
   });
 
+  const fmt = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n);
+
   const totals = {
     outstanding: invoices.filter(i => ["sent", "partially_paid", "overdue"].includes(i.status)).reduce((s, i) => s + Number(i.amount_due), 0),
     paid: invoices.filter(i => i.status === "paid").reduce((s, i) => s + Number(i.total), 0),
@@ -93,25 +95,25 @@ export function AdminInvoiceList({ invoices, loading, onCreateNew, onView, onEdi
         <Card>
           <CardContent className="pt-4 pb-3">
             <p className="text-xs text-muted-foreground">Outstanding</p>
-            <p className="text-xl font-bold text-orange-600">${totals.outstanding.toFixed(2)}</p>
+            <p className="text-lg sm:text-xl font-bold text-orange-600 truncate">{fmt(totals.outstanding)}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4 pb-3">
             <p className="text-xs text-muted-foreground">Collected</p>
-            <p className="text-xl font-bold text-green-600">${totals.paid.toFixed(2)}</p>
+            <p className="text-lg sm:text-xl font-bold text-green-600 truncate">{fmt(totals.paid)}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4 pb-3">
             <p className="text-xs text-muted-foreground">Overdue</p>
-            <p className="text-xl font-bold text-red-600">${totals.overdue.toFixed(2)}</p>
+            <p className="text-lg sm:text-xl font-bold text-red-600 truncate">{fmt(totals.overdue)}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4 pb-3">
             <p className="text-xs text-muted-foreground">Drafts</p>
-            <p className="text-xl font-bold">{totals.draft}</p>
+            <p className="text-lg sm:text-xl font-bold">{totals.draft}</p>
           </CardContent>
         </Card>
       </div>
