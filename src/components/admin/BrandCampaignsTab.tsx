@@ -440,14 +440,14 @@ export const BrandCampaignsTab = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h2 className="text-2xl font-bold">Brand Campaigns</h2>
           <p className="text-muted-foreground">Manage brand/manufacturer funded PawBucks campaigns</p>
         </div>
         <Dialog open={showCreateBrand} onOpenChange={setShowCreateBrand}>
           <DialogTrigger asChild>
-            <Button><Plus className="h-4 w-4 mr-2" /> Create Brand Account</Button>
+            <Button className="w-full sm:w-auto whitespace-nowrap"><Plus className="h-4 w-4 mr-2" /> Create Brand Account</Button>
           </DialogTrigger>
           <DialogContent className="max-w-md">
             <DialogHeader>
