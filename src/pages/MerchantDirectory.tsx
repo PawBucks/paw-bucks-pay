@@ -170,16 +170,16 @@ const MerchantDirectory = () => {
             .in("merchant_id", merchantIds)
         : { data: [] as { merchant_id: string; rating: number }[] };
 
-      const ratingMap = new Map<string, { sum: number; count: number }>();
-      (allReviews || []).forEach((r) => {
-        const entry = ratingMap.get(r.merchant_id) || { sum: 0, count: 0 };
+      const ratingMap: Record<string, { sum: number; count: number }> = {};
+      (allReviews || []).forEach((r: { merchant_id: string; rating: number }) => {
+        const entry = ratingMap[r.merchant_id] || { sum: 0, count: 0 };
         entry.sum += r.rating;
         entry.count += 1;
-        ratingMap.set(r.merchant_id, entry);
+        ratingMap[r.merchant_id] = entry;
       });
 
       return (merchantData || []).map((merchant) => {
-        const stats = ratingMap.get(merchant.id);
+        const stats = ratingMap[merchant.id];
         return {
           ...merchant,
           average_rating: stats && stats.count > 0 ? stats.sum / stats.count : 0,
