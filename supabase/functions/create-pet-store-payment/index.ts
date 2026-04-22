@@ -38,10 +38,18 @@ const generateOrderNumber = () => {
   return `PS-${timestamp}-${random}`;
 };
 
-const sendAdminNotification = async (customer: CustomerInfo, purchase: PurchaseDetails) => {
+const sendAdminNotification = async (
+  customer: CustomerInfo,
+  purchase: PurchaseDetails,
+  options: { paymentMethod?: string; statusLabel?: string; statusColorBg?: string; statusColorText?: string } = {},
+) => {
   try {
     const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
     const orderNumber = generateOrderNumber();
+    const paymentMethodLabel = options.paymentMethod || 'Stripe (Credit/Debit Card)';
+    const statusLabel = options.statusLabel || '✅ Payment Confirmed';
+    const statusBg = options.statusColorBg || '#d4edda';
+    const statusText = options.statusColorText || '#155724';
     const purchaseDate = new Date().toLocaleString('en-US', {
       weekday: 'long',
       year: 'numeric',
@@ -67,7 +75,7 @@ const sendAdminNotification = async (customer: CustomerInfo, purchase: PurchaseD
             <div style="border-bottom: 2px solid #7DD4D4; padding-bottom: 15px; margin-bottom: 25px;">
               <h2 style="color: #333; margin: 0; font-size: 20px;">Purchase Order #${orderNumber}</h2>
               <p style="color: #666; margin: 5px 0 0 0; font-size: 14px;">${purchaseDate}</p>
-              <span style="display: inline-block; background: #fff3cd; color: #856404; padding: 4px 12px; border-radius: 4px; font-size: 12px; margin-top: 10px;">⏳ Payment Pending - Stripe Checkout</span>
+              <span style="display: inline-block; background: ${statusBg}; color: ${statusText}; padding: 4px 12px; border-radius: 4px; font-size: 12px; margin-top: 10px;">${statusLabel}</span>
             </div>
             
             <!-- Customer Information Section -->
@@ -139,7 +147,7 @@ const sendAdminNotification = async (customer: CustomerInfo, purchase: PurchaseD
               <table style="width: 100%; border-collapse: collapse;">
                 <tr>
                   <td style="padding: 8px 0; color: #666;"><strong>Payment Method:</strong></td>
-                  <td style="padding: 8px 0; text-align: right; color: #333;">Stripe (Credit/Debit Card)</td>
+                  <td style="padding: 8px 0; text-align: right; color: #333;">${paymentMethodLabel}</td>
                 </tr>
                 <tr>
                   <td style="padding: 8px 0; color: #666;"><strong>PawBucks Multiplier:</strong></td>
@@ -156,12 +164,6 @@ const sendAdminNotification = async (customer: CustomerInfo, purchase: PurchaseD
               </table>
             </div>
             
-            <div style="margin-top: 25px; padding: 15px; background: #fff8e6; border-radius: 8px; border-left: 4px solid #ffc107;">
-              <p style="margin: 0; color: #856404; font-size: 13px;">
-                <strong>⚠️ Note:</strong> This purchase order is pending payment confirmation. The customer will complete checkout via Stripe. 
-                PawBucks rewards will be credited upon successful payment.
-              </p>
-            </div>
           </div>
           
           <div style="background: #333; padding: 20px; text-align: center;">
@@ -414,8 +416,12 @@ serve(async (req) => {
         await supabaseAdmin.from('shopping_cart_items').delete().eq('cart_id', body.cartId);
       }
 
-      // Send notifications
-      await sendAdminNotification(customerInfo, { item: item as ItemInfo, quantity: totalQuantity, totalAmount, pawbucksEarned: 0, pawbucksMultiplier: 0 });
+      // Send notifications — PawBucks-only purchase is fully completed at this point
+      await sendAdminNotification(
+        customerInfo,
+        { item: item as ItemInfo, quantity: totalQuantity, totalAmount, pawbucksEarned: 0, pawbucksMultiplier: 0 },
+        { paymentMethod: `${pawbucksUsed.toLocaleString()} PawBucks`, statusLabel: '✅ Paid with PawBucks' },
+      );
 
       // Send receipt email
       try {
@@ -556,14 +562,10 @@ serve(async (req) => {
       });
     }
 
-    // Send enhanced admin notification email
-    await sendAdminNotification(customerInfo, {
-      item: item as ItemInfo,
-      quantity: totalQuantity,
-      totalAmount,
-      pawbucksEarned,
-      pawbucksMultiplier,
-    });
+    // NOTE: Admin "Purchase Order" notification is intentionally NOT sent here.
+    // It must only fire AFTER Stripe Checkout is successfully completed,
+    // which is handled in `confirm-pet-store-payment`. Sending it at PaymentIntent
+    // creation produced false-positive purchase emails for abandoned/failed checkouts.
 
     return new Response(
       JSON.stringify({

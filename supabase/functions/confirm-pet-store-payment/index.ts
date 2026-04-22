@@ -125,6 +125,18 @@ serve(async (req) => {
       }
     } catch { /* fallback to single item */ }
 
+    // Build a normalized line-item array used by both receipt + admin emails.
+    // Falls back to the single-item metadata when cart_items isn't present.
+    const lineItems: { id: string; qty: number; name: string; priceCents: number }[] =
+      cartItemsParsed.length > 0
+        ? cartItemsParsed
+        : [{
+            id: itemId,
+            qty: quantity,
+            name: itemName,
+            priceCents: item?.price ?? Math.round((amountInDollars / Math.max(quantity, 1)) * 100),
+          }];
+
     if (cartItemsParsed.length > 0) {
       // Multi-item cart
       for (const ci of cartItemsParsed) {
@@ -280,7 +292,10 @@ serve(async (req) => {
               merchantName: 'PawBucks Pet Store',
               merchantDescription: 'Your one-stop shop for pet supplies, treats, and more!',
               merchantProfileUrl: 'https://pawbucks.app/pet-store',
-              items: [{ name: itemName, price: amountInDollars }],
+              items: lineItems.map((li) => ({
+                name: `${li.name} x${li.qty}`,
+                price: (li.priceCents * li.qty) / 100,
+              })),
               subtotal: amountInDollars,
               pawbucksApplied: 0,
               cardAmount: amountInDollars,
@@ -317,10 +332,19 @@ serve(async (req) => {
           minute: '2-digit',
         });
 
+        // Render every cart line item accurately
+        const lineItemsHtml = lineItems.map((li) => `
+            <tr>
+              <td style="padding:10px 0;font-size:14px;color:#1e293b;font-weight:500;border-bottom:1px solid #f1f5f9;">${li.name}</td>
+              <td style="padding:10px 0;font-size:14px;color:#64748b;text-align:center;border-bottom:1px solid #f1f5f9;">x${li.qty}</td>
+              <td style="padding:10px 0;font-size:14px;color:#1e293b;font-weight:600;text-align:right;border-bottom:1px solid #f1f5f9;">$${((li.priceCents * li.qty) / 100).toFixed(2)}</td>
+            </tr>`).join('');
+        const totalQuantity = lineItems.reduce((sum, li) => sum + li.qty, 0);
+
         await resend.emails.send({
           from: "PawBucks <noreply@pawbucks.app>",
           to: ["admin@pawbucks.app"],
-          subject: `✅ Pet Store Purchase Confirmed — Order #${orderNumber}: ${itemName}`,
+          subject: `✅ Pet Store Purchase Confirmed — Order #${orderNumber} (${totalQuantity} item${totalQuantity === 1 ? '' : 's'})`,
           html: `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
@@ -372,11 +396,7 @@ serve(async (req) => {
         <tr><td style="padding:20px;">
           <p style="margin:0 0 16px;font-size:11px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:1.5px;">Order Details</p>
           <table width="100%" cellpadding="0" cellspacing="0">
-            <tr>
-              <td style="padding:10px 0;font-size:14px;color:#1e293b;font-weight:500;border-bottom:1px solid #f1f5f9;">${itemName}</td>
-              <td style="padding:10px 0;font-size:14px;color:#64748b;text-align:center;border-bottom:1px solid #f1f5f9;">x${quantity}</td>
-              <td style="padding:10px 0;font-size:14px;color:#1e293b;font-weight:600;text-align:right;border-bottom:1px solid #f1f5f9;">$${(item?.price ? (item.price / 100) : amountInDollars).toFixed(2)}</td>
-            </tr>
+            ${lineItemsHtml}
             <tr>
               <td colspan="2" style="padding:12px 0;font-size:15px;font-weight:700;color:#0f172a;">Total Paid</td>
               <td style="padding:12px 0;font-size:15px;font-weight:700;color:#0f172a;text-align:right;">$${amountInDollars.toFixed(2)}</td>
