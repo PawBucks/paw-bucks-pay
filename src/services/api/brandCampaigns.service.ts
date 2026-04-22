@@ -88,6 +88,8 @@ export interface BrandCampaign {
   funded_at: string | null;
   created_at: string;
   updated_at: string;
+  trigger_type: "checkin" | "checkout" | "both";
+  min_purchase_usd: number;
   brand_accounts?: { brand_name: string; logo_url: string | null };
 }
 
@@ -251,6 +253,8 @@ export const createBrandCampaign = async (campaign: {
   auto_replenish_threshold?: number;
   auto_replenish_amount_usd?: number;
   funding_method?: "invoice" | "self_serve";
+  trigger_type?: "checkin" | "checkout" | "both";
+  min_purchase_usd?: number;
 }): Promise<ServiceResult<BrandCampaign>> => {
   try {
     const { targeting_rules, ...rest } = campaign;
@@ -282,6 +286,35 @@ export const updateBrandCampaignStatus = async (
   } catch (error) {
     return { data: null, error: handleError(error) };
   }
+};
+
+// ============================================================
+// Admin: campaign management
+// ============================================================
+export const adminUpdateBrandCampaign = async (
+  campaignId: string,
+  updates: Record<string, unknown>
+) => {
+  const { data, error } = await supabase.rpc("admin_update_brand_campaign", {
+    p_campaign_id: campaignId,
+    p_updates: updates as never,
+  });
+  return { data, error };
+};
+
+export const adminGrantBrandedPawbucks = async (
+  campaignId: string,
+  userId: string,
+  amount: number,
+  description?: string
+) => {
+  const { data, error } = await supabase.rpc("admin_grant_branded_pawbucks", {
+    p_campaign_id: campaignId,
+    p_user_id: userId,
+    p_amount: amount,
+    p_description: description ?? "Admin manual grant",
+  });
+  return { data, error };
 };
 
 // ============================================================

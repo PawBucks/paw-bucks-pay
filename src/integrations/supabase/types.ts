@@ -1291,6 +1291,7 @@ export type Database = {
           id: string
           last_auto_replenish_at: string | null
           last_guardrail_check_at: string | null
+          min_purchase_usd: number
           name: string
           paused_reason: string | null
           pawbucks_per_checkin: number
@@ -1304,6 +1305,7 @@ export type Database = {
           total_checkins: number
           total_distributed: number
           total_redeemed: number
+          trigger_type: string
           updated_at: string
         }
         Insert: {
@@ -1328,6 +1330,7 @@ export type Database = {
           id?: string
           last_auto_replenish_at?: string | null
           last_guardrail_check_at?: string | null
+          min_purchase_usd?: number
           name: string
           paused_reason?: string | null
           pawbucks_per_checkin?: number
@@ -1341,6 +1344,7 @@ export type Database = {
           total_checkins?: number
           total_distributed?: number
           total_redeemed?: number
+          trigger_type?: string
           updated_at?: string
         }
         Update: {
@@ -1365,6 +1369,7 @@ export type Database = {
           id?: string
           last_auto_replenish_at?: string | null
           last_guardrail_check_at?: string | null
+          min_purchase_usd?: number
           name?: string
           paused_reason?: string | null
           pawbucks_per_checkin?: number
@@ -1378,6 +1383,7 @@ export type Database = {
           total_checkins?: number
           total_distributed?: number
           total_redeemed?: number
+          trigger_type?: string
           updated_at?: string
         }
         Relationships: [
@@ -14280,8 +14286,21 @@ export type Database = {
         Args: { p_brand_id: string }
         Returns: Json
       }
+      admin_grant_branded_pawbucks: {
+        Args: {
+          p_amount: number
+          p_campaign_id: string
+          p_description?: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
       admin_set_user_ban: {
         Args: { _banned: boolean; _reason?: string; _target_user_id: string }
+        Returns: Json
+      }
+      admin_update_brand_campaign: {
+        Args: { p_campaign_id: string; p_updates: Json }
         Returns: Json
       }
       aggregate_brand_campaign_daily_stats: {

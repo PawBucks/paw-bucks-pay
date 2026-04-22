@@ -61,6 +61,7 @@ export default function CheckInPage() {
                   user_id: user.id,
                   merchant_id: merchantOrVetId,
                   checkin_id: (row as any).checkin_id,
+                  trigger: "checkin",
                 },
               }).then(({ data: brandedData }) => {
                 if (brandedData?.distributed && brandedData.campaigns?.length > 0) {

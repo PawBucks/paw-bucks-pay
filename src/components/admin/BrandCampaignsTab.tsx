@@ -12,11 +12,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Building2, Megaphone, Users, DollarSign, TrendingUp, Store, Eye, CheckCircle2, Clock, Loader2, Mail, Trash2 } from "lucide-react";
+import { Plus, Building2, Megaphone, Users, DollarSign, TrendingUp, Store, Eye, CheckCircle2, Clock, Loader2, Mail, Trash2, Settings } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { CampaignBriefCard } from "./CampaignBriefCard";
+import { AdminCampaignManageDialog } from "./AdminCampaignManageDialog";
 import {
   getAllBrandAccounts,
   getAllBrandCampaigns,
@@ -49,6 +50,7 @@ export const BrandCampaignsTab = () => {
   const [selectedCampaign, setSelectedCampaign] = useState<BrandCampaign | null>(null);
   const [showAddMerchant, setShowAddMerchant] = useState(false);
   const [merchantSearch, setMerchantSearch] = useState("");
+  const [showManage, setShowManage] = useState(false);
 
   // Form state for brand creation
   const [brandForm, setBrandForm] = useState({
@@ -290,6 +292,9 @@ export const BrandCampaignsTab = () => {
             <CardTitle className="text-lg">Campaign Controls</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-wrap gap-2">
+            <Button variant="outline" onClick={() => setShowManage(true)}>
+              <Settings className="h-4 w-4 mr-1" /> Manage Parameters & Grant PB
+            </Button>
             {selectedCampaign.status === "draft" && (
               <Button onClick={() => updateStatusMutation.mutate({ campaignId: selectedCampaign.id, status: "pending_payment" })}>
                 Submit for Payment
@@ -434,6 +439,11 @@ export const BrandCampaignsTab = () => {
             )}
           </TabsContent>
         </Tabs>
+        <AdminCampaignManageDialog
+          open={showManage}
+          onOpenChange={setShowManage}
+          campaign={selectedCampaign}
+        />
       </div>
     );
   }
