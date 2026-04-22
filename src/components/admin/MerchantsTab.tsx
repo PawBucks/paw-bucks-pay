@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Search, Edit, Coins, RefreshCw, PauseCircle, PlayCircle } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 
 type Merchant = {
@@ -27,6 +28,8 @@ type Merchant = {
   is_paused?: boolean;
   pause_reason?: string;
   approval_status?: 'pending' | 'approved' | 'denied' | null;
+  fee_model?: 'full_ecosystem' | 'acquisition_only';
+  acquisition_fee_rate?: number;
 };
 
 // Fetch merchants with their PawBucks balances
