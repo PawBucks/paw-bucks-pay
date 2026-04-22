@@ -19,7 +19,7 @@ const logStep = (step: string, details?: Record<string, unknown>) => {
   console.log(`[CREATE-DIRECT-CHARGE] ${step}`, details ? JSON.stringify(details) : "");
 };
 
-const PLATFORM_FEE_PERCENT = 0.03; // 3% platform fee
+const DEFAULT_PLATFORM_FEE_PERCENT = 0.03; // 3% platform fee for Full Ecosystem merchants
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
