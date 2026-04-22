@@ -92,7 +92,9 @@ Deno.serve(async (req) => {
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
-    const { user_id, merchant_id, checkin_id } = await req.json();
+    const { user_id, merchant_id, checkin_id, trigger, transaction_amount_usd, transaction_id } = await req.json();
+    const triggerType: "checkin" | "checkout" = trigger === "checkout" ? "checkout" : "checkin";
+    const txAmountUsd = Number(transaction_amount_usd) || 0;
 
     if (!user_id || !merchant_id) {
       return new Response(
@@ -108,6 +110,7 @@ Deno.serve(async (req) => {
         brand_campaigns!inner(
           id, name, pawbucks_per_checkin, pawbucks_pool, total_distributed,
           total_checkins, status, daily_spend_cap, targeting_rules,
+          trigger_type, min_purchase_usd,
           brand_accounts!inner(brand_name, logo_url)
         )
       `)
@@ -135,6 +138,21 @@ Deno.serve(async (req) => {
     for (const cm of activeCampaignMerchants) {
       const campaign = (cm as any).brand_campaigns;
       if (campaign.status !== "active") continue;
+
+      // Trigger gating
+      const campaignTrigger: string = campaign.trigger_type || "checkin";
+      if (campaignTrigger !== "both" && campaignTrigger !== triggerType) {
+        continue;
+      }
+
+      // Min purchase gating (only meaningful for checkout)
+      if (triggerType === "checkout") {
+        const minSpend = Number(campaign.min_purchase_usd || 0);
+        if (minSpend > 0 && txAmountUsd < minSpend) {
+          console.log(`Campaign ${campaign.id} min spend $${minSpend} not met (tx $${txAmountUsd})`);
+          continue;
+        }
+      }
 
       const remaining = campaign.pawbucks_pool - campaign.total_distributed;
       if (remaining < campaign.pawbucks_per_checkin) {
@@ -166,18 +184,21 @@ Deno.serve(async (req) => {
         continue;
       }
 
-      // Once-per-day per campaign per merchant
+      // Once-per-day per campaign per merchant per trigger type
+      const triggerTag = `[${triggerType}]`;
       const { data: existingToday } = await supabase
         .from("branded_pawbucks_activity")
-        .select("id")
+        .select("id, description")
         .eq("campaign_id", campaign.id)
         .eq("user_id", user_id)
         .eq("merchant_id", merchant_id)
         .eq("type", "earn")
-        .gte("created_at", today.toISOString())
-        .limit(1);
+        .gte("created_at", today.toISOString());
 
-      if (existingToday && existingToday.length > 0) continue;
+      const alreadyForTrigger = (existingToday || []).some((r: any) =>
+        typeof r.description === "string" && r.description.includes(triggerTag)
+      );
+      if (alreadyForTrigger) continue;
 
       const amount = campaign.pawbucks_per_checkin;
       const brandName = campaign.brand_accounts?.brand_name || "Brand";
@@ -191,7 +212,7 @@ Deno.serve(async (req) => {
           amount,
           merchant_id,
           checkin_id: checkin_id || null,
-          description: `${brandName} campaign check-in reward`,
+          description: `${brandName} campaign ${triggerType} reward ${triggerTag}`,
         });
 
       if (activityError) {
