@@ -305,12 +305,13 @@ export const addMerchantToCampaign = async (
   merchantId: string
 ): Promise<ServiceResult<BrandCampaignMerchant>> => {
   try {
-    const { data, error } = await supabase
-      .from("brand_campaign_merchants")
-      .insert({ campaign_id: campaignId, merchant_id: merchantId })
-      .select()
-      .single();
-    return { data, error };
+    // Route through invitation edge function to ensure consistent audit trail.
+    // Merchants must accept the invitation before being enrolled in brand_campaign_merchants.
+    const { data, error } = await supabase.functions.invoke("invite-merchant-to-campaign", {
+      body: { campaign_id: campaignId, merchant_ids: [merchantId] },
+    });
+    if (error) return { data: null, error };
+    return { data: data as unknown as BrandCampaignMerchant, error: null };
   } catch (error) {
     return { data: null, error: handleError(error) };
   }
