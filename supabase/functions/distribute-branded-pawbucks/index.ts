@@ -186,6 +186,25 @@ Deno.serve(async (req) => {
 
       // Once-per-day per campaign per merchant per trigger type
       const triggerTag = `[${triggerType}]`;
+      const txTag = transaction_id ? `[tx:${transaction_id}]` : null;
+
+      // Idempotency: if a transaction_id is provided (checkout flow), ensure we
+      // never double-credit for the same transaction regardless of retries.
+      if (txTag) {
+        const { data: existingTx } = await supabase
+          .from("branded_pawbucks_activity")
+          .select("id")
+          .eq("campaign_id", campaign.id)
+          .eq("user_id", user_id)
+          .eq("type", "earn")
+          .ilike("description", `%${txTag}%`)
+          .limit(1);
+        if (existingTx && existingTx.length > 0) {
+          console.log(`Campaign ${campaign.id} already credited for transaction ${transaction_id}`);
+          continue;
+        }
+      }
+
       const { data: existingToday } = await supabase
         .from("branded_pawbucks_activity")
         .select("id, description")
@@ -212,7 +231,7 @@ Deno.serve(async (req) => {
           amount,
           merchant_id,
           checkin_id: checkin_id || null,
-          description: `${brandName} campaign ${triggerType} reward ${triggerTag}`,
+          description: `${brandName} campaign ${triggerType} reward ${triggerTag}${txTag ? ` ${txTag}` : ""}`,
         });
 
       if (activityError) {
