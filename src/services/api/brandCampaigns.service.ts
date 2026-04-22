@@ -88,6 +88,8 @@ export interface BrandCampaign {
   funded_at: string | null;
   created_at: string;
   updated_at: string;
+  trigger_type: "checkin" | "checkout" | "both";
+  min_purchase_usd: number;
   brand_accounts?: { brand_name: string; logo_url: string | null };
 }
 
@@ -251,6 +253,8 @@ export const createBrandCampaign = async (campaign: {
   auto_replenish_threshold?: number;
   auto_replenish_amount_usd?: number;
   funding_method?: "invoice" | "self_serve";
+  trigger_type?: "checkin" | "checkout" | "both";
+  min_purchase_usd?: number;
 }): Promise<ServiceResult<BrandCampaign>> => {
   try {
     const { targeting_rules, ...rest } = campaign;
