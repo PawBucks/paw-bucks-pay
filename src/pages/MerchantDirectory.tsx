@@ -160,27 +160,32 @@ const MerchantDirectory = () => {
 
       if (merchantError) throw merchantError;
 
-      const merchantsWithRatings = await Promise.all(
-        (merchantData || []).map(async (merchant) => {
-          const { data: reviews } = await supabase
+      const merchantIds = (merchantData || []).map((m) => m.id);
+
+      // Single batched query for all reviews — visible to all (anon + authenticated)
+      const { data: allReviews } = merchantIds.length
+        ? await supabase
             .from("merchant_reviews")
-            .select("rating")
-            .eq("merchant_id", merchant.id);
+            .select("merchant_id, rating")
+            .in("merchant_id", merchantIds)
+        : { data: [] as { merchant_id: string; rating: number }[] };
 
-          const reviewCount = reviews?.length || 0;
-          const averageRating = reviewCount > 0
-            ? reviews!.reduce((sum, r) => sum + r.rating, 0) / reviewCount
-            : 0;
+      const ratingMap: Record<string, { sum: number; count: number }> = {};
+      (allReviews || []).forEach((r: { merchant_id: string; rating: number }) => {
+        const entry = ratingMap[r.merchant_id] || { sum: 0, count: 0 };
+        entry.sum += r.rating;
+        entry.count += 1;
+        ratingMap[r.merchant_id] = entry;
+      });
 
-          return {
-            ...merchant,
-            average_rating: averageRating,
-            review_count: reviewCount,
-          };
-        })
-      );
-
-      return merchantsWithRatings;
+      return (merchantData || []).map((merchant) => {
+        const stats = ratingMap[merchant.id];
+        return {
+          ...merchant,
+          average_rating: stats && stats.count > 0 ? stats.sum / stats.count : 0,
+          review_count: stats?.count || 0,
+        };
+      });
     },
     { staleTime: QUERY_STALE_TIMES.MEDIUM }
   );
