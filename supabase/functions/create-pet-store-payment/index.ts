@@ -556,14 +556,10 @@ serve(async (req) => {
       });
     }
 
-    // Send enhanced admin notification email
-    await sendAdminNotification(customerInfo, {
-      item: item as ItemInfo,
-      quantity: totalQuantity,
-      totalAmount,
-      pawbucksEarned,
-      pawbucksMultiplier,
-    });
+    // NOTE: Admin "Purchase Order" notification is intentionally NOT sent here.
+    // It must only fire AFTER Stripe Checkout is successfully completed,
+    // which is handled in `confirm-pet-store-payment`. Sending it at PaymentIntent
+    // creation produced false-positive purchase emails for abandoned/failed checkouts.
 
     return new Response(
       JSON.stringify({
