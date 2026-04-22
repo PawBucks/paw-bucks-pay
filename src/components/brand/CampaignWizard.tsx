@@ -547,6 +547,13 @@ export function CampaignWizard({ open, onOpenChange, brandId, brandName, brandLo
                   <span className="text-sm text-muted-foreground">Per Check-in</span>
                   <span className="font-semibold">{form.pawbucks_per_checkin} PB</span>
                 </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Trigger</span>
+                  <span className="font-semibold capitalize">
+                    {form.trigger_type === "both" ? "Check-in + Checkout" : form.trigger_type}
+                    {form.trigger_type !== "checkin" && form.min_purchase_usd > 0 && ` · min $${form.min_purchase_usd}`}
+                  </span>
+                </div>
                 {form.daily_spend_cap > 0 && (
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">Daily Cap</span>
