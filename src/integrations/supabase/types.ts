@@ -6957,6 +6957,7 @@ export type Database = {
         Row: {
           accepts_pawbucks: boolean
           accepts_welcome_credit: boolean | null
+          acquisition_fee_rate: number
           address: string | null
           approval_status: Database["public"]["Enums"]["approval_status"]
           approved_at: string | null
@@ -6974,6 +6975,7 @@ export type Database = {
           email: string | null
           entity_type: string | null
           facebook_url: string | null
+          fee_model: string
           funding_status: string | null
           id: string
           instagram_url: string | null
@@ -7010,6 +7012,7 @@ export type Database = {
         Insert: {
           accepts_pawbucks?: boolean
           accepts_welcome_credit?: boolean | null
+          acquisition_fee_rate?: number
           address?: string | null
           approval_status?: Database["public"]["Enums"]["approval_status"]
           approved_at?: string | null
@@ -7027,6 +7030,7 @@ export type Database = {
           email?: string | null
           entity_type?: string | null
           facebook_url?: string | null
+          fee_model?: string
           funding_status?: string | null
           id?: string
           instagram_url?: string | null
@@ -7063,6 +7067,7 @@ export type Database = {
         Update: {
           accepts_pawbucks?: boolean
           accepts_welcome_credit?: boolean | null
+          acquisition_fee_rate?: number
           address?: string | null
           approval_status?: Database["public"]["Enums"]["approval_status"]
           approved_at?: string | null
@@ -7080,6 +7085,7 @@ export type Database = {
           email?: string | null
           entity_type?: string | null
           facebook_url?: string | null
+          fee_model?: string
           funding_status?: string | null
           id?: string
           instagram_url?: string | null
@@ -14579,6 +14585,10 @@ export type Database = {
         Returns: string
       }
       is_offer_valid: { Args: { offer_uuid: string }; Returns: boolean }
+      is_returning_customer: {
+        Args: { p_merchant_id: string; p_user_id: string }
+        Returns: boolean
+      }
       is_shared_member_of: { Args: { owner_user_id: string }; Returns: boolean }
       is_superadmin: { Args: { _user_id: string }; Returns: boolean }
       is_user_banned: { Args: { _user_id: string }; Returns: boolean }
