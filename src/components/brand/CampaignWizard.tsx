@@ -103,6 +103,8 @@ const initialForm = {
   auto_replenish_enabled: false,
   auto_replenish_threshold: 10,
   auto_replenish_amount_usd: 250,
+  trigger_type: "checkin" as "checkin" | "checkout" | "both",
+  min_purchase_usd: 0,
 };
 
 export function CampaignWizard({ open, onOpenChange, brandId, brandName, brandLogoUrl, onCreated }: CampaignWizardProps) {
@@ -163,6 +165,8 @@ export function CampaignWizard({ open, onOpenChange, brandId, brandName, brandLo
         auto_replenish_enabled: form.auto_replenish_enabled,
         auto_replenish_threshold: form.auto_replenish_threshold,
         auto_replenish_amount_usd: form.auto_replenish_amount_usd,
+        trigger_type: form.trigger_type,
+        min_purchase_usd: form.trigger_type === "checkin" ? 0 : form.min_purchase_usd,
       });
     },
     onSuccess: (result) => {
