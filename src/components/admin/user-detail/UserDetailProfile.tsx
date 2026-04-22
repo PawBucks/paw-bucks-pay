@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { User, Mail, Phone, Calendar, Shield, Crown, Gift, Users, Ban } from "lucide-react";
 import { BanUserCard } from "./BanUserCard";
+import { DeleteUserCard } from "./DeleteUserCard";
 
 type ProfileData = {
   id: string;
@@ -195,13 +196,16 @@ export function UserDetailProfile({ userId }: { userId: string }) {
       </Card>
 
       {!isProtected && (
-        <BanUserCard
-          userId={profile.id}
-          isBanned={!!profile.is_banned}
-          bannedAt={profile.banned_at ?? null}
-          bannedReason={profile.banned_reason ?? null}
-          onChange={loadProfile}
-        />
+        <>
+          <BanUserCard
+            userId={profile.id}
+            isBanned={!!profile.is_banned}
+            bannedAt={profile.banned_at ?? null}
+            bannedReason={profile.banned_reason ?? null}
+            onChange={loadProfile}
+          />
+          <DeleteUserCard userId={profile.id} userEmail={profile.email} />
+        </>
       )}
     </div>
   );
