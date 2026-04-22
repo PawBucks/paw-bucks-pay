@@ -740,6 +740,24 @@ serve(async (req) => {
       }).catch(err => logStep("Loyalty milestone error", { error: String(err) }));
     }
 
+    // Trigger branded PawBucks distribution for "checkout" trigger type
+    if (merchantId && userId) {
+      fetch(`${supabaseUrl}/functions/v1/distribute-branded-pawbucks`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+        },
+        body: JSON.stringify({
+          user_id: userId,
+          merchant_id: merchantId,
+          trigger: 'checkout',
+          transaction_amount_usd: amountInDollars,
+          transaction_id: transaction.id,
+        }),
+      }).catch(err => logStep("Branded PB checkout distribution error", { error: String(err) }));
+    }
+
     logStep("Payment processing complete", { 
       transactionId: transaction.id,
       pawbucksEarned,
