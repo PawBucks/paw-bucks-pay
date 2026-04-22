@@ -16,6 +16,7 @@ import { AdPlacement } from "@/components/AdPlacement";
 import { FeedbackButton } from "@/components/FeedbackButton";
 import { PullToRefresh } from "@/components/PullToRefresh";
 import { AutoRedeemToggle } from "@/components/AutoRedeemToggle";
+import { DeleteMyAccountCard } from "@/components/profile/DeleteMyAccountCard";
 import { LogOut, User, Mail, Calendar, Crown, Sparkles, Settings, Loader2, Info, Bell, MessageSquare } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
@@ -507,6 +508,7 @@ const Profile = () => {
             <LogOut className="w-4 h-4 mr-2" />
             Sign Out
           </Button>
+          <DeleteMyAccountCard />
         </div>
         </div>
       </PullToRefresh>
