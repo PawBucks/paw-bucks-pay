@@ -366,6 +366,40 @@ export function MerchantsTab() {
                   onChange={(e) => setSelectedMerchant({ ...selectedMerchant, cashback_rate: parseFloat(e.target.value) })}
                 />
               </div>
+              <div className="space-y-2">
+                <Label>Fee Model</Label>
+                <Select
+                  value={selectedMerchant.fee_model || 'full_ecosystem'}
+                  onValueChange={(v) => setSelectedMerchant({ ...selectedMerchant, fee_model: v as 'full_ecosystem' | 'acquisition_only' })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="full_ecosystem">Full Ecosystem — 3% on every transaction</SelectItem>
+                    <SelectItem value="acquisition_only">Acquisition Only — fee on first purchase per customer</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Full Ecosystem charges 3% on every sale. Acquisition Only charges only on a customer's first-ever purchase at this merchant; repeat purchases are fee-free. Customers earn PawBucks on every purchase under both models.
+                </p>
+              </div>
+              {(selectedMerchant.fee_model || 'full_ecosystem') === 'acquisition_only' && (
+                <div className="space-y-2">
+                  <Label>Acquisition Fee Rate (%)</Label>
+                  <Input
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    max="100"
+                    value={selectedMerchant.acquisition_fee_rate ?? 10}
+                    onChange={(e) => setSelectedMerchant({ ...selectedMerchant, acquisition_fee_rate: parseFloat(e.target.value) })}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    One-time percentage charged on a new customer's first purchase. Recommended: 10–15%.
+                  </p>
+                </div>
+              )}
               <Button type="submit" disabled={loading} className="w-full">
                 {loading ? 'Updating...' : 'Update Merchant'}
               </Button>
