@@ -203,10 +203,10 @@ export const BrandCampaignsTab = () => {
     },
     onSuccess: (result) => {
       if (result.error) {
-        toast.error("Failed to add merchant");
+        toast.error("Failed to invite merchant");
         return;
       }
-      toast.success("Merchant added to campaign!");
+      toast.success("Invitation sent to merchant!");
       setShowAddMerchant(false);
       setMerchantSearch("");
       queryClient.invalidateQueries({ queryKey: ["campaign-merchants", selectedCampaign?.id] });
