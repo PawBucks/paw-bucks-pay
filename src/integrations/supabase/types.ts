@@ -2359,6 +2359,33 @@ export type Database = {
           },
         ]
       }
+      email_send_log: {
+        Row: {
+          created_at: string
+          id: string
+          idempotency_key: string
+          metadata: Json | null
+          recipient: string | null
+          source: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          idempotency_key: string
+          metadata?: Json | null
+          recipient?: string | null
+          source: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          idempotency_key?: string
+          metadata?: Json | null
+          recipient?: string | null
+          source?: string
+        }
+        Relationships: []
+      }
       external_imaging_results: {
         Row: {
           body_part: string | null

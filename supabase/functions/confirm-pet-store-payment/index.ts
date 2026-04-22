@@ -272,7 +272,25 @@ serve(async (req) => {
 
     // 5. Send customer receipt email (matching existing receipt format)
     const customerEmail = userProfile?.email || user.email;
+    // Idempotency: claim a unique key for this paymentIntent's customer email.
+    // If insert fails on the unique index, another invocation already sent it.
+    let canSendCustomerEmail = false;
     if (customerEmail) {
+      const { error: claimErr } = await supabaseAdmin
+        .from('email_send_log')
+        .insert({
+          idempotency_key: `pet_store_receipt:${paymentIntentId}`,
+          source: 'confirm-pet-store-payment',
+          recipient: customerEmail,
+          metadata: { transaction_id: transaction.id, type: 'customer_receipt' },
+        });
+      if (!claimErr) {
+        canSendCustomerEmail = true;
+      } else {
+        logStep("Customer receipt already sent (idempotency hit)", { paymentIntentId });
+      }
+    }
+    if (customerEmail && canSendCustomerEmail) {
       try {
         const supabaseUrl = Deno.env.get('SUPABASE_URL');
         const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
@@ -315,7 +333,17 @@ serve(async (req) => {
     }
 
     // 6. Send notification to support@pawbucks.app
-    try {
+    const { error: adminClaimErr } = await supabaseAdmin
+      .from('email_send_log')
+      .insert({
+        idempotency_key: `pet_store_admin:${paymentIntentId}`,
+        source: 'confirm-pet-store-payment',
+        recipient: 'admin@pawbucks.app',
+        metadata: { transaction_id: transaction.id, type: 'admin_notification' },
+      });
+    if (adminClaimErr) {
+      logStep("Admin notification already sent (idempotency hit)", { paymentIntentId });
+    } else try {
       const resendApiKey = Deno.env.get("RESEND_API_KEY");
       if (resendApiKey) {
         const { Resend } = await import("https://esm.sh/resend@2.0.0");
