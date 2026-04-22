@@ -50,6 +50,7 @@ const fetchMerchantsWithBalances = async (): Promise<Merchant[]> => {
 
   return (merchantsData || []).map(m => ({
     ...m,
+    fee_model: (m as any).fee_model === 'acquisition_only' ? 'acquisition_only' : 'full_ecosystem',
     pawbucks_balance: walletMap.get(m.id) ?? 0
   }));
 };
