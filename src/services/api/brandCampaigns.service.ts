@@ -289,6 +289,35 @@ export const updateBrandCampaignStatus = async (
 };
 
 // ============================================================
+// Admin: campaign management
+// ============================================================
+export const adminUpdateBrandCampaign = async (
+  campaignId: string,
+  updates: Record<string, unknown>
+) => {
+  const { data, error } = await supabase.rpc("admin_update_brand_campaign", {
+    p_campaign_id: campaignId,
+    p_updates: updates as never,
+  });
+  return { data, error };
+};
+
+export const adminGrantBrandedPawbucks = async (
+  campaignId: string,
+  userId: string,
+  amount: number,
+  description?: string
+) => {
+  const { data, error } = await supabase.rpc("admin_grant_branded_pawbucks", {
+    p_campaign_id: campaignId,
+    p_user_id: userId,
+    p_amount: amount,
+    p_description: description ?? "Admin manual grant",
+  });
+  return { data, error };
+};
+
+// ============================================================
 // Campaign merchants
 // ============================================================
 export const getCampaignMerchants = async (campaignId: string): Promise<ServiceListResult<BrandCampaignMerchant>> => {
