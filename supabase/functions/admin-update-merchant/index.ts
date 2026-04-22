@@ -6,6 +6,8 @@ const updateMerchantSchema = z.object({
   merchantId: z.string().uuid(),
   cashbackRate: z.number().min(0).max(100).optional(),
   fundingStatus: z.enum(['none', 'pending', 'approved', 'denied']).optional(),
+  feeModel: z.enum(['full_ecosystem', 'acquisition_only']).optional(),
+  acquisitionFeeRate: z.number().min(0).max(100).optional(),
 });
 
 const corsHeaders = {
@@ -66,11 +68,13 @@ serve(async (req) => {
       );
     }
 
-    const { merchantId, cashbackRate, fundingStatus } = validationResult.data;
+    const { merchantId, cashbackRate, fundingStatus, feeModel, acquisitionFeeRate } = validationResult.data;
 
     const updates: any = {};
     if (cashbackRate !== undefined) updates.cashback_rate = cashbackRate;
     if (fundingStatus !== undefined) updates.funding_status = fundingStatus;
+    if (feeModel !== undefined) updates.fee_model = feeModel;
+    if (acquisitionFeeRate !== undefined) updates.acquisition_fee_rate = acquisitionFeeRate;
 
     const { data, error } = await supabaseAdmin
       .from('merchants')
