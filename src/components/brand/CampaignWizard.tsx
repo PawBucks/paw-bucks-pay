@@ -382,6 +382,48 @@ export function CampaignWizard({ open, onOpenChange, brandId, brandName, brandLo
 
           {step.key === "budget" && (
             <>
+              <div className="space-y-3 p-4 rounded-lg bg-muted/50 border">
+                <h3 className="font-semibold flex items-center gap-2">
+                  <Zap className="h-4 w-4" /> When are PawBucks released?
+                </h3>
+                <div className="grid grid-cols-3 gap-2">
+                  {([
+                    { val: "checkin", label: "On Check-in", desc: "Reward when a pet owner checks in" },
+                    { val: "checkout", label: "On Checkout", desc: "Reward after they make a purchase" },
+                    { val: "both", label: "Both", desc: "Reward on either action (once/day each)" },
+                  ] as const).map((opt) => (
+                    <button
+                      key={opt.val}
+                      type="button"
+                      onClick={() => setForm((f) => ({ ...f, trigger_type: opt.val }))}
+                      className={`text-left p-3 rounded-lg border-2 transition-all ${
+                        form.trigger_type === opt.val
+                          ? "border-primary bg-primary/5"
+                          : "border-border hover:border-primary/40"
+                      }`}
+                    >
+                      <p className="font-semibold text-sm">{opt.label}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{opt.desc}</p>
+                    </button>
+                  ))}
+                </div>
+                {(form.trigger_type === "checkout" || form.trigger_type === "both") && (
+                  <div className="space-y-2 pt-2">
+                    <Label>Minimum purchase to earn (USD, 0 = none)</Label>
+                    <Input
+                      type="number"
+                      min={0}
+                      step={1}
+                      value={form.min_purchase_usd}
+                      onChange={(e) => setForm((f) => ({ ...f, min_purchase_usd: Math.max(0, Number(e.target.value)) }))}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Only checkouts at or above this amount will earn branded PawBucks.
+                    </p>
+                  </div>
+                )}
+              </div>
+
               <div className="space-y-4 p-4 rounded-lg bg-muted/50 border">
                 <h3 className="font-semibold flex items-center gap-2">
                   <DollarSign className="h-4 w-4" /> Budget Calculator
