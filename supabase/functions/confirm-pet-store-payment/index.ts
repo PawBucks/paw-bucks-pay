@@ -125,6 +125,18 @@ serve(async (req) => {
       }
     } catch { /* fallback to single item */ }
 
+    // Build a normalized line-item array used by both receipt + admin emails.
+    // Falls back to the single-item metadata when cart_items isn't present.
+    const lineItems: { id: string; qty: number; name: string; priceCents: number }[] =
+      cartItemsParsed.length > 0
+        ? cartItemsParsed
+        : [{
+            id: itemId,
+            qty: quantity,
+            name: itemName,
+            priceCents: item?.price ?? Math.round((amountInDollars / Math.max(quantity, 1)) * 100),
+          }];
+
     if (cartItemsParsed.length > 0) {
       // Multi-item cart
       for (const ci of cartItemsParsed) {
@@ -280,7 +292,10 @@ serve(async (req) => {
               merchantName: 'PawBucks Pet Store',
               merchantDescription: 'Your one-stop shop for pet supplies, treats, and more!',
               merchantProfileUrl: 'https://pawbucks.app/pet-store',
-              items: [{ name: itemName, price: amountInDollars }],
+              items: lineItems.map((li) => ({
+                name: `${li.name} x${li.qty}`,
+                price: (li.priceCents * li.qty) / 100,
+              })),
               subtotal: amountInDollars,
               pawbucksApplied: 0,
               cardAmount: amountInDollars,
