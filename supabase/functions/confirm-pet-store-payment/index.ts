@@ -332,6 +332,15 @@ serve(async (req) => {
           minute: '2-digit',
         });
 
+        // Render every cart line item accurately
+        const lineItemsHtml = lineItems.map((li) => `
+            <tr>
+              <td style="padding:10px 0;font-size:14px;color:#1e293b;font-weight:500;border-bottom:1px solid #f1f5f9;">${li.name}</td>
+              <td style="padding:10px 0;font-size:14px;color:#64748b;text-align:center;border-bottom:1px solid #f1f5f9;">x${li.qty}</td>
+              <td style="padding:10px 0;font-size:14px;color:#1e293b;font-weight:600;text-align:right;border-bottom:1px solid #f1f5f9;">$${((li.priceCents * li.qty) / 100).toFixed(2)}</td>
+            </tr>`).join('');
+        const totalQuantity = lineItems.reduce((sum, li) => sum + li.qty, 0);
+
         await resend.emails.send({
           from: "PawBucks <noreply@pawbucks.app>",
           to: ["admin@pawbucks.app"],
