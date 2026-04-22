@@ -139,6 +139,8 @@ export function MerchantsTab() {
           contact_person: selectedMerchant.contact_person,
           email: selectedMerchant.email,
           cashback_rate: selectedMerchant.cashback_rate,
+          fee_model: selectedMerchant.fee_model || 'full_ecosystem',
+          acquisition_fee_rate: selectedMerchant.acquisition_fee_rate ?? 10,
         })
         .eq('id', selectedMerchant.id);
 
@@ -151,6 +153,8 @@ export function MerchantsTab() {
         _changes: {
           business_name: selectedMerchant.business_name,
           cashback_rate: selectedMerchant.cashback_rate,
+          fee_model: selectedMerchant.fee_model,
+          acquisition_fee_rate: selectedMerchant.acquisition_fee_rate,
         },
       });
 
