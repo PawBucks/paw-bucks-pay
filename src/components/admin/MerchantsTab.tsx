@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Search, Edit, Coins, RefreshCw, PauseCircle, PlayCircle } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 
 type Merchant = {
@@ -27,6 +28,8 @@ type Merchant = {
   is_paused?: boolean;
   pause_reason?: string;
   approval_status?: 'pending' | 'approved' | 'denied' | null;
+  fee_model?: 'full_ecosystem' | 'acquisition_only';
+  acquisition_fee_rate?: number;
 };
 
 // Fetch merchants with their PawBucks balances
@@ -47,6 +50,7 @@ const fetchMerchantsWithBalances = async (): Promise<Merchant[]> => {
 
   return (merchantsData || []).map(m => ({
     ...m,
+    fee_model: (m as any).fee_model === 'acquisition_only' ? 'acquisition_only' : 'full_ecosystem',
     pawbucks_balance: walletMap.get(m.id) ?? 0
   }));
 };
@@ -135,6 +139,8 @@ export function MerchantsTab() {
           contact_person: selectedMerchant.contact_person,
           email: selectedMerchant.email,
           cashback_rate: selectedMerchant.cashback_rate,
+          fee_model: selectedMerchant.fee_model || 'full_ecosystem',
+          acquisition_fee_rate: selectedMerchant.acquisition_fee_rate ?? 10,
         })
         .eq('id', selectedMerchant.id);
 
@@ -147,6 +153,8 @@ export function MerchantsTab() {
         _changes: {
           business_name: selectedMerchant.business_name,
           cashback_rate: selectedMerchant.cashback_rate,
+          fee_model: selectedMerchant.fee_model,
+          acquisition_fee_rate: selectedMerchant.acquisition_fee_rate,
         },
       });
 
@@ -358,6 +366,40 @@ export function MerchantsTab() {
                   onChange={(e) => setSelectedMerchant({ ...selectedMerchant, cashback_rate: parseFloat(e.target.value) })}
                 />
               </div>
+              <div className="space-y-2">
+                <Label>Fee Model</Label>
+                <Select
+                  value={selectedMerchant.fee_model || 'full_ecosystem'}
+                  onValueChange={(v) => setSelectedMerchant({ ...selectedMerchant, fee_model: v as 'full_ecosystem' | 'acquisition_only' })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="full_ecosystem">Full Ecosystem — 3% on every transaction</SelectItem>
+                    <SelectItem value="acquisition_only">Acquisition Only — fee on first purchase per customer</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Full Ecosystem charges 3% on every sale. Acquisition Only charges only on a customer's first-ever purchase at this merchant; repeat purchases are fee-free. Customers earn PawBucks on every purchase under both models.
+                </p>
+              </div>
+              {(selectedMerchant.fee_model || 'full_ecosystem') === 'acquisition_only' && (
+                <div className="space-y-2">
+                  <Label>Acquisition Fee Rate (%)</Label>
+                  <Input
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    max="100"
+                    value={selectedMerchant.acquisition_fee_rate ?? 10}
+                    onChange={(e) => setSelectedMerchant({ ...selectedMerchant, acquisition_fee_rate: parseFloat(e.target.value) })}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    One-time percentage charged on a new customer's first purchase. Recommended: 10–15%.
+                  </p>
+                </div>
+              )}
               <Button type="submit" disabled={loading} className="w-full">
                 {loading ? 'Updating...' : 'Update Merchant'}
               </Button>
