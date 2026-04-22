@@ -86,13 +86,36 @@ serve(async (req) => {
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2024-12-18.acacia" });
 
-    // Calculate platform fee (3%)
-    const applicationFee = Math.round(amount * PLATFORM_FEE_PERCENT);
-    
+    // Determine fee based on merchant's fee model
+    // - Full Ecosystem: flat 3% on every transaction
+    // - Acquisition Only: acquisition_fee_rate% on the customer's first-ever completed
+    //   transaction at this merchant; 0% on repeats
+    const feeModel: string = (merchant as any).fee_model || 'full_ecosystem';
+    const acquisitionFeeRate: number = Number((merchant as any).acquisition_fee_rate ?? 10);
+
+    let feePercent = DEFAULT_PLATFORM_FEE_PERCENT;
+    let isAcquisition = false;
+
+    if (feeModel === 'acquisition_only') {
+      const { data: isReturning, error: returningErr } = await supabaseAdmin
+        .rpc('is_returning_customer', { p_merchant_id: merchantId, p_user_id: user.id });
+      if (returningErr) {
+        logStep("WARN: is_returning_customer RPC failed, defaulting to acquisition", { error: returningErr.message });
+      }
+      const returning = Boolean(isReturning);
+      isAcquisition = !returning;
+      feePercent = returning ? 0 : (acquisitionFeeRate / 100);
+    }
+
+    const applicationFee = Math.round(amount * feePercent);
+
     // Calculate PawBucks earned (10% of amount = 10 PawBucks per $1)
     const pawbucksEarned = Math.round((amount / 100) * 10);
 
     logStep("Fee calculation", { 
+      feeModel,
+      isAcquisition,
+      feePercent,
       amount, 
       applicationFee, 
       pawbucksEarned,
@@ -113,6 +136,8 @@ serve(async (req) => {
           user_email: user.email,
           business_name: merchant.business_name,
           pawbucks_earned: String(pawbucksEarned),
+          fee_model: feeModel,
+          is_acquisition: String(isAcquisition),
           platform: "pawbucks",
           ...metadata,
         },
