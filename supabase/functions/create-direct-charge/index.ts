@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
-import { calculateApplicationFee, type FeeModel } from "./fee-logic.ts";
+import { calculateApplicationFee, calculatePawBucksEarned, type FeeModel } from "./fee-logic.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -110,8 +110,41 @@ serve(async (req) => {
       isReturningCustomer,
     });
 
-    // Calculate PawBucks earned (10% of amount = 10 PawBucks per $1)
-    const pawbucksEarned = Math.round((amount / 100) * 10);
+    // Determine the user's PawBucks earning multiplier from their subscription tier.
+    // Free = 10x, PawPass = 20x, PawPass+ = 30x.
+    let tierMultiplier = 10;
+    let subscriptionTier = 'Free';
+    const { data: subscription } = await supabaseAdmin
+      .from('subscriptions')
+      .select('subscription_tier, is_manual_upgrade, expires_at, status')
+      .eq('user_id', user.id)
+      .in('status', ['active', 'trialing'])
+      .maybeSingle();
+
+    if (subscription?.subscription_tier) {
+      const expiresAt = subscription.expires_at ? new Date(subscription.expires_at) : null;
+      const stillValid = !expiresAt || expiresAt > new Date();
+      if (stillValid) {
+        const tier = String(subscription.subscription_tier).toLowerCase();
+        if (tier === 'pawpass_plus' || tier === 'plus') {
+          tierMultiplier = 30;
+          subscriptionTier = 'PawPass+';
+        } else if (tier === 'pawpass' || tier === 'basic') {
+          tierMultiplier = 20;
+          subscriptionTier = 'PawPass';
+        }
+      }
+    }
+
+    // PawBucks earning rules:
+    // - full_ecosystem merchants: customer earns on every purchase (tierMultiplier x $).
+    // - acquisition_only merchants: customer earns ONLY on their first (acquisition) purchase.
+    const pawbucksEarned = calculatePawBucksEarned({
+      amount,
+      feeModel,
+      isReturningCustomer,
+      tierMultiplier,
+    });
 
     logStep("Fee calculation", { 
       feeModel,
@@ -120,6 +153,8 @@ serve(async (req) => {
       amount, 
       applicationFee, 
       pawbucksEarned,
+      tierMultiplier,
+      subscriptionTier,
       merchantReceives: amount - applicationFee 
     });
 
@@ -139,6 +174,8 @@ serve(async (req) => {
           pawbucks_earned: String(pawbucksEarned),
           fee_model: feeModel,
           is_acquisition: String(isAcquisition),
+          subscription_tier: subscriptionTier,
+          tier_multiplier: String(tierMultiplier),
           platform: "pawbucks",
           ...metadata,
         },

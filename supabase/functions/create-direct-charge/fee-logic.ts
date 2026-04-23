@@ -42,3 +42,29 @@ export function calculateApplicationFee(input: FeeInput): FeeResult {
   const applicationFee = Math.round(amount * feePercent);
   return { applicationFee, feePercent, isAcquisition };
 }
+
+export interface PawBucksInput {
+  amount: number;                 // amount in cents
+  feeModel: FeeModel;
+  isReturningCustomer: boolean;
+  tierMultiplier: number;         // PawBucks per $1 (10 / 20 / 30)
+}
+
+/**
+ * Compute PawBucks earned for a charge.
+ *
+ * Rules:
+ * - full_ecosystem: earn on every purchase = $amount * tierMultiplier.
+ * - acquisition_only: earn ONLY on the acquisition (first) purchase.
+ *   Repeat purchases at the same merchant earn 0 PawBucks.
+ */
+export function calculatePawBucksEarned(input: PawBucksInput): number {
+  const { amount, feeModel, isReturningCustomer, tierMultiplier } = input;
+
+  if (feeModel === "acquisition_only" && isReturningCustomer) {
+    return 0;
+  }
+
+  const dollars = amount / 100;
+  return Math.round(dollars * tierMultiplier);
+}
