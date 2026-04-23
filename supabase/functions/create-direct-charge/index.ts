@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
+import { calculateApplicationFee, type FeeModel } from "./fee-logic.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -19,7 +20,6 @@ const logStep = (step: string, details?: Record<string, unknown>) => {
   console.log(`[CREATE-DIRECT-CHARGE] ${step}`, details ? JSON.stringify(details) : "");
 };
 
-const DEFAULT_PLATFORM_FEE_PERCENT = 0.03; // 3% platform fee for Full Ecosystem merchants
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
