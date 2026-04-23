@@ -1,5 +1,5 @@
 import { assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
-import { calculateApplicationFee } from "./fee-logic.ts";
+import { calculateApplicationFee, calculatePawBucksEarned } from "./fee-logic.ts";
 
 // ---------------------------------------------------------------------------
 // Full Ecosystem: flat 3% on EVERY transaction
@@ -169,4 +169,63 @@ Deno.test("Edge: 0% acquisition fee rate yields zero fee even on first purchase"
   });
   assertEquals(result.applicationFee, 0);
   assertEquals(result.isAcquisition, true);
+});
+
+// ---------------------------------------------------------------------------
+// PawBucks: tier-based earning, gated by fee model + acquisition status
+// ---------------------------------------------------------------------------
+
+Deno.test("PawBucks (Full Ecosystem): Free tier earns 10x on every purchase", () => {
+  const first = calculatePawBucksEarned({
+    amount: 10_000, feeModel: "full_ecosystem", isReturningCustomer: false, tierMultiplier: 10,
+  });
+  const repeat = calculatePawBucksEarned({
+    amount: 10_000, feeModel: "full_ecosystem", isReturningCustomer: true, tierMultiplier: 10,
+  });
+  assertEquals(first, 1_000);  // $100 * 10
+  assertEquals(repeat, 1_000); // every purchase earns
+});
+
+Deno.test("PawBucks (Full Ecosystem): PawPass earns 20x, PawPass+ earns 30x on every purchase", () => {
+  const pawpass = calculatePawBucksEarned({
+    amount: 5_000, feeModel: "full_ecosystem", isReturningCustomer: true, tierMultiplier: 20,
+  });
+  const plus = calculatePawBucksEarned({
+    amount: 5_000, feeModel: "full_ecosystem", isReturningCustomer: true, tierMultiplier: 30,
+  });
+  assertEquals(pawpass, 1_000); // $50 * 20
+  assertEquals(plus, 1_500);    // $50 * 30
+});
+
+Deno.test("PawBucks (Acquisition Only): earned ONLY on the first purchase", () => {
+  const first = calculatePawBucksEarned({
+    amount: 10_000, feeModel: "acquisition_only", isReturningCustomer: false, tierMultiplier: 10,
+  });
+  const repeat = calculatePawBucksEarned({
+    amount: 10_000, feeModel: "acquisition_only", isReturningCustomer: true, tierMultiplier: 10,
+  });
+  assertEquals(first, 1_000);
+  assertEquals(repeat, 0); // no PawBucks on repeat at acquisition_only merchant
+});
+
+Deno.test("PawBucks (Acquisition Only): tier multiplier applies to the acquisition purchase", () => {
+  const free = calculatePawBucksEarned({
+    amount: 10_000, feeModel: "acquisition_only", isReturningCustomer: false, tierMultiplier: 10,
+  });
+  const pawpass = calculatePawBucksEarned({
+    amount: 10_000, feeModel: "acquisition_only", isReturningCustomer: false, tierMultiplier: 20,
+  });
+  const plus = calculatePawBucksEarned({
+    amount: 10_000, feeModel: "acquisition_only", isReturningCustomer: false, tierMultiplier: 30,
+  });
+  assertEquals(free, 1_000);
+  assertEquals(pawpass, 2_000);
+  assertEquals(plus, 3_000);
+});
+
+Deno.test("PawBucks (Acquisition Only): PawPass+ repeat customer still earns 0", () => {
+  const result = calculatePawBucksEarned({
+    amount: 50_000, feeModel: "acquisition_only", isReturningCustomer: true, tierMultiplier: 30,
+  });
+  assertEquals(result, 0);
 });
