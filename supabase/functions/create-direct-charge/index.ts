@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
+import { calculateApplicationFee, type FeeModel } from "./fee-logic.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -19,7 +20,6 @@ const logStep = (step: string, details?: Record<string, unknown>) => {
   console.log(`[CREATE-DIRECT-CHARGE] ${step}`, details ? JSON.stringify(details) : "");
 };
 
-const DEFAULT_PLATFORM_FEE_PERCENT = 0.03; // 3% platform fee for Full Ecosystem merchants
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -86,28 +86,29 @@ serve(async (req) => {
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2024-12-18.acacia" });
 
-    // Determine fee based on merchant's fee model
-    // - Full Ecosystem: flat 3% on every transaction
-    // - Acquisition Only: acquisition_fee_rate% on the customer's first-ever completed
-    //   transaction at this merchant; 0% on repeats
-    const feeModel: string = (merchant as any).fee_model || 'full_ecosystem';
+    // Determine fee based on merchant's fee model.
+    // See ./fee-logic.ts for rules.
+    const feeModel: FeeModel = ((merchant as any).fee_model === 'acquisition_only'
+      ? 'acquisition_only'
+      : 'full_ecosystem');
     const acquisitionFeeRate: number = Number((merchant as any).acquisition_fee_rate ?? 10);
 
-    let feePercent = DEFAULT_PLATFORM_FEE_PERCENT;
-    let isAcquisition = false;
-
+    let isReturningCustomer = false;
     if (feeModel === 'acquisition_only') {
       const { data: isReturning, error: returningErr } = await supabaseAdmin
         .rpc('is_returning_customer', { p_merchant_id: merchantId, p_user_id: user.id });
       if (returningErr) {
         logStep("WARN: is_returning_customer RPC failed, defaulting to acquisition", { error: returningErr.message });
       }
-      const returning = Boolean(isReturning);
-      isAcquisition = !returning;
-      feePercent = returning ? 0 : (acquisitionFeeRate / 100);
+      isReturningCustomer = Boolean(isReturning);
     }
 
-    const applicationFee = Math.round(amount * feePercent);
+    const { applicationFee, feePercent, isAcquisition } = calculateApplicationFee({
+      amount,
+      feeModel,
+      acquisitionFeeRate,
+      isReturningCustomer,
+    });
 
     // Calculate PawBucks earned (10% of amount = 10 PawBucks per $1)
     const pawbucksEarned = Math.round((amount / 100) * 10);
