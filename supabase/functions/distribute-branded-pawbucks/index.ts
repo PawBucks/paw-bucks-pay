@@ -296,6 +296,14 @@ Deno.serve(async (req) => {
         amount,
         brand_logo: campaign.brand_accounts?.logo_url,
       });
+      console.log("[distribute-branded-pawbucks] credited", {
+        campaign_id: campaign.id,
+        brand_name: brandName,
+        user_id,
+        merchant_id,
+        amount,
+        trigger: triggerType,
+      });
     }
 
     if (results.length > 0) {
