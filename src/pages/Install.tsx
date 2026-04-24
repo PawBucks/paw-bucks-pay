@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Download, Smartphone, Zap, Shield, Wifi, CheckCircle2 } from "lucide-react";
 import { SEO } from "@/components/SEO";
+import { seoMeta } from "@/lib/seoMeta";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -81,8 +82,10 @@ export default function Install() {
   return (
     <>
       <SEO
-        title="Install PawBucks App"
-        description="Install PawBucks on your device for instant access, offline support, and the best mobile experience"
+        title={seoMeta.install.title}
+        description={seoMeta.install.description}
+        keywords={[...seoMeta.install.keywords]}
+        canonical={seoMeta.install.canonical}
       />
       
       <div className="min-h-screen bg-gradient-to-b from-background via-primary/5 to-background">

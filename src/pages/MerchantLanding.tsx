@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { SEO } from "@/components/SEO";
+import { seoMeta } from "@/lib/seoMeta";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CreditCard, TrendingUp, Shield, BarChart3, CheckCircle, ArrowRight, DollarSign, Sparkles, UserPlus, Settings, Percent, Zap, Store, ShoppingBag, Eye, LineChart, Target, Coins } from "lucide-react";
@@ -15,9 +16,10 @@ const MerchantLanding = () => {
   return (
     <>
       <SEO 
-        title="For Pet Merchants - Grow Your Business with PawBucks"
-        description="Get new paying customers for your pet business — pay only when PawBucks delivers them. No discounts, no ads, no upfront spend. Performance-based customer acquisition."
-        keywords={["pet merchant", "pet business payments", "PawBucks merchant", "pet store rewards", "groomer payments", "vet payment platform", "customer acquisition"]}
+        title={seoMeta.merchants.title}
+        description={seoMeta.merchants.description}
+        keywords={[...seoMeta.merchants.keywords]}
+        canonical={seoMeta.merchants.canonical}
       />
       <div className="min-h-screen bg-[var(--gradient-hero)] overflow-hidden">
       <header className="border-b bg-card/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm safe-area-inset-top" role="banner">

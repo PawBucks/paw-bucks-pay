@@ -27,6 +27,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { AdPlacement } from "@/components/AdPlacement";
 import { Header } from "@/components/Header";
 import { SEO } from "@/components/SEO";
+import { seoMeta } from "@/lib/seoMeta";
 import { PullToRefresh } from "@/components/PullToRefresh";
 import { CartIcon } from "@/components/pet-store/CartIcon";
 import { CartDrawer, type CartCheckoutParams } from "@/components/pet-store/CartDrawer";
@@ -435,9 +436,10 @@ export default function PetStore() {
   return (
     <>
       <SEO
-        title="Pet Store - Shop for Pet Supplies | PawBucks"
-        description="Browse our selection of pet supplies including food, treats, toys, and more. Earn PawBucks rewards on every purchase."
-        keywords={["pet store", "pet supplies", "pet food", "pet toys", "pet treats", "earn rewards"]}
+        title={seoMeta.petStore.title}
+        description={seoMeta.petStore.description}
+        keywords={[...seoMeta.petStore.keywords]}
+        canonical={seoMeta.petStore.canonical}
       />
       <div className="min-h-[100dvh] bg-background flex flex-col">
         <Header isAuthenticated={!!user} onLogout={handleSignOut} />

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { SEO } from "@/components/SEO";
+import { seoMeta } from "@/lib/seoMeta";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -505,9 +506,10 @@ const Auth = () => {
   return (
     <>
       <SEO 
-        title="Sign In or Sign Up - PawBucks"
-        description="Create your PawBucks account or sign in to manage pet expenses, earn rewards, and discover trusted pet services."
-        keywords={["PawBucks login", "pet rewards signup", "pet owner account", "merchant registration"]}
+        title={seoMeta.auth.title}
+        description={seoMeta.auth.description}
+        keywords={[...seoMeta.auth.keywords]}
+        canonical={seoMeta.auth.canonical}
       />
       <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-background relative">
       <div className="fixed inset-0 bg-[var(--gradient-hero)] pointer-events-none" />

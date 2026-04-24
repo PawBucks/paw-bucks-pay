@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { SEO } from "@/components/SEO";
+import { seoMeta } from "@/lib/seoMeta";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { 
@@ -99,9 +100,10 @@ const VetLanding = () => {
   return (
     <>
       <SEO 
-        title="For Veterinarians - PawBucks Vet Portal"
-        description="The complete veterinary practice platform. EMR, AI clinical tools, insurance automation, wellness plans, and practice growth — all integrated with PawBucks rewards."
-        keywords={["veterinary software", "vet EMR", "practice management", "pet insurance claims", "wellness plans", "PawBucks vet"]}
+        title={seoMeta.vets.title}
+        description={seoMeta.vets.description}
+        keywords={[...seoMeta.vets.keywords]}
+        canonical={seoMeta.vets.canonical}
       />
       <div className="min-h-screen bg-[var(--gradient-hero)] overflow-hidden">
         {/* Header */}

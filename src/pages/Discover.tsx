@@ -23,6 +23,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import { ROUTES, QUERY_STALE_TIMES } from "@/lib/constants";
 import { SEO } from "@/components/SEO";
+import { seoMeta } from "@/lib/seoMeta";
 import { usePersistentState } from "@/hooks/usePersistentState";
 import { useSponsoredMerchants, useVerifiedProMerchants, useSearchBoostedMerchantSet, useFeaturedPartnerMerchants, usePremiumAdMerchants, SERVICE_NAMES } from "@/hooks/useMerchantServices";
 import { useQueryClient } from "@tanstack/react-query";
@@ -595,9 +596,10 @@ const Discover = () => {
   return (
     <>
       <SEO
-        title="Discover Pet Merchants - PawBucks"
-        description="Find trusted pet stores, groomers, trainers and more. Earn PawBucks rewards with every purchase."
-        keywords={["pet merchants", "pet stores", "pet services", "PawBucks", "rewards"]}
+        title={seoMeta.discover.title}
+        description={seoMeta.discover.description}
+        keywords={[...seoMeta.discover.keywords]}
+        canonical={seoMeta.discover.canonical}
       />
       <Header isAuthenticated={!!user} onLogout={user ? handleLogout : undefined} />
       <div className="min-h-[100dvh] bg-background flex flex-col">

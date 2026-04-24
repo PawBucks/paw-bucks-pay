@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
 import { SEO } from "@/components/SEO";
+import { seoMeta } from "@/lib/seoMeta";
 import { Button } from "@/components/ui/button";
 import { GradientCard } from "@/components/ui/gradient-card";
 import { Input } from "@/components/ui/input";
@@ -139,9 +140,10 @@ const Referrals = () => {
   return (
     <>
       <SEO 
-        title="Referrals - Earn Rewards | PawBucks"
-        description="Share your PawBucks referral code and earn $10 for each friend who makes their first purchase."
-        keywords={["PawBucks referral", "pet rewards referral", "earn rewards"]}
+        title={seoMeta.referrals.title}
+        description={seoMeta.referrals.description}
+        keywords={[...seoMeta.referrals.keywords]}
+        canonical={seoMeta.referrals.canonical}
         noIndex={true}
       />
       <div className="min-h-screen bg-[var(--gradient-hero)] pb-24">
