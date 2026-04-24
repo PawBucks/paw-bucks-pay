@@ -35,6 +35,25 @@ export default function CheckInPage() {
     const doCheckin = async () => {
       if (checkinAttempted.current) return;
       checkinAttempted.current = true;
+      // Persistent idempotency across page reloads: if we've already processed
+      // this exact token in this browser session, don't re-invoke the RPC or
+      // the branded distributor. The server still enforces idempotency on the
+      // checkin_id — this is a UX/load-saver to avoid an unnecessary round-trip.
+      const storageKey = `checkin:processed:${token}`;
+      try {
+        const cached = sessionStorage.getItem(storageKey);
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          setResult({
+            success: false,
+            entityName: parsed.entityName ?? null,
+            message: "You've already processed this check-in. Reloading does not award additional PawBucks.",
+          });
+          return;
+        }
+      } catch {
+        // ignore storage errors
+      }
       setProcessing(true);
       try {
         const { data, error } = await supabase.rpc("process_checkin", {
@@ -91,11 +110,25 @@ export default function CheckInPage() {
                   const brandNames = brandedData.campaigns.map((c: any) => c.brand_name).join(", ");
                   toast.success(`🎁 You received ${total.toLocaleString()} branded PawBucks from ${brandNames}!`, { duration: 5000 });
                 }
+                try {
+                  sessionStorage.setItem(storageKey, JSON.stringify({
+                    entityName: row.entity_name,
+                  }));
+                } catch {
+                  // ignore storage errors
+                }
               }).catch((err) => {
                 console.warn("[checkin] distribute-branded-pawbucks failed", err);
               });
             } else {
               console.log("[checkin] skipping distributor — no merchant_id on check-in");
+              try {
+                sessionStorage.setItem(storageKey, JSON.stringify({
+                  entityName: row.entity_name,
+                }));
+              } catch {
+                // ignore storage errors
+              }
             }
           }
         }
