@@ -15,6 +15,37 @@ interface BrandedAward {
   brand_logo?: string | null;
 }
 
+const PROCESS_CHECKIN_TIMEOUT_MS = 10000;
+const MAX_TIMEOUT_RETRIES = 2;
+const RETRY_BACKOFF_MS = 750;
+
+type LastResult = {
+  success: boolean;
+  entityName: string | null;
+  message: string;
+  brandedAwards?: BrandedAward[];
+};
+
+function withTimeout<T>(promise: PromiseLike<T>, ms: number): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => {
+      const err = new Error("process_checkin timed out");
+      (err as Error & { isTimeout?: boolean }).isTimeout = true;
+      reject(err);
+    }, ms);
+    Promise.resolve(promise).then(
+      (v) => {
+        clearTimeout(timer);
+        resolve(v);
+      },
+      (e) => {
+        clearTimeout(timer);
+        reject(e);
+      },
+    );
+  });
+}
+
 export default function CheckInPage() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -52,10 +83,16 @@ export default function CheckInPage() {
         const cached = sessionStorage.getItem(storageKey);
         if (cached) {
           const parsed = JSON.parse(cached);
+          const cachedAwards: BrandedAward[] = Array.isArray(parsed.brandedAwards)
+            ? parsed.brandedAwards
+            : [];
+          if (cachedAwards.length > 0) setBrandedAwards(cachedAwards);
           setResult({
-            success: false,
+            success: parsed.success ?? true,
             entityName: parsed.entityName ?? null,
-            message: "You've already processed this check-in. Reloading does not award additional PawBucks.",
+            message:
+              parsed.message ??
+              "You've already processed this check-in. Reloading does not award additional PawBucks.",
           });
           return;
         }
@@ -64,12 +101,39 @@ export default function CheckInPage() {
       }
       setProcessing(true);
       try {
-        const { data, error } = await supabase.rpc("process_checkin", {
-          p_token: token,
-          p_user_id: user.id,
-        });
-
-        if (error) throw error;
+        // Retry process_checkin ONLY on client-side timeouts. Other errors
+        // (network/server) surface immediately so we don't risk duplicate work.
+        let data: any = null;
+        let lastTimeoutErr: Error | null = null;
+        for (let attempt = 0; attempt <= MAX_TIMEOUT_RETRIES; attempt++) {
+          try {
+            const res = await withTimeout(
+              supabase.rpc("process_checkin", {
+                p_token: token,
+                p_user_id: user.id,
+              }),
+              PROCESS_CHECKIN_TIMEOUT_MS,
+            );
+            if (res.error) throw res.error;
+            data = res.data;
+            lastTimeoutErr = null;
+            break;
+          } catch (e: any) {
+            if (e?.isTimeout) {
+              lastTimeoutErr = e;
+              console.warn(
+                `[checkin] process_checkin timed out (attempt ${attempt + 1}/${MAX_TIMEOUT_RETRIES + 1})`,
+              );
+              if (attempt < MAX_TIMEOUT_RETRIES) {
+                await new Promise((r) => setTimeout(r, RETRY_BACKOFF_MS * (attempt + 1)));
+                continue;
+              }
+              throw e;
+            }
+            throw e;
+          }
+        }
+        if (lastTimeoutErr) throw lastTimeoutErr;
 
         const row = Array.isArray(data) ? data[0] : data;
         console.log("[checkin] process_checkin result", {
@@ -121,7 +185,10 @@ export default function CheckInPage() {
                 }
                 try {
                   sessionStorage.setItem(storageKey, JSON.stringify({
+                    success: row.success,
                     entityName: row.entity_name,
+                    message: row.message,
+                    brandedAwards: (brandedData?.campaigns as BrandedAward[]) ?? [],
                   }));
                 } catch {
                   // ignore storage errors
@@ -133,7 +200,10 @@ export default function CheckInPage() {
               console.log("[checkin] skipping distributor — no merchant_id on check-in");
               try {
                 sessionStorage.setItem(storageKey, JSON.stringify({
+                  success: row.success,
                   entityName: row.entity_name,
+                  message: row.message,
+                  brandedAwards: [],
                 }));
               } catch {
                 // ignore storage errors
