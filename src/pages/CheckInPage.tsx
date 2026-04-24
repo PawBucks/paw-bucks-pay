@@ -185,7 +185,10 @@ export default function CheckInPage() {
                 }
                 try {
                   sessionStorage.setItem(storageKey, JSON.stringify({
+                    success: row.success,
                     entityName: row.entity_name,
+                    message: row.message,
+                    brandedAwards: (brandedData?.campaigns as BrandedAward[]) ?? [],
                   }));
                 } catch {
                   // ignore storage errors
@@ -197,7 +200,10 @@ export default function CheckInPage() {
               console.log("[checkin] skipping distributor — no merchant_id on check-in");
               try {
                 sessionStorage.setItem(storageKey, JSON.stringify({
+                  success: row.success,
                   entityName: row.entity_name,
+                  message: row.message,
+                  brandedAwards: [],
                 }));
               } catch {
                 // ignore storage errors
