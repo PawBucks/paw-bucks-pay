@@ -15,6 +15,37 @@ interface BrandedAward {
   brand_logo?: string | null;
 }
 
+const PROCESS_CHECKIN_TIMEOUT_MS = 10000;
+const MAX_TIMEOUT_RETRIES = 2;
+const RETRY_BACKOFF_MS = 750;
+
+type LastResult = {
+  success: boolean;
+  entityName: string | null;
+  message: string;
+  brandedAwards?: BrandedAward[];
+};
+
+function withTimeout<T>(promise: PromiseLike<T>, ms: number): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => {
+      const err = new Error("process_checkin timed out");
+      (err as Error & { isTimeout?: boolean }).isTimeout = true;
+      reject(err);
+    }, ms);
+    Promise.resolve(promise).then(
+      (v) => {
+        clearTimeout(timer);
+        resolve(v);
+      },
+      (e) => {
+        clearTimeout(timer);
+        reject(e);
+      },
+    );
+  });
+}
+
 export default function CheckInPage() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
