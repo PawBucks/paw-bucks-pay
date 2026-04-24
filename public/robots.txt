@@ -58,6 +58,8 @@ Allow: /auth
 Allow: /install
 Allow: /storefront/
 Allow: /referrals
+Allow: /privacy
+Allow: /terms
 
 # Crawl-delay for respectful crawling
 Crawl-delay: 1
