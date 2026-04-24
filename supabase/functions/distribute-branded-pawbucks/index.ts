@@ -96,7 +96,17 @@ Deno.serve(async (req) => {
     const triggerType: "checkin" | "checkout" = trigger === "checkout" ? "checkout" : "checkin";
     const txAmountUsd = Number(transaction_amount_usd) || 0;
 
+    console.log("[distribute-branded-pawbucks] invoked", {
+      user_id,
+      merchant_id,
+      checkin_id: checkin_id ?? null,
+      trigger: triggerType,
+      transaction_id: transaction_id ?? null,
+      transaction_amount_usd: txAmountUsd,
+    });
+
     if (!user_id || !merchant_id) {
+      console.warn("[distribute-branded-pawbucks] missing user_id or merchant_id");
       return new Response(
         JSON.stringify({ distributed: false, message: "Missing user_id or merchant_id" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
@@ -126,11 +136,18 @@ Deno.serve(async (req) => {
     }
 
     if (!activeCampaignMerchants || activeCampaignMerchants.length === 0) {
+      console.log("[distribute-branded-pawbucks] no active campaigns at merchant", { merchant_id });
       return new Response(
         JSON.stringify({ distributed: false, message: "No active brand campaigns at this merchant" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 }
       );
     }
+
+    console.log("[distribute-branded-pawbucks] candidate campaigns", {
+      merchant_id,
+      count: activeCampaignMerchants.length,
+      campaign_ids: activeCampaignMerchants.map((cm: any) => cm.campaign_id),
+    });
 
     const results: any[] = [];
     const today = new Date(); today.setHours(0, 0, 0, 0);
@@ -278,6 +295,14 @@ Deno.serve(async (req) => {
         brand_name: brandName,
         amount,
         brand_logo: campaign.brand_accounts?.logo_url,
+      });
+      console.log("[distribute-branded-pawbucks] credited", {
+        campaign_id: campaign.id,
+        brand_name: brandName,
+        user_id,
+        merchant_id,
+        amount,
+        trigger: triggerType,
       });
     }
 
