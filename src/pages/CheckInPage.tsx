@@ -8,6 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Loader2, CheckCircle2, XCircle, LogIn } from "lucide-react";
 import { toast } from "sonner";
 
+interface BrandedAward {
+  campaign_name: string;
+  brand_name: string;
+  amount: number;
+  brand_logo?: string | null;
+}
+
 export default function CheckInPage() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -15,6 +22,7 @@ export default function CheckInPage() {
   const token = searchParams.get("token");
   const [processing, setProcessing] = useState(false);
   const [result, setResult] = useState<{ success: boolean; entityName: string | null; message: string } | null>(null);
+  const [brandedAwards, setBrandedAwards] = useState<BrandedAward[]>([]);
   const checkinAttempted = useRef(false);
 
   useEffect(() => {
@@ -89,6 +97,7 @@ export default function CheckInPage() {
                 if (brandedData?.distributed && brandedData.campaigns?.length > 0) {
                   const total = brandedData.total_amount;
                   const brandNames = brandedData.campaigns.map((c: any) => c.brand_name).join(", ");
+                  setBrandedAwards(brandedData.campaigns as BrandedAward[]);
                   toast.success(`🎁 You received ${total.toLocaleString()} branded PawBucks from ${brandNames}!`, { duration: 5000 });
                 }
               }).catch((err) => {
