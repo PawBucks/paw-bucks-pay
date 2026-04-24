@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { SEO } from "@/components/SEO";
+import { seoMeta } from "@/lib/seoMeta";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -55,15 +56,10 @@ const About = () => {
   return (
     <div className="min-h-[100dvh] bg-[var(--gradient-hero)] overflow-x-hidden">
       <SEO
-        title="About PawBucks – How We Work, How We Make Money, and Who We Are"
-        description="PawBucks is a transparent pet rewards marketplace operated by PawBucks, Inc. (Los Angeles, CA). Payments are processed by Stripe. Learn how we make money and how rewards work."
-        keywords={[
-          "About PawBucks",
-          "PawBucks legit",
-          "PawBucks business model",
-          "PawBucks security",
-          "Stripe payments pets",
-        ]}
+        title={seoMeta.about.title}
+        description={seoMeta.about.description}
+        keywords={[...seoMeta.about.keywords]}
+        canonical={seoMeta.about.canonical}
       />
       <script
         type="application/ld+json"

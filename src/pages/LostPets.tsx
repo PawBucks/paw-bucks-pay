@@ -39,6 +39,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { SEO } from "@/components/SEO";
+import { seoMeta } from "@/lib/seoMeta";
 import { 
   PlusCircle, 
   Search, 
@@ -411,8 +412,10 @@ const LostPets = () => {
   return (
     <>
       <SEO
-        title="Lost Pets | Help Find Missing Pets"
-        description="View and create digital flyers for lost pets. Help reunite pets with their families."
+        title={seoMeta.lostPets.title}
+        description={seoMeta.lostPets.description}
+        keywords={[...seoMeta.lostPets.keywords]}
+        canonical={seoMeta.lostPets.canonical}
       />
       <div className="min-h-screen bg-background">
         <Header 

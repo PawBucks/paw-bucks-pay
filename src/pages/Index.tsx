@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Header } from "@/components/Header";
 import { SEO } from "@/components/SEO";
+import { seoMeta } from "@/lib/seoMeta";
 import { PremiumMerchantsBanner } from "@/components/PremiumMerchantsBanner";
 import { 
   Wallet, Store, Gift, ArrowRight, Shield, Zap, TrendingUp, CheckCircle, 
@@ -67,9 +68,10 @@ const Index = () => {
   return (
     <div className="min-h-[100dvh] bg-[var(--gradient-hero)] overflow-x-hidden">
       <SEO 
-        title="PawBucks - Rewards for Every Dollar You Spend on Your Pet"
-        description="Manage pet expenses, discover trusted local services, and earn PawBucks every time you care for your pet. Track spending, find local businesses, and turn everyday pet care into rewards."
-        keywords={["pet rewards", "pet expenses", "PawBucks", "pet services", "pet spending tracker", "local pet businesses", "lost pet flyer", "pet store"]}
+        title={seoMeta.home.title}
+        description={seoMeta.home.description}
+        keywords={[...seoMeta.home.keywords]}
+        canonical={seoMeta.home.canonical}
       />
       <Header menuItems={[
         { label: "Explore Pet Merchants", path: "/directory" },
