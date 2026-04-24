@@ -537,10 +537,26 @@ const Auth = () => {
               The trusted platform for pet owners &amp; businesses
             </p>
           </div>
-          <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1"><Shield className="w-3 h-3 text-primary" />Encrypted</span>
-            <span className="flex items-center gap-1"><Lock className="w-3 h-3 text-primary" />Secure</span>
-            <span className="flex items-center gap-1"><CheckCircle2 className="w-3 h-3 text-primary" />Verified</span>
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1">
+              <Lock className="w-3 h-3 text-primary" />
+              Payments by{" "}
+              <a
+                href="https://stripe.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-primary"
+              >
+                Stripe
+              </a>
+            </span>
+            <span className="text-muted-foreground/50">•</span>
+            <span>PawBucks, Inc. · Los Angeles, CA</span>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+            <a href="/about" className="underline hover:text-primary">About</a>
+            <span className="text-muted-foreground/50">•</span>
+            <a href="mailto:Legal@PawBucks.app" className="underline hover:text-primary">Contact</a>
           </div>
         </div>
 

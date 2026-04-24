@@ -106,6 +106,7 @@ const LoyaltyCardsPage = lazyWithRetry(() => import("./pages/LoyaltyCardsPage"),
 const AdminInvoicePayment = lazyWithRetry(() => import("./pages/AdminInvoicePayment"), "AdminInvoicePayment");
 const AdminInvoicePaymentSuccess = lazyWithRetry(() => import("./pages/AdminInvoicePaymentSuccess"), "AdminInvoicePaymentSuccess");
 const BrandDashboard = lazyWithRetry(() => import("./pages/BrandDashboard"), "BrandDashboard");
+const About = lazyWithRetry(() => import("./pages/About"), "About");
 
 const createQueryClient = () => new QueryClient({
   defaultOptions: {
@@ -165,6 +166,7 @@ const AppRoutes = () => {
       <Route path="/admin-invoice/:invoiceId/success" element={<PageTransition><AdminInvoicePaymentSuccess /></PageTransition>} />
       <Route path="/checkin" element={<PageTransition><CheckInPage /></PageTransition>} />
       <Route path="/brand-setup/:token" element={<PageTransition><BrandSetup /></PageTransition>} />
+      <Route path="/about" element={<PageTransition><About /></PageTransition>} />
 
       {/* Authenticated pet owner routes */}
       <Route path="/dashboard" element={<ProtectedRoute><PageTransition><Dashboard /></PageTransition></ProtectedRoute>} />
