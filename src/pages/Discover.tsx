@@ -23,6 +23,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import { ROUTES, QUERY_STALE_TIMES } from "@/lib/constants";
 import { SEO } from "@/components/SEO";
+import { seoMeta } from "@/lib/seoMeta";
 import { usePersistentState } from "@/hooks/usePersistentState";
 import { useSponsoredMerchants, useVerifiedProMerchants, useSearchBoostedMerchantSet, useFeaturedPartnerMerchants, usePremiumAdMerchants, SERVICE_NAMES } from "@/hooks/useMerchantServices";
 import { useQueryClient } from "@tanstack/react-query";
