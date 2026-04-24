@@ -158,6 +158,33 @@ export const seoMeta = {
     ],
     canonical: "/referrals",
   },
+  privacy: {
+    title: "Privacy Policy – PawBucks",
+    description:
+      "How PawBucks, Inc. collects, uses, stores, and protects your personal and pet data. Read our full privacy policy, your rights, and how to contact us.",
+    keywords: [
+      "PawBucks privacy policy",
+      "pet data privacy",
+      "data protection",
+      "GDPR",
+      "CCPA",
+      "privacy rights",
+    ],
+    canonical: "/privacy",
+  },
+  terms: {
+    title: "Terms of Service – PawBucks",
+    description:
+      "The legal terms governing your use of PawBucks. Covers accounts, payments, PawBucks rewards, disclaimers, liability limits, arbitration, and governing law.",
+    keywords: [
+      "PawBucks terms of service",
+      "PawBucks terms and conditions",
+      "user agreement",
+      "PawBucks legal",
+      "arbitration",
+    ],
+    canonical: "/terms",
+  },
 } as const satisfies Record<string, RouteMeta>;
 
 export type SeoRouteKey = keyof typeof seoMeta;
