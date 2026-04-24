@@ -205,6 +205,23 @@ Deno.serve(async (req) => {
       const triggerTag = `[${triggerType}]`;
       const txTag = transaction_id ? `[tx:${transaction_id}]` : null;
 
+      // Strongest idempotency: if a checkin_id is provided, never credit the
+      // same campaign twice for the same check-in row (handles page reloads).
+      if (checkin_id) {
+        const { data: existingCheckin } = await supabase
+          .from("branded_pawbucks_activity")
+          .select("id")
+          .eq("campaign_id", campaign.id)
+          .eq("user_id", user_id)
+          .eq("type", "earn")
+          .eq("checkin_id", checkin_id)
+          .limit(1);
+        if (existingCheckin && existingCheckin.length > 0) {
+          console.log(`[distribute-branded-pawbucks] already credited campaign ${campaign.id} for checkin ${checkin_id}`);
+          continue;
+        }
+      }
+
       // Idempotency: if a transaction_id is provided (checkout flow), ensure we
       // never double-credit for the same transaction regardless of retries.
       if (txTag) {
