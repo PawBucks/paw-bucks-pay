@@ -614,6 +614,31 @@ const Index = () => {
                 For Merchants
               </a>
             </div>
+            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-sm">
+              <a
+                href="/about"
+                className="text-muted-foreground hover:text-primary transition-colors"
+                onClick={(e) => { e.preventDefault(); navigate("/about"); }}
+              >
+                About
+              </a>
+              <span className="text-muted-foreground/50">•</span>
+              <a
+                href="/privacy"
+                className="text-muted-foreground hover:text-primary transition-colors"
+                onClick={(e) => { e.preventDefault(); navigate("/privacy"); }}
+              >
+                Privacy
+              </a>
+              <span className="text-muted-foreground/50">•</span>
+              <a
+                href="/terms"
+                className="text-muted-foreground hover:text-primary transition-colors"
+                onClick={(e) => { e.preventDefault(); navigate("/terms"); }}
+              >
+                Terms
+              </a>
+            </div>
             <p className="text-sm text-muted-foreground">
               &copy; {new Date().getFullYear()} PawBucks. All rights reserved.
             </p>
