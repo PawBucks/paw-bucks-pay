@@ -83,10 +83,16 @@ export default function CheckInPage() {
         const cached = sessionStorage.getItem(storageKey);
         if (cached) {
           const parsed = JSON.parse(cached);
+          const cachedAwards: BrandedAward[] = Array.isArray(parsed.brandedAwards)
+            ? parsed.brandedAwards
+            : [];
+          if (cachedAwards.length > 0) setBrandedAwards(cachedAwards);
           setResult({
-            success: false,
+            success: parsed.success ?? true,
             entityName: parsed.entityName ?? null,
-            message: "You've already processed this check-in. Reloading does not award additional PawBucks.",
+            message:
+              parsed.message ??
+              "You've already processed this check-in. Reloading does not award additional PawBucks.",
           });
           return;
         }
@@ -95,12 +101,39 @@ export default function CheckInPage() {
       }
       setProcessing(true);
       try {
-        const { data, error } = await supabase.rpc("process_checkin", {
-          p_token: token,
-          p_user_id: user.id,
-        });
-
-        if (error) throw error;
+        // Retry process_checkin ONLY on client-side timeouts. Other errors
+        // (network/server) surface immediately so we don't risk duplicate work.
+        let data: any = null;
+        let lastTimeoutErr: Error | null = null;
+        for (let attempt = 0; attempt <= MAX_TIMEOUT_RETRIES; attempt++) {
+          try {
+            const res = await withTimeout(
+              supabase.rpc("process_checkin", {
+                p_token: token,
+                p_user_id: user.id,
+              }),
+              PROCESS_CHECKIN_TIMEOUT_MS,
+            );
+            if (res.error) throw res.error;
+            data = res.data;
+            lastTimeoutErr = null;
+            break;
+          } catch (e: any) {
+            if (e?.isTimeout) {
+              lastTimeoutErr = e;
+              console.warn(
+                `[checkin] process_checkin timed out (attempt ${attempt + 1}/${MAX_TIMEOUT_RETRIES + 1})`,
+              );
+              if (attempt < MAX_TIMEOUT_RETRIES) {
+                await new Promise((r) => setTimeout(r, RETRY_BACKOFF_MS * (attempt + 1)));
+                continue;
+              }
+              throw e;
+            }
+            throw e;
+          }
+        }
+        if (lastTimeoutErr) throw lastTimeoutErr;
 
         const row = Array.isArray(data) ? data[0] : data;
         console.log("[checkin] process_checkin result", {
