@@ -14620,10 +14620,13 @@ export type Database = {
       process_checkin: {
         Args: { p_token: string; p_user_id: string }
         Returns: {
+          checkin_id: string
           entity_name: string
           entity_type: string
+          merchant_id: string
           message: string
           success: boolean
+          vet_id: string
         }[]
       }
       redeem_welcome_credit: {

@@ -54,13 +54,14 @@ export default function CheckInPage() {
           if (row.success) {
             toast.success(`Checked in at ${row.entity_name}!`);
             // Distribute branded PawBucks if applicable
-            const merchantOrVetId = (row as any).merchant_id || (row as any).vet_id;
-            if (merchantOrVetId) {
+            const merchantId = (row as any).merchant_id as string | null;
+            const checkinId = (row as any).checkin_id as string | null;
+            if (merchantId) {
               supabase.functions.invoke("distribute-branded-pawbucks", {
                 body: {
                   user_id: user.id,
-                  merchant_id: merchantOrVetId,
-                  checkin_id: (row as any).checkin_id,
+                  merchant_id: merchantId,
+                  checkin_id: checkinId,
                   trigger: "checkin",
                 },
               }).then(({ data: brandedData }) => {
