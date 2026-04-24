@@ -596,9 +596,10 @@ const Discover = () => {
   return (
     <>
       <SEO
-        title="Discover Pet Merchants - PawBucks"
-        description="Find trusted pet stores, groomers, trainers and more. Earn PawBucks rewards with every purchase."
-        keywords={["pet merchants", "pet stores", "pet services", "PawBucks", "rewards"]}
+        title={seoMeta.discover.title}
+        description={seoMeta.discover.description}
+        keywords={[...seoMeta.discover.keywords]}
+        canonical={seoMeta.discover.canonical}
       />
       <Header isAuthenticated={!!user} onLogout={user ? handleLogout : undefined} />
       <div className="min-h-[100dvh] bg-background flex flex-col">

@@ -9,6 +9,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { PageLoader } from "@/components/PageLoader";
 import { AdPlacement } from "@/components/AdPlacement";
 import { SEO } from "@/components/SEO";
+import { seoMeta } from "@/lib/seoMeta";
 import { PullToRefresh } from "@/components/PullToRefresh";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -318,9 +319,10 @@ const MerchantDirectory = () => {
   return (
     <>
       <SEO
-        title="Pet Merchant Directory - PawBucks"
-        description="Browse our complete directory of pet merchants. Find pet stores, groomers, vets, and more. Read reviews and earn points."
-        keywords={["pet directory", "pet merchants", "pet stores", "pet services", "reviews"]}
+        title={seoMeta.directory.title}
+        description={seoMeta.directory.description}
+        keywords={[...seoMeta.directory.keywords]}
+        canonical={seoMeta.directory.canonical}
       />
       <Header isAuthenticated={!!user} onLogout={user ? handleLogout : undefined} />
 
