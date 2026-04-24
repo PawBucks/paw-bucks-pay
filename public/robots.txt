@@ -47,7 +47,9 @@ Disallow: /api/
 
 # Allow important public pages
 Allow: /
+Allow: /about
 Allow: /merchants
+Allow: /vets
 Allow: /discover
 Allow: /directory
 Allow: /pet-store

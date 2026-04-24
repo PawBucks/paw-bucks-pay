@@ -5,7 +5,7 @@
   <!-- Homepage - Highest Priority -->
   <url>
     <loc>https://pawbucks.app/</loc>
-    <lastmod>2026-04-14</lastmod>
+    <lastmod>2026-04-24</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
     <image:image>
@@ -13,74 +13,82 @@
       <image:title>PawBucks - Digital Pet Payment Platform</image:title>
     </image:image>
   </url>
-  
+
+  <!-- About / Trust & Transparency -->
+  <url>
+    <loc>https://pawbucks.app/about</loc>
+    <lastmod>2026-04-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
   <!-- For Pet Merchants Landing Page -->
   <url>
     <loc>https://pawbucks.app/merchants</loc>
-    <lastmod>2026-04-14</lastmod>
+    <lastmod>2026-04-24</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
-  
+
   <!-- Vet Landing Page -->
   <url>
-    <loc>https://pawbucks.app/vet-landing</loc>
-    <lastmod>2026-04-14</lastmod>
+    <loc>https://pawbucks.app/vets</loc>
+    <lastmod>2026-04-24</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
-  
+
   <!-- Discover/Directory Pages -->
   <url>
     <loc>https://pawbucks.app/discover</loc>
-    <lastmod>2026-04-14</lastmod>
+    <lastmod>2026-04-24</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
-  
+
   <url>
     <loc>https://pawbucks.app/directory</loc>
-    <lastmod>2026-04-14</lastmod>
+    <lastmod>2026-04-24</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
-  
+
   <!-- Pet Store -->
   <url>
     <loc>https://pawbucks.app/pet-store</loc>
-    <lastmod>2026-04-14</lastmod>
+    <lastmod>2026-04-24</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
-  
+
   <!-- Lost Pets -->
   <url>
     <loc>https://pawbucks.app/lost-pets</loc>
-    <lastmod>2026-04-14</lastmod>
+    <lastmod>2026-04-24</lastmod>
     <changefreq>hourly</changefreq>
     <priority>0.8</priority>
   </url>
-  
+
   <!-- Authentication -->
   <url>
     <loc>https://pawbucks.app/auth</loc>
-    <lastmod>2026-04-14</lastmod>
+    <lastmod>2026-04-24</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <priority>0.7</priority>
   </url>
-  
+
   <!-- Install/PWA -->
   <url>
     <loc>https://pawbucks.app/install</loc>
-    <lastmod>2026-04-14</lastmod>
+    <lastmod>2026-04-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
-  
+
   <!-- Referrals -->
   <url>
     <loc>https://pawbucks.app/referrals</loc>
-    <lastmod>2026-04-14</lastmod>
+    <lastmod>2026-04-24</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -88,7 +96,7 @@
   <!-- AI Discoverability Files -->
   <url>
     <loc>https://pawbucks.app/llms.txt</loc>
-    <lastmod>2026-04-14</lastmod>
+    <lastmod>2026-04-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
