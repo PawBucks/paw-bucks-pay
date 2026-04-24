@@ -45,6 +45,14 @@ export default function CheckInPage() {
         if (error) throw error;
 
         const row = Array.isArray(data) ? data[0] : data;
+        console.log("[checkin] process_checkin result", {
+          success: row?.success,
+          entity_name: row?.entity_name,
+          entity_type: (row as any)?.entity_type,
+          merchant_id: (row as any)?.merchant_id ?? null,
+          vet_id: (row as any)?.vet_id ?? null,
+          checkin_id: (row as any)?.checkin_id ?? null,
+        });
         if (row) {
           setResult({
             success: row.success,
@@ -57,6 +65,12 @@ export default function CheckInPage() {
             const merchantId = (row as any).merchant_id as string | null;
             const checkinId = (row as any).checkin_id as string | null;
             if (merchantId) {
+              console.log("[checkin] invoking distribute-branded-pawbucks", {
+                user_id: user.id,
+                merchant_id: merchantId,
+                checkin_id: checkinId,
+                trigger: "checkin",
+              });
               supabase.functions.invoke("distribute-branded-pawbucks", {
                 body: {
                   user_id: user.id,
@@ -64,13 +78,24 @@ export default function CheckInPage() {
                   checkin_id: checkinId,
                   trigger: "checkin",
                 },
-              }).then(({ data: brandedData }) => {
+              }).then(({ data: brandedData, error: brandedError }) => {
+                console.log("[checkin] distribute-branded-pawbucks response", {
+                  error: brandedError?.message ?? null,
+                  distributed: brandedData?.distributed ?? false,
+                  total_amount: brandedData?.total_amount ?? 0,
+                  campaign_count: brandedData?.campaigns?.length ?? 0,
+                  campaigns: brandedData?.campaigns ?? [],
+                });
                 if (brandedData?.distributed && brandedData.campaigns?.length > 0) {
                   const total = brandedData.total_amount;
                   const brandNames = brandedData.campaigns.map((c: any) => c.brand_name).join(", ");
                   toast.success(`🎁 You received ${total.toLocaleString()} branded PawBucks from ${brandNames}!`, { duration: 5000 });
                 }
-              }).catch(() => { /* silent - branded PB is a bonus */ });
+              }).catch((err) => {
+                console.warn("[checkin] distribute-branded-pawbucks failed", err);
+              });
+            } else {
+              console.log("[checkin] skipping distributor — no merchant_id on check-in");
             }
           }
         }
