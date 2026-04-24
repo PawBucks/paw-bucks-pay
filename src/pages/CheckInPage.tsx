@@ -146,6 +146,34 @@ export default function CheckInPage() {
                     Welcome to {result.entityName}
                   </p>
                 </div>
+                {brandedAwards.length > 0 && (
+                  <div className="rounded-lg border border-primary/30 bg-primary/5 p-4 text-left space-y-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-semibold text-foreground">🎁 Branded PawBucks Awarded</p>
+                      <p className="text-sm font-bold text-primary">
+                        +{brandedAwards.reduce((s, a) => s + a.amount, 0).toLocaleString()} PB
+                      </p>
+                    </div>
+                    <ul className="space-y-2">
+                      {brandedAwards.map((a, i) => (
+                        <li key={i} className="flex items-center gap-3">
+                          {a.brand_logo ? (
+                            <img src={a.brand_logo} alt={a.brand_name} className="w-8 h-8 rounded object-cover" />
+                          ) : (
+                            <div className="w-8 h-8 rounded bg-muted flex items-center justify-center text-xs font-semibold text-muted-foreground">
+                              {a.brand_name?.[0] ?? "?"}
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-foreground truncate">{a.brand_name}</p>
+                            <p className="text-xs text-muted-foreground truncate">{a.campaign_name}</p>
+                          </div>
+                          <p className="text-sm font-semibold text-primary">+{a.amount.toLocaleString()}</p>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </>
             ) : (
               <>
