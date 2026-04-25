@@ -127,7 +127,7 @@ serve(async (req: Request) => {
         const txList = transactions || [];
         const transactionCount = txList.length;
         const totalSales = txList.reduce((sum, t) => sum + Number(t.amount || 0), 0);
-        // Net USD = stripe_amount minus the 3% network fee (application_fee)
+        // Net USD = stripe_amount minus the 3% success fee (application_fee)
         const totalStripeAmount = txList.reduce((sum, t) => sum + Number(t.stripe_amount || 0), 0);
         const totalApplicationFee = txList.reduce((sum, t) => sum + Number(t.application_fee || 0), 0);
         const totalUsdProcessed = totalStripeAmount - totalApplicationFee;

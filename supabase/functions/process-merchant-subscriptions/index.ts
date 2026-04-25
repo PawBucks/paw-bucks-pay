@@ -634,7 +634,7 @@ async function handlePaymentSuccess(
     subscription.product_name
   );
 
-  // Auto-log network fee as Tax Vault expense
+  // Auto-log success fee as Tax Vault expense
   if (applicationFee > 0) {
     const expenseDate = new Date().toISOString().split('T')[0];
     const taxYear = new Date().getFullYear();
@@ -645,7 +645,7 @@ async function handlePaymentSuccess(
         merchant_id: subscription.merchant_id,
         category: "platform_fees",
         amount: applicationFee / 100, // Convert to dollars
-        description: `PawBucks Network Fee (3%) on $${chargedDollars.toFixed(2)} subscription renewal (card portion)`,
+        description: `PawBucks Success Fee (3%) on $${chargedDollars.toFixed(2)} subscription renewal (card portion)`,
         vendor_name: "PawBucks Network",
         expense_date: expenseDate,
         tax_year: taxYear,
@@ -653,7 +653,7 @@ async function handlePaymentSuccess(
         source_purchase_id: paymentIntentId,
       });
 
-    logStep("Network fee auto-logged to Tax Vault", { subscriptionId: subscription.id });
+    logStep("Success fee auto-logged to Tax Vault", { subscriptionId: subscription.id });
   }
 
   // === CREATE TRANSACTION RECORD ===

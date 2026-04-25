@@ -119,7 +119,7 @@ const About = () => {
             <li className="flex items-start gap-3">
               <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
               <span>
-                <strong className="text-foreground">3% Network Fee.</strong> When a customer pays a
+                <strong className="text-foreground">3% Success Fee.</strong> When a customer pays a
                 merchant through our platform, PawBucks collects a 3% network service fee from the
                 transaction. This is disclosed at checkout — never hidden.
               </span>

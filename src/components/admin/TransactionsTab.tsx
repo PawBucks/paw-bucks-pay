@@ -365,7 +365,7 @@ export function TransactionsTab() {
                                 <span className="text-muted-foreground">None</span>
                               } />
                             )}
-                            <DetailRow icon={Receipt} label="Network Fee (3%)" value={`$${platformFee.toFixed(2)}`} className="text-orange-600 dark:text-orange-400" />
+                            <DetailRow icon={Receipt} label="Success Fee (3%)" value={`$${platformFee.toFixed(2)}`} className="text-orange-600 dark:text-orange-400" />
                             <DetailRow icon={DollarSign} label="Merchant Net" value={
                               `$${(transaction.amount - platformFee).toFixed(2)}`
                             } className="text-accent font-semibold" />

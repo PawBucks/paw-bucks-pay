@@ -169,7 +169,7 @@ function generateInvoicePaidEmailHtml(
     breakdownRows += `
       <tr>
         <td style="padding:10px 0 6px;">
-          <span style="font-size:13px;color:#6b7280;">PawBucks Network Fee</span><br/>
+          <span style="font-size:13px;color:#6b7280;">PawBucks Success Fee</span><br/>
           <span style="font-size:11px;color:#9ca3af;">(3% of cash portion)</span>
         </td>
         <td align="right" style="font-size:14px;color:#ef4444;padding:10px 0 6px;">-${formatCurrency(calculatedFee)}</td>
