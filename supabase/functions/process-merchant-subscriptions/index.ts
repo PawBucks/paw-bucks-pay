@@ -406,13 +406,48 @@ serve(async (req) => {
           ? defaultPaymentMethod 
           : defaultPaymentMethod.id;
 
-        // Calculate application fee
-        const applicationFee = Math.round(subscription.amount * PLATFORM_FEE_PERCENT);
+        // === AUTO-REDEEM PAWBUCKS ===
+        // Apply user's auto-redeem preference to reduce the Stripe charge
+        const autoRedeem = await computeAutoRedeem(
+          supabaseAdmin,
+          subscription.user_id,
+          subscription.amount,
+        );
+        const pawbucksToUse = autoRedeem.pawbucksToUse;
+        const pawbucksValueCents = Math.round(pawbucksToUse * PAWBUCKS_TO_USD * 100);
+        const stripeChargeAmount = subscription.amount - pawbucksValueCents;
+
+        logStep("Auto-redeem decision", {
+          subscriptionId: subscription.id,
+          mode: autoRedeem.mode,
+          pawbucksToUse,
+          pawbucksValueCents,
+          stripeChargeAmount,
+          fullAmount: subscription.amount,
+        });
+
+        // If PawBucks fully cover the charge, skip Stripe entirely
+        if (stripeChargeAmount <= 0 && pawbucksToUse > 0) {
+          await handleFullPawBucksRenewal(
+            supabaseAdmin,
+            stripe,
+            subscription,
+            pawbucksToUse,
+            pawbucksValueCents,
+          );
+          results.succeeded++;
+          results.details.push({ subscriptionId: subscription.id, status: "succeeded", pawbucksEarned: 0 });
+          results.processed++;
+          continue;
+        }
+
+        // Calculate application fee on the Stripe-charged portion only
+        const applicationFee = Math.round(stripeChargeAmount * PLATFORM_FEE_PERCENT);
 
         // Create PaymentIntent on connected account (off-session)
         const paymentIntent = await stripe.paymentIntents.create(
           {
-            amount: subscription.amount,
+            amount: stripeChargeAmount,
             currency: subscription.currency,
             customer: subscription.stripe_customer_id_on_connected,
             payment_method: paymentMethodId,
@@ -427,6 +462,8 @@ serve(async (req) => {
               subscription_type: "merchant_recurring",
               billing_type: "renewal",
               platform: "pawbucks",
+              pawbucks_used: String(pawbucksToUse),
+              auto_redeem_mode: autoRedeem.mode,
             },
           },
           { stripeAccount: subscription.connected_account_id }
@@ -434,17 +471,33 @@ serve(async (req) => {
 
         logStep("PaymentIntent created", { 
           paymentIntentId: paymentIntent.id,
-          status: paymentIntent.status 
+          status: paymentIntent.status,
+          stripeAmount: stripeChargeAmount,
+          pawbucksApplied: pawbucksToUse,
         });
 
         if (paymentIntent.status === "succeeded") {
+          // Deduct redeemed PawBucks from wallet now that the charge succeeded
+          if (pawbucksToUse > 0) {
+            await debitPawBucksForRedemption(
+              supabaseAdmin,
+              subscription.user_id,
+              subscription.merchant_id,
+              pawbucksToUse,
+              subscription.product_name,
+              paymentIntent.id,
+            );
+          }
+
           // Payment succeeded - update subscription and credit PawBucks
           const pawbucksEarned = await handlePaymentSuccess(
             supabaseAdmin, 
             stripe,
             subscription, 
             paymentIntent.id,
-            applicationFee
+            applicationFee,
+            pawbucksToUse,
+            stripeChargeAmount,
           );
           results.succeeded++;
           results.totalPawBucksAwarded += pawbucksEarned;
