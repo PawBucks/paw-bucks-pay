@@ -12,6 +12,7 @@ import { MerchantAnalyticsCards } from "./MerchantAnalyticsCards";
 import { MerchantCharts } from "./MerchantCharts";
 import { MerchantTransactionList } from "./MerchantTransactionList";
 import { ScarcitySignalWidget } from "./ScarcitySignalWidget";
+import { AccountTypeCard } from "./AccountTypeCard";
 
 type Merchant = {
   id: string;
@@ -19,6 +20,8 @@ type Merchant = {
   business_type: string;
   stripe_account_id?: string;
   accepts_pawbucks?: boolean;
+  fee_model?: "full_ecosystem" | "acquisition_only";
+  acquisition_fee_rate?: number | null;
 };
 
 type Analytics = {
@@ -72,6 +75,13 @@ export function MerchantOverviewTab({
         <h2 className="text-3xl font-bold">Dashboard Overview</h2>
         <p className="text-muted-foreground">Track your PawBucks sales, rewards, and repayments in one place.</p>
       </div>
+
+      {/* Account Type */}
+      <AccountTypeCard
+        merchantId={merchant.id}
+        feeModel={merchant.fee_model === "acquisition_only" ? "acquisition_only" : "full_ecosystem"}
+        acquisitionFeeRate={merchant.acquisition_fee_rate ?? 10}
+      />
 
       {/* Stripe Connect Status */}
       {!merchant.stripe_account_id && (
