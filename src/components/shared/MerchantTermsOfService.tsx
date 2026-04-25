@@ -104,7 +104,7 @@ PawBucks bears no financial liability for your transactions.
 
 5.1 Success Fee
 
-PawBucks charges a network service fee equal to 3% of the transaction amount ("Success Fee") for access to marketplace technology and related services.
+PawBucks charges a success fee equal to 3% of the transaction amount ("Success Fee") for access to marketplace technology and related services.
 
 5.2 Fee Collection
 
