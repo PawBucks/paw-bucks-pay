@@ -378,6 +378,7 @@ serve(async (req) => {
           }
 
           // Create transaction record
+          let transaction: { id: string } | null = null;
           if (invoicePayerUserId && merchantId) {
             const { data: invoiceForTx } = await supabaseAdmin
               .from('invoices')
@@ -394,7 +395,7 @@ serve(async (req) => {
             const totalTransactionAmount = cardPaymentAmount + pawbucksPaymentAmount;
             const platformFee = cardPaymentAmount * 0.03; // 3% fee on Stripe portion only
 
-            const { data: transaction, error: transactionError } = await supabaseAdmin
+            const { data: txData, error: transactionError } = await supabaseAdmin
               .from('transactions')
               .insert({
                 user_id: invoicePayerUserId,
@@ -415,6 +416,7 @@ serve(async (req) => {
             if (transactionError) {
               logStep("Error creating transaction", { error: transactionError.message });
             } else {
+              transaction = txData as { id: string } | null;
               logStep("Transaction created", { transactionId: transaction?.id });
             }
 
@@ -1070,7 +1072,7 @@ serve(async (req) => {
                   userId,
                   transactionAmount: totalAmount > 0 ? totalAmount : amountInDollars,
                   merchantCategory: merchantForBadge?.business_type || 'other',
-                  transactionId: paymentIntentId,
+                  transactionId: paymentIntent.id,
                 }),
               }).catch(err => console.error("[CONNECT-WEBHOOK] Badge check error:", err));
 
