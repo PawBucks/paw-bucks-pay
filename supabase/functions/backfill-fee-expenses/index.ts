@@ -126,7 +126,7 @@ serve(async (req: Request) => {
           merchant_id: merchant.id,
           category: "platform_fees",
           amount: Math.round(platformFee * 100) / 100,
-          description: `PawBucks Network Fee (3%) on $${stripeAmount.toFixed(2)} sale`,
+          description: `PawBucks Success Fee (3%) on $${stripeAmount.toFixed(2)} sale`,
           vendor_name: "PawBucks Network",
           expense_date: expenseDate,
           tax_year: taxYear,

@@ -8,7 +8,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-api-key",
 };
 
-const PLATFORM_FEE_RATE = 0.03; // 3% network fee on USD portion
+const PLATFORM_FEE_RATE = 0.03; // 3% success fee on USD portion
 
 // Clover webhook payload schema
 const cloverWebhookSchema = z.object({

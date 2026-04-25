@@ -46,7 +46,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 const getAutoLoggedTooltip = (category: string): string => {
   switch (category) {
     case 'platform_fees':
-      return 'Auto-logged PawBucks network fee (3% per transaction)';
+      return 'Auto-logged PawBucks success fee (3% per transaction)';
     case 'processing_fees':
       return 'Auto-logged Stripe card processing fee (pulled from Stripe)';
     case 'merchant_market':

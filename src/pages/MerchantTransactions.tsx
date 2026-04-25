@@ -172,7 +172,7 @@ const MerchantTransactions = () => {
   };
 
   const exportToCSV = () => {
-    const headers = ["Date", "Customer", "Amount", "Network Fee", "Funding Repayment", "Net Payout", "Payment Method", "Status"];
+    const headers = ["Date", "Customer", "Amount", "Success Fee", "Funding Repayment", "Net Payout", "Payment Method", "Status"];
     const csvData = sortedTransactions.map(t => [
       format(new Date(t.date), "MM/dd/yyyy"),
       t.customer_name,
@@ -286,7 +286,7 @@ const MerchantTransactions = () => {
           </Card>
           <Card>
             <CardHeader className="pb-3">
-              <CardDescription>Network Fees</CardDescription>
+              <CardDescription>Success Fees</CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-2xl font-bold text-muted-foreground">${summaryTotals.totalPlatformFees.toFixed(2)}</p>
@@ -422,7 +422,7 @@ const MerchantTransactions = () => {
                           Amount {sortColumn === "amount" && (sortDirection === "asc" ? "↑" : "↓")}
                         </TableHead>
                         <TableHead className="text-right">
-                          Network Fee
+                          Success Fee
                         </TableHead>
                         <TableHead className="text-right">
                           Repayment

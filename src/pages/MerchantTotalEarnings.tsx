@@ -93,7 +93,7 @@
                  <CardTitle className="text-3xl text-primary">
                    ${summary.totalEarnings.toFixed(2)}
                  </CardTitle>
-                 <CardDescription>Net earnings after network fees</CardDescription>
+                 <CardDescription>Net earnings after success fees</CardDescription>
                </div>
              </div>
            </CardHeader>
@@ -109,7 +109,7 @@
                <div className="p-4 rounded-lg bg-background border">
                  <div className="flex items-center gap-2 mb-2">
                    <DollarSign className="h-4 w-4 text-muted-foreground" />
-                   <span className="text-sm text-muted-foreground">Network Fees</span>
+                   <span className="text-sm text-muted-foreground">Success Fees</span>
                  </div>
                  <p className="text-2xl font-bold">${summary.totalFees.toFixed(2)}</p>
                </div>
@@ -217,7 +217,7 @@
          <Card className="bg-muted/30">
            <CardContent className="py-4">
              <p className="text-sm text-muted-foreground">
-               <strong>Note:</strong> Total earnings represent your net revenue after network fees (3% on Stripe-funded portion). 
+               <strong>Note:</strong> Total earnings represent your net revenue after success fees (3% on Stripe-funded portion). 
                This includes all completed transactions from Direct Payments and PawBucks platform transactions. 
                Refunded amounts are tracked separately and excluded from totals.
              </p>
