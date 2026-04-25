@@ -415,19 +415,18 @@ serve(async (req) => {
           remainingDeduction -= deductFromRelease;
         }
 
-        // Update ledger balances
-        await supabaseAdmin
-          .from('pet_fund_ledgers')
-          .update({
-            available_balance: supabaseAdmin.rpc ? undefined : 0, // Will be handled below
-            total_used: supabaseAdmin.rpc ? undefined : 0,
-          })
-          .eq('user_id', userId);
-
         // Use raw SQL update via RPC for atomic balance update
-        await supabaseAdmin.rpc('release_pet_fund_installment', { p_release_id: (availableReleases || [])[0]?.id }).catch(() => {
-          // Fallback: manually update ledger
-        });
+        try {
+          const { error: rpcError } = await supabaseAdmin.rpc(
+            'release_pet_fund_installment',
+            { p_release_id: (availableReleases || [])[0]?.id }
+          );
+          if (rpcError) {
+            // Fallback handled by manual ledger update below
+          }
+        } catch (_e) {
+          // Fallback handled by manual ledger update below
+        }
 
         // Manual ledger update
         const { data: currentLedger } = await supabaseAdmin

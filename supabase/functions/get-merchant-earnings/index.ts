@@ -92,9 +92,9 @@ serve(async (req) => {
     const payoutsEnabled = account.payouts_enabled || false;
 
     // Compute estimated arrival for pending balance from upcoming payouts
-    const pendingPayouts = allPayoutsResult.filter(p => ["pending", "in_transit"].includes(p.status));
+    const pendingPayouts = allPayoutsResult.filter((p: any) => ["pending", "in_transit"].includes(p.status));
     const nextArrivalDate = pendingPayouts.length > 0
-      ? Math.min(...pendingPayouts.map(p => p.arrival_date))
+      ? Math.min(...pendingPayouts.map((p: any) => p.arrival_date))
       : null;
 
     // Fetch balance transactions to get fee breakdown for charges
