@@ -17,6 +17,87 @@ const PLATFORM_FEE_PERCENT = 0.03; // 3% platform fee
 const PAWPASS_PLUS_PRODUCT_ID = 'prod_TQyZjYzt9DwoIK';
 const PAWPASS_PRODUCT_ID = 'prod_TJVK9ZhLiJnnpm';
 
+// PawBucks → USD conversion (1000 PB = $1.00)
+const PAWBUCKS_TO_USD = 0.001;
+
+/**
+ * Determine how many PawBucks to auto-apply to a recurring subscription charge
+ * based on the user's auto_redeem preference. Returns 0 if auto-redeem is off
+ * or if smart-mode coverage thresholds are not met.
+ *
+ * amountCents: full subscription amount about to be charged
+ * Returns: { pawbucksToUse, pawbucksUsdValue, mode }
+ */
+async function computeAutoRedeem(
+  supabaseAdmin: any,
+  userId: string,
+  amountCents: number,
+): Promise<{ pawbucksToUse: number; pawbucksUsdValue: number; mode: string }> {
+  try {
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('auto_redeem_mode, auto_redeem_min_coverage_pct, auto_redeem_max_apply_pct')
+      .eq('id', userId)
+      .maybeSingle();
+
+    const mode = (profile?.auto_redeem_mode as string) || 'off';
+    const minCoveragePct = profile?.auto_redeem_min_coverage_pct ?? 20;
+    const maxApplyPct = profile?.auto_redeem_max_apply_pct ?? 50;
+
+    // Recurring subscription renewal: trigger on 'subscriptions_only', 'always', or 'smart'
+    if (mode !== 'subscriptions_only' && mode !== 'always' && mode !== 'smart') {
+      return { pawbucksToUse: 0, pawbucksUsdValue: 0, mode };
+    }
+
+    const { data: wallet } = await supabaseAdmin
+      .from('pawbucks_wallet')
+      .select('balance')
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    const availablePB = wallet?.balance ?? 0;
+    if (availablePB <= 0) {
+      return { pawbucksToUse: 0, pawbucksUsdValue: 0, mode };
+    }
+
+    const amountDollars = amountCents / 100;
+    let pawbucksToUse = 0;
+
+    if (mode === 'always' || mode === 'subscriptions_only') {
+      // Apply as many PawBucks as possible, up to the full charge
+      const maxNeededPB = Math.floor(amountDollars / PAWBUCKS_TO_USD);
+      pawbucksToUse = Math.min(availablePB, maxNeededPB);
+    } else if (mode === 'smart') {
+      // Only apply if PawBucks meaningfully cover the charge
+      const coverageDollars = availablePB * PAWBUCKS_TO_USD;
+      const coveragePct = (coverageDollars / amountDollars) * 100;
+      if (coveragePct >= minCoveragePct) {
+        const capDollars = (amountDollars * maxApplyPct) / 100;
+        const capPB = Math.floor(capDollars / PAWBUCKS_TO_USD);
+        const maxNeededPB = Math.floor(amountDollars / PAWBUCKS_TO_USD);
+        pawbucksToUse = Math.min(availablePB, capPB, maxNeededPB);
+      }
+    }
+
+    // Stripe still needs a minimum charge (Stripe minimum is $0.50 = 50¢).
+    // Reserve at least 50¢ in cents for the card if any cents remain after redemption.
+    const pawbucksValueCents = Math.round(pawbucksToUse * PAWBUCKS_TO_USD * 100);
+    const remainingCents = amountCents - pawbucksValueCents;
+    if (remainingCents > 0 && remainingCents < 50) {
+      // Pull back PawBucks to leave at least $0.50 on the card
+      const pullBackCents = 50 - remainingCents;
+      const pullBackPB = Math.ceil(pullBackCents / (PAWBUCKS_TO_USD * 100));
+      pawbucksToUse = Math.max(0, pawbucksToUse - pullBackPB);
+    }
+
+    const pawbucksUsdValue = pawbucksToUse * PAWBUCKS_TO_USD;
+    return { pawbucksToUse, pawbucksUsdValue, mode };
+  } catch (err) {
+    logStep('Error computing auto-redeem (skipping)', { userId, error: String(err) });
+    return { pawbucksToUse: 0, pawbucksUsdValue: 0, mode: 'off' };
+  }
+}
+
 interface SubscriptionToProcess {
   id: string;
   user_id: string;
