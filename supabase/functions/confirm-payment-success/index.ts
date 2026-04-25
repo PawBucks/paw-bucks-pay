@@ -741,6 +741,7 @@ serve(async (req) => {
 
     // Trigger branded PawBucks distribution for "checkout" trigger type
     if (merchantId && userId) {
+      const supabaseUrl = Deno.env.get('SUPABASE_URL');
       fetch(`${supabaseUrl}/functions/v1/distribute-branded-pawbucks`, {
         method: 'POST',
         headers: {
