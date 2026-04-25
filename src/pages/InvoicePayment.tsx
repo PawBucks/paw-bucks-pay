@@ -203,7 +203,7 @@ const InvoicePayment = () => {
             const mode = (profile?.auto_redeem_mode as string) || "off";
             const minCoverage = profile?.auto_redeem_min_coverage_pct ?? 20;
             const maxApply = profile?.auto_redeem_max_apply_pct ?? 50;
-            const baseAmount = Number(invoice?.balance_due ?? invoice?.total ?? 0);
+            const baseAmount = Number((invoice as any)?.balance_due ?? invoice?.total ?? 0);
             if (baseAmount > 0 && wallet.balance > 0 && (mode === "always" || mode === "smart")) {
               const PB_TO_USD = 0.001;
               const maxNeededPB = Math.floor(baseAmount / PB_TO_USD);
