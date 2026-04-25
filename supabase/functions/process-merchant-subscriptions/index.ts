@@ -17,6 +17,87 @@ const PLATFORM_FEE_PERCENT = 0.03; // 3% platform fee
 const PAWPASS_PLUS_PRODUCT_ID = 'prod_TQyZjYzt9DwoIK';
 const PAWPASS_PRODUCT_ID = 'prod_TJVK9ZhLiJnnpm';
 
+// PawBucks → USD conversion (1000 PB = $1.00)
+const PAWBUCKS_TO_USD = 0.001;
+
+/**
+ * Determine how many PawBucks to auto-apply to a recurring subscription charge
+ * based on the user's auto_redeem preference. Returns 0 if auto-redeem is off
+ * or if smart-mode coverage thresholds are not met.
+ *
+ * amountCents: full subscription amount about to be charged
+ * Returns: { pawbucksToUse, pawbucksUsdValue, mode }
+ */
+async function computeAutoRedeem(
+  supabaseAdmin: any,
+  userId: string,
+  amountCents: number,
+): Promise<{ pawbucksToUse: number; pawbucksUsdValue: number; mode: string }> {
+  try {
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('auto_redeem_mode, auto_redeem_min_coverage_pct, auto_redeem_max_apply_pct')
+      .eq('id', userId)
+      .maybeSingle();
+
+    const mode = (profile?.auto_redeem_mode as string) || 'off';
+    const minCoveragePct = profile?.auto_redeem_min_coverage_pct ?? 20;
+    const maxApplyPct = profile?.auto_redeem_max_apply_pct ?? 50;
+
+    // Recurring subscription renewal: trigger on 'subscriptions_only', 'always', or 'smart'
+    if (mode !== 'subscriptions_only' && mode !== 'always' && mode !== 'smart') {
+      return { pawbucksToUse: 0, pawbucksUsdValue: 0, mode };
+    }
+
+    const { data: wallet } = await supabaseAdmin
+      .from('pawbucks_wallet')
+      .select('balance')
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    const availablePB = wallet?.balance ?? 0;
+    if (availablePB <= 0) {
+      return { pawbucksToUse: 0, pawbucksUsdValue: 0, mode };
+    }
+
+    const amountDollars = amountCents / 100;
+    let pawbucksToUse = 0;
+
+    if (mode === 'always' || mode === 'subscriptions_only') {
+      // Apply as many PawBucks as possible, up to the full charge
+      const maxNeededPB = Math.floor(amountDollars / PAWBUCKS_TO_USD);
+      pawbucksToUse = Math.min(availablePB, maxNeededPB);
+    } else if (mode === 'smart') {
+      // Only apply if PawBucks meaningfully cover the charge
+      const coverageDollars = availablePB * PAWBUCKS_TO_USD;
+      const coveragePct = (coverageDollars / amountDollars) * 100;
+      if (coveragePct >= minCoveragePct) {
+        const capDollars = (amountDollars * maxApplyPct) / 100;
+        const capPB = Math.floor(capDollars / PAWBUCKS_TO_USD);
+        const maxNeededPB = Math.floor(amountDollars / PAWBUCKS_TO_USD);
+        pawbucksToUse = Math.min(availablePB, capPB, maxNeededPB);
+      }
+    }
+
+    // Stripe still needs a minimum charge (Stripe minimum is $0.50 = 50¢).
+    // Reserve at least 50¢ in cents for the card if any cents remain after redemption.
+    const pawbucksValueCents = Math.round(pawbucksToUse * PAWBUCKS_TO_USD * 100);
+    const remainingCents = amountCents - pawbucksValueCents;
+    if (remainingCents > 0 && remainingCents < 50) {
+      // Pull back PawBucks to leave at least $0.50 on the card
+      const pullBackCents = 50 - remainingCents;
+      const pullBackPB = Math.ceil(pullBackCents / (PAWBUCKS_TO_USD * 100));
+      pawbucksToUse = Math.max(0, pawbucksToUse - pullBackPB);
+    }
+
+    const pawbucksUsdValue = pawbucksToUse * PAWBUCKS_TO_USD;
+    return { pawbucksToUse, pawbucksUsdValue, mode };
+  } catch (err) {
+    logStep('Error computing auto-redeem (skipping)', { userId, error: String(err) });
+    return { pawbucksToUse: 0, pawbucksUsdValue: 0, mode: 'off' };
+  }
+}
+
 interface SubscriptionToProcess {
   id: string;
   user_id: string;
@@ -325,13 +406,48 @@ serve(async (req) => {
           ? defaultPaymentMethod 
           : defaultPaymentMethod.id;
 
-        // Calculate application fee
-        const applicationFee = Math.round(subscription.amount * PLATFORM_FEE_PERCENT);
+        // === AUTO-REDEEM PAWBUCKS ===
+        // Apply user's auto-redeem preference to reduce the Stripe charge
+        const autoRedeem = await computeAutoRedeem(
+          supabaseAdmin,
+          subscription.user_id,
+          subscription.amount,
+        );
+        const pawbucksToUse = autoRedeem.pawbucksToUse;
+        const pawbucksValueCents = Math.round(pawbucksToUse * PAWBUCKS_TO_USD * 100);
+        const stripeChargeAmount = subscription.amount - pawbucksValueCents;
+
+        logStep("Auto-redeem decision", {
+          subscriptionId: subscription.id,
+          mode: autoRedeem.mode,
+          pawbucksToUse,
+          pawbucksValueCents,
+          stripeChargeAmount,
+          fullAmount: subscription.amount,
+        });
+
+        // If PawBucks fully cover the charge, skip Stripe entirely
+        if (stripeChargeAmount <= 0 && pawbucksToUse > 0) {
+          await handleFullPawBucksRenewal(
+            supabaseAdmin,
+            stripe,
+            subscription,
+            pawbucksToUse,
+            pawbucksValueCents,
+          );
+          results.succeeded++;
+          results.details.push({ subscriptionId: subscription.id, status: "succeeded", pawbucksEarned: 0 });
+          results.processed++;
+          continue;
+        }
+
+        // Calculate application fee on the Stripe-charged portion only
+        const applicationFee = Math.round(stripeChargeAmount * PLATFORM_FEE_PERCENT);
 
         // Create PaymentIntent on connected account (off-session)
         const paymentIntent = await stripe.paymentIntents.create(
           {
-            amount: subscription.amount,
+            amount: stripeChargeAmount,
             currency: subscription.currency,
             customer: subscription.stripe_customer_id_on_connected,
             payment_method: paymentMethodId,
@@ -346,6 +462,8 @@ serve(async (req) => {
               subscription_type: "merchant_recurring",
               billing_type: "renewal",
               platform: "pawbucks",
+              pawbucks_used: String(pawbucksToUse),
+              auto_redeem_mode: autoRedeem.mode,
             },
           },
           { stripeAccount: subscription.connected_account_id }
@@ -353,17 +471,33 @@ serve(async (req) => {
 
         logStep("PaymentIntent created", { 
           paymentIntentId: paymentIntent.id,
-          status: paymentIntent.status 
+          status: paymentIntent.status,
+          stripeAmount: stripeChargeAmount,
+          pawbucksApplied: pawbucksToUse,
         });
 
         if (paymentIntent.status === "succeeded") {
+          // Deduct redeemed PawBucks from wallet now that the charge succeeded
+          if (pawbucksToUse > 0) {
+            await debitPawBucksForRedemption(
+              supabaseAdmin,
+              subscription.user_id,
+              subscription.merchant_id,
+              pawbucksToUse,
+              subscription.product_name,
+              paymentIntent.id,
+            );
+          }
+
           // Payment succeeded - update subscription and credit PawBucks
           const pawbucksEarned = await handlePaymentSuccess(
             supabaseAdmin, 
             stripe,
             subscription, 
             paymentIntent.id,
-            applicationFee
+            applicationFee,
+            pawbucksToUse,
+            stripeChargeAmount,
           );
           results.succeeded++;
           results.totalPawBucksAwarded += pawbucksEarned;
@@ -428,9 +562,18 @@ async function handlePaymentSuccess(
   stripe: Stripe,
   subscription: SubscriptionToProcess,
   paymentIntentId: string,
-  applicationFee: number
+  applicationFee: number,
+  pawbucksUsed: number = 0,
+  stripeChargeAmount?: number,
 ): Promise<number> {
   const now = new Date();
+  // Use the actual Stripe-charged portion for fee logging and rewards calculation;
+  // fall back to the full subscription amount for legacy callers.
+  const chargedCents = typeof stripeChargeAmount === "number" ? stripeChargeAmount : subscription.amount;
+  const pawbucksValueCents = Math.round(pawbucksUsed * PAWBUCKS_TO_USD * 100);
+  const fullAmountDollars = subscription.amount / 100;
+  const chargedDollars = chargedCents / 100;
+  const pawbucksUsdValue = pawbucksValueCents / 100;
   
   // Calculate next billing date
   const nextBilling = new Date(now);
@@ -473,7 +616,9 @@ async function handlePaymentSuccess(
   });
 
   // === PAWBUCKS REWARDS PROCESSING ===
-  const amountInDollars = subscription.amount / 100;
+  // Earn PawBucks only on the Stripe-charged portion (consistent with policy that
+  // rewards are not earned on PawBucks-redeemed amounts).
+  const amountInDollars = chargedDollars;
 
   // Get user's subscription tier for multiplier
   const { multiplier, tierName } = await getUserTierMultiplier(supabase, stripe, subscription.user_id);
@@ -500,7 +645,7 @@ async function handlePaymentSuccess(
         merchant_id: subscription.merchant_id,
         category: "platform_fees",
         amount: applicationFee / 100, // Convert to dollars
-        description: `PawBucks Network Fee (3%) on $${amountInDollars.toFixed(2)} subscription renewal`,
+        description: `PawBucks Network Fee (3%) on $${chargedDollars.toFixed(2)} subscription renewal (card portion)`,
         vendor_name: "PawBucks Network",
         expense_date: expenseDate,
         tax_year: taxYear,
@@ -519,16 +664,18 @@ async function handlePaymentSuccess(
     .insert({
       user_id: subscription.user_id,
       merchant_id: subscription.merchant_id,
-      amount: amountInDollars,
-      stripe_amount: amountInDollars,
-      pawbucks_used: 0,
+      amount: fullAmountDollars,
+      stripe_amount: chargedDollars,
+      pawbucks_used: pawbucksUsed,
       application_fee: platformFeeInDollars,
       cashback_earned: pawbucksEarned,
       rewards_earned: pawbucksEarned,
-      description: `${subscription.product_name} subscription renewal`,
+      description: pawbucksUsed > 0
+        ? `${subscription.product_name} subscription renewal (auto-redeemed ${pawbucksUsed} PB)`
+        : `${subscription.product_name} subscription renewal`,
       status: "completed",
       stripe_payment_intent_id: paymentIntentId,
-      payment_method: "card",
+      payment_method: pawbucksUsed > 0 ? "mixed" : "card",
     })
     .select()
     .single();
@@ -536,14 +683,17 @@ async function handlePaymentSuccess(
   if (txError) {
     logStep("Error creating transaction record", { subscriptionId: subscription.id, error: txError.message });
   } else {
-    logStep("Transaction record created", { transactionId: txRecord?.id, amount: amountInDollars });
+    logStep("Transaction record created", { transactionId: txRecord?.id, amount: fullAmountDollars, pawbucksUsed });
   }
 
   // Send notification to user about renewal and rewards
+  const renewalNotice = pawbucksUsed > 0
+    ? `Your ${subscription.product_name} subscription renewed. We auto-redeemed ${pawbucksUsed.toLocaleString()} PawBucks ($${pawbucksUsdValue.toFixed(2)}) and charged $${chargedDollars.toFixed(2)}. You earned ${pawbucksEarned} PawBucks.`
+    : `Your ${subscription.product_name} subscription has been renewed. You earned ${pawbucksEarned} PawBucks!`;
   await supabase.from("notifications").insert({
     user_id: subscription.user_id,
     title: "Subscription Renewed",
-    message: `Your ${subscription.product_name} subscription has been renewed. You earned ${pawbucksEarned} PawBucks!`,
+    message: renewalNotice,
     category: "transactional",
   });
 
@@ -579,11 +729,11 @@ async function handlePaymentSuccess(
           receiptId: paymentIntentId || subscription.id,
           merchantName: merchantData?.business_name || subscription.product_name,
           merchantLocation: merchantData?.address || undefined,
-          items: [{ name: `${subscription.product_name} Subscription (Renewal)`, price: amountInDollars }],
-          subtotal: amountInDollars,
-          pawbucksApplied: 0,
-          cardAmount: amountInDollars,
-          totalPaid: amountInDollars,
+          items: [{ name: `${subscription.product_name} Subscription (Renewal)`, price: fullAmountDollars }],
+          subtotal: fullAmountDollars,
+          pawbucksApplied: pawbucksUsed,
+          cardAmount: chargedDollars,
+          totalPaid: fullAmountDollars,
           pawbucksEarned,
           tierInfo: { tierName, multiplier },
         }),
@@ -748,4 +898,107 @@ async function handleAccountInactive(
     subscriptionId: subscription.id,
     reason 
   });
+}
+
+// Debit redeemed PawBucks from user's wallet and log the redeem activity.
+async function debitPawBucksForRedemption(
+  supabase: any,
+  userId: string,
+  merchantId: string,
+  pawbucksUsed: number,
+  productName: string,
+  paymentIntentId: string,
+) {
+  if (pawbucksUsed <= 0) return;
+  try {
+    const { data: wallet } = await supabase
+      .from('pawbucks_wallet')
+      .select('balance')
+      .eq('user_id', userId)
+      .single();
+    if (wallet) {
+      await supabase
+        .from('pawbucks_wallet')
+        .update({ balance: Math.max(0, wallet.balance - pawbucksUsed) })
+        .eq('user_id', userId);
+    }
+    await supabase.from('pawbucks_activity').insert({
+      user_id: userId,
+      amount: -pawbucksUsed,
+      type: 'redeem',
+      source: 'subscription_renewal',
+      description: `Auto-redeemed ${pawbucksUsed} PawBucks on ${productName} renewal`,
+      pawbucks_status: 'available',
+      partner_id: merchantId,
+      metadata: { payment_intent_id: paymentIntentId, auto_redeem: true },
+    });
+  } catch (err) {
+    logStep('Error debiting PawBucks for redemption', { userId, error: String(err) });
+  }
+}
+
+// Handle a renewal that is fully covered by PawBucks (no Stripe charge needed).
+async function handleFullPawBucksRenewal(
+  supabase: any,
+  stripe: Stripe,
+  subscription: SubscriptionToProcess,
+  pawbucksUsed: number,
+  pawbucksValueCents: number,
+) {
+  const now = new Date();
+  const nextBilling = new Date(now);
+  switch (subscription.billing_interval) {
+    case 'day': nextBilling.setDate(nextBilling.getDate() + subscription.billing_interval_count); break;
+    case 'week': nextBilling.setDate(nextBilling.getDate() + (7 * subscription.billing_interval_count)); break;
+    case 'month': nextBilling.setMonth(nextBilling.getMonth() + subscription.billing_interval_count); break;
+    case 'year': nextBilling.setFullYear(nextBilling.getFullYear() + subscription.billing_interval_count); break;
+  }
+
+  await supabase.from('merchant_subscriptions').update({
+    status: 'active',
+    current_period_start: now.toISOString(),
+    current_period_end: nextBilling.toISOString(),
+    next_billing_date: nextBilling.toISOString(),
+    last_payment_date: now.toISOString(),
+    last_payment_status: 'succeeded_pawbucks',
+    failed_payment_count: 0,
+  }).eq('id', subscription.id);
+
+  await supabase.from('merchant_subscription_events').insert({
+    subscription_id: subscription.id,
+    event_type: 'renewed',
+    amount: subscription.amount,
+    metadata: { paid_with: 'pawbucks_only', pawbucks_used: pawbucksUsed },
+  });
+
+  // Debit wallet
+  await debitPawBucksForRedemption(
+    supabase, subscription.user_id, subscription.merchant_id,
+    pawbucksUsed, subscription.product_name, `pawbucks-only-${subscription.id}-${now.getTime()}`,
+  );
+
+  // Transaction record (no Stripe charge)
+  const fullAmountDollars = subscription.amount / 100;
+  await supabase.from('transactions').insert({
+    user_id: subscription.user_id,
+    merchant_id: subscription.merchant_id,
+    amount: fullAmountDollars,
+    stripe_amount: 0,
+    pawbucks_used: pawbucksUsed,
+    application_fee: 0,
+    cashback_earned: 0,
+    rewards_earned: 0,
+    description: `${subscription.product_name} subscription renewal (fully paid with PawBucks)`,
+    status: 'completed',
+    payment_method: 'pawbucks',
+  });
+
+  await supabase.from('notifications').insert({
+    user_id: subscription.user_id,
+    title: 'Subscription Renewed (PawBucks)',
+    message: `Your ${subscription.product_name} subscription renewed using ${pawbucksUsed.toLocaleString()} PawBucks ($${(pawbucksValueCents / 100).toFixed(2)}). No card charge.`,
+    category: 'transactional',
+  });
+
+  logStep('Renewal fully covered by PawBucks', { subscriptionId: subscription.id, pawbucksUsed });
 }

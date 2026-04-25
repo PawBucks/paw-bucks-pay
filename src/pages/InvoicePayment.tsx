@@ -192,6 +192,39 @@ const InvoicePayment = () => {
         } else if (wallet) {
           console.log("[PawBucks] Wallet found! Balance:", wallet.balance);
           setPawbucksBalance(wallet.balance);
+
+          // Auto-redeem: pre-apply PawBucks per user's preference
+          try {
+            const { data: profile } = await supabase
+              .from("profiles")
+              .select("auto_redeem_mode, auto_redeem_min_coverage_pct, auto_redeem_max_apply_pct")
+              .eq("id", user.id)
+              .maybeSingle();
+            const mode = (profile?.auto_redeem_mode as string) || "off";
+            const minCoverage = profile?.auto_redeem_min_coverage_pct ?? 20;
+            const maxApply = profile?.auto_redeem_max_apply_pct ?? 50;
+            const baseAmount = Number((invoice as any)?.balance_due ?? invoice?.total ?? 0);
+            if (baseAmount > 0 && wallet.balance > 0 && (mode === "always" || mode === "smart")) {
+              const PB_TO_USD = 0.001;
+              const maxNeededPB = Math.floor(baseAmount / PB_TO_USD);
+              let apply = 0;
+              if (mode === "always") {
+                apply = Math.min(wallet.balance, maxNeededPB);
+              } else {
+                const coveragePct = ((wallet.balance * PB_TO_USD) / baseAmount) * 100;
+                if (coveragePct >= minCoverage) {
+                  const capPB = Math.floor(((baseAmount * maxApply) / 100) / PB_TO_USD);
+                  apply = Math.min(wallet.balance, capPB, maxNeededPB);
+                }
+              }
+              if (apply > 0) {
+                console.log("[PawBucks] Auto-redeem pre-applied:", { mode, apply });
+                setPawbucksToUse(apply);
+              }
+            }
+          } catch (arErr) {
+            console.warn("[PawBucks] Auto-redeem pre-apply failed (non-fatal):", arErr);
+          }
         } else {
           console.log("[PawBucks] No wallet found for user");
           setPawbucksBalance(0);
