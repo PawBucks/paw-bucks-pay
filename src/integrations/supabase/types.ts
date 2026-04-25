@@ -5090,6 +5090,66 @@ export type Database = {
         }
         Relationships: []
       }
+      merchant_account_type_change_requests: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          current_fee_model: string
+          id: string
+          merchant_id: string
+          reason: string | null
+          requested_fee_model: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          current_fee_model: string
+          id?: string
+          merchant_id: string
+          reason?: string | null
+          requested_fee_model: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          current_fee_model?: string
+          id?: string
+          merchant_id?: string
+          reason?: string | null
+          requested_fee_model?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_account_type_change_requests_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_account_type_change_requests_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       merchant_analytics_products: {
         Row: {
           billing_period: string | null
