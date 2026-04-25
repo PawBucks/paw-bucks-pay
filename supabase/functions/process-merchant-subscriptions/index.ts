@@ -562,9 +562,18 @@ async function handlePaymentSuccess(
   stripe: Stripe,
   subscription: SubscriptionToProcess,
   paymentIntentId: string,
-  applicationFee: number
+  applicationFee: number,
+  pawbucksUsed: number = 0,
+  stripeChargeAmount?: number,
 ): Promise<number> {
   const now = new Date();
+  // Use the actual Stripe-charged portion for fee logging and rewards calculation;
+  // fall back to the full subscription amount for legacy callers.
+  const chargedCents = typeof stripeChargeAmount === "number" ? stripeChargeAmount : subscription.amount;
+  const pawbucksValueCents = Math.round(pawbucksUsed * PAWBUCKS_TO_USD * 100);
+  const fullAmountDollars = subscription.amount / 100;
+  const chargedDollars = chargedCents / 100;
+  const pawbucksUsdValue = pawbucksValueCents / 100;
   
   // Calculate next billing date
   const nextBilling = new Date(now);
@@ -607,7 +616,9 @@ async function handlePaymentSuccess(
   });
 
   // === PAWBUCKS REWARDS PROCESSING ===
-  const amountInDollars = subscription.amount / 100;
+  // Earn PawBucks only on the Stripe-charged portion (consistent with policy that
+  // rewards are not earned on PawBucks-redeemed amounts).
+  const amountInDollars = chargedDollars;
 
   // Get user's subscription tier for multiplier
   const { multiplier, tierName } = await getUserTierMultiplier(supabase, stripe, subscription.user_id);
@@ -634,7 +645,7 @@ async function handlePaymentSuccess(
         merchant_id: subscription.merchant_id,
         category: "platform_fees",
         amount: applicationFee / 100, // Convert to dollars
-        description: `PawBucks Network Fee (3%) on $${amountInDollars.toFixed(2)} subscription renewal`,
+        description: `PawBucks Network Fee (3%) on $${chargedDollars.toFixed(2)} subscription renewal (card portion)`,
         vendor_name: "PawBucks Network",
         expense_date: expenseDate,
         tax_year: taxYear,
@@ -653,16 +664,18 @@ async function handlePaymentSuccess(
     .insert({
       user_id: subscription.user_id,
       merchant_id: subscription.merchant_id,
-      amount: amountInDollars,
-      stripe_amount: amountInDollars,
-      pawbucks_used: 0,
+      amount: fullAmountDollars,
+      stripe_amount: chargedDollars,
+      pawbucks_used: pawbucksUsed,
       application_fee: platformFeeInDollars,
       cashback_earned: pawbucksEarned,
       rewards_earned: pawbucksEarned,
-      description: `${subscription.product_name} subscription renewal`,
+      description: pawbucksUsed > 0
+        ? `${subscription.product_name} subscription renewal (auto-redeemed ${pawbucksUsed} PB)`
+        : `${subscription.product_name} subscription renewal`,
       status: "completed",
       stripe_payment_intent_id: paymentIntentId,
-      payment_method: "card",
+      payment_method: pawbucksUsed > 0 ? "mixed" : "card",
     })
     .select()
     .single();
@@ -670,14 +683,17 @@ async function handlePaymentSuccess(
   if (txError) {
     logStep("Error creating transaction record", { subscriptionId: subscription.id, error: txError.message });
   } else {
-    logStep("Transaction record created", { transactionId: txRecord?.id, amount: amountInDollars });
+    logStep("Transaction record created", { transactionId: txRecord?.id, amount: fullAmountDollars, pawbucksUsed });
   }
 
   // Send notification to user about renewal and rewards
+  const renewalNotice = pawbucksUsed > 0
+    ? `Your ${subscription.product_name} subscription renewed. We auto-redeemed ${pawbucksUsed.toLocaleString()} PawBucks ($${pawbucksUsdValue.toFixed(2)}) and charged $${chargedDollars.toFixed(2)}. You earned ${pawbucksEarned} PawBucks.`
+    : `Your ${subscription.product_name} subscription has been renewed. You earned ${pawbucksEarned} PawBucks!`;
   await supabase.from("notifications").insert({
     user_id: subscription.user_id,
     title: "Subscription Renewed",
-    message: `Your ${subscription.product_name} subscription has been renewed. You earned ${pawbucksEarned} PawBucks!`,
+    message: renewalNotice,
     category: "transactional",
   });
 
@@ -713,11 +729,11 @@ async function handlePaymentSuccess(
           receiptId: paymentIntentId || subscription.id,
           merchantName: merchantData?.business_name || subscription.product_name,
           merchantLocation: merchantData?.address || undefined,
-          items: [{ name: `${subscription.product_name} Subscription (Renewal)`, price: amountInDollars }],
-          subtotal: amountInDollars,
-          pawbucksApplied: 0,
-          cardAmount: amountInDollars,
-          totalPaid: amountInDollars,
+          items: [{ name: `${subscription.product_name} Subscription (Renewal)`, price: fullAmountDollars }],
+          subtotal: fullAmountDollars,
+          pawbucksApplied: pawbucksUsed,
+          cardAmount: chargedDollars,
+          totalPaid: fullAmountDollars,
           pawbucksEarned,
           tierInfo: { tierName, multiplier },
         }),
