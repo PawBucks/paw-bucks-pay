@@ -899,3 +899,106 @@ async function handleAccountInactive(
     reason 
   });
 }
+
+// Debit redeemed PawBucks from user's wallet and log the redeem activity.
+async function debitPawBucksForRedemption(
+  supabase: any,
+  userId: string,
+  merchantId: string,
+  pawbucksUsed: number,
+  productName: string,
+  paymentIntentId: string,
+) {
+  if (pawbucksUsed <= 0) return;
+  try {
+    const { data: wallet } = await supabase
+      .from('pawbucks_wallet')
+      .select('balance')
+      .eq('user_id', userId)
+      .single();
+    if (wallet) {
+      await supabase
+        .from('pawbucks_wallet')
+        .update({ balance: Math.max(0, wallet.balance - pawbucksUsed) })
+        .eq('user_id', userId);
+    }
+    await supabase.from('pawbucks_activity').insert({
+      user_id: userId,
+      amount: -pawbucksUsed,
+      type: 'redeem',
+      source: 'subscription_renewal',
+      description: `Auto-redeemed ${pawbucksUsed} PawBucks on ${productName} renewal`,
+      pawbucks_status: 'available',
+      partner_id: merchantId,
+      metadata: { payment_intent_id: paymentIntentId, auto_redeem: true },
+    });
+  } catch (err) {
+    logStep('Error debiting PawBucks for redemption', { userId, error: String(err) });
+  }
+}
+
+// Handle a renewal that is fully covered by PawBucks (no Stripe charge needed).
+async function handleFullPawBucksRenewal(
+  supabase: any,
+  stripe: Stripe,
+  subscription: SubscriptionToProcess,
+  pawbucksUsed: number,
+  pawbucksValueCents: number,
+) {
+  const now = new Date();
+  const nextBilling = new Date(now);
+  switch (subscription.billing_interval) {
+    case 'day': nextBilling.setDate(nextBilling.getDate() + subscription.billing_interval_count); break;
+    case 'week': nextBilling.setDate(nextBilling.getDate() + (7 * subscription.billing_interval_count)); break;
+    case 'month': nextBilling.setMonth(nextBilling.getMonth() + subscription.billing_interval_count); break;
+    case 'year': nextBilling.setFullYear(nextBilling.getFullYear() + subscription.billing_interval_count); break;
+  }
+
+  await supabase.from('merchant_subscriptions').update({
+    status: 'active',
+    current_period_start: now.toISOString(),
+    current_period_end: nextBilling.toISOString(),
+    next_billing_date: nextBilling.toISOString(),
+    last_payment_date: now.toISOString(),
+    last_payment_status: 'succeeded_pawbucks',
+    failed_payment_count: 0,
+  }).eq('id', subscription.id);
+
+  await supabase.from('merchant_subscription_events').insert({
+    subscription_id: subscription.id,
+    event_type: 'renewed',
+    amount: subscription.amount,
+    metadata: { paid_with: 'pawbucks_only', pawbucks_used: pawbucksUsed },
+  });
+
+  // Debit wallet
+  await debitPawBucksForRedemption(
+    supabase, subscription.user_id, subscription.merchant_id,
+    pawbucksUsed, subscription.product_name, `pawbucks-only-${subscription.id}-${now.getTime()}`,
+  );
+
+  // Transaction record (no Stripe charge)
+  const fullAmountDollars = subscription.amount / 100;
+  await supabase.from('transactions').insert({
+    user_id: subscription.user_id,
+    merchant_id: subscription.merchant_id,
+    amount: fullAmountDollars,
+    stripe_amount: 0,
+    pawbucks_used: pawbucksUsed,
+    application_fee: 0,
+    cashback_earned: 0,
+    rewards_earned: 0,
+    description: `${subscription.product_name} subscription renewal (fully paid with PawBucks)`,
+    status: 'completed',
+    payment_method: 'pawbucks',
+  });
+
+  await supabase.from('notifications').insert({
+    user_id: subscription.user_id,
+    title: 'Subscription Renewed (PawBucks)',
+    message: `Your ${subscription.product_name} subscription renewed using ${pawbucksUsed.toLocaleString()} PawBucks ($${(pawbucksValueCents / 100).toFixed(2)}). No card charge.`,
+    category: 'transactional',
+  });
+
+  logStep('Renewal fully covered by PawBucks', { subscriptionId: subscription.id, pawbucksUsed });
+}
