@@ -154,7 +154,7 @@ const COOLDOWN_WEEKS_AFTER_CONSECUTIVE = 4; // 4 consecutive weeks triggers 1-we
  * Returns { allowed: true } or { allowed: false, reason: string }
  */
 async function checkAntiMonopoly(
-  supabaseAdmin: ReturnType<typeof createClient>,
+  supabaseAdmin: any,
   merchantId: string,
   serviceId: string,
   geoCellId: string | null,
@@ -261,7 +261,7 @@ async function checkAntiMonopoly(
  * Returns { allowed: true } or { allowed: false, reason: string }
  */
 async function checkGeoCellScarcity(
-  supabaseAdmin: ReturnType<typeof createClient>,
+  supabaseAdmin: any,
   merchantId: string,
   serviceId: string,
   billingPeriod: string | undefined,
@@ -405,7 +405,7 @@ async function checkGeoCellScarcity(
  * Reserve a geo cell slot after successful purchase
  */
 async function reserveGeoCellSlot(
-  supabaseAdmin: ReturnType<typeof createClient>,
+  supabaseAdmin: any,
   geoCellId: string,
   serviceId: string,
   merchantId: string,
