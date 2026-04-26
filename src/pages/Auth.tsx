@@ -539,23 +539,25 @@ const Auth = () => {
               The trusted platform for pet owners &amp; businesses
             </p>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1">
+          <div className="flex flex-col items-center gap-1 text-xs text-muted-foreground sm:flex-row sm:flex-wrap sm:justify-center sm:gap-x-4">
+            <span className="inline-flex items-center gap-1 whitespace-nowrap">
               <Lock className="w-3 h-3 text-primary" />
-              Payments by{" "}
-              <a
-                href="https://stripe.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline hover:text-primary"
-              >
-                Stripe
-              </a>
+              <span>
+                Payments by{" "}
+                <a
+                  href="https://stripe.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline hover:text-primary"
+                >
+                  Stripe
+                </a>
+              </span>
             </span>
-            <span className="text-muted-foreground/50">•</span>
-            <span>PawBucks, Inc. · Los Angeles, CA</span>
+            <span className="hidden sm:inline text-muted-foreground/50">•</span>
+            <span className="whitespace-nowrap">PawBucks, Inc. · Los Angeles, CA</span>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+          <div className="flex items-center justify-center gap-x-3 text-xs text-muted-foreground">
             <a href="/about" className="underline hover:text-primary">About</a>
             <span className="text-muted-foreground/50">•</span>
             <a href="mailto:Legal@PawBucks.app" className="underline hover:text-primary">Contact</a>
