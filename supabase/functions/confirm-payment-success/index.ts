@@ -223,7 +223,22 @@ serve(async (req) => {
     }
 
     // Calculate PawBucks earned based on Stripe amount and user's tier
-    const pawbucksEarned = Math.floor(amountInDollars * pawbucksMultiplier);
+    let pawbucksEarned = Math.floor(amountInDollars * pawbucksMultiplier);
+
+    // Acquisition-Only merchants only reward PawBucks on the customer's first visit.
+    const suppressAcq = await shouldSuppressPawBucksForAcquisitionOnly(
+      supabaseAdmin,
+      userId,
+      merchantId
+    );
+    if (suppressAcq) {
+      logStep("Acquisition-Only merchant + returning customer → suppressing PawBucks", {
+        userId,
+        merchantId,
+        wouldHaveEarned: pawbucksEarned,
+      });
+      pawbucksEarned = 0;
+    }
 
     // Get user profile for receipt
     const { data: userProfile } = await supabaseAdmin
