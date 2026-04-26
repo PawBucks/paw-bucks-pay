@@ -284,7 +284,34 @@ serve(async (req) => {
 
     const cashbackRate = merchant?.cashback_rate || 5;
     // PawBucks earn: only on the cash portion
-    const pawbucksEarned = Math.floor(cashPortionUsd * (cashbackRate / 100));
+    let pawbucksEarned = Math.floor(cashPortionUsd * (cashbackRate / 100));
+
+    // Acquisition-Only enforcement: only first-visit customers earn PawBucks.
+    try {
+      const { data: merchantFee } = await supabaseAdmin
+        .from('merchants')
+        .select('fee_model')
+        .eq('id', integration.merchant_id)
+        .maybeSingle();
+      if (merchantFee?.fee_model === 'acquisition_only') {
+        const { count } = await supabaseAdmin
+          .from('transactions')
+          .select('id', { count: 'exact', head: true })
+          .eq('merchant_id', integration.merchant_id)
+          .eq('user_id', matchedUser.id)
+          .eq('status', 'completed');
+        if ((count || 0) > 0) {
+          console.log('[CLOVER] Acquisition-Only + returning customer → suppressing PawBucks', {
+            user_id: matchedUser.id,
+            merchant_id: integration.merchant_id,
+            wouldHaveEarned: pawbucksEarned,
+          });
+          pawbucksEarned = 0;
+        }
+      }
+    } catch (e) {
+      console.error('[CLOVER] Acquisition-Only check error', e);
+    }
 
     // ── 9. Debit PawBucks if redeemed ──
     if (requestedPawbucks > 0) {

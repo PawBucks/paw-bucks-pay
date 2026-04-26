@@ -11,6 +11,38 @@ const logStep = (step: string, details?: Record<string, unknown>) => {
   console.log(`[CONFIRM-PAYMENT-SUCCESS] ${step}`, details ? JSON.stringify(details) : "");
 };
 
+/**
+ * Acquisition-Only enforcement:
+ * Returns true if the merchant is acquisition_only AND the user already has a
+ * prior completed transaction at this merchant. In that case, NO PawBucks
+ * should be awarded to the pet owner.
+ */
+async function shouldSuppressPawBucksForAcquisitionOnly(
+  supabaseAdmin: any,
+  userId: string,
+  merchantId: string
+): Promise<boolean> {
+  try {
+    const { data: merchant } = await supabaseAdmin
+      .from('merchants')
+      .select('fee_model')
+      .eq('id', merchantId)
+      .maybeSingle();
+    if (merchant?.fee_model !== 'acquisition_only') return false;
+
+    const { count } = await supabaseAdmin
+      .from('transactions')
+      .select('id', { count: 'exact', head: true })
+      .eq('merchant_id', merchantId)
+      .eq('user_id', userId)
+      .eq('status', 'completed');
+    return (count || 0) > 0;
+  } catch (e) {
+    console.error('[ACQUISITION_ONLY_CHECK] Error', e);
+    return false;
+  }
+}
+
 // Helper function to send receipt email
 async function sendReceiptEmail(params: {
   email: string;
@@ -191,7 +223,22 @@ serve(async (req) => {
     }
 
     // Calculate PawBucks earned based on Stripe amount and user's tier
-    const pawbucksEarned = Math.floor(amountInDollars * pawbucksMultiplier);
+    let pawbucksEarned = Math.floor(amountInDollars * pawbucksMultiplier);
+
+    // Acquisition-Only merchants only reward PawBucks on the customer's first visit.
+    const suppressAcq = await shouldSuppressPawBucksForAcquisitionOnly(
+      supabaseAdmin,
+      userId,
+      merchantId
+    );
+    if (suppressAcq) {
+      logStep("Acquisition-Only merchant + returning customer → suppressing PawBucks", {
+        userId,
+        merchantId,
+        wouldHaveEarned: pawbucksEarned,
+      });
+      pawbucksEarned = 0;
+    }
 
     // Get user profile for receipt
     const { data: userProfile } = await supabaseAdmin
