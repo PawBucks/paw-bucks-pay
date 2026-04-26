@@ -706,3 +706,143 @@ export const respondToCampaignInvitation = async (invitationId: string, accept: 
   } as never);
   return { data, error };
 };
+
+// ============================================================
+// Merchant-initiated join requests
+// ============================================================
+export interface AvailableBrandCampaign {
+  id: string;
+  brand_id: string;
+  name: string;
+  description: string | null;
+  pawbucks_per_checkin: number;
+  pawbucks_pool: number;
+  budget_usd: number;
+  start_date: string | null;
+  end_date: string | null;
+  campaign_color: string | null;
+  campaign_logo_url: string | null;
+  targeting_notes: string | null;
+  trigger_type: string;
+  min_purchase_usd: number;
+  status: string;
+  brand_name: string;
+  brand_logo_url: string | null;
+  brand_description: string | null;
+  brand_website_url: string | null;
+  existing_request_status: string | null;
+  existing_invitation_status: string | null;
+}
+
+export interface BrandCampaignJoinRequest {
+  id: string;
+  campaign_id: string;
+  merchant_id: string;
+  requested_by: string;
+  status: "pending" | "approved" | "declined" | "cancelled";
+  message: string | null;
+  response_message: string | null;
+  requested_at: string;
+  responded_at: string | null;
+  responded_by: string | null;
+  merchants?: { business_name: string; logo_url: string | null } | null;
+  brand_campaigns?: { name: string; campaign_color: string | null } | null;
+}
+
+export const getAvailableBrandCampaigns = async (
+  merchantId: string,
+): Promise<ServiceListResult<AvailableBrandCampaign>> => {
+  try {
+    const { data, error } = await supabase.rpc("get_available_brand_campaigns", {
+      p_merchant_id: merchantId,
+    } as never);
+    return { data: (data || []) as unknown as AvailableBrandCampaign[], error };
+  } catch (error) {
+    return { data: [], error: handleError(error) };
+  }
+};
+
+export const requestToJoinBrandCampaign = async (
+  campaignId: string,
+  merchantId: string,
+  message?: string,
+): Promise<ServiceResult<BrandCampaignJoinRequest>> => {
+  try {
+    const { data: userData } = await supabase.auth.getUser();
+    const userId = userData.user?.id;
+    if (!userId) return { data: null, error: new Error("Not authenticated") };
+    const { data, error } = await supabase
+      .from("brand_campaign_join_requests")
+      .insert({
+        campaign_id: campaignId,
+        merchant_id: merchantId,
+        requested_by: userId,
+        message: message || null,
+      })
+      .select()
+      .single();
+    return { data: data as unknown as BrandCampaignJoinRequest | null, error };
+  } catch (error) {
+    return { data: null, error: handleError(error) };
+  }
+};
+
+export const cancelBrandCampaignJoinRequest = async (requestId: string) => {
+  const { data, error } = await supabase
+    .from("brand_campaign_join_requests")
+    .update({ status: "cancelled" })
+    .eq("id", requestId)
+    .eq("status", "pending")
+    .select()
+    .maybeSingle();
+  return { data, error };
+};
+
+export const getMerchantJoinRequests = async (
+  merchantId: string,
+): Promise<ServiceListResult<BrandCampaignJoinRequest>> => {
+  try {
+    const { data, error } = await supabase
+      .from("brand_campaign_join_requests")
+      .select("*, brand_campaigns(name, campaign_color)")
+      .eq("merchant_id", merchantId)
+      .order("requested_at", { ascending: false });
+    return { data: (data || []) as unknown as BrandCampaignJoinRequest[], error };
+  } catch (error) {
+    return { data: [], error: handleError(error) };
+  }
+};
+
+export const getBrandJoinRequests = async (
+  brandId: string,
+): Promise<ServiceListResult<BrandCampaignJoinRequest>> => {
+  try {
+    const { data: campaigns } = await supabase
+      .from("brand_campaigns")
+      .select("id")
+      .eq("brand_id", brandId);
+    const ids = (campaigns || []).map((c: { id: string }) => c.id);
+    if (ids.length === 0) return { data: [], error: null };
+    const { data, error } = await supabase
+      .from("brand_campaign_join_requests")
+      .select("*, merchants(business_name, logo_url), brand_campaigns(name, campaign_color)")
+      .in("campaign_id", ids)
+      .order("requested_at", { ascending: false });
+    return { data: (data || []) as unknown as BrandCampaignJoinRequest[], error };
+  } catch (error) {
+    return { data: [], error: handleError(error) };
+  }
+};
+
+export const respondToBrandCampaignJoinRequest = async (
+  requestId: string,
+  approve: boolean,
+  responseMessage?: string,
+) => {
+  const { data, error } = await supabase.rpc("respond_to_brand_campaign_join_request", {
+    p_request_id: requestId,
+    p_approve: approve,
+    p_response_message: responseMessage ?? null,
+  } as never);
+  return { data, error };
+};
