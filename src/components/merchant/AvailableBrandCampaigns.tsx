@@ -43,7 +43,9 @@ export function AvailableBrandCampaigns({ merchantId }: AvailableBrandCampaignsP
         toast.error(error.message || "Failed to send request");
         return;
       }
-      toast.success("Request sent! The brand will review it shortly.");
+      toast.success("Request sent! The brand will review it shortly.", {
+        description: "📧 We've emailed the brand owner to notify them of your request.",
+      });
       queryClient.invalidateQueries({ queryKey: ["available-brand-campaigns"] });
       queryClient.invalidateQueries({ queryKey: ["merchant-brand-invitations"] });
       setSelected(null);
