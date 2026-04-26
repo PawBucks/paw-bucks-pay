@@ -63,6 +63,7 @@ import { MerchantDailySummaryTab } from "@/components/merchant/MerchantDailySumm
 import { CheckInDashboard } from "@/components/checkin";
 import { MerchantCampaignLeaderboardCard } from "@/components/merchant/MerchantCampaignLeaderboardCard";
 import { MerchantBrandCampaignInbox } from "@/components/merchant/MerchantBrandCampaignInbox";
+import { AvailableBrandCampaigns } from "@/components/merchant/AvailableBrandCampaigns";
 
 // Dialogs
 import { EditMerchantProfileDialog } from "@/components/merchant/EditMerchantProfileDialog";
@@ -834,6 +835,7 @@ const MerchantDashboard = () => {
               onViewWallet={() => navigate('/merchant/pawbucks')}
             />
             <MerchantBrandCampaignInbox merchantId={merchant.id} />
+            <AvailableBrandCampaigns merchantId={merchant.id} />
             <MerchantCampaignLeaderboardCard merchantId={merchant.id} />
           </div>
         );
@@ -899,7 +901,12 @@ const MerchantDashboard = () => {
       case "messages":
         return <MerchantMessagesTab merchantId={merchant.id} />;
       case "brand-campaigns":
-        return <MerchantBrandCampaignInbox merchantId={merchant.id} />;
+        return (
+          <div className="space-y-4">
+            <MerchantBrandCampaignInbox merchantId={merchant.id} />
+            <AvailableBrandCampaigns merchantId={merchant.id} />
+          </div>
+        );
       case "support":
         return <SupportTab submitterType="merchant" entityId={merchant.id} />;
       default:
