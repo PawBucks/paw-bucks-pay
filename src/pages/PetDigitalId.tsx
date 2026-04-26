@@ -7,9 +7,20 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Share2, Download, ShieldCheck, PawPrint, Syringe, AlertTriangle, Copy, Check } from "lucide-react";
+import { ArrowLeft, Share2, Download, ShieldCheck, PawPrint, Syringe, AlertTriangle, Copy, Check, RefreshCw, Ban } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { SEO } from "@/components/SEO";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 type PetRow = {
   id: string;
@@ -50,6 +61,8 @@ export default function PetDigitalId() {
   const [allergies, setAllergies] = useState<{ allergy_name: string; severity: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [rotating, setRotating] = useState(false);
+  const [revoking, setRevoking] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -86,6 +99,32 @@ export default function PetDigitalId() {
   const shareUrl = pet?.digital_id_token
     ? `${SHARE_BASE}/pet-id/public/${pet.digital_id_token}`
     : "";
+
+  const handleRegenerate = async () => {
+    if (!pet) return;
+    setRotating(true);
+    const { data, error } = await (supabase.rpc as any)("regenerate_pet_digital_id_token", { p_pet_id: pet.id });
+    setRotating(false);
+    if (error || !data?.success) {
+      toast({ title: "Couldn't regenerate link", description: error?.message || "Try again.", variant: "destructive" });
+      return;
+    }
+    setPet({ ...pet, digital_id_token: data.token });
+    toast({ title: "New share link generated", description: "The previous QR/link no longer works." });
+  };
+
+  const handleRevoke = async () => {
+    if (!pet) return;
+    setRevoking(true);
+    const { data, error } = await (supabase.rpc as any)("revoke_pet_digital_id_token", { p_pet_id: pet.id });
+    setRevoking(false);
+    if (error || !data?.success) {
+      toast({ title: "Couldn't revoke link", description: error?.message || "Try again.", variant: "destructive" });
+      return;
+    }
+    setPet({ ...pet, digital_id_token: null });
+    toast({ title: "Sharing disabled", description: "The QR code and share link are now inactive." });
+  };
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(shareUrl);
@@ -146,7 +185,7 @@ export default function PetDigitalId() {
             <ArrowLeft className="w-4 h-4 mr-2" /> Back
           </Button>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={handleShare}>
+            <Button variant="outline" size="sm" onClick={handleShare} disabled={!shareUrl}>
               <Share2 className="w-4 h-4 mr-2" /> Share
             </Button>
             <Button variant="outline" size="sm" onClick={handlePrint}>
@@ -267,7 +306,7 @@ export default function PetDigitalId() {
             )}
 
             {/* QR code */}
-            {shareUrl && (
+            {shareUrl ? (
               <div className="border-t pt-4 flex flex-col items-center gap-3">
                 <p className="text-sm font-medium text-center">Scan to verify in seconds</p>
                 <div className="bg-white p-3 rounded-lg border-2 border-primary/20">
@@ -280,6 +319,58 @@ export default function PetDigitalId() {
                   {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
                   {copied ? "Copied!" : "Copy share link"}
                 </button>
+                <div className="flex flex-wrap justify-center gap-2 pt-2 print:hidden">
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="outline" size="sm" disabled={rotating}>
+                        <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${rotating ? "animate-spin" : ""}`} />
+                        Regenerate link
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Regenerate share link?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This creates a brand-new QR code and link. The previous one will stop working immediately for anyone you've shared it with.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleRegenerate}>Regenerate</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="destructive" size="sm" disabled={revoking}>
+                        <Ban className="w-3.5 h-3.5 mr-1.5" />
+                        Revoke sharing
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Disable sharing?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          The public QR code and share link will be turned off instantly. You can generate a new one anytime.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleRevoke}>Revoke</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              </div>
+            ) : (
+              <div className="border-t pt-4 flex flex-col items-center gap-3 print:hidden">
+                <p className="text-sm text-muted-foreground text-center">
+                  Sharing is currently disabled. Generate a new link to share this Digital ID.
+                </p>
+                <Button size="sm" onClick={handleRegenerate} disabled={rotating}>
+                  <RefreshCw className={`w-4 h-4 mr-2 ${rotating ? "animate-spin" : ""}`} />
+                  Generate share link
+                </Button>
               </div>
             )}
 
