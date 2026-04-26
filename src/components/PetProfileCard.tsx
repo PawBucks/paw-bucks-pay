@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { GradientCard } from "@/components/ui/gradient-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, PawPrint, FileHeart, Pencil, Sparkles, Trash2 } from "lucide-react";
+import { Calendar, PawPrint, FileHeart, Pencil, Sparkles, Trash2, IdCard } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { petsService } from "@/services/api/pets.service";
 import { toast } from "@/hooks/use-toast";
@@ -74,6 +74,7 @@ const PetProfileCardComponent = ({ pet, onUpdate, index = 0 }: PetProfileCardPro
   // Memoize handlers
   const handleEditClick = useCallback(() => setEditDialogOpen(true), []);
   const handleHealthClick = useCallback(() => navigate(`/pet-health/${pet.id}`), [navigate, pet.id]);
+  const handleIdClick = useCallback(() => navigate(`/pet-id/${pet.id}`), [navigate, pet.id]);
   const handleQuizClick = useCallback(() => navigate(`/pet-personality-quiz?petId=${pet.id}`), [navigate, pet.id]);
   const handleEditSuccess = useCallback(() => onUpdate?.(), [onUpdate]);
   const handleDialogChange = useCallback((open: boolean) => setEditDialogOpen(open), []);
@@ -177,8 +178,18 @@ const PetProfileCardComponent = ({ pet, onUpdate, index = 0 }: PetProfileCardPro
               size="icon"
               className="h-9 w-9"
               onClick={handleHealthClick}
+              title="Health records"
             >
               <FileHeart className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-9 w-9 border-primary/40 text-primary"
+              onClick={handleIdClick}
+              title="Digital Pet ID"
+            >
+              <IdCard className="w-4 h-4" />
             </Button>
             <AlertDialog>
               <AlertDialogTrigger asChild>
