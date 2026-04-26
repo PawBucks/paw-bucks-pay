@@ -213,7 +213,7 @@ serve(async (req: Request) => {
             ? `${pet.name}'s ${v.vaccine_name} vaccine was due ${formatLocalDate(dueStr)}. Book a booster soon.`
             : `${pet.name}'s ${v.vaccine_name} vaccine is due ${formatLocalDate(dueStr)}.`,
           category: "vaccine_reminder",
-          link_url: `/pet-id/${pet.id}`,
+          link_url: `/pet-id/${pet.id}#vax-${v.id}`,
         });
         ok = !nErr;
         if (ok) inAppSent++;

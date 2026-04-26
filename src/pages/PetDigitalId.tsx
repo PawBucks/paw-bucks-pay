@@ -64,6 +64,7 @@ export default function PetDigitalId() {
   const [rotating, setRotating] = useState(false);
   const [revoking, setRevoking] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
+  const [highlightedVaxId, setHighlightedVaxId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!petId || !user) return;
@@ -95,6 +96,22 @@ export default function PetDigitalId() {
     setAllergies((allergyData || []) as any);
     setLoading(false);
   };
+
+  // Scroll to a specific vaccination row when arriving via #vax-{id}
+  useEffect(() => {
+    if (loading || vaccinations.length === 0) return;
+    const hash = window.location.hash;
+    if (!hash.startsWith("#vax-")) return;
+    const vaxId = hash.slice(5);
+    if (!vaccinations.some((v) => v.id === vaxId)) return;
+    setHighlightedVaxId(vaxId);
+    requestAnimationFrame(() => {
+      const el = document.getElementById(`vax-${vaxId}`);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+    const t = setTimeout(() => setHighlightedVaxId(null), 3000);
+    return () => clearTimeout(t);
+  }, [loading, vaccinations]);
 
   const shareUrl = pet?.digital_id_token
     ? `${SHARE_BASE}/pet-id/public/${pet.digital_id_token}`
@@ -265,8 +282,15 @@ export default function PetDigitalId() {
                 <div className="space-y-2">
                   {vaccinations.map((v) => {
                     const overdue = v.next_due_date && new Date(v.next_due_date) <= new Date();
+                    const highlighted = v.id === highlightedVaxId;
                     return (
-                      <div key={`${v.vaccine_name}-${v.administration_date}`} className="flex items-start justify-between p-3 rounded-lg bg-muted/40 border">
+                      <div
+                        key={v.id}
+                        id={`vax-${v.id}`}
+                        className={`flex items-start justify-between p-3 rounded-lg border transition-all scroll-mt-24 ${
+                          highlighted ? "bg-primary/10 border-primary ring-2 ring-primary/40" : "bg-muted/40"
+                        }`}
+                      >
                         <div>
                           <p className="font-medium text-sm">{v.vaccine_name}</p>
                           <p className="text-xs text-muted-foreground">
