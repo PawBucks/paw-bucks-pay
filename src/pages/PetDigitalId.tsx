@@ -185,7 +185,7 @@ export default function PetDigitalId() {
             <ArrowLeft className="w-4 h-4 mr-2" /> Back
           </Button>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={handleShare}>
+            <Button variant="outline" size="sm" onClick={handleShare} disabled={!shareUrl}>
               <Share2 className="w-4 h-4 mr-2" /> Share
             </Button>
             <Button variant="outline" size="sm" onClick={handlePrint}>
