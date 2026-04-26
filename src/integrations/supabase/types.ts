@@ -1216,6 +1216,73 @@ export type Database = {
           },
         ]
       }
+      brand_campaign_join_requests: {
+        Row: {
+          campaign_id: string
+          created_at: string
+          id: string
+          merchant_id: string
+          message: string | null
+          requested_at: string
+          requested_by: string
+          responded_at: string | null
+          responded_by: string | null
+          response_message: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string
+          id?: string
+          merchant_id: string
+          message?: string | null
+          requested_at?: string
+          requested_by: string
+          responded_at?: string | null
+          responded_by?: string | null
+          response_message?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string
+          id?: string
+          merchant_id?: string
+          message?: string | null
+          requested_at?: string
+          requested_by?: string
+          responded_at?: string | null
+          responded_by?: string | null
+          response_message?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "brand_campaign_join_requests_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "brand_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "brand_campaign_join_requests_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "brand_campaign_join_requests_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       brand_campaign_merchants: {
         Row: {
           campaign_id: string
@@ -14521,6 +14588,32 @@ export type Database = {
           total_users: number
         }[]
       }
+      get_available_brand_campaigns: {
+        Args: { p_merchant_id: string }
+        Returns: {
+          brand_description: string
+          brand_id: string
+          brand_logo_url: string
+          brand_name: string
+          brand_website_url: string
+          budget_usd: number
+          campaign_color: string
+          campaign_logo_url: string
+          description: string
+          end_date: string
+          existing_invitation_status: string
+          existing_request_status: string
+          id: string
+          min_purchase_usd: number
+          name: string
+          pawbucks_per_checkin: number
+          pawbucks_pool: number
+          start_date: string
+          status: string
+          targeting_notes: string
+          trigger_type: string
+        }[]
+      }
       get_brand_by_invitation_token: {
         Args: { p_token: string }
         Returns: {
@@ -14753,6 +14846,14 @@ export type Database = {
       }
       respond_to_brand_campaign_invitation: {
         Args: { p_accept: boolean; p_invitation_id: string }
+        Returns: Json
+      }
+      respond_to_brand_campaign_join_request: {
+        Args: {
+          p_approve: boolean
+          p_request_id: string
+          p_response_message?: string
+        }
         Returns: Json
       }
       revoke_pet_digital_id_token: { Args: { p_pet_id: string }; Returns: Json }
