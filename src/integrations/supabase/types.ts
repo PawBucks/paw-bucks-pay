@@ -9035,6 +9035,7 @@ export type Database = {
           collar_description: string | null
           color_markings: string | null
           created_at: string
+          digital_id_token: string | null
           gender: string | null
           id: string
           identifying_features: string | null
@@ -9057,6 +9058,7 @@ export type Database = {
           collar_description?: string | null
           color_markings?: string | null
           created_at?: string
+          digital_id_token?: string | null
           gender?: string | null
           id?: string
           identifying_features?: string | null
@@ -9079,6 +9081,7 @@ export type Database = {
           collar_description?: string | null
           color_markings?: string | null
           created_at?: string
+          digital_id_token?: string | null
           gender?: string | null
           id?: string
           identifying_features?: string | null
@@ -14596,6 +14599,7 @@ export type Database = {
           total_balance: number
         }[]
       }
+      get_pet_digital_id: { Args: { p_token: string }; Returns: Json }
       get_reviewer_display_name: {
         Args: { reviewer_id: string }
         Returns: string
