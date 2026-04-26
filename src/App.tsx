@@ -109,6 +109,8 @@ const BrandDashboard = lazyWithRetry(() => import("./pages/BrandDashboard"), "Br
 const About = lazyWithRetry(() => import("./pages/About"), "About");
 const Privacy = lazyWithRetry(() => import("./pages/Privacy"), "Privacy");
 const Terms = lazyWithRetry(() => import("./pages/Terms"), "Terms");
+const PetDigitalId = lazyWithRetry(() => import("./pages/PetDigitalId"), "PetDigitalId");
+const PetDigitalIdPublic = lazyWithRetry(() => import("./pages/PetDigitalIdPublic"), "PetDigitalIdPublic");
 
 const createQueryClient = () => new QueryClient({
   defaultOptions: {
@@ -182,6 +184,8 @@ const AppRoutes = () => {
       <Route path="/my-subscriptions" element={<ProtectedRoute><PageTransition><MySubscriptions /></PageTransition></ProtectedRoute>} />
       <Route path="/subscription-success" element={<ProtectedRoute><PageTransition><SubscriptionSuccess /></PageTransition></ProtectedRoute>} />
       <Route path="/pet-health/:petId" element={<ProtectedRoute><PageTransition><PetHealth /></PageTransition></ProtectedRoute>} />
+      <Route path="/pet-id/:petId" element={<ProtectedRoute><PageTransition><PetDigitalId /></PageTransition></ProtectedRoute>} />
+      <Route path="/pet-id/public/:token" element={<PageTransition><PetDigitalIdPublic /></PageTransition>} />
       <Route path="/pawbucks/wallet" element={<ProtectedRoute><PageTransition><PawBucksWallet /></PageTransition></ProtectedRoute>} />
       <Route path="/pawbucks/redeem" element={<ProtectedRoute><PageTransition><PawBucksRedeem /></PageTransition></ProtectedRoute>} />
       <Route path="/pet-store" element={<PageTransition><PetStore /></PageTransition>} />
