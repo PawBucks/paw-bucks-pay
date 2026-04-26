@@ -17,7 +17,7 @@ import { Progress } from "@/components/ui/progress";
 import {
   Megaphone, DollarSign, TrendingUp, Users, Store, Plus, ArrowRight,
   Calendar, CheckCircle2, Clock, Loader2, LogOut, Building2, BarChart3,
-  Target, Zap, PieChart, LayoutDashboard,
+  Target, Zap, PieChart, LayoutDashboard, Inbox,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -38,6 +38,7 @@ import { CommandCenter } from "@/components/brand/CommandCenter";
 import { TargetingRulesEditor } from "@/components/brand/TargetingRulesEditor";
 import { CampaignWizard } from "@/components/brand/CampaignWizard";
 import { MerchantMarketplace } from "@/components/brand/MerchantMarketplace";
+import { BrandJoinRequestsInbox } from "@/components/brand/BrandJoinRequestsInbox";
 
 const statusConfig: Record<string, { color: string; label: string; emoji: string }> = {
   draft: { color: "bg-muted text-muted-foreground", label: "Draft", emoji: "📝" },
@@ -474,6 +475,10 @@ const BrandDashboard = () => {
               <Store className="h-4 w-4" />
               Marketplace
             </TabsTrigger>
+            <TabsTrigger value="requests" className="gap-1.5">
+              <Inbox className="h-4 w-4" />
+              Requests
+            </TabsTrigger>
           </TabsList>
 
           {/* Command Center tab — the WOW moment */}
@@ -597,6 +602,11 @@ const BrandDashboard = () => {
           {/* Marketplace tab — browse merchants & invite */}
           <TabsContent value="marketplace" className="mt-0">
             <MerchantMarketplace brandId={brandAccount.id} campaigns={campaigns} />
+          </TabsContent>
+
+          {/* Requests tab — merchant-initiated join requests */}
+          <TabsContent value="requests" className="mt-0">
+            <BrandJoinRequestsInbox brandId={brandAccount.id} />
           </TabsContent>
         </Tabs>
       </main>
