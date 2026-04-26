@@ -781,6 +781,14 @@ export const requestToJoinBrandCampaign = async (
       })
       .select()
       .single();
+    if (!error && data?.id) {
+      // Fire-and-forget brand owner notification email
+      supabase.functions
+        .invoke("notify-brand-campaign-join-request", {
+          body: { requestId: data.id, event: "submitted" },
+        })
+        .catch((e) => console.warn("join-request submitted email failed", e));
+    }
     return { data: data as unknown as BrandCampaignJoinRequest | null, error };
   } catch (error) {
     return { data: null, error: handleError(error) };
@@ -844,5 +852,13 @@ export const respondToBrandCampaignJoinRequest = async (
     p_approve: approve,
     p_response_message: responseMessage ?? null,
   } as never);
+  if (!error) {
+    // Fire-and-forget merchant notification email
+    supabase.functions
+      .invoke("notify-brand-campaign-join-request", {
+        body: { requestId, event: approve ? "approved" : "declined" },
+      })
+      .catch((e) => console.warn("join-request response email failed", e));
+  }
   return { data, error };
 };
