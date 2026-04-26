@@ -12462,6 +12462,39 @@ export type Database = {
           },
         ]
       }
+      vaccine_reminder_log: {
+        Row: {
+          channel: string
+          id: string
+          milestone: string
+          next_due_date: string | null
+          pet_id: string
+          sent_at: string
+          user_id: string
+          vaccination_id: string
+        }
+        Insert: {
+          channel: string
+          id?: string
+          milestone: string
+          next_due_date?: string | null
+          pet_id: string
+          sent_at?: string
+          user_id: string
+          vaccination_id: string
+        }
+        Update: {
+          channel?: string
+          id?: string
+          milestone?: string
+          next_due_date?: string | null
+          pet_id?: string
+          sent_at?: string
+          user_id?: string
+          vaccination_id?: string
+        }
+        Relationships: []
+      }
       verification_answers: {
         Row: {
           answer: string
