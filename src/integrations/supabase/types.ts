@@ -14706,6 +14706,10 @@ export type Database = {
           success: boolean
         }[]
       }
+      regenerate_pet_digital_id_token: {
+        Args: { p_pet_id: string }
+        Returns: Json
+      }
       release_pet_fund_installment: {
         Args: { p_release_id: string }
         Returns: undefined
@@ -14718,6 +14722,7 @@ export type Database = {
         Args: { p_accept: boolean; p_invitation_id: string }
         Returns: Json
       }
+      revoke_pet_digital_id_token: { Args: { p_pet_id: string }; Returns: Json }
       send_pawbucks_expiry_reminders: { Args: never; Returns: number }
       use_pet_fund_credit: {
         Args: { p_amount: number; p_transaction_id?: string; p_user_id: string }
