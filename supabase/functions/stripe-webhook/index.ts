@@ -540,7 +540,11 @@ serve(async (req) => {
             console.error('[SUBSCRIPTION] Error determining tier (using default):', tierError);
           }
           
-          const pawbucksEarned = Math.floor(stripeAmountPaid * pawbucksMultiplier);
+          let pawbucksEarned = Math.floor(stripeAmountPaid * pawbucksMultiplier);
+          if (await shouldSuppressPawBucksForAcquisitionOnly(supabaseAdmin, userId, merchantId)) {
+            console.log('[SUBSCRIPTION] Acquisition-Only + returning customer → suppressing PawBucks', { userId, merchantId });
+            pawbucksEarned = 0;
+          }
           
           console.log('[SUBSCRIPTION] Recording transaction:', {
             userId,
@@ -748,6 +752,10 @@ serve(async (req) => {
             }
             
             pawbucksEarned = Math.floor(stripeAmountForRewards * pawbucksMultiplier);
+            if (await shouldSuppressPawBucksForAcquisitionOnly(supabaseAdmin, invoicePayerUserId, merchantId)) {
+              console.log('[INVOICE_PAYMENT] Acquisition-Only + returning customer → suppressing PawBucks', { invoicePayerUserId, merchantId });
+              pawbucksEarned = 0;
+            }
             
             console.log('[INVOICE_PAYMENT] Awarding PawBucks:', {
               userId: invoicePayerUserId,
@@ -1028,7 +1036,11 @@ serve(async (req) => {
               }
             }
 
-            const pawbucksEarned = Math.floor(amount * pawbucksMultiplier);
+            let pawbucksEarned = Math.floor(amount * pawbucksMultiplier);
+            if (await shouldSuppressPawBucksForAcquisitionOnly(supabaseAdmin, userId, merchantId)) {
+              console.log('[RECURRING] Acquisition-Only + returning customer → suppressing PawBucks', { userId, merchantId });
+              pawbucksEarned = 0;
+            }
 
             console.log('Recording recurring payment transaction:', {
               userId,
@@ -1283,7 +1295,11 @@ serve(async (req) => {
       // $10 × 10 = 100 PawBucks for Free
       // $10 × 20 = 200 PawBucks for PawPass
       // $10 × 30 = 300 PawBucks for PawPass+
-      const pawbucksEarned = Math.floor(amount * pawbucksMultiplier);
+      let pawbucksEarned = Math.floor(amount * pawbucksMultiplier);
+      if (await shouldSuppressPawBucksForAcquisitionOnly(supabaseAdmin, user_id, merchant_id)) {
+        console.log('[PAYMENT_INTENT] Acquisition-Only + returning customer → suppressing PawBucks', { user_id, merchant_id });
+        pawbucksEarned = 0;
+      }
 
       console.log('Recording transaction:', {
         amount,
