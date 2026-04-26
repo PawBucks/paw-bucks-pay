@@ -8,6 +8,37 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, stripe-signature',
 };
 
+/**
+ * Acquisition-Only enforcement: returns true if merchant is acquisition_only AND
+ * the user already has a prior completed transaction at this merchant.
+ * When true, NO PawBucks should be awarded.
+ */
+async function shouldSuppressPawBucksForAcquisitionOnly(
+  supabaseAdmin: any,
+  userId: string,
+  merchantId: string
+): Promise<boolean> {
+  try {
+    if (!userId || !merchantId) return false;
+    const { data: merchant } = await supabaseAdmin
+      .from('merchants')
+      .select('fee_model')
+      .eq('id', merchantId)
+      .maybeSingle();
+    if (merchant?.fee_model !== 'acquisition_only') return false;
+    const { count } = await supabaseAdmin
+      .from('transactions')
+      .select('id', { count: 'exact', head: true })
+      .eq('merchant_id', merchantId)
+      .eq('user_id', userId)
+      .eq('status', 'completed');
+    return (count || 0) > 0;
+  } catch (e) {
+    console.error('[ACQUISITION_ONLY_CHECK] Error', e);
+    return false;
+  }
+}
+
 // Helper function to send receipt email via dedicated edge function
 async function sendReceiptEmail(params: {
   email: string;
