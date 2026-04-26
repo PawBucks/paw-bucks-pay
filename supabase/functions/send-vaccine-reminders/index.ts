@@ -212,7 +212,7 @@ serve(async (req: Request) => {
           message: milestone === "overdue"
             ? `${pet.name}'s ${v.vaccine_name} vaccine was due ${formatLocalDate(dueStr)}. Book a booster soon.`
             : `${pet.name}'s ${v.vaccine_name} vaccine is due ${formatLocalDate(dueStr)}.`,
-          category: "transactional",
+          category: "vaccine_reminder",
           link_url: `/pet-id/${pet.id}`,
         });
         ok = !nErr;

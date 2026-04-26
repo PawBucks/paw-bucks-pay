@@ -20,6 +20,7 @@ import { AutoRedeemEducationCard } from "@/components/dashboard/AutoRedeemEducat
 import { PetOwnerInvoices } from "@/components/dashboard/PetOwnerInvoices";
 import { getSubscriptionTier } from "@/lib/constants";
 import { ActionRequiredSlices } from "@/components/dashboard/ActionRequiredSlices";
+import { VaccineReminderBanner } from "@/components/dashboard/VaccineReminderBanner";
 import { BottomNav } from "@/components/BottomNav";
 import { PullToRefresh } from "@/components/PullToRefresh";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
@@ -167,6 +168,11 @@ const Dashboard = () => {
             {/* Action Required - Denied insurance claims needing resolution */}
             {user && (
               <ActionRequiredSlices userId={user.id} />
+            )}
+
+            {/* Vaccine Reminders - in-app banners with read/unread status */}
+            {user && (
+              <VaccineReminderBanner userId={user.id} />
             )}
             
             {/* Auto-Redeem Education Card - Prominent placement for users with PawBucks */}
