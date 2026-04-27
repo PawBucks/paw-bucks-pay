@@ -14542,6 +14542,18 @@ export type Database = {
         Args: { p_brand_id: string; p_payload: Json }
         Returns: Json
       }
+      credit_branded_pawbucks: {
+        Args: {
+          p_amount: number
+          p_brand_name: string
+          p_campaign_id: string
+          p_checkin_id: string
+          p_description: string
+          p_merchant_id: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
       expire_pawbucks: { Args: never; Returns: number }
       expire_unused_pet_fund_credits: { Args: never; Returns: number }
       generate_admin_invoice_number: { Args: never; Returns: string }
