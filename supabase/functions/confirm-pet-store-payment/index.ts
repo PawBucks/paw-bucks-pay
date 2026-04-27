@@ -228,6 +228,22 @@ serve(async (req) => {
           .eq('user_id', userId);
         logStep("PawBucks deducted for split payment", { amount: pawbucksUsedInSplit, newBalance: currentWallet.balance - pawbucksUsedInSplit });
       }
+
+      // Track Branded PawBucks redemption (FIFO across active campaigns at this merchant)
+      if (item?.merchant_id) {
+        try {
+          const { error: brandedRedeemErr } = await supabaseAdmin.rpc("redeem_branded_pawbucks", {
+            p_user_id: userId,
+            p_merchant_id: item.merchant_id,
+            p_amount: pawbucksUsedInSplit,
+            p_transaction_id: transaction.id,
+            p_description: `Branded PawBucks redeemed in Pet Store: ${itemName}`,
+          });
+          if (brandedRedeemErr) logStep("Branded redemption tracking failed (non-fatal)", { error: brandedRedeemErr.message });
+        } catch (e) {
+          logStep("Branded redemption tracking exception (non-fatal)", { error: (e as Error).message });
+        }
+      }
     }
 
     // 3. Award PawBucks

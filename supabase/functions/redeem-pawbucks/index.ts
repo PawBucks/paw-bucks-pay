@@ -153,6 +153,25 @@ serve(async (req) => {
 
     console.log(`User ${user.id} redeemed ${offer.coins_required} coins for offer ${offer_id}`);
 
+    // Track Branded PawBucks redemption (FIFO across this merchant's active campaigns).
+    // Non-fatal: if this fails the offer redemption still stands.
+    if (offer.partner_id && offer.coins_required > 0) {
+      try {
+        const { error: brandedRedeemErr } = await supabaseAdmin.rpc("redeem_branded_pawbucks", {
+          p_user_id: user.id,
+          p_merchant_id: offer.partner_id,
+          p_amount: offer.coins_required,
+          p_transaction_id: null,
+          p_description: `Branded PawBucks redeemed for offer: ${offer.title}`,
+        });
+        if (brandedRedeemErr) {
+          console.error("Branded redemption tracking failed (non-fatal):", brandedRedeemErr.message);
+        }
+      } catch (e) {
+        console.error("Branded redemption tracking exception (non-fatal):", (e as Error).message);
+      }
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
