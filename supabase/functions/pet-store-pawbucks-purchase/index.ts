@@ -165,6 +165,23 @@ serve(async (req) => {
       description,
     }).select('id').single();
 
+    // Track Branded PawBucks redemption (FIFO across active campaigns at this merchant)
+    const storeMerchantId = validatedItems[0]?.dbItem?.merchant_id || null;
+    if (storeMerchantId && totalPawbucksCost > 0 && txRecord?.id) {
+      try {
+        const { error: brandedRedeemErr } = await supabaseAdmin.rpc("redeem_branded_pawbucks", {
+          p_user_id: effectiveUserId,
+          p_merchant_id: storeMerchantId,
+          p_amount: totalPawbucksCost,
+          p_transaction_id: txRecord.id,
+          p_description: `Branded PawBucks redeemed in Pet Store`,
+        });
+        if (brandedRedeemErr) console.error("Branded redemption tracking failed (non-fatal):", brandedRedeemErr.message);
+      } catch (e) {
+        console.error("Branded redemption tracking exception (non-fatal):", (e as Error).message);
+      }
+    }
+
     // Mark cart as converted if cartId provided
     if (cartId) {
       await supabaseAdmin.from('shopping_carts')
