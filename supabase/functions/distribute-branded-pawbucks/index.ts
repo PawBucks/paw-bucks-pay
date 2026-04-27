@@ -255,57 +255,42 @@ Deno.serve(async (req) => {
 
       const amount = campaign.pawbucks_per_checkin;
       const brandName = campaign.brand_accounts?.brand_name || "Brand";
+      const description = `${brandName} campaign ${triggerType} reward ${triggerTag}${txTag ? ` ${txTag}` : ""}`;
 
-      const { error: activityError } = await supabase
-        .from("branded_pawbucks_activity")
-        .insert({
+      // ATOMIC credit: branded activity + branded ledger + main wallet + main activity in a single transaction.
+      // If anything fails, NOTHING is written, and we do NOT notify the user about a credit they didn't get.
+      const { data: creditResult, error: creditError } = await supabase.rpc(
+        "credit_branded_pawbucks",
+        {
+          p_campaign_id: campaign.id,
+          p_user_id: user_id,
+          p_merchant_id: merchant_id,
+          p_checkin_id: checkin_id || null,
+          p_amount: amount,
+          p_description: description,
+          p_brand_name: brandName,
+        },
+      );
+
+      if (creditError) {
+        console.error("[distribute-branded-pawbucks] atomic credit FAILED — skipping notification", {
           campaign_id: campaign.id,
           user_id,
-          type: "earn",
-          amount,
-          merchant_id,
-          checkin_id: checkin_id || null,
-          description: `${brandName} campaign ${triggerType} reward ${triggerTag}${txTag ? ` ${txTag}` : ""}`,
+          error: creditError.message,
         });
-
-      if (activityError) {
-        console.error("Error recording branded activity:", activityError);
         continue;
       }
 
-      const { data: existingLedger } = await supabase
-        .from("branded_pawbucks_ledger")
-        .select("id, balance, total_earned")
-        .eq("campaign_id", campaign.id)
-        .eq("user_id", user_id)
-        .maybeSingle();
-
-      if (existingLedger) {
-        await supabase
-          .from("branded_pawbucks_ledger")
-          .update({
-            balance: existingLedger.balance + amount,
-            total_earned: existingLedger.total_earned + amount,
-          })
-          .eq("id", existingLedger.id);
-      } else {
-        await supabase
-          .from("branded_pawbucks_ledger")
-          .insert({
-            campaign_id: campaign.id,
-            user_id,
-            balance: amount,
-            total_earned: amount,
-          });
+      const credited = (creditResult as any)?.success === true;
+      if (!credited) {
+        console.log("[distribute-branded-pawbucks] not credited (likely already credited)", {
+          campaign_id: campaign.id,
+          user_id,
+          checkin_id,
+          result: creditResult,
+        });
+        continue;
       }
-
-      await supabase
-        .from("brand_campaigns")
-        .update({
-          total_distributed: campaign.total_distributed + amount,
-          total_checkins: (campaign.total_checkins || 0) + 1,
-        })
-        .eq("id", campaign.id);
 
       results.push({
         campaign_name: campaign.name,
@@ -313,7 +298,7 @@ Deno.serve(async (req) => {
         amount,
         brand_logo: campaign.brand_accounts?.logo_url,
       });
-      console.log("[distribute-branded-pawbucks] credited", {
+      console.log("[distribute-branded-pawbucks] credited (atomic)", {
         campaign_id: campaign.id,
         brand_name: brandName,
         user_id,
