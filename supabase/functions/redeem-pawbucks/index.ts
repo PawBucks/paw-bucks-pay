@@ -156,19 +156,43 @@ serve(async (req) => {
     // Track Branded PawBucks redemption (FIFO across this merchant's active campaigns).
     // Non-fatal: if this fails the offer redemption still stands.
     if (offer.partner_id && offer.coins_required > 0) {
+      const correlationId = crypto.randomUUID();
+      console.log(
+        `[redeem-pawbucks][branded-redeem][cid=${correlationId}] start`,
+        {
+          correlation_id: correlationId,
+          surface: "redeem-pawbucks",
+          user_id: user.id,
+          merchant_id: offer.partner_id,
+          offer_id,
+          amount: offer.coins_required,
+          redemption_code: redemptionCode,
+        },
+      );
       try {
         const { error: brandedRedeemErr } = await supabaseAdmin.rpc("redeem_branded_pawbucks", {
           p_user_id: user.id,
           p_merchant_id: offer.partner_id,
           p_amount: offer.coins_required,
           p_transaction_id: null,
-          p_description: `Branded PawBucks redeemed for offer: ${offer.title}`,
+          p_description: `Branded PawBucks redeemed for offer: ${offer.title} [cid:${correlationId}] [code:${redemptionCode}]`,
         });
         if (brandedRedeemErr) {
-          console.error("Branded redemption tracking failed (non-fatal):", brandedRedeemErr.message);
+          console.error(
+            `[redeem-pawbucks][branded-redeem][cid=${correlationId}] FAILED (non-fatal)`,
+            { correlation_id: correlationId, error: brandedRedeemErr.message },
+          );
+        } else {
+          console.log(
+            `[redeem-pawbucks][branded-redeem][cid=${correlationId}] success`,
+            { correlation_id: correlationId },
+          );
         }
       } catch (e) {
-        console.error("Branded redemption tracking exception (non-fatal):", (e as Error).message);
+        console.error(
+          `[redeem-pawbucks][branded-redeem][cid=${correlationId}] EXCEPTION (non-fatal)`,
+          { correlation_id: correlationId, error: (e as Error).message },
+        );
       }
     }
 
