@@ -450,6 +450,27 @@ serve(async (req) => {
         status: 'completed',
       }).select().single();
 
+      // Track Branded PawBucks redemption (FIFO across active campaigns at this merchant)
+      if (actualWalletPawbucks > 0 && transaction?.id) {
+        try {
+          const { error: brandedRedeemErr } = await supabaseAdmin.rpc(
+            "redeem_branded_pawbucks",
+            {
+              p_user_id: user.id,
+              p_merchant_id: merchantId,
+              p_amount: actualWalletPawbucks,
+              p_transaction_id: transaction.id,
+              p_description: `Branded PawBucks redeemed at ${merchant.business_name}`,
+            },
+          );
+          if (brandedRedeemErr) {
+            logStep("Branded PawBucks redemption tracking failed (non-fatal)", { error: brandedRedeemErr.message });
+          }
+        } catch (e) {
+          logStep("Branded PawBucks redemption tracking exception (non-fatal)", { error: (e as Error).message });
+        }
+      }
+
       // Get user profile for receipt email
       const { data: userProfile } = await supabaseAdmin
         .from('profiles')

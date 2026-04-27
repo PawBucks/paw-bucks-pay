@@ -1529,6 +1529,7 @@ export type Database = {
           description: string | null
           id: string
           merchant_id: string | null
+          transaction_id: string | null
           type: string
           user_id: string
         }
@@ -1540,6 +1541,7 @@ export type Database = {
           description?: string | null
           id?: string
           merchant_id?: string | null
+          transaction_id?: string | null
           type: string
           user_id: string
         }
@@ -1551,6 +1553,7 @@ export type Database = {
           description?: string | null
           id?: string
           merchant_id?: string | null
+          transaction_id?: string | null
           type?: string
           user_id?: string
         }
@@ -14830,6 +14833,16 @@ export type Database = {
           success: boolean
           vet_id: string
         }[]
+      }
+      redeem_branded_pawbucks: {
+        Args: {
+          p_amount: number
+          p_description?: string
+          p_merchant_id: string
+          p_transaction_id?: string
+          p_user_id: string
+        }
+        Returns: Json
       }
       redeem_welcome_credit: {
         Args: {
