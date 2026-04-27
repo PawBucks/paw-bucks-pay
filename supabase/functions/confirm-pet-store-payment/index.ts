@@ -231,17 +231,37 @@ serve(async (req) => {
 
       // Track Branded PawBucks redemption (FIFO across active campaigns at this merchant)
       if (item?.merchant_id) {
+        const correlationId = crypto.randomUUID();
+        logStep("Branded redemption attempt", {
+          correlation_id: correlationId,
+          surface: "confirm-pet-store-payment",
+          user_id: userId,
+          merchant_id: item.merchant_id,
+          transaction_id: transaction.id,
+          payment_intent_id: paymentIntentId,
+          amount: pawbucksUsedInSplit,
+        });
         try {
           const { error: brandedRedeemErr } = await supabaseAdmin.rpc("redeem_branded_pawbucks", {
             p_user_id: userId,
             p_merchant_id: item.merchant_id,
             p_amount: pawbucksUsedInSplit,
             p_transaction_id: transaction.id,
-            p_description: `Branded PawBucks redeemed in Pet Store: ${itemName}`,
+            p_description: `Branded PawBucks redeemed in Pet Store: ${itemName} [cid:${correlationId}] [pi:${paymentIntentId}]`,
           });
-          if (brandedRedeemErr) logStep("Branded redemption tracking failed (non-fatal)", { error: brandedRedeemErr.message });
+          if (brandedRedeemErr) {
+            logStep("Branded redemption tracking FAILED (non-fatal)", {
+              correlation_id: correlationId,
+              error: brandedRedeemErr.message,
+            });
+          } else {
+            logStep("Branded redemption tracking success", { correlation_id: correlationId });
+          }
         } catch (e) {
-          logStep("Branded redemption tracking exception (non-fatal)", { error: (e as Error).message });
+          logStep("Branded redemption tracking EXCEPTION (non-fatal)", {
+            correlation_id: correlationId,
+            error: (e as Error).message,
+          });
         }
       }
     }

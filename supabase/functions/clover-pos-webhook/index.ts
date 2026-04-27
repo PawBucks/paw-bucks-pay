@@ -398,19 +398,43 @@ serve(async (req) => {
 
     // ── 11b. Track Branded PawBucks redemption (FIFO across this merchant's active campaigns) ──
     if (requestedPawbucks > 0) {
+      const correlationId = crypto.randomUUID();
+      console.log(
+        `[CLOVER][branded-redeem][cid=${correlationId}] start`,
+        {
+          correlation_id: correlationId,
+          surface: "clover-pos-webhook",
+          user_id: matchedUser.id,
+          merchant_id: integration.merchant_id,
+          pos_transaction_id: posTx!.id,
+          external_transaction_id: externalTxId,
+          amount: requestedPawbucks,
+        },
+      );
       try {
         const { error: brandedRedeemErr } = await supabaseAdmin.rpc("redeem_branded_pawbucks", {
           p_user_id: matchedUser.id,
           p_merchant_id: integration.merchant_id,
           p_amount: requestedPawbucks,
           p_transaction_id: posTx!.id,
-          p_description: `Branded PawBucks redeemed at ${merchant?.business_name || "Partner Store"} (Clover POS)`,
+          p_description: `Branded PawBucks redeemed at ${merchant?.business_name || "Partner Store"} (Clover POS) [cid:${correlationId}] [ext:${externalTxId ?? "n/a"}]`,
         });
         if (brandedRedeemErr) {
-          console.error("[CLOVER] Branded redemption tracking failed (non-fatal):", brandedRedeemErr.message);
+          console.error(
+            `[CLOVER][branded-redeem][cid=${correlationId}] FAILED (non-fatal)`,
+            { correlation_id: correlationId, error: brandedRedeemErr.message },
+          );
+        } else {
+          console.log(
+            `[CLOVER][branded-redeem][cid=${correlationId}] success`,
+            { correlation_id: correlationId },
+          );
         }
       } catch (e) {
-        console.error("[CLOVER] Branded redemption tracking exception (non-fatal):", (e as Error).message);
+        console.error(
+          `[CLOVER][branded-redeem][cid=${correlationId}] EXCEPTION (non-fatal)`,
+          { correlation_id: correlationId, error: (e as Error).message },
+        );
       }
     }
 
