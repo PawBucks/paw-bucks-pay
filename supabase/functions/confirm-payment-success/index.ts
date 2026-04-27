@@ -435,6 +435,27 @@ serve(async (req) => {
           description: `Payment to ${businessName}`,
           partner_id: merchantId,
         });
+
+        // Track Branded PawBucks redemption (FIFO across active campaigns at this merchant)
+        try {
+          const { data: brandedRedeem, error: brandedRedeemErr } = await supabaseAdmin.rpc(
+            "redeem_branded_pawbucks",
+            {
+              p_user_id: userId,
+              p_merchant_id: merchantId,
+              p_amount: walletDeduction,
+              p_transaction_id: transaction.id,
+              p_description: `Branded PawBucks redeemed at ${businessName}`,
+            },
+          );
+          if (brandedRedeemErr) {
+            logStep("Branded PawBucks redemption tracking failed (non-fatal)", { error: brandedRedeemErr.message });
+          } else if ((brandedRedeem as any)?.redeemed > 0) {
+            logStep("Branded PawBucks redemption tracked", brandedRedeem as any);
+          }
+        } catch (e) {
+          logStep("Branded PawBucks redemption tracking exception (non-fatal)", { error: (e as Error).message });
+        }
       }
 
       // Deduct from Pet Fund
