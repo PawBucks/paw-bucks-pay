@@ -396,6 +396,24 @@ serve(async (req) => {
         `PB earned: ${pawbucksEarned}`
     );
 
+    // ── 11b. Track Branded PawBucks redemption (FIFO across this merchant's active campaigns) ──
+    if (requestedPawbucks > 0) {
+      try {
+        const { error: brandedRedeemErr } = await supabaseAdmin.rpc("redeem_branded_pawbucks", {
+          p_user_id: matchedUser.id,
+          p_merchant_id: integration.merchant_id,
+          p_amount: requestedPawbucks,
+          p_transaction_id: posTx!.id,
+          p_description: `Branded PawBucks redeemed at ${merchant?.business_name || "Partner Store"} (Clover POS)`,
+        });
+        if (brandedRedeemErr) {
+          console.error("[CLOVER] Branded redemption tracking failed (non-fatal):", brandedRedeemErr.message);
+        }
+      } catch (e) {
+        console.error("[CLOVER] Branded redemption tracking exception (non-fatal):", (e as Error).message);
+      }
+    }
+
     // ── 12. Fire-and-forget: loyalty, badges, timeline ──
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
