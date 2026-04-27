@@ -533,6 +533,21 @@ serve(async (req) => {
         });
 
         logStep("PawBucks deducted for mixed payment", { pawbucksUsed });
+
+        // Track Branded PawBucks redemption for the partial-payment path.
+        // Use a synthetic transaction_id so we keep idempotency per invoice.
+        try {
+          const { error: brandedRedeemErr } = await supabase.rpc("redeem_branded_pawbucks", {
+            p_user_id: userId,
+            p_merchant_id: merchant.id,
+            p_amount: pawbucksUsed,
+            p_transaction_id: null,
+            p_description: `Branded PawBucks redeemed on Invoice #${invoice.invoice_number} (partial)`,
+          });
+          if (brandedRedeemErr) console.error("Branded redemption tracking failed (non-fatal):", brandedRedeemErr.message);
+        } catch (e) {
+          console.error("Branded redemption tracking exception (non-fatal):", (e as Error).message);
+        }
       }
     }
 
