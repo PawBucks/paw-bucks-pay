@@ -2,22 +2,423 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Header } from "@/components/Header";
 import { SEO } from "@/components/SEO";
 import { seoMeta } from "@/lib/seoMeta";
 import { PremiumMerchantsBanner } from "@/components/PremiumMerchantsBanner";
-import { 
-  Wallet, Store, Gift, ArrowRight, Shield, Zap, TrendingUp, CheckCircle, 
-  Sparkles, BarChart3, MapPin, AlertTriangle, ShoppingBag, Heart, Users,
-  Trophy, Star, BookOpen, Flame, Crown, Target, Clock, Palette
-} from "lucide-react";
-import { motion } from "framer-motion";
-import { SocialFollowLinks } from "@/components/SocialFollowLinks";
 import logo from "@/assets/logo.png";
-import heroDogsRunning from "@/assets/hero-dogs-running.jpeg";
-import familyLifestyleFooter from "@/assets/family-lifestyle-footer.png";
+
+const styles = `
+  .pl-root {
+    --ink: #0a1f26;
+    --teal: #12a8b3;
+    --teal-light: #1ec8d4;
+    --teal-pale: #e8f9fa;
+    --teal-dark: #0a8f9a;
+    --muted: #3d6068;
+    --muted-light: #5a8a94;
+    --border: #caeaee;
+    --white: #ffffff;
+    --section-alt: #f5fbfc;
+    --dark-bg: #0a1f26;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    background: var(--white);
+    color: var(--ink);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+  .pl-root * { box-sizing: border-box; }
+  .pl-root h1, .pl-root h2, .pl-root h3, .pl-root .pl-display { font-family: 'Playfair Display', serif; }
+
+  /* NAV */
+  .pl-nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0.75rem 2.5rem;
+    background: rgba(255,255,255,0.96);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .pl-nav-logo img { height: 44px; width: auto; display: block; }
+  .pl-nav-links { display: flex; gap: 2rem; align-items: center; }
+  .pl-nav-links a {
+    color: var(--muted); text-decoration: none;
+    font-size: 0.875rem; font-weight: 400;
+    transition: color 0.2s; background: none; border: none; cursor: pointer;
+  }
+  .pl-nav-links a:hover { color: var(--teal); }
+  .pl-nav-cta {
+    background: var(--teal); color: #fff !important;
+    padding: 0.6rem 1.4rem; border-radius: 3px;
+    text-decoration: none; font-size: 0.85rem;
+    font-weight: 500; letter-spacing: 0.03em;
+    border: none; cursor: pointer;
+    transition: background 0.2s;
+  }
+  .pl-nav-cta:hover { background: var(--ink); }
+  .pl-nav-mobile-cta { display: none; }
+
+  /* HERO */
+  .pl-hero {
+    min-height: 100vh;
+    display: grid; grid-template-columns: 1fr 1fr;
+    padding-top: 5rem; background: var(--white);
+    position: relative; overflow: hidden;
+  }
+  .pl-hero::before {
+    content: ''; position: absolute;
+    top: -200px; right: -200px;
+    width: 700px; height: 700px; border-radius: 50%;
+    background: radial-gradient(circle, #1ec8d418 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .pl-hero-left {
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 5rem 3rem 5rem 5rem;
+  }
+  .pl-eyebrow {
+    font-size: 0.75rem; font-weight: 500;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--teal); margin-bottom: 1.5rem;
+  }
+  .pl-hero-title {
+    font-size: clamp(2.8rem, 5vw, 4.2rem);
+    font-weight: 900; line-height: 1.05;
+    letter-spacing: -0.03em; color: var(--ink);
+    margin-bottom: 1.75rem;
+  }
+  .pl-hero-title em { font-style: italic; color: var(--teal); }
+  .pl-hero-sub {
+    font-size: 1.1rem; color: var(--muted);
+    font-weight: 400; max-width: 440px;
+    line-height: 1.75; margin-bottom: 2.5rem;
+  }
+  .pl-actions { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; margin-bottom: 2.5rem; }
+  .pl-btn-primary {
+    background: var(--teal); color: #fff !important;
+    padding: 0.9rem 2rem; border-radius: 3px;
+    text-decoration: none; font-weight: 500; font-size: 0.95rem;
+    letter-spacing: 0.02em; border: none; cursor: pointer;
+    transition: all 0.2s; display: inline-block;
+  }
+  .pl-btn-primary:hover { background: var(--ink); transform: translateY(-1px); }
+  .pl-btn-ghost {
+    color: var(--ink); text-decoration: none;
+    font-size: 0.9rem; font-weight: 500;
+    border: none; background: none; cursor: pointer;
+    border-bottom: 1px solid var(--border); padding-bottom: 2px;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .pl-btn-ghost:hover { border-color: var(--teal); color: var(--teal); }
+
+  .pl-hero-stats { display: flex; gap: 2rem; flex-wrap: wrap; align-items: center; }
+  .pl-stat { display: flex; flex-direction: column; }
+  .pl-stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem; font-weight: 900;
+    color: var(--ink); line-height: 1;
+  }
+  .pl-stat-label { font-size: 0.75rem; color: var(--muted-light); margin-top: 0.2rem; }
+  .pl-stat-divider { width: 1px; align-self: stretch; background: var(--border); }
+
+  .pl-hero-right {
+    display: flex; align-items: center; justify-content: center;
+    padding: 5rem 4rem 5rem 2rem;
+  }
+
+  /* EARN CARD */
+  .pl-earn-card {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: 6px; padding: 2.5rem;
+    width: 100%; max-width: 400px;
+    box-shadow: 0 20px 60px rgba(10,31,38,0.09);
+    position: relative;
+  }
+  .pl-earn-card::before {
+    content: '1,000 PawBucks = $1';
+    position: absolute; top: -12px; left: 1.5rem;
+    background: var(--teal); color: #fff;
+    font-size: 0.7rem; font-weight: 500;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 0.25rem 0.75rem; border-radius: 2px;
+  }
+  .pl-earn-title {
+    font-size: 1.1rem; font-weight: 700;
+    color: var(--ink); margin-bottom: 1.25rem;
+  }
+  .pl-tier-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0.9rem 1rem; border-radius: 4px;
+    margin-bottom: 0.6rem; border: 1px solid var(--border);
+  }
+  .pl-tier-row:last-child { margin-bottom: 0; }
+  .pl-tier-row.featured {
+    background: var(--teal-pale); border-color: var(--teal);
+  }
+  .pl-tier-name { font-size: 0.9rem; font-weight: 500; color: var(--ink); }
+  .pl-tier-price { font-size: 0.75rem; color: var(--muted-light); margin-top: 0.15rem; }
+  .pl-tier-price.free-tag { color: var(--teal-dark); font-weight: 500; }
+  .pl-tier-earn {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem; font-weight: 900;
+    color: var(--teal-dark); text-align: right;
+  }
+  .pl-tier-earn span {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.7rem; color: var(--muted-light);
+    font-weight: 400; display: block;
+  }
+  .pl-earn-example {
+    margin-top: 1.25rem; background: var(--teal-pale);
+    border-radius: 3px; padding: 1rem 1.25rem;
+    font-size: 0.85rem; color: var(--ink); line-height: 1.6;
+  }
+  .pl-earn-example strong { color: var(--teal-dark); }
+
+  /* SECTIONS */
+  .pl-section { padding: 6rem 5rem; }
+  .pl-section-title {
+    font-size: clamp(2rem, 3.5vw, 2.8rem);
+    font-weight: 900; line-height: 1.1;
+    letter-spacing: -0.02em; color: var(--ink);
+    margin-bottom: 1.25rem;
+  }
+  .pl-section-sub {
+    font-size: 1rem; color: var(--muted);
+    max-width: 520px; line-height: 1.8;
+  }
+
+  /* HOW IT WORKS */
+  .pl-how { background: var(--dark-bg); }
+  .pl-how .pl-section-title { color: #fff; }
+  .pl-how .pl-section-sub { color: #6ab8c0; }
+  .pl-steps {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 2rem; margin-top: 3.5rem;
+  }
+  .pl-step { position: relative; padding-top: 1rem; }
+  .pl-step-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 3.5rem; font-weight: 900;
+    color: #1a5a66; line-height: 1;
+    margin-bottom: 1rem; user-select: none;
+  }
+  .pl-step-title {
+    font-size: 1rem; font-weight: 500;
+    color: var(--teal-light); margin-bottom: 0.5rem;
+  }
+  .pl-step-body {
+    font-size: 0.9rem; color: #6ab8c0;
+    line-height: 1.7; font-weight: 300;
+  }
+
+  /* FEATURES */
+  .pl-features { background: var(--white); }
+  .pl-features-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem; margin-top: 3rem;
+  }
+  .pl-feature-card {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: 4px; padding: 1.75rem 2rem;
+    transition: box-shadow 0.2s, transform 0.2s;
+    position: relative; overflow: hidden;
+  }
+  .pl-feature-card::after {
+    content: ''; position: absolute;
+    top: 0; left: 0; width: 100%; height: 3px;
+    background: var(--teal);
+    transform: scaleX(0); transform-origin: left;
+    transition: transform 0.3s;
+  }
+  .pl-feature-card:hover { box-shadow: 0 8px 30px rgba(10,31,38,0.08); transform: translateY(-2px); }
+  .pl-feature-card:hover::after { transform: scaleX(1); }
+  .pl-feature-icon { font-size: 1.75rem; margin-bottom: 0.75rem; }
+  .pl-feature-name { font-size: 1rem; font-weight: 500; margin-bottom: 0.4rem; color: var(--ink); }
+  .pl-feature-desc { font-size: 0.875rem; color: var(--muted); line-height: 1.7; }
+
+  /* LOST PET */
+  .pl-lostpet { background: var(--section-alt); }
+  .pl-lostpet-inner {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 5rem; align-items: center;
+  }
+  .pl-channels { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1.5rem; }
+  .pl-pill {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: 20px; padding: 0.35rem 0.9rem;
+    font-size: 0.8rem; color: var(--muted);
+  }
+  .pl-flyer {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: 6px; padding: 2rem;
+    box-shadow: 0 12px 40px rgba(10,31,38,0.07);
+  }
+  .pl-flyer-header {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding-bottom: 1rem; border-bottom: 1px solid var(--border);
+    margin-bottom: 1rem;
+  }
+  .pl-flyer-avatar {
+    width: 52px; height: 52px; border-radius: 50%;
+    background: var(--teal-pale);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; flex-shrink: 0;
+  }
+  .pl-flyer-name { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; color: var(--ink); }
+  .pl-flyer-tag { font-size: 0.75rem; color: var(--muted-light); }
+  .pl-flyer-alert {
+    background: #fff4e5; border: 1px solid #ffd99a;
+    border-radius: 3px; padding: 0.6rem 0.9rem;
+    font-size: 0.8rem; color: #8a5a00;
+    margin-bottom: 1rem; font-weight: 500;
+  }
+  .pl-flyer-details { font-size: 0.8rem; color: var(--muted); line-height: 1.8; margin-bottom: 1rem; }
+  .pl-flyer-share-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted-light); margin-bottom: 0.5rem; }
+  .pl-share-icons { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  .pl-share-icon {
+    background: var(--teal-pale); border: 1px solid var(--border);
+    border-radius: 3px; padding: 0.3rem 0.6rem;
+    font-size: 0.72rem; color: var(--teal-dark);
+    font-weight: 500;
+  }
+
+  /* TIERS */
+  .pl-tiers { background: var(--white); }
+  .pl-tiers-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem; margin-top: 3rem;
+  }
+  .pl-tier-card {
+    border: 1px solid var(--border); border-radius: 6px;
+    padding: 2.25rem 2rem; position: relative;
+    transition: box-shadow 0.2s; background: var(--white);
+  }
+  .pl-tier-card:hover { box-shadow: 0 12px 40px rgba(10,31,38,0.09); }
+  .pl-tier-card.popular {
+    border-color: var(--teal);
+    box-shadow: 0 12px 40px rgba(18,168,179,0.15);
+  }
+  .pl-popular-badge {
+    position: absolute; top: -12px; left: 50%;
+    transform: translateX(-50%);
+    background: var(--teal); color: #fff;
+    font-size: 0.68rem; font-weight: 500;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 0.25rem 0.9rem; border-radius: 2px; white-space: nowrap;
+  }
+  .pl-tier-card-name {
+    font-size: 0.8rem; font-weight: 500;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--teal); margin-bottom: 0.5rem;
+  }
+  .pl-tier-card-price {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem; font-weight: 900;
+    color: var(--ink); line-height: 1; margin-bottom: 0.25rem;
+  }
+  .pl-tier-card-price span {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem; color: var(--muted); font-weight: 400;
+  }
+  .pl-tier-card-earn {
+    font-size: 0.875rem; color: var(--muted);
+    margin-bottom: 1.5rem; padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .pl-tier-card-earn strong { color: var(--teal-dark); }
+  .pl-perks { list-style: none; padding: 0; margin: 0 0 1.75rem; display: flex; flex-direction: column; gap: 0.6rem; }
+  .pl-perks li { font-size: 0.875rem; color: var(--muted); display: flex; gap: 0.6rem; align-items: flex-start; line-height: 1.5; }
+  .pl-check { color: var(--teal); font-weight: 700; flex-shrink: 0; }
+  .pl-tier-cta {
+    display: block; text-align: center; padding: 0.75rem;
+    border-radius: 3px; font-size: 0.875rem; font-weight: 500;
+    text-decoration: none; transition: all 0.2s;
+    border: 1px solid var(--border); color: var(--ink);
+    background: none; cursor: pointer; width: 100%;
+  }
+  .pl-tier-cta:hover { background: var(--teal-pale); border-color: var(--teal); }
+  .pl-tier-cta.featured { background: var(--teal); color: #fff; border-color: var(--teal); }
+  .pl-tier-cta.featured:hover { background: var(--ink); border-color: var(--ink); }
+
+  /* REFERRAL */
+  .pl-referral { background: var(--section-alt); }
+  .pl-referral-inner {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 5rem; align-items: center;
+  }
+  .pl-ref-steps { display: flex; flex-direction: column; gap: 1.25rem; margin-top: 1.5rem; }
+  .pl-ref-step { display: flex; gap: 1rem; align-items: flex-start; }
+  .pl-ref-num {
+    width: 32px; height: 32px;
+    background: var(--teal); color: #fff;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.8rem; font-weight: 700; flex-shrink: 0;
+  }
+  .pl-ref-text { font-size: 0.9rem; color: var(--muted); line-height: 1.6; padding-top: 0.35rem; }
+  .pl-ref-text strong { color: var(--ink); }
+  .pl-referral-card {
+    background: var(--dark-bg); border-radius: 6px;
+    padding: 2.5rem; color: #fff; text-align: center;
+  }
+  .pl-referral-label { font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; color: #6ab8c0; margin-bottom: 0.5rem; }
+  .pl-referral-big {
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem; font-weight: 900;
+    color: var(--teal-light); line-height: 1; margin-bottom: 0.5rem;
+  }
+  .pl-referral-sub { font-size: 0.875rem; color: #6ab8c0; line-height: 1.6; margin-bottom: 1.5rem; }
+  .pl-referral-note { font-size: 0.75rem; color: #3d8a94; }
+
+  /* CTA */
+  .pl-cta {
+    background: var(--dark-bg); color: #fff;
+    text-align: center; padding: 7rem 5rem;
+    position: relative; overflow: hidden;
+  }
+  .pl-cta::before {
+    content: ''; position: absolute;
+    top: 50%; left: 50%; transform: translate(-50%,-50%);
+    width: 800px; height: 400px;
+    background: radial-gradient(ellipse, #1ec8d412 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .pl-cta .pl-eyebrow { color: var(--teal-light); }
+  .pl-cta .pl-section-title { color: #fff; max-width: 600px; margin: 0 auto 1rem; }
+  .pl-cta .pl-section-sub { color: #6ab8c0; max-width: 500px; margin: 0 auto 2.5rem; }
+  .pl-cta-note { font-size: 0.8rem; color: #4a9aa4; margin-top: 1rem; }
+
+  /* FOOTER */
+  .pl-footer {
+    background: var(--dark-bg); color: #3d8a94;
+    padding: 2rem 5rem;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 0.8rem;
+  }
+  .pl-footer a { color: #3d8a94; text-decoration: none; }
+  .pl-footer a:hover { color: var(--teal-light); }
+
+  /* RESPONSIVE */
+  @media (max-width: 1024px) {
+    .pl-features-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 900px) {
+    .pl-nav { padding: 0.75rem 1.5rem; }
+    .pl-nav-links { display: none; }
+    .pl-nav-mobile-cta { display: inline-block; }
+    .pl-section { padding: 4rem 1.5rem; }
+    .pl-cta { padding: 4rem 1.5rem; }
+    .pl-footer { flex-direction: column; gap: 0.75rem; text-align: center; padding: 2rem 1.5rem; }
+    .pl-hero { grid-template-columns: 1fr; min-height: auto; }
+    .pl-hero-left { padding: 6rem 1.5rem 2rem; }
+    .pl-hero-right { padding: 0 1.5rem 4rem; }
+    .pl-steps { grid-template-columns: 1fr 1fr; }
+    .pl-features-grid { grid-template-columns: 1fr; }
+    .pl-lostpet-inner { grid-template-columns: 1fr; gap: 2rem; }
+    .pl-tiers-grid { grid-template-columns: 1fr; }
+    .pl-referral-inner { grid-template-columns: 1fr; gap: 2rem; }
+  }
+`;
 
 const Index = () => {
   const navigate = useNavigate();
@@ -26,623 +427,358 @@ const Index = () => {
 
   useEffect(() => {
     supabase
-      .from('platform_settings')
-      .select('value')
-      .eq('key', 'welcome_credit_enabled')
+      .from("platform_settings")
+      .select("value")
+      .eq("key", "welcome_credit_enabled")
       .maybeSingle()
       .then(({ data }) => {
-        setWelcomeCreditEnabled(!data ? false : data.value === true || data.value === 'true');
+        setWelcomeCreditEnabled(!data ? false : data.value === true || data.value === "true");
       });
   }, []);
 
   useEffect(() => {
-    // Skip the async admin check if no user - faster redirect
     if (!loading && user) {
-      // For most users, redirect immediately to dashboard
-      // Admin check happens asynchronously and redirects if needed
       navigate("/dashboard", { replace: true });
-      
-      // Check admin in background (won't block navigation)
-      supabase.rpc('has_role', {
-        _user_id: user.id,
-        _role: 'admin'
-      }).then(({ data: isAdmin }) => {
-        if (isAdmin) {
-          navigate("/admin", { replace: true });
-        }
+      supabase.rpc("has_role", { _user_id: user.id, _role: "admin" }).then(({ data: isAdmin }) => {
+        if (isAdmin) navigate("/admin", { replace: true });
       });
     }
   }, [user, loading, navigate]);
 
-  // Show minimal loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-[var(--gradient-hero)] flex items-center justify-center" role="status" aria-label="Loading">
-        <div className="text-center space-y-4">
-          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" aria-hidden="true" />
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-white" role="status" aria-label="Loading">
+        <div className="w-12 h-12 border-4 border-[#12a8b3] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
+  const goSignup = () => navigate("/auth?role=pet_owner");
+  const goSignin = () => navigate("/auth?role=pet_owner&mode=signin");
+  const goDirectory = () => navigate("/directory");
+  const goLostPets = () => navigate("/lost-pets");
+  const goMerchants = () => navigate("/merchants");
+  const goVets = () => navigate("/vets");
+
   return (
-    <div className="min-h-[100dvh] bg-[var(--gradient-hero)] overflow-x-hidden">
-      <SEO 
+    <div className="pl-root">
+      <SEO
         title={seoMeta.home.title}
         description={seoMeta.home.description}
         keywords={[...seoMeta.home.keywords]}
         canonical={seoMeta.home.canonical}
       />
-      <Header menuItems={[
-        { label: "Explore Pet Merchants", path: "/directory" },
-        { label: "Lost Pets", path: "/lost-pets" },
-        { label: "About", path: "/about" },
-        { label: "Sign In", path: "/auth?role=pet_owner" }
-      ]} />
+      <style>{styles}</style>
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap"
+        rel="stylesheet"
+      />
 
-      <main role="main">
-        {/* Hero Section */}
-        <section className="relative container mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 lg:py-28" aria-labelledby="hero-heading">
-          <div className="absolute top-20 right-10 w-72 h-72 bg-accent/20 rounded-full blur-3xl animate-pulse" aria-hidden="true"></div>
-          <div className="absolute bottom-20 left-10 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse delay-700" aria-hidden="true"></div>
-          
-          <div className="relative max-w-4xl mx-auto text-center space-y-6 animate-fade-in">
-            <h1 
-              id="hero-heading"
-              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold leading-[1.1] tracking-tight text-foreground"
-            >
-              Everything Your Pet Needs.
-              <br />
-              <span className="bg-gradient-to-r from-accent via-secondary to-accent bg-clip-text text-transparent">
-                Rewards for Every Dollar You Spend.
-              </span>
-            </h1>
-            
-            <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Manage pet expenses, discover trusted local services, and earn PawBucks every time you care for your pet.
+      {/* NAV */}
+      <nav className="pl-nav">
+        <a href="/" className="pl-nav-logo" aria-label="PawBucks home">
+          <img src={logo} alt="PawBucks" />
+        </a>
+        <div className="pl-nav-links">
+          <a onClick={goDirectory} role="button" tabIndex={0}>Discover</a>
+          <a onClick={goMerchants} role="button" tabIndex={0}>For Merchants</a>
+          <a onClick={goVets} role="button" tabIndex={0}>For Vets</a>
+          <a onClick={goLostPets} role="button" tabIndex={0}>Lost Pets</a>
+          <a onClick={goSignin} role="button" tabIndex={0}>Sign In</a>
+          <button className="pl-nav-cta" onClick={goSignup}>Get Started</button>
+        </div>
+        <button className="pl-nav-cta pl-nav-mobile-cta" onClick={goSignup}>Sign Up</button>
+      </nav>
+
+      {/* HERO */}
+      <section className="pl-hero">
+        <div className="pl-hero-left">
+          <p className="pl-eyebrow">Rewards for Pet Parents</p>
+          <h1 className="pl-hero-title">
+            Earn rewards every time<br />you <em>care</em> for your pet.
+          </h1>
+          <p className="pl-hero-sub">
+            PawBucks rewards you on every dollar you spend on grooming, vet visits, food,
+            boarding and more. Earn cashback PawBucks. Redeem them for real discounts.
+            Free to join.
+          </p>
+          <div className="pl-actions">
+            <button className="pl-btn-primary" onClick={goSignup}>Create free account</button>
+            <button className="pl-btn-ghost" onClick={goDirectory}>Browse Pet Services →</button>
+          </div>
+          <div className="pl-hero-stats">
+            <div className="pl-stat">
+              <span className="pl-stat-num">10×</span>
+              <span className="pl-stat-label">PawBucks per dollar</span>
+            </div>
+            <div className="pl-stat-divider" />
+            <div className="pl-stat">
+              <span className="pl-stat-num">$0</span>
+              <span className="pl-stat-label">to join</span>
+            </div>
+            <div className="pl-stat-divider" />
+            <div className="pl-stat">
+              <span className="pl-stat-num">100%</span>
+              <span className="pl-stat-label">redeemable</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="pl-hero-right">
+          <div className="pl-earn-card">
+            <h3 className="pl-earn-title">How much you earn</h3>
+            <div className="pl-tier-row">
+              <div>
+                <div className="pl-tier-name">Free</div>
+                <div className="pl-tier-price free-tag">Always $0</div>
+              </div>
+              <div className="pl-tier-earn">10<span>PB / $1</span></div>
+            </div>
+            <div className="pl-tier-row featured">
+              <div>
+                <div className="pl-tier-name">PawPass</div>
+                <div className="pl-tier-price">$4.99 / mo</div>
+              </div>
+              <div className="pl-tier-earn">20<span>PB / $1</span></div>
+            </div>
+            <div className="pl-tier-row">
+              <div>
+                <div className="pl-tier-name">PawPass+</div>
+                <div className="pl-tier-price">$9.99 / mo</div>
+              </div>
+              <div className="pl-tier-earn">30<span>PB / $1</span></div>
+            </div>
+            <div className="pl-earn-example">
+              Spend <strong>$100</strong> on PawPass → earn <strong>2,000 PawBucks</strong> (worth $2.00).
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* HOW IT WORKS */}
+      <section className="pl-section pl-how">
+        <p className="pl-eyebrow">How It Works</p>
+        <h2 className="pl-section-title">Four steps. Real rewards.</h2>
+        <p className="pl-section-sub">No punch cards. No points that expire on you arbitrarily. Just cashback on what you already spend.</p>
+        <div className="pl-steps">
+          <div className="pl-step">
+            <div className="pl-step-num">01</div>
+            <div className="pl-step-title">Sign up free</div>
+            <div className="pl-step-body">Create your account in under a minute. Add your pet's profile to unlock health records, lost-pet tools, and personalized recommendations.</div>
+          </div>
+          <div className="pl-step">
+            <div className="pl-step-num">02</div>
+            <div className="pl-step-title">Spend at partners</div>
+            <div className="pl-step-body">Pay through PawBucks at any participating groomer, vet, boarder, or pet store. Submit receipts from non-partners to still earn rewards.</div>
+          </div>
+          <div className="pl-step">
+            <div className="pl-step-num">03</div>
+            <div className="pl-step-title">Earn PawBucks</div>
+            <div className="pl-step-body">Cashback lands in your wallet automatically. 10 PB per $1 on Free, up to 30 PB per $1 on PawPass+.</div>
+          </div>
+          <div className="pl-step">
+            <div className="pl-step-num">04</div>
+            <div className="pl-step-title">Redeem for discounts</div>
+            <div className="pl-step-body">1,000 PawBucks = $1 toward your next purchase. Apply at checkout. No minimums, no expiration on promotional credits.</div>
+          </div>
+        </div>
+      </section>
+
+      {/* FEATURES */}
+      <section className="pl-section pl-features">
+        <p className="pl-eyebrow">Built for pet parents</p>
+        <h2 className="pl-section-title">More than rewards.</h2>
+        <p className="pl-section-sub">PawBucks is the all-in-one app for the modern pet household.</p>
+        <div className="pl-features-grid">
+          <div className="pl-feature-card">
+            <div className="pl-feature-icon">🗺️</div>
+            <h3 className="pl-feature-name">Local discovery</h3>
+            <p className="pl-feature-desc">Find vetted groomers, vets, walkers, and boarders near you with verified reviews and live availability.</p>
+          </div>
+          <div className="pl-feature-card">
+            <div className="pl-feature-icon">🩺</div>
+            <h3 className="pl-feature-name">Pet health records</h3>
+            <p className="pl-feature-desc">Vaccines, prescriptions, and visit history in one secure place — shareable with any vet or boarder in seconds.</p>
+          </div>
+          <div className="pl-feature-card">
+            <div className="pl-feature-icon">📅</div>
+            <h3 className="pl-feature-name">Booking & scheduling</h3>
+            <p className="pl-feature-desc">Book grooming, vet appointments, and boarding directly. Get reminders, reschedule, and pay in one tap.</p>
+          </div>
+          <div className="pl-feature-card">
+            <div className="pl-feature-icon">🛍️</div>
+            <h3 className="pl-feature-name">Pet store</h3>
+            <p className="pl-feature-desc">Shop food, treats, and supplies from local merchants. Earn PawBucks on every order — and use them on the next.</p>
+          </div>
+          <div className="pl-feature-card">
+            <div className="pl-feature-icon">🐾</div>
+            <h3 className="pl-feature-name">Loyalty punch cards</h3>
+            <p className="pl-feature-desc">Auto-enrolled at every visit. No paper card to lose. Stack rewards across all your favorite spots.</p>
+          </div>
+          <div className="pl-feature-card">
+            <div className="pl-feature-icon">🎯</div>
+            <h3 className="pl-feature-name">Personalized for your pet</h3>
+            <p className="pl-feature-desc">Take the personality quiz. Get badges, milestones, and recommendations tailored to your dog or cat.</p>
+          </div>
+        </div>
+      </section>
+
+      {/* LOST PET */}
+      <section className="pl-section pl-lostpet">
+        <div className="pl-lostpet-inner">
+          <div>
+            <p className="pl-eyebrow">When it matters most</p>
+            <h2 className="pl-section-title">Lost pet? Mobilize your community in seconds.</h2>
+            <p className="pl-section-sub">
+              One tap turns your pet's profile into a shareable lost-pet flyer that broadcasts
+              to your network and every PawBucks user nearby. Faster than a paper flyer.
+              More effective than a single Facebook post.
             </p>
-            
-            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-              <Button 
-                size="lg" 
-                onClick={() => navigate("/auth?role=pet_owner")}
-                className="text-base sm:text-lg px-8 sm:px-10 py-6 sm:py-7 shadow-xl hover:shadow-2xl transition-all group bg-gradient-to-r from-primary to-primary/80"
-              >
-                Sign Up as Pet Owner
-                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-              </Button>
+            <div className="pl-channels">
+              <span className="pl-pill">SMS</span>
+              <span className="pl-pill">Email</span>
+              <span className="pl-pill">Facebook</span>
+              <span className="pl-pill">Instagram</span>
+              <span className="pl-pill">X / Twitter</span>
+              <span className="pl-pill">Nextdoor</span>
+              <span className="pl-pill">WhatsApp</span>
+              <span className="pl-pill">Local PawBucks alerts</span>
             </div>
-            <p className="text-sm text-muted-foreground">No credit card required</p>
           </div>
-        </section>
+          <div className="pl-flyer">
+            <div className="pl-flyer-header">
+              <div className="pl-flyer-avatar">🐕</div>
+              <div>
+                <div className="pl-flyer-name">Cooper</div>
+                <div className="pl-flyer-tag">Golden Retriever · 3 yrs</div>
+              </div>
+            </div>
+            <div className="pl-flyer-alert">⚠ Last seen near Maple & 5th — 2:14 PM</div>
+            <div className="pl-flyer-details">
+              Friendly, responds to his name. Wearing a blue collar with PawBucks ID tag.
+              No medications. Microchipped.
+            </div>
+            <div className="pl-flyer-share-label">Share Instantly</div>
+            <div className="pl-share-icons">
+              <span className="pl-share-icon">SMS</span>
+              <span className="pl-share-icon">Facebook</span>
+              <span className="pl-share-icon">Instagram</span>
+              <span className="pl-share-icon">Nextdoor</span>
+              <span className="pl-share-icon">Copy link</span>
+            </div>
+          </div>
+        </div>
+      </section>
 
-        {/* Welcome Credit Banner */}
-        {welcomeCreditEnabled && <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10" aria-label="Welcome Credit Offer">
-          <div className="relative max-w-4xl mx-auto">
-            <div className="relative rounded-2xl overflow-hidden border-2 border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-yellow-500/10 p-6 sm:p-8 shadow-xl">
-              {/* Sparkle decorations */}
-              <div className="absolute top-3 right-6 w-2.5 h-2.5 bg-yellow-400 rounded-full animate-pulse" aria-hidden="true" />
-              <div className="absolute top-8 right-3 w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse delay-150" aria-hidden="true" />
-              <div className="absolute bottom-4 left-8 w-2 h-2 bg-orange-400 rounded-full animate-pulse delay-300" aria-hidden="true" />
-              <div className="absolute top-4 left-4 w-1.5 h-1.5 bg-yellow-300 rounded-full animate-pulse delay-500" aria-hidden="true" />
+      {/* TIERS */}
+      <section className="pl-section pl-tiers">
+        <p className="pl-eyebrow">Membership</p>
+        <h2 className="pl-section-title">Pick your earn rate.</h2>
+        <p className="pl-section-sub">Start free. Upgrade only when the math works for you.</p>
 
-              <div className="flex flex-col sm:flex-row items-center gap-5 sm:gap-8">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shrink-0 shadow-lg">
-                  <Gift className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
-                </div>
-                <div className="flex-1 text-center sm:text-left space-y-2">
-                  <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
-                    <h2 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-foreground">
-                      🎉 Up to $250 in Free PawBucks
-                    </h2>
-                    <span className="inline-flex items-center px-3 py-1 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 text-xs font-semibold">
-                      Limited Spots
-                    </span>
-                  </div>
-                  <p className="text-muted-foreground text-base sm:text-lg">
-                    New members receive <span className="font-bold text-amber-600 dark:text-amber-400">$50–$250 in welcome credits</span> released monthly.
-                    Early adopters get the biggest rewards — sign up today before spots fill up!
-                  </p>
-                  <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
-                    <Button
-                      size="lg"
-                      onClick={() => navigate("/auth?role=pet_owner")}
-                      className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-md font-semibold"
-                    >
-                      <Sparkles className="w-4 h-4 mr-2" />
-                      Claim Your Welcome Credit
-                      <ArrowRight className="w-4 h-4 ml-2" />
-                    </Button>
-                    <span className="text-xs text-muted-foreground">Monthly credits • Use or lose each month • No credit card needed</span>
-                  </div>
-                </div>
+        <div className="pl-tiers-grid">
+          <div className="pl-tier-card">
+            <div className="pl-tier-card-name">Free</div>
+            <div className="pl-tier-card-price">$0<span> / mo</span></div>
+            <div className="pl-tier-card-earn">Earn <strong>10 PB per $1</strong> spent</div>
+            <ul className="pl-perks">
+              <li><span className="pl-check">✓</span> Cashback PawBucks on every purchase</li>
+              <li><span className="pl-check">✓</span> Local merchant discovery & booking</li>
+              <li><span className="pl-check">✓</span> Pet health records & lost-pet flyers</li>
+              <li><span className="pl-check">✓</span> Loyalty punch cards</li>
+            </ul>
+            <button className="pl-tier-cta" onClick={goSignup}>Get started</button>
+          </div>
+
+          <div className="pl-tier-card popular">
+            <div className="pl-popular-badge">Most Popular</div>
+            <div className="pl-tier-card-name">PawPass</div>
+            <div className="pl-tier-card-price">$4.99<span> / mo</span></div>
+            <div className="pl-tier-card-earn">Earn <strong>20 PB per $1</strong> — 2× the rate</div>
+            <ul className="pl-perks">
+              <li><span className="pl-check">✓</span> Everything in Free</li>
+              <li><span className="pl-check">✓</span> 2× cashback on every dollar</li>
+              <li><span className="pl-check">✓</span> Reduced ad density</li>
+              <li><span className="pl-check">✓</span> Priority booking with partner merchants</li>
+            </ul>
+            <button className="pl-tier-cta featured" onClick={goSignup}>Start PawPass</button>
+          </div>
+
+          <div className="pl-tier-card">
+            <div className="pl-tier-card-name">PawPass+</div>
+            <div className="pl-tier-card-price">$9.99<span> / mo</span></div>
+            <div className="pl-tier-card-earn">Earn <strong>30 PB per $1</strong> — 3× the rate</div>
+            <ul className="pl-perks">
+              <li><span className="pl-check">✓</span> Everything in PawPass</li>
+              <li><span className="pl-check">✓</span> 3× cashback on every dollar</li>
+              <li><span className="pl-check">✓</span> Ad-free experience</li>
+              <li><span className="pl-check">✓</span> Multi-pet households & shared accounts</li>
+              <li><span className="pl-check">✓</span> Early access to new features</li>
+            </ul>
+            <button className="pl-tier-cta" onClick={goSignup}>Go PawPass+</button>
+          </div>
+        </div>
+      </section>
+
+      {/* PREMIUM SPOTLIGHT */}
+      <section className="pl-section" style={{ background: "var(--section-alt)" }}>
+        <p className="pl-eyebrow">Spotlight</p>
+        <h2 className="pl-section-title" style={{ marginBottom: "2rem" }}>Featured pet merchants near you.</h2>
+        <PremiumMerchantsBanner title="" />
+      </section>
+
+      {/* REFERRAL */}
+      <section className="pl-section pl-referral">
+        <div className="pl-referral-inner">
+          <div>
+            <p className="pl-eyebrow">Referrals</p>
+            <h2 className="pl-section-title">Bring a friend.<br />Both of you earn.</h2>
+            <p className="pl-section-sub">When a friend joins PawBucks with your link and makes their first purchase, you both get a bonus.</p>
+            <div className="pl-ref-steps">
+              <div className="pl-ref-step">
+                <div className="pl-ref-num">1</div>
+                <div className="pl-ref-text"><strong>Share your link.</strong> Send your unique referral link by text, email, or social.</div>
+              </div>
+              <div className="pl-ref-step">
+                <div className="pl-ref-num">2</div>
+                <div className="pl-ref-text"><strong>Friend signs up free.</strong> They join PawBucks and add their pet.</div>
+              </div>
+              <div className="pl-ref-step">
+                <div className="pl-ref-num">3</div>
+                <div className="pl-ref-text"><strong>Both earn the bonus.</strong> After their first qualifying purchase, the reward lands in both wallets.</div>
               </div>
             </div>
           </div>
-        </section>}
-
-        {/* Lifestyle Hero Image Section */}
-        <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-          <div className="relative max-w-7xl mx-auto">
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl group aspect-[21/9]">
-              <img
-                src={heroDogsRunning}
-                alt="Four happy dogs running together through a green field"
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                loading="lazy"
-                decoding="async"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/10 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-8">
-                <span className="inline-block px-3 py-1 rounded-full bg-primary/90 text-primary-foreground text-xs font-bold mb-2 tracking-wide uppercase">Better Together</span>
-                <p className="text-base sm:text-lg lg:text-xl font-semibold text-white max-w-lg leading-snug">
-                  Every fetch, every walk, every treat — earn rewards for the moments that matter.
-                </p>
-              </div>
-            </div>
+          <div className="pl-referral-card">
+            <div className="pl-referral-label">Per Successful Referral</div>
+            <div className="pl-referral-big">5,000</div>
+            <div className="pl-referral-sub">PawBucks for you<br />+ 5,000 for your friend</div>
+            <div className="pl-referral-note">Worth $5 each. No cap on how many friends you refer.</div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Premium Merchants Carousel */}
-        <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-          <PremiumMerchantsBanner 
-            title="Shop with Premium Merchants"
-            rotationInterval={6000}
-          />
-        </section>
+      {/* CTA */}
+      <section className="pl-cta">
+        <p className="pl-eyebrow">Ready when you are</p>
+        <h2 className="pl-section-title">Start earning on the spending you'd do anyway.</h2>
+        <p className="pl-section-sub">Free forever. No credit card required to sign up. Cancel any paid tier anytime.</p>
+        <button className="pl-btn-primary" onClick={goSignup}>Create your free account</button>
+        {welcomeCreditEnabled && (
+          <p className="pl-cta-note">New members get a welcome credit on signup.</p>
+        )}
+      </section>
 
-        {/* Why PawBucks Section */}
-        <section className="relative bg-gradient-to-br from-accent/5 via-transparent to-primary/5 py-16 sm:py-20" aria-labelledby="why-heading">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-3xl mx-auto text-center space-y-6">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 border border-accent/20">
-                <Sparkles className="w-4 h-4 text-accent" />
-                <span className="text-sm font-medium text-accent">Why PawBucks</span>
-              </div>
-              <h2 id="why-heading" className="text-3xl sm:text-4xl font-bold">
-                Being a great pet parent shouldn't cost more — <span className="text-accent">it should give back.</span>
-              </h2>
-              <p className="text-lg text-muted-foreground leading-relaxed">
-                Between food, vet visits, grooming, walking, training, and unexpected expenses, pet ownership adds up fast.
-                PawBucks helps you stay organized, save money, and get rewarded for the care you already give.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* How It Works */}
-        <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20" aria-labelledby="how-it-works-heading">
-          <div className="text-center mb-12">
-            <h2 id="how-it-works-heading" className="text-3xl sm:text-4xl font-bold mb-4">
-              How It Works
-            </h2>
-          </div>
-
-          <div className="grid gap-8 md:grid-cols-3 max-w-4xl mx-auto">
-            <div className="text-center space-y-4">
-              <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mx-auto text-2xl font-bold text-accent">
-                1
-              </div>
-              <h3 className="text-xl font-bold">Sign up for free</h3>
-              <p className="text-muted-foreground">Create your account in seconds — no credit card required.</p>
-            </div>
-            <div className="text-center space-y-4">
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto text-2xl font-bold text-primary">
-                2
-              </div>
-              <h3 className="text-xl font-bold">Spend on your pet like you already do</h3>
-              <p className="text-muted-foreground">Shop at partner pet businesses for food, grooming, vet visits, and more.</p>
-            </div>
-            <div className="text-center space-y-4">
-              <div className="w-16 h-16 rounded-full bg-secondary/10 flex items-center justify-center mx-auto text-2xl font-bold text-secondary">
-                3
-              </div>
-              <h3 className="text-xl font-bold">Earn PawBucks and use them</h3>
-              <p className="text-muted-foreground">Redeem for discounts, services, and products at the PawBucks store.</p>
-            </div>
-          </div>
-        </section>
-
-        {/* 🔥 NEW: Exciting Features Showcase */}
-        <section className="relative py-16 sm:py-20 overflow-hidden" aria-labelledby="new-features-heading">
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-accent/5 to-transparent" />
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
-            {/* FOMO CTA */}
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }} 
-              whileInView={{ opacity: 1, scale: 1 }} 
-              viewport={{ once: true }}
-              className="max-w-2xl mx-auto text-center"
-            >
-              <Card className="p-6 sm:p-8 border-2 border-accent/30 bg-gradient-to-r from-accent/10 via-primary/10 to-accent/10">
-                <p className="text-lg sm:text-xl font-bold text-foreground mb-2">
-                  🚀 Pet owners are already earning badges, climbing tiers, and unlocking free services.
-                </p>
-                <p className="text-muted-foreground mb-4">
-                  Don't let your pet miss out on the fun.
-                </p>
-                <Button 
-                  size="lg" 
-                  onClick={() => navigate("/auth?role=pet_owner")}
-                  className="bg-gradient-to-r from-accent to-primary hover:opacity-90 text-white shadow-xl"
-                >
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  Join the Pack — It's Free
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </Button>
-              </Card>
-            </motion.div>
-          </div>
-        </section>
-
-        {/* What You Can Do Section */}
-        <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20" id="features" aria-labelledby="features-heading">
-          <div className="text-center mb-12">
-            <h2 id="features-heading" className="text-3xl sm:text-4xl font-bold mb-4">
-              Plus Everything Else <span className="text-accent">You Need</span>
-            </h2>
-          </div>
-
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">
-            {/* Earn Rewards */}
-            <Card className="p-6 space-y-4 hover:shadow-xl transition-all border-2 hover:border-accent/30">
-              <div className="w-14 h-14 rounded-xl bg-accent/10 flex items-center justify-center">
-                <Gift className="w-7 h-7 text-accent" />
-              </div>
-              <h3 className="text-xl font-bold">Earn Rewards on Everyday Spending</h3>
-              <ul className="space-y-2 text-muted-foreground">
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-accent mt-1 flex-shrink-0" />
-                  <span>Earn PawBucks at every partner merchant</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-accent mt-1 flex-shrink-0" />
-                  <span>Redeem for discounts, services, and products</span>
-                </li>
-              </ul>
-            </Card>
-
-            {/* Discover Businesses */}
-            <Card className="p-6 space-y-4 hover:shadow-xl transition-all border-2 hover:border-secondary/30">
-              <div className="w-14 h-14 rounded-xl bg-secondary/10 flex items-center justify-center">
-                <MapPin className="w-7 h-7 text-secondary" />
-              </div>
-              <h3 className="text-xl font-bold">Support Verified Local Businesses</h3>
-              <ul className="space-y-2 text-muted-foreground">
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-secondary mt-1 flex-shrink-0" />
-                  <span>Groomers, trainers, vets, walkers, pet stores & more</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-secondary mt-1 flex-shrink-0" />
-                  <span>Book services and earn rewards simultaneously</span>
-                </li>
-              </ul>
-            </Card>
-
-            {/* Lost Pets */}
-            <Card className="p-6 space-y-4 hover:shadow-xl transition-all border-2 hover:border-destructive/30">
-              <div className="w-14 h-14 rounded-xl bg-destructive/10 flex items-center justify-center">
-                <AlertTriangle className="w-7 h-7 text-destructive" />
-              </div>
-              <h3 className="text-xl font-bold">Lost Pet Flyers in Minutes</h3>
-              <ul className="space-y-2 text-muted-foreground">
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-destructive mt-1 flex-shrink-0" />
-                  <span>Create, share, and print lost pet flyers instantly</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-destructive mt-1 flex-shrink-0" />
-                  <span>Activate your local community when it matters most</span>
-                </li>
-              </ul>
-            </Card>
-
-            {/* Pet Store */}
-            <Card className="p-6 space-y-4 hover:shadow-xl transition-all border-2 hover:border-accent/30">
-              <div className="w-14 h-14 rounded-xl bg-accent/10 flex items-center justify-center">
-                <ShoppingBag className="w-7 h-7 text-accent" />
-              </div>
-              <h3 className="text-xl font-bold">PawBucks Pet Store</h3>
-              <ul className="space-y-2 text-muted-foreground">
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-accent mt-1 flex-shrink-0" />
-                  <span>Pay with cash or PawBucks for pet products</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-accent mt-1 flex-shrink-0" />
-                  <span>Unlock badge discounts at checkout</span>
-                </li>
-              </ul>
-            </Card>
-
-            {/* AI Spending Insights */}
-            <Card className="p-6 space-y-4 hover:shadow-xl transition-all border-2 hover:border-primary/30">
-              <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center">
-                <BarChart3 className="w-7 h-7 text-primary" />
-              </div>
-              <h3 className="text-xl font-bold">AI-Powered Spending Insights</h3>
-              <ul className="space-y-2 text-muted-foreground">
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-primary mt-1 flex-shrink-0" />
-                  <span>Smart anomaly detection & spending pace alerts</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-primary mt-1 flex-shrink-0" />
-                  <span>Budget goals, recurring expense tracking, year-over-year comparisons</span>
-                </li>
-              </ul>
-            </Card>
-
-            {/* Community */}
-            <Card className="p-6 space-y-4 hover:shadow-xl transition-all border-2 hover:border-pink-500/30 relative overflow-hidden">
-              <div className="absolute top-3 right-3 px-2 py-1 bg-pink-500/10 text-pink-500 text-xs font-medium rounded-full">
-                Coming Soon
-              </div>
-              <div className="w-14 h-14 rounded-xl bg-pink-500/10 flex items-center justify-center">
-                <Heart className="w-7 h-7 text-pink-500" />
-              </div>
-              <h3 className="text-xl font-bold">Support the Pet Community</h3>
-              <ul className="space-y-2 text-muted-foreground">
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-pink-500 mt-1 flex-shrink-0" />
-                  <span>Connect with rescues, shelters, and nonprofits</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-pink-500 mt-1 flex-shrink-0" />
-                  <span>Give back while caring for your own pet</span>
-                </li>
-              </ul>
-            </Card>
-          </div>
-        </section>
-
-        {/* Subscription Tiers */}
-        <section className="relative bg-gradient-to-br from-primary/5 via-transparent to-accent/5 py-16 sm:py-20" aria-labelledby="subscriptions-heading">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
-              <h2 id="subscriptions-heading" className="text-3xl sm:text-4xl font-bold mb-4">
-                Simple Subscriptions
-              </h2>
-              <p className="text-lg text-muted-foreground">
-                Choose how much you want to earn — upgrading is optional.
-              </p>
-            </div>
-
-            <div className="grid gap-6 md:grid-cols-3 max-w-5xl mx-auto">
-              {/* Free */}
-              <Card className="p-6 space-y-4 border-2 hover:shadow-xl transition-all">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                    <Gift className="w-5 h-5 text-muted-foreground" />
-                  </div>
-                  <h3 className="text-xl font-bold">Free</h3>
-                </div>
-                <ul className="space-y-3 text-muted-foreground">
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-accent mt-1 flex-shrink-0" />
-                    <span>Earn <strong className="text-foreground">10 PawBucks</strong> for every $1 spent at partner pet businesses</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-accent mt-1 flex-shrink-0" />
-                    <span>Access spending, budget, and health tracking</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-accent mt-1 flex-shrink-0" />
-                    <span>Browse local pet services</span>
-                  </li>
-                  <li className="flex items-start gap-2 text-muted-foreground/70">
-                    <span className="w-4 h-4 mt-1 flex-shrink-0">•</span>
-                    <span>See ads</span>
-                  </li>
-                </ul>
-              </Card>
-
-              {/* PawPass */}
-              <Card className="p-6 space-y-4 border-2 border-yellow-500/40 bg-yellow-500/5 hover:shadow-xl transition-all relative">
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-yellow-500 text-yellow-950 text-xs font-bold rounded-full">
-                  POPULAR
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-yellow-500/20 flex items-center justify-center">
-                    <Zap className="w-5 h-5 text-yellow-600" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold">PawPass</h3>
-                    <p className="text-sm text-muted-foreground">$10/month</p>
-                  </div>
-                </div>
-                <ul className="space-y-3 text-muted-foreground">
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-yellow-600 mt-1 flex-shrink-0" />
-                    <span>Earn <strong className="text-foreground">20 PawBucks</strong> for every $1 spent at partner pet businesses</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-yellow-600 mt-1 flex-shrink-0" />
-                    <span>Fewer ads</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-yellow-600 mt-1 flex-shrink-0" />
-                    <span>Higher rewards, same great tools</span>
-                  </li>
-                </ul>
-              </Card>
-
-              {/* PawPass+ */}
-              <Card className="p-6 space-y-4 border-2 border-purple-500/40 bg-purple-500/5 hover:shadow-xl transition-all relative">
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-purple-500 text-white text-xs font-bold rounded-full">
-                  BEST VALUE
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center">
-                    <TrendingUp className="w-5 h-5 text-purple-500" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold">PawPass+</h3>
-                    <p className="text-sm text-muted-foreground">$20/month</p>
-                  </div>
-                </div>
-                <ul className="space-y-3 text-muted-foreground">
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-purple-500 mt-1 flex-shrink-0" />
-                    <span>Earn <strong className="text-foreground">30 PawBucks</strong> for every $1 spent at partner pet businesses</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-purple-500 mt-1 flex-shrink-0" />
-                    <span>Earn <strong className="text-foreground">5 PawBucks</strong> per $1 spent at non-partner merchants (up to 20,000/month)</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-purple-500 mt-1 flex-shrink-0" />
-                    <span>Ad-free experience</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-purple-500 mt-1 flex-shrink-0" />
-                    <span>Maximum rewards and flexibility</span>
-                  </li>
-                </ul>
-                <p className="text-xs text-muted-foreground italic">Non-partner rewards vest after 30 days.</p>
-              </Card>
-            </div>
-          </div>
-        </section>
-        {/* Why Pet Owners Love PawBucks */}
-        <section className="bg-gradient-to-br from-accent/5 via-transparent to-primary/5 py-16 sm:py-20" aria-labelledby="love-heading">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
-              <h2 id="love-heading" className="text-3xl sm:text-4xl font-bold">
-                Why Pet Owners <span className="text-accent">Love</span> PawBucks
-              </h2>
-            </div>
-
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
-              {[
-                "Rewards without managing points or cards",
-                "One platform for spending, services, and tracking",
-                "Local businesses, not big-box chains",
-                "Real value — not gimmicks",
-                "Built by someone who worked in the pet industry for 15+ years",
-              ].map((item, index) => (
-                <div key={index} className="flex items-start gap-3 p-4 rounded-xl bg-card/50 backdrop-blur-sm border border-border/50">
-                  <CheckCircle className="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
-                  <span className="text-foreground">{item}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Family Lifestyle Image Section */}
-        <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-          <div className="relative max-w-6xl mx-auto">
-            <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-muted">
-              <img 
-                src={familyLifestyleFooter}
-                alt="A happy family relaxing at home with their dogs and cat"
-                className="w-full h-auto object-contain"
-              />
-              <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent" />
-              <div className="absolute inset-0 flex items-center p-6 sm:p-10 lg:p-14">
-                <div className="max-w-md space-y-3">
-                  <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white drop-shadow-lg">
-                    Real families. Real pets. Real rewards.
-                  </h3>
-                  <p className="text-sm sm:text-base text-white/90 drop-shadow-md">
-                    Join thousands of pet owners who are saving money and earning rewards every day.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Final CTA */}
-        <section className="relative py-20 sm:py-24 overflow-hidden bg-gradient-to-br from-accent to-secondary" aria-labelledby="cta-heading">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
-          
-          <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div className="max-w-3xl mx-auto space-y-6">
-              <h2 id="cta-heading" className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white">
-                Smarter Pet Care Starts Here
-              </h2>
-              <p className="text-lg sm:text-xl text-white/90 max-w-2xl mx-auto">
-                Join PawBucks and turn everyday pet spending into rewards, insights, and peace of mind.
-              </p>
-              <Button 
-                size="lg" 
-                onClick={() => navigate("/auth")}
-                className="bg-white text-accent hover:bg-white/90 text-base sm:text-lg px-10 py-7 shadow-2xl hover:shadow-3xl transition-all hover:scale-105"
-              >
-                Create Your Free Account
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </Button>
-            </div>
-          </div>
-        </section>
-      </main>
-
-      {/* Footer */}
-      <footer className="border-t py-12 sm:py-16 bg-card/80 backdrop-blur-sm" role="contentinfo">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col items-center gap-6">
-            <img
-              src={logo}
-              alt="PawBucks Logo"
-              className="h-24 sm:h-32 w-auto object-contain"
-              width={96}
-              height={96}
-              loading="lazy"
-            />
-            <p className="text-sm sm:text-base text-muted-foreground text-center max-w-md">
-              Making pet care payments simple, secure, and rewarding for everyone who loves pets.
-            </p>
-            <SocialFollowLinks />
-            <div className="flex items-center gap-4 text-sm">
-              <a 
-                href="/vets" 
-                className="text-muted-foreground hover:text-primary transition-colors"
-                onClick={(e) => { e.preventDefault(); navigate("/vets"); }}
-              >
-                For Vets
-              </a>
-              <span className="text-muted-foreground/50">•</span>
-              <a 
-                href="/merchants" 
-                className="text-muted-foreground hover:text-primary transition-colors"
-                onClick={(e) => { e.preventDefault(); navigate("/merchants"); }}
-              >
-                For Merchants
-              </a>
-            </div>
-            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-sm">
-              <a
-                href="/about"
-                className="text-muted-foreground hover:text-primary transition-colors"
-                onClick={(e) => { e.preventDefault(); navigate("/about"); }}
-              >
-                About
-              </a>
-              <span className="text-muted-foreground/50">•</span>
-              <a
-                href="/privacy"
-                className="text-muted-foreground hover:text-primary transition-colors"
-                onClick={(e) => { e.preventDefault(); navigate("/privacy"); }}
-              >
-                Privacy
-              </a>
-              <span className="text-muted-foreground/50">•</span>
-              <a
-                href="/terms"
-                className="text-muted-foreground hover:text-primary transition-colors"
-                onClick={(e) => { e.preventDefault(); navigate("/terms"); }}
-              >
-                Terms
-              </a>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              &copy; {new Date().getFullYear()} PawBucks. All rights reserved.
-            </p>
-          </div>
+      {/* FOOTER */}
+      <footer className="pl-footer">
+        <div>© {new Date().getFullYear()} PawBucks. All rights reserved.</div>
+        <div style={{ display: "flex", gap: "1.5rem" }}>
+          <a href="/about">About</a>
+          <a href="/privacy">Privacy</a>
+          <a href="/terms">Terms</a>
+          <a href="/merchants">For Merchants</a>
+          <a href="/vets">For Vets</a>
         </div>
       </footer>
     </div>
