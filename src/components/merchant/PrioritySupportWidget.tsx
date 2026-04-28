@@ -133,8 +133,8 @@ export function PrioritySupportWidget() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Badge className="bg-green-500/10 text-green-500 border-green-500/20">
-            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse mr-1.5" />
+          <Badge className="bg-success/10 text-success border-success/20">
+            <span className="w-2 h-2 rounded-full bg-success animate-pulse mr-1.5" />
             Support Active
           </Badge>
           <Badge className="bg-gradient-to-r from-primary to-primary/60 gap-1">
@@ -152,7 +152,7 @@ export function PrioritySupportWidget() {
           <div>
             <p className="text-sm text-muted-foreground">Your Dedicated Agent</p>
             <p className="text-xl font-bold">{metrics.dedicated_agent}</p>
-            <p className="text-sm text-green-500">Available {metrics.agent_availability}</p>
+            <p className="text-sm text-success">Available {metrics.agent_availability}</p>
           </div>
         </div>
         <div className="flex gap-2">
@@ -172,8 +172,8 @@ export function PrioritySupportWidget() {
         <Card>
           <CardContent className="pt-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-blue-500/10">
-                <Clock className="h-5 w-5 text-blue-500" />
+              <div className="p-2 rounded-lg bg-info/10">
+                <Clock className="h-5 w-5 text-info" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Avg Response</p>
@@ -186,8 +186,8 @@ export function PrioritySupportWidget() {
         <Card>
           <CardContent className="pt-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-green-500/10">
-                <CheckCircle className="h-5 w-5 text-green-500" />
+              <div className="p-2 rounded-lg bg-success/10">
+                <CheckCircle className="h-5 w-5 text-success" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Resolved</p>
@@ -200,8 +200,8 @@ export function PrioritySupportWidget() {
         <Card>
           <CardContent className="pt-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-yellow-500/10">
-                <Star className="h-5 w-5 text-yellow-500" />
+              <div className="p-2 rounded-lg bg-warning/10">
+                <Star className="h-5 w-5 text-warning" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Satisfaction</p>
@@ -251,7 +251,7 @@ export function PrioritySupportWidget() {
                       <div className="flex-1">
                         <div className="flex items-center justify-between">
                           <h4 className="font-semibold">{feature.name}</h4>
-                          <Badge variant="outline" className="bg-green-500/10 text-green-500 text-xs">
+                          <Badge variant="outline" className="bg-success/10 text-success text-xs">
                             Available
                           </Badge>
                         </div>
@@ -278,12 +278,12 @@ export function PrioritySupportWidget() {
                   <div key={interaction.id} className="flex items-center justify-between p-4 border rounded-lg">
                     <div className="flex items-center gap-4">
                       <div className={`p-2 rounded-lg ${
-                        interaction.type === 'chat' ? 'bg-blue-500/10' :
-                        interaction.type === 'email' ? 'bg-purple-500/10' : 'bg-green-500/10'
+                        interaction.type === 'chat' ? 'bg-info/10' :
+                        interaction.type === 'email' ? 'bg-purple-500/10' : 'bg-success/10'
                       }`}>
-                        {interaction.type === 'chat' ? <MessageCircle className="h-5 w-5 text-blue-500" /> :
+                        {interaction.type === 'chat' ? <MessageCircle className="h-5 w-5 text-info" /> :
                          interaction.type === 'email' ? <Mail className="h-5 w-5 text-purple-500" /> :
-                         <Phone className="h-5 w-5 text-green-500" />}
+                         <Phone className="h-5 w-5 text-success" />}
                       </div>
                       <div>
                         <p className="font-medium">{interaction.subject}</p>
@@ -293,7 +293,7 @@ export function PrioritySupportWidget() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <Badge variant="outline" className="bg-green-500/10 text-green-500">
+                      <Badge variant="outline" className="bg-success/10 text-success">
                         {interaction.status}
                       </Badge>
                       <p className="text-sm text-muted-foreground mt-1">
@@ -330,7 +330,7 @@ export function PrioritySupportWidget() {
                     </div>
                     <div className="flex items-center gap-2">
                       <Badge className={
-                        article.relevance === 'High' ? 'bg-green-500/10 text-green-500' : 'bg-blue-500/10 text-blue-500'
+                        article.relevance === 'High' ? 'bg-success/10 text-success' : 'bg-info/10 text-info'
                       }>
                         {article.relevance}
                       </Badge>

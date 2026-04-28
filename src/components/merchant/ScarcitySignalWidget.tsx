@@ -232,7 +232,7 @@ export function ScarcitySignalWidget({ merchantId, businessType }: ScarcitySigna
                   <div className="flex items-center gap-2">
                     <Icon className={`h-4 w-4 ${
                       slot.tier === "featured"
-                        ? "text-amber-500"
+                        ? "text-warning"
                         : slot.tier === "premium"
                         ? "text-primary"
                         : "text-muted-foreground"

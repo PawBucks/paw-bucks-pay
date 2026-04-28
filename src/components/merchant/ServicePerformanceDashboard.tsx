@@ -46,8 +46,8 @@ function roiMultiplier(revenue: number, cost: number): string {
 }
 
 function TrendIndicator({ value }: { value: number }) {
-  if (value > 0) return <ArrowUpRight className="h-4 w-4 text-green-500" />;
-  if (value < 0) return <ArrowDownRight className="h-4 w-4 text-red-500" />;
+  if (value > 0) return <ArrowUpRight className="h-4 w-4 text-success" />;
+  if (value < 0) return <ArrowDownRight className="h-4 w-4 text-destructive" />;
   return <Minus className="h-4 w-4 text-muted-foreground" />;
 }
 
@@ -320,7 +320,7 @@ export function ServicePerformanceDashboard({ merchantId }: { merchantId: string
                       </div>
                       <Badge
                         variant={roi >= 1 ? 'default' : 'secondary'}
-                        className={roi >= 2 ? 'bg-green-500 hover:bg-green-600' : roi >= 1 ? 'bg-primary' : ''}
+                        className={roi >= 2 ? 'bg-success hover:bg-success' : roi >= 1 ? 'bg-primary' : ''}
                       >
                         <TrendIndicator value={roi - 1} />
                         <span className="ml-1">{roiMultiplier(s.transaction_revenue, cost)} ROI</span>

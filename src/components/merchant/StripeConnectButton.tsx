@@ -88,14 +88,14 @@ export function StripeConnectButton({ onStatusChange }: StripeConnectButtonProps
 
   if (status?.onboardingComplete) {
     return (
-      <Card className="border-green-200 bg-green-50/50">
+      <Card className="border-success/30 bg-green-50/50">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg flex items-center gap-2">
-              <CheckCircle2 className="h-5 w-5 text-green-600" />
+              <CheckCircle2 className="h-5 w-5 text-success" />
               Stripe Connected
             </CardTitle>
-            <Badge variant="secondary" className="bg-green-100 text-green-700">
+            <Badge variant="secondary" className="bg-green-100 text-success">
               Active
             </Badge>
           </div>
@@ -117,14 +117,14 @@ export function StripeConnectButton({ onStatusChange }: StripeConnectButtonProps
 
   if (status?.connected && !status.onboardingComplete) {
     return (
-      <Card className="border-yellow-200 bg-yellow-50/50">
+      <Card className="border-warning/30 bg-yellow-50/50">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg flex items-center gap-2">
-              <AlertCircle className="h-5 w-5 text-yellow-600" />
+              <AlertCircle className="h-5 w-5 text-warning" />
               Complete Setup
             </CardTitle>
-            <Badge variant="secondary" className="bg-yellow-100 text-yellow-700">
+            <Badge variant="secondary" className="bg-yellow-100 text-warning">
               Pending
             </Badge>
           </div>

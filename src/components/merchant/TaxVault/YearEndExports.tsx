@@ -418,7 +418,7 @@ export function YearEndExports({ merchantId, businessName, taxYear, expenses }: 
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
-              <FileSpreadsheet className="h-5 w-5 text-green-600" />
+              <FileSpreadsheet className="h-5 w-5 text-success" />
               Complete Excel Bundle
             </CardTitle>
             <CardDescription>
@@ -427,10 +427,10 @@ export function YearEndExports({ merchantId, businessName, taxYear, expenses }: 
           </CardHeader>
           <CardContent>
             <div className="text-sm text-muted-foreground mb-3 space-y-1">
-              <p className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" /> Income summary</p>
-              <p className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" /> Expenses by category</p>
-              <p className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" /> Detailed expense log</p>
-              <p className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" /> Mileage log</p>
+              <p className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-success" /> Income summary</p>
+              <p className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-success" /> Expenses by category</p>
+              <p className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-success" /> Detailed expense log</p>
+              <p className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-success" /> Mileage log</p>
             </div>
             <Button 
               onClick={exportExcelBundle} 
@@ -504,11 +504,11 @@ export function YearEndExports({ merchantId, businessName, taxYear, expenses }: 
         <CardContent className="pt-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
             <div>
-              <p className="text-2xl font-bold text-green-600">${grossIncome.toFixed(0)}</p>
+              <p className="text-2xl font-bold text-success">${grossIncome.toFixed(0)}</p>
               <p className="text-xs text-muted-foreground">Gross Income</p>
             </div>
             <div>
-              <p className="text-2xl font-bold text-red-500">${(totalExpenses + mileageDeduction).toFixed(0)}</p>
+              <p className="text-2xl font-bold text-destructive">${(totalExpenses + mileageDeduction).toFixed(0)}</p>
               <p className="text-xs text-muted-foreground">Total Deductions</p>
             </div>
             <div>

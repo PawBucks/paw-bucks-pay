@@ -32,7 +32,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   platform_fees: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300',
   processing_fees: 'bg-rose-100 text-rose-800 dark:bg-rose-900 dark:text-rose-300',
   gas_mileage: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
-  pet_supplies_treats: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+  pet_supplies_treats: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-success',
   equipment: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
   insurance: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300',
   marketing_advertising: 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-300',
@@ -146,7 +146,7 @@ export function ExpensesList({ expenses, onExpenseDeleted }: ExpensesListProps) 
                   </TableCell>
                   <TableCell className="text-right">
                     {expense.savings_amount && expense.savings_amount > 0 ? (
-                      <div className="flex items-center justify-end gap-1 text-green-600 dark:text-green-400">
+                      <div className="flex items-center justify-end gap-1 text-success dark:text-success">
                         <TrendingDown className="h-3.5 w-3.5" />
                         <span className="font-medium">${expense.savings_amount.toFixed(2)}</span>
                       </div>

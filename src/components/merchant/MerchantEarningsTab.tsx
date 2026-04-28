@@ -76,8 +76,8 @@ export function MerchantEarningsTab() {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2 mb-1">
-              <DollarSign className="h-5 w-5 text-green-600" />
-              <span className="text-2xl font-bold text-green-600">
+              <DollarSign className="h-5 w-5 text-success" />
+              <span className="text-2xl font-bold text-success">
               {formatCurrency(getAvailableBalance())}
               </span>
             </div>
@@ -95,8 +95,8 @@ export function MerchantEarningsTab() {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2 mb-1">
-              <Clock className="h-5 w-5 text-yellow-600" />
-              <span className="text-2xl font-bold text-yellow-600">
+              <Clock className="h-5 w-5 text-warning" />
+              <span className="text-2xl font-bold text-warning">
               {formatCurrency(pendingBalance)}
               </span>
             </div>
@@ -189,7 +189,7 @@ export function MerchantEarningsTab() {
                 </span>
               </p>
             ) : (
-              <p className="text-lg font-bold text-green-600">None</p>
+              <p className="text-lg font-bold text-success">None</p>
             )}
           </CardContent>
         </Card>
@@ -247,9 +247,9 @@ export function MerchantEarningsTab() {
                 >
                   <div className="flex items-center gap-3">
                     {payout.status === "paid" ? (
-                      <ArrowUpRight className="h-5 w-5 text-green-500" />
+                      <ArrowUpRight className="h-5 w-5 text-success" />
                     ) : (
-                      <ArrowDownRight className="h-5 w-5 text-yellow-500" />
+                      <ArrowDownRight className="h-5 w-5 text-warning" />
                     )}
                     <div>
                       <p className="font-medium">
@@ -269,7 +269,7 @@ export function MerchantEarningsTab() {
                   <div className="flex flex-col items-end gap-1">
                     <Badge 
                       variant={payout.status === "paid" ? "default" : "secondary"}
-                      className={payout.status === "paid" ? "bg-green-100 text-green-700" : ""}
+                      className={payout.status === "paid" ? "bg-green-100 text-success" : ""}
                     >
                       {payout.status === "in_transit" ? "In Transit" : payout.status}
                     </Badge>

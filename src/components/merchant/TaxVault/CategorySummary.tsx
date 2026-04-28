@@ -196,7 +196,7 @@ export function CategorySummary({ expenses, vehicleDeduction }: CategorySummaryP
               </div>
               
               {totalSavings > 0 && (
-                <div className="flex justify-between items-center text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950/30 p-3 rounded-lg">
+                <div className="flex justify-between items-center text-success dark:text-success bg-green-50 dark:bg-green-950/30 p-3 rounded-lg">
                   <div className="flex items-center gap-2">
                     <TrendingDown className="h-4 w-4" />
                     <span className="font-medium">PawBucks Savings</span>

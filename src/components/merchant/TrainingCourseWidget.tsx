@@ -229,7 +229,7 @@ export function TrainingCourseWidget() {
                 </Button>
               )}
               {activeLesson.is_completed && (
-                <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/20">
+                <Badge variant="outline" className="bg-success/10 text-success border-success/20">
                   <CheckCircle2 className="h-3 w-3 mr-1" /> Completed
                 </Badge>
               )}
@@ -278,7 +278,7 @@ export function TrainingCourseWidget() {
                           >
                             <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
                               lesson.is_completed 
-                                ? 'bg-green-500/10 text-green-600' 
+                                ? 'bg-success/10 text-success' 
                                 : 'bg-muted text-muted-foreground'
                             }`}>
                               {lesson.is_completed ? (
@@ -348,7 +348,7 @@ export function TrainingCourseWidget() {
       {/* Certificate Section */}
       {course.progress_percent === 100 && (
         <GradientCard gradient className="text-center">
-          <Trophy className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
+          <Trophy className="h-12 w-12 text-warning mx-auto mb-4" />
           <h3 className="text-xl font-bold mb-2">Congratulations!</h3>
           <p className="text-muted-foreground mb-4">
             You've completed the PawBucks Merchant Training Course

@@ -19,7 +19,7 @@ interface CampaignRanking {
 }
 
 const RANK_DECOR = [
-  { icon: Crown, color: "text-amber-500", bg: "bg-amber-500/10 border-amber-500/30" },
+  { icon: Crown, color: "text-warning", bg: "bg-warning/10 border-warning/30" },
   { icon: Medal, color: "text-slate-400", bg: "bg-slate-400/10 border-slate-400/30" },
   { icon: Award, color: "text-orange-500", bg: "bg-orange-500/10 border-orange-500/30" },
 ];
@@ -93,7 +93,7 @@ export function MerchantCampaignLeaderboardCard({ merchantId }: MerchantCampaign
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="text-base flex items-center gap-2">
-          <Trophy className="h-4 w-4 text-amber-500" />
+          <Trophy className="h-4 w-4 text-warning" />
           Brand Campaign Rankings
         </CardTitle>
         <CardDescription>Your position in active brand campaigns</CardDescription>

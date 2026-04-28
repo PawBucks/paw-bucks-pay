@@ -43,7 +43,7 @@ export function LiveActivityFeed({ activity }: LiveActivityFeedProps) {
                       className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${
                         isEarn
                           ? "bg-emerald-500/15 text-emerald-600"
-                          : "bg-blue-500/15 text-blue-600"
+                          : "bg-info/15 text-info"
                       }`}
                     >
                       {isEarn ? (

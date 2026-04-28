@@ -128,9 +128,9 @@ export function DemandForecastingReport() {
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'high': return 'bg-red-500/10 text-red-500 border-red-500/20';
-      case 'medium': return 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20';
-      default: return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
+      case 'high': return 'bg-destructive/10 text-destructive border-destructive/20';
+      case 'medium': return 'bg-warning/10 text-warning border-warning/20';
+      default: return 'bg-info/10 text-info border-info/20';
     }
   };
 
@@ -205,8 +205,8 @@ export function DemandForecastingReport() {
 
         <GradientCard gradient>
           <div className="flex items-center gap-3">
-            <div className={`p-3 rounded-xl ${summary.predicted_growth_rate >= 0 ? 'bg-green-500/10' : 'bg-red-500/10'}`}>
-              <TrendingUp className={`h-5 w-5 ${summary.predicted_growth_rate >= 0 ? 'text-green-500' : 'text-red-500'}`} />
+            <div className={`p-3 rounded-xl ${summary.predicted_growth_rate >= 0 ? 'bg-success/10' : 'bg-destructive/10'}`}>
+              <TrendingUp className={`h-5 w-5 ${summary.predicted_growth_rate >= 0 ? 'text-success' : 'text-destructive'}`} />
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Predicted Growth</p>
@@ -217,8 +217,8 @@ export function DemandForecastingReport() {
 
         <GradientCard gradient>
           <div className="flex items-center gap-3">
-            <div className="p-3 rounded-xl bg-blue-500/10">
-              <Target className="h-5 w-5 text-blue-500" />
+            <div className="p-3 rounded-xl bg-info/10">
+              <Target className="h-5 w-5 text-info" />
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Confidence Level</p>
@@ -352,7 +352,7 @@ export function DemandForecastingReport() {
                         <td className="py-3 px-2 font-medium">{week.week}</td>
                         <td className="py-3 px-2 text-right">${week.predicted_revenue.toLocaleString()}</td>
                         <td className="py-3 px-2 text-right">
-                          <span className={week.growth_vs_prev >= 0 ? 'text-green-500' : 'text-red-500'}>
+                          <span className={week.growth_vs_prev >= 0 ? 'text-success' : 'text-destructive'}>
                             {week.growth_vs_prev >= 0 ? '+' : ''}{week.growth_vs_prev}%
                           </span>
                         </td>
@@ -374,7 +374,7 @@ export function DemandForecastingReport() {
                 <CardTitle className="text-base">Peak Season</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-2xl font-bold text-green-500">{seasonal_trends.peakSeason}</p>
+                <p className="text-2xl font-bold text-success">{seasonal_trends.peakSeason}</p>
                 <p className="text-sm text-muted-foreground">Highest demand period</p>
               </CardContent>
             </Card>
@@ -383,7 +383,7 @@ export function DemandForecastingReport() {
                 <CardTitle className="text-base">Low Season</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-2xl font-bold text-yellow-500">{seasonal_trends.lowSeason}</p>
+                <p className="text-2xl font-bold text-warning">{seasonal_trends.lowSeason}</p>
                 <p className="text-sm text-muted-foreground">Consider promotions</p>
               </CardContent>
             </Card>
@@ -472,8 +472,8 @@ export function DemandForecastingReport() {
                         </div>
                         <p className="text-sm text-muted-foreground mb-2">{rec.recommendation}</p>
                         <div className="flex items-center gap-2 text-sm">
-                          <Lightbulb className="h-4 w-4 text-yellow-500" />
-                          <span className="text-yellow-600 dark:text-yellow-400">{rec.impact}</span>
+                          <Lightbulb className="h-4 w-4 text-warning" />
+                          <span className="text-warning dark:text-yellow-400">{rec.impact}</span>
                         </div>
                       </div>
                     </div>

@@ -205,8 +205,8 @@ export function KeywordPerformanceWidget() {
 
         <GradientCard gradient>
           <div className="flex items-center gap-3">
-            <div className="p-3 rounded-xl bg-blue-500/10">
-              <MousePointerClick className="h-5 w-5 text-blue-500" />
+            <div className="p-3 rounded-xl bg-info/10">
+              <MousePointerClick className="h-5 w-5 text-info" />
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Total Clicks</p>
@@ -217,8 +217,8 @@ export function KeywordPerformanceWidget() {
 
         <GradientCard gradient>
           <div className="flex items-center gap-3">
-            <div className="p-3 rounded-xl bg-green-500/10">
-              <TrendingUp className="h-5 w-5 text-green-500" />
+            <div className="p-3 rounded-xl bg-success/10">
+              <TrendingUp className="h-5 w-5 text-success" />
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Avg CTR</p>
@@ -252,9 +252,9 @@ export function KeywordPerformanceWidget() {
           <CardContent className="space-y-4">
             {aiInsights.map((insight, idx) => (
               <div key={idx} className="flex gap-3 p-4 rounded-lg bg-card border">
-                {insight.type === 'success' && <CheckCircle className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />}
-                {insight.type === 'warning' && <AlertTriangle className="h-5 w-5 text-yellow-500 shrink-0 mt-0.5" />}
-                {insight.type === 'info' && <Info className="h-5 w-5 text-blue-500 shrink-0 mt-0.5" />}
+                {insight.type === 'success' && <CheckCircle className="h-5 w-5 text-success shrink-0 mt-0.5" />}
+                {insight.type === 'warning' && <AlertTriangle className="h-5 w-5 text-warning shrink-0 mt-0.5" />}
+                {insight.type === 'info' && <Info className="h-5 w-5 text-info shrink-0 mt-0.5" />}
                 {insight.type === 'opportunity' && <Lightbulb className="h-5 w-5 text-purple-500 shrink-0 mt-0.5" />}
                 <div className="space-y-1">
                   <p className="font-medium">{insight.title}</p>
@@ -450,9 +450,9 @@ export function KeywordPerformanceWidget() {
                           <td className="py-3 px-4 text-right">
                             <div className="flex items-center justify-end gap-1">
                               {kw.ctr > totals.avgCTR ? (
-                                <ArrowUp className="h-3 w-3 text-green-500" />
+                                <ArrowUp className="h-3 w-3 text-success" />
                               ) : (
-                                <ArrowDown className="h-3 w-3 text-red-500" />
+                                <ArrowDown className="h-3 w-3 text-destructive" />
                               )}
                               {kw.ctr.toFixed(1)}%
                             </div>
@@ -464,7 +464,7 @@ export function KeywordPerformanceWidget() {
                             </Badge>
                           </td>
                           <td className="py-3 px-4 text-right">
-                            <span className={kw.trend >= 0 ? 'text-green-500' : 'text-red-500'}>
+                            <span className={kw.trend >= 0 ? 'text-success' : 'text-destructive'}>
                               {kw.trend >= 0 ? '+' : ''}{kw.trend.toFixed(0)}%
                             </span>
                           </td>
@@ -528,7 +528,7 @@ export function KeywordPerformanceWidget() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Lightbulb className="h-5 w-5 text-yellow-500" />
+                <Lightbulb className="h-5 w-5 text-warning" />
                 Recommended Keywords
               </CardTitle>
               <CardDescription>Keywords you should target based on your business type</CardDescription>
@@ -560,7 +560,7 @@ export function KeywordPerformanceWidget() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Target className="h-5 w-5 text-red-500" />
+                <Target className="h-5 w-5 text-destructive" />
                 Competitor Keyword Gaps
               </CardTitle>
               <CardDescription>Keywords your competitors are ranking for that you're missing</CardDescription>

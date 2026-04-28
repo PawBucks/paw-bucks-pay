@@ -112,10 +112,10 @@ export const MerchantPendingReceipts = ({ merchantId }: MerchantPendingReceiptsP
   };
 
   const getStatusBadge = (status: string, hasConfirmation: boolean) => {
-    if (hasConfirmation) return <Badge className="bg-green-600">Confirmed</Badge>;
+    if (hasConfirmation) return <Badge className="bg-success">Confirmed</Badge>;
     switch (status) {
       case "pending": return <Badge variant="secondary"><Clock className="w-3 h-3 mr-1" />Pending Review</Badge>;
-      case "approved": return <Badge className="bg-green-600">Approved</Badge>;
+      case "approved": return <Badge className="bg-success">Approved</Badge>;
       case "rejected": return <Badge variant="destructive">Rejected</Badge>;
       default: return <Badge variant="outline">{status}</Badge>;
     }

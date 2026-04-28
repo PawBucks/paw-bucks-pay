@@ -104,10 +104,10 @@ export const MerchantSaleConfirmationsTab = ({ merchantId }: MerchantSaleConfirm
   };
 
   const getStatusBadge = (status: string, hasReceipt: boolean) => {
-    if (hasReceipt) return <Badge className="bg-green-600">Matched</Badge>;
+    if (hasReceipt) return <Badge className="bg-success">Matched</Badge>;
     switch (status) {
       case "pending": return <Badge variant="secondary">Awaiting Receipt</Badge>;
-      case "matched": return <Badge className="bg-green-600">Matched</Badge>;
+      case "matched": return <Badge className="bg-success">Matched</Badge>;
       default: return <Badge variant="outline">{status}</Badge>;
     }
   };

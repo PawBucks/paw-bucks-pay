@@ -217,7 +217,7 @@ export function AccountantCollaboration({ merchantId, businessName }: Accountant
       case 'pending':
         return <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" /> Pending</Badge>;
       case 'accepted':
-        return <Badge variant="default" className="bg-green-500"><CheckCircle2 className="h-3 w-3 mr-1" /> Active</Badge>;
+        return <Badge variant="default" className="bg-success"><CheckCircle2 className="h-3 w-3 mr-1" /> Active</Badge>;
       case 'revoked':
         return <Badge variant="destructive"><AlertTriangle className="h-3 w-3 mr-1" /> Revoked</Badge>;
       case 'expired':
@@ -358,10 +358,10 @@ export function AccountantCollaboration({ merchantId, businessName }: Accountant
 
       {/* Active Access */}
       {activeInvitations.length > 0 && (
-        <Alert className="border-green-200 bg-green-50">
-          <Shield className="h-4 w-4 text-green-600" />
+        <Alert className="border-success/30 bg-green-50">
+          <Shield className="h-4 w-4 text-success" />
           <AlertTitle className="text-green-800">Active Accountant Access</AlertTitle>
-          <AlertDescription className="text-green-700">
+          <AlertDescription className="text-success">
             {activeInvitations.length} accountant(s) currently have access to your tax data
           </AlertDescription>
         </Alert>
@@ -434,7 +434,7 @@ export function AccountantCollaboration({ merchantId, businessName }: Accountant
                                 onClick={() => revokeInvitation.mutate(invitation.id)}
                                 title="Revoke access"
                               >
-                                <Shield className="h-4 w-4 text-amber-500" />
+                                <Shield className="h-4 w-4 text-warning" />
                               </Button>
                             )}
                             <Button

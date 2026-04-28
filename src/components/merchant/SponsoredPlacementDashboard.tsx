@@ -206,9 +206,9 @@ export function SponsoredPlacementDashboard({ merchantId, serviceType = 'sponsor
 
   const getRecommendationColor = (type: string) => {
     switch (type) {
-      case "warning": return "text-amber-500";
-      case "opportunity": return "text-green-500";
-      case "action": return "text-blue-500";
+      case "warning": return "text-warning";
+      case "opportunity": return "text-success";
+      case "action": return "text-info";
       case "insight": return "text-purple-500";
       default: return "text-muted-foreground";
     }
@@ -281,10 +281,10 @@ export function SponsoredPlacementDashboard({ merchantId, serviceType = 'sponsor
                   </p>
                 </div>
               </div>
-              <Badge className="bg-green-500/10 text-green-600 border-green-500/20">Active</Badge>
+              <Badge className="bg-success/10 text-success border-success/20">Active</Badge>
             </div>
             {subscription.daysRemaining !== null && subscription.daysRemaining <= 7 && (
-              <div className="mt-3 p-2 bg-amber-500/10 rounded-lg border border-amber-500/20">
+              <div className="mt-3 p-2 bg-warning/10 rounded-lg border border-warning/20">
                 <p className="text-sm text-amber-600 flex items-center gap-2">
                   <AlertTriangle className="w-4 h-4" />
                   Your sponsored placement expires soon. Renew to maintain visibility.
@@ -318,8 +318,8 @@ export function SponsoredPlacementDashboard({ merchantId, serviceType = 'sponsor
                       {overview.uniqueViewers.toLocaleString()} unique viewers
                     </p>
                   </div>
-                  <div className="p-3 rounded-full bg-blue-500/10">
-                    <Eye className="w-6 h-6 text-blue-500" />
+                  <div className="p-3 rounded-full bg-info/10">
+                    <Eye className="w-6 h-6 text-info" />
                   </div>
                 </div>
               </CardContent>
@@ -331,13 +331,13 @@ export function SponsoredPlacementDashboard({ merchantId, serviceType = 'sponsor
                   <div>
                     <p className="text-sm text-muted-foreground">Total Clicks</p>
                     <p className="text-3xl font-bold">{overview.totalClicks.toLocaleString()}</p>
-                    <p className="text-xs text-green-500 mt-1 flex items-center gap-1">
+                    <p className="text-xs text-success mt-1 flex items-center gap-1">
                       <ArrowUp className="w-3 h-3" />
                       {overview.ctr}% CTR
                     </p>
                   </div>
-                  <div className="p-3 rounded-full bg-green-500/10">
-                    <MousePointerClick className="w-6 h-6 text-green-500" />
+                  <div className="p-3 rounded-full bg-success/10">
+                    <MousePointerClick className="w-6 h-6 text-success" />
                   </div>
                 </div>
               </CardContent>
@@ -369,8 +369,8 @@ export function SponsoredPlacementDashboard({ merchantId, serviceType = 'sponsor
                     <p className="text-3xl font-bold">#{overview.avgPosition}</p>
                     <p className="text-xs text-muted-foreground mt-1">in search results</p>
                   </div>
-                  <div className="p-3 rounded-full bg-amber-500/10">
-                    <Trophy className="w-6 h-6 text-amber-500" />
+                  <div className="p-3 rounded-full bg-warning/10">
+                    <Trophy className="w-6 h-6 text-warning" />
                   </div>
                 </div>
               </CardContent>
@@ -534,7 +534,7 @@ export function SponsoredPlacementDashboard({ merchantId, serviceType = 'sponsor
                       </div>
                       <div className="flex justify-between text-sm pt-2 border-t">
                         <span className="text-muted-foreground">CTR</span>
-                        <span className="font-medium text-green-500">
+                        <span className="font-medium text-success">
                           {data.impressions > 0
                             ? ((data.clicks / data.impressions) * 100).toFixed(1)
                             : 0}
@@ -584,8 +584,8 @@ export function SponsoredPlacementDashboard({ merchantId, serviceType = 'sponsor
                     <p className="text-3xl font-bold">${overview.revenue.toLocaleString()}</p>
                     <p className="text-xs text-muted-foreground mt-1">from sponsored placement</p>
                   </div>
-                  <div className="p-3 rounded-full bg-green-500/10">
-                    <TrendingUp className="w-6 h-6 text-green-500" />
+                  <div className="p-3 rounded-full bg-success/10">
+                    <TrendingUp className="w-6 h-6 text-success" />
                   </div>
                 </div>
               </CardContent>
@@ -599,19 +599,19 @@ export function SponsoredPlacementDashboard({ merchantId, serviceType = 'sponsor
                     <p className="text-3xl font-bold">${subscription?.amountPaid?.toLocaleString() || 0}</p>
                     <p className="text-xs text-muted-foreground mt-1">sponsored placement cost</p>
                   </div>
-                  <div className="p-3 rounded-full bg-blue-500/10">
-                    <Target className="w-6 h-6 text-blue-500" />
+                  <div className="p-3 rounded-full bg-info/10">
+                    <Target className="w-6 h-6 text-info" />
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className={overview.roi >= 0 ? "border-green-500/30" : "border-red-500/30"}>
+            <Card className={overview.roi >= 0 ? "border-success/30" : "border-destructive/30"}>
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground">Return on Investment</p>
-                    <p className={`text-3xl font-bold ${overview.roi >= 0 ? "text-green-500" : "text-red-500"}`}>
+                    <p className={`text-3xl font-bold ${overview.roi >= 0 ? "text-success" : "text-destructive"}`}>
                       {overview.roi >= 0 ? "+" : ""}
                       {overview.roi.toFixed(0)}%
                     </p>
@@ -619,11 +619,11 @@ export function SponsoredPlacementDashboard({ merchantId, serviceType = 'sponsor
                       {overview.roi >= 0 ? "profit" : "loss"} on investment
                     </p>
                   </div>
-                  <div className={`p-3 rounded-full ${overview.roi >= 0 ? "bg-green-500/10" : "bg-red-500/10"}`}>
+                  <div className={`p-3 rounded-full ${overview.roi >= 0 ? "bg-success/10" : "bg-destructive/10"}`}>
                     {overview.roi >= 0 ? (
-                      <ArrowUp className={`w-6 h-6 ${overview.roi >= 0 ? "text-green-500" : "text-red-500"}`} />
+                      <ArrowUp className={`w-6 h-6 ${overview.roi >= 0 ? "text-success" : "text-destructive"}`} />
                     ) : (
-                      <ArrowDown className="w-6 h-6 text-red-500" />
+                      <ArrowDown className="w-6 h-6 text-destructive" />
                     )}
                   </div>
                 </div>
@@ -732,13 +732,13 @@ export function SponsoredPlacementDashboard({ merchantId, serviceType = 'sponsor
                   </CardContent>
                 </Card>
 
-                <Card className={benchmark.performanceScore >= 70 ? "border-green-500/30" : "border-amber-500/30"}>
+                <Card className={benchmark.performanceScore >= 70 ? "border-success/30" : "border-warning/30"}>
                   <CardContent className="p-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">Performance Score</p>
                       <p
                         className={`text-4xl font-bold ${
-                          benchmark.performanceScore >= 70 ? "text-green-500" : "text-amber-500"
+                          benchmark.performanceScore >= 70 ? "text-success" : "text-warning"
                         }`}
                       >
                         {benchmark.performanceScore}
@@ -802,12 +802,12 @@ export function SponsoredPlacementDashboard({ merchantId, serviceType = 'sponsor
                                   : metric.average}
                               </span>
                               {isAboveAverage ? (
-                                <Badge className="bg-green-500/10 text-green-600 border-green-500/20">
+                                <Badge className="bg-success/10 text-success border-success/20">
                                   <ArrowUp className="w-3 h-3 mr-1" />
                                   Above
                                 </Badge>
                               ) : (
-                                <Badge className="bg-red-500/10 text-red-600 border-red-500/20">
+                                <Badge className="bg-destructive/10 text-destructive border-destructive/20">
                                   <ArrowDown className="w-3 h-3 mr-1" />
                                   Below
                                 </Badge>
@@ -849,10 +849,10 @@ export function SponsoredPlacementDashboard({ merchantId, serviceType = 'sponsor
                       <div
                         className={`text-4xl font-bold ${
                           aiData.healthScore >= 70
-                            ? "text-green-500"
+                            ? "text-success"
                             : aiData.healthScore >= 40
-                            ? "text-amber-500"
-                            : "text-red-500"
+                            ? "text-warning"
+                            : "text-destructive"
                         }`}
                       >
                         {aiData.healthScore}
@@ -864,10 +864,10 @@ export function SponsoredPlacementDashboard({ merchantId, serviceType = 'sponsor
                     value={aiData.healthScore}
                     className={`mt-4 h-3 ${
                       aiData.healthScore >= 70
-                        ? "[&>div]:bg-green-500"
+                        ? "[&>div]:bg-success"
                         : aiData.healthScore >= 40
-                        ? "[&>div]:bg-amber-500"
-                        : "[&>div]:bg-red-500"
+                        ? "[&>div]:bg-warning"
+                        : "[&>div]:bg-destructive"
                     }`}
                   />
                 </CardContent>
@@ -889,7 +889,7 @@ export function SponsoredPlacementDashboard({ merchantId, serviceType = 'sponsor
                       <p className="text-2xl font-bold">
                         {aiData.predictions.nextMonth.impressions.toLocaleString()}
                       </p>
-                      <Badge className="mt-2 bg-green-500/10 text-green-600 border-green-500/20">
+                      <Badge className="mt-2 bg-success/10 text-success border-success/20">
                         +{aiData.predictions.growthRate}% growth
                       </Badge>
                     </div>
@@ -942,7 +942,7 @@ export function SponsoredPlacementDashboard({ merchantId, serviceType = 'sponsor
                     })}
                     {aiData.recommendations.length === 0 && (
                       <div className="text-center py-8">
-                        <CheckCircle className="w-12 h-12 mx-auto text-green-500 mb-3" />
+                        <CheckCircle className="w-12 h-12 mx-auto text-success mb-3" />
                         <p className="font-medium">Great job!</p>
                         <p className="text-sm text-muted-foreground">
                           Your sponsored placement is optimized. Keep up the good work!
