@@ -716,7 +716,102 @@ serve(async (req) => {
                 pawbucks_used: pawbucksUsed,
               },
             });
-          
+
+          // ========================================
+          // DEFERRED PAWBUCKS DEBIT (split invoice payment)
+          // ========================================
+          // For split invoice payments, `process-invoice-pawbucks-payment` intentionally
+          // does NOT debit PawBucks at session-creation time. The debit + merchant credit
+          // happens here, only after Stripe confirms the checkout session completed.
+          if (invoicePayerUserId && pawbucksUsed > 0) {
+            try {
+              const { data: payerWallet } = await supabaseAdmin
+                .from('pawbucks_wallet')
+                .select('balance')
+                .eq('user_id', invoicePayerUserId)
+                .single();
+
+              const currentBalance = payerWallet?.balance || 0;
+              const debitAmount = Math.min(currentBalance, pawbucksUsed);
+
+              if (debitAmount > 0) {
+                await supabaseAdmin
+                  .from('pawbucks_wallet')
+                  .update({
+                    balance: currentBalance - debitAmount,
+                    updated_at: new Date().toISOString(),
+                  })
+                  .eq('user_id', invoicePayerUserId);
+
+                await supabaseAdmin.from('pawbucks_activity').insert({
+                  user_id: invoicePayerUserId,
+                  type: 'redeem',
+                  amount: -debitAmount,
+                  source: 'invoice_payment',
+                  description: `Partial payment for Invoice (Stripe-confirmed)`,
+                  partner_id: merchantId || null,
+                });
+
+                // Credit merchant
+                if (merchantId) {
+                  const { data: merchantWallet } = await supabaseAdmin
+                    .from('merchant_pawbucks_wallet')
+                    .select('balance, total_earned')
+                    .eq('merchant_id', merchantId)
+                    .single();
+
+                  if (merchantWallet) {
+                    await supabaseAdmin
+                      .from('merchant_pawbucks_wallet')
+                      .update({
+                        balance: merchantWallet.balance + debitAmount,
+                        total_earned: (merchantWallet.total_earned || 0) + debitAmount,
+                      })
+                      .eq('merchant_id', merchantId);
+                  } else {
+                    await supabaseAdmin.from('merchant_pawbucks_wallet').insert({
+                      merchant_id: merchantId,
+                      balance: debitAmount,
+                      total_earned: debitAmount,
+                    });
+                  }
+
+                  await supabaseAdmin.from('merchant_pawbucks_activity').insert({
+                    merchant_id: merchantId,
+                    type: 'earn',
+                    amount: debitAmount,
+                    source: 'Invoice Payment',
+                    customer_user_id: invoicePayerUserId,
+                    description: `Partial invoice payment (Stripe-confirmed)`,
+                  });
+
+                  // Branded PawBucks tracking (non-fatal)
+                  try {
+                    await supabaseAdmin.rpc('redeem_branded_pawbucks', {
+                      p_user_id: invoicePayerUserId,
+                      p_merchant_id: merchantId,
+                      p_amount: debitAmount,
+                      p_transaction_id: null,
+                      p_description: `Branded PawBucks redeemed on invoice payment (Stripe-confirmed)`,
+                    });
+                  } catch (e) {
+                    console.error('[INVOICE_PAYMENT] Branded redemption tracking exception (non-fatal):', (e as Error).message);
+                  }
+                }
+
+                console.log(`[INVOICE_PAYMENT] ✅ Deferred PawBucks debit applied: ${debitAmount} (after Stripe confirmation)`);
+              } else {
+                console.warn(`[INVOICE_PAYMENT] ⚠️ Could not debit PawBucks — insufficient balance at confirmation time`, {
+                  invoicePayerUserId,
+                  needed: pawbucksUsed,
+                  available: currentBalance,
+                });
+              }
+            } catch (debitError) {
+              console.error('[INVOICE_PAYMENT] ❌ Error applying deferred PawBucks debit:', debitError);
+            }
+          }
+
           // ========================================
           // AWARD PAWBUCKS TO INVOICE PAYER
           // ========================================
