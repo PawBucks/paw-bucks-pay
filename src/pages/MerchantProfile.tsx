@@ -323,7 +323,7 @@ const MerchantProfile = memo(() => {
                     </Badge>
                   )}
                   {merchant.accepts_pawbucks && (
-                    <Badge variant="outline" className="gap-1 text-xs bg-warning/100/10 text-warning border-amber-500/30 dark:text-amber-400">
+                    <Badge variant="outline" className="gap-1 text-xs bg-warning/10 text-warning border-warning/30">
                       <Coins className="w-3 h-3" /> PawBucks
                     </Badge>
                   )}
