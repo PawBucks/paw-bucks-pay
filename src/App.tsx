@@ -182,7 +182,17 @@ const AppRoutes = () => {
       {/* Authenticated pet owner routes */}
       <Route path="/dashboard" element={<ProtectedRoute><PageTransition><Dashboard /></PageTransition></ProtectedRoute>} />
       <Route path="/create-pet-profile" element={<ProtectedRoute><PageTransition><CreatePetProfile /></PageTransition></ProtectedRoute>} />
-      <Route path="/discover" element={<ProtectedRoute><PageTransition><Discover /></PageTransition></ProtectedRoute>} />
+      <Route
+        path="/discover"
+        element={
+          <PageTransition>
+            <PublicOrAuthRoute
+              authedElement={<ProtectedRoute><Discover /></ProtectedRoute>}
+              publicElement={<MerchantDirectory />}
+            />
+          </PageTransition>
+        }
+      />
       <Route path="/wallet" element={<ProtectedRoute><PageTransition><Wallet /></PageTransition></ProtectedRoute>} />
       <Route path="/referrals" element={<ProtectedRoute><PageTransition><Referrals /></PageTransition></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><PageTransition><Profile /></PageTransition></ProtectedRoute>} />
