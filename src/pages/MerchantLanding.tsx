@@ -230,6 +230,7 @@ const styles = `
     color: var(--teal-dark); line-height: 1; margin-bottom: 0.5rem;
   }
   .ml-math-caption { font-size: 0.875rem; color: var(--muted); line-height: 1.6; margin-bottom: 1.5rem; }
+  .ml-math-divider { height: 1px; background: var(--border); margin: 1.5rem 0; }
 
   .ml-cta-section {
     background: var(--dark-bg); color: #fff; text-align: center;
