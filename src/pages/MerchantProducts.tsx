@@ -595,8 +595,8 @@ const MerchantProducts = () => {
                   </div>
                   <div className={`px-3 py-1 rounded-full text-xs font-medium ${
                     plan.is_active 
-                      ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100" 
-                      : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100"
+                      ? "bg-success/15 text-success" 
+                      : "bg-muted text-muted-foreground"
                   }`}>
                     {plan.is_active ? "Active" : "Inactive"}
                   </div>
@@ -652,8 +652,8 @@ const MerchantProducts = () => {
                   </div>
                   <div className={`px-3 py-1 rounded-full text-xs font-medium ${
                     product.active 
-                      ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100" 
-                      : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100"
+                      ? "bg-success/15 text-success" 
+                      : "bg-muted text-muted-foreground"
                   }`}>
                     {product.active ? "Active" : "Inactive"}
                   </div>
