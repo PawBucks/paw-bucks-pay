@@ -152,7 +152,11 @@ const AppRoutes = () => {
       <Route path="/auth/callback" element={<PageTransition><AuthCallback /></PageTransition>} />
       <Route path="/reset-password" element={<PageTransition><ResetPassword /></PageTransition>} />
       <Route path="/merchants" element={<PageTransition><MerchantLanding /></PageTransition>} />
+      <Route path="/merchant-landing" element={<PageTransition><MerchantLanding /></PageTransition>} />
       <Route path="/vets" element={<PageTransition><VetLanding /></PageTransition>} />
+      <Route path="/vet-landing" element={<PageTransition><VetLanding /></PageTransition>} />
+      <Route path="/for-vets" element={<PageTransition><VetLanding /></PageTransition>} />
+      <Route path="/for-merchants" element={<PageTransition><MerchantLanding /></PageTransition>} />
       <Route path="/install" element={<PageTransition><Install /></PageTransition>} />
       <Route path="/directory" element={<PageTransition><MerchantDirectory /></PageTransition>} />
       <Route path="/storefront/:accountId" element={<PageTransition><Storefront /></PageTransition>} />
