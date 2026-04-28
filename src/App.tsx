@@ -25,6 +25,7 @@ import { UpdatePrompt } from "@/components/UpdatePrompt";
 
 import { lazyWithRetry, clearChunkReloadFlag } from "@/lib/lazyWithRetry";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { PublicOrAuthRoute } from "@/components/PublicOrAuthRoute";
 
 // Critical pages - Auth loaded immediately, Index lazy (734 lines + heavy images)
 import Auth from "./pages/Auth";
@@ -152,7 +153,11 @@ const AppRoutes = () => {
       <Route path="/auth/callback" element={<PageTransition><AuthCallback /></PageTransition>} />
       <Route path="/reset-password" element={<PageTransition><ResetPassword /></PageTransition>} />
       <Route path="/merchants" element={<PageTransition><MerchantLanding /></PageTransition>} />
+      <Route path="/merchant-landing" element={<PageTransition><MerchantLanding /></PageTransition>} />
       <Route path="/vets" element={<PageTransition><VetLanding /></PageTransition>} />
+      <Route path="/vet-landing" element={<PageTransition><VetLanding /></PageTransition>} />
+      <Route path="/for-vets" element={<PageTransition><VetLanding /></PageTransition>} />
+      <Route path="/for-merchants" element={<PageTransition><MerchantLanding /></PageTransition>} />
       <Route path="/install" element={<PageTransition><Install /></PageTransition>} />
       <Route path="/directory" element={<PageTransition><MerchantDirectory /></PageTransition>} />
       <Route path="/storefront/:accountId" element={<PageTransition><Storefront /></PageTransition>} />
@@ -177,7 +182,17 @@ const AppRoutes = () => {
       {/* Authenticated pet owner routes */}
       <Route path="/dashboard" element={<ProtectedRoute><PageTransition><Dashboard /></PageTransition></ProtectedRoute>} />
       <Route path="/create-pet-profile" element={<ProtectedRoute><PageTransition><CreatePetProfile /></PageTransition></ProtectedRoute>} />
-      <Route path="/discover" element={<ProtectedRoute><PageTransition><Discover /></PageTransition></ProtectedRoute>} />
+      <Route
+        path="/discover"
+        element={
+          <PageTransition>
+            <PublicOrAuthRoute
+              authedElement={<ProtectedRoute><Discover /></ProtectedRoute>}
+              publicElement={<MerchantDirectory />}
+            />
+          </PageTransition>
+        }
+      />
       <Route path="/wallet" element={<ProtectedRoute><PageTransition><Wallet /></PageTransition></ProtectedRoute>} />
       <Route path="/referrals" element={<ProtectedRoute><PageTransition><Referrals /></PageTransition></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><PageTransition><Profile /></PageTransition></ProtectedRoute>} />
