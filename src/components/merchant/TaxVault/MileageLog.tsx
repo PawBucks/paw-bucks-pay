@@ -742,7 +742,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
                                 </span>
                               </div>
                               {calculatedMiles === 0 && startOdometer && endOdometer && (
-                                <p className="text-xs text-amber-600 mt-1">
+                                <p className="text-xs text-warning mt-1">
                                   End odometer should be greater than start
                                 </p>
                               )}

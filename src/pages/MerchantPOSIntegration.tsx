@@ -682,7 +682,7 @@ export default function MerchantPOSIntegration() {
                         </div>
                         {tx.pawbucks_awarded && tx.pawbucks_awarded > 0 && (
                           <div className="text-right">
-                            <Badge variant="outline" className="bg-amber-50 text-warning border-amber-200">
+                            <Badge variant="outline" className="bg-warning/10 text-warning border-warning/30">
                               +{tx.pawbucks_awarded} PawBucks
                             </Badge>
                           </div>

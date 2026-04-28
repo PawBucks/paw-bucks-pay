@@ -49,7 +49,7 @@ export const FundingRequestDialog = ({
           <div className="space-y-4">
             <Alert variant="default" className="border-warning/50 bg-warning/10">
               <Clock className="h-4 w-4 text-warning" />
-              <AlertTitle className="text-amber-600">Not Yet Eligible</AlertTitle>
+              <AlertTitle className="text-warning">Not Yet Eligible</AlertTitle>
               <AlertDescription className="text-muted-foreground">
                 You need <strong>{daysRemaining} more days</strong> of active sales on the platform to request funding. 
                 Merchants must have at least 90 days of sales history.

@@ -285,7 +285,7 @@ export function SponsoredPlacementDashboard({ merchantId, serviceType = 'sponsor
             </div>
             {subscription.daysRemaining !== null && subscription.daysRemaining <= 7 && (
               <div className="mt-3 p-2 bg-warning/10 rounded-lg border border-warning/20">
-                <p className="text-sm text-amber-600 flex items-center gap-2">
+                <p className="text-sm text-warning flex items-center gap-2">
                   <AlertTriangle className="w-4 h-4" />
                   Your sponsored placement expires soon. Renew to maintain visibility.
                 </p>

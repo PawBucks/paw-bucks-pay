@@ -419,12 +419,12 @@ export function TaxLiabilityEstimator({ merchantId, taxYear }: TaxLiabilityEstim
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-4xl font-bold text-amber-600 mb-4">
+            <div className="text-4xl font-bold text-warning mb-4">
               ${quarterlyPayment.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
             
-            <Alert className="border-amber-200 bg-amber-50">
-              <AlertTriangle className="h-4 w-4 text-amber-600" />
+            <Alert className="border-warning/30 bg-warning/10">
+              <AlertTriangle className="h-4 w-4 text-warning" />
               <AlertTitle className="text-amber-800 text-sm">Avoid Penalties</AlertTitle>
               <AlertDescription className="text-amber-700 text-xs">
                 Pay quarterly estimates to avoid underpayment penalties. 
