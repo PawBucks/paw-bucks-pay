@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { SEO } from "@/components/SEO";
 import { seoMeta } from "@/lib/seoMeta";
 import logo from "@/assets/logo.png";
+import { PremiumMerchantsBanner } from "@/components/PremiumMerchantsBanner";
 
 const styles = `
   .ml-root {
@@ -295,8 +296,8 @@ const audiences = [
 ];
 
 const faqs = [
-  { q: "How much does it cost to join?", a: "Free. No monthly fees, no setup costs, no hidden charges. You only pay a 3% network fee on the USD portion of platform-processed transactions." },
-  { q: "What is the 3% fee on?", a: "It applies only to the USD/credit-card portion of a transaction processed through PawBucks. PawBucks (loyalty currency) redemptions never carry a network fee." },
+  { q: "How much does it cost to join?", a: "Free. No monthly fees, no setup costs, no hidden charges. You only pay a 3% success fee on the USD portion of platform-processed transactions." },
+  { q: "What is the 3% fee on?", a: "It applies only to the USD/credit-card portion of a transaction processed through PawBucks. PawBucks (loyalty currency) redemptions never carry a success fee." },
   { q: "How do customers earn PawBucks at my store?", a: "Customers automatically earn PawBucks on every USD purchase. You set the multiplier; they redeem on future visits." },
   { q: "Do I need new hardware?", a: "No. Use your phone, tablet, or laptop. Optional Clover POS integration is available." },
   { q: "When do I get paid?", a: "Payouts go directly to your bank via Stripe on a daily rolling schedule." },
@@ -364,13 +365,13 @@ const MerchantLanding = () => {
               </div>
               <div className="ml-price-row">
                 <div>
-                  <div className="ml-price-label">Network fee</div>
+                  <div className="ml-price-label">Success fee</div>
                   <div className="ml-price-sub">USD portion only</div>
                 </div>
                 <div className="ml-price-value pct">3%</div>
               </div>
               <div className="ml-price-example">
-                <strong>Example:</strong> A $100 USD sale → $3 network fee.
+                <strong>Example:</strong> A $100 USD sale → $3 success fee.
                 PawBucks redemptions carry <strong>0% fee</strong>.
               </div>
             </div>
@@ -462,6 +463,18 @@ const MerchantLanding = () => {
                 <strong style={{ color: "var(--ink)" }}>$6,000/year</strong> — regardless of results.
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* PREMIUM MERCHANTS SHOWCASE */}
+        <section className="ml-section" style={{ background: "var(--section-alt)" }}>
+          <div className="ml-eyebrow">Premium Spotlight</div>
+          <h2 className="ml-section-title">See where premium merchants get featured.</h2>
+          <p className="ml-section-sub">
+            Upgraded merchants rotate through our Premium Spotlight across the app — placed in front of pet owners actively looking to spend.
+          </p>
+          <div style={{ marginTop: "2.5rem" }}>
+            <PremiumMerchantsBanner title="Featured Premium Merchants" />
           </div>
         </section>
 
