@@ -141,7 +141,7 @@ export function AdminInvoiceList({ invoices, loading, onCreateNew, onView, onEdi
             <SelectTrigger className="w-[160px]"><SelectValue placeholder="Type" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Types</SelectItem>
-              <SelectItem value="platform_fee">Platform Fee</SelectItem>
+              <SelectItem value="platform_fee">Success Fee</SelectItem>
               <SelectItem value="subscription">Subscription</SelectItem>
               <SelectItem value="ad_hoc">Ad-hoc</SelectItem>
               <SelectItem value="commission">Commission</SelectItem>

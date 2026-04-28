@@ -117,7 +117,7 @@ export function AccountTypeCard({ merchantId, feeModel, acquisitionFeeRate }: Pr
             <p className="text-sm text-muted-foreground">
               {isAcq
                 ? `You pay a one-time ${acquisitionFeeRate ?? 10}% acquisition fee on each new customer's first purchase only.`
-                : "You pay a 3% platform fee on every transaction and participate in the full PawBucks rewards ecosystem."}
+                : "You pay a 3% success fee on every transaction and participate in the full PawBucks rewards ecosystem."}
             </p>
           </div>
         </div>
