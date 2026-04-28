@@ -454,18 +454,17 @@ serve(async (req) => {
       }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 });
     }
 
-    // If PawBucks partially cover, deduct now and charge the remainder via Stripe
+    // NOTE: For split payments (PawBucks + card), we DO NOT debit PawBucks here.
+    // The debit happens in `confirm-pet-store-payment` only after Stripe confirms
+    // `paymentIntent.status === 'succeeded'`. This guarantees PawBucks are never
+    // taken from a user unless the card payment actually completes.
+    // We still pass the intended `pawbucks_amount` in metadata so the confirmer
+    // knows how much to debit on success.
     if (pawbucksUsed > 0 && finalAmountCents > 0) {
-      const newBalance = availablePawBucks - pawbucksUsed;
-      await supabaseAdmin.from('pawbucks_wallet').update({ balance: newBalance }).eq('user_id', user.id);
-      await supabaseAdmin.from('pawbucks_activity').insert({
-        user_id: user.id,
-        type: 'redeem',
-        amount: pawbucksUsed,
-        source: 'pet_store',
-        description: `Applied ${pawbucksUsed.toLocaleString()} PB toward ${allItemNames}`,
+      console.log('PawBucks split payment queued (debit deferred until Stripe success)', {
+        pawbucksUsed,
+        remainingCents: finalAmountCents,
       });
-      console.log('PawBucks deducted for split payment', { pawbucksUsed, remainingCents: finalAmountCents });
     }
 
     const amountInCents = finalAmountCents;
@@ -539,7 +538,9 @@ serve(async (req) => {
         original_price: (originalPriceCents / 100).toString(),
         promotion_id: appliedPromotionId || '',
         user_badge_promotion_id: userBadgePromotionId || '',
-        pawbucks_amount: pawbucksAmount.toString(),
+        // pawbucks_amount carries the actual amount to debit on success.
+        // We use `pawbucksUsed` (validated/capped) rather than the raw request value.
+        pawbucks_amount: pawbucksUsed.toString(),
       },
     });
 
