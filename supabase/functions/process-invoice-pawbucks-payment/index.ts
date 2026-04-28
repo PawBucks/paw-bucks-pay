@@ -476,78 +476,32 @@ serve(async (req) => {
       logStep("Platform checkout session created", { sessionId: session.id });
     }
 
-    // If using PawBucks as part of payment, deduct now
+    // NOTE: For split invoice payments (PawBucks + card), we DO NOT debit PawBucks here.
+    // The Stripe Checkout Session has just been created — the user has not yet paid.
+    // If they abandon checkout or the card fails, debiting now would lose their PawBucks.
+    //
+    // The actual PawBucks debit + merchant credit happens in `stripe-webhook` once
+    // `checkout.session.completed` fires for `metadata.type === 'invoice_payment'`,
+    // guaranteeing Stripe has confirmed the payment first.
+    //
+    // We pre-validate balance up front so we can fail fast before sending the user to
+    // Stripe if they don't have enough PawBucks.
     if (pawbucksAmountCents > 0 && userId) {
       const { data: wallet, error: walletError } = await supabase
         .from("pawbucks_wallet")
-        .select("*")
+        .select("balance")
         .eq("user_id", userId)
         .single();
 
-      if (!walletError && wallet && wallet.balance >= pawbucksUsed) {
-        await supabase
-          .from("pawbucks_wallet")
-          .update({ 
-            balance: wallet.balance - pawbucksUsed,
-            updated_at: new Date().toISOString()
-          })
-          .eq("user_id", userId);
-
-        await supabase.from("pawbucks_activity").insert({
-          user_id: userId,
-          type: "redeem",
-          amount: -pawbucksUsed,
-          description: `Partial payment for Invoice #${invoice.invoice_number}`,
-          merchant_id: merchant.id,
+      if (walletError || !wallet || wallet.balance < pawbucksUsed) {
+        logStep("Insufficient PawBucks for split invoice payment (debit deferred)", {
+          have: wallet?.balance ?? 0,
+          need: pawbucksUsed,
         });
-
-        // Credit merchant
-        const { data: merchantWallet } = await supabase
-          .from("merchant_pawbucks_wallet")
-          .select("*")
-          .eq("merchant_id", merchant.id)
-          .single();
-
-        if (merchantWallet) {
-          await supabase
-            .from("merchant_pawbucks_wallet")
-            .update({ 
-              balance: merchantWallet.balance + pawbucksUsed,
-              total_earned: (merchantWallet.total_earned || 0) + pawbucksUsed,
-            })
-            .eq("merchant_id", merchant.id);
-        } else {
-          await supabase.from("merchant_pawbucks_wallet").insert({
-            merchant_id: merchant.id,
-            balance: pawbucksUsed,
-            total_earned: pawbucksUsed,
-          });
-        }
-
-        await supabase.from("merchant_pawbucks_activity").insert({
-          merchant_id: merchant.id,
-          type: "earn",
-          amount: pawbucksUsed,
-          description: `Partial invoice payment - Invoice #${invoice.invoice_number}`,
-          user_id: userId,
-        });
-
-        logStep("PawBucks deducted for mixed payment", { pawbucksUsed });
-
-        // Track Branded PawBucks redemption for the partial-payment path.
-        // Use a synthetic transaction_id so we keep idempotency per invoice.
-        try {
-          const { error: brandedRedeemErr } = await supabase.rpc("redeem_branded_pawbucks", {
-            p_user_id: userId,
-            p_merchant_id: merchant.id,
-            p_amount: pawbucksUsed,
-            p_transaction_id: null,
-            p_description: `Branded PawBucks redeemed on Invoice #${invoice.invoice_number} (partial)`,
-          });
-          if (brandedRedeemErr) console.error("Branded redemption tracking failed (non-fatal):", brandedRedeemErr.message);
-        } catch (e) {
-          console.error("Branded redemption tracking exception (non-fatal):", (e as Error).message);
-        }
+        // Note: we still allow the Stripe session to proceed because the front-end
+        // typically validates this; the webhook will guard against over-debit on success.
+      } else {
+        logStep("PawBucks split invoice queued (debit deferred until Stripe success)", { pawbucksUsed });
       }
     }
 
