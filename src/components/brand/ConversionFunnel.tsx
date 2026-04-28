@@ -19,7 +19,7 @@ export function ConversionFunnel({ summary }: ConversionFunnelProps) {
 
   const max = Math.max(reach, 1);
   const stages = [
-    { label: "Pet Owners Reached", value: reach, icon: Eye, color: "bg-blue-500" },
+    { label: "Pet Owners Reached", value: reach, icon: Eye, color: "bg-info" },
     { label: "Check-ins", value: checkins, icon: Zap, color: "bg-primary" },
     { label: "Redemptions", value: redemptions, icon: Gift, color: "bg-fuchsia-500" },
     { label: "Repeat Visitors", value: repeat, icon: Repeat, color: "bg-emerald-500" },

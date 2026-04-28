@@ -457,12 +457,12 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
             <Card className={cn(
               "relative overflow-hidden transition-all",
               betterMethod === 'standard' && totalMiles > 0 && totalVehicleExpenses > 0
-                ? "border-2 border-green-500 bg-green-500/5" 
+                ? "border-2 border-success bg-success/5" 
                 : "border"
             )}>
               {betterMethod === 'standard' && totalMiles > 0 && totalVehicleExpenses > 0 && (
                 <div className="absolute top-2 right-2">
-                  <Badge className="bg-green-500 text-white">
+                  <Badge className="bg-success text-white">
                     <Trophy className="h-3 w-3 mr-1" />
                     Best Option
                   </Badge>
@@ -471,7 +471,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
               <CardContent className="pt-6">
                 <div className="space-y-2">
                   <p className="text-sm font-medium text-muted-foreground">Standard Mileage Rate</p>
-                  <p className="text-3xl font-bold text-green-600">${standardMileageDeduction.toFixed(2)}</p>
+                  <p className="text-3xl font-bold text-success">${standardMileageDeduction.toFixed(2)}</p>
                   <div className="text-xs text-muted-foreground space-y-1 pt-2 border-t">
                     <p>{petCommuteMiles.toFixed(1)} business miles × ${IRS_MILEAGE_RATE}/mi</p>
                     <p className="font-medium">
@@ -499,12 +499,12 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
             <Card className={cn(
               "relative overflow-hidden transition-all",
               betterMethod === 'actual' && totalMiles > 0 && totalVehicleExpenses > 0
-                ? "border-2 border-green-500 bg-green-500/5" 
+                ? "border-2 border-success bg-success/5" 
                 : "border"
             )}>
               {betterMethod === 'actual' && totalMiles > 0 && totalVehicleExpenses > 0 && (
                 <div className="absolute top-2 right-2">
-                  <Badge className="bg-green-500 text-white">
+                  <Badge className="bg-success text-white">
                     <Trophy className="h-3 w-3 mr-1" />
                     Best Option
                   </Badge>
@@ -513,7 +513,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
               <CardContent className="pt-6">
                 <div className="space-y-2">
                   <p className="text-sm font-medium text-muted-foreground">Actual Expenses</p>
-                  <p className="text-3xl font-bold text-blue-600">${actualExpensesDeduction.toFixed(2)}</p>
+                  <p className="text-3xl font-bold text-info">${actualExpensesDeduction.toFixed(2)}</p>
                   <div className="text-xs text-muted-foreground space-y-1 pt-2 border-t">
                     <p>${totalVehicleExpenses.toFixed(2)} total expenses</p>
                     <p className="font-medium">
@@ -573,7 +573,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
                     <p className="text-sm text-muted-foreground">Business</p>
                     <p className="text-2xl font-bold">{petCommuteMiles.toFixed(1)} mi</p>
                   </div>
-                  <PawPrint className="h-8 w-8 text-green-500 opacity-80" />
+                  <PawPrint className="h-8 w-8 text-success opacity-80" />
                 </div>
               </CardContent>
             </Card>
@@ -587,7 +587,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
                       {isExclusivelyBusiness ? '100%' : `${petCommutePercentage.toFixed(1)}%`}
                     </p>
                   </div>
-                  <TrendingUp className="h-8 w-8 text-amber-500 opacity-80" />
+                  <TrendingUp className="h-8 w-8 text-warning opacity-80" />
                 </div>
               </CardContent>
             </Card>
@@ -634,7 +634,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
                           <SelectContent>
                             <SelectItem value="pet_commute">
                               <span className="flex items-center gap-2">
-                                <PawPrint className="h-4 w-4 text-green-500" />
+                                <PawPrint className="h-4 w-4 text-success" />
                                 Business
                               </span>
                             </SelectItem>
@@ -699,7 +699,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
                           <div className="grid grid-cols-2 gap-4">
                             <div className="grid gap-2">
                               <Label htmlFor="start-odometer" className="flex items-center gap-1">
-                                <MapPin className="h-3 w-3 text-green-500" />
+                                <MapPin className="h-3 w-3 text-success" />
                                 Start Trip
                               </Label>
                               <Input
@@ -714,7 +714,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
                             </div>
                             <div className="grid gap-2">
                               <Label htmlFor="end-odometer" className="flex items-center gap-1">
-                                <MapPin className="h-3 w-3 text-red-500" />
+                                <MapPin className="h-3 w-3 text-destructive" />
                                 End Trip
                               </Label>
                               <Input
@@ -731,18 +731,18 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
 
                           {/* Auto-calculated Miles Display */}
                           {calculatedMiles !== null && calculatedMiles >= 0 && (
-                            <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
+                            <div className="p-3 bg-success/10 border border-success/20 rounded-lg">
                               <div className="flex items-center justify-between">
                                 <span className="text-sm text-muted-foreground flex items-center gap-2">
                                   <Calculator className="h-4 w-4" />
                                   Calculated Miles
                                 </span>
-                                <span className="text-lg font-bold text-green-600">
+                                <span className="text-lg font-bold text-success">
                                   {calculatedMiles.toFixed(1)} mi
                                 </span>
                               </div>
                               {calculatedMiles === 0 && startOdometer && endOdometer && (
-                                <p className="text-xs text-amber-600 mt-1">
+                                <p className="text-xs text-warning mt-1">
                                   End odometer should be greater than start
                                 </p>
                               )}
@@ -768,7 +768,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
                       <div className="grid grid-cols-2 gap-4">
                         <div className="grid gap-2">
                           <Label htmlFor="start-location" className="flex items-center gap-1">
-                            <MapPin className="h-3 w-3 text-green-500" />
+                            <MapPin className="h-3 w-3 text-success" />
                             Start Location
                           </Label>
                           <Input
@@ -780,7 +780,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
                         </div>
                         <div className="grid gap-2">
                           <Label htmlFor="end-location" className="flex items-center gap-1">
-                            <MapPin className="h-3 w-3 text-red-500" />
+                            <MapPin className="h-3 w-3 text-destructive" />
                             End Location
                           </Label>
                           <Input
@@ -866,7 +866,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
                               variant={entry.trip_type === 'pet_commute' ? 'default' : 'secondary'}
                               className={cn(
                                 entry.trip_type === 'pet_commute' 
-                                  ? 'bg-green-500/10 text-green-700 border-green-500/20 hover:bg-green-500/20' 
+                                  ? 'bg-success/10 text-success border-success/20 hover:bg-success/20' 
                                   : ''
                               )}
                             >
@@ -882,13 +882,13 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
                               <div className="text-xs space-y-0.5">
                                 {entry.start_location && (
                                   <div className="flex items-center gap-1">
-                                    <MapPin className="h-3 w-3 text-green-500 shrink-0" />
+                                    <MapPin className="h-3 w-3 text-success shrink-0" />
                                     <span className="truncate max-w-[120px]" title={entry.start_location}>{entry.start_location}</span>
                                   </div>
                                 )}
                                 {entry.end_location && (
                                   <div className="flex items-center gap-1">
-                                    <MapPin className="h-3 w-3 text-red-500 shrink-0" />
+                                    <MapPin className="h-3 w-3 text-destructive shrink-0" />
                                     <span className="truncate max-w-[120px]" title={entry.end_location}>{entry.end_location}</span>
                                   </div>
                                 )}
@@ -945,7 +945,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
                     <p className="text-sm text-muted-foreground">Total Expenses</p>
                     <p className="text-2xl font-bold">${totalVehicleExpenses.toFixed(2)}</p>
                   </div>
-                  <Fuel className="h-8 w-8 text-blue-500 opacity-80" />
+                  <Fuel className="h-8 w-8 text-info opacity-80" />
                 </div>
               </CardContent>
             </Card>
@@ -957,7 +957,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
                     <p className="text-sm text-muted-foreground">Business Portion</p>
                     <p className="text-2xl font-bold">${actualExpensesDeduction.toFixed(2)}</p>
                   </div>
-                  <Calculator className="h-8 w-8 text-green-500 opacity-80" />
+                  <Calculator className="h-8 w-8 text-success opacity-80" />
                 </div>
               </CardContent>
             </Card>
@@ -969,7 +969,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
                     <p className="text-sm text-muted-foreground">Entries</p>
                     <p className="text-2xl font-bold">{vehicleExpenses.length}</p>
                   </div>
-                  <Wrench className="h-8 w-8 text-amber-500 opacity-80" />
+                  <Wrench className="h-8 w-8 text-warning opacity-80" />
                 </div>
               </CardContent>
             </Card>

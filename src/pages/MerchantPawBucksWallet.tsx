@@ -167,7 +167,7 @@ const MerchantPawBucksWallet = () => {
         <GradientCard gradient className="mb-6">
           <div className="text-center">
             <div className="flex items-center justify-center gap-2 mb-2">
-              <Coins className="w-8 h-8 text-yellow-400" />
+              <Coins className="w-8 h-8 text-warning" />
               <p className="text-sm text-muted-foreground">Current Balance</p>
             </div>
             <p className="text-5xl font-bold mb-2">{Formatters.number(balance)}</p>
@@ -181,8 +181,8 @@ const MerchantPawBucksWallet = () => {
         <div className="grid grid-cols-2 gap-4 mb-6">
           <GradientCard>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center">
-                <TrendingUp className="w-5 h-5 text-green-500" />
+              <div className="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center">
+                <TrendingUp className="w-5 h-5 text-success" />
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Total Earned</p>
@@ -193,8 +193,8 @@ const MerchantPawBucksWallet = () => {
 
           <GradientCard>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center">
-                <ShoppingBag className="w-5 h-5 text-blue-500" />
+              <div className="w-10 h-10 rounded-full bg-info/10 flex items-center justify-center">
+                <ShoppingBag className="w-5 h-5 text-info" />
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Total Spent</p>
@@ -243,14 +243,14 @@ const MerchantPawBucksWallet = () => {
                   <div className="flex items-center gap-3">
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
                       activity.source === 'refund' ? 'bg-destructive/10' :
-                      activity.type === 'earn' ? 'bg-green-500/10' : 'bg-blue-500/10'
+                      activity.type === 'earn' ? 'bg-success/10' : 'bg-info/10'
                     }`}>
                       {activity.source === 'refund' ? (
                         <ArrowDownRight className="w-4 h-4 text-destructive" />
                       ) : activity.type === 'earn' ? (
-                        <ArrowUpRight className="w-4 h-4 text-green-500" />
+                        <ArrowUpRight className="w-4 h-4 text-success" />
                       ) : (
-                        <ArrowDownRight className="w-4 h-4 text-blue-500" />
+                        <ArrowDownRight className="w-4 h-4 text-info" />
                       )}
                     </div>
                     <div>
@@ -269,7 +269,7 @@ const MerchantPawBucksWallet = () => {
                   </div>
                   <span className={`font-semibold ${
                     activity.source === 'refund' ? 'text-destructive' :
-                    activity.type === 'earn' ? 'text-green-500' : 'text-blue-500'
+                    activity.type === 'earn' ? 'text-success' : 'text-info'
                   }`}>
                     {activity.type === 'earn' ? '+' : '-'}{Formatters.number(Math.abs(activity.amount))}
                   </span>

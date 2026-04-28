@@ -408,10 +408,10 @@ export function TaxLiabilityEstimator({ merchantId, taxYear }: TaxLiabilityEstim
         </Card>
 
         {/* Quarterly Payment */}
-        <Card className="border-2 border-amber-500/20 bg-gradient-to-br from-amber-500/5 to-transparent">
+        <Card className="border-2 border-warning/20 bg-gradient-to-br from-amber-500/5 to-transparent">
           <CardHeader className="pb-2">
             <CardTitle className="text-lg flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-amber-500" />
+              <Calendar className="h-5 w-5 text-warning" />
               Quarterly Payment Due
             </CardTitle>
             <CardDescription>
@@ -419,14 +419,14 @@ export function TaxLiabilityEstimator({ merchantId, taxYear }: TaxLiabilityEstim
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-4xl font-bold text-amber-600 mb-4">
+            <div className="text-4xl font-bold text-warning mb-4">
               ${quarterlyPayment.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
             
-            <Alert className="border-amber-200 bg-amber-50">
-              <AlertTriangle className="h-4 w-4 text-amber-600" />
-              <AlertTitle className="text-amber-800 text-sm">Avoid Penalties</AlertTitle>
-              <AlertDescription className="text-amber-700 text-xs">
+            <Alert className="border-warning/30 bg-warning/10">
+              <AlertTriangle className="h-4 w-4 text-warning" />
+              <AlertTitle className="text-warning text-sm">Avoid Penalties</AlertTitle>
+              <AlertDescription className="text-warning text-xs">
                 Pay quarterly estimates to avoid underpayment penalties. 
                 Safe harbor: Pay 100% of last year's tax or 90% of this year's.
               </AlertDescription>
@@ -446,15 +446,15 @@ export function TaxLiabilityEstimator({ merchantId, taxYear }: TaxLiabilityEstim
         <CardContent>
           <div className="space-y-4">
             {/* Gross Income */}
-            <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-100">
+            <div className="flex items-center justify-between p-3 bg-success/10 rounded-lg border border-success/30">
               <div className="flex items-center gap-3">
-                <TrendingUp className="h-5 w-5 text-green-600" />
+                <TrendingUp className="h-5 w-5 text-success" />
                 <div>
-                  <p className="font-medium text-green-900">Gross Income (Platform Sales)</p>
-                  <p className="text-xs text-green-700">Total sales through PawBucks</p>
+                  <p className="font-medium text-success">Gross Income (Platform Sales)</p>
+                  <p className="text-xs text-success">Total sales through PawBucks</p>
                 </div>
               </div>
-              <span className="text-xl font-bold text-green-700">
+              <span className="text-xl font-bold text-success">
                 +${grossIncome.toFixed(2)}
               </span>
             </div>
@@ -468,7 +468,7 @@ export function TaxLiabilityEstimator({ merchantId, taxYear }: TaxLiabilityEstim
                   <Receipt className="h-4 w-4 text-muted-foreground" />
                   <span>Business Expenses (Tax Vault)</span>
                 </div>
-                <span className="font-medium text-red-600">
+                <span className="font-medium text-destructive">
                   -${totalExpenses.toFixed(2)}
                 </span>
               </div>
@@ -490,37 +490,37 @@ export function TaxLiabilityEstimator({ merchantId, taxYear }: TaxLiabilityEstim
                     </TooltipProvider>
                   </div>
                 </div>
-                <span className="font-medium text-red-600">
+                <span className="font-medium text-destructive">
                   -${vehicleDeduction.toFixed(2)}
                 </span>
               </div>
             </div>
 
             {/* Net Profit */}
-            <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-100 mt-4">
+            <div className="flex items-center justify-between p-3 bg-info/10 rounded-lg border border-info/30 mt-4">
               <div className="flex items-center gap-3">
-                <PiggyBank className="h-5 w-5 text-blue-600" />
+                <PiggyBank className="h-5 w-5 text-info" />
                 <div>
-                  <p className="font-medium text-blue-900">Net Profit (Taxable)</p>
-                  <p className="text-xs text-blue-700">Schedule C Line 31</p>
+                  <p className="font-medium text-info">Net Profit (Taxable)</p>
+                  <p className="text-xs text-info">Schedule C Line 31</p>
                 </div>
               </div>
-              <span className="text-xl font-bold text-blue-700">
+              <span className="text-xl font-bold text-info">
                 ${netProfit.toFixed(2)}
               </span>
             </div>
 
             {/* Tax Savings */}
             {taxSavingsFromDeductions > 0 && (
-              <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-100">
+              <div className="flex items-center justify-between p-3 bg-success/10 rounded-lg border border-success/30">
                 <div className="flex items-center gap-3">
-                  <CheckCircle2 className="h-5 w-5 text-green-600" />
+                  <CheckCircle2 className="h-5 w-5 text-success" />
                   <div>
-                    <p className="font-medium text-green-900">Estimated Tax Savings</p>
-                    <p className="text-xs text-green-700">From logged deductions</p>
+                    <p className="font-medium text-success">Estimated Tax Savings</p>
+                    <p className="text-xs text-success">From logged deductions</p>
                   </div>
                 </div>
-                <span className="text-lg font-bold text-green-700">
+                <span className="text-lg font-bold text-success">
                   ${taxSavingsFromDeductions.toFixed(2)}
                 </span>
               </div>
@@ -567,10 +567,10 @@ export function TaxLiabilityEstimator({ merchantId, taxYear }: TaxLiabilityEstim
                     Due {q.deadline}
                   </p>
                   {isPast && (
-                    <CheckCircle2 className="h-4 w-4 text-green-500 mx-auto mt-2" />
+                    <CheckCircle2 className="h-4 w-4 text-success mx-auto mt-2" />
                   )}
                   {isCurrent && (
-                    <AlertTriangle className="h-4 w-4 text-amber-500 mx-auto mt-2" />
+                    <AlertTriangle className="h-4 w-4 text-warning mx-auto mt-2" />
                   )}
                 </div>
               );

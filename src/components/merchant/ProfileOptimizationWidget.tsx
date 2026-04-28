@@ -128,10 +128,10 @@ export function ProfileOptimizationWidget() {
   };
 
   const getScoreColor = (score: number) => {
-    if (score >= 80) return 'text-green-500';
-    if (score >= 60) return 'text-yellow-500';
+    if (score >= 80) return 'text-success';
+    if (score >= 60) return 'text-warning';
     if (score >= 40) return 'text-orange-500';
-    return 'text-red-500';
+    return 'text-destructive';
   };
 
   const getScoreGradient = (score: number) => {
@@ -143,17 +143,17 @@ export function ProfileOptimizationWidget() {
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'high': return 'bg-red-500/10 text-red-500 border-red-500/20';
-      case 'medium': return 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20';
-      case 'low': return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
+      case 'high': return 'bg-destructive/10 text-destructive border-destructive/20';
+      case 'medium': return 'bg-warning/10 text-warning border-warning/20';
+      case 'low': return 'bg-info/10 text-info border-info/20';
       default: return 'bg-muted text-muted-foreground';
     }
   };
 
   const getEffortBadge = (effort: string) => {
     switch (effort) {
-      case 'easy': return <Badge variant="outline" className="bg-green-500/10 text-green-500 text-xs">Quick Fix</Badge>;
-      case 'moderate': return <Badge variant="outline" className="bg-yellow-500/10 text-yellow-500 text-xs">Some Effort</Badge>;
+      case 'easy': return <Badge variant="outline" className="bg-success/10 text-success text-xs">Quick Fix</Badge>;
+      case 'moderate': return <Badge variant="outline" className="bg-warning/10 text-warning text-xs">Some Effort</Badge>;
       case 'complex': return <Badge variant="outline" className="bg-purple-500/10 text-purple-500 text-xs">Project</Badge>;
       default: return null;
     }
@@ -161,9 +161,9 @@ export function ProfileOptimizationWidget() {
 
   const getInsightIcon = (type: string) => {
     switch (type) {
-      case 'success': return <CheckCircle className="h-5 w-5 text-green-500" />;
-      case 'warning': return <AlertTriangle className="h-5 w-5 text-yellow-500" />;
-      case 'info': return <Info className="h-5 w-5 text-blue-500" />;
+      case 'success': return <CheckCircle className="h-5 w-5 text-success" />;
+      case 'warning': return <AlertTriangle className="h-5 w-5 text-warning" />;
+      case 'info': return <Info className="h-5 w-5 text-info" />;
       case 'opportunity': return <Lightbulb className="h-5 w-5 text-purple-500" />;
       default: return <Info className="h-5 w-5" />;
     }
@@ -303,9 +303,9 @@ export function ProfileOptimizationWidget() {
                     <Badge 
                       variant="outline" 
                       className={
-                        section.status === 'complete' ? 'bg-green-500/10 text-green-500' :
-                        section.status === 'partial' ? 'bg-yellow-500/10 text-yellow-500' :
-                        'bg-red-500/10 text-red-500'
+                        section.status === 'complete' ? 'bg-success/10 text-success' :
+                        section.status === 'partial' ? 'bg-warning/10 text-warning' :
+                        'bg-destructive/10 text-destructive'
                       }
                     >
                       {section.status === 'complete' ? 'Complete' : 
@@ -329,7 +329,7 @@ export function ProfileOptimizationWidget() {
                       <div className="space-y-1">
                         {section.issues.map((issue, i) => (
                           <div key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
-                            <AlertTriangle className="h-4 w-4 text-yellow-500 mt-0.5 shrink-0" />
+                            <AlertTriangle className="h-4 w-4 text-warning mt-0.5 shrink-0" />
                             <span>{issue}</span>
                           </div>
                         ))}
@@ -388,13 +388,13 @@ export function ProfileOptimizationWidget() {
                           <p className="text-sm text-muted-foreground mb-2">
                             {rec.description}
                           </p>
-                          <div className="flex items-center gap-1 text-sm text-green-600">
+                          <div className="flex items-center gap-1 text-sm text-success">
                             <TrendingUp className="h-4 w-4" />
                             <span>{rec.impact}</span>
                           </div>
                         </div>
                         {rec.completed ? (
-                          <CheckCircle className="h-6 w-6 text-green-500 shrink-0" />
+                          <CheckCircle className="h-6 w-6 text-success shrink-0" />
                         ) : (
                           <Button size="sm" variant="outline">
                             Start
@@ -415,7 +415,7 @@ export function ProfileOptimizationWidget() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Trophy className="h-5 w-5 text-yellow-500" />
+                  <Trophy className="h-5 w-5 text-warning" />
                   Your Ranking
                 </CardTitle>
               </CardHeader>
@@ -487,7 +487,7 @@ export function ProfileOptimizationWidget() {
                         </div>
                       </div>
                       <div className={`flex items-center gap-1 w-20 justify-end text-sm ${
-                        diff > 0 ? 'text-green-500' : diff < 0 ? 'text-red-500' : 'text-muted-foreground'
+                        diff > 0 ? 'text-success' : diff < 0 ? 'text-destructive' : 'text-muted-foreground'
                       }`}>
                         {diff > 0 ? <ArrowUp className="h-4 w-4" /> : 
                          diff < 0 ? <ArrowDown className="h-4 w-4" /> : 
@@ -520,10 +520,10 @@ export function ProfileOptimizationWidget() {
                   <div 
                     key={index}
                     className={`p-4 rounded-lg border ${
-                      insight.type === 'success' ? 'bg-green-500/5 border-green-500/20' :
-                      insight.type === 'warning' ? 'bg-yellow-500/5 border-yellow-500/20' :
+                      insight.type === 'success' ? 'bg-success/5 border-success/20' :
+                      insight.type === 'warning' ? 'bg-warning/5 border-warning/20' :
                       insight.type === 'opportunity' ? 'bg-purple-500/5 border-purple-500/20' :
-                      'bg-blue-500/5 border-blue-500/20'
+                      'bg-info/5 border-info/20'
                     }`}
                   >
                     <div className="flex items-start gap-3">

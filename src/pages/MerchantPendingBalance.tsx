@@ -68,14 +68,14 @@ export default function MerchantPendingBalance() {
         </div>
 
         {/* Main Balance Card with Estimated Arrival */}
-        <Card className="border-yellow-200 bg-yellow-50/50 dark:bg-yellow-950/20">
+        <Card className="border-warning/30 bg-warning/5">
           <CardHeader>
             <div className="flex items-center gap-3">
-              <div className="p-3 rounded-full bg-yellow-100 dark:bg-yellow-900">
-                <Clock className="h-6 w-6 text-yellow-600" />
+              <div className="p-3 rounded-full bg-warning/15">
+                <Clock className="h-6 w-6 text-warning" />
               </div>
               <div>
-                <CardTitle className="text-3xl text-yellow-700 dark:text-yellow-400">
+                <CardTitle className="text-3xl text-warning">
                   {formatCurrency(totalPending)}
                 </CardTitle>
                 <CardDescription>Total pending clearance</CardDescription>
@@ -85,13 +85,13 @@ export default function MerchantPendingBalance() {
           <CardContent className="space-y-4">
             {/* Estimated Arrival */}
             {data.estimatedNextArrival && totalPending > 0 && (
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-yellow-100/50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800">
-                <CalendarClock className="h-5 w-5 text-yellow-600 shrink-0" />
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-warning/10 border border-warning/30">
+                <CalendarClock className="h-5 w-5 text-warning shrink-0" />
                 <div>
-                  <p className="text-sm font-medium text-yellow-800 dark:text-yellow-300">
+                  <p className="text-sm font-medium text-warning">
                     Estimated next arrival: {format(new Date(data.estimatedNextArrival * 1000), "EEEE, MMM d, yyyy")}
                   </p>
-                  <p className="text-xs text-yellow-600 dark:text-yellow-400">
+                  <p className="text-xs text-warning/80">
                     Based on your payout schedule
                   </p>
                 </div>
@@ -133,7 +133,7 @@ export default function MerchantPendingBalance() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Clock className="h-5 w-5 text-yellow-500" />
+              <Clock className="h-5 w-5 text-warning" />
                 In-Transit Payouts
               </CardTitle>
               <CardDescription>Payouts currently being transferred to your bank</CardDescription>
@@ -152,7 +152,7 @@ export default function MerchantPendingBalance() {
                       )}
                     </div>
                     <div className="flex flex-col items-end gap-1">
-                      <Badge className="bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300">
+                      <Badge className="bg-warning/15 text-warning border-transparent">
                         {payout.status === "in_transit" ? "In Transit" : "Pending"}
                       </Badge>
                       {payout.method && (

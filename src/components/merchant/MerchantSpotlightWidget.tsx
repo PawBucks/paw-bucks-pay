@@ -141,8 +141,8 @@ export function MerchantSpotlightWidget() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <span className="w-3 h-3 rounded-full bg-green-500 animate-pulse" />
-              <span className="font-semibold text-green-500">Spotlight Active</span>
+              <span className="w-3 h-3 rounded-full bg-success animate-pulse" />
+              <span className="font-semibold text-success">Spotlight Active</span>
             </div>
             <p className="text-sm text-muted-foreground">
               Activated on {new Date(spotlight_status.activated_at).toLocaleDateString()} • 
@@ -163,14 +163,14 @@ export function MerchantSpotlightWidget() {
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <Card>
           <CardContent className="pt-4 text-center">
-            <Eye className="h-5 w-5 text-blue-500 mx-auto mb-2" />
+            <Eye className="h-5 w-5 text-info mx-auto mb-2" />
             <p className="text-2xl font-bold">{(performance.total_impressions / 1000).toFixed(1)}K</p>
             <p className="text-xs text-muted-foreground">Impressions</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4 text-center">
-            <MousePointer className="h-5 w-5 text-green-500 mx-auto mb-2" />
+            <MousePointer className="h-5 w-5 text-success mx-auto mb-2" />
             <p className="text-2xl font-bold">{(performance.total_clicks / 1000).toFixed(1)}K</p>
             <p className="text-xs text-muted-foreground">Clicks</p>
           </CardContent>
@@ -198,7 +198,7 @@ export function MerchantSpotlightWidget() {
         </Card>
         <Card>
           <CardContent className="pt-4 text-center">
-            <Heart className="h-5 w-5 text-red-500 mx-auto mb-2" />
+            <Heart className="h-5 w-5 text-destructive mx-auto mb-2" />
             <p className="text-2xl font-bold">{performance.saves_to_favorites}</p>
             <p className="text-xs text-muted-foreground">Saves</p>
           </CardContent>
@@ -231,7 +231,7 @@ export function MerchantSpotlightWidget() {
             <CardTitle className="text-base flex items-center gap-2">
               After Spotlight
               {comparison.revenue_growth > 0 && (
-                <Badge className="bg-green-500/10 text-green-500">
+                <Badge className="bg-success/10 text-success">
                   +{comparison.revenue_growth}%
                 </Badge>
               )}
@@ -242,11 +242,11 @@ export function MerchantSpotlightWidget() {
             <div className="space-y-2">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Revenue</span>
-                <span className="font-semibold text-green-500">${comparison.after.revenue.toLocaleString()}</span>
+                <span className="font-semibold text-success">${comparison.after.revenue.toLocaleString()}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Transactions</span>
-                <span className="font-semibold text-green-500">{comparison.after.transactions}</span>
+                <span className="font-semibold text-success">{comparison.after.transactions}</span>
               </div>
             </div>
           </CardContent>
@@ -277,12 +277,12 @@ export function MerchantSpotlightWidget() {
                   <div key={idx} className="flex items-center justify-between p-4 border rounded-lg">
                     <div className="flex items-center gap-4">
                       <div className={`p-2 rounded-lg ${
-                        placement.status === 'active' ? 'bg-green-500/10' :
-                        placement.status === 'featured' ? 'bg-yellow-500/10' : 'bg-blue-500/10'
+                        placement.status === 'active' ? 'bg-success/10' :
+                        placement.status === 'featured' ? 'bg-warning/10' : 'bg-info/10'
                       }`}>
                         {placement.location.includes('Email') ? <Mail className="h-5 w-5 text-purple-500" /> :
-                         placement.location.includes('Push') ? <Bell className="h-5 w-5 text-blue-500" /> :
-                         <MapPin className={`h-5 w-5 ${placement.status === 'active' ? 'text-green-500' : 'text-yellow-500'}`} />}
+                         placement.location.includes('Push') ? <Bell className="h-5 w-5 text-info" /> :
+                         <MapPin className={`h-5 w-5 ${placement.status === 'active' ? 'text-success' : 'text-warning'}`} />}
                       </div>
                       <div>
                         <p className="font-medium">{placement.location}</p>
@@ -298,9 +298,9 @@ export function MerchantSpotlightWidget() {
                     </div>
                     <div className="text-right">
                       <Badge variant="outline" className={
-                        placement.status === 'active' ? 'bg-green-500/10 text-green-500' :
-                        placement.status === 'featured' ? 'bg-yellow-500/10 text-yellow-500' :
-                        'bg-blue-500/10 text-blue-500'
+                        placement.status === 'active' ? 'bg-success/10 text-success' :
+                        placement.status === 'featured' ? 'bg-warning/10 text-warning' :
+                        'bg-info/10 text-info'
                       }>
                         {placement.status}
                       </Badge>
@@ -377,18 +377,18 @@ export function MerchantSpotlightWidget() {
           <div className="grid gap-4">
             {insights.map((insight, idx) => (
               <Card key={idx} className={
-                insight.type === 'success' ? 'border-green-500/30 bg-green-500/5' :
-                insight.type === 'tip' ? 'border-blue-500/30 bg-blue-500/5' :
+                insight.type === 'success' ? 'border-success/30 bg-success/5' :
+                insight.type === 'tip' ? 'border-info/30 bg-info/5' :
                 'border-border'
               }>
                 <CardContent className="pt-4">
                   <div className="flex items-start gap-3">
                     <div className={`p-2 rounded-lg ${
-                      insight.type === 'success' ? 'bg-green-500/10' :
-                      insight.type === 'tip' ? 'bg-blue-500/10' : 'bg-muted'
+                      insight.type === 'success' ? 'bg-success/10' :
+                      insight.type === 'tip' ? 'bg-info/10' : 'bg-muted'
                     }`}>
-                      {insight.type === 'success' ? <CheckCircle className="h-5 w-5 text-green-500" /> :
-                       insight.type === 'tip' ? <Lightbulb className="h-5 w-5 text-blue-500" /> :
+                      {insight.type === 'success' ? <CheckCircle className="h-5 w-5 text-success" /> :
+                       insight.type === 'tip' ? <Lightbulb className="h-5 w-5 text-info" /> :
                        <TrendingUp className="h-5 w-5 text-muted-foreground" />}
                     </div>
                     <p className="text-sm leading-relaxed">{insight.insight}</p>
@@ -415,7 +415,7 @@ export function MerchantSpotlightWidget() {
                   <div key={idx} className="flex items-center justify-between p-4 border rounded-lg">
                     <div className="flex items-center gap-4">
                       <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                        opt.completed ? 'bg-green-500 text-white' : 'border-2 border-muted'
+                        opt.completed ? 'bg-success text-white' : 'border-2 border-muted'
                       }`}>
                         {opt.completed && <CheckCircle className="h-4 w-4" />}
                       </div>
@@ -424,7 +424,7 @@ export function MerchantSpotlightWidget() {
                           {opt.suggestion}
                         </p>
                         <Badge variant="outline" className={
-                          opt.impact === 'High' ? 'bg-red-500/10 text-red-500 mt-1' : 'bg-yellow-500/10 text-yellow-500 mt-1'
+                          opt.impact === 'High' ? 'bg-destructive/10 text-destructive mt-1' : 'bg-warning/10 text-warning mt-1'
                         }>
                           {opt.impact} Impact
                         </Badge>

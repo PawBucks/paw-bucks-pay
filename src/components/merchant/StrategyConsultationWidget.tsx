@@ -86,17 +86,17 @@ export function StrategyConsultationWidget() {
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'high': return 'bg-red-500/10 text-red-500 border-red-500/20';
-      case 'medium': return 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20';
-      default: return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
+      case 'high': return 'bg-destructive/10 text-destructive border-destructive/20';
+      case 'medium': return 'bg-warning/10 text-warning border-warning/20';
+      default: return 'bg-info/10 text-info border-info/20';
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'confirmed': return 'bg-green-500/10 text-green-500 border-green-500/20';
-      case 'pending': return 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20';
-      case 'completed': return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
+      case 'confirmed': return 'bg-success/10 text-success border-success/20';
+      case 'pending': return 'bg-warning/10 text-warning border-warning/20';
+      case 'completed': return 'bg-info/10 text-info border-info/20';
       default: return 'bg-muted text-muted-foreground';
     }
   };
@@ -132,8 +132,8 @@ export function StrategyConsultationWidget() {
 
         <GradientCard gradient>
           <div className="flex items-center gap-3">
-            <div className="p-3 rounded-xl bg-green-500/10">
-              <CheckCircle2 className="h-5 w-5 text-green-500" />
+            <div className="p-3 rounded-xl bg-success/10">
+              <CheckCircle2 className="h-5 w-5 text-success" />
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Sessions Completed</p>
@@ -241,7 +241,7 @@ export function StrategyConsultationWidget() {
               {/* Strengths */}
               <div>
                 <h4 className="font-semibold mb-3 flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  <CheckCircle2 className="h-4 w-4 text-success" />
                   Key Strengths
                 </h4>
                 <div className="space-y-2">
@@ -254,7 +254,7 @@ export function StrategyConsultationWidget() {
               {/* Opportunities */}
               <div>
                 <h4 className="font-semibold mb-3 flex items-center gap-2">
-                  <Lightbulb className="h-4 w-4 text-yellow-500" />
+                  <Lightbulb className="h-4 w-4 text-warning" />
                   Growth Opportunities
                 </h4>
                 <div className="space-y-2">

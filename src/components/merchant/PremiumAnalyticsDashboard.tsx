@@ -213,14 +213,14 @@ export function PremiumAnalyticsDashboard() {
   }];
 
   const getGrowthIcon = (value: number) => {
-    if (value > 0) return <ArrowUpRight className="h-4 w-4 text-green-500" />;
-    if (value < 0) return <ArrowDownRight className="h-4 w-4 text-red-500" />;
+    if (value > 0) return <ArrowUpRight className="h-4 w-4 text-success" />;
+    if (value < 0) return <ArrowDownRight className="h-4 w-4 text-destructive" />;
     return null;
   };
 
   const getGrowthColor = (value: number) => {
-    if (value > 0) return 'text-green-500';
-    if (value < 0) return 'text-red-500';
+    if (value > 0) return 'text-success';
+    if (value < 0) return 'text-destructive';
     return 'text-muted-foreground';
   };
 
@@ -231,7 +231,7 @@ export function PremiumAnalyticsDashboard() {
       case 'high':
         return <Badge className="bg-orange-500">High Priority</Badge>;
       case 'positive':
-        return <Badge className="bg-green-500">Positive</Badge>;
+        return <Badge className="bg-success">Positive</Badge>;
       default:
         return <Badge variant="secondary">Medium</Badge>;
     }
@@ -239,10 +239,10 @@ export function PremiumAnalyticsDashboard() {
 
   const getInsightIcon = (type: string) => {
     switch (type) {
-      case 'positive': return <Heart className="h-5 w-5 text-green-500" />;
+      case 'positive': return <Heart className="h-5 w-5 text-success" />;
       case 'warning': return <AlertTriangle className="h-5 w-5 text-orange-500" />;
-      case 'prediction': return <TrendingUp className="h-5 w-5 text-blue-500" />;
-      case 'opportunity': return <Zap className="h-5 w-5 text-yellow-500" />;
+      case 'prediction': return <TrendingUp className="h-5 w-5 text-info" />;
+      case 'opportunity': return <Zap className="h-5 w-5 text-warning" />;
       default: return <Brain className="h-5 w-5 text-primary" />;
     }
   };
@@ -340,8 +340,8 @@ export function PremiumAnalyticsDashboard() {
 
             <GradientCard gradient>
               <div className="flex items-center gap-3">
-                <div className="p-3 rounded-xl bg-green-500/10">
-                  <Users className="h-5 w-5 text-green-500" />
+                <div className="p-3 rounded-xl bg-success/10">
+                  <Users className="h-5 w-5 text-success" />
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Total Customers</p>
@@ -352,8 +352,8 @@ export function PremiumAnalyticsDashboard() {
 
             <GradientCard gradient>
               <div className="flex items-center gap-3">
-                <div className="p-3 rounded-xl bg-blue-500/10">
-                  <Activity className="h-5 w-5 text-blue-500" />
+                <div className="p-3 rounded-xl bg-info/10">
+                  <Activity className="h-5 w-5 text-info" />
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Total Transactions</p>
@@ -466,8 +466,8 @@ export function PremiumAnalyticsDashboard() {
 
             <GradientCard gradient>
               <div className="flex items-center gap-3">
-                <div className="p-3 rounded-xl bg-green-500/10">
-                  <DollarSign className="h-5 w-5 text-green-500" />
+                <div className="p-3 rounded-xl bg-success/10">
+                  <DollarSign className="h-5 w-5 text-success" />
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Daily Revenue</p>
@@ -478,8 +478,8 @@ export function PremiumAnalyticsDashboard() {
 
             <GradientCard gradient>
               <div className="flex items-center gap-3">
-                <div className="p-3 rounded-xl bg-blue-500/10">
-                  <Activity className="h-5 w-5 text-blue-500" />
+                <div className="p-3 rounded-xl bg-info/10">
+                  <Activity className="h-5 w-5 text-info" />
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Weekly Revenue</p>
@@ -524,7 +524,7 @@ export function PremiumAnalyticsDashboard() {
                 </div>
                 <div className="text-center p-6 rounded-lg bg-gradient-to-br from-green-500/10 to-green-500/5 border">
                   <p className="text-sm text-muted-foreground mb-2">Projected Monthly Transactions</p>
-                  <p className="text-4xl font-bold text-green-600">{transaction_velocity.projected_monthly_transactions}</p>
+                  <p className="text-4xl font-bold text-success">{transaction_velocity.projected_monthly_transactions}</p>
                   <p className="text-xs text-muted-foreground mt-2">Based on {transaction_velocity.daily_transactions}/day avg</p>
                 </div>
               </div>
@@ -559,8 +559,8 @@ export function PremiumAnalyticsDashboard() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <GradientCard gradient>
               <div className="flex items-center gap-3">
-                <div className="p-3 rounded-xl bg-green-500/10">
-                  <UserPlus className="h-5 w-5 text-green-500" />
+                <div className="p-3 rounded-xl bg-success/10">
+                  <UserPlus className="h-5 w-5 text-success" />
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">New Customers</p>
@@ -571,8 +571,8 @@ export function PremiumAnalyticsDashboard() {
 
             <GradientCard gradient>
               <div className="flex items-center gap-3">
-                <div className="p-3 rounded-xl bg-blue-500/10">
-                  <Repeat className="h-5 w-5 text-blue-500" />
+                <div className="p-3 rounded-xl bg-info/10">
+                  <Repeat className="h-5 w-5 text-info" />
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Returning</p>
@@ -760,8 +760,8 @@ export function PremiumAnalyticsDashboard() {
 
             <GradientCard gradient>
               <div className="flex items-center gap-3">
-                <div className="p-3 rounded-xl bg-green-500/10">
-                  <Clock className="h-5 w-5 text-green-500" />
+                <div className="p-3 rounded-xl bg-success/10">
+                  <Clock className="h-5 w-5 text-success" />
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Peak Hour</p>
@@ -903,7 +903,7 @@ export function PremiumAnalyticsDashboard() {
                             <span className="text-primary font-medium">{opportunity.action}</span>
                           </div>
                           {opportunity.potential_revenue > 0 && (
-                            <p className="text-xs text-green-600 mt-2">
+                            <p className="text-xs text-success mt-2">
                               Potential revenue: ${opportunity.potential_revenue.toFixed(2)}
                             </p>
                           )}
@@ -953,8 +953,8 @@ export function PremiumAnalyticsDashboard() {
               <div className="text-center mt-4">
                 <Badge 
                   className={
-                    competitive_benchmarking.overall_performance_score >= 70 ? 'bg-green-500' :
-                    competitive_benchmarking.overall_performance_score >= 40 ? 'bg-yellow-500' : 'bg-red-500'
+                    competitive_benchmarking.overall_performance_score >= 70 ? 'bg-success' :
+                    competitive_benchmarking.overall_performance_score >= 40 ? 'bg-warning' : 'bg-destructive'
                   }
                 >
                   {competitive_benchmarking.overall_performance_score >= 70 ? 'Excellent' :

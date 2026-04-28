@@ -283,7 +283,7 @@ export default function MerchantTaxVault() {
                     </div>
                     <p className="text-2xl font-bold">${deductionBreakdown.totalDeductions.toFixed(2)}</p>
                   </div>
-                  <DollarSign className="h-8 w-8 text-green-500 opacity-80" />
+                  <DollarSign className="h-8 w-8 text-success opacity-80" />
                 </div>
               </CardContent>
             </Card>
@@ -295,7 +295,7 @@ export default function MerchantTaxVault() {
                     <p className="text-sm text-muted-foreground">Logged Expenses</p>
                     <p className="text-2xl font-bold">{expenses.length}</p>
                   </div>
-                  <Receipt className="h-8 w-8 text-blue-500 opacity-80" />
+                  <Receipt className="h-8 w-8 text-info opacity-80" />
                 </div>
               </CardContent>
             </Card>
@@ -322,7 +322,7 @@ export default function MerchantTaxVault() {
                                 <span>Actual Expenses:</span>
                                 <span>${deductionBreakdown.actualExpensesDeduction.toFixed(2)}</span>
                               </div>
-                              <p className="text-green-500 pt-1 border-t">
+                              <p className="text-success pt-1 border-t">
                                 Using {deductionBreakdown.vehicleMethod === 'standard' ? 'Standard Mileage' : 'Actual Expenses'} method (higher value)
                               </p>
                             </div>

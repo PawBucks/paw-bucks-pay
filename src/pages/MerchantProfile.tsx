@@ -299,7 +299,7 @@ const MerchantProfile = memo(() => {
                 <div className="flex items-center gap-2 flex-wrap">
                   <h1 className="text-2xl font-bold tracking-tight leading-tight">{merchant.business_name}</h1>
                   {hasVerifiedPro && (
-                    <BadgeCheck className="w-6 h-6 text-blue-500 flex-shrink-0" />
+                    <BadgeCheck className="w-6 h-6 text-info flex-shrink-0" />
                   )}
                   {merchantId && (
                     <Founding50Badge entityType="merchant" entityId={merchantId} size="md" />
@@ -323,7 +323,7 @@ const MerchantProfile = memo(() => {
                     </Badge>
                   )}
                   {merchant.accepts_pawbucks && (
-                    <Badge variant="outline" className="gap-1 text-xs bg-amber-500/10 text-amber-600 border-amber-500/30 dark:text-amber-400">
+                    <Badge variant="outline" className="gap-1 text-xs bg-warning/10 text-warning border-warning/30">
                       <Coins className="w-3 h-3" /> PawBucks
                     </Badge>
                   )}
@@ -489,8 +489,8 @@ const MerchantProfile = memo(() => {
                         rel="noopener noreferrer"
                         className="flex items-center gap-3 group py-1"
                       >
-                        <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center flex-shrink-0">
-                          <MapPin className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                        <div className="w-10 h-10 rounded-full bg-info/10 flex items-center justify-center flex-shrink-0">
+                          <MapPin className="w-4 h-4 text-info" />
                         </div>
                         <div>
                           <p className="text-sm font-medium group-hover:text-primary transition-colors">{merchant.address}</p>
@@ -653,7 +653,7 @@ const MerchantProfile = memo(() => {
                             <span className="text-xs w-3 text-muted-foreground">{rating}</span>
                             <div className="flex-1 h-2.5 bg-muted rounded-full overflow-hidden">
                               <div
-                                className="h-full bg-amber-400 rounded-full transition-all duration-500"
+                                className="h-full bg-warning rounded-full transition-all duration-500"
                                 style={{ width: `${pct}%` }}
                               />
                             </div>

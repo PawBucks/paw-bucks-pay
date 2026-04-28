@@ -109,9 +109,9 @@ const tierIcons = {
 };
 
 const priorityColors = {
-  high: 'bg-red-100 text-red-700 border-red-200',
-  medium: 'bg-yellow-100 text-yellow-700 border-yellow-200',
-  low: 'bg-green-100 text-green-700 border-green-200',
+  high: 'bg-destructive/15 text-destructive border-destructive/30',
+  medium: 'bg-warning/15 text-warning border-warning/30',
+  low: 'bg-success/15 text-success border-success/30',
 };
 
 const categoryIcons = {
@@ -270,17 +270,17 @@ export function FeaturedPartnerWidget() {
               {/* Quick stats */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="bg-muted/50 rounded-lg p-4 text-center">
-                  <TrendingUp className="h-6 w-6 mx-auto mb-2 text-green-500" />
+                  <TrendingUp className="h-6 w-6 mx-auto mb-2 text-success" />
                   <p className="text-2xl font-bold">${data.metrics?.totalRevenue.toFixed(0)}</p>
                   <p className="text-xs text-muted-foreground">90-Day Revenue</p>
                 </div>
                 <div className="bg-muted/50 rounded-lg p-4 text-center">
-                  <Users className="h-6 w-6 mx-auto mb-2 text-blue-500" />
+                  <Users className="h-6 w-6 mx-auto mb-2 text-info" />
                   <p className="text-2xl font-bold">{data.metrics?.totalTransactions}</p>
                   <p className="text-xs text-muted-foreground">Transactions</p>
                 </div>
                 <div className="bg-muted/50 rounded-lg p-4 text-center">
-                  <Star className="h-6 w-6 mx-auto mb-2 text-yellow-500" />
+                  <Star className="h-6 w-6 mx-auto mb-2 text-warning" />
                   <p className="text-2xl font-bold">{data.metrics?.avgRating.toFixed(1)}</p>
                   <p className="text-xs text-muted-foreground">Avg Rating</p>
                 </div>
@@ -349,13 +349,13 @@ export function FeaturedPartnerWidget() {
                   >
                     <div className="flex items-center gap-3">
                       {benefit.status === 'available' && (
-                        <CheckCircle2 className="h-5 w-5 text-green-500" />
+                        <CheckCircle2 className="h-5 w-5 text-success" />
                       )}
                       {benefit.status === 'used' && (
                         <CheckCircle2 className="h-5 w-5 text-muted-foreground" />
                       )}
                       {benefit.status === 'pending' && (
-                        <Clock className="h-5 w-5 text-yellow-500" />
+                        <Clock className="h-5 w-5 text-warning" />
                       )}
                       <div>
                         <p className="font-medium">{benefit.name}</p>
@@ -364,7 +364,7 @@ export function FeaturedPartnerWidget() {
                     </div>
                     <Badge 
                       variant={benefit.status === 'available' ? 'default' : 'secondary'}
-                      className={benefit.status === 'pending' ? 'bg-yellow-100 text-yellow-700' : ''}
+                      className={benefit.status === 'pending' ? 'bg-warning/15 text-warning' : ''}
                     >
                       {benefit.status}
                     </Badge>

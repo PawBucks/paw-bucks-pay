@@ -57,8 +57,8 @@ export function MerchantQuickActionsTab({
       description: "See all your transaction activity",
       icon: FileText,
       onClick: () => onNavigate("/merchant/transactions"),
-      color: "text-blue-500",
-      bgColor: "bg-blue-500/10",
+      color: "text-info",
+      bgColor: "bg-info/10",
     },
     {
       title: "Request Funding",
@@ -83,8 +83,8 @@ export function MerchantQuickActionsTab({
       description: "Add and edit your products",
       icon: Package,
       onClick: () => onNavigate("/merchant/products"),
-      color: "text-green-500",
-      bgColor: "bg-green-500/10",
+      color: "text-success",
+      bgColor: "bg-success/10",
     }] : []),
     ...(hasStripeAccount ? [{
       title: "Subscription Plans",

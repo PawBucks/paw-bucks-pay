@@ -196,7 +196,7 @@ export function SearchRankingBoosterWidget() {
         </GradientCard>
         <GradientCard gradient>
           <div className="flex items-center gap-3">
-            <div className="p-3 rounded-xl bg-green-500/10"><Target className="h-5 w-5 text-green-500" /></div>
+            <div className="p-3 rounded-xl bg-success/10"><Target className="h-5 w-5 text-success" /></div>
             <div>
               <p className="text-sm text-muted-foreground">Avg Position</p>
               <p className="text-2xl font-bold">#{metrics.avgPosition || '-'}</p>
@@ -205,7 +205,7 @@ export function SearchRankingBoosterWidget() {
         </GradientCard>
         <GradientCard gradient>
           <div className="flex items-center gap-3">
-            <div className="p-3 rounded-xl bg-blue-500/10"><Search className="h-5 w-5 text-blue-500" /></div>
+            <div className="p-3 rounded-xl bg-info/10"><Search className="h-5 w-5 text-info" /></div>
             <div>
               <p className="text-sm text-muted-foreground">Impressions</p>
               <p className="text-2xl font-bold">{metrics.impressions}</p>
@@ -278,14 +278,14 @@ export function SearchRankingBoosterWidget() {
         <TabsContent value="keywords" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2"><Lightbulb className="h-5 w-5 text-yellow-500" /> Keyword Recommendations</CardTitle>
+              <CardTitle className="flex items-center gap-2"><Lightbulb className="h-5 w-5 text-warning" /> Keyword Recommendations</CardTitle>
               <CardDescription>Implement these keywords to improve ranking</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               {keywordData?.recommendations?.slice(0, 8).map((kw: any, idx: number) => (
                 <div key={idx} className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50">
                   <div className="flex items-center gap-3">
-                    {kw.implemented ? <CheckCircle2 className="h-5 w-5 text-green-500" /> : <AlertCircle className="h-5 w-5 text-yellow-500" />}
+                    {kw.implemented ? <CheckCircle2 className="h-5 w-5 text-success" /> : <AlertCircle className="h-5 w-5 text-warning" />}
                     <div>
                       <p className="font-medium">{kw.keyword}</p>
                       <p className="text-xs text-muted-foreground">Relevance: {kw.relevance}% • Competition: {kw.competition}</p>
@@ -348,13 +348,13 @@ export function SearchRankingBoosterWidget() {
               <Progress value={healthScore} className="h-3" />
               <p className="text-sm text-muted-foreground">{aiData?.summary}</p>
               {aiData?.recommendations?.slice(0, 4).map((rec: any, idx: number) => (
-                <div key={idx} className={`p-3 rounded-lg border-l-4 ${rec.priority === 'high' ? 'border-l-red-500 bg-red-500/5' : rec.priority === 'medium' ? 'border-l-yellow-500 bg-yellow-500/5' : 'border-l-blue-500 bg-blue-500/5'}`}>
+                <div key={idx} className={`p-3 rounded-lg border-l-4 ${rec.priority === 'high' ? 'border-l-red-500 bg-destructive/5' : rec.priority === 'medium' ? 'border-l-yellow-500 bg-warning/5' : 'border-l-blue-500 bg-info/5'}`}>
                   <div className="flex items-center gap-2 mb-1">
                     <Badge variant="outline" className="text-xs">{rec.priority}</Badge>
                     <span className="font-medium text-sm">{rec.title}</span>
                   </div>
                   <p className="text-sm text-muted-foreground">{rec.description}</p>
-                  <p className="text-xs text-green-600 mt-1">{rec.impact}</p>
+                  <p className="text-xs text-success mt-1">{rec.impact}</p>
                 </div>
               ))}
             </CardContent>
@@ -371,7 +371,7 @@ export function SearchRankingBoosterWidget() {
                   <p className="text-sm text-muted-foreground">Total Impressions</p>
                 </div>
                 <div className="text-center p-4 rounded-lg bg-muted">
-                  <p className="text-3xl font-bold text-green-600">{metrics.clicks}</p>
+                  <p className="text-3xl font-bold text-success">{metrics.clicks}</p>
                   <p className="text-sm text-muted-foreground">Total Clicks</p>
                 </div>
                 <div className="text-center p-4 rounded-lg bg-muted">

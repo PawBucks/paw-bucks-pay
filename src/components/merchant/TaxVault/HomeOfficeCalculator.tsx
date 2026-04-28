@@ -194,7 +194,7 @@ export function HomeOfficeCalculator() {
                           <span className="font-medium">{info.label}</span>
                         </div>
                         <p className="text-sm text-muted-foreground mt-1">{info.description}</p>
-                        <p className="text-xs text-blue-600 mt-1 flex items-center gap-1">
+                        <p className="text-xs text-info mt-1 flex items-center gap-1">
                           <Info className="h-3 w-3" />
                           {info.irsNote}
                         </p>
@@ -413,8 +413,8 @@ export function HomeOfficeCalculator() {
             )}
 
             {spaceType === 'storage' && (
-              <Alert className="border-green-200 bg-green-50 text-green-800">
-                <CheckCircle2 className="h-4 w-4 text-green-600" />
+              <Alert className="border-success/30 bg-success/10 text-success">
+                <CheckCircle2 className="h-4 w-4 text-success" />
                 <AlertTitle>Storage Exception</AlertTitle>
                 <AlertDescription>
                   Good news! The IRS allows deductions for inventory storage space even without exclusive use, 
@@ -429,19 +429,19 @@ export function HomeOfficeCalculator() {
         {step === 5 && result && (
           <div className="space-y-6">
             <div className="text-center pb-4 border-b">
-              <CheckCircle2 className="h-12 w-12 text-green-500 mx-auto mb-3" />
+              <CheckCircle2 className="h-12 w-12 text-success mx-auto mb-3" />
               <h3 className="text-xl font-bold">Your Deduction Estimate</h3>
               <p className="text-muted-foreground">Based on your {spaceTypeInfo[spaceType].label.toLowerCase()}</p>
             </div>
 
             {/* Main Result */}
             <div className="grid gap-4 sm:grid-cols-2">
-              <Card className={`${result.recommendedMethod === 'regular' ? 'border-green-500 border-2' : ''}`}>
+              <Card className={`${result.recommendedMethod === 'regular' ? 'border-success border-2' : ''}`}>
                 <CardHeader className="pb-2">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-sm font-medium">Regular Method</CardTitle>
                     {result.recommendedMethod === 'regular' && (
-                      <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">
+                      <span className="text-xs bg-success/15 text-success px-2 py-0.5 rounded-full">
                         Recommended
                       </span>
                     )}
@@ -465,12 +465,12 @@ export function HomeOfficeCalculator() {
                 </CardContent>
               </Card>
 
-              <Card className={`${result.recommendedMethod === 'simplified' ? 'border-green-500 border-2' : ''}`}>
+              <Card className={`${result.recommendedMethod === 'simplified' ? 'border-success border-2' : ''}`}>
                 <CardHeader className="pb-2">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-sm font-medium">Simplified Method</CardTitle>
                     {result.recommendedMethod === 'simplified' && (
-                      <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">
+                      <span className="text-xs bg-success/15 text-success px-2 py-0.5 rounded-full">
                         Recommended
                       </span>
                     )}

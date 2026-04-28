@@ -80,13 +80,13 @@ export function HeroMetrics({ summary }: HeroMetricsProps) {
           icon={Users}
           label="Pet Owners Reached"
           value={summary.unique_users_reached.toLocaleString()}
-          accent="text-blue-500"
+          accent="text-info"
         />
         <StatCard
           icon={Zap}
           label="Total Check-ins"
           value={summary.total_checkins.toLocaleString()}
-          accent="text-amber-500"
+          accent="text-warning"
         />
         <StatCard
           icon={DollarSign}

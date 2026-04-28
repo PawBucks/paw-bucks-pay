@@ -74,14 +74,14 @@
          </div>
  
          {/* Main Balance Card */}
-         <Card className="border-green-200 bg-green-50/50 dark:bg-green-950/20">
-           <CardHeader>
-             <div className="flex items-center gap-3">
-               <div className="p-3 rounded-full bg-green-100 dark:bg-green-900">
-                 <DollarSign className="h-6 w-6 text-green-600" />
-               </div>
-               <div>
-                 <CardTitle className="text-3xl text-green-700 dark:text-green-400">
+        <Card className="border-success/30 bg-success/5">
+          <CardHeader>
+            <div className="flex items-center gap-3">
+              <div className="p-3 rounded-full bg-success/15">
+                <DollarSign className="h-6 w-6 text-success" />
+              </div>
+              <div>
+                <CardTitle className="text-3xl text-success">
                    {formatCurrency(totalAvailable)}
                  </CardTitle>
                  <CardDescription>Total available for payout</CardDescription>
@@ -112,7 +112,7 @@
          <Card>
            <CardHeader>
              <CardTitle className="flex items-center gap-2">
-               <CheckCircle className="h-5 w-5 text-green-500" />
+              <CheckCircle className="h-5 w-5 text-success" />
                Completed Payouts
              </CardTitle>
              <CardDescription>Recent transfers to your bank account</CardDescription>
@@ -130,7 +130,7 @@
                          Arrived {format(new Date(payout.arrivalDate * 1000), "MMM d, yyyy")}
                        </p>
                      </div>
-                     <Badge className="bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
+                      <Badge className="bg-success/15 text-success border-transparent">
                        {payout.status}
                      </Badge>
                    </div>

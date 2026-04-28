@@ -40,10 +40,10 @@ export function OpenStatusBadge({ merchantId, vetId }: Props) {
       className={
         isOpen
           ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/30 dark:text-emerald-400"
-          : "bg-red-500/10 text-red-600 border-red-500/30 dark:text-red-400"
+          : "bg-destructive/10 text-destructive border-destructive/30 "
       }
     >
-      <span className={`w-2 h-2 rounded-full mr-1.5 ${isOpen ? "bg-emerald-500 animate-pulse" : "bg-red-500"}`} />
+      <span className={`w-2 h-2 rounded-full mr-1.5 ${isOpen ? "bg-emerald-500 animate-pulse" : "bg-destructive"}`} />
       {isOpen ? "Open Now" : "Closed"}
     </Badge>
   );

@@ -128,17 +128,17 @@ export function ReviewCampaignWidget() {
   };
 
   const getRatingColor = (rating: number) => {
-    if (rating >= 4.5) return 'text-green-500';
+    if (rating >= 4.5) return 'text-success';
     if (rating >= 4.0) return 'text-emerald-500';
-    if (rating >= 3.0) return 'text-yellow-500';
-    return 'text-red-500';
+    if (rating >= 3.0) return 'text-warning';
+    return 'text-destructive';
   };
 
   const getInsightIcon = (type: string) => {
     switch (type) {
-      case 'success': return <CheckCircle className="h-5 w-5 text-green-500" />;
-      case 'warning': return <AlertTriangle className="h-5 w-5 text-yellow-500" />;
-      case 'info': return <Info className="h-5 w-5 text-blue-500" />;
+      case 'success': return <CheckCircle className="h-5 w-5 text-success" />;
+      case 'warning': return <AlertTriangle className="h-5 w-5 text-warning" />;
+      case 'info': return <Info className="h-5 w-5 text-info" />;
       case 'opportunity': return <Lightbulb className="h-5 w-5 text-purple-500" />;
       default: return <Info className="h-5 w-5" />;
     }
@@ -146,17 +146,17 @@ export function ReviewCampaignWidget() {
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'high': return 'bg-red-500/10 text-red-500 border-red-500/20';
-      case 'medium': return 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20';
-      case 'low': return 'bg-green-500/10 text-green-500 border-green-500/20';
+      case 'high': return 'bg-destructive/10 text-destructive border-destructive/20';
+      case 'medium': return 'bg-warning/10 text-warning border-warning/20';
+      case 'low': return 'bg-success/10 text-success border-success/20';
       default: return 'bg-muted text-muted-foreground';
     }
   };
 
   const getDifficultyBadge = (difficulty: string) => {
     switch (difficulty) {
-      case 'easy': return <Badge variant="outline" className="bg-green-500/10 text-green-500 text-xs">Quick Setup</Badge>;
-      case 'moderate': return <Badge variant="outline" className="bg-yellow-500/10 text-yellow-500 text-xs">Some Setup</Badge>;
+      case 'easy': return <Badge variant="outline" className="bg-success/10 text-success text-xs">Quick Setup</Badge>;
+      case 'moderate': return <Badge variant="outline" className="bg-warning/10 text-warning text-xs">Some Setup</Badge>;
       case 'complex': return <Badge variant="outline" className="bg-purple-500/10 text-purple-500 text-xs">Advanced</Badge>;
       default: return null;
     }
@@ -164,9 +164,9 @@ export function ReviewCampaignWidget() {
 
   const getSentimentIcon = (sentiment: string) => {
     switch (sentiment) {
-      case 'positive': return <ThumbsUp className="h-4 w-4 text-green-500" />;
-      case 'negative': return <ThumbsDown className="h-4 w-4 text-red-500" />;
-      default: return <Minus className="h-4 w-4 text-yellow-500" />;
+      case 'positive': return <ThumbsUp className="h-4 w-4 text-success" />;
+      case 'negative': return <ThumbsDown className="h-4 w-4 text-destructive" />;
+      default: return <Minus className="h-4 w-4 text-warning" />;
     }
   };
 
@@ -235,7 +235,7 @@ export function ReviewCampaignWidget() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <GradientCard gradient>
           <div className="flex items-center gap-3">
-            <div className="p-3 rounded-xl bg-yellow-500/10"><Star className="h-5 w-5 text-yellow-500" /></div>
+            <div className="p-3 rounded-xl bg-warning/10"><Star className="h-5 w-5 text-warning" /></div>
             <div>
               <p className="text-sm text-muted-foreground">Avg Rating</p>
               <p className={`text-2xl font-bold ${getRatingColor(metrics.averageRating)}`}>
@@ -255,7 +255,7 @@ export function ReviewCampaignWidget() {
         </GradientCard>
         <GradientCard gradient>
           <div className="flex items-center gap-3">
-            <div className="p-3 rounded-xl bg-green-500/10"><Target className="h-5 w-5 text-green-500" /></div>
+            <div className="p-3 rounded-xl bg-success/10"><Target className="h-5 w-5 text-success" /></div>
             <div>
               <p className="text-sm text-muted-foreground">Review Rate</p>
               <p className="text-2xl font-bold">{metrics.reviewRate}%</p>
@@ -289,7 +289,7 @@ export function ReviewCampaignWidget() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Star className="h-5 w-5 text-yellow-500" />
+                  <Star className="h-5 w-5 text-warning" />
                   Rating Distribution
                 </CardTitle>
               </CardHeader>
@@ -308,7 +308,7 @@ export function ReviewCampaignWidget() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <ThumbsUp className="h-5 w-5 text-green-500" />
+                  <ThumbsUp className="h-5 w-5 text-success" />
                   Sentiment Analysis
                 </CardTitle>
               </CardHeader>
@@ -360,11 +360,11 @@ export function ReviewCampaignWidget() {
                   <div className="text-sm text-muted-foreground">Active Templates</div>
                 </div>
                 <div className="text-center p-4 bg-muted/50 rounded-lg">
-                  <div className="text-2xl font-bold text-blue-500">{campaignStats.emailsSent}</div>
+                  <div className="text-2xl font-bold text-info">{campaignStats.emailsSent}</div>
                   <div className="text-sm text-muted-foreground">Emails Sent</div>
                 </div>
                 <div className="text-center p-4 bg-muted/50 rounded-lg">
-                  <div className="text-2xl font-bold text-green-500">{campaignStats.clickRate}%</div>
+                  <div className="text-2xl font-bold text-success">{campaignStats.clickRate}%</div>
                   <div className="text-sm text-muted-foreground">Click Rate</div>
                 </div>
                 <div className="text-center p-4 bg-muted/50 rounded-lg">
@@ -394,7 +394,7 @@ export function ReviewCampaignWidget() {
                   {campaignSuggestions.map((campaign) => (
                     <div 
                       key={campaign.id} 
-                      className={`p-4 rounded-lg border ${campaign.status === 'active' ? 'bg-green-500/5 border-green-500/20' : 'bg-card'}`}
+                      className={`p-4 rounded-lg border ${campaign.status === 'active' ? 'bg-success/5 border-success/20' : 'bg-card'}`}
                     >
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1">
@@ -413,13 +413,13 @@ export function ReviewCampaignWidget() {
                           <p className="text-sm text-muted-foreground mb-2">
                             {campaign.description}
                           </p>
-                          <div className="flex items-center gap-1 text-sm text-green-600">
+                          <div className="flex items-center gap-1 text-sm text-success">
                             <TrendingUp className="h-4 w-4" />
                             <span>Expected: {campaign.expectedImpact}</span>
                           </div>
                         </div>
                         {campaign.status === 'active' ? (
-                          <CheckCircle className="h-6 w-6 text-green-500 shrink-0" />
+                          <CheckCircle className="h-6 w-6 text-success shrink-0" />
                         ) : (
                           <Button size="sm" variant="outline">
                             Enable
@@ -448,7 +448,7 @@ export function ReviewCampaignWidget() {
                   <div className="text-sm text-muted-foreground">Avg Response Time</div>
                 </div>
                 <div className="text-center p-4 bg-muted/50 rounded-lg">
-                  <div className="text-2xl font-bold text-green-500">{responseMetrics.responseRate}%</div>
+                  <div className="text-2xl font-bold text-success">{responseMetrics.responseRate}%</div>
                   <div className="text-sm text-muted-foreground">Response Rate</div>
                 </div>
                 <div className="text-center p-4 bg-muted/50 rounded-lg">
@@ -490,7 +490,7 @@ export function ReviewCampaignWidget() {
                                 {[1, 2, 3, 4, 5].map((star) => (
                                   <Star
                                     key={star}
-                                    className={`h-4 w-4 ${star <= review.rating ? 'text-yellow-500 fill-yellow-500' : 'text-muted'}`}
+                                    className={`h-4 w-4 ${star <= review.rating ? 'text-warning fill-yellow-500' : 'text-muted'}`}
                                   />
                                 ))}
                               </div>
@@ -533,10 +533,10 @@ export function ReviewCampaignWidget() {
                   <div 
                     key={idx} 
                     className={`p-4 rounded-lg border-l-4 ${
-                      insight.type === 'success' ? 'border-l-green-500 bg-green-500/5' :
-                      insight.type === 'warning' ? 'border-l-yellow-500 bg-yellow-500/5' :
+                      insight.type === 'success' ? 'border-l-green-500 bg-success/5' :
+                      insight.type === 'warning' ? 'border-l-yellow-500 bg-warning/5' :
                       insight.type === 'opportunity' ? 'border-l-purple-500 bg-purple-500/5' :
-                      'border-l-blue-500 bg-blue-500/5'
+                      'border-l-blue-500 bg-info/5'
                     }`}
                   >
                     <div className="flex items-start gap-3">

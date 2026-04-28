@@ -269,8 +269,8 @@ const MerchantScheduling = () => {
           </GradientCard>
           <GradientCard className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-yellow-500/10 rounded-lg">
-                <Clock className="w-5 h-5 text-yellow-500" />
+              <div className="p-2 bg-warning/10 rounded-lg">
+                <Clock className="w-5 h-5 text-warning" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{pendingBookings}</p>
@@ -280,8 +280,8 @@ const MerchantScheduling = () => {
           </GradientCard>
           <GradientCard className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-500/10 rounded-lg">
-                <Users className="w-5 h-5 text-green-500" />
+              <div className="p-2 bg-success/10 rounded-lg">
+                <Users className="w-5 h-5 text-success" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{bookings.filter(b => b.status === 'completed').length}</p>
@@ -292,8 +292,8 @@ const MerchantScheduling = () => {
           {/* Flash Sales Active Stat */}
           <GradientCard className="p-4 md:col-span-1 col-span-2">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-amber-500/10 rounded-lg">
-                <Zap className="w-5 h-5 text-amber-500" />
+              <div className="p-2 bg-warning/10 rounded-lg">
+                <Zap className="w-5 h-5 text-warning" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{services.filter(s => isFlashSaleActive(s)).length}</p>

@@ -193,8 +193,8 @@ export function CohortAnalysisReport() {
 
         <GradientCard gradient>
           <div className="flex items-center gap-3">
-            <div className="p-3 rounded-xl bg-green-500/10">
-              <DollarSign className="h-5 w-5 text-green-500" />
+            <div className="p-3 rounded-xl bg-success/10">
+              <DollarSign className="h-5 w-5 text-success" />
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Avg Lifetime Value</p>
@@ -205,8 +205,8 @@ export function CohortAnalysisReport() {
 
         <GradientCard gradient>
           <div className="flex items-center gap-3">
-            <div className="p-3 rounded-xl bg-blue-500/10">
-              <Activity className="h-5 w-5 text-blue-500" />
+            <div className="p-3 rounded-xl bg-info/10">
+              <Activity className="h-5 w-5 text-info" />
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Avg Order Value</p>
@@ -349,7 +349,7 @@ export function CohortAnalysisReport() {
                           <td className="py-3 px-2 text-right">${cohort.avg_ltv.toFixed(2)}</td>
                           <td className="py-3 px-2 text-right">${cohort.avg_aov.toFixed(2)}</td>
                           <td className="py-3 px-2 text-right">
-                            <span className={cohort.retention_rate >= 50 ? 'text-green-500' : cohort.retention_rate >= 25 ? 'text-yellow-500' : 'text-red-500'}>
+                            <span className={cohort.retention_rate >= 50 ? 'text-success' : cohort.retention_rate >= 25 ? 'text-warning' : 'text-destructive'}>
                               {cohort.retention_rate.toFixed(1)}%
                             </span>
                           </td>
@@ -401,9 +401,9 @@ export function CohortAnalysisReport() {
                             <td key={i} className="py-3 px-2 text-center">
                               <span 
                                 className={`inline-block px-2 py-1 rounded text-xs font-medium ${
-                                  pct >= 70 ? 'bg-green-500/20 text-green-500' :
-                                  pct >= 40 ? 'bg-yellow-500/20 text-yellow-500' :
-                                  pct > 0 ? 'bg-red-500/20 text-red-500' :
+                                  pct >= 70 ? 'bg-success/20 text-success' :
+                                  pct >= 40 ? 'bg-warning/20 text-warning' :
+                                  pct > 0 ? 'bg-destructive/20 text-destructive' :
                                   'bg-muted text-muted-foreground'
                                 }`}
                               >
@@ -576,8 +576,8 @@ export function CohortAnalysisReport() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/20">
-                  <h4 className="font-medium text-green-500 mb-2">Strengths</h4>
+                <div className="p-4 rounded-lg bg-success/10 border border-success/20">
+                  <h4 className="font-medium text-success mb-2">Strengths</h4>
                   <ul className="text-sm space-y-1 text-muted-foreground">
                     {summary.overall_retention_rate >= 30 && (
                       <li>• Good customer retention rate ({summary.overall_retention_rate}%)</li>
@@ -594,8 +594,8 @@ export function CohortAnalysisReport() {
                   </ul>
                 </div>
 
-                <div className="p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
-                  <h4 className="font-medium text-yellow-500 mb-2">Opportunities</h4>
+                <div className="p-4 rounded-lg bg-warning/10 border border-warning/20">
+                  <h4 className="font-medium text-warning mb-2">Opportunities</h4>
                   <ul className="text-sm space-y-1 text-muted-foreground">
                     {summary.overall_retention_rate < 30 && (
                       <li>• Improve retention with loyalty programs</li>

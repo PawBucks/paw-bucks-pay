@@ -206,7 +206,7 @@ export default function MerchantAnalytics() {
                         </div>
                       </div>
                       {isActive && (
-                        <Badge className="bg-green-500">
+                        <Badge className="bg-success text-success-foreground">
                           <Check className="h-3 w-3 mr-1" />
                           Active
                         </Badge>
