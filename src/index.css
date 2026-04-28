@@ -158,7 +158,7 @@
   
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'DM Sans', 'Inter', system-ui, sans-serif;
     font-feature-settings: "kern" 1, "liga" 1, "cv01" 1;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
@@ -172,10 +172,11 @@
     min-height: 100dvh;
   }
   
-  /* Premium typography for headings */
+  /* Editorial typography for headings */
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Poppins', 'Inter', system-ui, sans-serif;
-    letter-spacing: -0.02em;
+    font-family: 'Playfair Display', 'DM Sans', 'Inter', Georgia, serif;
+    letter-spacing: -0.015em;
+    font-weight: 700;
   }
   
   /* Focus visible improvements for accessibility */
