@@ -119,8 +119,8 @@ export function SmartReceiptScanner({ open, onOpenChange, onDataExtracted }: Sma
   };
 
   const confidenceColors = {
-    high: 'text-success bg-green-50 border-success/30',
-    medium: 'text-warning bg-yellow-50 border-warning/30',
+    high: 'text-success bg-success/10 border-success/30',
+    medium: 'text-warning bg-warning/10 border-warning/30',
     low: 'text-destructive bg-red-50 border-destructive/30'
   };
 

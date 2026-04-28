@@ -269,7 +269,7 @@ export function MerchantEarningsTab() {
                   <div className="flex flex-col items-end gap-1">
                     <Badge 
                       variant={payout.status === "paid" ? "default" : "secondary"}
-                      className={payout.status === "paid" ? "bg-green-100 text-success" : ""}
+                      className={payout.status === "paid" ? "bg-success/15 text-success" : ""}
                     >
                       {payout.status === "in_transit" ? "In Transit" : payout.status}
                     </Badge>

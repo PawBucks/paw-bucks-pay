@@ -413,7 +413,7 @@ export function HomeOfficeCalculator() {
             )}
 
             {spaceType === 'storage' && (
-              <Alert className="border-success/30 bg-green-50 text-green-800">
+              <Alert className="border-success/30 bg-success/10 text-green-800">
                 <CheckCircle2 className="h-4 w-4 text-success" />
                 <AlertTitle>Storage Exception</AlertTitle>
                 <AlertDescription>
@@ -441,7 +441,7 @@ export function HomeOfficeCalculator() {
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-sm font-medium">Regular Method</CardTitle>
                     {result.recommendedMethod === 'regular' && (
-                      <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">
+                      <span className="text-xs bg-success/15 text-green-800 px-2 py-0.5 rounded-full">
                         Recommended
                       </span>
                     )}
@@ -470,7 +470,7 @@ export function HomeOfficeCalculator() {
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-sm font-medium">Simplified Method</CardTitle>
                     {result.recommendedMethod === 'simplified' && (
-                      <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">
+                      <span className="text-xs bg-success/15 text-green-800 px-2 py-0.5 rounded-full">
                         Recommended
                       </span>
                     )}

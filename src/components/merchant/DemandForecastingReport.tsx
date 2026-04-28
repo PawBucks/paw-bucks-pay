@@ -473,7 +473,7 @@ export function DemandForecastingReport() {
                         <p className="text-sm text-muted-foreground mb-2">{rec.recommendation}</p>
                         <div className="flex items-center gap-2 text-sm">
                           <Lightbulb className="h-4 w-4 text-warning" />
-                          <span className="text-warning dark:text-yellow-400">{rec.impact}</span>
+                          <span className="text-warning">{rec.impact}</span>
                         </div>
                       </div>
                     </div>

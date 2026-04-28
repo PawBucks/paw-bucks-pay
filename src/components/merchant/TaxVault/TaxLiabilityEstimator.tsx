@@ -446,7 +446,7 @@ export function TaxLiabilityEstimator({ merchantId, taxYear }: TaxLiabilityEstim
         <CardContent>
           <div className="space-y-4">
             {/* Gross Income */}
-            <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-100">
+            <div className="flex items-center justify-between p-3 bg-success/10 rounded-lg border border-success/30">
               <div className="flex items-center gap-3">
                 <TrendingUp className="h-5 w-5 text-success" />
                 <div>
@@ -512,7 +512,7 @@ export function TaxLiabilityEstimator({ merchantId, taxYear }: TaxLiabilityEstim
 
             {/* Tax Savings */}
             {taxSavingsFromDeductions > 0 && (
-              <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-100">
+              <div className="flex items-center justify-between p-3 bg-success/10 rounded-lg border border-success/30">
                 <div className="flex items-center gap-3">
                   <CheckCircle2 className="h-5 w-5 text-success" />
                   <div>

@@ -358,7 +358,7 @@ export function AccountantCollaboration({ merchantId, businessName }: Accountant
 
       {/* Active Access */}
       {activeInvitations.length > 0 && (
-        <Alert className="border-success/30 bg-green-50">
+        <Alert className="border-success/30 bg-success/10">
           <Shield className="h-4 w-4 text-success" />
           <AlertTitle className="text-green-800">Active Accountant Access</AlertTitle>
           <AlertDescription className="text-success">

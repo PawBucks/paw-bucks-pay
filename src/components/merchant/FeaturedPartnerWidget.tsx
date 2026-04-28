@@ -109,9 +109,9 @@ const tierIcons = {
 };
 
 const priorityColors = {
-  high: 'bg-red-100 text-destructive border-destructive/30',
-  medium: 'bg-yellow-100 text-warning border-warning/30',
-  low: 'bg-green-100 text-success border-success/30',
+  high: 'bg-destructive/15 text-destructive border-destructive/30',
+  medium: 'bg-warning/15 text-warning border-warning/30',
+  low: 'bg-success/15 text-success border-success/30',
 };
 
 const categoryIcons = {
@@ -364,7 +364,7 @@ export function FeaturedPartnerWidget() {
                     </div>
                     <Badge 
                       variant={benefit.status === 'available' ? 'default' : 'secondary'}
-                      className={benefit.status === 'pending' ? 'bg-yellow-100 text-warning' : ''}
+                      className={benefit.status === 'pending' ? 'bg-warning/15 text-warning' : ''}
                     >
                       {benefit.status}
                     </Badge>
