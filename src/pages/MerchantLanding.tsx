@@ -466,6 +466,18 @@ const MerchantLanding = () => {
           </div>
         </section>
 
+        {/* PREMIUM MERCHANTS SHOWCASE */}
+        <section className="ml-section" style={{ background: "var(--section-alt)" }}>
+          <div className="ml-eyebrow">Premium Spotlight</div>
+          <h2 className="ml-section-title">See where premium merchants get featured.</h2>
+          <p className="ml-section-sub">
+            Upgraded merchants rotate through our Premium Spotlight across the app — placed in front of pet owners actively looking to spend.
+          </p>
+          <div style={{ marginTop: "2.5rem" }}>
+            <PremiumMerchantsBanner title="Featured Premium Merchants" />
+          </div>
+        </section>
+
         {/* FAQ */}
         <section className="ml-section">
           <div className="ml-eyebrow">FAQ</div>
