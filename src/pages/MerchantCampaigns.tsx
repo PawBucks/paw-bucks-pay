@@ -274,10 +274,10 @@ export default function MerchantCampaigns() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "sent": return <Badge className="bg-green-500/10 text-green-600 border-green-200"><CheckCircle className="w-3 h-3 mr-1" />Sent</Badge>;
-      case "partial": return <Badge className="bg-amber-500/10 text-amber-600 border-amber-200"><Clock className="w-3 h-3 mr-1" />Partial</Badge>;
-      case "failed": return <Badge className="bg-red-500/10 text-red-600 border-red-200"><XCircle className="w-3 h-3 mr-1" />Failed</Badge>;
-      case "sending": return <Badge className="bg-blue-500/10 text-blue-600 border-blue-200"><Send className="w-3 h-3 mr-1" />Sending</Badge>;
+      case "sent": return <Badge className="bg-success/10 text-success border-success/30"><CheckCircle className="w-3 h-3 mr-1" />Sent</Badge>;
+      case "partial": return <Badge className="bg-warning/10 text-warning border-warning/30"><Clock className="w-3 h-3 mr-1" />Partial</Badge>;
+      case "failed": return <Badge className="bg-destructive/10 text-destructive border-destructive/30"><XCircle className="w-3 h-3 mr-1" />Failed</Badge>;
+      case "sending": return <Badge className="bg-info/10 text-info border-info/30"><Send className="w-3 h-3 mr-1" />Sending</Badge>;
       default: return <Badge variant="outline">{status}</Badge>;
     }
   };

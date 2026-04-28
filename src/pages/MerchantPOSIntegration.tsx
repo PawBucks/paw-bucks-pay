@@ -321,9 +321,9 @@ export default function MerchantPOSIntegration() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "rewarded":
-        return <Badge className="bg-green-500"><CheckCircle className="w-3 h-3 mr-1" />Rewarded</Badge>;
+        return <Badge className="bg-success text-success-foreground"><CheckCircle className="w-3 h-3 mr-1" />Rewarded</Badge>;
       case "matched":
-        return <Badge className="bg-blue-500"><CheckCircle className="w-3 h-3 mr-1" />Matched</Badge>;
+        return <Badge className="bg-info text-info-foreground"><CheckCircle className="w-3 h-3 mr-1" />Matched</Badge>;
       case "pending":
         return <Badge variant="secondary"><Clock className="w-3 h-3 mr-1" />Pending</Badge>;
       case "failed":

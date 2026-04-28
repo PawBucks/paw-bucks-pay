@@ -489,8 +489,8 @@ const MerchantProfile = memo(() => {
                         rel="noopener noreferrer"
                         className="flex items-center gap-3 group py-1"
                       >
-                        <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center flex-shrink-0">
-                          <MapPin className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                        <div className="w-10 h-10 rounded-full bg-info/10 flex items-center justify-center flex-shrink-0">
+                          <MapPin className="w-4 h-4 text-info" />
                         </div>
                         <div>
                           <p className="text-sm font-medium group-hover:text-primary transition-colors">{merchant.address}</p>
