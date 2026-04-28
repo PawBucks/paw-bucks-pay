@@ -435,28 +435,31 @@ const MerchantLanding = () => {
           <div className="ml-math-inner">
             <div>
               <div className="ml-eyebrow">The Math</div>
-              <h2 className="ml-section-title">Transparent, predictable pricing.</h2>
-              <p className="ml-section-sub">No hidden fees. No surprise deductions. Here&apos;s exactly what a $100 sale looks like.</p>
+              <h2 className="ml-section-title">3% on USD revenue.<br/>100% transparent.</h2>
+              <p className="ml-section-sub">Compare PawBucks to what you&rsquo;re probably already paying to acquire clients.</p>
               <table className="ml-math-table">
                 <tbody>
-                  <tr><td>Customer pays</td><td>$100.00</td></tr>
-                  <tr><td>Network fee (3%)</td><td>−$3.00</td></tr>
-                  <tr><td>Stripe processing</td><td>−$3.20</td></tr>
-                  <tr className="total"><td>You receive</td><td>$93.80</td></tr>
+                  <tr><td>Google Ads (avg. pet industry CPC)</td><td>$2&ndash;$6 per click</td></tr>
+                  <tr><td>Yelp advertising</td><td>$300&ndash;$1,000/mo</td></tr>
+                  <tr><td>Groupon / deal sites</td><td>30&ndash;50% of revenue</td></tr>
+                  <tr><td>Instagram / Facebook ads</td><td>Pay upfront, no guarantee</td></tr>
+                  <tr className="total"><td>PawBucks success fee</td><td>3% of USD — always</td></tr>
                 </tbody>
               </table>
             </div>
             <div className="ml-math-callout">
-              <div className="ml-math-callout-label">PawBucks Redemptions</div>
-              <div className="ml-math-big">0%</div>
+              <div className="ml-math-callout-label">If you process</div>
+              <div className="ml-math-big">$50k</div>
               <div className="ml-math-caption">
-                When customers redeem PawBucks, you pay <strong>zero network fees</strong> on that portion.
-                You&apos;re reimbursed 100%.
+                in USD revenue through PawBucks over a year, your total success fee is{" "}
+                <strong style={{ color: "var(--teal-dark)" }}>$1,500</strong>. Clients who offset
+                with PawBucks rewards reduce your fee further.
               </div>
-              <div className="ml-math-callout-label">Customer Retention</div>
-              <div className="ml-math-big">+38%</div>
-              <div className="ml-math-caption">
-                Average increase in repeat-visit rate for merchants using PawBucks rewards.
+              <div className="ml-math-divider" />
+              <div className="ml-math-callout-label">Compare that to</div>
+              <div style={{ fontSize: "0.875rem", color: "var(--muted)", lineHeight: 1.7 }}>
+                A $500/mo Yelp ad budget ={" "}
+                <strong style={{ color: "var(--ink)" }}>$6,000/year</strong> — regardless of results.
               </div>
             </div>
           </div>
