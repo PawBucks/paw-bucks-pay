@@ -167,7 +167,7 @@ const MerchantPawBucksWallet = () => {
         <GradientCard gradient className="mb-6">
           <div className="text-center">
             <div className="flex items-center justify-center gap-2 mb-2">
-              <Coins className="w-8 h-8 text-yellow-400" />
+              <Coins className="w-8 h-8 text-warning" />
               <p className="text-sm text-muted-foreground">Current Balance</p>
             </div>
             <p className="text-5xl font-bold mb-2">{Formatters.number(balance)}</p>
@@ -269,7 +269,7 @@ const MerchantPawBucksWallet = () => {
                   </div>
                   <span className={`font-semibold ${
                     activity.source === 'refund' ? 'text-destructive' :
-                    activity.type === 'earn' ? 'text-green-500' : 'text-blue-500'
+                    activity.type === 'earn' ? 'text-success' : 'text-info'
                   }`}>
                     {activity.type === 'earn' ? '+' : '-'}{Formatters.number(Math.abs(activity.amount))}
                   </span>

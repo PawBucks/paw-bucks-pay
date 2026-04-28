@@ -486,7 +486,7 @@ export default function MerchantPOSIntegration() {
                           <div className="flex items-center gap-2">
                             <span className="font-medium">{integration.name}</span>
                             {integration.is_active ? (
-                              <Badge variant="outline" className="text-green-600 border-green-300">
+                              <Badge variant="outline" className="text-success border-success/40">
                                 <Unlock className="w-3 h-3 mr-1" />Active
                               </Badge>
                             ) : (
@@ -565,7 +565,7 @@ export default function MerchantPOSIntegration() {
                             <div className="flex items-center gap-2">
                               <span className="font-medium">{webhook.name}</span>
                               {webhook.is_active ? (
-                                <Badge variant="outline" className="text-green-600 border-green-300">Active</Badge>
+                                <Badge variant="outline" className="text-success border-success/40">Active</Badge>
                               ) : (
                                 <Badge variant="secondary">Disabled</Badge>
                               )}
@@ -618,7 +618,7 @@ export default function MerchantPOSIntegration() {
                       <div key={log.id} className="flex items-center justify-between p-3 border rounded-lg text-sm">
                         <div className="flex items-center gap-3">
                           {log.success ? (
-                            <CheckCircle className="w-4 h-4 text-green-500" />
+                            <CheckCircle className="w-4 h-4 text-success" />
                           ) : (
                             <AlertTriangle className="w-4 h-4 text-destructive" />
                           )}
@@ -682,7 +682,7 @@ export default function MerchantPOSIntegration() {
                         </div>
                         {tx.pawbucks_awarded && tx.pawbucks_awarded > 0 && (
                           <div className="text-right">
-                            <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+                            <Badge variant="outline" className="bg-amber-50 text-warning border-amber-200">
                               +{tx.pawbucks_awarded} PawBucks
                             </Badge>
                           </div>
@@ -857,7 +857,7 @@ x-api-key: pk_live_XXXXXXXX...`}
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-amber-500" />
+              <AlertTriangle className="h-5 w-5 text-warning" />
               Save Your API Key
             </DialogTitle>
             <DialogDescription>

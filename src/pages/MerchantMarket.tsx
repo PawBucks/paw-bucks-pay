@@ -446,7 +446,7 @@ const MerchantMarket = () => {
                         variant={scarcityMap[service.id].availableSlots === 0 ? "destructive" : "secondary"}
                         className={cn(
                           "text-xs font-medium",
-                          scarcityMap[service.id].availableSlots <= 1 && scarcityMap[service.id].availableSlots > 0 && "bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30"
+                          scarcityMap[service.id].availableSlots <= 1 && scarcityMap[service.id].availableSlots > 0 && "bg-warning/15 text-warning dark:text-amber-400 border-warning/30"
                         )}
                       >
                         <MapPin className="w-3 h-3 mr-1" />

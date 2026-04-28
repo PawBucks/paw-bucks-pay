@@ -42,11 +42,11 @@ import { BrandJoinRequestsInbox } from "@/components/brand/BrandJoinRequestsInbo
 
 const statusConfig: Record<string, { color: string; label: string; emoji: string }> = {
   draft: { color: "bg-muted text-muted-foreground", label: "Draft", emoji: "📝" },
-  pending_payment: { color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400", label: "Pending Payment", emoji: "💳" },
+  pending_payment: { color: "bg-warning/15 text-warning", label: "Pending Payment", emoji: "💳" },
   active: { color: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400", label: "Active", emoji: "🟢" },
   paused: { color: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400", label: "Paused", emoji: "⏸️" },
-  completed: { color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400", label: "Completed", emoji: "✅" },
-  expired: { color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400", label: "Expired", emoji: "⏰" },
+  completed: { color: "bg-info/15 text-info", label: "Completed", emoji: "✅" },
+  expired: { color: "bg-destructive/15 text-destructive", label: "Expired", emoji: "⏰" },
 };
 
 const BrandDashboard = () => {
@@ -340,7 +340,7 @@ const BrandDashboard = () => {
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-base flex items-center gap-2">
-                  <PieChart className="h-4 w-4 text-blue-500" /> Redemption
+                  <PieChart className="h-4 w-4 text-info" /> Redemption
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -648,8 +648,8 @@ const BrandDashboard = () => {
             </Card>
             <Card className="cursor-pointer hover:border-primary transition-all" onClick={() => fundingCampaign && handleRequestInvoice(fundingCampaign.id)}>
               <CardContent className="py-4 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
-                  <Calendar className="h-5 w-5 text-amber-600" />
+                <div className="w-10 h-10 rounded-lg bg-warning/10 flex items-center justify-center">
+                  <Calendar className="h-5 w-5 text-warning" />
                 </div>
                 <div className="flex-1">
                   <p className="font-semibold text-sm">Request Invoice (Net 14)</p>

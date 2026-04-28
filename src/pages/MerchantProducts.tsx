@@ -758,7 +758,7 @@ const MerchantProducts = () => {
 
               {listInPetStore && (
                 <div className="pt-2 border-t space-y-3">
-                  <div className="flex items-center gap-2 text-sm text-amber-600 dark:text-amber-400">
+                  <div className="flex items-center gap-2 text-sm text-warning dark:text-amber-400">
                     <Coins className="h-4 w-4" />
                     <span>Products in Pet Store must accept both USD and PawBucks</span>
                   </div>

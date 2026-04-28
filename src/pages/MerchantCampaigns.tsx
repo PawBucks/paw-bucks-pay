@@ -351,8 +351,8 @@ export default function MerchantCampaigns() {
                             <span className="flex items-center gap-1">
                               <Users className="w-3 h-3" />{c.recipient_count} recipients
                             </span>
-                            <span className="text-green-600">{c.sent_count} sent</span>
-                            {c.failed_count > 0 && <span className="text-red-500">{c.failed_count} failed</span>}
+                            <span className="text-success">{c.sent_count} sent</span>
+                            {c.failed_count > 0 && <span className="text-destructive">{c.failed_count} failed</span>}
                             <span>{new Date(c.created_at).toLocaleDateString()}</span>
                           </div>
                         </div>
@@ -392,7 +392,7 @@ export default function MerchantCampaigns() {
                   ))}
                 </div>
                 {channel === "sms" && !hasTwilio && (
-                  <p className="text-xs text-amber-600 mt-1">
+                  <p className="text-xs text-warning mt-1">
                     ⚠️ Configure your Twilio account in SMS Settings first
                   </p>
                 )}
