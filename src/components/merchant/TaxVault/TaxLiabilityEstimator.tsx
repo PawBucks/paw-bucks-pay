@@ -425,8 +425,8 @@ export function TaxLiabilityEstimator({ merchantId, taxYear }: TaxLiabilityEstim
             
             <Alert className="border-warning/30 bg-warning/10">
               <AlertTriangle className="h-4 w-4 text-warning" />
-              <AlertTitle className="text-amber-800 text-sm">Avoid Penalties</AlertTitle>
-              <AlertDescription className="text-amber-700 text-xs">
+              <AlertTitle className="text-warning text-sm">Avoid Penalties</AlertTitle>
+              <AlertDescription className="text-warning text-xs">
                 Pay quarterly estimates to avoid underpayment penalties. 
                 Safe harbor: Pay 100% of last year's tax or 90% of this year's.
               </AlertDescription>
@@ -450,7 +450,7 @@ export function TaxLiabilityEstimator({ merchantId, taxYear }: TaxLiabilityEstim
               <div className="flex items-center gap-3">
                 <TrendingUp className="h-5 w-5 text-success" />
                 <div>
-                  <p className="font-medium text-green-900">Gross Income (Platform Sales)</p>
+                  <p className="font-medium text-success">Gross Income (Platform Sales)</p>
                   <p className="text-xs text-success">Total sales through PawBucks</p>
                 </div>
               </div>
@@ -497,15 +497,15 @@ export function TaxLiabilityEstimator({ merchantId, taxYear }: TaxLiabilityEstim
             </div>
 
             {/* Net Profit */}
-            <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-100 mt-4">
+            <div className="flex items-center justify-between p-3 bg-info/10 rounded-lg border border-info/30 mt-4">
               <div className="flex items-center gap-3">
                 <PiggyBank className="h-5 w-5 text-info" />
                 <div>
-                  <p className="font-medium text-blue-900">Net Profit (Taxable)</p>
-                  <p className="text-xs text-blue-700">Schedule C Line 31</p>
+                  <p className="font-medium text-info">Net Profit (Taxable)</p>
+                  <p className="text-xs text-info">Schedule C Line 31</p>
                 </div>
               </div>
-              <span className="text-xl font-bold text-blue-700">
+              <span className="text-xl font-bold text-info">
                 ${netProfit.toFixed(2)}
               </span>
             </div>
@@ -516,7 +516,7 @@ export function TaxLiabilityEstimator({ merchantId, taxYear }: TaxLiabilityEstim
                 <div className="flex items-center gap-3">
                   <CheckCircle2 className="h-5 w-5 text-success" />
                   <div>
-                    <p className="font-medium text-green-900">Estimated Tax Savings</p>
+                    <p className="font-medium text-success">Estimated Tax Savings</p>
                     <p className="text-xs text-success">From logged deductions</p>
                   </div>
                 </div>

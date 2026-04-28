@@ -360,7 +360,7 @@ export function AccountantCollaboration({ merchantId, businessName }: Accountant
       {activeInvitations.length > 0 && (
         <Alert className="border-success/30 bg-success/10">
           <Shield className="h-4 w-4 text-success" />
-          <AlertTitle className="text-green-800">Active Accountant Access</AlertTitle>
+          <AlertTitle className="text-success">Active Accountant Access</AlertTitle>
           <AlertDescription className="text-success">
             {activeInvitations.length} accountant(s) currently have access to your tax data
           </AlertDescription>

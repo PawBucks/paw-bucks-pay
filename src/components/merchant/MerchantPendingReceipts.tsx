@@ -159,7 +159,7 @@ export const MerchantPendingReceipts = ({ merchantId }: MerchantPendingReceiptsP
             </TableHeader>
             <TableBody>
               {receipts.map((r) => (
-                <TableRow key={r.id} className={r.status === "pending" && !r.confirmation_id ? "bg-warning/10/50 dark:bg-amber-950/10" : ""}>
+                <TableRow key={r.id} className={r.status === "pending" && !r.confirmation_id ? "bg-warning/5 " : ""}>
                   <TableCell className="text-sm whitespace-nowrap">
                     {format(new Date(r.created_at), "MMM d, yyyy")}
                   </TableCell>
