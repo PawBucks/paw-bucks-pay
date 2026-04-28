@@ -259,7 +259,7 @@ export function AdminInvoiceForm({ invoice, onSave, onCancel }: Props) {
                 <Select value={invoiceType} onValueChange={setInvoiceType}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="platform_fee">Platform Fee</SelectItem>
+                    <SelectItem value="platform_fee">Success Fee</SelectItem>
                     <SelectItem value="subscription">Subscription</SelectItem>
                     <SelectItem value="ad_hoc">Ad-hoc</SelectItem>
                     <SelectItem value="commission">Commission</SelectItem>
@@ -292,7 +292,7 @@ export function AdminInvoiceForm({ invoice, onSave, onCancel }: Props) {
 
             <div className="space-y-1.5">
               <Label>Title / Subject</Label>
-              <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g., Monthly Platform Fees - March 2026" />
+              <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g., Monthly Success Fees - March 2026" />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
