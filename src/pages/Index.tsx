@@ -517,11 +517,6 @@ const Index = () => {
               <span className="pl-stat-num">$0</span>
               <span className="pl-stat-label">to join</span>
             </div>
-            <div className="pl-stat-divider" />
-            <div className="pl-stat">
-              <span className="pl-stat-num">100%</span>
-              <span className="pl-stat-label">redeemable</span>
-            </div>
           </div>
         </div>
 
@@ -538,14 +533,14 @@ const Index = () => {
             <div className="pl-tier-row featured">
               <div>
                 <div className="pl-tier-name">PawPass</div>
-                <div className="pl-tier-price">$4.99 / mo</div>
+                <div className="pl-tier-price">$10 / mo</div>
               </div>
               <div className="pl-tier-earn">20<span>PB / $1</span></div>
             </div>
             <div className="pl-tier-row">
               <div>
                 <div className="pl-tier-name">PawPass+</div>
-                <div className="pl-tier-price">$9.99 / mo</div>
+                <div className="pl-tier-price">$20 / mo</div>
               </div>
               <div className="pl-tier-earn">30<span>PB / $1</span></div>
             </div>
@@ -580,7 +575,7 @@ const Index = () => {
           <div className="pl-step">
             <div className="pl-step-num">04</div>
             <div className="pl-step-title">Redeem for discounts</div>
-            <div className="pl-step-body">1,000 PawBucks = $1 toward your next purchase. Apply at checkout. No minimums, no expiration on promotional credits.</div>
+            <div className="pl-step-body">1,000 PawBucks = $1 toward your next purchase. Apply at checkout in seconds.</div>
           </div>
         </div>
       </section>
@@ -694,7 +689,7 @@ const Index = () => {
           <div className="pl-tier-card popular">
             <div className="pl-popular-badge">Most Popular</div>
             <div className="pl-tier-card-name">PawPass</div>
-            <div className="pl-tier-card-price">$4.99<span> / mo</span></div>
+            <div className="pl-tier-card-price">$10<span> / mo</span></div>
             <div className="pl-tier-card-earn">Earn <strong>20 PB per $1</strong> — 2× the rate</div>
             <ul className="pl-perks">
               <li><span className="pl-check">✓</span> Everything in Free</li>
@@ -707,7 +702,7 @@ const Index = () => {
 
           <div className="pl-tier-card">
             <div className="pl-tier-card-name">PawPass+</div>
-            <div className="pl-tier-card-price">$9.99<span> / mo</span></div>
+            <div className="pl-tier-card-price">$20<span> / mo</span></div>
             <div className="pl-tier-card-earn">Earn <strong>30 PB per $1</strong> — 3× the rate</div>
             <ul className="pl-perks">
               <li><span className="pl-check">✓</span> Everything in PawPass</li>
