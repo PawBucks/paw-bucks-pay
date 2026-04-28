@@ -25,6 +25,7 @@ import { UpdatePrompt } from "@/components/UpdatePrompt";
 
 import { lazyWithRetry, clearChunkReloadFlag } from "@/lib/lazyWithRetry";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { PublicOrAuthRoute } from "@/components/PublicOrAuthRoute";
 
 // Critical pages - Auth loaded immediately, Index lazy (734 lines + heavy images)
 import Auth from "./pages/Auth";
