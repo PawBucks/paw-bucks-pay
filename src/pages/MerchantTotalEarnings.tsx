@@ -126,9 +126,9 @@
  
          {/* Refunds Card */}
          {summary.refunds && summary.refunds.count > 0 && (
-           <Card className="border-red-200 bg-red-50/50 dark:bg-red-950/20">
-             <CardHeader>
-               <CardTitle className="flex items-center gap-2 text-red-700 dark:text-red-400">
+          <Card className="border-destructive/30 bg-destructive/5">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-destructive">
                  <RotateCcw className="h-5 w-5" />
                  Refunds
                </CardTitle>
@@ -138,11 +138,11 @@
                <div className="grid gap-4 md:grid-cols-2">
                  <div className="p-4 rounded-lg bg-background border">
                    <p className="text-sm text-muted-foreground mb-1">Refund Count</p>
-                   <p className="text-2xl font-bold text-red-600">{summary.refunds.count}</p>
+                  <p className="text-2xl font-bold text-destructive">{summary.refunds.count}</p>
                  </div>
                  <div className="p-4 rounded-lg bg-background border">
                    <p className="text-sm text-muted-foreground mb-1">Total Refunded</p>
-                   <p className="text-2xl font-bold text-red-600">${summary.refunds.amount.toFixed(2)}</p>
+                  <p className="text-2xl font-bold text-destructive">${summary.refunds.amount.toFixed(2)}</p>
                  </div>
                </div>
              </CardContent>
