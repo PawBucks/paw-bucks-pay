@@ -340,10 +340,10 @@ export function MerchantMarketplace({ brandId, campaigns }: MerchantMarketplaceP
 
 function StatusBadge({ status }: { status: string }) {
   const cfg: Record<string, { icon: typeof CheckCircle2; cls: string; label: string }> = {
-    accepted: { icon: CheckCircle2, cls: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400", label: "Accepted" },
-    declined: { icon: XCircle, cls: "bg-destructive/15 text-destructive dark:bg-destructive/15 dark:text-destructive", label: "Declined" },
-    pending: { icon: Clock, cls: "bg-warning/15 text-warning dark:bg-warning/30", label: "Pending" },
-    sent: { icon: Clock, cls: "bg-warning/15 text-warning dark:bg-warning/30", label: "Pending" },
+    accepted: { icon: CheckCircle2, cls: "bg-success/15 text-success", label: "Accepted" },
+    declined: { icon: XCircle, cls: "bg-destructive/15 text-destructive", label: "Declined" },
+    pending: { icon: Clock, cls: "bg-warning/15 text-warning", label: "Pending" },
+    sent: { icon: Clock, cls: "bg-warning/15 text-warning", label: "Pending" },
   };
   const c = cfg[status] || cfg.pending;
   const Icon = c.icon;
