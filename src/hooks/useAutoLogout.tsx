@@ -1,5 +1,6 @@
 import { useEffect, useRef, useCallback } from'react';
 import { supabase } from'@/integrations/supabase/client';
+import { getAuthRedirectForUser, clearUserAccessCache } from'@/lib/userAccessCache';
 
 const INACTIVITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
 
@@ -8,7 +9,15 @@ export const useAutoLogout = (isAuthenticated: boolean) => {
  const lastResetRef = useRef(0);
 
  const logout = useCallback(async () => {
- await supabase.auth.signOut();
+    const { data: { session } } = await supabase.auth.getSession();
+    const redirect = session?.user?.id
+      ? getAuthRedirectForUser(session.user.id)
+      :"/auth";
+    await supabase.auth.signOut();
+    clearUserAccessCache();
+    if (typeof window !=="undefined") {
+      window.location.href = redirect;
+    }
  }, []);
 
  const resetTimer = useCallback(() => {
