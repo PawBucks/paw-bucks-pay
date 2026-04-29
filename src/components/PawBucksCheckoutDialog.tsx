@@ -15,6 +15,12 @@ import { PawBucksInfoTooltip } from"@/components/PawBucksInfoTooltip";
 import { useSpendablePawBucks } from"@/hooks/useSpendablePawBucks";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from"@/components/ui/tooltip";
 import { PawBucksSourceSelector, type PawBucksSource } from"@/components/checkout/PawBucksSourceSelector";
+import {
+  effectivePawBucksCapPct,
+  maxPawBucksUsdForSubtotal,
+  isPromoActive,
+  type MerchantCapFields,
+} from"@/lib/pawbucksCap";
 
 // Pet Owner conversion rate: 1000 PawBucks = $1.00 (1 PawBuck = $0.001)
 const PAWBUCKS_TO_USD = 0.001;
@@ -35,6 +41,9 @@ type PawBucksCheckoutDialogProps = {
  userId: string;
  onProceed: (pawbucksToUse: number) => void;
  isLoading?: boolean;
+  /** Optional merchant cap fields (from `merchants_public`). When provided,
+   *  the slider is clamped to the merchant's effective PawBucks acceptance cap. */
+  merchantCap?: MerchantCapFields | null;
 };
 
 export const PawBucksCheckoutDialog = ({
@@ -49,6 +58,7 @@ export const PawBucksCheckoutDialog = ({
  userId,
  onProceed,
  isLoading = false,
+  merchantCap,
 }: PawBucksCheckoutDialogProps) => {
  const [pawbucksToUse, setPawbucksToUse] = useState(0);
  const [pawbucksSource, setPawbucksSource] = useState<PawBucksSource>("none");
@@ -96,11 +106,24 @@ export const PawBucksCheckoutDialog = ({
  
  // For subscriptions, ensure minimum Stripe charge
  const minStripeForSubscription = isRecurring ? MINIMUM_STRIPE_AMOUNT : 0;
- const maxPawBucksUsd = priceAmount - minStripeForSubscription;
+  const subtotalForCap = Math.max(0, priceAmount - minStripeForSubscription);
+  const capUsdMax = merchantCap
+    ? Math.min(subtotalForCap, maxPawBucksUsdForSubtotal(priceAmount, merchantCap))
+    : subtotalForCap;
+  const maxPawBucksUsd = capUsdMax;
  const maxPawBucks = Math.min(
  pawbucksBalance, 
  Math.max(0, Math.floor(maxPawBucksUsd / PAWBUCKS_TO_USD))
  );
+  const capPctActive = merchantCap ? effectivePawBucksCapPct(merchantCap) : null;
+  const promoActive = merchantCap ? isPromoActive(merchantCap) : false;
+
+  // Clamp slider when cap tightens
+  useEffect(() => {
+    if (pawbucksToUse > maxPawBucks) {
+      setPawbucksToUse(Math.max(0, maxPawBucks));
+    }
+  }, [maxPawBucks, pawbucksToUse]);
  
  const stripeAmount = Math.max(minStripeForSubscription, priceAmount - pawbucksUsdValue);
  const cashbackPawBucks = stripeAmount > 0 ? Math.round(stripeAmount * cashbackRate) : 0;
@@ -229,6 +252,18 @@ export const PawBucksCheckoutDialog = ({
  )}
  </span>
  </div>
+
+                {capPctActive != null && (
+                  <div className="flex items-center justify-between text-xs rounded-md border border-info/20 bg-info/5 px-2.5 py-1.5">
+                    <span className="text-info">
+                      Up to <strong>{capPctActive}%</strong> of subtotal in PawBucks
+                      {promoActive && <span className="ml-1 text-warning">(promo!)</span>}
+                    </span>
+                    <span className="text-muted-foreground tabular-nums">
+                      max ${capUsdMax.toFixed(2)}
+                    </span>
+                  </div>
+                )}
 
  {/* Slider instruction hint */}
  {pawbucksToUse === 0 && (

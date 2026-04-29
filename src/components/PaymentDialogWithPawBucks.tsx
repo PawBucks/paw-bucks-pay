@@ -21,6 +21,12 @@ import { getStripeForConnectedAccount } from"@/lib/stripe";
 import { TipSelector } from"@/components/checkout/TipSelector";
 import { buildAppUrl } from"@/lib/url";
 import { useQuery } from"@tanstack/react-query";
+import {
+  effectivePawBucksCapPct,
+  maxPawBucksUsdForSubtotal,
+  isPromoActive,
+  type MerchantCapFields,
+} from"@/lib/pawbucksCap";
 
 // Pet Owner conversion rate: 1000 PawBucks = $1.00 (1 PawBuck = $0.001)
 const PAWBUCKS_TO_USD = 0.001;
@@ -270,6 +276,26 @@ export const PaymentDialogWithPawBucks = ({
  enabled: !!userId,
  });
 
+  // Merchant PawBucks acceptance cap (null when feature is off)
+  const { data: merchantCap } = useQuery<MerchantCapFields | null>({
+    queryKey: ["merchant-pawbucks-cap", merchantId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("merchants_public")
+        .select(
+          "business_type, pawbucks_cap_enabled, pawbucks_cap_pct, pawbucks_promo_cap_pct, pawbucks_promo_starts_at, pawbucks_promo_ends_at"
+        )
+        .eq("id", merchantId)
+        .maybeSingle();
+      return (data as MerchantCapFields) ?? null;
+    },
+    staleTime: 1000 * 60,
+    enabled: !!merchantId && open,
+  });
+
+  const capPct = merchantCap ? effectivePawBucksCapPct(merchantCap) : null;
+  const promoActive = merchantCap ? isPromoActive(merchantCap) : false;
+
  const totalAmount = parseFloat(amount) || 0;
 
  // Pet Fund / Welcome credit applicable if merchant accepts PawBucks and meets min transaction
@@ -296,7 +322,21 @@ export const PaymentDialogWithPawBucks = ({
  const pawbucksUsdValue = pawbucksToUse * PAWBUCKS_TO_USD;
  // PawBucks only apply to the base amount; tip always goes to card
  const stripeAmount = Math.max(0, totalAmount - pawbucksUsdValue) + tipAmount;
- const maxPawbucks = Math.min(pawbucksBalance, Math.ceil(totalAmount / PAWBUCKS_TO_USD)); // Max based on base amount only
+  // Clamp to the merchant's PawBucks acceptance cap (if enabled)
+  const capUsdMax = merchantCap
+    ? maxPawBucksUsdForSubtotal(totalAmount, merchantCap)
+    : totalAmount;
+  const maxPawbucks = Math.min(
+    pawbucksBalance,
+    Math.floor(capUsdMax / PAWBUCKS_TO_USD)
+  );
+
+  // If the cap tightens below current selection, gently clamp the slider
+  useEffect(() => {
+    if (pawbucksToUse > maxPawbucks) {
+      setPawbucksToUse(Math.max(0, maxPawbucks));
+    }
+  }, [maxPawbucks, pawbucksToUse]);
 
  const handleSubmit = async (e: React.FormEvent) => {
  e.preventDefault();
@@ -510,6 +550,21 @@ export const PaymentDialogWithPawBucks = ({
  )}
  </span>
  </div>
+
+              {capPct != null && (
+                <div className="flex items-center justify-between text-xs rounded-md border border-info/20 bg-info/5 px-2.5 py-1.5">
+                  <span className="text-info">
+                    {merchantName} accepts up to <strong>{capPct}%</strong> of the
+                    subtotal in PawBucks
+                    {promoActive && (
+                      <span className="ml-1 text-warning">(promo!)</span>
+                    )}
+                  </span>
+                  <span className="text-muted-foreground tabular-nums">
+                    max ${capUsdMax.toFixed(2)}
+                  </span>
+                </div>
+              )}
 
  {/* Slider instruction hint */}
  {pawbucksToUse === 0 && (
