@@ -15,6 +15,9 @@ verify_jwt = false
 [functions.notify-vet-onboarding]
 verify_jwt = false
 
+[functions.notify-merchant-onboarding]
+verify_jwt = false
+
 [functions.bootstrap-trigger-secret]
 verify_jwt = false
 
