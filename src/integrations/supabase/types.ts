@@ -7111,6 +7111,7 @@ export type Database = {
           instagram_url: string | null
           is_paused: boolean
           is_sponsored: boolean | null
+          last_notified_status: string | null
           latitude: number | null
           linkedin_url: string | null
           logo_url: string | null
@@ -7131,6 +7132,7 @@ export type Database = {
           storefront_slug: string
           stripe_account_id: string | null
           stripe_account_status: string | null
+          submission_email_sent_at: string | null
           tos_url: string | null
           twitter_url: string | null
           updated_at: string
@@ -7166,6 +7168,7 @@ export type Database = {
           instagram_url?: string | null
           is_paused?: boolean
           is_sponsored?: boolean | null
+          last_notified_status?: string | null
           latitude?: number | null
           linkedin_url?: string | null
           logo_url?: string | null
@@ -7186,6 +7189,7 @@ export type Database = {
           storefront_slug: string
           stripe_account_id?: string | null
           stripe_account_status?: string | null
+          submission_email_sent_at?: string | null
           tos_url?: string | null
           twitter_url?: string | null
           updated_at?: string
@@ -7221,6 +7225,7 @@ export type Database = {
           instagram_url?: string | null
           is_paused?: boolean
           is_sponsored?: boolean | null
+          last_notified_status?: string | null
           latitude?: number | null
           linkedin_url?: string | null
           logo_url?: string | null
@@ -7241,6 +7246,7 @@ export type Database = {
           storefront_slug?: string
           stripe_account_id?: string | null
           stripe_account_status?: string | null
+          submission_email_sent_at?: string | null
           tos_url?: string | null
           twitter_url?: string | null
           updated_at?: string
