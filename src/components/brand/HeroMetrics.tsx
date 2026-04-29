@@ -92,13 +92,13 @@ export function HeroMetrics({ summary }: HeroMetricsProps) {
           icon={DollarSign}
           label="Cost per Check-in"
           value={`$${summary.cost_per_checkin.toFixed(2)}`}
-          accent="text-emerald-500"
+          accent="text-success"
         />
         <StatCard
           icon={TrendingDown}
           label="Redemption Rate"
           value={`${summary.redemption_rate_pct.toFixed(1)}%`}
-          accent="text-fuchsia-500"
+          accent="text-accent"
           badge={
             <Badge variant="secondary" className="text-[10px] px-1.5 h-4">
               <Target className="h-2.5 w-2.5 mr-0.5" />
@@ -112,8 +112,8 @@ export function HeroMetrics({ summary }: HeroMetricsProps) {
       {summary.active_campaigns > 0 && (
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-success" />
           </span>
           {summary.active_campaigns} campaign{summary.active_campaigns === 1 ? "" : "s"} live
         </div>

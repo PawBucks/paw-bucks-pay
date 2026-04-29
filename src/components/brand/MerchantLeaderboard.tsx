@@ -10,8 +10,8 @@ interface MerchantLeaderboardProps {
 
 const RANK_DECOR = [
   { icon: Crown, color: "text-warning", bg: "bg-warning/10 border-warning/30", label: "🥇" },
-  { icon: Medal, color: "text-slate-400", bg: "bg-slate-400/10 border-slate-400/30", label: "🥈" },
-  { icon: Award, color: "text-orange-500", bg: "bg-orange-500/10 border-orange-500/30", label: "🥉" },
+  { icon: Medal, color: "text-muted-foreground", bg: "bg-muted/40 border-border", label: "🥈" },
+  { icon: Award, color: "text-accent", bg: "bg-accent/10 border-accent/30", label: "🥉" },
 ];
 
 export function MerchantLeaderboard({ entries }: MerchantLeaderboardProps) {

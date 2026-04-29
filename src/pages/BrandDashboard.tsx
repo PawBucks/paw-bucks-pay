@@ -43,8 +43,8 @@ import { BrandJoinRequestsInbox } from "@/components/brand/BrandJoinRequestsInbo
 const statusConfig: Record<string, { color: string; label: string; emoji: string }> = {
   draft: { color: "bg-muted text-muted-foreground", label: "Draft", emoji: "📝" },
   pending_payment: { color: "bg-warning/15 text-warning", label: "Pending Payment", emoji: "💳" },
-  active: { color: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400", label: "Active", emoji: "🟢" },
-  paused: { color: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400", label: "Paused", emoji: "⏸️" },
+  active: { color: "bg-success/15 text-success", label: "Active", emoji: "🟢" },
+  paused: { color: "bg-warning/15 text-warning", label: "Paused", emoji: "⏸️" },
   completed: { color: "bg-info/15 text-info", label: "Completed", emoji: "✅" },
   expired: { color: "bg-destructive/15 text-destructive", label: "Expired", emoji: "⏰" },
 };
@@ -328,7 +328,7 @@ const BrandDashboard = () => {
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-base flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4 text-emerald-500" /> Distribution
+                  <TrendingUp className="h-4 w-4 text-success" /> Distribution
                 </CardTitle>
               </CardHeader>
               <CardContent>
