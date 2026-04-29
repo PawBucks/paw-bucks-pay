@@ -12,6 +12,12 @@ verify_jwt = true
 [functions.stripe-webhook]
 verify_jwt = false
 
+[functions.notify-vet-onboarding]
+verify_jwt = false
+
+[functions.bootstrap-trigger-secret]
+verify_jwt = false
+
 [functions.create-stripe-connect-account]
 verify_jwt = true
 

@@ -7634,6 +7634,7 @@ export type Database = {
           id: string
           insurance_partners: string[] | null
           is_verified: boolean | null
+          last_notified_status: string | null
           license_number: string | null
           license_state: string | null
           location: string
@@ -7652,6 +7653,7 @@ export type Database = {
           splicing_preference: string | null
           stripe_account_id: string | null
           stripe_connect_account_id: string | null
+          submission_email_sent_at: string | null
           subscription_tier: string | null
           tax_id: string | null
           tos_url: string | null
@@ -7686,6 +7688,7 @@ export type Database = {
           id?: string
           insurance_partners?: string[] | null
           is_verified?: boolean | null
+          last_notified_status?: string | null
           license_number?: string | null
           license_state?: string | null
           location: string
@@ -7704,6 +7707,7 @@ export type Database = {
           splicing_preference?: string | null
           stripe_account_id?: string | null
           stripe_connect_account_id?: string | null
+          submission_email_sent_at?: string | null
           subscription_tier?: string | null
           tax_id?: string | null
           tos_url?: string | null
@@ -7738,6 +7742,7 @@ export type Database = {
           id?: string
           insurance_partners?: string[] | null
           is_verified?: boolean | null
+          last_notified_status?: string | null
           license_number?: string | null
           license_state?: string | null
           location?: string
@@ -7756,6 +7761,7 @@ export type Database = {
           splicing_preference?: string | null
           stripe_account_id?: string | null
           stripe_connect_account_id?: string | null
+          submission_email_sent_at?: string | null
           subscription_tier?: string | null
           tax_id?: string | null
           tos_url?: string | null
@@ -14892,6 +14898,10 @@ export type Database = {
       }
       revoke_pet_digital_id_token: { Args: { p_pet_id: string }; Returns: Json }
       send_pawbucks_expiry_reminders: { Args: never; Returns: number }
+      set_system_config: {
+        Args: { _key: string; _value: string }
+        Returns: undefined
+      }
       use_pet_fund_credit: {
         Args: { p_amount: number; p_transaction_id?: string; p_user_id: string }
         Returns: boolean
