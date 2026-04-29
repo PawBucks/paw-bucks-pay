@@ -199,7 +199,7 @@ export function GroomingPetSelector({
  const effectivePrice = groomingData.adjustedPrice || basePrice;
 
  return (
- <div className="space-y-4 p-4 rounded-xl bg-muted/30 border">
+ <div className="space-y-4 p-4 rounded-md bg-muted/30 border">
  <h4 className="text-sm font-medium flex items-center gap-2">
  <Dog className="w-4 h-4 text-primary" />
  Pet & Grooming Details

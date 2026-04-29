@@ -306,7 +306,7 @@ const Storefront = memo(() => {
  <div className="container relative py-12">
  <Skeleton className="h-8 w-32 mb-6" />
  <div className="flex flex-col md:flex-row gap-6 items-start md:items-center">
- <Skeleton className="h-24 w-24 rounded-2xl" />
+ <Skeleton className="h-24 w-24 rounded-md" />
  <div className="space-y-3 flex-1">
  <Skeleton className="h-10 w-72" />
  <Skeleton className="h-5 w-48" />
@@ -349,9 +349,9 @@ const Storefront = memo(() => {
  <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8">
  {/* Left: Store Info */}
  <div className="flex flex-col sm:flex-row gap-6 items-start">
- <Avatar className="h-24 w-24 rounded-2xl border-4 border-background shadow-xl ring-2 ring-primary/20">
+ <Avatar className="h-24 w-24 rounded-md border-4 border-background shadow-xl ring-2 ring-primary/20">
  <AvatarImage src={merchantLogo || undefined} alt={merchantName} className="object-cover" />
- <AvatarFallback className="rounded-2xl bg-gradient-to-br from-primary to-primary/70 text-primary-foreground text-3xl font-bold">
+ <AvatarFallback className="rounded-md bg-gradient-to-br from-primary to-primary/70 text-primary-foreground text-3xl font-bold">
  {merchantName?.charAt(0) || <Store className="h-10 w-10" />}
  </AvatarFallback>
  </Avatar>
@@ -403,7 +403,7 @@ const Storefront = memo(() => {
  )}
 
  {/* Rewards Badge */}
- <div className="inline-flex items-center gap-3 px-5 py-3 rounded-xl bg-gradient-to-r from-warning/15 to-warning/15 border border-warning/30">
+ <div className="inline-flex items-center gap-3 px-5 py-3 rounded-md bg-gradient-to-r from-warning/15 to-warning/15 border border-warning/30">
  <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-warning to-warning flex items-center justify-center shadow-lg">
  <Sparkles className="h-5 w-5 text-white" />
  </div>
@@ -435,7 +435,7 @@ const Storefront = memo(() => {
  {products.length === 0 && subscriptionPlans.length === 0 ? (
  <Card className="border-dashed border-2 bg-gradient-to-br from-muted/30 to-muted">
  <CardContent className="flex flex-col items-center justify-center py-20">
- <div className="h-24 w-24 rounded-2xl bg-gradient-to-br from-muted to-muted/80 flex items-center justify-center mb-8 shadow-inner">
+ <div className="h-24 w-24 rounded-md bg-gradient-to-br from-muted to-muted/80 flex items-center justify-center mb-8 shadow-inner">
  <Package className="h-12 w-12 text-muted-foreground" />
  </div>
  <h3 className="text-2xl font-semibold mb-3">No products available yet</h3>
@@ -600,9 +600,9 @@ const Storefront = memo(() => {
  <div className="border-t bg-gradient-to-b from-card/80 to-card py-10 mt-16">
  <div className="container">
  <div className="flex flex-col items-center gap-6">
- <Avatar className="h-12 w-12 rounded-xl border-2 border-primary/20">
+ <Avatar className="h-12 w-12 rounded-md border-2 border-primary/20">
  <AvatarImage src={merchantLogo || undefined} alt={merchantName} />
- <AvatarFallback className="rounded-xl bg-primary/10 text-primary font-bold">{merchantName?.charAt(0) ||"S"}</AvatarFallback>
+ <AvatarFallback className="rounded-md bg-primary/10 text-primary font-bold">{merchantName?.charAt(0) ||"S"}</AvatarFallback>
  </Avatar>
  
  <div className="flex flex-col items-center gap-2 text-center">

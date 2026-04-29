@@ -62,18 +62,18 @@ export default function PublicBookingPage() {
  if (isLoading) {
  return isMobile ? (
  <div className="min-h-screen bg-background p-4 max-w-xl mx-auto">
- <Skeleton className="h-24 w-24 rounded-2xl mb-4" />
+ <Skeleton className="h-24 w-24 rounded-md mb-4" />
  <Skeleton className="h-8 w-48 mb-2" />
  <Skeleton className="h-4 w-32 mb-6" />
- <Skeleton className="h-96 w-full rounded-xl" />
+ <Skeleton className="h-96 w-full rounded-md" />
  </div>
  ) : (
  <div className="min-h-screen bg-muted/30">
  <div className="max-w-6xl mx-auto px-8 py-10">
- <Skeleton className="h-64 w-full rounded-2xl mb-8" />
+ <Skeleton className="h-64 w-full rounded-md mb-8" />
  <div className="grid grid-cols-3 gap-8">
- <div className="col-span-2"><Skeleton className="h-96 rounded-xl" /></div>
- <div><Skeleton className="h-72 rounded-xl" /></div>
+ <div className="col-span-2"><Skeleton className="h-96 rounded-md" /></div>
+ <div><Skeleton className="h-72 rounded-md" /></div>
  </div>
  </div>
  </div>
@@ -123,7 +123,7 @@ export default function PublicBookingPage() {
 
  <div className="mb-6">
  <div className="flex gap-4 items-start">
- <div className={`w-20 h-20 rounded-2xl overflow-hidden shadow-lg border-2 border-border ring-2 ring-primary/10 flex-shrink-0 ${!merchant.logo_url ?'bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center' :''}`}>
+ <div className={`w-20 h-20 rounded-md overflow-hidden shadow-lg border-2 border-border ring-2 ring-primary/10 flex-shrink-0 ${!merchant.logo_url ?'bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center' :''}`}>
  {logoElement}
  </div>
  <div className="flex-1 min-w-0 pt-0.5">
@@ -177,7 +177,7 @@ export default function PublicBookingPage() {
  <BusinessHoursDisplay merchantId={merchant.id} />
  </div>
 
- <div className="mb-6 p-3 bg-primary/5 rounded-xl border border-primary/10 text-center">
+ <div className="mb-6 p-3 bg-primary/5 rounded-md border border-primary/10 text-center">
  <p className="text-sm text-primary font-semibold">
  🎉 Earn {merchant.cashback_rate}x PawBucks on every booking!
  </p>
@@ -212,7 +212,7 @@ export default function PublicBookingPage() {
  <div className="bg-background border-b border-border">
  <div className="max-w-6xl mx-auto px-8 py-8">
  <div className="flex gap-6 items-start">
- <div className={`w-28 h-28 rounded-2xl overflow-hidden shadow-lg border-2 border-border ring-2 ring-primary/10 flex-shrink-0 ${!merchant.logo_url ?'bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center' :''}`}>
+ <div className={`w-28 h-28 rounded-md overflow-hidden shadow-lg border-2 border-border ring-2 ring-primary/10 flex-shrink-0 ${!merchant.logo_url ?'bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center' :''}`}>
  {logoElement}
  </div>
 

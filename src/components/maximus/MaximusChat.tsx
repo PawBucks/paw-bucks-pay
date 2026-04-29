@@ -138,7 +138,7 @@ export const MaximusChat = () => {
  animate={{ opacity: 1, y: 0, scale: 1 }}
  exit={{ opacity: 0, y: 40, scale: 0.95 }}
  transition={{ type:"spring", damping: 25, stiffness: 300 }}
- className="fixed bottom-20 right-4 z-50 flex h-[min(75vh,520px)] w-[min(92vw,380px)] flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl md:bottom-6"
+ className="fixed bottom-20 right-4 z-50 flex h-[min(75vh,520px)] w-[min(92vw,380px)] flex-col overflow-hidden rounded-md border border-border bg-card shadow-2xl md:bottom-6"
  >
  {/* Header */}
  <div className="flex items-center gap-3 bg-primary px-4 py-3">
@@ -166,7 +166,7 @@ export const MaximusChat = () => {
 
  {messages.map((msg, i) => (
  <div key={i} className={`flex ${msg.role ==="user" ?"justify-end" :"justify-start"}`}>
- <div className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm ${
+ <div className={`max-w-[85%] rounded-md px-3 py-2 text-sm ${
  msg.role ==="user"
  ?"bg-primary text-primary-foreground rounded-br-md"
  :"bg-muted text-foreground rounded-bl-md"
@@ -199,7 +199,7 @@ export const MaximusChat = () => {
 
  {isLoading && messages[messages.length - 1]?.role ==="user" && (
  <div className="flex justify-start">
- <div className="flex items-center gap-2 rounded-2xl rounded-bl-md bg-muted px-3 py-2 text-sm text-muted-foreground">
+ <div className="flex items-center gap-2 rounded-md rounded-bl-md bg-muted px-3 py-2 text-sm text-muted-foreground">
  <Loader2 className="h-3 w-3 animate-spin" />
  <span>Sniffing out the answer...</span>
  </div>
@@ -222,9 +222,9 @@ export const MaximusChat = () => {
  onChange={(e) => setInput(e.target.value)}
  placeholder="Ask Maximus anything..."
  disabled={isLoading}
- className="flex-1 rounded-xl border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
+ className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
  />
- <Button type="submit" size="icon" disabled={isLoading || !input.trim()} className="h-9 w-9 rounded-xl">
+ <Button type="submit" size="icon" disabled={isLoading || !input.trim()} className="h-9 w-9 rounded-md">
  <Send className="h-4 w-4" />
  </Button>
  </form>

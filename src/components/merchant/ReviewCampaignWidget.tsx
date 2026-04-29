@@ -235,7 +235,7 @@ export function ReviewCampaignWidget() {
  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
  <GradientCard gradient>
  <div className="flex items-center gap-3">
- <div className="p-3 rounded-xl bg-warning/10"><Star className="h-5 w-5 text-warning" /></div>
+ <div className="p-3 rounded-md bg-warning/10"><Star className="h-5 w-5 text-warning" /></div>
  <div>
  <p className="text-sm text-muted-foreground">Avg Rating</p>
  <p className={`text-2xl font-bold ${getRatingColor(metrics.averageRating)}`}>
@@ -246,7 +246,7 @@ export function ReviewCampaignWidget() {
  </GradientCard>
  <GradientCard gradient>
  <div className="flex items-center gap-3">
- <div className="p-3 rounded-xl bg-primary/10"><MessageSquare className="h-5 w-5 text-primary" /></div>
+ <div className="p-3 rounded-md bg-primary/10"><MessageSquare className="h-5 w-5 text-primary" /></div>
  <div>
  <p className="text-sm text-muted-foreground">Total Reviews</p>
  <p className="text-2xl font-bold">{metrics.totalReviews}</p>
@@ -255,7 +255,7 @@ export function ReviewCampaignWidget() {
  </GradientCard>
  <GradientCard gradient>
  <div className="flex items-center gap-3">
- <div className="p-3 rounded-xl bg-success/10"><Target className="h-5 w-5 text-success" /></div>
+ <div className="p-3 rounded-md bg-success/10"><Target className="h-5 w-5 text-success" /></div>
  <div>
  <p className="text-sm text-muted-foreground">Review Rate</p>
  <p className="text-2xl font-bold">{metrics.reviewRate}%</p>
@@ -264,7 +264,7 @@ export function ReviewCampaignWidget() {
  </GradientCard>
  <GradientCard gradient>
  <div className="flex items-center gap-3">
- <div className="p-3 rounded-xl bg-accent/10"><Users className="h-5 w-5 text-accent" /></div>
+ <div className="p-3 rounded-md bg-accent/10"><Users className="h-5 w-5 text-accent" /></div>
  <div>
  <p className="text-sm text-muted-foreground">Customers</p>
  <p className="text-2xl font-bold">{metrics.uniqueCustomers}</p>

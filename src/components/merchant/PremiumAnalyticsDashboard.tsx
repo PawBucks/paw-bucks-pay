@@ -328,7 +328,7 @@ export function PremiumAnalyticsDashboard() {
  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
  <GradientCard gradient>
  <div className="flex items-center gap-3">
- <div className="p-3 rounded-xl bg-primary/10">
+ <div className="p-3 rounded-md bg-primary/10">
  <DollarSign className="h-5 w-5 text-primary" />
  </div>
  <div>
@@ -340,7 +340,7 @@ export function PremiumAnalyticsDashboard() {
 
  <GradientCard gradient>
  <div className="flex items-center gap-3">
- <div className="p-3 rounded-xl bg-success/10">
+ <div className="p-3 rounded-md bg-success/10">
  <Users className="h-5 w-5 text-success" />
  </div>
  <div>
@@ -352,7 +352,7 @@ export function PremiumAnalyticsDashboard() {
 
  <GradientCard gradient>
  <div className="flex items-center gap-3">
- <div className="p-3 rounded-xl bg-info/10">
+ <div className="p-3 rounded-md bg-info/10">
  <Activity className="h-5 w-5 text-info" />
  </div>
  <div>
@@ -364,7 +364,7 @@ export function PremiumAnalyticsDashboard() {
 
  <GradientCard gradient>
  <div className="flex items-center gap-3">
- <div className="p-3 rounded-xl bg-accent/10">
+ <div className="p-3 rounded-md bg-accent/10">
  <TrendingUp className="h-5 w-5 text-accent" />
  </div>
  <div>
@@ -454,7 +454,7 @@ export function PremiumAnalyticsDashboard() {
  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
  <GradientCard gradient>
  <div className="flex items-center gap-3">
- <div className="p-3 rounded-xl bg-primary/10">
+ <div className="p-3 rounded-md bg-primary/10">
  <Rocket className="h-5 w-5 text-primary" />
  </div>
  <div>
@@ -466,7 +466,7 @@ export function PremiumAnalyticsDashboard() {
 
  <GradientCard gradient>
  <div className="flex items-center gap-3">
- <div className="p-3 rounded-xl bg-success/10">
+ <div className="p-3 rounded-md bg-success/10">
  <DollarSign className="h-5 w-5 text-success" />
  </div>
  <div>
@@ -478,7 +478,7 @@ export function PremiumAnalyticsDashboard() {
 
  <GradientCard gradient>
  <div className="flex items-center gap-3">
- <div className="p-3 rounded-xl bg-info/10">
+ <div className="p-3 rounded-md bg-info/10">
  <Activity className="h-5 w-5 text-info" />
  </div>
  <div>
@@ -490,7 +490,7 @@ export function PremiumAnalyticsDashboard() {
 
  <GradientCard gradient>
  <div className="flex items-center gap-3">
- <div className="p-3 rounded-xl bg-accent/10">
+ <div className="p-3 rounded-md bg-accent/10">
  <TrendingUp className="h-5 w-5 text-accent" />
  </div>
  <div>
@@ -559,7 +559,7 @@ export function PremiumAnalyticsDashboard() {
  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
  <GradientCard gradient>
  <div className="flex items-center gap-3">
- <div className="p-3 rounded-xl bg-success/10">
+ <div className="p-3 rounded-md bg-success/10">
  <UserPlus className="h-5 w-5 text-success" />
  </div>
  <div>
@@ -571,7 +571,7 @@ export function PremiumAnalyticsDashboard() {
 
  <GradientCard gradient>
  <div className="flex items-center gap-3">
- <div className="p-3 rounded-xl bg-info/10">
+ <div className="p-3 rounded-md bg-info/10">
  <Repeat className="h-5 w-5 text-info" />
  </div>
  <div>
@@ -583,7 +583,7 @@ export function PremiumAnalyticsDashboard() {
 
  <GradientCard gradient>
  <div className="flex items-center gap-3">
- <div className="p-3 rounded-xl bg-warning/10">
+ <div className="p-3 rounded-md bg-warning/10">
  <UserMinus className="h-5 w-5 text-warning" />
  </div>
  <div>
@@ -595,7 +595,7 @@ export function PremiumAnalyticsDashboard() {
 
  <GradientCard gradient>
  <div className="flex items-center gap-3">
- <div className="p-3 rounded-xl bg-primary/10">
+ <div className="p-3 rounded-md bg-primary/10">
  <DollarSign className="h-5 w-5 text-primary" />
  </div>
  <div>
@@ -748,7 +748,7 @@ export function PremiumAnalyticsDashboard() {
  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
  <GradientCard gradient>
  <div className="flex items-center gap-3">
- <div className="p-3 rounded-xl bg-primary/10">
+ <div className="p-3 rounded-md bg-primary/10">
  <CalendarIcon className="h-5 w-5 text-primary" />
  </div>
  <div>
@@ -760,7 +760,7 @@ export function PremiumAnalyticsDashboard() {
 
  <GradientCard gradient>
  <div className="flex items-center gap-3">
- <div className="p-3 rounded-xl bg-success/10">
+ <div className="p-3 rounded-md bg-success/10">
  <Clock className="h-5 w-5 text-success" />
  </div>
  <div>

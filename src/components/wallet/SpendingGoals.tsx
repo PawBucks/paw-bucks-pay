@@ -178,7 +178,7 @@ export const SpendingGoals = memo(({ transactions, medicalRecords = [] }: Spendi
  {localGoal ? (
  <div className="space-y-4">
  {/* Goal Progress */}
- <div className="p-4 rounded-xl bg-muted/30 border border-border/50">
+ <div className="p-4 rounded-md bg-muted/30 border border-border/50">
  <div className="flex items-center justify-between mb-3">
  <div className="flex items-center gap-2">
  {isOnTrack ? (

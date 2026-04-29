@@ -38,7 +38,7 @@ export function PosApiWidget() {
  {features.map((feature) => (
  <GradientCard key={feature.title} gradient>
  <div className="flex items-start gap-4">
- <div className="p-3 rounded-xl bg-primary/10">
+ <div className="p-3 rounded-md bg-primary/10">
  <feature.icon className="h-5 w-5 text-primary" />
  </div>
  <div>

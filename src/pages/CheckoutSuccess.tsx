@@ -72,7 +72,7 @@ const CheckoutSuccess = () => {
  <CardContent className="space-y-6">
  {/* PawBucks Reward Notification */}
  <div 
- className={`p-4 bg-gradient-to-r from-warning/10 via-warning/10 to-warning/10 rounded-xl border border-warning/20 transition-all duration-500 delay-300 ${
+ className={`p-4 bg-gradient-to-r from-warning/10 via-warning/10 to-warning/10 rounded-md border border-warning/20 transition-all duration-500 delay-300 ${
  isVisible ?'opacity-100 translate-x-0' :'opacity-0 -translate-x-4'
  }`}
  >

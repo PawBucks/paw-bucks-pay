@@ -55,7 +55,7 @@ export const ServiceCreditCard = ({ credit, onClick, compact = false }: ServiceC
  whileHover={{ scale: 1.01, y: -2 }}
  onClick={onClick}
  className={cn(
-"p-4 rounded-xl border cursor-pointer transition-all",
+"p-4 rounded-md border cursor-pointer transition-all",
  isUsed || isExpired 
  ?"opacity-60 bg-muted/30 border-border" 
  :"bg-gradient-to-br from-primary/5 via-accent/5 to-secondary/5 border-primary/20 hover:shadow-lg"
@@ -64,7 +64,7 @@ export const ServiceCreditCard = ({ credit, onClick, compact = false }: ServiceC
  <div className="flex items-start gap-3">
  {/* Credit Icon/Value */}
  <div className={cn(
-"w-14 h-14 rounded-xl flex flex-col items-center justify-center",
+"w-14 h-14 rounded-md flex flex-col items-center justify-center",
  isUsed || isExpired
  ?"bg-muted"
  :"bg-gradient-to-br from-primary/20 to-accent/20"

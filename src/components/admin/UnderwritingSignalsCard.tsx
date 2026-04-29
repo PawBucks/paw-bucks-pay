@@ -90,7 +90,7 @@ function SignalScore({ signals }: { signals: UnderwritingSignals }) {
  const bg = score >= 75 ?'bg-success/10 border-success/20' : score >= 50 ?'bg-warning/10 border-warning/20' : score >= 25 ?'bg-warning/10 border-warning/20' :'bg-destructive/10 border-destructive/20';
 
  return (
- <div className={cn('rounded-xl border p-4 text-center', bg)}>
+ <div className={cn('rounded-md border p-4 text-center', bg)}>
  <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Underwriting Score</p>
  <p className={cn('text-4xl font-extrabold', color)}>{score}</p>
  <p className={cn('text-sm font-semibold mt-0.5', color)}>{label}</p>

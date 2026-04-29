@@ -98,7 +98,7 @@ export const VaccineReminderBanner = ({ userId }: Props) => {
  animate={{ opacity: 1, y: 0, height:"auto" }}
  exit={{ opacity: 0, y: -6, height: 0 }}
  className={cn(
-"flex items-start gap-3 rounded-xl border p-3 transition-colors",
+"flex items-start gap-3 rounded-md border p-3 transition-colors",
  n.is_read ?"bg-card border-border" :"bg-primary/5 border-primary/30",
  )}
  >

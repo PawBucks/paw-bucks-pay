@@ -166,7 +166,7 @@ const BadgesPage = () => {
  initial={{ opacity: 0, scale: 0.95 }}
  animate={{ opacity: 1, scale: 1 }}
  transition={{ delay: 0.1 }}
- className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-primary/10 via-accent/10 to-secondary/10 border border-primary/20 text-center"
+ className="mb-6 p-4 rounded-md bg-gradient-to-r from-primary/10 via-accent/10 to-secondary/10 border border-primary/20 text-center"
  >
  <Sparkles className="w-6 h-6 mx-auto text-primary mb-2" />
  <p className="text-sm font-medium">
@@ -186,7 +186,7 @@ const BadgesPage = () => {
  {selectedBadge && (
  <>
  <DialogHeader className="text-center">
- <div className="w-20 h-20 mx-auto mb-3 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 border border-primary/30 flex items-center justify-center text-5xl">
+ <div className="w-20 h-20 mx-auto mb-3 rounded-md bg-gradient-to-br from-primary/20 to-accent/20 border border-primary/30 flex items-center justify-center text-5xl">
  {selectedBadge.emoji}
  </div>
  <DialogTitle className="text-xl">{selectedBadge.name}</DialogTitle>
@@ -204,7 +204,7 @@ const BadgesPage = () => {
 
  {/* Earned Status */}
  {selectedEarned ? (
- <div className="p-4 rounded-xl bg-gradient-to-br from-primary/10 to-accent/10 border border-primary/20">
+ <div className="p-4 rounded-md bg-gradient-to-br from-primary/10 to-accent/10 border border-primary/20">
  <div className="flex items-center gap-2 text-primary mb-2">
  <CheckCircle className="w-5 h-5" />
  <span className="font-semibold">Badge Earned!</span>
@@ -214,7 +214,7 @@ const BadgesPage = () => {
  </p>
  </div>
  ) : (
- <div className="p-4 rounded-xl bg-muted border border-border text-center">
+ <div className="p-4 rounded-md bg-muted border border-border text-center">
  <p className="text-muted-foreground">
  Keep spending in the {selectedBadge.category} category to unlock this badge!
  </p>
@@ -223,7 +223,7 @@ const BadgesPage = () => {
 
  {/* Reward Section */}
  {selectedBadge.reward_description && selectedEarned && (
- <div className="p-4 rounded-xl bg-gradient-to-r from-primary/5 to-accent/5 border border-primary/10">
+ <div className="p-4 rounded-md bg-gradient-to-r from-primary/5 to-accent/5 border border-primary/10">
  <div className="flex items-center gap-2 mb-2">
  <Gift className="w-5 h-5 text-primary" />
  <span className="font-semibold">Your Reward</span>

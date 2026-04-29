@@ -221,7 +221,7 @@ const Referrals = () => {
  {referrals.map((referral) => (
  <div
  key={referral.id}
- className="flex items-center justify-between p-4 bg-muted/30 rounded-xl border border-border/50"
+ className="flex items-center justify-between p-4 bg-muted/30 rounded-md border border-border/50"
  >
  <div className="flex-1">
  <p className="font-medium">

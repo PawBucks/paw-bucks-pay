@@ -193,7 +193,7 @@ export function DemandForecastingReport() {
  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
  <GradientCard gradient>
  <div className="flex items-center gap-3">
- <div className="p-3 rounded-xl bg-primary/10">
+ <div className="p-3 rounded-md bg-primary/10">
  <DollarSign className="h-5 w-5 text-primary" />
  </div>
  <div>
@@ -205,7 +205,7 @@ export function DemandForecastingReport() {
 
  <GradientCard gradient>
  <div className="flex items-center gap-3">
- <div className={`p-3 rounded-xl ${summary.predicted_growth_rate >= 0 ?'bg-success/10' :'bg-destructive/10'}`}>
+ <div className={`p-3 rounded-md ${summary.predicted_growth_rate >= 0 ?'bg-success/10' :'bg-destructive/10'}`}>
  <TrendingUp className={`h-5 w-5 ${summary.predicted_growth_rate >= 0 ?'text-success' :'text-destructive'}`} />
  </div>
  <div>
@@ -217,7 +217,7 @@ export function DemandForecastingReport() {
 
  <GradientCard gradient>
  <div className="flex items-center gap-3">
- <div className="p-3 rounded-xl bg-info/10">
+ <div className="p-3 rounded-md bg-info/10">
  <Target className="h-5 w-5 text-info" />
  </div>
  <div>
@@ -229,7 +229,7 @@ export function DemandForecastingReport() {
 
  <GradientCard gradient>
  <div className="flex items-center gap-3">
- <div className="p-3 rounded-xl bg-accent/10">
+ <div className="p-3 rounded-md bg-accent/10">
  <BarChart3 className="h-5 w-5 text-accent" />
  </div>
  <div>

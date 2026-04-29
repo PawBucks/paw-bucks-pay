@@ -60,7 +60,7 @@ export const LoyaltyWarningBanner = ({ warnings, onDismiss, onAction }: LoyaltyW
  animate={{ opacity: 1, y: 0, height:'auto' }}
  exit={{ opacity: 0, y: -10, height: 0 }}
  className={cn(
-"p-3 rounded-xl border flex items-start gap-3",
+"p-3 rounded-md border flex items-start gap-3",
  styles.bg,
  styles.border
  )}

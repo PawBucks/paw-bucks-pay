@@ -197,7 +197,7 @@ export function CheckInDashboard({ entityId, entityType, entityName }: CheckInDa
  <h3 className="text-lg font-semibold mb-4">Your Check-In QR Code</h3>
  {qrToken ? (
  <>
- <div ref={qrRef} className="bg-white p-4 rounded-xl shadow-inner mb-4">
+ <div ref={qrRef} className="bg-white p-4 rounded-md shadow-inner mb-4">
  <QRCodeSVG
  value={qrValue}
  size={200}

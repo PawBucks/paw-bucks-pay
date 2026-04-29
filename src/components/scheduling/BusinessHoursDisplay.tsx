@@ -50,7 +50,7 @@ export function BusinessHoursDisplay({ merchantId, vetId }: Props) {
  hours.forEach((h: any) => hoursMap.set(h.day_of_week, h));
 
  return (
- <div className="rounded-xl border bg-card p-4">
+ <div className="rounded-md border bg-card p-4">
  <div className="flex items-center gap-2 mb-3">
  <Clock className="w-4 h-4 text-primary" />
  <h3 className="font-semibold text-sm">Hours of Operation</h3>

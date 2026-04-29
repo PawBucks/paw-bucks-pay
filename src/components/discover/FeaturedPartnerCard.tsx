@@ -82,7 +82,7 @@ const FeaturedPartnerCardComponent = ({
  {/* Large photo */}
  <div className="flex-shrink-0">
  {merchant.logo_url ? (
- <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden bg-muted shadow-md border border-warning/20">
+ <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-md overflow-hidden bg-muted shadow-md border border-warning/20">
  <img
  src={merchant.logo_url}
  alt={merchant.business_name}
@@ -92,7 +92,7 @@ const FeaturedPartnerCardComponent = ({
  />
  </div>
  ) : (
- <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl bg-gradient-to-br from-warning/10 to-warning/5 flex items-center justify-center border border-warning/20">
+ <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-md bg-gradient-to-br from-warning/10 to-warning/5 flex items-center justify-center border border-warning/20">
  <Crown className="w-10 h-10 text-warning/60" />
  </div>
  )}

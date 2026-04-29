@@ -140,7 +140,7 @@ export const WelcomeCreditCard = ({ userId }: WelcomeCreditCardProps) => {
  }`}
  >
  <div className="flex items-start gap-4">
- <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-lg ${
+ <div className={`w-14 h-14 rounded-md flex items-center justify-center shrink-0 shadow-lg ${
  waitingForPhase2
  ?'bg-gradient-to-br from-accent to-accent'
  : isCritical 

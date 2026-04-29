@@ -26,7 +26,7 @@ export const MilestoneCard = ({ milestone, onRedeem, compact = false }: Mileston
  return (
  <motion.div
  whileHover={{ scale: 1.02 }}
- className={`p-4 rounded-xl border ${
+ className={`p-4 rounded-md border ${
  isComplete 
  ?'bg-gradient-to-r from-primary/10 to-accent/10 border-primary/30' 
  :'bg-card border-border'

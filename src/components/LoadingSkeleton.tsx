@@ -82,7 +82,7 @@ export const TableSkeleton = memo(({ rows = 5 }: { rows?: number }) => {
 TableSkeleton.displayName ="TableSkeleton";
 
 export const MerchantCardSkeleton = memo(() => (
- <div className="border rounded-xl p-4 space-y-4" role="status" aria-label="Loading merchant">
+ <div className="border rounded-md p-4 space-y-4" role="status" aria-label="Loading merchant">
  <span className="sr-only">Loading merchant information...</span>
  <div className="flex gap-4">
  <Skeleton className="w-24 h-24 rounded-lg skeleton-pulse" />

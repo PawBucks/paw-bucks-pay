@@ -187,7 +187,7 @@ export function SearchRankingBoosterWidget() {
  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
  <GradientCard gradient>
  <div className="flex items-center gap-3">
- <div className="p-3 rounded-xl bg-primary/10"><TrendingUp className="h-5 w-5 text-primary" /></div>
+ <div className="p-3 rounded-md bg-primary/10"><TrendingUp className="h-5 w-5 text-primary" /></div>
  <div>
  <p className="text-sm text-muted-foreground">Boost Multiplier</p>
  <p className="text-2xl font-bold">{analyticsData.boostMultiplier}x</p>
@@ -196,7 +196,7 @@ export function SearchRankingBoosterWidget() {
  </GradientCard>
  <GradientCard gradient>
  <div className="flex items-center gap-3">
- <div className="p-3 rounded-xl bg-success/10"><Target className="h-5 w-5 text-success" /></div>
+ <div className="p-3 rounded-md bg-success/10"><Target className="h-5 w-5 text-success" /></div>
  <div>
  <p className="text-sm text-muted-foreground">Avg Position</p>
  <p className="text-2xl font-bold">#{metrics.avgPosition ||'-'}</p>
@@ -205,7 +205,7 @@ export function SearchRankingBoosterWidget() {
  </GradientCard>
  <GradientCard gradient>
  <div className="flex items-center gap-3">
- <div className="p-3 rounded-xl bg-info/10"><Search className="h-5 w-5 text-info" /></div>
+ <div className="p-3 rounded-md bg-info/10"><Search className="h-5 w-5 text-info" /></div>
  <div>
  <p className="text-sm text-muted-foreground">Impressions</p>
  <p className="text-2xl font-bold">{metrics.impressions}</p>
@@ -214,7 +214,7 @@ export function SearchRankingBoosterWidget() {
  </GradientCard>
  <GradientCard gradient>
  <div className="flex items-center gap-3">
- <div className="p-3 rounded-xl bg-accent/10"><Star className="h-5 w-5 text-accent" /></div>
+ <div className="p-3 rounded-md bg-accent/10"><Star className="h-5 w-5 text-accent" /></div>
  <div>
  <p className="text-sm text-muted-foreground">CTR</p>
  <p className="text-2xl font-bold">{metrics.ctr}%</p>

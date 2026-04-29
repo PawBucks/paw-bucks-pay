@@ -173,7 +173,7 @@ export default function PetStoreProduct() {
  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-10">
  {/* Left: Image Gallery */}
  <div className="space-y-3">
- <div className="relative aspect-square rounded-xl overflow-hidden bg-muted/30 border">
+ <div className="relative aspect-square rounded-md overflow-hidden bg-muted/30 border">
  {hasPromo && (
  <PromotionalBadge
  discountPercentage={promo!.discountPercentage}

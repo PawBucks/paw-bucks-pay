@@ -92,7 +92,7 @@ export const QuizResult = ({ petName, petType, result, onContinue }: QuizResultP
  initial={{ y: 30, opacity: 0 }}
  animate={{ y: 0, opacity: 1 }}
  transition={{ delay: 0.9 }}
- className="bg-gradient-to-br rounded-2xl p-6 border-2"
+ className="bg-gradient-to-br rounded-md p-6 border-2"
  style={{
  borderColor: transformedResult.color_primary,
  background: `linear-gradient(135deg, ${transformedResult.color_primary}10, ${transformedResult.color_secondary}10)`,
@@ -137,7 +137,7 @@ export const QuizResult = ({ petName, petType, result, onContinue }: QuizResultP
  initial={{ opacity: 0, y: 20 }}
  animate={{ opacity: 1, y: 0 }}
  transition={{ delay: 1.5 }}
- className="bg-muted rounded-xl p-5"
+ className="bg-muted rounded-md p-5"
  >
  <h3 className="font-semibold mb-3 flex items-center gap-2">
  <Lightbulb className="w-4 h-4 text-warning" />
@@ -190,7 +190,7 @@ export const QuizResult = ({ petName, petType, result, onContinue }: QuizResultP
  <Button
  size="lg"
  onClick={onContinue}
- className="text-lg px-8 py-6 rounded-xl"
+ className="text-lg px-8 py-6 rounded-md"
  >
  Continue to Dashboard
  <ArrowRight className="w-5 h-5 ml-2" />

@@ -101,17 +101,17 @@ export const MonthlyComparison = memo(({ transactions, medicalRecords = [] }: Mo
  <h3 className="text-lg font-semibold mb-4">Month-over-Month</h3>
  
  <div className="grid grid-cols-2 gap-4 mb-4">
- <div className="p-4 rounded-xl bg-muted/30 border border-border/50">
+ <div className="p-4 rounded-md bg-muted/30 border border-border/50">
  <p className="text-xs text-muted-foreground mb-1">This Month</p>
  <p className="text-xl font-bold">${comparison.thisMonth.toFixed(2)}</p>
  </div>
- <div className="p-4 rounded-xl bg-muted/30 border border-border/50">
+ <div className="p-4 rounded-md bg-muted/30 border border-border/50">
  <p className="text-xs text-muted-foreground mb-1">Last Month</p>
  <p className="text-xl font-bold">${comparison.lastMonth.toFixed(2)}</p>
  </div>
  </div>
 
- <div className={`flex items-center justify-between p-4 rounded-xl ${getTrendBg()}`}>
+ <div className={`flex items-center justify-between p-4 rounded-md ${getTrendBg()}`}>
  <div className="flex items-center gap-3">
  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${getTrendBg()}`}>
  {getTrendIcon()}

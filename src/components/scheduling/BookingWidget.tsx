@@ -431,7 +431,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
  <Card className="overflow-hidden">
  <CardHeader className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent">
  <div className="flex items-center gap-3">
- <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+ <div className="w-10 h-10 rounded-md bg-primary/10 flex items-center justify-center">
  <CalendarIcon className="w-5 h-5 text-primary" />
  </div>
  <div>
@@ -489,7 +489,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
  setSelectedService(service.id);
  setStep("date");
  }}
- className={`w-full p-4 rounded-xl border text-left transition-all hover:border-primary hover:bg-primary/5 ${
+ className={`w-full p-4 rounded-md border text-left transition-all hover:border-primary hover:bg-primary/5 ${
  selectedService === service.id ?"border-primary bg-primary/5" :"border-border"
  } ${hasFlashSale ?"ring-2 ring-warning/30" :""}`}
  >
@@ -649,7 +649,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
  </div>
 
  {/* Summary */}
- <div className="p-4 rounded-xl bg-muted space-y-3">
+ <div className="p-4 rounded-md bg-muted space-y-3">
  <div className="flex items-center justify-between">
  <span className="text-muted-foreground">Service</span>
  <span className="font-medium">{selectedServiceData.name}</span>

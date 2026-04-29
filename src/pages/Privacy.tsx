@@ -24,7 +24,7 @@ const Privacy = () => {
 
  <main role="main" className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 max-w-3xl">
  <header className="text-center space-y-3 mb-10">
- <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 text-primary">
+ <div className="inline-flex items-center justify-center w-14 h-14 rounded-md bg-primary/10 text-primary">
  <ShieldCheck className="w-7 h-7" />
  </div>
  <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">

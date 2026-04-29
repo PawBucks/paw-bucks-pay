@@ -24,7 +24,7 @@ export function BrandedCheckinPreview({
  pawbucksAmount,
 }: BrandedCheckinPreviewProps) {
  return (
- <div className="rounded-2xl border-2 border-border overflow-hidden shadow-lg bg-card max-w-sm mx-auto">
+ <div className="rounded-md border-2 border-border overflow-hidden shadow-lg bg-card max-w-sm mx-auto">
  {/* Branded header */}
  <div
  className="px-5 pt-5 pb-12 text-white relative"
@@ -45,7 +45,7 @@ export function BrandedCheckinPreview({
  {/* Floating PawBucks badge */}
  <div className="px-5 -mt-8 relative">
  <div
- className="rounded-2xl shadow-xl px-4 py-3 flex items-center justify-between bg-card border"
+ className="rounded-md shadow-xl px-4 py-3 flex items-center justify-between bg-card border"
  >
  <div>
  <p className="text-xs text-muted-foreground">Check-in reward</p>
@@ -62,7 +62,7 @@ export function BrandedCheckinPreview({
  <h3 className="font-bold text-lg leading-tight">{headline}</h3>
  <p className="text-sm text-muted-foreground leading-snug">{subtext}</p>
  <button
- className="w-full py-3 rounded-xl font-semibold text-white shadow-md hover:opacity-90 transition-opacity"
+ className="w-full py-3 rounded-md font-semibold text-white shadow-md hover:opacity-90 transition-opacity"
  style={{ background: color }}
  type="button"
  tabIndex={-1}

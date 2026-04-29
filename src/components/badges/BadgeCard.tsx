@@ -47,7 +47,7 @@ export const BadgeCard = ({ badge, earned, progress, onClick, compact = false }:
  whileTap={{ scale: 0.95 }}
  onClick={onClick}
  className={cn(
-"relative flex flex-col items-center justify-center p-3 rounded-xl border cursor-pointer transition-all",
+"relative flex flex-col items-center justify-center p-3 rounded-md border cursor-pointer transition-all",
  isEarned 
  ?"bg-gradient-to-br from-primary/20 to-accent/20 border-primary/30 shadow-lg" 
  :"bg-muted/30 border-border/50 opacity-60"
@@ -68,7 +68,7 @@ export const BadgeCard = ({ badge, earned, progress, onClick, compact = false }:
  whileTap={{ scale: 0.98 }}
  onClick={onClick}
  className={cn(
-"relative p-4 rounded-2xl border cursor-pointer transition-all",
+"relative p-4 rounded-md border cursor-pointer transition-all",
  isEarned 
  ?"bg-gradient-to-br from-primary/10 via-accent/5 to-secondary/10 border-primary/30 shadow-lg" 
  :"bg-card border-border hover:border-primary/30"
@@ -77,7 +77,7 @@ export const BadgeCard = ({ badge, earned, progress, onClick, compact = false }:
  {/* Badge Icon & Name */}
  <div className="flex items-start gap-3">
  <div className={cn(
-"w-14 h-14 rounded-xl flex items-center justify-center text-3xl",
+"w-14 h-14 rounded-md flex items-center justify-center text-3xl",
  isEarned 
  ?"bg-gradient-to-br from-primary/30 to-accent/30 shadow-inner" 
  :"bg-muted"

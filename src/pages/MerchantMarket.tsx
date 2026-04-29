@@ -437,7 +437,7 @@ const MerchantMarket = () => {
  <div className="flex-1">
  {/* Header */}
  <div className="flex items-start justify-between mb-4">
- <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+ <div className="w-12 h-12 rounded-md bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
  {service.icon && iconMap[service.icon] ? iconMap[service.icon] : <Sparkles className="w-6 h-6" />}
  </div>
  <div className="flex flex-wrap gap-2">
@@ -657,21 +657,21 @@ const MerchantMarket = () => {
  </div>
 
  <div className="grid gap-6 md:grid-cols-3">
- <div className="text-center p-6 rounded-xl bg-muted/30 border">
+ <div className="text-center p-6 rounded-md bg-muted/30 border">
  <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
  <TrendingUp className="w-7 h-7 text-primary" />
  </div>
  <p className="text-3xl font-bold text-primary mb-2">3.2x</p>
  <p className="text-muted-foreground">Average increase in visibility</p>
  </div>
- <div className="text-center p-6 rounded-xl bg-muted/30 border">
+ <div className="text-center p-6 rounded-md bg-muted/30 border">
  <div className="w-14 h-14 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-4">
  <DollarSign className="w-7 h-7 text-accent" />
  </div>
  <p className="text-3xl font-bold text-accent mb-2">47%</p>
  <p className="text-muted-foreground">Average revenue growth</p>
  </div>
- <div className="text-center p-6 rounded-xl bg-muted/30 border">
+ <div className="text-center p-6 rounded-md bg-muted/30 border">
  <div className="w-14 h-14 rounded-full bg-secondary/10 flex items-center justify-center mx-auto mb-4">
  <Star className="w-7 h-7 text-secondary" />
  </div>
@@ -682,7 +682,7 @@ const MerchantMarket = () => {
  </div>
 
  {/* CTA Section */}
- <div className="mt-16 text-center p-8 rounded-2xl bg-gradient-to-r from-primary/10 via-accent/10 to-secondary/10 border">
+ <div className="mt-16 text-center p-8 rounded-md bg-gradient-to-r from-primary/10 via-accent/10 to-secondary/10 border">
  <Lightbulb className="w-12 h-12 text-primary mx-auto mb-4" />
  <h2 className="text-2xl font-bold mb-2">Not sure where to start?</h2>
  <p className="text-muted-foreground mb-6 max-w-lg mx-auto">

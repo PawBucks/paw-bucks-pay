@@ -381,7 +381,7 @@
 
   .mapboxgl-popup-content {
     padding: 0;
-    border-radius: 0.75rem;
+    border-radius: 0.375rem;
     box-shadow: var(--shadow-medium);
   }
 

@@ -149,7 +149,7 @@ export const TimelineTeaser = ({ userId, pets }: TimelineTeaserProps) => {
  <div className="flex items-start gap-4">
  {/* Latest moment photo or icon */}
  {latestMoment.photo_url ? (
- <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 shadow-md group-hover:scale-105 transition-transform">
+ <div className="w-16 h-16 rounded-md overflow-hidden flex-shrink-0 shadow-md group-hover:scale-105 transition-transform">
  <img 
  src={latestMoment.photo_url} 
  alt="Latest moment"
@@ -157,7 +157,7 @@ export const TimelineTeaser = ({ userId, pets }: TimelineTeaserProps) => {
  />
  </div>
  ) : (
- <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-2xl flex-shrink-0 group-hover:scale-105 transition-transform">
+ <div className="w-16 h-16 rounded-md bg-gradient-to-br from-primary to-accent flex items-center justify-center text-2xl flex-shrink-0 group-hover:scale-105 transition-transform">
  {latestMoment.emoji}
  </div>
  )}

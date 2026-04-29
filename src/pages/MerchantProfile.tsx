@@ -284,11 +284,11 @@ const MerchantProfile = memo(() => {
  {/* Logo */}
  <div className="flex-shrink-0">
  {merchant.logo_url ? (
- <div className="w-24 h-24 rounded-2xl overflow-hidden shadow-lg border-2 border-border ring-2 ring-primary/10">
+ <div className="w-24 h-24 rounded-md overflow-hidden shadow-lg border-2 border-border ring-2 ring-primary/10">
  <img src={merchant.logo_url} alt={merchant.business_name} className="w-full h-full object-cover" />
  </div>
  ) : (
- <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shadow-lg border-2 border-border">
+ <div className="w-24 h-24 rounded-md bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shadow-lg border-2 border-border">
  <Icon className="w-12 h-12 text-primary" />
  </div>
  )}
@@ -431,7 +431,7 @@ const MerchantProfile = memo(() => {
  <section id="section-overview">
  {/* Featured Review Quote */}
  {featuredReview && (
- <div className="bg-muted rounded-xl p-4 mb-6 border border-border/50">
+ <div className="bg-muted rounded-md p-4 mb-6 border border-border/50">
  <div className="flex items-start gap-3">
  <ThumbsUp className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
  <div>
@@ -498,7 +498,7 @@ const MerchantProfile = memo(() => {
  </div>
  </a>
  {/* Map */}
- <div className="rounded-xl overflow-hidden border">
+ <div className="rounded-md overflow-hidden border">
  <iframe
  title={`Map of ${merchant.business_name}`}
  width="100%"

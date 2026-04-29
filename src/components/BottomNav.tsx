@@ -39,7 +39,7 @@ const BottomNavComponent = () => {
  key={item.to}
  to={item.to}
  className={cn(
-"flex flex-col items-center justify-center gap-0.5 px-2 py-2 rounded-xl transition-all duration-200 min-w-[56px] min-h-[48px] active:scale-95 touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+"flex flex-col items-center justify-center gap-0.5 px-2 py-2 rounded-md transition-all duration-200 min-w-[56px] min-h-[48px] active:scale-95 touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
 "text-muted-foreground hover:text-foreground",
  isActive &&"text-primary"
  )}
