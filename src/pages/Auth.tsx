@@ -258,9 +258,9 @@ const Auth = () => {
  // Redirect already-logged-in users
  useEffect(() => {
  if (user) {
- redirectBasedOnRole(user.id);
+  redirectBasedOnRole(user.id, undefined, false, roleParam);
  }
- }, [user, redirectBasedOnRole]);
+ }, [user, redirectBasedOnRole, roleParam]);
 
  const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
  e.preventDefault();
