@@ -29,7 +29,7 @@ export default function PetStoreProduct() {
  const { itemId } = useParams<{ itemId: string }>();
  const navigate = useNavigate();
  const location = useLocation();
- const { user } = useAuth();
+ const { user, signOut } = useAuth();
  const queryClient = useQueryClient();
  const sharedAccount = useSharedAccount(user?.id);
  const effectiveUserId = getEffectiveWalletUserId(user?.id, sharedAccount);

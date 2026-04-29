@@ -33,8 +33,7 @@ interface Transaction {
  description: string;
 }
 
-const MerchantTransactions = () => {
- const { user, loading } = useAuth();
+const MerchantTransactions = () => { const { user, loading, signOut } = useAuth();
  const navigate = useNavigate();
  
  const [transactions, setTransactions] = useState<Transaction[]>([]);

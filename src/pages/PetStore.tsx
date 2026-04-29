@@ -142,8 +142,7 @@ const PetStorePaymentForm = ({
  );
 };
 
-export default function PetStore() {
- const { user } = useAuth();
+export default function PetStore() { const { user, signOut } = useAuth();
  const navigate = useNavigate();
  const queryClient = useQueryClient();
  const sharedAccount = useSharedAccount(user?.id);

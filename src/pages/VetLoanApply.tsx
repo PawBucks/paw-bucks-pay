@@ -34,8 +34,7 @@ interface LoanResponse {
  }>;
 }
 
-const VetLoanApply = () => {
- const { user, loading } = useAuth();
+const VetLoanApply = () => { const { user, loading, signOut } = useAuth();
  const { subscription, loading: subscriptionLoading, createCheckout } = useSubscription();
  const navigate = useNavigate();
 
