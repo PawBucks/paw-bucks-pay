@@ -41,7 +41,8 @@
     --success-foreground: 0 0% 100%;
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
-    --info: 210 80% 52%;
+    /* Royal blue — used for Verified Pro badge across the platform */
+    --info: 225 75% 45%;
     --info-foreground: 0 0% 100%;
     
     /* Review star gold */
@@ -119,7 +120,8 @@
     --success-foreground: 0 0% 100%;
     --warning: 38 90% 55%;
     --warning-foreground: 0 0% 100%;
-    --info: 210 75% 58%;
+    /* Royal blue (dark mode) */
+    --info: 225 70% 60%;
     --info-foreground: 0 0% 100%;
     
     --gold: 45 95% 55%;
