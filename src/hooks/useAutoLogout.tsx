@@ -1,6 +1,10 @@
 import { useEffect, useRef, useCallback } from'react';
 import { supabase } from'@/integrations/supabase/client';
-import { getAuthRedirectForUser, clearUserAccessCache } from'@/lib/userAccessCache';
+import {
+  getAuthRedirectForUser,
+  getUserAccessInfo,
+  clearUserAccessCache,
+} from'@/lib/userAccessCache';
 
 const INACTIVITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
 
@@ -9,10 +13,27 @@ export const useAutoLogout = (isAuthenticated: boolean) => {
  const lastResetRef = useRef(0);
 
  const logout = useCallback(async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    const redirect = session?.user?.id
-      ? getAuthRedirectForUser(session.user.id)
-      :"/auth";
+    // Resolve the persona-specific redirect BEFORE signing out so that an
+    // expired access cache doesn't cause us to fall back to the generic
+    // /auth page. We warm the cache first if necessary.
+    let redirect ="/auth";
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const userId = session?.user?.id;
+      if (userId) {
+        // Ensure cache is populated/refreshed so getAuthRedirectForUser
+        // can read the persona synchronously even after TTL expiry.
+        try {
+          await getUserAccessInfo(userId);
+        } catch (err) {
+          console.error('Failed to refresh access info before logout:', err);
+        }
+        redirect = getAuthRedirectForUser(userId);
+      }
+    } catch (err) {
+      console.error('Failed to resolve logout redirect:', err);
+    }
+
     await supabase.auth.signOut();
     clearUserAccessCache();
     if (typeof window !=="undefined") {
