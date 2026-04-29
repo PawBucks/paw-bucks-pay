@@ -169,8 +169,8 @@ export function VerificationChecklist({ entityType, entityId, onChecklistComplet
   const answerButton = (questionId: string, value: AnswerValue, current?: AnswerValue) => {
     const isActive = current === value;
     const configs: Record<AnswerValue, { icon: typeof CheckCircle2; label: string; activeClass: string }> = {
-      yes: { icon: CheckCircle2, label: 'Yes', activeClass: 'bg-success/15 border-success/30 text-success dark:bg-green-950 dark:text-success' },
-      no: { icon: XCircle, label: 'No', activeClass: 'bg-destructive/15 border-destructive/30 text-destructive dark:bg-red-950 dark:text-destructive' },
+      yes: { icon: CheckCircle2, label: 'Yes', activeClass: 'bg-success/15 border-success/30 text-success dark:text-success' },
+      no: { icon: XCircle, label: 'No', activeClass: 'bg-destructive/15 border-destructive/30 text-destructive dark:text-destructive' },
       na: { icon: MinusCircle, label: 'N/A', activeClass: 'bg-muted border-muted-foreground/30 text-muted-foreground' },
     };
     const cfg = configs[value];

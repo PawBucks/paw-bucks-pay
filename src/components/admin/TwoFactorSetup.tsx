@@ -289,7 +289,7 @@ export const TwoFactorSetup = ({ onSetupComplete }: TwoFactorSetupProps) => {
       <CardContent>
         {is2FAEnabled ? (
           <div className="space-y-4">
-            <Alert className="border-success/30 bg-success/10 dark:bg-green-950/20">
+            <Alert className="border-success/30 bg-success/10">
               <ShieldCheck className="h-4 w-4 text-success" />
               <AlertDescription className="text-success dark:text-success-foreground">
                 Two-factor authentication is enabled. Your account is more secure.

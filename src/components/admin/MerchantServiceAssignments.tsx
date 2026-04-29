@@ -50,7 +50,7 @@ const STATUS_OPTIONS = [
   { value: 'active', label: 'Active', color: 'bg-success' },
   { value: 'pending', label: 'Pending', color: 'bg-warning' },
   { value: 'paused', label: 'Paused', color: 'bg-warning' },
-  { value: 'expired', label: 'Expired', color: 'bg-gray-500' },
+  { value: 'expired', label: 'Expired', color: 'bg-muted-foreground' },
   { value: 'cancelled', label: 'Cancelled', color: 'bg-destructive' },
 ];
 

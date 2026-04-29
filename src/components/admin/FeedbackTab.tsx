@@ -40,7 +40,7 @@ const statusColors: Record<string, string> = {
   new: "bg-info",
   in_progress: "bg-warning",
   resolved: "bg-success",
-  dismissed: "bg-gray-500",
+  dismissed: "bg-muted-foreground",
 };
 
 const statusLabels: Record<string, string> = {

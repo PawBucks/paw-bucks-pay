@@ -273,7 +273,7 @@ export function TransactionsTab() {
                       {hasPawbucks ? (
                         <div className="flex items-center justify-end gap-1">
                           <Coins className="w-3.5 h-3.5 text-warning" />
-                          <span className="text-sm font-medium text-warning dark:text-amber-400">
+                          <span className="text-sm font-medium text-warning">
                             {pawbucksUsed.toLocaleString()} PB
                           </span>
                         </div>
@@ -348,7 +348,7 @@ export function TransactionsTab() {
                             {hasPawbucks ? (
                               <>
                                 <DetailRow icon={Coins} label="PawBucks Applied" value={
-                                  <span className="text-warning dark:text-amber-400 font-semibold">
+                                  <span className="text-warning font-semibold">
                                     {pawbucksUsed.toLocaleString()} PB (${pawbucksUSD.toFixed(2)})
                                   </span>
                                 } />
@@ -365,7 +365,7 @@ export function TransactionsTab() {
                                 <span className="text-muted-foreground">None</span>
                               } />
                             )}
-                            <DetailRow icon={Receipt} label="Success Fee (3%)" value={`$${platformFee.toFixed(2)}`} className="text-warning dark:text-orange-400" />
+                            <DetailRow icon={Receipt} label="Success Fee (3%)" value={`$${platformFee.toFixed(2)}`} className="text-warning" />
                             <DetailRow icon={DollarSign} label="Merchant Net" value={
                               `$${(transaction.amount - platformFee).toFixed(2)}`
                             } className="text-accent font-semibold" />

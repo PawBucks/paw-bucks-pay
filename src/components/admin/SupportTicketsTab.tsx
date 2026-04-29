@@ -39,7 +39,7 @@ const STATUS_CONFIG: Record<string, { label: string; variant: 'default' | 'secon
 const PRIORITY_CONFIG: Record<string, { label: string; className: string }> = {
   low: { label: 'Low', className: 'bg-muted text-muted-foreground' },
   medium: { label: 'Medium', className: 'bg-primary/10 text-primary' },
-  high: { label: 'High', className: 'bg-warning/10 text-warning dark:bg-orange-900/30 dark:text-orange-400' },
+  high: { label: 'High', className: 'bg-warning/10 text-warning' },
   urgent: { label: 'Urgent', className: 'bg-destructive/10 text-destructive' },
 };
 

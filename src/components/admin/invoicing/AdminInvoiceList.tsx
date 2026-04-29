@@ -56,10 +56,10 @@ interface Props {
 
 const statusColors: Record<string, string> = {
   draft: "bg-muted text-muted-foreground",
-  sent: "bg-info/15 text-info dark:bg-blue-900/30 dark:text-info",
-  paid: "bg-success/15 text-success dark:bg-green-900/30 dark:text-success",
-  partially_paid: "bg-warning/15 text-warning dark:bg-yellow-900/30 dark:text-yellow-400",
-  overdue: "bg-destructive/15 text-destructive dark:bg-red-900/30 dark:text-destructive",
+  sent: "bg-info/15 text-info dark:text-info",
+  paid: "bg-success/15 text-success dark:text-success",
+  partially_paid: "bg-warning/15 text-warning",
+  overdue: "bg-destructive/15 text-destructive dark:text-destructive",
   cancelled: "bg-muted text-muted-foreground dark:bg-foreground dark:text-muted-foreground",
   void: "bg-muted text-muted-foreground dark:bg-foreground dark:text-muted-foreground",
 };

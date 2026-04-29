@@ -406,8 +406,8 @@ export default function PetStoreAdmin() {
                           </div>
                           <span className={`px-2 py-1 rounded-full text-xs ${
                             item.is_active 
-                              ? "bg-success/15 text-success dark:bg-green-900 dark:text-success-foreground"
-                              : "bg-muted text-foreground dark:bg-foreground dark:text-gray-100"
+                              ? "bg-success/15 text-success dark:text-success-foreground"
+                              : "bg-muted text-foreground dark:bg-foreground"
                           }`}>
                             {item.is_active ? "Active" : "Inactive"}
                           </span>
@@ -471,8 +471,8 @@ export default function PetStoreAdmin() {
                         <TableCell>
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                             item.item_type === 'service'
-                              ? "bg-info/15 text-info dark:bg-blue-900 dark:text-blue-100"
-                              : "bg-primary/15 text-primary dark:bg-purple-900 dark:text-purple-100"
+                              ? "bg-info/15 text-info"
+                              : "bg-primary/15 text-primary"
                           }`}>
                             {item.item_type === 'service' ? 'Service' : 'Product'}
                           </span>
@@ -485,8 +485,8 @@ export default function PetStoreAdmin() {
                         <TableCell>
                           <span className={`px-2 py-1 rounded-full text-xs ${
                             item.is_active 
-                              ? "bg-success/15 text-success dark:bg-green-900 dark:text-success-foreground"
-                              : "bg-muted text-foreground dark:bg-foreground dark:text-gray-100"
+                              ? "bg-success/15 text-success dark:text-success-foreground"
+                              : "bg-muted text-foreground dark:bg-foreground"
                           }`}>
                             {item.is_active ? "Active" : "Inactive"}
                           </span>
