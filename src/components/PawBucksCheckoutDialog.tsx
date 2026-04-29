@@ -21,6 +21,7 @@ import {
   isPromoActive,
   type MerchantCapFields,
 } from"@/lib/pawbucksCap";
+import { PawBucksCapBreakdown } from"@/components/checkout/PawBucksCapBreakdown";
 
 // Pet Owner conversion rate: 1000 PawBucks = $1.00 (1 PawBuck = $0.001)
 const PAWBUCKS_TO_USD = 0.001;
@@ -254,15 +255,11 @@ export const PawBucksCheckoutDialog = ({
  </div>
 
                 {capPctActive != null && (
-                  <div className="flex items-center justify-between text-xs rounded-md border border-info/20 bg-info/5 px-2.5 py-1.5">
-                    <span className="text-info">
-                      Up to <strong>{capPctActive}%</strong> of subtotal in PawBucks
-                      {promoActive && <span className="ml-1 text-warning">(promo!)</span>}
-                    </span>
-                    <span className="text-muted-foreground tabular-nums">
-                      max ${capUsdMax.toFixed(2)}
-                    </span>
-                  </div>
+                  <PawBucksCapBreakdown
+                    merchantCap={merchantCap}
+                    subtotalUsd={priceAmount}
+                    merchantName={merchantName}
+                  />
                 )}
 
  {/* Slider instruction hint */}
