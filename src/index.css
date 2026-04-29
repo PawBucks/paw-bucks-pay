@@ -120,9 +120,9 @@
     --success-foreground: 0 0% 100%;
     --warning: 38 90% 55%;
     --warning-foreground: 0 0% 100%;
-    /* Royal blue (dark mode) */
-    --info: 225 70% 60%;
-    --info-foreground: 0 0% 100%;
+    /* Royal blue (dark mode) — lightened to L 70% for WCAG AA on dark surfaces */
+    --info: 225 70% 70%;
+    --info-foreground: 220 30% 12%;
     
     --gold: 45 95% 55%;
     --gold-foreground: 30 50% 15%;
