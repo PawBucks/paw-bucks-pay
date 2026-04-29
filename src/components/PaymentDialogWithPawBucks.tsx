@@ -551,6 +551,21 @@ export const PaymentDialogWithPawBucks = ({
  </span>
  </div>
 
+              {capPct != null && (
+                <div className="flex items-center justify-between text-xs rounded-md border border-info/20 bg-info/5 px-2.5 py-1.5">
+                  <span className="text-info">
+                    {merchantName} accepts up to <strong>{capPct}%</strong> of the
+                    subtotal in PawBucks
+                    {promoActive && (
+                      <span className="ml-1 text-warning">(promo!)</span>
+                    )}
+                  </span>
+                  <span className="text-muted-foreground tabular-nums">
+                    max ${capUsdMax.toFixed(2)}
+                  </span>
+                </div>
+              )}
+
  {/* Slider instruction hint */}
  {pawbucksToUse === 0 && (
  <div className="flex items-center gap-2 text-xs text-primary bg-primary/10 px-3 py-2 rounded-md animate-pulse">
