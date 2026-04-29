@@ -200,11 +200,11 @@ export function PMSIntegrationManager({ vetId }: PMSIntegrationManagerProps) {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "completed":
-        return <Badge className="bg-green-100 text-green-800"><CheckCircle className="h-3 w-3 mr-1" />Completed</Badge>;
+        return <Badge className="bg-success/10 text-success"><CheckCircle className="h-3 w-3 mr-1" />Completed</Badge>;
       case "failed":
         return <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />Failed</Badge>;
       case "in_progress":
-        return <Badge className="bg-blue-100 text-blue-800"><RefreshCw className="h-3 w-3 mr-1 animate-spin" />In Progress</Badge>;
+        return <Badge className="bg-info/10 text-info"><RefreshCw className="h-3 w-3 mr-1 animate-spin" />In Progress</Badge>;
       default:
         return <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" />Pending</Badge>;
     }
@@ -515,14 +515,14 @@ export function PMSIntegrationManager({ vetId }: PMSIntegrationManagerProps) {
       )}
 
       {/* Info Card */}
-      <Card className="p-4 bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800">
+      <Card className="p-4 bg-info/10 /30 border-info/20">
         <div className="flex items-start gap-3">
-          <Database className="h-5 w-5 text-blue-600 mt-0.5" />
+          <Database className="h-5 w-5 text-info mt-0.5" />
           <div>
-            <h4 className="font-medium text-blue-900 dark:text-blue-100">
+            <h4 className="font-medium text-info">
               How PMS Integration Works
             </h4>
-            <p className="text-sm text-blue-700 dark:text-blue-300">
+            <p className="text-sm text-info">
               Once connected, patient records sync automatically. When you update a vaccine in your PMS, 
               it updates the owner's PawBucks Health Tracker. Conversely, if an owner shares medical records 
               from another vet, you'll see them in your system.

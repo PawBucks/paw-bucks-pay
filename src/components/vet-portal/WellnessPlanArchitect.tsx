@@ -275,7 +275,7 @@ export function WellnessPlanArchitect({ vetId }: WellnessPlanArchitectProps) {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2">
-            <Heart className="h-6 w-6 text-pink-500" />
+            <Heart className="h-6 w-6 text-destructive" />
             Wellness Plan Architect
           </h2>
           <p className="text-muted-foreground">
@@ -584,7 +584,7 @@ export function WellnessPlanArchitect({ vetId }: WellnessPlanArchitectProps) {
 
                 {/* Savings Summary */}
                 {parseFloat(newPlan.monthly_price) > 0 && planServices.length > 0 && (
-                  <Card className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 border-green-200">
+                  <Card className="bg-gradient-to-r from-success/20 to-success/20 /30 /30 border-success/20">
                     <CardContent className="py-4">
                       <div className="grid grid-cols-3 gap-4 text-center">
                         <div>
@@ -597,7 +597,7 @@ export function WellnessPlanArchitect({ vetId }: WellnessPlanArchitectProps) {
                         </div>
                         <div>
                           <p className="text-xs text-muted-foreground">Customer Savings</p>
-                          <p className="text-lg font-bold text-green-600">
+                          <p className="text-lg font-bold text-success">
                             {totals.savingsPercentage > 0 ? `${totals.savingsPercentage.toFixed(0)}%` : "—"}
                           </p>
                         </div>
@@ -693,7 +693,7 @@ export function WellnessPlanArchitect({ vetId }: WellnessPlanArchitectProps) {
                   </div>
 
                   {plan.savings_percentage && plan.savings_percentage > 0 && (
-                    <Badge variant="outline" className="text-green-600 border-green-300">
+                    <Badge variant="outline" className="text-success border-success/40">
                       Save {plan.savings_percentage.toFixed(0)}% vs. à la carte
                     </Badge>
                   )}
@@ -766,10 +766,10 @@ export function WellnessPlanArchitect({ vetId }: WellnessPlanArchitectProps) {
       )}
 
       {/* Info Card */}
-      <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30">
+      <Card className="bg-gradient-to-r from-info/20 to-primary/20 /30 /30">
         <CardContent className="py-4">
           <div className="flex items-start gap-3">
-            <DollarSign className="h-5 w-5 text-blue-600 mt-0.5" />
+            <DollarSign className="h-5 w-5 text-info mt-0.5" />
             <div>
               <p className="font-medium">How Wellness Plan Billing Works</p>
               <p className="text-sm text-muted-foreground mt-1">

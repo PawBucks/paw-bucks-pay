@@ -134,11 +134,11 @@ export const SurgicalNotesTab = ({ petId, vetId }: SurgicalNotesTabProps) => {
   const getOutcomeIcon = (outcome: string) => {
     switch (outcome) {
       case "successful":
-        return <CheckCircle className="w-4 h-4 text-green-500" />;
+        return <CheckCircle className="w-4 h-4 text-success" />;
       case "complications":
-        return <AlertCircle className="w-4 h-4 text-amber-500" />;
+        return <AlertCircle className="w-4 h-4 text-warning" />;
       default:
-        return <AlertCircle className="w-4 h-4 text-red-500" />;
+        return <AlertCircle className="w-4 h-4 text-destructive" />;
     }
   };
 
@@ -375,8 +375,8 @@ export const SurgicalNotesTab = ({ petId, vetId }: SurgicalNotesTabProps) => {
                         </div>
                       )}
                       {note.complications && (
-                        <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20">
-                          <strong className="text-amber-700 dark:text-amber-400">Complications:</strong>
+                        <div className="p-3 rounded-lg bg-warning/10 /20">
+                          <strong className="text-warning dark:text-amber-400">Complications:</strong>
                           <p className="text-sm mt-1">{note.complications}</p>
                         </div>
                       )}

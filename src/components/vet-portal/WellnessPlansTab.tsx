@@ -239,13 +239,13 @@ export function WellnessPlansTab({ vetId }: WellnessPlansTabProps) {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "active":
-        return <Badge className="bg-green-100 text-green-700">Active</Badge>;
+        return <Badge className="bg-success/10 text-success">Active</Badge>;
       case "completed":
-        return <Badge className="bg-blue-100 text-blue-700">Completed</Badge>;
+        return <Badge className="bg-info/10 text-info">Completed</Badge>;
       case "cancelled":
-        return <Badge className="bg-red-100 text-red-700">Cancelled</Badge>;
+        return <Badge className="bg-destructive/10 text-destructive">Cancelled</Badge>;
       case "expired":
-        return <Badge className="bg-gray-100 text-gray-700">Expired</Badge>;
+        return <Badge className="bg-muted text-muted-foreground">Expired</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -469,11 +469,11 @@ export function WellnessPlansTab({ vetId }: WellnessPlansTabProps) {
 
                     <div className="flex items-center gap-4 mt-4">
                       <div className="flex items-center gap-1">
-                        <DollarSign className="h-4 w-4 text-green-600" />
+                        <DollarSign className="h-4 w-4 text-success" />
                         <span className="font-bold">${plan.price_usd}</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <Coins className="h-4 w-4 text-amber-600" />
+                        <Coins className="h-4 w-4 text-warning" />
                         <span className="font-bold">{plan.price_pawbucks.toLocaleString()}</span>
                       </div>
                       {!plan.is_active && (
@@ -549,7 +549,7 @@ export function WellnessPlansTab({ vetId }: WellnessPlansTabProps) {
                         <div className="text-sm">
                           {purchase.payment_method === 'pawbucks' ? (
                             <span className="flex items-center gap-1">
-                              <Coins className="h-3 w-3 text-amber-600" />
+                              <Coins className="h-3 w-3 text-warning" />
                               {purchase.amount_pawbucks?.toLocaleString()}
                             </span>
                           ) : purchase.payment_method === 'combined' ? (
@@ -607,14 +607,14 @@ export function WellnessPlansTab({ vetId }: WellnessPlansTabProps) {
       </Tabs>
 
       {/* Info Card */}
-      <Card className="p-4 bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800">
+      <Card className="p-4 bg-warning/10 /30 border-warning/20">
         <div className="flex items-start gap-3">
-          <Coins className="h-5 w-5 text-amber-600 mt-0.5" />
+          <Coins className="h-5 w-5 text-warning mt-0.5" />
           <div>
-            <h4 className="font-medium text-amber-900 dark:text-amber-100">
+            <h4 className="font-medium text-warning">
               PawBucks Integration
             </h4>
-            <p className="text-sm text-amber-700 dark:text-amber-300">
+            <p className="text-sm text-warning">
               Pet owners can use their accumulated PawBucks rewards to pay for wellness plans. 
               This encourages preventive care by making it more accessible. You'll receive the 
               full USD value regardless of payment method.

@@ -179,13 +179,13 @@ export const PrescriptionRefillsTab = ({ vetId }: PrescriptionRefillsTabProps) =
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "pending":
-        return <Badge className="bg-yellow-500"><Clock className="w-3 h-3 mr-1" />Pending</Badge>;
+        return <Badge className="bg-warning"><Clock className="w-3 h-3 mr-1" />Pending</Badge>;
       case "approved":
-        return <Badge className="bg-blue-500"><Check className="w-3 h-3 mr-1" />Approved</Badge>;
+        return <Badge className="bg-info"><Check className="w-3 h-3 mr-1" />Approved</Badge>;
       case "denied":
         return <Badge variant="destructive"><X className="w-3 h-3 mr-1" />Denied</Badge>;
       case "fulfilled":
-        return <Badge className="bg-green-500"><Package className="w-3 h-3 mr-1" />Fulfilled</Badge>;
+        return <Badge className="bg-success"><Package className="w-3 h-3 mr-1" />Fulfilled</Badge>;
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
@@ -225,10 +225,10 @@ export const PrescriptionRefillsTab = ({ vetId }: PrescriptionRefillsTabProps) =
         <div className="space-y-6">
           {pendingRequests.length > 0 && (
             <div>
-              <h3 className="font-medium mb-3 text-yellow-600">Pending Review ({pendingRequests.length})</h3>
+              <h3 className="font-medium mb-3 text-warning">Pending Review ({pendingRequests.length})</h3>
               <div className="grid gap-4">
                 {pendingRequests.map((request) => (
-                  <Card key={request.id} className="p-4 border-yellow-200 bg-yellow-50/50">
+                  <Card key={request.id} className="p-4 border-warning/20 bg-warning/10/50">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
@@ -283,10 +283,10 @@ export const PrescriptionRefillsTab = ({ vetId }: PrescriptionRefillsTabProps) =
 
           {approvedRequests.length > 0 && (
             <div>
-              <h3 className="font-medium mb-3 text-blue-600">Approved - Awaiting Fulfillment ({approvedRequests.length})</h3>
+              <h3 className="font-medium mb-3 text-info">Approved - Awaiting Fulfillment ({approvedRequests.length})</h3>
               <div className="grid gap-4">
                 {approvedRequests.map((request) => (
-                  <Card key={request.id} className="p-4 border-blue-200 bg-blue-50/50">
+                  <Card key={request.id} className="p-4 border-info/20 bg-info/10/50">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">

@@ -149,14 +149,14 @@ export function LostPetAlertsWidget({ vetId }: LostPetAlertsWidgetProps) {
     <div className="space-y-4">
       {/* Critical Patient Alerts */}
       {patientAlerts.length > 0 && (
-        <Card className="border-red-300 bg-red-50 dark:bg-red-950/30 dark:border-red-800">
-          <div className="p-4 border-b border-red-200 dark:border-red-800">
+        <Card className="border-destructive/40 bg-destructive/10 /30">
+          <div className="p-4 border-b border-destructive/20">
             <div className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-red-600 animate-pulse" />
-              <h3 className="font-semibold text-red-900 dark:text-red-100">
+              <AlertTriangle className="h-5 w-5 text-destructive animate-pulse" />
+              <h3 className="font-semibold text-destructive">
                 ⚠️ YOUR PATIENT IS LOST!
               </h3>
-              <Badge className="bg-red-600 text-white ml-auto">
+              <Badge className="bg-destructive text-white ml-auto">
                 {patientAlerts.length} Alert{patientAlerts.length > 1 ? 's' : ''}
               </Badge>
             </div>
@@ -168,7 +168,7 @@ export function LostPetAlertsWidget({ vetId }: LostPetAlertsWidgetProps) {
               return (
                 <div 
                   key={alert.id}
-                  className="flex items-start gap-4 p-3 bg-white dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-700"
+                  className="flex items-start gap-4 p-3 bg-white /20 rounded-lg border border-destructive/20"
                 >
                   {photos[0] ? (
                     <img 
@@ -177,14 +177,14 @@ export function LostPetAlertsWidget({ vetId }: LostPetAlertsWidgetProps) {
                       className="w-16 h-16 rounded-lg object-cover"
                     />
                   ) : (
-                    <div className="w-16 h-16 rounded-lg bg-red-100 dark:bg-red-800 flex items-center justify-center">
-                      <Icon className="h-8 w-8 text-red-600" />
+                    <div className="w-16 h-16 rounded-lg bg-destructive/10 flex items-center justify-center">
+                      <Icon className="h-8 w-8 text-destructive" />
                     </div>
                   )}
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       <h4 className="font-bold text-lg">{alert.pet_name}</h4>
-                      <Badge variant="outline" className="border-red-300 text-red-700">
+                      <Badge variant="outline" className="border-destructive/40 text-destructive">
                         {alert.pet_type} • {alert.breed}
                       </Badge>
                     </div>
@@ -199,7 +199,7 @@ export function LostPetAlertsWidget({ vetId }: LostPetAlertsWidgetProps) {
                     {alert.contact_phone && (
                       <div className="flex items-center gap-2 text-sm mt-1">
                         <Phone className="h-3 w-3" />
-                        <a href={`tel:${alert.contact_phone}`} className="text-blue-600 hover:underline">
+                        <a href={`tel:${alert.contact_phone}`} className="text-info hover:underline">
                           {alert.contact_phone}
                         </a>
                       </div>
@@ -208,7 +208,7 @@ export function LostPetAlertsWidget({ vetId }: LostPetAlertsWidgetProps) {
                   <Button 
                     size="sm"
                     onClick={() => setSelectedAlert(alert)}
-                    className="bg-red-600 hover:bg-red-700"
+                    className="bg-destructive hover:bg-destructive"
                   >
                     <Eye className="h-4 w-4 mr-1" />
                     Review
@@ -225,7 +225,7 @@ export function LostPetAlertsWidget({ vetId }: LostPetAlertsWidgetProps) {
         <Card>
           <div className="p-4 border-b">
             <div className="flex items-center gap-2">
-              <Bell className="h-5 w-5 text-amber-600" />
+              <Bell className="h-5 w-5 text-warning" />
               <h3 className="font-semibold">Lost Pets in Your Area</h3>
               <Badge variant="outline" className="ml-auto">
                 {otherAlerts.length}
@@ -275,7 +275,7 @@ export function LostPetAlertsWidget({ vetId }: LostPetAlertsWidgetProps) {
       {/* No Alerts State */}
       {patientAlerts.length === 0 && otherAlerts.length === 0 && (
         <Card className="p-6 text-center text-muted-foreground">
-          <CheckCircle className="h-10 w-10 mx-auto mb-2 text-green-500 opacity-50" />
+          <CheckCircle className="h-10 w-10 mx-auto mb-2 text-success opacity-50" />
           <p className="font-medium">No Lost Pet Alerts</p>
           <p className="text-sm">All clear! No patients are currently reported as lost.</p>
         </Card>
@@ -286,7 +286,7 @@ export function LostPetAlertsWidget({ vetId }: LostPetAlertsWidgetProps) {
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-red-500" />
+              <AlertTriangle className="h-5 w-5 text-destructive" />
               Lost Pet Alert
             </DialogTitle>
           </DialogHeader>
@@ -328,7 +328,7 @@ export function LostPetAlertsWidget({ vetId }: LostPetAlertsWidgetProps) {
                 {selectedAlert.contact_phone && (
                   <div className="flex items-center gap-2">
                     <Phone className="h-4 w-4 text-muted-foreground" />
-                    <a href={`tel:${selectedAlert.contact_phone}`} className="text-blue-600 hover:underline">
+                    <a href={`tel:${selectedAlert.contact_phone}`} className="text-info hover:underline">
                       {selectedAlert.contact_phone}
                     </a>
                   </div>
@@ -343,8 +343,8 @@ export function LostPetAlertsWidget({ vetId }: LostPetAlertsWidgetProps) {
               )}
 
               {selectedAlert.isPatient && (
-                <div className="p-3 bg-amber-50 dark:bg-amber-950/30 rounded-lg border border-amber-200 dark:border-amber-800">
-                  <p className="text-sm text-amber-800 dark:text-amber-200 font-medium">
+                <div className="p-3 bg-warning/10 /30 rounded-lg border border-warning/20">
+                  <p className="text-sm text-warning font-medium">
                     ⚠️ This is one of your patients! If they are brought in, 
                     immediately contact the owner.
                   </p>

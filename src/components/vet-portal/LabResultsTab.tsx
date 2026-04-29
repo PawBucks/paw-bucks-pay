@@ -181,9 +181,9 @@ export const LabResultsTab = ({ petId, vetId }: LabResultsTabProps) => {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "reviewed":
-        return <CheckCircle className="w-4 h-4 text-green-500" />;
+        return <CheckCircle className="w-4 h-4 text-success" />;
       case "completed":
-        return <AlertCircle className="w-4 h-4 text-amber-500" />;
+        return <AlertCircle className="w-4 h-4 text-warning" />;
       default:
         return <Clock className="w-4 h-4 text-muted-foreground" />;
     }
@@ -356,7 +356,7 @@ export const LabResultsTab = ({ petId, vetId }: LabResultsTabProps) => {
                       </div>
                       <div className="flex items-center gap-2">
                         {result.abnormal_flags && result.abnormal_flags.length > 0 && (
-                          <Badge variant="outline" className="border-amber-500 text-amber-500">
+                          <Badge variant="outline" className="border-warning text-warning">
                             {result.abnormal_flags.length} Abnormal
                           </Badge>
                         )}
@@ -379,11 +379,11 @@ export const LabResultsTab = ({ petId, vetId }: LabResultsTabProps) => {
                         <p className="text-sm mt-1">{result.result_summary}</p>
                       </div>
                       {result.abnormal_flags && result.abnormal_flags.length > 0 && (
-                        <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20">
-                          <strong className="text-amber-700 dark:text-amber-400">Abnormal Values:</strong>
+                        <div className="p-3 rounded-lg bg-warning/10 /20">
+                          <strong className="text-warning dark:text-amber-400">Abnormal Values:</strong>
                           <div className="flex flex-wrap gap-2 mt-2">
                             {result.abnormal_flags.map((flag, idx) => (
-                              <Badge key={idx} variant="outline" className="border-amber-500">
+                              <Badge key={idx} variant="outline" className="border-warning">
                                 {flag}
                               </Badge>
                             ))}

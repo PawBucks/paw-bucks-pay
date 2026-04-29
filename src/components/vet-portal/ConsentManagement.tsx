@@ -163,13 +163,13 @@ export const ConsentManagement = ({ vetId }: ConsentManagementProps) => {
   const getStatusIcon = (status: ConsentStatus) => {
     switch (status) {
       case "signed":
-        return <CheckCircle className="w-4 h-4 text-green-500" />;
+        return <CheckCircle className="w-4 h-4 text-success" />;
       case "declined":
-        return <XCircle className="w-4 h-4 text-red-500" />;
+        return <XCircle className="w-4 h-4 text-destructive" />;
       case "expired":
         return <Clock className="w-4 h-4 text-muted-foreground" />;
       default:
-        return <Clock className="w-4 h-4 text-amber-500" />;
+        return <Clock className="w-4 h-4 text-warning" />;
     }
   };
 

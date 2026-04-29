@@ -257,8 +257,8 @@ export const AutoSOAPGenerator = ({ vetId }: AutoSOAPGeneratorProps) => {
       {/* Recording Section */}
       <Card className="p-6">
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-            <Mic className="w-5 h-5 text-blue-600" />
+          <div className="w-10 h-10 rounded-full bg-info/10 /30 flex items-center justify-center">
+            <Mic className="w-5 h-5 text-info" />
           </div>
           <div>
             <h3 className="text-lg font-semibold">Voice-to-SOAP Generator</h3>
@@ -287,7 +287,7 @@ export const AutoSOAPGenerator = ({ vetId }: AutoSOAPGeneratorProps) => {
               <Button
                 onClick={startRecording}
                 disabled={!selectedPetId}
-                className="bg-red-500 hover:bg-red-600"
+                className="bg-destructive hover:bg-destructive"
               >
                 <Mic className="w-4 h-4 mr-2" />
                 Start Recording
@@ -296,7 +296,7 @@ export const AutoSOAPGenerator = ({ vetId }: AutoSOAPGeneratorProps) => {
               <Button
                 onClick={stopRecording}
                 variant="outline"
-                className="border-red-500 text-red-500"
+                className="border-destructive text-destructive"
               >
                 <MicOff className="w-4 h-4 mr-2" />
                 Stop ({formatTime(recordingTime)})
@@ -305,10 +305,10 @@ export const AutoSOAPGenerator = ({ vetId }: AutoSOAPGeneratorProps) => {
           </div>
 
           {isRecording && (
-            <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-4">
+            <div className="bg-destructive/10 /20 rounded-lg p-4">
               <div className="flex items-center gap-2 mb-2">
-                <span className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
-                <span className="text-sm font-medium text-red-600 dark:text-red-400">
+                <span className="w-3 h-3 bg-destructive rounded-full animate-pulse" />
+                <span className="text-sm font-medium text-destructive">
                   Recording in progress...
                 </span>
               </div>
@@ -435,7 +435,7 @@ export const AutoSOAPGenerator = ({ vetId }: AutoSOAPGeneratorProps) => {
                     <div className="grid gap-3">
                       <div className="space-y-1">
                         <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium text-blue-600">
+                          <span className="text-sm font-medium text-info">
                             Subjective
                           </span>
                           <Button
@@ -446,14 +446,14 @@ export const AutoSOAPGenerator = ({ vetId }: AutoSOAPGeneratorProps) => {
                             <Copy className="w-3 h-3" />
                           </Button>
                         </div>
-                        <p className="text-sm bg-blue-50 dark:bg-blue-900/20 rounded p-2">
+                        <p className="text-sm bg-info/10 /20 rounded p-2">
                           {draft.ai_subjective}
                         </p>
                       </div>
 
                       <div className="space-y-1">
                         <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium text-green-600">
+                          <span className="text-sm font-medium text-success">
                             Objective
                           </span>
                           <Button
@@ -464,14 +464,14 @@ export const AutoSOAPGenerator = ({ vetId }: AutoSOAPGeneratorProps) => {
                             <Copy className="w-3 h-3" />
                           </Button>
                         </div>
-                        <p className="text-sm bg-green-50 dark:bg-green-900/20 rounded p-2">
+                        <p className="text-sm bg-success/10 /20 rounded p-2">
                           {draft.ai_objective}
                         </p>
                       </div>
 
                       <div className="space-y-1">
                         <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium text-purple-600">
+                          <span className="text-sm font-medium text-primary">
                             Assessment (Suggested)
                           </span>
                           <Button
@@ -484,14 +484,14 @@ export const AutoSOAPGenerator = ({ vetId }: AutoSOAPGeneratorProps) => {
                             <Copy className="w-3 h-3" />
                           </Button>
                         </div>
-                        <p className="text-sm bg-purple-50 dark:bg-purple-900/20 rounded p-2">
+                        <p className="text-sm bg-primary/10 /20 rounded p-2">
                           {draft.ai_suggested_assessment}
                         </p>
                       </div>
 
                       <div className="space-y-1">
                         <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium text-amber-600">
+                          <span className="text-sm font-medium text-warning">
                             Plan (Suggested)
                           </span>
                           <Button
@@ -504,7 +504,7 @@ export const AutoSOAPGenerator = ({ vetId }: AutoSOAPGeneratorProps) => {
                             <Copy className="w-3 h-3" />
                           </Button>
                         </div>
-                        <p className="text-sm bg-amber-50 dark:bg-amber-900/20 rounded p-2">
+                        <p className="text-sm bg-warning/10 /20 rounded p-2">
                           {draft.ai_suggested_plan}
                         </p>
                       </div>
@@ -534,14 +534,14 @@ export const AutoSOAPGenerator = ({ vetId }: AutoSOAPGeneratorProps) => {
       {typeof window !== "undefined" &&
         !("SpeechRecognition" in window) &&
         !("webkitSpeechRecognition" in window) && (
-          <Card className="p-4 bg-amber-50 dark:bg-amber-900/20 border-amber-200">
+          <Card className="p-4 bg-warning/10 /20 border-warning/20">
             <div className="flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+              <AlertCircle className="w-5 h-5 text-warning flex-shrink-0 mt-0.5" />
               <div>
-                <p className="font-medium text-amber-800 dark:text-amber-200">
+                <p className="font-medium text-warning">
                   Limited Browser Support
                 </p>
-                <p className="text-sm text-amber-700 dark:text-amber-300">
+                <p className="text-sm text-warning">
                   Voice-to-text works best in Chrome or Edge. You can still manually
                   type or paste transcriptions.
                 </p>

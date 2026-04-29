@@ -296,9 +296,9 @@ export const EMRDashboard = ({ vetId }: EMRDashboardProps) => {
                   >
                     <div className="flex items-start gap-2">
                       {activity.type === "soap" ? (
-                        <FileText className="w-4 h-4 mt-0.5 text-blue-500" />
+                        <FileText className="w-4 h-4 mt-0.5 text-info" />
                       ) : (
-                        <FlaskConical className="w-4 h-4 mt-0.5 text-green-500" />
+                        <FlaskConical className="w-4 h-4 mt-0.5 text-success" />
                       )}
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium truncate">
@@ -333,8 +333,8 @@ export const EMRDashboard = ({ vetId }: EMRDashboardProps) => {
       <div className="grid gap-4 md:grid-cols-4">
         <Card className="p-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-              <FileText className="w-5 h-5 text-blue-600" />
+            <div className="w-10 h-10 rounded-full bg-info/10 /30 flex items-center justify-center">
+              <FileText className="w-5 h-5 text-info" />
             </div>
             <div>
               <p className="text-2xl font-bold">{patients.length}</p>
@@ -344,8 +344,8 @@ export const EMRDashboard = ({ vetId }: EMRDashboardProps) => {
         </Card>
         <Card className="p-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-              <Syringe className="w-5 h-5 text-green-600" />
+            <div className="w-10 h-10 rounded-full bg-success/10 /30 flex items-center justify-center">
+              <Syringe className="w-5 h-5 text-success" />
             </div>
             <div>
               <p className="text-2xl font-bold">
@@ -357,8 +357,8 @@ export const EMRDashboard = ({ vetId }: EMRDashboardProps) => {
         </Card>
         <Card className="p-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-              <FlaskConical className="w-5 h-5 text-purple-600" />
+            <div className="w-10 h-10 rounded-full bg-primary/10 /30 flex items-center justify-center">
+              <FlaskConical className="w-5 h-5 text-primary" />
             </div>
             <div>
               <p className="text-2xl font-bold">
@@ -370,8 +370,8 @@ export const EMRDashboard = ({ vetId }: EMRDashboardProps) => {
         </Card>
         <Card className="p-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
-              <AlertTriangle className="w-5 h-5 text-amber-600" />
+            <div className="w-10 h-10 rounded-full bg-warning/10 /30 flex items-center justify-center">
+              <AlertTriangle className="w-5 h-5 text-warning" />
             </div>
             <div>
               <p className="text-2xl font-bold">0</p>

@@ -261,19 +261,19 @@ export const AllergiesTab = ({ petId, vetId, onUpdate }: AllergiesTabProps) => {
                   <div
                     className={`w-10 h-10 rounded-full flex items-center justify-center ${
                       allergy.severity === "severe"
-                        ? "bg-red-100 dark:bg-red-900/30"
+                        ? "bg-destructive/10 /30"
                         : allergy.severity === "moderate"
-                        ? "bg-amber-100 dark:bg-amber-900/30"
-                        : "bg-yellow-100 dark:bg-yellow-900/30"
+                        ? "bg-warning/10 /30"
+                        : "bg-warning/10 /30"
                     }`}
                   >
                     <AlertTriangle
                       className={`w-5 h-5 ${
                         allergy.severity === "severe"
-                          ? "text-red-600"
+                          ? "text-destructive"
                           : allergy.severity === "moderate"
-                          ? "text-amber-600"
-                          : "text-yellow-600"
+                          ? "text-warning"
+                          : "text-warning"
                       }`}
                     />
                   </div>

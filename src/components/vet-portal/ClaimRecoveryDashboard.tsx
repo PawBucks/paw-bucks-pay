@@ -77,15 +77,15 @@ const getStatusProgress = (status: string): number => {
 const getStatusColor = (status: string): string => {
   switch (status) {
     case "funded":
-      return "bg-green-500";
+      return "bg-success";
     case "option_selected":
-      return "bg-blue-500";
+      return "bg-info";
     case "notification_sent":
-      return "bg-amber-500";
+      return "bg-warning";
     case "written_off":
-      return "bg-gray-400";
+      return "bg-muted/50";
     default:
-      return "bg-indigo-500";
+      return "bg-primary";
   }
 };
 
@@ -166,9 +166,9 @@ export function ClaimRecoveryDashboard({ vetId }: ClaimRecoveryDashboardProps) {
 
   if (isLoading) {
     return (
-      <Card className="bg-white border-indigo-100">
+      <Card className="bg-white border-primary/20">
         <CardContent className="p-8 text-center">
-          <RefreshCw className="h-8 w-8 animate-spin mx-auto text-indigo-600" />
+          <RefreshCw className="h-8 w-8 animate-spin mx-auto text-primary" />
           <p className="mt-2 text-muted-foreground">Loading recovery data...</p>
         </CardContent>
       </Card>
@@ -179,25 +179,25 @@ export function ClaimRecoveryDashboard({ vetId }: ClaimRecoveryDashboardProps) {
     <div className="space-y-6">
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card className="bg-white border-indigo-100">
+        <Card className="bg-white border-primary/20">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-red-50">
-                <TrendingDown className="h-5 w-5 text-red-600" />
+              <div className="p-2 rounded-lg bg-destructive/10">
+                <TrendingDown className="h-5 w-5 text-destructive" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Total Gap Amount</p>
-                <p className="text-2xl font-bold text-red-600">${totalGap.toFixed(2)}</p>
+                <p className="text-2xl font-bold text-destructive">${totalGap.toFixed(2)}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-white border-indigo-100">
+        <Card className="bg-white border-primary/20">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-amber-50">
-                <Clock className="h-5 w-5 text-amber-600" />
+              <div className="p-2 rounded-lg bg-warning/10">
+                <Clock className="h-5 w-5 text-warning" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Pending Action</p>
@@ -207,11 +207,11 @@ export function ClaimRecoveryDashboard({ vetId }: ClaimRecoveryDashboardProps) {
           </CardContent>
         </Card>
 
-        <Card className="bg-white border-indigo-100">
+        <Card className="bg-white border-primary/20">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-blue-50">
-                <Send className="h-5 w-5 text-blue-600" />
+              <div className="p-2 rounded-lg bg-info/10">
+                <Send className="h-5 w-5 text-info" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">In Progress</p>
@@ -221,15 +221,15 @@ export function ClaimRecoveryDashboard({ vetId }: ClaimRecoveryDashboardProps) {
           </CardContent>
         </Card>
 
-        <Card className="bg-white border-indigo-100">
+        <Card className="bg-white border-primary/20">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-green-50">
-                <CheckCircle className="h-5 w-5 text-green-600" />
+              <div className="p-2 rounded-lg bg-success/10">
+                <CheckCircle className="h-5 w-5 text-success" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Recovered</p>
-                <p className="text-2xl font-bold text-green-600">{fundedCount}</p>
+                <p className="text-2xl font-bold text-success">{fundedCount}</p>
               </div>
             </div>
           </CardContent>
@@ -237,24 +237,24 @@ export function ClaimRecoveryDashboard({ vetId }: ClaimRecoveryDashboardProps) {
       </div>
 
       {/* Underpaid Slices Table */}
-      <Card className="bg-white border-indigo-100">
-        <CardHeader className="border-b border-indigo-50">
-          <CardTitle className="flex items-center gap-2 text-indigo-900">
-            <AlertCircle className="h-5 w-5 text-indigo-600" />
+      <Card className="bg-white border-primary/20">
+        <CardHeader className="border-b border-primary/20">
+          <CardTitle className="flex items-center gap-2 text-primary">
+            <AlertCircle className="h-5 w-5 text-primary" />
             Underpaid Insurance Slices
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           {slices.length === 0 ? (
             <div className="p-8 text-center">
-              <CheckCircle className="h-12 w-12 mx-auto text-green-500 mb-3" />
+              <CheckCircle className="h-12 w-12 mx-auto text-success mb-3" />
               <p className="text-lg font-medium">No Underpaid Claims</p>
               <p className="text-muted-foreground">All insurance claims are fully reconciled.</p>
             </div>
           ) : (
             <Table>
               <TableHeader>
-                <TableRow className="bg-indigo-50/50">
+                <TableRow className="bg-primary/10/50">
                   <TableHead>Claim / Patient</TableHead>
                   <TableHead>Carrier</TableHead>
                   <TableHead className="text-right">Original Est.</TableHead>
@@ -266,7 +266,7 @@ export function ClaimRecoveryDashboard({ vetId }: ClaimRecoveryDashboardProps) {
               </TableHeader>
               <TableBody>
                 {slices.map((slice) => (
-                  <TableRow key={slice.id} className="hover:bg-indigo-50/30">
+                  <TableRow key={slice.id} className="hover:bg-primary/10/30">
                     <TableCell>
                       <div>
                         <p className="font-medium">{slice.claim?.claim_number || "N/A"}</p>
@@ -276,7 +276,7 @@ export function ClaimRecoveryDashboard({ vetId }: ClaimRecoveryDashboardProps) {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline" className="bg-slate-50">
+                      <Badge variant="outline" className="bg-muted">
                         {slice.claim?.policy?.vet_insurance_providers?.name || "Unknown"}
                       </Badge>
                     </TableCell>
@@ -287,7 +287,7 @@ export function ClaimRecoveryDashboard({ vetId }: ClaimRecoveryDashboardProps) {
                       ${Number(slice.actual_amount).toFixed(2)}
                     </TableCell>
                     <TableCell className="text-right">
-                      <span className="font-bold text-red-600">
+                      <span className="font-bold text-destructive">
                         ${Number(slice.gap_amount).toFixed(2)}
                       </span>
                     </TableCell>
@@ -317,7 +317,7 @@ export function ClaimRecoveryDashboard({ vetId }: ClaimRecoveryDashboardProps) {
                           <Button
                             size="sm"
                             variant="outline"
-                            className="border-indigo-200 text-indigo-700 hover:bg-indigo-50"
+                            className="border-primary/20 text-primary hover:bg-primary/10"
                             onClick={() => sendOwnerNotification(slice)}
                             disabled={sendingNotification === slice.id}
                           >
@@ -332,7 +332,7 @@ export function ClaimRecoveryDashboard({ vetId }: ClaimRecoveryDashboardProps) {
                         <Button
                           size="sm"
                           variant="ghost"
-                          className="text-indigo-600 hover:bg-indigo-50"
+                          className="text-primary hover:bg-primary/10"
                           onClick={() => generateAppealPDF(slice)}
                         >
                           <FileDown className="h-4 w-4" />

@@ -171,14 +171,14 @@ export function MerchantDataSyncTab({ vetId }: MerchantDataSyncTabProps) {
 
       {/* Activity Alerts */}
       {alertPets.length > 0 && (
-        <Card className="p-4 bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800">
+        <Card className="p-4 bg-warning/10 /30 border-warning/20">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5" />
+            <AlertTriangle className="h-5 w-5 text-warning mt-0.5" />
             <div>
-              <h4 className="font-medium text-amber-900 dark:text-amber-100">
+              <h4 className="font-medium text-warning">
                 Activity Drop Detected
               </h4>
-              <p className="text-sm text-amber-700 dark:text-amber-300 mb-2">
+              <p className="text-sm text-warning mb-2">
                 The following pets have shown a significant decrease in activity:
               </p>
               <div className="flex flex-wrap gap-2">
@@ -186,7 +186,7 @@ export function MerchantDataSyncTab({ vetId }: MerchantDataSyncTabProps) {
                   <Badge 
                     key={pet.id} 
                     variant="outline" 
-                    className="bg-amber-100 dark:bg-amber-900 border-amber-300"
+                    className="bg-warning/10 border-warning/40"
                   >
                     <Dog className="h-3 w-3 mr-1" />
                     {pet.name}
@@ -227,14 +227,14 @@ export function MerchantDataSyncTab({ vetId }: MerchantDataSyncTabProps) {
       {/* Activity Trends Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {activityTrends.slice(0, 6).map(({ pet, recentWeek, previousWeek, trend, hasAlert, totalActivities }) => (
-          <Card key={pet.id} className={`p-4 ${hasAlert ? 'border-amber-300 bg-amber-50/50 dark:bg-amber-950/20' : ''}`}>
+          <Card key={pet.id} className={`p-4 ${hasAlert ? 'border-warning/40 bg-warning/10/50 /20' : ''}`}>
             <div className="flex items-start justify-between">
               <div>
                 <h4 className="font-medium">{pet.name}</h4>
                 <p className="text-xs text-muted-foreground">{pet.type}</p>
               </div>
               {hasAlert && (
-                <Badge variant="outline" className="bg-amber-100 text-amber-700 border-amber-300">
+                <Badge variant="outline" className="bg-warning/10 text-warning border-warning/40">
                   <AlertTriangle className="h-3 w-3 mr-1" />
                   Alert
                 </Badge>
@@ -252,14 +252,14 @@ export function MerchantDataSyncTab({ vetId }: MerchantDataSyncTabProps) {
                 <p className="text-xs text-muted-foreground">vs Last Week</p>
                 <div className="flex items-center gap-1">
                   {trend > 0 ? (
-                    <TrendingUp className="h-4 w-4 text-green-500" />
+                    <TrendingUp className="h-4 w-4 text-success" />
                   ) : trend < 0 ? (
-                    <TrendingDown className="h-4 w-4 text-red-500" />
+                    <TrendingDown className="h-4 w-4 text-destructive" />
                   ) : (
                     <span className="h-4 w-4 text-muted-foreground">—</span>
                   )}
                   <span className={`text-lg font-bold ${
-                    trend > 0 ? 'text-green-600' : trend < 0 ? 'text-red-600' : ''
+                    trend > 0 ? 'text-success' : trend < 0 ? 'text-destructive' : ''
                   }`}>
                     {trend > 0 ? '+' : ''}{trend}
                   </span>
@@ -336,14 +336,14 @@ export function MerchantDataSyncTab({ vetId }: MerchantDataSyncTabProps) {
       </Card>
 
       {/* Info Card */}
-      <Card className="p-4 bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800">
+      <Card className="p-4 bg-info/10 /30 border-info/20">
         <div className="flex items-start gap-3">
-          <Activity className="h-5 w-5 text-blue-600 mt-0.5" />
+          <Activity className="h-5 w-5 text-info mt-0.5" />
           <div>
-            <h4 className="font-medium text-blue-900 dark:text-blue-100">
+            <h4 className="font-medium text-info">
               Proactive Health Monitoring
             </h4>
-            <p className="text-sm text-blue-700 dark:text-blue-300">
+            <p className="text-sm text-info">
               This dashboard syncs data from your patients' walkers, runners, and other care providers. 
               Activity drops can be early indicators of health issues—you'll see this data before owners 
               even mention it during their visit.

@@ -15,7 +15,7 @@ export const AIClinicalAssistant = ({ vetId }: AIClinicalAssistantProps) => {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary/20 to-primary/20 flex items-center justify-center">
           <Scan className="w-5 h-5 text-white" />
         </div>
         <div>

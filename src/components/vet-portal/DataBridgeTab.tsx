@@ -57,32 +57,32 @@ export function DataBridgeTab({ vetId }: DataBridgeTabProps) {
       </Tabs>
 
       {/* Integration Info */}
-      <Card className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 border-blue-200 dark:border-blue-800">
+      <Card className="p-4 bg-gradient-to-r from-info/20 to-primary/20 /30 /30 border-info/20">
         <div className="flex items-start gap-3">
-          <ArrowRightLeft className="h-5 w-5 text-blue-600 mt-0.5" />
+          <ArrowRightLeft className="h-5 w-5 text-info mt-0.5" />
           <div>
-            <h4 className="font-medium text-blue-900 dark:text-blue-100">
+            <h4 className="font-medium text-info">
               Seamless Data Flow
             </h4>
-            <p className="text-sm text-blue-700 dark:text-blue-300 mb-3">
+            <p className="text-sm text-info mb-3">
               The Data Bridge eliminates manual data entry by automatically syncing patient records 
               between your practice management system and PawBucks.
             </p>
             <div className="grid gap-2 md:grid-cols-2 text-sm">
               <div className="flex items-start gap-2">
-                <Database className="h-4 w-4 text-blue-600 mt-0.5" />
+                <Database className="h-4 w-4 text-info mt-0.5" />
                 <div>
-                  <p className="font-medium text-blue-900 dark:text-blue-100">PMS Sync</p>
-                  <p className="text-xs text-blue-600 dark:text-blue-400">
+                  <p className="font-medium text-info">PMS Sync</p>
+                  <p className="text-xs text-info">
                     Updates from IDEXX Cornerstone, Neo, AVImark automatically sync to owner health trackers
                   </p>
                 </div>
               </div>
               <div className="flex items-start gap-2">
-                <FlaskConical className="h-4 w-4 text-purple-600 mt-0.5" />
+                <FlaskConical className="h-4 w-4 text-primary mt-0.5" />
                 <div>
-                  <p className="font-medium text-purple-900 dark:text-purple-100">Lab Integration</p>
-                  <p className="text-xs text-purple-600 dark:text-purple-400">
+                  <p className="font-medium text-primary">Lab Integration</p>
+                  <p className="text-xs text-primary">
                     Bloodwork and DICOM imaging from Antech, IDEXX, Zoetis imported automatically
                   </p>
                 </div>
