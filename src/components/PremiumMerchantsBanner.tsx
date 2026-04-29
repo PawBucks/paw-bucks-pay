@@ -156,7 +156,7 @@ const PremiumMerchantsBannerComponent = ({
  {merchant.business_name}
  </h4>
  {isVerifiedPro && (
- <BadgeCheck className="w-4 h-4 text-accent flex-shrink-0" />
+                              <BadgeCheck className="w-4 h-4 text-info flex-shrink-0" />
  )}
  </div>
  <Badge variant="outline" className="mt-1.5 text-xs">
