@@ -128,8 +128,20 @@ const Auth = () => {
  }
  }, [inviteToken]);
 
- // Helper function to redirect user based on their role/type
- const redirectBasedOnRole = useCallback(async (userId: string, userTypeOverride?:"pet_owner" |"merchant", isVetSignup?: boolean) => {
+ // Helper function to redirect user based on their role/type.
+ //
+ // Priority order:
+ //   1. Explicit `redirect` query param (e.g. returning to invoice payment)
+ //   2. Admin role (system-level) — always wins
+ //   3. Vet signup flag — vet onboarding
+ //   4. Role hint from /auth?role=… deep link OR signup userType override
+ //   5. Profile-driven default
+ const redirectBasedOnRole = useCallback(async (
+    userId: string,
+    userTypeOverride?:"pet_owner" |"merchant",
+    isVetSignup?: boolean,
+    roleHint?:"pet_owner" |"merchant" |"vet" | null,
+ ) => {
  // If there's a redirect URL specified, use it (e.g., returning to invoice payment)
  if (redirectUrl) {
  navigate(redirectUrl);
@@ -152,6 +164,35 @@ const Auth = () => {
  navigate("/vet-onboarding");
  return;
  }
+
+  // Honor role hint from deep link (/auth?role=vet|merchant|pet_owner) on sign-in.
+  // This ensures clicking the role buttons routes the user to the correct portal
+  // immediately after login, regardless of their stored profile defaults.
+  if (roleHint && !userTypeOverride) {
+    if (roleHint ==="vet") {
+      // Vets are stored as merchants — check for an existing merchant record.
+      const { data: merchantData } = await supabase
+        .from("merchants")
+        .select("id")
+        .eq("user_id", userId)
+        .maybeSingle();
+      navigate(merchantData ? ROUTES.MERCHANT_DASHBOARD :"/vet-onboarding");
+      return;
+    }
+    if (roleHint ==="merchant") {
+      const { data: merchantData } = await supabase
+        .from("merchants")
+        .select("id")
+        .eq("user_id", userId)
+        .maybeSingle();
+      navigate(merchantData ? ROUTES.MERCHANT_DASHBOARD :"/merchant-onboarding");
+      return;
+    }
+    if (roleHint ==="pet_owner") {
+      navigate(ROUTES.DASHBOARD);
+      return;
+    }
+  }
 
  // If we have a user type override (from signup), use it
  if (userTypeOverride) {
@@ -217,9 +258,9 @@ const Auth = () => {
  // Redirect already-logged-in users
  useEffect(() => {
  if (user) {
- redirectBasedOnRole(user.id);
+  redirectBasedOnRole(user.id, undefined, false, roleParam);
  }
- }, [user, redirectBasedOnRole]);
+ }, [user, redirectBasedOnRole, roleParam]);
 
  const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
  e.preventDefault();
@@ -438,7 +479,8 @@ const Auth = () => {
  // If they joined via invite, go directly to dashboard
  navigate(ROUTES.DASHBOARD);
  } else {
- await redirectBasedOnRole(loggedInUser.id);
+  // Honor /auth?role=… deep link so role buttons route to the correct portal.
+  await redirectBasedOnRole(loggedInUser.id, undefined, false, roleParam);
  }
  } else {
  navigate(redirectUrl || ROUTES.DASHBOARD);
@@ -644,7 +686,7 @@ const Auth = () => {
  const { data: sessionData } = await supabase.auth.getSession();
  const loggedInUser = sessionData?.session?.user;
  if (loggedInUser) {
- await redirectBasedOnRole(loggedInUser.id);
+  await redirectBasedOnRole(loggedInUser.id, undefined, false, roleParam);
  } else {
  navigate(ROUTES.DASHBOARD);
  }
