@@ -285,11 +285,11 @@ export const NonPartnerReceiptVerificationTab = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "pending":
-        return <Badge variant="outline" className="bg-yellow-500/10 text-yellow-600 border-yellow-500/30">Pending Review</Badge>;
+        return <Badge variant="outline" className="bg-warning/10 text-warning border-warning/30/30">Pending Review</Badge>;
       case "approved":
-        return <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/30">Approved</Badge>;
+        return <Badge variant="outline" className="bg-success/10 text-success border-success/30/30">Approved</Badge>;
       case "rejected":
-        return <Badge variant="outline" className="bg-red-500/10 text-red-600 border-red-500/30">Rejected</Badge>;
+        return <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/30/30">Rejected</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -315,7 +315,7 @@ export const NonPartnerReceiptVerificationTab = () => {
               <li>• Rate: 5 PawBucks per $1 USD spent</li>
               <li>• Monthly cap: 20,000 PawBucks per Pet Owner</li>
               <li>• 30-day vesting period after approval</li>
-              <li>• <span className="font-medium text-purple-500">Only PawPass+ subscribers</span> can earn non-partner PawBucks</li>
+              <li>• <span className="font-medium text-primary">Only PawPass+ subscribers</span> can earn non-partner PawBucks</li>
             </ul>
           </div>
         </div>
@@ -347,20 +347,20 @@ export const NonPartnerReceiptVerificationTab = () => {
 
       {/* Summary Stats */}
       <div className="grid grid-cols-3 gap-3">
-        <div className="bg-yellow-500/10 rounded-lg p-3 text-center">
-          <p className="text-2xl font-bold text-yellow-600">
+        <div className="bg-warning/10 rounded-lg p-3 text-center">
+          <p className="text-2xl font-bold text-warning">
             {receipts.filter(r => r.status === "pending").length}
           </p>
           <p className="text-xs text-muted-foreground">Pending</p>
         </div>
-        <div className="bg-green-500/10 rounded-lg p-3 text-center">
-          <p className="text-2xl font-bold text-green-600">
+        <div className="bg-success/10 rounded-lg p-3 text-center">
+          <p className="text-2xl font-bold text-success">
             {receipts.filter(r => r.status === "approved").length}
           </p>
           <p className="text-xs text-muted-foreground">Approved</p>
         </div>
-        <div className="bg-red-500/10 rounded-lg p-3 text-center">
-          <p className="text-2xl font-bold text-red-600">
+        <div className="bg-destructive/10 rounded-lg p-3 text-center">
+          <p className="text-2xl font-bold text-destructive">
             {receipts.filter(r => r.status === "rejected").length}
           </p>
           <p className="text-xs text-muted-foreground">Rejected</p>
@@ -485,7 +485,7 @@ export const NonPartnerReceiptVerificationTab = () => {
                 {selectedReceipt.decision_reason && (
                   <div className="col-span-2">
                     <Label className="text-muted-foreground text-xs">Rejection Reason</Label>
-                    <p className="font-medium text-red-600">{selectedReceipt.decision_reason}</p>
+                    <p className="font-medium text-destructive">{selectedReceipt.decision_reason}</p>
                   </div>
                 )}
               </div>
@@ -525,7 +525,7 @@ export const NonPartnerReceiptVerificationTab = () => {
                       <p className="text-sm text-muted-foreground">{selectedUserInfo.email}</p>
                     </div>
                     {selectedUserInfo.subscription_tier === "pawpass_plus" ? (
-                      <Badge className="bg-purple-500/10 text-purple-500 border-purple-500/30">
+                      <Badge className="bg-primary/10 text-primary border-primary/30/30">
                         <Crown className="w-3 h-3 mr-1" /> PawPass+
                       </Badge>
                     ) : (
@@ -536,9 +536,9 @@ export const NonPartnerReceiptVerificationTab = () => {
                   </div>
                   
                   {selectedUserInfo.subscription_tier !== "pawpass_plus" && (
-                    <div className="p-3 bg-yellow-500/10 rounded-lg flex items-start gap-2">
-                      <AlertTriangle className="w-4 h-4 text-yellow-600 mt-0.5 flex-shrink-0" />
-                      <p className="text-sm text-yellow-700">
+                    <div className="p-3 bg-warning/10 rounded-lg flex items-start gap-2">
+                      <AlertTriangle className="w-4 h-4 text-warning mt-0.5 flex-shrink-0" />
+                      <p className="text-sm text-warning">
                         This user is not a PawPass+ subscriber. Only PawPass+ subscribers can earn non-partner PawBucks.
                       </p>
                     </div>
@@ -576,7 +576,7 @@ export const NonPartnerReceiptVerificationTab = () => {
                       <span>
                         {pawbucks} PB
                         {capped && (
-                          <span className="text-yellow-600 ml-1">
+                          <span className="text-warning ml-1">
                             (capped from {originalAmount} PB)
                           </span>
                         )}
@@ -614,7 +614,7 @@ export const NonPartnerReceiptVerificationTab = () => {
               {/* Action Buttons */}
               <div className="flex gap-3">
                 <Button
-                  className="flex-1 bg-green-600 hover:bg-green-700"
+                  className="flex-1 bg-success hover:bg-success"
                   onClick={() => handleUpdateStatus("approved")}
                   disabled={updating || !selectedUserInfo || selectedUserInfo.subscription_tier !== "pawpass_plus"}
                 >

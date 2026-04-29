@@ -12,7 +12,7 @@ type SubscriptionTier = 'free' | 'pawpass' | 'pawpass_plus';
 const TIER_CONFIG: Record<SubscriptionTier, { label: string; multiplier: number; color: string }> = {
   free: { label: 'Free Tier', multiplier: POINTS_MULTIPLIER.FREE, color: 'text-muted-foreground' },
   pawpass: { label: 'PawPass', multiplier: POINTS_MULTIPLIER.PAWPASS, color: 'text-primary' },
-  pawpass_plus: { label: 'PawPass+', multiplier: POINTS_MULTIPLIER.PAWPASS_PLUS, color: 'text-amber-500' },
+  pawpass_plus: { label: 'PawPass+', multiplier: POINTS_MULTIPLIER.PAWPASS_PLUS, color: 'text-warning' },
 };
 
 export function PawBucksCalculator() {
@@ -157,7 +157,7 @@ export function PawBucksCalculator() {
               </div>
               <div className="flex items-center justify-between">
                 <span className="font-medium">USD Equivalent:</span>
-                <span className="flex items-center gap-2 text-2xl font-bold text-green-600">
+                <span className="flex items-center gap-2 text-2xl font-bold text-success">
                   ${usdEquivalent.toFixed(2)}
                 </span>
               </div>

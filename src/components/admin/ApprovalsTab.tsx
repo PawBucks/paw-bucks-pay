@@ -200,7 +200,7 @@ export function ApprovalsTab() {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <Store className="w-5 h-5 text-amber-500" />
+              <Store className="w-5 h-5 text-warning" />
               <span className="text-3xl font-bold">{pendingMerchants.length}</span>
             </div>
           </CardContent>
@@ -211,7 +211,7 @@ export function ApprovalsTab() {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <Stethoscope className="w-5 h-5 text-blue-500" />
+              <Stethoscope className="w-5 h-5 text-info" />
               <span className="text-3xl font-bold">{pendingVets.length}</span>
             </div>
           </CardContent>
@@ -222,7 +222,7 @@ export function ApprovalsTab() {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <Clock className="w-5 h-5 text-orange-500" />
+              <Clock className="w-5 h-5 text-warning" />
               <span className="text-3xl font-bold">{totalPending}</span>
             </div>
           </CardContent>
@@ -262,7 +262,7 @@ export function ApprovalsTab() {
                 </div>
               ) : pendingMerchants.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
-                  <CheckCircle2 className="w-12 h-12 mx-auto mb-4 text-green-500" />
+                  <CheckCircle2 className="w-12 h-12 mx-auto mb-4 text-success" />
                   <p className="text-lg font-medium">All caught up!</p>
                   <p className="text-sm">No pending merchant applications</p>
                 </div>
@@ -344,7 +344,7 @@ export function ApprovalsTab() {
                 </div>
               ) : pendingVets.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
-                  <CheckCircle2 className="w-12 h-12 mx-auto mb-4 text-green-500" />
+                  <CheckCircle2 className="w-12 h-12 mx-auto mb-4 text-success" />
                   <p className="text-lg font-medium">All caught up!</p>
                   <p className="text-sm">No pending vet applications</p>
                 </div>

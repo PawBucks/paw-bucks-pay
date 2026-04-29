@@ -12,7 +12,7 @@ export default function AdminInvoicePaymentSuccess() {
         <img src={logo} alt="PawBucks" className="h-16 mx-auto" />
         <Card>
           <CardContent className="pt-8 pb-6 space-y-4">
-            <CheckCircle className="w-16 h-16 text-green-600 mx-auto" />
+            <CheckCircle className="w-16 h-16 text-success mx-auto" />
             <h1 className="text-2xl font-bold">Payment Successful!</h1>
             <p className="text-muted-foreground">
               Your payment has been processed successfully. You will receive a confirmation email shortly.

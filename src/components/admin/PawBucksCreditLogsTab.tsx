@@ -156,7 +156,7 @@ export const PawBucksCreditLogsTab = () => {
                     </div>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Badge variant="default" className="bg-green-600">
+                    <Badge variant="default" className="bg-success">
                       +{log.changes?.amount?.toLocaleString() || 0} PB
                     </Badge>
                   </TableCell>
@@ -170,7 +170,7 @@ export const PawBucksCreditLogsTab = () => {
                       {log.changes?.old_balance?.toLocaleString() || 0}
                     </span>
                     <span className="mx-1">→</span>
-                    <span className="font-medium text-green-600">
+                    <span className="font-medium text-success">
                       {log.changes?.new_balance?.toLocaleString() || 0}
                     </span>
                   </TableCell>

@@ -31,12 +31,12 @@ interface Props {
 
 const statusColors: Record<string, string> = {
   draft: "bg-muted text-muted-foreground",
-  sent: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
-  paid: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-  partially_paid: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
-  overdue: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
-  cancelled: "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400",
-  void: "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400",
+  sent: "bg-info/15 text-info dark:bg-blue-900/30 dark:text-info",
+  paid: "bg-success/15 text-success dark:bg-green-900/30 dark:text-success",
+  partially_paid: "bg-warning/15 text-warning dark:bg-yellow-900/30 dark:text-yellow-400",
+  overdue: "bg-destructive/15 text-destructive dark:bg-red-900/30 dark:text-destructive",
+  cancelled: "bg-muted text-muted-foreground dark:bg-foreground dark:text-muted-foreground",
+  void: "bg-muted text-muted-foreground dark:bg-foreground dark:text-muted-foreground",
 };
 
 export function AdminInvoiceDetail({ invoice, onBack, onEdit, onRefresh }: Props) {
@@ -218,7 +218,7 @@ export function AdminInvoiceDetail({ invoice, onBack, onEdit, onRefresh }: Props
               <div className="w-64 space-y-2 text-sm">
                 <div className="flex justify-between"><span>Subtotal</span><span>${Number(invoice.subtotal).toFixed(2)}</span></div>
                 {Number(invoice.discount_amount) > 0 && (
-                  <div className="flex justify-between text-green-600"><span>Discount</span><span>-${Number(invoice.discount_amount).toFixed(2)}</span></div>
+                  <div className="flex justify-between text-success"><span>Discount</span><span>-${Number(invoice.discount_amount).toFixed(2)}</span></div>
                 )}
                 {Number(invoice.tax_amount) > 0 && (
                   <div className="flex justify-between"><span>Tax ({invoice.tax_rate}%)</span><span>${Number(invoice.tax_amount).toFixed(2)}</span></div>
@@ -263,7 +263,7 @@ export function AdminInvoiceDetail({ invoice, onBack, onEdit, onRefresh }: Props
                 {payments.map((p) => (
                   <div key={p.id} className="p-3 rounded-md bg-muted/50 text-sm">
                     <div className="flex justify-between items-center">
-                      <span className="font-medium text-green-600">${Number(p.amount).toFixed(2)}</span>
+                      <span className="font-medium text-success">${Number(p.amount).toFixed(2)}</span>
                       <Badge variant="outline" className="text-xs capitalize">{p.payment_method.replace("_", " ")}</Badge>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">{format(new Date(p.paid_at), "MMM d, yyyy h:mm a")}</p>

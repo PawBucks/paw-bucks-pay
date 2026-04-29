@@ -261,7 +261,7 @@ export function ConsultationBookingsTab() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "confirmed":
-        return <Badge className="bg-green-500">Confirmed</Badge>;
+        return <Badge className="bg-success">Confirmed</Badge>;
       case "cancelled":
         return <Badge variant="destructive">Cancelled</Badge>;
       case "completed":
@@ -318,28 +318,28 @@ export function ConsultationBookingsTab() {
         <Card>
           <CardContent className="pt-4">
             <div className="flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-yellow-500" />
+              <AlertCircle className="w-4 h-4 text-warning" />
               <span className="text-sm text-muted-foreground">Pending</span>
             </div>
-            <p className="text-2xl font-bold text-yellow-600">{stats.pending}</p>
+            <p className="text-2xl font-bold text-warning">{stats.pending}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4">
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-green-500" />
+              <CheckCircle2 className="w-4 h-4 text-success" />
               <span className="text-sm text-muted-foreground">Confirmed</span>
             </div>
-            <p className="text-2xl font-bold text-green-600">{stats.confirmed}</p>
+            <p className="text-2xl font-bold text-success">{stats.confirmed}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4">
             <div className="flex items-center gap-2">
-              <XCircle className="w-4 h-4 text-red-500" />
+              <XCircle className="w-4 h-4 text-destructive" />
               <span className="text-sm text-muted-foreground">Cancelled</span>
             </div>
-            <p className="text-2xl font-bold text-red-600">{stats.cancelled}</p>
+            <p className="text-2xl font-bold text-destructive">{stats.cancelled}</p>
           </CardContent>
         </Card>
       </div>
@@ -422,7 +422,7 @@ export function ConsultationBookingsTab() {
                             {updating === booking.id ? (
                               <Loader2 className="w-4 h-4 animate-spin" />
                             ) : (
-                              <Check className="w-4 h-4 text-green-500" />
+                              <Check className="w-4 h-4 text-success" />
                             )}
                           </Button>
                           <Button
@@ -433,7 +433,7 @@ export function ConsultationBookingsTab() {
                             disabled={updating === booking.id}
                             title="Cancel booking"
                           >
-                            <X className="w-4 h-4 text-red-500" />
+                            <X className="w-4 h-4 text-destructive" />
                           </Button>
                         </>
                       )}

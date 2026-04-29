@@ -56,12 +56,12 @@ interface Props {
 
 const statusColors: Record<string, string> = {
   draft: "bg-muted text-muted-foreground",
-  sent: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
-  paid: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-  partially_paid: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
-  overdue: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
-  cancelled: "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400",
-  void: "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400",
+  sent: "bg-info/15 text-info dark:bg-blue-900/30 dark:text-info",
+  paid: "bg-success/15 text-success dark:bg-green-900/30 dark:text-success",
+  partially_paid: "bg-warning/15 text-warning dark:bg-yellow-900/30 dark:text-yellow-400",
+  overdue: "bg-destructive/15 text-destructive dark:bg-red-900/30 dark:text-destructive",
+  cancelled: "bg-muted text-muted-foreground dark:bg-foreground dark:text-muted-foreground",
+  void: "bg-muted text-muted-foreground dark:bg-foreground dark:text-muted-foreground",
 };
 
 export function AdminInvoiceList({ invoices, loading, onCreateNew, onView, onEdit, onDelete, onSend }: Props) {
@@ -95,19 +95,19 @@ export function AdminInvoiceList({ invoices, loading, onCreateNew, onView, onEdi
         <Card>
           <CardContent className="pt-4 pb-3">
             <p className="text-xs text-muted-foreground">Outstanding</p>
-            <p className="text-lg sm:text-xl font-bold text-orange-600 truncate">{fmt(totals.outstanding)}</p>
+            <p className="text-lg sm:text-xl font-bold text-warning truncate">{fmt(totals.outstanding)}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4 pb-3">
             <p className="text-xs text-muted-foreground">Collected</p>
-            <p className="text-lg sm:text-xl font-bold text-green-600 truncate">{fmt(totals.paid)}</p>
+            <p className="text-lg sm:text-xl font-bold text-success truncate">{fmt(totals.paid)}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4 pb-3">
             <p className="text-xs text-muted-foreground">Overdue</p>
-            <p className="text-lg sm:text-xl font-bold text-red-600 truncate">{fmt(totals.overdue)}</p>
+            <p className="text-lg sm:text-xl font-bold text-destructive truncate">{fmt(totals.overdue)}</p>
           </CardContent>
         </Card>
         <Card>
@@ -196,9 +196,9 @@ export function AdminInvoiceList({ invoices, loading, onCreateNew, onView, onEdi
                     <TableCell className="text-right font-medium">${Number(inv.total).toFixed(2)}</TableCell>
                     <TableCell className="text-right">
                       {Number(inv.amount_due) > 0 ? (
-                        <span className="text-orange-600 font-medium">${Number(inv.amount_due).toFixed(2)}</span>
+                        <span className="text-warning font-medium">${Number(inv.amount_due).toFixed(2)}</span>
                       ) : (
-                        <span className="text-green-600">$0.00</span>
+                        <span className="text-success">$0.00</span>
                       )}
                     </TableCell>
                     <TableCell className="text-sm">{format(new Date(inv.due_date + "T00:00:00"), "MMM d, yyyy")}</TableCell>

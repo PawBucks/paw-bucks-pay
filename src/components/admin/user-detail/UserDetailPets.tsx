@@ -112,7 +112,7 @@ export function UserDetailPets({ userId }: { userId: string }) {
                       <div className="border-t pt-2 space-y-1">
                         {pet.medical_conditions && (
                           <div className="flex items-start gap-1 text-sm">
-                            <Heart className="w-3 h-3 mt-0.5 text-red-500" />
+                            <Heart className="w-3 h-3 mt-0.5 text-destructive" />
                             <span>{pet.medical_conditions}</span>
                           </div>
                         )}

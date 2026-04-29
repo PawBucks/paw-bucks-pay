@@ -273,9 +273,9 @@ export const TwoFactorSetup = ({ onSetupComplete }: TwoFactorSetupProps) => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           {is2FAEnabled ? (
-            <ShieldCheck className="h-5 w-5 text-green-500" />
+            <ShieldCheck className="h-5 w-5 text-success" />
           ) : (
-            <ShieldOff className="h-5 w-5 text-yellow-500" />
+            <ShieldOff className="h-5 w-5 text-warning" />
           )}
           Two-Factor Authentication
         </CardTitle>
@@ -289,9 +289,9 @@ export const TwoFactorSetup = ({ onSetupComplete }: TwoFactorSetupProps) => {
       <CardContent>
         {is2FAEnabled ? (
           <div className="space-y-4">
-            <Alert className="border-green-200 bg-green-50 dark:bg-green-950/20">
-              <ShieldCheck className="h-4 w-4 text-green-500" />
-              <AlertDescription className="text-green-700 dark:text-green-300">
+            <Alert className="border-success/30 bg-success/10 dark:bg-green-950/20">
+              <ShieldCheck className="h-4 w-4 text-success" />
+              <AlertDescription className="text-success dark:text-success-foreground">
                 Two-factor authentication is enabled. Your account is more secure.
               </AlertDescription>
             </Alert>

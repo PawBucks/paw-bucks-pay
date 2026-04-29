@@ -357,7 +357,7 @@ export function UsersTab() {
                   <div>
                     {user.email}
                     {user.shared_with_owner && (
-                      <span className="block text-xs text-amber-600 font-medium">
+                      <span className="block text-xs text-warning font-medium">
                         🔗 Shares with {user.shared_with_owner}
                       </span>
                     )}
@@ -384,12 +384,12 @@ export function UsersTab() {
                         variant="outline"
                         className={
                           user.welcome_credit_status === 'active'
-                            ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30'
+                            ? 'bg-success/10 text-success dark:text-success border-success/30/30'
                             : user.welcome_credit_status === 'used'
-                            ? 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/30'
+                            ? 'bg-info/10 text-info dark:text-info border-info/30/30'
                             : user.welcome_credit_status === 'expired'
                             ? 'bg-muted text-muted-foreground border-border'
-                            : 'bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/30'
+                            : 'bg-destructive/10 text-destructive dark:text-destructive border-destructive/30/30'
                         }
                       >
                         <Gift className="w-3 h-3 mr-1" />

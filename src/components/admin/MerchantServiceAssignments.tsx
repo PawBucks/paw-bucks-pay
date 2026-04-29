@@ -47,11 +47,11 @@ type ServiceAssignment = {
 };
 
 const STATUS_OPTIONS = [
-  { value: 'active', label: 'Active', color: 'bg-green-500' },
-  { value: 'pending', label: 'Pending', color: 'bg-yellow-500' },
-  { value: 'paused', label: 'Paused', color: 'bg-orange-500' },
+  { value: 'active', label: 'Active', color: 'bg-success' },
+  { value: 'pending', label: 'Pending', color: 'bg-warning' },
+  { value: 'paused', label: 'Paused', color: 'bg-warning' },
   { value: 'expired', label: 'Expired', color: 'bg-gray-500' },
-  { value: 'cancelled', label: 'Cancelled', color: 'bg-red-500' },
+  { value: 'cancelled', label: 'Cancelled', color: 'bg-destructive' },
 ];
 
 const DURATION_OPTIONS = [
@@ -316,7 +316,7 @@ export function MerchantServiceAssignments() {
     return (
       <Badge 
         variant={status === 'active' ? 'default' : 'secondary'}
-        className={`${status === 'active' ? 'bg-green-500' : status === 'paused' ? 'bg-orange-500' : ''}`}
+        className={`${status === 'active' ? 'bg-success' : status === 'paused' ? 'bg-warning' : ''}`}
       >
         {icons[status]}
         {statusOption?.label || status}
@@ -361,7 +361,7 @@ export function MerchantServiceAssignments() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">
+            <div className="text-2xl font-bold text-success">
               {assignments.filter(a => a.status === 'active').length}
             </div>
           </CardContent>
@@ -373,7 +373,7 @@ export function MerchantServiceAssignments() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-600">
+            <div className="text-2xl font-bold text-warning">
               {assignments.filter(a => {
                 if (a.status !== 'active' || !a.expires_at) return false;
                 const daysUntilExpiry = differenceInDays(new Date(a.expires_at), new Date());
@@ -390,7 +390,7 @@ export function MerchantServiceAssignments() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">
+            <div className="text-2xl font-bold text-warning">
               {assignments.filter(a => a.status === 'pending').length}
             </div>
           </CardContent>
@@ -402,7 +402,7 @@ export function MerchantServiceAssignments() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-600">
+            <div className="text-2xl font-bold text-warning">
               {assignments.filter(a => a.status === 'paused').length}
             </div>
           </CardContent>
@@ -503,11 +503,11 @@ export function MerchantServiceAssignments() {
                         const isExpiringSoon = daysUntilExpiry >= 0 && daysUntilExpiry <= 7;
                         
                         return (
-                          <div className={`flex items-center gap-1 text-sm ${isExpired ? 'text-red-600' : isExpiringSoon ? 'text-orange-600' : ''}`}>
+                          <div className={`flex items-center gap-1 text-sm ${isExpired ? 'text-destructive' : isExpiringSoon ? 'text-warning' : ''}`}>
                             <Calendar className="w-3 h-3" />
                             <span>{format(expiryDate, 'MMM d, yyyy')}</span>
                             {isExpiringSoon && !isExpired && (
-                              <Badge variant="outline" className="ml-1 text-xs bg-orange-50 text-orange-700 border-orange-200">
+                              <Badge variant="outline" className="ml-1 text-xs bg-warning/10 text-warning border-warning/30">
                                 {daysUntilExpiry === 0 ? 'Today' : `${daysUntilExpiry}d left`}
                               </Badge>
                             )}
@@ -530,7 +530,7 @@ export function MerchantServiceAssignments() {
                           onClick={() => handleQuickStatusChange(assignment, 'paused')}
                           title="Pause Service"
                         >
-                          <Pause className="w-4 h-4 text-orange-500" />
+                          <Pause className="w-4 h-4 text-warning" />
                         </Button>
                       )}
                       {assignment.status === 'paused' && (
@@ -540,7 +540,7 @@ export function MerchantServiceAssignments() {
                           onClick={() => handleQuickStatusChange(assignment, 'active')}
                           title="Resume Service"
                         >
-                          <Play className="w-4 h-4 text-green-500" />
+                          <Play className="w-4 h-4 text-success" />
                         </Button>
                       )}
                       {assignment.status !== 'cancelled' && (
@@ -550,7 +550,7 @@ export function MerchantServiceAssignments() {
                           onClick={() => handleQuickStatusChange(assignment, 'cancelled')}
                           title="Cancel Service"
                         >
-                          <StopCircle className="w-4 h-4 text-red-500" />
+                          <StopCircle className="w-4 h-4 text-destructive" />
                         </Button>
                       )}
                       <Button

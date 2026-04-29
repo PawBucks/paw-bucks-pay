@@ -374,7 +374,7 @@ export function PawBucksManagementTool() {
                   {targetType === 'user' ? foundUser?.email : foundMerchant?.email || 'No email'}
                 </p>
                 {targetType === 'user' && foundUser?.sharedWithOwner && (
-                  <p className="text-xs text-amber-600 font-medium mt-1">
+                  <p className="text-xs text-warning font-medium mt-1">
                     🔗 Shared account with {foundUser.sharedWithOwner}
                   </p>
                 )}
@@ -398,13 +398,13 @@ export function PawBucksManagementTool() {
                   <SelectContent>
                     <SelectItem value="credit">
                       <span className="flex items-center gap-2">
-                        <Plus className="w-4 h-4 text-green-600" />
+                        <Plus className="w-4 h-4 text-success" />
                         Credit (Add)
                       </span>
                     </SelectItem>
                     <SelectItem value="debit">
                       <span className="flex items-center gap-2">
-                        <Minus className="w-4 h-4 text-red-600" />
+                        <Minus className="w-4 h-4 text-destructive" />
                         Debit (Remove)
                       </span>
                     </SelectItem>
@@ -463,8 +463,8 @@ export function PawBucksManagementTool() {
         {lastOperation && (
           <div className={`flex items-center gap-2 p-3 rounded-lg border ${
             lastOperation.type === 'credit' 
-              ? 'bg-green-500/10 border-green-500/20 text-green-600' 
-              : 'bg-red-500/10 border-red-500/20 text-red-600'
+              ? 'bg-success/10 border-success/30/20 text-success' 
+              : 'bg-destructive/10 border-destructive/30/20 text-destructive'
           }`}>
             <CheckCircle className="w-5 h-5" />
             <span>

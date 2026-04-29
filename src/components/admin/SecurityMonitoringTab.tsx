@@ -142,13 +142,13 @@ export const SecurityMonitoringTab = () => {
   const getSeverityColor = (severity: string) => {
     switch (severity) {
       case "critical":
-        return "bg-red-600";
+        return "bg-destructive";
       case "high":
-        return "bg-orange-500";
+        return "bg-warning";
       case "medium":
-        return "bg-yellow-500";
+        return "bg-warning";
       default:
-        return "bg-blue-500";
+        return "bg-info";
     }
   };
 
@@ -201,10 +201,10 @@ export const SecurityMonitoringTab = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Unresolved Alerts</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-orange-500" />
+            <AlertTriangle className="h-4 w-4 text-warning" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-500">{stats.unresolvedAlerts}</div>
+            <div className="text-2xl font-bold text-warning">{stats.unresolvedAlerts}</div>
             <p className="text-xs text-muted-foreground">Require attention</p>
           </CardContent>
         </Card>
@@ -292,7 +292,7 @@ export const SecurityMonitoringTab = () => {
                         </TableCell>
                         <TableCell>
                           {alert.is_resolved ? (
-                            <Badge variant="secondary" className="bg-green-100 text-green-800">
+                            <Badge variant="secondary" className="bg-success/15 text-success">
                               <CheckCircle className="h-3 w-3 mr-1" />
                               Resolved
                             </Badge>
@@ -351,7 +351,7 @@ export const SecurityMonitoringTab = () => {
                         </TableCell>
                         <TableCell>
                           {event.success ? (
-                            <Badge variant="secondary" className="bg-green-100 text-green-800">
+                            <Badge variant="secondary" className="bg-success/15 text-success">
                               <CheckCircle className="h-3 w-3 mr-1" />
                               Success
                             </Badge>

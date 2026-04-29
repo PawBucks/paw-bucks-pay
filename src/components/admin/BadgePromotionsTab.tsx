@@ -672,7 +672,7 @@ export function BadgePromotionsTab() {
                             is_active: !promo.is_active,
                           })}
                           className={promo.is_active 
-                            ? "text-green-600 hover:text-green-700" 
+                            ? "text-success hover:text-success" 
                             : "text-muted-foreground hover:text-foreground"
                           }
                         >

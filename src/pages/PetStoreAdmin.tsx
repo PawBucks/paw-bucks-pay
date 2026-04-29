@@ -406,8 +406,8 @@ export default function PetStoreAdmin() {
                           </div>
                           <span className={`px-2 py-1 rounded-full text-xs ${
                             item.is_active 
-                              ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100"
-                              : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100"
+                              ? "bg-success/15 text-success dark:bg-green-900 dark:text-success-foreground"
+                              : "bg-muted text-foreground dark:bg-foreground dark:text-gray-100"
                           }`}>
                             {item.is_active ? "Active" : "Inactive"}
                           </span>
@@ -471,8 +471,8 @@ export default function PetStoreAdmin() {
                         <TableCell>
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                             item.item_type === 'service'
-                              ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100"
-                              : "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-100"
+                              ? "bg-info/15 text-info dark:bg-blue-900 dark:text-blue-100"
+                              : "bg-primary/15 text-primary dark:bg-purple-900 dark:text-purple-100"
                           }`}>
                             {item.item_type === 'service' ? 'Service' : 'Product'}
                           </span>
@@ -485,8 +485,8 @@ export default function PetStoreAdmin() {
                         <TableCell>
                           <span className={`px-2 py-1 rounded-full text-xs ${
                             item.is_active 
-                              ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100"
-                              : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100"
+                              ? "bg-success/15 text-success dark:bg-green-900 dark:text-success-foreground"
+                              : "bg-muted text-foreground dark:bg-foreground dark:text-gray-100"
                           }`}>
                             {item.is_active ? "Active" : "Inactive"}
                           </span>

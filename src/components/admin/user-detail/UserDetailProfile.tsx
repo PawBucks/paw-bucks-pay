@@ -161,9 +161,9 @@ export function UserDetailProfile({ userId }: { userId: string }) {
                 <div className="space-y-1">
                   <Badge variant="outline" className={
                     welcomeCredit.status === "active"
-                      ? "bg-emerald-500/10 text-emerald-700 border-emerald-500/30"
+                      ? "bg-success/10 text-success border-success/30/30"
                       : welcomeCredit.status === "used"
-                      ? "bg-blue-500/10 text-blue-700 border-blue-500/30"
+                      ? "bg-info/10 text-info border-info/30/30"
                       : "bg-muted text-muted-foreground"
                   }>
                     {welcomeCredit.status} — ${(welcomeCredit.credit_amount / 1000).toFixed(0)}
