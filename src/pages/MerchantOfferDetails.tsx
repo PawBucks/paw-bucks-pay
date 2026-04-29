@@ -189,10 +189,7 @@ export default function MerchantOfferDetails() {
  }
  };
 
- const handleSignOut = async () => {
- await supabase.auth.signOut();
- navigate("/auth");
- };
+ const handleSignOut = async () => { await signOut(); };
 
  const getStatusBadge = (status: string) => {
  const variants: Record<string, any> = {

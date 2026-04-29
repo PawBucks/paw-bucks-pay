@@ -195,10 +195,7 @@ const MerchantTransactions = () => {
  toast.success("Transactions exported successfully");
  };
 
- const handleSignOut = async () => {
- await supabase.auth.signOut();
- navigate("/auth");
- };
+ const handleSignOut = async () => { await signOut(); };
 
  const handleRefundClick = (transaction: Transaction) => {
  setSelectedTransaction(transaction);

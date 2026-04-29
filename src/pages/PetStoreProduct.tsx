@@ -119,7 +119,7 @@ export default function PetStoreProduct() {
  addToCart.mutate({ itemId: itemId! }, { onSuccess: () => toast.success("Added to cart! 🛒") });
  };
 
- const handleSignOut = async () => { await supabase.auth.signOut(); navigate("/auth"); };
+ const handleSignOut = async () => { await signOut(); };
 
  if (isLoading) {
  return (

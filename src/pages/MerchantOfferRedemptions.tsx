@@ -119,10 +119,7 @@ export default function MerchantOfferRedemptions() {
  }
  };
 
- const handleSignOut = async () => {
- await supabase.auth.signOut();
- navigate("/auth");
- };
+ const handleSignOut = async () => { await signOut(); };
 
  const filteredRedemptions = redemptions.filter(r => {
  if (!searchQuery) return true;

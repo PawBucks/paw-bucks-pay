@@ -88,10 +88,7 @@ export default function MerchantOfferCodes() {
  toast.success("Codes downloaded successfully");
  };
 
- const handleSignOut = async () => {
- await supabase.auth.signOut();
- navigate("/auth");
- };
+ const handleSignOut = async () => { await signOut(); };
 
  return (
  <>

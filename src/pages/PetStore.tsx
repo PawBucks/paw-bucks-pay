@@ -376,10 +376,7 @@ export default function PetStore() {
  setClientSecret("");
  };
 
- const handleSignOut = async () => {
- await supabase.auth.signOut();
- navigate("/auth");
- };
+ const handleSignOut = async () => { await signOut(); };
 
  const handleRefresh = useCallback(async () => {
  await queryClient.invalidateQueries({ queryKey: ["pet-store-items"] });
