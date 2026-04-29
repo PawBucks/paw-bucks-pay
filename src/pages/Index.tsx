@@ -747,9 +747,9 @@ const Index = () => {
  </div>
  <div className="pl-referral-card">
  <div className="pl-referral-label">Per Successful Referral</div>
- <div className="pl-referral-big">5,000</div>
- <div className="pl-referral-sub">PawBucks for you<br />+ 5,000 for your friend</div>
- <div className="pl-referral-note">Worth $5 each. No cap on how many friends you refer.</div>
+              <div className="pl-referral-big">10,000</div>
+              <div className="pl-referral-sub">PawBucks for you<br />+ 10,000 for your friend</div>
+              <div className="pl-referral-note">Worth $10 each. No cap on how many friends you refer.</div>
  </div>
  </div>
  </section>
