@@ -110,7 +110,7 @@ const petTypeIcons: Record<string, React.ReactNode> = {
 const statusColors: Record<string, string> = {
  lost:"bg-destructive text-destructive-foreground",
  found:"bg-secondary text-secondary-foreground",
- reunited:"bg-success/100 text-white",
+ reunited:"bg-success text-white",
 };
 
 const statusIcons: Record<string, React.ReactNode> = {
@@ -911,7 +911,7 @@ const LostPets = () => {
  
  {/* Reward Badge */}
  {post.reward_amount && (
- <Badge className="absolute top-3 right-3 bg-success/100 text-white gap-1">
+ <Badge className="absolute top-3 right-3 bg-success text-white gap-1">
  <DollarSign className="w-3 h-3" />
  ${post.reward_amount} Reward
  </Badge>
@@ -1001,7 +1001,7 @@ const LostPets = () => {
  <Button
  variant="outline"
  size="sm"
- className="w-full gap-1.5 border-success/200 text-success hover:bg-success/10 hover:text-success"
+ className="w-full gap-1.5 border-success text-success hover:bg-success/10 hover:text-success"
  >
  <PartyPopper className="w-3.5 h-3.5" />
  Mark as Found / Reunited
@@ -1010,7 +1010,7 @@ const LostPets = () => {
  <AlertDialogContent>
  <AlertDialogHeader>
  <AlertDialogTitle className="flex items-center gap-2">
- <PartyPopper className="w-5 h-5 text-success0" />
+ <PartyPopper className="w-5 h-5 text-success" />
  Great News!
  </AlertDialogTitle>
  <AlertDialogDescription>

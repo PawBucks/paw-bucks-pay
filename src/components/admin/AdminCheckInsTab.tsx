@@ -216,7 +216,7 @@ export function AdminCheckInsTab() {
  </Card>
  <Card>
  <CardContent className="p-4 flex items-center gap-3">
- <div className="p-2 bg-secondary/50 rounded-lg">
+ <div className="p-2 bg-secondary rounded-lg">
  <MapPin className="w-5 h-5 text-secondary-foreground" />
  </div>
  <div>
@@ -269,7 +269,7 @@ export function AdminCheckInsTab() {
  {loading ? (
  <div className="space-y-3">
  {[1, 2, 3, 4, 5].map(i => (
- <div key={i} className="h-12 bg-muted/50 rounded animate-pulse" />
+ <div key={i} className="h-12 bg-muted rounded animate-pulse" />
  ))}
  </div>
  ) : filtered.length === 0 ? (

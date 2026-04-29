@@ -160,7 +160,7 @@ const PawBucksRedeem = () => {
  </div>
  <GradientCard className="px-6 py-4">
  <div className="flex items-center gap-2">
- <Coins className="w-6 h-6 text-warning0" />
+ <Coins className="w-6 h-6 text-warning" />
  <div>
  <p className="text-sm text-muted-foreground">Your Balance</p>
  <p className="text-2xl font-bold">{wallet?.balance.toLocaleString() || 0}</p>
@@ -179,7 +179,7 @@ const PawBucksRedeem = () => {
  return (
  <GradientCard key={offer.id} className="relative overflow-hidden">
  {!canAfford && (
- <div className="absolute top-2 right-2 bg-destructive/100/20 text-destructive0 px-3 py-1 rounded-full text-xs font-semibold">
+ <div className="absolute top-2 right-2 bg-destructive/20 text-destructive px-3 py-1 rounded-full text-xs font-semibold">
  Insufficient PawBucks
  </div>
  )}
@@ -199,7 +199,7 @@ const PawBucksRedeem = () => {
 
  <div className="flex items-center justify-between mt-4 pt-4 border-t border-border/50">
  <div className="flex items-center gap-1">
- <Coins className="w-5 h-5 text-warning0" />
+ <Coins className="w-5 h-5 text-warning" />
  <span className="font-bold text-lg">{offer.coins_required.toLocaleString()}</span>
  <span className="text-sm text-muted-foreground">PawBucks</span>
  </div>
@@ -218,7 +218,7 @@ const PawBucksRedeem = () => {
  </div>
  ) : (
  <div className="text-center py-16">
- <div className="w-20 h-20 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4">
+ <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
  <Gift className="w-10 h-10 text-muted-foreground" />
  </div>
  <h3 className="text-xl font-semibold mb-2">No Offers Available Yet</h3>
@@ -238,10 +238,10 @@ const PawBucksRedeem = () => {
  </DialogHeader>
  {selectedOffer && (
  <div className="space-y-4">
- <div className="bg-muted/50 p-4 rounded-lg">
+ <div className="bg-muted p-4 rounded-lg">
  <p className="font-semibold text-lg mb-2">{selectedOffer.title}</p>
  <p className="text-sm text-muted-foreground mb-2">{selectedOffer.merchants?.business_name ||'Partner'}</p>
- <div className="flex items-center gap-2 text-warning0">
+ <div className="flex items-center gap-2 text-warning">
  <Coins className="w-5 h-5" />
  <span className="font-bold text-xl">{selectedOffer.coins_required.toLocaleString()} PawBucks</span>
  </div>
@@ -264,13 +264,13 @@ const PawBucksRedeem = () => {
  <DialogContent>
  <DialogHeader>
  <DialogTitle className="flex items-center gap-2">
- <Check className="w-6 h-6 text-success0" />
+ <Check className="w-6 h-6 text-success" />
  Redemption Successful!
  </DialogTitle>
  </DialogHeader>
  {redemptionResult && (
  <div className="space-y-4">
- <div className="text-center bg-gradient-to-r from-warning0/10 to-warning0/10 p-6 rounded-lg border-2 border-warning/200/20">
+ <div className="text-center bg-gradient-to-r from-warning/10 to-warning/10 p-6 rounded-lg border-2 border-warning/20">
  <p className="text-sm text-muted-foreground mb-2">Your Redemption Code</p>
  <div className="flex items-center justify-center gap-2 mb-2">
  <p className="text-3xl font-bold font-mono tracking-wider">{redemptionResult.code}</p>

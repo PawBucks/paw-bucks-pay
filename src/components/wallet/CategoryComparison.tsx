@@ -168,7 +168,7 @@ export const CategoryComparison = memo(({ transactions, medicalRecords = [] }: C
  {/* This month */}
  <div className="flex items-center gap-2">
  <div className="w-14 text-xs text-muted-foreground">This mo.</div>
- <div className="flex-1 h-2 bg-muted/50 rounded-full overflow-hidden">
+ <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
  <div 
  className="h-full rounded-full transition-all duration-500"
  style={{ 
@@ -183,7 +183,7 @@ export const CategoryComparison = memo(({ transactions, medicalRecords = [] }: C
  {/* Last month */}
  <div className="flex items-center gap-2">
  <div className="w-14 text-xs text-muted-foreground">Last mo.</div>
- <div className="flex-1 h-2 bg-muted/50 rounded-full overflow-hidden">
+ <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
  <div 
  className="h-full rounded-full transition-all duration-500 opacity-50"
  style={{ 
@@ -207,7 +207,7 @@ export const CategoryComparison = memo(({ transactions, medicalRecords = [] }: C
  <span>This month</span>
  </div>
  <div className="flex items-center gap-1">
- <div className="w-3 h-3 rounded-full bg-primary/50" />
+ <div className="w-3 h-3 rounded-full bg-primary" />
  <span>Last month</span>
  </div>
  </div>

@@ -149,7 +149,7 @@ const ReferralCardComponent = () => {
  {referrals.map((referral) => (
  <div
  key={referral.id}
- className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
+ className="flex items-center justify-between p-3 bg-muted rounded-lg"
  >
  <span className="text-sm">
  {referral.profiles?.full_name ||"User"}

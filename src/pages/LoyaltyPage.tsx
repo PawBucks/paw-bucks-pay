@@ -329,7 +329,7 @@ const LoyaltyPage = () => {
  </div>
 
  {/* Benefits */}
- <div className="p-3 rounded-lg bg-muted/50">
+ <div className="p-3 rounded-lg bg-muted">
  <p className="text-sm font-medium mb-2">Benefits:</p>
  <ul className="text-xs space-y-1">
  {tierDef.annual_free_credit_value > 0 && (

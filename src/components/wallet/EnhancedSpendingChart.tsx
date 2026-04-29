@@ -247,13 +247,13 @@ export const EnhancedSpendingChart = memo(({ transactions, medicalRecords = [] }
  <div className="flex border rounded-md overflow-hidden">
  <button
  onClick={() => setChartType('area')}
- className={`p-1.5 ${chartType ==='area' ?'bg-primary/20' :'bg-muted/50'}`}
+ className={`p-1.5 ${chartType ==='area' ?'bg-primary/20' :'bg-muted'}`}
  >
  <LineChart className="w-4 h-4" />
  </button>
  <button
  onClick={() => setChartType('bar')}
- className={`p-1.5 ${chartType ==='bar' ?'bg-primary/20' :'bg-muted/50'}`}
+ className={`p-1.5 ${chartType ==='bar' ?'bg-primary/20' :'bg-muted'}`}
  >
  <BarChart3 className="w-4 h-4" />
  </button>

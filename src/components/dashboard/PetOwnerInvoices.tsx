@@ -182,7 +182,7 @@ export function PetOwnerInvoices({ userEmail }: PetOwnerInvoicesProps) {
  return (
  <div
  key={invoice.id}
- className="flex items-center gap-4 p-4 rounded-lg border bg-card hover:bg-muted/50 transition-colors"
+ className="flex items-center gap-4 p-4 rounded-lg border bg-card hover:bg-muted transition-colors"
  >
  {/* Merchant Logo */}
  <div className="flex-shrink-0">

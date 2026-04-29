@@ -527,7 +527,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
 
  {/* Quick Tips */}
  {totalMiles === 0 && totalVehicleExpenses === 0 && (
- <div className="mt-4 p-4 bg-muted/50 rounded-lg text-sm text-muted-foreground">
+ <div className="mt-4 p-4 bg-muted rounded-lg text-sm text-muted-foreground">
  <p className="flex items-center gap-2">
  <Info className="h-4 w-4" />
  Log your mileage and vehicle expenses below to compare deduction methods
@@ -675,7 +675,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
  </div>
 
  {/* Entry Mode Toggle */}
- <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+ <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
  <div className="flex items-center gap-2">
  <Car className="h-4 w-4 text-primary" />
  <Label htmlFor="entry-mode" className="text-sm font-medium cursor-pointer">

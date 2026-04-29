@@ -239,7 +239,7 @@ export const EMRDashboard = ({ vetId }: EMRDashboardProps) => {
  {filteredPatients.map((patient) => (
  <Card
  key={patient.pet_id}
- className="p-4 hover:bg-accent/50 cursor-pointer transition-colors"
+ className="p-4 hover:bg-accent cursor-pointer transition-colors"
  onClick={() => setSelectedPatient(patient)}
  >
  <div className="flex items-center justify-between">
@@ -292,7 +292,7 @@ export const EMRDashboard = ({ vetId }: EMRDashboardProps) => {
  {recentActivity.map((activity, idx) => (
  <div
  key={`${activity.type}-${activity.id}`}
- className="p-3 rounded-lg bg-muted/50"
+ className="p-3 rounded-lg bg-muted"
  >
  <div className="flex items-start gap-2">
  {activity.type ==="soap" ? (

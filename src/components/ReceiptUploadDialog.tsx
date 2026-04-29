@@ -328,7 +328,7 @@ export const ReceiptUploadDialog = ({ open, onOpenChange, userId }: ReceiptUploa
 
  {/* Non-partner disclaimer */}
  {submissionType ==="non_partner" && (
- <div className="p-3 bg-warning/100/10 border border-warning/200/20 rounded-lg">
+ <div className="p-3 bg-warning/10 border border-warning/20 rounded-lg">
  <p className="text-xs text-warning">
  <strong>Note:</strong> Non-partner PawBucks vest after 30 days and are subject to a 20,000 PawBucks monthly cap.
  </p>
@@ -339,7 +339,7 @@ export const ReceiptUploadDialog = ({ open, onOpenChange, userId }: ReceiptUploa
  <div className="space-y-2">
  <Label>Receipt Photo *</Label>
  {!imagePreview ? (
- <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-muted-foreground/25 rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
+ <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-muted-foreground/25 rounded-lg cursor-pointer hover:bg-muted transition-colors">
  <div className="flex flex-col items-center justify-center pt-5 pb-6">
  <ImageIcon className="w-8 h-8 text-muted-foreground mb-2" />
  <p className="text-sm text-muted-foreground">Click to upload a clear photo</p>

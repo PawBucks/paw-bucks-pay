@@ -413,7 +413,7 @@ const MerchantMarket = () => {
 
  {/* Category Description */}
  {selectedCategory !=="all" && (
- <div className="mb-8 p-4 rounded-lg bg-muted/50 border">
+ <div className="mb-8 p-4 rounded-lg bg-muted border">
  <div className="flex items-center gap-3">
  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
  {categoryInfo[selectedCategory].icon}

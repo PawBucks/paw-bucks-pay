@@ -84,7 +84,7 @@ const AdPlacementComponent = ({ position ='top' }: AdPlacementProps) => {
  <div className="flex items-center gap-2 flex-wrap">
  <h3 className="text-lg font-bold text-foreground">{currentMerchant.business_name}</h3>
  {hasVerifiedBadge && (
- <Badge className="bg-info/100/10 text-info border-info/200/20 gap-1">
+ <Badge className="bg-info/10 text-info border-info/20 gap-1">
  <BadgeCheck className="w-3 h-3" />
  Verified Pro
  </Badge>

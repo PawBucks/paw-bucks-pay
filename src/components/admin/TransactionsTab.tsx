@@ -352,7 +352,7 @@ export function TransactionsTab() {
  {pawbucksUsed.toLocaleString()} PB (${pawbucksUSD.toFixed(2)})
  </span>
  } />
- <div className="border-l-2 border-warning/30/50 pl-3 ml-5 mt-1 mb-1">
+ <div className="border-l-2 border-warning/50 pl-3 ml-5 mt-1 mb-1">
  <p className="text-xs text-muted-foreground">
  Customer redeemed <strong>{pawbucksUsed.toLocaleString()}</strong> PawBucks
  worth <strong>${pawbucksUSD.toFixed(2)}</strong>, reducing the Stripe charge
@@ -375,7 +375,7 @@ export function TransactionsTab() {
  <div className="space-y-1">
  <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Rewards & Metadata</h4>
  <DetailRow icon={Coins} label="Rewards Earned" value={
- <span className="text-success dark:text-success">
+ <span className="text-success">
  {rewardsEarnedPB.toLocaleString()} PB (${rewardsUSD.toFixed(2)})
  </span>
  } />

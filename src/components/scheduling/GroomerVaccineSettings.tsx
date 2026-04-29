@@ -23,9 +23,9 @@ import { Plus, Edit, Trash2, ShieldCheck, Loader2 } from"lucide-react";
 import { toast } from"sonner";
 
 const ENFORCEMENT_LEVELS = [
- { value:"required", label:"Required", description:"Blocks booking if missing/expired", color:"bg-destructive/100/10 text-destructive border-destructive/200/20" },
- { value:"warning", label:"Warning", description:"Shows warning but allows booking", color:"bg-warning/100/10 text-warning border-warning/200/20" },
- { value:"info", label:"Info Only", description:"Shows info, no restrictions", color:"bg-info/100/10 text-info border-info/200/20" },
+ { value:"required", label:"Required", description:"Blocks booking if missing/expired", color:"bg-destructive/10 text-destructive border-destructive/20" },
+ { value:"warning", label:"Warning", description:"Shows warning but allows booking", color:"bg-warning/10 text-warning border-warning/20" },
+ { value:"info", label:"Info Only", description:"Shows info, no restrictions", color:"bg-info/10 text-info border-info/20" },
 ];
 
 const COMMON_VACCINES = ["Rabies","DHPP","Bordetella","Canine Influenza","Leptospirosis","Lyme Disease"];

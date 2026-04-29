@@ -424,7 +424,7 @@ export default function MerchantCampaigns() {
  )}
  </div>
 
- <div className="bg-muted/50 rounded-lg p-3">
+ <div className="bg-muted rounded-lg p-3">
  <div className="flex items-center gap-2 text-sm font-medium mb-1">
  <Users className="w-4 h-4" />
  Recipients

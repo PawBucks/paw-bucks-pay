@@ -184,7 +184,7 @@ export function HomeOfficeCalculator() {
  key={key}
  htmlFor={key}
  className={`flex items-start gap-4 p-4 border rounded-lg cursor-pointer transition-colors ${
- spaceType === key ?'border-primary bg-primary/5' :'hover:border-primary/50'
+ spaceType === key ?'border-primary bg-primary/5' :'hover:border-primary'
  }`}
  >
  <RadioGroupItem value={key} id={key} className="mt-1" />
@@ -276,7 +276,7 @@ export function HomeOfficeCalculator() {
  </div>
 
  {businessSqFt && totalSqFt && parseFloat(businessSqFt) > 0 && parseFloat(totalSqFt) > 0 && (
- <div className="p-4 bg-muted/50 rounded-lg">
+ <div className="p-4 bg-muted rounded-lg">
  <div className="flex items-center justify-between">
  <span className="text-sm text-muted-foreground">Business Use Percentage</span>
  <span className="text-2xl font-bold text-primary">
@@ -363,7 +363,7 @@ export function HomeOfficeCalculator() {
  <Label
  htmlFor="exclusive-yes"
  className={`flex items-start gap-4 p-4 border rounded-lg cursor-pointer transition-colors ${
- isExclusiveUse ==='yes' ?'border-primary bg-primary/5' :'hover:border-primary/50'
+ isExclusiveUse ==='yes' ?'border-primary bg-primary/5' :'hover:border-primary'
  }`}
  >
  <RadioGroupItem value="yes" id="exclusive-yes" className="mt-1" />
@@ -376,7 +376,7 @@ export function HomeOfficeCalculator() {
  <Label
  htmlFor="exclusive-partial"
  className={`flex items-start gap-4 p-4 border rounded-lg cursor-pointer transition-colors ${
- isExclusiveUse ==='partial' ?'border-primary bg-primary/5' :'hover:border-primary/50'
+ isExclusiveUse ==='partial' ?'border-primary bg-primary/5' :'hover:border-primary'
  }`}
  >
  <RadioGroupItem value="partial" id="exclusive-partial" className="mt-1" />
@@ -389,7 +389,7 @@ export function HomeOfficeCalculator() {
  <Label
  htmlFor="exclusive-no"
  className={`flex items-start gap-4 p-4 border rounded-lg cursor-pointer transition-colors ${
- isExclusiveUse ==='no' ?'border-primary bg-primary/5' :'hover:border-primary/50'
+ isExclusiveUse ==='no' ?'border-primary bg-primary/5' :'hover:border-primary'
  }`}
  >
  <RadioGroupItem value="no" id="exclusive-no" className="mt-1" />
@@ -495,22 +495,22 @@ export function HomeOfficeCalculator() {
 
  {/* Summary Stats */}
  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
- <div className="text-center p-3 bg-muted/50 rounded-lg">
+ <div className="text-center p-3 bg-muted rounded-lg">
  <Percent className="h-5 w-5 mx-auto mb-1 text-primary" />
  <p className="text-lg font-bold">{result.businessPercentage}%</p>
  <p className="text-xs text-muted-foreground">Business Use</p>
  </div>
- <div className="text-center p-3 bg-muted/50 rounded-lg">
+ <div className="text-center p-3 bg-muted rounded-lg">
  <Calculator className="h-5 w-5 mx-auto mb-1 text-primary" />
  <p className="text-lg font-bold">${result.monthlyDeduction.toFixed(0)}</p>
  <p className="text-xs text-muted-foreground">Monthly Savings</p>
  </div>
- <div className="text-center p-3 bg-muted/50 rounded-lg">
+ <div className="text-center p-3 bg-muted rounded-lg">
  <Home className="h-5 w-5 mx-auto mb-1 text-primary" />
  <p className="text-lg font-bold">{businessSqFt}</p>
  <p className="text-xs text-muted-foreground">Business Sq Ft</p>
  </div>
- <div className="text-center p-3 bg-muted/50 rounded-lg">
+ <div className="text-center p-3 bg-muted rounded-lg">
  <DollarSign className="h-5 w-5 mx-auto mb-1 text-primary" />
  <p className="text-lg font-bold">
  ${Math.max(result.totalAnnualDeduction, result.simplifiedDeduction).toLocaleString()}

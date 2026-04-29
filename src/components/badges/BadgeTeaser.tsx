@@ -124,7 +124,7 @@ export const BadgeTeaser = ({ userId }: BadgeTeaserProps) => {
  if (loading) {
  return (
  <GradientCard className="animate-pulse">
- <div className="h-32 bg-muted/50 rounded-xl" />
+ <div className="h-32 bg-muted rounded-xl" />
  </GradientCard>
  );
  }

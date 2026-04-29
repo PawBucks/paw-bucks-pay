@@ -291,7 +291,7 @@ export function ConsultationScheduleDialog({
 
  {/* Summary */}
  {selectedDate && selectedTime && (
- <div className="p-4 rounded-lg bg-muted/50 border">
+ <div className="p-4 rounded-lg bg-muted border">
  <h4 className="text-sm font-medium mb-2">Your Selection</h4>
  <div className="flex items-center justify-between">
  <div>

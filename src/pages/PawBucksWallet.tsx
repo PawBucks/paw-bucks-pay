@@ -89,20 +89,20 @@ const UpgradePrompt = ({ totalEarned, onUpgrade, isPawPassSubscriber = false }: 
  <div className="relative z-10">
  {/* Header with sparkle animation */}
  <div className="flex items-center justify-center gap-2 mb-4">
- <Sparkles className="w-5 h-5 text-warning0 animate-pulse" />
+ <Sparkles className="w-5 h-5 text-warning animate-pulse" />
  <h3 className="text-lg font-bold text-center">Earn More PawBucks!</h3>
- <Sparkles className="w-5 h-5 text-warning0 animate-pulse" />
+ <Sparkles className="w-5 h-5 text-warning animate-pulse" />
  </div>
 
  {/* Tier Toggle - Only show if NOT a PawPass subscriber */}
  {!isPawPassSubscriber && (
  <div className="flex justify-center mb-6">
- <div className="inline-flex bg-muted/50 rounded-full p-1">
+ <div className="inline-flex bg-muted rounded-full p-1">
  <button
  onClick={() => setActiveTab('pawpass')}
  className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
  activeTab ==='pawpass' 
- ?'bg-warning/100 text-warning shadow-lg' 
+ ?'bg-warning text-warning shadow-lg' 
  :'text-muted-foreground hover:text-foreground'
  }`}
  >
@@ -113,7 +113,7 @@ const UpgradePrompt = ({ totalEarned, onUpgrade, isPawPassSubscriber = false }: 
  onClick={() => setActiveTab('pawpassplus')}
  className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
  activeTab ==='pawpassplus' 
- ?'bg-accent/100 text-white shadow-lg' 
+ ?'bg-accent text-white shadow-lg' 
  :'text-muted-foreground hover:text-foreground'
  }`}
  >
@@ -130,9 +130,9 @@ const UpgradePrompt = ({ totalEarned, onUpgrade, isPawPassSubscriber = false }: 
  <div className="space-y-4 animate-fade-in">
  {/* What you missed section */}
  {totalEarned > 0 && pawPassExtra > 0 && (
- <div className="text-center p-4 rounded-xl bg-warning/100/10 border border-warning/200/20">
+ <div className="text-center p-4 rounded-xl bg-warning/10 border border-warning/20">
  <p className="text-sm text-muted-foreground mb-1">With PawPass, you would have earned</p>
- <p className="text-3xl font-bold text-warning0">
+ <p className="text-3xl font-bold text-warning">
  +{Formatters.number(pawPassExtra)} more
  </p>
  <p className="text-xs text-muted-foreground mt-1">PawBucks from your purchases</p>
@@ -145,7 +145,7 @@ const UpgradePrompt = ({ totalEarned, onUpgrade, isPawPassSubscriber = false }: 
  <p className="text-xs text-muted-foreground">Free Tier</p>
  <p className="text-lg font-semibold">$1 = 10</p>
  </div>
- <div className="text-center p-3 rounded-lg bg-warning/100/10 border border-warning/200/30">
+ <div className="text-center p-3 rounded-lg bg-warning/10 border border-warning/30">
  <p className="text-xs text-warning font-medium">PawPass (2x)</p>
  <p className="text-lg font-bold text-warning">$1 = 20</p>
  </div>
@@ -181,13 +181,13 @@ const UpgradePrompt = ({ totalEarned, onUpgrade, isPawPassSubscriber = false }: 
  <div className="space-y-4 animate-fade-in">
  {/* What you missed section */}
  {totalEarned > 0 && pawPassPlusExtra > 0 && (
- <div className="text-center p-4 rounded-xl bg-accent/100/10 border border-accent/200/20">
+ <div className="text-center p-4 rounded-xl bg-accent/10 border border-accent/20">
  <p className="text-sm text-muted-foreground mb-1">
  {isPawPassSubscriber 
  ?"With PawPass+, you would earn" 
  :"With PawPass+, you would have earned"}
  </p>
- <p className="text-3xl font-bold text-accent0">
+ <p className="text-3xl font-bold text-accent">
  +{Formatters.number(pawPassPlusExtra)} more
  </p>
  <p className="text-xs text-muted-foreground mt-1">PawBucks from your purchases</p>
@@ -204,11 +204,11 @@ const UpgradePrompt = ({ totalEarned, onUpgrade, isPawPassSubscriber = false }: 
  $1 = {isPawPassSubscriber ?"20" :"10"}
  </p>
  </div>
- <div className="text-center p-3 rounded-lg bg-accent/100/10 border border-accent/200/30">
- <p className="text-xs text-accent0 font-medium">
+ <div className="text-center p-3 rounded-lg bg-accent/10 border border-accent/30">
+ <p className="text-xs text-accent font-medium">
  PawPass+ ({isPawPassSubscriber ?"1.5x more" :"3x"})
  </p>
- <p className="text-lg font-bold text-accent0">$1 = 30</p>
+ <p className="text-lg font-bold text-accent">$1 = 30</p>
  </div>
  </div>
 
@@ -221,7 +221,7 @@ const UpgradePrompt = ({ totalEarned, onUpgrade, isPawPassSubscriber = false }: 
  <th className="py-2 px-3 text-center text-xs font-medium text-muted-foreground">
  {isPawPassSubscriber ?"PawPass" :"Free"}
  </th>
- <th className="py-2 px-3 text-center text-xs font-medium text-accent0">PawPass+</th>
+ <th className="py-2 px-3 text-center text-xs font-medium text-accent">PawPass+</th>
  </tr>
  </thead>
  <tbody>
@@ -231,7 +231,7 @@ const UpgradePrompt = ({ totalEarned, onUpgrade, isPawPassSubscriber = false }: 
  <td className="py-2 px-3 text-center text-muted-foreground">
  {Formatters.number(isPawPassSubscriber ? p.pawpass : p.free)}
  </td>
- <td className="py-2 px-3 text-center font-semibold text-accent0">{Formatters.number(p.pawpassplus)}</td>
+ <td className="py-2 px-3 text-center font-semibold text-accent">{Formatters.number(p.pawpassplus)}</td>
  </tr>
  ))}
  </tbody>
@@ -239,11 +239,11 @@ const UpgradePrompt = ({ totalEarned, onUpgrade, isPawPassSubscriber = false }: 
  </div>
 
  <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
- <Crown className="w-4 h-4 text-accent0" />
+ <Crown className="w-4 h-4 text-accent" />
  <span>
  {isPawPassSubscriber 
- ? <>Only $10/month more • <span className="text-accent0 font-medium">Ad-Free!</span></>
- : <>$20/month • 7-day free trial • <span className="text-accent0 font-medium">Ad-Free!</span></>
+ ? <>Only $10/month more • <span className="text-accent font-medium">Ad-Free!</span></>
+ : <>$20/month • 7-day free trial • <span className="text-accent font-medium">Ad-Free!</span></>
  }
  </span>
  </div>
@@ -256,8 +256,8 @@ const UpgradePrompt = ({ totalEarned, onUpgrade, isPawPassSubscriber = false }: 
  onClick={onUpgrade}
  className={`w-full mt-4 font-semibold transition-all duration-300 ${
  activeTab ==='pawpass' && !isPawPassSubscriber
- ?'bg-gradient-to-r from-warning0 to-warning hover:from-warning hover:to-warning text-warning'
- :'bg-gradient-to-r from-accent0 to-accent hover:from-accent hover:to-accent text-white'
+ ?'bg-gradient-to-r from-warning to-warning hover:from-warning hover:to-warning text-warning'
+ :'bg-gradient-to-r from-accent to-accent hover:from-accent hover:to-accent text-white'
  }`}
  >
  {activeTab ==='pawpass' && !isPawPassSubscriber ? (
@@ -372,7 +372,7 @@ const PawBucksWallet = () => {
  {/* Header */}
  <div className="mb-8 text-center">
  <div className="flex items-center justify-center gap-3 mb-2">
- <Coins className="w-10 h-10 text-warning0" />
+ <Coins className="w-10 h-10 text-warning" />
  <h2 className="text-4xl font-bold">Your PawBucks Wallet</h2>
  <PawBucksInfoTooltip variant="earning" className="ml-1" />
  </div>
@@ -511,19 +511,19 @@ const PawBucksWallet = () => {
  {activities.map((activity) => (
  <div
  key={activity.id}
- className="flex items-center justify-between p-4 rounded-xl bg-muted/30 border border-border/50 hover:bg-muted/50 transition-colors"
+ className="flex items-center justify-between p-4 rounded-xl bg-muted/30 border border-border/50 hover:bg-muted transition-colors"
  >
  <div className="flex items-center gap-3">
  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
  activity.source ==='refund' ?'bg-destructive/10' :
- activity.type ==='earn' || activity.type ==='credit' ?'bg-success/100/10' :'bg-warning/100/10'
+ activity.type ==='earn' || activity.type ==='credit' ?'bg-success/10' :'bg-warning/10'
  }`}>
  {activity.source ==='refund' ? (
  <ArrowUpRight className="w-5 h-5 text-destructive" />
  ) : activity.type ==='earn' || activity.type ==='credit' ? (
- <ArrowDownRight className="w-5 h-5 text-success0" />
+ <ArrowDownRight className="w-5 h-5 text-success" />
  ) : (
- <ArrowUpRight className="w-5 h-5 text-warning0" />
+ <ArrowUpRight className="w-5 h-5 text-warning" />
  )}
  </div>
  <div>
@@ -543,7 +543,7 @@ const PawBucksWallet = () => {
  <div className="text-right">
  <p className={`font-bold text-lg ${
  activity.source ==='refund' ?'text-destructive' :
- activity.type ==='earn' ?'text-success0' :'text-warning0'
+ activity.type ==='earn' ?'text-success' :'text-warning'
  }`}>
  {activity.type ==='earn' || activity.type ==='credit' ?'+' :'-'}{Formatters.number(Math.abs(activity.amount))}
  </p>

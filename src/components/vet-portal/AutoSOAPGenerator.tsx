@@ -398,7 +398,7 @@ export const AutoSOAPGenerator = ({ vetId }: AutoSOAPGeneratorProps) => {
  Object.keys(draft.extracted_vitals).some(
  (k) => draft.extracted_vitals[k]
  ) && (
- <div className="bg-muted/50 rounded-lg p-3">
+ <div className="bg-muted rounded-lg p-3">
  <p className="text-sm font-medium mb-2">
  Extracted Vitals
  </p>

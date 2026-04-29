@@ -298,7 +298,7 @@ export function CampaignWizard({ open, onOpenChange, brandId, brandName, brandLo
  rows={3}
  />
  </div>
- <div className="p-3 rounded-lg bg-muted/50 border text-sm text-muted-foreground">
+ <div className="p-3 rounded-lg bg-muted border text-sm text-muted-foreground">
  💡 You'll invite specific merchants in the next step (Marketplace tab) — targeting rules apply at the pet-owner level.
  </div>
  </>
@@ -382,7 +382,7 @@ export function CampaignWizard({ open, onOpenChange, brandId, brandName, brandLo
 
  {step.key ==="budget" && (
  <>
- <div className="space-y-3 p-4 rounded-lg bg-muted/50 border">
+ <div className="space-y-3 p-4 rounded-lg bg-muted border">
  <h3 className="font-semibold flex items-center gap-2">
  <Zap className="h-4 w-4" /> When are PawBucks released?
  </h3>
@@ -424,7 +424,7 @@ export function CampaignWizard({ open, onOpenChange, brandId, brandName, brandLo
  )}
  </div>
 
- <div className="space-y-4 p-4 rounded-lg bg-muted/50 border">
+ <div className="space-y-4 p-4 rounded-lg bg-muted border">
  <h3 className="font-semibold flex items-center gap-2">
  <DollarSign className="h-4 w-4" /> Budget Calculator
  </h3>
@@ -475,7 +475,7 @@ export function CampaignWizard({ open, onOpenChange, brandId, brandName, brandLo
  </div>
  </div>
 
- <div className="space-y-3 p-4 rounded-lg bg-muted/50 border">
+ <div className="space-y-3 p-4 rounded-lg bg-muted border">
  <h3 className="font-semibold flex items-center gap-2">
  <Zap className="h-4 w-4" /> Guardrails
  </h3>

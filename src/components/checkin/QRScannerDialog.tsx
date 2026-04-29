@@ -291,7 +291,7 @@ export function QRScannerDialog({ open, onOpenChange }: QRScannerDialogProps) {
  <div className="text-center py-6 space-y-4">
  {result.success ? (
  <>
- <CheckCircle2 className="w-16 h-16 mx-auto text-success0" />
+ <CheckCircle2 className="w-16 h-16 mx-auto text-success" />
  <div>
  <h3 className="text-lg font-semibold">Checked In!</h3>
  <p className="text-muted-foreground">Welcome to {result.entityName}</p>
@@ -375,7 +375,7 @@ export function QRScannerDialog({ open, onOpenChange }: QRScannerDialogProps) {
  className={`w-full flex items-center justify-between gap-2 p-3 rounded-lg border text-left text-sm transition-colors ${
  selectedEntityToken === entity.checkin_qr_token
  ?"border-primary bg-primary/5"
- :"border-border hover:bg-muted/50"
+ :"border-border hover:bg-muted"
  }`}
  >
  <div className="flex items-center gap-2 min-w-0">
@@ -395,7 +395,7 @@ export function QRScannerDialog({ open, onOpenChange }: QRScannerDialogProps) {
 
  {/* Location error or no location */}
  {locationError && (
- <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg">
+ <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
  <MapPin className="w-4 h-4 text-muted-foreground shrink-0" />
  <div className="text-xs text-muted-foreground">
  <p>{locationError}. You can select from the list below instead.</p>

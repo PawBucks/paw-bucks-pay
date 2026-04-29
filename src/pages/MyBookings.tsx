@@ -51,10 +51,10 @@ import { GroomingReportCardView } from"@/components/scheduling/GroomingReportCar
 type BookingStatus ="pending" |"confirmed" |"cancelled" |"completed" |"no_show";
 
 const STATUS_CONFIG: Record<BookingStatus, { label: string; color: string; icon: any }> = {
- pending: { label:"Pending", color:"bg-warning/100/10 text-warning border-warning/200/20", icon: Clock },
+ pending: { label:"Pending", color:"bg-warning/10 text-warning border-warning/20", icon: Clock },
  confirmed: { label:"Confirmed", color:"bg-chart-1/10 text-chart-1 border-chart-1/20", icon: CheckCircle2 },
  cancelled: { label:"Cancelled", color:"bg-muted text-muted-foreground border-border", icon: XCircle },
- completed: { label:"Completed", color:"bg-success/100/10 text-success border-success/200/20", icon: CheckCircle2 },
+ completed: { label:"Completed", color:"bg-success/10 text-success border-success/20", icon: CheckCircle2 },
  no_show: { label:"No Show", color:"bg-destructive/10 text-destructive border-destructive/20", icon: AlertTriangle },
 };
 
@@ -243,7 +243,7 @@ export default function MyBookings() {
 
  {/* Pending approval notice */}
  {status ==="pending" && isUpcoming && (
- <div className="flex items-center gap-2 p-2.5 rounded-lg bg-warning/100/10 border border-warning/200/20 text-xs text-warning mb-3">
+ <div className="flex items-center gap-2 p-2.5 rounded-lg bg-warning/10 border border-warning/20 text-xs text-warning mb-3">
  <Clock className="w-3.5 h-3.5 flex-shrink-0" />
  <span>Awaiting confirmation from {merchant?.business_name ||'the business'}</span>
  </div>

@@ -53,21 +53,21 @@ export const PetFundCard = ({ userId }: PetFundCardProps) => {
 
  const getStatusIcon = (status: string) => {
  switch (status) {
- case'released': return <CheckCircle className="w-3.5 h-3.5 text-success0" />;
+ case'released': return <CheckCircle className="w-3.5 h-3.5 text-success" />;
  case'used': return <CheckCircle className="w-3.5 h-3.5 text-muted-foreground" />;
- case'pending': return <Lock className="w-3.5 h-3.5 text-warning0" />;
+ case'pending': return <Lock className="w-3.5 h-3.5 text-warning" />;
  default: return <Clock className="w-3.5 h-3.5 text-muted-foreground" />;
  }
  };
 
  const getStatusBadge = (release: PetFundRelease) => {
  if (release.usedAt) {
- return <Badge variant="outline" className="text-xs bg-muted/50">Used</Badge>;
+ return <Badge variant="outline" className="text-xs bg-muted">Used</Badge>;
  }
  if (release.status ==='released') {
- return <Badge variant="outline" className="text-xs bg-success/100/10 text-success border-success/200/30">Available</Badge>;
+ return <Badge variant="outline" className="text-xs bg-success/10 text-success border-success/30">Available</Badge>;
  }
- return <Badge variant="outline" className="text-xs bg-warning/100/10 text-warning border-warning/200/30">Locked</Badge>;
+ return <Badge variant="outline" className="text-xs bg-warning/10 text-warning border-warning/30">Locked</Badge>;
  };
 
  return (
@@ -82,7 +82,7 @@ export const PetFundCard = ({ userId }: PetFundCardProps) => {
  </div>
  Welcome Credit Fund
  </span>
- <Badge variant="outline" className="bg-success/100/10 text-success border-success/200/30">
+ <Badge variant="outline" className="bg-success/10 text-success border-success/30">
  Active
  </Badge>
  </CardTitle>
@@ -108,7 +108,7 @@ export const PetFundCard = ({ userId }: PetFundCardProps) => {
 
  {/* Balance Cards */}
  <div className="grid grid-cols-2 gap-3">
- <div className="rounded-lg border border-success/200/20 bg-success/100/5 p-3">
+ <div className="rounded-lg border border-success/20 bg-success/5 p-3">
  <div className="flex items-center gap-1.5 mb-1">
  <CheckCircle className="w-3.5 h-3.5 text-success" />
  <span className="text-xs text-muted-foreground">Available Now</span>
@@ -116,7 +116,7 @@ export const PetFundCard = ({ userId }: PetFundCardProps) => {
  <p className="text-xl font-bold text-success">${availableBalanceUsd.toFixed(2)}</p>
  <p className="text-xs text-success/60">{availableBalance.toLocaleString()} PB</p>
  </div>
- <div className="rounded-lg border border-warning/200/20 bg-warning/100/5 p-3">
+ <div className="rounded-lg border border-warning/20 bg-warning/5 p-3">
  <div className="flex items-center gap-1.5 mb-1">
  <Lock className="w-3.5 h-3.5 text-warning" />
  <span className="text-xs text-muted-foreground">In Escrow</span>
@@ -165,7 +165,7 @@ export const PetFundCard = ({ userId }: PetFundCardProps) => {
  release.usedAt
  ?'bg-muted/30 border-border/30 opacity-60'
  : release.status ==='released'
- ?'bg-success/100/5 border-success/200/20'
+ ?'bg-success/5 border-success/20'
  :'bg-muted/20 border-border/50'
  }`}
  >

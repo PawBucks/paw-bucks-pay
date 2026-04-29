@@ -285,11 +285,11 @@ export const NonPartnerReceiptVerificationTab = () => {
  const getStatusBadge = (status: string) => {
  switch (status) {
  case"pending":
- return <Badge variant="outline" className="bg-warning/10 text-warning border-warning/30/30">Pending Review</Badge>;
+ return <Badge variant="outline" className="bg-warning/10 text-warning border-warning/30">Pending Review</Badge>;
  case"approved":
- return <Badge variant="outline" className="bg-success/10 text-success border-success/30/30">Approved</Badge>;
+ return <Badge variant="outline" className="bg-success/10 text-success border-success/30">Approved</Badge>;
  case"rejected":
- return <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/30/30">Rejected</Badge>;
+ return <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/30">Rejected</Badge>;
  default:
  return <Badge variant="outline">{status}</Badge>;
  }
@@ -525,7 +525,7 @@ export const NonPartnerReceiptVerificationTab = () => {
  <p className="text-sm text-muted-foreground">{selectedUserInfo.email}</p>
  </div>
  {selectedUserInfo.subscription_tier ==="pawpass_plus" ? (
- <Badge className="bg-primary/10 text-primary border-primary/30/30">
+ <Badge className="bg-primary/10 text-primary border-primary/30">
  <Crown className="w-3 h-3 mr-1" /> PawPass+
  </Badge>
  ) : (

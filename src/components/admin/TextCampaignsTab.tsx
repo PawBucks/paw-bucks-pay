@@ -246,11 +246,11 @@ export function TextCampaignsTab() {
  const getStatusBadge = (status: string) => {
  switch (status) {
  case"sent":
- return <Badge className="bg-success/10 text-success border-success/30/20"><CheckCircle className="w-3 h-3 mr-1" />Sent</Badge>;
+ return <Badge className="bg-success/10 text-success border-success/20"><CheckCircle className="w-3 h-3 mr-1" />Sent</Badge>;
  case"failed":
  return <Badge variant="destructive"><XCircle className="w-3 h-3 mr-1" />Failed</Badge>;
  case"partial":
- return <Badge className="bg-warning/10 text-warning border-warning/30/20"><AlertCircle className="w-3 h-3 mr-1" />Partial</Badge>;
+ return <Badge className="bg-warning/10 text-warning border-warning/20"><AlertCircle className="w-3 h-3 mr-1" />Partial</Badge>;
  case"scheduled":
  return <Badge variant="secondary"><Clock className="w-3 h-3 mr-1" />Scheduled</Badge>;
  default:
@@ -355,7 +355,7 @@ export function TextCampaignsTab() {
  </Select>
  </div>
 
- <div className="bg-muted/50 rounded-lg p-3 flex items-center justify-between">
+ <div className="bg-muted rounded-lg p-3 flex items-center justify-between">
  <p className="text-sm text-muted-foreground">
  Recipients: <span className="font-medium text-foreground">{recipientCount}</span>
  </p>
@@ -497,7 +497,7 @@ export function TextCampaignsTab() {
  </div>
 
  {/* Message Preview */}
- <div className="bg-muted/50 rounded-lg p-4">
+ <div className="bg-muted rounded-lg p-4">
  <h4 className="font-medium mb-2 text-sm">Preview</h4>
  <div className="bg-background rounded-xl border p-3 max-w-[280px] mx-auto">
  <div className="bg-primary/10 text-primary-foreground rounded-lg p-3 text-sm">
@@ -638,7 +638,7 @@ export function TextCampaignsTab() {
  </DialogDescription>
  </DialogHeader>
  <div className="space-y-3 py-4">
- <div className="bg-muted/50 rounded-lg p-3">
+ <div className="bg-muted rounded-lg p-3">
  <p className="text-sm font-medium">Campaign: {campaignTitle}</p>
  <p className="text-sm text-muted-foreground mt-1">{message}</p>
  </div>

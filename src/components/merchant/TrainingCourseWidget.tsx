@@ -148,7 +148,7 @@ export function TrainingCourseWidget() {
  </p>
  </div>
  {course.certificate_earned && (
- <Badge className="bg-gradient-to-r from-warning0 to-warning0 text-white gap-1 self-start">
+ <Badge className="bg-gradient-to-r from-warning to-warning text-white gap-1 self-start">
  <Trophy className="h-3 w-3" /> Certificate Earned
  </Badge>
  )}
@@ -273,7 +273,7 @@ export function TrainingCourseWidget() {
  className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-all ${
  isActive 
  ?'bg-primary/10 border border-primary/20' 
- :'hover:bg-muted/50 border border-transparent'
+ :'hover:bg-muted border border-transparent'
  }`}
  >
  <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${

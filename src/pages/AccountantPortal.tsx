@@ -481,7 +481,7 @@ export default function AccountantPortal() {
  <DialogTitle>Add Note for Expense</DialogTitle>
  </DialogHeader>
  <div className="space-y-4">
- <div className="bg-muted/50 p-3 rounded-lg text-sm">
+ <div className="bg-muted p-3 rounded-lg text-sm">
  <p><strong>Date:</strong> {formatLocalDate(expense.expense_date,'MMM d, yyyy')}</p>
  <p><strong>Amount:</strong> ${expense.amount.toFixed(2)}</p>
  <p><strong>Current Category:</strong> {formatCategory(expense.category)}</p>
@@ -572,7 +572,7 @@ export default function AccountantPortal() {
  return acc;
  }, {} as Record<string, number>)
  ).sort((a, b) => b[1] - a[1]).map(([category, amount]) => (
- <div key={category} className="bg-muted/50 p-3 rounded-lg">
+ <div key={category} className="bg-muted p-3 rounded-lg">
  <p className="text-sm text-muted-foreground">{formatCategory(category)}</p>
  <p className="font-semibold">${amount.toLocaleString()}</p>
  </div>
@@ -666,7 +666,7 @@ export default function AccountantPortal() {
  </Table>
 
  <div className="mt-6 pt-6 border-t grid grid-cols-2 gap-4">
- <div className="bg-muted/50 p-4 rounded-lg">
+ <div className="bg-muted p-4 rounded-lg">
  <p className="text-sm text-muted-foreground">Total Miles</p>
  <p className="text-2xl font-bold">{totalMiles.toLocaleString()}</p>
  </div>
@@ -685,7 +685,7 @@ export default function AccountantPortal() {
  </Tabs>
 
  {/* Security Notice */}
- <div className="mt-8 flex items-center gap-3 text-sm text-muted-foreground bg-muted/50 p-4 rounded-lg">
+ <div className="mt-8 flex items-center gap-3 text-sm text-muted-foreground bg-muted p-4 rounded-lg">
  <Shield className="h-5 w-5 flex-shrink-0" />
  <div>
  <p className="font-medium">Secure Access</p>

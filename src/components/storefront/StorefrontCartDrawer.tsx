@@ -107,7 +107,7 @@ export function StorefrontCartDrawer({
 
  {items.length === 0 ? (
  <div className="flex-1 flex flex-col items-center justify-center gap-4 text-center px-4">
- <div className="w-20 h-20 rounded-full bg-muted/50 flex items-center justify-center">
+ <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center">
  <Package className="w-10 h-10 text-muted-foreground" />
  </div>
  <div>
@@ -202,7 +202,7 @@ export function StorefrontCartDrawer({
 
  {/* PawBucks slider */}
  {merchantAcceptsPawBucks && pawbucksBalance > 0 && (
- <div className="bg-muted/50 border border-border rounded-lg p-3 space-y-3">
+ <div className="bg-muted border border-border rounded-lg p-3 space-y-3">
  <div className="flex justify-between items-center text-sm">
  <span className="font-medium flex items-center gap-1.5">
  <Coins className="h-4 w-4 text-primary" />

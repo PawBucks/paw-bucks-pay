@@ -303,7 +303,7 @@ export const SymptomTriageQueue = ({ vetId }: SymptomTriageQueueProps) => {
  {selectedAssessment && (
  <div className="space-y-6">
  {/* Patient Info */}
- <div className="flex items-center gap-4 p-4 bg-muted/50 rounded-lg">
+ <div className="flex items-center gap-4 p-4 bg-muted rounded-lg">
  {selectedAssessment.pet?.photo_url ? (
  <img
  src={selectedAssessment.pet.photo_url}
@@ -366,19 +366,19 @@ export const SymptomTriageQueue = ({ vetId }: SymptomTriageQueueProps) => {
  <div>
  <h4 className="font-semibold mb-2">Owner Observations</h4>
  <div className="grid grid-cols-2 gap-2 text-sm">
- <div className="p-2 bg-muted/50 rounded">
+ <div className="p-2 bg-muted rounded">
  <span className="text-muted-foreground">Eating:</span>{""}
  {selectedAssessment.eating_status ||"Normal"}
  </div>
- <div className="p-2 bg-muted/50 rounded">
+ <div className="p-2 bg-muted rounded">
  <span className="text-muted-foreground">Drinking:</span>{""}
  {selectedAssessment.drinking_status ||"Normal"}
  </div>
- <div className="p-2 bg-muted/50 rounded">
+ <div className="p-2 bg-muted rounded">
  <span className="text-muted-foreground">Energy:</span>{""}
  {selectedAssessment.energy_level ||"Normal"}
  </div>
- <div className="p-2 bg-muted/50 rounded">
+ <div className="p-2 bg-muted rounded">
  <span className="text-muted-foreground">Bathroom:</span>{""}
  {selectedAssessment.bathroom_habits ||"Normal"}
  </div>
@@ -481,7 +481,7 @@ export const SymptomTriageQueue = ({ vetId }: SymptomTriageQueueProps) => {
  (diag: any, idx: number) => (
  <div
  key={idx}
- className="p-2 bg-muted/50 rounded flex items-center justify-between"
+ className="p-2 bg-muted rounded flex items-center justify-between"
  >
  <div>
  <span className="font-medium">{diag.test}</span>

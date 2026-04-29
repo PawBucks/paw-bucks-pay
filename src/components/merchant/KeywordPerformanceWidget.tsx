@@ -175,7 +175,7 @@ export function KeywordPerformanceWidget() {
  </p>
  </div>
  <div className="flex items-center gap-2">
- <Badge className="bg-gradient-to-r from-warning0 to-warning">
+ <Badge className="bg-gradient-to-r from-warning to-warning">
  {report.report_period.start} - {report.report_period.end}
  </Badge>
  <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isRefetching}>
@@ -229,8 +229,8 @@ export function KeywordPerformanceWidget() {
 
  <GradientCard gradient>
  <div className="flex items-center gap-3">
- <div className="p-3 rounded-xl bg-accent/100/10">
- <Target className="h-5 w-5 text-accent0" />
+ <div className="p-3 rounded-xl bg-accent/10">
+ <Target className="h-5 w-5 text-accent" />
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Conversions</p>
@@ -255,7 +255,7 @@ export function KeywordPerformanceWidget() {
  {insight.type ==='success' && <CheckCircle className="h-5 w-5 text-success shrink-0 mt-0.5" />}
  {insight.type ==='warning' && <AlertTriangle className="h-5 w-5 text-warning shrink-0 mt-0.5" />}
  {insight.type ==='info' && <Info className="h-5 w-5 text-info shrink-0 mt-0.5" />}
- {insight.type ==='opportunity' && <Lightbulb className="h-5 w-5 text-accent0 shrink-0 mt-0.5" />}
+ {insight.type ==='opportunity' && <Lightbulb className="h-5 w-5 text-accent shrink-0 mt-0.5" />}
  <div className="space-y-1">
  <p className="font-medium">{insight.title}</p>
  <p className="text-sm text-muted-foreground">{insight.description}</p>
@@ -443,7 +443,7 @@ export function KeywordPerformanceWidget() {
  </thead>
  <tbody>
  {keywords.map((kw, idx) => (
- <tr key={idx} className="border-b border-border/50 hover:bg-muted/50">
+ <tr key={idx} className="border-b border-border/50 hover:bg-muted">
  <td className="py-3 px-4 font-medium">{kw.term}</td>
  <td className="py-3 px-4 text-right">{kw.views.toLocaleString()}</td>
  <td className="py-3 px-4 text-right">{kw.clicks.toLocaleString()}</td>

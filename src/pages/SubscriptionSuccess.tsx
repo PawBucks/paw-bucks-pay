@@ -20,8 +20,8 @@ const SubscriptionSuccess = () => {
  <div className="min-h-screen bg-[var(--gradient-hero)] flex items-center justify-center p-4">
  <GradientCard className="max-w-md w-full text-center" gradient>
  <div className="flex justify-center mb-6">
- <div className="w-20 h-20 rounded-full bg-success/100/20 flex items-center justify-center">
- <CheckCircle className="w-12 h-12 text-success0" />
+ <div className="w-20 h-20 rounded-full bg-success/20 flex items-center justify-center">
+ <CheckCircle className="w-12 h-12 text-success" />
  </div>
  </div>
  

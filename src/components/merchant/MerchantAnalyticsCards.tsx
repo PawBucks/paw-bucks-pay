@@ -101,8 +101,8 @@ const MerchantAnalyticsCardsComponent = ({ analytics }: MerchantAnalyticsCardsPr
 
  <GradientCard>
  <div className="flex items-center gap-4">
- <div className="w-12 h-12 rounded-full bg-warning/100/10 flex items-center justify-center">
- <ShoppingCart className="w-6 h-6 text-warning0" />
+ <div className="w-12 h-12 rounded-full bg-warning/10 flex items-center justify-center">
+ <ShoppingCart className="w-6 h-6 text-warning" />
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Total Transactions</p>

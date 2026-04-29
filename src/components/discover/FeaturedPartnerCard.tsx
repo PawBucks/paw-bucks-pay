@@ -60,21 +60,21 @@ const FeaturedPartnerCardComponent = ({
  animate={{ opacity: 1, y: 0 }}
  transition={{ duration: 0.4, ease:"easeOut" }}
  >
- <Card className="relative overflow-hidden border-2 border-warning/200/30 bg-gradient-to-br from-warning0/[0.04] via-warning0/[0.02] to-transparent shadow-lg hover:shadow-xl transition-all duration-300">
+ <Card className="relative overflow-hidden border-2 border-warning/30 bg-gradient-to-br from-warning/[0.04] via-warning/[0.02] to-transparent shadow-lg hover:shadow-xl transition-all duration-300">
  {/* Gold accent */}
- <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-warning via-warning0 to-warning" />
+ <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-warning via-warning to-warning" />
  
  <CardContent className="p-0">
  <Link to={`/merchant/${merchant.id}`} className="block" onClick={onCardClick}>
  <div className="p-4 sm:p-5">
  {/* Top badges row */}
  <div className="flex items-center gap-2 mb-3">
- <Badge className="gap-1 bg-gradient-to-r from-warning0/15 to-warning0/15 text-warning border-warning/200/25 text-[10px] font-semibold uppercase tracking-wider">
+ <Badge className="gap-1 bg-gradient-to-r from-warning/15 to-warning/15 text-warning border-warning/25 text-[10px] font-semibold uppercase tracking-wider">
  <Crown className="w-3 h-3" />
  Featured Partner
  </Badge>
  {isVerifiedPro && (
- <BadgeCheck className="w-4 h-4 text-info0" />
+ <BadgeCheck className="w-4 h-4 text-info" />
  )}
  </div>
 
@@ -82,7 +82,7 @@ const FeaturedPartnerCardComponent = ({
  {/* Large photo */}
  <div className="flex-shrink-0">
  {merchant.logo_url ? (
- <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden bg-muted shadow-md border border-warning/200/20">
+ <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden bg-muted shadow-md border border-warning/20">
  <img
  src={merchant.logo_url}
  alt={merchant.business_name}
@@ -92,7 +92,7 @@ const FeaturedPartnerCardComponent = ({
  />
  </div>
  ) : (
- <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl bg-gradient-to-br from-warning0/10 to-warning0/5 flex items-center justify-center border border-warning/200/20">
+ <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl bg-gradient-to-br from-warning/10 to-warning/5 flex items-center justify-center border border-warning/20">
  <Crown className="w-10 h-10 text-warning/60" />
  </div>
  )}
@@ -118,9 +118,9 @@ const FeaturedPartnerCardComponent = ({
  key={i}
  className={`w-4 h-4 ${
  i < fullStars
- ?"text-warning0 fill-warning0"
+ ?"text-warning fill-warning"
  : i === fullStars && hasHalfStar
- ?"text-warning0 fill-warning0/50"
+ ?"text-warning fill-warning/50"
  :"text-muted-foreground/20"
  }`}
  />

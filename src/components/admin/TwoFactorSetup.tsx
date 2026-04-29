@@ -291,7 +291,7 @@ export const TwoFactorSetup = ({ onSetupComplete }: TwoFactorSetupProps) => {
  <div className="space-y-4">
  <Alert className="border-success/30 bg-success/10">
  <ShieldCheck className="h-4 w-4 text-success" />
- <AlertDescription className="text-success dark:text-success-foreground">
+ <AlertDescription className="text-success">
  Two-factor authentication is enabled. Your account is more secure.
  </AlertDescription>
  </Alert>

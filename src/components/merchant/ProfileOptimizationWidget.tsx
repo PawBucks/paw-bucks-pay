@@ -130,15 +130,15 @@ export function ProfileOptimizationWidget() {
  const getScoreColor = (score: number) => {
  if (score >= 80) return'text-success';
  if (score >= 60) return'text-warning';
- if (score >= 40) return'text-warning0';
+ if (score >= 40) return'text-warning';
  return'text-destructive';
  };
 
  const getScoreGradient = (score: number) => {
- if (score >= 80) return'from-success0 to-success0';
- if (score >= 60) return'from-warning0 to-warning0';
- if (score >= 40) return'from-warning0 to-warning0';
- return'from-destructive0 to-destructive0';
+ if (score >= 80) return'from-success to-success';
+ if (score >= 60) return'from-warning to-warning';
+ if (score >= 40) return'from-warning to-warning';
+ return'from-destructive to-destructive';
  };
 
  const getPriorityColor = (priority: string) => {
@@ -154,7 +154,7 @@ export function ProfileOptimizationWidget() {
  switch (effort) {
  case'easy': return <Badge variant="outline" className="bg-success/10 text-success text-xs">Quick Fix</Badge>;
  case'moderate': return <Badge variant="outline" className="bg-warning/10 text-warning text-xs">Some Effort</Badge>;
- case'complex': return <Badge variant="outline" className="bg-accent/100/10 text-accent0 text-xs">Project</Badge>;
+ case'complex': return <Badge variant="outline" className="bg-accent/10 text-accent text-xs">Project</Badge>;
  default: return null;
  }
  };
@@ -164,7 +164,7 @@ export function ProfileOptimizationWidget() {
  case'success': return <CheckCircle className="h-5 w-5 text-success" />;
  case'warning': return <AlertTriangle className="h-5 w-5 text-warning" />;
  case'info': return <Info className="h-5 w-5 text-info" />;
- case'opportunity': return <Lightbulb className="h-5 w-5 text-accent0" />;
+ case'opportunity': return <Lightbulb className="h-5 w-5 text-accent" />;
  default: return <Info className="h-5 w-5" />;
  }
  };
@@ -244,25 +244,25 @@ export function ProfileOptimizationWidget() {
  
  <CardContent className="p-6">
  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
- <div className="text-center p-4 bg-muted/50 rounded-lg">
+ <div className="text-center p-4 bg-muted rounded-lg">
  <div className={`text-2xl font-bold ${getScoreColor(analysis.completenessScore)}`}>
  {analysis.completenessScore}%
  </div>
  <div className="text-sm text-muted-foreground">Completeness</div>
  </div>
- <div className="text-center p-4 bg-muted/50 rounded-lg">
+ <div className="text-center p-4 bg-muted rounded-lg">
  <div className={`text-2xl font-bold ${getScoreColor(analysis.seoScore)}`}>
  {analysis.seoScore}%
  </div>
  <div className="text-sm text-muted-foreground">SEO Score</div>
  </div>
- <div className="text-center p-4 bg-muted/50 rounded-lg">
+ <div className="text-center p-4 bg-muted rounded-lg">
  <div className={`text-2xl font-bold ${getScoreColor(analysis.localScore)}`}>
  {analysis.localScore}%
  </div>
  <div className="text-sm text-muted-foreground">Local SEO</div>
  </div>
- <div className="text-center p-4 bg-muted/50 rounded-lg">
+ <div className="text-center p-4 bg-muted rounded-lg">
  <div className={`text-2xl font-bold ${getScoreColor(analysis.categoryScore)}`}>
  {analysis.categoryScore}%
  </div>
@@ -371,7 +371,7 @@ export function ProfileOptimizationWidget() {
  {analysis.recommendations.map((rec) => (
  <div 
  key={rec.id} 
- className={`p-4 rounded-lg border ${rec.completed ?'bg-muted/50 opacity-60' :'bg-card'}`}
+ className={`p-4 rounded-lg border ${rec.completed ?'bg-muted opacity-60' :'bg-card'}`}
  >
  <div className="flex items-start justify-between gap-4">
  <div className="flex-1">
@@ -428,13 +428,13 @@ export function ProfileOptimizationWidget() {
  out of {analysis.competitorComparison.totalCompetitors + 1} {analysis.merchant.business_type} businesses
  </p>
  <div className="mt-4 grid grid-cols-2 gap-4">
- <div className="p-3 bg-muted/50 rounded-lg">
+ <div className="p-3 bg-muted rounded-lg">
  <div className="text-lg font-semibold">
  {analysis.competitorComparison.avgCompetitorScore}
  </div>
  <div className="text-xs text-muted-foreground">Avg Score</div>
  </div>
- <div className="p-3 bg-muted/50 rounded-lg">
+ <div className="p-3 bg-muted rounded-lg">
  <div className="text-lg font-semibold">
  {analysis.competitorComparison.topPerformerScore}
  </div>
@@ -507,7 +507,7 @@ export function ProfileOptimizationWidget() {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <Sparkles className="h-5 w-5 text-accent0" />
+ <Sparkles className="h-5 w-5 text-accent" />
  AI-Powered Insights
  </CardTitle>
  <CardDescription>
@@ -522,7 +522,7 @@ export function ProfileOptimizationWidget() {
  className={`p-4 rounded-lg border ${
  insight.type ==='success' ?'bg-success/5 border-success/20' :
  insight.type ==='warning' ?'bg-warning/5 border-warning/20' :
- insight.type ==='opportunity' ?'bg-accent/100/5 border-accent/200/20' :
+ insight.type ==='opportunity' ?'bg-accent/5 border-accent/20' :
 'bg-info/5 border-info/20'
  }`}
  >

@@ -277,7 +277,7 @@ export function OverviewTab() {
  </div>
  )}
  {stats.pawbucksSpendRate >= 50 && stats.pawbucksSpendRate < 70 && stats.totalPawbucksEarned > 0 && (
- <div className="bg-warning/5 border border-warning/30/20 rounded-lg p-3 text-sm text-warning">
+ <div className="bg-warning/5 border border-warning/20 rounded-lg p-3 text-sm text-warning">
  <strong>📊 Moderate:</strong> Spend rate is acceptable but below optimal. Target 70–90% for a healthy ecosystem.
  </div>
  )}
@@ -364,12 +364,12 @@ export function OverviewTab() {
  </div>
  )}
  {stats.repeatRedemptionRate >= 35 && stats.repeatRedemptionRate < 60 && stats.totalRedeemers > 0 && (
- <div className="bg-warning/5 border border-warning/30/20 rounded-lg p-3 text-sm text-warning">
+ <div className="bg-warning/5 border border-warning/20 rounded-lg p-3 text-sm text-warning">
  <strong>📊 Moderate:</strong> Some redeemers are returning, but there's room to grow. Target 60%+ for strong merchant confidence in PawBucks.
  </div>
  )}
  {stats.repeatRedemptionRate >= 60 && stats.totalRedeemers > 0 && (
- <div className="bg-success/5 border border-success/30/20 rounded-lg p-3 text-sm text-success">
+ <div className="bg-success/5 border border-success/20 rounded-lg p-3 text-sm text-success">
  <strong>✅ Strong:</strong> PawBucks is successfully driving repeat business. Merchants should see clear value in accepting PawBucks.
  </div>
  )}

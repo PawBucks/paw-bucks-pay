@@ -107,7 +107,7 @@ const DirectoryMerchantCardComponent = ({
  {merchant.business_name}
  </h3>
  {isVerified && (
- <BadgeCheck className="w-4 h-4 text-info0 flex-shrink-0" />
+ <BadgeCheck className="w-4 h-4 text-info flex-shrink-0" />
  )}
  </div>
  </div>
@@ -122,9 +122,9 @@ const DirectoryMerchantCardComponent = ({
  key={i}
  className={`w-3.5 h-3.5 ${
  i < fullStars
- ?"text-warning0 fill-warning0"
+ ?"text-warning fill-warning"
  : i === fullStars && hasHalf
- ?"text-warning0 fill-warning0/50"
+ ?"text-warning fill-warning/50"
  :"text-muted-foreground/20"
  }`}
  />
@@ -163,7 +163,7 @@ const DirectoryMerchantCardComponent = ({
  {merchant.business_type.replace(/_/g,"")}
  </Badge>
  <OpenStatusBadge merchantId={merchant.id} />
- <Badge className="bg-success/100/10 text-success border-success/200/20 text-[10px] h-5 px-1.5 gap-0.5">
+ <Badge className="bg-success/10 text-success border-success/20 text-[10px] h-5 px-1.5 gap-0.5">
  {merchant.cashback_rate}x pts
  </Badge>
  {merchant.accepts_pawbucks && (

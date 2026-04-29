@@ -47,7 +47,7 @@ export const PersonalityQuizCTA = ({ petId, petName }: PersonalityQuizCTAProps) 
  ].map((item, i) => (
  <span
  key={i}
- className="inline-flex items-center gap-1 bg-muted/50 px-2 py-1 rounded-full text-xs"
+ className="inline-flex items-center gap-1 bg-muted px-2 py-1 rounded-full text-xs"
  >
  {item.emoji} {item.text}
  </span>

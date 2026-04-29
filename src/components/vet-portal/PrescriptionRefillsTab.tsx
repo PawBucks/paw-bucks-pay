@@ -228,7 +228,7 @@ export const PrescriptionRefillsTab = ({ vetId }: PrescriptionRefillsTabProps) =
  <h3 className="font-medium mb-3 text-warning">Pending Review ({pendingRequests.length})</h3>
  <div className="grid gap-4">
  {pendingRequests.map((request) => (
- <Card key={request.id} className="p-4 border-warning/20 bg-warning/10/50">
+ <Card key={request.id} className="p-4 border-warning/20 bg-warning/50">
  <div className="flex items-start justify-between">
  <div className="flex-1">
  <div className="flex items-center gap-2 mb-1">
@@ -286,7 +286,7 @@ export const PrescriptionRefillsTab = ({ vetId }: PrescriptionRefillsTabProps) =
  <h3 className="font-medium mb-3 text-info">Approved - Awaiting Fulfillment ({approvedRequests.length})</h3>
  <div className="grid gap-4">
  {approvedRequests.map((request) => (
- <Card key={request.id} className="p-4 border-info/20 bg-info/10/50">
+ <Card key={request.id} className="p-4 border-info/20 bg-info/50">
  <div className="flex items-start justify-between">
  <div className="flex-1">
  <div className="flex items-center gap-2 mb-1">

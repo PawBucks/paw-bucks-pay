@@ -81,13 +81,13 @@ interface ServicesListProps {
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
- daycare:'bg-info/100/10 text-info0 border-info/200/20',
- boarding:'bg-accent/100/10 text-accent0 border-accent/200/20',
- grooming:'bg-accent/100/10 text-accent0 border-accent/200/20',
- walking:'bg-success/100/10 text-success0 border-success/200/20',
- training:'bg-warning/100/10 text-warning0 border-warning/200/20',
- veterinary:'bg-destructive/100/10 text-destructive0 border-destructive/200/20',
- pet_sitting:'bg-success/100/10 text-success0 border-success/200/20',
+ daycare:'bg-info/10 text-info border-info/20',
+ boarding:'bg-accent/10 text-accent border-accent/20',
+ grooming:'bg-accent/10 text-accent border-accent/20',
+ walking:'bg-success/10 text-success border-success/20',
+ training:'bg-warning/10 text-warning border-warning/20',
+ veterinary:'bg-destructive/10 text-destructive border-destructive/20',
+ pet_sitting:'bg-success/10 text-success border-success/20',
  other:'bg-muted text-muted-foreground border-border',
 };
 
@@ -153,7 +153,7 @@ export function ServicesList({ services, onEdit, onDelete, onToggleActive, onMan
  const savingsPercent = calculateFlashSaleSavings(service);
  
  return (
- <GradientCard key={service.id} className={`p-4 ${isFlashActive ?'ring-2 ring-warning0/50' :''}`}>
+ <GradientCard key={service.id} className={`p-4 ${isFlashActive ?'ring-2 ring-warning/50' :''}`}>
  <div className="flex items-start justify-between gap-3 mb-3">
  <div className="flex-1 min-w-0">
  <div className="flex items-center gap-2 mb-1 flex-wrap">
@@ -162,13 +162,13 @@ export function ServicesList({ services, onEdit, onDelete, onToggleActive, onMan
  <Badge variant="secondary" className="text-xs">Inactive</Badge>
  )}
  {isFlashActive && (
- <Badge className="bg-gradient-to-r from-warning0 to-warning0 text-white border-0 text-xs gap-0.5">
+ <Badge className="bg-gradient-to-r from-warning to-warning text-white border-0 text-xs gap-0.5">
  <Zap className="w-3 h-3" />
  Flash Sale
  </Badge>
  )}
  {service.is_flash_sale && !isFlashActive && (
- <Badge variant="outline" className="text-xs text-warning border-warning/200/30">
+ <Badge variant="outline" className="text-xs text-warning border-warning/30">
  Scheduled
  </Badge>
  )}
@@ -233,7 +233,7 @@ export function ServicesList({ services, onEdit, onDelete, onToggleActive, onMan
 
  {/* Flash Sale Pricing Display */}
  {isFlashActive && service.flash_sale_pawbucks_price && (
- <div className="p-2 rounded-lg bg-gradient-to-r from-warning0/10 to-warning0/10 border border-warning/200/20 mb-3">
+ <div className="p-2 rounded-lg bg-gradient-to-r from-warning/10 to-warning/10 border border-warning/20 mb-3">
  <div className="flex items-center justify-between">
  <div>
  <div className="flex items-baseline gap-2">

@@ -114,7 +114,7 @@ function CheckoutForm({
 
  return (
  <form onSubmit={handleSubmit} className="space-y-6">
- <div className="p-4 bg-muted/50 rounded-lg">
+ <div className="p-4 bg-muted rounded-lg">
  <div className="flex justify-between items-center mb-2">
  <span className="text-muted-foreground">Payment to</span>
  <span className="font-medium">{merchantName}</span>

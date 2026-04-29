@@ -311,7 +311,7 @@ export const DiagnosticOverlayTool = ({ vetId }: DiagnosticOverlayToolProps) => 
  <Label>Upload Images</Label>
  <div
  className={`mt-2 border-2 border-dashed rounded-lg p-8 text-center ${
- uploading ?"bg-muted/50" :"hover:bg-muted/50"
+ uploading ?"bg-muted" :"hover:bg-muted"
  } transition-colors cursor-pointer`}
  onClick={() => document.getElementById("image-upload")?.click()}
  >
@@ -520,7 +520,7 @@ export const DiagnosticOverlayTool = ({ vetId }: DiagnosticOverlayToolProps) => 
  {selectedAnalysis.ai_summary && (
  <div>
  <Label>AI Summary</Label>
- <p className="mt-1 p-3 bg-muted/50 rounded-lg">
+ <p className="mt-1 p-3 bg-muted rounded-lg">
  {selectedAnalysis.ai_summary}
  </p>
  </div>

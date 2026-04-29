@@ -378,7 +378,7 @@ export function InsuranceClaimSplitter({ vetId }: InsuranceClaimSplitterProps) {
 
  {/* Coverage Preview */}
  {estimatedCoverage && (
- <Card className="bg-muted/50">
+ <Card className="bg-muted">
  <CardHeader className="pb-2">
  <CardTitle className="text-sm font-medium">Estimated Coverage Split</CardTitle>
  </CardHeader>

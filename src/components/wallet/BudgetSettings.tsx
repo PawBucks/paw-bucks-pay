@@ -215,7 +215,7 @@ export const BudgetSettings = memo(({ transactions }: BudgetSettingsProps) => {
  return (
  <div 
  key={category.id} 
- className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border/50 hover:bg-muted/50 transition-colors"
+ className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border/50 hover:bg-muted transition-colors"
  >
  <div className="flex items-center gap-3">
  <div className="relative w-8 h-8 rounded-full flex items-center justify-center">

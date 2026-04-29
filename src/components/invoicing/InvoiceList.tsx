@@ -81,7 +81,7 @@ const statusConfig: Record<string, { label: string; color: string; icon: any }> 
  partially_paid: { label:"Partial", color:"bg-warning/10 text-warning", icon: DollarSign },
  paid: { label:"Paid", color:"bg-success/10 text-success", icon: CheckCircle },
  overdue: { label:"Overdue", color:"bg-destructive/10 text-destructive", icon: AlertCircle },
- cancelled: { label:"Cancelled", color:"bg-muted/50 text-foreground", icon: XCircle },
+ cancelled: { label:"Cancelled", color:"bg-muted text-foreground", icon: XCircle },
  refunded: { label:"Refunded", color:"bg-warning/10 text-warning", icon: RefreshCw },
 };
 
@@ -340,7 +340,7 @@ export function InvoiceList({
  </TableHeader>
  <TableBody>
  {filteredInvoices.map((invoice) => (
- <TableRow key={invoice.id} className="cursor-pointer hover:bg-muted/50" onClick={() => onView(invoice)}>
+ <TableRow key={invoice.id} className="cursor-pointer hover:bg-muted" onClick={() => onView(invoice)}>
  <TableCell className="font-medium">{invoice.invoice_number}</TableCell>
  <TableCell>
  <div>
@@ -354,7 +354,7 @@ export function InvoiceList({
  <TableCell>
  {invoice.viewed_at ? (
  <div className="flex items-center gap-1.5">
- <Eye className="h-4 w-4 text-accent0" />
+ <Eye className="h-4 w-4 text-accent" />
  <div className="text-sm">
  <span className="text-foreground font-medium">
  {invoice.view_count || 1}×

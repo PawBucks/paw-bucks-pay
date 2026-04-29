@@ -146,7 +146,7 @@ export default function Install() {
  </Button>
  ) : (
  <div className="space-y-4">
- <div className="p-4 bg-muted/50 rounded-lg border">
+ <div className="p-4 bg-muted rounded-lg border">
  <p className="text-sm font-medium mb-2">How to Install:</p>
  <div className="space-y-2 text-sm text-muted-foreground">
  <p><strong>iPhone/iPad:</strong> Tap the Share button (📤) →"Add to Home Screen"</p>

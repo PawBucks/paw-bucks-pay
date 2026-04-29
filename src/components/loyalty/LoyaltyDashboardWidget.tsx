@@ -18,7 +18,7 @@ export const LoyaltyDashboardWidget = ({ userId }: LoyaltyDashboardWidgetProps) 
  if (isLoading) {
  return (
  <GradientCard className="animate-pulse">
- <div className="h-40 bg-muted/50 rounded-xl" />
+ <div className="h-40 bg-muted rounded-xl" />
  </GradientCard>
  );
  }
@@ -38,7 +38,7 @@ export const LoyaltyDashboardWidget = ({ userId }: LoyaltyDashboardWidgetProps) 
  <h3 className="font-semibold flex items-center gap-2">
  Your Rewards
  {hasUrgentWarnings && (
- <AlertCircle className="w-4 h-4 text-warning0 animate-pulse" />
+ <AlertCircle className="w-4 h-4 text-warning animate-pulse" />
  )}
  </h3>
  <p className="text-sm text-muted-foreground capitalize">{tier} Member</p>

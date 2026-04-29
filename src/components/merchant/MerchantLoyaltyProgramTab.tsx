@@ -267,7 +267,7 @@ export function MerchantLoyaltyProgramTab({ merchantId }: MerchantLoyaltyProgram
  className={`w-10 h-10 rounded-lg text-xl flex items-center justify-center border-2 transition-colors ${
  formEmoji === e
  ?"border-primary bg-primary/10"
- :"border-border hover:border-primary/50"
+ :"border-border hover:border-primary"
  }`}
  >
  {e}
@@ -383,7 +383,7 @@ export function MerchantLoyaltyProgramTab({ merchantId }: MerchantLoyaltyProgram
  </CardHeader>
  <CardContent className="space-y-4">
  {/* Punch card visualization */}
- <div className="bg-muted/50 rounded-lg p-4">
+ <div className="bg-muted rounded-lg p-4">
  <div className="flex items-center justify-between mb-2">
  <span className="text-sm font-medium">
  {program.punches_required} punches → {program.reward_description}

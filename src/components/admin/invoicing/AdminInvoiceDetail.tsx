@@ -31,12 +31,12 @@ interface Props {
 
 const statusColors: Record<string, string> = {
  draft:"bg-muted text-muted-foreground",
- sent:"bg-info/15 text-info dark:text-info",
- paid:"bg-success/15 text-success dark:text-success",
+ sent:"bg-info/15 text-info",
+ paid:"bg-success/15 text-success",
  partially_paid:"bg-warning/15 text-warning",
- overdue:"bg-destructive/15 text-destructive dark:text-destructive",
- cancelled:"bg-muted text-muted-foreground dark:bg-foreground dark:text-muted-foreground",
- void:"bg-muted text-muted-foreground dark:bg-foreground dark:text-muted-foreground",
+ overdue:"bg-destructive/15 text-destructive",
+ cancelled:"bg-muted text-muted-foreground",
+ void:"bg-muted text-muted-foreground",
 };
 
 export function AdminInvoiceDetail({ invoice, onBack, onEdit, onRefresh }: Props) {
@@ -261,7 +261,7 @@ export function AdminInvoiceDetail({ invoice, onBack, onEdit, onRefresh }: Props
  ) : (
  <div className="space-y-3">
  {payments.map((p) => (
- <div key={p.id} className="p-3 rounded-md bg-muted/50 text-sm">
+ <div key={p.id} className="p-3 rounded-md bg-muted text-sm">
  <div className="flex justify-between items-center">
  <span className="font-medium text-success">${Number(p.amount).toFixed(2)}</span>
  <Badge variant="outline" className="text-xs capitalize">{p.payment_method.replace("_","")}</Badge>

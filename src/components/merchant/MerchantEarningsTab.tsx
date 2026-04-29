@@ -175,7 +175,7 @@ export function MerchantEarningsTab() {
  </Card>
 
  {/* Disputes */}
- <Card className={data.disputes?.open > 0 ?"border-destructive/50" :""}>
+ <Card className={data.disputes?.open > 0 ?"border-destructive" :""}>
  <CardContent className="pt-6">
  <div className="flex items-center gap-2 mb-2">
  <AlertTriangle className={`h-4 w-4 ${data.disputes?.open > 0 ?"text-destructive" :"text-muted-foreground"}`} />

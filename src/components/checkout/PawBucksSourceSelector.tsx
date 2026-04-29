@@ -22,7 +22,7 @@ export const PawBucksSourceSelector = ({
  promotionalLabel ="Pet Fund Credit",
 }: PawBucksSourceSelectorProps) => {
  return (
- <div className="bg-muted/50 border border-border rounded-lg p-3 space-y-2">
+ <div className="bg-muted border border-border rounded-lg p-3 space-y-2">
  <p className="text-sm font-medium text-foreground">Choose PawBucks source:</p>
  <p className="text-xs text-muted-foreground">
  You can use earned PawBucks or promotional credit, but not both in the same purchase.
@@ -54,8 +54,8 @@ export const PawBucksSourceSelector = ({
  htmlFor="source-promotional"
  className={`flex items-center gap-3 rounded-lg border p-3 cursor-pointer transition-colors ${
  selectedSource ==="promotional"
- ?"border-success/200 bg-success/100/5"
- :"border-border hover:border-success/200/40"
+ ?"border-success bg-success/5"
+ :"border-border hover:border-success/40"
  }`}
  >
  <RadioGroupItem value="promotional" id="source-promotional" />

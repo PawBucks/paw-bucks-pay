@@ -242,12 +242,12 @@ export function GroomingPetSelector({
  {(groomingData.adjustedDuration || groomingData.adjustedPrice) && (
  <div className="flex gap-3 text-sm">
  {groomingData.adjustedDuration && groomingData.adjustedDuration !== baseDuration && (
- <Badge variant="outline" className="bg-info/100/10 text-info border-info/200/20">
+ <Badge variant="outline" className="bg-info/10 text-info border-info/20">
  Duration adjusted: {effectiveDuration} min (was {baseDuration})
  </Badge>
  )}
  {groomingData.adjustedPrice && groomingData.adjustedPrice !== basePrice && (
- <Badge variant="outline" className="bg-success/100/10 text-success border-success/200/20">
+ <Badge variant="outline" className="bg-success/10 text-success border-success/20">
  Price: ${effectivePrice.toFixed(2)} (was ${basePrice.toFixed(2)})
  </Badge>
  )}
@@ -287,11 +287,11 @@ export function GroomingPetSelector({
  return (
  <div key={req.id} className="flex items-center gap-2 text-sm">
  {status?.status ==="valid" ? (
- <CheckCircle2 className="w-4 h-4 text-success0 flex-shrink-0" />
+ <CheckCircle2 className="w-4 h-4 text-success flex-shrink-0" />
  ) : status?.status ==="expired" ? (
- <AlertTriangle className="w-4 h-4 text-warning0 flex-shrink-0" />
+ <AlertTriangle className="w-4 h-4 text-warning flex-shrink-0" />
  ) : (
- <XCircle className="w-4 h-4 text-destructive0 flex-shrink-0" />
+ <XCircle className="w-4 h-4 text-destructive flex-shrink-0" />
  )}
  <span className={status?.status ==="valid" ?"text-success" : status?.status ==="expired" ?"text-warning" :"text-destructive"}>
  {req.vaccine_name}
@@ -308,7 +308,7 @@ export function GroomingPetSelector({
  </div>
  )}
  {groomingData.vaccineWarnings.length > 0 && (
- <div className={`p-3 rounded-lg text-sm ${groomingData.hasBlockingVaccineIssue ?"bg-destructive/10 border border-destructive/20" :"bg-warning/100/10 border border-warning/200/20"}`}>
+ <div className={`p-3 rounded-lg text-sm ${groomingData.hasBlockingVaccineIssue ?"bg-destructive/10 border border-destructive/20" :"bg-warning/10 border border-warning/20"}`}>
  {groomingData.hasBlockingVaccineIssue ? (
  <p className="font-medium text-destructive mb-1">⚠ Booking cannot proceed:</p>
  ) : (

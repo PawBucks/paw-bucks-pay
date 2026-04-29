@@ -73,7 +73,7 @@ export function UserLookupTab() {
  results.map(user => (
  <TableRow
  key={user.id}
- className="cursor-pointer hover:bg-muted/50"
+ className="cursor-pointer hover:bg-muted"
  onClick={() => navigate(`/admin/users/${user.id}`)}
  >
  <TableCell className="font-medium">{user.full_name ||"—"}</TableCell>

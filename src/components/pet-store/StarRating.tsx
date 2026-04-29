@@ -25,7 +25,7 @@ export const StarRating = memo(({ rating, count, size ="sm", showCount = true }:
  filled
  ?"fill-warning text-warning"
  : halfFilled
- ?"fill-warning/50 text-warning"
+ ?"fill-warning text-warning"
  :"fill-muted text-muted-foreground/30"
  }`}
  />

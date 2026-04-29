@@ -83,7 +83,7 @@ const getStatusColor = (status: string): string => {
  case"notification_sent":
  return"bg-warning";
  case"written_off":
- return"bg-muted/50";
+ return"bg-muted";
  default:
  return"bg-primary";
  }
@@ -254,7 +254,7 @@ export function ClaimRecoveryDashboard({ vetId }: ClaimRecoveryDashboardProps) {
  ) : (
  <Table>
  <TableHeader>
- <TableRow className="bg-primary/10/50">
+ <TableRow className="bg-primary/50">
  <TableHead>Claim / Patient</TableHead>
  <TableHead>Carrier</TableHead>
  <TableHead className="text-right">Original Est.</TableHead>
@@ -266,7 +266,7 @@ export function ClaimRecoveryDashboard({ vetId }: ClaimRecoveryDashboardProps) {
  </TableHeader>
  <TableBody>
  {slices.map((slice) => (
- <TableRow key={slice.id} className="hover:bg-primary/10/30">
+ <TableRow key={slice.id} className="hover:bg-primary/30">
  <TableCell>
  <div>
  <p className="font-medium">{slice.claim?.claim_number ||"N/A"}</p>

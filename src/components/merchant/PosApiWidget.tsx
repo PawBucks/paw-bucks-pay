@@ -94,7 +94,7 @@ export function PosApiWidget() {
  <CardContent className="space-y-3">
  <button 
  onClick={() => navigate('/merchant/pos-integration')}
- className="w-full flex items-center justify-between p-4 rounded-lg border hover:bg-muted/50 transition-colors text-left"
+ className="w-full flex items-center justify-between p-4 rounded-lg border hover:bg-muted transition-colors text-left"
  >
  <div className="flex items-center gap-3">
  <Key className="h-5 w-5 text-muted-foreground" />
@@ -108,7 +108,7 @@ export function PosApiWidget() {
 
  <button 
  onClick={() => navigate('/merchant/pos-integration')}
- className="w-full flex items-center justify-between p-4 rounded-lg border hover:bg-muted/50 transition-colors text-left"
+ className="w-full flex items-center justify-between p-4 rounded-lg border hover:bg-muted transition-colors text-left"
  >
  <div className="flex items-center gap-3">
  <Webhook className="h-5 w-5 text-muted-foreground" />
@@ -122,7 +122,7 @@ export function PosApiWidget() {
 
  <button 
  onClick={() => navigate('/merchant/pos-integration')}
- className="w-full flex items-center justify-between p-4 rounded-lg border hover:bg-muted/50 transition-colors text-left"
+ className="w-full flex items-center justify-between p-4 rounded-lg border hover:bg-muted transition-colors text-left"
  >
  <div className="flex items-center gap-3">
  <Code className="h-5 w-5 text-muted-foreground" />

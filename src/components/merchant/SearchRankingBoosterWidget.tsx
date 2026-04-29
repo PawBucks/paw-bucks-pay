@@ -178,7 +178,7 @@ export function SearchRankingBoosterWidget() {
  </h2>
  <p className="text-muted-foreground">Visibility enhanced by {analyticsData.visibilityIncrease}%</p>
  </div>
- <Badge className="bg-gradient-to-r from-success0 to-success text-white gap-1">
+ <Badge className="bg-gradient-to-r from-success to-success text-white gap-1">
  <Zap className="h-3 w-3" /> Boost Active
  </Badge>
  </div>
@@ -214,7 +214,7 @@ export function SearchRankingBoosterWidget() {
  </GradientCard>
  <GradientCard gradient>
  <div className="flex items-center gap-3">
- <div className="p-3 rounded-xl bg-accent/100/10"><Star className="h-5 w-5 text-accent0" /></div>
+ <div className="p-3 rounded-xl bg-accent/10"><Star className="h-5 w-5 text-accent" /></div>
  <div>
  <p className="text-sm text-muted-foreground">CTR</p>
  <p className="text-2xl font-bold">{metrics.ctr}%</p>
@@ -283,7 +283,7 @@ export function SearchRankingBoosterWidget() {
  </CardHeader>
  <CardContent className="space-y-3">
  {keywordData?.recommendations?.slice(0, 8).map((kw: any, idx: number) => (
- <div key={idx} className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50">
+ <div key={idx} className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted">
  <div className="flex items-center gap-3">
  {kw.implemented ? <CheckCircle2 className="h-5 w-5 text-success" /> : <AlertCircle className="h-5 w-5 text-warning" />}
  <div>
@@ -341,7 +341,7 @@ export function SearchRankingBoosterWidget() {
  <TabsContent value="ai" className="space-y-4">
  <Card>
  <CardHeader>
- <CardTitle className="flex items-center gap-2"><Brain className="h-5 w-5 text-accent0" /> AI Recommendations</CardTitle>
+ <CardTitle className="flex items-center gap-2"><Brain className="h-5 w-5 text-accent" /> AI Recommendations</CardTitle>
  <CardDescription>Health Score: {healthScore}/100</CardDescription>
  </CardHeader>
  <CardContent className="space-y-3">

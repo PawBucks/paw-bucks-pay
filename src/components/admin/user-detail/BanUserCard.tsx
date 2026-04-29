@@ -55,7 +55,7 @@ export function BanUserCard({ userId, isBanned, bannedAt, bannedReason, onChange
  };
 
  return (
- <Card className={isBanned ?"border-destructive/50" :""}>
+ <Card className={isBanned ?"border-destructive" :""}>
  <CardHeader>
  <CardTitle className="flex items-center gap-2 text-lg">
  {isBanned ? (
@@ -84,7 +84,7 @@ export function BanUserCard({ userId, isBanned, bannedAt, bannedReason, onChange
  </p>
  )}
  {bannedReason && (
- <div className="rounded-md border bg-muted/50 p-3">
+ <div className="rounded-md border bg-muted p-3">
  <p className="text-xs font-medium text-muted-foreground mb-1">Reason</p>
  <p className="text-sm">{bannedReason}</p>
  </div>

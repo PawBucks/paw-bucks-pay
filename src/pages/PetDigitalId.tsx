@@ -268,7 +268,7 @@ export default function PetDigitalId() {
  <Syringe className="w-4 h-4" /> Vaccination Status
  </h2>
  <div className="flex gap-2">
- <Badge className="bg-success/100/15 text-success hover:bg-success/100/20 border-success/200/30">
+ <Badge className="bg-success/15 text-success hover:bg-success/20 border-success/30">
  {upToDateCount} Current
  </Badge>
  {overdueCount > 0 && (
@@ -317,11 +317,11 @@ export default function PetDigitalId() {
  {allergies.length > 0 && (
  <div className="border-t pt-4">
  <h2 className="font-bold flex items-center gap-2 mb-3">
- <AlertTriangle className="w-4 h-4 text-warning0" /> Allergies & Alerts
+ <AlertTriangle className="w-4 h-4 text-warning" /> Allergies & Alerts
  </h2>
  <div className="flex flex-wrap gap-2">
  {allergies.map((a, i) => (
- <Badge key={i} variant="outline" className="border-warning/200/40 text-warning">
+ <Badge key={i} variant="outline" className="border-warning/40 text-warning">
  {a.allergy_name} ({a.severity})
  </Badge>
  ))}

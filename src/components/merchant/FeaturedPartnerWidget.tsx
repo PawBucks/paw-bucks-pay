@@ -269,23 +269,23 @@ export function FeaturedPartnerWidget() {
  <TabsContent value="overview" className="m-0 space-y-6">
  {/* Quick stats */}
  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
- <div className="bg-muted/50 rounded-lg p-4 text-center">
+ <div className="bg-muted rounded-lg p-4 text-center">
  <TrendingUp className="h-6 w-6 mx-auto mb-2 text-success" />
  <p className="text-2xl font-bold">${data.metrics?.totalRevenue.toFixed(0)}</p>
  <p className="text-xs text-muted-foreground">90-Day Revenue</p>
  </div>
- <div className="bg-muted/50 rounded-lg p-4 text-center">
+ <div className="bg-muted rounded-lg p-4 text-center">
  <Users className="h-6 w-6 mx-auto mb-2 text-info" />
  <p className="text-2xl font-bold">{data.metrics?.totalTransactions}</p>
  <p className="text-xs text-muted-foreground">Transactions</p>
  </div>
- <div className="bg-muted/50 rounded-lg p-4 text-center">
+ <div className="bg-muted rounded-lg p-4 text-center">
  <Star className="h-6 w-6 mx-auto mb-2 text-warning" />
  <p className="text-2xl font-bold">{data.metrics?.avgRating.toFixed(1)}</p>
  <p className="text-xs text-muted-foreground">Avg Rating</p>
  </div>
- <div className="bg-muted/50 rounded-lg p-4 text-center">
- <Zap className="h-6 w-6 mx-auto mb-2 text-accent0" />
+ <div className="bg-muted rounded-lg p-4 text-center">
+ <Zap className="h-6 w-6 mx-auto mb-2 text-accent" />
  <p className="text-2xl font-bold">
  {data.metrics?.customerGrowth > 0 ?'+' :''}{data.metrics?.customerGrowth.toFixed(0)}%
  </p>
@@ -345,7 +345,7 @@ export function FeaturedPartnerWidget() {
  {data.benefits?.map((benefit) => (
  <div 
  key={benefit.id} 
- className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+ className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted transition-colors"
  >
  <div className="flex items-center gap-3">
  {benefit.status ==='available' && (
@@ -387,7 +387,7 @@ export function FeaturedPartnerWidget() {
  return (
  <div 
  key={opportunity.id}
- className="border rounded-lg p-4 hover:border-primary/50 transition-colors"
+ className="border rounded-lg p-4 hover:border-primary transition-colors"
  >
  <div className="flex items-start justify-between">
  <div className="flex items-start gap-3">
@@ -506,7 +506,7 @@ export function FeaturedPartnerWidget() {
  return (
  <div 
  key={index}
- className="border rounded-lg p-4 hover:border-primary/50 transition-colors"
+ className="border rounded-lg p-4 hover:border-primary transition-colors"
  >
  <div className="flex items-start gap-3">
  <div className="p-2 bg-primary/10 rounded-lg shrink-0">
@@ -532,7 +532,7 @@ export function FeaturedPartnerWidget() {
  })}
  </div>
 
- <div className="bg-muted/50 rounded-lg p-4 mt-6">
+ <div className="bg-muted rounded-lg p-4 mt-6">
  <div className="flex items-center gap-2 text-sm text-muted-foreground">
  <AlertCircle className="h-4 w-4" />
  <span>Insights are updated based on your latest business metrics and market trends.</span>

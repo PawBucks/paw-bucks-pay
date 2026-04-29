@@ -127,7 +127,7 @@ export function CategorySummary({ expenses, vehicleDeduction }: CategorySummaryP
  <div className="space-y-2 pb-3 border-b">
  <div className="flex justify-between items-start">
  <div className="flex items-center gap-2">
- <Car className="h-4 w-4 text-warning0" />
+ <Car className="h-4 w-4 text-warning" />
  <div>
  <p className="font-medium text-sm">
  Vehicle Deduction ({vehicleDeduction.vehicleMethod ==='standard' ?'Standard Mileage' :'Actual Expenses'})
@@ -196,7 +196,7 @@ export function CategorySummary({ expenses, vehicleDeduction }: CategorySummaryP
  </div>
  
  {totalSavings > 0 && (
- <div className="flex justify-between items-center text-success dark:text-success bg-success/10 p-3 rounded-lg">
+ <div className="flex justify-between items-center text-success bg-success/10 p-3 rounded-lg">
  <div className="flex items-center gap-2">
  <TrendingDown className="h-4 w-4" />
  <span className="font-medium">PawBucks Savings</span>

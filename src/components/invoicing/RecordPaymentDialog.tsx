@@ -129,7 +129,7 @@ export function RecordPaymentDialog({
  <DialogTitle>Record Payment</DialogTitle>
  </DialogHeader>
 
- <div className="bg-muted/50 rounded-lg p-4 mb-4">
+ <div className="bg-muted rounded-lg p-4 mb-4">
  <div className="flex justify-between text-sm">
  <span className="text-muted-foreground">Invoice</span>
  <span className="font-medium">{invoice.invoice_number}</span>
@@ -270,7 +270,7 @@ export function RecordPaymentDialog({
  control={form.control}
  name="send_receipt"
  render={({ field }) => (
- <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 bg-muted/50">
+ <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 bg-muted">
  <FormControl>
  <Checkbox
  checked={field.value}

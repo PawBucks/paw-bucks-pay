@@ -159,13 +159,13 @@ export const PrescriptionRefillRequest = () => {
  const getStatusBadge = (status: string) => {
  switch (status) {
  case"pending":
- return <Badge className="bg-warning/100"><Clock className="w-3 h-3 mr-1" />Pending</Badge>;
+ return <Badge className="bg-warning"><Clock className="w-3 h-3 mr-1" />Pending</Badge>;
  case"approved":
- return <Badge className="bg-info/100"><Check className="w-3 h-3 mr-1" />Approved</Badge>;
+ return <Badge className="bg-info"><Check className="w-3 h-3 mr-1" />Approved</Badge>;
  case"denied":
  return <Badge variant="destructive"><X className="w-3 h-3 mr-1" />Denied</Badge>;
  case"fulfilled":
- return <Badge className="bg-success/100"><Package className="w-3 h-3 mr-1" />Fulfilled</Badge>;
+ return <Badge className="bg-success"><Package className="w-3 h-3 mr-1" />Fulfilled</Badge>;
  default:
  return <Badge variant="secondary">{status}</Badge>;
  }

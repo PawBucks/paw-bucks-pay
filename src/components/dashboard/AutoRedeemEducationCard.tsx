@@ -58,7 +58,7 @@ export const AutoRedeemEducationCard = ({ userId, pawbucksBalance }: AutoRedeemE
  {/* Dismiss button */}
  <button
  onClick={() => setDismissed(true)}
- className="absolute top-3 right-3 p-1 rounded-full hover:bg-muted/50 transition-colors"
+ className="absolute top-3 right-3 p-1 rounded-full hover:bg-muted transition-colors"
  aria-label="Dismiss"
  >
  <X className="w-4 h-4 text-muted-foreground" />

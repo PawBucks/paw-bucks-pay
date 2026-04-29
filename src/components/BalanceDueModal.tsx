@@ -214,11 +214,11 @@ export function BalanceDueModal({
  <Info className="h-4 w-4" />
  Why did the balance shift?
  </div>
- <Card className="bg-muted/50 border-border">
+ <Card className="bg-muted border-border">
  <CardContent className="p-0">
  <Table>
  <TableHeader>
- <TableRow className="bg-muted/50">
+ <TableRow className="bg-muted">
  <TableHead className="text-xs">Description</TableHead>
  <TableHead className="text-xs text-right">Amount</TableHead>
  </TableRow>

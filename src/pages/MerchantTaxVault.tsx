@@ -332,7 +332,7 @@ export default function MerchantTaxVault() {
  </div>
  <p className="text-2xl font-bold">${deductionBreakdown.vehicleDeduction.toFixed(2)}</p>
  </div>
- <Car className="h-8 w-8 text-warning0 opacity-80" />
+ <Car className="h-8 w-8 text-warning opacity-80" />
  </div>
  </CardContent>
  </Card>

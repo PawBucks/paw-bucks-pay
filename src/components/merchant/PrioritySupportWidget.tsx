@@ -214,8 +214,8 @@ export function PrioritySupportWidget() {
  <Card>
  <CardContent className="pt-4">
  <div className="flex items-center gap-3">
- <div className="p-2 rounded-lg bg-accent/100/10">
- <CalendarCheck className="h-5 w-5 text-accent0" />
+ <div className="p-2 rounded-lg bg-accent/10">
+ <CalendarCheck className="h-5 w-5 text-accent" />
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Next Check-in</p>
@@ -242,7 +242,7 @@ export function PrioritySupportWidget() {
  {support_features.map((feature, idx) => {
  const IconComponent = iconMap[feature.icon] || Zap;
  return (
- <Card key={idx} className="hover:border-primary/50 transition-colors">
+ <Card key={idx} className="hover:border-primary transition-colors">
  <CardContent className="pt-4">
  <div className="flex items-start gap-3">
  <div className="p-2 rounded-lg bg-primary/10">
@@ -279,10 +279,10 @@ export function PrioritySupportWidget() {
  <div className="flex items-center gap-4">
  <div className={`p-2 rounded-lg ${
  interaction.type ==='chat' ?'bg-info/10' :
- interaction.type ==='email' ?'bg-accent/100/10' :'bg-success/10'
+ interaction.type ==='email' ?'bg-accent/10' :'bg-success/10'
  }`}>
  {interaction.type ==='chat' ? <MessageCircle className="h-5 w-5 text-info" /> :
- interaction.type ==='email' ? <Mail className="h-5 w-5 text-accent0" /> :
+ interaction.type ==='email' ? <Mail className="h-5 w-5 text-accent" /> :
  <Phone className="h-5 w-5 text-success" />}
  </div>
  <div>
@@ -320,7 +320,7 @@ export function PrioritySupportWidget() {
  <CardContent>
  <div className="space-y-3">
  {knowledge_base.map((article, idx) => (
- <div key={idx} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors">
+ <div key={idx} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted cursor-pointer transition-colors">
  <div>
  <p className="font-medium">{article.title}</p>
  <div className="flex items-center gap-2 mt-1">
@@ -347,7 +347,7 @@ export function PrioritySupportWidget() {
  <TabsContent value="actions" className="space-y-4">
  <div className="grid gap-4">
  {quick_actions.map((action, idx) => (
- <Card key={idx} className={action.priority ==='recommended' ?'border-primary/50' :''}>
+ <Card key={idx} className={action.priority ==='recommended' ?'border-primary' :''}>
  <CardContent className="pt-4">
  <div className="flex items-center justify-between">
  <div>

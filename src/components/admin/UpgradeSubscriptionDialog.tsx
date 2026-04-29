@@ -148,7 +148,7 @@ export function UpgradeSubscriptionDialog({
  className={`flex items-center space-x-3 p-4 border rounded-lg cursor-pointer transition-colors ${
  selectedTier === key
  ?'border-primary bg-primary/5'
- :'border-border hover:border-primary/50'
+ :'border-border hover:border-primary'
  }`}
  >
  <RadioGroupItem value={key} id={key} />
@@ -201,7 +201,7 @@ export function UpgradeSubscriptionDialog({
  </p>
  </div>
 
- <div className="bg-muted/50 rounded-lg p-3 text-sm space-y-2">
+ <div className="bg-muted rounded-lg p-3 text-sm space-y-2">
  <p className="text-muted-foreground">
  <strong>Note:</strong> This is a complimentary subscription that does not require payment from the user.
  </p>

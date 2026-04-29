@@ -28,18 +28,18 @@ const CATEGORY_COLORS: Record<string, string> = {
  inventory_supplies:'bg-success/10 text-success',
  specialized_equipment:'bg-accent/10 text-accent',
  professional_services:'bg-info/10 text-info',
- merchant_market:'bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary',
- platform_fees:'bg-warning/15 text-warning dark:bg-warning/30 dark:text-warning',
+ merchant_market:'bg-primary/10 text-primary',
+ platform_fees:'bg-warning/15 text-warning',
  processing_fees:'bg-destructive/10 text-destructive',
- gas_mileage:'bg-info/15 text-info dark:bg-info/30 dark:text-info',
- pet_supplies_treats:'bg-success/15 text-success dark:bg-success/30 dark:text-success',
+ gas_mileage:'bg-info/15 text-info',
+ pet_supplies_treats:'bg-success/15 text-success',
  equipment:'bg-accent/10 text-accent',
  insurance:'bg-warning/10 text-warning',
  marketing_advertising:'bg-accent/10 text-accent',
- office_supplies:'bg-warning/15 text-warning dark:bg-warning/30 dark:text-warning',
+ office_supplies:'bg-warning/15 text-warning',
  software_subscriptions:'bg-info/10 text-info',
  training_education:'bg-success/10 text-success',
- other:'bg-muted/50 text-foreground',
+ other:'bg-muted text-foreground',
 };
 
 // Helper to get auto-logged tooltip text based on category
@@ -146,7 +146,7 @@ export function ExpensesList({ expenses, onExpenseDeleted }: ExpensesListProps) 
  </TableCell>
  <TableCell className="text-right">
  {expense.savings_amount && expense.savings_amount > 0 ? (
- <div className="flex items-center justify-end gap-1 text-success dark:text-success">
+ <div className="flex items-center justify-end gap-1 text-success">
  <TrendingDown className="h-3.5 w-3.5" />
  <span className="font-medium">${expense.savings_amount.toFixed(2)}</span>
  </div>

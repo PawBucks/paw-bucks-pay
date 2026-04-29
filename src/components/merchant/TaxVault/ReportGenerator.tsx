@@ -243,7 +243,7 @@ export function ReportGenerator({ expenses, businessName, taxYear }: ReportGener
  </Button>
  </div>
  
- <div className="mt-4 p-4 bg-muted/50 rounded-lg">
+ <div className="mt-4 p-4 bg-muted rounded-lg">
  <p className="text-sm text-muted-foreground">
  <strong>Report Summary:</strong> {expenses.length} expenses totaling ${totalExpenses.toFixed(2)} for tax year {taxYear}
  </p>

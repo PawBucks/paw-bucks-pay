@@ -248,7 +248,7 @@ const Referrals = () => {
  </div>
  ) : (
  <div className="text-center py-8">
- <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-3">
+ <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-3">
  <Users className="w-8 h-8 text-muted-foreground" />
  </div>
  <p className="text-muted-foreground mb-2">No referrals yet</p>

@@ -131,7 +131,7 @@ export function ActionRequiredSlices({ userId }: ActionRequiredSlicesProps) {
  <CardTitle className="flex items-center gap-2 text-warning">
  <AlertCircle className="h-5 w-5 text-warning" />
  Action Required
- <Badge className="bg-warning/100 text-white ml-2">{slices.length}</Badge>
+ <Badge className="bg-warning text-white ml-2">{slices.length}</Badge>
  </CardTitle>
  </CardHeader>
  <CardContent className="space-y-3">

@@ -50,10 +50,10 @@ const COAT_TYPES = [
 ];
 
 const SIZE_COLORS: Record<string, string> = {
- small:"bg-info/100/10 text-info border-info/200/20",
- medium:"bg-success/100/10 text-success border-success/200/20",
- large:"bg-warning/100/10 text-warning border-warning/200/20",
- giant:"bg-destructive/100/10 text-destructive border-destructive/200/20",
+ small:"bg-info/10 text-info border-info/20",
+ medium:"bg-success/10 text-success border-success/20",
+ large:"bg-warning/10 text-warning border-warning/20",
+ giant:"bg-destructive/10 text-destructive border-destructive/20",
 };
 
 interface BreedProfile {

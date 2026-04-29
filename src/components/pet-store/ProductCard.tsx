@@ -101,7 +101,7 @@ export const ProductCard = memo(({
  {/* Best seller indicator */}
  {ratingCount >= 10 && ratingAvg >= 4.0 && (
  <div className="absolute bottom-2 left-2">
- <Badge variant="secondary" className="text-[10px] px-1.5 py-0.5 bg-warning/100/90 text-white border-0">
+ <Badge variant="secondary" className="text-[10px] px-1.5 py-0.5 bg-warning/90 text-white border-0">
  <TrendingUp className="h-2.5 w-2.5 mr-0.5" /> Best Seller
  </Badge>
  </div>

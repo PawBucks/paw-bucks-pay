@@ -38,7 +38,7 @@ export function QuickActions({
  icon: MapPin,
  label:"Directions",
  href: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`,
- color:"text-info dark:text-info",
+ color:"text-info",
  external: true,
  }]
  : []),

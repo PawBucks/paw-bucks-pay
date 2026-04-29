@@ -236,7 +236,7 @@ const SharePawBucksCardComponent = () => {
  case"pending":
  return <Badge variant="secondary" className="gap-1"><Clock className="w-3 h-3" /> Pending</Badge>;
  case"accepted":
- return <Badge variant="default" className="gap-1 bg-success/100"><Check className="w-3 h-3" /> Accepted</Badge>;
+ return <Badge variant="default" className="gap-1 bg-success"><Check className="w-3 h-3" /> Accepted</Badge>;
  case"declined":
  return <Badge variant="destructive" className="gap-1"><X className="w-3 h-3" /> Declined</Badge>;
  default:
@@ -306,8 +306,8 @@ const SharePawBucksCardComponent = () => {
  
  {/* Info message for shared members */}
  {isSharedMember && (
- <div className="mb-4 p-3 bg-info/100/10 rounded-lg border border-info/200/20 flex items-start gap-2">
- <Info className="w-4 h-4 text-info0 mt-0.5 shrink-0" />
+ <div className="mb-4 p-3 bg-info/10 rounded-lg border border-info/20 flex items-start gap-2">
+ <Info className="w-4 h-4 text-info mt-0.5 shrink-0" />
  <p className="text-sm text-muted-foreground">
  You're a member of {sharedAccount.ownerName}'s shared account. Only the account owner can invite new members.
  </p>
@@ -359,7 +359,7 @@ const SharePawBucksCardComponent = () => {
  {sharedMembers.map((member) => (
  <div
  key={member.id}
- className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
+ className="flex items-center justify-between p-3 bg-muted rounded-lg"
  >
  <div className="flex items-center gap-3">
  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">

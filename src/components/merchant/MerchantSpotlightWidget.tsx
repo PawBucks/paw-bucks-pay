@@ -127,7 +127,7 @@ export function MerchantSpotlightWidget() {
  </p>
  </div>
  <div className="flex items-center gap-2">
- <Badge className="bg-gradient-to-r from-warning0 to-warning0 text-white gap-1">
+ <Badge className="bg-gradient-to-r from-warning to-warning text-white gap-1">
  <Sparkles className="h-3 w-3" /> Featured
  </Badge>
  <Badge className="bg-gradient-to-r from-primary to-primary/60 gap-1">
@@ -177,21 +177,21 @@ export function MerchantSpotlightWidget() {
  </Card>
  <Card>
  <CardContent className="pt-4 text-center">
- <TrendingUp className="h-5 w-5 text-accent0 mx-auto mb-2" />
+ <TrendingUp className="h-5 w-5 text-accent mx-auto mb-2" />
  <p className="text-2xl font-bold">{performance.click_through_rate.toFixed(1)}%</p>
  <p className="text-xs text-muted-foreground">CTR</p>
  </CardContent>
  </Card>
  <Card>
  <CardContent className="pt-4 text-center">
- <Users className="h-5 w-5 text-warning0 mx-auto mb-2" />
+ <Users className="h-5 w-5 text-warning mx-auto mb-2" />
  <p className="text-2xl font-bold">{performance.new_customers}</p>
  <p className="text-xs text-muted-foreground">New Customers</p>
  </CardContent>
  </Card>
  <Card>
  <CardContent className="pt-4 text-center">
- <BarChart3 className="h-5 w-5 text-info0 mx-auto mb-2" />
+ <BarChart3 className="h-5 w-5 text-info mx-auto mb-2" />
  <p className="text-2xl font-bold">{(performance.profile_views / 1000).toFixed(1)}K</p>
  <p className="text-xs text-muted-foreground">Profile Views</p>
  </CardContent>
@@ -226,7 +226,7 @@ export function MerchantSpotlightWidget() {
  </CardContent>
  </Card>
 
- <Card className="border-primary/50 bg-primary/5">
+ <Card className="border-primary bg-primary/5">
  <CardHeader className="pb-2">
  <CardTitle className="text-base flex items-center gap-2">
  After Spotlight
@@ -280,7 +280,7 @@ export function MerchantSpotlightWidget() {
  placement.status ==='active' ?'bg-success/10' :
  placement.status ==='featured' ?'bg-warning/10' :'bg-info/10'
  }`}>
- {placement.location.includes('Email') ? <Mail className="h-5 w-5 text-accent0" /> :
+ {placement.location.includes('Email') ? <Mail className="h-5 w-5 text-accent" /> :
  placement.location.includes('Push') ? <Bell className="h-5 w-5 text-info" /> :
  <MapPin className={`h-5 w-5 ${placement.status ==='active' ?'text-success' :'text-warning'}`} />}
  </div>

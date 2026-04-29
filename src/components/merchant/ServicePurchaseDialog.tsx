@@ -434,7 +434,7 @@ export const ServicePurchaseDialog = ({
  {!showPaymentForm ? (
  <form onSubmit={handleSubmit} className="space-y-4">
  {/* Service Summary */}
- <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+ <div className="bg-muted rounded-lg p-4 space-y-3">
  <p className="text-sm text-muted-foreground">{service.description}</p>
  <div className="space-y-1">
  {service.benefits.slice(0, 3).map((benefit, i) => (
@@ -549,7 +549,7 @@ export const ServicePurchaseDialog = ({
  paymentMethod ==='pawbucks' && canPayWithPawBucks
  ?"border-primary bg-primary/10"
  : canPayWithPawBucks
- ?"border-border hover:border-primary/50 hover:bg-muted/50"
+ ?"border-border hover:border-primary hover:bg-muted"
  :"border-border bg-muted/30 opacity-60 cursor-not-allowed"
  )}
  >
@@ -594,7 +594,7 @@ export const ServicePurchaseDialog = ({
 "w-full p-4 rounded-lg border-2 text-left transition-all",
  paymentMethod ==='usd'
  ?"border-primary bg-primary/10"
- :"border-border hover:border-primary/50 hover:bg-muted/50"
+ :"border-border hover:border-primary hover:bg-muted"
  )}
  >
  <div className="flex items-start justify-between gap-3">

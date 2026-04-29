@@ -203,7 +203,7 @@ export function SubscriptionPlanForm({
  </div>
 
  {amount && (
- <div className="p-3 rounded-lg bg-muted/50 text-sm">
+ <div className="p-3 rounded-lg bg-muted text-sm">
  <span className="font-medium">${parseFloat(amount ||"0").toFixed(2)}</span>
  <span className="text-muted-foreground"> {getIntervalLabel()}</span>
  </div>

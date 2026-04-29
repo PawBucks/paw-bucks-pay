@@ -209,7 +209,7 @@ export function SponsoredPlacementDashboard({ merchantId, serviceType ='sponsore
  case"warning": return"text-warning";
  case"opportunity": return"text-success";
  case"action": return"text-info";
- case"insight": return"text-accent0";
+ case"insight": return"text-accent";
  default: return"text-muted-foreground";
  }
  };
@@ -349,13 +349,13 @@ export function SponsoredPlacementDashboard({ merchantId, serviceType ='sponsore
  <div>
  <p className="text-sm text-muted-foreground">Conversions</p>
  <p className="text-3xl font-bold">{overview.totalConversions.toLocaleString()}</p>
- <p className="text-xs text-accent0 mt-1 flex items-center gap-1">
+ <p className="text-xs text-accent mt-1 flex items-center gap-1">
  <ArrowUp className="w-3 h-3" />
  {overview.conversionRate}% rate
  </p>
  </div>
- <div className="p-3 rounded-full bg-accent/100/10">
- <ShoppingCart className="w-6 h-6 text-accent0" />
+ <div className="p-3 rounded-full bg-accent/10">
+ <ShoppingCart className="w-6 h-6 text-accent" />
  </div>
  </div>
  </CardContent>
@@ -640,19 +640,19 @@ export function SponsoredPlacementDashboard({ merchantId, serviceType ='sponsore
  <CardContent>
  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
  <div className="space-y-4">
- <div className="flex justify-between p-3 bg-muted/50 rounded-lg">
+ <div className="flex justify-between p-3 bg-muted rounded-lg">
  <span>Impressions Value</span>
  <span className="font-medium">
  ~${(overview.totalImpressions * 0.01).toFixed(2)}
  </span>
  </div>
- <div className="flex justify-between p-3 bg-muted/50 rounded-lg">
+ <div className="flex justify-between p-3 bg-muted rounded-lg">
  <span>Click Value</span>
  <span className="font-medium">
  ~${(overview.totalClicks * 0.50).toFixed(2)}
  </span>
  </div>
- <div className="flex justify-between p-3 bg-muted/50 rounded-lg">
+ <div className="flex justify-between p-3 bg-muted rounded-lg">
  <span>Conversion Value</span>
  <span className="font-medium">
  ~${(overview.totalConversions * 25).toFixed(2)}
@@ -884,7 +884,7 @@ export function SponsoredPlacementDashboard({ merchantId, serviceType ='sponsore
  </CardHeader>
  <CardContent>
  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
- <div className="p-4 bg-muted/50 rounded-lg text-center">
+ <div className="p-4 bg-muted rounded-lg text-center">
  <p className="text-sm text-muted-foreground mb-1">Projected Impressions</p>
  <p className="text-2xl font-bold">
  {aiData.predictions.nextMonth.impressions.toLocaleString()}
@@ -893,13 +893,13 @@ export function SponsoredPlacementDashboard({ merchantId, serviceType ='sponsore
  +{aiData.predictions.growthRate}% growth
  </Badge>
  </div>
- <div className="p-4 bg-muted/50 rounded-lg text-center">
+ <div className="p-4 bg-muted rounded-lg text-center">
  <p className="text-sm text-muted-foreground mb-1">Projected Clicks</p>
  <p className="text-2xl font-bold">
  {aiData.predictions.nextMonth.clicks.toLocaleString()}
  </p>
  </div>
- <div className="p-4 bg-muted/50 rounded-lg text-center">
+ <div className="p-4 bg-muted rounded-lg text-center">
  <p className="text-sm text-muted-foreground mb-1">Projected Conversions</p>
  <p className="text-2xl font-bold">
  {aiData.predictions.nextMonth.conversions.toLocaleString()}
@@ -922,7 +922,7 @@ export function SponsoredPlacementDashboard({ merchantId, serviceType ='sponsore
  return (
  <div
  key={index}
- className="p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+ className="p-4 border rounded-lg hover:bg-muted transition-colors"
  >
  <div className="flex items-start gap-4">
  <div className={`p-2 rounded-lg bg-muted ${getRecommendationColor(rec.type)}`}>

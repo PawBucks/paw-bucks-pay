@@ -207,7 +207,7 @@ export function ScarcitySignalWidget({ merchantId, businessType }: ScarcitySigna
  </div>
 
  {scarcityData.competitorCount > 1 && (
- <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 rounded-lg px-3 py-2">
+ <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted rounded-lg px-3 py-2">
  <Users className="h-4 w-4" />
  <span>
  <strong className="text-foreground">{scarcityData.competitorCount}</strong>{""}

@@ -214,7 +214,7 @@ export default function AdminInvoicePayment() {
 
  {/* Notes */}
  {invoice.notes && (
- <div className="bg-muted/50 rounded-lg p-4">
+ <div className="bg-muted rounded-lg p-4">
  <p className="text-xs font-medium mb-1">Notes</p>
  <p className="text-sm text-muted-foreground whitespace-pre-wrap">{invoice.notes}</p>
  </div>

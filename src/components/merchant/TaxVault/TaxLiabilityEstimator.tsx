@@ -408,7 +408,7 @@ export function TaxLiabilityEstimator({ merchantId, taxYear }: TaxLiabilityEstim
  </Card>
 
  {/* Quarterly Payment */}
- <Card className="border-2 border-warning/20 bg-gradient-to-br from-warning0/5 to-transparent">
+ <Card className="border-2 border-warning/20 bg-gradient-to-br from-warning/5 to-transparent">
  <CardHeader className="pb-2">
  <CardTitle className="text-lg flex items-center gap-2">
  <Calendar className="h-5 w-5 text-warning" />
@@ -463,7 +463,7 @@ export function TaxLiabilityEstimator({ merchantId, taxYear }: TaxLiabilityEstim
  <div className="space-y-2">
  <p className="text-sm font-medium text-muted-foreground">Deductions</p>
  
- <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+ <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
  <div className="flex items-center gap-3">
  <Receipt className="h-4 w-4 text-muted-foreground" />
  <span>Business Expenses (Tax Vault)</span>
@@ -473,7 +473,7 @@ export function TaxLiabilityEstimator({ merchantId, taxYear }: TaxLiabilityEstim
  </span>
  </div>
 
- <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+ <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
  <div className="flex items-center gap-3">
  <Car className="h-4 w-4 text-muted-foreground" />
  <div>

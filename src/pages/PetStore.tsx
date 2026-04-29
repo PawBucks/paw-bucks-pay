@@ -602,7 +602,7 @@ export default function PetStore() {
  </div>
  ) : filteredItems.length === 0 ? (
  <div className="text-center py-16 px-4">
- <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4">
+ <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
  <Store className="w-8 h-8 text-muted-foreground" />
  </div>
  <h3 className="text-xl font-semibold mb-2">No items found</h3>

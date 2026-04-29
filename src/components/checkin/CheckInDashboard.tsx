@@ -295,7 +295,7 @@ function CheckInList({ checkins, loading, emptyMessage }: { checkins: CheckIn[];
  return (
  <div className="space-y-3">
  {[1, 2, 3].map(i => (
- <div key={i} className="h-16 bg-muted/50 rounded-lg animate-pulse" />
+ <div key={i} className="h-16 bg-muted rounded-lg animate-pulse" />
  ))}
  </div>
  );

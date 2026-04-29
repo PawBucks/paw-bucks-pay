@@ -129,27 +129,27 @@ export const WelcomeCreditCard = ({ userId }: WelcomeCreditCardProps) => {
  <GradientCard 
  className={`overflow-hidden relative ${
  waitingForPhase2
- ?'bg-gradient-to-r from-accent0/20 via-accent0/20 to-accent0/20 border-accent/200/30'
+ ?'bg-gradient-to-r from-accent/20 via-accent/20 to-accent/20 border-accent/30'
  : isCritical 
- ?'bg-gradient-to-r from-destructive0/20 via-warning0/20 to-warning0/20 border-destructive/200/30' 
+ ?'bg-gradient-to-r from-destructive/20 via-warning/20 to-warning/20 border-destructive/30' 
  : isUrgent 
- ?'bg-gradient-to-r from-warning0/20 via-warning0/20 to-warning0/20 border-warning/200/30'
+ ?'bg-gradient-to-r from-warning/20 via-warning/20 to-warning/20 border-warning/30'
  : currentPhase === 2
- ?'bg-gradient-to-r from-warning0/20 via-warning0/20 to-success0/20 border-warning/200/30'
- :'bg-gradient-to-r from-success0/20 via-success0/20 to-info0/20 border-success/200/30'
+ ?'bg-gradient-to-r from-warning/20 via-warning/20 to-success/20 border-warning/30'
+ :'bg-gradient-to-r from-success/20 via-success/20 to-info/20 border-success/30'
  }`}
  >
  <div className="flex items-start gap-4">
  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-lg ${
  waitingForPhase2
- ?'bg-gradient-to-br from-accent0 to-accent0'
+ ?'bg-gradient-to-br from-accent to-accent'
  : isCritical 
- ?'bg-gradient-to-br from-destructive0 to-warning0' 
+ ?'bg-gradient-to-br from-destructive to-warning' 
  : isUrgent 
- ?'bg-gradient-to-br from-warning0 to-warning0'
+ ?'bg-gradient-to-br from-warning to-warning'
  : currentPhase === 2
- ?'bg-gradient-to-br from-warning0 to-warning0'
- :'bg-gradient-to-br from-success0 to-success0'
+ ?'bg-gradient-to-br from-warning to-warning'
+ :'bg-gradient-to-br from-success to-success'
  }`}>
  {waitingForPhase2 ? (
  <Sparkles className="w-7 h-7 text-white" />
@@ -165,14 +165,14 @@ export const WelcomeCreditCard = ({ userId }: WelcomeCreditCardProps) => {
  </h3>
  <Badge className={`${
  waitingForPhase2
- ?'bg-accent/100/20 text-accent border-accent/200/30'
+ ?'bg-accent/20 text-accent border-accent/30'
  : isCritical 
- ?'bg-destructive/100/20 text-destructive border-destructive/200/30 animate-pulse' 
+ ?'bg-destructive/20 text-destructive border-destructive/30 animate-pulse' 
  : isUrgent 
- ?'bg-warning/100/20 text-warning border-warning/200/30'
+ ?'bg-warning/20 text-warning border-warning/30'
  : currentPhase === 2
- ?'bg-warning/100/20 text-warning border-warning/200/30'
- :'bg-success/100/20 text-success border-success/200/30'
+ ?'bg-warning/20 text-warning border-warning/30'
+ :'bg-success/20 text-success border-success/30'
  }`}>
  {badgeText}
  </Badge>
@@ -185,7 +185,7 @@ export const WelcomeCreditCard = ({ userId }: WelcomeCreditCardProps) => {
  {/* Countdown Timer */}
  <div className="flex items-center gap-4 mb-3">
  <div className="flex items-center gap-2">
- <Clock className={`w-4 h-4 ${isCritical ?'text-destructive0 animate-pulse' : isUrgent ?'text-warning0' :'text-muted-foreground'}`} />
+ <Clock className={`w-4 h-4 ${isCritical ?'text-destructive animate-pulse' : isUrgent ?'text-warning' :'text-muted-foreground'}`} />
  <span className={`text-sm font-medium ${
  isCritical ?'text-destructive' : isUrgent ?'text-warning' :'text-foreground'
  }`}>
@@ -197,7 +197,7 @@ export const WelcomeCreditCard = ({ userId }: WelcomeCreditCardProps) => {
  <Progress 
  value={Math.max(0, Math.min(100, (daysRemaining / 45) * 100))} 
  className={`h-2 ${
- isCritical ?'[&>div]:bg-destructive/100' : isUrgent ?'[&>div]:bg-warning/100' :'[&>div]:bg-success/100'
+ isCritical ?'[&>div]:bg-destructive' : isUrgent ?'[&>div]:bg-warning' :'[&>div]:bg-success'
  }`}
  />
  </div>
@@ -208,12 +208,12 @@ export const WelcomeCreditCard = ({ userId }: WelcomeCreditCardProps) => {
  onClick={() => navigate('/discover')}
  className={`${
  isCritical 
- ?'bg-gradient-to-r from-destructive0 to-warning0 hover:from-destructive hover:to-warning' 
+ ?'bg-gradient-to-r from-destructive to-warning hover:from-destructive hover:to-warning' 
  : isUrgent 
- ?'bg-gradient-to-r from-warning0 to-warning0 hover:from-warning hover:to-warning'
+ ?'bg-gradient-to-r from-warning to-warning hover:from-warning hover:to-warning'
  : currentPhase === 2
- ?'bg-gradient-to-r from-warning0 to-warning0 hover:from-warning hover:to-warning'
- :'bg-gradient-to-r from-success0 to-success0 hover:from-success hover:to-success'
+ ?'bg-gradient-to-r from-warning to-warning hover:from-warning hover:to-warning'
+ :'bg-gradient-to-r from-success to-success hover:from-success hover:to-success'
  } text-white shadow-md`}
  >
  Find Participating Partners

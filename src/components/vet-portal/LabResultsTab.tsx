@@ -342,7 +342,7 @@ export const LabResultsTab = ({ petId, vetId }: LabResultsTabProps) => {
  <Card key={result.id} className="overflow-hidden">
  <Accordion type="single" collapsible>
  <AccordionItem value={result.id} className="border-none">
- <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-accent/50">
+ <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-accent">
  <div className="flex items-center justify-between w-full pr-4">
  <div className="flex items-center gap-3">
  {getStatusIcon(result.status)}

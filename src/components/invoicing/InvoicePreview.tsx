@@ -38,7 +38,7 @@ const statusConfig: Record<string, { label: string; color: string }> = {
  partially_paid: { label:"Partially Paid", color:"bg-warning/10 text-warning" },
  paid: { label:"Paid", color:"bg-success/10 text-success" },
  overdue: { label:"Overdue", color:"bg-destructive/10 text-destructive" },
- cancelled: { label:"Cancelled", color:"bg-muted/50 text-foreground" },
+ cancelled: { label:"Cancelled", color:"bg-muted text-foreground" },
  refunded: { label:"Refunded", color:"bg-warning/10 text-warning" },
 };
 
@@ -325,13 +325,13 @@ export function InvoicePreview({
  return (
  <div 
  key={index} 
- className="flex items-center gap-3 p-2 border rounded-lg bg-muted/30 hover:bg-muted/50 cursor-pointer transition-colors"
+ className="flex items-center gap-3 p-2 border rounded-lg bg-muted/30 hover:bg-muted cursor-pointer transition-colors"
  onClick={handleView}
  >
  {isImage ? (
- <Image className="h-4 w-4 text-info0" />
+ <Image className="h-4 w-4 text-info" />
  ) : (
- <FileText className="h-4 w-4 text-destructive0" />
+ <FileText className="h-4 w-4 text-destructive" />
  )}
  <span className="text-sm flex-1 truncate">{displayName}</span>
  <Eye className="h-4 w-4 text-muted-foreground" />

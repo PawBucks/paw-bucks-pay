@@ -385,7 +385,7 @@ export function SmartScheduleTab({ merchantId }: Props) {
  </Card>
  <Card className="p-4">
  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
- <TrendingDown className="w-4 h-4 text-success0" />
+ <TrendingDown className="w-4 h-4 text-success" />
  Time Saved
  </div>
  <p className="text-xl font-bold text-success">
@@ -454,15 +454,15 @@ export function SmartScheduleTab({ merchantId }: Props) {
  )}
  </div>
  )}
- <div className="flex items-start gap-3 p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors">
+ <div className="flex items-start gap-3 p-3 rounded-lg border bg-card hover:bg-muted transition-colors">
  <div
  className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0 ${
  stop.status ==="completed"
- ?"bg-success/100"
+ ?"bg-success"
  : stop.status ==="arrived"
- ?"bg-info/100"
+ ?"bg-info"
  : stop.status ==="en_route"
- ?"bg-warning/100"
+ ?"bg-warning"
  :"bg-muted-foreground"
  }`}
  >

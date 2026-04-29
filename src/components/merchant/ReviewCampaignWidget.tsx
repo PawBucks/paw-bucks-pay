@@ -129,7 +129,7 @@ export function ReviewCampaignWidget() {
 
  const getRatingColor = (rating: number) => {
  if (rating >= 4.5) return'text-success';
- if (rating >= 4.0) return'text-success0';
+ if (rating >= 4.0) return'text-success';
  if (rating >= 3.0) return'text-warning';
  return'text-destructive';
  };
@@ -139,7 +139,7 @@ export function ReviewCampaignWidget() {
  case'success': return <CheckCircle className="h-5 w-5 text-success" />;
  case'warning': return <AlertTriangle className="h-5 w-5 text-warning" />;
  case'info': return <Info className="h-5 w-5 text-info" />;
- case'opportunity': return <Lightbulb className="h-5 w-5 text-accent0" />;
+ case'opportunity': return <Lightbulb className="h-5 w-5 text-accent" />;
  default: return <Info className="h-5 w-5" />;
  }
  };
@@ -157,7 +157,7 @@ export function ReviewCampaignWidget() {
  switch (difficulty) {
  case'easy': return <Badge variant="outline" className="bg-success/10 text-success text-xs">Quick Setup</Badge>;
  case'moderate': return <Badge variant="outline" className="bg-warning/10 text-warning text-xs">Some Setup</Badge>;
- case'complex': return <Badge variant="outline" className="bg-accent/100/10 text-accent0 text-xs">Advanced</Badge>;
+ case'complex': return <Badge variant="outline" className="bg-accent/10 text-accent text-xs">Advanced</Badge>;
  default: return null;
  }
  };
@@ -225,7 +225,7 @@ export function ReviewCampaignWidget() {
  {refreshing ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-2" />}
  Refresh
  </Button>
- <Badge className="bg-gradient-to-r from-warning0 to-warning text-white gap-1">
+ <Badge className="bg-gradient-to-r from-warning to-warning text-white gap-1">
  <Zap className="h-3 w-3" /> Campaign Active
  </Badge>
  </div>
@@ -264,7 +264,7 @@ export function ReviewCampaignWidget() {
  </GradientCard>
  <GradientCard gradient>
  <div className="flex items-center gap-3">
- <div className="p-3 rounded-xl bg-accent/100/10"><Users className="h-5 w-5 text-accent0" /></div>
+ <div className="p-3 rounded-xl bg-accent/10"><Users className="h-5 w-5 text-accent" /></div>
  <div>
  <p className="text-sm text-muted-foreground">Customers</p>
  <p className="text-2xl font-bold">{metrics.uniqueCustomers}</p>
@@ -355,20 +355,20 @@ export function ReviewCampaignWidget() {
  </CardHeader>
  <CardContent>
  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
- <div className="text-center p-4 bg-muted/50 rounded-lg">
+ <div className="text-center p-4 bg-muted rounded-lg">
  <div className="text-2xl font-bold text-primary">{campaignStats.activeTemplates}</div>
  <div className="text-sm text-muted-foreground">Active Templates</div>
  </div>
- <div className="text-center p-4 bg-muted/50 rounded-lg">
+ <div className="text-center p-4 bg-muted rounded-lg">
  <div className="text-2xl font-bold text-info">{campaignStats.emailsSent}</div>
  <div className="text-sm text-muted-foreground">Emails Sent</div>
  </div>
- <div className="text-center p-4 bg-muted/50 rounded-lg">
+ <div className="text-center p-4 bg-muted rounded-lg">
  <div className="text-2xl font-bold text-success">{campaignStats.clickRate}%</div>
  <div className="text-sm text-muted-foreground">Click Rate</div>
  </div>
- <div className="text-center p-4 bg-muted/50 rounded-lg">
- <div className="text-2xl font-bold text-accent0">{campaignStats.conversionRate}%</div>
+ <div className="text-center p-4 bg-muted rounded-lg">
+ <div className="text-2xl font-bold text-accent">{campaignStats.conversionRate}%</div>
  <div className="text-sm text-muted-foreground">Conversion Rate</div>
  </div>
  </div>
@@ -443,16 +443,16 @@ export function ReviewCampaignWidget() {
  </CardHeader>
  <CardContent>
  <div className="grid grid-cols-3 gap-4">
- <div className="text-center p-4 bg-muted/50 rounded-lg">
+ <div className="text-center p-4 bg-muted rounded-lg">
  <div className="text-2xl font-bold text-primary">{responseMetrics.averageResponseTime}</div>
  <div className="text-sm text-muted-foreground">Avg Response Time</div>
  </div>
- <div className="text-center p-4 bg-muted/50 rounded-lg">
+ <div className="text-center p-4 bg-muted rounded-lg">
  <div className="text-2xl font-bold text-success">{responseMetrics.responseRate}%</div>
  <div className="text-sm text-muted-foreground">Response Rate</div>
  </div>
- <div className="text-center p-4 bg-muted/50 rounded-lg">
- <div className="text-2xl font-bold text-accent0">{responseMetrics.positiveResponseImpact}</div>
+ <div className="text-center p-4 bg-muted rounded-lg">
+ <div className="text-2xl font-bold text-accent">{responseMetrics.positiveResponseImpact}</div>
  <div className="text-sm text-muted-foreground">Rating Impact</div>
  </div>
  </div>
@@ -482,7 +482,7 @@ export function ReviewCampaignWidget() {
  </div>
  ) : (
  recentReviews.map((review) => (
- <div key={review.id} className="p-4 rounded-lg border hover:bg-muted/50 transition-colors">
+ <div key={review.id} className="p-4 rounded-lg border hover:bg-muted transition-colors">
  <div className="flex items-start justify-between gap-3">
  <div className="flex-1">
  <div className="flex items-center gap-2 mb-2">
@@ -490,7 +490,7 @@ export function ReviewCampaignWidget() {
  {[1, 2, 3, 4, 5].map((star) => (
  <Star
  key={star}
- className={`h-4 w-4 ${star <= review.rating ?'text-warning fill-warning0' :'text-muted'}`}
+ className={`h-4 w-4 ${star <= review.rating ?'text-warning fill-warning' :'text-muted'}`}
  />
  ))}
  </div>
@@ -520,7 +520,7 @@ export function ReviewCampaignWidget() {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <Brain className="h-5 w-5 text-accent0" />
+ <Brain className="h-5 w-5 text-accent" />
  AI-Powered Insights
  </CardTitle>
  <CardDescription>
@@ -535,7 +535,7 @@ export function ReviewCampaignWidget() {
  className={`p-4 rounded-lg border-l-4 ${
  insight.type ==='success' ?'border-l-green-500 bg-success/5' :
  insight.type ==='warning' ?'border-l-yellow-500 bg-warning/5' :
- insight.type ==='opportunity' ?'border-l-purple-500 bg-accent/100/5' :
+ insight.type ==='opportunity' ?'border-l-purple-500 bg-accent/5' :
 'border-l-blue-500 bg-info/5'
  }`}
  >

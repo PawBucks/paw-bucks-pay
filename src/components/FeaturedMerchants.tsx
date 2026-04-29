@@ -70,7 +70,7 @@ const FeaturedMerchantsComponent = ({ onMerchantClick }: { onMerchantClick: (mer
  {merchant.business_name}
  </h3>
  {hasVerifiedBadge && (
- <Badge className="bg-info/100/10 text-info border-info/200/20 gap-1 text-xs">
+ <Badge className="bg-info/10 text-info border-info/20 gap-1 text-xs">
  <BadgeCheck className="w-3 h-3" />
  Verified
  </Badge>

@@ -87,7 +87,7 @@ function SignalScore({ signals }: { signals: UnderwritingSignals }) {
 
  const label = score >= 75 ?'Strong' : score >= 50 ?'Moderate' : score >= 25 ?'Developing' :'Insufficient';
  const color = score >= 75 ?'text-success' : score >= 50 ?'text-warning' : score >= 25 ?'text-warning' :'text-destructive';
- const bg = score >= 75 ?'bg-success/10 border-success/30/20' : score >= 50 ?'bg-warning/10 border-warning/30/20' : score >= 25 ?'bg-warning/10 border-warning/30/20' :'bg-destructive/10 border-destructive/20';
+ const bg = score >= 75 ?'bg-success/10 border-success/20' : score >= 50 ?'bg-warning/10 border-warning/20' : score >= 25 ?'bg-warning/10 border-warning/20' :'bg-destructive/10 border-destructive/20';
 
  return (
  <div className={cn('rounded-xl border p-4 text-center', bg)}>

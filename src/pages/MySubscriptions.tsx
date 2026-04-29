@@ -122,7 +122,7 @@ const MySubscriptions = () => {
  const getStatusBadge = (subscription: Subscription) => {
  if (subscription.cancel_at_period_end) {
  return (
- <Badge variant="outline" className="bg-warning/100/10 text-warning border-warning/200/20">
+ <Badge variant="outline" className="bg-warning/10 text-warning border-warning/20">
  Canceling
  </Badge>
  );
@@ -131,19 +131,19 @@ const MySubscriptions = () => {
  switch (subscription.status) {
  case"active":
  return (
- <Badge variant="outline" className="bg-success/100/10 text-success border-success/200/20">
+ <Badge variant="outline" className="bg-success/10 text-success border-success/20">
  Active
  </Badge>
  );
  case"trialing":
  return (
- <Badge variant="outline" className="bg-info/100/10 text-info border-info/200/20">
+ <Badge variant="outline" className="bg-info/10 text-info border-info/20">
  Trial
  </Badge>
  );
  case"past_due":
  return (
- <Badge variant="outline" className="bg-destructive/100/10 text-destructive border-destructive/200/20">
+ <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/20">
  Past Due
  </Badge>
  );
@@ -240,7 +240,7 @@ const MySubscriptions = () => {
  <div className="flex items-start justify-between">
  <div className="flex items-center gap-3">
  {subscription.type ==="platform" ? (
- <div className="w-12 h-12 rounded-full flex items-center justify-center bg-gradient-to-br from-accent0 to-accent0">
+ <div className="w-12 h-12 rounded-full flex items-center justify-center bg-gradient-to-br from-accent to-accent">
  <Crown className="w-6 h-6 text-white" />
  </div>
  ) : subscription.logo_url ? (
@@ -250,7 +250,7 @@ const MySubscriptions = () => {
  className="w-12 h-12 rounded-full object-cover border border-border"
  />
  ) : (
- <div className="w-12 h-12 rounded-full flex items-center justify-center bg-gradient-to-br from-info0 to-info0">
+ <div className="w-12 h-12 rounded-full flex items-center justify-center bg-gradient-to-br from-info to-info">
  <Store className="w-6 h-6 text-white" />
  </div>
  )}
@@ -287,7 +287,7 @@ const MySubscriptions = () => {
  </div>
 
  {subscription.cancel_at_period_end ? (
- <div className="flex items-center gap-2 text-sm text-warning bg-warning/100/10 rounded-lg p-3">
+ <div className="flex items-center gap-2 text-sm text-warning bg-warning/10 rounded-lg p-3">
  <AlertTriangle className="w-4 h-4 flex-shrink-0" />
  <span>
  This subscription will end on{""}

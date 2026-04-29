@@ -72,12 +72,12 @@ const CheckoutSuccess = () => {
  <CardContent className="space-y-6">
  {/* PawBucks Reward Notification */}
  <div 
- className={`p-4 bg-gradient-to-r from-warning0/10 via-warning0/10 to-warning0/10 rounded-xl border border-warning/200/20 transition-all duration-500 delay-300 ${
+ className={`p-4 bg-gradient-to-r from-warning/10 via-warning/10 to-warning/10 rounded-xl border border-warning/20 transition-all duration-500 delay-300 ${
  isVisible ?'opacity-100 translate-x-0' :'opacity-0 -translate-x-4'
  }`}
  >
  <div className="flex items-center gap-3">
- <div className="h-10 w-10 rounded-full bg-gradient-to-br from-warning to-warning0 flex items-center justify-center">
+ <div className="h-10 w-10 rounded-full bg-gradient-to-br from-warning to-warning flex items-center justify-center">
  <Sparkles className="h-5 w-5 text-white" />
  </div>
  <div>
@@ -97,7 +97,7 @@ const CheckoutSuccess = () => {
  isVisible ?'opacity-100' :'opacity-0'
  }`}
  >
- <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+ <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
  <Gift className="h-5 w-5 text-primary" />
  <div className="text-sm">
  <p className="font-medium">Confirmation email sent</p>
@@ -133,7 +133,7 @@ const CheckoutSuccess = () => {
  <Button 
  onClick={() => navigate("/pawbucks/wallet")} 
  variant="outline"
- className="w-full border-warning/200/30 text-warning hover:bg-warning/100/10"
+ className="w-full border-warning/30 text-warning hover:bg-warning/10"
  size="lg"
  >
  <Sparkles className="h-4 w-4 mr-2" />
@@ -168,7 +168,7 @@ const CheckoutSuccess = () => {
 
  {/* Floating Background Decorations */}
  <div className="absolute top-1/4 left-10 w-20 h-20 bg-primary/5 rounded-full blur-2xl" />
- <div className="absolute bottom-1/4 right-10 w-32 h-32 bg-warning/100/5 rounded-full blur-3xl" />
+ <div className="absolute bottom-1/4 right-10 w-32 h-32 bg-warning/5 rounded-full blur-3xl" />
  </div>
  );
 };

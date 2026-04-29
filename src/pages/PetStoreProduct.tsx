@@ -243,7 +243,7 @@ export default function PetStoreProduct() {
  </Badge>
  )}
  {ratingCount >= 10 && ratingAvg >= 4.0 && (
- <Badge variant="secondary" className="bg-warning/100/90 text-white border-0 text-xs">
+ <Badge variant="secondary" className="bg-warning/90 text-white border-0 text-xs">
  <TrendingUp className="h-3 w-3 mr-1" /> Best Seller
  </Badge>
  )}

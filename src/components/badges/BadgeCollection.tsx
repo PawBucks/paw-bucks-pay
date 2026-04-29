@@ -131,7 +131,7 @@ export const BadgeCollection = ({ userId, onBadgeClick }: BadgeCollectionProps) 
  return (
  <div className="space-y-4">
  {[1, 2, 3].map(i => (
- <div key={i} className="h-24 bg-muted/50 rounded-2xl animate-pulse" />
+ <div key={i} className="h-24 bg-muted rounded-2xl animate-pulse" />
  ))}
  </div>
  );
@@ -146,7 +146,7 @@ export const BadgeCollection = ({ userId, onBadgeClick }: BadgeCollectionProps) 
  <div className="text-2xl font-bold text-primary">{totalEarned}</div>
  <div className="text-xs text-muted-foreground">Earned</div>
  </div>
- <div className="p-3 rounded-xl bg-muted/50 border border-border text-center">
+ <div className="p-3 rounded-xl bg-muted border border-border text-center">
  <Target className="w-5 h-5 mx-auto text-muted-foreground mb-1" />
  <div className="text-2xl font-bold">{totalBadges - totalEarned}</div>
  <div className="text-xs text-muted-foreground">To Unlock</div>
