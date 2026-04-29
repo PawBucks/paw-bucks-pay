@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from"react";
 import { User, Session } from"@supabase/supabase-js";
 import { supabase } from"@/integrations/supabase/client";
 import { getPreHydratedSession } from"@/lib/authPreHydrate";
-import { clearUserAccessCache } from"@/lib/userAccessCache";
+import { clearUserAccessCache, getAuthRedirectForUser } from"@/lib/userAccessCache";
 
 // Pre-hydrate from localStorage synchronously — instant first render
 const preHydrated = getPreHydratedSession();
@@ -70,6 +70,10 @@ export const useAuth = () => {
  }, []);
 
  const signOut = useCallback(async () => {
+    // Capture the role-specific auth URL BEFORE clearing user state/cache
+    const redirectTarget = cachedSession?.user?.id
+      ? getAuthRedirectForUser(cachedSession.user.id)
+      :"/auth";
  try {
  const { error } = await supabase.auth.signOut();
  if (error) {
@@ -95,6 +99,11 @@ export const useAuth = () => {
  } catch (storageError) {
  console.error("Error clearing local auth storage:", storageError);
  }
+
+      // Redirect to the persona-specific auth/login page
+      if (typeof window !=="undefined") {
+        window.location.href = redirectTarget;
+      }
  }
  }, []);
 
