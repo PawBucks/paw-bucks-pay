@@ -193,7 +193,7 @@ export function KeywordPerformanceWidget() {
  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
  <GradientCard gradient>
  <div className="flex items-center gap-3">
- <div className="p-3 rounded-xl bg-primary/10">
+ <div className="p-3 rounded-md bg-primary/10">
  <Eye className="h-5 w-5 text-primary" />
  </div>
  <div>
@@ -205,7 +205,7 @@ export function KeywordPerformanceWidget() {
 
  <GradientCard gradient>
  <div className="flex items-center gap-3">
- <div className="p-3 rounded-xl bg-info/10">
+ <div className="p-3 rounded-md bg-info/10">
  <MousePointerClick className="h-5 w-5 text-info" />
  </div>
  <div>
@@ -217,7 +217,7 @@ export function KeywordPerformanceWidget() {
 
  <GradientCard gradient>
  <div className="flex items-center gap-3">
- <div className="p-3 rounded-xl bg-success/10">
+ <div className="p-3 rounded-md bg-success/10">
  <TrendingUp className="h-5 w-5 text-success" />
  </div>
  <div>
@@ -229,7 +229,7 @@ export function KeywordPerformanceWidget() {
 
  <GradientCard gradient>
  <div className="flex items-center gap-3">
- <div className="p-3 rounded-xl bg-accent/10">
+ <div className="p-3 rounded-md bg-accent/10">
  <Target className="h-5 w-5 text-accent" />
  </div>
  <div>

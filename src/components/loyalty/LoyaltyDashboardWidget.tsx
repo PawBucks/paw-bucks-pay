@@ -18,7 +18,7 @@ export const LoyaltyDashboardWidget = ({ userId }: LoyaltyDashboardWidgetProps) 
  if (isLoading) {
  return (
  <GradientCard className="animate-pulse">
- <div className="h-40 bg-muted rounded-xl" />
+ <div className="h-40 bg-muted rounded-md" />
  </GradientCard>
  );
  }
@@ -52,7 +52,7 @@ export const LoyaltyDashboardWidget = ({ userId }: LoyaltyDashboardWidgetProps) 
  <motion.div 
  initial={{ opacity: 0, scale: 0.95 }}
  animate={{ opacity: 1, scale: 1 }}
- className="p-4 rounded-xl bg-gradient-to-r from-primary/20 to-accent/20 border border-primary/30 text-center"
+ className="p-4 rounded-md bg-gradient-to-r from-primary/20 to-accent/20 border border-primary/30 text-center"
  >
  <Gift className="w-10 h-10 mx-auto text-primary mb-2" />
  <p className="text-lg font-bold text-primary mb-1">

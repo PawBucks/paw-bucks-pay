@@ -120,7 +120,7 @@ export function StrategyConsultationWidget() {
  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
  <GradientCard gradient>
  <div className="flex items-center gap-3">
- <div className="p-3 rounded-xl bg-primary/10">
+ <div className="p-3 rounded-md bg-primary/10">
  <CalendarDays className="h-5 w-5 text-primary" />
  </div>
  <div>
@@ -132,7 +132,7 @@ export function StrategyConsultationWidget() {
 
  <GradientCard gradient>
  <div className="flex items-center gap-3">
- <div className="p-3 rounded-xl bg-success/10">
+ <div className="p-3 rounded-md bg-success/10">
  <CheckCircle2 className="h-5 w-5 text-success" />
  </div>
  <div>
@@ -144,7 +144,7 @@ export function StrategyConsultationWidget() {
 
  <GradientCard gradient>
  <div className="flex items-center gap-3">
- <div className="p-3 rounded-xl bg-accent/10">
+ <div className="p-3 rounded-md bg-accent/10">
  <Brain className="h-5 w-5 text-accent" />
  </div>
  <div>
@@ -160,7 +160,7 @@ export function StrategyConsultationWidget() {
  <CardContent className="py-6">
  <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
  <div className="flex items-center gap-4">
- <div className="p-3 rounded-xl bg-primary/10">
+ <div className="p-3 rounded-md bg-primary/10">
  <Users className="h-6 w-6 text-primary" />
  </div>
  <div>

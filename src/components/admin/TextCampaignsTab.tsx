@@ -499,7 +499,7 @@ export function TextCampaignsTab() {
  {/* Message Preview */}
  <div className="bg-muted rounded-lg p-4">
  <h4 className="font-medium mb-2 text-sm">Preview</h4>
- <div className="bg-background rounded-xl border p-3 max-w-[280px] mx-auto">
+ <div className="bg-background rounded-md border p-3 max-w-[280px] mx-auto">
  <div className="bg-primary/10 text-primary-foreground rounded-lg p-3 text-sm">
  {message ||"Your message will appear here..."}
  </div>

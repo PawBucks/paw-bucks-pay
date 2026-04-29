@@ -358,7 +358,7 @@ const Wallet = () => {
  return (
  <div
  key={transaction.id}
- className={`flex items-center justify-between p-4 rounded-xl border border-border/50 hover:bg-muted transition-colors ${
+ className={`flex items-center justify-between p-4 rounded-md border border-border/50 hover:bg-muted transition-colors ${
  isRefunded ?'bg-destructive/5 border-destructive/20' :'bg-muted/30'
  }`}
  >
@@ -423,7 +423,7 @@ const Wallet = () => {
  {pawbucksActivity.map((activity) => (
  <div
  key={activity.id}
- className="flex items-center justify-between p-4 rounded-xl bg-muted/30 border border-border/50 hover:bg-muted transition-colors"
+ className="flex items-center justify-between p-4 rounded-md bg-muted/30 border border-border/50 hover:bg-muted transition-colors"
  >
  <div className="flex items-center gap-3">
  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${

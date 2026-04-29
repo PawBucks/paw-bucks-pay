@@ -47,7 +47,7 @@ export function PhotoGallery({ merchantId }: Props) {
  <button
  key={photo.id}
  onClick={() => setLightboxIndex(idx)}
- className="flex-shrink-0 w-28 h-28 rounded-xl overflow-hidden border-2 border-border hover:border-primary transition-all hover:scale-105"
+ className="flex-shrink-0 w-28 h-28 rounded-md overflow-hidden border-2 border-border hover:border-primary transition-all hover:scale-105"
  >
  <img
  src={photo.photo_url}

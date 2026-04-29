@@ -93,7 +93,7 @@ export default function Install() {
  {/* Hero Section */}
  <div className="text-center mb-12 animate-fade-in">
  <div className="flex justify-center mb-6">
- <div className="w-24 h-24 bg-gradient-to-br from-primary to-secondary rounded-3xl shadow-[var(--shadow-large)] flex items-center justify-center animate-float">
+ <div className="w-24 h-24 bg-gradient-to-br from-primary to-secondary rounded-md shadow-[var(--shadow-large)] flex items-center justify-center animate-float">
  <img src="/logo.png" alt="PawBucks" className="w-16 h-16" />
  </div>
  </div>
@@ -170,7 +170,7 @@ export default function Install() {
  >
  <CardContent className="pt-6">
  <div className="flex items-start gap-4">
- <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center text-primary flex-shrink-0">
+ <div className="w-12 h-12 rounded-md bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center text-primary flex-shrink-0">
  {feature.icon}
  </div>
  <div>

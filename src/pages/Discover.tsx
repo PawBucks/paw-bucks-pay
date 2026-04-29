@@ -861,7 +861,7 @@ const Discover = () => {
  />
  </ScrollArea>
 
- <div className="w-[42%] flex-shrink-0 rounded-xl overflow-hidden border border-border shadow-sm">
+ <div className="w-[42%] flex-shrink-0 rounded-md overflow-hidden border border-border shadow-sm">
  <MerchantMap
  merchants={allMapMerchants}
  onMerchantClick={mapClickHandler}

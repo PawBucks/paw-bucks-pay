@@ -124,7 +124,7 @@ export const BadgeTeaser = ({ userId }: BadgeTeaserProps) => {
  if (loading) {
  return (
  <GradientCard className="animate-pulse">
- <div className="h-32 bg-muted rounded-xl" />
+ <div className="h-32 bg-muted rounded-md" />
  </GradientCard>
  );
  }
@@ -171,13 +171,13 @@ export const BadgeTeaser = ({ userId }: BadgeTeaserProps) => {
  transition={{ delay: index * 0.1 }}
  className="flex-shrink-0"
  >
- <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 border border-primary/30 flex items-center justify-center text-2xl shadow-lg">
+ <div className="w-14 h-14 rounded-md bg-gradient-to-br from-primary/20 to-accent/20 border border-primary/30 flex items-center justify-center text-2xl shadow-lg">
  {badge.guilt_badge_definitions.emoji}
  </div>
  </motion.div>
  ))}
  {earnedCount > 3 && (
- <div className="flex-shrink-0 w-14 h-14 rounded-xl bg-muted border border-border flex items-center justify-center text-sm font-medium text-muted-foreground">
+ <div className="flex-shrink-0 w-14 h-14 rounded-md bg-muted border border-border flex items-center justify-center text-sm font-medium text-muted-foreground">
  +{earnedCount - 3}
  </div>
  )}

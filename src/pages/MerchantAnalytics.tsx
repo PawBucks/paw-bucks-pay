@@ -193,7 +193,7 @@ export default function MerchantAnalytics() {
  <GradientCard key={product.id} gradient>
  <div className="flex items-start justify-between mb-4">
  <div className="flex items-center gap-3">
- <div className="p-3 rounded-xl bg-primary/10">
+ <div className="p-3 rounded-md bg-primary/10">
  <Icon className="h-6 w-6 text-primary" />
  </div>
  <div>

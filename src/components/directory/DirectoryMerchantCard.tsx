@@ -74,7 +74,7 @@ const DirectoryMerchantCardComponent = ({
  {/* Logo */}
  <div className="flex-shrink-0">
  {merchant.logo_url ? (
- <div className="w-[88px] h-[88px] rounded-xl overflow-hidden bg-background shadow-sm border border-border/50 group-hover:shadow-md transition-shadow">
+ <div className="w-[88px] h-[88px] rounded-md overflow-hidden bg-background shadow-sm border border-border/50 group-hover:shadow-md transition-shadow">
  <img
  src={merchant.logo_url}
  alt={`${merchant.business_name} logo`}
@@ -85,7 +85,7 @@ const DirectoryMerchantCardComponent = ({
  />
  </div>
  ) : (
- <div className="w-[88px] h-[88px] rounded-xl bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center border border-border/30 group-hover:shadow-md transition-shadow">
+ <div className="w-[88px] h-[88px] rounded-md bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center border border-border/30 group-hover:shadow-md transition-shadow">
  <FallbackIcon className="w-9 h-9 text-primary/70" />
  </div>
  )}

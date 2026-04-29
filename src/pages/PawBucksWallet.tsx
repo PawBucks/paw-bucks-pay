@@ -130,7 +130,7 @@ const UpgradePrompt = ({ totalEarned, onUpgrade, isPawPassSubscriber = false }: 
  <div className="space-y-4 animate-fade-in">
  {/* What you missed section */}
  {totalEarned > 0 && pawPassExtra > 0 && (
- <div className="text-center p-4 rounded-xl bg-warning/10 border border-warning/20">
+ <div className="text-center p-4 rounded-md bg-warning/10 border border-warning/20">
  <p className="text-sm text-muted-foreground mb-1">With PawPass, you would have earned</p>
  <p className="text-3xl font-bold text-warning">
  +{Formatters.number(pawPassExtra)} more
@@ -181,7 +181,7 @@ const UpgradePrompt = ({ totalEarned, onUpgrade, isPawPassSubscriber = false }: 
  <div className="space-y-4 animate-fade-in">
  {/* What you missed section */}
  {totalEarned > 0 && pawPassPlusExtra > 0 && (
- <div className="text-center p-4 rounded-xl bg-accent/10 border border-accent/20">
+ <div className="text-center p-4 rounded-md bg-accent/10 border border-accent/20">
  <p className="text-sm text-muted-foreground mb-1">
  {isPawPassSubscriber 
  ?"With PawPass+, you would earn" 
@@ -511,7 +511,7 @@ const PawBucksWallet = () => {
  {activities.map((activity) => (
  <div
  key={activity.id}
- className="flex items-center justify-between p-4 rounded-xl bg-muted/30 border border-border/50 hover:bg-muted transition-colors"
+ className="flex items-center justify-between p-4 rounded-md bg-muted/30 border border-border/50 hover:bg-muted transition-colors"
  >
  <div className="flex items-center gap-3">
  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${

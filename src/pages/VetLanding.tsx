@@ -188,19 +188,19 @@ const VetLanding = () => {
  {/* Stats Section */}
  <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
  <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
- <div className="text-center p-6 rounded-2xl bg-card/50 backdrop-blur-sm border border-border/50">
+ <div className="text-center p-6 rounded-md bg-card/50 backdrop-blur-sm border border-border/50">
  <p className="text-3xl sm:text-4xl font-bold text-primary">10x-30x</p>
  <p className="text-muted-foreground mt-1">PawBucks Rewards</p>
  </div>
- <div className="text-center p-6 rounded-2xl bg-card/50 backdrop-blur-sm border border-border/50">
+ <div className="text-center p-6 rounded-md bg-card/50 backdrop-blur-sm border border-border/50">
  <p className="text-3xl sm:text-4xl font-bold text-accent">AI</p>
  <p className="text-muted-foreground mt-1">Clinical Assistant</p>
  </div>
- <div className="text-center p-6 rounded-2xl bg-card/50 backdrop-blur-sm border border-border/50">
+ <div className="text-center p-6 rounded-md bg-card/50 backdrop-blur-sm border border-border/50">
  <p className="text-3xl sm:text-4xl font-bold text-secondary">Auto</p>
  <p className="text-muted-foreground mt-1">Insurance Claims</p>
  </div>
- <div className="text-center p-6 rounded-2xl bg-card/50 backdrop-blur-sm border border-border/50">
+ <div className="text-center p-6 rounded-md bg-card/50 backdrop-blur-sm border border-border/50">
  <p className="text-3xl sm:text-4xl font-bold text-primary">$0</p>
  <p className="text-muted-foreground mt-1">Setup Fee</p>
  </div>
@@ -210,7 +210,7 @@ const VetLanding = () => {
  {/* Vet Lifestyle Hero Image Section */}
  <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
  <div className="relative max-w-5xl mx-auto">
- <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-br from-muted to-muted">
+ <div className="relative rounded-md overflow-hidden shadow-2xl bg-gradient-to-br from-muted to-muted">
  <img 
  src={vetClinicHero}
  alt="Veterinarian with pets in a modern clinic setting"
@@ -255,7 +255,7 @@ const VetLanding = () => {
  key={index} 
  className="group p-8 hover:scale-105 transition-all duration-300 hover:shadow-2xl border-2"
  >
- <div className={`w-16 h-16 rounded-2xl bg-${feature.color}/10 flex items-center justify-center mb-6 shadow-md group-hover:scale-110 group-hover:bg-${feature.color}/20 transition-all`}>
+ <div className={`w-16 h-16 rounded-md bg-${feature.color}/10 flex items-center justify-center mb-6 shadow-md group-hover:scale-110 group-hover:bg-${feature.color}/20 transition-all`}>
  <feature.icon className={`w-8 h-8 text-${feature.color}`} />
  </div>
  <h3 className="text-xl font-bold mb-3">{feature.title}</h3>
@@ -312,7 +312,7 @@ const VetLanding = () => {
  </ul>
  </div>
  <div className="relative">
- <div className="absolute inset-0 bg-gradient-to-br from-accent/20 to-primary/20 rounded-3xl blur-3xl"></div>
+ <div className="absolute inset-0 bg-gradient-to-br from-accent/20 to-primary/20 rounded-md blur-3xl"></div>
  <Card className="relative p-8 space-y-6 border-2">
  <div className="flex items-center gap-3">
  <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center">
@@ -357,7 +357,7 @@ const VetLanding = () => {
  <div className="max-w-5xl mx-auto">
  <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
  {/* Image Container */}
- <div className="relative rounded-3xl overflow-hidden shadow-2xl order-2 lg:order-1">
+ <div className="relative rounded-md overflow-hidden shadow-2xl order-2 lg:order-1">
  <img 
  src={vetConsultationHero} 
  alt="Veterinarian consulting with pet owner about their pet's care"
@@ -415,7 +415,7 @@ const VetLanding = () => {
 
  <div className="grid md:grid-cols-2 gap-8">
  <Card className="p-8 border-2 hover:shadow-xl transition-all">
- <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-6">
+ <div className="w-16 h-16 rounded-md bg-primary/10 flex items-center justify-center mb-6">
  <Shield className="w-8 h-8 text-primary" />
  </div>
  <h3 className="text-2xl font-bold mb-4">Insurance Claim-Splicing</h3>
@@ -440,7 +440,7 @@ const VetLanding = () => {
  </Card>
 
  <Card className="p-8 border-2 hover:shadow-xl transition-all">
- <div className="w-16 h-16 rounded-2xl bg-accent/10 flex items-center justify-center mb-6">
+ <div className="w-16 h-16 rounded-md bg-accent/10 flex items-center justify-center mb-6">
  <Heart className="w-8 h-8 text-accent" />
  </div>
  <h3 className="text-2xl font-bold mb-4">Wellness Plan Architect</h3>
@@ -486,7 +486,7 @@ const VetLanding = () => {
 
  <div className="grid md:grid-cols-2 gap-8">
  <Card className="p-8 border-2 hover:shadow-xl transition-all">
- <div className="w-16 h-16 rounded-2xl bg-secondary/10 flex items-center justify-center mb-6">
+ <div className="w-16 h-16 rounded-md bg-secondary/10 flex items-center justify-center mb-6">
  <CalendarCheck className="w-8 h-8 text-secondary" />
  </div>
  <h3 className="text-2xl font-bold mb-4">The"Gap Filler" Tool</h3>
@@ -494,7 +494,7 @@ const VetLanding = () => {
  Analytics identify which patients are overdue for dentals, vaccines, or check-ups. 
  Send targeted PawBucks bonus offers to bring them back.
  </p>
- <div className="p-4 rounded-xl bg-muted">
+ <div className="p-4 rounded-md bg-muted">
  <p className="text-sm font-medium mb-2">Example Campaign:</p>
  <p className="text-muted-foreground text-sm">
 "15 patients overdue for dental cleaning → Send 500 bonus PawBucks offer → 
@@ -504,7 +504,7 @@ const VetLanding = () => {
  </Card>
 
  <Card className="p-8 border-2 hover:shadow-xl transition-all">
- <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-6">
+ <div className="w-16 h-16 rounded-md bg-primary/10 flex items-center justify-center mb-6">
  <Pill className="w-8 h-8 text-primary" />
  </div>
  <h3 className="text-2xl font-bold mb-4">Prescription Fulfillment Engine</h3>
@@ -512,7 +512,7 @@ const VetLanding = () => {
  Stop losing pharmacy revenue to Chewy. Approve prescriptions in the portal 
  that ship from our PawBucks Store — you keep 10-25% margin.
  </p>
- <div className="p-4 rounded-xl bg-muted">
+ <div className="p-4 rounded-md bg-muted">
  <p className="text-sm font-medium mb-2">Your Revenue Share:</p>
  <p className="text-muted-foreground text-sm">
  Apoquel 16mg (30ct) @ $85.99 → You earn $12.90 (15% margin)
@@ -535,7 +535,7 @@ const VetLanding = () => {
 
  <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
  {benefits.map((benefit, index) => (
- <div key={index} className="text-center p-6 rounded-2xl bg-card border border-border/50 hover:shadow-lg transition-all">
+ <div key={index} className="text-center p-6 rounded-md bg-card border border-border/50 hover:shadow-lg transition-all">
  <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
  <benefit.icon className="w-7 h-7 text-primary" />
  </div>
@@ -560,7 +560,7 @@ const VetLanding = () => {
  </div>
  
  {/* Lifestyle Image Container */}
- <div className="relative rounded-3xl overflow-hidden shadow-2xl">
+ <div className="relative rounded-md overflow-hidden shadow-2xl">
  <img 
  src={vetTeamHero} 
  alt="Professional veterinary team with a husky puppy in front of their animal hospital"

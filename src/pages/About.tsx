@@ -91,7 +91,7 @@ const About = () => {
 
  <Card className="p-6 sm:p-8 space-y-4">
  <div className="flex items-center gap-3">
- <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+ <div className="w-12 h-12 rounded-md bg-primary/10 flex items-center justify-center">
  <Users className="w-6 h-6 text-primary" />
  </div>
  <h2 className="text-2xl font-bold">What is PawBucks?</h2>
@@ -107,7 +107,7 @@ const About = () => {
 
  <Card className="p-6 sm:p-8 space-y-4 border-2 border-primary/20">
  <div className="flex items-center gap-3">
- <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+ <div className="w-12 h-12 rounded-md bg-primary/10 flex items-center justify-center">
  <DollarSign className="w-6 h-6 text-primary" />
  </div>
  <h2 className="text-2xl font-bold">How PawBucks Makes Money</h2>
@@ -149,7 +149,7 @@ const About = () => {
 
  <Card className="p-6 sm:p-8 space-y-4">
  <div className="flex items-center gap-3">
- <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center">
+ <div className="w-12 h-12 rounded-md bg-accent/10 flex items-center justify-center">
  <Store className="w-6 h-6 text-accent" />
  </div>
  <h2 className="text-2xl font-bold">How Rewards Work</h2>
@@ -164,7 +164,7 @@ const About = () => {
 
  <Card className="p-6 sm:p-8 space-y-4">
  <div className="flex items-center gap-3">
- <div className="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center">
+ <div className="w-12 h-12 rounded-md bg-secondary/10 flex items-center justify-center">
  <ShieldCheck className="w-6 h-6 text-secondary" />
  </div>
  <h2 className="text-2xl font-bold">Security &amp; Payments</h2>
@@ -213,7 +213,7 @@ const About = () => {
 
  <Card className="p-6 sm:p-8 space-y-4">
  <div className="flex items-center gap-3">
- <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center">
+ <div className="w-12 h-12 rounded-md bg-muted flex items-center justify-center">
  <Building2 className="w-6 h-6 text-foreground" />
  </div>
  <h2 className="text-2xl font-bold">Company Information</h2>

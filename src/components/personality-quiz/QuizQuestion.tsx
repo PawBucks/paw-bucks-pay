@@ -103,7 +103,7 @@ const OptionCard = ({ option, index, isSelected, onSelect }: OptionCardProps) =>
  animate={{ opacity: 1, y: 0 }}
  transition={{ delay: 0.3 + index * 0.1 }}
  onClick={onSelect}
- className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-200 group ${
+ className={`w-full text-left p-4 rounded-md border-2 transition-all duration-200 group ${
  isSelected
  ?"border-primary bg-primary/10 shadow-md"
  :"border-border hover:border-primary hover:bg-muted"

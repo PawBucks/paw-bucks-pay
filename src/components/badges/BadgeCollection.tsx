@@ -131,7 +131,7 @@ export const BadgeCollection = ({ userId, onBadgeClick }: BadgeCollectionProps) 
  return (
  <div className="space-y-4">
  {[1, 2, 3].map(i => (
- <div key={i} className="h-24 bg-muted rounded-2xl animate-pulse" />
+ <div key={i} className="h-24 bg-muted rounded-md animate-pulse" />
  ))}
  </div>
  );
@@ -141,17 +141,17 @@ export const BadgeCollection = ({ userId, onBadgeClick }: BadgeCollectionProps) 
  <div className="space-y-6">
  {/* Stats Header */}
  <div className="grid grid-cols-3 gap-3">
- <div className="p-3 rounded-xl bg-gradient-to-br from-primary/10 to-accent/10 border border-primary/20 text-center">
+ <div className="p-3 rounded-md bg-gradient-to-br from-primary/10 to-accent/10 border border-primary/20 text-center">
  <Award className="w-5 h-5 mx-auto text-primary mb-1" />
  <div className="text-2xl font-bold text-primary">{totalEarned}</div>
  <div className="text-xs text-muted-foreground">Earned</div>
  </div>
- <div className="p-3 rounded-xl bg-muted border border-border text-center">
+ <div className="p-3 rounded-md bg-muted border border-border text-center">
  <Target className="w-5 h-5 mx-auto text-muted-foreground mb-1" />
  <div className="text-2xl font-bold">{totalBadges - totalEarned}</div>
  <div className="text-xs text-muted-foreground">To Unlock</div>
  </div>
- <div className="p-3 rounded-xl bg-gradient-to-br from-accent/10 to-secondary/10 border border-accent/20 text-center">
+ <div className="p-3 rounded-md bg-gradient-to-br from-accent/10 to-secondary/10 border border-accent/20 text-center">
  <Clock className="w-5 h-5 mx-auto text-accent mb-1" />
  <div className="text-2xl font-bold text-accent">{activeRewardBadges.length}</div>
  <div className="text-xs text-muted-foreground">Active Rewards</div>

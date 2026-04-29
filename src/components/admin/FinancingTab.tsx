@@ -162,7 +162,7 @@ function DealCard({ applicant, selected, onSelect }: {
  return (
  <button
  onClick={onSelect}
- className={`w-full text-left p-4 rounded-xl border-2 transition-all hover:shadow-md ${
+ className={`w-full text-left p-4 rounded-md border-2 transition-all hover:shadow-md ${
  selected
  ?'border-primary bg-primary/5 shadow-md'
  :'border-border bg-card hover:border-primary/40'
@@ -201,7 +201,7 @@ function Metric({ icon: Icon, label, value, sub, accent = false }: {
  icon: any; label: string; value: string; sub?: string; accent?: boolean;
 }) {
  return (
- <div className={`rounded-xl p-4 border ${accent ?'bg-primary/5 border-primary/20' :'bg-muted/30 border-border'}`}>
+ <div className={`rounded-md p-4 border ${accent ?'bg-primary/5 border-primary/20' :'bg-muted/30 border-border'}`}>
  <div className="flex items-center gap-2 mb-1">
  <Icon className={`w-4 h-4 ${accent ?'text-primary' :'text-muted-foreground'}`} />
  <span className="text-xs text-muted-foreground uppercase tracking-wide">{label}</span>
@@ -1065,7 +1065,7 @@ export function FinancingTab() {
  <button
  key={loan.id}
  onClick={() => setSelectedVetLoan(loan)}
- className={`w-full text-left p-4 rounded-xl border-2 transition-all hover:shadow-md ${
+ className={`w-full text-left p-4 rounded-md border-2 transition-all hover:shadow-md ${
  selectedVetLoan?.id === loan.id
  ?'border-primary bg-primary/5 shadow-md'
  :'border-border bg-card hover:border-primary/40'

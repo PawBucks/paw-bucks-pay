@@ -186,7 +186,7 @@ const LoyaltyPage = () => {
  )}
 
  {/* Quick Stats */}
- <div className="p-4 rounded-xl bg-gradient-to-r from-primary/5 via-accent/5 to-secondary/5 border border-primary/10">
+ <div className="p-4 rounded-md bg-gradient-to-r from-primary/5 via-accent/5 to-secondary/5 border border-primary/10">
  <h4 className="font-semibold mb-3">Why You'll Never Pay Full Price</h4>
  <ul className="space-y-2 text-sm">
  <li className="flex items-center gap-2">
@@ -231,7 +231,7 @@ const LoyaltyPage = () => {
 
  {/* Milestones Tab */}
  <TabsContent value="milestones" className="mt-6 space-y-4">
- <div className="text-center p-4 rounded-xl bg-muted/30 border border-border mb-4">
+ <div className="text-center p-4 rounded-md bg-muted/30 border border-border mb-4">
  <Trophy className="w-10 h-10 mx-auto text-primary mb-2" />
  <h3 className="font-semibold">Loyal Pet Parent Guarantee</h3>
  <p className="text-sm text-muted-foreground">
@@ -359,7 +359,7 @@ const LoyaltyPage = () => {
 
  {/* Tier Progress */}
  {nextTierDef && (
- <div className="p-4 rounded-xl bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20 text-center">
+ <div className="p-4 rounded-md bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20 text-center">
  <p className="text-sm mb-2">
  Progress to <strong className="capitalize">{nextTierDef.tier}</strong>
  </p>

@@ -353,7 +353,7 @@ const MerchantDirectory = () => {
  placeholder="Search by name, service, or location…"
  value={searchTerm}
  onChange={(e) => setSearchTerm(e.target.value)}
- className="pl-10 pr-10 h-11 bg-background/80 backdrop-blur-sm border-border/60 shadow-sm rounded-xl focus-visible:ring-primary/30"
+ className="pl-10 pr-10 h-11 bg-background/80 backdrop-blur-sm border-border/60 shadow-sm rounded-md focus-visible:ring-primary/30"
  />
  {searchTerm && (
  <button
@@ -498,7 +498,7 @@ const MerchantDirectory = () => {
  <div className="flex flex-col lg:flex-row gap-4">
  {/* Map panel */}
  <div className="w-full lg:w-1/2 lg:sticky lg:top-16 lg:self-start">
- <div className="rounded-xl overflow-hidden border border-border/60 shadow-sm" style={{ height:"min(70vh, 600px)" }}>
+ <div className="rounded-md overflow-hidden border border-border/60 shadow-sm" style={{ height:"min(70vh, 600px)" }}>
  <MerchantMap
  merchants={mapMerchants}
  onMerchantClick={handleMapMerchantClick}
