@@ -663,8 +663,8 @@ export const VetOnboardingForm = () => {
       <Dialog open={showWelcomeModal} onOpenChange={setShowWelcomeModal}>
         <DialogContent className="sm:max-w-md text-center">
           <DialogHeader>
-            <div className="mx-auto mb-4 w-16 h-16 bg-gradient-to-br from-primary/20 to-primary/20 rounded-full flex items-center justify-center">
-              <PartyPopper className="h-8 w-8 text-white" />
+            <div className="mx-auto mb-4 w-16 h-16 bg-primary rounded-full flex items-center justify-center">
+              <PartyPopper className="h-8 w-8 text-primary-foreground" />
             </div>
             <DialogTitle className="text-2xl">Welcome to the PawBucks Family! 🎉</DialogTitle>
             <DialogDescription className="text-base mt-4">
@@ -673,9 +673,9 @@ export const VetOnboardingForm = () => {
             </DialogDescription>
           </DialogHeader>
           <div className="mt-6">
-            <Button 
+            <Button
               onClick={handleWelcomeModalClose}
-              className="bg-primary hover:bg-primary text-white w-full rounded-lg"
+              className="w-full rounded-lg"
             >
               Go to Dashboard
               <ArrowRight className="h-4 w-4 ml-2" />
@@ -685,9 +685,9 @@ export const VetOnboardingForm = () => {
       </Dialog>
 
       {/* Header */}
-      <div className="bg-white border-b">
+      <div className="bg-card border-b border-border">
         <div className="max-w-5xl mx-auto px-4 py-6">
-          <h1 className="text-2xl font-bold text-muted-foreground">Veterinary Practice Onboarding</h1>
+          <h1 className="text-2xl font-bold text-foreground">Veterinary Practice Onboarding</h1>
           <p className="text-muted-foreground mt-1">Join the PawBucks network and grow your practice</p>
         </div>
       </div>
@@ -708,16 +708,16 @@ export const VetOnboardingForm = () => {
                   className={cn(
                     "flex flex-col items-center text-center p-2 rounded-lg transition-all cursor-pointer",
                     isActive && "bg-primary/10 border-2 border-primary",
-                    isCompleted && "bg-success/10 hover:bg-success/10",
-                    !isActive && !isCompleted && "bg-white border border-border hover:border-border"
+                    isCompleted && "bg-success/10 hover:bg-success/15",
+                    !isActive && !isCompleted && "bg-card border border-border hover:border-primary/40"
                   )}
                   onClick={() => isCompleted && goToStep(step.id)}
                 >
                   <div
                     className={cn(
                       "w-8 h-8 rounded-full flex items-center justify-center mb-1",
-                      isActive && "bg-primary text-white",
-                      isCompleted && "bg-success text-white",
+                      isActive && "bg-primary text-primary-foreground",
+                      isCompleted && "bg-success text-success-foreground",
                       !isActive && !isCompleted && "bg-muted text-muted-foreground"
                     )}
                   >
