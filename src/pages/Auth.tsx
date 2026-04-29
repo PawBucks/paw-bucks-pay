@@ -479,7 +479,8 @@ const Auth = () => {
  // If they joined via invite, go directly to dashboard
  navigate(ROUTES.DASHBOARD);
  } else {
- await redirectBasedOnRole(loggedInUser.id);
+  // Honor /auth?role=… deep link so role buttons route to the correct portal.
+  await redirectBasedOnRole(loggedInUser.id, undefined, false, roleParam);
  }
  } else {
  navigate(redirectUrl || ROUTES.DASHBOARD);
@@ -685,7 +686,7 @@ const Auth = () => {
  const { data: sessionData } = await supabase.auth.getSession();
  const loggedInUser = sessionData?.session?.user;
  if (loggedInUser) {
- await redirectBasedOnRole(loggedInUser.id);
+  await redirectBasedOnRole(loggedInUser.id, undefined, false, roleParam);
  } else {
  navigate(ROUTES.DASHBOARD);
  }
