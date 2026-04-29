@@ -167,7 +167,7 @@ export const WriteReviewDialog = ({
  <Star
  className={`w-8 h-8 transition-colors ${
  star <= (hoverRating || rating)
- ?"fill-warning text-warning"
+ ?"fill-gold text-gold"
  :"text-muted-foreground/30"
  }`}
  />

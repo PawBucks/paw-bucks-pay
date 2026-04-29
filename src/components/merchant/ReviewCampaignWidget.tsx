@@ -490,7 +490,7 @@ export function ReviewCampaignWidget() {
  {[1, 2, 3, 4, 5].map((star) => (
  <Star
  key={star}
- className={`h-4 w-4 ${star <= review.rating ?'text-warning fill-warning' :'text-muted'}`}
+ className={`h-4 w-4 ${star <= review.rating ?'text-gold fill-gold' :'text-muted'}`}
  />
  ))}
  </div>

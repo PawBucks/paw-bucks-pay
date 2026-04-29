@@ -259,7 +259,7 @@ export function UnderwritingSignalsCard({ merchantId }: { merchantId: string }) 
  key={s}
  className={cn(
 "w-3.5 h-3.5",
- s <= Math.round(signals.avg_review_score) ?"text-warning fill-warning" :"text-muted-foreground/30"
+ s <= Math.round(signals.avg_review_score) ?"text-gold fill-gold" :"text-muted-foreground/30"
  )}
  />
  ))}

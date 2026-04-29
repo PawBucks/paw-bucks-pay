@@ -99,7 +99,7 @@ export const ReviewCard = ({ review, currentUserId, onDelete }: ReviewCardProps)
  key={star}
  className={`w-4 h-4 ${
  star <= review.rating
- ?"fill-warning text-warning"
+ ?"fill-gold text-gold"
  :"text-muted-foreground/30"
  }`}
  />

@@ -341,7 +341,7 @@ const MerchantProfile = memo(() => {
  key={star}
  className={`w-4 h-4 ${
  star <= Math.round(ratingStats.average)
- ?"fill-warning text-warning"
+ ?"fill-gold text-gold"
  :"text-muted-foreground/20"
  }`}
  />
@@ -442,7 +442,7 @@ const MerchantProfile = memo(() => {
  — {featuredReview.user_name}
  <span className="inline-flex items-center gap-0.5 ml-2">
  {[1,2,3,4,5].map(s => (
- <Star key={s} className={`w-3 h-3 ${s <= featuredReview.rating ?"fill-warning text-warning" :"text-muted-foreground/20"}`} />
+ <Star key={s} className={`w-3 h-3 ${s <= featuredReview.rating ?"fill-gold text-gold" :"text-muted-foreground/20"}`} />
  ))}
  </span>
  </p>
@@ -624,7 +624,7 @@ const MerchantProfile = memo(() => {
  {/* ─── Reviews Section ─── */}
  <section id="section-reviews">
  <h2 className="font-semibold text-lg mb-4 flex items-center gap-2">
- <Star className="w-5 h-5 text-warning fill-warning" />
+ <Star className="w-5 h-5 text-gold fill-gold" />
  Recommended Reviews
  </h2>
 
@@ -637,7 +637,7 @@ const MerchantProfile = memo(() => {
  <div className="text-5xl font-bold tracking-tight">{ratingStats.average.toFixed(1)}</div>
  <div className="flex items-center justify-center gap-0.5 mt-1">
  {[1,2,3,4,5].map((star) => (
- <Star key={star} className={`w-4 h-4 ${star <= Math.round(ratingStats.average) ?"fill-warning text-warning" :"text-muted-foreground/20"}`} />
+ <Star key={star} className={`w-4 h-4 ${star <= Math.round(ratingStats.average) ?"fill-gold text-gold" :"text-muted-foreground/20"}`} />
  ))}
  </div>
  <p className="text-xs text-muted-foreground mt-1">{ratingStats.total} reviews</p>
