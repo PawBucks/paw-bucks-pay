@@ -227,7 +227,7 @@ export function MerchantDataSyncTab({ vetId }: MerchantDataSyncTabProps) {
  {/* Activity Trends Grid */}
  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
  {activityTrends.slice(0, 6).map(({ pet, recentWeek, previousWeek, trend, hasAlert, totalActivities }) => (
- <Card key={pet.id} className={`p-4 ${hasAlert ?'border-warning/40 bg-warning/10/50 /20' :''}`}>
+ <Card key={pet.id} className={`p-4 ${hasAlert ?'border-warning/40 bg-warning/50 /20' :''}`}>
  <div className="flex items-start justify-between">
  <div>
  <h4 className="font-medium">{pet.name}</h4>

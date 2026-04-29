@@ -284,7 +284,7 @@ export function MerchantsTab() {
  {merchant.is_paused ? (
  <Badge variant="destructive">Paused</Badge>
  ) : merchant.approval_status ==='pending' ? (
- <Badge variant="secondary" className="bg-warning/15 text-warning border-warning/30/30">
+ <Badge variant="secondary" className="bg-warning/15 text-warning border-warning/30">
  Pending
  </Badge>
  ) : merchant.approval_status ==='denied' ? (

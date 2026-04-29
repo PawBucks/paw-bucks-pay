@@ -107,7 +107,7 @@ export function SettingsTab() {
  variant="outline"
  className={
  welcomeCreditEnabled
- ?'bg-success/10 text-success border-success/30/30'
+ ?'bg-success/10 text-success border-success/30'
  :'bg-destructive/10 text-destructive border-destructive/30'
  }
  >

@@ -246,11 +246,11 @@ export function TextCampaignsTab() {
  const getStatusBadge = (status: string) => {
  switch (status) {
  case"sent":
- return <Badge className="bg-success/10 text-success border-success/30/20"><CheckCircle className="w-3 h-3 mr-1" />Sent</Badge>;
+ return <Badge className="bg-success/10 text-success border-success/20"><CheckCircle className="w-3 h-3 mr-1" />Sent</Badge>;
  case"failed":
  return <Badge variant="destructive"><XCircle className="w-3 h-3 mr-1" />Failed</Badge>;
  case"partial":
- return <Badge className="bg-warning/10 text-warning border-warning/30/20"><AlertCircle className="w-3 h-3 mr-1" />Partial</Badge>;
+ return <Badge className="bg-warning/10 text-warning border-warning/20"><AlertCircle className="w-3 h-3 mr-1" />Partial</Badge>;
  case"scheduled":
  return <Badge variant="secondary"><Clock className="w-3 h-3 mr-1" />Scheduled</Badge>;
  default:

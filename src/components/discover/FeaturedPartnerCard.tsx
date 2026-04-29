@@ -60,7 +60,7 @@ const FeaturedPartnerCardComponent = ({
  animate={{ opacity: 1, y: 0 }}
  transition={{ duration: 0.4, ease:"easeOut" }}
  >
- <Card className="relative overflow-hidden border-2 border-warning/30 bg-gradient-to-br from-warning0/[0.04] via-warning0/[0.02] to-transparent shadow-lg hover:shadow-xl transition-all duration-300">
+ <Card className="relative overflow-hidden border-2 border-warning/30 bg-gradient-to-br from-warning/[0.04] via-warning/[0.02] to-transparent shadow-lg hover:shadow-xl transition-all duration-300">
  {/* Gold accent */}
  <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-warning via-warning to-warning" />
  

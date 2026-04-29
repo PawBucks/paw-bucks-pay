@@ -384,12 +384,12 @@ export function UsersTab() {
  variant="outline"
  className={
  user.welcome_credit_status ==='active'
- ?'bg-success/10 text-success border-success/30/30'
+ ?'bg-success/10 text-success border-success/30'
  : user.welcome_credit_status ==='used'
- ?'bg-info/10 text-info border-info/30/30'
+ ?'bg-info/10 text-info border-info/30'
  : user.welcome_credit_status ==='expired'
  ?'bg-muted text-muted-foreground border-border'
- :'bg-destructive/10 text-destructive border-destructive/30/30'
+ :'bg-destructive/10 text-destructive border-destructive/30'
  }
  >
  <Gift className="w-3 h-3 mr-1" />

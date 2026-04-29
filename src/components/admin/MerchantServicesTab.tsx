@@ -312,7 +312,7 @@ export function MerchantServicesTab() {
  </Badge>
  )}
  {service.is_new && (
- <Badge variant="outline" className="text-xs bg-success/10 text-success border-success/30/20">
+ <Badge variant="outline" className="text-xs bg-success/10 text-success border-success/20">
  <Sparkles className="w-3 h-3 mr-1" />New
  </Badge>
  )}

@@ -222,9 +222,9 @@ export const ReceiptsTab = () => {
 
  const getStatusBadge = (status: string) => {
  switch (status) {
- case"pending": return <Badge variant="outline" className="bg-warning/10 text-warning border-warning/30/30">Pending</Badge>;
- case"approved": return <Badge variant="outline" className="bg-success/10 text-success border-success/30/30">Approved</Badge>;
- case"rejected": return <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/30/30">Rejected</Badge>;
+ case"pending": return <Badge variant="outline" className="bg-warning/10 text-warning border-warning/30">Pending</Badge>;
+ case"approved": return <Badge variant="outline" className="bg-success/10 text-success border-success/30">Approved</Badge>;
+ case"rejected": return <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/30">Rejected</Badge>;
  default: return <Badge variant="outline">{status}</Badge>;
  }
  };
@@ -419,7 +419,7 @@ export const ReceiptsTab = () => {
  <div className="mt-1">{getStatusBadge(selectedReceipt.status)}</div>
  </div>
  {selectedReceipt.merchant_confirmation && (
- <div className="col-span-2 p-3 bg-success/10 rounded-lg border border-success/30/20">
+ <div className="col-span-2 p-3 bg-success/10 rounded-lg border border-success/20">
  <div className="flex items-center gap-2 mb-1">
  <ShieldCheck className="w-4 h-4 text-success" />
  <span className="font-semibold text-sm text-success">Merchant Confirmed</span>
@@ -475,7 +475,7 @@ export const ReceiptsTab = () => {
  <p><strong>Type:</strong> {selectedReceipt.submission_type ==="partner" ?"Partner Merchant" :"Non-Partner"}</p>
  <p><strong>Date:</strong> {format(new Date(selectedReceipt.receipt_date),"MMM d, yyyy")}</p>
  {selectedReceipt.merchant_confirmation && (
- <div className="mt-2 p-2 bg-success/10 rounded border border-success/30/20 flex items-center gap-2">
+ <div className="mt-2 p-2 bg-success/10 rounded border border-success/20 flex items-center gap-2">
  <ShieldCheck className="w-4 h-4 text-success" />
  <span className="text-success text-xs font-medium">
  Merchant confirmed: ${selectedReceipt.merchant_confirmation.amount.toFixed(2)}

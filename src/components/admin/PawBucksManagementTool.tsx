@@ -463,8 +463,8 @@ export function PawBucksManagementTool() {
  {lastOperation && (
  <div className={`flex items-center gap-2 p-3 rounded-lg border ${
  lastOperation.type ==='credit' 
- ?'bg-success/10 border-success/30/20 text-success' 
- :'bg-destructive/10 border-destructive/30/20 text-destructive'
+ ?'bg-success/10 border-success/20 text-success' 
+ :'bg-destructive/10 border-destructive/20 text-destructive'
  }`}>
  <CheckCircle className="w-5 h-5" />
  <span>

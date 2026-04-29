@@ -352,7 +352,7 @@ export function TransactionsTab() {
  {pawbucksUsed.toLocaleString()} PB (${pawbucksUSD.toFixed(2)})
  </span>
  } />
- <div className="border-l-2 border-warning/30/50 pl-3 ml-5 mt-1 mb-1">
+ <div className="border-l-2 border-warning/50 pl-3 ml-5 mt-1 mb-1">
  <p className="text-xs text-muted-foreground">
  Customer redeemed <strong>{pawbucksUsed.toLocaleString()}</strong> PawBucks
  worth <strong>${pawbucksUSD.toFixed(2)}</strong>, reducing the Stripe charge

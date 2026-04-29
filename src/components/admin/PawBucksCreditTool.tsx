@@ -289,7 +289,7 @@ export function PawBucksCreditTool() {
 
  {/* Success Confirmation */}
  {lastCredited && (
- <div className="flex items-center gap-2 p-3 rounded-lg bg-success/10 border border-success/30/20 text-success">
+ <div className="flex items-center gap-2 p-3 rounded-lg bg-success/10 border border-success/20 text-success">
  <CheckCircle className="w-5 h-5" />
  <span>
  Credited <strong>{lastCredited.amount.toLocaleString()} PawBucks</strong> to {lastCredited.email}
