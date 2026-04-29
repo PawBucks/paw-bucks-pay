@@ -76,3 +76,32 @@ export function clearUserAccessCache(userId?: string) {
 export function invalidatePetCache(userId: string) {
  cache.delete(userId);
 }
+
+/**
+ * Determine the role-specific auth/login URL for a user based on their
+ * cached access info. Falls back to the generic /auth page.
+ *
+ * Priority: admin/superadmin → /admin
+ *           brand           → /auth?role=brand
+ *           vet             → /auth?role=vet
+ *           merchant        → /auth?role=merchant
+ *           pet_owner       → /auth?role=pet_owner
+ *           default         → /auth
+ */
+export function getAuthRedirectForUser(userId: string): string {
+  const entry = cache.get(userId);
+  const info = entry?.data;
+  if (!info) return"/auth";
+
+  if (
+    info.system_roles?.includes("admin") ||
+    info.system_roles?.includes("superadmin")
+  ) {
+    return"/admin";
+  }
+  if (info.user_type ==="brand") return"/auth?role=brand";
+  if (info.is_vet || info.user_type ==="vet") return"/auth?role=vet";
+  if (info.is_merchant || info.user_type ==="merchant") return"/auth?role=merchant";
+  if (info.user_type ==="pet_owner") return"/auth?role=pet_owner";
+  return"/auth";
+}
