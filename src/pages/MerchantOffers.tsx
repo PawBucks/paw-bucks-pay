@@ -127,8 +127,7 @@ export default function MerchantOffers() {
  };
 
 const handleSignOut = async () => {
- await globalSignOut();
- navigate("/auth");
+  await globalSignOut();
 };
 
  const getStatusBadge = (status: string) => {
