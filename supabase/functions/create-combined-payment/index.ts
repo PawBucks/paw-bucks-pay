@@ -2,6 +2,11 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { z } from "https://esm.sh/zod@3.22.4";
+import {
+  effectivePawBucksCapPct,
+  clampManualPawBucks,
+  clampAutoRedeemPawBucks,
+} from "../_shared/pawbucks-cap.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -134,27 +139,7 @@ serve(async (req) => {
 
     // --- Merchant PawBucks Acceptance Cap ---
     // Compute the effective cap right now. null = no cap.
-    const computeEffectiveCapPct = (): number | null => {
-      if (!merchant.pawbucks_cap_enabled) return null;
-      const now = Date.now();
-      const promoStart = merchant.pawbucks_promo_starts_at ? new Date(merchant.pawbucks_promo_starts_at).getTime() : null;
-      const promoEnd = merchant.pawbucks_promo_ends_at ? new Date(merchant.pawbucks_promo_ends_at).getTime() : null;
-      if (
-        merchant.pawbucks_promo_cap_pct &&
-        promoStart !== null && promoEnd !== null &&
-        now >= promoStart && now < promoEnd
-      ) {
-        return Math.min(50, merchant.pawbucks_promo_cap_pct);
-      }
-      if (merchant.pawbucks_cap_pct) return merchant.pawbucks_cap_pct;
-      // Type-based default when enabled but not set
-      const bt = merchant.business_type as string | undefined;
-      if (bt === 'veterinary') return 10;
-      if (bt && ['pet_store','food','delivery','insurance'].includes(bt)) return 20;
-      if (bt && ['grooming','mobile_groomer','boarding','training','walker','daycare','sitter','photography','hiker','runner','masseuse','behaviorist','breeder','rescue_nonprofit'].includes(bt)) return 30;
-      return 20;
-    };
-    const effectiveCapPct = computeEffectiveCapPct();
+    const effectiveCapPct = effectivePawBucksCapPct(merchant);
 
     // --- Auto-Redeem Logic ---
     let pawbucksAmount = manualPawbucksAmount;
@@ -162,15 +147,14 @@ serve(async (req) => {
 
     // Apply cap to manual redemption requests up-front
     if (effectiveCapPct !== null && pawbucksAmount > 0 && baseAmount > 0) {
-      const maxUsdAllowed = (baseAmount * effectiveCapPct) / 100;
-      const maxPbAllowed = Math.floor(maxUsdAllowed / PAWBUCKS_TO_USD);
-      if (pawbucksAmount > maxPbAllowed) {
+      const clamped = clampManualPawBucks(pawbucksAmount, baseAmount, merchant);
+      if (clamped < pawbucksAmount) {
         logStep('Manual PawBucks clamped to merchant cap', {
           requested: pawbucksAmount,
           capPct: effectiveCapPct,
-          maxPbAllowed,
+          maxPbAllowed: clamped,
         });
-        pawbucksAmount = maxPbAllowed;
+        pawbucksAmount = clamped;
       }
     }
 
@@ -216,21 +200,15 @@ serve(async (req) => {
         // subscriptions_only: not applicable for merchant payments
 
         if (shouldAutoRedeem && maxPBToApply > 0) {
-          // Cap so PawBucks USD value doesn't exceed baseAmount
-          let autoUsd = maxPBToApply * PAWBUCKS_TO_USD;
-          if (autoUsd > baseAmount) {
-            autoUsd = baseAmount;
-            maxPBToApply = Math.floor(autoUsd / PAWBUCKS_TO_USD);
+          // Clamp to subtotal AND to merchant cap (single source of truth).
+          const before = maxPBToApply;
+          maxPBToApply = clampAutoRedeemPawBucks(maxPBToApply, baseAmount, merchant);
+          if (maxPBToApply < before) {
+            logStep('Auto-redeem clamped (subtotal/cap)', {
+              before, after: maxPBToApply, capPct: effectiveCapPct,
+            });
           }
-          // Also enforce merchant cap on auto-redeem
-          if (effectiveCapPct !== null) {
-            const merchantMaxUsd = (baseAmount * effectiveCapPct) / 100;
-            if (autoUsd > merchantMaxUsd) {
-              autoUsd = merchantMaxUsd;
-              maxPBToApply = Math.floor(autoUsd / PAWBUCKS_TO_USD);
-              logStep('Auto-redeem clamped to merchant cap', { capPct: effectiveCapPct, maxPBToApply });
-            }
-          }
+          const autoUsd = maxPBToApply * PAWBUCKS_TO_USD;
           pawbucksAmount = maxPBToApply;
           logStep('Auto-redeem applied (combined)', { pawbucksAmount, usdValue: autoUsd.toFixed(2) });
         }
