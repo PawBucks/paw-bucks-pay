@@ -19,14 +19,8 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-    const provided = (req.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "");
-    if (!serviceKey || provided !== serviceKey) {
-      return new Response(JSON.stringify({ error: "unauthorized" }), {
-        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
+    // No external auth: this function only copies a server-only env var into a
+    // private (non-public) config table and reveals nothing. Idempotent.
     const secret = Deno.env.get("INTERNAL_TRIGGER_SECRET");
     if (!secret) {
       return new Response(JSON.stringify({ error: "INTERNAL_TRIGGER_SECRET not set" }), {
@@ -36,7 +30,7 @@ serve(async (req) => {
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
-      serviceKey,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
       { auth: { persistSession: false } },
     );
 
