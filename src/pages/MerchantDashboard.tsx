@@ -833,6 +833,7 @@ const MerchantDashboard = () => {
  connectingStripe={connectingStripe}
  togglingPawbucks={togglingPawbucks}
  onViewWallet={() => navigate('/merchant/pawbucks')}
+  onRefreshMerchant={loadMerchantData}
  />
  <MerchantBrandCampaignInbox merchantId={merchant.id} />
  <AvailableBrandCampaigns merchantId={merchant.id} />
