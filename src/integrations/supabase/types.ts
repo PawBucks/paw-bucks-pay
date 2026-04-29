@@ -7614,6 +7614,8 @@ export type Database = {
           agreed_to_splicing_liability_at: string | null
           agreed_to_tos: boolean | null
           agreed_to_tos_at: string | null
+          agreed_to_vet_addendum: boolean
+          agreed_to_vet_addendum_at: string | null
           approval_status: Database["public"]["Enums"]["approval_status"]
           approved_at: string | null
           approved_by: string | null
@@ -7664,6 +7666,8 @@ export type Database = {
           agreed_to_splicing_liability_at?: string | null
           agreed_to_tos?: boolean | null
           agreed_to_tos_at?: string | null
+          agreed_to_vet_addendum?: boolean
+          agreed_to_vet_addendum_at?: string | null
           approval_status?: Database["public"]["Enums"]["approval_status"]
           approved_at?: string | null
           approved_by?: string | null
@@ -7714,6 +7718,8 @@ export type Database = {
           agreed_to_splicing_liability_at?: string | null
           agreed_to_tos?: boolean | null
           agreed_to_tos_at?: string | null
+          agreed_to_vet_addendum?: boolean
+          agreed_to_vet_addendum_at?: string | null
           approval_status?: Database["public"]["Enums"]["approval_status"]
           approved_at?: string | null
           approved_by?: string | null
@@ -7879,6 +7885,7 @@ export type Database = {
           admin_splicing_fee: number | null
           agreed_to_splicing_liability: boolean | null
           agreed_to_tos: boolean | null
+          agreed_to_vet_addendum: boolean
           city: string | null
           clinic_bio: string | null
           completed_at: string | null
@@ -7921,6 +7928,7 @@ export type Database = {
           admin_splicing_fee?: number | null
           agreed_to_splicing_liability?: boolean | null
           agreed_to_tos?: boolean | null
+          agreed_to_vet_addendum?: boolean
           city?: string | null
           clinic_bio?: string | null
           completed_at?: string | null
@@ -7963,6 +7971,7 @@ export type Database = {
           admin_splicing_fee?: number | null
           agreed_to_splicing_liability?: boolean | null
           agreed_to_tos?: boolean | null
+          agreed_to_vet_addendum?: boolean
           city?: string | null
           clinic_bio?: string | null
           completed_at?: string | null

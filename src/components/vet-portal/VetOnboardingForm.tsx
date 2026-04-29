@@ -488,6 +488,7 @@ export const VetOnboardingForm = () => {
         emergency_protocol: values.emergency_protocol,
         subscription_tier: values.subscription_tier,
         agreed_to_tos: values.agreed_to_tos,
+        agreed_to_vet_addendum: values.agreed_to_vet_addendum,
         agreed_to_splicing_liability: values.agreed_to_splicing_liability,
       };
 
@@ -565,6 +566,7 @@ export const VetOnboardingForm = () => {
         subscription_tier: data.subscription_tier,
         // Step 7: Legal
         agreed_to_tos: data.agreed_to_tos,
+        agreed_to_vet_addendum: data.agreed_to_vet_addendum,
         agreed_to_splicing_liability: data.agreed_to_splicing_liability,
         // Metadata
         user_id: user?.id,
@@ -617,6 +619,8 @@ export const VetOnboardingForm = () => {
         subscription_tier: data.subscription_tier,
         agreed_to_tos: data.agreed_to_tos,
         agreed_to_tos_at: data.agreed_to_tos ? new Date().toISOString() : null,
+        agreed_to_vet_addendum: data.agreed_to_vet_addendum,
+        agreed_to_vet_addendum_at: data.agreed_to_vet_addendum ? new Date().toISOString() : null,
         agreed_to_splicing_liability: data.agreed_to_splicing_liability,
         agreed_to_splicing_liability_at: data.agreed_to_splicing_liability ? new Date().toISOString() : null,
         is_verified: false,
@@ -659,8 +663,8 @@ export const VetOnboardingForm = () => {
       <Dialog open={showWelcomeModal} onOpenChange={setShowWelcomeModal}>
         <DialogContent className="sm:max-w-md text-center">
           <DialogHeader>
-            <div className="mx-auto mb-4 w-16 h-16 bg-gradient-to-br from-primary/20 to-primary/20 rounded-full flex items-center justify-center">
-              <PartyPopper className="h-8 w-8 text-white" />
+            <div className="mx-auto mb-4 w-16 h-16 bg-primary rounded-full flex items-center justify-center">
+              <PartyPopper className="h-8 w-8 text-primary-foreground" />
             </div>
             <DialogTitle className="text-2xl">Welcome to the PawBucks Family! 🎉</DialogTitle>
             <DialogDescription className="text-base mt-4">
@@ -669,9 +673,9 @@ export const VetOnboardingForm = () => {
             </DialogDescription>
           </DialogHeader>
           <div className="mt-6">
-            <Button 
+            <Button
               onClick={handleWelcomeModalClose}
-              className="bg-primary hover:bg-primary text-white w-full rounded-lg"
+              className="w-full rounded-lg"
             >
               Go to Dashboard
               <ArrowRight className="h-4 w-4 ml-2" />
@@ -681,9 +685,9 @@ export const VetOnboardingForm = () => {
       </Dialog>
 
       {/* Header */}
-      <div className="bg-white border-b">
+      <div className="bg-card border-b border-border">
         <div className="max-w-5xl mx-auto px-4 py-6">
-          <h1 className="text-2xl font-bold text-muted-foreground">Veterinary Practice Onboarding</h1>
+          <h1 className="text-2xl font-bold text-foreground">Veterinary Practice Onboarding</h1>
           <p className="text-muted-foreground mt-1">Join the PawBucks network and grow your practice</p>
         </div>
       </div>
@@ -704,16 +708,16 @@ export const VetOnboardingForm = () => {
                   className={cn(
                     "flex flex-col items-center text-center p-2 rounded-lg transition-all cursor-pointer",
                     isActive && "bg-primary/10 border-2 border-primary",
-                    isCompleted && "bg-success/10 hover:bg-success/10",
-                    !isActive && !isCompleted && "bg-white border border-border hover:border-border"
+                    isCompleted && "bg-success/10 hover:bg-success/15",
+                    !isActive && !isCompleted && "bg-card border border-border hover:border-primary/40"
                   )}
                   onClick={() => isCompleted && goToStep(step.id)}
                 >
                   <div
                     className={cn(
                       "w-8 h-8 rounded-full flex items-center justify-center mb-1",
-                      isActive && "bg-primary text-white",
-                      isCompleted && "bg-success text-white",
+                      isActive && "bg-primary text-primary-foreground",
+                      isCompleted && "bg-success text-success-foreground",
                       !isActive && !isCompleted && "bg-muted text-muted-foreground"
                     )}
                   >
@@ -738,7 +742,7 @@ export const VetOnboardingForm = () => {
           <form onSubmit={form.handleSubmit(onSubmit)}>
             {/* Step 1: Practice Identity */}
             {currentStep === 1 && (
-              <Card className="bg-white border-border rounded-lg shadow-sm">
+              <Card className="bg-card border-border rounded-lg shadow-sm">
                 <CardHeader className="border-b border-border">
                   <CardTitle className="flex items-center gap-2 text-muted-foreground">
                     <Building2 className="h-5 w-5 text-primary" />
@@ -907,7 +911,7 @@ export const VetOnboardingForm = () => {
 
             {/* Step 2: Medical Verification */}
             {currentStep === 2 && (
-              <Card className="bg-white border-border rounded-lg shadow-sm">
+              <Card className="bg-card border-border rounded-lg shadow-sm">
                 <CardHeader className="border-b border-border">
                   <CardTitle className="flex items-center gap-2 text-muted-foreground">
                     <Stethoscope className="h-5 w-5 text-primary" />
@@ -1054,7 +1058,7 @@ export const VetOnboardingForm = () => {
 
             {/* Step 3: Insurance Setup */}
             {currentStep === 3 && (
-              <Card className="bg-white border-border rounded-lg shadow-sm">
+              <Card className="bg-card border-border rounded-lg shadow-sm">
                 <CardHeader className="border-b border-border">
                   <CardTitle className="flex items-center gap-2 text-muted-foreground">
                     <ShieldCheck className="h-5 w-5 text-primary" />
@@ -1182,7 +1186,7 @@ export const VetOnboardingForm = () => {
 
             {/* Step 4: Integration */}
             {currentStep === 4 && (
-              <Card className="bg-white border-border rounded-lg shadow-sm">
+              <Card className="bg-card border-border rounded-lg shadow-sm">
                 <CardHeader className="border-b border-border">
                   <CardTitle className="flex items-center gap-2 text-muted-foreground">
                     <Wallet className="h-5 w-5 text-primary" />
@@ -1265,7 +1269,7 @@ export const VetOnboardingForm = () => {
 
             {/* Step 5: Public Profile & Merchant Display */}
             {currentStep === 5 && (
-              <Card className="bg-white border-border rounded-lg shadow-sm">
+              <Card className="bg-card border-border rounded-lg shadow-sm">
                 <CardHeader className="border-b border-border">
                   <CardTitle className="flex items-center gap-2 text-muted-foreground">
                     <User className="h-5 w-5 text-primary" />
@@ -1415,7 +1419,7 @@ export const VetOnboardingForm = () => {
 
             {/* Step 6: Financial Onboarding */}
             {currentStep === 6 && (
-              <Card className="bg-white border-border rounded-lg shadow-sm">
+              <Card className="bg-card border-border rounded-lg shadow-sm">
                 <CardHeader className="border-b border-border">
                   <CardTitle className="flex items-center gap-2 text-muted-foreground">
                     <CreditCard className="h-5 w-5 text-primary" />
@@ -1427,7 +1431,7 @@ export const VetOnboardingForm = () => {
                   {/* Stripe Connect Card */}
                   <div className="rounded-lg border-2 border-dashed border-border p-6 text-center">
                     <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-primary/20 to-primary/20 rounded-full flex items-center justify-center">
-                      <CreditCard className="h-8 w-8 text-white" />
+                      <CreditCard className="h-8 w-8 text-primary-foreground" />
                     </div>
                     <h3 className="text-lg font-semibold text-muted-foreground mb-2">Stripe Connect</h3>
                     <p className="text-muted-foreground mb-4">
@@ -1435,7 +1439,7 @@ export const VetOnboardingForm = () => {
                     </p>
                     <Button
                       type="button"
-                      className="bg-primary hover:bg-primary text-white rounded-lg"
+                      className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg"
                       onClick={() => {
                         toast({
                           title: "Stripe Connect",
@@ -1470,7 +1474,7 @@ export const VetOnboardingForm = () => {
                           >
                             {field.value === "standard" && (
                               <div className="absolute top-3 right-3 w-6 h-6 bg-primary rounded-full flex items-center justify-center">
-                                <Check className="h-4 w-4 text-white" />
+                                <Check className="h-4 w-4 text-primary-foreground" />
                               </div>
                             )}
                             <div className="mb-4">
@@ -1511,12 +1515,12 @@ export const VetOnboardingForm = () => {
                             )}
                             onClick={() => field.onChange("enterprise")}
                           >
-                            <div className="absolute -top-3 left-4 px-3 py-1 bg-gradient-to-r from-primary/20 to-primary/20 text-white text-xs font-medium rounded-full">
+                            <div className="absolute -top-3 left-4 px-3 py-1 bg-primary text-primary-foreground text-xs font-medium rounded-full">
                               Most Popular
                             </div>
                             {field.value === "enterprise" && (
                               <div className="absolute top-3 right-3 w-6 h-6 bg-primary rounded-full flex items-center justify-center">
-                                <Check className="h-4 w-4 text-white" />
+                                <Check className="h-4 w-4 text-primary-foreground" />
                               </div>
                             )}
                             <div className="mb-4">
@@ -1561,7 +1565,7 @@ export const VetOnboardingForm = () => {
 
             {/* Step 7: Legal & Compliance */}
             {currentStep === 7 && (
-              <Card className="bg-white border-border rounded-lg shadow-sm">
+              <Card className="bg-card border-border rounded-lg shadow-sm">
                 <CardHeader className="border-b border-border">
                   <CardTitle className="flex items-center gap-2 text-muted-foreground">
                     <FileText className="h-5 w-5 text-primary" />
@@ -1716,7 +1720,7 @@ export const VetOnboardingForm = () => {
 
             {/* Step 8: Review */}
             {currentStep === 8 && (
-              <Card className="bg-white border-border rounded-lg shadow-sm">
+              <Card className="bg-card border-border rounded-lg shadow-sm">
                 <CardHeader className="border-b border-border">
                   <CardTitle className="flex items-center gap-2 text-muted-foreground">
                     <Check className="h-5 w-5 text-primary" />
@@ -1890,7 +1894,7 @@ export const VetOnboardingForm = () => {
                   <Button
                     type="button"
                     onClick={handleNext}
-                    className="bg-primary hover:bg-primary text-white rounded-lg"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg"
                   >
                     Next
                     <ArrowRight className="h-4 w-4 ml-2" />
@@ -1899,7 +1903,7 @@ export const VetOnboardingForm = () => {
                   <Button
                     type="submit"
                     disabled={isSubmitting || !values.agreed_to_tos || !values.agreed_to_splicing_liability}
-                    className="bg-gradient-to-r from-primary/20 to-primary/20 hover:from-primary/20 hover:to-primary/20 text-white rounded-lg"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg"
                   >
                     {isSubmitting ? (
                       <>Submitting...</>
