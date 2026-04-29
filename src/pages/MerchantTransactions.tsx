@@ -437,7 +437,7 @@ const MerchantTransactions = () => {
  </TableHeader>
  <TableBody>
  {paginatedTransactions.map((transaction) => (
- <TableRow key={transaction.transaction_id} className="hover:bg-muted/50 transition-colors">
+ <TableRow key={transaction.transaction_id} className="hover:bg-muted transition-colors">
  <TableCell>{format(new Date(transaction.date),"MM/dd/yyyy")}</TableCell>
  <TableCell className="font-medium">{transaction.customer_name}</TableCell>
  <TableCell className="text-right font-semibold">${transaction.amount.toFixed(2)}</TableCell>

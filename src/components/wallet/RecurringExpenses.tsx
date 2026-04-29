@@ -176,7 +176,7 @@ export const RecurringExpenses = memo(({ transactions }: RecurringExpensesProps)
  return (
  <div
  key={`${pattern.merchantName}-${idx}`}
- className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border/50 hover:bg-muted/50 transition-colors"
+ className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border/50 hover:bg-muted transition-colors"
  >
  <div className="flex items-center gap-3">
  {Icon && (

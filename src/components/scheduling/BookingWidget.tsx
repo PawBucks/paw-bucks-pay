@@ -464,7 +464,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
  <div
  className={`w-8 md:w-12 h-0.5 mx-1 ${
  ["service","date","time","confirm"].indexOf(step) > i
- ?"bg-primary/50"
+ ?"bg-primary"
  :"bg-muted"
  }`}
  />
@@ -489,9 +489,9 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
  setSelectedService(service.id);
  setStep("date");
  }}
- className={`w-full p-4 rounded-xl border text-left transition-all hover:border-primary/50 hover:bg-primary/5 ${
+ className={`w-full p-4 rounded-xl border text-left transition-all hover:border-primary hover:bg-primary/5 ${
  selectedService === service.id ?"border-primary bg-primary/5" :"border-border"
- } ${hasFlashSale ?"ring-2 ring-warning0/30" :""}`}
+ } ${hasFlashSale ?"ring-2 ring-warning/30" :""}`}
  >
  <div className="flex items-start justify-between gap-4">
  <div className="flex-1">
@@ -507,7 +507,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
  </Badge>
  )}
  {hasFlashSale && (
- <Badge className="bg-gradient-to-r from-warning0 to-warning0 text-white border-0 text-xs gap-0.5">
+ <Badge className="bg-gradient-to-r from-warning to-warning text-white border-0 text-xs gap-0.5">
  <Zap className="w-3 h-3" />
  Flash Sale
  </Badge>
@@ -649,7 +649,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
  </div>
 
  {/* Summary */}
- <div className="p-4 rounded-xl bg-muted/50 space-y-3">
+ <div className="p-4 rounded-xl bg-muted space-y-3">
  <div className="flex items-center justify-between">
  <span className="text-muted-foreground">Service</span>
  <span className="font-medium">{selectedServiceData.name}</span>
@@ -683,7 +683,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
  </div>
 
  {/* Pending approval notice */}
- <div className="flex items-start gap-2 p-3 rounded-lg bg-warning/100/10 border border-warning/200/20 text-sm">
+ <div className="flex items-start gap-2 p-3 rounded-lg bg-warning/10 border border-warning/20 text-sm">
  <Clock className="w-4 h-4 text-warning mt-0.5 flex-shrink-0" />
  <p className="text-warning">
  Your booking will be submitted as a <strong>request</strong>. {merchantName} will review and confirm it fits their schedule and location.
@@ -734,7 +734,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
 
  {/* Deposit Notice */}
  {(selectedServiceData as any).require_deposit && (
- <div className="flex items-start gap-2 p-3 rounded-lg bg-info/100/10 border border-info/200/20 text-sm">
+ <div className="flex items-start gap-2 p-3 rounded-lg bg-info/10 border border-info/20 text-sm">
  <CreditCard className="w-4 h-4 text-info mt-0.5 flex-shrink-0" />
  <p className="text-info">
  This service requires a <strong>card on file</strong> to book.

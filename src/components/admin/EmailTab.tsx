@@ -201,7 +201,7 @@ export function EmailTab() {
  </Select>
  </div>
 
- <div className="bg-muted/50 rounded-lg p-3">
+ <div className="bg-muted rounded-lg p-3">
  <p className="text-sm text-muted-foreground">
  Recipients: <span className="font-medium text-foreground">{getRecipientCount()}</span>
  </p>
@@ -321,7 +321,7 @@ export function EmailTab() {
  </p>
  </div>
 
- <div className="bg-muted/50 rounded-lg p-4">
+ <div className="bg-muted rounded-lg p-4">
  <h4 className="font-medium mb-2">Preview</h4>
  <div
  className="bg-background rounded border p-4 prose prose-sm max-w-none"

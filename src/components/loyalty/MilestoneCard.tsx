@@ -137,7 +137,7 @@ export const MilestoneCard = ({ milestone, onRedeem, compact = false }: Mileston
  <Clock className="w-3 h-3" />
  <span>
  {isExpiring ? (
- <span className="text-warning0 font-medium">
+ <span className="text-warning font-medium">
  Expires {formatDistanceToNow(periodEnd, { addSuffix: true })}
  </span>
  ) : (

@@ -203,7 +203,7 @@ export const PricingCalculator = ({ onApplyPrice, compact = false }: PricingCalc
  <CardContent className="space-y-6">
  <Collapsible open={showCustomFees} onOpenChange={setShowCustomFees}>
  <CollapsibleContent className="space-y-4">
- <div className="grid grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg border">
+ <div className="grid grid-cols-2 gap-4 p-4 bg-muted rounded-lg border">
  <div>
  <Label htmlFor="pct-fee">Percentage Fee (%)</Label>
  <Input
@@ -271,7 +271,7 @@ export const PricingCalculator = ({ onApplyPrice, compact = false }: PricingCalc
  </div>
  </div>
 
- <div className="rounded-lg border bg-muted/50 p-4 space-y-3">
+ <div className="rounded-lg border bg-muted p-4 space-y-3">
  <h4 className="font-medium text-sm flex items-center gap-2">
  <CreditCard className="h-4 w-4" />
  Breakdown

@@ -217,10 +217,10 @@ export const SymptomTriageForm = ({ petId, onComplete }: SymptomTriageFormProps)
  const selectedPet = pets?.find((p) => p.id === selectedPetId);
 
  const urgencyColors: Record<string, string> = {
- emergency:"bg-destructive/100 text-white",
- urgent:"bg-warning/100 text-white",
- soon:"bg-warning/100 text-black",
- routine:"bg-success/100 text-white",
+ emergency:"bg-destructive text-white",
+ urgent:"bg-warning text-white",
+ soon:"bg-warning text-black",
+ routine:"bg-success text-white",
  };
 
  return (
@@ -386,7 +386,7 @@ export const SymptomTriageForm = ({ petId, onComplete }: SymptomTriageFormProps)
  onClick={() => toggleSymptom(symptom.symptom_name)}
  >
  {symptom.urgency_weight >= 7 && (
- <AlertTriangle className="w-3 h-3 mr-1 text-destructive0" />
+ <AlertTriangle className="w-3 h-3 mr-1 text-destructive" />
  )}
  {symptom.symptom_name}
  </Badge>
@@ -621,7 +621,7 @@ export const SymptomTriageForm = ({ petId, onComplete }: SymptomTriageFormProps)
  {step === 4 && submittedAssessment && (
  <Card className="p-6">
  <div className="text-center mb-6">
- <CheckCircle className="w-16 h-16 mx-auto text-success0 mb-4" />
+ <CheckCircle className="w-16 h-16 mx-auto text-success mb-4" />
  <h2 className="text-xl font-semibold">Assessment Submitted!</h2>
  <p className="text-muted-foreground">
  Your vet will review this before your appointment.
@@ -665,7 +665,7 @@ export const SymptomTriageForm = ({ petId, onComplete }: SymptomTriageFormProps)
  )}
 
  {submittedAssessment.ai_summary && (
- <div className="p-4 bg-muted/50 rounded-lg">
+ <div className="p-4 bg-muted rounded-lg">
  <p className="text-sm">{submittedAssessment.ai_summary}</p>
  </div>
  )}

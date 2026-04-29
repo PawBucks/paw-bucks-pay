@@ -237,13 +237,13 @@ export function GapFillerTool({ vetId }: GapFillerToolProps) {
  <CardContent className="space-y-4">
  {/* Stats Overview */}
  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
- <Card className="bg-muted/50">
+ <Card className="bg-muted">
  <CardContent className="p-4 text-center">
  <p className="text-3xl font-bold text-warning">{overduePatients.length}</p>
  <p className="text-sm text-muted-foreground">Total Overdue</p>
  </CardContent>
  </Card>
- <Card className="bg-muted/50">
+ <Card className="bg-muted">
  <CardContent className="p-4 text-center">
  <p className="text-3xl font-bold text-destructive">
  {overduePatients.filter(p => p.daysOverdue > 90).length}
@@ -251,7 +251,7 @@ export function GapFillerTool({ vetId }: GapFillerToolProps) {
  <p className="text-sm text-muted-foreground">Critical (90+ days)</p>
  </CardContent>
  </Card>
- <Card className="bg-muted/50">
+ <Card className="bg-muted">
  <CardContent className="p-4 text-center">
  <p className="text-3xl font-bold text-primary">
  {overduePatients.filter(p => p.serviceType ==="dental").length}
@@ -259,7 +259,7 @@ export function GapFillerTool({ vetId }: GapFillerToolProps) {
  <p className="text-sm text-muted-foreground">Dentals Overdue</p>
  </CardContent>
  </Card>
- <Card className="bg-muted/50">
+ <Card className="bg-muted">
  <CardContent className="p-4 text-center">
  <p className="text-3xl font-bold text-info">
  {overduePatients.filter(p => p.serviceType ==="vaccination").length}

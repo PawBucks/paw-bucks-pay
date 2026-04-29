@@ -68,7 +68,7 @@ export function StripeSettingsCard({ payoutSchedule, onPayoutScheduleChange, sav
  </Button>
  </div>
  </div>
- <div className="bg-muted/50 rounded-md p-3 font-mono text-xs">
+ <div className="bg-muted rounded-md p-3 font-mono text-xs">
  {showKey ?'sk_live_••••••••••••••••' :'••••••••••••••••••••••••••••••••'}
  </div>
  </div>
@@ -84,7 +84,7 @@ export function StripeSettingsCard({ payoutSchedule, onPayoutScheduleChange, sav
  Configured
  </Badge>
  </div>
- <div className="bg-muted/50 rounded-md p-3 font-mono text-xs">
+ <div className="bg-muted rounded-md p-3 font-mono text-xs">
  pk_live_••••••••••••••••
  </div>
  </div>
@@ -93,13 +93,13 @@ export function StripeSettingsCard({ payoutSchedule, onPayoutScheduleChange, sav
  <div className="space-y-2">
  <p className="font-medium text-sm">Webhook Secrets</p>
  <div className="grid gap-2">
- <div className="flex items-center justify-between bg-muted/50 rounded-md p-3">
+ <div className="flex items-center justify-between bg-muted rounded-md p-3">
  <span className="text-xs">Platform Webhook</span>
  <Badge variant="outline" className="bg-success/10 text-success dark:text-success border-success/30/30 text-xs">
  Active
  </Badge>
  </div>
- <div className="flex items-center justify-between bg-muted/50 rounded-md p-3">
+ <div className="flex items-center justify-between bg-muted rounded-md p-3">
  <span className="text-xs">Connect Webhook</span>
  <Badge variant="outline" className="bg-success/10 text-success dark:text-success border-success/30/30 text-xs">
  Active

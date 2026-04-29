@@ -210,7 +210,7 @@ const VetLanding = () => {
  {/* Vet Lifestyle Hero Image Section */}
  <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
  <div className="relative max-w-5xl mx-auto">
- <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-br from-muted/50 to-muted">
+ <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-br from-muted to-muted">
  <img 
  src={vetClinicHero}
  alt="Veterinarian with pets in a modern clinic setting"
@@ -324,15 +324,15 @@ const VetLanding = () => {
  </div>
  </div>
  <div className="space-y-3 text-sm">
- <div className="p-3 rounded-lg bg-muted/50">
+ <div className="p-3 rounded-lg bg-muted">
  <p className="font-semibold text-primary">Subjective:</p>
  <p className="text-muted-foreground">Owner reports decreased appetite x3 days, lethargy...</p>
  </div>
- <div className="p-3 rounded-lg bg-muted/50">
+ <div className="p-3 rounded-lg bg-muted">
  <p className="font-semibold text-accent">Objective:</p>
  <p className="text-muted-foreground">T: 102.8°F, HR: 120, RR: 24, BCS: 5/9...</p>
  </div>
- <div className="p-3 rounded-lg bg-muted/50">
+ <div className="p-3 rounded-lg bg-muted">
  <p className="font-semibold text-secondary">Assessment:</p>
  <p className="text-muted-foreground">R/O gastroenteritis, pancreatitis, dietary indiscretion...</p>
  </div>
@@ -494,7 +494,7 @@ const VetLanding = () => {
  Analytics identify which patients are overdue for dentals, vaccines, or check-ups. 
  Send targeted PawBucks bonus offers to bring them back.
  </p>
- <div className="p-4 rounded-xl bg-muted/50">
+ <div className="p-4 rounded-xl bg-muted">
  <p className="text-sm font-medium mb-2">Example Campaign:</p>
  <p className="text-muted-foreground text-sm">
 "15 patients overdue for dental cleaning → Send 500 bonus PawBucks offer → 
@@ -512,7 +512,7 @@ const VetLanding = () => {
  Stop losing pharmacy revenue to Chewy. Approve prescriptions in the portal 
  that ship from our PawBucks Store — you keep 10-25% margin.
  </p>
- <div className="p-4 rounded-xl bg-muted/50">
+ <div className="p-4 rounded-xl bg-muted">
  <p className="text-sm font-medium mb-2">Your Revenue Share:</p>
  <p className="text-muted-foreground text-sm">
  Apoquel 16mg (30ct) @ $85.99 → You earn $12.90 (15% margin)

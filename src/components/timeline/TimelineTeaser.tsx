@@ -113,7 +113,7 @@ export const TimelineTeaser = ({ userId, pets }: TimelineTeaserProps) => {
  animate={{ opacity: 1, y: 0 }}
  transition={{ duration: 0.5 }}
  >
- <Card className="overflow-hidden border-2 border-dashed border-primary/30 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 hover:border-primary/50 transition-all cursor-pointer group">
+ <Card className="overflow-hidden border-2 border-dashed border-primary/30 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 hover:border-primary transition-all cursor-pointer group">
  <CardContent className="p-4">
  <div className="flex items-center gap-4">
  <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center group-hover:scale-110 transition-transform">

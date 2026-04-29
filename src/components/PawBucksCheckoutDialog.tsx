@@ -154,7 +154,7 @@ export const PawBucksCheckoutDialog = ({
  ) : (
  <div className="space-y-4">
  {/* Product Info */}
- <div className="bg-muted/50 rounded-lg p-4">
+ <div className="bg-muted rounded-lg p-4">
  <p className="font-medium text-sm mb-1">{productName}</p>
  <p className="text-xl font-bold">${priceAmount.toFixed(2)}{isRecurring && <span className="text-sm font-normal text-muted-foreground">/period</span>}</p>
  {isRecurring && (
@@ -180,7 +180,7 @@ export const PawBucksCheckoutDialog = ({
 
  {/* Pet Fund Credit Banner - only when it's the sole source */}
  {welcomeCreditApplicable && !hasBothSources && (
- <div className="bg-success/100/10 border border-success/200/20 rounded-lg p-3 flex items-start gap-2">
+ <div className="bg-success/10 border border-success/20 rounded-lg p-3 flex items-start gap-2">
  <Gift className="w-4 h-4 text-success mt-0.5 flex-shrink-0" />
  <div>
  <p className="text-sm font-medium text-success">
@@ -195,7 +195,7 @@ export const PawBucksCheckoutDialog = ({
 
  {/* Pet Fund not applicable - below minimum */}
  {(hasPetFund || hasWelcomeCredit) && merchantAcceptsPawBucks && priceAmount < petFundMinUsd && (
- <div className="bg-warning/100/10 border border-warning/200/20 rounded-lg p-3 flex items-start gap-2">
+ <div className="bg-warning/10 border border-warning/20 rounded-lg p-3 flex items-start gap-2">
  <Gift className="w-4 h-4 text-warning mt-0.5 flex-shrink-0" />
  <div>
  <p className="text-sm font-medium text-warning">
@@ -206,7 +206,7 @@ export const PawBucksCheckoutDialog = ({
  </p>
  <div className="mt-2">
  <div className="w-full bg-warning/15 rounded-full h-2">
- <div className="bg-warning/100 h-2 rounded-full transition-all" style={{ width: `${Math.min(100, (priceAmount / petFundMinUsd) * 100)}%` }} />
+ <div className="bg-warning h-2 rounded-full transition-all" style={{ width: `${Math.min(100, (priceAmount / petFundMinUsd) * 100)}%` }} />
  </div>
  <p className="text-xs mt-1 text-warning/70">${priceAmount.toFixed(2)} / ${petFundMinUsd.toFixed(2)} minimum</p>
  </div>
@@ -268,7 +268,7 @@ export const PawBucksCheckoutDialog = ({
  )}
 
  {isRecurring && pawbucksToUse > 0 && (
- <div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded">
+ <div className="text-xs text-muted-foreground bg-muted p-2 rounded">
  💡 A minimum ${MINIMUM_STRIPE_AMOUNT.toFixed(2)} charge is required to set up recurring billing.
  </div>
  )}
@@ -277,7 +277,7 @@ export const PawBucksCheckoutDialog = ({
 
  {/* Info when no PawBucks available */}
  {merchantAcceptsPawBucks && pawbucksBalance === 0 && !hasWelcomeCredit && (
- <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg flex items-start gap-2">
+ <div className="text-sm text-muted-foreground bg-muted p-3 rounded-lg flex items-start gap-2">
  <Coins className="w-4 h-4 mt-0.5 flex-shrink-0" />
  <span>This merchant accepts PawBucks, but you don't have any spendable yet. Earn PawBucks by making purchases!</span>
  </div>
@@ -285,7 +285,7 @@ export const PawBucksCheckoutDialog = ({
 
  {/* Info about locked rewards */}
  {merchantAcceptsPawBucks && lockedBalance > 0 && pawbucksBalance === 0 && (
- <div className="text-sm text-warning bg-warning/100/10 p-3 rounded-lg flex items-start gap-2 border border-warning/200/20">
+ <div className="text-sm text-warning bg-warning/10 p-3 rounded-lg flex items-start gap-2 border border-warning/20">
  <Lock className="w-4 h-4 mt-0.5 flex-shrink-0" />
  <div>
  <span className="font-medium">You have {lockedBalance.toLocaleString()} PawBucks locked</span>
@@ -343,7 +343,7 @@ export const PawBucksCheckoutDialog = ({
  {stripeAmount > 0 && (
  <div className="flex justify-between text-sm">
  <span className="text-muted-foreground flex items-center gap-1">
- <Sparkles className="w-3 h-3 text-warning0" />
+ <Sparkles className="w-3 h-3 text-warning" />
  Cashback ({cashbackRate}x):
  </span>
  <span className="font-bold text-warning">

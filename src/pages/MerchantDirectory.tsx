@@ -409,7 +409,7 @@ const MerchantDirectory = () => {
  className={`text-xs font-medium px-2.5 py-1 rounded-md whitespace-nowrap transition-colors ${
  sortBy === opt.value
  ?"bg-foreground text-background"
- :"text-muted-foreground hover:text-foreground hover:bg-muted/50"
+ :"text-muted-foreground hover:text-foreground hover:bg-muted"
  }`}
  >
  {opt.label}
@@ -421,7 +421,7 @@ const MerchantDirectory = () => {
  className={`flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-md whitespace-nowrap transition-colors ${
  pawbucksOnly
  ?"bg-primary/10 text-primary border border-primary/20"
- :"text-muted-foreground hover:text-foreground hover:bg-muted/50"
+ :"text-muted-foreground hover:text-foreground hover:bg-muted"
  }`}
  >
  <Coins className="w-3 h-3" />
@@ -484,7 +484,7 @@ const MerchantDirectory = () => {
  {/* ── Results ── */}
  {filteredMerchants.length === 0 ? (
  <div className="text-center py-20">
- <div className="w-16 h-16 rounded-full bg-muted/50 mx-auto flex items-center justify-center mb-4">
+ <div className="w-16 h-16 rounded-full bg-muted mx-auto flex items-center justify-center mb-4">
  <Store className="w-8 h-8 text-muted-foreground/40" />
  </div>
  <h3 className="text-lg font-semibold mb-1">No merchants found</h3>

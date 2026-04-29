@@ -215,7 +215,7 @@ export function GroomingReportCardForm({
  </p>
  </div>
  {existingReport?.status ==="sent" && (
- <Badge className="bg-success/100/10 text-success border-success/200/20">Sent</Badge>
+ <Badge className="bg-success/10 text-success border-success/20">Sent</Badge>
  )}
  </div>
 
@@ -254,7 +254,7 @@ export function GroomingReportCardForm({
  ))}
  <button
  onClick={() => fileInputRef.current?.click()}
- className="aspect-square rounded-lg border-2 border-dashed border-muted-foreground/30 flex flex-col items-center justify-center gap-1 hover:border-primary/50 transition-colors"
+ className="aspect-square rounded-lg border-2 border-dashed border-muted-foreground/30 flex flex-col items-center justify-center gap-1 hover:border-primary transition-colors"
  >
  <Camera className="w-5 h-5 text-muted-foreground" />
  <span className="text-xs text-muted-foreground">Add Photo</span>

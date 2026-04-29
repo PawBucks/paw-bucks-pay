@@ -467,7 +467,7 @@ export function InvoiceSettingsComponent({
  />
  
  {form.watch("reminder_enabled") && (
- <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+ <div className="bg-muted rounded-lg p-4 space-y-3">
  <div>
  <p className="text-sm font-medium">Before Due Date</p>
  <p className="text-sm text-muted-foreground">

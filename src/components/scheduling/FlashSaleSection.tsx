@@ -107,23 +107,23 @@ export function FlashSaleSection({ service, onUpdate }: FlashSaleSectionProps) {
 
  return (
  <Collapsible open={isOpen} onOpenChange={setIsOpen}>
- <div className="rounded-lg border border-warning/200/30 bg-gradient-to-r from-warning0/5 to-warning0/5 p-4">
+ <div className="rounded-lg border border-warning/30 bg-gradient-to-r from-warning/5 to-warning/5 p-4">
  <CollapsibleTrigger className="w-full">
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-3">
- <div className="p-2 bg-warning/100/10 rounded-lg">
- <Zap className="w-5 h-5 text-warning0" />
+ <div className="p-2 bg-warning/10 rounded-lg">
+ <Zap className="w-5 h-5 text-warning" />
  </div>
  <div className="text-left">
  <div className="flex items-center gap-2">
  <h4 className="font-semibold">Flash Sale</h4>
  {isActive && (
- <Badge className="bg-success/100/10 text-success border-success/200/30">
+ <Badge className="bg-success/10 text-success border-success/30">
  Live
  </Badge>
  )}
  {service.is_flash_sale && !isActive && (
- <Badge className="bg-warning/100/10 text-warning border-warning/200/30">
+ <Badge className="bg-warning/10 text-warning border-warning/30">
  Scheduled
  </Badge>
  )}
@@ -167,7 +167,7 @@ export function FlashSaleSection({ service, onUpdate }: FlashSaleSectionProps) {
  {watchFlashSale && (
  <>
  {/* Price Preview */}
- <div className="p-3 rounded-lg bg-muted/50 border">
+ <div className="p-3 rounded-lg bg-muted border">
  <div className="flex items-center justify-between mb-2">
  <span className="text-sm text-muted-foreground">Regular Price</span>
  <span className="font-medium">{regularPawbucksPrice.toLocaleString()} PB</span>
@@ -202,7 +202,7 @@ export function FlashSaleSection({ service, onUpdate }: FlashSaleSectionProps) {
  </FormControl>
  {previewSavings > 0 && (
  <div className="flex items-center gap-2 mt-2">
- <TrendingDown className="w-4 h-4 text-success0" />
+ <TrendingDown className="w-4 h-4 text-success" />
  <span className="text-sm text-success font-medium">
  {previewSavings}% off with PawBucks!
  </span>
@@ -259,9 +259,9 @@ export function FlashSaleSection({ service, onUpdate }: FlashSaleSectionProps) {
  />
  </div>
 
- <div className="p-3 rounded-lg bg-info/100/10 border border-info/200/20">
+ <div className="p-3 rounded-lg bg-info/10 border border-info/20">
  <div className="flex items-start gap-2">
- <Bell className="w-4 h-4 text-info0 mt-0.5" />
+ <Bell className="w-4 h-4 text-info mt-0.5" />
  <div className="text-sm">
  <p className="font-medium text-info">
  Push Notification

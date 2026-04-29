@@ -397,7 +397,7 @@ const SpendingBreakdown = () => {
  return (
  <div
  key={item.id}
- className="flex items-center justify-between p-4 rounded-xl bg-muted/30 border border-border/50 hover:bg-muted/50 transition-colors"
+ className="flex items-center justify-between p-4 rounded-xl bg-muted/30 border border-border/50 hover:bg-muted transition-colors"
  >
  <div className="flex items-center gap-3">
  <div 
@@ -426,7 +426,7 @@ const SpendingBreakdown = () => {
  </div>
  ) : (
  <div className="text-center py-12">
- <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-3">
+ <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-3">
  <ShoppingBag className="w-8 h-8 text-muted-foreground" />
  </div>
  <p className="text-muted-foreground mb-4">No spending recorded yet</p>

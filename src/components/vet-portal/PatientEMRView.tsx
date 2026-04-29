@@ -151,7 +151,7 @@ export const PatientEMRView = ({ patient, vetId, onBack }: PatientEMRViewProps) 
  <AlertTriangle className="w-4 h-4 text-destructive" />
  <span className="font-medium text-destructive text-sm">Allergies:</span>
  {allergies.map((allergy) => (
- <Badge key={allergy.id} variant="outline" className="border-destructive/50 text-destructive">
+ <Badge key={allergy.id} variant="outline" className="border-destructive text-destructive">
  {allergy.allergy_name} ({allergy.severity})
  </Badge>
  ))}

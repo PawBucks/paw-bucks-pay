@@ -93,7 +93,7 @@ export const MonthlyComparison = memo(({ transactions, medicalRecords = [] }: Mo
  const getTrendBg = () => {
  if (comparison.percentageChange > 5) return"bg-destructive/10";
  if (comparison.percentageChange < -5) return"bg-accent/10";
- return"bg-muted/50";
+ return"bg-muted";
  };
 
  return (

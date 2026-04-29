@@ -352,7 +352,7 @@ const NotificationsDropdownComponent = ({ userId }: { userId: string }) => {
  <DropdownMenuItem
  key={notification.id}
  className={`flex flex-col items-start gap-1 p-3 cursor-pointer ${
- !notification.is_read ?"bg-accent/50" :""
+ !notification.is_read ?"bg-accent" :""
  }`}
  onClick={(e) => handleNotificationClick(notification, e)}
  >

@@ -38,7 +38,7 @@ export function MerchantLeaderboard({ entries }: MerchantLeaderboardProps) {
  key={entry.merchant_id}
  className={cn(
 "flex items-center gap-3 rounded-lg p-2.5 border transition-colors",
- decor ? decor.bg :"border-transparent hover:bg-muted/50"
+ decor ? decor.bg :"border-transparent hover:bg-muted"
  )}
  >
  <div className="w-7 h-7 rounded-full bg-background flex items-center justify-center text-xs font-bold flex-shrink-0">

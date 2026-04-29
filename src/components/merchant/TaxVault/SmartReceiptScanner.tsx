@@ -164,7 +164,7 @@ export function SmartReceiptScanner({ open, onOpenChange, onDataExtracted }: Sma
  {!previewUrl && !isProcessing && (
  <div className="grid grid-cols-2 gap-4">
  <Card 
- className="cursor-pointer hover:border-primary/50 transition-colors"
+ className="cursor-pointer hover:border-primary transition-colors"
  onClick={() => cameraInputRef.current?.click()}
  >
  <CardContent className="flex flex-col items-center justify-center p-6 text-center">
@@ -177,7 +177,7 @@ export function SmartReceiptScanner({ open, onOpenChange, onDataExtracted }: Sma
  </Card>
 
  <Card 
- className="cursor-pointer hover:border-primary/50 transition-colors"
+ className="cursor-pointer hover:border-primary transition-colors"
  onClick={() => fileInputRef.current?.click()}
  >
  <CardContent className="flex flex-col items-center justify-center p-6 text-center">

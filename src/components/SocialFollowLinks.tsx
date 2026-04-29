@@ -45,7 +45,7 @@ export const SocialFollowLinks = ({ className ="", showLabel = true }: SocialFol
  href={social.url}
  target="_blank"
  rel="noopener noreferrer"
- className="w-10 h-10 rounded-full bg-muted/50 hover:bg-primary/20 flex items-center justify-center text-muted-foreground hover:text-primary transition-all duration-200 hover:scale-110"
+ className="w-10 h-10 rounded-full bg-muted hover:bg-primary/20 flex items-center justify-center text-muted-foreground hover:text-primary transition-all duration-200 hover:scale-110"
  aria-label={social.label}
  >
  <social.icon className="w-5 h-5" />

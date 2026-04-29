@@ -144,8 +144,8 @@ export function StrategyConsultationWidget() {
 
  <GradientCard gradient>
  <div className="flex items-center gap-3">
- <div className="p-3 rounded-xl bg-accent/100/10">
- <Brain className="h-5 w-5 text-accent0" />
+ <div className="p-3 rounded-xl bg-accent/10">
+ <Brain className="h-5 w-5 text-accent" />
  </div>
  <div>
  <p className="text-sm text-muted-foreground">AI Report</p>
@@ -234,7 +234,7 @@ export function StrategyConsultationWidget() {
  </p>
 
  {/* Summary */}
- <div className="p-4 rounded-lg bg-muted/50 border">
+ <div className="p-4 rounded-lg bg-muted border">
  <p className="text-sm">{aiReport.summary}</p>
  </div>
 

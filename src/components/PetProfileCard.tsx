@@ -37,9 +37,9 @@ type PetProfileCardProps = {
 };
 
 const petTypeColors = {
- dog:"bg-info/100/10 text-info border-info/200/20",
- cat:"bg-accent/100/10 text-accent border-accent/200/20",
- other:"bg-muted/500/10 text-foreground border-border0/20",
+ dog:"bg-info/10 text-info border-info/20",
+ cat:"bg-accent/10 text-accent border-accent/20",
+ other:"bg-muted/10 text-foreground border-border0/20",
 } as const;
 
 const PetProfileCardComponent = ({ pet, onUpdate, index = 0 }: PetProfileCardProps) => {

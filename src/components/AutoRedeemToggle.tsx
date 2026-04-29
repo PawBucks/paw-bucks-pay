@@ -253,7 +253,7 @@ export const AutoRedeemToggle = ({ userId }: AutoRedeemToggleProps) => {
  </div>
 
  {/* Example */}
- <div className="p-2.5 bg-muted/50 rounded-md border border-border">
+ <div className="p-2.5 bg-muted rounded-md border border-border">
  <p className="text-[11px] text-muted-foreground">
  <span className="font-semibold text-foreground">Example:</span> On a $100 purchase, PawBucks will auto-apply
  only if you have at least {(100 * minCoverage / 100).toFixed(0)}k PB (${(100 * minCoverage / 100).toFixed(0)}),

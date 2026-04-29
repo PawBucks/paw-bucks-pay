@@ -229,7 +229,7 @@ export function PremiumAnalyticsDashboard() {
  case'critical':
  return <Badge variant="destructive">Critical</Badge>;
  case'high':
- return <Badge className="bg-warning/100">High Priority</Badge>;
+ return <Badge className="bg-warning">High Priority</Badge>;
  case'positive':
  return <Badge className="bg-success">Positive</Badge>;
  default:
@@ -240,7 +240,7 @@ export function PremiumAnalyticsDashboard() {
  const getInsightIcon = (type: string) => {
  switch (type) {
  case'positive': return <Heart className="h-5 w-5 text-success" />;
- case'warning': return <AlertTriangle className="h-5 w-5 text-warning0" />;
+ case'warning': return <AlertTriangle className="h-5 w-5 text-warning" />;
  case'prediction': return <TrendingUp className="h-5 w-5 text-info" />;
  case'opportunity': return <Zap className="h-5 w-5 text-warning" />;
  default: return <Brain className="h-5 w-5 text-primary" />;
@@ -364,8 +364,8 @@ export function PremiumAnalyticsDashboard() {
 
  <GradientCard gradient>
  <div className="flex items-center gap-3">
- <div className="p-3 rounded-xl bg-accent/100/10">
- <TrendingUp className="h-5 w-5 text-accent0" />
+ <div className="p-3 rounded-xl bg-accent/10">
+ <TrendingUp className="h-5 w-5 text-accent" />
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Avg Order Value</p>
@@ -386,7 +386,7 @@ export function PremiumAnalyticsDashboard() {
  </CardHeader>
  <CardContent>
  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
- <div className="text-center p-4 rounded-lg bg-muted/50">
+ <div className="text-center p-4 rounded-lg bg-muted">
  <p className="text-sm text-muted-foreground mb-1">Revenue</p>
  <p className="text-3xl font-bold">${period_comparison.current_period.revenue.toLocaleString()}</p>
  <div className={`flex items-center justify-center gap-1 mt-1 ${getGrowthColor(period_comparison.growth.revenue)}`}>
@@ -394,7 +394,7 @@ export function PremiumAnalyticsDashboard() {
  <span className="text-sm font-medium">{period_comparison.growth.revenue.toFixed(1)}%</span>
  </div>
  </div>
- <div className="text-center p-4 rounded-lg bg-muted/50">
+ <div className="text-center p-4 rounded-lg bg-muted">
  <p className="text-sm text-muted-foreground mb-1">Transactions</p>
  <p className="text-3xl font-bold">{period_comparison.current_period.transactions}</p>
  <div className={`flex items-center justify-center gap-1 mt-1 ${getGrowthColor(period_comparison.growth.transactions)}`}>
@@ -402,7 +402,7 @@ export function PremiumAnalyticsDashboard() {
  <span className="text-sm font-medium">{period_comparison.growth.transactions.toFixed(1)}%</span>
  </div>
  </div>
- <div className="text-center p-4 rounded-lg bg-muted/50">
+ <div className="text-center p-4 rounded-lg bg-muted">
  <p className="text-sm text-muted-foreground mb-1">Customers</p>
  <p className="text-3xl font-bold">{period_comparison.current_period.customers}</p>
  <div className={`flex items-center justify-center gap-1 mt-1 ${getGrowthColor(period_comparison.growth.customers)}`}>
@@ -490,8 +490,8 @@ export function PremiumAnalyticsDashboard() {
 
  <GradientCard gradient>
  <div className="flex items-center gap-3">
- <div className="p-3 rounded-xl bg-accent/100/10">
- <TrendingUp className="h-5 w-5 text-accent0" />
+ <div className="p-3 rounded-xl bg-accent/10">
+ <TrendingUp className="h-5 w-5 text-accent" />
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Velocity Growth</p>
@@ -522,7 +522,7 @@ export function PremiumAnalyticsDashboard() {
  <p className="text-4xl font-bold text-primary">${transaction_velocity.projected_monthly_revenue.toLocaleString()}</p>
  <p className="text-xs text-muted-foreground mt-2">Based on ${transaction_velocity.daily_revenue}/day avg</p>
  </div>
- <div className="text-center p-6 rounded-lg bg-gradient-to-br from-success0/10 to-success0/5 border">
+ <div className="text-center p-6 rounded-lg bg-gradient-to-br from-success/10 to-success/5 border">
  <p className="text-sm text-muted-foreground mb-2">Projected Monthly Transactions</p>
  <p className="text-4xl font-bold text-success">{transaction_velocity.projected_monthly_transactions}</p>
  <p className="text-xs text-muted-foreground mt-2">Based on {transaction_velocity.daily_transactions}/day avg</p>
@@ -583,8 +583,8 @@ export function PremiumAnalyticsDashboard() {
 
  <GradientCard gradient>
  <div className="flex items-center gap-3">
- <div className="p-3 rounded-xl bg-warning/100/10">
- <UserMinus className="h-5 w-5 text-warning0" />
+ <div className="p-3 rounded-xl bg-warning/10">
+ <UserMinus className="h-5 w-5 text-warning" />
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Churn Risk</p>
@@ -711,7 +711,7 @@ export function PremiumAnalyticsDashboard() {
  {customer_insights.top_customers.length > 0 ? (
  <div className="space-y-3 max-h-[300px] overflow-y-auto">
  {customer_insights.top_customers.slice(0, 5).map((customer: any, index: number) => (
- <div key={customer.user_id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+ <div key={customer.user_id} className="flex items-center justify-between p-3 rounded-lg bg-muted">
  <div className="flex items-center gap-3">
  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-bold">
  {index + 1}
@@ -851,7 +851,7 @@ export function PremiumAnalyticsDashboard() {
  {ai_insights && ai_insights.length > 0 ? (
  <div className="space-y-4">
  {ai_insights.map((insight: any, index: number) => (
- <div key={index} className="p-4 rounded-lg border bg-card hover:bg-muted/50 transition-colors">
+ <div key={index} className="p-4 rounded-lg border bg-card hover:bg-muted transition-colors">
  <div className="flex items-start gap-4">
  <div className="p-2 rounded-lg bg-muted">
  {getInsightIcon(insight.type)}
@@ -972,7 +972,7 @@ export function PremiumAnalyticsDashboard() {
  </CardHeader>
  <CardContent>
  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
- <div className="text-center p-4 rounded-lg bg-muted/50">
+ <div className="text-center p-4 rounded-lg bg-muted">
  <p className="text-sm text-muted-foreground mb-1">Avg Order Value</p>
  <p className="text-2xl font-bold">${competitive_benchmarking.your_avg_transaction.toFixed(2)}</p>
  <p className="text-xs text-muted-foreground">Industry: ${competitive_benchmarking.industry_avg_transaction}</p>
@@ -981,7 +981,7 @@ export function PremiumAnalyticsDashboard() {
  <span className="text-sm font-medium">{competitive_benchmarking.transaction_value_vs_industry.toFixed(1)}% vs industry</span>
  </div>
  </div>
- <div className="text-center p-4 rounded-lg bg-muted/50">
+ <div className="text-center p-4 rounded-lg bg-muted">
  <p className="text-sm text-muted-foreground mb-1">Repeat Purchase Rate</p>
  <p className="text-2xl font-bold">{competitive_benchmarking.your_repeat_rate.toFixed(1)}%</p>
  <p className="text-xs text-muted-foreground">Industry: {competitive_benchmarking.industry_avg_repeat_rate}%</p>
@@ -990,7 +990,7 @@ export function PremiumAnalyticsDashboard() {
  <span className="text-sm font-medium">{competitive_benchmarking.repeat_rate_vs_industry > 0 ?'+' :''}{competitive_benchmarking.repeat_rate_vs_industry.toFixed(1)}pp</span>
  </div>
  </div>
- <div className="text-center p-4 rounded-lg bg-muted/50">
+ <div className="text-center p-4 rounded-lg bg-muted">
  <p className="text-sm text-muted-foreground mb-1">Customer Lifetime Value</p>
  <p className="text-2xl font-bold">${competitive_benchmarking.your_ltv.toFixed(2)}</p>
  <p className="text-xs text-muted-foreground">Industry: ${competitive_benchmarking.industry_avg_ltv}</p>
@@ -1010,22 +1010,22 @@ export function PremiumAnalyticsDashboard() {
  </CardHeader>
  <CardContent>
  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
- <div className="text-center p-4 rounded-lg bg-muted/50">
+ <div className="text-center p-4 rounded-lg bg-muted">
  <p className="text-sm text-muted-foreground">Rewards Given</p>
  <p className="text-xl font-bold">{overview.total_rewards_given.toLocaleString()}</p>
  <p className="text-xs text-muted-foreground">PawBucks</p>
  </div>
- <div className="text-center p-4 rounded-lg bg-muted/50">
+ <div className="text-center p-4 rounded-lg bg-muted">
  <p className="text-sm text-muted-foreground">One-time Buyers</p>
  <p className="text-xl font-bold">{customer_insights.segments.one_time_buyers}</p>
  <p className="text-xs text-muted-foreground">customers</p>
  </div>
- <div className="text-center p-4 rounded-lg bg-muted/50">
+ <div className="text-center p-4 rounded-lg bg-muted">
  <p className="text-sm text-muted-foreground">Repeat Buyers</p>
  <p className="text-xl font-bold">{customer_insights.segments.repeat_buyers}</p>
  <p className="text-xs text-muted-foreground">customers</p>
  </div>
- <div className="text-center p-4 rounded-lg bg-muted/50">
+ <div className="text-center p-4 rounded-lg bg-muted">
  <p className="text-sm text-muted-foreground">VIP Customers</p>
  <p className="text-xl font-bold">{customer_insights.segments.vip_customers}</p>
  <p className="text-xs text-muted-foreground">$500+ spent</p>

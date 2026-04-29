@@ -242,7 +242,7 @@ export default function CheckInPage() {
  <>
  {result.success ? (
  <>
- <CheckCircle2 className="w-20 h-20 mx-auto text-success0" />
+ <CheckCircle2 className="w-20 h-20 mx-auto text-success" />
  <div>
  <h1 className="text-2xl font-bold">Checked In!</h1>
  <p className="text-muted-foreground mt-2">

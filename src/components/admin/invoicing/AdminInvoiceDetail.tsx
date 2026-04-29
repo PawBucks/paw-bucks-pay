@@ -261,7 +261,7 @@ export function AdminInvoiceDetail({ invoice, onBack, onEdit, onRefresh }: Props
  ) : (
  <div className="space-y-3">
  {payments.map((p) => (
- <div key={p.id} className="p-3 rounded-md bg-muted/50 text-sm">
+ <div key={p.id} className="p-3 rounded-md bg-muted text-sm">
  <div className="flex justify-between items-center">
  <span className="font-medium text-success">${Number(p.amount).toFixed(2)}</span>
  <Badge variant="outline" className="text-xs capitalize">{p.payment_method.replace("_","")}</Badge>

@@ -62,14 +62,14 @@ type MedicalRecordsListProps = {
 };
 
 const recordTypeColors: Record<string, string> = {
- vaccination:"bg-success/100/10 text-success border-success/200/20",
- checkup:"bg-info/100/10 text-info border-info/200/20",
- surgery:"bg-destructive/100/10 text-destructive border-destructive/200/20",
- lab_results:"bg-accent/100/10 text-accent border-accent/200/20",
- prescription:"bg-warning/100/10 text-warning border-warning/200/20",
- dental:"bg-info/100/10 text-info border-info/200/20",
- emergency:"bg-accent/100/10 text-accent border-accent/200/20",
- other:"bg-muted/500/10 text-foreground border-border0/20",
+ vaccination:"bg-success/10 text-success border-success/20",
+ checkup:"bg-info/10 text-info border-info/20",
+ surgery:"bg-destructive/10 text-destructive border-destructive/20",
+ lab_results:"bg-accent/10 text-accent border-accent/20",
+ prescription:"bg-warning/10 text-warning border-warning/20",
+ dental:"bg-info/10 text-info border-info/20",
+ emergency:"bg-accent/10 text-accent border-accent/20",
+ other:"bg-muted/10 text-foreground border-border0/20",
 };
 
 export const MedicalRecordsList = ({ petId, refreshTrigger }: MedicalRecordsListProps) => {
@@ -407,7 +407,7 @@ export const MedicalRecordsList = ({ petId, refreshTrigger }: MedicalRecordsList
  <Card key={visit.id} className="overflow-hidden">
  <Collapsible open={isExpanded} onOpenChange={() => toggleVisit(visit.id)}>
  <CollapsibleTrigger className="w-full">
- <div className="flex items-center justify-between p-4 hover:bg-accent/50 transition-colors">
+ <div className="flex items-center justify-between p-4 hover:bg-accent transition-colors">
  <div className="flex items-center gap-3">
  {isExpanded ? (
  <ChevronDown className="w-5 h-5 text-muted-foreground" />

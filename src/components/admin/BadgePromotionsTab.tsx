@@ -493,7 +493,7 @@ export function BadgePromotionsTab() {
  {items.map((item) => (
  <div
  key={item.id}
- className={`flex items-center gap-3 px-3 py-2 border-b last:border-b-0 cursor-pointer hover:bg-accent/50 transition-colors ${
+ className={`flex items-center gap-3 px-3 py-2 border-b last:border-b-0 cursor-pointer hover:bg-accent transition-colors ${
  formData.selected_items.includes(item.id) ?"bg-primary/10" :""
  }`}
  onClick={() => toggleItemSelection(item.id)}

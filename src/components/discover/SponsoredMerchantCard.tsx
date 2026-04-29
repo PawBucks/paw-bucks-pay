@@ -100,7 +100,7 @@ const SponsoredMerchantCardComponent = ({
  {merchant.business_name}
  </h3>
  {isVerifiedPro && (
- <BadgeCheck className="w-4 h-4 text-info0 flex-shrink-0 mt-0.5" />
+ <BadgeCheck className="w-4 h-4 text-info flex-shrink-0 mt-0.5" />
  )}
  </div>
 
@@ -112,9 +112,9 @@ const SponsoredMerchantCardComponent = ({
  key={i}
  className={`w-3.5 h-3.5 ${
  i < fullStars
- ?"text-warning0 fill-warning0"
+ ?"text-warning fill-warning"
  : i === fullStars && hasHalfStar
- ?"text-warning0 fill-warning0/50"
+ ?"text-warning fill-warning/50"
  :"text-muted-foreground/20"
  }`}
  />

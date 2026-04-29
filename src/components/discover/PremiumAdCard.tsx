@@ -82,7 +82,7 @@ const PremiumAdCardComponent = ({
  </div>
  ) : (
  <div className="w-[88px] h-[88px] sm:w-24 sm:h-24 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
- <FallbackIcon className="w-9 h-9 text-primary/50" />
+ <FallbackIcon className="w-9 h-9 text-primary" />
  </div>
  )}
  </div>
@@ -101,7 +101,7 @@ const PremiumAdCardComponent = ({
  {merchant.business_name}
  </h3>
  {isVerifiedPro && (
- <BadgeCheck className="w-4 h-4 text-info0 flex-shrink-0 mt-0.5" />
+ <BadgeCheck className="w-4 h-4 text-info flex-shrink-0 mt-0.5" />
  )}
  </div>
 
@@ -113,9 +113,9 @@ const PremiumAdCardComponent = ({
  key={i}
  className={`w-3.5 h-3.5 ${
  i < fullStars
- ?"text-warning0 fill-warning0"
+ ?"text-warning fill-warning"
  : i === fullStars && hasHalfStar
- ?"text-warning0 fill-warning0/50"
+ ?"text-warning fill-warning/50"
  :"text-muted-foreground/20"
  }`}
  />

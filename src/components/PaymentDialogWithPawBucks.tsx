@@ -455,7 +455,7 @@ export const PaymentDialogWithPawBucks = ({
 
  {/* Pet Fund Credit Banner - only when sole source */}
  {petFundApplicable && !hasBothSources && totalAmount > 0 && (
- <div className="bg-success/100/10 border border-success/200/20 rounded-lg p-3 flex items-start gap-2">
+ <div className="bg-success/10 border border-success/20 rounded-lg p-3 flex items-start gap-2">
  <Gift className="w-4 h-4 text-success mt-0.5 flex-shrink-0" />
  <div>
  <p className="text-sm font-medium text-success">
@@ -470,7 +470,7 @@ export const PaymentDialogWithPawBucks = ({
 
  {/* Pet Fund not applicable - below minimum */}
  {(hasPetFund || hasWelcomeCredit) && acceptsPawbucks && totalAmount > 0 && totalAmount < petFundMinUsd && (
- <div className="bg-warning/100/10 border border-warning/200/20 rounded-lg p-3 flex items-start gap-2">
+ <div className="bg-warning/10 border border-warning/20 rounded-lg p-3 flex items-start gap-2">
  <Gift className="w-4 h-4 text-warning mt-0.5 flex-shrink-0" />
  <div>
  <p className="text-sm font-medium text-warning">
@@ -483,7 +483,7 @@ export const PaymentDialogWithPawBucks = ({
  <div className="mt-2">
  <div className="w-full bg-warning/15 rounded-full h-2">
  <div
- className="bg-warning/100 h-2 rounded-full transition-all"
+ className="bg-warning h-2 rounded-full transition-all"
  style={{ width: `${Math.min(100, (totalAmount / petFundMinUsd) * 100)}%` }}
  />
  </div>
@@ -551,7 +551,7 @@ export const PaymentDialogWithPawBucks = ({
  )}
 
  {acceptsPawbucks && pawbucksBalance === 0 && totalAmount > 0 && !hasWelcomeCredit && (
- <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
+ <div className="text-sm text-muted-foreground bg-muted p-3 rounded-lg">
  <Coins className="w-4 h-4 inline mr-1" />
  This merchant accepts PawBucks, but you don't have any yet. Earn PawBucks by making purchases!
  </div>

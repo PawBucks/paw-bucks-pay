@@ -967,7 +967,7 @@ const MerchantDashboard = () => {
  onClick={() => handleTabChange(item.id)}
  className={cn(
 "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
-"hover:bg-accent/50 hover:text-accent-foreground",
+"hover:bg-accent hover:text-accent-foreground",
 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
  isActive &&"bg-primary/10 text-primary border-l-2 border-primary"
  )}

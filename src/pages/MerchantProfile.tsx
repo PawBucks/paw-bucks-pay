@@ -431,7 +431,7 @@ const MerchantProfile = memo(() => {
  <section id="section-overview">
  {/* Featured Review Quote */}
  {featuredReview && (
- <div className="bg-muted/50 rounded-xl p-4 mb-6 border border-border/50">
+ <div className="bg-muted rounded-xl p-4 mb-6 border border-border/50">
  <div className="flex items-start gap-3">
  <ThumbsUp className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
  <div>
@@ -520,7 +520,7 @@ const MerchantProfile = memo(() => {
  rel="noopener noreferrer"
  className="flex items-center gap-3 group py-1"
  >
- <div className="w-10 h-10 rounded-full bg-accent/100/10 flex items-center justify-center flex-shrink-0">
+ <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0">
  <Globe className="w-4 h-4 text-accent" />
  </div>
  <div>

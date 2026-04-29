@@ -284,7 +284,7 @@ export function AdminInvoiceForm({ invoice, onSave, onCancel }: Props) {
  </div>
 
  {recipientName && (
- <div className="text-sm p-3 rounded-md bg-muted/50">
+ <div className="text-sm p-3 rounded-md bg-muted">
  <p className="font-medium">{recipientName}</p>
  {recipientEmail && <p className="text-muted-foreground">{recipientEmail}</p>}
  </div>

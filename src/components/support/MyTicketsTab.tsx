@@ -292,7 +292,7 @@ export const MyTicketsTab = () => {
  ) : (
  <div className="space-y-3 max-h-60 overflow-y-auto">
  {ticketReplies.map(reply => (
- <div key={reply.id} className={`rounded-lg p-3 text-sm ${reply.is_admin_reply ?'bg-primary/5 border border-primary/20 ml-4' :'bg-muted/50 mr-4'}`}>
+ <div key={reply.id} className={`rounded-lg p-3 text-sm ${reply.is_admin_reply ?'bg-primary/5 border border-primary/20 ml-4' :'bg-muted mr-4'}`}>
  <div className="flex items-center gap-2 mb-1">
  <span className="font-medium text-xs">
  {reply.is_admin_reply ?'🛡️ Support Team' :'You'}

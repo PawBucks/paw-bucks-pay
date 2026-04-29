@@ -479,7 +479,7 @@ export function AccountantCollaboration({ merchantId, businessName }: Accountant
  {activityLogs.map((log) => (
  <div 
  key={log.id} 
- className="flex items-start gap-3 p-3 rounded-lg bg-muted/50"
+ className="flex items-start gap-3 p-3 rounded-lg bg-muted"
  >
  <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
  <Eye className="h-4 w-4 text-primary" />

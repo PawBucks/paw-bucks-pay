@@ -195,7 +195,7 @@ const BadgesPage = () => {
 
  <div className="space-y-4 py-4">
  {/* Badge Details */}
- <div className="p-3 rounded-lg bg-muted/50">
+ <div className="p-3 rounded-lg bg-muted">
  <div className="text-sm text-muted-foreground">
  <p><strong>Threshold:</strong> ${selectedBadge.threshold_amount} per {selectedBadge.threshold_period}</p>
  <p><strong>Category:</strong> {selectedBadge.category}</p>
@@ -214,7 +214,7 @@ const BadgesPage = () => {
  </p>
  </div>
  ) : (
- <div className="p-4 rounded-xl bg-muted/50 border border-border text-center">
+ <div className="p-4 rounded-xl bg-muted border border-border text-center">
  <p className="text-muted-foreground">
  Keep spending in the {selectedBadge.category} category to unlock this badge!
  </p>

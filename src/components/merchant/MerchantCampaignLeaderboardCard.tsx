@@ -21,7 +21,7 @@ interface CampaignRanking {
 const RANK_DECOR = [
  { icon: Crown, color:"text-warning", bg:"bg-warning/10 border-warning/30" },
  { icon: Medal, color:"text-muted-foreground", bg:"bg-muted/10 border-border/30" },
- { icon: Award, color:"text-warning0", bg:"bg-warning/100/10 border-warning/200/30" },
+ { icon: Award, color:"text-warning", bg:"bg-warning/10 border-warning/30" },
 ];
 
 export function MerchantCampaignLeaderboardCard({ merchantId }: MerchantCampaignLeaderboardCardProps) {

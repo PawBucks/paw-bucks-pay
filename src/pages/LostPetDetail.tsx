@@ -86,7 +86,7 @@ const petTypeIcons: Record<string, React.ReactNode> = {
 const statusColors: Record<string, string> = {
  lost:"bg-destructive text-destructive-foreground",
  found:"bg-secondary text-secondary-foreground",
- reunited:"bg-success/100 text-white",
+ reunited:"bg-success text-white",
 };
 
 const statusIcons: Record<string, React.ReactNode> = {
@@ -432,7 +432,7 @@ const LostPetDetail = () => {
  
  {/* Thumbnail strip for multiple photos */}
  {allPhotos.length > 1 && (
- <div className="flex gap-2 p-3 bg-muted/50 overflow-x-auto">
+ <div className="flex gap-2 p-3 bg-muted overflow-x-auto">
  {allPhotos.map((photo, index) => (
  <PhotoThumbnail
  key={index}
@@ -461,7 +461,7 @@ const LostPetDetail = () => {
  {post.status.charAt(0).toUpperCase() + post.status.slice(1)}
  </Badge>
  {post.reward_amount && (
- <Badge className="absolute top-4 right-4 bg-success/100 text-white gap-1 text-base px-3 py-1">
+ <Badge className="absolute top-4 right-4 bg-success text-white gap-1 text-base px-3 py-1">
  <DollarSign className="w-4 h-4" />
  ${post.reward_amount} Reward
  </Badge>
@@ -608,7 +608,7 @@ const LostPetDetail = () => {
  <AlertDialogTrigger asChild>
  <Button
  variant="outline"
- className="w-full gap-2 border-success/200 text-success hover:bg-success/10 hover:text-success"
+ className="w-full gap-2 border-success text-success hover:bg-success/10 hover:text-success"
  size="lg"
  >
  <PartyPopper className="w-5 h-5" />
@@ -618,7 +618,7 @@ const LostPetDetail = () => {
  <AlertDialogContent>
  <AlertDialogHeader>
  <AlertDialogTitle className="flex items-center gap-2">
- <PartyPopper className="w-5 h-5 text-success0" />
+ <PartyPopper className="w-5 h-5 text-success" />
  Great News!
  </AlertDialogTitle>
  <AlertDialogDescription>
@@ -641,7 +641,7 @@ const LostPetDetail = () => {
 
  {isOwner && post.status ==="reunited" && (
  <div className="p-3 bg-success/10 rounded-lg text-center">
- <CheckCircle2 className="w-8 h-8 text-success0 mx-auto mb-2" />
+ <CheckCircle2 className="w-8 h-8 text-success mx-auto mb-2" />
  <p className="text-sm text-success font-medium">
  {post.pet_name} has been reunited!
  </p>

@@ -141,7 +141,7 @@ export default function MerchantPendingBalance() {
  <CardContent>
  <div className="space-y-3">
  {pendingPayouts.map((payout) => (
- <div key={payout.id} className="flex items-center justify-between p-4 rounded-lg border hover:bg-muted/50 transition-colors">
+ <div key={payout.id} className="flex items-center justify-between p-4 rounded-lg border hover:bg-muted transition-colors">
  <div>
  <p className="font-medium">{formatCurrency(payout.amount, payout.currency)}</p>
  <p className="text-sm text-muted-foreground">

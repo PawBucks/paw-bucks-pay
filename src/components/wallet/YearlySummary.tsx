@@ -294,14 +294,14 @@ export function YearlySummary() {
  </div>
  <p className="text-2xl font-bold">${yearlyData?.totalSpent.toFixed(2) ||'0.00'}</p>
  </div>
- <div className="bg-info/100/10 rounded-lg p-4">
+ <div className="bg-info/10 rounded-lg p-4">
  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
  <TrendingUp className="h-4 w-4" />
  Avg Monthly
  </div>
  <p className="text-2xl font-bold">${yearlyData?.avgMonthly.toFixed(2) ||'0.00'}</p>
  </div>
- <div className="bg-success/100/10 rounded-lg p-4">
+ <div className="bg-success/10 rounded-lg p-4">
  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
  <Store className="h-4 w-4" />
  Transactions
@@ -358,7 +358,7 @@ export function YearlySummary() {
  <h4 className="text-sm font-medium mb-3">Top Merchants</h4>
  <div className="space-y-2">
  {yearlyData?.topMerchants.map((merchant, idx) => (
- <div key={merchant.name} className="flex items-center justify-between p-2 bg-muted/50 rounded-lg">
+ <div key={merchant.name} className="flex items-center justify-between p-2 bg-muted rounded-lg">
  <div className="flex items-center gap-2">
  <span className="text-xs font-medium text-muted-foreground w-5">{idx + 1}.</span>
  <span className="text-sm font-medium truncate max-w-[150px]">{merchant.name}</span>

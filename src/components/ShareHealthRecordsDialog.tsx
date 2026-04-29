@@ -274,7 +274,7 @@ export function ShareHealthRecordsDialog({ petId, petName }: ShareHealthRecordsD
  </div>
  </div>
 
- <div className="flex items-center gap-2 bg-muted/50 rounded-md p-2">
+ <div className="flex items-center gap-2 bg-muted rounded-md p-2">
  <code className="flex-1 text-sm font-mono">{code.access_code}</code>
  <Button
  variant="ghost"

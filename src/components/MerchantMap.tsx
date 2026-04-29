@@ -263,7 +263,7 @@ export const MerchantMap = ({ merchants, onMerchantClick, featuredIds, premiumId
  <h3 class="font-semibold text-sm mb-1">${safeName}</h3>
  <p class="text-xs text-muted-foreground capitalize mb-1">${safeType}</p>
  <div class="flex items-center gap-1 text-xs mb-1">
- <span class="text-warning0">★</span>
+ <span class="text-warning">★</span>
  <span>${(merchant.avg_rating ?? 0).toFixed(1)}</span>
  <span class="text-muted-foreground">(${merchant.review_count ?? 0})</span>
  </div>
@@ -335,7 +335,7 @@ export const MerchantMap = ({ merchants, onMerchantClick, featuredIds, premiumId
  <p className="text-xs font-medium mb-2">Map Legend</p>
  <div className="space-y-1.5">
  <div className="flex items-center gap-2 text-xs text-muted-foreground">
- <div className="w-4 h-4 rounded-full bg-gradient-to-br from-warning to-warning0 border-2 border-warning/30 flex-shrink-0" />
+ <div className="w-4 h-4 rounded-full bg-gradient-to-br from-warning to-warning border-2 border-warning/30 flex-shrink-0" />
  <span>Featured Partner</span>
  </div>
  <div className="flex items-center gap-2 text-xs text-muted-foreground">

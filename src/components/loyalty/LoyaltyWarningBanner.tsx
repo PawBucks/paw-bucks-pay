@@ -19,9 +19,9 @@ const URGENCY_STYLES = {
  text:'text-destructive',
  },
  high: {
- bg:'bg-warning/100/10',
- border:'border-warning/200/30',
- icon:'text-warning0',
+ bg:'bg-warning/10',
+ border:'border-warning/30',
+ icon:'text-warning',
  text:'text-warning',
  },
  medium: {
@@ -31,7 +31,7 @@ const URGENCY_STYLES = {
  text:'text-foreground',
  },
  low: {
- bg:'bg-muted/50',
+ bg:'bg-muted',
  border:'border-border',
  icon:'text-muted-foreground',
  text:'text-muted-foreground',

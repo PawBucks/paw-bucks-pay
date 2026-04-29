@@ -20,7 +20,7 @@ const TIER_CONFIG = {
  gold: {
  emoji:'🥇',
  label:'Gold',
- gradient:'from-warning via-warning to-warning0',
+ gradient:'from-warning via-warning to-warning',
  border:'border-warning/30',
  text:'text-warning',
  glow:'shadow-yellow-400/50',

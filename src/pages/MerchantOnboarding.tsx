@@ -507,7 +507,7 @@ const MerchantOnboarding = () => {
  className={`relative p-3 rounded-lg border-2 transition-all text-left ${
  isSelected 
  ?'border-primary bg-primary/10' 
- :'border-border hover:border-primary/50 hover:bg-muted/50'
+ :'border-border hover:border-primary hover:bg-muted'
  }`}
  >
  <Icon className={`w-5 h-5 mb-1 ${isSelected ?'text-primary' :'text-muted-foreground'}`} />
@@ -565,7 +565,7 @@ const MerchantOnboarding = () => {
  </SelectContent>
  </Select>
  {entityType && ENTITY_TYPE_CONFIG[entityType] && (
- <div className="bg-muted/50 rounded-lg p-3 mt-2">
+ <div className="bg-muted rounded-lg p-3 mt-2">
  <p className="text-sm text-muted-foreground">{ENTITY_TYPE_CONFIG[entityType].description}</p>
  <Badge variant="outline" className="mt-2">
  {ENTITY_TYPE_CONFIG[entityType].taxNote}
@@ -622,7 +622,7 @@ const MerchantOnboarding = () => {
  className={`p-4 rounded-lg border-2 transition-all text-left ${
  isSelected 
  ?'border-primary bg-primary/10' 
- :'border-border hover:border-primary/50 hover:bg-muted/50'
+ :'border-border hover:border-primary hover:bg-muted'
  }`}
  >
  <div className="flex items-center gap-3">

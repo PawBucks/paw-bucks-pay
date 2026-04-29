@@ -109,7 +109,7 @@ export const QuizResult = ({ petName, petType, result, onContinue }: QuizResultP
  className="text-center"
  >
  <h3 className="font-semibold mb-3 flex items-center justify-center gap-2">
- <Star className="w-4 h-4 text-warning0" />
+ <Star className="w-4 h-4 text-warning" />
  Key Traits
  </h3>
  <div className="flex flex-wrap justify-center gap-2">
@@ -137,10 +137,10 @@ export const QuizResult = ({ petName, petType, result, onContinue }: QuizResultP
  initial={{ opacity: 0, y: 20 }}
  animate={{ opacity: 1, y: 0 }}
  transition={{ delay: 1.5 }}
- className="bg-muted/50 rounded-xl p-5"
+ className="bg-muted rounded-xl p-5"
  >
  <h3 className="font-semibold mb-3 flex items-center gap-2">
- <Lightbulb className="w-4 h-4 text-warning0" />
+ <Lightbulb className="w-4 h-4 text-warning" />
  Tips for {transformedResult.name} Parents
  </h3>
  <ul className="space-y-2">

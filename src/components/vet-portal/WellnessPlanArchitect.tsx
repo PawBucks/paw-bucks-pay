@@ -482,7 +482,7 @@ export function WellnessPlanArchitect({ vetId }: WellnessPlanArchitectProps) {
  </Card>
  ))}
 
- <Card className="bg-muted/50">
+ <Card className="bg-muted">
  <CardContent className="py-3">
  <div className="flex justify-between text-sm">
  <span>Total Retail Value:</span>

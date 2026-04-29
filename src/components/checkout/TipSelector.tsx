@@ -58,7 +58,7 @@ export const TipSelector = ({
  return (
  <div className={cn("space-y-2", className)}>
  <Label className="flex items-center gap-2 text-sm font-medium">
- <Heart className="w-4 h-4 text-accent0" />
+ <Heart className="w-4 h-4 text-accent" />
  Add a Tip (USD only)
  </Label>
  <p className="text-xs text-muted-foreground">

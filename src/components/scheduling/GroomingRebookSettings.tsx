@@ -168,7 +168,7 @@ export function GroomingRebookSettings({ merchantId }: GroomingRebookSettingsPro
  <p className="text-xs text-muted-foreground">Reminders Sent</p>
  </GradientCard>
  <GradientCard className="p-3 text-center">
- <CheckCircle className="w-4 h-4 mx-auto text-success0 mb-1" />
+ <CheckCircle className="w-4 h-4 mx-auto text-success mb-1" />
  <p className="text-xl font-bold">{stats.totalRebooked}</p>
  <p className="text-xs text-muted-foreground">Rebooked</p>
  </GradientCard>

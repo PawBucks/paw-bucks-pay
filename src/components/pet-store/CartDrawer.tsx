@@ -123,7 +123,7 @@ export function CartDrawer({
 
  {items.length === 0 ? (
  <div className="flex-1 flex flex-col items-center justify-center gap-4 text-center px-4">
- <div className="w-20 h-20 rounded-full bg-muted/50 flex items-center justify-center">
+ <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center">
  <Package className="w-10 h-10 text-muted-foreground" />
  </div>
  <div>
@@ -150,7 +150,7 @@ export function CartDrawer({
  animate={{ opacity: 1, y: 0 }}
  exit={{ opacity: 0, x: -100 }}
  className={`flex gap-3 p-3 rounded-lg border ${
- outOfStock ?"border-destructive/50 bg-destructive/5" :"bg-card"
+ outOfStock ?"border-destructive bg-destructive/5" :"bg-card"
  }`}
  >
  {item.item.image_url ? (
@@ -236,7 +236,7 @@ export function CartDrawer({
 
  {/* PawBucks slider — only show if user has PawBucks AND order meets $25 min */}
  {pawbucksBalance > 0 && meetsMinOrder && (
- <div className="bg-muted/50 border border-border rounded-lg p-3 space-y-3">
+ <div className="bg-muted border border-border rounded-lg p-3 space-y-3">
  <div className="flex justify-between items-center text-sm">
  <span className="font-medium flex items-center gap-1.5">
  <Coins className="h-4 w-4 text-primary" />

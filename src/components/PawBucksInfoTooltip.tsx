@@ -64,7 +64,7 @@ const PawBucksInfoTooltipComponent = ({
  Your subscription tier determines your earning power:
  </p>
  <div className="grid grid-cols-3 gap-2 text-center text-sm mt-2">
- <div className="bg-muted/50 rounded p-2">
+ <div className="bg-muted rounded p-2">
  <div className="font-bold">10x</div>
  <div className="text-xs text-muted-foreground">Free</div>
  </div>

@@ -64,7 +64,7 @@ function CardFormInner({
 
  return (
  <form onSubmit={handleSubmit} className="space-y-4">
- <div className="flex items-start gap-2 p-3 rounded-lg bg-info/100/10 border border-info/200/20 text-sm">
+ <div className="flex items-start gap-2 p-3 rounded-lg bg-info/10 border border-info/20 text-sm">
  <Shield className="w-4 h-4 text-info mt-0.5 flex-shrink-0" />
  <div className="text-info">
  <p className="font-medium">Card Required for This Booking</p>

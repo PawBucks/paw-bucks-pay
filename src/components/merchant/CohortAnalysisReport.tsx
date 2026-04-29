@@ -217,8 +217,8 @@ export function CohortAnalysisReport() {
 
  <GradientCard gradient>
  <div className="flex items-center gap-3">
- <div className="p-3 rounded-xl bg-accent/100/10">
- <Repeat className="h-5 w-5 text-accent0" />
+ <div className="p-3 rounded-xl bg-accent/10">
+ <Repeat className="h-5 w-5 text-accent" />
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Overall Retention</p>
@@ -343,7 +343,7 @@ export function CohortAnalysisReport() {
  </thead>
  <tbody>
  {cohort_breakdown.map((cohort) => (
- <tr key={cohort.cohort_month} className="border-b hover:bg-muted/50">
+ <tr key={cohort.cohort_month} className="border-b hover:bg-muted">
  <td className="py-3 px-2 font-medium">{cohort.cohort_month}</td>
  <td className="py-3 px-2 text-right">{cohort.customer_count}</td>
  <td className="py-3 px-2 text-right">${cohort.avg_ltv.toFixed(2)}</td>
@@ -504,7 +504,7 @@ export function CohortAnalysisReport() {
 
  <div className="space-y-4">
  {customer_segments.map((segment) => (
- <div key={segment.segment} className="p-4 rounded-lg bg-muted/50">
+ <div key={segment.segment} className="p-4 rounded-lg bg-muted">
  <div className="flex items-center justify-between mb-2">
  <span className="font-medium">{segment.segment}</span>
  <Badge variant="secondary">{segment.percentage.toFixed(1)}%</Badge>
@@ -552,7 +552,7 @@ export function CohortAnalysisReport() {
  {recommendations.map((rec, i) => (
  <div 
  key={i} 
- className="flex items-start gap-3 p-4 rounded-lg bg-muted/50 border-l-4 border-primary"
+ className="flex items-start gap-3 p-4 rounded-lg bg-muted border-l-4 border-primary"
  >
  <div className="p-2 rounded-full bg-primary/10">
  <TrendingUp className="h-4 w-4 text-primary" />

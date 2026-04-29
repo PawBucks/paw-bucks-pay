@@ -183,7 +183,7 @@ export default function MerchantOfferCodes() {
  {codes.map((code, index) => (
  <div
  key={index}
- className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent/50 transition-colors"
+ className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent transition-colors"
  >
  <code className="font-mono text-sm">{code}</code>
  <Button

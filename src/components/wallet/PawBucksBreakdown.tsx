@@ -107,7 +107,7 @@ export const PawBucksBreakdown = ({ userId }: PawBucksBreakdownProps) => {
  <div className="space-y-4">
  {/* Balance Cards */}
  <div className="grid grid-cols-2 gap-3">
- <Card className="p-4 bg-success/100/10 border-success/200/20">
+ <Card className="p-4 bg-success/10 border-success/20">
  <div className="flex items-center gap-2 mb-1">
  <CheckCircle className="w-4 h-4 text-success" />
  <span className="text-sm text-muted-foreground">Available</span>
@@ -117,7 +117,7 @@ export const PawBucksBreakdown = ({ userId }: PawBucksBreakdownProps) => {
  </p>
  </Card>
  
- <Card className="p-4 bg-warning/100/10 border-warning/200/20">
+ <Card className="p-4 bg-warning/10 border-warning/20">
  <div className="flex items-center gap-2 mb-1">
  <Clock className="w-4 h-4 text-warning" />
  <span className="text-sm text-muted-foreground">Pending</span>
@@ -140,11 +140,11 @@ export const PawBucksBreakdown = ({ userId }: PawBucksBreakdownProps) => {
 
  {/* Expiring Soon Alert */}
  {expiringItems.length > 0 && (
- <Card className="p-4 border-warning/200/30 bg-warning/100/5">
+ <Card className="p-4 border-warning/30 bg-warning/5">
  <h4 className="font-medium mb-3 flex items-center gap-2">
- <AlertTriangle className="w-4 h-4 text-warning0" />
+ <AlertTriangle className="w-4 h-4 text-warning" />
  Expiring Soon
- <Badge variant="outline" className="text-xs bg-warning/100/10 text-warning border-warning/200/30">
+ <Badge variant="outline" className="text-xs bg-warning/10 text-warning border-warning/30">
  {Formatters.number(totalExpiring)} PB
  </Badge>
  </h4>
@@ -157,13 +157,13 @@ export const PawBucksBreakdown = ({ userId }: PawBucksBreakdownProps) => {
  key={item.id}
  className={`flex items-center justify-between p-3 rounded-lg border ${
  isUrgent 
- ?'bg-destructive/100/10 border-destructive/200/30' 
+ ?'bg-destructive/10 border-destructive/30' 
  :'bg-muted/30 border-border/50'
  }`}
  >
  <div className="flex-1">
  <p className="text-sm font-medium">{item.description ||"Earned PawBucks"}</p>
- <p className={`text-xs ${isUrgent ?'text-destructive0 font-medium' :'text-muted-foreground'}`}>
+ <p className={`text-xs ${isUrgent ?'text-destructive font-medium' :'text-muted-foreground'}`}>
  {daysLeft === 0 
  ?'Expires today!' 
  : daysLeft === 1 
@@ -172,7 +172,7 @@ export const PawBucksBreakdown = ({ userId }: PawBucksBreakdownProps) => {
  </p>
  </div>
  <div className="text-right">
- <p className={`font-semibold ${isUrgent ?'text-destructive0' :'text-warning0'}`}>
+ <p className={`font-semibold ${isUrgent ?'text-destructive' :'text-warning'}`}>
  {Formatters.number(item.amount)}
  </p>
  <p className="text-xs text-muted-foreground">
@@ -215,7 +215,7 @@ export const PawBucksBreakdown = ({ userId }: PawBucksBreakdownProps) => {
  </div>
  <div className="text-right">
  <p className="font-semibold text-warning">+{Formatters.number(item.amount)}</p>
- <Badge variant="outline" className="text-xs bg-warning/100/10 text-warning border-warning/200/30">
+ <Badge variant="outline" className="text-xs bg-warning/10 text-warning border-warning/30">
  Vesting
  </Badge>
  </div>

@@ -39,7 +39,7 @@ export const ServiceCreditCard = ({ credit, onClick, compact = false }: ServiceC
  {!isUsed && !isExpired && (
  <div className="flex items-center gap-1 text-xs text-muted-foreground">
  <Clock className="w-3 h-3" />
- <span className={isExpiringSoon ?"text-warning0" :""}>
+ <span className={isExpiringSoon ?"text-warning" :""}>
  {formatDistanceToNow(expiresAt, { addSuffix: true })}
  </span>
  </div>
@@ -107,7 +107,7 @@ export const ServiceCreditCard = ({ credit, onClick, compact = false }: ServiceC
  {isExpired ? (
  <span className="text-destructive">Expired</span>
  ) : isExpiringSoon ? (
- <span className="text-warning0 font-medium">
+ <span className="text-warning font-medium">
  Expires {formatDistanceToNow(expiresAt, { addSuffix: true })}!
  </span>
  ) : (

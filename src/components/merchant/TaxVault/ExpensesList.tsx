@@ -39,7 +39,7 @@ const CATEGORY_COLORS: Record<string, string> = {
  office_supplies:'bg-warning/15 text-warning dark:bg-warning/30 dark:text-warning',
  software_subscriptions:'bg-info/10 text-info',
  training_education:'bg-success/10 text-success',
- other:'bg-muted/50 text-foreground',
+ other:'bg-muted text-foreground',
 };
 
 // Helper to get auto-logged tooltip text based on category

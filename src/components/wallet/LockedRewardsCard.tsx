@@ -111,9 +111,9 @@ export const LockedRewardsCard = ({ userId, onBalanceUpdate }: LockedRewardsCard
  const getStatusIcon = (status: string) => {
  switch (status) {
  case"funded":
- return <CheckCircle2 className="w-3 h-3 text-success0" />;
+ return <CheckCircle2 className="w-3 h-3 text-success" />;
  case"action_required":
- return <Clock className="w-3 h-3 text-warning0" />;
+ return <Clock className="w-3 h-3 text-warning" />;
  default:
  return <Lock className="w-3 h-3 text-muted-foreground" />;
  }
@@ -176,7 +176,7 @@ export const LockedRewardsCard = ({ userId, onBalanceUpdate }: LockedRewardsCard
  <motion.div
  initial={{ opacity: 0, y: 10 }}
  animate={{ opacity: 1, y: 0 }}
- className="p-3 rounded-lg bg-warning/100/10 border border-warning/200/20"
+ className="p-3 rounded-lg bg-warning/10 border border-warning/20"
  >
  <button
  onClick={() => setShowDetails(!showDetails)}
@@ -192,7 +192,7 @@ export const LockedRewardsCard = ({ userId, onBalanceUpdate }: LockedRewardsCard
  <span className="text-sm font-semibold text-warning">
  +{Formatters.number(lockedBalance)} PB
  </span>
- <Badge variant="outline" className="text-xs bg-warning/100/10 text-warning border-warning/200/30">
+ <Badge variant="outline" className="text-xs bg-warning/10 text-warning border-warning/30">
  ${lockedUSD}
  </Badge>
  </div>
@@ -206,7 +206,7 @@ export const LockedRewardsCard = ({ userId, onBalanceUpdate }: LockedRewardsCard
  exit={{ height: 0, opacity: 0 }}
  className="overflow-hidden"
  >
- <div className="mt-3 pt-3 border-t border-warning/200/20 space-y-2">
+ <div className="mt-3 pt-3 border-t border-warning/20 space-y-2">
  {lockedItems.map((item) => (
  <div
  key={item.id}

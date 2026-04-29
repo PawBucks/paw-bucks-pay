@@ -384,7 +384,7 @@ const InvoicePayment = () => {
  <div className="min-h-screen bg-background flex items-center justify-center p-4">
  <Card className="max-w-md w-full">
  <CardContent className="pt-6 text-center">
- <CheckCircle className="h-16 w-16 text-success0 mx-auto mb-4" />
+ <CheckCircle className="h-16 w-16 text-success mx-auto mb-4" />
  <h2 className="text-2xl font-semibold mb-2">Payment Successful!</h2>
  <p className="text-muted-foreground mb-4">
  Thank you for your payment. A receipt has been sent to your email.
@@ -526,7 +526,7 @@ const InvoicePayment = () => {
  .map((item: any) => (
  <div
  key={item.id}
- className="grid grid-cols-12 gap-2 text-sm py-2 px-2 rounded bg-muted/50"
+ className="grid grid-cols-12 gap-2 text-sm py-2 px-2 rounded bg-muted"
  >
  <div className="col-span-6">{item.description ||"—"}</div>
  <div className="col-span-2 text-right">{item.quantity}</div>
@@ -622,7 +622,7 @@ const InvoicePayment = () => {
  {isPaid ? (
  <Card className="border-success/20 bg-success/10">
  <CardContent className="pt-6 text-center">
- <CheckCircle className="h-12 w-12 text-success0 mx-auto mb-3" />
+ <CheckCircle className="h-12 w-12 text-success mx-auto mb-3" />
  <h3 className="font-semibold text-success mb-1">
  Invoice Paid
  </h3>
@@ -642,7 +642,7 @@ const InvoicePayment = () => {
  </Card>
  ) : !user && !guestCheckoutConfirmed ? (
  /* Login Recommended - But can proceed as guest */
- <Card className="border-primary/50">
+ <Card className="border-primary">
  <CardHeader className="text-center pb-2">
  <div className="h-16 w-16 rounded-full bg-gradient-to-br from-warning to-warning flex items-center justify-center mx-auto mb-3">
  <Coins className="h-8 w-8 text-warning" />
@@ -655,19 +655,19 @@ const InvoicePayment = () => {
  <CardContent className="space-y-4">
  <div className="space-y-2 text-sm">
  <div className="flex items-center gap-2 text-muted-foreground">
- <CheckCircle className="h-4 w-4 text-success0" />
+ <CheckCircle className="h-4 w-4 text-success" />
  <span>Earn up to 30x PawBucks rewards</span>
  </div>
  <div className="flex items-center gap-2 text-muted-foreground">
- <CheckCircle className="h-4 w-4 text-success0" />
+ <CheckCircle className="h-4 w-4 text-success" />
  <span>Pay with PawBucks + credit card</span>
  </div>
  <div className="flex items-center gap-2 text-muted-foreground">
- <CheckCircle className="h-4 w-4 text-success0" />
+ <CheckCircle className="h-4 w-4 text-success" />
  <span>Track all your payment history</span>
  </div>
  <div className="flex items-center gap-2 text-muted-foreground">
- <CheckCircle className="h-4 w-4 text-success0" />
+ <CheckCircle className="h-4 w-4 text-success" />
  <span>Receive payment receipts via email</span>
  </div>
  </div>

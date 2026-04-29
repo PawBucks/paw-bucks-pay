@@ -350,7 +350,7 @@ export function ClaimResolutionScreen({
  <div className="min-h-screen bg-gradient-to-b from-muted to-white flex items-center justify-center p-4">
  <Card className="max-w-md w-full">
  <CardContent className="p-8 text-center">
- <AlertCircle className="h-12 w-12 mx-auto text-warning0 mb-4" />
+ <AlertCircle className="h-12 w-12 mx-auto text-warning mb-4" />
  <h2 className="text-xl font-semibold mb-2">Claim Not Found</h2>
  <p className="text-muted-foreground mb-4">
  This claim may have already been resolved or doesn't exist.
@@ -466,7 +466,7 @@ export function ClaimResolutionScreen({
 
  // Options Step (Main View)
  return (
- <div className="min-h-screen bg-gradient-to-b from-warning/50 to-white p-4">
+ <div className="min-h-screen bg-gradient-to-b from-warning to-white p-4">
  <div className="max-w-lg mx-auto">
  {onBack && (
  <Button variant="ghost" onClick={onBack} className="mb-4 text-warning">
@@ -507,7 +507,7 @@ export function ClaimResolutionScreen({
 
  {/* Denial Reason */}
  {slice.claim?.denial_reason && (
- <div className="p-3 bg-muted/50 rounded-lg border border-border mb-4">
+ <div className="p-3 bg-muted rounded-lg border border-border mb-4">
  <div className="flex items-start gap-2">
  <Info className="h-4 w-4 text-muted-foreground0 mt-0.5" />
  <div>
@@ -519,11 +519,11 @@ export function ClaimResolutionScreen({
  )}
 
  <div className="grid grid-cols-2 gap-3 text-sm">
- <div className="p-2 bg-muted/50 rounded">
+ <div className="p-2 bg-muted rounded">
  <p className="text-muted-foreground">Claim</p>
  <p className="font-medium">{slice.claim?.claim_number ||"N/A"}</p>
  </div>
- <div className="p-2 bg-muted/50 rounded">
+ <div className="p-2 bg-muted rounded">
  <p className="text-muted-foreground">Provider</p>
  <p className="font-medium">
  {slice.claim?.policy?.vet_insurance_providers?.name ||"N/A"}
@@ -565,7 +565,7 @@ export function ClaimResolutionScreen({
  <div className="flex items-center gap-2">
  <p className="font-semibold text-success">Use PawBucks</p>
  {canPayFullWithPawBucks && (
- <Badge className="bg-success/100 text-white text-xs">Recommended</Badge>
+ <Badge className="bg-success text-white text-xs">Recommended</Badge>
  )}
  </div>
  <p className="text-sm text-success">

@@ -180,7 +180,7 @@ const Profile = () => {
  </p>
  </div>
  {subscription.subscribed && (
- <Badge className="bg-gradient-to-r from-warning0 to-warning0 border-0">
+ <Badge className="bg-gradient-to-r from-warning to-warning border-0">
  <Crown className="w-3 h-3 mr-1" />
  Premium Member
  </Badge>
@@ -264,7 +264,7 @@ const Profile = () => {
  <div className="space-y-4">
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-3">
- <div className="w-12 h-12 rounded-full bg-gradient-to-br from-warning0 to-warning0 flex items-center justify-center">
+ <div className="w-12 h-12 rounded-full bg-gradient-to-br from-warning to-warning flex items-center justify-center">
  <Sparkles className="w-6 h-6 text-white" />
  </div>
  <div>
@@ -284,7 +284,7 @@ const Profile = () => {
  </div>
 
  <Button 
- className="w-full bg-gradient-to-r from-warning0 to-warning0 hover:from-warning hover:to-warning"
+ className="w-full bg-gradient-to-r from-warning to-warning hover:from-warning hover:to-warning"
  onClick={() => handleSubscribe('basic')}
  disabled={isSubscribing || subLoading}
  >
@@ -305,13 +305,13 @@ const Profile = () => {
 
  {/* PawPass+ */}
  <GradientCard className="relative border-2 border-primary" gradient={true}>
- <Badge className="absolute -top-3 right-4 bg-gradient-to-r from-accent0 to-accent0 border-0">
+ <Badge className="absolute -top-3 right-4 bg-gradient-to-r from-accent to-accent border-0">
  Most Popular
  </Badge>
  <div className="space-y-4">
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-3">
- <div className="w-12 h-12 rounded-full bg-gradient-to-br from-accent0 to-accent0 flex items-center justify-center">
+ <div className="w-12 h-12 rounded-full bg-gradient-to-br from-accent to-accent flex items-center justify-center">
  <Crown className="w-6 h-6 text-white" />
  </div>
  <div>
@@ -334,7 +334,7 @@ const Profile = () => {
  </div>
 
  <Button 
- className="w-full bg-gradient-to-r from-accent0 to-accent0 hover:from-accent hover:to-accent"
+ className="w-full bg-gradient-to-r from-accent to-accent hover:from-accent hover:to-accent"
  onClick={() => handleSubscribe('plus')}
  disabled={isSubscribing || subLoading}
  >
@@ -363,8 +363,8 @@ const Profile = () => {
  <div className="flex items-center gap-3">
  <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
  getSubscriptionTier(subscription.product_id, subscription.subscription_tier) ==='pawpass_plus'
- ?'bg-gradient-to-br from-accent0 to-accent0'
- :'bg-gradient-to-br from-warning0 to-warning0'
+ ?'bg-gradient-to-br from-accent to-accent'
+ :'bg-gradient-to-br from-warning to-warning'
  }`}>
  {getSubscriptionTier(subscription.product_id, subscription.subscription_tier) ==='pawpass_plus' ? (
  <Crown className="w-6 h-6 text-white" />
@@ -379,7 +379,7 @@ const Profile = () => {
  <p className="text-sm text-muted-foreground">Active Subscription</p>
  </div>
  </div>
- <Badge variant="outline" className="bg-success/100/10 text-success0 border-success/200/20">
+ <Badge variant="outline" className="bg-success/10 text-success border-success/20">
  {subscription.status ==='trialing' ?'Trial' :'Active'}
  </Badge>
  </div>

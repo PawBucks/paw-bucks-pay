@@ -358,7 +358,7 @@ const Wallet = () => {
  return (
  <div
  key={transaction.id}
- className={`flex items-center justify-between p-4 rounded-xl border border-border/50 hover:bg-muted/50 transition-colors ${
+ className={`flex items-center justify-between p-4 rounded-xl border border-border/50 hover:bg-muted transition-colors ${
  isRefunded ?'bg-destructive/5 border-destructive/20' :'bg-muted/30'
  }`}
  >
@@ -401,7 +401,7 @@ const Wallet = () => {
  </div>
  ) : (
  <div className="text-center py-12">
- <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-3">
+ <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-3">
  <WalletIcon className="w-8 h-8 text-muted-foreground" />
  </div>
  <p className="text-muted-foreground mb-4">No transactions yet</p>
@@ -423,7 +423,7 @@ const Wallet = () => {
  {pawbucksActivity.map((activity) => (
  <div
  key={activity.id}
- className="flex items-center justify-between p-4 rounded-xl bg-muted/30 border border-border/50 hover:bg-muted/50 transition-colors"
+ className="flex items-center justify-between p-4 rounded-xl bg-muted/30 border border-border/50 hover:bg-muted transition-colors"
  >
  <div className="flex items-center gap-3">
  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
@@ -459,7 +459,7 @@ const Wallet = () => {
  </div>
  ) : (
  <div className="text-center py-12">
- <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-3">
+ <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-3">
  <Coins className="w-8 h-8 text-muted-foreground" />
  </div>
  <p className="text-muted-foreground mb-4">No PawBucks activity yet</p>

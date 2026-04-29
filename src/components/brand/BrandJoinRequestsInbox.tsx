@@ -143,7 +143,7 @@ export function BrandJoinRequestsInbox({ brandId }: BrandJoinRequestsInboxProps)
  {history.map((req) => (
  <div
  key={req.id}
- className="flex items-center gap-3 p-3 rounded-lg border opacity-80 cursor-pointer hover:opacity-100 hover:bg-muted/50 transition"
+ className="flex items-center gap-3 p-3 rounded-lg border opacity-80 cursor-pointer hover:opacity-100 hover:bg-muted transition"
  onClick={() => setSelected(req)}
  >
  <div className="flex-1 min-w-0">

@@ -403,8 +403,8 @@ const Storefront = memo(() => {
  )}
 
  {/* Rewards Badge */}
- <div className="inline-flex items-center gap-3 px-5 py-3 rounded-xl bg-gradient-to-r from-warning0/15 to-warning0/15 border border-warning/200/30">
- <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-warning to-warning0 flex items-center justify-center shadow-lg">
+ <div className="inline-flex items-center gap-3 px-5 py-3 rounded-xl bg-gradient-to-r from-warning/15 to-warning/15 border border-warning/30">
+ <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-warning to-warning flex items-center justify-center shadow-lg">
  <Sparkles className="h-5 w-5 text-white" />
  </div>
  <div>
@@ -415,13 +415,13 @@ const Storefront = memo(() => {
 
  {/* Trust Indicators */}
  <div className="flex flex-wrap gap-3">
- <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-success/100/10 text-success text-sm">
+ <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-success/10 text-success text-sm">
  <Shield className="h-4 w-4" /> Secure
  </div>
- <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-info/100/10 text-info text-sm">
+ <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-info/10 text-info text-sm">
  <CreditCard className="h-4 w-4" /> Stripe
  </div>
- <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-warning/100/10 text-warning text-sm">
+ <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-warning/10 text-warning text-sm">
  <Star className="h-4 w-4" /> Verified
  </div>
  </div>
@@ -433,7 +433,7 @@ const Storefront = memo(() => {
  {/* Products Section */}
  <div className="container py-10 md:py-14">
  {products.length === 0 && subscriptionPlans.length === 0 ? (
- <Card className="border-dashed border-2 bg-gradient-to-br from-muted/30 to-muted/50">
+ <Card className="border-dashed border-2 bg-gradient-to-br from-muted/30 to-muted">
  <CardContent className="flex flex-col items-center justify-center py-20">
  <div className="h-24 w-24 rounded-2xl bg-gradient-to-br from-muted to-muted/80 flex items-center justify-center mb-8 shadow-inner">
  <Package className="h-12 w-12 text-muted-foreground" />
@@ -484,7 +484,7 @@ const Storefront = memo(() => {
  </div>
  {plan.trial_days > 0 && (
  <div className="absolute top-3 right-3">
- <Badge variant="outline" className="bg-success/100/20 text-success border-success/200/30">
+ <Badge variant="outline" className="bg-success/20 text-success border-success/30">
  {plan.trial_days} day trial
  </Badge>
  </div>
@@ -534,7 +534,7 @@ const Storefront = memo(() => {
  className="group overflow-hidden hover:shadow-2xl transition-all duration-300 hover:border-primary/40 hover:-translate-y-1.5 bg-card/80 backdrop-blur-sm"
  >
  {/* Product Image */}
- <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-muted to-muted/50">
+ <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-muted to-muted">
  {product.images && product.images.length > 0 ? (
  <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" width={400} height={400} />
  ) : (
@@ -544,7 +544,7 @@ const Storefront = memo(() => {
  )}
  {estimatedPawBucks > 0 && (
  <div className="absolute top-3 right-3">
- <Badge className="bg-gradient-to-r from-warning0 to-warning0 text-white border-0 shadow-lg">
+ <Badge className="bg-gradient-to-r from-warning to-warning text-white border-0 shadow-lg">
  <Sparkles className="h-3 w-3 mr-1" /> +{estimatedPawBucks} PB
  </Badge>
  </div>

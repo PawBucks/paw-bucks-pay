@@ -34,7 +34,7 @@ export const QuizQuestion = ({
  i < questionNumber
  ?"w-8 bg-primary"
  : i === questionNumber
- ?"w-8 bg-primary/50"
+ ?"w-8 bg-primary"
  :"w-2 bg-muted"
  }`}
  initial={false}
@@ -106,7 +106,7 @@ const OptionCard = ({ option, index, isSelected, onSelect }: OptionCardProps) =>
  className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-200 group ${
  isSelected
  ?"border-primary bg-primary/10 shadow-md"
- :"border-border hover:border-primary/50 hover:bg-muted/50"
+ :"border-border hover:border-primary hover:bg-muted"
  }`}
  whileHover={{ scale: 1.02 }}
  whileTap={{ scale: 0.98 }}

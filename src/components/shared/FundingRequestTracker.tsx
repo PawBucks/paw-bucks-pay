@@ -42,11 +42,11 @@ function getStatusBadge(status: string) {
  case"pending":
  return <Badge variant="secondary" className="gap-1"><Clock className="w-3 h-3" /> Submitted</Badge>;
  case"in_review":
- return <Badge className="gap-1 bg-warning/100/15 text-warning border-warning/200/30 hover:bg-warning/100/20"><Search className="w-3 h-3" /> In Review</Badge>;
+ return <Badge className="gap-1 bg-warning/15 text-warning border-warning/30 hover:bg-warning/20"><Search className="w-3 h-3" /> In Review</Badge>;
  case"approved":
- return <Badge className="gap-1 bg-success/100/15 text-success border-success/200/30 hover:bg-success/100/20"><CheckCircle2 className="w-3 h-3" /> Approved</Badge>;
+ return <Badge className="gap-1 bg-success/15 text-success border-success/30 hover:bg-success/20"><CheckCircle2 className="w-3 h-3" /> Approved</Badge>;
  case"funded":
- return <Badge className="gap-1 bg-info/100/15 text-info border-info/200/30 hover:bg-info/100/20"><DollarSign className="w-3 h-3" /> Funded</Badge>;
+ return <Badge className="gap-1 bg-info/15 text-info border-info/30 hover:bg-info/20"><DollarSign className="w-3 h-3" /> Funded</Badge>;
  case"denied":
  return <Badge variant="destructive" className="gap-1"><XCircle className="w-3 h-3" /> Denied</Badge>;
  default:
@@ -78,7 +78,7 @@ function StepIndicator({ step, currentIndex, isLast, status }: {
  isCompleted &&"bg-primary border-primary text-primary-foreground",
  isCurrent && !isDenied && !isFunded &&"border-primary bg-primary/10 text-primary ring-4 ring-primary/20",
  isCurrent && isDenied &&"border-destructive bg-destructive/10 text-destructive ring-4 ring-destructive/20",
- isCurrent && (isApproved || isFunded) &&"border-success/200 bg-success/100/10 text-success ring-4 ring-success0/20",
+ isCurrent && (isApproved || isFunded) &&"border-success bg-success/10 text-success ring-4 ring-success/20",
  !isCompleted && !isCurrent &&"border-muted-foreground/30 text-muted-foreground/50"
  )}
  >
@@ -170,7 +170,7 @@ function RequestCard({ request, entityType }: { request: FundingRequest; entityT
  {/* Status description */}
  <div className={cn(
 "rounded-lg px-4 py-3",
- (request.status ==="approved" || request.status ==="funded") ?"bg-success/100/10 border border-success/200/20" :"bg-muted/50"
+ (request.status ==="approved" || request.status ==="funded") ?"bg-success/10 border border-success/20" :"bg-muted"
  )}>
  <p className={cn(
 "text-sm",

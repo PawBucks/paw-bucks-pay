@@ -32,7 +32,7 @@ export const WelcomeCreditBadge = ({
 
  const badge = (
  <Badge 
- className={`bg-gradient-to-r from-warning0/20 to-warning0/20 text-warning border-warning/200/30 hover:from-warning0/30 hover:to-warning0/30 ${sizeClasses[size]} ${className}`}
+ className={`bg-gradient-to-r from-warning/20 to-warning/20 text-warning border-warning/30 hover:from-warning/30 hover:to-warning/30 ${sizeClasses[size]} ${className}`}
  >
  <Gift className={`${iconSizes[size]} mr-1`} />
  Welcome Credit Accepted

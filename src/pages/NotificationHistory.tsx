@@ -147,7 +147,7 @@ export default function NotificationHistory() {
  case"marketing":
  return"bg-primary/10 text-primary border-primary/20";
  case"transactional":
- return"bg-success/100/10 text-success border-success/200/20";
+ return"bg-success/10 text-success border-success/20";
  default:
  return"bg-muted text-muted-foreground border-border";
  }
@@ -339,7 +339,7 @@ export default function NotificationHistory() {
 "w-full text-left p-4 rounded-lg border transition-colors hover:bg-accent/30 cursor-pointer",
  notification.is_read
  ?"bg-background border-border"
- :"bg-accent/50 border-accent"
+ :"bg-accent border-accent"
  )}
  >
  <div className="flex items-start justify-between gap-4">

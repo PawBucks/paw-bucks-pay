@@ -49,7 +49,7 @@ const Founding50BadgeComponent = ({ entityType, entityId, size ="md" }: Founding
  transition={{ type:"spring", stiffness: 200, damping: 15 }}
  className={`
  inline-flex items-center font-bold rounded-full cursor-default select-none
- bg-gradient-to-r from-warning0 via-warning to-warning0
+ bg-gradient-to-r from-warning via-warning to-warning
  text-warning shadow-[0_0_12px_rgba(245,158,11,0.4)]
  border border-warning/30
  ${sizeClasses[size]}

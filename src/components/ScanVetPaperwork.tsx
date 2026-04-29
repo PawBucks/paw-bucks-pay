@@ -352,7 +352,7 @@ export const ScanVetPaperwork = ({
  ) : (
  <div className="grid grid-cols-2 gap-4">
  <Card
- className="p-8 flex flex-col items-center justify-center gap-3 cursor-pointer hover:bg-accent/50 transition-colors border-dashed border-2"
+ className="p-8 flex flex-col items-center justify-center gap-3 cursor-pointer hover:bg-accent transition-colors border-dashed border-2"
  onClick={() => cameraInputRef.current?.click()}
  >
  <Camera className="w-10 h-10 text-primary" />
@@ -362,7 +362,7 @@ export const ScanVetPaperwork = ({
  </span>
  </Card>
  <Card
- className="p-8 flex flex-col items-center justify-center gap-3 cursor-pointer hover:bg-accent/50 transition-colors border-dashed border-2"
+ className="p-8 flex flex-col items-center justify-center gap-3 cursor-pointer hover:bg-accent transition-colors border-dashed border-2"
  onClick={() => fileInputRef.current?.click()}
  >
  <ImageIcon className="w-10 h-10 text-primary" />

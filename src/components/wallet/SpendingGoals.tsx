@@ -267,7 +267,7 @@ export const SpendingGoals = memo(({ transactions, medicalRecords = [] }: Spendi
  </div>
  ) : (
  <div className="text-center py-6">
- <div className="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-3">
+ <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mx-auto mb-3">
  <Target className="w-6 h-6 text-muted-foreground" />
  </div>
  <p className="text-sm text-muted-foreground mb-2">No spending goal set</p>
@@ -289,7 +289,7 @@ export const SpendingGoals = memo(({ transactions, medicalRecords = [] }: Spendi
  </DialogHeader>
  
  <div className="space-y-4 pt-4">
- <div className="p-3 rounded-lg bg-muted/50 text-sm">
+ <div className="p-3 rounded-lg bg-muted text-sm">
  <p className="text-muted-foreground">Your 3-month average:</p>
  <p className="font-bold text-lg">${averageMonthlySpending.toFixed(0)}/month</p>
  </div>

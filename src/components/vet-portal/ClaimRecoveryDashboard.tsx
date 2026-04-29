@@ -83,7 +83,7 @@ const getStatusColor = (status: string): string => {
  case"notification_sent":
  return"bg-warning";
  case"written_off":
- return"bg-muted/50";
+ return"bg-muted";
  default:
  return"bg-primary";
  }

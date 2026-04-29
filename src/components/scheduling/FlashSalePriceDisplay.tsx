@@ -73,7 +73,7 @@ export function FlashSalePriceDisplay({
  <div className={`space-y-1 ${compact ?"text-sm" :""}`}>
  {/* Flash Sale Badge */}
  <Badge 
- className="bg-gradient-to-r from-warning0 to-warning0 text-white border-0 gap-1"
+ className="bg-gradient-to-r from-warning to-warning text-white border-0 gap-1"
  variant="outline"
  >
  <Zap className="w-3 h-3" />

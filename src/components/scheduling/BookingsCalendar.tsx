@@ -45,11 +45,11 @@ interface BookingsCalendarProps {
 }
 
 const STATUS_COLORS: Record<BookingStatus, string> = {
- pending:'bg-warning/100/10 text-warning border-warning/200/20',
- confirmed:'bg-info/100/10 text-info border-info/200/20',
+ pending:'bg-warning/10 text-warning border-warning/20',
+ confirmed:'bg-info/10 text-info border-info/20',
  cancelled:'bg-muted text-muted-foreground border-border',
- completed:'bg-success/100/10 text-success border-success/200/20',
- no_show:'bg-destructive/100/10 text-destructive border-destructive/200/20',
+ completed:'bg-success/10 text-success border-success/20',
+ no_show:'bg-destructive/10 text-destructive border-destructive/20',
 };
 
 const STATUS_LABELS: Record<BookingStatus, string> = {
@@ -92,7 +92,7 @@ function NoShowChargeButton({ booking, onCharged }: { booking: BookingWithDetail
  if (charged) {
  return (
  <div className="pt-4 border-t">
- <div className="flex items-center gap-2 p-3 rounded-lg bg-success/100/10 text-success text-sm">
+ <div className="flex items-center gap-2 p-3 rounded-lg bg-success/10 text-success text-sm">
  <CheckCircle className="w-4 h-4" />
  <span>No-show fee charged successfully</span>
  </div>
@@ -102,7 +102,7 @@ function NoShowChargeButton({ booking, onCharged }: { booking: BookingWithDetail
 
  return (
  <div className="pt-4 border-t space-y-2">
- <div className="flex items-center gap-2 p-2 rounded-lg bg-warning/100/10 text-warning text-xs">
+ <div className="flex items-center gap-2 p-2 rounded-lg bg-warning/10 text-warning text-xs">
  <CreditCard className="w-3.5 h-3.5 flex-shrink-0" />
  <span>Card on file available — charge no-show fee</span>
  </div>
@@ -212,7 +212,7 @@ export function BookingsCalendar({ bookings, merchantId, onUpdateStatus }: Booki
  {filteredBookings.map((booking) => (
  <GradientCard 
  key={booking.id} 
- className="p-4 cursor-pointer hover:border-primary/50 transition-colors"
+ className="p-4 cursor-pointer hover:border-primary transition-colors"
  onClick={() => setSelectedBooking(booking)}
  >
  <div className="flex items-start justify-between gap-4">

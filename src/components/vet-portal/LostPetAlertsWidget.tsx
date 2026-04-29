@@ -240,7 +240,7 @@ export function LostPetAlertsWidget({ vetId }: LostPetAlertsWidgetProps) {
  const Icon = PetIcon(alert.pet_type ||'');
  const photos = alert.photo_urls || (alert.photo_url ? [alert.photo_url] : []);
  return (
- <div key={alert.id} className="p-3 flex items-center gap-3 hover:bg-muted/50">
+ <div key={alert.id} className="p-3 flex items-center gap-3 hover:bg-muted">
  {photos[0] ? (
  <img 
  src={photos[0]} 
