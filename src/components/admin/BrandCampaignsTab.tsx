@@ -37,10 +37,10 @@ import {
 const statusColors: Record<string, string> = {
  draft:"bg-muted text-muted-foreground",
  pending_payment:"bg-warning/15 text-warning",
- active:"bg-success/15 text-success dark:text-success",
+ active:"bg-success/15 text-success",
  paused:"bg-warning/10 text-warning",
- completed:"bg-info/15 text-info dark:text-info",
- expired:"bg-destructive/15 text-destructive dark:text-destructive",
+ completed:"bg-info/15 text-info",
+ expired:"bg-destructive/15 text-destructive",
 };
 
 export const BrandCampaignsTab = () => {

@@ -107,7 +107,7 @@ export function SettingsTab() {
  variant="outline"
  className={
  welcomeCreditEnabled
- ?'bg-success/10 text-success dark:text-success border-success/30/30'
+ ?'bg-success/10 text-success border-success/30/30'
  :'bg-destructive/10 text-destructive border-destructive/30'
  }
  >
@@ -173,7 +173,7 @@ export function SettingsTab() {
  Sessions expire after 15 minutes of inactivity
  </p>
  </div>
- <span className="px-2 py-1 bg-success/10 text-success text-xs rounded-full dark:text-success">
+ <span className="px-2 py-1 bg-success/10 text-success text-xs rounded-full">
  Enabled
  </span>
  </div>
@@ -185,7 +185,7 @@ export function SettingsTab() {
  Server-side role checks on all admin actions
  </p>
  </div>
- <span className="px-2 py-1 bg-success/10 text-success text-xs rounded-full dark:text-success">
+ <span className="px-2 py-1 bg-success/10 text-success text-xs rounded-full">
  Enabled
  </span>
  </div>

@@ -375,7 +375,7 @@ export function TransactionsTab() {
  <div className="space-y-1">
  <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Rewards & Metadata</h4>
  <DetailRow icon={Coins} label="Rewards Earned" value={
- <span className="text-success dark:text-success">
+ <span className="text-success">
  {rewardsEarnedPB.toLocaleString()} PB (${rewardsUSD.toFixed(2)})
  </span>
  } />

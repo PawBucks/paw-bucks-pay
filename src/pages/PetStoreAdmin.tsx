@@ -406,7 +406,7 @@ export default function PetStoreAdmin() {
  </div>
  <span className={`px-2 py-1 rounded-full text-xs ${
  item.is_active 
- ?"bg-success/15 text-success dark:text-success-foreground"
+ ?"bg-success/15 text-success"
  :"bg-muted text-foreground dark:bg-foreground"
  }`}>
  {item.is_active ?"Active" :"Inactive"}
@@ -485,7 +485,7 @@ export default function PetStoreAdmin() {
  <TableCell>
  <span className={`px-2 py-1 rounded-full text-xs ${
  item.is_active 
- ?"bg-success/15 text-success dark:text-success-foreground"
+ ?"bg-success/15 text-success"
  :"bg-muted text-foreground dark:bg-foreground"
  }`}>
  {item.is_active ?"Active" :"Inactive"}

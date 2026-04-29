@@ -56,12 +56,12 @@ interface Props {
 
 const statusColors: Record<string, string> = {
  draft:"bg-muted text-muted-foreground",
- sent:"bg-info/15 text-info dark:text-info",
- paid:"bg-success/15 text-success dark:text-success",
+ sent:"bg-info/15 text-info",
+ paid:"bg-success/15 text-success",
  partially_paid:"bg-warning/15 text-warning",
- overdue:"bg-destructive/15 text-destructive dark:text-destructive",
- cancelled:"bg-muted text-muted-foreground dark:bg-foreground dark:text-muted-foreground",
- void:"bg-muted text-muted-foreground dark:bg-foreground dark:text-muted-foreground",
+ overdue:"bg-destructive/15 text-destructive",
+ cancelled:"bg-muted text-muted-foreground dark:bg-foreground",
+ void:"bg-muted text-muted-foreground dark:bg-foreground",
 };
 
 export function AdminInvoiceList({ invoices, loading, onCreateNew, onView, onEdit, onDelete, onSend }: Props) {
