@@ -1,6 +1,7 @@
 import { memo } from"react";
 import { motion } from"framer-motion";
 import { useQuery } from"@tanstack/react-query";
+import { Star } from"lucide-react";
 import { supabase } from"@/integrations/supabase/client";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from"@/components/ui/tooltip";
 
@@ -17,9 +18,9 @@ const sizeClasses = {
 };
 
 const iconSizes = {
- sm:"text-sm",
- md:"text-base",
- lg:"text-lg",
+ sm: 12,
+ md: 14,
+ lg: 16,
 };
 
 const Founding50BadgeComponent = ({ entityType, entityId, size ="md" }: Founding50BadgeProps) => {
@@ -55,7 +56,7 @@ const Founding50BadgeComponent = ({ entityType, entityId, size ="md" }: Founding
  ${sizeClasses[size]}
  `}
  >
- <span className={iconSizes[size]}>⭐</span>
+ <Star size={iconSizes[size]} className="fill-warning-foreground text-warning-foreground" />
  <span className="whitespace-nowrap tracking-wide">FOUNDING 50</span>
  <span className="opacity-70">#{badge.badge_number}</span>
  </motion.div>
