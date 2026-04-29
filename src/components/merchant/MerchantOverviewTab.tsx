@@ -13,6 +13,7 @@ import { MerchantCharts } from"./MerchantCharts";
 import { MerchantTransactionList } from"./MerchantTransactionList";
 import { ScarcitySignalWidget } from"./ScarcitySignalWidget";
 import { AccountTypeCard } from"./AccountTypeCard";
+import { PawBucksCapCard } from"./PawBucksCapCard";
 
 type Merchant = {
  id: string;
@@ -22,6 +23,11 @@ type Merchant = {
  accepts_pawbucks?: boolean;
  fee_model?:"full_ecosystem" |"acquisition_only";
  acquisition_fee_rate?: number | null;
+  pawbucks_cap_enabled?: boolean | null;
+  pawbucks_cap_pct?: number | null;
+  pawbucks_promo_cap_pct?: number | null;
+  pawbucks_promo_starts_at?: string | null;
+  pawbucks_promo_ends_at?: string | null;
 };
 
 type Analytics = {
@@ -55,6 +61,7 @@ type MerchantOverviewTabProps = {
  connectingStripe: boolean;
  togglingPawbucks: boolean;
  onViewWallet: () => void;
+  onRefreshMerchant?: () => void;
 };
 
 export function MerchantOverviewTab({
@@ -68,6 +75,7 @@ export function MerchantOverviewTab({
  connectingStripe,
  togglingPawbucks,
  onViewWallet,
+  onRefreshMerchant,
 }: MerchantOverviewTabProps) {
  return (
  <div className="space-y-6">
@@ -166,6 +174,21 @@ export function MerchantOverviewTab({
  )}
  </GradientCard>
  )}
+
+      {/* PawBucks Acceptance Cap */}
+      {merchant.stripe_account_id && merchant.accepts_pawbucks && (
+        <PawBucksCapCard
+          merchantId={merchant.id}
+          businessType={merchant.business_type}
+          acceptsPawbucks={!!merchant.accepts_pawbucks}
+          capEnabled={!!merchant.pawbucks_cap_enabled}
+          capPct={merchant.pawbucks_cap_pct ?? null}
+          promoCapPct={merchant.pawbucks_promo_cap_pct ?? null}
+          promoStartsAt={merchant.pawbucks_promo_starts_at ?? null}
+          promoEndsAt={merchant.pawbucks_promo_ends_at ?? null}
+          onUpdated={onRefreshMerchant}
+        />
+      )}
 
  {/* Analytics Summary Cards */}
  <MerchantAnalyticsCards analytics={analytics} />
