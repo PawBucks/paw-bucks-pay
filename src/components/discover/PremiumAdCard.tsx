@@ -113,9 +113,9 @@ const PremiumAdCardComponent = ({
  key={i}
  className={`w-3.5 h-3.5 ${
  i < fullStars
- ?"text-warning fill-warning"
+ ?"text-gold fill-gold"
  : i === fullStars && hasHalfStar
- ?"text-warning fill-warning/50"
+ ?"text-gold fill-gold/50"
  :"text-muted-foreground/20"
  }`}
  />

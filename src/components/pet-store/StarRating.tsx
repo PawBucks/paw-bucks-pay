@@ -23,9 +23,9 @@ export const StarRating = memo(({ rating, count, size ="sm", showCount = true }:
  key={star}
  className={`${starSize} ${
  filled
- ?"fill-warning text-warning"
+ ?"fill-gold text-gold"
  : halfFilled
- ?"fill-warning text-warning"
+ ?"fill-gold text-gold"
  :"fill-muted text-muted-foreground/30"
  }`}
  />
