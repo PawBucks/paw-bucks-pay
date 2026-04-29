@@ -488,6 +488,7 @@ export const VetOnboardingForm = () => {
         emergency_protocol: values.emergency_protocol,
         subscription_tier: values.subscription_tier,
         agreed_to_tos: values.agreed_to_tos,
+        agreed_to_vet_addendum: values.agreed_to_vet_addendum,
         agreed_to_splicing_liability: values.agreed_to_splicing_liability,
       };
 
@@ -565,6 +566,7 @@ export const VetOnboardingForm = () => {
         subscription_tier: data.subscription_tier,
         // Step 7: Legal
         agreed_to_tos: data.agreed_to_tos,
+        agreed_to_vet_addendum: data.agreed_to_vet_addendum,
         agreed_to_splicing_liability: data.agreed_to_splicing_liability,
         // Metadata
         user_id: user?.id,
@@ -617,6 +619,8 @@ export const VetOnboardingForm = () => {
         subscription_tier: data.subscription_tier,
         agreed_to_tos: data.agreed_to_tos,
         agreed_to_tos_at: data.agreed_to_tos ? new Date().toISOString() : null,
+        agreed_to_vet_addendum: data.agreed_to_vet_addendum,
+        agreed_to_vet_addendum_at: data.agreed_to_vet_addendum ? new Date().toISOString() : null,
         agreed_to_splicing_liability: data.agreed_to_splicing_liability,
         agreed_to_splicing_liability_at: data.agreed_to_splicing_liability ? new Date().toISOString() : null,
         is_verified: false,
