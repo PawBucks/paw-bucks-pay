@@ -1,217 +1,217 @@
-import { useState, useEffect } from "react";
-import { GradientCard } from "@/components/ui/gradient-card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
+import { useState, useEffect } from"react";
+import { GradientCard } from"@/components/ui/gradient-card";
+import { Badge } from"@/components/ui/badge";
+import { Button } from"@/components/ui/button";
+import { Switch } from"@/components/ui/switch";
 import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
-} from "@/components/ui/dropdown-menu";
-import { MoreVertical, Edit, Trash2, Clock, DollarSign, Users, Zap, Timer } from "lucide-react";
+ DropdownMenu, 
+ DropdownMenuContent, 
+ DropdownMenuItem, 
+ DropdownMenuTrigger 
+} from"@/components/ui/dropdown-menu";
+import { MoreVertical, Edit, Trash2, Clock, DollarSign, Users, Zap, Timer } from"lucide-react";
 import { 
-  type MerchantService, 
-  CATEGORY_LABELS,
-  calculateRegularPawbucksPrice,
-  calculateFlashSaleSavings,
-  isFlashSaleActive
-} from "@/services/api/scheduling.service";
+ type MerchantService, 
+ CATEGORY_LABELS,
+ calculateRegularPawbucksPrice,
+ calculateFlashSaleSavings,
+ isFlashSaleActive
+} from"@/services/api/scheduling.service";
 
 interface FlashSaleCardProps {
-  service: MerchantService;
-  onEdit: (service: MerchantService) => void;
-  onDelete: (id: string) => void;
-  onToggleActive: (id: string, active: boolean) => void;
-  onManageFlashSale: (service: MerchantService) => void;
+ service: MerchantService;
+ onEdit: (service: MerchantService) => void;
+ onDelete: (id: string) => void;
+ onToggleActive: (id: string, active: boolean) => void;
+ onManageFlashSale: (service: MerchantService) => void;
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
-  daycare: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
-  boarding: 'bg-purple-500/10 text-purple-500 border-purple-500/20',
-  grooming: 'bg-pink-500/10 text-pink-500 border-pink-500/20',
-  walking: 'bg-green-500/10 text-green-500 border-green-500/20',
-  training: 'bg-orange-500/10 text-orange-500 border-orange-500/20',
-  veterinary: 'bg-red-500/10 text-red-500 border-red-500/20',
-  pet_sitting: 'bg-teal-500/10 text-teal-500 border-teal-500/20',
-  other: 'bg-muted text-muted-foreground border-border',
+ daycare:'bg-info/100/10 text-info0 border-info/200/20',
+ boarding:'bg-accent/100/10 text-accent0 border-accent/200/20',
+ grooming:'bg-accent/100/10 text-accent0 border-accent/200/20',
+ walking:'bg-success/100/10 text-success0 border-success/200/20',
+ training:'bg-warning/100/10 text-warning0 border-warning/200/20',
+ veterinary:'bg-destructive/100/10 text-destructive0 border-destructive/200/20',
+ pet_sitting:'bg-success/100/10 text-success0 border-success/200/20',
+ other:'bg-muted text-muted-foreground border-border',
 };
 
 // Helper function to format duration based on category
 const formatDuration = (minutes: number, category: string): string => {
-  if (category === 'boarding') {
-    const nights = Math.round(minutes / 1440);
-    return nights === 1 ? '1 night' : `${nights} nights`;
-  }
-  if (category === 'daycare') {
-    if (minutes <= 360) return 'Half Day';
-    if (minutes <= 720) return 'Full Day';
-    return `${Math.round(minutes / 60)}h`;
-  }
-  // Standard format for other categories
-  if (minutes >= 60) {
-    const hours = Math.floor(minutes / 60);
-    const remainingMins = minutes % 60;
-    return remainingMins > 0 ? `${hours}h ${remainingMins}m` : `${hours}h`;
-  }
-  return `${minutes} min`;
+ if (category ==='boarding') {
+ const nights = Math.round(minutes / 1440);
+ return nights === 1 ?'1 night' : `${nights} nights`;
+ }
+ if (category ==='daycare') {
+ if (minutes <= 360) return'Half Day';
+ if (minutes <= 720) return'Full Day';
+ return `${Math.round(minutes / 60)}h`;
+ }
+ // Standard format for other categories
+ if (minutes >= 60) {
+ const hours = Math.floor(minutes / 60);
+ const remainingMins = minutes % 60;
+ return remainingMins > 0 ? `${hours}h ${remainingMins}m` : `${hours}h`;
+ }
+ return `${minutes} min`;
 };
 
 export function FlashSaleCard({ 
-  service, 
-  onEdit, 
-  onDelete, 
-  onToggleActive,
-  onManageFlashSale 
+ service, 
+ onEdit, 
+ onDelete, 
+ onToggleActive,
+ onManageFlashSale 
 }: FlashSaleCardProps) {
-  const [timeRemaining, setTimeRemaining] = useState<string>("");
-  const isActive = isFlashSaleActive(service);
-  const regularPawbucksPrice = calculateRegularPawbucksPrice(service.price);
-  const savingsPercent = calculateFlashSaleSavings(service);
+ const [timeRemaining, setTimeRemaining] = useState<string>("");
+ const isActive = isFlashSaleActive(service);
+ const regularPawbucksPrice = calculateRegularPawbucksPrice(service.price);
+ const savingsPercent = calculateFlashSaleSavings(service);
 
-  useEffect(() => {
-    if (!isActive || !service.flash_sale_end_at) return;
-    
-    const updateCountdown = () => {
-      const now = new Date();
-      const end = new Date(service.flash_sale_end_at!);
-      const diff = end.getTime() - now.getTime();
-      
-      if (diff <= 0) {
-        setTimeRemaining("Ended");
-        return;
-      }
-      
-      const hours = Math.floor(diff / (1000 * 60 * 60));
-      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      
-      if (hours > 24) {
-        const days = Math.floor(hours / 24);
-        setTimeRemaining(`${days}d ${hours % 24}h left`);
-      } else if (hours > 0) {
-        setTimeRemaining(`${hours}h ${minutes}m left`);
-      } else {
-        setTimeRemaining(`${minutes}m left`);
-      }
-    };
-    
-    updateCountdown();
-    const interval = setInterval(updateCountdown, 60000); // Update every minute
-    
-    return () => clearInterval(interval);
-  }, [isActive, service.flash_sale_end_at]);
+ useEffect(() => {
+ if (!isActive || !service.flash_sale_end_at) return;
+ 
+ const updateCountdown = () => {
+ const now = new Date();
+ const end = new Date(service.flash_sale_end_at!);
+ const diff = end.getTime() - now.getTime();
+ 
+ if (diff <= 0) {
+ setTimeRemaining("Ended");
+ return;
+ }
+ 
+ const hours = Math.floor(diff / (1000 * 60 * 60));
+ const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+ 
+ if (hours > 24) {
+ const days = Math.floor(hours / 24);
+ setTimeRemaining(`${days}d ${hours % 24}h left`);
+ } else if (hours > 0) {
+ setTimeRemaining(`${hours}h ${minutes}m left`);
+ } else {
+ setTimeRemaining(`${minutes}m left`);
+ }
+ };
+ 
+ updateCountdown();
+ const interval = setInterval(updateCountdown, 60000); // Update every minute
+ 
+ return () => clearInterval(interval);
+ }, [isActive, service.flash_sale_end_at]);
 
-  return (
-    <GradientCard className={`p-4 ${isActive ? 'ring-2 ring-amber-500/50' : ''}`}>
-      <div className="flex items-start justify-between gap-3 mb-3">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1 flex-wrap">
-            <h3 className="font-semibold truncate">{service.name}</h3>
-            {!service.is_active && (
-              <Badge variant="secondary" className="text-xs">Inactive</Badge>
-            )}
-            {isActive && (
-              <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 text-xs gap-0.5">
-                <Zap className="w-3 h-3" />
-                Flash Sale
-              </Badge>
-            )}
-            {service.is_flash_sale && !isActive && (
-              <Badge variant="outline" className="text-xs text-amber-600 border-amber-500/30">
-                Scheduled
-              </Badge>
-            )}
-          </div>
-          <Badge 
-            variant="outline" 
-            className={`text-xs ${CATEGORY_COLORS[service.category]}`}
-          >
-            {CATEGORY_LABELS[service.category]}
-          </Badge>
-        </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <MoreVertical className="w-4 h-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => onEdit(service)}>
-              <Edit className="w-4 h-4 mr-2" />
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onManageFlashSale(service)}>
-              <Zap className="w-4 h-4 mr-2" />
-              Flash Sale
-            </DropdownMenuItem>
-            <DropdownMenuItem 
-              onClick={() => onDelete(service.id)}
-              className="text-destructive"
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+ return (
+ <GradientCard className={`p-4 ${isActive ?'ring-2 ring-warning0/50' :''}`}>
+ <div className="flex items-start justify-between gap-3 mb-3">
+ <div className="flex-1 min-w-0">
+ <div className="flex items-center gap-2 mb-1 flex-wrap">
+ <h3 className="font-semibold truncate">{service.name}</h3>
+ {!service.is_active && (
+ <Badge variant="secondary" className="text-xs">Inactive</Badge>
+ )}
+ {isActive && (
+ <Badge className="bg-gradient-to-r from-warning0 to-warning0 text-white border-0 text-xs gap-0.5">
+ <Zap className="w-3 h-3" />
+ Flash Sale
+ </Badge>
+ )}
+ {service.is_flash_sale && !isActive && (
+ <Badge variant="outline" className="text-xs text-warning border-warning/200/30">
+ Scheduled
+ </Badge>
+ )}
+ </div>
+ <Badge 
+ variant="outline" 
+ className={`text-xs ${CATEGORY_COLORS[service.category]}`}
+ >
+ {CATEGORY_LABELS[service.category]}
+ </Badge>
+ </div>
+ <DropdownMenu>
+ <DropdownMenuTrigger asChild>
+ <Button variant="ghost" size="icon" className="h-8 w-8">
+ <MoreVertical className="w-4 h-4" />
+ </Button>
+ </DropdownMenuTrigger>
+ <DropdownMenuContent align="end">
+ <DropdownMenuItem onClick={() => onEdit(service)}>
+ <Edit className="w-4 h-4 mr-2" />
+ Edit
+ </DropdownMenuItem>
+ <DropdownMenuItem onClick={() => onManageFlashSale(service)}>
+ <Zap className="w-4 h-4 mr-2" />
+ Flash Sale
+ </DropdownMenuItem>
+ <DropdownMenuItem 
+ onClick={() => onDelete(service.id)}
+ className="text-destructive"
+ >
+ <Trash2 className="w-4 h-4 mr-2" />
+ Delete
+ </DropdownMenuItem>
+ </DropdownMenuContent>
+ </DropdownMenu>
+ </div>
 
-      {service.description && (
-        <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-          {service.description}
-        </p>
-      )}
+ {service.description && (
+ <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+ {service.description}
+ </p>
+ )}
 
-      <div className="flex flex-wrap gap-3 text-sm text-muted-foreground mb-3">
-        <div className="flex items-center gap-1">
-          <Clock className="w-4 h-4" />
-          <span>{formatDuration(service.duration_minutes, service.category)}</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <DollarSign className="w-4 h-4" />
-          <span>${service.price.toFixed(2)}</span>
-        </div>
-        {service.max_capacity > 1 && (
-          <div className="flex items-center gap-1">
-            <Users className="w-4 h-4" />
-            <span>Up to {service.max_capacity}</span>
-          </div>
-        )}
-      </div>
+ <div className="flex flex-wrap gap-3 text-sm text-muted-foreground mb-3">
+ <div className="flex items-center gap-1">
+ <Clock className="w-4 h-4" />
+ <span>{formatDuration(service.duration_minutes, service.category)}</span>
+ </div>
+ <div className="flex items-center gap-1">
+ <DollarSign className="w-4 h-4" />
+ <span>${service.price.toFixed(2)}</span>
+ </div>
+ {service.max_capacity > 1 && (
+ <div className="flex items-center gap-1">
+ <Users className="w-4 h-4" />
+ <span>Up to {service.max_capacity}</span>
+ </div>
+ )}
+ </div>
 
-      {/* Flash Sale Pricing Display */}
-      {isActive && service.flash_sale_pawbucks_price && (
-        <div className="p-2 rounded-lg bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 mb-3">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="flex items-baseline gap-2">
-                <span className="text-muted-foreground line-through text-xs">
-                  {regularPawbucksPrice.toLocaleString()} PB
-                </span>
-                <span className="font-bold text-green-600 dark:text-green-400">
-                  {service.flash_sale_pawbucks_price.toLocaleString()} PB
-                </span>
-              </div>
-              <span className="text-xs text-green-600 font-medium">
-                {savingsPercent}% off!
-              </span>
-            </div>
-            {timeRemaining && (
-              <div className="flex items-center gap-1 text-amber-600 text-xs">
-                <Timer className="w-3 h-3" />
-                <span>{timeRemaining}</span>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+ {/* Flash Sale Pricing Display */}
+ {isActive && service.flash_sale_pawbucks_price && (
+ <div className="p-2 rounded-lg bg-gradient-to-r from-warning0/10 to-warning0/10 border border-warning/200/20 mb-3">
+ <div className="flex items-center justify-between">
+ <div>
+ <div className="flex items-baseline gap-2">
+ <span className="text-muted-foreground line-through text-xs">
+ {regularPawbucksPrice.toLocaleString()} PB
+ </span>
+ <span className="font-bold text-success">
+ {service.flash_sale_pawbucks_price.toLocaleString()} PB
+ </span>
+ </div>
+ <span className="text-xs text-success font-medium">
+ {savingsPercent}% off!
+ </span>
+ </div>
+ {timeRemaining && (
+ <div className="flex items-center gap-1 text-warning text-xs">
+ <Timer className="w-3 h-3" />
+ <span>{timeRemaining}</span>
+ </div>
+ )}
+ </div>
+ </div>
+ )}
 
-      <div className="flex items-center justify-between pt-3 border-t border-border/50">
-        <span className="text-sm text-muted-foreground">Active</span>
-        <Switch
-          checked={service.is_active}
-          onCheckedChange={(checked) => onToggleActive(service.id, checked)}
-        />
-      </div>
-    </GradientCard>
-  );
+ <div className="flex items-center justify-between pt-3 border-t border-border/50">
+ <span className="text-sm text-muted-foreground">Active</span>
+ <Switch
+ checked={service.is_active}
+ onCheckedChange={(checked) => onToggleActive(service.id, checked)}
+ />
+ </div>
+ </GradientCard>
+ );
 }

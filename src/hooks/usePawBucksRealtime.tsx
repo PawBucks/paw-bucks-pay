@@ -1,6 +1,6 @@
-import { useEffect } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { useEffect } from"react";
+import { useQueryClient } from"@tanstack/react-query";
+import { supabase } from"@/integrations/supabase/client";
 
 /**
  * Hook that subscribes to realtime updates for PawBucks wallet and activity.
@@ -9,76 +9,76 @@ import { supabase } from "@/integrations/supabase/client";
  * @param userId - The user ID to subscribe to updates for
  */
 export function usePawBucksRealtime(userId: string | undefined) {
-  const queryClient = useQueryClient();
+ const queryClient = useQueryClient();
 
-  useEffect(() => {
-    if (!userId) return;
+ useEffect(() => {
+ if (!userId) return;
 
-    // Subscribe to PawBucks wallet changes for this user
-    const channel = supabase
-      .channel(`pawbucks-realtime-${userId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'pawbucks_wallet',
-          filter: `user_id=eq.${userId}`,
-        },
-        (payload) => {
-          console.log('[Realtime] PawBucks wallet update:', payload);
-          // Invalidate all PawBucks-related queries with various key formats
-          queryClient.invalidateQueries({ queryKey: ['pawbucks_wallet', userId] });
-          queryClient.invalidateQueries({ queryKey: ['pawbucks-wallet', userId] });
-          queryClient.invalidateQueries({ queryKey: ['pawbucks_wallet'] });
-          queryClient.invalidateQueries({ queryKey: ['pawbucks-wallet'] });
-          queryClient.invalidateQueries({ queryKey: ['wallet', userId] });
-          queryClient.invalidateQueries({ queryKey: ['wallet'] });
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'pawbucks_activity',
-          filter: `user_id=eq.${userId}`,
-        },
-        (payload) => {
-          console.log('[Realtime] PawBucks activity:', payload);
-          // Invalidate activity queries with various key formats
-          queryClient.invalidateQueries({ queryKey: ['pawbucks_activity', userId] });
-          queryClient.invalidateQueries({ queryKey: ['pawbucks-activity', userId] });
-          queryClient.invalidateQueries({ queryKey: ['pawbucks_activity'] });
-          queryClient.invalidateQueries({ queryKey: ['pawbucks-activity'] });
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
-          schema: 'public',
-          table: 'transactions',
-          filter: `user_id=eq.${userId}`,
-        },
-        (payload) => {
-          console.log('[Realtime] Transaction update:', payload);
-          // Invalidate all transaction-related queries
-          queryClient.invalidateQueries({ queryKey: ['transactions', userId] });
-          queryClient.invalidateQueries({ queryKey: ['transactions'] });
-          queryClient.invalidateQueries({ queryKey: ['budget-transactions', userId] });
-          queryClient.invalidateQueries({ queryKey: ['wallet', userId] });
-          queryClient.invalidateQueries({ queryKey: ['wallet'] });
-          queryClient.invalidateQueries({ queryKey: ['pawbucks_wallet', userId] });
-          queryClient.invalidateQueries({ queryKey: ['pawbucks_activity', userId] });
-        }
-      )
-      .subscribe();
+ // Subscribe to PawBucks wallet changes for this user
+ const channel = supabase
+ .channel(`pawbucks-realtime-${userId}`)
+ .on(
+'postgres_changes',
+ {
+ event:'*',
+ schema:'public',
+ table:'pawbucks_wallet',
+ filter: `user_id=eq.${userId}`,
+ },
+ (payload) => {
+ console.log('[Realtime] PawBucks wallet update:', payload);
+ // Invalidate all PawBucks-related queries with various key formats
+ queryClient.invalidateQueries({ queryKey: ['pawbucks_wallet', userId] });
+ queryClient.invalidateQueries({ queryKey: ['pawbucks-wallet', userId] });
+ queryClient.invalidateQueries({ queryKey: ['pawbucks_wallet'] });
+ queryClient.invalidateQueries({ queryKey: ['pawbucks-wallet'] });
+ queryClient.invalidateQueries({ queryKey: ['wallet', userId] });
+ queryClient.invalidateQueries({ queryKey: ['wallet'] });
+ }
+ )
+ .on(
+'postgres_changes',
+ {
+ event:'INSERT',
+ schema:'public',
+ table:'pawbucks_activity',
+ filter: `user_id=eq.${userId}`,
+ },
+ (payload) => {
+ console.log('[Realtime] PawBucks activity:', payload);
+ // Invalidate activity queries with various key formats
+ queryClient.invalidateQueries({ queryKey: ['pawbucks_activity', userId] });
+ queryClient.invalidateQueries({ queryKey: ['pawbucks-activity', userId] });
+ queryClient.invalidateQueries({ queryKey: ['pawbucks_activity'] });
+ queryClient.invalidateQueries({ queryKey: ['pawbucks-activity'] });
+ }
+ )
+ .on(
+'postgres_changes',
+ {
+ event:'*', // Listen to all events (INSERT, UPDATE, DELETE)
+ schema:'public',
+ table:'transactions',
+ filter: `user_id=eq.${userId}`,
+ },
+ (payload) => {
+ console.log('[Realtime] Transaction update:', payload);
+ // Invalidate all transaction-related queries
+ queryClient.invalidateQueries({ queryKey: ['transactions', userId] });
+ queryClient.invalidateQueries({ queryKey: ['transactions'] });
+ queryClient.invalidateQueries({ queryKey: ['budget-transactions', userId] });
+ queryClient.invalidateQueries({ queryKey: ['wallet', userId] });
+ queryClient.invalidateQueries({ queryKey: ['wallet'] });
+ queryClient.invalidateQueries({ queryKey: ['pawbucks_wallet', userId] });
+ queryClient.invalidateQueries({ queryKey: ['pawbucks_activity', userId] });
+ }
+ )
+ .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [userId, queryClient]);
+ return () => {
+ supabase.removeChannel(channel);
+ };
+ }, [userId, queryClient]);
 }
 
 /**
@@ -87,63 +87,63 @@ export function usePawBucksRealtime(userId: string | undefined) {
  * @param merchantId - The merchant ID to subscribe to updates for
  */
 export function useMerchantPawBucksRealtime(merchantId: string | undefined) {
-  const queryClient = useQueryClient();
+ const queryClient = useQueryClient();
 
-  useEffect(() => {
-    if (!merchantId) return;
+ useEffect(() => {
+ if (!merchantId) return;
 
-    const channel = supabase
-      .channel(`merchant-pawbucks-${merchantId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'merchant_pawbucks_wallet',
-          filter: `merchant_id=eq.${merchantId}`,
-        },
-        (payload) => {
-          console.log('[Realtime] Merchant PawBucks wallet update:', payload);
-          queryClient.invalidateQueries({ queryKey: ['merchant-pawbucks-wallet', merchantId] });
-          queryClient.invalidateQueries({ queryKey: ['merchant-pawbucks-wallet'] });
-          queryClient.invalidateQueries({ queryKey: ['merchant-analytics'] });
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'merchant_pawbucks_activity',
-          filter: `merchant_id=eq.${merchantId}`,
-        },
-        (payload) => {
-          console.log('[Realtime] Merchant PawBucks activity:', payload);
-          queryClient.invalidateQueries({ queryKey: ['merchant-pawbucks-activity', merchantId] });
-          queryClient.invalidateQueries({ queryKey: ['merchant-pawbucks-activity'] });
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
-          schema: 'public',
-          table: 'transactions',
-          filter: `merchant_id=eq.${merchantId}`,
-        },
-        (payload) => {
-          console.log('[Realtime] Merchant transaction update:', payload);
-          // Invalidate all merchant transaction queries
-          queryClient.invalidateQueries({ queryKey: ['merchant-transactions', merchantId] });
-          queryClient.invalidateQueries({ queryKey: ['merchant-transactions'] });
-          queryClient.invalidateQueries({ queryKey: ['merchant-analytics'] });
-          queryClient.invalidateQueries({ queryKey: ['merchant-dashboard'] });
-        }
-      )
-      .subscribe();
+ const channel = supabase
+ .channel(`merchant-pawbucks-${merchantId}`)
+ .on(
+'postgres_changes',
+ {
+ event:'*',
+ schema:'public',
+ table:'merchant_pawbucks_wallet',
+ filter: `merchant_id=eq.${merchantId}`,
+ },
+ (payload) => {
+ console.log('[Realtime] Merchant PawBucks wallet update:', payload);
+ queryClient.invalidateQueries({ queryKey: ['merchant-pawbucks-wallet', merchantId] });
+ queryClient.invalidateQueries({ queryKey: ['merchant-pawbucks-wallet'] });
+ queryClient.invalidateQueries({ queryKey: ['merchant-analytics'] });
+ }
+ )
+ .on(
+'postgres_changes',
+ {
+ event:'INSERT',
+ schema:'public',
+ table:'merchant_pawbucks_activity',
+ filter: `merchant_id=eq.${merchantId}`,
+ },
+ (payload) => {
+ console.log('[Realtime] Merchant PawBucks activity:', payload);
+ queryClient.invalidateQueries({ queryKey: ['merchant-pawbucks-activity', merchantId] });
+ queryClient.invalidateQueries({ queryKey: ['merchant-pawbucks-activity'] });
+ }
+ )
+ .on(
+'postgres_changes',
+ {
+ event:'*', // Listen to all events (INSERT, UPDATE, DELETE)
+ schema:'public',
+ table:'transactions',
+ filter: `merchant_id=eq.${merchantId}`,
+ },
+ (payload) => {
+ console.log('[Realtime] Merchant transaction update:', payload);
+ // Invalidate all merchant transaction queries
+ queryClient.invalidateQueries({ queryKey: ['merchant-transactions', merchantId] });
+ queryClient.invalidateQueries({ queryKey: ['merchant-transactions'] });
+ queryClient.invalidateQueries({ queryKey: ['merchant-analytics'] });
+ queryClient.invalidateQueries({ queryKey: ['merchant-dashboard'] });
+ }
+ )
+ .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [merchantId, queryClient]);
+ return () => {
+ supabase.removeChannel(channel);
+ };
+ }, [merchantId, queryClient]);
 }
