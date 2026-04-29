@@ -33,8 +33,7 @@ interface Transaction {
  description: string;
 }
 
-const MerchantTransactions = () => {
- const { user, loading } = useAuth();
+const MerchantTransactions = () => { const { user, loading, signOut } = useAuth();
  const navigate = useNavigate();
  
  const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -195,10 +194,7 @@ const MerchantTransactions = () => {
  toast.success("Transactions exported successfully");
  };
 
- const handleSignOut = async () => {
- await supabase.auth.signOut();
- navigate("/auth");
- };
+ const handleSignOut = async () => { await signOut(); };
 
  const handleRefundClick = (transaction: Transaction) => {
  setSelectedTransaction(transaction);

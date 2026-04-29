@@ -34,8 +34,7 @@ interface LoanResponse {
  }>;
 }
 
-const VetLoanApply = () => {
- const { user, loading } = useAuth();
+const VetLoanApply = () => { const { user, loading, signOut } = useAuth();
  const { subscription, loading: subscriptionLoading, createCheckout } = useSubscription();
  const navigate = useNavigate();
 
@@ -80,10 +79,7 @@ const VetLoanApply = () => {
  setVets(data || []);
  };
 
- const handleSignOut = async () => {
- await supabase.auth.signOut();
- navigate("/auth");
- };
+ const handleSignOut = async () => { await signOut(); };
 
  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
  if (e.target.files && e.target.files[0]) {

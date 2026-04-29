@@ -120,7 +120,7 @@ const statusIcons: Record<string, React.ReactNode> = {
 };
 
 const LostPets = () => {
- const { user } = useAuth();
+  const { user, signOut } = useAuth();
  const { toast } = useToast();
  const queryClient = useQueryClient();
  const navigate = useNavigate();
@@ -420,10 +420,9 @@ const LostPets = () => {
  <div className="min-h-screen bg-background">
  <Header 
  isAuthenticated={!!user} 
- onLogout={async () => {
- await supabase.auth.signOut();
- navigate("/");
- }}
+          onLogout={async () => {
+            await signOut();
+          }}
  userId={user?.id}
  />
  

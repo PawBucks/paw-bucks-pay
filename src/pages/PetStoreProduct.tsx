@@ -29,7 +29,7 @@ export default function PetStoreProduct() {
  const { itemId } = useParams<{ itemId: string }>();
  const navigate = useNavigate();
  const location = useLocation();
- const { user } = useAuth();
+ const { user, signOut } = useAuth();
  const queryClient = useQueryClient();
  const sharedAccount = useSharedAccount(user?.id);
  const effectiveUserId = getEffectiveWalletUserId(user?.id, sharedAccount);
@@ -119,7 +119,7 @@ export default function PetStoreProduct() {
  addToCart.mutate({ itemId: itemId! }, { onSuccess: () => toast.success("Added to cart! 🛒") });
  };
 
- const handleSignOut = async () => { await supabase.auth.signOut(); navigate("/auth"); };
+ const handleSignOut = async () => { await signOut(); };
 
  if (isLoading) {
  return (

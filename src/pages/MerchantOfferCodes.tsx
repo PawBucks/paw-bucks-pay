@@ -1,4 +1,5 @@
 import { useState, useEffect } from"react";
+import { useAuth } from"@/hooks/useAuth";
 import { useNavigate, useParams } from"react-router-dom";
 import { supabase } from"@/integrations/supabase/client";
 import { Header } from"@/components/Header";
@@ -88,10 +89,9 @@ export default function MerchantOfferCodes() {
  toast.success("Codes downloaded successfully");
  };
 
- const handleSignOut = async () => {
- await supabase.auth.signOut();
- navigate("/auth");
- };
+ const { signOut } = useAuth();
+
+ const handleSignOut = async () => { await signOut(); };
 
  return (
  <>
