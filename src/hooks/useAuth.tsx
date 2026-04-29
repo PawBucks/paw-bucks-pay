@@ -2,7 +2,11 @@ import { useState, useEffect, useCallback, useMemo } from"react";
 import { User, Session } from"@supabase/supabase-js";
 import { supabase } from"@/integrations/supabase/client";
 import { getPreHydratedSession } from"@/lib/authPreHydrate";
-import { clearUserAccessCache, getAuthRedirectForUser } from"@/lib/userAccessCache";
+import {
+  clearUserAccessCache,
+  getAuthRedirectForUser,
+  getUserAccessInfo,
+} from"@/lib/userAccessCache";
 
 // Pre-hydrate from localStorage synchronously — instant first render
 const preHydrated = getPreHydratedSession();
@@ -70,10 +74,19 @@ export const useAuth = () => {
  }, []);
 
  const signOut = useCallback(async () => {
-    // Capture the role-specific auth URL BEFORE clearing user state/cache
-    const redirectTarget = cachedSession?.user?.id
-      ? getAuthRedirectForUser(cachedSession.user.id)
-      :"/auth";
+    // Capture the role-specific auth URL BEFORE clearing user state/cache.
+    // Warm the access cache first so we never fall back to the generic
+    // /auth page when the cached entry has expired.
+    let redirectTarget ="/auth";
+    const userId = cachedSession?.user?.id;
+    if (userId) {
+      try {
+        await getUserAccessInfo(userId);
+      } catch (err) {
+        console.error("Failed to refresh access info before sign-out:", err);
+      }
+      redirectTarget = getAuthRedirectForUser(userId);
+    }
  try {
  const { error } = await supabase.auth.signOut();
  if (error) {
