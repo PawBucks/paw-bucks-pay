@@ -309,9 +309,9 @@
       padding-right: 1rem;
     }
 
-    /* Smaller border radius on mobile */
+    /* Editorial squared aesthetic on mobile — match landing page */
     .card, [data-radix-dialog-content], [data-radix-popover-content] {
-      border-radius: 1rem;
+      border-radius: 0.5rem;
     }
 
     /* Reduce visual noise on mobile */
