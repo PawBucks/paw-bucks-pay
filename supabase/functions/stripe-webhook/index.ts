@@ -681,7 +681,20 @@ serve(async (req) => {
           const paymentAmount = (session.amount_total || 0) / 100;
           const stripeAmountForRewards = paymentAmount - (tipAmount / 100); // Exclude tip from rewards calculation
           
-          // Record payment in invoice_payments table
+          // ============================================================
+          // IDEMPOTENCY GATE
+          // ------------------------------------------------------------
+          // A unique partial index on invoice_payments.stripe_payment_intent_id
+          // (uniq_invoice_payments_stripe_pi) guarantees only one row per
+          // Stripe PaymentIntent. We attempt the insert FIRST and use its
+          // success as the single source of truth for whether the deferred
+          // PawBucks debit, merchant credit, branded redemption, rewards,
+          // and notifications should run for this checkout session.
+          //
+          // If the insert fails with a unique-violation (Postgres 23505),
+          // another webhook delivery has already processed this session —
+          // we short-circuit and return success so Stripe stops retrying.
+          // ============================================================
           const { data: payment, error: paymentError } = await supabaseAdmin
             .from('invoice_payments')
             .insert({
@@ -695,12 +708,29 @@ serve(async (req) => {
             })
             .select()
             .single();
-          
+
           if (paymentError) {
+            // Unique-violation = duplicate webhook delivery. This is the
+            // hard idempotency guarantee for the deferred PawBucks debit
+            // and merchant credit below — they CANNOT run twice for the
+            // same Stripe session.
+            if ((paymentError as any).code === '23505') {
+              console.log('[INVOICE_PAYMENT] ⏭️ Duplicate webhook — invoice payment already recorded for payment_intent:', session.payment_intent);
+              return new Response(
+                JSON.stringify({ received: true, skipped: 'duplicate_invoice_payment' }),
+                { status: 200, headers: { 'Content-Type': 'application/json' } }
+              );
+            }
             console.error('[INVOICE_PAYMENT] Error recording payment:', paymentError);
-          } else {
-            console.log('[INVOICE_PAYMENT] ✅ Payment recorded:', payment.id);
+            // Without a recorded payment row we cannot safely run the
+            // deferred debit/credit (no idempotency anchor). Bail out.
+            return new Response(
+              JSON.stringify({ error: 'Failed to record invoice payment', details: paymentError.message }),
+              { status: 500, headers: { 'Content-Type': 'application/json' } }
+            );
           }
+
+          console.log('[INVOICE_PAYMENT] ✅ Payment recorded (idempotency anchor):', payment.id);
           
           // Log activity
           await supabaseAdmin
