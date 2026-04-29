@@ -78,30 +78,66 @@ export function invalidatePetCache(userId: string) {
 }
 
 /**
- * Determine the role-specific auth/login URL for a user based on their
- * cached access info. Falls back to the generic /auth page.
- *
- * Priority: admin/superadmin → /admin
- *           brand           → /auth?role=brand
- *           vet             → /auth?role=vet
- *           merchant        → /auth?role=merchant
- *           pet_owner       → /auth?role=pet_owner
- *           default         → /auth
+ * Canonical persona → auth-page route mapping.
+ * Single source of truth for role-specific logout/login redirects.
  */
-export function getAuthRedirectForUser(userId: string): string {
-  const entry = cache.get(userId);
-  const info = entry?.data;
-  if (!info) return"/auth";
+export type AuthPersona ="admin" |"brand" |"vet" |"merchant" |"pet_owner";
+
+export const AUTH_ROUTE_BY_PERSONA: Record<AuthPersona, string> = {
+  admin:"/admin",
+  brand:"/auth?role=brand",
+  vet:"/auth?role=vet",
+  merchant:"/auth?role=merchant",
+  pet_owner:"/auth?role=pet_owner",
+};
+
+/**
+ * Resolve the persona for a user from cached access info.
+ *
+ * Resolution order (most specific → least specific):
+ *  1. system_roles contains 'admin' or 'superadmin'           → admin
+ *  2. user_type explicitly set ('brand' | 'vet' | 'merchant'  → that persona
+ *     | 'pet_owner')
+ *  3. capability flags (is_vet, is_merchant)                  → vet / merchant
+ *  4. fallback                                                → pet_owner
+ */
+export function resolveAuthPersona(info: UserAccessInfo | null | undefined): AuthPersona | null {
+  if (!info) return null;
 
   if (
     info.system_roles?.includes("admin") ||
     info.system_roles?.includes("superadmin")
   ) {
-    return"/admin";
+    return"admin";
   }
-  if (info.user_type ==="brand") return"/auth?role=brand";
-  if (info.is_vet || info.user_type ==="vet") return"/auth?role=vet";
-  if (info.is_merchant || info.user_type ==="merchant") return"/auth?role=merchant";
-  if (info.user_type ==="pet_owner") return"/auth?role=pet_owner";
-  return"/auth";
+
+  // Explicit user_type wins — it's the canonical persona field.
+  switch (info.user_type) {
+    case"brand":
+      return"brand";
+    case"vet":
+      return"vet";
+    case"merchant":
+      return"merchant";
+    case"pet_owner":
+      return"pet_owner";
+  }
+
+  // Fall back to capability flags when user_type is missing/unknown.
+  if (info.is_vet) return"vet";
+  if (info.is_merchant) return"merchant";
+
+  return"pet_owner";
+}
+
+/**
+ * Determine the role-specific auth/login URL for a user based on their
+ * cached access info. Falls back to the generic /auth page when no cache
+ * entry exists.
+ */
+export function getAuthRedirectForUser(userId: string): string {
+  const entry = cache.get(userId);
+  const persona = resolveAuthPersona(entry?.data);
+  if (!persona) return"/auth";
+  return AUTH_ROUTE_BY_PERSONA[persona];
 }
