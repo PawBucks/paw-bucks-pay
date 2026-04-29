@@ -7121,6 +7121,11 @@ export type Database = {
           pause_reason: string | null
           paused_at: string | null
           paused_by: string | null
+          pawbucks_cap_enabled: boolean
+          pawbucks_cap_pct: number | null
+          pawbucks_promo_cap_pct: number | null
+          pawbucks_promo_ends_at: string | null
+          pawbucks_promo_starts_at: string | null
           phone: string | null
           price_range: number | null
           privacy_policy_url: string | null
@@ -7178,6 +7183,11 @@ export type Database = {
           pause_reason?: string | null
           paused_at?: string | null
           paused_by?: string | null
+          pawbucks_cap_enabled?: boolean
+          pawbucks_cap_pct?: number | null
+          pawbucks_promo_cap_pct?: number | null
+          pawbucks_promo_ends_at?: string | null
+          pawbucks_promo_starts_at?: string | null
           phone?: string | null
           price_range?: number | null
           privacy_policy_url?: string | null
@@ -7235,6 +7245,11 @@ export type Database = {
           pause_reason?: string | null
           paused_at?: string | null
           paused_by?: string | null
+          pawbucks_cap_enabled?: boolean
+          pawbucks_cap_pct?: number | null
+          pawbucks_promo_cap_pct?: number | null
+          pawbucks_promo_ends_at?: string | null
+          pawbucks_promo_starts_at?: string | null
           phone?: string | null
           price_range?: number | null
           privacy_policy_url?: string | null
@@ -14367,6 +14382,11 @@ export type Database = {
           linkedin_url: string | null
           logo_url: string | null
           longitude: number | null
+          pawbucks_cap_enabled: boolean | null
+          pawbucks_cap_pct: number | null
+          pawbucks_promo_cap_pct: number | null
+          pawbucks_promo_ends_at: string | null
+          pawbucks_promo_starts_at: string | null
           phone: string | null
           price_range: number | null
           privacy_policy_url: string | null
@@ -14393,6 +14413,11 @@ export type Database = {
           linkedin_url?: string | null
           logo_url?: string | null
           longitude?: number | null
+          pawbucks_cap_enabled?: boolean | null
+          pawbucks_cap_pct?: number | null
+          pawbucks_promo_cap_pct?: number | null
+          pawbucks_promo_ends_at?: string | null
+          pawbucks_promo_starts_at?: string | null
           phone?: string | null
           price_range?: number | null
           privacy_policy_url?: string | null
@@ -14419,6 +14444,11 @@ export type Database = {
           linkedin_url?: string | null
           logo_url?: string | null
           longitude?: number | null
+          pawbucks_cap_enabled?: boolean | null
+          pawbucks_cap_pct?: number | null
+          pawbucks_promo_cap_pct?: number | null
+          pawbucks_promo_ends_at?: string | null
+          pawbucks_promo_starts_at?: string | null
           phone?: string | null
           price_range?: number | null
           privacy_policy_url?: string | null
@@ -14578,6 +14608,10 @@ export type Database = {
         }
         Returns: Json
       }
+      default_pawbucks_cap_pct: {
+        Args: { p_business_type: string }
+        Returns: number
+      }
       expire_pawbucks: { Args: never; Returns: number }
       expire_unused_pet_fund_credits: { Args: never; Returns: number }
       generate_admin_invoice_number: { Args: never; Returns: string }
@@ -14671,6 +14705,10 @@ export type Database = {
         }[]
       }
       get_current_user_email: { Args: never; Returns: string }
+      get_effective_pawbucks_cap_pct: {
+        Args: { p_merchant_id: string }
+        Returns: number
+      }
       get_geo_cell_availability:
         | {
             Args: { p_geo_cell_id: string; p_service_id: string }
