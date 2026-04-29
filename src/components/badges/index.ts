@@ -1,3 +1,3 @@
-export * from './BadgeCard';
-export * from './BadgeCollection';
-export * from './BadgeTeaser';
+export * from'./BadgeCard';
+export * from'./BadgeCollection';
+export * from'./BadgeTeaser';

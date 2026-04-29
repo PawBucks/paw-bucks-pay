@@ -1,10 +1,10 @@
-import { useState, useRef, useCallback } from "react";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { FileText, AlertCircle } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { useState, useRef, useCallback } from"react";
+import { Checkbox } from"@/components/ui/checkbox";
+import { Label } from"@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from"@/components/ui/card";
+import { ScrollArea } from"@/components/ui/scroll-area";
+import { FileText, AlertCircle } from"lucide-react";
+import { cn } from"@/lib/utils";
 
 export const MERCHANT_TOS_CONTENT = `PAWBUCKS MERCHANT TERMS OF SERVICE
 
@@ -13,7 +13,7 @@ export const MERCHANT_TOS_CONTENT = `PAWBUCKS MERCHANT TERMS OF SERVICE
 Effective Date: February 2, 2026
 Last Updated: February 5, 2026
 
-These Merchant Terms of Service ("Agreement") govern your access to and use of the PawBucks platform, website, applications, software, APIs, and related services (collectively, the "Platform") provided by PawBucks, Inc. ("PawBucks," "we," "us," or "our").
+These Merchant Terms of Service ("Agreement") govern your access to and use of the PawBucks platform, website, applications, software, APIs, and related services (collectively, the"Platform") provided by PawBucks, Inc. ("PawBucks,""we,""us," or"our").
 
 By registering for, accessing, or using the Platform as a merchant, service provider, seller, or veterinary professional, you agree to be legally bound by this Agreement.
 
@@ -30,7 +30,7 @@ By registering for, accessing, or using the Platform as a merchant, service prov
 • Boarding providers
 • Licensed veterinarians, veterinary clinics, veterinary hospitals, and veterinary professionals
 
-Unless expressly stated otherwise, all references to "Merchant" apply equally to veterinary professionals.
+Unless expressly stated otherwise, all references to"Merchant" apply equally to veterinary professionals.
 
 ⸻
 
@@ -201,7 +201,7 @@ PawBucks may suspend or terminate access immediately for:
 
 12. DISCLAIMERS
 
-THE PLATFORM IS PROVIDED "AS IS" AND "AS AVAILABLE."
+THE PLATFORM IS PROVIDED"AS IS" AND"AS AVAILABLE."
 PAWBUCKS DISCLAIMS ALL WARRANTIES, INCLUDING WARRANTIES RELATED TO MEDICAL OR PROFESSIONAL SERVICES.
 
 ⸻
@@ -241,72 +241,72 @@ PawBucks, Inc.
 Legal@PawBucks.app`;
 
 interface MerchantTermsOfServiceProps {
-  agreed: boolean;
-  onAgreeChange: (agreed: boolean) => void;
-  disabled?: boolean;
+ agreed: boolean;
+ onAgreeChange: (agreed: boolean) => void;
+ disabled?: boolean;
 }
 
 export const MerchantTermsOfService = ({
-  agreed,
-  onAgreeChange,
-  disabled = false,
+ agreed,
+ onAgreeChange,
+ disabled = false,
 }: MerchantTermsOfServiceProps) => {
-  const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
+ const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
+ const scrollRef = useRef<HTMLDivElement>(null);
 
-  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
-    const target = e.currentTarget;
-    const isAtBottom = Math.abs(target.scrollHeight - target.scrollTop - target.clientHeight) < 20;
-    if (isAtBottom && !hasScrolledToBottom) {
-      setHasScrolledToBottom(true);
-    }
-  }, [hasScrolledToBottom]);
+ const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+ const target = e.currentTarget;
+ const isAtBottom = Math.abs(target.scrollHeight - target.scrollTop - target.clientHeight) < 20;
+ if (isAtBottom && !hasScrolledToBottom) {
+ setHasScrolledToBottom(true);
+ }
+ }, [hasScrolledToBottom]);
 
-  const canCheck = hasScrolledToBottom;
+ const canCheck = hasScrolledToBottom;
 
-  return (
-    <Card className="border-border">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg flex items-center gap-2">
-          <FileText className="w-5 h-5 text-primary" />
-          Merchant Terms of Service
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div 
-          ref={scrollRef}
-          onScroll={handleScroll}
-          className="h-64 overflow-y-auto border rounded-lg p-4 bg-muted/30 text-sm whitespace-pre-wrap font-mono"
-        >
-          {MERCHANT_TOS_CONTENT}
-        </div>
+ return (
+ <Card className="border-border">
+ <CardHeader className="pb-3">
+ <CardTitle className="text-lg flex items-center gap-2">
+ <FileText className="w-5 h-5 text-primary" />
+ Merchant Terms of Service
+ </CardTitle>
+ </CardHeader>
+ <CardContent className="space-y-4">
+ <div 
+ ref={scrollRef}
+ onScroll={handleScroll}
+ className="h-64 overflow-y-auto border rounded-lg p-4 bg-muted/30 text-sm whitespace-pre-wrap font-mono"
+ >
+ {MERCHANT_TOS_CONTENT}
+ </div>
 
-        {!hasScrolledToBottom && (
-          <div className="flex items-center gap-2 text-destructive text-sm">
-            <AlertCircle className="w-4 h-4" />
-            <span>Please scroll to the bottom to read the entire agreement</span>
-          </div>
-        )}
+ {!hasScrolledToBottom && (
+ <div className="flex items-center gap-2 text-destructive text-sm">
+ <AlertCircle className="w-4 h-4" />
+ <span>Please scroll to the bottom to read the entire agreement</span>
+ </div>
+ )}
 
-        <div className="flex items-start space-x-3">
-          <Checkbox
-            id="tos-agreement"
-            checked={agreed}
-            onCheckedChange={(checked) => onAgreeChange(checked === true)}
-            disabled={disabled || !canCheck}
-            className={cn(!canCheck && "opacity-50 cursor-not-allowed")}
-          />
-          <Label
-            htmlFor="tos-agreement"
-            className={cn(
-              "text-sm cursor-pointer leading-relaxed",
-              !canCheck && "opacity-50 cursor-not-allowed"
-            )}
-          >
-            I have read and agree to the PawBucks Merchant Terms of Service
-          </Label>
-        </div>
-      </CardContent>
-    </Card>
-  );
+ <div className="flex items-start space-x-3">
+ <Checkbox
+ id="tos-agreement"
+ checked={agreed}
+ onCheckedChange={(checked) => onAgreeChange(checked === true)}
+ disabled={disabled || !canCheck}
+ className={cn(!canCheck &&"opacity-50 cursor-not-allowed")}
+ />
+ <Label
+ htmlFor="tos-agreement"
+ className={cn(
+"text-sm cursor-pointer leading-relaxed",
+ !canCheck &&"opacity-50 cursor-not-allowed"
+ )}
+ >
+ I have read and agree to the PawBucks Merchant Terms of Service
+ </Label>
+ </div>
+ </CardContent>
+ </Card>
+ );
 };

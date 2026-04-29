@@ -1,10 +1,10 @@
-import { ReactNode } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { PageLoader } from "@/components/PageLoader";
+import { ReactNode } from"react";
+import { useAuth } from"@/hooks/useAuth";
+import { PageLoader } from"@/components/PageLoader";
 
 interface PublicOrAuthRouteProps {
-  authedElement: ReactNode;
-  publicElement: ReactNode;
+ authedElement: ReactNode;
+ publicElement: ReactNode;
 }
 
 /**
@@ -12,7 +12,7 @@ interface PublicOrAuthRouteProps {
  * Used so public landing/discovery pages don't blank-redirect to /auth.
  */
 export const PublicOrAuthRoute = ({ authedElement, publicElement }: PublicOrAuthRouteProps) => {
-  const { user, loading } = useAuth();
-  if (loading) return <PageLoader message="Loading..." />;
-  return <>{user ? authedElement : publicElement}</>;
+ const { user, loading } = useAuth();
+ if (loading) return <PageLoader message="Loading..." />;
+ return <>{user ? authedElement : publicElement}</>;
 };

@@ -1,9 +1,9 @@
-import { useState, useCallback } from "react";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertCircle, Stethoscope } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { useState, useCallback } from"react";
+import { Checkbox } from"@/components/ui/checkbox";
+import { Label } from"@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from"@/components/ui/card";
+import { AlertCircle, Stethoscope } from"lucide-react";
+import { cn } from"@/lib/utils";
 
 export const VET_ADDENDUM_CONTENT = `PAWBUCKS
 
@@ -11,7 +11,7 @@ VETERINARY SERVICES DISCLOSURE ADDENDUM
 
 Effective Date: February 5, 2026
 
-This Veterinary Services Disclosure Addendum ("Addendum") supplements and forms part of the PawBucks Merchant Terms of Service (the "Merchant Agreement") between PawBucks, Inc. ("PawBucks") and any Merchant that is a licensed veterinary professional, veterinary clinic, veterinary hospital, or veterinary service provider ("Veterinary Merchant").
+This Veterinary Services Disclosure Addendum ("Addendum") supplements and forms part of the PawBucks Merchant Terms of Service (the"Merchant Agreement") between PawBucks, Inc. ("PawBucks") and any Merchant that is a licensed veterinary professional, veterinary clinic, veterinary hospital, or veterinary service provider ("Veterinary Merchant").
 
 In the event of a conflict, this Addendum controls with respect to veterinary-specific matters.
 
@@ -203,70 +203,70 @@ By using the PawBucks Platform, the Veterinary Merchant acknowledges and agrees 
 • This Addendum is legally binding and enforceable`;
 
 interface VetServicesAddendumProps {
-  agreed: boolean;
-  onAgreeChange: (agreed: boolean) => void;
-  disabled?: boolean;
+ agreed: boolean;
+ onAgreeChange: (agreed: boolean) => void;
+ disabled?: boolean;
 }
 
 export const VetServicesAddendum = ({
-  agreed,
-  onAgreeChange,
-  disabled = false,
+ agreed,
+ onAgreeChange,
+ disabled = false,
 }: VetServicesAddendumProps) => {
-  const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
+ const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
 
-  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
-    const target = e.currentTarget;
-    const isAtBottom = Math.abs(target.scrollHeight - target.scrollTop - target.clientHeight) < 20;
-    if (isAtBottom && !hasScrolledToBottom) {
-      setHasScrolledToBottom(true);
-    }
-  }, [hasScrolledToBottom]);
+ const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+ const target = e.currentTarget;
+ const isAtBottom = Math.abs(target.scrollHeight - target.scrollTop - target.clientHeight) < 20;
+ if (isAtBottom && !hasScrolledToBottom) {
+ setHasScrolledToBottom(true);
+ }
+ }, [hasScrolledToBottom]);
 
-  const canCheck = hasScrolledToBottom;
+ const canCheck = hasScrolledToBottom;
 
-  return (
-    <Card className="border-border">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg flex items-center gap-2">
-          <Stethoscope className="w-5 h-5 text-primary" />
-          Veterinary Services Disclosure Addendum
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div 
-          onScroll={handleScroll}
-          className="h-64 overflow-y-auto border rounded-lg p-4 bg-muted/30 text-sm whitespace-pre-wrap font-mono"
-        >
-          {VET_ADDENDUM_CONTENT}
-        </div>
+ return (
+ <Card className="border-border">
+ <CardHeader className="pb-3">
+ <CardTitle className="text-lg flex items-center gap-2">
+ <Stethoscope className="w-5 h-5 text-primary" />
+ Veterinary Services Disclosure Addendum
+ </CardTitle>
+ </CardHeader>
+ <CardContent className="space-y-4">
+ <div 
+ onScroll={handleScroll}
+ className="h-64 overflow-y-auto border rounded-lg p-4 bg-muted/30 text-sm whitespace-pre-wrap font-mono"
+ >
+ {VET_ADDENDUM_CONTENT}
+ </div>
 
-        {!hasScrolledToBottom && (
-          <div className="flex items-center gap-2 text-destructive text-sm">
-            <AlertCircle className="w-4 h-4" />
-            <span>Please scroll to the bottom to read the entire addendum</span>
-          </div>
-        )}
+ {!hasScrolledToBottom && (
+ <div className="flex items-center gap-2 text-destructive text-sm">
+ <AlertCircle className="w-4 h-4" />
+ <span>Please scroll to the bottom to read the entire addendum</span>
+ </div>
+ )}
 
-        <div className="flex items-start space-x-3">
-          <Checkbox
-            id="addendum-agreement"
-            checked={agreed}
-            onCheckedChange={(checked) => onAgreeChange(checked === true)}
-            disabled={disabled || !canCheck}
-            className={cn(!canCheck && "opacity-50 cursor-not-allowed")}
-          />
-          <Label
-            htmlFor="addendum-agreement"
-            className={cn(
-              "text-sm cursor-pointer leading-relaxed",
-              !canCheck && "opacity-50 cursor-not-allowed"
-            )}
-          >
-            I have read and agree to the Veterinary Services Disclosure Addendum
-          </Label>
-        </div>
-      </CardContent>
-    </Card>
-  );
+ <div className="flex items-start space-x-3">
+ <Checkbox
+ id="addendum-agreement"
+ checked={agreed}
+ onCheckedChange={(checked) => onAgreeChange(checked === true)}
+ disabled={disabled || !canCheck}
+ className={cn(!canCheck &&"opacity-50 cursor-not-allowed")}
+ />
+ <Label
+ htmlFor="addendum-agreement"
+ className={cn(
+"text-sm cursor-pointer leading-relaxed",
+ !canCheck &&"opacity-50 cursor-not-allowed"
+ )}
+ >
+ I have read and agree to the Veterinary Services Disclosure Addendum
+ </Label>
+ </div>
+ </CardContent>
+ </Card>
+ );
 };

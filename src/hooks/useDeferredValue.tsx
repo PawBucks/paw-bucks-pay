@@ -1,4 +1,4 @@
-import { useDeferredValue as useReactDeferredValue, useTransition, useCallback } from 'react';
+import { useDeferredValue as useReactDeferredValue, useTransition, useCallback } from'react';
 
 /**
  * Performance hook for deferring expensive renders.
@@ -9,10 +9,10 @@ import { useDeferredValue as useReactDeferredValue, useTransition, useCallback }
  * - Expensive computations triggered by user input
  */
 export const useDeferredFilter = <T,>(value: T) => {
-  const deferredValue = useReactDeferredValue(value);
-  const isStale = value !== deferredValue;
+ const deferredValue = useReactDeferredValue(value);
+ const isStale = value !== deferredValue;
 
-  return { deferredValue, isStale };
+ return { deferredValue, isStale };
 };
 
 /**
@@ -20,11 +20,11 @@ export const useDeferredFilter = <T,>(value: T) => {
  * The UI stays responsive while the transition runs in the background.
  */
 export const useNonBlockingUpdate = () => {
-  const [isPending, startTransition] = useTransition();
+ const [isPending, startTransition] = useTransition();
 
-  const update = useCallback((fn: () => void) => {
-    startTransition(fn);
-  }, [startTransition]);
+ const update = useCallback((fn: () => void) => {
+ startTransition(fn);
+ }, [startTransition]);
 
-  return { isPending, update };
+ return { isPending, update };
 };
