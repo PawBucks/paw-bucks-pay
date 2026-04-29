@@ -164,7 +164,7 @@ export function CampaignBriefCard({ campaign }: Props) {
               value={
                 campaign.auto_replenish_enabled ? (
                   <span>
-                    <Badge className="bg-emerald-500/10 text-emerald-700 dark:text-emerald-400">Enabled</Badge>
+                    <Badge className="bg-success/10 text-success dark:text-success">Enabled</Badge>
                     <span className="block text-xs text-muted-foreground mt-1">
                       Trigger at {campaign.auto_replenish_threshold?.toLocaleString() || "—"} PB → top up ${campaign.auto_replenish_amount_usd?.toLocaleString() || "—"}
                     </span>
@@ -259,7 +259,7 @@ export function CampaignBriefCard({ campaign }: Props) {
               value={
                 fundedDate ? (
                   <span className="flex items-center gap-1">
-                    <CreditCard className="h-3.5 w-3.5 text-emerald-600" />
+                    <CreditCard className="h-3.5 w-3.5 text-success" />
                     {fundedDate}
                   </span>
                 ) : (

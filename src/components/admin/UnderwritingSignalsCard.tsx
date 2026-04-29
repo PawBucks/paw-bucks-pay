@@ -41,9 +41,9 @@ function SignalGauge({ label, value, max, unit, icon: Icon, thresholds }: {
     ? value >= thresholds.warning && value < thresholds.good
     : value > thresholds.good && value <= thresholds.warning;
 
-  const color = isGood ? 'text-emerald-600' : isWarning ? 'text-amber-600' : 'text-destructive';
-  const barColor = isGood ? '[&>div]:bg-emerald-500' : isWarning ? '[&>div]:bg-amber-500' : '[&>div]:bg-destructive';
-  const bgColor = isGood ? 'bg-emerald-500/10' : isWarning ? 'bg-amber-500/10' : 'bg-destructive/10';
+  const color = isGood ? 'text-success' : isWarning ? 'text-warning' : 'text-destructive';
+  const barColor = isGood ? '[&>div]:bg-success' : isWarning ? '[&>div]:bg-warning' : '[&>div]:bg-destructive';
+  const bgColor = isGood ? 'bg-success/10' : isWarning ? 'bg-warning/10' : 'bg-destructive/10';
 
   return (
     <div className="space-y-2">
@@ -86,8 +86,8 @@ function SignalScore({ signals }: { signals: UnderwritingSignals }) {
   else if (signals.avg_review_score >= 3.5) score += 8;
 
   const label = score >= 75 ? 'Strong' : score >= 50 ? 'Moderate' : score >= 25 ? 'Developing' : 'Insufficient';
-  const color = score >= 75 ? 'text-emerald-600' : score >= 50 ? 'text-amber-600' : score >= 25 ? 'text-orange-600' : 'text-destructive';
-  const bg = score >= 75 ? 'bg-emerald-500/10 border-emerald-500/20' : score >= 50 ? 'bg-amber-500/10 border-amber-500/20' : score >= 25 ? 'bg-orange-500/10 border-orange-500/20' : 'bg-destructive/10 border-destructive/20';
+  const color = score >= 75 ? 'text-success' : score >= 50 ? 'text-warning' : score >= 25 ? 'text-warning' : 'text-destructive';
+  const bg = score >= 75 ? 'bg-success/10 border-success/30/20' : score >= 50 ? 'bg-warning/10 border-warning/30/20' : score >= 25 ? 'bg-warning/10 border-warning/30/20' : 'bg-destructive/10 border-destructive/20';
 
   return (
     <div className={cn('rounded-xl border p-4 text-center', bg)}>
@@ -207,8 +207,8 @@ export function UnderwritingSignalsCard({ merchantId }: { merchantId: string }) 
             <div className="flex items-end gap-3">
               <span className={cn(
                 "text-3xl font-extrabold",
-                signals.customer_repeat_rate_pct >= 40 ? "text-emerald-600" :
-                signals.customer_repeat_rate_pct >= 20 ? "text-amber-600" : "text-destructive"
+                signals.customer_repeat_rate_pct >= 40 ? "text-success" :
+                signals.customer_repeat_rate_pct >= 20 ? "text-warning" : "text-destructive"
               )}>
                 {signals.customer_repeat_rate_pct}%
               </span>
@@ -247,8 +247,8 @@ export function UnderwritingSignalsCard({ merchantId }: { merchantId: string }) 
             <div className="flex items-end gap-3">
               <span className={cn(
                 "text-3xl font-extrabold",
-                signals.avg_review_score >= 4.5 ? "text-emerald-600" :
-                signals.avg_review_score >= 3.5 ? "text-amber-600" : "text-destructive"
+                signals.avg_review_score >= 4.5 ? "text-success" :
+                signals.avg_review_score >= 3.5 ? "text-warning" : "text-destructive"
               )}>
                 {signals.avg_review_score > 0 ? signals.avg_review_score.toFixed(1) : 'N/A'}
               </span>
@@ -277,13 +277,13 @@ export function UnderwritingSignalsCard({ merchantId }: { merchantId: string }) 
               </div>
             </div>
             {signals.review_count < 3 && (
-              <div className="flex items-center gap-2 text-xs text-amber-600 bg-amber-500/10 rounded-lg p-2">
+              <div className="flex items-center gap-2 text-xs text-warning bg-warning/10 rounded-lg p-2">
                 <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
                 <span>Low review volume — signal confidence is limited</span>
               </div>
             )}
             {signals.review_count >= 5 && signals.avg_review_score >= 4.5 && (
-              <div className="flex items-center gap-2 text-xs text-emerald-600 bg-emerald-500/10 rounded-lg p-2">
+              <div className="flex items-center gap-2 text-xs text-success bg-success/10 rounded-lg p-2">
                 <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
                 <span>Strong social proof — high customer satisfaction</span>
               </div>

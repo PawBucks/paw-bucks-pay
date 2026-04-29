@@ -36,11 +36,11 @@ import {
 
 const statusColors: Record<string, string> = {
   draft: "bg-muted text-muted-foreground",
-  pending_payment: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400",
-  active: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400",
-  paused: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400",
-  completed: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
-  expired: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+  pending_payment: "bg-warning/15 text-warning",
+  active: "bg-success/15 text-success dark:text-success",
+  paused: "bg-warning/10 text-warning",
+  completed: "bg-info/15 text-info dark:text-info",
+  expired: "bg-destructive/15 text-destructive dark:text-destructive",
 };
 
 export const BrandCampaignsTab = () => {
@@ -301,7 +301,7 @@ export const BrandCampaignsTab = () => {
               </Button>
             )}
             {selectedCampaign.status === "pending_payment" && (
-              <Button onClick={() => updateStatusMutation.mutate({ campaignId: selectedCampaign.id, status: "active" })} className="bg-emerald-600 hover:bg-emerald-700">
+              <Button onClick={() => updateStatusMutation.mutate({ campaignId: selectedCampaign.id, status: "active" })} className="bg-success hover:bg-success">
                 Activate Campaign (Payment Confirmed)
               </Button>
             )}
@@ -316,7 +316,7 @@ export const BrandCampaignsTab = () => {
               </>
             )}
             {selectedCampaign.status === "paused" && (
-              <Button onClick={() => updateStatusMutation.mutate({ campaignId: selectedCampaign.id, status: "active" })} className="bg-emerald-600 hover:bg-emerald-700">
+              <Button onClick={() => updateStatusMutation.mutate({ campaignId: selectedCampaign.id, status: "active" })} className="bg-success hover:bg-success">
                 Resume Campaign
               </Button>
             )}
@@ -540,7 +540,7 @@ export const BrandCampaignsTab = () => {
                       <Megaphone className="h-4 w-4 text-muted-foreground" />
                       <span>{brandCampaigns.length} campaign{brandCampaigns.length !== 1 ? "s" : ""}</span>
                       {activeCampaigns.length > 0 && (
-                        <Badge variant="outline" className="text-emerald-600">{activeCampaigns.length} active</Badge>
+                        <Badge variant="outline" className="text-success">{activeCampaigns.length} active</Badge>
                       )}
                     </div>
                     <div className="flex gap-2 pt-2 border-t">

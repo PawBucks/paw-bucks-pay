@@ -104,7 +104,7 @@ export default function AdminInvoicePayment() {
               <p className="text-xs text-muted-foreground uppercase tracking-widest">Platform Invoice</p>
               <h1 className="text-2xl font-bold">{invoice.invoice_number}</h1>
               {invoice.title && <p className="text-muted-foreground">{invoice.title}</p>}
-              <Badge className={`capitalize ${isPaid ? "bg-green-100 text-green-800" : "bg-blue-100 text-blue-800"}`}>
+              <Badge className={`capitalize ${isPaid ? "bg-success/15 text-success" : "bg-info/15 text-info"}`}>
                 {isPaid ? "Paid" : invoice.status.replace("_", " ")}
               </Badge>
             </div>
@@ -168,7 +168,7 @@ export default function AdminInvoicePayment() {
                   <span>${Number(invoice.subtotal).toFixed(2)}</span>
                 </div>
                 {Number(invoice.discount_amount) > 0 && (
-                  <div className="flex justify-between text-green-600">
+                  <div className="flex justify-between text-success">
                     <span>Discount</span>
                     <span>-${Number(invoice.discount_amount).toFixed(2)}</span>
                   </div>
@@ -207,8 +207,8 @@ export default function AdminInvoicePayment() {
 
             {isPaid && (
               <div className="text-center py-4 space-y-2">
-                <CheckCircle className="w-10 h-10 text-green-600 mx-auto" />
-                <p className="text-green-700 font-medium">This invoice has been paid</p>
+                <CheckCircle className="w-10 h-10 text-success mx-auto" />
+                <p className="text-success font-medium">This invoice has been paid</p>
               </div>
             )}
 

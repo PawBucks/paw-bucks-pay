@@ -284,7 +284,7 @@ export function MerchantsTab() {
                     {merchant.is_paused ? (
                       <Badge variant="destructive">Paused</Badge>
                     ) : merchant.approval_status === 'pending' ? (
-                      <Badge variant="secondary" className="bg-amber-500/15 text-amber-700 border-amber-500/30">
+                      <Badge variant="secondary" className="bg-warning/15 text-warning border-warning/30/30">
                         Pending
                       </Badge>
                     ) : merchant.approval_status === 'denied' ? (
@@ -315,7 +315,7 @@ export function MerchantsTab() {
                       title={merchant.is_paused ? 'Resume merchant' : 'Pause merchant'}
                     >
                       {merchant.is_paused ? (
-                        <PlayCircle className="w-4 h-4 text-green-600" />
+                        <PlayCircle className="w-4 h-4 text-success" />
                       ) : (
                         <PauseCircle className="w-4 h-4 text-destructive" />
                       )}

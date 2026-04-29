@@ -169,8 +169,8 @@ export function VerificationChecklist({ entityType, entityId, onChecklistComplet
   const answerButton = (questionId: string, value: AnswerValue, current?: AnswerValue) => {
     const isActive = current === value;
     const configs: Record<AnswerValue, { icon: typeof CheckCircle2; label: string; activeClass: string }> = {
-      yes: { icon: CheckCircle2, label: 'Yes', activeClass: 'bg-green-100 border-green-500 text-green-700 dark:bg-green-950 dark:text-green-400' },
-      no: { icon: XCircle, label: 'No', activeClass: 'bg-red-100 border-red-500 text-red-700 dark:bg-red-950 dark:text-red-400' },
+      yes: { icon: CheckCircle2, label: 'Yes', activeClass: 'bg-success/15 border-success/30 text-success dark:text-success' },
+      no: { icon: XCircle, label: 'No', activeClass: 'bg-destructive/15 border-destructive/30 text-destructive dark:text-destructive' },
       na: { icon: MinusCircle, label: 'N/A', activeClass: 'bg-muted border-muted-foreground/30 text-muted-foreground' },
     };
     const cfg = configs[value];
@@ -215,10 +215,10 @@ export function VerificationChecklist({ entityType, entityId, onChecklistComplet
       {/* Progress summary */}
       <div className="px-6 pb-3">
         <div className="flex gap-3 text-xs">
-          <span className="flex items-center gap-1 text-green-600 dark:text-green-400">
+          <span className="flex items-center gap-1 text-success dark:text-success">
             <CheckCircle2 className="w-3.5 h-3.5" /> {stats.yesCount} Verified
           </span>
-          <span className="flex items-center gap-1 text-red-600 dark:text-red-400">
+          <span className="flex items-center gap-1 text-destructive dark:text-destructive">
             <XCircle className="w-3.5 h-3.5" /> {stats.noCount} Failed
           </span>
           <span className="flex items-center gap-1 text-muted-foreground">
@@ -226,12 +226,12 @@ export function VerificationChecklist({ entityType, entityId, onChecklistComplet
           </span>
         </div>
         {stats.allAnswered && !stats.hasFailures && (
-          <div className="mt-2 flex items-center gap-1.5 text-xs text-green-600 dark:text-green-400 font-medium">
+          <div className="mt-2 flex items-center gap-1.5 text-xs text-success dark:text-success font-medium">
             <ShieldCheck className="w-4 h-4" /> All checks passed — eligible for approval
           </div>
         )}
         {stats.hasFailures && (
-          <div className="mt-2 flex items-center gap-1.5 text-xs text-red-600 dark:text-red-400 font-medium">
+          <div className="mt-2 flex items-center gap-1.5 text-xs text-destructive dark:text-destructive font-medium">
             <AlertTriangle className="w-4 h-4" /> {stats.noCount} check(s) failed — review before approving
           </div>
         )}

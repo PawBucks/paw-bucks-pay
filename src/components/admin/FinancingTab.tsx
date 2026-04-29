@@ -122,9 +122,9 @@ function getRiskScore(a: FundingApplicant): { score: number; label: string; colo
   // Stripe connected
   if (a.stripe_account_status === 'active') score += 15;
 
-  if (score >= 75) return { score, label: 'Low Risk', color: 'text-green-600' };
-  if (score >= 50) return { score, label: 'Moderate Risk', color: 'text-yellow-600' };
-  if (score >= 25) return { score, label: 'Elevated Risk', color: 'text-orange-600' };
+  if (score >= 75) return { score, label: 'Low Risk', color: 'text-success' };
+  if (score >= 50) return { score, label: 'Moderate Risk', color: 'text-warning' };
+  if (score >= 25) return { score, label: 'Elevated Risk', color: 'text-warning' };
   return { score, label: 'High Risk', color: 'text-destructive' };
 }
 
@@ -464,7 +464,7 @@ function MerchantDetailPanel({
               <div key={label} className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   {check
-                    ? <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0" />
+                    ? <CheckCircle2 className="w-4 h-4 text-success shrink-0" />
                     : <XCircle className="w-4 h-4 text-destructive shrink-0" />
                   }
                   <span className={check ? 'text-foreground' : 'text-muted-foreground'}>{label}</span>
@@ -556,7 +556,7 @@ function MerchantDetailPanel({
       )}
       {applicant.status === 'approved' && (
         <div className="flex gap-3 pt-2">
-          <Button className="flex-1 gap-2 bg-blue-600 hover:bg-blue-700 text-white" onClick={onMarkFunded}>
+          <Button className="flex-1 gap-2 bg-info hover:bg-info text-white" onClick={onMarkFunded}>
             <DollarSign className="w-4 h-4" /> Mark as Funded
           </Button>
         </div>
@@ -715,7 +715,7 @@ function VetLoanDetailPanel({
       )}
       {loan.status === 'approved' && (
         <div className="flex gap-3 pt-2">
-          <Button className="flex-1 gap-2 bg-blue-600 hover:bg-blue-700 text-white" onClick={onMarkFunded}>
+          <Button className="flex-1 gap-2 bg-info hover:bg-info text-white" onClick={onMarkFunded}>
             <DollarSign className="w-4 h-4" /> Mark as Funded
           </Button>
         </div>
@@ -1113,7 +1113,7 @@ export function FinancingTab() {
       <Dialog open={approveDialogOpen} onOpenChange={setApproveDialogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-green-600">
+            <DialogTitle className="flex items-center gap-2 text-success">
               <CheckCircle2 className="w-5 h-5" />
               {tab === 'merchant' ? 'Approve Merchant Funding' : 'Approve Vet Loan'}
             </DialogTitle>
@@ -1151,7 +1151,7 @@ export function FinancingTab() {
           <div className="flex gap-3 pt-2">
             <Button variant="outline" className="flex-1" onClick={() => setApproveDialogOpen(false)}>Cancel</Button>
             <Button
-              className="flex-1 gap-2 bg-green-600 hover:bg-green-700 text-white"
+              className="flex-1 gap-2 bg-success hover:bg-success text-white"
               disabled={loading || (tab === 'merchant' && !fundingAmount)}
               onClick={tab === 'merchant' ? handleApproveMerchant : handleApproveVetLoan}
             >

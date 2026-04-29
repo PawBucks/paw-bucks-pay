@@ -222,9 +222,9 @@ export const ReceiptsTab = () => {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "pending": return <Badge variant="outline" className="bg-yellow-500/10 text-yellow-600 border-yellow-500/30">Pending</Badge>;
-      case "approved": return <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/30">Approved</Badge>;
-      case "rejected": return <Badge variant="outline" className="bg-red-500/10 text-red-600 border-red-500/30">Rejected</Badge>;
+      case "pending": return <Badge variant="outline" className="bg-warning/10 text-warning border-warning/30/30">Pending</Badge>;
+      case "approved": return <Badge variant="outline" className="bg-success/10 text-success border-success/30/30">Approved</Badge>;
+      case "rejected": return <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/30/30">Rejected</Badge>;
       default: return <Badge variant="outline">{status}</Badge>;
     }
   };
@@ -289,12 +289,12 @@ export const ReceiptsTab = () => {
 
       {/* Summary Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="bg-yellow-500/10 rounded-lg p-3 text-center">
-          <p className="text-2xl font-bold text-yellow-600">{receipts.filter(r => r.status === "pending").length}</p>
+        <div className="bg-warning/10 rounded-lg p-3 text-center">
+          <p className="text-2xl font-bold text-warning">{receipts.filter(r => r.status === "pending").length}</p>
           <p className="text-xs text-muted-foreground">Pending Review</p>
         </div>
-        <div className="bg-green-500/10 rounded-lg p-3 text-center">
-          <p className="text-2xl font-bold text-green-600">{receipts.filter(r => r.status === "approved").length}</p>
+        <div className="bg-success/10 rounded-lg p-3 text-center">
+          <p className="text-2xl font-bold text-success">{receipts.filter(r => r.status === "approved").length}</p>
           <p className="text-xs text-muted-foreground">Approved</p>
         </div>
         <div className="bg-primary/10 rounded-lg p-3 text-center">
@@ -343,7 +343,7 @@ export const ReceiptsTab = () => {
                 <TableCell>{getStatusBadge(receipt.status)}</TableCell>
                 <TableCell>
                   {receipt.merchant_confirmation ? (
-                    <Badge className="bg-green-600 text-xs"><ShieldCheck className="w-3 h-3 mr-1" />Yes</Badge>
+                    <Badge className="bg-success text-xs"><ShieldCheck className="w-3 h-3 mr-1" />Yes</Badge>
                   ) : (
                     <span className="text-xs text-muted-foreground">—</span>
                   )}
@@ -419,10 +419,10 @@ export const ReceiptsTab = () => {
                   <div className="mt-1">{getStatusBadge(selectedReceipt.status)}</div>
                 </div>
                 {selectedReceipt.merchant_confirmation && (
-                  <div className="col-span-2 p-3 bg-green-500/10 rounded-lg border border-green-500/20">
+                  <div className="col-span-2 p-3 bg-success/10 rounded-lg border border-success/30/20">
                     <div className="flex items-center gap-2 mb-1">
-                      <ShieldCheck className="w-4 h-4 text-green-600" />
-                      <span className="font-semibold text-sm text-green-700">Merchant Confirmed</span>
+                      <ShieldCheck className="w-4 h-4 text-success" />
+                      <span className="font-semibold text-sm text-success">Merchant Confirmed</span>
                     </div>
                     <p className="text-xs text-muted-foreground">
                       Code: {selectedReceipt.merchant_confirmation.confirmation_code} •
@@ -475,9 +475,9 @@ export const ReceiptsTab = () => {
                 <p><strong>Type:</strong> {selectedReceipt.submission_type === "partner" ? "Partner Merchant" : "Non-Partner"}</p>
                 <p><strong>Date:</strong> {format(new Date(selectedReceipt.receipt_date), "MMM d, yyyy")}</p>
                 {selectedReceipt.merchant_confirmation && (
-                  <div className="mt-2 p-2 bg-green-500/10 rounded border border-green-500/20 flex items-center gap-2">
-                    <ShieldCheck className="w-4 h-4 text-green-600" />
-                    <span className="text-green-700 text-xs font-medium">
+                  <div className="mt-2 p-2 bg-success/10 rounded border border-success/30/20 flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4 text-success" />
+                    <span className="text-success text-xs font-medium">
                       Merchant confirmed: ${selectedReceipt.merchant_confirmation.amount.toFixed(2)}
                     </span>
                   </div>

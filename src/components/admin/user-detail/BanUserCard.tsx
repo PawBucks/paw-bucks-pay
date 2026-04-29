@@ -65,7 +65,7 @@ export function BanUserCard({ userId, isBanned, bannedAt, bannedReason, onChange
             </>
           ) : (
             <>
-              <ShieldCheck className="w-5 h-5 text-emerald-600" />
+              <ShieldCheck className="w-5 h-5 text-success" />
               Account Status
             </>
           )}

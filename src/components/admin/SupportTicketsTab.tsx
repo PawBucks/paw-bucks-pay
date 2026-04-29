@@ -39,7 +39,7 @@ const STATUS_CONFIG: Record<string, { label: string; variant: 'default' | 'secon
 const PRIORITY_CONFIG: Record<string, { label: string; className: string }> = {
   low: { label: 'Low', className: 'bg-muted text-muted-foreground' },
   medium: { label: 'Medium', className: 'bg-primary/10 text-primary' },
-  high: { label: 'High', className: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' },
+  high: { label: 'High', className: 'bg-warning/10 text-warning' },
   urgent: { label: 'Urgent', className: 'bg-destructive/10 text-destructive' },
 };
 
@@ -221,7 +221,7 @@ export const SupportTicketsTab = () => {
         <Card><CardContent className="pt-4"><div className="flex items-center gap-2"><AlertCircle className="h-4 w-4 text-destructive" /><span className="text-sm text-muted-foreground">Open</span></div><p className="text-2xl font-bold">{counts.open}</p></CardContent></Card>
         <Card><CardContent className="pt-4"><div className="flex items-center gap-2"><Clock className="h-4 w-4 text-primary" /><span className="text-sm text-muted-foreground">In Progress</span></div><p className="text-2xl font-bold">{counts.in_progress}</p></CardContent></Card>
         <Card><CardContent className="pt-4"><div className="flex items-center gap-2"><MessageSquare className="h-4 w-4 text-muted-foreground" /><span className="text-sm text-muted-foreground">Awaiting</span></div><p className="text-2xl font-bold">{counts.awaiting}</p></CardContent></Card>
-        <Card><CardContent className="pt-4"><div className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /><span className="text-sm text-muted-foreground">Resolved</span></div><p className="text-2xl font-bold">{counts.resolved}</p></CardContent></Card>
+        <Card><CardContent className="pt-4"><div className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-success" /><span className="text-sm text-muted-foreground">Resolved</span></div><p className="text-2xl font-bold">{counts.resolved}</p></CardContent></Card>
       </div>
 
       {/* Filters */}
@@ -393,7 +393,7 @@ export const SupportTicketsTab = () => {
                   </Select>
                   <div className="flex gap-2">
                     <Button variant="outline" onClick={() => setSelectedTicket(null)}>Close</Button>
-                    <Button onClick={handleResolve} variant="default" className="bg-green-600 hover:bg-green-700">
+                    <Button onClick={handleResolve} variant="default" className="bg-success hover:bg-success">
                       <CheckCircle className="w-4 h-4 mr-2" />
                       Mark Resolved
                     </Button>

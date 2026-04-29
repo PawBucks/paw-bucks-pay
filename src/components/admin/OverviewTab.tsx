@@ -110,44 +110,44 @@ export function OverviewTab() {
       title: 'Total Users',
       value: stats.totalUsers.toLocaleString(),
       icon: Users,
-      color: 'text-blue-500',
+      color: 'text-info',
     },
     {
       title: 'Total Merchants',
       value: stats.totalMerchants.toLocaleString(),
       icon: Store,
-      color: 'text-purple-500',
+      color: 'text-primary',
     },
     {
       title: 'Total Transactions',
       value: stats.totalTransactions.toLocaleString(),
       icon: Activity,
-      color: 'text-green-500',
+      color: 'text-success',
     },
     {
       title: 'Total GMV',
       value: `$${stats.totalGMV.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
       icon: TrendingUp,
-      color: 'text-orange-500',
+      color: 'text-warning',
     },
     {
       title: 'Platform Revenue (3%)',
       value: `$${stats.platformRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
       icon: DollarSign,
-      color: 'text-emerald-500',
+      color: 'text-success',
     },
     {
       title: 'Total Rewards Distributed',
       // totalCashback is in PawBucks, convert to USD (1 PawBuck = $0.001)
       value: `$${(stats.totalCashback * 0.001).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
       icon: Award,
-      color: 'text-pink-500',
+      color: 'text-accent',
     },
     {
       title: 'Refunds Processed',
       value: `${stats.refundedTransactions} ($${stats.refundedAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })})`,
       icon: RotateCcw,
-      color: 'text-red-500',
+      color: 'text-destructive',
     },
   ];
 
@@ -198,17 +198,17 @@ export function OverviewTab() {
           <div className="flex items-end gap-3">
             <span className={cn(
               "text-5xl font-extrabold tracking-tight",
-              stats.pawbucksSpendRate >= 70 && stats.pawbucksSpendRate <= 90 ? "text-emerald-500" :
-              stats.pawbucksSpendRate >= 50 ? "text-amber-500" : "text-destructive"
+              stats.pawbucksSpendRate >= 70 && stats.pawbucksSpendRate <= 90 ? "text-success" :
+              stats.pawbucksSpendRate >= 50 ? "text-warning" : "text-destructive"
             )}>
               {stats.pawbucksSpendRate}%
             </span>
             <span className={cn(
               "text-sm font-semibold mb-2 px-2 py-0.5 rounded-full",
               stats.pawbucksSpendRate >= 70 && stats.pawbucksSpendRate <= 90
-                ? "bg-emerald-500/10 text-emerald-600"
+                ? "bg-success/10 text-success"
                 : stats.pawbucksSpendRate >= 50
-                ? "bg-amber-500/10 text-amber-600"
+                ? "bg-warning/10 text-warning"
                 : "bg-destructive/10 text-destructive"
             )}>
               {stats.pawbucksSpendRate >= 70 && stats.pawbucksSpendRate <= 90 ? "Healthy" :
@@ -224,9 +224,9 @@ export function OverviewTab() {
                 className={cn(
                   "h-4 rounded-full",
                   stats.pawbucksSpendRate >= 70 && stats.pawbucksSpendRate <= 90
-                    ? "[&>div]:bg-emerald-500"
+                    ? "[&>div]:bg-success"
                     : stats.pawbucksSpendRate >= 50
-                    ? "[&>div]:bg-amber-500"
+                    ? "[&>div]:bg-warning"
                     : "[&>div]:bg-destructive"
                 )}
               />
@@ -234,7 +234,7 @@ export function OverviewTab() {
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>0%</span>
               <span className="text-destructive font-medium">50% ⚠️</span>
-              <span className="text-emerald-600 font-medium">70–90% ✓</span>
+              <span className="text-success font-medium">70–90% ✓</span>
               <span>100%</span>
             </div>
           </div>
@@ -277,7 +277,7 @@ export function OverviewTab() {
             </div>
           )}
           {stats.pawbucksSpendRate >= 50 && stats.pawbucksSpendRate < 70 && stats.totalPawbucksEarned > 0 && (
-            <div className="bg-amber-500/5 border border-amber-500/20 rounded-lg p-3 text-sm text-amber-700">
+            <div className="bg-warning/5 border border-warning/30/20 rounded-lg p-3 text-sm text-warning">
               <strong>📊 Moderate:</strong> Spend rate is acceptable but below optimal. Target 70–90% for a healthy ecosystem.
             </div>
           )}
@@ -300,17 +300,17 @@ export function OverviewTab() {
           <div className="flex items-end gap-3">
             <span className={cn(
               "text-5xl font-extrabold tracking-tight",
-              stats.repeatRedemptionRate >= 60 ? "text-emerald-500" :
-              stats.repeatRedemptionRate >= 35 ? "text-amber-500" : "text-destructive"
+              stats.repeatRedemptionRate >= 60 ? "text-success" :
+              stats.repeatRedemptionRate >= 35 ? "text-warning" : "text-destructive"
             )}>
               {stats.repeatRedemptionRate}%
             </span>
             <span className={cn(
               "text-sm font-semibold mb-2 px-2 py-0.5 rounded-full",
               stats.repeatRedemptionRate >= 60
-                ? "bg-emerald-500/10 text-emerald-600"
+                ? "bg-success/10 text-success"
                 : stats.repeatRedemptionRate >= 35
-                ? "bg-amber-500/10 text-amber-600"
+                ? "bg-warning/10 text-warning"
                 : "bg-destructive/10 text-destructive"
             )}>
               {stats.repeatRedemptionRate >= 60 ? "Strong" :
@@ -325,9 +325,9 @@ export function OverviewTab() {
                 className={cn(
                   "h-4 rounded-full",
                   stats.repeatRedemptionRate >= 60
-                    ? "[&>div]:bg-emerald-500"
+                    ? "[&>div]:bg-success"
                     : stats.repeatRedemptionRate >= 35
-                    ? "[&>div]:bg-amber-500"
+                    ? "[&>div]:bg-warning"
                     : "[&>div]:bg-destructive"
                 )}
               />
@@ -335,7 +335,7 @@ export function OverviewTab() {
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>0%</span>
               <span className="text-destructive font-medium">35% ⚠️</span>
-              <span className="text-emerald-600 font-medium">60%+ ✓</span>
+              <span className="text-success font-medium">60%+ ✓</span>
               <span>100%</span>
             </div>
           </div>
@@ -364,12 +364,12 @@ export function OverviewTab() {
             </div>
           )}
           {stats.repeatRedemptionRate >= 35 && stats.repeatRedemptionRate < 60 && stats.totalRedeemers > 0 && (
-            <div className="bg-amber-500/5 border border-amber-500/20 rounded-lg p-3 text-sm text-amber-700">
+            <div className="bg-warning/5 border border-warning/30/20 rounded-lg p-3 text-sm text-warning">
               <strong>📊 Moderate:</strong> Some redeemers are returning, but there's room to grow. Target 60%+ for strong merchant confidence in PawBucks.
             </div>
           )}
           {stats.repeatRedemptionRate >= 60 && stats.totalRedeemers > 0 && (
-            <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-lg p-3 text-sm text-emerald-700">
+            <div className="bg-success/5 border border-success/30/20 rounded-lg p-3 text-sm text-success">
               <strong>✅ Strong:</strong> PawBucks is successfully driving repeat business. Merchants should see clear value in accepting PawBucks.
             </div>
           )}

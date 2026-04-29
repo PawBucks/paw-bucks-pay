@@ -112,17 +112,17 @@ export function UserDetailWallet({ userId }: { userId: string }) {
           value={(pawbucksWallet?.balance ?? 0).toLocaleString()}
         />
         <SummaryCard
-          icon={<Wallet className="w-5 h-5 text-emerald-600" />}
+          icon={<Wallet className="w-5 h-5 text-success" />}
           label="Cashback Balance"
           value={`$${((pawbucksWallet?.balance ?? 0) * PAWBUCKS_CONVERSION.PAWBUCKS_USD_VALUE).toFixed(2)}`}
         />
         <SummaryCard
-          icon={<TrendingDown className="w-5 h-5 text-red-500" />}
+          icon={<TrendingDown className="w-5 h-5 text-destructive" />}
           label={isMerchant ? "Total Revenue" : "Total Spent"}
           value={`$${(wallet?.total_spent ?? 0).toFixed(2)}`}
         />
         <SummaryCard
-          icon={<Award className="w-5 h-5 text-amber-500" />}
+          icon={<Award className="w-5 h-5 text-warning" />}
           label="Badges Earned"
           value={badges.length.toString()}
         />
@@ -173,9 +173,9 @@ export function UserDetailWallet({ userId }: { userId: string }) {
                       <TableCell>
                         <div className="flex items-center gap-1">
                           {a.type === "credit" || a.type === "earn" ? (
-                            <TrendingUp className="w-3 h-3 text-emerald-500" />
+                            <TrendingUp className="w-3 h-3 text-success" />
                           ) : (
-                            <TrendingDown className="w-3 h-3 text-red-500" />
+                            <TrendingDown className="w-3 h-3 text-destructive" />
                           )}
                           <span className="text-sm">{a.type}</span>
                         </div>
@@ -189,7 +189,7 @@ export function UserDetailWallet({ userId }: { userId: string }) {
                           </Badge>
                         )}
                       </TableCell>
-                      <TableCell className={`text-right font-medium ${a.type === "credit" || a.type === "earn" ? "text-emerald-600" : "text-red-600"}`}>
+                      <TableCell className={`text-right font-medium ${a.type === "credit" || a.type === "earn" ? "text-success" : "text-destructive"}`}>
                         {a.type === "credit" || a.type === "earn" ? "+" : "-"}{Math.abs(a.amount).toLocaleString()}
                       </TableCell>
                     </TableRow>

@@ -60,7 +60,7 @@ export function StripeSettingsCard({ payoutSchedule, onPayoutScheduleChange, sav
               <p className="text-xs text-muted-foreground">Used for server-side payment processing</p>
             </div>
             <div className="flex items-center gap-2">
-              <Badge variant="outline" className="bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30">
+              <Badge variant="outline" className="bg-success/10 text-success dark:text-success border-success/30/30">
                 Configured
               </Badge>
               <Button variant="ghost" size="icon" onClick={() => setShowKey(!showKey)} className="h-8 w-8">
@@ -80,7 +80,7 @@ export function StripeSettingsCard({ payoutSchedule, onPayoutScheduleChange, sav
               <p className="font-medium text-sm">Publishable Key</p>
               <p className="text-xs text-muted-foreground">Used for client-side Stripe Elements</p>
             </div>
-            <Badge variant="outline" className="bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30">
+            <Badge variant="outline" className="bg-success/10 text-success dark:text-success border-success/30/30">
               Configured
             </Badge>
           </div>
@@ -95,13 +95,13 @@ export function StripeSettingsCard({ payoutSchedule, onPayoutScheduleChange, sav
           <div className="grid gap-2">
             <div className="flex items-center justify-between bg-muted/50 rounded-md p-3">
               <span className="text-xs">Platform Webhook</span>
-              <Badge variant="outline" className="bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30 text-xs">
+              <Badge variant="outline" className="bg-success/10 text-success dark:text-success border-success/30/30 text-xs">
                 Active
               </Badge>
             </div>
             <div className="flex items-center justify-between bg-muted/50 rounded-md p-3">
               <span className="text-xs">Connect Webhook</span>
-              <Badge variant="outline" className="bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30 text-xs">
+              <Badge variant="outline" className="bg-success/10 text-success dark:text-success border-success/30/30 text-xs">
                 Active
               </Badge>
             </div>
@@ -129,7 +129,7 @@ export function StripeSettingsCard({ payoutSchedule, onPayoutScheduleChange, sav
           {verifying ? (
             <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Verifying...</>
           ) : stripeStatus === 'connected' ? (
-            <><CheckCircle2 className="h-4 w-4 mr-2 text-emerald-500" /> Connection Verified</>
+            <><CheckCircle2 className="h-4 w-4 mr-2 text-success" /> Connection Verified</>
           ) : (
             'Verify Stripe Connection'
           )}

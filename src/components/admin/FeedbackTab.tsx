@@ -37,10 +37,10 @@ interface FeedbackSubmission {
 }
 
 const statusColors: Record<string, string> = {
-  new: "bg-blue-500",
-  in_progress: "bg-yellow-500",
-  resolved: "bg-green-500",
-  dismissed: "bg-gray-500",
+  new: "bg-info",
+  in_progress: "bg-warning",
+  resolved: "bg-success",
+  dismissed: "bg-muted-foreground",
 };
 
 const statusLabels: Record<string, string> = {
@@ -170,7 +170,7 @@ export default function FeedbackTab() {
           <Card>
             <CardContent className="pt-4">
               <div className="flex items-center gap-2">
-                <AlertCircle className="h-4 w-4 text-blue-500" />
+                <AlertCircle className="h-4 w-4 text-info" />
                 <span className="text-sm text-muted-foreground">New</span>
               </div>
               <p className="text-2xl font-bold">{counts.new}</p>
@@ -179,7 +179,7 @@ export default function FeedbackTab() {
           <Card>
             <CardContent className="pt-4">
               <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-yellow-500" />
+                <Clock className="h-4 w-4 text-warning" />
                 <span className="text-sm text-muted-foreground">In Progress</span>
               </div>
               <p className="text-2xl font-bold">{counts.in_progress}</p>
@@ -188,7 +188,7 @@ export default function FeedbackTab() {
           <Card>
             <CardContent className="pt-4">
               <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-green-500" />
+                <CheckCircle className="h-4 w-4 text-success" />
                 <span className="text-sm text-muted-foreground">Resolved</span>
               </div>
               <p className="text-2xl font-bold">{counts.resolved}</p>
@@ -197,7 +197,7 @@ export default function FeedbackTab() {
           <Card>
             <CardContent className="pt-4">
               <div className="flex items-center gap-2">
-                <MessageSquare className="h-4 w-4 text-gray-500" />
+                <MessageSquare className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm text-muted-foreground">Dismissed</span>
               </div>
               <p className="text-2xl font-bold">{counts.dismissed}</p>

@@ -246,11 +246,11 @@ export function TextCampaignsTab() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "sent":
-        return <Badge className="bg-green-500/10 text-green-600 border-green-500/20"><CheckCircle className="w-3 h-3 mr-1" />Sent</Badge>;
+        return <Badge className="bg-success/10 text-success border-success/30/20"><CheckCircle className="w-3 h-3 mr-1" />Sent</Badge>;
       case "failed":
         return <Badge variant="destructive"><XCircle className="w-3 h-3 mr-1" />Failed</Badge>;
       case "partial":
-        return <Badge className="bg-yellow-500/10 text-yellow-600 border-yellow-500/20"><AlertCircle className="w-3 h-3 mr-1" />Partial</Badge>;
+        return <Badge className="bg-warning/10 text-warning border-warning/30/20"><AlertCircle className="w-3 h-3 mr-1" />Partial</Badge>;
       case "scheduled":
         return <Badge variant="secondary"><Clock className="w-3 h-3 mr-1" />Scheduled</Badge>;
       default:
@@ -479,7 +479,7 @@ export function TextCampaignsTab() {
               <div>
                 <div className="flex justify-between items-center mb-1">
                   <Label htmlFor="message">Message</Label>
-                  <span className={`text-xs ${characterCount > 160 ? 'text-yellow-600' : 'text-muted-foreground'}`}>
+                  <span className={`text-xs ${characterCount > 160 ? 'text-warning' : 'text-muted-foreground'}`}>
                     {characterCount}/160 ({segmentCount} segment{segmentCount !== 1 ? 's' : ''})
                   </span>
                 </div>
@@ -581,9 +581,9 @@ export function TextCampaignsTab() {
                           <span className="text-sm ml-2">{campaign.recipient_count}</span>
                         </TableCell>
                         <TableCell>
-                          <span className="text-green-600">{campaign.sent_count}</span>
+                          <span className="text-success">{campaign.sent_count}</span>
                           {" / "}
-                          <span className="text-red-600">{campaign.failed_count}</span>
+                          <span className="text-destructive">{campaign.failed_count}</span>
                         </TableCell>
                         <TableCell>{getStatusBadge(campaign.status)}</TableCell>
                         <TableCell className="text-sm text-muted-foreground">
@@ -610,13 +610,13 @@ export function TextCampaignsTab() {
           <Card>
             <CardHeader className="pb-2">
               <CardDescription>Messages Sent</CardDescription>
-              <CardTitle className="text-3xl text-green-600">{analytics.totalSent}</CardTitle>
+              <CardTitle className="text-3xl text-success">{analytics.totalSent}</CardTitle>
             </CardHeader>
           </Card>
           <Card>
             <CardHeader className="pb-2">
               <CardDescription>Messages Failed</CardDescription>
-              <CardTitle className="text-3xl text-red-600">{analytics.totalFailed}</CardTitle>
+              <CardTitle className="text-3xl text-destructive">{analytics.totalFailed}</CardTitle>
             </CardHeader>
           </Card>
           <Card>
