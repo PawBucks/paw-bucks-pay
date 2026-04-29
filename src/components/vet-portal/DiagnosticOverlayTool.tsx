@@ -50,11 +50,11 @@ const analysisTypes = [
 ];
 
 const severityColors: Record<string, string> = {
-  normal: "bg-green-500 text-white",
-  mild: "bg-yellow-500 text-black",
-  moderate: "bg-orange-500 text-white",
-  severe: "bg-red-500 text-white",
-  critical: "bg-red-700 text-white",
+  normal: "bg-success text-white",
+  mild: "bg-warning text-black",
+  moderate: "bg-warning text-white",
+  severe: "bg-destructive text-white",
+  critical: "bg-destructive text-white",
 };
 
 export const DiagnosticOverlayTool = ({ vetId }: DiagnosticOverlayToolProps) => {
@@ -241,8 +241,8 @@ export const DiagnosticOverlayTool = ({ vetId }: DiagnosticOverlayToolProps) => 
       {/* Upload Section */}
       <Card className="p-6">
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-full bg-cyan-100 dark:bg-cyan-900/30 flex items-center justify-center">
-            <Scan className="w-5 h-5 text-cyan-600" />
+          <div className="w-10 h-10 rounded-full bg-info/10 /30 flex items-center justify-center">
+            <Scan className="w-5 h-5 text-info" />
           </div>
           <div>
             <h3 className="text-lg font-semibold">Diagnostic AI Overlay</h3>
@@ -350,7 +350,7 @@ export const DiagnosticOverlayTool = ({ vetId }: DiagnosticOverlayToolProps) => 
                       className="w-20 h-20 object-cover rounded-lg border"
                     />
                     <button
-                      className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full text-xs"
+                      className="absolute -top-2 -right-2 w-5 h-5 bg-destructive text-white rounded-full text-xs"
                       onClick={() =>
                         setImageUrls((prev) => prev.filter((_, i) => i !== idx))
                       }
@@ -433,13 +433,13 @@ export const DiagnosticOverlayTool = ({ vetId }: DiagnosticOverlayToolProps) => 
                       </Badge>
                     )}
                     {analysis.status === "confirmed" && (
-                      <Badge className="bg-green-500 text-white">
+                      <Badge className="bg-success text-white">
                         <CheckCircle className="w-3 h-3 mr-1" />
                         Confirmed
                       </Badge>
                     )}
                     {analysis.status === "disputed" && (
-                      <Badge className="bg-amber-500 text-white">
+                      <Badge className="bg-warning text-white">
                         <AlertCircle className="w-3 h-3 mr-1" />
                         Disputed
                       </Badge>
@@ -561,14 +561,14 @@ export const DiagnosticOverlayTool = ({ vetId }: DiagnosticOverlayToolProps) => 
                 {selectedAnalysis.ai_anomalies_detected?.length > 0 && (
                   <div>
                     <Label className="flex items-center gap-2">
-                      <AlertCircle className="w-4 h-4 text-red-500" />
+                      <AlertCircle className="w-4 h-4 text-destructive" />
                       Anomalies Detected
                     </Label>
                     <div className="mt-2 space-y-2">
                       {selectedAnalysis.ai_anomalies_detected.map((anomaly: any, idx: number) => (
                         <div
                           key={idx}
-                          className="p-3 border-l-4 border-l-red-500 bg-red-50 dark:bg-red-900/20 rounded-r-lg"
+                          className="p-3 border-l-4 border-l-red-500 bg-destructive/10 /20 rounded-r-lg"
                         >
                           <div className="flex items-center justify-between">
                             <span className="font-medium">{anomaly.anomaly}</span>
@@ -594,7 +594,7 @@ export const DiagnosticOverlayTool = ({ vetId }: DiagnosticOverlayToolProps) => 
                 {selectedAnalysis.ai_recommendations && (
                   <div>
                     <Label>AI Recommendations</Label>
-                    <p className="mt-1 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                    <p className="mt-1 p-3 bg-info/10 /20 rounded-lg">
                       {selectedAnalysis.ai_recommendations}
                     </p>
                   </div>
@@ -613,7 +613,7 @@ export const DiagnosticOverlayTool = ({ vetId }: DiagnosticOverlayToolProps) => 
                     />
                     <div className="flex gap-2 mt-4">
                       <Button
-                        className="flex-1 bg-green-600 hover:bg-green-700"
+                        className="flex-1 bg-success hover:bg-success"
                         onClick={() =>
                           reviewMutation.mutate({
                             analysisId: selectedAnalysis.id,

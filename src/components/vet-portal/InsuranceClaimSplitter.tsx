@@ -73,15 +73,15 @@ interface InsuranceClaim {
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: any }> = {
-  draft: { label: "Draft", color: "bg-gray-100 text-gray-800", icon: FileText },
-  pending_submission: { label: "Pending", color: "bg-yellow-100 text-yellow-800", icon: Clock },
-  submitted: { label: "Submitted", color: "bg-blue-100 text-blue-800", icon: Send },
-  under_review: { label: "Under Review", color: "bg-purple-100 text-purple-800", icon: Search },
-  approved: { label: "Approved", color: "bg-green-100 text-green-800", icon: CheckCircle2 },
-  partially_approved: { label: "Partial", color: "bg-orange-100 text-orange-800", icon: AlertTriangle },
-  denied: { label: "Denied", color: "bg-red-100 text-red-800", icon: XCircle },
-  paid: { label: "Paid", color: "bg-emerald-100 text-emerald-800", icon: DollarSign },
-  appealed: { label: "Appealed", color: "bg-indigo-100 text-indigo-800", icon: FileText },
+  draft: { label: "Draft", color: "bg-muted text-muted-foreground", icon: FileText },
+  pending_submission: { label: "Pending", color: "bg-warning/10 text-warning", icon: Clock },
+  submitted: { label: "Submitted", color: "bg-info/10 text-info", icon: Send },
+  under_review: { label: "Under Review", color: "bg-primary/10 text-primary", icon: Search },
+  approved: { label: "Approved", color: "bg-success/10 text-success", icon: CheckCircle2 },
+  partially_approved: { label: "Partial", color: "bg-warning/10 text-warning", icon: AlertTriangle },
+  denied: { label: "Denied", color: "bg-destructive/10 text-destructive", icon: XCircle },
+  paid: { label: "Paid", color: "bg-success/10 text-success", icon: DollarSign },
+  appealed: { label: "Appealed", color: "bg-primary/10 text-primary", icon: FileText },
 };
 
 export function InsuranceClaimSplitter({ vetId }: InsuranceClaimSplitterProps) {
@@ -281,7 +281,7 @@ export function InsuranceClaimSplitter({ vetId }: InsuranceClaimSplitterProps) {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2">
-            <Shield className="h-6 w-6 text-blue-500" />
+            <Shield className="h-6 w-6 text-info" />
             Insurance Claim Splitter
           </h2>
           <p className="text-muted-foreground">
@@ -396,19 +396,19 @@ export function InsuranceClaimSplitter({ vetId }: InsuranceClaimSplitterProps) {
                     <Separator />
                     <div className="flex justify-between text-sm">
                       <span className="flex items-center gap-1">
-                        <Shield className="h-4 w-4 text-blue-500" />
+                        <Shield className="h-4 w-4 text-info" />
                         Insurance Pays:
                       </span>
-                      <span className="font-medium text-blue-600">
+                      <span className="font-medium text-info">
                         ${estimatedCoverage.insurancePortion.toFixed(2)}
                       </span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="flex items-center gap-1">
-                        <CreditCard className="h-4 w-4 text-orange-500" />
+                        <CreditCard className="h-4 w-4 text-warning" />
                         Owner Copay ({estimatedCoverage.copayPercentage}%):
                       </span>
-                      <span className="font-medium text-orange-600">
+                      <span className="font-medium text-warning">
                         ${estimatedCoverage.ownerResponsibility.toFixed(2)}
                       </span>
                     </div>
@@ -504,7 +504,7 @@ export function InsuranceClaimSplitter({ vetId }: InsuranceClaimSplitterProps) {
                           {claim.covered_amount !== null && (
                             <div className="text-right">
                               <p className="text-sm text-muted-foreground">Insurance</p>
-                              <p className="font-medium text-blue-600">
+                              <p className="font-medium text-info">
                                 ${claim.covered_amount?.toFixed(2)}
                               </p>
                             </div>
@@ -512,7 +512,7 @@ export function InsuranceClaimSplitter({ vetId }: InsuranceClaimSplitterProps) {
                           {claim.owner_responsibility !== null && (
                             <div className="text-right">
                               <p className="text-sm text-muted-foreground">Owner</p>
-                              <p className="font-medium text-orange-600">
+                              <p className="font-medium text-warning">
                                 ${claim.owner_responsibility?.toFixed(2)}
                               </p>
                             </div>
@@ -597,10 +597,10 @@ export function InsuranceClaimSplitter({ vetId }: InsuranceClaimSplitterProps) {
       </Tabs>
 
       {/* How It Works Card */}
-      <Card className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30">
+      <Card className="bg-gradient-to-r from-info/20 to-info/20 /30 /30">
         <CardContent className="py-4">
           <div className="flex items-start gap-3">
-            <Shield className="h-5 w-5 text-blue-600 mt-0.5" />
+            <Shield className="h-5 w-5 text-info mt-0.5" />
             <div>
               <p className="font-medium">Direct-to-Vet Insurance Processing</p>
               <p className="text-sm text-muted-foreground mt-1">
@@ -675,13 +675,13 @@ function ClaimCard({
               {claim.covered_amount !== null && (
                 <div className="text-right">
                   <p className="text-sm text-muted-foreground">Insurance</p>
-                  <p className="font-medium text-blue-600">${claim.covered_amount?.toFixed(2)}</p>
+                  <p className="font-medium text-info">${claim.covered_amount?.toFixed(2)}</p>
                 </div>
               )}
               {claim.owner_responsibility !== null && (
                 <div className="text-right">
                   <p className="text-sm text-muted-foreground">Owner</p>
-                  <p className="font-medium text-orange-600">${claim.owner_responsibility?.toFixed(2)}</p>
+                  <p className="font-medium text-warning">${claim.owner_responsibility?.toFixed(2)}</p>
                 </div>
               )}
               
@@ -696,7 +696,7 @@ function ClaimCard({
                   <Button 
                     size="sm" 
                     variant="outline"
-                    className="border-red-200 text-red-700 hover:bg-red-50"
+                    className="border-destructive/20 text-destructive hover:bg-destructive/10"
                     onClick={() => setShowDenyDialog(true)}
                   >
                     <XCircle className="h-4 w-4 mr-1" />
@@ -713,7 +713,7 @@ function ClaimCard({
       <Dialog open={showDenyDialog} onOpenChange={setShowDenyDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-red-700">
+            <DialogTitle className="flex items-center gap-2 text-destructive">
               <XCircle className="h-5 w-5" />
               Mark Claim as Denied
             </DialogTitle>
@@ -723,8 +723,8 @@ function ClaimCard({
           </DialogHeader>
           
           <div className="space-y-4 mt-4">
-            <div className="p-3 bg-amber-50 rounded-lg border border-amber-200">
-              <p className="text-sm text-amber-800">
+            <div className="p-3 bg-warning/10 rounded-lg border border-warning/20">
+              <p className="text-sm text-warning">
                 <strong>Claim:</strong> {claim.claim_number}<br />
                 <strong>Patient:</strong> {policy?.pet_profiles?.name}<br />
                 <strong>Amount:</strong> ${claim.total_amount?.toFixed(2)}

@@ -174,8 +174,8 @@ export const SOAPNoteEditor = ({
         {/* Subjective Section */}
         <Card className="p-6">
           <div className="flex items-center gap-2 mb-4">
-            <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-              <FileText className="w-4 h-4 text-blue-600" />
+            <div className="w-8 h-8 rounded-full bg-info/10 /30 flex items-center justify-center">
+              <FileText className="w-4 h-4 text-info" />
             </div>
             <h3 className="text-lg font-semibold">Subjective</h3>
             <span className="text-sm text-muted-foreground">- Owner's observations and history</span>
@@ -226,8 +226,8 @@ export const SOAPNoteEditor = ({
         {/* Objective Section */}
         <Card className="p-6">
           <div className="flex items-center gap-2 mb-4">
-            <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-              <Stethoscope className="w-4 h-4 text-green-600" />
+            <div className="w-8 h-8 rounded-full bg-success/10 /30 flex items-center justify-center">
+              <Stethoscope className="w-4 h-4 text-success" />
             </div>
             <h3 className="text-lg font-semibold">Objective</h3>
             <span className="text-sm text-muted-foreground">- Clinical findings and vitals</span>
@@ -321,8 +321,8 @@ export const SOAPNoteEditor = ({
         {/* Assessment Section */}
         <Card className="p-6">
           <div className="flex items-center gap-2 mb-4">
-            <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-              <ClipboardList className="w-4 h-4 text-purple-600" />
+            <div className="w-8 h-8 rounded-full bg-primary/10 /30 flex items-center justify-center">
+              <ClipboardList className="w-4 h-4 text-primary" />
             </div>
             <h3 className="text-lg font-semibold">Assessment</h3>
             <span className="text-sm text-muted-foreground">- Diagnosis and differential</span>
@@ -371,8 +371,8 @@ export const SOAPNoteEditor = ({
         {/* Plan Section */}
         <Card className="p-6">
           <div className="flex items-center gap-2 mb-4">
-            <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
-              <Pill className="w-4 h-4 text-amber-600" />
+            <div className="w-8 h-8 rounded-full bg-warning/10 /30 flex items-center justify-center">
+              <Pill className="w-4 h-4 text-warning" />
             </div>
             <h3 className="text-lg font-semibold">Plan</h3>
             <span className="text-sm text-muted-foreground">- Treatment and follow-up</span>

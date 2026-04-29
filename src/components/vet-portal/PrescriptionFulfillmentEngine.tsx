@@ -257,13 +257,13 @@ export function PrescriptionFulfillmentEngine({ vetId }: PrescriptionFulfillment
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "pending_approval":
-        return <Badge variant="outline" className="bg-yellow-100 text-yellow-800"><Clock className="h-3 w-3 mr-1" /> Pending</Badge>;
+        return <Badge variant="outline" className="bg-warning/10 text-warning"><Clock className="h-3 w-3 mr-1" /> Pending</Badge>;
       case "approved":
-        return <Badge className="bg-blue-100 text-blue-800"><CheckCircle className="h-3 w-3 mr-1" /> Approved</Badge>;
+        return <Badge className="bg-info/10 text-info"><CheckCircle className="h-3 w-3 mr-1" /> Approved</Badge>;
       case "shipped":
-        return <Badge className="bg-purple-100 text-purple-800"><Truck className="h-3 w-3 mr-1" /> Shipped</Badge>;
+        return <Badge className="bg-primary/10 text-primary"><Truck className="h-3 w-3 mr-1" /> Shipped</Badge>;
       case "delivered":
-        return <Badge className="bg-green-100 text-green-800"><Package className="h-3 w-3 mr-1" /> Delivered</Badge>;
+        return <Badge className="bg-success/10 text-success"><Package className="h-3 w-3 mr-1" /> Delivered</Badge>;
       case "cancelled":
         return <Badge variant="destructive"><AlertCircle className="h-3 w-3 mr-1" /> Cancelled</Badge>;
       default:
@@ -292,36 +292,36 @@ export function PrescriptionFulfillmentEngine({ vetId }: PrescriptionFulfillment
     <div className="space-y-6">
       {/* Earnings Overview */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20">
+        <Card className="bg-gradient-to-br from-success/20 to-success/20 /20 /20">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Total Earnings</p>
-                <p className="text-2xl font-bold text-green-600">${earnings.total.toFixed(2)}</p>
+                <p className="text-2xl font-bold text-success">${earnings.total.toFixed(2)}</p>
               </div>
-              <DollarSign className="h-8 w-8 text-green-500 opacity-50" />
+              <DollarSign className="h-8 w-8 text-success opacity-50" />
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20">
+        <Card className="bg-gradient-to-br from-info/20 to-info/20 /20 /20">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Pending</p>
-                <p className="text-2xl font-bold text-blue-600">${earnings.pending.toFixed(2)}</p>
+                <p className="text-2xl font-bold text-info">${earnings.pending.toFixed(2)}</p>
               </div>
-              <Clock className="h-8 w-8 text-blue-500 opacity-50" />
+              <Clock className="h-8 w-8 text-info opacity-50" />
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-900/20 dark:to-violet-900/20">
+        <Card className="bg-gradient-to-br from-primary/20 to-primary/20 /20 /20">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Fulfilled Orders</p>
-                <p className="text-2xl font-bold text-purple-600">{fulfillments.length}</p>
+                <p className="text-2xl font-bold text-primary">{fulfillments.length}</p>
               </div>
-              <Package className="h-8 w-8 text-purple-500 opacity-50" />
+              <Package className="h-8 w-8 text-primary opacity-50" />
             </div>
           </CardContent>
         </Card>
@@ -446,7 +446,7 @@ export function PrescriptionFulfillmentEngine({ vetId }: PrescriptionFulfillment
                                       </SelectContent>
                                     </Select>
                                     {selectedStoreItem && (
-                                      <p className="text-sm text-green-600">
+                                      <p className="text-sm text-success">
                                         You'll earn ${((storeItems.find(i => i.id === selectedStoreItem)?.price || 0) * (vetMargin / 100)).toFixed(2)} on this sale
                                       </p>
                                     )}
@@ -537,7 +537,7 @@ export function PrescriptionFulfillmentEngine({ vetId }: PrescriptionFulfillment
                           <TableCell>{f.petName}</TableCell>
                           <TableCell>{f.ownerName}</TableCell>
                           <TableCell>${f.productPrice?.toFixed(2) || "—"}</TableCell>
-                          <TableCell className="text-green-600 font-medium">
+                          <TableCell className="text-success font-medium">
                             ${f.vetEarnings?.toFixed(2) || "—"}
                           </TableCell>
                           <TableCell>{getStatusBadge(f.status)}</TableCell>

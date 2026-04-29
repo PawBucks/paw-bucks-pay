@@ -52,12 +52,12 @@ interface CollaborativeCareTabProps {
 type ShareType = 'medical_notes' | 'behavioral' | 'physical_limitations' | 'allergies' | 'medications' | 'full_record';
 
 const shareTypeConfig: Record<ShareType, { label: string; icon: typeof Heart; color: string }> = {
-  medical_notes: { label: "Medical Notes", icon: FileText, color: "bg-blue-100 text-blue-700" },
-  behavioral: { label: "Behavioral Triggers", icon: Brain, color: "bg-purple-100 text-purple-700" },
-  physical_limitations: { label: "Physical Limitations", icon: AlertCircle, color: "bg-orange-100 text-orange-700" },
-  allergies: { label: "Allergies", icon: Shield, color: "bg-red-100 text-red-700" },
-  medications: { label: "Current Medications", icon: Pill, color: "bg-green-100 text-green-700" },
-  full_record: { label: "Full Record Access", icon: FileText, color: "bg-gray-100 text-gray-700" },
+  medical_notes: { label: "Medical Notes", icon: FileText, color: "bg-info/10 text-info" },
+  behavioral: { label: "Behavioral Triggers", icon: Brain, color: "bg-primary/10 text-primary" },
+  physical_limitations: { label: "Physical Limitations", icon: AlertCircle, color: "bg-warning/10 text-warning" },
+  allergies: { label: "Allergies", icon: Shield, color: "bg-destructive/10 text-destructive" },
+  medications: { label: "Current Medications", icon: Pill, color: "bg-success/10 text-success" },
+  full_record: { label: "Full Record Access", icon: FileText, color: "bg-muted text-muted-foreground" },
 };
 
 export function CollaborativeCareTab({ vetId }: CollaborativeCareTabProps) {
@@ -371,14 +371,14 @@ export function CollaborativeCareTab({ vetId }: CollaborativeCareTabProps) {
       </Card>
 
       {/* Info Card */}
-      <Card className="p-4 bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800">
+      <Card className="p-4 bg-info/10 /30 border-info/20">
         <div className="flex items-start gap-3">
-          <Shield className="h-5 w-5 text-blue-600 mt-0.5" />
+          <Shield className="h-5 w-5 text-info mt-0.5" />
           <div>
-            <h4 className="font-medium text-blue-900 dark:text-blue-100">
+            <h4 className="font-medium text-info">
               Secure Information Sharing
             </h4>
-            <p className="text-sm text-blue-700 dark:text-blue-300">
+            <p className="text-sm text-info">
               Shared information is encrypted and only accessible to the selected provider. 
               You can revoke access at any time. Providers will see relevant care instructions 
               to ensure the best care for your patients.

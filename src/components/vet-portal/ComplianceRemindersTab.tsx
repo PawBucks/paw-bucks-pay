@@ -296,9 +296,9 @@ export const ComplianceRemindersTab = ({ vetId }: ComplianceRemindersTabProps) =
       return <Badge variant="destructive">Overdue</Badge>;
     }
     if (dueDate <= addMonths(today, 1)) {
-      return <Badge className="bg-yellow-500">Due Soon</Badge>;
+      return <Badge className="bg-warning">Due Soon</Badge>;
     }
-    return <Badge className="bg-green-500">Scheduled</Badge>;
+    return <Badge className="bg-success">Scheduled</Badge>;
   };
 
   if (isLoading) {

@@ -163,9 +163,9 @@ export function UniversalLabDashboard({ vetId }: UniversalLabDashboardProps) {
     }
     switch (status) {
       case "final":
-        return <Badge className="bg-green-100 text-green-800"><CheckCircle className="h-3 w-3 mr-1" />Final</Badge>;
+        return <Badge className="bg-success/10 text-success"><CheckCircle className="h-3 w-3 mr-1" />Final</Badge>;
       case "preliminary":
-        return <Badge className="bg-yellow-100 text-yellow-800"><Clock className="h-3 w-3 mr-1" />Preliminary</Badge>;
+        return <Badge className="bg-warning/10 text-warning"><Clock className="h-3 w-3 mr-1" />Preliminary</Badge>;
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
@@ -173,13 +173,13 @@ export function UniversalLabDashboard({ vetId }: UniversalLabDashboardProps) {
 
   const getVendorBadge = (vendor: string) => {
     const colors: Record<string, string> = {
-      idexx: "bg-blue-100 text-blue-800",
-      antech: "bg-purple-100 text-purple-800",
-      zoetis: "bg-green-100 text-green-800",
-      heska: "bg-orange-100 text-orange-800",
+      idexx: "bg-info/10 text-info",
+      antech: "bg-primary/10 text-primary",
+      zoetis: "bg-success/10 text-success",
+      heska: "bg-warning/10 text-warning",
     };
     return (
-      <Badge className={colors[vendor] || "bg-gray-100 text-gray-800"}>
+      <Badge className={colors[vendor] || "bg-muted text-muted-foreground"}>
         {vendor.toUpperCase()}
       </Badge>
     );
@@ -191,8 +191,8 @@ export function UniversalLabDashboard({ vetId }: UniversalLabDashboardProps) {
       <div className="grid gap-4 md:grid-cols-4">
         <Card className="p-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center">
-              <Clock className="h-5 w-5 text-yellow-600" />
+            <div className="w-10 h-10 rounded-full bg-warning/10 flex items-center justify-center">
+              <Clock className="h-5 w-5 text-warning" />
             </div>
             <div>
               <p className="text-2xl font-bold">{pendingLabCount}</p>
@@ -202,8 +202,8 @@ export function UniversalLabDashboard({ vetId }: UniversalLabDashboardProps) {
         </Card>
         <Card className="p-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
-              <AlertTriangle className="h-5 w-5 text-red-600" />
+            <div className="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
             </div>
             <div>
               <p className="text-2xl font-bold">{abnormalLabCount}</p>
@@ -213,8 +213,8 @@ export function UniversalLabDashboard({ vetId }: UniversalLabDashboardProps) {
         </Card>
         <Card className="p-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-              <Image className="h-5 w-5 text-blue-600" />
+            <div className="w-10 h-10 rounded-full bg-info/10 flex items-center justify-center">
+              <Image className="h-5 w-5 text-info" />
             </div>
             <div>
               <p className="text-2xl font-bold">{pendingImagingCount}</p>
@@ -224,8 +224,8 @@ export function UniversalLabDashboard({ vetId }: UniversalLabDashboardProps) {
         </Card>
         <Card className="p-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
-              <CheckCircle className="h-5 w-5 text-green-600" />
+            <div className="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center">
+              <CheckCircle className="h-5 w-5 text-success" />
             </div>
             <div>
               <p className="text-2xl font-bold">{labResults?.filter((r) => r.is_reviewed).length || 0}</p>
@@ -318,7 +318,7 @@ export function UniversalLabDashboard({ vetId }: UniversalLabDashboardProps) {
                   filteredLabResults.map((result) => (
                     <TableRow 
                       key={result.id}
-                      className={result.has_abnormal_values ? "bg-red-50 dark:bg-red-950/20" : ""}
+                      className={result.has_abnormal_values ? "bg-destructive/10 /20" : ""}
                     >
                       <TableCell className="text-sm">
                         {format(new Date(result.result_date), "MMM d, yyyy")}
@@ -341,9 +341,9 @@ export function UniversalLabDashboard({ vetId }: UniversalLabDashboardProps) {
                       </TableCell>
                       <TableCell>
                         {result.is_reviewed ? (
-                          <CheckCircle className="h-4 w-4 text-green-600" />
+                          <CheckCircle className="h-4 w-4 text-success" />
                         ) : (
-                          <Clock className="h-4 w-4 text-yellow-600" />
+                          <Clock className="h-4 w-4 text-warning" />
                         )}
                       </TableCell>
                       <TableCell className="text-right">

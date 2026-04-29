@@ -48,9 +48,9 @@ export const SOAPNotesList = ({ petId, vetId, refreshTrigger, onEdit }: SOAPNote
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "finalized":
-        return <CheckCircle className="w-4 h-4 text-green-500" />;
+        return <CheckCircle className="w-4 h-4 text-success" />;
       case "amended":
-        return <AlertCircle className="w-4 h-4 text-amber-500" />;
+        return <AlertCircle className="w-4 h-4 text-warning" />;
       default:
         return <Clock className="w-4 h-4 text-muted-foreground" />;
     }
@@ -117,8 +117,8 @@ export const SOAPNotesList = ({ petId, vetId, refreshTrigger, onEdit }: SOAPNote
               <AccordionContent className="px-4 pb-4">
                 <div className="grid gap-4">
                   {/* Subjective */}
-                  <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20">
-                    <h4 className="font-semibold text-blue-700 dark:text-blue-400 mb-2">
+                  <div className="p-4 rounded-lg bg-info/10 /20">
+                    <h4 className="font-semibold text-info mb-2">
                       Subjective
                     </h4>
                     <div className="space-y-2 text-sm">
@@ -144,8 +144,8 @@ export const SOAPNotesList = ({ petId, vetId, refreshTrigger, onEdit }: SOAPNote
                   </div>
 
                   {/* Objective */}
-                  <div className="p-4 rounded-lg bg-green-50 dark:bg-green-900/20">
-                    <h4 className="font-semibold text-green-700 dark:text-green-400 mb-2">
+                  <div className="p-4 rounded-lg bg-success/10 /20">
+                    <h4 className="font-semibold text-success mb-2">
                       Objective
                     </h4>
                     <div className="space-y-2 text-sm">
@@ -188,8 +188,8 @@ export const SOAPNotesList = ({ petId, vetId, refreshTrigger, onEdit }: SOAPNote
                   </div>
 
                   {/* Assessment */}
-                  <div className="p-4 rounded-lg bg-purple-50 dark:bg-purple-900/20">
-                    <h4 className="font-semibold text-purple-700 dark:text-purple-400 mb-2">
+                  <div className="p-4 rounded-lg bg-primary/10 /20">
+                    <h4 className="font-semibold text-primary mb-2">
                       Assessment
                     </h4>
                     <div className="space-y-2 text-sm">
@@ -215,8 +215,8 @@ export const SOAPNotesList = ({ petId, vetId, refreshTrigger, onEdit }: SOAPNote
                   </div>
 
                   {/* Plan */}
-                  <div className="p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20">
-                    <h4 className="font-semibold text-amber-700 dark:text-amber-400 mb-2">
+                  <div className="p-4 rounded-lg bg-warning/10 /20">
+                    <h4 className="font-semibold text-warning dark:text-amber-400 mb-2">
                       Plan
                     </h4>
                     <div className="space-y-2 text-sm">

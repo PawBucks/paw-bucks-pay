@@ -268,7 +268,7 @@ export default function VetDashboard() {
               <MessageSquare className="w-4 h-4" />
               <span className="hidden sm:inline">Messages</span>
               {stats.unreadMessages > 0 && (
-                <span className="bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 ml-1">
+                <span className="bg-destructive text-white text-xs rounded-full px-1.5 py-0.5 ml-1">
                   {stats.unreadMessages}
                 </span>
               )}

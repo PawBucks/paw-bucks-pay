@@ -283,8 +283,8 @@ export const VaccinationsTab = ({ petId, vetId }: VaccinationsTabProps) => {
             <Card key={vax.id} className="p-4">
               <div className="flex items-start justify-between">
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                    <Syringe className="w-5 h-5 text-green-600" />
+                  <div className="w-10 h-10 rounded-full bg-success/10 /30 flex items-center justify-center">
+                    <Syringe className="w-5 h-5 text-success" />
                   </div>
                   <div>
                     <h3 className="font-semibold">{vax.vaccine_name}</h3>
@@ -317,7 +317,7 @@ export const VaccinationsTab = ({ petId, vetId }: VaccinationsTabProps) => {
                         <Badge variant="destructive">Overdue</Badge>
                       )}
                       {isDueSoon(vax.next_due_date) && !isOverdue(vax.next_due_date) && (
-                        <Badge variant="outline" className="border-amber-500 text-amber-500">
+                        <Badge variant="outline" className="border-warning text-warning">
                           Due Soon
                         </Badge>
                       )}

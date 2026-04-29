@@ -198,18 +198,18 @@ export function GapFillerTool({ vetId }: GapFillerToolProps) {
 
   const getServiceBadgeColor = (service: string) => {
     switch (service.toLowerCase()) {
-      case "vaccination": return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400";
-      case "dental": return "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400";
-      case "exam": return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400";
-      case "heartworm": return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400";
-      default: return "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400";
+      case "vaccination": return "bg-info/10 text-info /30 ";
+      case "dental": return "bg-primary/10 text-primary /30 ";
+      case "exam": return "bg-success/10 text-success /30 ";
+      case "heartworm": return "bg-destructive/10 text-destructive /30 ";
+      default: return "bg-muted text-muted-foreground /30 ";
     }
   };
 
   const getUrgencyColor = (daysOverdue: number) => {
-    if (daysOverdue > 90) return "text-red-600 dark:text-red-400";
-    if (daysOverdue > 30) return "text-orange-600 dark:text-orange-400";
-    return "text-yellow-600 dark:text-yellow-400";
+    if (daysOverdue > 90) return "text-destructive ";
+    if (daysOverdue > 30) return "text-warning ";
+    return "text-warning dark:text-yellow-400";
   };
 
   if (isLoading) {
@@ -227,7 +227,7 @@ export function GapFillerTool({ vetId }: GapFillerToolProps) {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-orange-500" />
+            <AlertTriangle className="h-5 w-5 text-warning" />
             Gap Filler - Overdue Services
           </CardTitle>
           <CardDescription>
@@ -239,13 +239,13 @@ export function GapFillerTool({ vetId }: GapFillerToolProps) {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Card className="bg-muted/50">
               <CardContent className="p-4 text-center">
-                <p className="text-3xl font-bold text-orange-600">{overduePatients.length}</p>
+                <p className="text-3xl font-bold text-warning">{overduePatients.length}</p>
                 <p className="text-sm text-muted-foreground">Total Overdue</p>
               </CardContent>
             </Card>
             <Card className="bg-muted/50">
               <CardContent className="p-4 text-center">
-                <p className="text-3xl font-bold text-red-600">
+                <p className="text-3xl font-bold text-destructive">
                   {overduePatients.filter(p => p.daysOverdue > 90).length}
                 </p>
                 <p className="text-sm text-muted-foreground">Critical (90+ days)</p>
@@ -253,7 +253,7 @@ export function GapFillerTool({ vetId }: GapFillerToolProps) {
             </Card>
             <Card className="bg-muted/50">
               <CardContent className="p-4 text-center">
-                <p className="text-3xl font-bold text-purple-600">
+                <p className="text-3xl font-bold text-primary">
                   {overduePatients.filter(p => p.serviceType === "dental").length}
                 </p>
                 <p className="text-sm text-muted-foreground">Dentals Overdue</p>
@@ -261,7 +261,7 @@ export function GapFillerTool({ vetId }: GapFillerToolProps) {
             </Card>
             <Card className="bg-muted/50">
               <CardContent className="p-4 text-center">
-                <p className="text-3xl font-bold text-blue-600">
+                <p className="text-3xl font-bold text-info">
                   {overduePatients.filter(p => p.serviceType === "vaccination").length}
                 </p>
                 <p className="text-sm text-muted-foreground">Vaccines Overdue</p>

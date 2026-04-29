@@ -652,14 +652,14 @@ export const VetOnboardingForm = () => {
   const values = form.getValues();
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-muted">
       <ConfettiEffect active={showConfetti} />
       
       {/* Welcome Modal */}
       <Dialog open={showWelcomeModal} onOpenChange={setShowWelcomeModal}>
         <DialogContent className="sm:max-w-md text-center">
           <DialogHeader>
-            <div className="mx-auto mb-4 w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center">
+            <div className="mx-auto mb-4 w-16 h-16 bg-gradient-to-br from-primary/20 to-primary/20 rounded-full flex items-center justify-center">
               <PartyPopper className="h-8 w-8 text-white" />
             </div>
             <DialogTitle className="text-2xl">Welcome to the PawBucks Family! 🎉</DialogTitle>
@@ -671,7 +671,7 @@ export const VetOnboardingForm = () => {
           <div className="mt-6">
             <Button 
               onClick={handleWelcomeModalClose}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white w-full rounded-lg"
+              className="bg-primary hover:bg-primary text-white w-full rounded-lg"
             >
               Go to Dashboard
               <ArrowRight className="h-4 w-4 ml-2" />
@@ -683,8 +683,8 @@ export const VetOnboardingForm = () => {
       {/* Header */}
       <div className="bg-white border-b">
         <div className="max-w-5xl mx-auto px-4 py-6">
-          <h1 className="text-2xl font-bold text-slate-900">Veterinary Practice Onboarding</h1>
-          <p className="text-slate-600 mt-1">Join the PawBucks network and grow your practice</p>
+          <h1 className="text-2xl font-bold text-muted-foreground">Veterinary Practice Onboarding</h1>
+          <p className="text-muted-foreground mt-1">Join the PawBucks network and grow your practice</p>
         </div>
       </div>
 
@@ -703,27 +703,27 @@ export const VetOnboardingForm = () => {
                   key={step.id}
                   className={cn(
                     "flex flex-col items-center text-center p-2 rounded-lg transition-all cursor-pointer",
-                    isActive && "bg-indigo-50 border-2 border-indigo-600",
-                    isCompleted && "bg-green-50 hover:bg-green-100",
-                    !isActive && !isCompleted && "bg-white border border-slate-200 hover:border-slate-300"
+                    isActive && "bg-primary/10 border-2 border-primary",
+                    isCompleted && "bg-success/10 hover:bg-success/10",
+                    !isActive && !isCompleted && "bg-white border border-border hover:border-border"
                   )}
                   onClick={() => isCompleted && goToStep(step.id)}
                 >
                   <div
                     className={cn(
                       "w-8 h-8 rounded-full flex items-center justify-center mb-1",
-                      isActive && "bg-indigo-600 text-white",
-                      isCompleted && "bg-green-500 text-white",
-                      !isActive && !isCompleted && "bg-slate-200 text-slate-600"
+                      isActive && "bg-primary text-white",
+                      isCompleted && "bg-success text-white",
+                      !isActive && !isCompleted && "bg-muted text-muted-foreground"
                     )}
                   >
                     {isCompleted ? <Check className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
                   </div>
                   <span className={cn(
                     "text-xs font-medium hidden md:block",
-                    isActive && "text-indigo-600",
-                    isCompleted && "text-green-600",
-                    !isActive && !isCompleted && "text-slate-500"
+                    isActive && "text-primary",
+                    isCompleted && "text-success",
+                    !isActive && !isCompleted && "text-muted-foreground"
                   )}>
                     {step.title}
                   </span>
@@ -738,10 +738,10 @@ export const VetOnboardingForm = () => {
           <form onSubmit={form.handleSubmit(onSubmit)}>
             {/* Step 1: Practice Identity */}
             {currentStep === 1 && (
-              <Card className="bg-white border-slate-200 rounded-lg shadow-sm">
-                <CardHeader className="border-b border-slate-100">
-                  <CardTitle className="flex items-center gap-2 text-slate-900">
-                    <Building2 className="h-5 w-5 text-indigo-600" />
+              <Card className="bg-white border-border rounded-lg shadow-sm">
+                <CardHeader className="border-b border-border">
+                  <CardTitle className="flex items-center gap-2 text-muted-foreground">
+                    <Building2 className="h-5 w-5 text-primary" />
                     Practice Identity
                   </CardTitle>
                   <CardDescription>Tell us about your veterinary practice</CardDescription>
@@ -794,7 +794,7 @@ export const VetOnboardingForm = () => {
                       control={form.control}
                       name="sms_capability"
                       render={({ field }) => (
-                        <FormItem className="flex items-center justify-between rounded-lg border border-slate-200 p-4">
+                        <FormItem className="flex items-center justify-between rounded-lg border border-border p-4">
                           <div>
                             <FormLabel>SMS Appointment Reminders</FormLabel>
                             <FormDescription>Enable text message reminders</FormDescription>
@@ -907,10 +907,10 @@ export const VetOnboardingForm = () => {
 
             {/* Step 2: Medical Verification */}
             {currentStep === 2 && (
-              <Card className="bg-white border-slate-200 rounded-lg shadow-sm">
-                <CardHeader className="border-b border-slate-100">
-                  <CardTitle className="flex items-center gap-2 text-slate-900">
-                    <Stethoscope className="h-5 w-5 text-indigo-600" />
+              <Card className="bg-white border-border rounded-lg shadow-sm">
+                <CardHeader className="border-b border-border">
+                  <CardTitle className="flex items-center gap-2 text-muted-foreground">
+                    <Stethoscope className="h-5 w-5 text-primary" />
                     Medical Authority & Verification
                   </CardTitle>
                   <CardDescription>Verify your professional credentials</CardDescription>
@@ -1023,8 +1023,8 @@ export const VetOnboardingForm = () => {
                                   className={cn(
                                     "flex items-center space-x-3 space-y-0 rounded-lg border p-4 cursor-pointer transition-all",
                                     field.value?.includes(item.id)
-                                      ? "border-indigo-600 bg-indigo-50"
-                                      : "border-slate-200 hover:border-indigo-300"
+                                      ? "border-primary bg-primary/10"
+                                      : "border-border hover:border-primary/40"
                                   )}
                                 >
                                   <FormControl>
@@ -1054,10 +1054,10 @@ export const VetOnboardingForm = () => {
 
             {/* Step 3: Insurance Setup */}
             {currentStep === 3 && (
-              <Card className="bg-white border-slate-200 rounded-lg shadow-sm">
-                <CardHeader className="border-b border-slate-100">
-                  <CardTitle className="flex items-center gap-2 text-slate-900">
-                    <ShieldCheck className="h-5 w-5 text-indigo-600" />
+              <Card className="bg-white border-border rounded-lg shadow-sm">
+                <CardHeader className="border-b border-border">
+                  <CardTitle className="flex items-center gap-2 text-muted-foreground">
+                    <ShieldCheck className="h-5 w-5 text-primary" />
                     Claim-Splicing Configuration
                   </CardTitle>
                   <CardDescription>Set up your insurance processing preferences</CardDescription>
@@ -1081,8 +1081,8 @@ export const VetOnboardingForm = () => {
                                   className={cn(
                                     "flex flex-col items-center justify-center p-4 rounded-lg border cursor-pointer transition-all text-center",
                                     field.value?.includes(partner.id)
-                                      ? "border-indigo-600 bg-indigo-50 ring-2 ring-indigo-600"
-                                      : "border-slate-200 hover:border-indigo-300"
+                                      ? "border-primary bg-primary/10 ring-2 ring-primary"
+                                      : "border-border hover:border-primary/40"
                                   )}
                                   onClick={() => {
                                     const current = field.value || [];
@@ -1110,7 +1110,7 @@ export const VetOnboardingForm = () => {
                     control={form.control}
                     name="direct_pay_capability"
                     render={({ field }) => (
-                      <FormItem className="flex items-center justify-between rounded-lg border border-slate-200 p-4">
+                      <FormItem className="flex items-center justify-between rounded-lg border border-border p-4">
                         <div>
                           <FormLabel>Direct-Pay from Insurers</FormLabel>
                           <FormDescription>
@@ -1157,7 +1157,7 @@ export const VetOnboardingForm = () => {
                         <FormLabel>Admin Splicing Fee (Optional)</FormLabel>
                         <FormControl>
                           <div className="relative">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
                             <Input
                               type="number"
                               min={0}
@@ -1182,10 +1182,10 @@ export const VetOnboardingForm = () => {
 
             {/* Step 4: Integration */}
             {currentStep === 4 && (
-              <Card className="bg-white border-slate-200 rounded-lg shadow-sm">
-                <CardHeader className="border-b border-slate-100">
-                  <CardTitle className="flex items-center gap-2 text-slate-900">
-                    <Wallet className="h-5 w-5 text-indigo-600" />
+              <Card className="bg-white border-border rounded-lg shadow-sm">
+                <CardHeader className="border-b border-border">
+                  <CardTitle className="flex items-center gap-2 text-muted-foreground">
+                    <Wallet className="h-5 w-5 text-primary" />
                     Platform Integration
                   </CardTitle>
                   <CardDescription>Connect your practice management systems</CardDescription>
@@ -1218,7 +1218,7 @@ export const VetOnboardingForm = () => {
                     control={form.control}
                     name="data_sync_permission"
                     render={({ field }) => (
-                      <FormItem className="rounded-lg border border-slate-200 p-4">
+                      <FormItem className="rounded-lg border border-border p-4">
                         <div className="flex items-start space-x-4">
                           <FormControl>
                             <Checkbox
@@ -1229,7 +1229,7 @@ export const VetOnboardingForm = () => {
                           </FormControl>
                           <div>
                             <FormLabel className="font-medium">Data Sync Authorization</FormLabel>
-                            <FormDescription className="text-sm text-slate-500 mt-1">
+                            <FormDescription className="text-sm text-muted-foreground mt-1">
                               I authorize PawBucks to sync patient vaccine and appointment history from my PIMS 
                               to provide seamless health record access for pet owners.
                             </FormDescription>
@@ -1265,10 +1265,10 @@ export const VetOnboardingForm = () => {
 
             {/* Step 5: Public Profile & Merchant Display */}
             {currentStep === 5 && (
-              <Card className="bg-white border-slate-200 rounded-lg shadow-sm">
-                <CardHeader className="border-b border-slate-100">
-                  <CardTitle className="flex items-center gap-2 text-slate-900">
-                    <User className="h-5 w-5 text-indigo-600" />
+              <Card className="bg-white border-border rounded-lg shadow-sm">
+                <CardHeader className="border-b border-border">
+                  <CardTitle className="flex items-center gap-2 text-muted-foreground">
+                    <User className="h-5 w-5 text-primary" />
                     Public Profile & Merchant Display
                   </CardTitle>
                   <CardDescription>How pet owners will see your practice</CardDescription>
@@ -1313,8 +1313,8 @@ export const VetOnboardingForm = () => {
                                   className={cn(
                                     "flex flex-col items-center justify-center p-4 rounded-lg border cursor-pointer transition-all text-center",
                                     field.value?.includes(service.id)
-                                      ? "border-indigo-600 bg-indigo-50 ring-2 ring-indigo-600"
-                                      : "border-slate-200 hover:border-indigo-300"
+                                      ? "border-primary bg-primary/10 ring-2 ring-primary"
+                                      : "border-border hover:border-primary/40"
                                   )}
                                   onClick={() => {
                                     const current = field.value || [];
@@ -1342,7 +1342,7 @@ export const VetOnboardingForm = () => {
                     control={form.control}
                     name="accepting_new_patients"
                     render={({ field }) => (
-                      <FormItem className="flex items-center justify-between rounded-lg border border-slate-200 p-4">
+                      <FormItem className="flex items-center justify-between rounded-lg border border-border p-4">
                         <div>
                           <FormLabel>Accepting New Patients</FormLabel>
                           <FormDescription>
@@ -1356,9 +1356,9 @@ export const VetOnboardingForm = () => {
                     )}
                   />
 
-                  <div className="space-y-4 rounded-lg border border-slate-200 p-4">
-                    <div className="flex items-center gap-2 text-slate-900 font-medium">
-                      <Phone className="h-5 w-5 text-indigo-600" />
+                  <div className="space-y-4 rounded-lg border border-border p-4">
+                    <div className="flex items-center gap-2 text-muted-foreground font-medium">
+                      <Phone className="h-5 w-5 text-primary" />
                       Emergency Protocol
                     </div>
                     
@@ -1395,12 +1395,12 @@ export const VetOnboardingForm = () => {
                     />
 
                     {values.emergency_phone && (
-                      <div className="mt-4 p-3 bg-slate-50 rounded-lg">
-                        <p className="text-sm text-slate-600 mb-2">Tap to Call Preview:</p>
+                      <div className="mt-4 p-3 bg-muted rounded-lg">
+                        <p className="text-sm text-muted-foreground mb-2">Tap to Call Preview:</p>
                         <Button
                           type="button"
                           variant="outline"
-                          className="w-full rounded-lg border-indigo-200 text-indigo-600 hover:bg-indigo-50"
+                          className="w-full rounded-lg border-primary/20 text-primary hover:bg-primary/10"
                           onClick={() => window.open(`tel:${values.emergency_phone}`)}
                         >
                           <Phone className="h-4 w-4 mr-2" />
@@ -1415,27 +1415,27 @@ export const VetOnboardingForm = () => {
 
             {/* Step 6: Financial Onboarding */}
             {currentStep === 6 && (
-              <Card className="bg-white border-slate-200 rounded-lg shadow-sm">
-                <CardHeader className="border-b border-slate-100">
-                  <CardTitle className="flex items-center gap-2 text-slate-900">
-                    <CreditCard className="h-5 w-5 text-indigo-600" />
+              <Card className="bg-white border-border rounded-lg shadow-sm">
+                <CardHeader className="border-b border-border">
+                  <CardTitle className="flex items-center gap-2 text-muted-foreground">
+                    <CreditCard className="h-5 w-5 text-primary" />
                     Financial Onboarding
                   </CardTitle>
                   <CardDescription>Set up your payment processing and subscription</CardDescription>
                 </CardHeader>
                 <CardContent className="pt-6 space-y-6">
                   {/* Stripe Connect Card */}
-                  <div className="rounded-lg border-2 border-dashed border-slate-300 p-6 text-center">
-                    <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center">
+                  <div className="rounded-lg border-2 border-dashed border-border p-6 text-center">
+                    <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-primary/20 to-primary/20 rounded-full flex items-center justify-center">
                       <CreditCard className="h-8 w-8 text-white" />
                     </div>
-                    <h3 className="text-lg font-semibold text-slate-900 mb-2">Stripe Connect</h3>
-                    <p className="text-slate-600 mb-4">
+                    <h3 className="text-lg font-semibold text-muted-foreground mb-2">Stripe Connect</h3>
+                    <p className="text-muted-foreground mb-4">
                       Connect your bank account to receive payments directly from pet owners and insurance carriers.
                     </p>
                     <Button
                       type="button"
-                      className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg"
+                      className="bg-primary hover:bg-primary text-white rounded-lg"
                       onClick={() => {
                         toast({
                           title: "Stripe Connect",
@@ -1445,7 +1445,7 @@ export const VetOnboardingForm = () => {
                     >
                       Connect Bank Account
                     </Button>
-                    <p className="text-xs text-slate-500 mt-3">
+                    <p className="text-xs text-muted-foreground mt-3">
                       You can complete this step after registration from your dashboard
                     </p>
                   </div>
@@ -1463,39 +1463,39 @@ export const VetOnboardingForm = () => {
                             className={cn(
                               "relative rounded-lg border-2 p-6 cursor-pointer transition-all",
                               field.value === "standard"
-                                ? "border-indigo-600 bg-indigo-50 ring-2 ring-indigo-600"
-                                : "border-slate-200 hover:border-indigo-300"
+                                ? "border-primary bg-primary/10 ring-2 ring-primary"
+                                : "border-border hover:border-primary/40"
                             )}
                             onClick={() => field.onChange("standard")}
                           >
                             {field.value === "standard" && (
-                              <div className="absolute top-3 right-3 w-6 h-6 bg-indigo-600 rounded-full flex items-center justify-center">
+                              <div className="absolute top-3 right-3 w-6 h-6 bg-primary rounded-full flex items-center justify-center">
                                 <Check className="h-4 w-4 text-white" />
                               </div>
                             )}
                             <div className="mb-4">
-                              <h4 className="text-lg font-semibold text-slate-900">Standard</h4>
-                              <p className="text-2xl font-bold text-indigo-600 mt-1">$99<span className="text-sm font-normal text-slate-500">/month</span></p>
+                              <h4 className="text-lg font-semibold text-muted-foreground">Standard</h4>
+                              <p className="text-2xl font-bold text-primary mt-1">$99<span className="text-sm font-normal text-muted-foreground">/month</span></p>
                             </div>
-                            <ul className="space-y-2 text-sm text-slate-600">
+                            <ul className="space-y-2 text-sm text-muted-foreground">
                               <li className="flex items-center gap-2">
-                                <Check className="h-4 w-4 text-green-500" />
+                                <Check className="h-4 w-4 text-success" />
                                 Full EMR System Access
                               </li>
                               <li className="flex items-center gap-2">
-                                <Check className="h-4 w-4 text-green-500" />
-                                <span className="font-medium text-indigo-600">Claim-Splicing Engine</span>
+                                <Check className="h-4 w-4 text-success" />
+                                <span className="font-medium text-primary">Claim-Splicing Engine</span>
                               </li>
                               <li className="flex items-center gap-2">
-                                <Check className="h-4 w-4 text-green-500" />
+                                <Check className="h-4 w-4 text-success" />
                                 AI Clinical Assistant
                               </li>
                               <li className="flex items-center gap-2">
-                                <Check className="h-4 w-4 text-green-500" />
+                                <Check className="h-4 w-4 text-success" />
                                 Patient Portal
                               </li>
                               <li className="flex items-center gap-2">
-                                <Check className="h-4 w-4 text-green-500" />
+                                <Check className="h-4 w-4 text-success" />
                                 3% Transaction Fee
                               </li>
                             </ul>
@@ -1506,46 +1506,46 @@ export const VetOnboardingForm = () => {
                             className={cn(
                               "relative rounded-lg border-2 p-6 cursor-pointer transition-all",
                               field.value === "enterprise"
-                                ? "border-indigo-600 bg-indigo-50 ring-2 ring-indigo-600"
-                                : "border-slate-200 hover:border-indigo-300"
+                                ? "border-primary bg-primary/10 ring-2 ring-primary"
+                                : "border-border hover:border-primary/40"
                             )}
                             onClick={() => field.onChange("enterprise")}
                           >
-                            <div className="absolute -top-3 left-4 px-3 py-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-xs font-medium rounded-full">
+                            <div className="absolute -top-3 left-4 px-3 py-1 bg-gradient-to-r from-primary/20 to-primary/20 text-white text-xs font-medium rounded-full">
                               Most Popular
                             </div>
                             {field.value === "enterprise" && (
-                              <div className="absolute top-3 right-3 w-6 h-6 bg-indigo-600 rounded-full flex items-center justify-center">
+                              <div className="absolute top-3 right-3 w-6 h-6 bg-primary rounded-full flex items-center justify-center">
                                 <Check className="h-4 w-4 text-white" />
                               </div>
                             )}
                             <div className="mb-4">
-                              <h4 className="text-lg font-semibold text-slate-900">Enterprise</h4>
-                              <p className="text-2xl font-bold text-indigo-600 mt-1">$299<span className="text-sm font-normal text-slate-500">/month</span></p>
+                              <h4 className="text-lg font-semibold text-muted-foreground">Enterprise</h4>
+                              <p className="text-2xl font-bold text-primary mt-1">$299<span className="text-sm font-normal text-muted-foreground">/month</span></p>
                             </div>
-                            <ul className="space-y-2 text-sm text-slate-600">
+                            <ul className="space-y-2 text-sm text-muted-foreground">
                               <li className="flex items-center gap-2">
-                                <Check className="h-4 w-4 text-green-500" />
+                                <Check className="h-4 w-4 text-success" />
                                 Everything in Standard
                               </li>
                               <li className="flex items-center gap-2">
-                                <Check className="h-4 w-4 text-green-500" />
+                                <Check className="h-4 w-4 text-success" />
                                 Multi-Location Support
                               </li>
                               <li className="flex items-center gap-2">
-                                <Check className="h-4 w-4 text-green-500" />
+                                <Check className="h-4 w-4 text-success" />
                                 Advanced Analytics
                               </li>
                               <li className="flex items-center gap-2">
-                                <Check className="h-4 w-4 text-green-500" />
+                                <Check className="h-4 w-4 text-success" />
                                 Priority Support
                               </li>
                               <li className="flex items-center gap-2">
-                                <Check className="h-4 w-4 text-green-500" />
+                                <Check className="h-4 w-4 text-success" />
                                 2% Transaction Fee
                               </li>
                               <li className="flex items-center gap-2">
-                                <Check className="h-4 w-4 text-green-500" />
+                                <Check className="h-4 w-4 text-success" />
                                 Custom Integrations
                               </li>
                             </ul>
@@ -1561,10 +1561,10 @@ export const VetOnboardingForm = () => {
 
             {/* Step 7: Legal & Compliance */}
             {currentStep === 7 && (
-              <Card className="bg-white border-slate-200 rounded-lg shadow-sm">
-                <CardHeader className="border-b border-slate-100">
-                  <CardTitle className="flex items-center gap-2 text-slate-900">
-                    <FileText className="h-5 w-5 text-indigo-600" />
+              <Card className="bg-white border-border rounded-lg shadow-sm">
+                <CardHeader className="border-b border-border">
+                  <CardTitle className="flex items-center gap-2 text-muted-foreground">
+                    <FileText className="h-5 w-5 text-primary" />
                     Legal & Compliance
                   </CardTitle>
                   <CardDescription>Review and agree to our terms and policies</CardDescription>
@@ -1579,15 +1579,15 @@ export const VetOnboardingForm = () => {
                     <div 
                       ref={tosScrollRef}
                       onScroll={handleTosScroll}
-                      className="h-64 rounded-lg border border-slate-200 p-4 bg-slate-50 overflow-y-auto"
+                      className="h-64 rounded-lg border border-border p-4 bg-muted overflow-y-auto"
                     >
-                      <pre className="text-xs text-slate-600 whitespace-pre-wrap font-sans">
+                      <pre className="text-xs text-muted-foreground whitespace-pre-wrap font-sans">
                         {TERMS_OF_SERVICE}
                       </pre>
                     </div>
                     {!hasScrolledTos && (
-                      <p className="text-xs text-amber-600 flex items-center gap-1">
-                        <span className="inline-block w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
+                      <p className="text-xs text-warning flex items-center gap-1">
+                        <span className="inline-block w-1.5 h-1.5 bg-warning rounded-full animate-pulse" />
                         Please scroll to the bottom to read the entire agreement
                       </p>
                     )}
@@ -1607,7 +1607,7 @@ export const VetOnboardingForm = () => {
                           <div className="leading-none">
                             <FormLabel className={cn(
                               "text-sm font-medium",
-                              !hasScrolledTos && "text-slate-400"
+                              !hasScrolledTos && "text-muted-foreground"
                             )}>
                               I have read and agree to the PawBucks Merchant Terms of Service *
                             </FormLabel>
@@ -1627,15 +1627,15 @@ export const VetOnboardingForm = () => {
                     <div 
                       ref={vetAddendumScrollRef}
                       onScroll={handleVetAddendumScroll}
-                      className="h-64 rounded-lg border border-slate-200 p-4 bg-slate-50 overflow-y-auto"
+                      className="h-64 rounded-lg border border-border p-4 bg-muted overflow-y-auto"
                     >
-                      <pre className="text-xs text-slate-600 whitespace-pre-wrap font-sans">
+                      <pre className="text-xs text-muted-foreground whitespace-pre-wrap font-sans">
                         {VET_ADDENDUM_CONTENT}
                       </pre>
                     </div>
                     {!hasScrolledVetAddendum && (
-                      <p className="text-xs text-amber-600 flex items-center gap-1">
-                        <span className="inline-block w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
+                      <p className="text-xs text-warning flex items-center gap-1">
+                        <span className="inline-block w-1.5 h-1.5 bg-warning rounded-full animate-pulse" />
                         Please scroll to the bottom to read the entire addendum
                       </p>
                     )}
@@ -1655,7 +1655,7 @@ export const VetOnboardingForm = () => {
                           <div className="leading-none">
                             <FormLabel className={cn(
                               "text-sm font-medium",
-                              !hasScrolledVetAddendum && "text-slate-400"
+                              !hasScrolledVetAddendum && "text-muted-foreground"
                             )}>
                               I have read and agree to the Veterinary Services Disclosure Addendum *
                             </FormLabel>
@@ -1672,15 +1672,15 @@ export const VetOnboardingForm = () => {
                     <div 
                       ref={splicingScrollRef}
                       onScroll={handleSplicingScroll}
-                      className="h-64 rounded-lg border border-slate-200 p-4 bg-slate-50 overflow-y-auto"
+                      className="h-64 rounded-lg border border-border p-4 bg-muted overflow-y-auto"
                     >
-                      <pre className="text-xs text-slate-600 whitespace-pre-wrap font-sans leading-relaxed">
+                      <pre className="text-xs text-muted-foreground whitespace-pre-wrap font-sans leading-relaxed">
                         {INSURANCE_SPLICING_AGREEMENT}
                       </pre>
                     </div>
                     {!hasScrolledSplicing && (
-                      <p className="text-xs text-amber-600 flex items-center gap-1">
-                        <span className="inline-block w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
+                      <p className="text-xs text-warning flex items-center gap-1">
+                        <span className="inline-block w-1.5 h-1.5 bg-warning rounded-full animate-pulse" />
                         Please scroll to the bottom to enable agreement
                       </p>
                     )}
@@ -1700,7 +1700,7 @@ export const VetOnboardingForm = () => {
                           <div className="leading-none">
                             <FormLabel className={cn(
                               "text-sm font-medium",
-                              !hasScrolledSplicing && "text-slate-400"
+                              !hasScrolledSplicing && "text-muted-foreground"
                             )}>
                               I have read and agree to the Insurance Splicing & Direct-Pay Liability Agreement *
                             </FormLabel>
@@ -1716,20 +1716,20 @@ export const VetOnboardingForm = () => {
 
             {/* Step 8: Review */}
             {currentStep === 8 && (
-              <Card className="bg-white border-slate-200 rounded-lg shadow-sm">
-                <CardHeader className="border-b border-slate-100">
-                  <CardTitle className="flex items-center gap-2 text-slate-900">
-                    <Check className="h-5 w-5 text-indigo-600" />
+              <Card className="bg-white border-border rounded-lg shadow-sm">
+                <CardHeader className="border-b border-border">
+                  <CardTitle className="flex items-center gap-2 text-muted-foreground">
+                    <Check className="h-5 w-5 text-primary" />
                     Review Your Details
                   </CardTitle>
                   <CardDescription>Please verify all information before submitting</CardDescription>
                 </CardHeader>
                 <CardContent className="pt-6 space-y-6">
                   {/* Practice Identity Summary */}
-                  <div className="rounded-lg border border-slate-200 p-4">
+                  <div className="rounded-lg border border-border p-4">
                     <div className="flex items-center justify-between mb-3">
-                      <h4 className="font-semibold text-slate-900 flex items-center gap-2">
-                        <Building2 className="h-4 w-4 text-indigo-600" />
+                      <h4 className="font-semibold text-muted-foreground flex items-center gap-2">
+                        <Building2 className="h-4 w-4 text-primary" />
                         Practice Identity
                       </h4>
                       <Button type="button" variant="ghost" size="sm" onClick={() => goToStep(1)}>
@@ -1737,18 +1737,18 @@ export const VetOnboardingForm = () => {
                       </Button>
                     </div>
                     <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-                      <div><span className="text-slate-500">Name:</span> {values.legal_practice_name}</div>
-                      <div><span className="text-slate-500">Phone:</span> {values.primary_phone}</div>
-                      <div><span className="text-slate-500">Address:</span> {values.physical_address}, {values.city}, {values.state} {values.zip_code}</div>
-                      <div><span className="text-slate-500">EIN:</span> {values.tax_id_ein}</div>
+                      <div><span className="text-muted-foreground">Name:</span> {values.legal_practice_name}</div>
+                      <div><span className="text-muted-foreground">Phone:</span> {values.primary_phone}</div>
+                      <div><span className="text-muted-foreground">Address:</span> {values.physical_address}, {values.city}, {values.state} {values.zip_code}</div>
+                      <div><span className="text-muted-foreground">EIN:</span> {values.tax_id_ein}</div>
                     </div>
                   </div>
 
                   {/* Medical Verification Summary */}
-                  <div className="rounded-lg border border-slate-200 p-4">
+                  <div className="rounded-lg border border-border p-4">
                     <div className="flex items-center justify-between mb-3">
-                      <h4 className="font-semibold text-slate-900 flex items-center gap-2">
-                        <Stethoscope className="h-4 w-4 text-indigo-600" />
+                      <h4 className="font-semibold text-muted-foreground flex items-center gap-2">
+                        <Stethoscope className="h-4 w-4 text-primary" />
                         Medical Verification
                       </h4>
                       <Button type="button" variant="ghost" size="sm" onClick={() => goToStep(2)}>
@@ -1756,18 +1756,18 @@ export const VetOnboardingForm = () => {
                       </Button>
                     </div>
                     <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-                      <div><span className="text-slate-500">Medical Director:</span> {values.medical_director_name}</div>
-                      <div><span className="text-slate-500">License:</span> {values.dvm_license_number} ({values.dvm_license_state})</div>
-                      <div><span className="text-slate-500">Practice Type:</span> {values.practice_type}</div>
-                      <div><span className="text-slate-500">Accreditations:</span> {values.accreditations?.join(", ") || "None"}</div>
+                      <div><span className="text-muted-foreground">Medical Director:</span> {values.medical_director_name}</div>
+                      <div><span className="text-muted-foreground">License:</span> {values.dvm_license_number} ({values.dvm_license_state})</div>
+                      <div><span className="text-muted-foreground">Practice Type:</span> {values.practice_type}</div>
+                      <div><span className="text-muted-foreground">Accreditations:</span> {values.accreditations?.join(", ") || "None"}</div>
                     </div>
                   </div>
 
                   {/* Insurance Setup Summary */}
-                  <div className="rounded-lg border border-slate-200 p-4">
+                  <div className="rounded-lg border border-border p-4">
                     <div className="flex items-center justify-between mb-3">
-                      <h4 className="font-semibold text-slate-900 flex items-center gap-2">
-                        <ShieldCheck className="h-4 w-4 text-indigo-600" />
+                      <h4 className="font-semibold text-muted-foreground flex items-center gap-2">
+                        <ShieldCheck className="h-4 w-4 text-primary" />
                         Insurance Setup
                       </h4>
                       <Button type="button" variant="ghost" size="sm" onClick={() => goToStep(3)}>
@@ -1775,18 +1775,18 @@ export const VetOnboardingForm = () => {
                       </Button>
                     </div>
                     <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-                      <div><span className="text-slate-500">Partners:</span> {values.insurance_partners?.length || 0} selected</div>
-                      <div><span className="text-slate-500">Direct-Pay:</span> {values.direct_pay_capability ? "Yes" : "No"}</div>
-                      <div><span className="text-slate-500">Splicing:</span> {values.splicing_preference === "api" ? "API-Integrated" : "Manual"}</div>
-                      <div><span className="text-slate-500">Fee:</span> ${values.admin_splicing_fee || 0}</div>
+                      <div><span className="text-muted-foreground">Partners:</span> {values.insurance_partners?.length || 0} selected</div>
+                      <div><span className="text-muted-foreground">Direct-Pay:</span> {values.direct_pay_capability ? "Yes" : "No"}</div>
+                      <div><span className="text-muted-foreground">Splicing:</span> {values.splicing_preference === "api" ? "API-Integrated" : "Manual"}</div>
+                      <div><span className="text-muted-foreground">Fee:</span> ${values.admin_splicing_fee || 0}</div>
                     </div>
                   </div>
 
                   {/* Integration Summary */}
-                  <div className="rounded-lg border border-slate-200 p-4">
+                  <div className="rounded-lg border border-border p-4">
                     <div className="flex items-center justify-between mb-3">
-                      <h4 className="font-semibold text-slate-900 flex items-center gap-2">
-                        <Wallet className="h-4 w-4 text-indigo-600" />
+                      <h4 className="font-semibold text-muted-foreground flex items-center gap-2">
+                        <Wallet className="h-4 w-4 text-primary" />
                         Integration
                       </h4>
                       <Button type="button" variant="ghost" size="sm" onClick={() => goToStep(4)}>
@@ -1794,16 +1794,16 @@ export const VetOnboardingForm = () => {
                       </Button>
                     </div>
                     <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-                      <div><span className="text-slate-500">PIMS:</span> {values.pims_software}</div>
-                      <div><span className="text-slate-500">Data Sync:</span> {values.data_sync_permission ? "Authorized" : "Not Authorized"}</div>
+                      <div><span className="text-muted-foreground">PIMS:</span> {values.pims_software}</div>
+                      <div><span className="text-muted-foreground">Data Sync:</span> {values.data_sync_permission ? "Authorized" : "Not Authorized"}</div>
                     </div>
                   </div>
 
                   {/* Public Profile Summary */}
-                  <div className="rounded-lg border border-slate-200 p-4">
+                  <div className="rounded-lg border border-border p-4">
                     <div className="flex items-center justify-between mb-3">
-                      <h4 className="font-semibold text-slate-900 flex items-center gap-2">
-                        <User className="h-4 w-4 text-indigo-600" />
+                      <h4 className="font-semibold text-muted-foreground flex items-center gap-2">
+                        <User className="h-4 w-4 text-primary" />
                         Public Profile
                       </h4>
                       <Button type="button" variant="ghost" size="sm" onClick={() => goToStep(5)}>
@@ -1811,17 +1811,17 @@ export const VetOnboardingForm = () => {
                       </Button>
                     </div>
                     <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-                      <div><span className="text-slate-500">Services:</span> {values.services_provided?.length || 0} selected</div>
-                      <div><span className="text-slate-500">New Patients:</span> {values.accepting_new_patients ? "Accepting" : "Not Accepting"}</div>
-                      <div><span className="text-slate-500">Emergency Phone:</span> {values.emergency_phone || "Not set"}</div>
+                      <div><span className="text-muted-foreground">Services:</span> {values.services_provided?.length || 0} selected</div>
+                      <div><span className="text-muted-foreground">New Patients:</span> {values.accepting_new_patients ? "Accepting" : "Not Accepting"}</div>
+                      <div><span className="text-muted-foreground">Emergency Phone:</span> {values.emergency_phone || "Not set"}</div>
                     </div>
                   </div>
 
                   {/* Financial Summary */}
-                  <div className="rounded-lg border border-slate-200 p-4">
+                  <div className="rounded-lg border border-border p-4">
                     <div className="flex items-center justify-between mb-3">
-                      <h4 className="font-semibold text-slate-900 flex items-center gap-2">
-                        <CreditCard className="h-4 w-4 text-indigo-600" />
+                      <h4 className="font-semibold text-muted-foreground flex items-center gap-2">
+                        <CreditCard className="h-4 w-4 text-primary" />
                         Financial Setup
                       </h4>
                       <Button type="button" variant="ghost" size="sm" onClick={() => goToStep(6)}>
@@ -1829,16 +1829,16 @@ export const VetOnboardingForm = () => {
                       </Button>
                     </div>
                     <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-                      <div><span className="text-slate-500">Subscription:</span> {values.subscription_tier === "enterprise" ? "Enterprise ($299/mo)" : "Standard ($99/mo)"}</div>
-                      <div><span className="text-slate-500">Stripe:</span> Connect after registration</div>
+                      <div><span className="text-muted-foreground">Subscription:</span> {values.subscription_tier === "enterprise" ? "Enterprise ($299/mo)" : "Standard ($99/mo)"}</div>
+                      <div><span className="text-muted-foreground">Stripe:</span> Connect after registration</div>
                     </div>
                   </div>
 
                   {/* Legal Summary */}
-                  <div className="rounded-lg border border-slate-200 p-4">
+                  <div className="rounded-lg border border-border p-4">
                     <div className="flex items-center justify-between mb-3">
-                      <h4 className="font-semibold text-slate-900 flex items-center gap-2">
-                        <FileText className="h-4 w-4 text-indigo-600" />
+                      <h4 className="font-semibold text-muted-foreground flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-primary" />
                         Legal & Compliance
                       </h4>
                       <Button type="button" variant="ghost" size="sm" onClick={() => goToStep(7)}>
@@ -1847,11 +1847,11 @@ export const VetOnboardingForm = () => {
                     </div>
                     <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
                       <div className="flex items-center gap-2">
-                        {values.agreed_to_tos ? <Check className="h-4 w-4 text-green-500" /> : <span className="h-4 w-4 rounded border border-slate-300" />}
+                        {values.agreed_to_tos ? <Check className="h-4 w-4 text-success" /> : <span className="h-4 w-4 rounded border border-border" />}
                         Terms of Service
                       </div>
                       <div className="flex items-center gap-2">
-                        {values.agreed_to_splicing_liability ? <Check className="h-4 w-4 text-green-500" /> : <span className="h-4 w-4 rounded border border-slate-300" />}
+                        {values.agreed_to_splicing_liability ? <Check className="h-4 w-4 text-success" /> : <span className="h-4 w-4 rounded border border-border" />}
                         Splicing Liability Agreement
                       </div>
                     </div>
@@ -1890,7 +1890,7 @@ export const VetOnboardingForm = () => {
                   <Button
                     type="button"
                     onClick={handleNext}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg"
+                    className="bg-primary hover:bg-primary text-white rounded-lg"
                   >
                     Next
                     <ArrowRight className="h-4 w-4 ml-2" />
@@ -1899,7 +1899,7 @@ export const VetOnboardingForm = () => {
                   <Button
                     type="submit"
                     disabled={isSubmitting || !values.agreed_to_tos || !values.agreed_to_splicing_liability}
-                    className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-lg"
+                    className="bg-gradient-to-r from-primary/20 to-primary/20 hover:from-primary/20 hover:to-primary/20 text-white rounded-lg"
                   >
                     {isSubmitting ? (
                       <>Submitting...</>

@@ -30,10 +30,10 @@ interface SymptomTriageQueueProps {
 }
 
 const urgencyColors: Record<string, string> = {
-  emergency: "bg-red-500 text-white",
-  urgent: "bg-orange-500 text-white",
-  soon: "bg-yellow-500 text-black",
-  routine: "bg-green-500 text-white",
+  emergency: "bg-destructive text-white",
+  urgent: "bg-warning text-white",
+  soon: "bg-warning text-black",
+  routine: "bg-success text-white",
 };
 
 const urgencyIcons: Record<string, any> = {
@@ -138,8 +138,8 @@ export const SymptomTriageQueue = ({ vetId }: SymptomTriageQueueProps) => {
       <Card className="p-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-              <ClipboardCheck className="w-5 h-5 text-purple-600" />
+            <div className="w-10 h-10 rounded-full bg-primary/10 /30 flex items-center justify-center">
+              <ClipboardCheck className="w-5 h-5 text-primary" />
             </div>
             <div>
               <h3 className="text-lg font-semibold">Symptom Triage Queue</h3>
@@ -271,7 +271,7 @@ export const SymptomTriageQueue = ({ vetId }: SymptomTriageQueueProps) => {
         </div>
       ) : (
         <Card className="p-12 text-center">
-          <CheckCircle className="w-12 h-12 mx-auto mb-4 text-green-500" />
+          <CheckCircle className="w-12 h-12 mx-auto mb-4 text-success" />
           <h3 className="text-lg font-semibold">Queue is Clear</h3>
           <p className="text-muted-foreground">
             No pending symptom assessments at this time
@@ -335,7 +335,7 @@ export const SymptomTriageQueue = ({ vetId }: SymptomTriageQueueProps) => {
                 {/* Chief Complaint */}
                 <div>
                   <h4 className="font-semibold mb-2">Chief Complaint</h4>
-                  <p className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                  <p className="p-3 bg-destructive/10 /20 rounded-lg">
                     {selectedAssessment.chief_complaint}
                   </p>
                 </div>
@@ -393,7 +393,7 @@ export const SymptomTriageQueue = ({ vetId }: SymptomTriageQueueProps) => {
                         <Stethoscope className="w-4 h-4" />
                         AI Triage Summary
                       </h4>
-                      <p className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                      <p className="p-3 bg-primary/10 /20 rounded-lg">
                         {selectedAssessment.ai_summary}
                       </p>
                     </div>

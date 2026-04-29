@@ -353,7 +353,7 @@ export const SecureMessagingTab = ({ vetId }: SecureMessagingTabProps) => {
                     <div className="flex items-center justify-between">
                       <span className="font-medium truncate">{conv.owner_name}</span>
                       {conv.unread_count > 0 && (
-                        <Badge className="bg-red-500 text-white">{conv.unread_count}</Badge>
+                        <Badge className="bg-destructive text-white">{conv.unread_count}</Badge>
                       )}
                     </div>
                     {conv.pet_name && (
