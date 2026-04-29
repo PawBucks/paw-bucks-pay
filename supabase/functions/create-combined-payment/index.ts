@@ -119,7 +119,7 @@ serve(async (req) => {
     // Get merchant details
     const { data: merchant, error: merchantError } = await supabaseAdmin
       .from('merchants')
-      .select('stripe_account_id, cashback_rate, business_name, accepts_pawbucks, onboarding_complete, address')
+      .select('stripe_account_id, cashback_rate, business_name, accepts_pawbucks, onboarding_complete, address, business_type, pawbucks_cap_enabled, pawbucks_cap_pct, pawbucks_promo_cap_pct, pawbucks_promo_starts_at, pawbucks_promo_ends_at')
       .eq('id', merchantId)
       .single();
 
@@ -132,9 +132,47 @@ serve(async (req) => {
       throw new Error('This merchant does not accept PawBucks');
     }
 
+    // --- Merchant PawBucks Acceptance Cap ---
+    // Compute the effective cap right now. null = no cap.
+    const computeEffectiveCapPct = (): number | null => {
+      if (!merchant.pawbucks_cap_enabled) return null;
+      const now = Date.now();
+      const promoStart = merchant.pawbucks_promo_starts_at ? new Date(merchant.pawbucks_promo_starts_at).getTime() : null;
+      const promoEnd = merchant.pawbucks_promo_ends_at ? new Date(merchant.pawbucks_promo_ends_at).getTime() : null;
+      if (
+        merchant.pawbucks_promo_cap_pct &&
+        promoStart !== null && promoEnd !== null &&
+        now >= promoStart && now < promoEnd
+      ) {
+        return Math.min(50, merchant.pawbucks_promo_cap_pct);
+      }
+      if (merchant.pawbucks_cap_pct) return merchant.pawbucks_cap_pct;
+      // Type-based default when enabled but not set
+      const bt = merchant.business_type as string | undefined;
+      if (bt === 'veterinary') return 10;
+      if (bt && ['pet_store','food','delivery','insurance'].includes(bt)) return 20;
+      if (bt && ['grooming','mobile_groomer','boarding','training','walker','daycare','sitter','photography','hiker','runner','masseuse','behaviorist','breeder','rescue_nonprofit'].includes(bt)) return 30;
+      return 20;
+    };
+    const effectiveCapPct = computeEffectiveCapPct();
+
     // --- Auto-Redeem Logic ---
     let pawbucksAmount = manualPawbucksAmount;
     const baseAmount = totalAmount - tipAmount; // Base amount excluding tip
+
+    // Apply cap to manual redemption requests up-front
+    if (effectiveCapPct !== null && pawbucksAmount > 0 && baseAmount > 0) {
+      const maxUsdAllowed = (baseAmount * effectiveCapPct) / 100;
+      const maxPbAllowed = Math.floor(maxUsdAllowed / PAWBUCKS_TO_USD);
+      if (pawbucksAmount > maxPbAllowed) {
+        logStep('Manual PawBucks clamped to merchant cap', {
+          requested: pawbucksAmount,
+          capPct: effectiveCapPct,
+          maxPbAllowed,
+        });
+        pawbucksAmount = maxPbAllowed;
+      }
+    }
 
     if (requestAutoRedeem && pawbucksAmount === 0 && merchant.accepts_pawbucks && baseAmount > 0) {
       // Fetch user's auto-redeem preferences
@@ -183,6 +221,15 @@ serve(async (req) => {
           if (autoUsd > baseAmount) {
             autoUsd = baseAmount;
             maxPBToApply = Math.floor(autoUsd / PAWBUCKS_TO_USD);
+          }
+          // Also enforce merchant cap on auto-redeem
+          if (effectiveCapPct !== null) {
+            const merchantMaxUsd = (baseAmount * effectiveCapPct) / 100;
+            if (autoUsd > merchantMaxUsd) {
+              autoUsd = merchantMaxUsd;
+              maxPBToApply = Math.floor(autoUsd / PAWBUCKS_TO_USD);
+              logStep('Auto-redeem clamped to merchant cap', { capPct: effectiveCapPct, maxPBToApply });
+            }
           }
           pawbucksAmount = maxPBToApply;
           logStep('Auto-redeem applied (combined)', { pawbucksAmount, usdValue: autoUsd.toFixed(2) });
