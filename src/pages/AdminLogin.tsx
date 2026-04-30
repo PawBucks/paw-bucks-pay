@@ -7,7 +7,8 @@ import { Input } from"@/components/ui/input";
 import { Label } from"@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from"@/components/ui/card";
 import { toast } from"sonner";
-import { Shield, ArrowLeft } from"lucide-react";
+import { ArrowLeft } from"lucide-react";
+import pawbucksLogo from"@/assets/pawbucks-logo.png";
 import { TwoFactorVerify } from"@/components/admin/TwoFactorVerify";
 
 const AdminLogin = () => {
