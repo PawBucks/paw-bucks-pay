@@ -452,14 +452,16 @@ const About = () => {
       {/* HERO */}
       <section className="pa-hero">
         <div className="pa-hero-inner">
-          <div className="pa-hero-eyebrow">Our Story</div>
+          <div className="pa-hero-eyebrow">Our Story — Los Angeles, CA</div>
           <h1 className="pa-hero-title">
             Built for pet people,<br />
             <em>by a pet person.</em>
           </h1>
           <p className="pa-hero-sub">
-            PawBucks was built by a 15-year pet care veteran who wanted to keep money in
-            the local pet economy. Learn our story, mission, and values.
+            PawBucks started on a hiking trail in Los Angeles with a simple frustration:
+            too many great pet businesses, too little visibility — and too much money
+            flowing out of the local pet economy into big tech ad platforms that don't
+            deliver.
           </p>
         </div>
       </section>
