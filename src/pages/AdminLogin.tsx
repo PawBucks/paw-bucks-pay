@@ -7,7 +7,8 @@ import { Input } from"@/components/ui/input";
 import { Label } from"@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from"@/components/ui/card";
 import { toast } from"sonner";
-import { Shield, ArrowLeft } from"lucide-react";
+import { ArrowLeft } from"lucide-react";
+import pawbucksLogo from"@/assets/pawbucks-logo.png";
 import { TwoFactorVerify } from"@/components/admin/TwoFactorVerify";
 
 const AdminLogin = () => {
@@ -226,9 +227,9 @@ const AdminLogin = () => {
  <Card className="w-full max-w-md">
  <CardHeader className="space-y-1 text-center">
  <div className="flex justify-center mb-4">
- <div className="p-3 bg-primary/10 rounded-full">
- <Shield className="h-8 w-8 text-primary" />
- </div>
+  <div className="p-3 bg-primary/10 rounded-full">
+  <img src={pawbucksLogo} alt="PawBucks" className="h-8 w-8 object-contain" />
+  </div>
  </div>
  <CardTitle className="text-2xl font-bold">Forgot Password</CardTitle>
  <CardDescription>
@@ -278,9 +279,9 @@ const AdminLogin = () => {
  <Card className="w-full max-w-md">
  <CardHeader className="space-y-1 text-center">
  <div className="flex justify-center mb-4">
- <div className="p-3 bg-primary/10 rounded-full">
- <Shield className="h-8 w-8 text-primary" />
- </div>
+  <div className="p-3 bg-primary/10 rounded-full">
+  <img src={pawbucksLogo} alt="PawBucks" className="h-8 w-8 object-contain" />
+  </div>
  </div>
  <CardTitle className="text-2xl font-bold">Admin Login</CardTitle>
  <CardDescription>
