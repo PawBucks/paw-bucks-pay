@@ -48,7 +48,7 @@ export default defineConfig(({ mode }) => ({
         name: "PawBucks - Pet Payment Platform",
         short_name: "PawBucks",
         description: "Digital payment platform for pet services with cashback rewards",
-        theme_color: "#3fbcd0",
+        theme_color: "#7DD4D4",
         background_color: "#ffffff",
         display: "standalone",
         orientation: "portrait",
