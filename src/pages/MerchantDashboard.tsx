@@ -64,6 +64,7 @@ import { CheckInDashboard } from"@/components/checkin";
 import { MerchantCampaignLeaderboardCard } from"@/components/merchant/MerchantCampaignLeaderboardCard";
 import { MerchantBrandCampaignInbox } from"@/components/merchant/MerchantBrandCampaignInbox";
 import { AvailableBrandCampaigns } from"@/components/merchant/AvailableBrandCampaigns";
+import { PromotionInvitationsInbox } from"@/components/PromotionInvitationsInbox";
 
 // Dialogs
 import { EditMerchantProfileDialog } from"@/components/merchant/EditMerchantProfileDialog";
@@ -211,6 +212,12 @@ const NAV_SECTIONS = [
  icon: Megaphone,
  description:"Review and respond to brand campaign invitations",
  },
+  {
+   id:"promotions",
+   label:"Promotions",
+   icon: Sparkles,
+   description:"Review and respond to platform promotion invitations from PawBucks",
+  },
  ],
  },
  {
@@ -908,6 +915,8 @@ const MerchantDashboard = () => {
  <AvailableBrandCampaigns merchantId={merchant.id} />
  </div>
  );
+  case"promotions":
+   return <PromotionInvitationsInbox recipientType="merchant" recipientId={merchant.id} />;
  case"support":
  return <SupportTab submitterType="merchant" entityId={merchant.id} />;
  default:
