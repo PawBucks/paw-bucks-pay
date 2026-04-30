@@ -555,7 +555,7 @@ const Index = () => {
  <section className="pl-section pl-how">
  <p className="pl-eyebrow">How It Works</p>
  <h2 className="pl-section-title">Four steps. Real rewards.</h2>
- <p className="pl-section-sub">No punch cards. No points that expire on you arbitrarily. Just cashback on what you already spend.</p>
+                <p className="pl-section-sub">No punch cards. Just cashback on what you already spend.</p>
  <div className="pl-steps">
  <div className="pl-step">
  <div className="pl-step-num">01</div>
