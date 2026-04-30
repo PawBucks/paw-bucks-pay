@@ -51,7 +51,6 @@ import {
 } from"@/components/ui/sheet";
 import {
  LogOut,
- Shield,
  Users,
  Store,
  DollarSign,
