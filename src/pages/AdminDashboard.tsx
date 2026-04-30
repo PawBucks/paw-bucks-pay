@@ -28,6 +28,7 @@ import { OverviewTab } from"@/components/admin/OverviewTab";
 import { AnalyticsTab } from"@/components/admin/AnalyticsTab";
 import { AuditLogsTab } from"@/components/admin/AuditLogsTab";
 import { AdminInvoicingTab } from"@/components/admin/AdminInvoicingTab";
+import pawbucksLogo from"@/assets/pawbucks-logo.png";
 import { ApprovalsTab } from"@/components/admin/ApprovalsTab";
 import { AdminCheckInsTab } from"@/components/admin/AdminCheckInsTab";
 import { CheckInFeedbackTab } from"@/components/admin/CheckInFeedbackTab";
