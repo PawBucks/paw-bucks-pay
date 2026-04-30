@@ -4,6 +4,36 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
 import { prerenderRoutes } from "./plugins/vite-prerender-routes";
+import { faviconManifestCheck } from "./plugins/vite-favicon-manifest-check";
+
+// Single source of truth for PWA theme color and icons
+const PWA_THEME_COLOR = "#7DD4D4";
+const PWA_ICONS = [
+  {
+    src: "/icon-192.png?v=2",
+    sizes: "192x192",
+    type: "image/png",
+    purpose: "any",
+  },
+  {
+    src: "/icon-512.png?v=2",
+    sizes: "512x512",
+    type: "image/png",
+    purpose: "any",
+  },
+  {
+    src: "/icon-512.png?v=2",
+    sizes: "512x512",
+    type: "image/png",
+    purpose: "maskable",
+  },
+  {
+    src: "/apple-touch-icon.png?v=2",
+    sizes: "180x180",
+    type: "image/png",
+    purpose: "any",
+  },
+];
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -48,38 +78,13 @@ export default defineConfig(({ mode }) => ({
         name: "PawBucks - Pet Payment Platform",
         short_name: "PawBucks",
         description: "Digital payment platform for pet services with cashback rewards",
-        theme_color: "#7DD4D4",
+        theme_color: PWA_THEME_COLOR,
         background_color: "#ffffff",
         display: "standalone",
         orientation: "portrait",
         scope: "/",
         start_url: "/",
-        icons: [
-          {
-            src: "/icon-192.png?v=2",
-            sizes: "192x192",
-            type: "image/png",
-            purpose: "any"
-          },
-          {
-            src: "/icon-512.png?v=2",
-            sizes: "512x512",
-            type: "image/png",
-            purpose: "any"
-          },
-          {
-            src: "/icon-512.png?v=2",
-            sizes: "512x512",
-            type: "image/png",
-            purpose: "maskable"
-          },
-          {
-            src: "/apple-touch-icon.png?v=2",
-            sizes: "180x180",
-            type: "image/png",
-            purpose: "any"
-          }
-        ]
+        icons: PWA_ICONS,
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff,woff2}"],
@@ -132,6 +137,7 @@ export default defineConfig(({ mode }) => ({
       }
     }),
     prerenderRoutes(),
+    faviconManifestCheck(PWA_THEME_COLOR, PWA_ICONS),
   ].filter(Boolean),
   resolve: {
     alias: {
