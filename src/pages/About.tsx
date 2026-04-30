@@ -500,10 +500,16 @@ const About = () => {
           <div className="pa-story-pull">
             <div className="pa-pull-quote">
               <div className="pa-pull-quote-text">
-                "Why not build a digital directory of local pet merchants — and
-                <em> layer a rewards system on top?</em>"
+                "I've received countless business cards from pet professionals. But out in the world,
+                <em> all of their names slip my mind.</em>"
               </div>
-              <div className="pa-pull-quote-attr">— Jonathan Fields, Founder</div>
+              <div className="pa-pull-quote-attr">Jonathan Fields — Founder, PawBucks</div>
+            </div>
+            <div className="pa-pull-quote" style={{ marginTop: '1.5rem' }}>
+              <div className="pa-pull-quote-text">
+                "Small pet businesses <em>bleed cash to big tech</em> for ads that don't convert to dollars."
+              </div>
+              <div className="pa-pull-quote-attr">The problem PawBucks was built to solve</div>
             </div>
           </div>
         </div>
