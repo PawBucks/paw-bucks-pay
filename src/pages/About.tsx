@@ -753,10 +753,12 @@ const About = () => {
       {/* FOOTER */}
       <footer className="pa-footer">
         <div>© {new Date().getFullYear()} PawBucks, Inc. · Los Angeles, CA</div>
-        <div style={{ display: "flex", gap: "1.5rem" }}>
+        <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap", justifyContent: "center" }}>
+          <a href="/privacy">Privacy</a>
+          <a href="/terms">Terms</a>
+          <a href="/merchants">For Merchants</a>
+          <a href="/vets">For Vets</a>
           <a href="mailto:Legal@PawBucks.app">Legal@PawBucks.app</a>
-          <button onClick={() => navigate("/privacy")}>Privacy</button>
-          <button onClick={() => navigate("/terms")}>Terms</button>
         </div>
       </footer>
     </div>
