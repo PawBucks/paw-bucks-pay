@@ -28,6 +28,7 @@ import { OverviewTab } from"@/components/admin/OverviewTab";
 import { AnalyticsTab } from"@/components/admin/AnalyticsTab";
 import { AuditLogsTab } from"@/components/admin/AuditLogsTab";
 import { AdminInvoicingTab } from"@/components/admin/AdminInvoicingTab";
+import pawbucksLogo from"@/assets/pawbucks-logo.png";
 import { ApprovalsTab } from"@/components/admin/ApprovalsTab";
 import { AdminCheckInsTab } from"@/components/admin/AdminCheckInsTab";
 import { CheckInFeedbackTab } from"@/components/admin/CheckInFeedbackTab";
@@ -443,9 +444,9 @@ const AdminDashboard = () => {
  {/* Logo and Title */}
  <div className="p-4 border-b">
  <div className="flex items-center gap-3">
- <div className="w-10 h-10 rounded-md bg-primary flex items-center justify-center shadow-lg">
- <Shield className="w-5 h-5 text-primary-foreground" />
- </div>
+  <div className="w-10 h-10 rounded-md flex items-center justify-center shadow-lg overflow-hidden">
+  <img src={pawbucksLogo} alt="PawBucks" className="w-full h-full object-contain" />
+  </div>
  <div>
  <h1 className="font-bold text-lg">Admin Dashboard</h1>
  <p className="text-xs text-muted-foreground">PawBucks Platform</p>
