@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { SEO } from "@/components/SEO";
 import { seoMeta } from "@/lib/seoMeta";
 import logo from "@/assets/logo.png";
+import founderPhoto from "@/assets/founder-jonathan.jpeg";
 
 const styles = `
 .pa-root {
@@ -232,12 +233,25 @@ const styles = `
   position: sticky; top: 7rem;
 }
 .pa-founder-avatar {
-  width: 100px; height: 100px; border-radius: 50%;
+  width: 140px; height: 140px; border-radius: 50%;
   background: var(--teal-pale);
   border: 3px solid var(--border);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 2.5rem; margin: 0 auto 1rem;
+  margin: 0 auto 1rem;
+  overflow: hidden;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
 }
+.pa-founder-linkedin {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  margin-top: 0.75rem;
+  font-size: 0.78rem; letter-spacing: 0.04em;
+  color: var(--teal-dark); text-decoration: none;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 2px;
+  transition: color 0.2s, border-color 0.2s;
+}
+.pa-founder-linkedin:hover { color: var(--teal); border-color: var(--teal); }
 .pa-founder-name {
   font-family: 'Playfair Display', Georgia, serif;
   font-size: 1.2rem; font-weight: 700;
@@ -630,7 +644,11 @@ const About = () => {
       <section className="pa-section pa-founder">
         <div className="pa-founder-inner">
           <div className="pa-founder-card">
-            <div className="pa-founder-avatar">🧑</div>
+            <img
+              src={founderPhoto}
+              alt="Jonathan Fields, Founder of PawBucks"
+              className="pa-founder-avatar"
+            />
             <div className="pa-founder-name">Jonathan Fields</div>
             <div className="pa-founder-title">Founder &amp; CEO, PawBucks</div>
             <div>
@@ -642,6 +660,14 @@ const About = () => {
             <div>
               <span className="pa-founder-tag">Los Angeles, CA</span>
             </div>
+            <a
+              href="https://www.linkedin.com/in/jonathan-fields-1b611a177"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="pa-founder-linkedin"
+            >
+              Connect on LinkedIn →
+            </a>
           </div>
           <div>
             <div className="pa-eyebrow">The Founder</div>
