@@ -458,9 +458,8 @@ const About = () => {
             <em>by a pet person.</em>
           </h1>
           <p className="pa-hero-sub">
-            PawBucks was born from 15 years inside the pet care industry — and a simple
-            belief that every dollar spent on your pet should reward you, your pet, and
-            the small businesses that care for them.
+            PawBucks was built by a 15-year pet care veteran who wanted to keep money in
+            the local pet economy. Learn our story, mission, and values.
           </p>
         </div>
       </section>
@@ -470,34 +469,39 @@ const About = () => {
         <div className="pa-story-inner">
           <div>
             <div className="pa-eyebrow">The Origin</div>
-            <h2 className="pa-section-title">A pet care veteran's frustration.</h2>
+            <h2 className="pa-section-title">A business card problem that became a platform.</h2>
             <div className="pa-story-body">
               <p>
-                After <strong>15 years</strong> grooming, walking, training, and caring for
-                pets across Los Angeles, our founder kept seeing the same broken pattern:
-                local pet businesses pouring everything into their craft, while customers
-                drove past them to chain stores offering generic loyalty points that
-                expired before anyone could use them.
+                After 15 years working in the pet care industry— running dog hikes, working
+                alongside trainers, groomers, and vets — <strong>Jonathan Fields</strong> had
+                collected more business cards than he could count. Fellow pet professionals,
+                small operations doing incredible work, businesses his own clients would have
+                loved.
               </p>
               <p>
-                Meanwhile, pet parents were spending <strong>thousands a year</strong> on
-                food, vet visits, grooming, and boarding — and getting almost nothing back.
-                The few rewards programs that existed locked you into a single store.
+                The problem? Out in the world, names slip your mind. Great businesses stayed
+                invisible while ad budgets bought clicks that never became clients. Small
+                pet businesses were bleeding cash to platforms that didn't understand their
+                world.
               </p>
               <p>
-                PawBucks was built to fix that. <strong>One wallet.</strong> One reward
-                currency. Earned everywhere your pet is cared for, redeemable everywhere
-                in the network. Real cashback for real spend.
+                So Jonathan asked a simple question: why not build a digital directory of
+                local pet merchants — and layer a rewards system on top? Something that
+                gives pet owners a reason to discover and return to local businesses, and
+                gives those businesses a way to grow without paying for ads that don't convert.
+              </p>
+              <p>
+                <strong>That question became PawBucks.</strong>
               </p>
             </div>
           </div>
           <div className="pa-story-pull">
             <div className="pa-pull-quote">
               <div className="pa-pull-quote-text">
-                "I built PawBucks because <em>local pet businesses deserve better</em> —
-                and so do the people who love their pets enough to choose them."
+                "Why not build a digital directory of local pet merchants — and
+                <em> layer a rewards system on top?</em>"
               </div>
-              <div className="pa-pull-quote-attr">— Founder, PawBucks</div>
+              <div className="pa-pull-quote-attr">— Jonathan Fields, Founder</div>
             </div>
           </div>
         </div>
@@ -506,23 +510,30 @@ const About = () => {
       {/* MISSION */}
       <section className="pa-section pa-mission">
         <div className="pa-eyebrow">Our Mission</div>
-        <h2 className="pa-section-title">Keep money in the local pet economy.</h2>
+        <h2 className="pa-section-title">Money should stay in the local pet economy.</h2>
         <div className="pa-mission-inner">
           <div className="pa-mission-statement">
-            We're building the rewards layer for the <em>independent pet economy</em> —
-            so your favorite groomer, vet, and pet store can compete with the chains, and
-            your loyalty actually pays you back.
+            We exist to empower pet owners with more spending power, and local pet
+            businesses with the funds they need to scale — <em>without debt, without
+            equity, without paying for ads that don't work.</em>
           </div>
           <div className="pa-mission-body">
             <p>
-              Every PawBuck earned is a small vote for a <strong>local business</strong>.
-              Every PawBuck redeemed is a discount that came out of network economics — not
-              the merchant's margin.
+              PawBucks was built on a belief that the pet care industry deserves better
+              than pay-per-click. Every dollar a small groomer or independent vet spends
+              on Google Ads, Yelp, or Groupon is a dollar that leaves the local economy —
+              often with nothing to show for it.
             </p>
             <p>
-              We charge a transparent <strong>3% Success Fee</strong> on USD payments
-              processed through the platform. That's it. No hidden cuts, no data sales, no
-              surprise auto-renewals.
+              Our <strong>3% success fee model</strong> flips that dynamic. We only earn
+              when we deliver value. No upfront ad spend. No monthly retainers. No equity.
+              Just a performance-aligned partnership between PawBucks and the businesses
+              we serve.
+            </p>
+            <p>
+              And on the other side of the transaction, pet owners earn real rewards on
+              every dollar they spend on their animals — PawBucks they can redeem anywhere
+              on the platform, turning everyday pet care into <strong>genuine spending power</strong>.
             </p>
           </div>
         </div>
@@ -531,30 +542,36 @@ const About = () => {
       {/* VALUES */}
       <section className="pa-section pa-values">
         <div className="pa-eyebrow">What We Stand For</div>
-        <h2 className="pa-section-title">Four values. No compromises.</h2>
+        <h2 className="pa-section-title">Three values that drive every decision we make.</h2>
         <div className="pa-values-grid">
           <div className="pa-value-card">
-            <span className="pa-value-icon">🐾</span>
-            <h3 className="pa-value-name">Pet-first decisions</h3>
+            <span className="pa-value-icon">🤝</span>
+            <h3 className="pa-value-name">Community</h3>
             <p className="pa-value-desc">
-              Every feature ships through one filter: does it make life better for the pet,
-              the pet parent, or the people caring for them? If not, it doesn't ship.
-            </p>
-          </div>
-          <div className="pa-value-card">
-            <span className="pa-value-icon">🏪</span>
-            <h3 className="pa-value-name">Local over chain</h3>
-            <p className="pa-value-desc">
-              We will always prioritize the independent groomer, vet, trainer, and pet
-              store. Their margins are tighter; their care is closer.
+              PawBucks exists to strengthen the local pet economy. We believe the best pet
+              care businesses are the ones your neighbors built — and they deserve a
+              platform that works as hard as they do. Every feature we build is designed
+              to keep money circulating locally.
             </p>
           </div>
           <div className="pa-value-card">
             <span className="pa-value-icon">🔍</span>
-            <h3 className="pa-value-name">Radical transparency</h3>
+            <h3 className="pa-value-name">Transparency</h3>
             <p className="pa-value-desc">
-              Our fees are public. Our reward math is public. Our expiration rules are
-              public. If we can't explain it on a single page, we don't do it.
+              No hidden fees. No confusing multipliers. No surprise charges. Our 3%
+              success fee applies only to the USD portion of transactions processed
+              through the platform — and pet owners always know exactly what their
+              PawBucks are worth. 1,000 PawBucks = $1. Always.
+            </p>
+          </div>
+          <div className="pa-value-card">
+            <span className="pa-value-icon">🐾</span>
+            <h3 className="pa-value-name">Pet Life Cycle</h3>
+            <p className="pa-value-desc">
+              We think about the full life of a pet — from adoption through every stage
+              of care. PawBucks connects pet owners with the right service at the right
+              moment: training when they're young, nutrition as they grow, veterinary
+              care as they age. We're here for the whole journey.
             </p>
           </div>
         </div>
@@ -564,37 +581,38 @@ const About = () => {
       <section className="pa-section pa-traction">
         <div className="pa-traction-inner">
           <div>
-            <div className="pa-eyebrow">Where We Are</div>
-            <h2 className="pa-section-title">Early. Focused. Real.</h2>
+            <div className="pa-eyebrow">Where We Are Today</div>
+            <h2 className="pa-section-title">Early days. Real proof.</h2>
             <p className="pa-section-sub">
-              We're a young company building carefully. Every merchant onboarded is
-              hand-verified. Every pet parent gets a real welcome credit. No vanity
-              metrics — just the work.
+              PawBucks hasn't officially launched yet — but the model is already working.
+              Our first proving ground is Jonathan's own pet business,
+              <strong> iHikeDogs LLC</strong>, giving us real transaction data before we
+              open the platform to the world.
             </p>
           </div>
           <div>
             <div className="pa-stats-grid">
               <div className="pa-stat-card">
-                <div className="pa-stat-num">15+</div>
-                <div className="pa-stat-label">Years of pet industry experience behind the platform</div>
+                <div className="pa-stat-num">$22,816</div>
+                <div className="pa-stat-label">GMV processed through iHikeDogs LLC</div>
               </div>
               <div className="pa-stat-card">
-                <div className="pa-stat-num">100%</div>
-                <div className="pa-stat-label">Merchant reimbursement on PawBucks redemptions</div>
+                <div className="pa-stat-num">$465</div>
+                <div className="pa-stat-label">Platform revenue from 3% success fee</div>
               </div>
               <div className="pa-stat-card">
-                <div className="pa-stat-num">3%</div>
-                <div className="pa-stat-label">Flat Success Fee — never hidden, never raised silently</div>
+                <div className="pa-stat-num">$365</div>
+                <div className="pa-stat-label">PawBucks rewards distributed to pet owners</div>
               </div>
               <div className="pa-stat-card">
-                <div className="pa-stat-num">0</div>
-                <div className="pa-stat-label">Customer data sold to third parties. Ever.</div>
+                <div className="pa-stat-num">8</div>
+                <div className="pa-stat-label">Merchants signed up ahead of launch</div>
               </div>
             </div>
             <div className="pa-traction-note">
-              <strong>What we're focused on right now:</strong> onboarding the best local
-              pet businesses in our launch markets, paying out merchants fast, and proving
-              that a fair rewards network can outcompete chain loyalty programs.
+              <strong>Pre-launch, Los Angeles.</strong> These numbers represent early
+              validation from a single merchant before the platform opens to the public.
+              The 3% fee works. Rewards get distributed. The model is real.
             </div>
           </div>
         </div>
@@ -604,34 +622,49 @@ const About = () => {
       <section className="pa-section pa-founder">
         <div className="pa-founder-inner">
           <div className="pa-founder-card">
-            <div className="pa-founder-avatar">🐶</div>
-            <div className="pa-founder-name">The Founder</div>
-            <div className="pa-founder-title">Founder &amp; CEO, PawBucks Inc.</div>
+            <div className="pa-founder-avatar">🧑</div>
+            <div className="pa-founder-name">Jonathan Fields</div>
+            <div className="pa-founder-title">Founder &amp; CEO, PawBucks</div>
             <div>
-              <span className="pa-founder-tag">15 yrs in pet care</span>
+              <span className="pa-founder-tag">15+ Years in Pet Care</span>
+            </div>
+            <div>
+              <span className="pa-founder-tag">Founder, iHikeDogs LLC</span>
             </div>
             <div>
               <span className="pa-founder-tag">Los Angeles, CA</span>
             </div>
           </div>
           <div>
-            <div className="pa-eyebrow">Who's Behind This</div>
-            <h2 className="pa-section-title">A decade and a half in the trenches.</h2>
+            <div className="pa-eyebrow">The Founder</div>
+            <h2 className="pa-section-title">Built by someone who's lived it.</h2>
             <div className="pa-founder-bio">
               <p>
-                Before PawBucks, our founder spent <strong>15 years</strong> on the floor
-                of the pet industry — grooming tables, training fields, boarding kennels,
-                vet front desks. Not as an investor. Not as a consultant. As the person
-                handing the leash back to the owner.
+                <strong>Jonathan Fields</strong> has spent over 15 years working in the
+                pet care industry — running dog hikes, building client relationships, and
+                watching the business of pet care up close. His company,
+                <strong> iHikeDogs LLC</strong>, has given him a front-row seat to both
+                the joy and the economics of running a small pet business in Los Angeles.
               </p>
               <p>
-                That experience shaped everything about PawBucks: how merchants get paid,
-                how PawBucks expire, why we refuse to sell customer data, and why every
-                line of copy tries to read like a real person wrote it — because one did.
+                Over those 15 years, Jonathan collected business cards from hundreds of
+                fellow pet professionals — groomers, trainers, veterinarians, boarding
+                operators, pet store owners. People doing great work. Businesses that
+                deserved more visibility than a Yelp listing and a hope.
               </p>
               <p>
-                <strong>This isn't a tech company that discovered pets.</strong> It's a
-                pet company that built the technology it always wished existed.
+                But out in the world, away from those moments of connection, names and
+                details would slip. Great businesses stayed hard to find. And when he
+                looked at how those same businesses were trying to solve their discovery
+                problem — Google Ads, Yelp subscriptions, Groupon deals that gutted their
+                margins — he saw a fundamental mismatch between what they were paying and
+                what they were getting.
+              </p>
+              <p>
+                PawBucks is his answer to that. <strong>A platform built from the inside
+                out</strong> — by someone who knows what it costs to run a pet business,
+                what pet owners actually need, and what a fair partnership between a
+                platform and its users looks like.
               </p>
             </div>
           </div>
@@ -640,35 +673,29 @@ const About = () => {
 
       {/* ROADMAP */}
       <section className="pa-section pa-roadmap">
-        <div className="pa-eyebrow">What's Next</div>
-        <h2 className="pa-section-title">The road ahead.</h2>
-        <p className="pa-section-sub">A focused roadmap. No moonshots — just real things, shipped well.</p>
+        <div className="pa-eyebrow">The Roadmap</div>
+        <h2 className="pa-section-title">Two phases. One mission.</h2>
+        <p className="pa-section-sub">
+          We're building this deliberately — merchants first, then pet owners — so that
+          when owners arrive, the platform is already full of businesses worth discovering.
+        </p>
         <div className="pa-roadmap-track">
           <div className="pa-roadmap-phase">
-            <div className="pa-phase-dot done">✓</div>
-            <div className="pa-phase-label">Phase 1 · Done</div>
-            <div className="pa-phase-title">Launch the wallet</div>
+            <div className="pa-phase-dot active">Q2</div>
+            <div className="pa-phase-label">Active Now — 2025</div>
+            <div className="pa-phase-title">Merchant Onboarding</div>
             <div className="pa-phase-desc">
-              Earn-and-redeem live across local merchants, with PawPass tiers and a real
-              cashback economy.
+              Signing up groomers, trainers, vets, pet stores, and pet brands across Los
+              Angeles. Building the merchant network before pet owners arrive.
             </div>
           </div>
           <div className="pa-roadmap-phase">
-            <div className="pa-phase-dot active">2</div>
-            <div className="pa-phase-label">Phase 2 · Now</div>
-            <div className="pa-phase-title">Deepen the network</div>
+            <div className="pa-phase-dot upcoming">Q3</div>
+            <div className="pa-phase-label muted">Coming Soon — 2025</div>
+            <div className="pa-phase-title">Pet Owner Launch</div>
             <div className="pa-phase-desc">
-              More verified vets, groomers, and trainers. Booking, messaging, and lost-pet
-              tools built into one app.
-            </div>
-          </div>
-          <div className="pa-roadmap-phase">
-            <div className="pa-phase-dot upcoming">3</div>
-            <div className="pa-phase-label muted">Phase 3 · Soon</div>
-            <div className="pa-phase-title">A real pet OS</div>
-            <div className="pa-phase-desc">
-              Health records, financing, and pet-life planning — all paid for in part by
-              the rewards you've already earned.
+              Opening the platform to pet owners once a strong merchant network is in
+              place. Los Angeles first — then expanding from there.
             </div>
           </div>
         </div>
@@ -677,13 +704,15 @@ const About = () => {
       {/* CTA */}
       <section className="pa-cta">
         <div className="pa-eyebrow">Join Us</div>
-        <h2 className="pa-section-title">Get rewarded for loving your pet.</h2>
+        <h2 className="pa-section-title">Be part of building something different.</h2>
         <p className="pa-section-sub">
-          Free to start. New members get a welcome credit. No credit card required.
+          Whether you're a pet owner who wants real rewards, a local business that's tired
+          of paying for ads that don't convert, or just someone who loves animals — there's
+          a place for you in PawBucks.
         </p>
         <div className="pa-cta-btns">
-          <button className="pa-btn-primary" onClick={goSignup}>Create free account</button>
-          <button className="pa-btn-outline" onClick={goDirectory}>Browse merchants</button>
+          <button className="pa-btn-primary" onClick={goSignup}>Join as a Pet Owner</button>
+          <button className="pa-btn-outline" onClick={() => navigate("/auth?role=merchant")}>List Your Business</button>
         </div>
       </section>
 
