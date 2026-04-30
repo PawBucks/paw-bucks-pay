@@ -8,7 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Plus, Send, Megaphone, Archive, Edit, CheckCircle2, XCircle, Clock } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Loader2, Plus, Send, Megaphone, Archive, Edit, CheckCircle2, XCircle, Clock, Inbox } from "lucide-react";
 import { toast } from "sonner";
 import {
   listPromotions,
@@ -21,6 +22,7 @@ import {
   type PromotionStatus,
 } from "@/services/api/platformPromotions.service";
 import { PromotionInviteDialog } from "./PromotionInviteDialog";
+import { PromotionInvitationsLog } from "./PromotionInvitationsLog";
 
 const emptyForm = {
   title: "",
@@ -113,6 +115,13 @@ export function PromotionsTab() {
 
   return (
     <div className="space-y-4">
+      <Tabs defaultValue="promotions" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="promotions"><Megaphone className="h-4 w-4 mr-1" /> Promotions</TabsTrigger>
+          <TabsTrigger value="invitations"><Inbox className="h-4 w-4 mr-1" /> Sent Invitations</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="promotions" className="space-y-4">
       <Card>
         <CardHeader className="flex flex-row items-start justify-between gap-3">
           <div>
@@ -148,6 +157,12 @@ export function PromotionsTab() {
           )}
         </CardContent>
       </Card>
+        </TabsContent>
+
+        <TabsContent value="invitations">
+          <PromotionInvitationsLog />
+        </TabsContent>
+      </Tabs>
 
       {/* Editor */}
       <Dialog open={editorOpen} onOpenChange={setEditorOpen}>

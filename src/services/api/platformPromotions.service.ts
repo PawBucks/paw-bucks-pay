@@ -78,6 +78,58 @@ export const listInvitationsForPromotion = async (promotionId: string) => {
     .order("invited_at", { ascending: false });
 };
 
+/**
+ * Admin-only: list every invitation across all promotions, joined with
+ * promotion title/status. Recipient name resolved separately for performance.
+ */
+export const listAllPromotionInvitations = async (filters?: {
+  status?: "pending" | "accepted" | "declined";
+  recipient_type?: "merchant" | "vet";
+  promotion_id?: string;
+}) => {
+  let q = supabase
+    .from("platform_promotion_invitations" as any)
+    .select("*, promotion:platform_promotions(id, title, status, recipient_type)")
+    .order("invited_at", { ascending: false })
+    .limit(500);
+  if (filters?.status) q = q.eq("status", filters.status);
+  if (filters?.recipient_type) q = q.eq("recipient_type", filters.recipient_type);
+  if (filters?.promotion_id) q = q.eq("promotion_id", filters.promotion_id);
+  return await q;
+};
+
+/**
+ * Admin-only: hydrate a list of merchant/vet ids into name/email maps.
+ */
+export const resolveRecipientNames = async (
+  merchantIds: string[],
+  vetIds: string[],
+) => {
+  const result = {
+    merchants: {} as Record<string, { name: string; email: string | null }>,
+    vets: {} as Record<string, { name: string; email: string | null }>,
+  };
+  if (merchantIds.length) {
+    const { data } = await supabase
+      .from("merchants")
+      .select("id, business_name, email")
+      .in("id", merchantIds);
+    (data || []).forEach((m: any) => {
+      result.merchants[m.id] = { name: m.business_name, email: m.email };
+    });
+  }
+  if (vetIds.length) {
+    const { data } = await supabase
+      .from("partner_vets")
+      .select("id, name, clinic_name, contact_email")
+      .in("id", vetIds);
+    (data || []).forEach((v: any) => {
+      result.vets[v.id] = { name: v.clinic_name || v.name, email: v.contact_email };
+    });
+  }
+  return result;
+};
+
 export const bulkInviteToPromotion = async (params: {
   promotion_id: string;
   recipient_type: "merchant" | "vet";
