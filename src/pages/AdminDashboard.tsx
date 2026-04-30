@@ -444,9 +444,9 @@ const AdminDashboard = () => {
  {/* Logo and Title */}
  <div className="p-4 border-b">
  <div className="flex items-center gap-3">
- <div className="w-10 h-10 rounded-md bg-primary flex items-center justify-center shadow-lg">
- <Shield className="w-5 h-5 text-primary-foreground" />
- </div>
+  <div className="w-10 h-10 rounded-md flex items-center justify-center shadow-lg overflow-hidden">
+  <img src={pawbucksLogo} alt="PawBucks" className="w-full h-full object-contain" />
+  </div>
  <div>
  <h1 className="font-bold text-lg">Admin Dashboard</h1>
  <p className="text-xs text-muted-foreground">PawBucks Platform</p>
