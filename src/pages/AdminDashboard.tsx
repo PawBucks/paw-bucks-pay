@@ -33,6 +33,7 @@ import { ApprovalsTab } from"@/components/admin/ApprovalsTab";
 import { AdminCheckInsTab } from"@/components/admin/AdminCheckInsTab";
 import { CheckInFeedbackTab } from"@/components/admin/CheckInFeedbackTab";
 import { BrandCampaignsTab } from"@/components/admin/BrandCampaignsTab";
+import { PromotionsTab } from"@/components/admin/PromotionsTab";
 import { Button } from"@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/components/ui/card";
 import { ScrollArea } from"@/components/ui/scroll-area";
@@ -165,6 +166,12 @@ const NAV_SECTIONS = [
  icon: Megaphone,
  description:"Manage brand/manufacturer funded PawBucks campaigns",
  },
+  {
+   id:"promotions",
+   label:"Promotions",
+   icon: Gift,
+   description:"Create platform promotions and invite Merchants/Vets to join",
+  },
  ],
  },
  {
@@ -396,6 +403,8 @@ const AdminDashboard = () => {
  return <AdminInvoicingTab />;
  case"brand-campaigns":
  return <BrandCampaignsTab />;
+  case"promotions":
+   return <PromotionsTab />;
  case"receipts":
  return <ReceiptsTab />;
  case"checkins":

@@ -26,6 +26,7 @@ import {
 import { SalesReportGenerator } from"@/components/shared/SalesReportGenerator";
 import { MerchantLoyaltyProgramTab } from"@/components/merchant/MerchantLoyaltyProgramTab";
 import { CheckInDashboard } from"@/components/checkin";
+import { PromotionInvitationsInbox } from"@/components/PromotionInvitationsInbox";
 import {
  Stethoscope,
  Users,
@@ -337,6 +338,10 @@ export default function VetDashboard() {
  <Settings className="w-4 h-4" />
  <span className="hidden sm:inline">Settings</span>
  </TabsTrigger>
+  <TabsTrigger value="promotions" className="flex items-center gap-1">
+   <Sparkles className="w-4 h-4" />
+   <span className="hidden sm:inline">Promotions</span>
+  </TabsTrigger>
  </TabsList>
 
  <TabsContent value="emr">
@@ -409,6 +414,9 @@ export default function VetDashboard() {
  <TabsContent value="checkins">
  <CheckInDashboard entityId={vetInfo.id} entityType="vet" entityName={vetInfo.name} />
  </TabsContent>
+  <TabsContent value="promotions">
+   <PromotionInvitationsInbox recipientType="vet" recipientId={vetInfo.id} />
+  </TabsContent>
  <TabsContent value="settings">
  <Card className="p-6">
  <h3 className="text-lg font-semibold mb-4">Practice Settings</h3>

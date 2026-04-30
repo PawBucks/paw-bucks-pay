@@ -9801,6 +9801,101 @@ export type Database = {
         }
         Relationships: []
       }
+      platform_promotion_invitations: {
+        Row: {
+          created_at: string
+          id: string
+          invited_at: string
+          invited_by: string
+          message: string | null
+          promotion_id: string
+          recipient_id: string
+          recipient_type: string
+          responded_at: string | null
+          status: Database["public"]["Enums"]["platform_promotion_invitation_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          invited_at?: string
+          invited_by: string
+          message?: string | null
+          promotion_id: string
+          recipient_id: string
+          recipient_type: string
+          responded_at?: string | null
+          status?: Database["public"]["Enums"]["platform_promotion_invitation_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          invited_at?: string
+          invited_by?: string
+          message?: string | null
+          promotion_id?: string
+          recipient_id?: string
+          recipient_type?: string
+          responded_at?: string | null
+          status?: Database["public"]["Enums"]["platform_promotion_invitation_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "platform_promotion_invitations_promotion_id_fkey"
+            columns: ["promotion_id"]
+            isOneToOne: false
+            referencedRelation: "platform_promotions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      platform_promotions: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          end_date: string | null
+          id: string
+          perks: string | null
+          recipient_type: Database["public"]["Enums"]["platform_promotion_recipient_type"]
+          reward_amount_usd: number | null
+          start_date: string | null
+          status: Database["public"]["Enums"]["platform_promotion_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          perks?: string | null
+          recipient_type?: Database["public"]["Enums"]["platform_promotion_recipient_type"]
+          reward_amount_usd?: number | null
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["platform_promotion_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          perks?: string | null
+          recipient_type?: Database["public"]["Enums"]["platform_promotion_recipient_type"]
+          reward_amount_usd?: number | null
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["platform_promotion_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       platform_settings: {
         Row: {
           id: string
@@ -14573,6 +14668,19 @@ export type Database = {
         Args: { target_date?: string }
         Returns: undefined
       }
+      bulk_invite_to_promotion: {
+        Args: {
+          p_message?: string
+          p_promotion_id: string
+          p_recipient_ids?: string[]
+          p_recipient_type: string
+          p_scope: string
+        }
+        Returns: {
+          invited: number
+          skipped: number
+        }[]
+      }
       check_welcome_credit_abuse: {
         Args: { p_email: string; p_ip?: string; p_phone?: string }
         Returns: {
@@ -14940,6 +15048,28 @@ export type Database = {
         }
         Returns: Json
       }
+      respond_to_promotion_invitation: {
+        Args: { p_accept: boolean; p_invitation_id: string }
+        Returns: {
+          created_at: string
+          id: string
+          invited_at: string
+          invited_by: string
+          message: string | null
+          promotion_id: string
+          recipient_id: string
+          recipient_type: string
+          responded_at: string | null
+          status: Database["public"]["Enums"]["platform_promotion_invitation_status"]
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "platform_promotion_invitations"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       revoke_pet_digital_id_token: { Args: { p_pet_id: string }; Returns: Json }
       send_pawbucks_expiry_reminders: { Args: never; Returns: number }
       set_system_config: {
@@ -15015,6 +15145,9 @@ export type Database = {
       message_sender_type: "owner" | "vet"
       payment_type: "pay_at_booking" | "pay_at_service" | "both"
       pet_type: "dog" | "cat" | "other"
+      platform_promotion_invitation_status: "pending" | "accepted" | "declined"
+      platform_promotion_recipient_type: "merchant" | "vet" | "both"
+      platform_promotion_status: "draft" | "active" | "archived"
       service_category:
         | "daycare"
         | "boarding"
@@ -15217,6 +15350,9 @@ export const Constants = {
       message_sender_type: ["owner", "vet"],
       payment_type: ["pay_at_booking", "pay_at_service", "both"],
       pet_type: ["dog", "cat", "other"],
+      platform_promotion_invitation_status: ["pending", "accepted", "declined"],
+      platform_promotion_recipient_type: ["merchant", "vet", "both"],
+      platform_promotion_status: ["draft", "active", "archived"],
       service_category: [
         "daycare",
         "boarding",
