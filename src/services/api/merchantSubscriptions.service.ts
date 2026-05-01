@@ -10,6 +10,7 @@ export interface CreateMerchantSubscriptionParams {
  productName: string;
  paymentMethodId: string;
  pawbucksToUse?: number;
+ autoRedeem?: boolean;
  metadata?: Record<string, string>;
 }
 
