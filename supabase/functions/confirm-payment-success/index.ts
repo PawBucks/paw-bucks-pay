@@ -430,7 +430,7 @@ serve(async (req) => {
         await supabaseAdmin.from('pawbucks_activity').insert({
           user_id: userId,
           amount: -walletDeduction,
-          type: 'redemption',
+          type: 'redeem',
           source: 'merchant_payment',
           description: `Payment to ${businessName}`,
           partner_id: merchantId,

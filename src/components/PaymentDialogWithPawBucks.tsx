@@ -34,6 +34,9 @@ const PAWBUCKS_TO_USD = 0.001;
 // Minimum transaction for Pet Fund credits (dynamic, but defaults)
 const PET_FUND_INITIAL_MIN_USD = 40;
 const PET_FUND_MONTHLY_MIN_USD = 20;
+// Server enforces a $75 minimum for legacy Welcome Credit redemption
+// (see public.redeem_welcome_credit RPC). Keep UI in sync.
+const WELCOME_CREDIT_MIN_USD = 75;
 
 type PaymentFormProps = {
  merchantName: string;
@@ -299,8 +302,10 @@ export const PaymentDialogWithPawBucks = ({
 
  const totalAmount = parseFloat(amount) || 0;
 
- // Pet Fund / Welcome credit applicable if merchant accepts PawBucks and meets min transaction
- const petFundMinUsd = petFundMinTransactionUsd || PET_FUND_MONTHLY_MIN_USD;
+ // Pet Fund uses dynamic min; Welcome Credit uses fixed $75 min (server-enforced).
+ const petFundMinUsd = hasPetFund
+   ? (petFundMinTransactionUsd || PET_FUND_MONTHLY_MIN_USD)
+   : WELCOME_CREDIT_MIN_USD;
  const petFundApplicable = (hasPetFund || hasWelcomeCredit) && acceptsPawbucks && totalAmount >= petFundMinUsd;
  const petFundCreditBalance = hasPetFund ? petFundBalance : welcomeCreditBalance;
 

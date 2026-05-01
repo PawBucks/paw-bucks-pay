@@ -336,7 +336,7 @@ serve(async (req) => {
         await supabaseAdmin.from('pawbucks_activity').insert({
           user_id: user.id,
           amount: -actualWalletPawbucks,
-          type: 'redemption',
+          type: 'redeem',
           source: 'merchant_payment',
           description: `Payment to ${merchant.business_name}`,
           partner_id: merchantId,
@@ -376,39 +376,22 @@ serve(async (req) => {
             deductRemaining -= release.amount;
           }
 
-          // Update ledger
-          await supabaseAdmin
+          // Update ledger atomically: decrement available_balance and increment total_used
+          // by the exact amount we deducted (petFundPawbucks).
+          const { data: currentLedger } = await supabaseAdmin
             .from('pet_fund_ledgers')
-            .update({
-              available_balance: Math.max(0, petFundLedger.available_balance - petFundPawbucks),
-              total_used: petFundLedger.available_balance, // Will be corrected below
-            })
-            .eq('user_id', user.id);
-
-          // Correct total_used
-          const { data: updatedLedger } = await supabaseAdmin
-            .from('pet_fund_ledgers')
-            .select('total_used')
-            .eq('user_id', user.id)
+            .select('available_balance, total_used')
+            .eq('id', petFundLedger.id)
             .single();
-          
-          if (updatedLedger) {
-            // Re-read the actual value and add our deduction
-            const { data: ledgerForUpdate } = await supabaseAdmin
+
+          if (currentLedger) {
+            await supabaseAdmin
               .from('pet_fund_ledgers')
-              .select('available_balance, total_used')
-              .eq('id', petFundLedger.id)
-              .single();
-            
-            if (ledgerForUpdate) {
-              await supabaseAdmin
-                .from('pet_fund_ledgers')
-                .update({
-                  available_balance: Math.max(0, petFundLedger.available_balance - petFundPawbucks),
-                  total_used: (ledgerForUpdate.total_used || 0) + petFundPawbucks,
-                })
-                .eq('id', petFundLedger.id);
-            }
+              .update({
+                available_balance: Math.max(0, (currentLedger.available_balance || 0) - petFundPawbucks),
+                total_used: (currentLedger.total_used || 0) + petFundPawbucks,
+              })
+              .eq('id', petFundLedger.id);
           }
 
           logStep("Pet Fund deducted (PawBucks-only)", { amount: petFundPawbucks });

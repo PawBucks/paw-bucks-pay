@@ -100,7 +100,7 @@ serve(async (req) => {
         .from('pawbucks_activity')
         .insert({
           user_id: user.id,
-          type: 'debit',
+          type: 'redeem',
           source: 'analytics_purchase',
           amount: -product.price_pawbucks,
           description: `Purchased ${product.name}`

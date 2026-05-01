@@ -308,7 +308,7 @@ serve(async (req) => {
         // Create locked reward entry (pending status, linked to slice)
         await supabaseClient.from("pawbucks_activity").insert({
           user_id: petData.user_id,
-          type: "credit",
+          type: "earn",
           amount: lockedRewards,
           description: `Rewards for vet visit (${claim.claim_number}) - Pending insurance`,
           source: "insurance_claim",
