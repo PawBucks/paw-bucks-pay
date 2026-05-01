@@ -83,7 +83,7 @@ export const ProtectedRoute = ({
  const [checkDone, setCheckDone] = useState(false);
  const [authorized, setAuthorized] = useState(false);
  const [hasPets, setHasPets] = useState(true);
- const [roleRedirectTo, setRoleRedirectTo] = useState(ROUTES.DASHBOARD);
+ const [roleRedirectTo, setRoleRedirectTo] = useState<string>(ROUTES.DASHBOARD);
  const checkingRef = useRef(false);
 
  const isExemptRoute = skipPetOnboarding || PET_ONBOARDING_EXEMPT_ROUTES.some(
