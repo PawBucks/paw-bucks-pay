@@ -54,6 +54,7 @@ import { toast } from"sonner";
 import { PendingApprovalNotice } from"@/components/PendingApprovalNotice";
 import { SupportTab } from"@/components/support/SupportTab";
 import { PolicyDocumentUpload } from"@/components/merchant/PolicyDocumentUpload";
+import { EditorialPageHeader } from"@/components/shared/EditorialPageHeader";
 
 type VetInfo = {
  id: string;
@@ -172,25 +173,23 @@ export default function VetDashboard() {
  <div className="min-h-screen bg-background">
  <SEO title="Veterinary Portal" description="Manage your veterinary practice" />
  <Header />
- <div className="container max-w-7xl mx-auto px-4 py-6 space-y-6">
- {/* Professional Header */}
- <div className="flex items-center justify-between">
- <div>
- <h1 className="text-2xl font-bold tracking-tight flex items-center gap-3">
- {vetInfo.logo_url ? (
- <img src={vetInfo.logo_url} alt={vetInfo.name} className="w-9 h-9 rounded-lg object-cover border border-border" />
- ) : (
- <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
- <Stethoscope className="w-5 h-5 text-primary" />
- </div>
- )}
- {vetInfo.name}
- </h1>
- <p className="text-sm text-muted-foreground mt-0.5">
- Veterinary Practice Management
- </p>
- </div>
- </div>
+  <div className="container max-w-7xl mx-auto px-4 py-6 md:py-8 space-y-6">
+  <EditorialPageHeader
+    eyebrow="Veterinary Portal"
+    title={
+      <span className="inline-flex items-center gap-3 align-middle">
+        {vetInfo.logo_url ? (
+          <img src={vetInfo.logo_url} alt={vetInfo.name} className="w-10 h-10 md:w-12 md:h-12 rounded-lg object-cover border border-border" />
+        ) : (
+          <span className="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+            <Stethoscope className="w-5 h-5 md:w-6 md:h-6 text-primary" />
+          </span>
+        )}
+        <span>{vetInfo.name}</span>
+      </span>
+    }
+    subtitle="Manage your patients, medical records, prescriptions, and practice growth — all in one calm, focused workspace."
+  />
 
  {/* Pending Approval Notice */}
  {vetInfo.approval_status !=='approved' && (
