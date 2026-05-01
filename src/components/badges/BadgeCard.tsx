@@ -124,7 +124,7 @@ export const BadgeCard = ({ badge, earned, progress, onClick, compact = false }:
  <div className="mt-3">
  <div className="flex justify-between text-xs text-muted-foreground mb-1">
  <span>Progress this {badge.threshold_period}</span>
- <span>${progress?.current_amount?.toFixed(2) ||'0.00'} / {Formatters.currency(badge.threshold_amount)}</span>
+              <span>{Formatters.currency(progress?.current_amount || 0)} / {Formatters.currency(badge.threshold_amount)}</span>
  </div>
  <div className="h-2 bg-muted rounded-full overflow-hidden">
  <motion.div 
