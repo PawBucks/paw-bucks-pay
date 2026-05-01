@@ -790,7 +790,7 @@ serve(async (req) => {
       // Log merchant credit activity
       await supabaseAdmin.from('merchant_pawbucks_activity').insert({
         merchant_id: merchantId,
-        type: 'redeem',
+        type: 'earn',
         amount: actualPawbucksUsed,
         source: 'Customer Redemption',
         customer_user_id: user.id,
