@@ -500,13 +500,13 @@ export function InsuranceClaimSplitter({ vetId }: InsuranceClaimSplitterProps) {
  <div className="flex items-center gap-6">
  <div className="text-right">
  <p className="text-sm text-muted-foreground">Total</p>
- <p className="font-medium">{Formatters.currency(claim.total_amount?)}</p>
+ <p className="font-medium">{Formatters.currency(claim.total_amount ?? 0)}</p>
  </div>
  {claim.covered_amount !== null && (
  <div className="text-right">
  <p className="text-sm text-muted-foreground">Insurance</p>
  <p className="font-medium text-info">
- {Formatters.currency(claim.covered_amount?)}
+ {Formatters.currency(claim.covered_amount ?? 0)}
  </p>
  </div>
  )}
@@ -514,7 +514,7 @@ export function InsuranceClaimSplitter({ vetId }: InsuranceClaimSplitterProps) {
  <div className="text-right">
  <p className="text-sm text-muted-foreground">Owner</p>
  <p className="font-medium text-warning">
- {Formatters.currency(claim.owner_responsibility?)}
+ {Formatters.currency(claim.owner_responsibility ?? 0)}
  </p>
  </div>
  )}
@@ -671,18 +671,18 @@ function ClaimCard({
  <div className="flex items-center gap-6">
  <div className="text-right">
  <p className="text-sm text-muted-foreground">Total</p>
- <p className="font-medium">{Formatters.currency(claim.total_amount?)}</p>
+ <p className="font-medium">{Formatters.currency(claim.total_amount ?? 0)}</p>
  </div>
  {claim.covered_amount !== null && (
  <div className="text-right">
  <p className="text-sm text-muted-foreground">Insurance</p>
- <p className="font-medium text-info">{Formatters.currency(claim.covered_amount?)}</p>
+ <p className="font-medium text-info">{Formatters.currency(claim.covered_amount ?? 0)}</p>
  </div>
  )}
  {claim.owner_responsibility !== null && (
  <div className="text-right">
  <p className="text-sm text-muted-foreground">Owner</p>
- <p className="font-medium text-warning">{Formatters.currency(claim.owner_responsibility?)}</p>
+ <p className="font-medium text-warning">{Formatters.currency(claim.owner_responsibility ?? 0)}</p>
  </div>
  )}
  
@@ -728,7 +728,7 @@ function ClaimCard({
  <p className="text-sm text-warning">
  <strong>Claim:</strong> {claim.claim_number}<br />
  <strong>Patient:</strong> {policy?.pet_profiles?.name}<br />
- <strong>Amount:</strong> {Formatters.currency(claim.total_amount?)}
+ <strong>Amount:</strong> {Formatters.currency(claim.total_amount ?? 0)}
  </p>
  </div>
  

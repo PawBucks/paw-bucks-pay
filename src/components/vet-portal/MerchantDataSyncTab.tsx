@@ -320,7 +320,7 @@ export function MerchantDataSyncTab({ vetId }: MerchantDataSyncTabProps) {
  </Badge>
  </TableCell>
  <TableCell className="text-right font-medium">
- {Formatters.currency(expense.amount?)}
+ {Formatters.currency(expense.amount ?? 0)}
  </TableCell>
  </TableRow>
  ))
