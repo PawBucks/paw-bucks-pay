@@ -173,7 +173,7 @@ serve(async (req) => {
           // Log activity
           await supabaseClient.from("pawbucks_activity").insert({
             user_id: user.id,
-            type: "debit",
+            type: "redeem",
             amount: -pawBucksNeeded,
             description: `Claim gap payment for ${slice.claim?.claim_number || "claim"}`,
             source: "claim_recovery",
@@ -389,7 +389,7 @@ async function releaseLockedRewards(
       // Log the reward release
       await supabaseClient.from("pawbucks_activity").insert({
         user_id: userId,
-        type: "credit",
+        type: "earn",
         amount: rewardsToRelease,
         description: `Rewards released for resolved claim`,
         source: "claim_recovery_reward",
