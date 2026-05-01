@@ -27,6 +27,7 @@ import { SpendingGoals } from"@/components/wallet/SpendingGoals";
 import { CategoryComparison } from"@/components/wallet/CategoryComparison";
 import { Wallet as WalletIcon, TrendingUp, Gift, ArrowUpRight, ArrowDownRight, Coins, Sparkles, PieChart, Calendar, RotateCcw } from"lucide-react";
 import { format } from"date-fns";
+import { Formatters } from"@/utils/formatters";
 import { useQueryClient } from"@tanstack/react-query";
 
 type WalletData = {
@@ -257,7 +258,7 @@ const Wallet = () => {
  <div>
  <p className="text-sm text-muted-foreground">Balance</p>
  {/* Show USD value of PawBucks (1 PawBuck = $0.001) */}
- <p className="text-2xl font-bold">${((pawbucksWallet?.balance || 0) * 0.001).toFixed(2)}</p>
+  <p className="text-2xl font-bold">{Formatters.currency((pawbucksWallet?.balance || 0) * 0.001)}</p>
  </div>
  </div>
  </GradientCard>
@@ -269,7 +270,7 @@ const Wallet = () => {
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Total Spent</p>
- <p className="text-2xl font-bold">${totalSpent.toFixed(2)}</p>
+  <p className="text-2xl font-bold">{Formatters.currency(totalSpent)}</p>
  </div>
  </div>
  </GradientCard>
@@ -281,7 +282,7 @@ const Wallet = () => {
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Points</p>
- <p className="text-2xl font-bold">{pawbucksWallet?.balance || 0}</p>
+  <p className="text-2xl font-bold">{Formatters.number(pawbucksWallet?.balance || 0)}</p>
  </div>
  </div>
  </GradientCard>
@@ -388,11 +389,11 @@ const Wallet = () => {
  </div>
  <div className="text-right">
  <p className={`font-bold ${isRefunded ?'text-destructive line-through' :'text-foreground'}`}>
- -${transaction.amount.toFixed(2)}
+  -{Formatters.currency(transaction.amount)}
  </p>
  {/* rewards_earned stores the correct PawBucks amount (amount * multiplier) */}
  <p className={`text-xs ${isRefunded ?'text-destructive line-through' :'text-accent'}`}>
- +{transaction.rewards_earned} PawBucks
+  +{Formatters.number(transaction.rewards_earned ?? 0)} PawBucks
  </p>
  </div>
  </div>
