@@ -9,7 +9,6 @@ import { Formatters } from"@/utils/formatters";
 import { motion, AnimatePresence } from"framer-motion";
 import type { StorefrontCartItem } from"@/hooks/useStorefrontCart";
 
-import { Formatters } from "@/utils/formatters";
 const PAWBUCKS_TO_USD = 0.001; // 1000 PB = $1
 
 export type StorefrontCheckoutMode ="card" |"pawbucks" |"split";

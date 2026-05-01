@@ -8,7 +8,6 @@ import { StarRating } from"./StarRating";
 import { PromotionalBadge } from"./PromotionalBadge";
 import { useNavigate } from"react-router-dom";
 
-import { Formatters } from "@/utils/formatters";
 interface ProductCardProps {
  item: {
  id: string;

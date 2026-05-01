@@ -9,7 +9,6 @@ import { CartItem } from"@/hooks/useShoppingCart";
 import { Formatters } from"@/utils/formatters";
 import { motion, AnimatePresence } from"framer-motion";
 
-import { Formatters } from "@/utils/formatters";
 const PAWBUCKS_TO_USD = 0.001;
 const MIN_ORDER_USD_FOR_PAWBUCKS = 25; // PawBucks only allowed on orders $25+
 const MAX_PAWBUCKS_COVERAGE_PCT = 0.33; // PawBucks may cover up to 33% of total

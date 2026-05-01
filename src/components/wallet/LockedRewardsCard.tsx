@@ -9,7 +9,6 @@ import { formatDistanceToNow } from"date-fns";
 import { useSharedAccount, getEffectiveWalletUserId } from"@/hooks/useSharedAccount";
 import { motion, AnimatePresence } from"framer-motion";
 
-import { Formatters } from "@/utils/formatters";
 interface LockedItem {
  id: string;
  amount: number;

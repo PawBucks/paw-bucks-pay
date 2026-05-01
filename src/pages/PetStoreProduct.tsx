@@ -25,7 +25,6 @@ import { CartDrawer, type CartCheckoutParams } from"@/components/pet-store/CartD
 import { usePromotionalItems } from"@/hooks/usePromotionalItems";
 import { useShoppingCart } from"@/hooks/useShoppingCart";
 
-import { Formatters } from "@/utils/formatters";
 export default function PetStoreProduct() {
  const { itemId } = useParams<{ itemId: string }>();
  const navigate = useNavigate();
