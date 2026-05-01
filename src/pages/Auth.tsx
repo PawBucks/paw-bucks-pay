@@ -223,9 +223,9 @@ const Auth = () => {
 
  // Redirect already-logged-in users
  useEffect(() => {
- if (user) {
-  redirectBasedOnRole(user.id, undefined, false, roleParam);
- }
+  if (user) {
+   redirectBasedOnRole(user.id, undefined, false);
+  }
  }, [user, redirectBasedOnRole, roleParam]);
 
  const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -445,8 +445,7 @@ const Auth = () => {
  // If they joined via invite, go directly to dashboard
  navigate(ROUTES.DASHBOARD);
  } else {
-  // Honor /auth?role=… deep link so role buttons route to the correct portal.
-  await redirectBasedOnRole(loggedInUser.id, undefined, false, roleParam);
+   await redirectBasedOnRole(loggedInUser.id, undefined, false);
  }
  } else {
  navigate(redirectUrl || ROUTES.DASHBOARD);
@@ -652,7 +651,7 @@ const Auth = () => {
  const { data: sessionData } = await supabase.auth.getSession();
  const loggedInUser = sessionData?.session?.user;
  if (loggedInUser) {
-  await redirectBasedOnRole(loggedInUser.id, undefined, false, roleParam);
+   await redirectBasedOnRole(loggedInUser.id, undefined, false);
  } else {
  navigate(ROUTES.DASHBOARD);
  }
