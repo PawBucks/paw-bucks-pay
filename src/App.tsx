@@ -180,7 +180,7 @@ const AppRoutes = () => {
  <Route path="/terms" element={<PageTransition><Terms /></PageTransition>} />
 
  {/* Authenticated pet owner routes */}
- <Route path="/dashboard" element={<ProtectedRoute><PageTransition><Dashboard /></PageTransition></ProtectedRoute>} />
+  <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['pet_owner']}><PageTransition><Dashboard /></PageTransition></ProtectedRoute>} />
  <Route path="/create-pet-profile" element={<ProtectedRoute><PageTransition><CreatePetProfile /></PageTransition></ProtectedRoute>} />
  <Route
  path="/discover"

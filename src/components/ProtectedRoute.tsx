@@ -1,9 +1,14 @@
 import { ReactNode, useEffect, useState, useRef } from'react';
-import { useNavigate, useLocation } from'react-router-dom';
+import { Navigate, useNavigate, useLocation } from'react-router-dom';
 import { useAuth } from'@/hooks/useAuth';
 import { PageLoader } from'@/components/PageLoader';
 import { ROUTES } from'@/lib/constants';
-import { getUserAccessInfo, type UserAccessInfo } from'@/lib/userAccessCache';
+import {
+ getUserAccessInfo,
+ resolveAuthPersona,
+ DASHBOARD_ROUTE_BY_PERSONA,
+ type UserAccessInfo,
+} from'@/lib/userAccessCache';
 
 type AllowedRole ='admin' |'superadmin' |'merchant' |'vet' |'pet_owner' |'brand';
 
@@ -78,6 +83,7 @@ export const ProtectedRoute = ({
  const [checkDone, setCheckDone] = useState(false);
  const [authorized, setAuthorized] = useState(false);
  const [hasPets, setHasPets] = useState(true);
+ const [roleRedirectTo, setRoleRedirectTo] = useState<string>(ROUTES.AUTH);
  const checkingRef = useRef(false);
 
  const isExemptRoute = skipPetOnboarding || PET_ONBOARDING_EXEMPT_ROUTES.some(
@@ -111,6 +117,9 @@ export const ProtectedRoute = ({
  const roleOk = allowedRoles ? checkRoleAccess(info, allowedRoles) : true;
  setAuthorized(roleOk);
 
+  const persona = resolveAuthPersona(info);
+  setRoleRedirectTo(persona ? DASHBOARD_ROUTE_BY_PERSONA[persona] : ROUTES.AUTH);
+
  // Pet onboarding check
  if (isExemptRoute) {
  setHasPets(true);
@@ -122,6 +131,7 @@ export const ProtectedRoute = ({
  console.error('Access check failed:', err);
  setAuthorized(!allowedRoles); // fail open for non-role routes
  setHasPets(true);
+ setRoleRedirectTo(ROUTES.AUTH);
  })
  .finally(() => {
  setCheckDone(true);
@@ -138,8 +148,7 @@ export const ProtectedRoute = ({
  }
 
  if (allowedRoles && !authorized) {
- navigate(ROUTES.DASHBOARD, { replace: true });
- return null;
+  return <Navigate to={roleRedirectTo} replace />;
  }
 
  if (!hasPets && !isExemptRoute) {
