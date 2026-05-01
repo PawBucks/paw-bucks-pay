@@ -721,6 +721,15 @@ export const PaymentDialogWithPawBucks = ({
  </div>
  )}
 
+ {/* Wallet redemption error banner */}
+ {activeError && (
+   <Alert variant="destructive" role="alert" aria-live="polite">
+     <AlertCircle className="h-4 w-4" />
+     <AlertTitle>{activeError.title}</AlertTitle>
+     <AlertDescription>{activeError.message}</AlertDescription>
+   </Alert>
+ )}
+
  <div className="flex gap-3">
  <Button type="button" variant="outline" onClick={handleCancel} className="flex-1" disabled={isLoading}>
  Cancel
