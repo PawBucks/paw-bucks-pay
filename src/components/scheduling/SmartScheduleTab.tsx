@@ -375,7 +375,7 @@ export function SmartScheduleTab({ merchantId }: Props) {
  <RouteIcon className="w-4 h-4" />
  Total Distance
  </div>
- <p className="text-xl font-bold">{routePlan.total_distance_miles?.toFixed(1) ||"—"} mi</p>
+                <p className="text-xl font-bold">{routePlan.total_distance_miles != null ? Formatters.decimal(routePlan.total_distance_miles, 1) :"—"} mi</p>
  </Card>
  <Card className="p-4">
  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
