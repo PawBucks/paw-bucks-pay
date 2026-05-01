@@ -191,7 +191,7 @@ export function InvoiceEditor({
  client_address: invoice?.client_address ||"",
  title: invoice?.title ||"",
  issue_date: invoice?.issue_date ? parseISO(invoice.issue_date) : new Date(),
- due_date: invoice?.due_date ? parseISO(invoice.due_date) : addDays(new Date(), settings?.default_payment_terms || 30),
+ due_date: invoice?.due_date ? parseISO(invoice.due_date) : addDays(new Date(), settings?.default_payment_terms ?? 30),
  payment_terms: invoice?.payment_terms ?? settings?.default_payment_terms ?? 30,
  discount_type: (invoice?.discount_type as"percentage" |"flat") || undefined,
  discount_value: invoice?.discount_value || 0,
