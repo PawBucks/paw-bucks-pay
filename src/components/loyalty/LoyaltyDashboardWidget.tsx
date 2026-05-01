@@ -104,7 +104,7 @@ export const LoyaltyDashboardWidget = ({ userId }: LoyaltyDashboardWidgetProps) 
  <div className="text-center">
  <div className="flex items-center justify-center gap-1 text-primary mb-1">
  <Gift className="w-4 h-4" />
- <span className="font-bold">${summary?.totalCredits?.toFixed(0) || 0}</span>
+                <span className="font-bold">{Formatters.currency(summary?.totalCredits || 0)}</span>
  </div>
  <p className="text-[10px] text-muted-foreground">Credits Available</p>
  </div>
