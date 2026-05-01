@@ -334,17 +334,27 @@ const MerchantDirectory = () => {
  className="min-h-screen bg-background pb-24 md:pb-12 overflow-auto"
  >
  {/* ── Hero + Search ── */}
- <div className="bg-gradient-to-b from-primary/8 via-primary/4 to-transparent border-b border-border/40">
- <div className="container mx-auto px-4 pt-6 pb-5 max-w-4xl">
- <div className="flex items-center gap-3 mb-1">
- <MapPin className="w-6 h-6 text-primary" />
- <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
- Find Pet Services
- </h1>
- </div>
- <p className="text-sm text-muted-foreground mb-4 ml-9">
- {merchants.length} merchants · Reviews · Rewards
- </p>
+      <div className="relative bg-gradient-to-b from-primary/[0.06] via-primary/[0.02] to-transparent border-b border-border/40 overflow-hidden">
+       {/* Editorial radial accent */}
+       <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -top-32 -right-24 w-[420px] h-[420px] rounded-full opacity-60"
+        style={{ background:"radial-gradient(circle, hsl(var(--primary) / 0.18) 0%, transparent 70%)" }}
+       />
+       <div className="container mx-auto px-4 pt-10 pb-6 max-w-4xl relative">
+        <div className="text-[0.7rem] font-medium tracking-[0.18em] uppercase text-primary mb-3 flex items-center gap-2">
+         <MapPin className="w-3.5 h-3.5" />
+         The Directory
+        </div>
+        <h1
+         className="font-serif font-black leading-[1.05] tracking-[-0.025em] text-foreground mb-4"
+         style={{ fontFamily:'"Playfair Display", Georgia, serif', fontSize:"clamp(2rem, 5vw, 3.25rem)" }}
+        >
+         Find pet services <em className="italic text-primary font-black">worth loving</em>.
+        </h1>
+        <p className="text-base text-muted-foreground mb-6 max-w-xl leading-relaxed">
+         {merchants.length} hand-picked merchants. Real reviews. Rewards on every visit.
+        </p>
 
  {/* Search Bar */}
  <div className="relative max-w-2xl ml-0">
