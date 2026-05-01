@@ -278,7 +278,23 @@ const MerchantProfile = memo(() => {
  </div>
 
  {/* ═══════════════ HERO SECTION ═══════════════ */}
- <div className="px-4 pt-2 pb-4">
+  <div className="relative px-4 pt-2 pb-6 overflow-hidden">
+  {/* Editorial radial accent */}
+  <div
+   aria-hidden
+   className="pointer-events-none absolute -top-24 -right-16 w-[420px] h-[420px] rounded-full opacity-60"
+   style={{
+    background:
+     "radial-gradient(closest-side, hsl(var(--primary) / 0.18), transparent 70%)",
+   }}
+  />
+  <div className="relative">
+  {/* Eyebrow */}
+  <div className="text-[0.7rem] font-medium tracking-[0.18em] uppercase text-primary mb-3 flex items-center gap-2">
+   <Store className="w-3.5 h-3.5" />
+   The Profile
+  </div>
+
  {/* Logo + Name Row */}
  <div className="flex gap-4 items-start">
  {/* Logo */}
@@ -297,7 +313,15 @@ const MerchantProfile = memo(() => {
  {/* Name & Meta */}
  <div className="flex-1 min-w-0 pt-1">
  <div className="flex items-center gap-2 flex-wrap">
- <h1 className="text-2xl font-bold tracking-tight leading-tight">{merchant.business_name}</h1>
+  <h1
+   className="font-black leading-[1.05] tracking-[-0.025em] text-foreground"
+   style={{
+    fontFamily: '"Playfair Display", Georgia, serif',
+    fontSize: "clamp(1.75rem, 4.5vw, 2.5rem)",
+   }}
+  >
+   {merchant.business_name}
+  </h1>
  {hasVerifiedPro && (
  <BadgeCheck className="w-6 h-6 text-info flex-shrink-0" />
  )}
@@ -393,6 +417,7 @@ const MerchantProfile = memo(() => {
  </Link>
  </Button>
  )}
+  </div>
  </div>
 
  <Separator />
