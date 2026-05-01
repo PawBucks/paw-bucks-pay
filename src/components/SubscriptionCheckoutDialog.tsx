@@ -386,6 +386,15 @@ const CheckoutForm = ({
  </span>
  </div>
 
+         {autoRedeemEnabled && pawbucksToUse > 0 && (
+          <div className="flex items-center gap-2 text-xs text-primary bg-primary/10 px-3 py-2 rounded-md border border-primary/20">
+           <Sparkles className="w-3.5 h-3.5 flex-shrink-0" />
+           <span>
+            <span className="font-semibold">Auto-Redeem active</span> — your saved preference applied {pawbucksToUse.toLocaleString()} PB. Adjust the slider to override.
+           </span>
+          </div>
+         )}
+
  {/* Slider instruction hint */}
  {pawbucksToUse === 0 && (
  <div className="flex items-center gap-2 text-xs text-primary bg-primary/10 px-3 py-2 rounded-md animate-pulse">
