@@ -331,103 +331,111 @@ const Storefront = memo(() => {
  description={`Browse and purchase products from ${merchantName ||"this store"}. Earn PawBucks on every purchase!`}
  />
 
- {/* Hero Header */}
- <div className="relative overflow-hidden border-b">
- <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
- <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent" />
- 
- <div className="container relative py-8 md:py-12">
- {merchantId && (
- <Link to={`/merchant/${merchantId}`}>
- <Button variant="ghost" size="sm" className="mb-6 -ml-2 hover:bg-primary/10 group">
- <ArrowLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform" />
- Back to Profile
- </Button>
- </Link>
- )}
- 
- <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8">
- {/* Left: Store Info */}
- <div className="flex flex-col sm:flex-row gap-6 items-start">
- <Avatar className="h-24 w-24 rounded-md border-4 border-background shadow-xl ring-2 ring-primary/20">
- <AvatarImage src={merchantLogo || undefined} alt={merchantName} className="object-cover" />
- <AvatarFallback className="rounded-md bg-gradient-to-br from-primary to-primary/70 text-primary-foreground text-3xl font-bold">
- {merchantName?.charAt(0) || <Store className="h-10 w-10" />}
- </AvatarFallback>
- </Avatar>
+ {/* Editorial Hero Header */}
+ <div className="relative bg-gradient-to-b from-primary/[0.06] via-primary/[0.02] to-transparent border-b border-border/40 overflow-hidden">
+  <div
+   aria-hidden="true"
+   className="pointer-events-none absolute -top-32 -right-24 w-[420px] h-[420px] rounded-full opacity-60"
+   style={{ background: "radial-gradient(circle, hsl(var(--primary) / 0.18) 0%, transparent 70%)" }}
+  />
+  <div className="container relative mx-auto px-4 pt-10 pb-8 max-w-4xl">
+   {merchantId && (
+    <Link to={`/merchant/${merchantId}`}>
+     <Button variant="ghost" size="sm" className="mb-6 -ml-2 hover:bg-primary/10 group">
+      <ArrowLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform" />
+      Back to Profile
+     </Button>
+    </Link>
+   )}
 
- <div className="space-y-3">
- <div>
- <div className="flex items-center gap-3 flex-wrap">
- <h1 className="text-3xl md:text-4xl font-bold text-foreground tracking-tight">
- {merchantName ||"Store"}
- </h1>
- {merchantBusinessType && (
- <Badge variant="secondary" className="capitalize">{merchantBusinessType.replace(/_/g,'')}</Badge>
- )}
- {merchantIdForProducts && (
- <Founding50Badge entityType="merchant" entityId={merchantIdForProducts} size="md" />
- )}
- </div>
- <p className="text-muted-foreground mt-1">Official Storefront</p>
- </div>
+   {/* Eyebrow */}
+   <div className="text-[0.7rem] font-medium tracking-[0.18em] uppercase text-primary mb-3 flex items-center gap-2">
+    <Store className="w-3.5 h-3.5" />
+    The Storefront
+   </div>
 
- {merchantDescription && (
- <p className="text-muted-foreground max-w-xl leading-relaxed">{merchantDescription}</p>
- )}
+   <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8">
+    {/* Left: Store Info */}
+    <div className="flex flex-col sm:flex-row gap-6 items-start flex-1 min-w-0">
+     <Avatar className="h-24 w-24 rounded-md border-4 border-background shadow-xl ring-2 ring-primary/20 shrink-0">
+      <AvatarImage src={merchantLogo || undefined} alt={merchantName} className="object-cover" />
+      <AvatarFallback className="rounded-md bg-gradient-to-br from-primary to-primary/70 text-primary-foreground text-3xl font-bold">
+       {merchantName?.charAt(0) || <Store className="h-10 w-10" />}
+      </AvatarFallback>
+     </Avatar>
 
- <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
- {merchantAddress && (
- <div className="flex items-center gap-1.5">
- <MapPin className="h-4 w-4 text-primary" />
- <span className="truncate max-w-[200px]">{merchantAddress}</span>
- </div>
- )}
- <div className="flex items-center gap-1.5">
- <Clock className="h-4 w-4 text-primary" />
- <span>Usually responds quickly</span>
- </div>
- </div>
+     <div className="space-y-3 min-w-0">
+      <div>
+       <h1
+        className="font-serif font-black leading-[1.05] tracking-[-0.025em] text-foreground mb-2"
+        style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: "clamp(1.85rem, 4.5vw, 2.75rem)" }}
+       >
+        {merchantName || "Store"}
+       </h1>
+       <div className="flex items-center gap-2 flex-wrap">
+        {merchantBusinessType && (
+         <Badge variant="secondary" className="capitalize">{merchantBusinessType.replace(/_/g, ' ')}</Badge>
+        )}
+        {merchantIdForProducts && (
+         <Founding50Badge entityType="merchant" entityId={merchantIdForProducts} size="md" />
+        )}
+        <span className="text-xs text-muted-foreground">Official Storefront</span>
+       </div>
+      </div>
 
- {merchantId && (
- <AskQuestionButton merchantId={merchantId} merchantName={merchantName ||"Store"} />
- )}
- </div>
- </div>
+      {merchantDescription && (
+       <p className="text-base text-muted-foreground max-w-xl leading-relaxed">{merchantDescription}</p>
+      )}
 
- {/* Right: Rewards & Trust + Cart */}
- <div className="flex flex-col gap-4 sm:items-end">
- {/* Cart Icon */}
- {user && (
- <CartIcon itemCount={itemCount} onClick={() => setCartOpen(true)} />
- )}
+      <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+       {merchantAddress && (
+        <div className="flex items-center gap-1.5">
+         <MapPin className="h-4 w-4 text-primary" />
+         <span className="truncate max-w-[220px]">{merchantAddress}</span>
+        </div>
+       )}
+       <div className="flex items-center gap-1.5">
+        <Clock className="h-4 w-4 text-primary" />
+        <span>Usually responds quickly</span>
+       </div>
+      </div>
 
- {/* Rewards Badge */}
- <div className="inline-flex items-center gap-3 px-5 py-3 rounded-md bg-gradient-to-r from-warning/15 to-warning/15 border border-warning/30">
- <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-warning to-warning flex items-center justify-center shadow-lg">
- <Sparkles className="h-5 w-5 text-white" />
- </div>
- <div>
- <p className="text-sm font-medium text-foreground">Earn Rewards</p>
- <p className="text-lg font-bold text-warning">Up to {cashbackRate * 3}x PawBucks</p>
- </div>
- </div>
+      {merchantId && (
+       <AskQuestionButton merchantId={merchantId} merchantName={merchantName || "Store"} />
+      )}
+     </div>
+    </div>
 
- {/* Trust Indicators */}
- <div className="flex flex-wrap gap-3">
- <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-success/10 text-success text-sm">
- <Shield className="h-4 w-4" /> Secure
- </div>
- <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-info/10 text-info text-sm">
- <CreditCard className="h-4 w-4" /> Stripe
- </div>
- <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-warning/10 text-warning text-sm">
- <Star className="h-4 w-4" /> Verified
- </div>
- </div>
- </div>
- </div>
- </div>
+    {/* Right: Rewards & Trust + Cart */}
+    <div className="flex flex-col gap-4 sm:items-end">
+     {user && (
+      <CartIcon itemCount={itemCount} onClick={() => setCartOpen(true)} />
+     )}
+
+     <div className="inline-flex items-center gap-3 px-5 py-3 rounded-md bg-gradient-to-r from-warning/15 to-warning/15 border border-warning/30">
+      <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-warning to-warning flex items-center justify-center shadow-lg">
+       <Sparkles className="h-5 w-5 text-white" />
+      </div>
+      <div>
+       <p className="text-sm font-medium text-foreground">Earn Rewards</p>
+       <p className="text-lg font-bold text-warning">Up to {cashbackRate * 3}x PawBucks</p>
+      </div>
+     </div>
+
+     <div className="flex flex-wrap gap-3">
+      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-success/10 text-success text-sm">
+       <Shield className="h-4 w-4" /> Secure
+      </div>
+      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-info/10 text-info text-sm">
+       <CreditCard className="h-4 w-4" /> Stripe
+      </div>
+      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-warning/10 text-warning text-sm">
+       <Star className="h-4 w-4" /> Verified
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
  </div>
 
  {/* Products Section */}
