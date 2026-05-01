@@ -32,6 +32,11 @@ const Auth = () => {
  const roleParam = searchParams.get("role") as"pet_owner" |"merchant" |"vet" | null;
  const { user } = useAuth();
  const [isLoading, setIsLoading] = useState(false);
+  // Guard against duplicate redirects: handleSignIn AND the user-watching
+  // useEffect can both fire concurrently after onAuthStateChange. Whichever
+  // wins races against the other and a stale profile fetch could send a
+  // merchant to /dashboard. Once we kick off a redirect, lock it in.
+  const redirectInFlight = useRef(false);
  // Map vet role to merchant for database storage, but track original role for redirect
  const [userType, setUserType] = useState<"pet_owner" |"merchant">(
  roleParam ==="vet" ?"merchant" : (roleParam ||"pet_owner")
