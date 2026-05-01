@@ -499,6 +499,84 @@ serve(async (req) => {
     let actualPawbucksUsed = 0;
     let pawbucksDiscountCents = 0;
     let stripeChargeAmount = amount;
+    let autoRedeemApplied = false;
+
+    // === AUTO-REDEEM FALLBACK ===
+    // If the client did not pre-compute pawbucksToUse and the user has auto-redeem on,
+    // compute the redemption amount server-side from their saved preferences.
+    if ((!pawbucksToUse || pawbucksToUse <= 0) && autoRedeem) {
+      const { data: arProfile } = await supabaseAdmin
+        .from('profiles')
+        .select('auto_redeem_mode, auto_redeem_min_coverage_pct, auto_redeem_max_apply_pct')
+        .eq('id', user.id)
+        .single();
+
+      const arMode = (arProfile?.auto_redeem_mode as string) || 'off';
+      const minCoveragePct = arProfile?.auto_redeem_min_coverage_pct ?? 20;
+      const maxApplyPct = arProfile?.auto_redeem_max_apply_pct ?? 50;
+
+      logStep("Auto-redeem evaluation (merchant subscription)", { arMode, minCoveragePct, maxApplyPct });
+
+      // Merchant subscriptions are recurring, so all four "on" modes apply
+      // (off | subscriptions_only | smart | always).
+      if (arMode === 'subscriptions_only' || arMode === 'always' || arMode === 'smart') {
+        // Confirm merchant accepts PawBucks
+        const { data: merchantCheck } = await supabaseAdmin
+          .from('merchants')
+          .select('accepts_pawbucks')
+          .eq('id', merchantId)
+          .single();
+
+        if (merchantCheck?.accepts_pawbucks) {
+          const { data: wallet } = await supabaseAdmin
+            .from('pawbucks_wallet')
+            .select('balance')
+            .eq('user_id', user.id)
+            .single();
+
+          const availablePB = wallet?.balance || 0;
+          const priceUsd = amount / 100;
+
+          if (availablePB > 0 && priceUsd > 0) {
+            const maxPbBySubFloor = Math.max(
+              0,
+              Math.floor((amount - MINIMUM_STRIPE_CENTS) / 100 / PAWBUCKS_TO_USD),
+            );
+            let proposedPb = 0;
+
+            if (arMode === 'always' || arMode === 'subscriptions_only') {
+              proposedPb = Math.min(availablePB, maxPbBySubFloor);
+            } else if (arMode === 'smart') {
+              const availableUsd = availablePB * PAWBUCKS_TO_USD;
+              const coveragePct = (availableUsd / priceUsd) * 100;
+              if (coveragePct >= minCoveragePct) {
+                const maxUsd = priceUsd * (maxApplyPct / 100);
+                proposedPb = Math.min(
+                  availablePB,
+                  Math.floor(maxUsd / PAWBUCKS_TO_USD),
+                  maxPbBySubFloor,
+                );
+              }
+            }
+
+            if (proposedPb > 0) {
+              pawbucksToUse = proposedPb;
+              autoRedeemApplied = true;
+              logStep("Auto-redeem applied to merchant subscription", {
+                pawbucksToUse,
+                arMode,
+                availablePB,
+                priceUsd,
+              });
+            } else {
+              logStep("Auto-redeem skipped (proposed amount = 0)", { arMode, availablePB, priceUsd });
+            }
+          }
+        } else {
+          logStep("Auto-redeem skipped: merchant does not accept PawBucks");
+        }
+      }
+    }
 
     if (pawbucksToUse && pawbucksToUse > 0) {
       // Validate user has sufficient balance
