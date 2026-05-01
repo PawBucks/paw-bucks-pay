@@ -2,6 +2,8 @@ import { useState, useEffect } from"react";
 import { useAuth } from"@/hooks/useAuth";
 import { merchantSubscriptionsService } from"@/services/api/merchantSubscriptions.service";
 import { getStripeForConnectedAccount } from"@/lib/stripe";
+import { supabase } from"@/integrations/supabase/client";
+import { useQuery } from"@tanstack/react-query";
 import {
  Dialog,
  DialogContent,
@@ -88,6 +90,27 @@ const CheckoutForm = ({
  isLoading: loadingBalance 
  } = useSpendablePawBucks(user?.id);
 
+ // Read user's auto-redeem preference so we honor it on merchant subscriptions.
+ const { data: autoRedeemPref } = useQuery({
+  queryKey: ["auto-redeem-preference-merchant-sub", user?.id],
+  queryFn: async () => {
+   if (!user?.id) return { mode:"off", minCoverage: 20, maxApply: 50 };
+   const { data } = await supabase
+    .from("profiles")
+    .select("auto_redeem_mode, auto_redeem_min_coverage_pct, auto_redeem_max_apply_pct")
+    .eq("id", user.id)
+    .single();
+   return {
+    mode: (data?.auto_redeem_mode as string) ||"off",
+    minCoverage: data?.auto_redeem_min_coverage_pct ?? 20,
+    maxApply: data?.auto_redeem_max_apply_pct ?? 50,
+   };
+  },
+  staleTime: 1000 * 60 * 5,
+  enabled: !!user?.id,
+ });
+ const autoRedeemEnabled = !!autoRedeemPref && autoRedeemPref.mode !=="off";
+
  // Reset slider when dialog is mounted
  useEffect(() => {
  setPawbucksToUse(0);
@@ -124,6 +147,34 @@ const CheckoutForm = ({
  
  const stripeAmount = Math.max(MINIMUM_STRIPE_AMOUNT, priceAmount - pawbucksUsdValue);
  const cashbackPawBucks = stripeAmount > 0 ? Math.round(stripeAmount * cashbackRate) : 0;
+
+  // Pre-fill the slider based on user's auto-redeem preference (one-shot, when balance loads).
+  useEffect(() => {
+   if (loadingBalance) return;
+   if (!autoRedeemEnabled) return;
+   if (!merchantAcceptsPawBucks) return;
+   if (pawbucksToUse > 0) return; // user already adjusted
+   if (maxPawBucks <= 0 || pawbucksBalance <= 0) return;
+
+   const mode = autoRedeemPref!.mode;
+   let proposed = 0;
+   if (mode ==="always" || mode ==="subscriptions_only") {
+    proposed = Math.min(pawbucksBalance, maxPawBucks);
+   } else if (mode ==="smart") {
+    const availableUsd = pawbucksBalance * PAWBUCKS_TO_USD;
+    const coveragePct = (availableUsd / priceAmount) * 100;
+    if (coveragePct >= autoRedeemPref!.minCoverage) {
+     const maxUsd = priceAmount * (autoRedeemPref!.maxApply / 100);
+     proposed = Math.min(
+      pawbucksBalance,
+      Math.floor(maxUsd / PAWBUCKS_TO_USD),
+      maxPawBucks,
+     );
+    }
+   }
+   if (proposed > 0) setPawbucksToUse(proposed);
+   // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loadingBalance, autoRedeemEnabled, merchantAcceptsPawBucks, maxPawBucks, pawbucksBalance]);
 
  const formatInterval = (interval: string, count: number) => {
  const labels: Record<string, [string, string]> = {
@@ -181,6 +232,7 @@ const CheckoutForm = ({
  productName: plan.name,
  paymentMethodId: paymentMethod.id,
  pawbucksToUse: pawbucksToUse > 0 ? pawbucksToUse : undefined,
+    autoRedeem: autoRedeemEnabled,
  });
 
  if (!result.success) {
