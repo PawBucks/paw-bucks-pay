@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from"react";
+import { useState, useEffect, useCallback, useRef } from"react";
 import { useNavigate, useSearchParams } from"react-router-dom";
 import { supabase } from"@/integrations/supabase/client";
 import { SEO } from"@/components/SEO";
@@ -16,6 +16,10 @@ import { useAuth } from"@/hooks/useAuth";
 import { signUpSchema, signInSchema } from"@/lib/validation";
 import { ROUTES } from"@/lib/constants";
 import { buildAppUrl } from"@/lib/url";
+import {
+  clearUserAccessCache,
+  resolvePostLoginRoute,
+} from"@/lib/userAccessCache";
 import { Alert, AlertDescription } from"@/components/ui/alert";
 import { BiometricLoginButton } from"@/components/BiometricLoginButton";
 import { BiometricEnrollPrompt } from"@/components/BiometricEnrollPrompt";
@@ -28,6 +32,11 @@ const Auth = () => {
  const roleParam = searchParams.get("role") as"pet_owner" |"merchant" |"vet" | null;
  const { user } = useAuth();
  const [isLoading, setIsLoading] = useState(false);
+  // Guard against duplicate redirects: handleSignIn AND the user-watching
+  // useEffect can both fire concurrently after onAuthStateChange. Whichever
+  // wins races against the other and a stale profile fetch could send a
+  // merchant to /dashboard. Once we kick off a redirect, lock it in.
+  const redirectInFlight = useRef(false);
  // Map vet role to merchant for database storage, but track original role for redirect
  const [userType, setUserType] = useState<"pet_owner" |"merchant">(
  roleParam ==="vet" ?"merchant" : (roleParam ||"pet_owner")
@@ -142,20 +151,13 @@ const Auth = () => {
     isVetSignup?: boolean,
     roleHint?:"pet_owner" |"merchant" |"vet" | null,
  ) => {
+    // Single-flight guard — ignore concurrent calls.
+    if (redirectInFlight.current) return;
+    redirectInFlight.current = true;
+    try {
  // If there's a redirect URL specified, use it (e.g., returning to invoice payment)
  if (redirectUrl) {
  navigate(redirectUrl);
- return;
- }
-
- // Check if user is admin first
- const { data: isAdmin } = await supabase.rpc('has_role', {
- _user_id: userId,
- _role:'admin'
- });
-
- if (isAdmin) {
- navigate(ROUTES.ADMIN);
  return;
  }
 
@@ -222,38 +224,37 @@ const Auth = () => {
  return;
  }
 
- // Otherwise, fetch the user's profile and roles to determine their type
- const [profileResult, rolesResult] = await Promise.all([
- supabase.from("profiles").select("user_type").eq("id", userId).single(),
- supabase.from("user_roles").select("role").eq("user_id", userId).in("role", ["admin","superadmin"]).limit(1),
- ]);
+      // AUTHORITATIVE persona resolution via the unified access-info RPC.
+      // We invalidate the cache first so a freshly signed-in user always
+      // gets fresh role/type/capability data — never a stale pet-owner
+      // entry from a prior session.
+      clearUserAccessCache(userId);
+      try {
+        const route = await resolvePostLoginRoute(userId);
 
- const profile = profileResult.data;
- const hasAdminRole = rolesResult.data && rolesResult.data.length > 0;
+        // Merchants without a merchants row need to finish onboarding first.
+        if (route === ROUTES.MERCHANT_DASHBOARD) {
+          const { data: merchantData } = await supabase
+            .from("merchants")
+            .select("id")
+            .eq("user_id", userId)
+            .maybeSingle();
+          navigate(merchantData ? ROUTES.MERCHANT_DASHBOARD :"/merchant-onboarding");
+          return;
+        }
 
- // Admin/SuperAdmin users go straight to admin dashboard
- if (hasAdminRole || profile?.user_type ==="admin") {
- navigate(ROUTES.ADMIN);
- } else if (profile?.user_type ==="brand") {
- // Brand users always go to brand dashboard
- navigate("/brand-dashboard");
- } else if (profile?.user_type ==="merchant") {
- // Check if they have a merchant record
- const { data: merchantData } = await supabase
- .from("merchants")
- .select("id")
- .eq("user_id", userId)
- .maybeSingle();
-
- if (merchantData) {
- navigate(ROUTES.MERCHANT_DASHBOARD);
- } else {
- navigate("/merchant-onboarding");
- }
- } else {
- navigate(ROUTES.DASHBOARD);
- }
- }, [navigate, redirectUrl, inviteToken]);
+        navigate(route);
+      } catch (err) {
+        console.error("Post-login route resolution failed:", err);
+        // FAIL SAFE: do NOT silently send merchants/admins to /dashboard.
+        // Stay on /auth so a refresh re-runs the resolver with a clean cache.
+        toast.error("Could not load your account. Please try again.");
+      }
+    } finally {
+      // Release the lock on the next tick so navigation has time to commit.
+      setTimeout(() => { redirectInFlight.current = false; }, 0);
+    }
+  }, [navigate, redirectUrl, inviteToken]);
 
  // Redirect already-logged-in users
  useEffect(() => {

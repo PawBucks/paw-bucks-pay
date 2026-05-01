@@ -3,6 +3,24 @@ import { useNavigate, useSearchParams } from"react-router-dom";
 import { supabase } from"@/integrations/supabase/client";
 import { Card, CardContent } from"@/components/ui/card";
 import { toast } from"sonner";
+import {
+  clearUserAccessCache,
+  resolvePostLoginRoute,
+} from"@/lib/userAccessCache";
+
+/**
+ * Resolve the persona-correct landing route for a freshly authenticated user.
+ * Falls back to /dashboard ONLY if the resolver throws (network failure).
+ */
+const resolveLandingRoute = async (userId: string): Promise<string> => {
+  try {
+    clearUserAccessCache(userId);
+    return await resolvePostLoginRoute(userId);
+  } catch (err) {
+    console.error("AuthCallback: persona resolution failed, defaulting to /dashboard", err);
+    return"/dashboard";
+  }
+};
 
 /**
  * AuthCallback handles all Supabase authentication redirects:
@@ -75,9 +93,10 @@ const AuthCallback = () => {
  return;
  }
 
- // Regular email confirmation - redirect to dashboard
- toast.success("Email confirmed! Welcome to PawBucks.");
- navigate("/dashboard", { replace: true });
+  // Regular email confirmation - redirect to persona-specific dashboard
+  toast.success("Email confirmed! Welcome to PawBucks.");
+  const landing = await resolveLandingRoute(data.session.user.id);
+  navigate(landing, { replace: true });
  return;
  }
  }
@@ -108,8 +127,9 @@ const AuthCallback = () => {
  return;
  }
 
- toast.success("Email confirmed! Welcome to PawBucks.");
- navigate("/dashboard", { replace: true });
+  toast.success("Email confirmed! Welcome to PawBucks.");
+  const landing = await resolveLandingRoute(data.session.user.id);
+  navigate(landing, { replace: true });
  return;
  }
  }
@@ -136,15 +156,19 @@ const AuthCallback = () => {
  return;
  }
 
- toast.success("Welcome to PawBucks!");
- navigate("/dashboard", { replace: true });
+  toast.success("Welcome to PawBucks!");
+  const { data: sess } = await supabase.auth.getSession();
+  const uid = sess?.session?.user?.id;
+  const landing = uid ? await resolveLandingRoute(uid) :"/dashboard";
+  navigate(landing, { replace: true });
  return;
  }
 
  // No valid auth parameters found - check for existing session
  const { data: { session } } = await supabase.auth.getSession();
  if (session) {
- navigate("/dashboard", { replace: true });
+  const landing = await resolveLandingRoute(session.user.id);
+  navigate(landing, { replace: true });
  return;
  }
 
