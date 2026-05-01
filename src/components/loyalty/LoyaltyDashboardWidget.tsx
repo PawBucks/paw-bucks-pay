@@ -6,6 +6,7 @@ import { Button } from"@/components/ui/button";
 import { LoyaltyProgressRing } from"./LoyaltyProgressRing";
 import { TierBadge } from"./TierBadge";
 import { useLoyaltySummary } from"@/hooks/useLoyaltyData";
+import { Formatters } from"@/utils/formatters";
 
 interface LoyaltyDashboardWidgetProps {
  userId: string;
