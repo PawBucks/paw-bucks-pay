@@ -159,7 +159,7 @@ const LoyaltyPage = () => {
  <GradientCard className="text-center">
  <Gift className="w-8 h-8 mx-auto text-primary mb-2" />
  <div className="text-2xl font-bold text-primary">
- ${summary?.totalCredits?.toFixed(0) || 0}
+                  {Formatters.currency(summary?.totalCredits || 0)}
  </div>
  <p className="text-sm text-muted-foreground">Available Credits</p>
  </GradientCard>
