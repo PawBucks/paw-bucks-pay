@@ -537,9 +537,9 @@ export function PrescriptionFulfillmentEngine({ vetId }: PrescriptionFulfillment
  </TableCell>
  <TableCell>{f.petName}</TableCell>
  <TableCell>{f.ownerName}</TableCell>
- <TableCell>${f.productPrice?.toFixed(2) ||"—"}</TableCell>
+ <TableCell>{f.productPrice != null ? Formatters.currency(f.productPrice) :"—"}</TableCell>
  <TableCell className="text-success font-medium">
- ${f.vetEarnings?.toFixed(2) ||"—"}
+ {f.vetEarnings != null ? Formatters.currency(f.vetEarnings) :"—"}
  </TableCell>
  <TableCell>{getStatusBadge(f.status)}</TableCell>
  <TableCell className="text-sm text-muted-foreground">
