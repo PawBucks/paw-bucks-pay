@@ -320,7 +320,7 @@ serve(async (req) => {
           .insert({
             user_id: matchedUser.id,
             amount: pawbucksAwarded,
-            type: 'credit',
+            type: 'earn',
             source: 'pos_transaction',
             description: `Purchase at ${merchantData?.business_name || 'Partner Store'}`,
             partner_id: integration.merchant_id,
