@@ -29,6 +29,8 @@ const PAWBUCKS_TO_USD = 0.001;
 const MINIMUM_STRIPE_AMOUNT = 0.50;
 // Minimum transaction for Pet Fund
 const PET_FUND_MIN_USD = 20;
+// Server-enforced minimum for legacy Welcome Credit redemption ($75).
+const WELCOME_CREDIT_MIN_USD = 75;
 
 interface SubscriptionCheckoutDialogProps {
  open: boolean;
@@ -119,7 +121,9 @@ const CheckoutForm = ({
 
  const priceAmount = plan.amount / 100; // Convert cents to dollars
  
- const petFundMinUsd = petFundMinTransactionUsd || PET_FUND_MIN_USD;
+ const petFundMinUsd = hasPetFund
+   ? (petFundMinTransactionUsd || PET_FUND_MIN_USD)
+   : WELCOME_CREDIT_MIN_USD;
  const petFundCreditBalance = hasPetFund ? petFundBalance : welcomeCreditBalance;
  const welcomeCreditApplicable = (hasPetFund || hasWelcomeCredit) && merchantAcceptsPawBucks && priceAmount >= petFundMinUsd;
  
