@@ -260,7 +260,7 @@ const LoyaltyPage = () => {
  <h3 className="font-semibold">Your Service Credits</h3>
  <div className="text-right">
  <div className="text-2xl font-bold text-primary">
- ${summary?.totalCredits?.toFixed(0) || 0}
+                  {Formatters.currency(summary?.totalCredits || 0)}
  </div>
  <p className="text-xs text-muted-foreground">Total Available</p>
  </div>
