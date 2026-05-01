@@ -191,7 +191,7 @@ export default function PetStoreAdmin() {
  description: item.description ||"",
  category: item.category,
  item_type: item.item_type ||"product",
- price: (item.price / 100).toFixed(2),
+ price: Formatters.money((item.price / 100)),
  price_pawbucks: item.price_pawbucks.toString(),
  stock_quantity: item.stock_quantity.toString(),
  image_url: item.image_url ||"",

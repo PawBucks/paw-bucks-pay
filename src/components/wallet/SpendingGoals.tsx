@@ -216,7 +216,7 @@ export const SpendingGoals = memo(({ transactions, medicalRecords = [] }: Spendi
  Remaining
  </div>
  <p className="font-bold text-lg">
- ${Math.max(localGoal.monthlyTarget - currentMonthSpending, 0).toFixed(0)}
+ ${Formatters.number(Math.round(Math.max(localGoal.monthlyTarget - currentMonthSpending, 0)))}
  </p>
  </div>
  <div className="p-3 rounded-lg bg-background/50">
@@ -239,7 +239,7 @@ export const SpendingGoals = memo(({ transactions, medicalRecords = [] }: Spendi
  </div>
  <div className="text-right">
  <span className="font-bold text-accent">
- {((1 - localGoal.monthlyTarget / averageMonthlySpending) * 100).toFixed(0)}% less
+ {Formatters.number(Math.round(((1 - localGoal.monthlyTarget / averageMonthlySpending) * 100)))}% less
  </span>
  </div>
  </div>

@@ -137,7 +137,7 @@ const PremiumAdCardComponent = ({
  </span>
  <span className="text-muted-foreground/40">·</span>
  <span className="text-xs text-success font-medium">
- {(merchant.cashback_rate ?? 0).toFixed(0)}x points
+ {Formatters.number(Math.round((merchant.cashback_rate ?? 0)))}x points
  </span>
  {merchant.accepts_pawbucks && (
  <>

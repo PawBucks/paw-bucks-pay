@@ -118,7 +118,7 @@ const InvoicePayment = () => {
  }
  
  setInvoice(data.invoice as any);
- setPaymentAmount((data.invoice.amount_due || data.invoice.total || 0).toFixed(2));
+ setPaymentAmount(Formatters.money((data.invoice.amount_due || data.invoice.total || 0)));
 
  if (data.merchant) setMerchant(data.merchant);
  } catch (error: any) {
@@ -811,13 +811,13 @@ const InvoicePayment = () => {
  </SelectTrigger>
  <SelectContent>
  <SelectItem value="0">No tip</SelectItem>
- <SelectItem value={(amountDue * 0.1).toFixed(2)}>
+ <SelectItem value={Formatters.money((amountDue * 0.1))}>
  10% ({Formatters.currency((amountDue * 0.1))})
  </SelectItem>
- <SelectItem value={(amountDue * 0.15).toFixed(2)}>
+ <SelectItem value={Formatters.money((amountDue * 0.15))}>
  15% ({Formatters.currency((amountDue * 0.15))})
  </SelectItem>
- <SelectItem value={(amountDue * 0.2).toFixed(2)}>
+ <SelectItem value={Formatters.money((amountDue * 0.2))}>
  20% ({Formatters.currency((amountDue * 0.2))})
  </SelectItem>
  <SelectItem value="custom">Custom amount</SelectItem>

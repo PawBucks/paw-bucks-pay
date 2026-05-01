@@ -38,12 +38,12 @@ const CHART_COLORS = [
 
 function ctr(clicks: number, impressions: number): string {
  if (impressions === 0) return'0%';
- return ((clicks / impressions) * 100).toFixed(1) +'%';
+ return Formatters.decimal(((clicks / impressions) * 100), 1) +'%';
 }
 
 function roiMultiplier(revenue: number, cost: number): string {
  if (cost === 0) return'∞';
- return (revenue / cost).toFixed(1) +'x';
+ return Formatters.decimal((revenue / cost), 1) +'x';
 }
 
 function TrendIndicator({ value }: { value: number }) {

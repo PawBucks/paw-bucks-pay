@@ -281,7 +281,7 @@ export function HomeOfficeCalculator() {
  <div className="flex items-center justify-between">
  <span className="text-sm text-muted-foreground">Business Use Percentage</span>
  <span className="text-2xl font-bold text-primary">
- {((parseFloat(businessSqFt) / parseFloat(totalSqFt)) * 100).toFixed(1)}%
+ {Formatters.decimal(((parseFloat(businessSqFt) / parseFloat(totalSqFt)) * 100), 1)}%
  </span>
  </div>
  </div>

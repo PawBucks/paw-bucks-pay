@@ -214,7 +214,7 @@ export function YearlySummary() {
  pdf.addPage();
  y = 20;
  }
- const percentage = ((item.value / yearlyData.totalSpent) * 100).toFixed(1);
+ const percentage = Formatters.decimal(((item.value / yearlyData.totalSpent) * 100), 1);
  pdf.text(`${item.name}: ${Formatters.currency(item.value)} (${percentage}%)`, 25, y);
  y += 7;
  });
@@ -342,7 +342,7 @@ export function YearlySummary() {
  innerRadius={40}
  outerRadius={70}
  dataKey="value"
- label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+ label={({ name, percent }) => `${name} ${Formatters.number(Math.round((percent * 100)))}%`}
  labelLine={false}
  >
  {yearlyData?.categoryData.map((entry, index) => (

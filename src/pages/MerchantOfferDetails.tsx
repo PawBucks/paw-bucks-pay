@@ -12,6 +12,7 @@ import { toast } from"sonner";
 import { ErrorHandler } from"@/utils/errorHandler";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from"recharts";
 
+import { Formatters } from "@/utils/formatters";
 interface Offer {
  id: string;
  title: string;
@@ -321,7 +322,7 @@ export default function MerchantOfferDetails() {
  </p>
  {offer.redemption_cap && (
  <p className="text-sm text-muted-foreground">
- {((offer.redemption_count / offer.redemption_cap) * 100).toFixed(1)}% used
+ {Formatters.decimal(((offer.redemption_count / offer.redemption_cap) * 100), 1)}% used
  </p>
  )}
  </CardContent>

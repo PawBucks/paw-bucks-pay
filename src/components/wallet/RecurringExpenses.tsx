@@ -217,7 +217,7 @@ export const RecurringExpenses = memo(({ transactions }: RecurringExpensesProps)
  <TrendingUp className="w-4 h-4 text-primary" />
  <span className="text-sm font-medium">Yearly Projection</span>
  </div>
- <span className="text-lg font-bold">${(monthlyRecurring * 12).toFixed(0)}</span>
+ <span className="text-lg font-bold">${Formatters.number(Math.round((monthlyRecurring * 12)))}</span>
  </div>
  <p className="text-xs text-muted-foreground mt-1">
  Based on your recurring spending patterns

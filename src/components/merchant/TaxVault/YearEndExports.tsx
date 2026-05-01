@@ -145,8 +145,8 @@ export function YearEndExports({ merchantId, businessName, taxYear, expenses }: 
  const headers = ['Category','Amount'];
  const rows = [
  ['Gross Income (Platform Sales)', Formatters.money(grossIncome)],
- ['Total Expenses', (-totalExpenses).toFixed(2)],
- ['Vehicle/Mileage Deduction', (-mileageDeduction).toFixed(2)],
+ ['Total Expenses', Formatters.money((-totalExpenses))],
+ ['Vehicle/Mileage Deduction', Formatters.money((-mileageDeduction))],
  ['Net Profit', Formatters.money(netProfit)],
  ];
 
@@ -509,7 +509,7 @@ export function YearEndExports({ merchantId, businessName, taxYear, expenses }: 
  <p className="text-xs text-muted-foreground">Gross Income</p>
  </div>
  <div>
- <p className="text-2xl font-bold text-destructive">${(totalExpenses + mileageDeduction).toFixed(0)}</p>
+ <p className="text-2xl font-bold text-destructive">${Formatters.number(Math.round((totalExpenses + mileageDeduction)))}</p>
  <p className="text-xs text-muted-foreground">Total Deductions</p>
  </div>
  <div>

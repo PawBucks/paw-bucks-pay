@@ -165,14 +165,14 @@ export function MerchantSpotlightWidget() {
  <Card>
  <CardContent className="pt-4 text-center">
  <Eye className="h-5 w-5 text-info mx-auto mb-2" />
- <p className="text-2xl font-bold">{(performance.total_impressions / 1000).toFixed(1)}K</p>
+ <p className="text-2xl font-bold">{Formatters.decimal((performance.total_impressions / 1000), 1)}K</p>
  <p className="text-xs text-muted-foreground">Impressions</p>
  </CardContent>
  </Card>
  <Card>
  <CardContent className="pt-4 text-center">
  <MousePointer className="h-5 w-5 text-success mx-auto mb-2" />
- <p className="text-2xl font-bold">{(performance.total_clicks / 1000).toFixed(1)}K</p>
+ <p className="text-2xl font-bold">{Formatters.decimal((performance.total_clicks / 1000), 1)}K</p>
  <p className="text-xs text-muted-foreground">Clicks</p>
  </CardContent>
  </Card>
@@ -193,7 +193,7 @@ export function MerchantSpotlightWidget() {
  <Card>
  <CardContent className="pt-4 text-center">
  <BarChart3 className="h-5 w-5 text-info mx-auto mb-2" />
- <p className="text-2xl font-bold">{(performance.profile_views / 1000).toFixed(1)}K</p>
+ <p className="text-2xl font-bold">{Formatters.decimal((performance.profile_views / 1000), 1)}K</p>
  <p className="text-xs text-muted-foreground">Profile Views</p>
  </CardContent>
  </Card>

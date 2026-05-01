@@ -134,7 +134,7 @@ export const PetFundCard = ({ userId }: PetFundCardProps) => {
  <Calendar className="w-5 h-5 text-primary" />
  </div>
  <div className="flex-1">
- <p className="text-sm font-medium">Next Release: ${(nextRelease.amount / 1000).toFixed(0)}</p>
+ <p className="text-sm font-medium">Next Release: ${Formatters.number(Math.round((nextRelease.amount / 1000)))}</p>
  <p className="text-xs text-muted-foreground">
  {formatDistanceToNow(new Date(nextRelease.scheduledAt), { addSuffix: true })}
  {' ·'}
@@ -183,7 +183,7 @@ export const PetFundCard = ({ userId }: PetFundCardProps) => {
  </div>
  <div className="flex items-center gap-2">
  <span className={`font-medium ${release.usedAt ?'line-through text-muted-foreground' :''}`}>
- ${(release.amount / 1000).toFixed(0)}
+ ${Formatters.number(Math.round((release.amount / 1000)))}
  </span>
  {getStatusBadge(release)}
  </div>
@@ -236,7 +236,7 @@ export const PetFundCard = ({ userId }: PetFundCardProps) => {
  {bonus.status ==='released' &&'Added to your PawBucks wallet!'}
  </p>
  </div>
- <span className="font-bold text-accent">${(bonus.amount / 1000).toFixed(0)}</span>
+ <span className="font-bold text-accent">${Formatters.number(Math.round((bonus.amount / 1000)))}</span>
  </div>
  ))}
  </CardContent>

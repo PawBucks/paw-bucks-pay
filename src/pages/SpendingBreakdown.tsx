@@ -291,7 +291,7 @@ const SpendingBreakdown = () => {
  {categoryBreakdown.map((cat) => {
  const config = CATEGORY_CONFIG[cat.category] || CATEGORY_CONFIG.other;
  const Icon = config.icon;
- const percentage = ((cat.value / totalSpending) * 100).toFixed(1);
+ const percentage = Formatters.decimal(((cat.value / totalSpending) * 100), 1);
  
  return (
  <div key={cat.category} className="flex items-center justify-between p-3 rounded-lg bg-muted/30">

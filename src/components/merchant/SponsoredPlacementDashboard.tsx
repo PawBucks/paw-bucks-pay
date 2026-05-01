@@ -177,7 +177,7 @@ export function SponsoredPlacementDashboard({ merchantId, serviceType ='sponsore
  impressions: data.impressions,
  clicks: data.clicks,
  conversions: data.conversions,
- ctr: data.impressions > 0 ? ((data.clicks / data.impressions) * 100).toFixed(1) : 0,
+ ctr: data.impressions > 0 ? Formatters.decimal(((data.clicks / data.impressions) * 100), 1) : 0,
  }));
 
  // Format device data for pie chart
@@ -473,7 +473,7 @@ export function SponsoredPlacementDashboard({ merchantId, serviceType ='sponsore
  {deviceChartData.map((device, index) => {
  const Icon = getDeviceIcon(device.name);
  const total = deviceChartData.reduce((sum, d) => sum + d.value, 0);
- const percentage = total > 0 ? ((device.value / total) * 100).toFixed(1) : 0;
+ const percentage = total > 0 ? Formatters.decimal(((device.value / total) * 100), 1) : 0;
  return (
  <div key={device.name} className="flex items-center gap-4">
  <div
@@ -537,7 +537,7 @@ export function SponsoredPlacementDashboard({ merchantId, serviceType ='sponsore
  <span className="text-muted-foreground">CTR</span>
  <span className="font-medium text-success">
  {data.impressions > 0
- ? ((data.clicks / data.impressions) * 100).toFixed(1)
+ ? Formatters.decimal(((data.clicks / data.impressions) * 100), 1)
  : 0}
  %
  </span>
@@ -695,7 +695,7 @@ export function SponsoredPlacementDashboard({ merchantId, serviceType ='sponsore
  />
  </svg>
  <span className="absolute text-2xl font-bold">
- {Math.min(100, Math.max(0, overview.roi + 100)).toFixed(0)}%
+ {Formatters.number(Math.round(Math.min(100, Math.max(0, overview.roi + 100))))}%
  </span>
  </div>
  <p className="text-sm text-muted-foreground mt-2">ROI Score</p>
