@@ -481,18 +481,29 @@ const MerchantProfile = memo(() => {
 
  {/* About */}
  {merchant.description && (
- <div className="mb-6">
- <h2 className="font-semibold text-base mb-2">About the Business</h2>
- <p className="text-sm text-muted-foreground whitespace-pre-line leading-relaxed">
+  <div className="mb-8">
+  <div className="text-[0.7rem] font-medium tracking-[0.18em] uppercase text-primary mb-2">
+   About
+  </div>
+  <h2
+   className="font-black leading-[1.1] tracking-[-0.02em] text-foreground mb-3"
+   style={{
+    fontFamily: '"Playfair Display", Georgia, serif',
+    fontSize: "clamp(1.35rem, 2.6vw, 1.65rem)",
+   }}
+  >
+   About the Business
+  </h2>
+  <p className="text-[15px] text-muted-foreground whitespace-pre-line leading-relaxed">
  {merchant.description}
  </p>
  </div>
  )}
 
  {/* Contact & Location Card */}
- <Card className="mb-6">
+  <Card className="mb-8 border-border/60 shadow-sm">
  <CardContent className="p-5 space-y-4">
- <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">Location & Contact</h3>
+  <h3 className="text-[0.7rem] font-medium tracking-[0.18em] uppercase text-primary">Location & Contact</h3>
  
  {merchant.phone && (
  <a href={`tel:${merchant.phone}`} className="flex items-center gap-3 group py-1">
@@ -561,8 +572,8 @@ const MerchantProfile = memo(() => {
 
  {/* Social Media */}
  {(merchant.facebook_url || merchant.instagram_url || merchant.twitter_url || merchant.linkedin_url) && (
- <div className="mb-6">
- <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider mb-3">Follow</h3>
+  <div className="mb-8">
+  <h3 className="text-[0.7rem] font-medium tracking-[0.18em] uppercase text-primary mb-3">Follow</h3>
  <div className="flex items-center gap-3">
  {merchant.facebook_url && (
  <a href={merchant.facebook_url} target="_blank" rel="noopener noreferrer"
@@ -597,9 +608,9 @@ const MerchantProfile = memo(() => {
  )}
 
  {/* Payment Options */}
- <Card>
+  <Card className="border-border/60 shadow-sm">
  <CardContent className="p-5">
- <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider mb-3">Payment Options</h3>
+  <h3 className="text-[0.7rem] font-medium tracking-[0.18em] uppercase text-primary mb-3">Payment Options</h3>
  <div className="space-y-2">
  <div className="flex items-center justify-between p-3 bg-muted/40 rounded-lg">
  <div className="flex items-center gap-3">
@@ -634,10 +645,19 @@ const MerchantProfile = memo(() => {
  {/* ─── Booking Section ─── */}
  {hasBookableServices && (
  <section id="section-booking" ref={bookingRef}>
- <h2 className="font-semibold text-lg mb-4 flex items-center gap-2">
- <CalendarDays className="w-5 h-5 text-primary" />
- Book an Appointment
- </h2>
+  <div className="text-[0.7rem] font-medium tracking-[0.18em] uppercase text-primary mb-2 flex items-center gap-2">
+   <CalendarDays className="w-3.5 h-3.5" />
+   Booking
+  </div>
+  <h2
+   className="font-black leading-[1.1] tracking-[-0.02em] text-foreground mb-5"
+   style={{
+    fontFamily: '"Playfair Display", Georgia, serif',
+    fontSize: "clamp(1.5rem, 3vw, 1.85rem)",
+   }}
+  >
+   Book an <span className="italic text-primary">appointment</span>
+  </h2>
  <BookingWidget
  merchantId={merchant.id}
  merchantName={merchant.business_name}
@@ -648,18 +668,32 @@ const MerchantProfile = memo(() => {
 
  {/* ─── Reviews Section ─── */}
  <section id="section-reviews">
- <h2 className="font-semibold text-lg mb-4 flex items-center gap-2">
- <Star className="w-5 h-5 text-gold fill-gold" />
- Recommended Reviews
- </h2>
+  <div className="text-[0.7rem] font-medium tracking-[0.18em] uppercase text-primary mb-2 flex items-center gap-2">
+   <Star className="w-3.5 h-3.5 fill-current" />
+   Reviews
+  </div>
+  <h2
+   className="font-black leading-[1.1] tracking-[-0.02em] text-foreground mb-5"
+   style={{
+    fontFamily: '"Playfair Display", Georgia, serif',
+    fontSize: "clamp(1.5rem, 3vw, 1.85rem)",
+   }}
+  >
+   What pet parents <span className="italic text-primary">are saying</span>
+  </h2>
 
  {/* Rating Breakdown Card */}
- <Card className="mb-6">
+  <Card className="mb-6 border-border/60 shadow-sm">
  <CardContent className="p-5">
  <div className="flex gap-6">
  {/* Big number */}
  <div className="text-center flex-shrink-0">
- <div className="text-5xl font-bold tracking-tight">{ratingStats.average.toFixed(1)}</div>
+  <div
+   className="text-5xl font-black tracking-tight text-foreground"
+   style={{ fontFamily: '"Playfair Display", Georgia, serif' }}
+  >
+   {ratingStats.average.toFixed(1)}
+  </div>
  <div className="flex items-center justify-center gap-0.5 mt-1">
  {[1,2,3,4,5].map((star) => (
  <Star key={star} className={`w-4 h-4 ${star <= Math.round(ratingStats.average) ?"fill-gold text-gold" :"text-muted-foreground/20"}`} />
@@ -722,6 +756,18 @@ const MerchantProfile = memo(() => {
 
  {/* ─── Hours Section ─── */}
  <section id="section-hours">
+  <div className="text-[0.7rem] font-medium tracking-[0.18em] uppercase text-primary mb-2">
+   Hours
+  </div>
+  <h2
+   className="font-black leading-[1.1] tracking-[-0.02em] text-foreground mb-5"
+   style={{
+    fontFamily: '"Playfair Display", Georgia, serif',
+    fontSize: "clamp(1.5rem, 3vw, 1.85rem)",
+   }}
+  >
+   When we're <span className="italic text-primary">open</span>
+  </h2>
  <BusinessHoursDisplay merchantId={merchant.id} />
  </section>
 
