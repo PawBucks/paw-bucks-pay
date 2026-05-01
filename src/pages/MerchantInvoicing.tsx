@@ -631,16 +631,15 @@ const MerchantInvoicing = () => {
 
  // Settings actions
  const handleSaveSettings = async (data: Partial<InvoiceSettings>) => {
- if (!merchantId) return;
- 
- try {
- await invoicingService.upsertSettings(merchantId, data);
- toast.success("Settings saved");
- loadData();
- } catch (error) {
- console.error("Error saving settings:", error);
- toast.error("Failed to save settings");
+ if (!merchantId) {
+ throw new Error("Merchant not loaded yet");
  }
+ const { error } = await invoicingService.upsertSettings(merchantId, data);
+ if (error) {
+ console.error("Error saving settings:", error);
+ throw error;
+ }
+ await loadData();
  };
 
  // Catalog actions
