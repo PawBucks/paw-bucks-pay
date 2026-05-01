@@ -211,7 +211,7 @@ export function InvoicePreview({
  <p className="font-medium">{item.description}</p>
  </td>
  <td className="text-right p-3">
- {Number(item.quantity).toFixed(item.unit_type ==='hour' ? 2 : 0)} {item.unit_type !=='unit' && item.unit_type}
+                  {Formatters.decimal(Number(item.quantity), item.unit_type ==='hour' ? 2 : 0)} {item.unit_type !=='unit' && item.unit_type}
  </td>
  <td className="text-right p-3">{Formatters.currency(Number(item.unit_price))}</td>
  <td className="text-right p-3 font-medium">{Formatters.currency(Number(item.subtotal))}</td>
