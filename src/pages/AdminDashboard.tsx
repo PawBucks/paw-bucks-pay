@@ -450,16 +450,19 @@ const AdminDashboard = () => {
  const NavigationSidebar = ({ className }: { className?: string }) => (
  <div className={cn("flex flex-col h-full", className)}>
  {/* Logo and Title */}
- <div className="p-4 border-b">
- <div className="flex items-center gap-3">
-  <div className="w-10 h-10 rounded-md flex items-center justify-center shadow-lg overflow-hidden">
-  <img src={pawbucksLogo} alt="PawBucks" className="w-full h-full object-contain" />
+  <div className="p-4 border-b">
+  <p className="text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-primary mb-2">
+    Platform Control
+  </p>
+  <div className="flex items-center gap-3">
+   <div className="w-11 h-11 rounded-md flex items-center justify-center shadow-lg overflow-hidden">
+   <img src={pawbucksLogo} alt="PawBucks" className="w-full h-full object-contain" />
+   </div>
+  <div className="min-w-0">
+  <h1 className="font-bold text-lg leading-tight tracking-[-0.02em]">Admin Dashboard</h1>
+  <p className="text-xs text-muted-foreground mt-0.5">PawBucks Platform</p>
   </div>
- <div>
- <h1 className="font-bold text-lg">Admin Dashboard</h1>
- <p className="text-xs text-muted-foreground">PawBucks Platform</p>
- </div>
- </div>
+  </div>
  <div className="mt-3 flex items-center gap-2">
  <Badge variant={isSuperAdmin ?"default" :"secondary"} className="text-xs">
  {isSuperAdmin ?"SuperAdmin" :"Admin"}
