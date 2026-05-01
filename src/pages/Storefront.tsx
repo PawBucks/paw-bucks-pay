@@ -20,6 +20,7 @@ import { useStorefrontCart } from"@/hooks/useStorefrontCart";
 import { StorefrontCartDrawer, type StorefrontCheckoutParams } from"@/components/storefront/StorefrontCartDrawer";
 import { CartIcon } from"@/components/pet-store/CartIcon";
 
+import { Formatters } from "@/utils/formatters";
 type Product = {
  id: string;
  name: string;
@@ -473,7 +474,7 @@ const Storefront = memo(() => {
  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
  {/* Subscription Plans */}
  {subscriptionPlans.map((plan) => {
- const formattedPrice = `$${(plan.amount / 100).toFixed(2)}`;
+ const formattedPrice = `${Formatters.currency((plan.amount / 100))}`;
  const intervalLabel = plan.billing_interval_count === 1 
  ? plan.billing_interval 
  : `${plan.billing_interval_count} ${plan.billing_interval}s`;

@@ -6,6 +6,7 @@ import {
   type MerchantCapFields,
 } from "@/lib/pawbucksCap";
 
+import { Formatters } from "@/utils/formatters";
 const PAWBUCKS_TO_USD = 0.001;
 
 type Props = {
@@ -102,11 +103,11 @@ export const PawBucksCapBreakdown = ({
 
       <div className="flex items-center justify-between pt-1 border-t border-border/40">
         <span className="text-muted-foreground">
-          On ${safeSubtotal.toFixed(2)} subtotal
+          On {Formatters.currency(safeSubtotal)} subtotal
         </span>
         <span className="flex items-center gap-1 font-semibold text-foreground tabular-nums">
           <Coins className="w-3 h-3 text-primary" />
-          max ${maxUsd.toFixed(2)}
+          max {Formatters.currency(maxUsd)}
           <span className="text-muted-foreground font-normal">
             ({maxPb.toLocaleString()} PB)
           </span>

@@ -11,6 +11,7 @@ import { getCategoryLabel, getNormalizedCategory, CATEGORY_CONFIG } from"@/lib/c
 import { useSharedAccount, getEffectiveWalletUserId } from"@/hooks/useSharedAccount";
 import { useAuth } from"@/hooks/useAuth";
 
+import { Formatters } from "@/utils/formatters";
 // Fixed colors for pie chart (actual HSL values, not CSS variables)
 const CATEGORY_COLORS: Record<string, string> = {
  veterinary:"hsl(340, 75%, 55%)",
@@ -178,9 +179,9 @@ export function YearlySummary() {
  pdf.text('Summary', 20, 65);
  
  pdf.setFontSize(11);
- pdf.text(`Total Spent: $${yearlyData.totalSpent.toFixed(2)}`, 25, 75);
+ pdf.text(`Total Spent: ${Formatters.currency(yearlyData.totalSpent)}`, 25, 75);
  pdf.text(`Total Transactions: ${yearlyData.transactionCount}`, 25, 82);
- pdf.text(`Average Monthly: $${yearlyData.avgMonthly.toFixed(2)}`, 25, 89);
+ pdf.text(`Average Monthly: ${Formatters.currency(yearlyData.avgMonthly)}`, 25, 89);
 
  // Monthly breakdown
  pdf.setFontSize(14);
@@ -193,7 +194,7 @@ export function YearlySummary() {
  pdf.addPage();
  y = 20;
  }
- pdf.text(`${MONTHS[idx]}: $${item.amount.toFixed(2)}`, 25, y);
+ pdf.text(`${MONTHS[idx]}: ${Formatters.currency(item.amount)}`, 25, y);
  y += 7;
  });
 
@@ -214,7 +215,7 @@ export function YearlySummary() {
  y = 20;
  }
  const percentage = ((item.value / yearlyData.totalSpent) * 100).toFixed(1);
- pdf.text(`${item.name}: $${item.value.toFixed(2)} (${percentage}%)`, 25, y);
+ pdf.text(`${item.name}: ${Formatters.currency(item.value)} (${percentage}%)`, 25, y);
  y += 7;
  });
 
@@ -234,7 +235,7 @@ export function YearlySummary() {
  pdf.addPage();
  y = 20;
  }
- pdf.text(`${idx + 1}. ${merchant.name}: $${merchant.total.toFixed(2)}`, 25, y);
+ pdf.text(`${idx + 1}. ${merchant.name}: ${Formatters.currency(merchant.total)}`, 25, y);
  y += 7;
  });
 
@@ -319,7 +320,7 @@ export function YearlySummary() {
  <XAxis dataKey="month" tick={{ fontSize: 12 }} />
  <YAxis tickFormatter={(v) => `$${v}`} tick={{ fontSize: 12 }} />
  <Tooltip 
- formatter={(value: number) => [`$${value.toFixed(2)}`,'Spent']}
+ formatter={(value: number) => [`${Formatters.currency(value)}`,'Spent']}
  contentStyle={{ background:'hsl(var(--card))', border:'1px solid hsl(var(--border))' }}
  />
  <Bar dataKey="amount" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
@@ -348,7 +349,7 @@ export function YearlySummary() {
  <Cell key={`cell-${index}`} fill={entry.color} />
  ))}
  </Pie>
- <Tooltip formatter={(value: number) => `$${value.toFixed(2)}`} />
+ <Tooltip formatter={(value: number) => `${Formatters.currency(value)}`} />
  </PieChart>
  </ResponsiveContainer>
  </div>
@@ -363,7 +364,7 @@ export function YearlySummary() {
  <span className="text-xs font-medium text-muted-foreground w-5">{idx + 1}.</span>
  <span className="text-sm font-medium truncate max-w-[150px]">{merchant.name}</span>
  </div>
- <span className="text-sm font-semibold">${merchant.total.toFixed(2)}</span>
+ <span className="text-sm font-semibold">{Formatters.currency(merchant.total)}</span>
  </div>
  ))}
  {(!yearlyData?.topMerchants || yearlyData.topMerchants.length === 0) && (

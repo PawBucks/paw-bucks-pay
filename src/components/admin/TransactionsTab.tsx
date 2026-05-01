@@ -10,6 +10,7 @@ import { toast } from'sonner';
 import { RefundPaymentDialog } from'@/components/shared/RefundPaymentDialog';
 import { format } from'date-fns';
 
+import { Formatters } from "@/utils/formatters";
 type Transaction = {
  id: string;
  amount: number;
@@ -154,7 +155,7 @@ export function TransactionsTab() {
  });
  if (error) throw error;
  if (data?.error) throw new Error(data.error);
- toast.success(`Refund of $${params.amount.toFixed(2)} processed successfully`);
+ toast.success(`Refund of ${Formatters.currency(params.amount)} processed successfully`);
  loadTransactions();
  loadSummaryStats();
  } catch (error: any) {
@@ -264,10 +265,10 @@ export function TransactionsTab() {
  {transaction.profiles?.full_name ||'N/A'}
  </TableCell>
  <TableCell className={`text-right font-semibold ${isRefund ?'text-destructive' :''}`}>
- {isRefund ?'-' :''}${transaction.amount.toFixed(2)}
+ {isRefund ?'-' :''}{Formatters.currency(transaction.amount)}
  </TableCell>
  <TableCell className={`text-right text-sm ${isRefund ?'text-destructive' :''}`}>
- ${stripeAmount.toFixed(2)}
+ {Formatters.currency(stripeAmount)}
  </TableCell>
  <TableCell className="text-right">
  {hasPawbucks ? (
@@ -282,7 +283,7 @@ export function TransactionsTab() {
  )}
  </TableCell>
  <TableCell className={`text-right text-xs ${isRefund ?'text-destructive' :'text-muted-foreground'}`}>
- ${platformFee.toFixed(2)}
+ {Formatters.currency(platformFee)}
  </TableCell>
  <TableCell>
  <Badge variant="outline" className="text-xs font-normal">
@@ -343,20 +344,20 @@ export function TransactionsTab() {
  {/* Column 2: Financial Breakdown */}
  <div className="space-y-1">
  <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Financial Breakdown</h4>
- <DetailRow icon={DollarSign} label="Total Amount" value={`$${transaction.amount.toFixed(2)}`} className="font-bold" />
- <DetailRow icon={CreditCard} label="Stripe Charged" value={`$${stripeAmount.toFixed(2)}`} />
+ <DetailRow icon={DollarSign} label="Total Amount" value={`${Formatters.currency(transaction.amount)}`} className="font-bold" />
+ <DetailRow icon={CreditCard} label="Stripe Charged" value={`${Formatters.currency(stripeAmount)}`} />
  {hasPawbucks ? (
  <>
  <DetailRow icon={Coins} label="PawBucks Applied" value={
  <span className="text-warning font-semibold">
- {pawbucksUsed.toLocaleString()} PB (${pawbucksUSD.toFixed(2)})
+ {pawbucksUsed.toLocaleString()} PB ({Formatters.currency(pawbucksUSD)})
  </span>
  } />
  <div className="border-l-2 border-warning/50 pl-3 ml-5 mt-1 mb-1">
  <p className="text-xs text-muted-foreground">
  Customer redeemed <strong>{pawbucksUsed.toLocaleString()}</strong> PawBucks
- worth <strong>${pawbucksUSD.toFixed(2)}</strong>, reducing the Stripe charge
- from ${transaction.amount.toFixed(2)} to ${stripeAmount.toFixed(2)}.
+ worth <strong>{Formatters.currency(pawbucksUSD)}</strong>, reducing the Stripe charge
+ from {Formatters.currency(transaction.amount)} to {Formatters.currency(stripeAmount)}.
  </p>
  </div>
  </>
@@ -365,9 +366,9 @@ export function TransactionsTab() {
  <span className="text-muted-foreground">None</span>
  } />
  )}
- <DetailRow icon={Receipt} label="Success Fee (3%)" value={`$${platformFee.toFixed(2)}`} className="text-warning" />
+ <DetailRow icon={Receipt} label="Success Fee (3%)" value={`${Formatters.currency(platformFee)}`} className="text-warning" />
  <DetailRow icon={DollarSign} label="Merchant Net" value={
- `$${(transaction.amount - platformFee).toFixed(2)}`
+ `${Formatters.currency((transaction.amount - platformFee))}`
  } className="text-accent font-semibold" />
  </div>
 
@@ -376,11 +377,11 @@ export function TransactionsTab() {
  <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Rewards & Metadata</h4>
  <DetailRow icon={Coins} label="Rewards Earned" value={
  <span className="text-success">
- {rewardsEarnedPB.toLocaleString()} PB (${rewardsUSD.toFixed(2)})
+ {rewardsEarnedPB.toLocaleString()} PB ({Formatters.currency(rewardsUSD)})
  </span>
  } />
  <DetailRow icon={Coins} label="Cashback (Legacy)" value={
- `${cashbackEarnedPB.toLocaleString()} PB ($${(cashbackEarnedPB * 0.001).toFixed(2)})`
+ `${cashbackEarnedPB.toLocaleString()} PB (${Formatters.currency((cashbackEarnedPB * 0.001))})`
  } />
  <DetailRow icon={CreditCard} label="Payment Method" value={formatPaymentMethod(transaction.payment_method)} />
  <DetailRow icon={Clock} label="Created" value={format(new Date(transaction.created_at),"MMM d, yyyy'at' h:mm:ss a")} />

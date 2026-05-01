@@ -20,6 +20,7 @@ import {
 import { UnderwritingSignalsCard } from'./UnderwritingSignalsCard';
 import { format, formatDistanceToNow, differenceInDays } from'date-fns';
 
+import { Formatters } from "@/utils/formatters";
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type FundingApplicant = {
@@ -315,7 +316,7 @@ function MerchantDetailPanel({
  <Metric icon={Users} label="Unique Customers" value={applicant.unique_customers.toString()} />
  <Metric icon={DollarSign} label="Avg Transaction" value={
  applicant.total_transactions > 0
- ? `$${(applicant.total_revenue / applicant.total_transactions).toFixed(2)}`
+ ? `${Formatters.currency((applicant.total_revenue / applicant.total_transactions))}`
  :'N/A'
  } />
  <Metric icon={CreditCard} label="Stripe Status" value={applicant.stripe_account_status ??'N/A'} />

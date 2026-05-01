@@ -18,6 +18,7 @@ import { toast } from"sonner";
 import { cn } from"@/lib/utils";
 import { RefundPaymentDialog } from"@/components/shared/RefundPaymentDialog";
 
+import { Formatters } from "@/utils/formatters";
 interface Transaction {
  transaction_id: string;
  date: string;
@@ -175,10 +176,10 @@ const MerchantTransactions = () => { const { user, loading, signOut } = useAuth(
  const csvData = sortedTransactions.map(t => [
  format(new Date(t.date),"MM/dd/yyyy"),
  t.customer_name,
- `$${t.amount.toFixed(2)}`,
- `$${(t.platform_fee || 0).toFixed(2)}`,
- `$${t.repayment_deducted.toFixed(2)}`,
- `$${t.net_payout.toFixed(2)}`,
+ `${Formatters.currency(t.amount)}`,
+ `${Formatters.currency((t.platform_fee || 0))}`,
+ `${Formatters.currency(t.repayment_deducted)}`,
+ `${Formatters.currency(t.net_payout)}`,
  t.payment_method,
  t.status,
  ]);
@@ -227,7 +228,7 @@ const MerchantTransactions = () => { const { user, loading, signOut } = useAuth(
  if (error) throw error;
  if (data?.error) throw new Error(data.error);
 
- toast.success(`Refund of $${params.amount.toFixed(2)} processed successfully`);
+ toast.success(`Refund of ${Formatters.currency(params.amount)} processed successfully`);
  fetchTransactions();
  } catch (error: unknown) {
  const errorMessage = error instanceof Error ? error.message :'Failed to process refund';
@@ -277,7 +278,7 @@ const MerchantTransactions = () => { const { user, loading, signOut } = useAuth(
  <CardDescription>Total Sales</CardDescription>
  </CardHeader>
  <CardContent>
- <p className="text-2xl font-bold text-primary">${summaryTotals.totalSales.toFixed(2)}</p>
+ <p className="text-2xl font-bold text-primary">{Formatters.currency(summaryTotals.totalSales)}</p>
  </CardContent>
  </Card>
  <Card>
@@ -285,7 +286,7 @@ const MerchantTransactions = () => { const { user, loading, signOut } = useAuth(
  <CardDescription>Success Fees</CardDescription>
  </CardHeader>
  <CardContent>
- <p className="text-2xl font-bold text-muted-foreground">${summaryTotals.totalPlatformFees.toFixed(2)}</p>
+ <p className="text-2xl font-bold text-muted-foreground">{Formatters.currency(summaryTotals.totalPlatformFees)}</p>
  </CardContent>
  </Card>
  <Card>
@@ -293,7 +294,7 @@ const MerchantTransactions = () => { const { user, loading, signOut } = useAuth(
  <CardDescription>Funding Repayment</CardDescription>
  </CardHeader>
  <CardContent>
- <p className="text-2xl font-bold text-muted-foreground">${summaryTotals.totalRepayment.toFixed(2)}</p>
+ <p className="text-2xl font-bold text-muted-foreground">{Formatters.currency(summaryTotals.totalRepayment)}</p>
  </CardContent>
  </Card>
  <Card>
@@ -301,7 +302,7 @@ const MerchantTransactions = () => { const { user, loading, signOut } = useAuth(
  <CardDescription>Net Payout</CardDescription>
  </CardHeader>
  <CardContent>
- <p className="text-2xl font-bold text-success">${summaryTotals.totalNetPayout.toFixed(2)}</p>
+ <p className="text-2xl font-bold text-success">{Formatters.currency(summaryTotals.totalNetPayout)}</p>
  </CardContent>
  </Card>
  </div>
@@ -436,10 +437,10 @@ const MerchantTransactions = () => { const { user, loading, signOut } = useAuth(
  <TableRow key={transaction.transaction_id} className="hover:bg-muted transition-colors">
  <TableCell>{format(new Date(transaction.date),"MM/dd/yyyy")}</TableCell>
  <TableCell className="font-medium">{transaction.customer_name}</TableCell>
- <TableCell className="text-right font-semibold">${transaction.amount.toFixed(2)}</TableCell>
- <TableCell className="text-right text-muted-foreground">${(transaction.platform_fee || 0).toFixed(2)}</TableCell>
- <TableCell className="text-right text-muted-foreground">${transaction.repayment_deducted.toFixed(2)}</TableCell>
- <TableCell className="text-right font-semibold text-success">${transaction.net_payout.toFixed(2)}</TableCell>
+ <TableCell className="text-right font-semibold">{Formatters.currency(transaction.amount)}</TableCell>
+ <TableCell className="text-right text-muted-foreground">{Formatters.currency((transaction.platform_fee || 0))}</TableCell>
+ <TableCell className="text-right text-muted-foreground">{Formatters.currency(transaction.repayment_deducted)}</TableCell>
+ <TableCell className="text-right font-semibold text-success">{Formatters.currency(transaction.net_payout)}</TableCell>
  <TableCell>{transaction.payment_method}</TableCell>
  <TableCell>
  <Badge variant="outline" className={getStatusColor(transaction.status)}>

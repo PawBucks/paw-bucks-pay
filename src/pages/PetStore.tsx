@@ -37,6 +37,7 @@ import { useShoppingCart } from"@/hooks/useShoppingCart";
 import { getStripePromise } from"@/lib/stripe";
 import { buildAppUrl } from"@/lib/url";
 
+import { Formatters } from "@/utils/formatters";
 const CATEGORIES = ["All","Food","Treats","Toys","Bedding","Accessories","Healthcare","Grooming","Sanitation"];
 const ITEM_TYPES = ["All","Product","Service"] as const;
 const SORT_OPTIONS = [
@@ -121,7 +122,7 @@ const PetStorePaymentForm = ({
  </div>
  <div className="flex justify-between text-sm mb-2">
  <span className="text-muted-foreground">Amount:</span>
- <span className="font-medium">${totalAmountDollars.toFixed(2)}</span>
+ <span className="font-medium">{Formatters.currency(totalAmountDollars)}</span>
  </div>
  <div className="flex justify-between text-sm">
  <span className="text-muted-foreground">You'll earn ({cashbackRate}x):</span>

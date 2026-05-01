@@ -14,6 +14,7 @@ import { ExpenseEntryDialog, ExpensesList, CategorySummary, ReportGenerator, Mil
 import { LoadingSpinner } from'@/components/LoadingSpinner';
 import { toast } from'sonner';
 
+import { Formatters } from "@/utils/formatters";
 function BackfillFeesButton({ onComplete }: { onComplete: () => void }) {
  const [isSyncing, setIsSyncing] = useState(false);
 
@@ -266,12 +267,12 @@ export default function MerchantTaxVault() {
  <p className="font-semibold">Deduction Breakdown:</p>
  <div className="flex justify-between">
  <span>General Expenses:</span>
- <span>${deductionBreakdown.totalGeneralExpenses.toFixed(2)}</span>
+ <span>{Formatters.currency(deductionBreakdown.totalGeneralExpenses)}</span>
  </div>
  {deductionBreakdown.vehicleDeduction > 0 && (
  <div className="flex justify-between">
  <span>Vehicle ({deductionBreakdown.vehicleMethod ==='standard' ?'Mileage' :'Actual'}):</span>
- <span>${deductionBreakdown.vehicleDeduction.toFixed(2)}</span>
+ <span>{Formatters.currency(deductionBreakdown.vehicleDeduction)}</span>
  </div>
  )}
  <p className="text-muted-foreground pt-1 border-t">
@@ -281,7 +282,7 @@ export default function MerchantTaxVault() {
  </TooltipContent>
  </Tooltip>
  </div>
- <p className="text-2xl font-bold">${deductionBreakdown.totalDeductions.toFixed(2)}</p>
+ <p className="text-2xl font-bold">{Formatters.currency(deductionBreakdown.totalDeductions)}</p>
  </div>
  <DollarSign className="h-8 w-8 text-success opacity-80" />
  </div>
@@ -316,11 +317,11 @@ export default function MerchantTaxVault() {
  <p className="font-semibold">Best Option Selected:</p>
  <div className="flex justify-between">
  <span>Standard Mileage ({deductionBreakdown.businessMiles.toFixed(0)} mi):</span>
- <span>${deductionBreakdown.standardMileageDeduction.toFixed(2)}</span>
+ <span>{Formatters.currency(deductionBreakdown.standardMileageDeduction)}</span>
  </div>
  <div className="flex justify-between">
  <span>Actual Expenses:</span>
- <span>${deductionBreakdown.actualExpensesDeduction.toFixed(2)}</span>
+ <span>{Formatters.currency(deductionBreakdown.actualExpensesDeduction)}</span>
  </div>
  <p className="text-success pt-1 border-t">
  Using {deductionBreakdown.vehicleMethod ==='standard' ?'Standard Mileage' :'Actual Expenses'} method (higher value)
@@ -330,7 +331,7 @@ export default function MerchantTaxVault() {
  </Tooltip>
  )}
  </div>
- <p className="text-2xl font-bold">${deductionBreakdown.vehicleDeduction.toFixed(2)}</p>
+ <p className="text-2xl font-bold">{Formatters.currency(deductionBreakdown.vehicleDeduction)}</p>
  </div>
  <Car className="h-8 w-8 text-warning opacity-80" />
  </div>

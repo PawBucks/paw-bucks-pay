@@ -4,6 +4,7 @@ import { GradientCard } from"@/components/ui/gradient-card";
 import { format } from"date-fns";
 import { User } from"lucide-react";
 
+import { Formatters } from "@/utils/formatters";
 type Transaction = {
  id: string;
  amount: number;
@@ -74,11 +75,11 @@ const MerchantTransactionListComponent = ({
  </div>
  <div className="text-right">
  <p className={`font-bold ${isRefunded ?'text-destructive line-through' :'text-accent'}`}>
- +${transaction.amount.toFixed(2)}
+ +{Formatters.currency(transaction.amount)}
  </p>
  <p className={`text-sm ${isRefunded ?'text-destructive line-through' :'text-muted-foreground'}`}>
  {/* Convert PawBucks to USD (1 PawBuck = $0.001) */}
- Rewards: ${((transaction.rewards_earned ?? transaction.cashback_earned) * 0.001).toFixed(2)}
+ Rewards: {Formatters.currency(((transaction.rewards_earned ?? transaction.cashback_earned) * 0.001))}
  </p>
  </div>
  </div>

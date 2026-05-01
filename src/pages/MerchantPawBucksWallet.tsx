@@ -11,6 +11,7 @@ import { Coins, TrendingUp, ArrowUpRight, ArrowDownRight, ArrowLeft, Store, Shop
 import { Formatters } from"@/utils/formatters";
 import { format, parseISO } from"date-fns";
 
+import { Formatters } from "@/utils/formatters";
 type MerchantPawBucksWallet = {
  id: string;
  balance: number;
@@ -172,7 +173,7 @@ const MerchantPawBucksWallet = () => {
  </div>
  <p className="text-5xl font-bold mb-2">{Formatters.number(balance)}</p>
  <p className="text-xl text-muted-foreground">PawBucks</p>
- <p className="text-lg text-accent mt-2">≈ ${usdValue.toFixed(2)} USD</p>
+ <p className="text-lg text-accent mt-2">≈ {Formatters.currency(usdValue)} USD</p>
  <p className="text-xs text-muted-foreground mt-2">1000 PawBucks = $1.00</p>
  </div>
  </GradientCard>

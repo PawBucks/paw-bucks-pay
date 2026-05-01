@@ -2,6 +2,7 @@ import { RadioGroup, RadioGroupItem } from"@/components/ui/radio-group";
 import { Label } from"@/components/ui/label";
 import { Coins, Gift } from"lucide-react";
 
+import { Formatters } from "@/utils/formatters";
 export type PawBucksSource ="earned" |"promotional" |"none";
 
 const PAWBUCKS_TO_USD = 0.001;
@@ -45,7 +46,7 @@ export const PawBucksSourceSelector = ({
  <div className="flex-1 min-w-0">
  <p className="text-sm font-medium">Earned PawBucks</p>
  <p className="text-xs text-muted-foreground">
- {earnedBalance.toLocaleString()} PB (${(earnedBalance * PAWBUCKS_TO_USD).toFixed(2)})
+ {earnedBalance.toLocaleString()} PB ({Formatters.currency((earnedBalance * PAWBUCKS_TO_USD))})
  </p>
  </div>
  </label>
@@ -63,7 +64,7 @@ export const PawBucksSourceSelector = ({
  <div className="flex-1 min-w-0">
  <p className="text-sm font-medium">{promotionalLabel}</p>
  <p className="text-xs text-muted-foreground">
- {promotionalBalance.toLocaleString()} PB (${(promotionalBalance * PAWBUCKS_TO_USD).toFixed(2)})
+ {promotionalBalance.toLocaleString()} PB ({Formatters.currency((promotionalBalance * PAWBUCKS_TO_USD))})
  </p>
  </div>
  </label>

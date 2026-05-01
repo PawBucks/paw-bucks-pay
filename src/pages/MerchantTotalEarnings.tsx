@@ -91,7 +91,7 @@
  </div>
  <div>
  <CardTitle className="text-3xl text-primary">
- ${summary.totalEarnings.toFixed(2)}
+ {Formatters.currency(summary.totalEarnings)}
  </CardTitle>
  <CardDescription>Net earnings after success fees</CardDescription>
  </div>
@@ -111,7 +111,7 @@
  <DollarSign className="h-4 w-4 text-muted-foreground" />
  <span className="text-sm text-muted-foreground">Success Fees</span>
  </div>
- <p className="text-2xl font-bold">${summary.totalFees.toFixed(2)}</p>
+ <p className="text-2xl font-bold">{Formatters.currency(summary.totalFees)}</p>
  </div>
  <div className="p-4 rounded-lg bg-background border">
  <div className="flex items-center gap-2 mb-2">
@@ -142,7 +142,7 @@
  </div>
  <div className="p-4 rounded-lg bg-background border">
  <p className="text-sm text-muted-foreground mb-1">Total Refunded</p>
- <p className="text-2xl font-bold text-destructive">${summary.refunds.amount.toFixed(2)}</p>
+ <p className="text-2xl font-bold text-destructive">{Formatters.currency(summary.refunds.amount)}</p>
  </div>
  </div>
  </CardContent>
@@ -170,11 +170,11 @@
  <div className="grid gap-3 md:grid-cols-3">
  <div className="p-3 rounded-lg border bg-muted/30">
  <p className="text-xs text-muted-foreground uppercase tracking-wide">Earnings</p>
- <p className="text-lg font-semibold">${breakdown.directPaymentEarnings.toFixed(2)}</p>
+ <p className="text-lg font-semibold">{Formatters.currency(breakdown.directPaymentEarnings)}</p>
  </div>
  <div className="p-3 rounded-lg border bg-muted/30">
  <p className="text-xs text-muted-foreground uppercase tracking-wide">Fees</p>
- <p className="text-lg font-semibold">${breakdown.directPaymentFees.toFixed(2)}</p>
+ <p className="text-lg font-semibold">{Formatters.currency(breakdown.directPaymentFees)}</p>
  </div>
  <div className="p-3 rounded-lg border bg-muted/30">
  <p className="text-xs text-muted-foreground uppercase tracking-wide">Count</p>
@@ -192,7 +192,7 @@
  <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
  <div className="p-3 rounded-lg border bg-muted/30">
  <p className="text-xs text-muted-foreground uppercase tracking-wide">Earnings</p>
- <p className="text-lg font-semibold">${breakdown.transactionEarnings.toFixed(2)}</p>
+ <p className="text-lg font-semibold">{Formatters.currency(breakdown.transactionEarnings)}</p>
  </div>
  <div className="p-3 rounded-lg border bg-muted/30">
  <p className="text-xs text-muted-foreground uppercase tracking-wide">Count</p>

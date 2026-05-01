@@ -14,6 +14,7 @@ import {
  Legend,
 } from"recharts";
 
+import { Formatters } from "@/utils/formatters";
 type MonthlySalesData = {
  month: string;
  amount: number;
@@ -40,8 +41,8 @@ const MerchantChartsComponent = ({
  borderRadius:"8px",
  }), []);
 
- const barFormatter = useMemo(() => (value: number) => [`$${value.toFixed(2)}`,"Sales"], []);
- const pieFormatter = useMemo(() => (value: number) => `$${value.toFixed(2)}`, []);
+ const barFormatter = useMemo(() => (value: number) => [`${Formatters.currency(value)}`,"Sales"], []);
+ const pieFormatter = useMemo(() => (value: number) => `${Formatters.currency(value)}`, []);
  const yAxisFormatter = useMemo(() => (value: number) => `$${value}`, []);
  return (
  <div className="grid gap-6 md:grid-cols-2 mb-8">
