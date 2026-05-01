@@ -1,9 +1,14 @@
 import { ReactNode, useEffect, useState, useRef } from'react';
-import { useNavigate, useLocation } from'react-router-dom';
+import { Navigate, useNavigate, useLocation } from'react-router-dom';
 import { useAuth } from'@/hooks/useAuth';
 import { PageLoader } from'@/components/PageLoader';
 import { ROUTES } from'@/lib/constants';
-import { getUserAccessInfo, type UserAccessInfo } from'@/lib/userAccessCache';
+import {
+ getUserAccessInfo,
+ resolveAuthPersona,
+ DASHBOARD_ROUTE_BY_PERSONA,
+ type UserAccessInfo,
+} from'@/lib/userAccessCache';
 
 type AllowedRole ='admin' |'superadmin' |'merchant' |'vet' |'pet_owner' |'brand';
 
@@ -78,6 +83,7 @@ export const ProtectedRoute = ({
  const [checkDone, setCheckDone] = useState(false);
  const [authorized, setAuthorized] = useState(false);
  const [hasPets, setHasPets] = useState(true);
+ const [roleRedirectTo, setRoleRedirectTo] = useState(ROUTES.DASHBOARD);
  const checkingRef = useRef(false);
 
  const isExemptRoute = skipPetOnboarding || PET_ONBOARDING_EXEMPT_ROUTES.some(
