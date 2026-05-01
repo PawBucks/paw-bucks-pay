@@ -108,11 +108,11 @@ export function InvoiceSettingsComponent({
  }
  };
 
- const getFormValues = (s: InvoiceSettingsType | null): SettingsFormData => ({
- invoice_prefix: s?.invoice_prefix ||"INV-",
- next_invoice_number: s?.next_invoice_number || 1001,
- default_payment_terms: s?.default_payment_terms || 30,
- default_tax_rate: s?.default_tax_rate || 0,
+  const getFormValues = (s: InvoiceSettingsType | null): SettingsFormData => ({
+  invoice_prefix: s?.invoice_prefix ||"INV-",
+  next_invoice_number: s?.next_invoice_number || 1001,
+  default_payment_terms: s?.default_payment_terms ?? 30,
+  default_tax_rate: s?.default_tax_rate ?? 0,
  default_notes: s?.default_notes ||"",
  default_footer: s?.default_footer ||"",
  late_fee_enabled: s?.late_fee_enabled || false,

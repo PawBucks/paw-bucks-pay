@@ -138,9 +138,9 @@ export function InvoiceEditor({
  client_company: invoice?.client_company ||"",
  client_address: invoice?.client_address ||"",
  title: invoice?.title ||"",
- issue_date: invoice?.issue_date ? parseISO(invoice.issue_date) : new Date(),
- due_date: invoice?.due_date ? parseISO(invoice.due_date) : addDays(new Date(), settings?.default_payment_terms || 30),
- payment_terms: invoice?.payment_terms ?? settings?.default_payment_terms ?? 30,
+  issue_date: invoice?.issue_date ? parseISO(invoice.issue_date) : new Date(),
+  due_date: invoice?.due_date ? parseISO(invoice.due_date) : addDays(new Date(), settings?.default_payment_terms ?? 30),
+  payment_terms: invoice?.payment_terms ?? settings?.default_payment_terms ?? 30,
  discount_type: (invoice?.discount_type as"percentage" |"flat") || undefined,
  discount_value: invoice?.discount_value || 0,
  tax_rate: invoice?.tax_rate ?? settings?.default_tax_rate ?? 0,
@@ -191,7 +191,7 @@ export function InvoiceEditor({
  client_address: invoice?.client_address ||"",
  title: invoice?.title ||"",
  issue_date: invoice?.issue_date ? parseISO(invoice.issue_date) : new Date(),
- due_date: invoice?.due_date ? parseISO(invoice.due_date) : addDays(new Date(), settings?.default_payment_terms || 30),
+ due_date: invoice?.due_date ? parseISO(invoice.due_date) : addDays(new Date(), settings?.default_payment_terms ?? 30),
  payment_terms: invoice?.payment_terms ?? settings?.default_payment_terms ?? 30,
  discount_type: (invoice?.discount_type as"percentage" |"flat") || undefined,
  discount_value: invoice?.discount_value || 0,
@@ -224,7 +224,9 @@ export function InvoiceEditor({
  form.reset(newDefaults);
  setAttachments(invoice?.attachment_urls || []);
  setRecipients(invoice?.recipients || []);
- }, [invoice?.id]); // Reset when the invoice identity changes
+  // Re-run when invoice identity changes OR when default settings load for a brand-new invoice
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [invoice?.id, invoice ? null : settings?.default_payment_terms, invoice ? null : settings?.default_tax_rate, invoice ? null : settings?.default_notes, invoice ? null : settings?.default_footer]);
 
  const watchDiscountType = form.watch("discount_type");
  const watchDiscountValue = form.watch("discount_value");

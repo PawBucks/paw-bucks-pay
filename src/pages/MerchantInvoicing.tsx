@@ -424,7 +424,7 @@ const MerchantInvoicing = () => {
  client_address: invoice.client_address,
  title: invoice.title,
  issue_date: new Date().toISOString().split("T")[0],
- due_date: new Date(Date.now() + (invoice.payment_terms || 30) * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+ due_date: new Date(Date.now() + ((invoice.payment_terms ?? 30) * 24 * 60 * 60 * 1000)).toISOString().split("T")[0],
  payment_terms: invoice.payment_terms,
  tax_rate: invoice.tax_rate,
  discount_type: invoice.discount_type,
@@ -631,16 +631,15 @@ const MerchantInvoicing = () => {
 
  // Settings actions
  const handleSaveSettings = async (data: Partial<InvoiceSettings>) => {
- if (!merchantId) return;
- 
- try {
- await invoicingService.upsertSettings(merchantId, data);
- toast.success("Settings saved");
- loadData();
- } catch (error) {
- console.error("Error saving settings:", error);
- toast.error("Failed to save settings");
+ if (!merchantId) {
+ throw new Error("Merchant not loaded yet");
  }
+ const { error } = await invoicingService.upsertSettings(merchantId, data);
+ if (error) {
+ console.error("Error saving settings:", error);
+ throw error;
+ }
+ await loadData();
  };
 
  // Catalog actions
@@ -760,7 +759,7 @@ const MerchantInvoicing = () => {
  invoice_number: nextInvoiceNumber,
  status:'draft',
  issue_date: new Date().toISOString().split('T')[0],
- due_date: new Date(Date.now() + (template.payment_terms || 30) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+ due_date: new Date(Date.now() + ((template.payment_terms ?? 30) * 24 * 60 * 60 * 1000)).toISOString().split('T')[0],
  client_id: null,
  client_name:'',
  client_email:'',
