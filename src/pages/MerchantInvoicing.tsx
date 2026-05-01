@@ -759,7 +759,7 @@ const MerchantInvoicing = () => {
  invoice_number: nextInvoiceNumber,
  status:'draft',
  issue_date: new Date().toISOString().split('T')[0],
- due_date: new Date(Date.now() + (template.payment_terms || 30) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+ due_date: new Date(Date.now() + ((template.payment_terms ?? 30) * 24 * 60 * 60 * 1000)).toISOString().split('T')[0],
  client_id: null,
  client_name:'',
  client_email:'',
