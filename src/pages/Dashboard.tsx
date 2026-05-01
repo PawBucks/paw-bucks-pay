@@ -36,6 +36,7 @@ import { WelcomeCreditCard } from"@/components/dashboard/WelcomeCreditCard";
 import { MaximusChat } from"@/components/maximus/MaximusChat";
 import { QRScannerDialog, CheckInFollowupBanner } from"@/components/checkin";
 import { Store, Users, TrendingUp, Receipt, QrCode } from"lucide-react";
+import { EditorialPageHeader } from"@/components/shared/EditorialPageHeader";
 
 const cardVariants = {
  hidden: { opacity: 0, y: 20 },
@@ -139,19 +140,24 @@ const Dashboard = () => {
  <AdPlacement />
  </div>
 
- <div className="mb-6">
- <h2 className="text-2xl sm:text-3xl font-bold mb-1">Welcome back, {profile.full_name}!</h2>
- <p className="text-sm sm:text-base text-muted-foreground">
- {profile.user_type ==="pet_owner" ?"Manage your pet expenses and rewards" :"Manage your business transactions"}
- </p>
- {/* Shared Account Indicator */}
- {sharedAccount.isSharedMember && sharedAccount.ownerName && (
- <div className="mt-2 inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-medium">
- <Users className="w-4 h-4" />
- Viewing shared account with {sharedAccount.ownerName}
- </div>
- )}
- </div>
+  <EditorialPageHeader
+    eyebrow={profile.user_type ==="pet_owner" ?"Your pet wallet" :"Business overview"}
+    title={`Welcome back, ${profile.full_name?.split(" ")[0] || profile.full_name}`}
+    titleAccent="."
+    subtitle={
+      profile.user_type ==="pet_owner"
+        ?"Track your PawBucks, manage your pets, and discover rewards across your favorite local merchants."
+        :"Manage your business transactions, rewards, and customer relationships."
+    }
+    actions={
+      sharedAccount.isSharedMember && sharedAccount.ownerName ? (
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-medium">
+          <Users className="w-4 h-4" />
+          Shared with {sharedAccount.ownerName}
+        </div>
+      ) : undefined
+    }
+  />
 
  {profile.user_type ==="pet_owner" ? (
  <div className="flex flex-col gap-4 sm:gap-6">
