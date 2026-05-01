@@ -141,3 +141,35 @@ export function getAuthRedirectForUser(userId: string): string {
   if (!persona) return"/auth";
   return AUTH_ROUTE_BY_PERSONA[persona];
 }
+
+/**
+ * Canonical persona → post-login dashboard route mapping.
+ * Single source of truth for where each persona lands after authenticating.
+ */
+export const DASHBOARD_ROUTE_BY_PERSONA: Record<AuthPersona, string> = {
+  admin:"/admin",
+  brand:"/brand-dashboard",
+  vet:"/merchant-dashboard", // vets are stored as merchants
+  merchant:"/merchant-dashboard",
+  pet_owner:"/dashboard",
+};
+
+/**
+ * Resolve the post-login dashboard route for a user using the unified
+ * access-info RPC (with caching/dedup). This is the AUTHORITATIVE answer —
+ * never guess or fall back to the pet-owner dashboard for unknown personas.
+ *
+ * Order of precedence:
+ *   1. system_roles admin/superadmin → /admin
+ *   2. user_type explicit (brand/vet/merchant/pet_owner)
+ *   3. capability flags (is_vet, is_merchant)
+ *   4. fallback → pet_owner
+ *
+ * If the lookup fails entirely we throw — callers should NOT silently
+ * default to /dashboard.
+ */
+export async function resolvePostLoginRoute(userId: string): Promise<string> {
+  const info = await getUserAccessInfo(userId);
+  const persona = resolveAuthPersona(info) ??"pet_owner";
+  return DASHBOARD_ROUTE_BY_PERSONA[persona];
+}
