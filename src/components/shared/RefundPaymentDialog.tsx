@@ -20,6 +20,7 @@ import {
  SelectValue,
 } from'@/components/ui/select';
 
+import { Formatters } from "@/utils/formatters";
 type RefundPaymentDialogProps = {
  open: boolean;
  onOpenChange: (open: boolean) => void;
@@ -50,7 +51,7 @@ export function RefundPaymentDialog({
  // Reset form when dialog opens
  useEffect(() => {
  if (open) {
- setAmount(transactionAmount.toFixed(2));
+ setAmount(Formatters.money(transactionAmount));
  setReason('');
  setNote('');
  setRefundApplicationFee(true);
@@ -104,12 +105,12 @@ export function RefundPaymentDialog({
  </div>
  {isPartial && (
  <p className="text-xs text-muted-foreground">
- Partial refund of ${parsedAmount.toFixed(2)} out of ${transactionAmount.toFixed(2)}
+ Partial refund of {Formatters.currency(parsedAmount)} out of {Formatters.currency(transactionAmount)}
  </p>
  )}
  {!isValidAmount && amount !=='' && (
  <p className="text-xs text-destructive">
- Amount must be between $0.01 and ${transactionAmount.toFixed(2)}
+ Amount must be between $0.01 and {Formatters.currency(transactionAmount)}
  </p>
  )}
  </div>

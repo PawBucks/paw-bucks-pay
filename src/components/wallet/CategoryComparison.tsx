@@ -6,6 +6,7 @@ import { ArrowUp, ArrowDown, Minus, BarChart2 } from"lucide-react";
 import { startOfMonth, endOfMonth, subMonths } from"date-fns";
 import { CATEGORY_CONFIG, getNormalizedCategory } from"@/lib/categoryMapping";
 
+import { Formatters } from "@/utils/formatters";
 type Transaction = {
  id: string;
  amount: number;
@@ -159,7 +160,7 @@ export const CategoryComparison = memo(({ transactions, medicalRecords = [] }: C
  className={`text-[10px] gap-0.5 ${getChangeColor(cat.change)}`}
  >
  {getChangeIcon(cat.change)}
- {cat.change > 0 ?'+' :''}{cat.change.toFixed(0)}%
+ {cat.change > 0 ?'+' :''}{Formatters.number(Math.round(cat.change))}%
  </Badge>
  </div>
  </div>
@@ -177,7 +178,7 @@ export const CategoryComparison = memo(({ transactions, medicalRecords = [] }: C
  }}
  />
  </div>
- <div className="w-16 text-xs font-medium text-right">${cat.thisMonth.toFixed(0)}</div>
+ <div className="w-16 text-xs font-medium text-right">${Formatters.number(Math.round(cat.thisMonth))}</div>
  </div>
  
  {/* Last month */}
@@ -192,7 +193,7 @@ export const CategoryComparison = memo(({ transactions, medicalRecords = [] }: C
  }}
  />
  </div>
- <div className="w-16 text-xs text-muted-foreground text-right">${cat.lastMonth.toFixed(0)}</div>
+ <div className="w-16 text-xs text-muted-foreground text-right">${Formatters.number(Math.round(cat.lastMonth))}</div>
  </div>
  </div>
  </div>

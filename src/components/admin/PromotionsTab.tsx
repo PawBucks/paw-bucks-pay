@@ -24,6 +24,7 @@ import {
 import { PromotionInviteDialog } from "./PromotionInviteDialog";
 import { PromotionInvitationsLog } from "./PromotionInvitationsLog";
 
+import { Formatters } from "@/utils/formatters";
 const emptyForm = {
   title: "",
   description: "",
@@ -290,7 +291,7 @@ function PromotionRow({
             <Badge className={statusColor}>{p.status}</Badge>
             <Badge variant="outline" className="capitalize">{p.recipient_type === "both" ? "Merchants & Vets" : p.recipient_type}</Badge>
             {p.reward_amount_usd != null && (
-              <Badge variant="secondary">${Number(p.reward_amount_usd).toFixed(2)}</Badge>
+              <Badge variant="secondary">{Formatters.currency(Number(p.reward_amount_usd))}</Badge>
             )}
           </div>
           {p.description && <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{p.description}</p>}

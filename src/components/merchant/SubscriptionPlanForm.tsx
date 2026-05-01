@@ -21,6 +21,7 @@ import {
 import { Loader2, Plus, X } from"lucide-react";
 import { Badge } from"@/components/ui/badge";
 
+import { Formatters } from "@/utils/formatters";
 type BillingInterval ="day" |"week" |"month" |"year";
 
 interface SubscriptionPlanFormProps {
@@ -204,7 +205,7 @@ export function SubscriptionPlanForm({
 
  {amount && (
  <div className="p-3 rounded-lg bg-muted text-sm">
- <span className="font-medium">${parseFloat(amount ||"0").toFixed(2)}</span>
+ <span className="font-medium">{Formatters.currency(parseFloat(amount ||"0"))}</span>
  <span className="text-muted-foreground"> {getIntervalLabel()}</span>
  </div>
  )}

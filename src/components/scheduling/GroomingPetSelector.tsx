@@ -15,6 +15,7 @@ import {
 import { AlertTriangle, CheckCircle2, XCircle, Dog, Loader2 } from"lucide-react";
 import { differenceInMonths, parseISO } from"date-fns";
 
+import { Formatters } from "@/utils/formatters";
 const COAT_CONDITIONS = [
  { value:"good", label:"Good – well maintained" },
  { value:"matted", label:"Matted – some tangles" },
@@ -248,7 +249,7 @@ export function GroomingPetSelector({
  )}
  {groomingData.adjustedPrice && groomingData.adjustedPrice !== basePrice && (
  <Badge variant="outline" className="bg-success/10 text-success border-success/20">
- Price: ${effectivePrice.toFixed(2)} (was ${basePrice.toFixed(2)})
+ Price: {Formatters.currency(effectivePrice)} (was {Formatters.currency(basePrice)})
  </Badge>
  )}
  </div>

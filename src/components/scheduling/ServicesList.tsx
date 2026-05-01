@@ -28,6 +28,7 @@ import {
  isFlashSaleActive
 } from"@/services/api/scheduling.service";
 
+import { Formatters } from "@/utils/formatters";
 // Flash Sale Countdown component
 function FlashSaleCountdown({ endAt }: { endAt: string }) {
  const [timeRemaining, setTimeRemaining] = useState<string>("");
@@ -221,7 +222,7 @@ export function ServicesList({ services, onEdit, onDelete, onToggleActive, onMan
  </div>
  <div className="flex items-center gap-1">
  <DollarSign className="w-4 h-4" />
- <span>${service.price.toFixed(2)}</span>
+ <span>{Formatters.currency(service.price)}</span>
  </div>
  {service.max_capacity > 1 && (
  <div className="flex items-center gap-1">

@@ -13,6 +13,7 @@ import { ArrowLeft, Gift, Clock, CheckCircle, Sparkles } from"lucide-react";
 import { supabase } from"@/integrations/supabase/client";
 import { toast } from"sonner";
 
+import { Formatters } from "@/utils/formatters";
 interface BadgeDefinition {
  id: string;
  badge_key: string;
@@ -210,7 +211,7 @@ const BadgesPage = () => {
  <span className="font-semibold">Badge Earned!</span>
  </div>
  <p className="text-sm text-muted-foreground">
- Earned on {new Date(selectedEarned.earned_at).toLocaleDateString()} by spending ${selectedEarned.spending_amount.toFixed(2)}
+ Earned on {new Date(selectedEarned.earned_at).toLocaleDateString()} by spending {Formatters.currency(selectedEarned.spending_amount)}
  </p>
  </div>
  ) : (

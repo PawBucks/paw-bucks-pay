@@ -7,6 +7,7 @@ import { Button } from"@/components/ui/button";
 import { MapPin, Star, Navigation, Coins, BadgeCheck, Gem, ChevronRight } from"lucide-react";
 import { PawBucksInfoTooltip } from"@/components/PawBucksInfoTooltip";
 
+import { Formatters } from "@/utils/formatters";
 type MerchantWithRating = {
  id: string;
  business_name: string;
@@ -37,7 +38,7 @@ interface PremiumAdCardProps {
 const formatDistance = (distance?: number): string => {
  if (distance === undefined) return'';
  if (distance < 0.1) return'< 0.1 mi';
- if (distance < 10) return `${distance.toFixed(1)} mi`;
+ if (distance < 10) return `${Formatters.decimal(distance, 1)} mi`;
  return `${Math.round(distance)} mi`;
 };
 
@@ -121,7 +122,7 @@ const PremiumAdCardComponent = ({
  />
  ))}
  </div>
- <span className="text-xs font-semibold">{safeRating.toFixed(1)}</span>
+ <span className="text-xs font-semibold">{Formatters.decimal(safeRating, 1)}</span>
  <span className="text-xs text-muted-foreground">({merchant.review_count ?? 0})</span>
  <span className="text-muted-foreground/40">·</span>
  <span className="text-xs text-muted-foreground font-medium">

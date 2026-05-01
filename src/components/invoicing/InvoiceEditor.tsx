@@ -54,6 +54,7 @@ import { InvoiceRecipients } from"./InvoiceRecipients";
 import { PricingCalculator } from"@/components/merchant/PricingCalculator";
 import { cn } from"@/lib/utils";
 
+import { Formatters } from "@/utils/formatters";
 const invoiceSchema = z.object({
  client_id: z.string().optional(),
  client_name: z.string().min(1,"Client name is required"),
@@ -674,7 +675,7 @@ export function InvoiceEditor({
  </div>
  <div className="col-span-12 md:col-span-1 flex items-end justify-end">
  <p className="font-semibold pb-2">
- ${((formValues.items?.[index]?.quantity || 0) * (formValues.items?.[index]?.unit_price || 0)).toFixed(2)}
+ {Formatters.currency(((formValues.items?.[index]?.quantity || 0) * (formValues.items?.[index]?.unit_price || 0)))}
  </p>
  </div>
  </div>
@@ -1017,30 +1018,30 @@ export function InvoiceEditor({
  <CardContent className="space-y-3">
  <div className="flex justify-between text-sm">
  <span className="text-muted-foreground">Subtotal</span>
- <span>${totals.subtotal.toFixed(2)}</span>
+ <span>{Formatters.currency(totals.subtotal)}</span>
  </div>
  {totals.discount > 0 && (
  <div className="flex justify-between text-sm text-success">
  <span>Discount</span>
- <span>-${totals.discount.toFixed(2)}</span>
+ <span>-{Formatters.currency(totals.discount)}</span>
  </div>
  )}
  {totals.tax > 0 && (
  <div className="flex justify-between text-sm">
  <span className="text-muted-foreground">Tax</span>
- <span>${totals.tax.toFixed(2)}</span>
+ <span>{Formatters.currency(totals.tax)}</span>
  </div>
  )}
  {totals.shipping > 0 && (
  <div className="flex justify-between text-sm">
  <span className="text-muted-foreground">Shipping</span>
- <span>${totals.shipping.toFixed(2)}</span>
+ <span>{Formatters.currency(totals.shipping)}</span>
  </div>
  )}
  <Separator />
  <div className="flex justify-between font-bold text-lg">
  <span>Total</span>
- <span>${totals.total.toFixed(2)}</span>
+ <span>{Formatters.currency(totals.total)}</span>
  </div>
  </CardContent>
  </Card>

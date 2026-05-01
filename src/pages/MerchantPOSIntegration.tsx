@@ -21,6 +21,7 @@ import {
 import { Header } from"@/components/Header";
 import { BottomNav } from"@/components/BottomNav";
 
+import { Formatters } from "@/utils/formatters";
 interface POSIntegration {
  id: string;
  name: string;
@@ -670,7 +671,7 @@ export default function MerchantPOSIntegration() {
  >
  <div className="space-y-1">
  <div className="flex items-center gap-2">
- <span className="font-medium">${tx.amount.toFixed(2)}</span>
+ <span className="font-medium">{Formatters.currency(tx.amount)}</span>
  {getStatusBadge(tx.status)}
  </div>
  <p className="text-sm text-muted-foreground">

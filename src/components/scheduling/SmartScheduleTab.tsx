@@ -27,6 +27,7 @@ import {
  Users
 } from"lucide-react";
 import mapboxgl from"mapbox-gl";
+import { Formatters } from "@/utils/formatters";
 import"mapbox-gl/dist/mapbox-gl.css";
 
 interface RouteStop {
@@ -450,7 +451,7 @@ export function SmartScheduleTab({ merchantId }: Props) {
  <span>{stop.drive_duration_minutes} min drive</span>
  )}
  {stop.drive_distance_miles != null && (
- <span>• {stop.drive_distance_miles.toFixed(1)} mi</span>
+ <span>• {Formatters.decimal(stop.drive_distance_miles, 1)} mi</span>
  )}
  </div>
  )}

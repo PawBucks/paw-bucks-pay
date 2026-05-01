@@ -4,6 +4,7 @@ import { TaxExpense, TaxExpenseCategory, CATEGORY_LABELS, SCHEDULE_C_MAPPING } f
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from'recharts';
 import { TrendingDown, Sparkles, Car } from'lucide-react';
 
+import { Formatters } from "@/utils/formatters";
 interface VehicleDeductionData {
  vehicleDeduction: number;
  vehicleMethod:'standard' |'actual';
@@ -103,7 +104,7 @@ export function CategorySummary({ expenses, vehicleDeduction }: CategorySummaryP
  ))}
  </Pie>
  <Tooltip
- formatter={(value: number) => `$${value.toFixed(2)}`}
+ formatter={(value: number) => `${Formatters.currency(value)}`}
  />
  <Legend />
  </PieChart>
@@ -137,7 +138,7 @@ export function CategorySummary({ expenses, vehicleDeduction }: CategorySummaryP
  </p>
  </div>
  </div>
- <span className="font-semibold">${vehicleAmount.toFixed(2)}</span>
+ <span className="font-semibold">{Formatters.currency(vehicleAmount)}</span>
  </div>
  <Progress 
  value={grandTotal > 0 ? (vehicleAmount / grandTotal) * 100 : 0} 
@@ -148,7 +149,7 @@ export function CategorySummary({ expenses, vehicleDeduction }: CategorySummaryP
  />
  <p className="text-xs text-muted-foreground">
  {vehicleDeduction.vehicleMethod ==='standard' 
- ? `${vehicleDeduction.businessMiles.toFixed(0)} business miles @ IRS rate`
+ ? `${Formatters.number(Math.round(vehicleDeduction.businessMiles))} business miles @ IRS rate`
  :'Based on actual vehicle expenses × business use %'}
  </p>
  </div>
@@ -170,7 +171,7 @@ export function CategorySummary({ expenses, vehicleDeduction }: CategorySummaryP
  {scheduleC.line}: {scheduleC.description}
  </p>
  </div>
- <span className="font-semibold">${amount.toFixed(2)}</span>
+ <span className="font-semibold">{Formatters.currency(amount)}</span>
  </div>
  <Progress 
  value={percentage} 
@@ -192,7 +193,7 @@ export function CategorySummary({ expenses, vehicleDeduction }: CategorySummaryP
  <div className="pt-4 border-t space-y-3">
  <div className="flex justify-between items-center font-bold">
  <span>Total Deductions</span>
- <span className="text-xl">${grandTotal.toFixed(2)}</span>
+ <span className="text-xl">{Formatters.currency(grandTotal)}</span>
  </div>
  
  {totalSavings > 0 && (
@@ -201,7 +202,7 @@ export function CategorySummary({ expenses, vehicleDeduction }: CategorySummaryP
  <TrendingDown className="h-4 w-4" />
  <span className="font-medium">PawBucks Savings</span>
  </div>
- <span className="font-bold">${totalSavings.toFixed(2)}</span>
+ <span className="font-bold">{Formatters.currency(totalSavings)}</span>
  </div>
  )}
  

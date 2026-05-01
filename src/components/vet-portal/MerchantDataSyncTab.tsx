@@ -34,6 +34,7 @@ import {
 } from"lucide-react";
 import { format, subDays, differenceInDays } from"date-fns";
 
+import { Formatters } from "@/utils/formatters";
 interface MerchantDataSyncTabProps {
  vetId: string;
 }
@@ -319,7 +320,7 @@ export function MerchantDataSyncTab({ vetId }: MerchantDataSyncTabProps) {
  </Badge>
  </TableCell>
  <TableCell className="text-right font-medium">
- ${expense.amount?.toFixed(2)}
+ {Formatters.currency(expense.amount?)}
  </TableCell>
  </TableRow>
  ))

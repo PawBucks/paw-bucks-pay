@@ -14,6 +14,7 @@ import {
 import { startOfMonth, endOfMonth, subMonths, differenceInDays, format } from"date-fns";
 import { CATEGORY_CONFIG, getNormalizedCategory } from"@/lib/categoryMapping";
 
+import { Formatters } from "@/utils/formatters";
 type Transaction = {
  id: string;
  amount: number;
@@ -135,7 +136,7 @@ export const SpendingInsights = memo(({
  type:'warning',
  icon: AlertTriangle,
  title:'Spending Pace Alert',
- description: `At this rate, you'll spend $${projectedSpending.toFixed(0)} this month — ${percentageIncrease.toFixed(0)}% more than last month.`,
+ description: `At this rate, you'll spend $${Formatters.number(Math.round(projectedSpending))} this month — ${Formatters.number(Math.round(percentageIncrease))}% more than last month.`,
  priority: 10
  });
  }
@@ -163,7 +164,7 @@ export const SpendingInsights = memo(({
  type:'tip',
  icon: Target,
  title:'Consistent Spender',
- description: `Your monthly spending stays around $${trend.toFixed(0)}. Consider setting this as your monthly budget target.`,
+ description: `Your monthly spending stays around $${Formatters.number(Math.round(trend))}. Consider setting this as your monthly budget target.`,
  priority: 5
  });
  }

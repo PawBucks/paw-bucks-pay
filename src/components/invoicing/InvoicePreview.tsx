@@ -10,6 +10,7 @@ import { toast } from"sonner";
 import { supabase } from"@/integrations/supabase/client";
 import { buildAppUrl } from"@/lib/url";
 
+import { Formatters } from "@/utils/formatters";
 interface InvoicePreviewProps {
  invoice: Invoice;
  items: InvoiceItem[];
@@ -212,8 +213,8 @@ export function InvoicePreview({
  <td className="text-right p-3">
  {Number(item.quantity).toFixed(item.unit_type ==='hour' ? 2 : 0)} {item.unit_type !=='unit' && item.unit_type}
  </td>
- <td className="text-right p-3">${Number(item.unit_price).toFixed(2)}</td>
- <td className="text-right p-3 font-medium">${Number(item.subtotal).toFixed(2)}</td>
+ <td className="text-right p-3">{Formatters.currency(Number(item.unit_price))}</td>
+ <td className="text-right p-3 font-medium">{Formatters.currency(Number(item.subtotal))}</td>
  </tr>
  ))}
  </tbody>
@@ -225,41 +226,41 @@ export function InvoicePreview({
  <div className="w-64 space-y-2">
  <div className="flex justify-between text-sm">
  <span className="text-muted-foreground">Subtotal</span>
- <span>${Number(invoice.subtotal).toFixed(2)}</span>
+ <span>{Formatters.currency(Number(invoice.subtotal))}</span>
  </div>
  {Number(invoice.discount_amount) > 0 && (
  <div className="flex justify-between text-sm text-success">
  <span>Discount</span>
- <span>-${Number(invoice.discount_amount).toFixed(2)}</span>
+ <span>-{Formatters.currency(Number(invoice.discount_amount))}</span>
  </div>
  )}
  {Number(invoice.tax_amount) > 0 && (
  <div className="flex justify-between text-sm">
  <span className="text-muted-foreground">Tax ({invoice.tax_rate}%)</span>
- <span>${Number(invoice.tax_amount).toFixed(2)}</span>
+ <span>{Formatters.currency(Number(invoice.tax_amount))}</span>
  </div>
  )}
  {Number(invoice.shipping_amount) > 0 && (
  <div className="flex justify-between text-sm">
  <span className="text-muted-foreground">Shipping</span>
- <span>${Number(invoice.shipping_amount).toFixed(2)}</span>
+ <span>{Formatters.currency(Number(invoice.shipping_amount))}</span>
  </div>
  )}
  <Separator />
  <div className="flex justify-between font-bold text-lg">
  <span>Total</span>
- <span>${Number(invoice.total).toFixed(2)}</span>
+ <span>{Formatters.currency(Number(invoice.total))}</span>
  </div>
  {Number(invoice.amount_paid) > 0 && (
  <>
  <div className="flex justify-between text-sm text-success">
  <span>Paid</span>
- <span>-${Number(invoice.amount_paid).toFixed(2)}</span>
+ <span>-{Formatters.currency(Number(invoice.amount_paid))}</span>
  </div>
  <Separator />
  <div className="flex justify-between font-bold text-lg" style={{ color: accentColor }}>
  <span>Amount Due</span>
- <span>${Number(invoice.amount_due).toFixed(2)}</span>
+ <span>{Formatters.currency(Number(invoice.amount_due))}</span>
  </div>
  </>
  )}
@@ -287,7 +288,7 @@ export function InvoicePreview({
  <td className="p-2 capitalize">{payment.payment_method.replace('_','')}</td>
  <td className="p-2">{payment.reference_number ||'-'}</td>
  <td className="p-2 text-right font-medium text-success">
- ${Number(payment.amount).toFixed(2)}
+ {Formatters.currency(Number(payment.amount))}
  </td>
  </tr>
  ))}
@@ -369,7 +370,7 @@ export function InvoicePreview({
  {isPublic && Number(invoice.amount_due) > 0 && invoice.accept_credit_card && (
  <div className="mt-8 text-center print:hidden">
  <Button size="lg" style={{ backgroundColor: accentColor }} className="text-white">
- Pay ${Number(invoice.amount_due).toFixed(2)} Now
+ Pay {Formatters.currency(Number(invoice.amount_due))} Now
  </Button>
  {invoice.allow_partial_payments && (
  <p className="text-sm text-muted-foreground mt-2">

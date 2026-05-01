@@ -7,6 +7,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from"@/compo
 import { Button } from"@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from"@/components/ui/collapsible";
 
+import { Formatters } from "@/utils/formatters";
 // Default Stripe processing fees
 const DEFAULT_PERCENTAGE_FEE = 3; // 3%
 const DEFAULT_FIXED_FEE = 0; // No fixed fee
@@ -156,7 +157,7 @@ export const PricingCalculator = ({ onApplyPrice, compact = false }: PricingCalc
  type="button"
  size="sm"
  variant="outline"
- onClick={() => onApplyPrice(calculation.suggestedPrice.toFixed(2))}
+ onClick={() => onApplyPrice(Formatters.money(calculation.suggestedPrice))}
  >
  Apply
  </Button>
@@ -169,7 +170,7 @@ export const PricingCalculator = ({ onApplyPrice, compact = false }: PricingCalc
 
  {calculation && (
  <p className="text-xs text-muted-foreground">
- Fee: {formatCurrency(calculation.processingFee)} ({calculation.pctFee}% + ${calculation.fxdFee.toFixed(2)}) → You receive: {formatCurrency(calculation.netAmount)}
+ Fee: {formatCurrency(calculation.processingFee)} ({calculation.pctFee}% + {Formatters.currency(calculation.fxdFee)}) → You receive: {formatCurrency(calculation.netAmount)}
  </p>
  )}
  </div>
@@ -282,7 +283,7 @@ export const PricingCalculator = ({ onApplyPrice, compact = false }: PricingCalc
  <span className="font-medium">{formatCurrency(calculation.suggestedPrice)}</span>
  </div>
  <div className="flex justify-between text-destructive">
- <span>Processing fee ({calculation.pctFee}% + ${calculation.fxdFee.toFixed(2)})</span>
+ <span>Processing fee ({calculation.pctFee}% + {Formatters.currency(calculation.fxdFee)})</span>
  <span>-{formatCurrency(calculation.processingFee)}</span>
  </div>
  <div className="border-t pt-2 flex justify-between font-semibold">
@@ -294,7 +295,7 @@ export const PricingCalculator = ({ onApplyPrice, compact = false }: PricingCalc
 
  {onApplyPrice && (
  <Button 
- onClick={() => onApplyPrice(calculation.suggestedPrice.toFixed(2))}
+ onClick={() => onApplyPrice(Formatters.money(calculation.suggestedPrice))}
  className="w-full"
  >
  Use {formatCurrency(calculation.suggestedPrice)} as price

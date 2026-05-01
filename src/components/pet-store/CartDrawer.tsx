@@ -9,6 +9,7 @@ import { CartItem } from"@/hooks/useShoppingCart";
 import { Formatters } from"@/utils/formatters";
 import { motion, AnimatePresence } from"framer-motion";
 
+import { Formatters } from "@/utils/formatters";
 const PAWBUCKS_TO_USD = 0.001;
 const MIN_ORDER_USD_FOR_PAWBUCKS = 25; // PawBucks only allowed on orders $25+
 const MAX_PAWBUCKS_COVERAGE_PCT = 0.33; // PawBucks may cover up to 33% of total
@@ -169,7 +170,7 @@ export function CartDrawer({
  <h4 className="font-medium text-sm truncate">{item.item.name}</h4>
  <div className="flex items-center gap-2 mt-0.5">
  <span className="text-sm font-semibold">
- ${(item.item.price / 100).toFixed(2)}
+ {Formatters.currency((item.item.price / 100))}
  </span>
  </div>
  {outOfStock && (
@@ -231,7 +232,7 @@ export function CartDrawer({
  {/* Order total */}
  <div className="flex justify-between items-center">
  <span className="text-sm text-muted-foreground">Order Total</span>
- <span className="font-bold text-lg">${totalUsdDollars.toFixed(2)}</span>
+ <span className="font-bold text-lg">{Formatters.currency(totalUsdDollars)}</span>
  </div>
 
  {/* PawBucks slider — only show if user has PawBucks AND order meets $25 min */}
@@ -248,7 +249,7 @@ export function CartDrawer({
  </div>
 
  <p className="text-[11px] text-muted-foreground">
- PawBucks may cover up to 33% of your order (max ${maxCoverageUsd.toFixed(2)}).
+ PawBucks may cover up to 33% of your order (max {Formatters.currency(maxCoverageUsd)}).
  </p>
 
  <Slider
@@ -262,7 +263,7 @@ export function CartDrawer({
  <div className="flex justify-between items-center text-xs">
  <span className="text-muted-foreground">
  {actualPawbucks > 0
- ? `${Formatters.number(actualPawbucks)} PB ($${pawbucksUsdValue.toFixed(2)})`
+ ? `${Formatters.number(actualPawbucks)} PB (${Formatters.currency(pawbucksUsdValue)})`
  :"No PawBucks applied"}
  </span>
  {maxApplicablePawbucks > 0 && (
@@ -289,7 +290,7 @@ export function CartDrawer({
  <div className="bg-muted/40 border border-dashed border-border rounded-lg p-3 text-xs text-muted-foreground flex items-start gap-2">
  <Coins className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
  <span>
- Add ${(MIN_ORDER_USD_FOR_PAWBUCKS - totalUsdDollars).toFixed(2)} more to use PawBucks. PawBucks
+ Add {Formatters.currency((MIN_ORDER_USD_FOR_PAWBUCKS - totalUsdDollars))} more to use PawBucks. PawBucks
  are available on orders of ${MIN_ORDER_USD_FOR_PAWBUCKS}+ and may cover up to 33% of the total.
  </span>
  </div>
@@ -305,7 +306,7 @@ export function CartDrawer({
  <Coins className="h-3.5 w-3.5" /> PawBucks
  </span>
  <span className="font-medium text-primary">
- {Formatters.number(actualPawbucks)} PB (−${pawbucksUsdValue.toFixed(2)})
+ {Formatters.number(actualPawbucks)} PB (−{Formatters.currency(pawbucksUsdValue)})
  </span>
  </div>
  )}
@@ -315,7 +316,7 @@ export function CartDrawer({
  <CreditCard className="h-3.5 w-3.5" /> Card
  </span>
  <span className="font-medium">
- ${cardAmountDollars.toFixed(2)}
+ {Formatters.currency(cardAmountDollars)}
  </span>
  </div>
  )}
@@ -341,12 +342,12 @@ export function CartDrawer({
  ) : getMode() ==="split" ? (
  <>
  <CreditCard className="mr-2 h-4 w-4" />
- Pay ${cardAmountDollars.toFixed(2)} + {Formatters.number(actualPawbucks)} PB
+ Pay {Formatters.currency(cardAmountDollars)} + {Formatters.number(actualPawbucks)} PB
  </>
  ) : (
  <>
  <CreditCard className="mr-2 h-4 w-4" />
- Pay ${totalUsdDollars.toFixed(2)} with Card
+ Pay {Formatters.currency(totalUsdDollars)} with Card
  </>
  )}
  </Button>

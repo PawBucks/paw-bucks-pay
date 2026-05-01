@@ -36,6 +36,7 @@ import {
 } from"lucide-react";
 import { Input } from"@/components/ui/input";
 
+import { Formatters } from "@/utils/formatters";
 // Flash Sale Countdown component for service listings
 function FlashSaleCountdown({ endAt }: { endAt: string }) {
  const [timeRemaining, setTimeRemaining] = useState<string>("");
@@ -533,7 +534,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
  </div>
  <div className="text-right flex-shrink-0">
  <div className="text-lg font-bold text-primary">
- ${service.price.toFixed(2)}
+ {Formatters.currency(service.price)}
  </div>
  
  {/* Flash Sale PawBucks Pricing */}
@@ -670,7 +671,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
  <span className="font-medium">Total</span>
  <div className="text-right">
  <span className="text-xl font-bold text-primary">
- ${effectivePrice.toFixed(2)}
+ {Formatters.currency(effectivePrice)}
  </span>
  {selectedServiceData.payment_type ==="pay_at_booking" && (
  <p className="text-xs text-muted-foreground">Due at booking</p>
@@ -739,7 +740,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
  <p className="text-info">
  This service requires a <strong>card on file</strong> to book.
  {(selectedServiceData as any).no_show_fee_amount > 0 && (
- <> A ${Number((selectedServiceData as any).no_show_fee_amount).toFixed(2)} no-show fee applies if you miss your appointment.</>
+ <> A {Formatters.currency(Number((selectedServiceData as any).no_show_fee_amount))} no-show fee applies if you miss your appointment.</>
  )}
  </p>
  </div>

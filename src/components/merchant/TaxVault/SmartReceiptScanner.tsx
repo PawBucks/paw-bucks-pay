@@ -7,6 +7,7 @@ import { toast } from'sonner';
 import { supabase } from'@/integrations/supabase/client';
 import { TaxExpenseCategory } from'./types';
 
+import { Formatters } from "@/utils/formatters";
 interface ExtractedReceiptData {
  vendor_name: string | null;
  amount: number | null;
@@ -236,7 +237,7 @@ export function SmartReceiptScanner({ open, onOpenChange, onDataExtracted }: Sma
  <p className="text-muted-foreground text-xs">Amount</p>
  <p className="font-medium">
  {extractedData.amount !== null 
- ? `$${extractedData.amount.toFixed(2)}` 
+ ? `${Formatters.currency(extractedData.amount)}` 
  : <span className="text-muted-foreground italic">Not detected</span>}
  </p>
  </div>

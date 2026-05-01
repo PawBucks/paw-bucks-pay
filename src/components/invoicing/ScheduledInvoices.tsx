@@ -8,6 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { CalendarClock, RefreshCw, Clock, AlertCircle, MoreHorizontal, Edit, Trash2, Eye } from"lucide-react";
 import { type Invoice } from"@/services/api/invoicing.service";
 
+import { Formatters } from "@/utils/formatters";
 interface ScheduledInvoicesProps {
  invoices: Invoice[];
  loading: boolean;
@@ -151,7 +152,7 @@ export function ScheduledInvoices({ invoices, loading, onEdit, onDelete, onView 
  </div>
  </TableCell>
  <TableCell className="font-medium">
- ${(inv.total || 0).toFixed(2)}
+ {Formatters.currency((inv.total || 0))}
  </TableCell>
  <TableCell>
  {inv.is_recurring ? (

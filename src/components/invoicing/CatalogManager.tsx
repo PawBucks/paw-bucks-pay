@@ -47,6 +47,7 @@ import {
 import { Textarea } from"@/components/ui/textarea";
 import { toast } from"sonner";
 
+import { Formatters } from "@/utils/formatters";
 export interface CatalogItem {
  id: string;
  merchant_id: string;
@@ -296,7 +297,7 @@ export function CatalogManager({
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-2">
  <span className="text-lg font-semibold">
- ${Number(item.unit_price).toFixed(2)}
+ {Formatters.currency(Number(item.unit_price))}
  </span>
  <span className="text-sm text-muted-foreground">
  / {item.unit_type}

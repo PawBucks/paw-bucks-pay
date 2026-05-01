@@ -16,6 +16,7 @@ import { Facebook, Instagram, Twitter, Linkedin, Globe, Info } from"lucide-react
 import { PolicyDocumentUpload } from"./PolicyDocumentUpload";
 import { BusinessHoursEditor } from"./BusinessHoursEditor";
 
+import { Formatters } from "@/utils/formatters";
 const BUSINESS_TYPE_OPTIONS: { key: string; label: string }[] = [
  { key:"veterinary", label:"Veterinary" },
  { key:"grooming", label:"Grooming" },
@@ -238,7 +239,7 @@ export const EditMerchantProfileDialog = ({
  className="w-full"
  />
  <p className="text-xs text-muted-foreground text-center">
- Scale: {logoZoom.toFixed(1)}x
+ Scale: {Formatters.decimal(logoZoom, 1)}x
  </p>
  </div>
  )}

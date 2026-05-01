@@ -43,6 +43,7 @@ import {
 import { toast } from"sonner";
 import { SubscriptionPlanForm } from"@/components/merchant/SubscriptionPlanForm";
 
+import { Formatters } from "@/utils/formatters";
 type SubscriptionPlan = {
  id: string;
  name: string;
@@ -422,7 +423,7 @@ const MerchantSubscriptionPlans = () => {
  <div className="flex flex-wrap gap-6">
  <div className="flex items-center gap-2">
  <DollarSign className="h-4 w-4 text-muted-foreground" />
- <span className="font-semibold">${(plan.amount / 100).toFixed(2)}</span>
+ <span className="font-semibold">{Formatters.currency((plan.amount / 100))}</span>
  <span className="text-muted-foreground">{formatInterval(plan.billing_interval, plan.billing_interval_count)}</span>
  </div>
  

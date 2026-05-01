@@ -29,6 +29,7 @@ import {
 } from"lucide-react";
 import { format, formatDistanceToNow } from"date-fns";
 
+import { Formatters } from "@/utils/formatters";
 interface FeaturedPartnerData {
  hasSubscription: boolean;
  subscription?: {
@@ -271,7 +272,7 @@ export function FeaturedPartnerWidget() {
  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
  <div className="bg-muted rounded-lg p-4 text-center">
  <TrendingUp className="h-6 w-6 mx-auto mb-2 text-success" />
- <p className="text-2xl font-bold">${data.metrics?.totalRevenue.toFixed(0)}</p>
+ <p className="text-2xl font-bold">${Formatters.number(Math.round(data.metrics?.totalRevenue))}</p>
  <p className="text-xs text-muted-foreground">90-Day Revenue</p>
  </div>
  <div className="bg-muted rounded-lg p-4 text-center">
@@ -281,13 +282,13 @@ export function FeaturedPartnerWidget() {
  </div>
  <div className="bg-muted rounded-lg p-4 text-center">
  <Star className="h-6 w-6 mx-auto mb-2 text-warning" />
- <p className="text-2xl font-bold">{data.metrics?.avgRating.toFixed(1)}</p>
+ <p className="text-2xl font-bold">{Formatters.decimal(data.metrics?.avgRating, 1)}</p>
  <p className="text-xs text-muted-foreground">Avg Rating</p>
  </div>
  <div className="bg-muted rounded-lg p-4 text-center">
  <Zap className="h-6 w-6 mx-auto mb-2 text-accent" />
  <p className="text-2xl font-bold">
- {data.metrics?.customerGrowth > 0 ?'+' :''}{data.metrics?.customerGrowth.toFixed(0)}%
+ {data.metrics?.customerGrowth > 0 ?'+' :''}{Formatters.number(Math.round(data.metrics?.customerGrowth))}%
  </p>
  <p className="text-xs text-muted-foreground">Customer Growth</p>
  </div>
@@ -461,7 +462,7 @@ export function FeaturedPartnerWidget() {
  {review.metrics && (
  <div className="grid grid-cols-4 gap-4 mt-4 pt-4 border-t">
  <div className="text-center">
- <p className="text-lg font-semibold">${review.metrics.totalRevenue.toFixed(0)}</p>
+ <p className="text-lg font-semibold">${Formatters.number(Math.round(review.metrics.totalRevenue))}</p>
  <p className="text-xs text-muted-foreground">Revenue</p>
  </div>
  <div className="text-center">
@@ -475,7 +476,7 @@ export function FeaturedPartnerWidget() {
  <p className="text-xs text-muted-foreground">Growth</p>
  </div>
  <div className="text-center">
- <p className="text-lg font-semibold">{review.metrics.avgRating.toFixed(1)}</p>
+ <p className="text-lg font-semibold">{Formatters.decimal(review.metrics.avgRating, 1)}</p>
  <p className="text-xs text-muted-foreground">Rating</p>
  </div>
  </div>

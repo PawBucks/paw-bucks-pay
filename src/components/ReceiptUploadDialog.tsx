@@ -14,6 +14,7 @@ import { cn } from"@/lib/utils";
 import { useSubscription } from"@/hooks/useSubscription";
 import { getSubscriptionTier } from"@/lib/constants";
 
+import { Formatters } from "@/utils/formatters";
 interface ReceiptUploadDialogProps {
  open: boolean;
  onOpenChange: (open: boolean) => void;
@@ -220,7 +221,7 @@ export const ReceiptUploadDialog = ({ open, onOpenChange, userId }: ReceiptUploa
  await supabase.from("notifications").insert({
  user_id: userId,
  title:"Receipt Submitted Successfully",
- message: `We've received your receipt from ${finalMerchantName} for $${amount.toFixed(2)}. You'll earn approximately ${estimatedPawBucks.toLocaleString()} PawBucks (${creditRate}% ${tierLabel} rate). Review takes 24-72 hours.`,
+ message: `We've received your receipt from ${finalMerchantName} for ${Formatters.currency(amount)}. You'll earn approximately ${estimatedPawBucks.toLocaleString()} PawBucks (${creditRate}% ${tierLabel} rate). Review takes 24-72 hours.`,
  category:"transactional",
  });
 

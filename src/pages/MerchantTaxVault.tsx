@@ -316,7 +316,7 @@ export default function MerchantTaxVault() {
  <div className="space-y-1 text-xs">
  <p className="font-semibold">Best Option Selected:</p>
  <div className="flex justify-between">
- <span>Standard Mileage ({deductionBreakdown.businessMiles.toFixed(0)} mi):</span>
+ <span>Standard Mileage ({Formatters.number(Math.round(deductionBreakdown.businessMiles))} mi):</span>
  <span>{Formatters.currency(deductionBreakdown.standardMileageDeduction)}</span>
  </div>
  <div className="flex justify-between">

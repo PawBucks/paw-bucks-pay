@@ -34,6 +34,7 @@ import { toast } from"sonner";
 import { Plus, Edit, Trash2 } from"lucide-react";
 import { useNavigate } from"react-router-dom";
 
+import { Formatters } from "@/utils/formatters";
 const CATEGORIES = ["Food","Treats","Toys","Bedding","Accessories","Healthcare","Grooming","Sanitation"];
 
 export default function PetStoreAdmin() {
@@ -414,7 +415,7 @@ export default function PetStoreAdmin() {
  </div>
  <div className="flex items-center justify-between">
  <div className="flex gap-4 text-sm">
- <span><strong>${(item.price / 100).toFixed(2)}</strong></span>
+ <span><strong>{Formatters.currency((item.price / 100))}</strong></span>
  <span><strong>{item.price_pawbucks}</strong> PB</span>
  <span>Stock: <strong>{item.stock_quantity}</strong></span>
  </div>
@@ -478,7 +479,7 @@ export default function PetStoreAdmin() {
  </span>
  </TableCell>
  <TableCell>{item.category}</TableCell>
- <TableCell>${(item.price / 100).toFixed(2)}</TableCell>
+ <TableCell>{Formatters.currency((item.price / 100))}</TableCell>
  <TableCell>{item.price_pawbucks} PB</TableCell>
  <TableCell>{item.stock_quantity}</TableCell>
  <TableCell>{item.stock_quantity}</TableCell>

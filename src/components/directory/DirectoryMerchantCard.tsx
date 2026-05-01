@@ -15,6 +15,7 @@ import {
 } from"lucide-react";
 import { OpenStatusBadge } from"@/components/merchant/OpenStatusBadge";
 
+import { Formatters } from "@/utils/formatters";
 type DirectoryMerchant = {
  id: string;
  business_name: string;
@@ -131,7 +132,7 @@ const DirectoryMerchantCardComponent = ({
  ))}
  </div>
  <span className="text-sm font-semibold">
- {rating > 0 ? rating.toFixed(1) :"New"}
+ {rating > 0 ? Formatters.decimal(rating, 1) :"New"}
  </span>
  <span className="text-xs text-muted-foreground">
  ({merchant.review_count ?? 0})

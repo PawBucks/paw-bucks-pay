@@ -17,6 +17,7 @@ import {
 import { useState } from"react";
 import { toast } from"sonner";
 
+import { Formatters } from "@/utils/formatters";
 const tooltipStyle = {
  backgroundColor:'hsl(var(--card))',
  border:'1px solid hsl(var(--border))',
@@ -260,7 +261,7 @@ export function CohortAnalysisReport() {
  <YAxis tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
  <Tooltip 
  contentStyle={tooltipStyle}
- formatter={(value: number) => [`$${value.toFixed(2)}`,'Avg LTV']}
+ formatter={(value: number) => [`${Formatters.currency(value)}`,'Avg LTV']}
  />
  <Bar dataKey="avg_ltv" fill="hsl(var(--chart-2))" radius={[4, 4, 0, 0]} name="avg_ltv" />
  </BarChart>
@@ -299,7 +300,7 @@ export function CohortAnalysisReport() {
  />
  <Tooltip 
  contentStyle={tooltipStyle}
- formatter={(value: number) => [`${value.toFixed(1)}%`,'Retention Rate']}
+ formatter={(value: number) => [`${Formatters.decimal(value, 1)}%`,'Retention Rate']}
  />
  <Line 
  type="monotone" 
@@ -346,11 +347,11 @@ export function CohortAnalysisReport() {
  <tr key={cohort.cohort_month} className="border-b hover:bg-muted">
  <td className="py-3 px-2 font-medium">{cohort.cohort_month}</td>
  <td className="py-3 px-2 text-right">{cohort.customer_count}</td>
- <td className="py-3 px-2 text-right">${cohort.avg_ltv.toFixed(2)}</td>
- <td className="py-3 px-2 text-right">${cohort.avg_aov.toFixed(2)}</td>
+ <td className="py-3 px-2 text-right">{Formatters.currency(cohort.avg_ltv)}</td>
+ <td className="py-3 px-2 text-right">{Formatters.currency(cohort.avg_aov)}</td>
  <td className="py-3 px-2 text-right">
  <span className={cohort.retention_rate >= 50 ?'text-success' : cohort.retention_rate >= 25 ?'text-warning' :'text-destructive'}>
- {cohort.retention_rate.toFixed(1)}%
+ {Formatters.decimal(cohort.retention_rate, 1)}%
  </span>
  </td>
  <td className="py-3 px-2 text-right">${cohort.total_revenue.toLocaleString()}</td>
@@ -446,7 +447,7 @@ export function CohortAnalysisReport() {
  </CardHeader>
  <CardContent>
  <p className="text-3xl font-bold text-primary">
- {summary.avg_transactions_per_customer.toFixed(1)}
+ {Formatters.decimal(summary.avg_transactions_per_customer, 1)}
  </p>
  <p className="text-sm text-muted-foreground">
  transactions per customer
@@ -507,7 +508,7 @@ export function CohortAnalysisReport() {
  <div key={segment.segment} className="p-4 rounded-lg bg-muted">
  <div className="flex items-center justify-between mb-2">
  <span className="font-medium">{segment.segment}</span>
- <Badge variant="secondary">{segment.percentage.toFixed(1)}%</Badge>
+ <Badge variant="secondary">{Formatters.decimal(segment.percentage, 1)}%</Badge>
  </div>
  <div className="grid grid-cols-3 gap-2 text-sm">
  <div>
@@ -520,7 +521,7 @@ export function CohortAnalysisReport() {
  </div>
  <div>
  <p className="text-muted-foreground">Avg Value</p>
- <p className="font-semibold">${segment.avg_value.toFixed(2)}</p>
+ <p className="font-semibold">{Formatters.currency(segment.avg_value)}</p>
  </div>
  </div>
  </div>

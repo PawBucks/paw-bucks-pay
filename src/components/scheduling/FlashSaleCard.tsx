@@ -18,6 +18,7 @@ import {
  isFlashSaleActive
 } from"@/services/api/scheduling.service";
 
+import { Formatters } from "@/utils/formatters";
 interface FlashSaleCardProps {
  service: MerchantService;
  onEdit: (service: MerchantService) => void;
@@ -168,7 +169,7 @@ export function FlashSaleCard({
  </div>
  <div className="flex items-center gap-1">
  <DollarSign className="w-4 h-4" />
- <span>${service.price.toFixed(2)}</span>
+ <span>{Formatters.currency(service.price)}</span>
  </div>
  {service.max_capacity > 1 && (
  <div className="flex items-center gap-1">

@@ -9,6 +9,7 @@ import { Html5Qrcode } from"html5-qrcode";
 import { Camera, CheckCircle2, XCircle, Loader2, MapPin, Store, Navigation } from"lucide-react";
 import { toast } from"sonner";
 
+import { Formatters } from "@/utils/formatters";
 type QRScannerDialogProps = {
  open: boolean;
  onOpenChange: (open: boolean) => void;
@@ -274,7 +275,7 @@ export function QRScannerDialog({ open, onOpenChange }: QRScannerDialogProps) {
 
  const formatDistance = (miles: number) => {
  if (miles < 0.1) return"< 0.1 mi";
- return `${miles.toFixed(1)} mi`;
+ return `${Formatters.decimal(miles, 1)} mi`;
  };
 
  return (

@@ -40,6 +40,7 @@ import { CampaignWizard } from"@/components/brand/CampaignWizard";
 import { MerchantMarketplace } from"@/components/brand/MerchantMarketplace";
 import { BrandJoinRequestsInbox } from"@/components/brand/BrandJoinRequestsInbox";
 
+import { Formatters } from "@/utils/formatters";
 const statusConfig: Record<string, { color: string; label: string; emoji: string }> = {
  draft: { color:"bg-muted text-muted-foreground", label:"Draft", emoji:"📝" },
  pending_payment: { color:"bg-warning/15 text-warning", label:"Pending Payment", emoji:"💳" },
@@ -333,7 +334,7 @@ const BrandDashboard = () => {
  </CardHeader>
  <CardContent>
  <p className="text-3xl font-bold">{selectedCampaign.total_distributed.toLocaleString()} <span className="text-base font-normal text-muted-foreground">PB</span></p>
- <p className="text-sm text-muted-foreground">{distributionPct.toFixed(1)}% of {selectedCampaign.pawbucks_pool.toLocaleString()} PB pool</p>
+ <p className="text-sm text-muted-foreground">{Formatters.decimal(distributionPct, 1)}% of {selectedCampaign.pawbucks_pool.toLocaleString()} PB pool</p>
  <Progress value={distributionPct} className="h-2 mt-2" />
  </CardContent>
  </Card>
@@ -345,7 +346,7 @@ const BrandDashboard = () => {
  </CardHeader>
  <CardContent>
  <p className="text-3xl font-bold">{selectedCampaign.total_redeemed.toLocaleString()} <span className="text-base font-normal text-muted-foreground">PB</span></p>
- <p className="text-sm text-muted-foreground">{redemptionPct.toFixed(1)}% of distributed PawBucks redeemed</p>
+ <p className="text-sm text-muted-foreground">{Formatters.decimal(redemptionPct, 1)}% of distributed PawBucks redeemed</p>
  <Progress value={redemptionPct} className="h-2 mt-2" />
  </CardContent>
  </Card>
@@ -583,7 +584,7 @@ const BrandDashboard = () => {
  </div>
  </div>
  <Progress value={poolPct} className="h-1.5 mt-3" />
- <p className="text-xs text-muted-foreground mt-1">{poolPct.toFixed(0)}% of PawBucks pool distributed</p>
+ <p className="text-xs text-muted-foreground mt-1">{Formatters.number(Math.round(poolPct))}% of PawBucks pool distributed</p>
  {(campaign.status ==="draft" || campaign.status ==="pending_payment") && (
  <div className="flex gap-2 mt-3" onClick={(e) => e.stopPropagation()}>
  <Button size="sm" className="flex-1" onClick={() => setFundingCampaign(campaign)}>

@@ -10,6 +10,7 @@ import {
 } from'lucide-react';
 import { cn } from'@/lib/utils';
 
+import { Formatters } from "@/utils/formatters";
 type UnderwritingSignals = {
  tx_frequency_30d: number;
  tx_frequency_90d: number;
@@ -250,7 +251,7 @@ export function UnderwritingSignalsCard({ merchantId }: { merchantId: string }) 
  signals.avg_review_score >= 4.5 ?"text-success" :
  signals.avg_review_score >= 3.5 ?"text-warning" :"text-destructive"
  )}>
- {signals.avg_review_score > 0 ? signals.avg_review_score.toFixed(1) :'N/A'}
+ {signals.avg_review_score > 0 ? Formatters.decimal(signals.avg_review_score, 1) :'N/A'}
  </span>
  {signals.avg_review_score > 0 && (
  <div className="flex items-center gap-0.5 mb-1.5">

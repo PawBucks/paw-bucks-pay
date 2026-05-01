@@ -6,6 +6,7 @@ import { Store, MapPin, Percent, Info } from"lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from"@/components/ui/tooltip";
 import { WelcomeCreditBadge } from"@/components/shared/WelcomeCreditBadge";
 
+import { Formatters } from "@/utils/formatters";
 type Merchant = {
  id: string;
  business_name: string;
@@ -87,7 +88,7 @@ const MerchantCardComponent = ({ merchant, distance, onPayNow }: MerchantCardPro
  <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
  <MapPin className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
  {distance !== undefined ? (
- <span>{distance.toFixed(1)} miles away</span>
+ <span>{Formatters.decimal(distance, 1)} miles away</span>
  ) : (
  <span className="truncate">{merchant.address ||"Location not available"}</span>
  )}

@@ -31,6 +31,7 @@ import {
 } from"lucide-react";
 import { toast } from"sonner";
 
+import { Formatters } from "@/utils/formatters";
 interface BalanceDueModalProps {
  open: boolean;
  onOpenChange: (open: boolean) => void;
@@ -204,7 +205,7 @@ export function BalanceDueModal({
  {slice.claim?.policy?.vet_insurance_providers?.name ||"Insurance"}
  </Badge>
  </div>
- <p className="text-3xl font-bold text-warning">${gapAmount.toFixed(2)}</p>
+ <p className="text-3xl font-bold text-warning">{Formatters.currency(gapAmount)}</p>
  </CardContent>
  </Card>
 
@@ -249,8 +250,7 @@ export function BalanceDueModal({
  :""
  }`}
  >
- {item.type ==="deduction" ?"-" :""}$
- {Math.abs(item.amount).toFixed(2)}
+ {item.type ==="deduction" ?"-" :""}{Formatters.currency(Math.abs(item.amount))}
  </TableCell>
  </TableRow>
  ))}
@@ -280,7 +280,7 @@ export function BalanceDueModal({
  <div className="text-left">
  <p className="font-medium text-warning">Pay Now</p>
  <p className="text-xs text-muted-foreground">
- Credit/Debit Card • ${gapAmount.toFixed(2)}
+ Credit/Debit Card • {Formatters.currency(gapAmount)}
  </p>
  </div>
  </div>
@@ -326,7 +326,7 @@ export function BalanceDueModal({
  <div className="text-left">
  <p className="font-medium text-accent">Split into 3 Payments</p>
  <p className="text-xs text-muted-foreground">
- ${installmentAmount.toFixed(2)}/month • No interest
+ {Formatters.currency(installmentAmount)}/month • No interest
  </p>
  </div>
  </div>
@@ -348,7 +348,7 @@ export function BalanceDueModal({
  </div>
  <p className="text-xs text-success mt-0.5">
  Your <span className="font-semibold">{rewardsMultiplier}x rewards</span> earned
- on the original ${originalTransactionAmount.toFixed(2)} transaction (
+ on the original {Formatters.currency(originalTransactionAmount)} transaction (
  <span className="font-semibold">
  {originalRewardsEarned.toLocaleString()} PawBucks
  </span>

@@ -18,6 +18,7 @@ import { supabase } from'@/integrations/supabase/client';
 import { toast } from'sonner';
 import { cn } from'@/lib/utils';
 
+import { Formatters } from "@/utils/formatters";
 // Helper to format date without timezone issues
 const formatDateLocal = (date: Date): string => {
  const year = date.getFullYear();
@@ -471,11 +472,11 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
  <CardContent className="pt-6">
  <div className="space-y-2">
  <p className="text-sm font-medium text-muted-foreground">Standard Mileage Rate</p>
- <p className="text-3xl font-bold text-success">${standardMileageDeduction.toFixed(2)}</p>
+ <p className="text-3xl font-bold text-success">{Formatters.currency(standardMileageDeduction)}</p>
  <div className="text-xs text-muted-foreground space-y-1 pt-2 border-t">
- <p>{petCommuteMiles.toFixed(1)} business miles × ${IRS_MILEAGE_RATE}/mi</p>
+ <p>{Formatters.decimal(petCommuteMiles, 1)} business miles × ${IRS_MILEAGE_RATE}/mi</p>
  <p className="font-medium">
- {isExclusivelyBusiness ?'100% of miles' : `${petCommutePercentage.toFixed(1)}% of miles`} deductible
+ {isExclusivelyBusiness ?'100% of miles' : `${Formatters.decimal(petCommutePercentage, 1)}% of miles`} deductible
  </p>
  </div>
  </div>
@@ -489,7 +490,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
  {totalMiles > 0 && totalVehicleExpenses > 0 && (
  <div className="text-center">
  <p className="text-xs text-muted-foreground">Difference</p>
- <p className="text-lg font-bold text-primary">${deductionDifference.toFixed(2)}</p>
+ <p className="text-lg font-bold text-primary">{Formatters.currency(deductionDifference)}</p>
  </div>
  )}
  </div>
@@ -513,11 +514,11 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
  <CardContent className="pt-6">
  <div className="space-y-2">
  <p className="text-sm font-medium text-muted-foreground">Actual Expenses</p>
- <p className="text-3xl font-bold text-info">${actualExpensesDeduction.toFixed(2)}</p>
+ <p className="text-3xl font-bold text-info">{Formatters.currency(actualExpensesDeduction)}</p>
  <div className="text-xs text-muted-foreground space-y-1 pt-2 border-t">
- <p>${totalVehicleExpenses.toFixed(2)} total expenses</p>
+ <p>{Formatters.currency(totalVehicleExpenses)} total expenses</p>
  <p className="font-medium">
- × {petCommutePercentage.toFixed(1)}% business use
+ × {Formatters.decimal(petCommutePercentage, 1)}% business use
  </p>
  </div>
  </div>
@@ -559,7 +560,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
  <div className="flex items-center justify-between">
  <div>
  <p className="text-sm text-muted-foreground">Total Miles</p>
- <p className="text-2xl font-bold">{totalMiles.toFixed(1)}</p>
+ <p className="text-2xl font-bold">{Formatters.decimal(totalMiles, 1)}</p>
  </div>
  <Car className="h-8 w-8 text-primary opacity-80" />
  </div>
@@ -571,7 +572,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
  <div className="flex items-center justify-between">
  <div>
  <p className="text-sm text-muted-foreground">Business</p>
- <p className="text-2xl font-bold">{petCommuteMiles.toFixed(1)} mi</p>
+ <p className="text-2xl font-bold">{Formatters.decimal(petCommuteMiles, 1)} mi</p>
  </div>
  <PawPrint className="h-8 w-8 text-success opacity-80" />
  </div>
@@ -584,7 +585,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
  <div>
  <p className="text-sm text-muted-foreground">Business Use</p>
  <p className="text-2xl font-bold">
- {isExclusivelyBusiness ?'100%' : `${petCommutePercentage.toFixed(1)}%`}
+ {isExclusivelyBusiness ?'100%' : `${Formatters.decimal(petCommutePercentage, 1)}%`}
  </p>
  </div>
  <TrendingUp className="h-8 w-8 text-warning opacity-80" />
@@ -738,7 +739,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
  Calculated Miles
  </span>
  <span className="text-lg font-bold text-success">
- {calculatedMiles.toFixed(1)} mi
+ {Formatters.decimal(calculatedMiles, 1)} mi
  </span>
  </div>
  {calculatedMiles === 0 && startOdometer && endOdometer && (
@@ -904,7 +905,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
  <span>Manual</span>
  )}
  </TableCell>
- <TableCell className="font-mono font-semibold">{entry.miles.toFixed(1)}</TableCell>
+ <TableCell className="font-mono font-semibold">{Formatters.decimal(entry.miles, 1)}</TableCell>
  <TableCell className="text-right">
  <div className="flex items-center justify-end gap-1">
  <Button
@@ -943,7 +944,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
  <div className="flex items-center justify-between">
  <div>
  <p className="text-sm text-muted-foreground">Total Expenses</p>
- <p className="text-2xl font-bold">${totalVehicleExpenses.toFixed(2)}</p>
+ <p className="text-2xl font-bold">{Formatters.currency(totalVehicleExpenses)}</p>
  </div>
  <Fuel className="h-8 w-8 text-info opacity-80" />
  </div>
@@ -955,7 +956,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
  <div className="flex items-center justify-between">
  <div>
  <p className="text-sm text-muted-foreground">Business Portion</p>
- <p className="text-2xl font-bold">${actualExpensesDeduction.toFixed(2)}</p>
+ <p className="text-2xl font-bold">{Formatters.currency(actualExpensesDeduction)}</p>
  </div>
  <Calculator className="h-8 w-8 text-success opacity-80" />
  </div>
@@ -1130,7 +1131,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
  {EXPENSE_TYPE_LABELS[expense.expense_type]?.label || expense.expense_type}
  </Badge>
  </TableCell>
- <TableCell className="font-mono font-medium">${expense.amount.toFixed(2)}</TableCell>
+ <TableCell className="font-mono font-medium">{Formatters.currency(expense.amount)}</TableCell>
  <TableCell className="max-w-[200px] truncate">
  {expense.description || <span className="text-muted-foreground">—</span>}
  </TableCell>

@@ -19,6 +19,7 @@ import { Badge } from"@/components/ui/badge";
 import { cn } from"@/lib/utils";
 import { CatalogItem } from"./CatalogManager";
 
+import { Formatters } from "@/utils/formatters";
 interface CatalogItemPickerProps {
  items: CatalogItem[];
  onSelect: (item: CatalogItem) => void;
@@ -101,7 +102,7 @@ export function CatalogItemPicker({ items, onSelect, className }: CatalogItemPic
  </div>
  <div className="flex items-center gap-2 ml-2">
  <span className="text-sm font-semibold text-primary">
- ${Number(item.unit_price).toFixed(2)}
+ {Formatters.currency(Number(item.unit_price))}
  </span>
  <Plus className="h-4 w-4 text-muted-foreground" />
  </div>

@@ -11,6 +11,7 @@ import { format, startOfMonth, endOfMonth } from"date-fns";
 import { Upload, CalendarIcon, ImageIcon, X, Loader2, Sparkles, Receipt, AlertTriangle } from"lucide-react";
 import { cn } from"@/lib/utils";
 
+import { Formatters } from "@/utils/formatters";
 interface NonPartnerReceiptDialogProps {
  open: boolean;
  onOpenChange: (open: boolean) => void;
@@ -116,7 +117,7 @@ export const NonPartnerReceiptDialog = ({ open, onOpenChange, userId }: NonPartn
 
  const amount = parseFloat(purchaseAmount);
  if (amount > remainingDollarCap) {
- toast.error(`You've reached your monthly cap. Only $${remainingDollarCap.toFixed(2)} remaining this month.`);
+ toast.error(`You've reached your monthly cap. Only ${Formatters.currency(remainingDollarCap)} remaining this month.`);
  return;
  }
 
@@ -146,7 +147,7 @@ export const NonPartnerReceiptDialog = ({ open, onOpenChange, userId }: NonPartn
  await supabase.from("notifications").insert({
  user_id: userId,
  title:"Non-Partner Receipt Submitted",
- message: `Receipt from ${merchantName.trim()} for $${amount.toFixed(2)} received. You'll earn ~${estimatedPB.toLocaleString()} PawBucks (${PB_PER_DOLLAR} PB/$1). These vest after 30 days. Review takes 24-72 hours.`,
+ message: `Receipt from ${merchantName.trim()} for ${Formatters.currency(amount)} received. You'll earn ~${estimatedPB.toLocaleString()} PawBucks (${PB_PER_DOLLAR} PB/$1). These vest after 30 days. Review takes 24-72 hours.`,
  category:"transactional",
  });
 
@@ -206,7 +207,7 @@ export const NonPartnerReceiptDialog = ({ open, onOpenChange, userId }: NonPartn
  <div className="p-3 rounded-lg bg-muted border">
  <div className="flex justify-between text-xs mb-1.5">
  <span className="text-muted-foreground">Monthly Cap</span>
- <span className="font-medium">${monthlySpent.toFixed(0)} / ${MONTHLY_DOLLAR_CAP} used</span>
+ <span className="font-medium">${Formatters.number(Math.round(monthlySpent))} / ${MONTHLY_DOLLAR_CAP} used</span>
  </div>
  <div className="h-2 bg-muted rounded-full overflow-hidden">
  <div

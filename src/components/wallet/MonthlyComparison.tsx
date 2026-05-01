@@ -128,7 +128,7 @@ export const MonthlyComparison = memo(({ transactions, medicalRecords = [] }: Mo
  </div>
  <div className="text-right">
  <p className={`text-xl font-bold ${getTrendColor()}`}>
- {comparison.percentageChange > 0 ?'+' :''}{comparison.percentageChange.toFixed(1)}%
+ {comparison.percentageChange > 0 ?'+' :''}{Formatters.decimal(comparison.percentageChange, 1)}%
  </p>
  <p className="text-xs text-muted-foreground">
  {comparison.difference >= 0 ?'+' :''}{Formatters.currency(comparison.difference)}

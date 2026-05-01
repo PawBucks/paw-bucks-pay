@@ -22,6 +22,7 @@ import { toast } from"sonner";
 import { useQueryClient } from"@tanstack/react-query";
 import { startOfMonth, endOfMonth, differenceInDays, addMonths, format } from"date-fns";
 
+import { Formatters } from "@/utils/formatters";
 type Transaction = {
  id: string;
  amount: number;
@@ -199,7 +200,7 @@ export const SpendingGoals = memo(({ transactions, medicalRecords = [] }: Spendi
  <div className="flex justify-between text-sm mb-1">
  <span className="text-muted-foreground">Progress</span>
  <span className="font-medium">
- ${currentMonthSpending.toFixed(0)} / ${localGoal.monthlyTarget.toFixed(0)}
+ ${Formatters.number(Math.round(currentMonthSpending))} / ${Formatters.number(Math.round(localGoal.monthlyTarget))}
  </span>
  </div>
  <Progress 
@@ -224,7 +225,7 @@ export const SpendingGoals = memo(({ transactions, medicalRecords = [] }: Spendi
  Projected
  </div>
  <p className={`font-bold text-lg ${projectedSpending > localGoal.monthlyTarget ?'text-destructive' :'text-accent'}`}>
- ${projectedSpending.toFixed(0)}
+ ${Formatters.number(Math.round(projectedSpending))}
  </p>
  </div>
  </div>
@@ -272,7 +273,7 @@ export const SpendingGoals = memo(({ transactions, medicalRecords = [] }: Spendi
  </div>
  <p className="text-sm text-muted-foreground mb-2">No spending goal set</p>
  <p className="text-xs text-muted-foreground mb-4">
- Your average: <span className="font-medium">${averageMonthlySpending.toFixed(0)}/month</span>
+ Your average: <span className="font-medium">${Formatters.number(Math.round(averageMonthlySpending))}/month</span>
  </p>
  <Button size="sm" onClick={() => setDialogOpen(true)}>
  <Plus className="w-4 h-4 mr-1" />
@@ -291,7 +292,7 @@ export const SpendingGoals = memo(({ transactions, medicalRecords = [] }: Spendi
  <div className="space-y-4 pt-4">
  <div className="p-3 rounded-lg bg-muted text-sm">
  <p className="text-muted-foreground">Your 3-month average:</p>
- <p className="font-bold text-lg">${averageMonthlySpending.toFixed(0)}/month</p>
+ <p className="font-bold text-lg">${Formatters.number(Math.round(averageMonthlySpending))}/month</p>
  </div>
 
  <div className="space-y-2">
@@ -299,7 +300,7 @@ export const SpendingGoals = memo(({ transactions, medicalRecords = [] }: Spendi
  <Input
  id="goal-amount"
  type="number"
- placeholder={`Less than $${averageMonthlySpending.toFixed(0)}`}
+ placeholder={`Less than $${Formatters.number(Math.round(averageMonthlySpending))}`}
  value={goalAmount}
  onChange={(e) => setGoalAmount(e.target.value)}
  min="0"

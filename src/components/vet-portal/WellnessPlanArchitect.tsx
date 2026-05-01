@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
 import { toast } from"sonner";
 import { Plus, Trash2, Edit, DollarSign, Users, Calendar, Heart, Sparkles, Package } from"lucide-react";
 
+import { Formatters } from "@/utils/formatters";
 interface WellnessPlanArchitectProps {
  vetId: string;
 }
@@ -486,7 +487,7 @@ export function WellnessPlanArchitect({ vetId }: WellnessPlanArchitectProps) {
  <CardContent className="py-3">
  <div className="flex justify-between text-sm">
  <span>Total Retail Value:</span>
- <span className="font-semibold">${totals.totalValue.toFixed(2)}/year</span>
+ <span className="font-semibold">{Formatters.currency(totals.totalValue)}/year</span>
  </div>
  </CardContent>
  </Card>
@@ -589,16 +590,16 @@ export function WellnessPlanArchitect({ vetId }: WellnessPlanArchitectProps) {
  <div className="grid grid-cols-3 gap-4 text-center">
  <div>
  <p className="text-xs text-muted-foreground">Retail Value</p>
- <p className="text-lg font-bold">${totals.totalValue.toFixed(2)}</p>
+ <p className="text-lg font-bold">{Formatters.currency(totals.totalValue)}</p>
  </div>
  <div>
  <p className="text-xs text-muted-foreground">Plan Cost/Year</p>
- <p className="text-lg font-bold">${totals.annualCost.toFixed(2)}</p>
+ <p className="text-lg font-bold">{Formatters.currency(totals.annualCost)}</p>
  </div>
  <div>
  <p className="text-xs text-muted-foreground">Customer Savings</p>
  <p className="text-lg font-bold text-success">
- {totals.savingsPercentage > 0 ? `${totals.savingsPercentage.toFixed(0)}%` :"—"}
+ {totals.savingsPercentage > 0 ? `${Formatters.number(Math.round(totals.savingsPercentage))}%` :"—"}
  </p>
  </div>
  </div>
@@ -694,7 +695,7 @@ export function WellnessPlanArchitect({ vetId }: WellnessPlanArchitectProps) {
 
  {plan.savings_percentage && plan.savings_percentage > 0 && (
  <Badge variant="outline" className="text-success border-success/40">
- Save {plan.savings_percentage.toFixed(0)}% vs. à la carte
+ Save {Formatters.number(Math.round(plan.savings_percentage))}% vs. à la carte
  </Badge>
  )}
 

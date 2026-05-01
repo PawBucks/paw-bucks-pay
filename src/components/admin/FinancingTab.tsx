@@ -257,7 +257,7 @@ function MerchantDetailPanel({
  <Metric icon={DollarSign} label="Amount Requested" value={`$${applicant.requested_amount.toLocaleString()}`} accent />
  <Metric icon={Shield} label="Risk Score" value={`${risk.score}/100`} sub={risk.label} />
  <Metric icon={TrendingUp} label="Max Eligible" value={`$${maxEligible.toLocaleString('en', { maximumFractionDigits: 0 })}`} sub="80% of 90d revenue" />
- <Metric icon={Activity} label="Revenue Coverage" value={`${coverage.toFixed(1)}x`} sub="90d rev / ask" />
+ <Metric icon={Activity} label="Revenue Coverage" value={`${Formatters.decimal(coverage, 1)}x`} sub="90d rev / ask" />
  </div>
 
  {/* Financial Performance */}
@@ -334,7 +334,7 @@ function MerchantDetailPanel({
  </CardHeader>
  <CardContent>
  <div className="grid grid-cols-3 gap-3">
- <Metric icon={DollarSign} label="Est. Monthly Payment" value={`$${projection.monthlyPayment.toFixed(0)}`} sub="10% of 30d revenue" accent />
+ <Metric icon={DollarSign} label="Est. Monthly Payment" value={`$${Formatters.number(Math.round(projection.monthlyPayment))}`} sub="10% of 30d revenue" accent />
  <Metric icon={Calendar} label="Est. Payoff Period" value={`${projection.months} months`} accent />
  <Metric icon={TrendingUp} label="Effective Rate" value="10% of revenue" sub="Revenue-based" accent />
  </div>

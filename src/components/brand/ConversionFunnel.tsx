@@ -3,6 +3,7 @@ import { Filter, Eye, Zap, Gift, Repeat } from"lucide-react";
 import { cn } from"@/lib/utils";
 import type { CommandCenterSummary } from"@/services/api/brandCampaigns.service";
 
+import { Formatters } from "@/utils/formatters";
 interface ConversionFunnelProps {
  summary: CommandCenterSummary;
 }
@@ -52,7 +53,7 @@ export function ConversionFunnel({ summary }: ConversionFunnelProps) {
  <div className="flex items-center gap-2">
  {conversionPct !== null && (
  <span className="text-[10px] text-muted-foreground tabular-nums">
- {conversionPct.toFixed(0)}% ↓
+ {Formatters.number(Math.round(conversionPct))}% ↓
  </span>
  )}
  <span className="font-bold tabular-nums">{stage.value.toLocaleString()}</span>

@@ -19,6 +19,7 @@ import {
 } from'@/components/ui/alert-dialog';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from'@/components/ui/tooltip';
 
+import { Formatters } from "@/utils/formatters";
 interface ExpensesListProps {
  expenses: TaxExpense[];
  onExpenseDeleted: () => void;
@@ -137,10 +138,10 @@ export function ExpensesList({ expenses, onExpenseDeleted }: ExpensesListProps) 
  {expense.description ||'-'}
  </TableCell>
  <TableCell className="text-right font-medium">
- ${expense.amount.toFixed(2)}
+ {Formatters.currency(expense.amount)}
  {expense.original_price && expense.original_price > expense.amount && (
  <span className="block text-xs text-muted-foreground line-through">
- ${expense.original_price.toFixed(2)}
+ {Formatters.currency(expense.original_price)}
  </span>
  )}
  </TableCell>
@@ -148,7 +149,7 @@ export function ExpensesList({ expenses, onExpenseDeleted }: ExpensesListProps) 
  {expense.savings_amount && expense.savings_amount > 0 ? (
  <div className="flex items-center justify-end gap-1 text-success">
  <TrendingDown className="h-3.5 w-3.5" />
- <span className="font-medium">${expense.savings_amount.toFixed(2)}</span>
+ <span className="font-medium">{Formatters.currency(expense.savings_amount)}</span>
  </div>
  ) : (
  <span className="text-muted-foreground">-</span>

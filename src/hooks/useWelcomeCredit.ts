@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from"react";
 import { supabase } from"@/integrations/supabase/client";
 
+import { Formatters } from "@/utils/formatters";
 export interface WelcomeCreditStatus {
  hasCredit: boolean;
  isEligible: boolean;
@@ -101,7 +102,7 @@ export const useWelcomeCredit = (userId: string | undefined, merchantId?: string
  if (transactionAmountCents < minAmount) {
  return { 
  canUse: false, 
- reason: `Minimum $${(minAmount / 100).toFixed(2)} transaction required` 
+ reason: `Minimum ${Formatters.currency((minAmount / 100))} transaction required` 
  };
  }
 

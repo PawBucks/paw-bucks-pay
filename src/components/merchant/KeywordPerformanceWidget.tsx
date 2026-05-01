@@ -17,6 +17,7 @@ import {
 } from"recharts";
 import { toast } from"sonner";
 
+import { Formatters } from "@/utils/formatters";
 interface KeywordData {
  term: string;
  views: number;
@@ -117,7 +118,7 @@ export function KeywordPerformanceWidget() {
  [],
  ['Search Term','Views','Clicks','CTR (%)','Conversions','Conv. Rate (%)','Trend (%)'],
  ...report.keywords.map(k => [
- k.term, k.views, k.clicks, k.ctr.toFixed(2), k.conversions, k.conversionRate.toFixed(2), k.trend.toFixed(1)
+ k.term, k.views, k.clicks, Formatters.money(k.ctr), k.conversions, Formatters.money(k.conversionRate), Formatters.decimal(k.trend, 1)
  ])
  ].map(row => row.join(',')).join('\n');
 
@@ -222,7 +223,7 @@ export function KeywordPerformanceWidget() {
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Avg CTR</p>
- <p className="text-2xl font-bold">{totals.avgCTR.toFixed(1)}%</p>
+ <p className="text-2xl font-bold">{Formatters.decimal(totals.avgCTR, 1)}%</p>
  </div>
  </div>
  </GradientCard>
@@ -352,7 +353,7 @@ export function KeywordPerformanceWidget() {
  outerRadius={100}
  paddingAngle={2}
  dataKey="value"
- label={({ name, percentage }) => `${name}: ${percentage.toFixed(0)}%`}
+ label={({ name, percentage }) => `${name}: ${Formatters.number(Math.round(percentage))}%`}
  labelLine={false}
  >
  {pieData.map((_, index) => (
@@ -454,18 +455,18 @@ export function KeywordPerformanceWidget() {
  ) : (
  <ArrowDown className="h-3 w-3 text-destructive" />
  )}
- {kw.ctr.toFixed(1)}%
+ {Formatters.decimal(kw.ctr, 1)}%
  </div>
  </td>
  <td className="py-3 px-4 text-right">{kw.conversions}</td>
  <td className="py-3 px-4 text-right">
  <Badge variant={kw.conversionRate > 5 ?'default' :'secondary'}>
- {kw.conversionRate.toFixed(1)}%
+ {Formatters.decimal(kw.conversionRate, 1)}%
  </Badge>
  </td>
  <td className="py-3 px-4 text-right">
  <span className={kw.trend >= 0 ?'text-success' :'text-destructive'}>
- {kw.trend >= 0 ?'+' :''}{kw.trend.toFixed(0)}%
+ {kw.trend >= 0 ?'+' :''}{Formatters.number(Math.round(kw.trend))}%
  </span>
  </td>
  </tr>
@@ -489,7 +490,7 @@ export function KeywordPerformanceWidget() {
  <Card key={idx}>
  <CardHeader>
  <CardTitle className="text-lg">{source.name}</CardTitle>
- <CardDescription>{source.percentage.toFixed(1)}% of total traffic</CardDescription>
+ <CardDescription>{Formatters.decimal(source.percentage, 1)}% of total traffic</CardDescription>
  </CardHeader>
  <CardContent className="space-y-4">
  <div className="grid grid-cols-3 gap-4 text-center">

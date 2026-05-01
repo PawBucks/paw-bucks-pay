@@ -16,6 +16,7 @@ import {
  Tooltip, ResponsiveContainer, BarChart, Bar
 } from"recharts";
 
+import { Formatters } from "@/utils/formatters";
 const tooltipStyle = {
  backgroundColor:'hsl(var(--card))',
  border:'1px solid hsl(var(--border))',
@@ -178,7 +179,7 @@ export function MerchantSpotlightWidget() {
  <Card>
  <CardContent className="pt-4 text-center">
  <TrendingUp className="h-5 w-5 text-accent mx-auto mb-2" />
- <p className="text-2xl font-bold">{performance.click_through_rate.toFixed(1)}%</p>
+ <p className="text-2xl font-bold">{Formatters.decimal(performance.click_through_rate, 1)}%</p>
  <p className="text-xs text-muted-foreground">CTR</p>
  </CardContent>
  </Card>

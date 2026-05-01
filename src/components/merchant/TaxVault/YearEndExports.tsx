@@ -26,6 +26,7 @@ import { toast } from'sonner';
 import jsPDF from'jspdf';
 import { TaxExpense, CATEGORY_LABELS, SCHEDULE_C_MAPPING, TaxExpenseCategory } from'./types';
 
+import { Formatters } from "@/utils/formatters";
 interface YearEndExportsProps {
  merchantId: string;
  businessName: string;
@@ -121,7 +122,7 @@ export function YearEndExports({ merchantId, businessName, taxYear, expenses }: 
  SCHEDULE_C_MAPPING[expense.category].line,
  expense.vendor_name ||'',
  expense.description ||'',
- expense.amount.toFixed(2),
+ Formatters.money(expense.amount),
  expense.receipt_url ?'Yes' :'No',
  ]);
 
@@ -143,10 +144,10 @@ export function YearEndExports({ merchantId, businessName, taxYear, expenses }: 
  try {
  const headers = ['Category','Amount'];
  const rows = [
- ['Gross Income (Platform Sales)', grossIncome.toFixed(2)],
+ ['Gross Income (Platform Sales)', Formatters.money(grossIncome)],
  ['Total Expenses', (-totalExpenses).toFixed(2)],
  ['Vehicle/Mileage Deduction', (-mileageDeduction).toFixed(2)],
- ['Net Profit', netProfit.toFixed(2)],
+ ['Net Profit', Formatters.money(netProfit)],
  ];
 
  const csvContent = [
@@ -157,7 +158,7 @@ export function YearEndExports({ merchantId, businessName, taxYear, expenses }: 
 '',
 'Expenses by Category:',
  ...Object.entries(categoryTotals).map(([cat, amt]) => 
- `${CATEGORY_LABELS[cat as TaxExpenseCategory]},${amt.toFixed(2)}`
+ `${CATEGORY_LABELS[cat as TaxExpenseCategory]},{Formatters.currency(amt)}`
  ),
  ].join('\n');
 
@@ -190,7 +191,7 @@ export function YearEndExports({ merchantId, businessName, taxYear, expenses }: 
 '',
  `Total Business Miles: ${businessMiles}`,
  `IRS Rate: $${IRS_MILEAGE_RATE}/mile`,
- `Total Deduction: $${mileageDeduction.toFixed(2)}`,
+ `Total Deduction: ${Formatters.currency(mileageDeduction)}`,
  ].join('\n');
 
  downloadFile(csvContent, `${businessName.replace(/\s+/g,'_')}_Mileage_${taxYear}.csv`,'text/csv');
@@ -207,21 +208,21 @@ export function YearEndExports({ merchantId, businessName, taxYear, expenses }: 
  // Create a multi-sheet CSV (Excel can open)
  const sections = [
 '=== INCOME SUMMARY ===',
- `Gross Income,$${grossIncome.toFixed(2)}`,
- `Total Expenses,$${totalExpenses.toFixed(2)}`,
- `Mileage Deduction,$${mileageDeduction.toFixed(2)}`,
- `Net Profit,$${netProfit.toFixed(2)}`,
+ `Gross Income,${Formatters.currency(grossIncome)}`,
+ `Total Expenses,${Formatters.currency(totalExpenses)}`,
+ `Mileage Deduction,${Formatters.currency(mileageDeduction)}`,
+ `Net Profit,${Formatters.currency(netProfit)}`,
 '',
 '=== EXPENSES BY CATEGORY ===',
 'Category,Schedule C Line,Amount',
  ...Object.entries(categoryTotals).map(([cat, amt]) => 
- `${CATEGORY_LABELS[cat as TaxExpenseCategory]},${SCHEDULE_C_MAPPING[cat as TaxExpenseCategory].line},$${amt.toFixed(2)}`
+ `${CATEGORY_LABELS[cat as TaxExpenseCategory]},${SCHEDULE_C_MAPPING[cat as TaxExpenseCategory].line},${Formatters.currency(amt)}`
  ),
 '',
 '=== DETAILED EXPENSES ===',
 'Date,Category,Vendor,Description,Amount',
  ...expenses.map(e => 
- `${format(new Date(e.expense_date),'yyyy-MM-dd')},${CATEGORY_LABELS[e.category]},"${e.vendor_name ||''}","${e.description ||''}",$${e.amount.toFixed(2)}`
+ `${format(new Date(e.expense_date),'yyyy-MM-dd')},${CATEGORY_LABELS[e.category]},"${e.vendor_name ||''}","${e.description ||''}",${Formatters.currency(e.amount)}`
  ),
 '',
 '=== MILEAGE LOG ===',
@@ -231,7 +232,7 @@ export function YearEndExports({ merchantId, businessName, taxYear, expenses }: 
  ),
 '',
  `Business Miles Total: ${businessMiles}`,
- `Mileage Deduction: $${mileageDeduction.toFixed(2)}`,
+ `Mileage Deduction: ${Formatters.currency(mileageDeduction)}`,
  ];
 
  downloadFile(sections.join('\n'), `${businessName.replace(/\s+/g,'_')}_TaxBundle_${taxYear}.csv`,'text/csv');
@@ -304,7 +305,7 @@ export function YearEndExports({ merchantId, businessName, taxYear, expenses }: 
  const scheduleC = SCHEDULE_C_MAPPING[cat as TaxExpenseCategory];
  doc.text(CATEGORY_LABELS[cat as TaxExpenseCategory], 25, yPos);
  doc.text(`(${scheduleC.line})`, 110, yPos);
- doc.text(`$${(amt as number).toFixed(2)}`, pageWidth - 25, yPos, { align:'right' });
+ doc.text(`${Formatters.currency((amt as number))}`, pageWidth - 25, yPos, { align:'right' });
  yPos += 7;
  });
 
@@ -312,7 +313,7 @@ export function YearEndExports({ merchantId, businessName, taxYear, expenses }: 
  if (mileageDeduction > 0) {
  doc.text('Vehicle/Mileage', 25, yPos);
  doc.text('(Line 9)', 110, yPos);
- doc.text(`$${mileageDeduction.toFixed(2)}`, pageWidth - 25, yPos, { align:'right' });
+ doc.text(`${Formatters.currency(mileageDeduction)}`, pageWidth - 25, yPos, { align:'right' });
  yPos += 7;
  }
 
@@ -324,7 +325,7 @@ export function YearEndExports({ merchantId, businessName, taxYear, expenses }: 
  
  doc.setFont('helvetica','bold');
  doc.text('Total Deductions:', 25, yPos);
- doc.text(`$${(totalExpenses + mileageDeduction).toFixed(2)}`, pageWidth - 25, yPos, { align:'right' });
+ doc.text(`${Formatters.currency((totalExpenses + mileageDeduction))}`, pageWidth - 25, yPos, { align:'right' });
 
  // Net Profit Box
  yPos += 20;
@@ -504,7 +505,7 @@ export function YearEndExports({ merchantId, businessName, taxYear, expenses }: 
  <CardContent className="pt-4">
  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
  <div>
- <p className="text-2xl font-bold text-success">${grossIncome.toFixed(0)}</p>
+ <p className="text-2xl font-bold text-success">${Formatters.number(Math.round(grossIncome))}</p>
  <p className="text-xs text-muted-foreground">Gross Income</p>
  </div>
  <div>
@@ -512,7 +513,7 @@ export function YearEndExports({ merchantId, businessName, taxYear, expenses }: 
  <p className="text-xs text-muted-foreground">Total Deductions</p>
  </div>
  <div>
- <p className="text-2xl font-bold text-primary">${netProfit.toFixed(0)}</p>
+ <p className="text-2xl font-bold text-primary">${Formatters.number(Math.round(netProfit))}</p>
  <p className="text-xs text-muted-foreground">Net Profit</p>
  </div>
  <div>

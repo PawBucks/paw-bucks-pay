@@ -17,6 +17,7 @@ import {
 import { useState } from"react";
 import { toast } from"sonner";
 
+import { Formatters } from "@/utils/formatters";
 const tooltipStyle = {
  backgroundColor:'hsl(var(--card))',
  border:'1px solid hsl(var(--border))',
@@ -563,7 +564,7 @@ export function DemandForecastingReport() {
  <YAxis tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
  <Tooltip 
  contentStyle={tooltipStyle}
- formatter={(value: number) => [`$${value.toFixed(2)}`,'Avg Revenue']}
+ formatter={(value: number) => [`${Formatters.currency(value)}`,'Avg Revenue']}
  />
  <Bar dataKey="avgRevenue" fill="hsl(var(--chart-2))" radius={[4, 4, 0, 0]} />
  </BarChart>
@@ -640,7 +641,7 @@ export function DemandForecastingReport() {
  <Tooltip 
  contentStyle={tooltipStyle}
  formatter={(value: number, name: string) => [
- name ==='revenue' ? `$${value.toFixed(2)}` : value,
+ name ==='revenue' ? `${Formatters.currency(value)}` : value,
  name ==='revenue' ?'Revenue' :'Transactions'
  ]}
  labelFormatter={(label) => new Date(label).toLocaleDateString()}

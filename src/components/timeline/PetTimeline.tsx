@@ -11,6 +11,7 @@ import { AspectRatio } from"@/components/ui/aspect-ratio";
 import { Skeleton } from"@/components/ui/skeleton";
 import { PhotoLightbox } from"@/components/PhotoLightbox";
 
+import { Formatters } from "@/utils/formatters";
 interface TimelineMoment {
  id: string;
  pet_id: string;
@@ -147,7 +148,7 @@ const MomentCard = ({
  <div className="flex items-center gap-3 flex-wrap">
  {moment.amount && (
  <span className="text-xs text-muted-foreground">
- ${moment.amount.toFixed(2)}
+ {Formatters.currency(moment.amount)}
  </span>
  )}
  {moment.pawbucks_earned > 0 && (

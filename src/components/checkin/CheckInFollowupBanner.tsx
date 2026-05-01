@@ -11,6 +11,7 @@ import { NonPartnerReceiptDialog } from"@/components/receipts/NonPartnerReceiptD
 import { useSubscription } from"@/hooks/useSubscription";
 import { getSubscriptionTier } from"@/lib/constants";
 
+import { Formatters } from "@/utils/formatters";
 interface Followup {
  id: string;
  entity_name: string;
@@ -107,7 +108,7 @@ export const CheckInFollowupBanner = ({ userId }: CheckInFollowupBannerProps) =>
  type:"earn",
  amount: estimatedPB,
  source:"checkin_provisional",
- description: `Provisional credit — ${followup?.entity_name} ($${amount.toFixed(2)}${pbUsedLabel})`,
+ description: `Provisional credit — ${followup?.entity_name} (${Formatters.currency(amount)}${pbUsedLabel})`,
  pawbucks_status:"pending",
  vest_date: new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString(),
  });

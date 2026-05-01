@@ -15,6 +15,7 @@ import {
  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from"@/components/ui/select";
 
+import { Formatters } from "@/utils/formatters";
 export interface AdminInvoice {
  id: string;
  invoice_number: string;
@@ -193,10 +194,10 @@ export function AdminInvoiceList({ invoices, loading, onCreateNew, onView, onEdi
  {inv.status.replace("_","")}
  </Badge>
  </TableCell>
- <TableCell className="text-right font-medium">${Number(inv.total).toFixed(2)}</TableCell>
+ <TableCell className="text-right font-medium">{Formatters.currency(Number(inv.total))}</TableCell>
  <TableCell className="text-right">
  {Number(inv.amount_due) > 0 ? (
- <span className="text-warning font-medium">${Number(inv.amount_due).toFixed(2)}</span>
+ <span className="text-warning font-medium">{Formatters.currency(Number(inv.amount_due))}</span>
  ) : (
  <span className="text-success">$0.00</span>
  )}

@@ -21,6 +21,7 @@ import { useSharedAccount, getEffectiveWalletUserId } from"@/hooks/useSharedAcco
 import { getStripePromise } from"@/lib/stripe";
 import { buildAppUrl } from"@/lib/url";
 
+import { Formatters } from "@/utils/formatters";
 // Merchant PawBucks conversion: 1000 PawBucks = $1.00
 const PAWBUCKS_TO_USD = 0.001;
 
@@ -99,7 +100,7 @@ const StripePaymentForm = ({
  <div className="bg-accent/10 border border-accent/20 rounded-lg p-4 space-y-2">
  <div className="flex justify-between text-sm">
  <span className="text-muted-foreground">Service Price:</span>
- <span className="font-medium">${totalPrice.toFixed(2)}</span>
+ <span className="font-medium">{Formatters.currency(totalPrice)}</span>
  </div>
  {pawbucksAmount > 0 && (
  <div className="flex justify-between text-sm">
@@ -107,13 +108,13 @@ const StripePaymentForm = ({
  <Coins className="w-3 h-3" /> PawBucks Applied:
  </span>
  <span className="font-medium text-primary">
- {pawbucksAmount.toLocaleString()} (−${(pawbucksAmount * PAWBUCKS_TO_USD).toFixed(2)})
+ {pawbucksAmount.toLocaleString()} (−{Formatters.currency((pawbucksAmount * PAWBUCKS_TO_USD))})
  </span>
  </div>
  )}
  <div className="flex justify-between text-sm border-t pt-2">
  <span className="text-muted-foreground">Pay with Card:</span>
- <span className="font-bold">${stripeAmount.toFixed(2)}</span>
+ <span className="font-bold">{Formatters.currency(stripeAmount)}</span>
  </div>
  </div>
 
@@ -135,7 +136,7 @@ const StripePaymentForm = ({
  ) : !isReady ? (
  <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Loading...</>
  ) : (
- `Pay $${stripeAmount.toFixed(2)}`
+ `Pay ${Formatters.currency(stripeAmount)}`
  )}
  </Button>
  </div>
@@ -568,7 +569,7 @@ export const ServicePurchaseDialog = ({
  Pay with PawBucks
  {canPayWithPawBucks && pawbucksSavings > 0 && (
  <Badge variant="secondary" className="text-xs bg-accent/20 text-accent">
- Save ${pawbucksSavings.toFixed(2)}!
+ Save {Formatters.currency(pawbucksSavings)}!
  </Badge>
  )}
  </p>
@@ -608,7 +609,7 @@ export const ServicePurchaseDialog = ({
  <div>
  <p className="font-medium">Pay with Card</p>
  <p className="text-sm text-muted-foreground">
- ${service.priceUSD.toFixed(2)} USD
+ {Formatters.currency(service.priceUSD)} USD
  </p>
  </div>
  </div>
@@ -639,14 +640,14 @@ export const ServicePurchaseDialog = ({
  <span className="font-bold">
  {paymentMethod ==='pawbucks' 
  ? `${service.pricePawBucks.toLocaleString()} PawBucks`
- : `$${service.priceUSD.toFixed(2)}`
+ : `${Formatters.currency(service.priceUSD)}`
  }
  </span>
  </div>
  {paymentMethod ==='pawbucks' && pawbucksSavings > 0 && (
  <div className="flex justify-between text-sm text-accent">
  <span>You save:</span>
- <span className="font-medium">${pawbucksSavings.toFixed(2)}</span>
+ <span className="font-medium">{Formatters.currency(pawbucksSavings)}</span>
  </div>
  )}
  </div>

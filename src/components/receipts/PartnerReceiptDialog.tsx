@@ -14,6 +14,7 @@ import { cn } from"@/lib/utils";
 import { useSubscription } from"@/hooks/useSubscription";
 import { getSubscriptionTier } from"@/lib/constants";
 
+import { Formatters } from "@/utils/formatters";
 interface PartnerReceiptDialogProps {
  open: boolean;
  onOpenChange: (open: boolean) => void;
@@ -155,7 +156,7 @@ export const PartnerReceiptDialog = ({ open, onOpenChange, userId }: PartnerRece
  await supabase.from("notifications").insert({
  user_id: userId,
  title:"Receipt Submitted Successfully",
- message: `Receipt from ${merchantName} for $${amount.toFixed(2)} received. You'll earn ~${estimatedPB.toLocaleString()} PawBucks (${pbPerDollar} PB/$1 ${tierLabel} rate). Review takes 24-72 hours.`,
+ message: `Receipt from ${merchantName} for ${Formatters.currency(amount)} received. You'll earn ~${estimatedPB.toLocaleString()} PawBucks (${pbPerDollar} PB/$1 ${tierLabel} rate). Review takes 24-72 hours.`,
  category:"transactional",
  });
 

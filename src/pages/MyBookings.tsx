@@ -48,6 +48,7 @@ import { useNavigate } from"react-router-dom";
 import { cn } from"@/lib/utils";
 import { GroomingReportCardView } from"@/components/scheduling/GroomingReportCardView";
 
+import { Formatters } from "@/utils/formatters";
 type BookingStatus ="pending" |"confirmed" |"cancelled" |"completed" |"no_show";
 
 const STATUS_CONFIG: Record<BookingStatus, { label: string; color: string; icon: any }> = {
@@ -250,7 +251,7 @@ export default function MyBookings() {
  )}
 
  <div className="flex items-center justify-between pt-3 border-t">
- <span className="font-semibold text-primary">${booking.total_price.toFixed(2)}</span>
+ <span className="font-semibold text-primary">{Formatters.currency(booking.total_price)}</span>
  {isUpcoming && status !=="cancelled" && (
  <div className="flex gap-2">
  <Button
