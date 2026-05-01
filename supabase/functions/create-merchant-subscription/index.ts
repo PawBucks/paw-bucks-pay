@@ -117,6 +117,7 @@ const subscriptionSchema = z.object({
   productName: z.string().min(1).max(200),
   paymentMethodId: z.string().min(1), // Card payment method from Stripe Elements
   pawbucksToUse: z.number().int().min(0).optional(), // PawBucks to redeem
+  autoRedeem: z.boolean().optional().default(false), // Honor user's auto_redeem_mode preference
   metadata: z.record(z.string()).optional(),
 });
 
@@ -303,8 +304,9 @@ serve(async (req) => {
     if (!parseResult.success) {
       throw new Error(`Invalid request: ${parseResult.error.message}`);
     }
-    const { merchantId, priceId, productName, paymentMethodId, pawbucksToUse, metadata } = parseResult.data;
-    logStep("Request validated", { merchantId, priceId, productName, pawbucksToUse });
+    const { merchantId, priceId, productName, paymentMethodId, pawbucksToUse: rawPawbucksToUse, autoRedeem, metadata } = parseResult.data;
+    let pawbucksToUse = rawPawbucksToUse;
+    logStep("Request validated", { merchantId, priceId, productName, pawbucksToUse, autoRedeem });
 
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
     const stripe = new Stripe(stripeKey, { apiVersion: "2024-12-18.acacia" });
