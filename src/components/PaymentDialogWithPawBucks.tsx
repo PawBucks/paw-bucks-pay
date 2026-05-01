@@ -14,6 +14,7 @@ import { supabase } from"@/integrations/supabase/client";
 import { Elements, PaymentElement, useStripe, useElements } from"@stripe/react-stripe-js";
 import { toast } from"sonner";
 import { Loader2, CreditCard, Coins, Check, AlertCircle, Gift } from"lucide-react";
+import { Alert, AlertTitle, AlertDescription } from"@/components/ui/alert";
 import { PawBucksInfoTooltip } from"@/components/PawBucksInfoTooltip";
 import { useSpendablePawBucks } from"@/hooks/useSpendablePawBucks";
 import { PawBucksSourceSelector, type PawBucksSource } from"@/components/checkout/PawBucksSourceSelector";
@@ -256,6 +257,7 @@ export const PaymentDialogWithPawBucks = ({
  const [isLoading, setIsLoading] = useState(false);
  const [showPaymentForm, setShowPaymentForm] = useState(false);
  const [paymentData, setPaymentData] = useState<any>(null);
+ const [redemptionError, setRedemptionError] = useState<{ title: string; message: string } | null>(null);
 
  // Use the spendable PawBucks hook which includes Pet Fund
  const {
@@ -344,8 +346,51 @@ export const PaymentDialogWithPawBucks = ({
     }
   }, [maxPawbucks, pawbucksToUse]);
 
+ // Clear redemption error when user adjusts inputs
+ useEffect(() => {
+   if (redemptionError) setRedemptionError(null);
+   // eslint-disable-next-line react-hooks/exhaustive-deps
+ }, [amount, pawbucksToUse, pawbucksSource, tipAmount]);
+
+ // Proactive (client-side) wallet redemption validation
+ const MIN_STRIPE_USD = 0.50;
+ const cardPortion = stripeAmount; // includes tip
+ const cardPortionBelowMin = pawbucksToUse > 0 && cardPortion > 0 && cardPortion < MIN_STRIPE_USD;
+ const exceedsBalance = pawbucksToUse > pawbucksBalance;
+ const exceedsCap = capPct != null && pawbucksUsdValue > capUsdMax + 0.001;
+ const promoBelowMin =
+   pawbucksSource ==="promotional" &&
+   pawbucksToUse > 0 &&
+   totalAmount > 0 &&
+   totalAmount < petFundMinUsd;
+
+ const liveWarning: { title: string; message: string } | null = exceedsBalance
+   ? {
+       title:"Insufficient PawBucks balance",
+       message: `You're trying to redeem ${pawbucksToUse.toLocaleString()} PB but only have ${pawbucksBalance.toLocaleString()} PB available. Lower the slider to continue.`,
+     }
+   : promoBelowMin
+   ? {
+       title:"Below minimum for credit redemption",
+       message: `${hasPetFund ?"Pet Fund" :"Welcome"} credit requires a purchase of at least $${petFundMinUsd.toFixed(2)}. Add $${(petFundMinUsd - totalAmount).toFixed(2)} more or switch to earned PawBucks.`,
+     }
+   : exceedsCap
+   ? {
+       title:"Above merchant's PawBucks cap",
+       message: `${merchantName} caps PawBucks at $${capUsdMax.toFixed(2)} of this purchase. Reduce the slider to stay within the cap.`,
+     }
+   : cardPortionBelowMin
+   ? {
+       title:"Card portion too small",
+       message: `The remaining card amount is $${cardPortion.toFixed(2)}, but the minimum card charge is $0.50. Use fewer PawBucks, or use enough to cover the full purchase.`,
+     }
+   : null;
+
+ const activeError = redemptionError || liveWarning;
+
  const handleSubmit = async (e: React.FormEvent) => {
  e.preventDefault();
+ setRedemptionError(null);
  if (totalAmount < 0.50 && pawbucksToUse <= 0) {
  toast.error("Minimum payment amount is $0.50");
  return;
@@ -353,6 +398,11 @@ export const PaymentDialogWithPawBucks = ({
  if (totalAmount <= 0) {
  toast.error("Please enter a valid amount");
  return;
+ }
+ // Block submission when there's a live wallet redemption issue
+ if (liveWarning) {
+   setRedemptionError(liveWarning);
+   return;
  }
 
  setIsLoading(true);
@@ -399,7 +449,28 @@ export const PaymentDialogWithPawBucks = ({
  setShowPaymentForm(true);
  } catch (error: any) {
  console.error("Payment error:", error);
- toast.error(error.message ||"Failed to initialize payment");
+ const raw = (error?.message ||"Failed to initialize payment").toString();
+ const lower = raw.toLowerCase();
+ let banner: { title: string; message: string };
+ if (lower.includes("insufficient") && (lower.includes("pawbuck") || lower.includes("balance"))) {
+   banner = { title:"Insufficient PawBucks balance", message: raw };
+ } else if (lower.includes("minimum") || lower.includes("at least") || lower.includes("min ")) {
+   banner = { title:"Minimum amount not met", message: raw };
+ } else if (lower.includes("cap") || lower.includes("limit") || lower.includes("exceeds")) {
+   banner = { title:"Redemption limit reached", message: raw };
+ } else if (lower.includes("expired") || lower.includes("expire")) {
+   banner = { title:"PawBucks expired", message: raw };
+ } else if (lower.includes("welcome credit")) {
+   banner = { title:"Welcome credit unavailable", message: raw };
+ } else if (lower.includes("pet fund")) {
+   banner = { title:"Pet Fund unavailable", message: raw };
+ } else if (lower.includes("not accept") || lower.includes("accepts_pawbucks")) {
+   banner = { title:"Merchant doesn't accept PawBucks", message: raw };
+ } else {
+   banner = { title:"Payment couldn't be processed", message: raw };
+ }
+ setRedemptionError(banner);
+ toast.error(banner.title);
  } finally {
  setIsLoading(false);
  }
@@ -650,11 +721,20 @@ export const PaymentDialogWithPawBucks = ({
  </div>
  )}
 
+ {/* Wallet redemption error banner */}
+ {activeError && (
+   <Alert variant="destructive" role="alert" aria-live="polite">
+     <AlertCircle className="h-4 w-4" />
+     <AlertTitle>{activeError.title}</AlertTitle>
+     <AlertDescription>{activeError.message}</AlertDescription>
+   </Alert>
+ )}
+
  <div className="flex gap-3">
  <Button type="button" variant="outline" onClick={handleCancel} className="flex-1" disabled={isLoading}>
  Cancel
  </Button>
- <Button type="submit" className="flex-1" disabled={isLoading}>
+ <Button type="submit" className="flex-1" disabled={isLoading || !!liveWarning}>
  {isLoading ? (
  <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Loading...</>
  ) : stripeAmount <= 0 && pawbucksToUse > 0 ? (
