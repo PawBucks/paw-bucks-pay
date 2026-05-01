@@ -424,7 +424,7 @@ const MerchantInvoicing = () => {
  client_address: invoice.client_address,
  title: invoice.title,
  issue_date: new Date().toISOString().split("T")[0],
- due_date: new Date(Date.now() + (invoice.payment_terms || 30) * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+ due_date: new Date(Date.now() + ((invoice.payment_terms ?? 30) * 24 * 60 * 60 * 1000)).toISOString().split("T")[0],
  payment_terms: invoice.payment_terms,
  tax_rate: invoice.tax_rate,
  discount_type: invoice.discount_type,
