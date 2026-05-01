@@ -12,6 +12,7 @@ import {
 import { Loader2, AlertCircle, Clock } from"lucide-react";
 import { Alert, AlertDescription, AlertTitle } from"@/components/ui/alert";
 
+import { Formatters } from "@/utils/formatters";
 type FundingRequestDialogProps = {
  open: boolean;
  onOpenChange: (open: boolean) => void;
@@ -83,10 +84,10 @@ export const FundingRequestDialog = ({
  <div className="bg-muted rounded-lg p-4 mb-4">
  <div className="flex justify-between text-sm mb-2">
  <span className="text-muted-foreground">Available to borrow:</span>
- <span className="font-bold">${maxBorrowable.toFixed(2)}</span>
+ <span className="font-bold">{Formatters.currency(maxBorrowable)}</span>
  </div>
  <p className="text-xs text-muted-foreground">
- Up to 80% of your average 90-day sales (${sales90Days.toFixed(2)})
+ Up to 80% of your average 90-day sales ({Formatters.currency(sales90Days)})
  </p>
  </div>
 

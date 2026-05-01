@@ -31,6 +31,7 @@ import { supabase } from'@/integrations/supabase/client';
 import { toast } from'sonner';
 import { LoadingSpinner } from'@/components/LoadingSpinner';
 
+import { Formatters } from "@/utils/formatters";
 interface TaxLiabilityEstimatorProps {
  merchantId: string;
  taxYear: number;
@@ -391,16 +392,16 @@ export function TaxLiabilityEstimator({ merchantId, taxYear }: TaxLiabilityEstim
  <div className="space-y-3">
  <div className="flex justify-between text-sm">
  <span className="text-muted-foreground">Self-Employment Tax</span>
- <span className="font-medium">${selfEmploymentTax.toFixed(2)}</span>
+ <span className="font-medium">{Formatters.currency(selfEmploymentTax)}</span>
  </div>
  <div className="flex justify-between text-sm">
  <span className="text-muted-foreground">Federal Income Tax</span>
- <span className="font-medium">${federalIncomeTax.toFixed(2)}</span>
+ <span className="font-medium">{Formatters.currency(federalIncomeTax)}</span>
  </div>
  <div className="border-t pt-2 flex justify-between text-sm">
  <span className="text-muted-foreground">Effective Tax Rate</span>
  <Badge variant={effectiveTaxRate < 25 ?'secondary' :'destructive'}>
- {effectiveTaxRate.toFixed(1)}%
+ {Formatters.decimal(effectiveTaxRate, 1)}%
  </Badge>
  </div>
  </div>
@@ -455,7 +456,7 @@ export function TaxLiabilityEstimator({ merchantId, taxYear }: TaxLiabilityEstim
  </div>
  </div>
  <span className="text-xl font-bold text-success">
- +${grossIncome.toFixed(2)}
+ +{Formatters.currency(grossIncome)}
  </span>
  </div>
 
@@ -469,7 +470,7 @@ export function TaxLiabilityEstimator({ merchantId, taxYear }: TaxLiabilityEstim
  <span>Business Expenses (Tax Vault)</span>
  </div>
  <span className="font-medium text-destructive">
- -${totalExpenses.toFixed(2)}
+ -{Formatters.currency(totalExpenses)}
  </span>
  </div>
 
@@ -484,14 +485,14 @@ export function TaxLiabilityEstimator({ merchantId, taxYear }: TaxLiabilityEstim
  <Info className="h-3 w-3 ml-1 inline text-muted-foreground" />
  </TooltipTrigger>
  <TooltipContent>
- <p className="text-xs">{businessMiles.toFixed(0)} business miles @ ${IRS_MILEAGE_RATE}/mile ({taxYear} rate)</p>
+ <p className="text-xs">{Formatters.number(Math.round(businessMiles))} business miles @ ${IRS_MILEAGE_RATE}/mile ({taxYear} rate)</p>
  </TooltipContent>
  </Tooltip>
  </TooltipProvider>
  </div>
  </div>
  <span className="font-medium text-destructive">
- -${vehicleDeduction.toFixed(2)}
+ -{Formatters.currency(vehicleDeduction)}
  </span>
  </div>
  </div>
@@ -506,7 +507,7 @@ export function TaxLiabilityEstimator({ merchantId, taxYear }: TaxLiabilityEstim
  </div>
  </div>
  <span className="text-xl font-bold text-info">
- ${netProfit.toFixed(2)}
+ {Formatters.currency(netProfit)}
  </span>
  </div>
 
@@ -521,7 +522,7 @@ export function TaxLiabilityEstimator({ merchantId, taxYear }: TaxLiabilityEstim
  </div>
  </div>
  <span className="text-lg font-bold text-success">
- ${taxSavingsFromDeductions.toFixed(2)}
+ {Formatters.currency(taxSavingsFromDeductions)}
  </span>
  </div>
  )}
@@ -561,7 +562,7 @@ export function TaxLiabilityEstimator({ merchantId, taxYear }: TaxLiabilityEstim
  {q.quarter}
  </Badge>
  <p className="text-lg font-bold mt-2">
- ${quarterlyPayment.toFixed(0)}
+ ${Formatters.number(Math.round(quarterlyPayment))}
  </p>
  <p className="text-xs text-muted-foreground mt-1">
  Due {q.deadline}

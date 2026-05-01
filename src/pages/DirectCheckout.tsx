@@ -14,6 +14,7 @@ import { SEO } from"@/components/SEO";
 import { getStripeForConnectedAccount } from"@/lib/stripe";
 import { buildAppUrl } from"@/lib/url";
 
+import { Formatters } from "@/utils/formatters";
 interface Merchant {
  id: string;
  business_name: string;
@@ -121,7 +122,7 @@ function CheckoutForm({
  </div>
  <div className="flex justify-between items-center mb-2">
  <span className="text-muted-foreground">Amount</span>
- <span className="text-2xl font-bold">${(amount / 100).toFixed(2)}</span>
+ <span className="text-2xl font-bold">{Formatters.currency((amount / 100))}</span>
  </div>
  <div className="flex justify-between items-center">
  <span className="text-muted-foreground flex items-center gap-1">
@@ -163,7 +164,7 @@ function CheckoutForm({
  ) : (
  <>
  <DollarSign className="h-4 w-4 mr-2" />
- Pay ${(amount / 100).toFixed(2)}
+ Pay {Formatters.currency((amount / 100))}
  </>
  )}
  </Button>

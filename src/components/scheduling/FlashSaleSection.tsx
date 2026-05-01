@@ -37,6 +37,7 @@ import {
  isFlashSaleActive
 } from"@/services/api/scheduling.service";
 
+import { Formatters } from "@/utils/formatters";
 const flashSaleSchema = z.object({
  is_flash_sale: z.boolean(),
  flash_sale_pawbucks_price: z.coerce.number().min(1,"Price must be at least 1 PB").optional().nullable(),
@@ -174,7 +175,7 @@ export function FlashSaleSection({ service, onUpdate }: FlashSaleSectionProps) {
  </div>
  <div className="flex items-center justify-between">
  <span className="text-sm text-muted-foreground">USD Value</span>
- <span className="font-medium">${service.price.toFixed(2)}</span>
+ <span className="font-medium">{Formatters.currency(service.price)}</span>
  </div>
  </div>
 

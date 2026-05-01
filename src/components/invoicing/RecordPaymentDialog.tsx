@@ -40,6 +40,7 @@ import { cn } from"@/lib/utils";
 import { toast } from"sonner";
 import { Checkbox } from"@/components/ui/checkbox";
 
+import { Formatters } from "@/utils/formatters";
 const paymentSchema = z.object({
  amount: z.number().min(0.01,"Amount must be greater than 0"),
  payment_method: z.string().min(1,"Payment method is required"),
@@ -140,7 +141,7 @@ export function RecordPaymentDialog({
  </div>
  <div className="flex justify-between text-sm mt-1">
  <span className="text-muted-foreground">Amount Due</span>
- <span className="font-bold text-primary">${Number(invoice.amount_due).toFixed(2)}</span>
+ <span className="font-bold text-primary">{Formatters.currency(Number(invoice.amount_due))}</span>
  </div>
  </div>
 

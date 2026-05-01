@@ -30,6 +30,7 @@ import {
 import { toast } from"sonner";
 import { format } from"date-fns";
 
+import { Formatters } from "@/utils/formatters";
 interface PetEmailInboxProps {
  petId: string;
  petName: string;
@@ -398,7 +399,7 @@ export const PetEmailInbox = ({ petId, petName }: PetEmailInboxProps) => {
  {doc.file_size_bytes && (
  <span>
  {doc.file_size_bytes > 1048576
- ? `${(doc.file_size_bytes / 1048576).toFixed(1)} MB`
+ ? `${Formatters.decimal((doc.file_size_bytes / 1048576), 1)} MB`
  : `${Math.round(doc.file_size_bytes / 1024)} KB`}
  </span>
  )}

@@ -8,6 +8,7 @@ import { Separator } from"@/components/ui/separator";
 import { Loader2, CreditCard, CheckCircle, AlertCircle } from"lucide-react";
 import logo from"@/assets/logo.png";
 
+import { Formatters } from "@/utils/formatters";
 export default function AdminInvoicePayment() {
  const { invoiceId } = useParams();
  const [searchParams] = useSearchParams();
@@ -152,8 +153,8 @@ export default function AdminInvoicePayment() {
  <tr key={item.id} className="border-b border-border/50">
  <td className="py-3 pr-2">{item.description}</td>
  <td className="text-center py-3 px-2">{item.quantity}</td>
- <td className="text-right py-3 px-2">${Number(item.unit_price).toFixed(2)}</td>
- <td className="text-right py-3 pl-2">${Number(item.amount).toFixed(2)}</td>
+ <td className="text-right py-3 px-2">{Formatters.currency(Number(item.unit_price))}</td>
+ <td className="text-right py-3 pl-2">{Formatters.currency(Number(item.amount))}</td>
  </tr>
  ))}
  </tbody>
@@ -165,23 +166,23 @@ export default function AdminInvoicePayment() {
  <div className="w-64 space-y-2 text-sm">
  <div className="flex justify-between">
  <span className="text-muted-foreground">Subtotal</span>
- <span>${Number(invoice.subtotal).toFixed(2)}</span>
+ <span>{Formatters.currency(Number(invoice.subtotal))}</span>
  </div>
  {Number(invoice.discount_amount) > 0 && (
  <div className="flex justify-between text-success">
  <span>Discount</span>
- <span>-${Number(invoice.discount_amount).toFixed(2)}</span>
+ <span>-{Formatters.currency(Number(invoice.discount_amount))}</span>
  </div>
  )}
  {Number(invoice.tax_amount) > 0 && (
  <div className="flex justify-between">
  <span className="text-muted-foreground">Tax ({invoice.tax_rate}%)</span>
- <span>${Number(invoice.tax_amount).toFixed(2)}</span>
+ <span>{Formatters.currency(Number(invoice.tax_amount))}</span>
  </div>
  )}
  <div className="flex justify-between font-bold text-lg border-t pt-2">
  <span>Amount Due</span>
- <span className="text-primary">${amountDue.toFixed(2)}</span>
+ <span className="text-primary">{Formatters.currency(amountDue)}</span>
  </div>
  </div>
  </div>
@@ -198,7 +199,7 @@ export default function AdminInvoicePayment() {
  ) : (
  <CreditCard className="w-4 h-4 mr-2" />
  )}
- Pay ${amountDue.toFixed(2)}
+ Pay {Formatters.currency(amountDue)}
  </Button>
  <p className="text-xs text-muted-foreground">Secure payment powered by Stripe</p>
  </div>

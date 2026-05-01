@@ -14,6 +14,7 @@ import { toast } from"sonner";
 import { Pill, Package, DollarSign, CheckCircle, Clock, Truck, Search, Plus, AlertCircle } from"lucide-react";
 import { format } from"date-fns";
 
+import { Formatters } from "@/utils/formatters";
 interface PrescriptionFulfillmentEngineProps {
  vetId: string;
 }
@@ -297,7 +298,7 @@ export function PrescriptionFulfillmentEngine({ vetId }: PrescriptionFulfillment
  <div className="flex items-center justify-between">
  <div>
  <p className="text-sm text-muted-foreground">Total Earnings</p>
- <p className="text-2xl font-bold text-success">${earnings.total.toFixed(2)}</p>
+ <p className="text-2xl font-bold text-success">{Formatters.currency(earnings.total)}</p>
  </div>
  <DollarSign className="h-8 w-8 text-success opacity-50" />
  </div>
@@ -308,7 +309,7 @@ export function PrescriptionFulfillmentEngine({ vetId }: PrescriptionFulfillment
  <div className="flex items-center justify-between">
  <div>
  <p className="text-sm text-muted-foreground">Pending</p>
- <p className="text-2xl font-bold text-info">${earnings.pending.toFixed(2)}</p>
+ <p className="text-2xl font-bold text-info">{Formatters.currency(earnings.pending)}</p>
  </div>
  <Clock className="h-8 w-8 text-info opacity-50" />
  </div>
@@ -422,7 +423,7 @@ export function PrescriptionFulfillmentEngine({ vetId }: PrescriptionFulfillment
  <SelectContent>
  {storeItems.map(item => (
  <SelectItem key={item.id} value={item.id}>
- {item.name} - ${item.price.toFixed(2)}
+ {item.name} - {Formatters.currency(item.price)}
  </SelectItem>
  ))}
  </SelectContent>
@@ -447,7 +448,7 @@ export function PrescriptionFulfillmentEngine({ vetId }: PrescriptionFulfillment
  </Select>
  {selectedStoreItem && (
  <p className="text-sm text-success">
- You'll earn ${((storeItems.find(i => i.id === selectedStoreItem)?.price || 0) * (vetMargin / 100)).toFixed(2)} on this sale
+ You'll earn {Formatters.currency(((storeItems.find(i => i.id === selectedStoreItem)?.price || 0) * (vetMargin / 100)))} on this sale
  </p>
  )}
  </div>
@@ -536,9 +537,9 @@ export function PrescriptionFulfillmentEngine({ vetId }: PrescriptionFulfillment
  </TableCell>
  <TableCell>{f.petName}</TableCell>
  <TableCell>{f.ownerName}</TableCell>
- <TableCell>${f.productPrice?.toFixed(2) ||"—"}</TableCell>
+ <TableCell>{f.productPrice != null ? Formatters.currency(f.productPrice) :"—"}</TableCell>
  <TableCell className="text-success font-medium">
- ${f.vetEarnings?.toFixed(2) ||"—"}
+ {f.vetEarnings != null ? Formatters.currency(f.vetEarnings) :"—"}
  </TableCell>
  <TableCell>{getStatusBadge(f.status)}</TableCell>
  <TableCell className="text-sm text-muted-foreground">

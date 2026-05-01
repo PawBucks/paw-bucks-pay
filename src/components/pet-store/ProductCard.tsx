@@ -142,10 +142,10 @@ export const ProductCard = memo(({
  {hasPromo ? (
  <div className="flex items-baseline gap-1.5 flex-wrap">
  <span className="text-lg font-bold text-foreground">
- ${(discountedPrice / 100).toFixed(2)}
+ {Formatters.currency((discountedPrice / 100))}
  </span>
  <span className="text-xs text-muted-foreground line-through">
- ${(item.price / 100).toFixed(2)}
+ {Formatters.currency((item.price / 100))}
  </span>
  <Badge variant="destructive" className="text-[10px] px-1 py-0 h-4">
  -{promo!.discountPercentage}%
@@ -153,7 +153,7 @@ export const ProductCard = memo(({
  </div>
  ) : (
  <span className="text-lg font-bold text-foreground">
- ${(item.price / 100).toFixed(2)}
+ {Formatters.currency((item.price / 100))}
  </span>
  )}
 
@@ -215,7 +215,7 @@ export const ProductCard = memo(({
  disabled={outOfStock}
  >
  <CreditCard className="mr-1 h-3 w-3" />
- Buy Now ${(discountedPrice / 100).toFixed(2)}
+ Buy Now {Formatters.currency((discountedPrice / 100))}
  </Button>
  </>
  ) : (

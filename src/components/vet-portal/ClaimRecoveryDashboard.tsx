@@ -25,6 +25,7 @@ import {
 } from"lucide-react";
 import { toast } from"sonner";
 
+import { Formatters } from "@/utils/formatters";
 interface ClaimSlice {
  id: string;
  invoice_id: string;
@@ -187,7 +188,7 @@ export function ClaimRecoveryDashboard({ vetId }: ClaimRecoveryDashboardProps) {
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Total Gap Amount</p>
- <p className="text-2xl font-bold text-destructive">${totalGap.toFixed(2)}</p>
+ <p className="text-2xl font-bold text-destructive">{Formatters.currency(totalGap)}</p>
  </div>
  </div>
  </CardContent>
@@ -281,14 +282,14 @@ export function ClaimRecoveryDashboard({ vetId }: ClaimRecoveryDashboardProps) {
  </Badge>
  </TableCell>
  <TableCell className="text-right font-medium">
- ${Number(slice.original_amount).toFixed(2)}
+ {Formatters.currency(Number(slice.original_amount))}
  </TableCell>
  <TableCell className="text-right">
- ${Number(slice.actual_amount).toFixed(2)}
+ {Formatters.currency(Number(slice.actual_amount))}
  </TableCell>
  <TableCell className="text-right">
  <span className="font-bold text-destructive">
- ${Number(slice.gap_amount).toFixed(2)}
+ {Formatters.currency(Number(slice.gap_amount))}
  </span>
  </TableCell>
  <TableCell>

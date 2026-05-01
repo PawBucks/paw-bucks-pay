@@ -149,7 +149,7 @@ export function StorefrontCartDrawer({
  <div className="flex-1 min-w-0">
  <h4 className="font-medium text-sm truncate">{item.name}</h4>
  <span className="text-sm font-semibold">
- ${(item.unitAmount / 100).toFixed(2)}
+ {Formatters.currency((item.unitAmount / 100))}
  </span>
 
  <div className="flex items-center justify-between mt-2">
@@ -197,7 +197,7 @@ export function StorefrontCartDrawer({
  <div className="border-t pt-4 space-y-3">
  <div className="flex justify-between items-center">
  <span className="text-sm text-muted-foreground">Order Total</span>
- <span className="font-bold text-lg">${totalDollars.toFixed(2)}</span>
+ <span className="font-bold text-lg">{Formatters.currency(totalDollars)}</span>
  </div>
 
  {/* PawBucks slider */}
@@ -224,7 +224,7 @@ export function StorefrontCartDrawer({
  <div className="flex justify-between items-center text-xs">
  <span className="text-muted-foreground">
  {actualPawbucks > 0
- ? `${Formatters.number(actualPawbucks)} PB ($${pawbucksUsdValue.toFixed(2)})`
+ ? `${Formatters.number(actualPawbucks)} PB (${Formatters.currency(pawbucksUsdValue)})`
  :"No PawBucks applied"}
  </span>
  {canAffordFull && (
@@ -257,7 +257,7 @@ export function StorefrontCartDrawer({
  <Coins className="h-3.5 w-3.5" /> PawBucks
  </span>
  <span className="font-medium text-primary">
- {Formatters.number(actualPawbucks)} PB (−${pawbucksUsdValue.toFixed(2)})
+ {Formatters.number(actualPawbucks)} PB (−{Formatters.currency(pawbucksUsdValue)})
  </span>
  </div>
  )}
@@ -266,7 +266,7 @@ export function StorefrontCartDrawer({
  <span className="text-muted-foreground flex items-center gap-1">
  <CreditCard className="h-3.5 w-3.5" /> Card
  </span>
- <span className="font-medium">${cardDollars.toFixed(2)}</span>
+ <span className="font-medium">{Formatters.currency(cardDollars)}</span>
  </div>
  )}
  </div>
@@ -291,12 +291,12 @@ export function StorefrontCartDrawer({
  ) : getMode() ==="split" ? (
  <>
  <CreditCard className="mr-2 h-4 w-4" />
- Pay ${cardDollars.toFixed(2)} + {Formatters.number(actualPawbucks)} PB
+ Pay {Formatters.currency(cardDollars)} + {Formatters.number(actualPawbucks)} PB
  </>
  ) : (
  <>
  <CreditCard className="mr-2 h-4 w-4" />
- Pay ${totalDollars.toFixed(2)} with Card
+ Pay {Formatters.currency(totalDollars)} with Card
  </>
  )}
  </Button>

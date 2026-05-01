@@ -13,6 +13,7 @@ import { ArrowLeft, MapPin, Star, Phone, Globe, Share2, Coins, Clock, Navigation
 import { toast } from"sonner";
 import { useIsMobile } from"@/hooks/use-mobile";
 
+import { Formatters } from "@/utils/formatters";
 export default function PublicBookingPage() {
  const { slug } = useParams<{ slug: string }>();
  const navigate = useNavigate();
@@ -44,7 +45,7 @@ export default function PublicBookingPage() {
  .eq("merchant_id", merchant.id);
  if (!data || data.length === 0) return null;
  const avg = data.reduce((s: number, r: any) => s + r.rating, 0) / data.length;
- return { avg: avg.toFixed(1), count: data.length };
+ return { avg: Formatters.decimal(avg, 1), count: data.length };
  },
  enabled: !!merchant?.id,
  });

@@ -5,6 +5,7 @@ import { RefreshCw, Calendar, DollarSign, TrendingUp } from"lucide-react";
 import { format, subMonths, startOfMonth, endOfMonth, differenceInDays } from"date-fns";
 import { CATEGORY_CONFIG, getNormalizedCategory } from"@/lib/categoryMapping";
 
+import { Formatters } from "@/utils/formatters";
 type Transaction = {
  id: string;
  amount: number;
@@ -164,7 +165,7 @@ export const RecurringExpenses = memo(({ transactions }: RecurringExpensesProps)
  </div>
  <div className="text-right">
  <p className="text-sm text-muted-foreground">Est. Monthly</p>
- <p className="text-lg font-bold text-primary">${monthlyRecurring.toFixed(0)}</p>
+ <p className="text-lg font-bold text-primary">${Formatters.number(Math.round(monthlyRecurring))}</p>
  </div>
  </div>
 
@@ -202,7 +203,7 @@ export const RecurringExpenses = memo(({ transactions }: RecurringExpensesProps)
  <Badge variant="outline" className={`text-[10px] ${getFrequencyColor(pattern.frequency)}`}>
  {getFrequencyLabel(pattern.frequency)}
  </Badge>
- <p className="font-semibold text-sm">${pattern.averageAmount.toFixed(0)}/visit</p>
+ <p className="font-semibold text-sm">${Formatters.number(Math.round(pattern.averageAmount))}/visit</p>
  </div>
  </div>
  );
@@ -216,7 +217,7 @@ export const RecurringExpenses = memo(({ transactions }: RecurringExpensesProps)
  <TrendingUp className="w-4 h-4 text-primary" />
  <span className="text-sm font-medium">Yearly Projection</span>
  </div>
- <span className="text-lg font-bold">${(monthlyRecurring * 12).toFixed(0)}</span>
+ <span className="text-lg font-bold">${Formatters.number(Math.round((monthlyRecurring * 12)))}</span>
  </div>
  <p className="text-xs text-muted-foreground mt-1">
  Based on your recurring spending patterns

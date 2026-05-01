@@ -4,6 +4,7 @@ import'mapbox-gl/dist/mapbox-gl.css';
 import { supabase } from'@/integrations/supabase/client';
 import { Loader2 } from'lucide-react';
 
+import { Formatters } from "@/utils/formatters";
 export type MerchantTier ='featured' |'premium' |'sponsored' |'boosted' |'organic';
 
 type MerchantMarker = {
@@ -264,7 +265,7 @@ export const MerchantMap = ({ merchants, onMerchantClick, featuredIds, premiumId
  <p class="text-xs text-muted-foreground capitalize mb-1">${safeType}</p>
  <div class="flex items-center gap-1 text-xs mb-1">
  <span class="text-warning">★</span>
- <span>${(merchant.avg_rating ?? 0).toFixed(1)}</span>
+ <span>${Formatters.decimal((merchant.avg_rating ?? 0), 1)}</span>
  <span class="text-muted-foreground">(${merchant.review_count ?? 0})</span>
  </div>
  <p class="text-xs text-success">${merchant.cashback_rate}x points</p>

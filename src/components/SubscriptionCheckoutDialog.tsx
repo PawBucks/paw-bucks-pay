@@ -23,6 +23,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from"@/compo
 import { PawBucksInfoTooltip } from"@/components/PawBucksInfoTooltip";
 import { PawBucksSourceSelector, type PawBucksSource } from"@/components/checkout/PawBucksSourceSelector";
 
+import { Formatters } from "@/utils/formatters";
 // Pet Owner conversion rate: 1000 PawBucks = $1.00 (1 PawBuck = $0.001)
 const PAWBUCKS_TO_USD = 0.001;
 // Minimum Stripe charge for subscriptions
@@ -264,7 +265,7 @@ const CheckoutForm = ({
  ? ` You earned ${result.pawbucksEarned} PawBucks!` 
  :"";
  const pawbucksUsedMsg = pawbucksToUse > 0 
- ? ` Used ${pawbucksToUse.toLocaleString()} PawBucks for $${pawbucksUsdValue.toFixed(2)} discount.` 
+ ? ` Used ${pawbucksToUse.toLocaleString()} PawBucks for ${Formatters.currency(pawbucksUsdValue)} discount.` 
  :"";
 
  toast.success(`Subscribed to ${plan.name}!`, {
@@ -305,7 +306,7 @@ const CheckoutForm = ({
  </div>
  
  <div className="flex items-baseline gap-1">
- <span className="text-2xl font-bold">${priceAmount.toFixed(2)}</span>
+ <span className="text-2xl font-bold">{Formatters.currency(priceAmount)}</span>
  <span className="text-muted-foreground">{formatInterval(plan.billing_interval, plan.billing_interval_count)}</span>
  </div>
 
@@ -344,7 +345,7 @@ const CheckoutForm = ({
  <Gift className="w-4 h-4 text-success mt-0.5 flex-shrink-0" />
  <div>
  <p className="text-sm font-medium text-success">
- 🎉 Welcome Credit Available: {welcomeCreditBalance.toLocaleString()} PB (${(welcomeCreditBalance * PAWBUCKS_TO_USD).toFixed(2)})
+ 🎉 Welcome Credit Available: {welcomeCreditBalance.toLocaleString()} PB ({Formatters.currency((welcomeCreditBalance * PAWBUCKS_TO_USD))})
  </p>
  <p className="text-xs text-success/80 mt-0.5">
  Your Welcome Credit is included in your available balance below.
@@ -359,10 +360,10 @@ const CheckoutForm = ({
  <Gift className="w-4 h-4 text-warning mt-0.5 flex-shrink-0" />
  <div>
  <p className="text-sm font-medium text-warning">
- Pet Fund: ${(petFundCreditBalance * PAWBUCKS_TO_USD).toFixed(2)} available
+ Pet Fund: {Formatters.currency((petFundCreditBalance * PAWBUCKS_TO_USD))} available
  </p>
  <p className="text-xs text-warning/80 mt-0.5">
- Add ${(petFundMinUsd - priceAmount).toFixed(2)} more to unlock your Pet Fund credit.
+ Add {Formatters.currency((petFundMinUsd - priceAmount))} more to unlock your Pet Fund credit.
  </p>
  <div className="mt-2">
  <div className="w-full bg-warning/15 rounded-full h-2">
@@ -425,13 +426,13 @@ const CheckoutForm = ({
  )}
  </span>
  <span className={`font-medium ${pawbucksToUse > 0 ?'text-primary' :'text-muted-foreground'}`}>
- {pawbucksToUse > 0 ? `= $${pawbucksUsdValue.toFixed(2)} off` :'$0.00 off'}
+ {pawbucksToUse > 0 ? `= ${Formatters.currency(pawbucksUsdValue)} off` :'$0.00 off'}
  </span>
  </div>
 
  {pawbucksToUse > 0 && (
  <div className="text-xs text-muted-foreground bg-muted p-2 rounded">
- 💡 A minimum ${MINIMUM_STRIPE_AMOUNT.toFixed(2)} charge is required for recurring billing. PawBucks discount applies to first payment only.
+ 💡 A minimum {Formatters.currency(MINIMUM_STRIPE_AMOUNT)} charge is required for recurring billing. PawBucks discount applies to first payment only.
  </div>
  )}
  </div>
@@ -480,13 +481,13 @@ const CheckoutForm = ({
  <div className="bg-accent/10 border border-accent/20 rounded-lg p-4 space-y-2">
  <div className="flex justify-between text-sm">
  <span className="text-muted-foreground">Price:</span>
- <span>${priceAmount.toFixed(2)}</span>
+ <span>{Formatters.currency(priceAmount)}</span>
  </div>
  
  {pawbucksToUse > 0 && (
  <div className="flex justify-between text-sm">
  <span className="text-muted-foreground">PawBucks Discount:</span>
- <span className="text-primary font-medium">−${pawbucksUsdValue.toFixed(2)}</span>
+ <span className="text-primary font-medium">−{Formatters.currency(pawbucksUsdValue)}</span>
  </div>
  )}
 
@@ -499,7 +500,7 @@ const CheckoutForm = ({
  
  <div className="flex justify-between text-sm pt-2 border-t">
  <span className="font-medium">Card Payment:</span>
- <span className="font-bold">${stripeAmount.toFixed(2)}</span>
+ <span className="font-bold">{Formatters.currency(stripeAmount)}</span>
  </div>
  
  {stripeAmount > 0 && (
@@ -560,7 +561,7 @@ const CheckoutForm = ({
  ) : (
  <>
  <CreditCard className="h-4 w-4 mr-2" />
- {pawbucksToUse > 0 ? `Pay $${stripeAmount.toFixed(2)}` :"Subscribe"}
+ {pawbucksToUse > 0 ? `Pay ${Formatters.currency(stripeAmount)}` :"Subscribe"}
  </>
  )}
  </Button>

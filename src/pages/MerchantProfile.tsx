@@ -56,6 +56,7 @@ import {
  ThumbsUp,
 } from"lucide-react";
 
+import { Formatters } from "@/utils/formatters";
 const getBusinessIcon = (type: string) => {
  const lowerType = type.toLowerCase();
  if (lowerType.includes("store") || lowerType.includes("shop")) return Store;
@@ -358,7 +359,7 @@ const MerchantProfile = memo(() => {
  {/* ═══ Rating Summary Bar ═══ */}
  <div className="flex items-center gap-3 mt-4 px-1">
  <div className="flex items-center gap-1.5">
- <span className="text-2xl font-bold text-foreground">{ratingStats.average.toFixed(1)}</span>
+ <span className="text-2xl font-bold text-foreground">{Formatters.decimal(ratingStats.average, 1)}</span>
  <div className="flex items-center">
  {[1, 2, 3, 4, 5].map((star) => (
  <Star
@@ -692,7 +693,7 @@ const MerchantProfile = memo(() => {
    className="text-5xl font-black tracking-tight text-foreground"
    style={{ fontFamily: '"Playfair Display", Georgia, serif' }}
   >
-   {ratingStats.average.toFixed(1)}
+   {Formatters.decimal(ratingStats.average, 1)}
   </div>
  <div className="flex items-center justify-center gap-0.5 mt-1">
  {[1,2,3,4,5].map((star) => (

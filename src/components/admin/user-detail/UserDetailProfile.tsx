@@ -7,6 +7,7 @@ import { User, Mail, Phone, Calendar, Shield, Crown, Gift, Users, Ban } from"luc
 import { BanUserCard } from"./BanUserCard";
 import { DeleteUserCard } from"./DeleteUserCard";
 
+import { Formatters } from "@/utils/formatters";
 type ProfileData = {
  id: string;
  email: string;
@@ -166,7 +167,7 @@ export function UserDetailProfile({ userId }: { userId: string }) {
  ?"bg-info/10 text-info border-info/30"
  :"bg-muted text-muted-foreground"
  }>
- {welcomeCredit.status} — ${(welcomeCredit.credit_amount / 1000).toFixed(0)}
+ {welcomeCredit.status} — ${Formatters.number(Math.round((welcomeCredit.credit_amount / 1000)))}
  </Badge>
  {welcomeCredit.status ==="active" && (
  <p className="text-xs text-muted-foreground">

@@ -242,7 +242,7 @@ export const EnhancedSpendingChart = memo(({ transactions, medicalRecords = [] }
  ) : (
  <TrendingUp className="w-3 h-3" />
  )}
- {Math.abs(weeklyTrend).toFixed(0)}%
+ {Formatters.number(Math.round(Math.abs(weeklyTrend)))}%
  </Badge>
  )}
  <div className="flex border rounded-md overflow-hidden">

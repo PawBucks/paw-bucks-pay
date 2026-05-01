@@ -36,6 +36,7 @@ import { toast } from"sonner";
 import { Plus, Edit, Trash2, Gift, Tag, Clock, Package, Sparkles, AlertCircle } from"lucide-react";
 import { format } from"date-fns";
 
+import { Formatters } from "@/utils/formatters";
 type BadgeDefinition = {
  id: string;
  badge_key: string;
@@ -505,16 +506,16 @@ export function BadgePromotionsTab() {
  <div className="flex-1 min-w-0">
  <p className="font-medium truncate">{item.name}</p>
  <p className="text-xs text-muted-foreground">
- ${(item.price / 100).toFixed(2)} • {item.price_pawbucks} PB
+ {Formatters.currency((item.price / 100))} • {item.price_pawbucks} PB
  </p>
  </div>
  {formData.selected_items.includes(item.id) && (
  <div className="text-right">
  <p className="text-sm font-medium text-primary">
- ${((item.price / 100) * (1 - formData.discount_percentage / 100)).toFixed(2)}
+ {Formatters.currency(((item.price / 100) * (1 - formData.discount_percentage / 100)))}
  </p>
  <p className="text-xs text-muted-foreground line-through">
- ${(item.price / 100).toFixed(2)}
+ {Formatters.currency((item.price / 100))}
  </p>
  </div>
  )}

@@ -15,6 +15,7 @@ import { toast } from"sonner";
 import { Upload, CheckCircle, XCircle, Clock, Crown } from"lucide-react";
 import { Alert, AlertDescription, AlertTitle } from"@/components/ui/alert";
 
+import { Formatters } from "@/utils/formatters";
 interface PartnerVet {
  id: string;
  name: string;
@@ -286,7 +287,7 @@ const VetLoanApply = () => { const { user, loading, signOut } = useAuth();
  {result.repayment_schedule.map((payment) => (
  <div key={payment.month} className="flex justify-between">
  <span>Month {payment.month}</span>
- <span className="font-medium">${payment.amount.toFixed(2)}</span>
+ <span className="font-medium">{Formatters.currency(payment.amount)}</span>
  </div>
  ))}
  </div>

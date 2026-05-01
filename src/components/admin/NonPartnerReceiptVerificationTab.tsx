@@ -39,6 +39,7 @@ import { Check, X, Eye, Loader2, Search, FileText, AlertTriangle, Info, Crown } 
 import { toast } from"sonner";
 import { format, addDays } from"date-fns";
 
+import { Formatters } from "@/utils/formatters";
 const EARN_RATE = 5; // 5 PawBucks per $1 USD
 const MONTHLY_CAP = 20000; // 20,000 PawBucks per month
 const VESTING_DAYS = 30; // 30-day vesting period
@@ -385,7 +386,7 @@ export const NonPartnerReceiptVerificationTab = () => {
  {filteredReceipts.map((receipt) => (
  <TableRow key={receipt.id}>
  <TableCell className="font-medium">{receipt.merchant_name}</TableCell>
- <TableCell>${receipt.purchase_amount.toFixed(2)}</TableCell>
+ <TableCell>{Formatters.currency(receipt.purchase_amount)}</TableCell>
  <TableCell>
  <TooltipProvider>
  <Tooltip>
@@ -393,7 +394,7 @@ export const NonPartnerReceiptVerificationTab = () => {
  {Math.floor(receipt.purchase_amount * EARN_RATE)} PB
  </TooltipTrigger>
  <TooltipContent>
- <p>5 PawBucks × ${receipt.purchase_amount.toFixed(2)}</p>
+ <p>5 PawBucks × {Formatters.currency(receipt.purchase_amount)}</p>
  </TooltipContent>
  </Tooltip>
  </TooltipProvider>
@@ -456,7 +457,7 @@ export const NonPartnerReceiptVerificationTab = () => {
  </div>
  <div>
  <Label className="text-muted-foreground text-xs">Purchase Amount</Label>
- <p className="font-medium">${selectedReceipt.purchase_amount.toFixed(2)}</p>
+ <p className="font-medium">{Formatters.currency(selectedReceipt.purchase_amount)}</p>
  </div>
  <div>
  <Label className="text-muted-foreground text-xs">Calculated PawBucks</Label>
@@ -563,7 +564,7 @@ export const NonPartnerReceiptVerificationTab = () => {
 
  {/* Receipt Details */}
  <div className="bg-muted rounded-lg p-3 text-sm space-y-1">
- <p><strong>Amount:</strong> ${selectedReceipt.purchase_amount.toFixed(2)}</p>
+ <p><strong>Amount:</strong> {Formatters.currency(selectedReceipt.purchase_amount)}</p>
  <p><strong>Date:</strong> {format(new Date(selectedReceipt.receipt_date),"MMM d, yyyy")}</p>
  <p>
  <strong>Calculated PawBucks:</strong>{""}

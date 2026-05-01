@@ -9,6 +9,7 @@ import { parseLocalDate } from'@/utils/formatters';
 import jsPDF from'jspdf';
 import { toast } from'sonner';
 
+import { Formatters } from "@/utils/formatters";
 interface ReportGeneratorProps {
  expenses: TaxExpense[];
  businessName: string;
@@ -67,7 +68,7 @@ export function ReportGenerator({ expenses, businessName, taxYear }: ReportGener
  const scheduleDesc = Object.entries(SCHEDULE_C_MAPPING).find(([, v]) => v.line === line)?.[1].description ||'';
  doc.setFont('helvetica','bold');
  doc.text(`${line} - ${scheduleDesc}`, 20, yPos);
- doc.text(`$${data.total.toFixed(2)}`, pageWidth - 20, yPos, { align:'right' });
+ doc.text(`${Formatters.currency(data.total)}`, pageWidth - 20, yPos, { align:'right' });
  yPos += 6;
  
  doc.setFont('helvetica','normal');
@@ -85,7 +86,7 @@ export function ReportGenerator({ expenses, businessName, taxYear }: ReportGener
  doc.setFontSize(12);
  doc.setFont('helvetica','bold');
  doc.text('Total Deductions:', 20, yPos);
- doc.text(`$${totalExpenses.toFixed(2)}`, pageWidth - 20, yPos, { align:'right' });
+ doc.text(`${Formatters.currency(totalExpenses)}`, pageWidth - 20, yPos, { align:'right' });
  
  // Detailed Expenses Section
  yPos += 20;
@@ -119,7 +120,7 @@ export function ReportGenerator({ expenses, businessName, taxYear }: ReportGener
  doc.text(format(parseLocalDate(expense.expense_date),'MM/dd/yy'), 20, yPos);
  doc.text(CATEGORY_LABELS[expense.category].substring(0, 20), 45, yPos);
  doc.text((expense.vendor_name ||'-').substring(0, 25), 100, yPos);
- doc.text(`$${expense.amount.toFixed(2)}`, pageWidth - 20, yPos, { align:'right' });
+ doc.text(`${Formatters.currency(expense.amount)}`, pageWidth - 20, yPos, { align:'right' });
  yPos += 5;
  });
  
@@ -135,7 +136,7 @@ export function ReportGenerator({ expenses, businessName, taxYear }: ReportGener
  SCHEDULE_C_MAPPING[expense.category].line,
  expense.vendor_name ||'',
  expense.description ||'',
- expense.amount.toFixed(2),
+ Formatters.money(expense.amount),
  ]);
  
  const csvContent = [
@@ -164,8 +165,8 @@ export function ReportGenerator({ expenses, businessName, taxYear }: ReportGener
  const date = format(parseLocalDate(expense.expense_date),'MM/dd/yyyy');
  const account = SCHEDULE_C_MAPPING[expense.category].description;
  
- lines.push(`TRNS\tCHECK\t${date}\tChecking\t${expense.vendor_name ||'Unknown'}\t-${expense.amount.toFixed(2)}\t${expense.description || CATEGORY_LABELS[expense.category]}`);
- lines.push(`SPL\tCHECK\t${date}\t${account}\t\t${expense.amount.toFixed(2)}\t`);
+ lines.push(`TRNS\tCHECK\t${date}\tChecking\t${expense.vendor_name ||'Unknown'}\t-{Formatters.currency(expense.amount)}\t${expense.description || CATEGORY_LABELS[expense.category]}`);
+ lines.push(`SPL\tCHECK\t${date}\t${account}\t\t{Formatters.currency(expense.amount)}\t`);
  lines.push('ENDTRNS');
  });
  
@@ -245,7 +246,7 @@ export function ReportGenerator({ expenses, businessName, taxYear }: ReportGener
  
  <div className="mt-4 p-4 bg-muted rounded-lg">
  <p className="text-sm text-muted-foreground">
- <strong>Report Summary:</strong> {expenses.length} expenses totaling ${totalExpenses.toFixed(2)} for tax year {taxYear}
+ <strong>Report Summary:</strong> {expenses.length} expenses totaling {Formatters.currency(totalExpenses)} for tax year {taxYear}
  </p>
  </div>
  </CardContent>

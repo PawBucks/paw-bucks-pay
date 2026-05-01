@@ -11,7 +11,6 @@ import { Coins, TrendingUp, ArrowUpRight, ArrowDownRight, ArrowLeft, Store, Shop
 import { Formatters } from"@/utils/formatters";
 import { format, parseISO } from"date-fns";
 
-import { Formatters } from "@/utils/formatters";
 type MerchantPawBucksWallet = {
  id: string;
  balance: number;

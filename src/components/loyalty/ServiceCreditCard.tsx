@@ -4,6 +4,7 @@ import { cn } from"@/lib/utils";
 import type { ServiceCredit } from"@/services/api/loyalty.service";
 import { formatDistanceToNow, isPast } from"date-fns";
 
+import { Formatters } from "@/utils/formatters";
 interface ServiceCreditCardProps {
  credit: ServiceCredit;
  onClick?: () => void;
@@ -34,7 +35,7 @@ export const ServiceCreditCard = ({ credit, onClick, compact = false }: ServiceC
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-2">
  <CreditCard className="w-4 h-4 text-primary" />
- <span className="font-semibold">${credit.remaining_value.toFixed(0)}</span>
+ <span className="font-semibold">${Formatters.number(Math.round(credit.remaining_value))}</span>
  </div>
  {!isUsed && !isExpired && (
  <div className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -69,7 +70,7 @@ export const ServiceCreditCard = ({ credit, onClick, compact = false }: ServiceC
  ?"bg-muted"
  :"bg-gradient-to-br from-primary/20 to-accent/20"
  )}>
- <span className="text-lg font-bold">${credit.remaining_value.toFixed(0)}</span>
+ <span className="text-lg font-bold">${Formatters.number(Math.round(credit.remaining_value))}</span>
  {isPartiallyUsed && (
  <span className="text-[10px] text-muted-foreground">left</span>
  )}

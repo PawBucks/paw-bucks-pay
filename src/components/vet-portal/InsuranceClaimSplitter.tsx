@@ -27,6 +27,7 @@ import {
  Loader2
 } from"lucide-react";
 
+import { Formatters } from "@/utils/formatters";
 interface InsuranceClaimSplitterProps {
  vetId: string;
 }
@@ -177,7 +178,7 @@ export function InsuranceClaimSplitter({ vetId }: InsuranceClaimSplitterProps) {
  toast.success(
  <div>
  <p className="font-medium">Claim created: {data.claim.claimNumber}</p>
- <p className="text-sm">Owner copay: ${data.paymentSplit.ownerCopay.toFixed(2)}</p>
+ <p className="text-sm">Owner copay: {Formatters.currency(data.paymentSplit.ownerCopay)}</p>
  </div>
  );
  },
@@ -385,12 +386,12 @@ export function InsuranceClaimSplitter({ vetId }: InsuranceClaimSplitterProps) {
  <CardContent className="space-y-2">
  <div className="flex justify-between text-sm">
  <span>Invoice Total:</span>
- <span className="font-medium">${estimatedCoverage.total.toFixed(2)}</span>
+ <span className="font-medium">{Formatters.currency(estimatedCoverage.total)}</span>
  </div>
  {estimatedCoverage.deductibleApplied > 0 && (
  <div className="flex justify-between text-sm text-muted-foreground">
  <span>Deductible Applied:</span>
- <span>-${estimatedCoverage.deductibleApplied.toFixed(2)}</span>
+ <span>-{Formatters.currency(estimatedCoverage.deductibleApplied)}</span>
  </div>
  )}
  <Separator />
@@ -400,7 +401,7 @@ export function InsuranceClaimSplitter({ vetId }: InsuranceClaimSplitterProps) {
  Insurance Pays:
  </span>
  <span className="font-medium text-info">
- ${estimatedCoverage.insurancePortion.toFixed(2)}
+ {Formatters.currency(estimatedCoverage.insurancePortion)}
  </span>
  </div>
  <div className="flex justify-between text-sm">
@@ -409,7 +410,7 @@ export function InsuranceClaimSplitter({ vetId }: InsuranceClaimSplitterProps) {
  Owner Copay ({estimatedCoverage.copayPercentage}%):
  </span>
  <span className="font-medium text-warning">
- ${estimatedCoverage.ownerResponsibility.toFixed(2)}
+ {Formatters.currency(estimatedCoverage.ownerResponsibility)}
  </span>
  </div>
  </CardContent>
@@ -499,13 +500,13 @@ export function InsuranceClaimSplitter({ vetId }: InsuranceClaimSplitterProps) {
  <div className="flex items-center gap-6">
  <div className="text-right">
  <p className="text-sm text-muted-foreground">Total</p>
- <p className="font-medium">${claim.total_amount?.toFixed(2)}</p>
+ <p className="font-medium">{Formatters.currency(claim.total_amount ?? 0)}</p>
  </div>
  {claim.covered_amount !== null && (
  <div className="text-right">
  <p className="text-sm text-muted-foreground">Insurance</p>
  <p className="font-medium text-info">
- ${claim.covered_amount?.toFixed(2)}
+ {Formatters.currency(claim.covered_amount ?? 0)}
  </p>
  </div>
  )}
@@ -513,7 +514,7 @@ export function InsuranceClaimSplitter({ vetId }: InsuranceClaimSplitterProps) {
  <div className="text-right">
  <p className="text-sm text-muted-foreground">Owner</p>
  <p className="font-medium text-warning">
- ${claim.owner_responsibility?.toFixed(2)}
+ {Formatters.currency(claim.owner_responsibility ?? 0)}
  </p>
  </div>
  )}
@@ -670,18 +671,18 @@ function ClaimCard({
  <div className="flex items-center gap-6">
  <div className="text-right">
  <p className="text-sm text-muted-foreground">Total</p>
- <p className="font-medium">${claim.total_amount?.toFixed(2)}</p>
+ <p className="font-medium">{Formatters.currency(claim.total_amount ?? 0)}</p>
  </div>
  {claim.covered_amount !== null && (
  <div className="text-right">
  <p className="text-sm text-muted-foreground">Insurance</p>
- <p className="font-medium text-info">${claim.covered_amount?.toFixed(2)}</p>
+ <p className="font-medium text-info">{Formatters.currency(claim.covered_amount ?? 0)}</p>
  </div>
  )}
  {claim.owner_responsibility !== null && (
  <div className="text-right">
  <p className="text-sm text-muted-foreground">Owner</p>
- <p className="font-medium text-warning">${claim.owner_responsibility?.toFixed(2)}</p>
+ <p className="font-medium text-warning">{Formatters.currency(claim.owner_responsibility ?? 0)}</p>
  </div>
  )}
  
@@ -727,7 +728,7 @@ function ClaimCard({
  <p className="text-sm text-warning">
  <strong>Claim:</strong> {claim.claim_number}<br />
  <strong>Patient:</strong> {policy?.pet_profiles?.name}<br />
- <strong>Amount:</strong> ${claim.total_amount?.toFixed(2)}
+ <strong>Amount:</strong> {Formatters.currency(claim.total_amount ?? 0)}
  </p>
  </div>
  

@@ -26,6 +26,7 @@ import {
  Calendar
 } from'lucide-react';
 
+import { Formatters } from "@/utils/formatters";
 interface InvitationData {
  id: string;
  merchant_id: string;
@@ -438,7 +439,7 @@ export default function AccountantPortal() {
  </TableCell>
  <TableCell>{expense.vendor_name ||'-'}</TableCell>
  <TableCell className="max-w-xs truncate">{expense.description ||'-'}</TableCell>
- <TableCell className="text-right font-medium">${expense.amount.toFixed(2)}</TableCell>
+ <TableCell className="text-right font-medium">{Formatters.currency(expense.amount)}</TableCell>
  <TableCell>
  {expense.receipt_url ? (
  <a 
@@ -483,7 +484,7 @@ export default function AccountantPortal() {
  <div className="space-y-4">
  <div className="bg-muted p-3 rounded-lg text-sm">
  <p><strong>Date:</strong> {formatLocalDate(expense.expense_date,'MMM d, yyyy')}</p>
- <p><strong>Amount:</strong> ${expense.amount.toFixed(2)}</p>
+ <p><strong>Amount:</strong> {Formatters.currency(expense.amount)}</p>
  <p><strong>Current Category:</strong> {formatCategory(expense.category)}</p>
  </div>
 

@@ -10,6 +10,7 @@ import {
   respondToPromotionInvitation,
 } from "@/services/api/platformPromotions.service";
 
+import { Formatters } from "@/utils/formatters";
 interface Props {
   recipientType: "merchant" | "vet";
   recipientId: string;
@@ -126,7 +127,7 @@ function InvitationCard({
 
       <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
         {p.reward_amount_usd != null && (
-          <span className="flex items-center gap-1"><DollarSign className="h-3 w-3" /> ${Number(p.reward_amount_usd).toFixed(2)}</span>
+          <span className="flex items-center gap-1"><DollarSign className="h-3 w-3" /> {Formatters.currency(Number(p.reward_amount_usd))}</span>
         )}
         {p.end_date && (
           <span className="flex items-center gap-1"><Calendar className="h-3 w-3" /> Ends {new Date(p.end_date).toLocaleDateString()}</span>

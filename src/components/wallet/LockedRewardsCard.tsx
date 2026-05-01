@@ -105,8 +105,8 @@ export const LockedRewardsCard = ({ userId, onBalanceUpdate }: LockedRewardsCard
  }
 
  const totalBalance = spendableBalance + lockedBalance;
- const spendableUSD = (spendableBalance * PAWBUCKS_TO_USD).toFixed(2);
- const lockedUSD = (lockedBalance * PAWBUCKS_TO_USD).toFixed(2);
+ const spendableUSD = Formatters.money((spendableBalance * PAWBUCKS_TO_USD));
+ const lockedUSD = Formatters.money((lockedBalance * PAWBUCKS_TO_USD));
 
  const getStatusIcon = (status: string) => {
  switch (status) {

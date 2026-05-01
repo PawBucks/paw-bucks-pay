@@ -6,6 +6,7 @@ import { Button } from"@/components/ui/button";
 import { Card, CardContent } from"@/components/ui/card";
 import { CheckCircle, Loader2, Download, Home, AlertCircle } from"lucide-react";
 
+import { Formatters } from "@/utils/formatters";
 const InvoicePaymentSuccess = () => {
  const { invoiceId } = useParams<{ invoiceId: string }>();
  const [searchParams] = useSearchParams();
@@ -111,7 +112,7 @@ const InvoicePaymentSuccess = () => {
  <div className="text-right">
  <span className="text-muted-foreground">Amount Paid</span>
  <p className="font-medium text-success">
- ${Number(invoice.amount_paid || invoice.total || 0).toFixed(2)}
+ {Formatters.currency(Number(invoice.amount_paid || invoice.total || 0))}
  </p>
  </div>
  </div>

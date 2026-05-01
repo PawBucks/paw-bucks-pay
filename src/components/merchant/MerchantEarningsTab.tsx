@@ -123,11 +123,11 @@ export function MerchantEarningsTab() {
  <div className="flex items-center gap-2 mb-1">
  <TrendingUp className="h-5 w-5 text-primary" />
  <span className="text-2xl font-bold">
- ${data.summary?.totalEarnings?.toFixed(2) ||"0.00"}
+                {Formatters.currency(data.summary?.totalEarnings || 0)}
  </span>
  </div>
  <p className="text-xs text-muted-foreground">
- {data.summary?.transactionCount || 0} transactions • ${data.summary?.totalFees?.toFixed(2) ||"0.00"} in fees
+              {Formatters.number(data.summary?.transactionCount || 0)} transactions • {Formatters.currency(data.summary?.totalFees || 0)} in fees
  </p>
  </CardContent>
  </Card>

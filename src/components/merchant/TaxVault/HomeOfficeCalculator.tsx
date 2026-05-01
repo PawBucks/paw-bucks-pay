@@ -22,6 +22,7 @@ import {
 import { Alert, AlertDescription, AlertTitle } from'@/components/ui/alert';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from'@/components/ui/tooltip';
 
+import { Formatters } from "@/utils/formatters";
 interface CalculationResult {
  businessPercentage: number;
  annualRentDeduction: number;
@@ -280,7 +281,7 @@ export function HomeOfficeCalculator() {
  <div className="flex items-center justify-between">
  <span className="text-sm text-muted-foreground">Business Use Percentage</span>
  <span className="text-2xl font-bold text-primary">
- {((parseFloat(businessSqFt) / parseFloat(totalSqFt)) * 100).toFixed(1)}%
+ {Formatters.decimal(((parseFloat(businessSqFt) / parseFloat(totalSqFt)) * 100), 1)}%
  </span>
  </div>
  </div>
@@ -502,7 +503,7 @@ export function HomeOfficeCalculator() {
  </div>
  <div className="text-center p-3 bg-muted rounded-lg">
  <Calculator className="h-5 w-5 mx-auto mb-1 text-primary" />
- <p className="text-lg font-bold">${result.monthlyDeduction.toFixed(0)}</p>
+ <p className="text-lg font-bold">${Formatters.number(Math.round(result.monthlyDeduction))}</p>
  <p className="text-xs text-muted-foreground">Monthly Savings</p>
  </div>
  <div className="text-center p-3 bg-muted rounded-lg">

@@ -6,6 +6,7 @@ import { supabase } from"@/integrations/supabase/client";
 import { toast } from"sonner";
 import { cn } from"@/lib/utils";
 
+import { Formatters } from "@/utils/formatters";
 interface Attachment {
  name: string;
  url: string;
@@ -32,8 +33,8 @@ const ALLOWED_TYPES = [
 
 function formatFileSize(bytes: number): string {
  if (bytes < 1024) return `${bytes} B`;
- if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
- return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+ if (bytes < 1024 * 1024) return `${Formatters.decimal((bytes / 1024), 1)} KB`;
+ return `${Formatters.decimal((bytes / (1024 * 1024)), 1)} MB`;
 }
 
 function getFileIcon(type: string) {

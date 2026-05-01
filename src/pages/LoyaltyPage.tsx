@@ -1,3 +1,4 @@
+import { Formatters } from "@/utils/formatters";
 import { useEffect, useState } from"react";
 import { useNavigate } from"react-router-dom";
 import { motion, AnimatePresence } from"framer-motion";
@@ -159,7 +160,7 @@ const LoyaltyPage = () => {
  <GradientCard className="text-center">
  <Gift className="w-8 h-8 mx-auto text-primary mb-2" />
  <div className="text-2xl font-bold text-primary">
- ${summary?.totalCredits?.toFixed(0) || 0}
+                  {Formatters.currency(summary?.totalCredits || 0)}
  </div>
  <p className="text-sm text-muted-foreground">Available Credits</p>
  </GradientCard>
@@ -260,7 +261,7 @@ const LoyaltyPage = () => {
  <h3 className="font-semibold">Your Service Credits</h3>
  <div className="text-right">
  <div className="text-2xl font-bold text-primary">
- ${summary?.totalCredits?.toFixed(0) || 0}
+                  {Formatters.currency(summary?.totalCredits || 0)}
  </div>
  <p className="text-xs text-muted-foreground">Total Available</p>
  </div>

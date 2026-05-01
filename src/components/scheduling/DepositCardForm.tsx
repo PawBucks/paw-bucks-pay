@@ -5,6 +5,7 @@ import { supabase } from"@/integrations/supabase/client";
 import { Button } from"@/components/ui/button";
 import { Loader2, CreditCard, Shield, CheckCircle2 } from"lucide-react";
 
+import { Formatters } from "@/utils/formatters";
 interface DepositCardFormProps {
  merchantId: string;
  serviceId: string;
@@ -70,9 +71,9 @@ function CardFormInner({
  <p className="font-medium">Card Required for This Booking</p>
  <p className="mt-1 text-xs">
  {noShowFeeAmount > 0 
- ? `A $${noShowFeeAmount.toFixed(2)} no-show fee will be charged if you miss your appointment without canceling.` 
+ ? `A ${Formatters.currency(noShowFeeAmount)} no-show fee will be charged if you miss your appointment without canceling.` 
  :"Your card will be saved on file. You will only be charged if you miss your appointment."}
- {depositAmount > 0 && ` A $${depositAmount.toFixed(2)} deposit will be collected now.`}
+ {depositAmount > 0 && ` A ${Formatters.currency(depositAmount)} deposit will be collected now.`}
  </p>
  </div>
  </div>

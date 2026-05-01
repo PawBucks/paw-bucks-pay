@@ -39,6 +39,7 @@ import { format, parseISO } from"date-fns";
 import { toast } from"sonner";
 import { type Invoice } from"@/services/api/invoicing.service";
 
+import { Formatters } from "@/utils/formatters";
 const PAWBUCKS_TO_USD = 0.001; // 1 PawBuck = $0.001
 
 const InvoicePayment = () => {
@@ -117,7 +118,7 @@ const InvoicePayment = () => {
  }
  
  setInvoice(data.invoice as any);
- setPaymentAmount((data.invoice.amount_due || data.invoice.total || 0).toFixed(2));
+ setPaymentAmount(Formatters.money((data.invoice.amount_due || data.invoice.total || 0)));
 
  if (data.merchant) setMerchant(data.merchant);
  } catch (error: any) {
@@ -531,10 +532,10 @@ const InvoicePayment = () => {
  <div className="col-span-6">{item.description ||"—"}</div>
  <div className="col-span-2 text-right">{item.quantity}</div>
  <div className="col-span-2 text-right">
- ${Number(item.unit_price).toFixed(2)}
+ {Formatters.currency(Number(item.unit_price))}
  </div>
  <div className="col-span-2 text-right font-medium">
- ${(Number(item.quantity) * Number(item.unit_price)).toFixed(2)}
+ {Formatters.currency((Number(item.quantity) * Number(item.unit_price)))}
  </div>
  </div>
  ))}
@@ -547,12 +548,12 @@ const InvoicePayment = () => {
  <div className="space-y-2 text-sm">
  <div className="flex justify-between">
  <span className="text-muted-foreground">Subtotal</span>
- <span>${Number(invoice.subtotal).toFixed(2)}</span>
+ <span>{Formatters.currency(Number(invoice.subtotal))}</span>
  </div>
  {invoice.discount_amount && invoice.discount_amount > 0 && (
  <div className="flex justify-between text-success">
  <span>Discount</span>
- <span>-${Number(invoice.discount_amount).toFixed(2)}</span>
+ <span>-{Formatters.currency(Number(invoice.discount_amount))}</span>
  </div>
  )}
  {invoice.tax_amount && invoice.tax_amount > 0 && (
@@ -560,29 +561,29 @@ const InvoicePayment = () => {
  <span className="text-muted-foreground">
  Tax {invoice.tax_rate ? `(${invoice.tax_rate}%)` :""}
  </span>
- <span>${Number(invoice.tax_amount).toFixed(2)}</span>
+ <span>{Formatters.currency(Number(invoice.tax_amount))}</span>
  </div>
  )}
  {invoice.shipping_amount && invoice.shipping_amount > 0 && (
  <div className="flex justify-between">
  <span className="text-muted-foreground">Shipping</span>
- <span>${Number(invoice.shipping_amount).toFixed(2)}</span>
+ <span>{Formatters.currency(Number(invoice.shipping_amount))}</span>
  </div>
  )}
  <Separator />
  <div className="flex justify-between text-lg font-semibold">
  <span>Total</span>
- <span>${Number(invoice.total).toFixed(2)}</span>
+ <span>{Formatters.currency(Number(invoice.total))}</span>
  </div>
  {amountPaid > 0 && (
  <>
  <div className="flex justify-between text-success">
  <span>Amount Paid</span>
- <span>-${Number(amountPaid).toFixed(2)}</span>
+ <span>-{Formatters.currency(Number(amountPaid))}</span>
  </div>
  <div className="flex justify-between text-lg font-semibold">
  <span>Amount Due</span>
- <span>${Number(amountDue).toFixed(2)}</span>
+ <span>{Formatters.currency(Number(amountDue))}</span>
  </div>
  </>
  )}
@@ -676,7 +677,7 @@ const InvoicePayment = () => {
  
  <div className="p-4 bg-muted rounded-lg text-center">
  <p className="text-sm text-muted-foreground mb-1">Amount Due</p>
- <p className="text-2xl font-bold">${Number(amountDue).toFixed(2)}</p>
+ <p className="text-2xl font-bold">{Formatters.currency(Number(amountDue))}</p>
  </div>
  
  <Button 
@@ -776,7 +777,7 @@ const InvoicePayment = () => {
  {/* Payment UI */}
  <div className="p-4 bg-muted rounded-lg text-center">
  <p className="text-sm text-muted-foreground">Amount Due</p>
- <p className="text-3xl font-bold">${Number(amountDue).toFixed(2)}</p>
+ <p className="text-3xl font-bold">{Formatters.currency(Number(amountDue))}</p>
  </div>
 
  {invoice.allow_partial_payments && (
@@ -810,14 +811,14 @@ const InvoicePayment = () => {
  </SelectTrigger>
  <SelectContent>
  <SelectItem value="0">No tip</SelectItem>
- <SelectItem value={(amountDue * 0.1).toFixed(2)}>
- 10% (${(amountDue * 0.1).toFixed(2)})
+ <SelectItem value={Formatters.money((amountDue * 0.1))}>
+ 10% ({Formatters.currency((amountDue * 0.1))})
  </SelectItem>
- <SelectItem value={(amountDue * 0.15).toFixed(2)}>
- 15% (${(amountDue * 0.15).toFixed(2)})
+ <SelectItem value={Formatters.money((amountDue * 0.15))}>
+ 15% ({Formatters.currency((amountDue * 0.15))})
  </SelectItem>
- <SelectItem value={(amountDue * 0.2).toFixed(2)}>
- 20% (${(amountDue * 0.2).toFixed(2)})
+ <SelectItem value={Formatters.money((amountDue * 0.2))}>
+ 20% ({Formatters.currency((amountDue * 0.2))})
  </SelectItem>
  <SelectItem value="custom">Custom amount</SelectItem>
  </SelectContent>
@@ -851,7 +852,7 @@ const InvoicePayment = () => {
  <div className="flex justify-between text-sm">
  <span className="text-muted-foreground">PawBucks to use</span>
  <span className="font-medium">
- {pawbucksToUse.toLocaleString()} PB = ${pawbucksValueUSD.toFixed(2)}
+ {pawbucksToUse.toLocaleString()} PB = {Formatters.currency(pawbucksValueUSD)}
  </span>
  </div>
  <Slider
@@ -871,7 +872,7 @@ const InvoicePayment = () => {
  {pawbucksToUse > 0 && (
  <div className="flex items-center gap-2 text-sm text-success">
  <Sparkles className="h-4 w-4" />
- <span>Saving ${pawbucksValueUSD.toFixed(2)} with PawBucks!</span>
+ <span>Saving {Formatters.currency(pawbucksValueUSD)} with PawBucks!</span>
  </div>
  )}
  </>
@@ -895,18 +896,18 @@ const InvoicePayment = () => {
  <div className="space-y-2 text-sm">
  <div className="flex justify-between">
  <span className="text-muted-foreground">Subtotal</span>
- <span>${totalPayment.toFixed(2)}</span>
+ <span>{Formatters.currency(totalPayment)}</span>
  </div>
  {pawbucksToUse > 0 && (
  <div className="flex justify-between text-success">
  <span>PawBucks ({pawbucksToUse.toLocaleString()} PB)</span>
- <span>-${pawbucksValueUSD.toFixed(2)}</span>
+ <span>-{Formatters.currency(pawbucksValueUSD)}</span>
  </div>
  )}
  <Separator />
  <div className="flex justify-between font-semibold text-base">
  <span>{stripeAmount > 0 ?"Card Payment" :"Total"}</span>
- <span>${stripeAmount.toFixed(2)}</span>
+ <span>{Formatters.currency(stripeAmount)}</span>
  </div>
  </div>
 
@@ -924,7 +925,7 @@ const InvoicePayment = () => {
  ) : stripeAmount > 0 ? (
  <>
  <CreditCard className="h-4 w-4 mr-2" />
- Pay ${stripeAmount.toFixed(2)} Now
+ Pay {Formatters.currency(stripeAmount)} Now
  </>
  ) : (
  <>
@@ -957,7 +958,7 @@ const InvoicePayment = () => {
  className="flex items-center justify-between text-sm py-2 border-b last:border-0"
  >
  <div>
- <p className="font-medium">${Number(payment.amount).toFixed(2)}</p>
+ <p className="font-medium">{Formatters.currency(Number(payment.amount))}</p>
  <p className="text-xs text-muted-foreground">
  {format(parseISO(payment.payment_date),"MMM d, yyyy")}
  </p>

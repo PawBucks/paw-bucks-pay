@@ -392,7 +392,7 @@ export function PremiumAnalyticsDashboard() {
  <p className="text-3xl font-bold">${period_comparison.current_period.revenue.toLocaleString()}</p>
  <div className={`flex items-center justify-center gap-1 mt-1 ${getGrowthColor(period_comparison.growth.revenue)}`}>
  {getGrowthIcon(period_comparison.growth.revenue)}
- <span className="text-sm font-medium">{period_comparison.growth.revenue.toFixed(1)}%</span>
+ <span className="text-sm font-medium">{Formatters.decimal(period_comparison.growth.revenue, 1)}%</span>
  </div>
  </div>
  <div className="text-center p-4 rounded-lg bg-muted">
@@ -400,7 +400,7 @@ export function PremiumAnalyticsDashboard() {
  <p className="text-3xl font-bold">{period_comparison.current_period.transactions}</p>
  <div className={`flex items-center justify-center gap-1 mt-1 ${getGrowthColor(period_comparison.growth.transactions)}`}>
  {getGrowthIcon(period_comparison.growth.transactions)}
- <span className="text-sm font-medium">{period_comparison.growth.transactions.toFixed(1)}%</span>
+ <span className="text-sm font-medium">{Formatters.decimal(period_comparison.growth.transactions, 1)}%</span>
  </div>
  </div>
  <div className="text-center p-4 rounded-lg bg-muted">
@@ -408,7 +408,7 @@ export function PremiumAnalyticsDashboard() {
  <p className="text-3xl font-bold">{period_comparison.current_period.customers}</p>
  <div className={`flex items-center justify-center gap-1 mt-1 ${getGrowthColor(period_comparison.growth.customers)}`}>
  {getGrowthIcon(period_comparison.growth.customers)}
- <span className="text-sm font-medium">{period_comparison.growth.customers.toFixed(1)}%</span>
+ <span className="text-sm font-medium">{Formatters.decimal(period_comparison.growth.customers, 1)}%</span>
  </div>
  </div>
  </div>
@@ -979,16 +979,16 @@ export function PremiumAnalyticsDashboard() {
  <p className="text-xs text-muted-foreground">Industry: ${competitive_benchmarking.industry_avg_transaction}</p>
  <div className={`flex items-center justify-center gap-1 mt-1 ${getGrowthColor(competitive_benchmarking.transaction_value_vs_industry)}`}>
  {getGrowthIcon(competitive_benchmarking.transaction_value_vs_industry)}
- <span className="text-sm font-medium">{competitive_benchmarking.transaction_value_vs_industry.toFixed(1)}% vs industry</span>
+ <span className="text-sm font-medium">{Formatters.decimal(competitive_benchmarking.transaction_value_vs_industry, 1)}% vs industry</span>
  </div>
  </div>
  <div className="text-center p-4 rounded-lg bg-muted">
  <p className="text-sm text-muted-foreground mb-1">Repeat Purchase Rate</p>
- <p className="text-2xl font-bold">{competitive_benchmarking.your_repeat_rate.toFixed(1)}%</p>
+ <p className="text-2xl font-bold">{Formatters.decimal(competitive_benchmarking.your_repeat_rate, 1)}%</p>
  <p className="text-xs text-muted-foreground">Industry: {competitive_benchmarking.industry_avg_repeat_rate}%</p>
  <div className={`flex items-center justify-center gap-1 mt-1 ${getGrowthColor(competitive_benchmarking.repeat_rate_vs_industry)}`}>
  {getGrowthIcon(competitive_benchmarking.repeat_rate_vs_industry)}
- <span className="text-sm font-medium">{competitive_benchmarking.repeat_rate_vs_industry > 0 ?'+' :''}{competitive_benchmarking.repeat_rate_vs_industry.toFixed(1)}pp</span>
+ <span className="text-sm font-medium">{competitive_benchmarking.repeat_rate_vs_industry > 0 ?'+' :''}{Formatters.decimal(competitive_benchmarking.repeat_rate_vs_industry, 1)}pp</span>
  </div>
  </div>
  <div className="text-center p-4 rounded-lg bg-muted">
@@ -997,7 +997,7 @@ export function PremiumAnalyticsDashboard() {
  <p className="text-xs text-muted-foreground">Industry: ${competitive_benchmarking.industry_avg_ltv}</p>
  <div className={`flex items-center justify-center gap-1 mt-1 ${getGrowthColor(competitive_benchmarking.ltv_vs_industry)}`}>
  {getGrowthIcon(competitive_benchmarking.ltv_vs_industry)}
- <span className="text-sm font-medium">{competitive_benchmarking.ltv_vs_industry.toFixed(1)}% vs industry</span>
+ <span className="text-sm font-medium">{Formatters.decimal(competitive_benchmarking.ltv_vs_industry, 1)}% vs industry</span>
  </div>
  </div>
  </div>

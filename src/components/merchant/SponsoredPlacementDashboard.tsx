@@ -57,6 +57,7 @@ import {
 import { format, subDays } from"date-fns";
 import { toast } from"sonner";
 
+import { Formatters } from "@/utils/formatters";
 interface SponsoredPlacementDashboardProps {
  merchantId: string;
  serviceType?:'sponsored' |'premium-ad';
@@ -176,7 +177,7 @@ export function SponsoredPlacementDashboard({ merchantId, serviceType ='sponsore
  impressions: data.impressions,
  clicks: data.clicks,
  conversions: data.conversions,
- ctr: data.impressions > 0 ? ((data.clicks / data.impressions) * 100).toFixed(1) : 0,
+ ctr: data.impressions > 0 ? Formatters.decimal(((data.clicks / data.impressions) * 100), 1) : 0,
  }));
 
  // Format device data for pie chart
@@ -472,7 +473,7 @@ export function SponsoredPlacementDashboard({ merchantId, serviceType ='sponsore
  {deviceChartData.map((device, index) => {
  const Icon = getDeviceIcon(device.name);
  const total = deviceChartData.reduce((sum, d) => sum + d.value, 0);
- const percentage = total > 0 ? ((device.value / total) * 100).toFixed(1) : 0;
+ const percentage = total > 0 ? Formatters.decimal(((device.value / total) * 100), 1) : 0;
  return (
  <div key={device.name} className="flex items-center gap-4">
  <div
@@ -536,7 +537,7 @@ export function SponsoredPlacementDashboard({ merchantId, serviceType ='sponsore
  <span className="text-muted-foreground">CTR</span>
  <span className="font-medium text-success">
  {data.impressions > 0
- ? ((data.clicks / data.impressions) * 100).toFixed(1)
+ ? Formatters.decimal(((data.clicks / data.impressions) * 100), 1)
  : 0}
  %
  </span>
@@ -613,7 +614,7 @@ export function SponsoredPlacementDashboard({ merchantId, serviceType ='sponsore
  <p className="text-sm text-muted-foreground">Return on Investment</p>
  <p className={`text-3xl font-bold ${overview.roi >= 0 ?"text-success" :"text-destructive"}`}>
  {overview.roi >= 0 ?"+" :""}
- {overview.roi.toFixed(0)}%
+ {Formatters.number(Math.round(overview.roi))}%
  </p>
  <p className="text-xs text-muted-foreground mt-1">
  {overview.roi >= 0 ?"profit" :"loss"} on investment
@@ -643,29 +644,29 @@ export function SponsoredPlacementDashboard({ merchantId, serviceType ='sponsore
  <div className="flex justify-between p-3 bg-muted rounded-lg">
  <span>Impressions Value</span>
  <span className="font-medium">
- ~${(overview.totalImpressions * 0.01).toFixed(2)}
+ ~{Formatters.currency((overview.totalImpressions * 0.01))}
  </span>
  </div>
  <div className="flex justify-between p-3 bg-muted rounded-lg">
  <span>Click Value</span>
  <span className="font-medium">
- ~${(overview.totalClicks * 0.50).toFixed(2)}
+ ~{Formatters.currency((overview.totalClicks * 0.50))}
  </span>
  </div>
  <div className="flex justify-between p-3 bg-muted rounded-lg">
  <span>Conversion Value</span>
  <span className="font-medium">
- ~${(overview.totalConversions * 25).toFixed(2)}
+ ~{Formatters.currency((overview.totalConversions * 25))}
  </span>
  </div>
  <div className="flex justify-between p-3 bg-primary/10 rounded-lg border border-primary/20">
  <span className="font-semibold">Total Estimated Value</span>
  <span className="font-bold text-primary">
- ~${(
+ ~{Formatters.currency((
  overview.totalImpressions * 0.01 +
  overview.totalClicks * 0.50 +
  overview.totalConversions * 25
- ).toFixed(2)}
+ ))}
  </span>
  </div>
  </div>
@@ -694,7 +695,7 @@ export function SponsoredPlacementDashboard({ merchantId, serviceType ='sponsore
  />
  </svg>
  <span className="absolute text-2xl font-bold">
- {Math.min(100, Math.max(0, overview.roi + 100)).toFixed(0)}%
+ {Formatters.number(Math.round(Math.min(100, Math.max(0, overview.roi + 100))))}%
  </span>
  </div>
  <p className="text-sm text-muted-foreground mt-2">ROI Score</p>

@@ -14,6 +14,7 @@ import { Search, Edit, Shield, Coins, RefreshCw, Crown, Gift } from'lucide-react
 import { toast } from'sonner';
 import { UpgradeSubscriptionDialog } from'./UpgradeSubscriptionDialog';
 
+import { Formatters } from "@/utils/formatters";
 type User = {
  id: string;
  email: string;
@@ -393,7 +394,7 @@ export function UsersTab() {
  }
  >
  <Gift className="w-3 h-3 mr-1" />
- {user.welcome_credit_status ==='active' ? `$${((user.welcome_credit_amount ?? 0) / 1000).toFixed(0)} Active` : user.welcome_credit_status.charAt(0).toUpperCase() + user.welcome_credit_status.slice(1)}
+ {user.welcome_credit_status ==='active' ? `$${Formatters.number(Math.round(((user.welcome_credit_amount ?? 0) / 1000)))} Active` : user.welcome_credit_status.charAt(0).toUpperCase() + user.welcome_credit_status.slice(1)}
  </Badge>
  {user.welcome_credit_status ==='active' && user.welcome_credit_expires && (
  <span className="text-xs text-muted-foreground">

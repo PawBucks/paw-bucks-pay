@@ -16,6 +16,7 @@ import { startOfMonth, endOfMonth } from"date-fns";
 import { CATEGORY_CONFIG, getNormalizedCategory, getCategoryIcon } from"@/lib/categoryMapping";
 import { useSharedAccount, getEffectiveWalletUserId } from"@/hooks/useSharedAccount";
 
+import { Formatters } from "@/utils/formatters";
 type Transaction = {
  id: string;
  amount: number;
@@ -194,8 +195,8 @@ export const BudgetSettings = memo(({ transactions }: BudgetSettingsProps) => {
  </span>
  </div>
  <div className="flex items-center justify-between text-xs text-muted-foreground">
- <span>${spent.toFixed(2)} of ${alert.monthly_limit.toFixed(2)}</span>
- <span>{percentage.toFixed(0)}%</span>
+ <span>{Formatters.currency(spent)} of {Formatters.currency(alert.monthly_limit)}</span>
+ <span>{Formatters.number(Math.round(percentage))}%</span>
  </div>
  <Progress value={percentage} className="h-1.5 mt-1" />
  </div>
@@ -230,7 +231,7 @@ export const BudgetSettings = memo(({ transactions }: BudgetSettingsProps) => {
  {budget ? (
  <div className="flex items-center gap-2">
  <p className="text-xs text-muted-foreground">
- ${spent.toFixed(2)} / ${budget.monthly_limit.toFixed(2)}
+ {Formatters.currency(spent)} / {Formatters.currency(budget.monthly_limit)}
  </p>
  <div className="w-16 h-1.5 bg-muted rounded-full overflow-hidden">
  <div 

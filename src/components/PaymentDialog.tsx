@@ -17,6 +17,7 @@ import { getStripeForConnectedAccount } from"@/lib/stripe";
 import { TipSelector } from"@/components/checkout/TipSelector";
 import { buildAppUrl } from"@/lib/url";
 
+import { Formatters } from "@/utils/formatters";
 type PaymentFormProps = {
  merchantId: string;
  merchantName: string;
@@ -92,7 +93,7 @@ const PaymentForm = ({
  <div className="bg-accent/10 border border-accent/20 rounded-lg p-4 mb-4">
  <div className="flex justify-between text-sm mb-2">
  <span className="text-muted-foreground">Amount:</span>
- <span className="font-medium">${parseFloat(amount).toFixed(2)}</span>
+ <span className="font-medium">{Formatters.currency(parseFloat(amount))}</span>
  </div>
  <div className="flex justify-between text-sm">
  <span className="text-muted-foreground">Points Earned ({cashbackRate}x):</span>
@@ -295,18 +296,18 @@ export const PaymentDialog = ({
  <div className="bg-accent/10 border border-accent/20 rounded-lg p-4">
  <div className="flex justify-between text-sm mb-2">
  <span className="text-muted-foreground">Amount:</span>
- <span className="font-medium">${parseFloat(amount).toFixed(2)}</span>
+ <span className="font-medium">{Formatters.currency(parseFloat(amount))}</span>
  </div>
  {tipAmount > 0 && (
  <div className="flex justify-between text-sm mb-2">
  <span className="text-muted-foreground">Tip:</span>
- <span className="font-medium">${tipAmount.toFixed(2)}</span>
+ <span className="font-medium">{Formatters.currency(tipAmount)}</span>
  </div>
  )}
  {tipAmount > 0 && (
  <div className="flex justify-between text-sm mb-2 border-t pt-2">
  <span className="text-muted-foreground">Total:</span>
- <span className="font-bold">${(parseFloat(amount) + tipAmount).toFixed(2)}</span>
+ <span className="font-bold">{Formatters.currency((parseFloat(amount) + tipAmount))}</span>
  </div>
  )}
  <div className="flex justify-between text-sm">

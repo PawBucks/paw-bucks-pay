@@ -14,6 +14,7 @@ import {
 } from"lucide-react";
 import { format, subDays } from"date-fns";
 
+import { Formatters } from "@/utils/formatters";
 type ServiceStat = {
  service_name: string;
  impressions: number;
@@ -37,12 +38,12 @@ const CHART_COLORS = [
 
 function ctr(clicks: number, impressions: number): string {
  if (impressions === 0) return'0%';
- return ((clicks / impressions) * 100).toFixed(1) +'%';
+ return Formatters.decimal(((clicks / impressions) * 100), 1) +'%';
 }
 
 function roiMultiplier(revenue: number, cost: number): string {
  if (cost === 0) return'∞';
- return (revenue / cost).toFixed(1) +'x';
+ return Formatters.decimal((revenue / cost), 1) +'x';
 }
 
 function TrendIndicator({ value }: { value: number }) {
@@ -219,7 +220,7 @@ export function ServicePerformanceDashboard({ merchantId }: { merchantId: string
  <DollarSign className="h-4 w-4 text-muted-foreground" />
  <span className="text-sm text-muted-foreground">Revenue</span>
  </div>
- <p className="text-2xl font-bold">${totalRevenue.toFixed(0)}</p>
+ <p className="text-2xl font-bold">${Formatters.number(Math.round(totalRevenue))}</p>
  </GradientCard>
  <GradientCard gradient>
  <div className="flex items-center gap-2 mb-2">
@@ -227,7 +228,7 @@ export function ServicePerformanceDashboard({ merchantId }: { merchantId: string
  <span className="text-sm text-muted-foreground">ROI</span>
  </div>
  <p className="text-2xl font-bold">{roiMultiplier(totalRevenue, totalSpend)}</p>
- <p className="text-xs text-muted-foreground">Spend: ${totalSpend.toFixed(0)}</p>
+ <p className="text-xs text-muted-foreground">Spend: ${Formatters.number(Math.round(totalSpend))}</p>
  </GradientCard>
  </div>
 
@@ -348,7 +349,7 @@ export function ServicePerformanceDashboard({ merchantId }: { merchantId: string
  <p className="text-xs text-muted-foreground">Transactions</p>
  </div>
  <div>
- <p className="text-lg font-bold">${s.transaction_revenue.toFixed(0)}</p>
+ <p className="text-lg font-bold">${Formatters.number(Math.round(s.transaction_revenue))}</p>
  <p className="text-xs text-muted-foreground">Revenue</p>
  </div>
  </div>

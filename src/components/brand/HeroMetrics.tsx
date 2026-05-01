@@ -68,7 +68,7 @@ export function HeroMetrics({ summary }: HeroMetricsProps) {
  <div className="mt-4 space-y-1.5">
  <div className="flex justify-between text-xs">
  <span className="text-muted-foreground">Spent</span>
- <span className="font-medium tabular-nums">{spendPct.toFixed(1)}%</span>
+ <span className="font-medium tabular-nums">{Formatters.decimal(spendPct, 1)}%</span>
  </div>
  <Progress value={spendPct} className="h-2" />
  </div>
@@ -98,7 +98,7 @@ export function HeroMetrics({ summary }: HeroMetricsProps) {
  <StatCard
  icon={TrendingDown}
  label="Redemption Rate"
- value={`${summary.redemption_rate_pct.toFixed(1)}%`}
+ value={`${Formatters.decimal(summary.redemption_rate_pct, 1)}%`}
  accent="text-accent"
  badge={
  <Badge variant="secondary" className="text-[10px] px-1.5 h-4">

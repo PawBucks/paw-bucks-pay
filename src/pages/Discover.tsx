@@ -32,6 +32,7 @@ import { useSearchRankingTracking } from"@/hooks/useSearchRankingTracking";
 import { useServiceConversionTracking } from"@/hooks/useServiceConversionTracking";
 import { FeaturedPartnerCard, PremiumAdCard, SponsoredMerchantCard, OrganicMerchantCard, AttentionLadderFeed } from"@/components/discover";
 
+import { Formatters } from "@/utils/formatters";
 type MerchantWithRating = {
  id: string;
  business_name: string;
@@ -84,7 +85,7 @@ const calculateDistance = (
 const formatDistance = (distance?: number): string => {
  if (distance === undefined) return'';
  if (distance < 0.1) return'< 0.1 mi';
- if (distance < 10) return `${distance.toFixed(1)} mi`;
+ if (distance < 10) return `${Formatters.decimal(distance, 1)} mi`;
  return `${Math.round(distance)} mi`;
 };
 

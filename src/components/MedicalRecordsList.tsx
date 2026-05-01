@@ -32,6 +32,7 @@ import {
 import { Card } from"@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from"@/components/ui/collapsible";
 
+import { Formatters } from "@/utils/formatters";
 type RecordType ="vaccination" |"checkup" |"surgery" |"lab_results" |"prescription" |"dental" |"emergency" |"other";
 
 type MedicalRecord = {
@@ -381,7 +382,7 @@ export const MedicalRecordsList = ({ petId, refreshTrigger }: MedicalRecordsList
  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
  <div>
  <div className="text-sm text-muted-foreground mb-2">Annual Total</div>
- <div className="text-3xl font-bold text-primary">${annualTotal.toFixed(2)}</div>
+ <div className="text-3xl font-bold text-primary">{Formatters.currency(annualTotal)}</div>
  </div>
  <div>
  <div className="text-sm text-muted-foreground mb-2">Monthly Breakdown</div>
@@ -392,7 +393,7 @@ export const MedicalRecordsList = ({ petId, refreshTrigger }: MedicalRecordsList
  .map(([month, { total, date }]) => (
  <div key={month} className="flex justify-between text-sm">
  <span>{format(date,"MMMM yyyy")}</span>
- <span className="font-semibold">${total.toFixed(2)}</span>
+ <span className="font-semibold">{Formatters.currency(total)}</span>
  </div>
  ))}
  </div>
@@ -420,7 +421,7 @@ export const MedicalRecordsList = ({ petId, refreshTrigger }: MedicalRecordsList
  </div>
  <div className="text-sm text-muted-foreground">
  {visit.records.length} item{visit.records.length !== 1 ?'s' :''}
- {totalCost > 0 && ` • Total: $${totalCost.toFixed(2)}`}
+ {totalCost > 0 && ` • Total: ${Formatters.currency(totalCost)}`}
  </div>
  {(visit.vet_name || visit.doctor_name) && (
  <div className="text-sm text-muted-foreground mt-1">
@@ -486,7 +487,7 @@ export const MedicalRecordsList = ({ petId, refreshTrigger }: MedicalRecordsList
  </TableCell>
  <TableCell className="text-right">{record.quantity ||"-"}</TableCell>
  <TableCell className="text-right">
- {record.price ? `$${Number(record.price).toFixed(2)}` :"-"}
+ {record.price ? `${Formatters.currency(Number(record.price))}` :"-"}
  </TableCell>
  <TableCell className="max-w-xs truncate">
  {record.description ||"-"}

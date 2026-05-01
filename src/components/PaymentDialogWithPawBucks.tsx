@@ -30,6 +30,7 @@ import {
 } from"@/lib/pawbucksCap";
 import { PawBucksCapBreakdown } from"@/components/checkout/PawBucksCapBreakdown";
 
+import { Formatters } from "@/utils/formatters";
 // Pet Owner conversion rate: 1000 PawBucks = $1.00 (1 PawBuck = $0.001)
 const PAWBUCKS_TO_USD = 0.001;
 // Minimum transaction for Pet Fund credits (dynamic, but defaults)
@@ -167,7 +168,7 @@ const StripePaymentForm = ({
  <div className="bg-accent/10 border border-accent/20 rounded-lg p-4 space-y-2">
  <div className="flex justify-between text-sm">
  <span className="text-muted-foreground">Total Amount:</span>
- <span className="font-medium">${totalAmount.toFixed(2)}</span>
+ <span className="font-medium">{Formatters.currency(totalAmount)}</span>
  </div>
  {pawbucksAmount > 0 && (
  <div className="flex justify-between text-sm">
@@ -175,13 +176,13 @@ const StripePaymentForm = ({
  <Coins className="w-3 h-3" /> PawBucks Used:
  </span>
  <span className="font-medium text-primary">
- {pawbucksAmount} (−${(pawbucksAmount * PAWBUCKS_TO_USD).toFixed(2)})
+ {pawbucksAmount} (−{Formatters.currency((pawbucksAmount * PAWBUCKS_TO_USD))})
  </span>
  </div>
  )}
  <div className="flex justify-between text-sm border-t pt-2">
  <span className="text-muted-foreground">Pay with Card:</span>
- <span className="font-bold">${stripeAmount.toFixed(2)}</span>
+ <span className="font-bold">{Formatters.currency(stripeAmount)}</span>
  </div>
  <div className="flex justify-between text-sm">
  <span className="text-muted-foreground">Points Earned ({cashbackRate}x):</span>
@@ -218,7 +219,7 @@ const StripePaymentForm = ({
  ) : !isReady ? (
  <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Loading...</>
  ) : (
- `Pay $${stripeAmount.toFixed(2)}`
+ `Pay ${Formatters.currency(stripeAmount)}`
  )}
  </Button>
  </div>
@@ -372,17 +373,17 @@ export const PaymentDialogWithPawBucks = ({
    : promoBelowMin
    ? {
        title:"Below minimum for credit redemption",
-       message: `${hasPetFund ?"Pet Fund" :"Welcome"} credit requires a purchase of at least $${petFundMinUsd.toFixed(2)}. Add $${(petFundMinUsd - totalAmount).toFixed(2)} more or switch to earned PawBucks.`,
+       message: `${hasPetFund ?"Pet Fund" :"Welcome"} credit requires a purchase of at least ${Formatters.currency(petFundMinUsd)}. Add ${Formatters.currency((petFundMinUsd - totalAmount))} more or switch to earned PawBucks.`,
      }
    : exceedsCap
    ? {
        title:"Above merchant's PawBucks cap",
-       message: `${merchantName} caps PawBucks at $${capUsdMax.toFixed(2)} of this purchase. Reduce the slider to stay within the cap.`,
+       message: `${merchantName} caps PawBucks at ${Formatters.currency(capUsdMax)} of this purchase. Reduce the slider to stay within the cap.`,
      }
    : cardPortionBelowMin
    ? {
        title:"Card portion too small",
-       message: `The remaining card amount is $${cardPortion.toFixed(2)}, but the minimum card charge is $0.50. Use fewer PawBucks, or use enough to cover the full purchase.`,
+       message: `The remaining card amount is ${Formatters.currency(cardPortion)}, but the minimum card charge is $0.50. Use fewer PawBucks, or use enough to cover the full purchase.`,
      }
    : null;
 
@@ -438,7 +439,7 @@ export const PaymentDialogWithPawBucks = ({
 
  // Full PawBucks payment - no Stripe needed
  if (data.paymentMethod ==='pawbucks_only') {
- toast.success(`Payment of $${totalAmount.toFixed(2)} completed using ${pawbucksToUse} PawBucks!`);
+ toast.success(`Payment of ${Formatters.currency(totalAmount)} completed using ${pawbucksToUse} PawBucks!`);
  handleSuccess();
  return;
  }
@@ -576,7 +577,7 @@ export const PaymentDialogWithPawBucks = ({
  <Gift className="w-4 h-4 text-success mt-0.5 flex-shrink-0" />
  <div>
  <p className="text-sm font-medium text-success">
- 🎉 Pet Fund Credit Available: {petFundCreditBalance.toLocaleString()} PB (${(petFundCreditBalance * PAWBUCKS_TO_USD).toFixed(2)})
+ 🎉 Pet Fund Credit Available: {petFundCreditBalance.toLocaleString()} PB ({Formatters.currency((petFundCreditBalance * PAWBUCKS_TO_USD))})
  </p>
  <p className="text-xs text-success/80 mt-0.5">
  Your Pet Fund credit is included in your balance below. Use the slider to apply it!
@@ -591,10 +592,10 @@ export const PaymentDialogWithPawBucks = ({
  <Gift className="w-4 h-4 text-warning mt-0.5 flex-shrink-0" />
  <div>
  <p className="text-sm font-medium text-warning">
- Pet Fund: ${(petFundCreditBalance * PAWBUCKS_TO_USD).toFixed(2)} available
+ Pet Fund: {Formatters.currency((petFundCreditBalance * PAWBUCKS_TO_USD))} available
  </p>
  <p className="text-xs text-warning/80 mt-0.5">
- Add ${(petFundMinUsd - totalAmount).toFixed(2)} more to unlock your Pet Fund credit.
+ Add {Formatters.currency((petFundMinUsd - totalAmount))} more to unlock your Pet Fund credit.
  </p>
  {/* Progress bar */}
  <div className="mt-2">
@@ -605,7 +606,7 @@ export const PaymentDialogWithPawBucks = ({
  />
  </div>
  <p className="text-xs mt-1 text-warning/70">
- ${totalAmount.toFixed(2)} / ${petFundMinUsd.toFixed(2)} minimum
+ {Formatters.currency(totalAmount)} / {Formatters.currency(petFundMinUsd)} minimum
  </p>
  </div>
  </div>
@@ -662,7 +663,7 @@ export const PaymentDialogWithPawBucks = ({
  )}
  </span>
  <span className={`font-medium ${pawbucksToUse > 0 ?'text-primary' :'text-muted-foreground'}`}>
- {pawbucksToUse > 0 ? `= $${pawbucksUsdValue.toFixed(2)} off` :'$0.00 off'}
+ {pawbucksToUse > 0 ? `= ${Formatters.currency(pawbucksUsdValue)} off` :'$0.00 off'}
  </span>
  </div>
 
@@ -687,25 +688,25 @@ export const PaymentDialogWithPawBucks = ({
  <div className="bg-accent/10 border border-accent/20 rounded-lg p-4 space-y-2">
  <div className="flex justify-between text-sm">
  <span className="text-muted-foreground">Subtotal:</span>
- <span className="font-medium">${totalAmount.toFixed(2)}</span>
+ <span className="font-medium">{Formatters.currency(totalAmount)}</span>
  </div>
  {tipAmount > 0 && (
  <div className="flex justify-between text-sm">
  <span className="text-muted-foreground">Tip (USD):</span>
- <span className="font-medium">${tipAmount.toFixed(2)}</span>
+ <span className="font-medium">{Formatters.currency(tipAmount)}</span>
  </div>
  )}
  {pawbucksToUse > 0 && (
  <div className="flex justify-between text-sm">
  <span className="text-muted-foreground">PawBucks:</span>
- <span className="text-primary">−${pawbucksUsdValue.toFixed(2)}</span>
+ <span className="text-primary">−{Formatters.currency(pawbucksUsdValue)}</span>
  </div>
  )}
  {stripeAmount > 0 && (
  <>
  <div className="flex justify-between text-sm border-t pt-2">
  <span className="text-muted-foreground">Card Payment:</span>
- <span className="font-bold">${stripeAmount.toFixed(2)}</span>
+ <span className="font-bold">{Formatters.currency(stripeAmount)}</span>
  </div>
  <div className="flex justify-between text-sm">
  <span className="text-muted-foreground">Points Earned ({cashbackRate}x):</span>

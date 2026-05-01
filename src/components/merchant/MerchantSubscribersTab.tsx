@@ -33,6 +33,7 @@ import { Label } from"@/components/ui/label";
 import { format } from"date-fns";
 import { toast } from"sonner";
 
+import { Formatters } from "@/utils/formatters";
 type Subscriber = {
  id: string;
  user_id: string;
@@ -195,7 +196,7 @@ export function MerchantSubscribersTab({ merchantId }: MerchantSubscribersTabPro
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Monthly Recurring</p>
- <p className="text-2xl font-bold">${(totalMRR / 100).toFixed(2)}</p>
+ <p className="text-2xl font-bold">{Formatters.currency((totalMRR / 100))}</p>
  </div>
  </div>
  </GradientCard>
@@ -246,7 +247,7 @@ export function MerchantSubscribersTab({ merchantId }: MerchantSubscribersTabPro
  <span className="font-medium">{sub.product_name}</span>
  </TableCell>
  <TableCell>
- ${(sub.amount / 100).toFixed(2)}
+ {Formatters.currency((sub.amount / 100))}
  <span className="text-xs text-muted-foreground ml-1">
  /{sub.billing_interval_count > 1 ? `${sub.billing_interval_count} ` :""}
  {sub.billing_interval}

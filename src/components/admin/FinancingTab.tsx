@@ -183,7 +183,7 @@ function DealCard({ applicant, selected, onSelect }: {
  <span className={`text-xs font-medium ${risk.color}`}>{risk.label}</span>
  </div>
  <div className="grid grid-cols-3 gap-1 text-xs text-muted-foreground">
- <span>⬆ ${(applicant.revenue_30d / 1000).toFixed(1)}k / 30d</span>
+ <span>⬆ ${Formatters.decimal((applicant.revenue_30d / 1000), 1)}k / 30d</span>
  <span>📦 {applicant.total_transactions} txns</span>
  <span>🕐 {daysSince}d old</span>
  </div>
@@ -257,7 +257,7 @@ function MerchantDetailPanel({
  <Metric icon={DollarSign} label="Amount Requested" value={`$${applicant.requested_amount.toLocaleString()}`} accent />
  <Metric icon={Shield} label="Risk Score" value={`${risk.score}/100`} sub={risk.label} />
  <Metric icon={TrendingUp} label="Max Eligible" value={`$${maxEligible.toLocaleString('en', { maximumFractionDigits: 0 })}`} sub="80% of 90d revenue" />
- <Metric icon={Activity} label="Revenue Coverage" value={`${coverage.toFixed(1)}x`} sub="90d rev / ask" />
+ <Metric icon={Activity} label="Revenue Coverage" value={`${Formatters.decimal(coverage, 1)}x`} sub="90d rev / ask" />
  </div>
 
  {/* Financial Performance */}
@@ -279,7 +279,7 @@ function MerchantDetailPanel({
  <div className="mt-4 space-y-2">
  <div className="flex justify-between text-xs text-muted-foreground">
  <span>Revenue vs. Requested Amount</span>
- <span>{(coverage * 100).toFixed(0)}% covered</span>
+ <span>{Formatters.number(Math.round((coverage * 100)))}% covered</span>
  </div>
  <Progress value={Math.min(coverage * 33, 100)} className="h-2" />
  <div className="flex justify-between text-xs text-muted-foreground">
@@ -334,7 +334,7 @@ function MerchantDetailPanel({
  </CardHeader>
  <CardContent>
  <div className="grid grid-cols-3 gap-3">
- <Metric icon={DollarSign} label="Est. Monthly Payment" value={`$${projection.monthlyPayment.toFixed(0)}`} sub="10% of 30d revenue" accent />
+ <Metric icon={DollarSign} label="Est. Monthly Payment" value={`$${Formatters.number(Math.round(projection.monthlyPayment))}`} sub="10% of 30d revenue" accent />
  <Metric icon={Calendar} label="Est. Payoff Period" value={`${projection.months} months`} accent />
  <Metric icon={TrendingUp} label="Effective Rate" value="10% of revenue" sub="Revenue-based" accent />
  </div>
@@ -602,7 +602,7 @@ function VetLoanDetailPanel({
  <Metric icon={DollarSign} label="Requested" value={`$${loan.requested_amount.toLocaleString()}`} accent />
  <Metric icon={FileText} label="Invoice Amount" value={`$${loan.invoice_amount.toLocaleString()}`} />
  <Metric icon={Calendar} label="Term" value={`${loan.term_months} months`} />
- <Metric icon={DollarSign} label="Monthly Payment" value={`$${(loan.requested_amount / loan.term_months).toFixed(0)}`} />
+ <Metric icon={DollarSign} label="Monthly Payment" value={`$${Formatters.number(Math.round((loan.requested_amount / loan.term_months)))}`} />
  </div>
 
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1146,7 +1146,7 @@ export function FinancingTab() {
  <div className="bg-muted/30 rounded-lg p-3 space-y-1 text-sm">
  <div className="flex justify-between"><span className="text-muted-foreground">Amount</span><span className="font-bold">${selectedVetLoan.requested_amount.toLocaleString()}</span></div>
  <div className="flex justify-between"><span className="text-muted-foreground">Term</span><span>{selectedVetLoan.term_months} months</span></div>
- <div className="flex justify-between"><span className="text-muted-foreground">Monthly payment</span><span>${(selectedVetLoan.requested_amount / selectedVetLoan.term_months).toFixed(0)}</span></div>
+ <div className="flex justify-between"><span className="text-muted-foreground">Monthly payment</span><span>${Formatters.number(Math.round((selectedVetLoan.requested_amount / selectedVetLoan.term_months)))}</span></div>
  </div>
  )}
  <div className="flex gap-3 pt-2">

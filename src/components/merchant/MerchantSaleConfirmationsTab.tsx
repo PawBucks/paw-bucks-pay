@@ -17,6 +17,7 @@ import { format } from"date-fns";
 import { MerchantPendingReceipts } from"./MerchantPendingReceipts";
 import { Separator } from"@/components/ui/separator";
 
+import { Formatters } from "@/utils/formatters";
 type Confirmation = {
  id: string;
  customer_email: string;
@@ -197,7 +198,7 @@ export const MerchantSaleConfirmationsTab = ({ merchantId }: MerchantSaleConfirm
  </div>
  </TableCell>
  <TableCell className="text-right font-medium">
- ${c.amount.toFixed(2)}
+ {Formatters.currency(c.amount)}
  </TableCell>
  <TableCell>
  <code className="text-xs bg-muted px-2 py-1 rounded">{c.confirmation_code}</code>

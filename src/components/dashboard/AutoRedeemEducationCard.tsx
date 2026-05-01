@@ -6,6 +6,7 @@ import { Button } from"@/components/ui/button";
 import { Sparkles, Settings, ArrowRight, X, Coins } from"lucide-react";
 import { motion, AnimatePresence } from"framer-motion";
 
+import { Formatters } from "@/utils/formatters";
 interface AutoRedeemEducationCardProps {
  userId: string;
  pawbucksBalance: number;
@@ -44,7 +45,7 @@ export const AutoRedeemEducationCard = ({ userId, pawbucksBalance }: AutoRedeemE
  return null;
  }
 
- const pawbucksValue = (pawbucksBalance * 0.001).toFixed(2);
+ const pawbucksValue = Formatters.money((pawbucksBalance * 0.001));
 
  return (
  <AnimatePresence>

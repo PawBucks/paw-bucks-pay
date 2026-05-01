@@ -12,6 +12,7 @@ import { supabase } from"@/integrations/supabase/client";
 import { toast } from"sonner";
 import { useAuth } from"@/hooks/useAuth";
 
+import { Formatters } from "@/utils/formatters";
 interface LineItem {
  id?: string;
  description: string;
@@ -353,7 +354,7 @@ export function AdminInvoiceForm({ invoice, onSave, onCancel }: Props) {
  <Input value={item.description} onChange={(e) => updateItem(idx,"description", e.target.value)} placeholder="Description" />
  <Input type="number" value={item.quantity} onChange={(e) => updateItem(idx,"quantity", e.target.value)} min="0" step="1" />
  <Input type="number" value={item.unit_price} onChange={(e) => updateItem(idx,"unit_price", e.target.value)} min="0" step="0.01" />
- <div className="text-sm font-medium text-right pr-2">${lineTotal.toFixed(2)}</div>
+ <div className="text-sm font-medium text-right pr-2">{Formatters.currency(lineTotal)}</div>
  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => removeItem(idx)} disabled={items.length <= 1}>
  <Trash2 className="w-4 h-4 text-muted-foreground" />
  </Button>
@@ -365,10 +366,10 @@ export function AdminInvoiceForm({ invoice, onSave, onCancel }: Props) {
  {/* Totals */}
  <div className="mt-6 flex justify-end">
  <div className="w-64 space-y-2 text-sm">
- <div className="flex justify-between"><span>Subtotal</span><span>${subtotal.toFixed(2)}</span></div>
- {discount > 0 && <div className="flex justify-between text-success"><span>Discount</span><span>-${discount.toFixed(2)}</span></div>}
- {tax > 0 && <div className="flex justify-between"><span>Tax ({taxRate}%)</span><span>${tax.toFixed(2)}</span></div>}
- <div className="flex justify-between font-bold text-base border-t pt-2"><span>Total</span><span>${total.toFixed(2)}</span></div>
+ <div className="flex justify-between"><span>Subtotal</span><span>{Formatters.currency(subtotal)}</span></div>
+ {discount > 0 && <div className="flex justify-between text-success"><span>Discount</span><span>-{Formatters.currency(discount)}</span></div>}
+ {tax > 0 && <div className="flex justify-between"><span>Tax ({taxRate}%)</span><span>{Formatters.currency(tax)}</span></div>}
+ <div className="flex justify-between font-bold text-base border-t pt-2"><span>Total</span><span>{Formatters.currency(total)}</span></div>
  </div>
  </div>
  </CardContent>

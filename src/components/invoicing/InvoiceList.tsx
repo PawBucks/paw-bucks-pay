@@ -57,6 +57,7 @@ import { Invoice } from"@/services/api/invoicing.service";
 import { cn } from"@/lib/utils";
 import { buildAppUrl } from"@/lib/url";
 
+import { Formatters } from "@/utils/formatters";
 interface InvoiceListProps {
  invoices: Invoice[];
  loading: boolean;
@@ -202,7 +203,7 @@ export function InvoiceList({
  <div className="flex items-center justify-between">
  <div>
  <p className="text-sm text-muted-foreground">Outstanding</p>
- <p className="text-2xl font-bold">${stats.totalOutstanding.toFixed(2)}</p>
+ <p className="text-2xl font-bold">{Formatters.currency(stats.totalOutstanding)}</p>
  </div>
  <div className="h-10 w-10 rounded-full bg-warning/10 flex items-center justify-center">
  <Clock className="h-5 w-5 text-warning" />
@@ -215,7 +216,7 @@ export function InvoiceList({
  <div className="flex items-center justify-between">
  <div>
  <p className="text-sm text-muted-foreground">Paid</p>
- <p className="text-2xl font-bold">${stats.totalPaid.toFixed(2)}</p>
+ <p className="text-2xl font-bold">{Formatters.currency(stats.totalPaid)}</p>
  </div>
  <div className="h-10 w-10 rounded-full bg-success/10 flex items-center justify-center">
  <CheckCircle className="h-5 w-5 text-success" />
@@ -381,12 +382,12 @@ export function InvoiceList({
  </span>
  </TableCell>
  <TableCell className="text-right font-medium">
- ${Number(invoice.total).toFixed(2)}
+ {Formatters.currency(Number(invoice.total))}
  </TableCell>
  <TableCell className="text-right">
  {Number(invoice.amount_due) > 0 ? (
  <span className="text-warning font-medium">
- ${Number(invoice.amount_due).toFixed(2)}
+ {Formatters.currency(Number(invoice.amount_due))}
  </span>
  ) : (
  <span className="text-success">Paid</span>

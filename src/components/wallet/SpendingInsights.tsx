@@ -14,6 +14,7 @@ import {
 import { startOfMonth, endOfMonth, subMonths, differenceInDays, format } from"date-fns";
 import { CATEGORY_CONFIG, getNormalizedCategory } from"@/lib/categoryMapping";
 
+import { Formatters } from "@/utils/formatters";
 type Transaction = {
  id: string;
  amount: number;
@@ -135,7 +136,7 @@ export const SpendingInsights = memo(({
  type:'warning',
  icon: AlertTriangle,
  title:'Spending Pace Alert',
- description: `At this rate, you'll spend $${projectedSpending.toFixed(0)} this month — ${percentageIncrease.toFixed(0)}% more than last month.`,
+ description: `At this rate, you'll spend $${Formatters.number(Math.round(projectedSpending))} this month — ${Formatters.number(Math.round(percentageIncrease))}% more than last month.`,
  priority: 10
  });
  }
@@ -147,7 +148,7 @@ export const SpendingInsights = memo(({
  type:'achievement',
  icon: Sparkles,
  title:'Great Progress!',
- description: `You've spent ${(100 - (thisMonthSpending / lastMonthSpending * 100)).toFixed(0)}% less than last month so far. Keep it up!`,
+ description: `You've spent ${Formatters.number(Math.round((100 - (thisMonthSpending / lastMonthSpending * 100))))}% less than last month so far. Keep it up!`,
  priority: 8
  });
  }
@@ -163,7 +164,7 @@ export const SpendingInsights = memo(({
  type:'tip',
  icon: Target,
  title:'Consistent Spender',
- description: `Your monthly spending stays around $${trend.toFixed(0)}. Consider setting this as your monthly budget target.`,
+ description: `Your monthly spending stays around $${Formatters.number(Math.round(trend))}. Consider setting this as your monthly budget target.`,
  priority: 5
  });
  }
@@ -180,7 +181,7 @@ export const SpendingInsights = memo(({
  type:'anomaly',
  icon: TrendingUp,
  title: `${catLabel} Spike Detected`,
- description: `${catLabel} spending is ${((amount / lastMonth - 1) * 100).toFixed(0)}% higher than last month.`,
+ description: `${catLabel} spending is ${Formatters.number(Math.round(((amount / lastMonth - 1) * 100)))}% higher than last month.`,
  category,
  priority: 9
  });
@@ -200,7 +201,7 @@ export const SpendingInsights = memo(({
  type:'warning',
  icon: Calendar,
  title: `${catLabel} Budget at Risk`,
- description: `You're on track to exceed your $${budget.monthly_limit} budget by ~$${((projectedPct / 100 - 1) * budget.monthly_limit).toFixed(0)}.`,
+ description: `You're on track to exceed your $${budget.monthly_limit} budget by ~$${Formatters.number(Math.round(((projectedPct / 100 - 1) * budget.monthly_limit)))}.`,
  category: budget.category,
  priority: 9
  });
@@ -218,7 +219,7 @@ export const SpendingInsights = memo(({
  type:'tip',
  icon: Lightbulb,
  title: `${catLabel} is Your Top Expense`,
- description: `${((topCategory[1] / thisMonthSpending) * 100).toFixed(0)}% of your spending goes to ${catLabel}. Look for deals or consider bundling services.`,
+ description: `${Formatters.number(Math.round(((topCategory[1] / thisMonthSpending) * 100)))}% of your spending goes to ${catLabel}. Look for deals or consider bundling services.`,
  category: topCategory[0],
  priority: 6
  });

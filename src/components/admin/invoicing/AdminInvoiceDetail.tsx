@@ -22,6 +22,7 @@ import { useAuth } from"@/hooks/useAuth";
 import { toast } from"sonner";
 import type { AdminInvoice } from"./AdminInvoiceList";
 
+import { Formatters } from "@/utils/formatters";
 interface Props {
  invoice: AdminInvoice;
  onBack: () => void;
@@ -205,8 +206,8 @@ export function AdminInvoiceDetail({ invoice, onBack, onEdit, onRefresh }: Props
  <TableRow key={item.id}>
  <TableCell>{item.description}</TableCell>
  <TableCell className="text-center">{Number(item.quantity)}</TableCell>
- <TableCell className="text-right">${Number(item.unit_price).toFixed(2)}</TableCell>
- <TableCell className="text-right">${Number(item.amount).toFixed(2)}</TableCell>
+ <TableCell className="text-right">{Formatters.currency(Number(item.unit_price))}</TableCell>
+ <TableCell className="text-right">{Formatters.currency(Number(item.amount))}</TableCell>
  </TableRow>
  ))}
  </TableBody>
@@ -216,19 +217,19 @@ export function AdminInvoiceDetail({ invoice, onBack, onEdit, onRefresh }: Props
  {/* Totals */}
  <div className="flex justify-end">
  <div className="w-64 space-y-2 text-sm">
- <div className="flex justify-between"><span>Subtotal</span><span>${Number(invoice.subtotal).toFixed(2)}</span></div>
+ <div className="flex justify-between"><span>Subtotal</span><span>{Formatters.currency(Number(invoice.subtotal))}</span></div>
  {Number(invoice.discount_amount) > 0 && (
- <div className="flex justify-between text-success"><span>Discount</span><span>-${Number(invoice.discount_amount).toFixed(2)}</span></div>
+ <div className="flex justify-between text-success"><span>Discount</span><span>-{Formatters.currency(Number(invoice.discount_amount))}</span></div>
  )}
  {Number(invoice.tax_amount) > 0 && (
- <div className="flex justify-between"><span>Tax ({invoice.tax_rate}%)</span><span>${Number(invoice.tax_amount).toFixed(2)}</span></div>
+ <div className="flex justify-between"><span>Tax ({invoice.tax_rate}%)</span><span>{Formatters.currency(Number(invoice.tax_amount))}</span></div>
  )}
  <div className="flex justify-between font-bold text-base border-t pt-2">
- <span>Total</span><span>${Number(invoice.total).toFixed(2)}</span>
+ <span>Total</span><span>{Formatters.currency(Number(invoice.total))}</span>
  </div>
- <div className="flex justify-between text-muted-foreground"><span>Paid</span><span>${Number(invoice.amount_paid).toFixed(2)}</span></div>
+ <div className="flex justify-between text-muted-foreground"><span>Paid</span><span>{Formatters.currency(Number(invoice.amount_paid))}</span></div>
  <div className="flex justify-between font-bold text-primary">
- <span>Balance Due</span><span>${Number(invoice.amount_due).toFixed(2)}</span>
+ <span>Balance Due</span><span>{Formatters.currency(Number(invoice.amount_due))}</span>
  </div>
  </div>
  </div>
@@ -263,7 +264,7 @@ export function AdminInvoiceDetail({ invoice, onBack, onEdit, onRefresh }: Props
  {payments.map((p) => (
  <div key={p.id} className="p-3 rounded-md bg-muted text-sm">
  <div className="flex justify-between items-center">
- <span className="font-medium text-success">${Number(p.amount).toFixed(2)}</span>
+ <span className="font-medium text-success">{Formatters.currency(Number(p.amount))}</span>
  <Badge variant="outline" className="text-xs capitalize">{p.payment_method.replace("_","")}</Badge>
  </div>
  <p className="text-xs text-muted-foreground mt-1">{format(new Date(p.paid_at),"MMM d, yyyy h:mm a")}</p>
@@ -285,7 +286,7 @@ export function AdminInvoiceDetail({ invoice, onBack, onEdit, onRefresh }: Props
  <div className="space-y-1.5">
  <Label>Amount ($)</Label>
  <Input type="number" value={payAmount} onChange={(e) => setPayAmount(e.target.value)} min="0" step="0.01" />
- <p className="text-xs text-muted-foreground">Balance due: ${Number(invoice.amount_due).toFixed(2)}</p>
+ <p className="text-xs text-muted-foreground">Balance due: {Formatters.currency(Number(invoice.amount_due))}</p>
  </div>
  <div className="space-y-1.5">
  <Label>Payment Method</Label>

@@ -7,6 +7,7 @@ import { AlertCircle, ChevronRight, Shield, Loader2 } from"lucide-react";
 import { Dialog, DialogContent } from"@/components/ui/dialog";
 import { ClaimResolutionScreen } from"@/components/ClaimResolutionScreen";
 
+import { Formatters } from "@/utils/formatters";
 interface ActionSlice {
  id: string;
  gap_amount: number;
@@ -157,7 +158,7 @@ export function ActionRequiredSlices({ userId }: ActionRequiredSlicesProps) {
  </div>
  <div className="flex items-center gap-3">
  <div className="text-right">
- <p className="font-bold text-warning">${Number(slice.gap_amount).toFixed(2)}</p>
+ <p className="font-bold text-warning">{Formatters.currency(Number(slice.gap_amount))}</p>
  <p className="text-xs text-warning">Balance due</p>
  </div>
  <ChevronRight className="h-5 w-5 text-warning" />

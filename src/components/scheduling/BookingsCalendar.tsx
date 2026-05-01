@@ -38,6 +38,7 @@ import { FileText } from"lucide-react";
 import { supabase } from"@/integrations/supabase/client";
 import { toast } from"sonner";
 
+import { Formatters } from "@/utils/formatters";
 interface BookingsCalendarProps {
  bookings: BookingWithDetails[];
  merchantId?: string;
@@ -68,7 +69,7 @@ function NoShowChargeButton({ booking, onCharged }: { booking: BookingWithDetail
  const feeAmount = (booking.merchant_services as any)?.no_show_fee_amount || (booking as any).deposit_amount || 0;
 
  const handleCharge = async () => {
- if (!window.confirm(`Charge $${feeAmount.toFixed(2)} no-show fee to this client's card on file?`)) return;
+ if (!window.confirm(`Charge ${Formatters.currency(feeAmount)} no-show fee to this client's card on file?`)) return;
  
  setCharging(true);
  try {
@@ -79,7 +80,7 @@ function NoShowChargeButton({ booking, onCharged }: { booking: BookingWithDetail
  if (error) throw error;
  if (data?.error) throw new Error(data.error);
 
- toast.success(`No-show fee of $${data.chargeAmount.toFixed(2)} charged successfully`);
+ toast.success(`No-show fee of ${Formatters.currency(data.chargeAmount)} charged successfully`);
  setCharged(true);
  onCharged();
  } catch (err: any) {
@@ -115,7 +116,7 @@ function NoShowChargeButton({ booking, onCharged }: { booking: BookingWithDetail
  {charging ? (
  <><Loader2 className="w-4 h-4 animate-spin" /> Charging...</>
  ) : (
- <><DollarSign className="w-4 h-4" /> Charge ${feeAmount.toFixed(2)} No-Show Fee</>
+ <><DollarSign className="w-4 h-4" /> Charge {Formatters.currency(feeAmount)} No-Show Fee</>
  )}
  </Button>
  </div>
@@ -247,7 +248,7 @@ export function BookingsCalendar({ bookings, merchantId, onUpdateStatus }: Booki
  </div>
 
  <div className="text-right">
- <p className="font-semibold">${booking.total_price.toFixed(2)}</p>
+ <p className="font-semibold">{Formatters.currency(booking.total_price)}</p>
  <Badge variant="outline" className="text-xs mt-1">
  {booking.payment_status ==='paid' ?'Paid' :'Unpaid'}
  </Badge>
@@ -343,7 +344,7 @@ export function BookingsCalendar({ bookings, merchantId, onUpdateStatus }: Booki
 
  <div>
  <p className="text-sm text-muted-foreground">Total</p>
- <p className="text-lg font-bold">${selectedBooking.total_price.toFixed(2)}</p>
+ <p className="text-lg font-bold">{Formatters.currency(selectedBooking.total_price)}</p>
  </div>
  </div>
 

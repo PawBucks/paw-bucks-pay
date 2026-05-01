@@ -281,13 +281,13 @@ export default function PetStoreProduct() {
  {hasPromo ? (
  <div className="space-y-1">
  <div className="flex items-baseline gap-2 flex-wrap">
- <span className="text-3xl font-bold text-foreground">${(discountedPrice / 100).toFixed(2)}</span>
- <span className="text-lg text-muted-foreground line-through">${(item.price / 100).toFixed(2)}</span>
+ <span className="text-3xl font-bold text-foreground">{Formatters.currency((discountedPrice / 100))}</span>
+ <span className="text-lg text-muted-foreground line-through">{Formatters.currency((item.price / 100))}</span>
  <Badge variant="destructive" className="text-sm px-2">-{promo!.discountPercentage}%</Badge>
  </div>
  </div>
  ) : (
- <span className="text-3xl font-bold text-foreground">${(item.price / 100).toFixed(2)}</span>
+ <span className="text-3xl font-bold text-foreground">{Formatters.currency((item.price / 100))}</span>
  )}
 
 
@@ -343,7 +343,7 @@ export default function PetStoreProduct() {
  disabled={outOfStock}
  >
  <CreditCard className="mr-2 h-4 w-4" />
- Buy Now — ${(discountedPrice / 100).toFixed(2)}
+ Buy Now — {Formatters.currency((discountedPrice / 100))}
  </Button>
  </>
  ) : (
@@ -381,7 +381,7 @@ export default function PetStoreProduct() {
  {/* Rating summary */}
  <div className="space-y-3">
  <div className="flex items-center gap-3">
- <span className="text-4xl font-bold">{ratingAvg.toFixed(1)}</span>
+ <span className="text-4xl font-bold">{Formatters.decimal(ratingAvg, 1)}</span>
  <div>
  <StarRating rating={ratingAvg} showCount={false} size="md" />
  <p className="text-xs text-muted-foreground mt-0.5">{ratingCount.toLocaleString()} ratings</p>

@@ -34,6 +34,7 @@ import { toast } from'@/hooks/use-toast';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from'recharts';
 import { Link } from'react-router-dom';
 
+import { Formatters } from "@/utils/formatters";
 interface ReviewCampaignData {
  hasService: boolean;
  merchant: {
@@ -239,7 +240,7 @@ export function ReviewCampaignWidget() {
  <div>
  <p className="text-sm text-muted-foreground">Avg Rating</p>
  <p className={`text-2xl font-bold ${getRatingColor(metrics.averageRating)}`}>
- {metrics.averageRating.toFixed(1)} ★
+ {Formatters.decimal(metrics.averageRating, 1)} ★
  </p>
  </div>
  </div>

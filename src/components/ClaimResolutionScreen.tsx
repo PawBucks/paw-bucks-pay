@@ -29,6 +29,7 @@ import { getStripePromise } from"@/lib/stripe";
 import { Elements, PaymentElement, useStripe, useElements } from"@stripe/react-stripe-js";
 import { buildAppUrl } from"@/lib/url";
 
+import { Formatters } from "@/utils/formatters";
 interface ActionRequiredSlice {
  id: string;
  invoice_id: string;
@@ -122,7 +123,7 @@ function PaymentForm({
  Processing...
  </>
  ) : (
- `Pay $${amount.toFixed(2)}`
+ `Pay ${Formatters.currency(amount)}`
  )}
  </Button>
  </div>
@@ -443,8 +444,8 @@ export function ClaimResolutionScreen({
  <div className="mb-4 p-3 bg-success/10 rounded-lg border border-success/20">
  <p className="text-sm text-success">
  <Coins className="h-4 w-4 inline mr-1" />
- ${pawBucksToApply.toFixed(2)} in PawBucks applied.
- Remaining: ${remainingAfterPawBucks.toFixed(2)}
+ {Formatters.currency(pawBucksToApply)} in PawBucks applied.
+ Remaining: {Formatters.currency(remainingAfterPawBucks)}
  </p>
  </div>
  )}
@@ -498,7 +499,7 @@ export function ClaimResolutionScreen({
  <div className="flex items-center justify-between mb-4">
  <div>
  <p className="text-sm text-muted-foreground">Balance Due</p>
- <p className="text-3xl font-bold text-warning">${gapAmount.toFixed(2)}</p>
+ <p className="text-3xl font-bold text-warning">{Formatters.currency(gapAmount)}</p>
  </div>
  <Badge className="bg-destructive/10 text-destructive">
  Claim Denied
@@ -571,7 +572,7 @@ export function ClaimResolutionScreen({
  <p className="text-sm text-success">
  {canPayFullWithPawBucks
  ? `Pay full balance with ${Math.ceil(gapAmount * 1000).toLocaleString()} PB`
- : `Apply $${pawBucksToApply.toFixed(2)} in PawBucks (Remaining: $${remainingAfterPawBucks.toFixed(2)})`}
+ : `Apply ${Formatters.currency(pawBucksToApply)} in PawBucks (Remaining: ${Formatters.currency(remainingAfterPawBucks)})`}
  </p>
  </div>
  </div>
@@ -621,7 +622,7 @@ export function ClaimResolutionScreen({
  <div>
  <p className="font-semibold text-warning">Pay Full Balance</p>
  <p className="text-sm text-warning">
- Credit/Debit Card • ${gapAmount.toFixed(2)}
+ Credit/Debit Card • {Formatters.currency(gapAmount)}
  </p>
  </div>
  </div>
@@ -648,7 +649,7 @@ export function ClaimResolutionScreen({
  <div>
  <p className="font-semibold text-info">Split into 3 Payments</p>
  <p className="text-sm text-info">
- ${installmentAmount.toFixed(2)}/month • No interest
+ {Formatters.currency(installmentAmount)}/month • No interest
  </p>
  </div>
  </div>
@@ -682,7 +683,7 @@ export function ClaimResolutionScreen({
  </div>
  <p className="text-sm text-info mt-1">
  Your <span className="font-semibold">{rewardsMultiplier}x rewards</span> earned on
- the original ${Number(slice.original_amount).toFixed(2)} transaction (
+ the original {Formatters.currency(Number(slice.original_amount))} transaction (
  <span className="font-semibold">{originalRewardsEarned.toLocaleString()} PawBucks</span>)
  will be released to your wallet upon resolution.
  </p>

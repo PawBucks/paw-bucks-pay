@@ -14,6 +14,7 @@ import { Check, Clock, Eye, Loader2, Receipt } from"lucide-react";
 import { toast } from"sonner";
 import { format } from"date-fns";
 
+import { Formatters } from "@/utils/formatters";
 type PendingReceipt = {
  id: string;
  user_id: string;
@@ -164,7 +165,7 @@ export const MerchantPendingReceipts = ({ merchantId }: MerchantPendingReceiptsP
  {format(new Date(r.created_at),"MMM d, yyyy")}
  </TableCell>
  <TableCell className="text-right font-medium">
- ${r.purchase_amount.toFixed(2)}
+ {Formatters.currency(r.purchase_amount)}
  </TableCell>
  <TableCell>
  {getStatusBadge(r.status, !!r.confirmation_id)}
@@ -201,7 +202,7 @@ export const MerchantPendingReceipts = ({ merchantId }: MerchantPendingReceiptsP
  <div className="grid grid-cols-2 gap-3 text-sm">
  <div>
  <span className="text-muted-foreground">Amount</span>
- <p className="font-semibold">${selectedReceipt.purchase_amount.toFixed(2)}</p>
+ <p className="font-semibold">{Formatters.currency(selectedReceipt.purchase_amount)}</p>
  </div>
  <div>
  <span className="text-muted-foreground">Receipt Date</span>

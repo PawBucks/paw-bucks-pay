@@ -12,6 +12,7 @@ import { cn } from"@/lib/utils";
 import { toast } from"sonner";
 import jsPDF from"jspdf";
 
+import { Formatters } from "@/utils/formatters";
 type TimeframeOption ="1d" |"1w" |"1m" |"3m" |"1y" |"custom";
 
 interface SalesReportData {
@@ -202,14 +203,14 @@ export function SalesReportGenerator({ entityId, entityType, entityName }: Sales
  doc.setFontSize(10);
  doc.setFont("helvetica","normal");
  const summaryItems = [
- ["Gross Sales", `$${reportData.totalSales.toFixed(2)}`],
- ["Refunds", `- $${reportData.totalRefunds.toFixed(2)} (${reportData.refundCount})`],
- ["Success Fees (3%)", `- $${reportData.totalPlatformFees.toFixed(2)}`],
- ["Processing Fees (est.)", `- $${reportData.totalProcessingFees.toFixed(2)}`],
- ["Net Sales", `$${reportData.netSales.toFixed(2)}`],
+ ["Gross Sales", `${Formatters.currency(reportData.totalSales)}`],
+ ["Refunds", `- ${Formatters.currency(reportData.totalRefunds)} (${reportData.refundCount})`],
+ ["Success Fees (3%)", `- ${Formatters.currency(reportData.totalPlatformFees)}`],
+ ["Processing Fees (est.)", `- ${Formatters.currency(reportData.totalProcessingFees)}`],
+ ["Net Sales", `${Formatters.currency(reportData.netSales)}`],
  ["Total Transactions", `${reportData.totalTransactions}`],
  ["Unique Customers", `${reportData.uniqueCustomers}`],
- ["Avg Transaction", `$${reportData.avgTransactionAmount.toFixed(2)}`],
+ ["Avg Transaction", `${Formatters.currency(reportData.avgTransactionAmount)}`],
  ["PawBucks Distributed", `${reportData.totalPawbucksEarned.toLocaleString()} PB`],
  ];
 
@@ -240,7 +241,7 @@ export function SalesReportGenerator({ entityId, entityType, entityName }: Sales
  reportData.dailyBreakdown.forEach(row => {
  if (y > 280) { doc.addPage(); y = 20; }
  doc.text(format(new Date(row.date),"MM/dd/yyyy"), 25, y);
- doc.text(`$${row.sales.toFixed(2)}`, 100, y);
+ doc.text(`${Formatters.currency(row.sales)}`, 100, y);
  doc.text(`${row.count}`, pw - 25, y, { align:"right" });
  y += 5;
  });
@@ -271,7 +272,7 @@ export function SalesReportGenerator({ entityId, entityType, entityName }: Sales
  doc.text((t.customer_name ||"").substring(0, 20), 50, y);
  doc.text((t.description ||"-").substring(0, 22), 100, y);
  doc.text(t.status, 150, y);
- doc.text(`$${t.amount.toFixed(2)}`, pw - 20, y, { align:"right" });
+ doc.text(`${Formatters.currency(t.amount)}`, pw - 20, y, { align:"right" });
  y += 5;
  });
 
@@ -347,7 +348,7 @@ export function SalesReportGenerator({ entityId, entityType, entityName }: Sales
  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
  <DollarSign className="h-4 w-4" /> Net Sales
  </div>
- <p className="text-2xl font-bold">${reportData.netSales.toFixed(2)}</p>
+ <p className="text-2xl font-bold">{Formatters.currency(reportData.netSales)}</p>
  </Card>
  <Card className="p-4">
  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
@@ -365,7 +366,7 @@ export function SalesReportGenerator({ entityId, entityType, entityName }: Sales
  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
  <TrendingUp className="h-4 w-4" /> Avg. Sale
  </div>
- <p className="text-2xl font-bold">${reportData.avgTransactionAmount.toFixed(2)}</p>
+ <p className="text-2xl font-bold">{Formatters.currency(reportData.avgTransactionAmount)}</p>
  </Card>
  </div>
 
@@ -376,16 +377,16 @@ export function SalesReportGenerator({ entityId, entityType, entityName }: Sales
  <span className="text-muted-foreground">Period</span>
  <span className="text-right">{format(dateRange.start,"MMM d, yyyy")} — {format(dateRange.end,"MMM d, yyyy")}</span>
  <span className="text-muted-foreground">Gross Sales</span>
- <span className="text-right font-medium">${reportData.totalSales.toFixed(2)}</span>
+ <span className="text-right font-medium">{Formatters.currency(reportData.totalSales)}</span>
  <span className="text-muted-foreground">Refunds</span>
- <span className="text-right text-destructive">-${reportData.totalRefunds.toFixed(2)} ({reportData.refundCount})</span>
+ <span className="text-right text-destructive">-{Formatters.currency(reportData.totalRefunds)} ({reportData.refundCount})</span>
  <span className="text-muted-foreground">Success Fees (3%)</span>
- <span className="text-right text-destructive">-${reportData.totalPlatformFees.toFixed(2)}</span>
+ <span className="text-right text-destructive">-{Formatters.currency(reportData.totalPlatformFees)}</span>
  <span className="text-muted-foreground">Processing Fees (est.)</span>
- <span className="text-right text-destructive">-${reportData.totalProcessingFees.toFixed(2)}</span>
+ <span className="text-right text-destructive">-{Formatters.currency(reportData.totalProcessingFees)}</span>
  <Separator className="col-span-2 my-1" />
  <span className="text-muted-foreground">Net Sales</span>
- <span className="text-right font-bold">${reportData.netSales.toFixed(2)}</span>
+ <span className="text-right font-bold">{Formatters.currency(reportData.netSales)}</span>
  <span className="text-muted-foreground">PawBucks Distributed</span>
  <span className="text-right">{reportData.totalPawbucksEarned.toLocaleString()} PB</span>
  </div>
@@ -408,7 +409,7 @@ export function SalesReportGenerator({ entityId, entityType, entityName }: Sales
  {reportData.dailyBreakdown.map(row => (
  <tr key={row.date} className="border-b last:border-0">
  <td className="py-2">{format(new Date(row.date),"MMM d, yyyy")}</td>
- <td className="text-right py-2">${row.sales.toFixed(2)}</td>
+ <td className="text-right py-2">{Formatters.currency(row.sales)}</td>
  <td className="text-right py-2">{row.count}</td>
  </tr>
  ))}

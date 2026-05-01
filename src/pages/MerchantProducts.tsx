@@ -35,6 +35,7 @@ import { Badge } from"@/components/ui/badge";
 import { merchantSubscriptionPlansService } from"@/services/api/merchantSubscriptionPlans.service";
 import { buildAppUrl } from"@/lib/url";
 
+import { Formatters } from "@/utils/formatters";
 type Product = {
  id: string;
  name: string;
@@ -104,7 +105,7 @@ const MerchantProducts = () => {
  setEditingPlan(plan);
  setPlanName(plan.name);
  setPlanDescription(plan.description ||"");
- setPlanPrice((plan.amount / 100).toFixed(2));
+ setPlanPrice(Formatters.money((plan.amount / 100)));
  setPlanActive(plan.is_active);
  setEditPlanDialogOpen(true);
  };
@@ -392,7 +393,7 @@ const MerchantProducts = () => {
  setEditingProduct(product);
  setEditName(product.name);
  setEditDescription(product.description ||"");
- setEditPrice(product.price?.unit_amount ? (product.price.unit_amount / 100).toFixed(2) :"");
+ setEditPrice(product.price?.unit_amount ? Formatters.money((product.price.unit_amount / 100)) :"");
  setEditActive(product.active);
  setEditDialogOpen(true);
  };
@@ -587,7 +588,7 @@ const MerchantProducts = () => {
  <div className="flex items-baseline gap-1">
  <div className="flex items-center gap-1 text-2xl font-bold text-primary">
  <DollarSign className="h-5 w-5" />
- {(plan.amount / 100).toFixed(2)}
+ {Formatters.money((plan.amount / 100))}
  </div>
  <span className="text-sm text-muted-foreground">
  {formatInterval(plan.billing_interval, plan.billing_interval_count)}
