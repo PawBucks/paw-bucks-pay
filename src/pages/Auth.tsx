@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from"react";
+import { useState, useEffect, useCallback, useRef } from"react";
 import { useNavigate, useSearchParams } from"react-router-dom";
 import { supabase } from"@/integrations/supabase/client";
 import { SEO } from"@/components/SEO";
@@ -16,6 +16,10 @@ import { useAuth } from"@/hooks/useAuth";
 import { signUpSchema, signInSchema } from"@/lib/validation";
 import { ROUTES } from"@/lib/constants";
 import { buildAppUrl } from"@/lib/url";
+import {
+  clearUserAccessCache,
+  resolvePostLoginRoute,
+} from"@/lib/userAccessCache";
 import { Alert, AlertDescription } from"@/components/ui/alert";
 import { BiometricLoginButton } from"@/components/BiometricLoginButton";
 import { BiometricEnrollPrompt } from"@/components/BiometricEnrollPrompt";
