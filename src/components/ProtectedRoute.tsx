@@ -117,6 +117,9 @@ export const ProtectedRoute = ({
  const roleOk = allowedRoles ? checkRoleAccess(info, allowedRoles) : true;
  setAuthorized(roleOk);
 
+  const persona = resolveAuthPersona(info);
+  setRoleRedirectTo(persona ? DASHBOARD_ROUTE_BY_PERSONA[persona] : ROUTES.AUTH);
+
  // Pet onboarding check
  if (isExemptRoute) {
  setHasPets(true);
@@ -144,8 +147,7 @@ export const ProtectedRoute = ({
  }
 
  if (allowedRoles && !authorized) {
- navigate(ROUTES.DASHBOARD, { replace: true });
- return null;
+  return <Navigate to={roleRedirectTo} replace />;
  }
 
  if (!hasPets && !isExemptRoute) {
