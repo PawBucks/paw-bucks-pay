@@ -725,7 +725,7 @@ export const PaymentDialogWithPawBucks = ({
  <Button type="button" variant="outline" onClick={handleCancel} className="flex-1" disabled={isLoading}>
  Cancel
  </Button>
- <Button type="submit" className="flex-1" disabled={isLoading}>
+ <Button type="submit" className="flex-1" disabled={isLoading || !!liveWarning}>
  {isLoading ? (
  <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Loading...</>
  ) : stripeAmount <= 0 && pawbucksToUse > 0 ? (
