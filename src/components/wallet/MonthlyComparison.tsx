@@ -3,6 +3,7 @@ import { GradientCard } from"@/components/ui/gradient-card";
 import { TrendingUp, TrendingDown, Minus } from"lucide-react";
 import { startOfMonth, endOfMonth, subMonths } from"date-fns";
 
+import { Formatters } from "@/utils/formatters";
 type Transaction = {
  id: string;
  amount: number;
@@ -103,11 +104,11 @@ export const MonthlyComparison = memo(({ transactions, medicalRecords = [] }: Mo
  <div className="grid grid-cols-2 gap-4 mb-4">
  <div className="p-4 rounded-md bg-muted/30 border border-border/50">
  <p className="text-xs text-muted-foreground mb-1">This Month</p>
- <p className="text-xl font-bold">${comparison.thisMonth.toFixed(2)}</p>
+ <p className="text-xl font-bold">{Formatters.currency(comparison.thisMonth)}</p>
  </div>
  <div className="p-4 rounded-md bg-muted/30 border border-border/50">
  <p className="text-xs text-muted-foreground mb-1">Last Month</p>
- <p className="text-xl font-bold">${comparison.lastMonth.toFixed(2)}</p>
+ <p className="text-xl font-bold">{Formatters.currency(comparison.lastMonth)}</p>
  </div>
  </div>
 
@@ -130,7 +131,7 @@ export const MonthlyComparison = memo(({ transactions, medicalRecords = [] }: Mo
  {comparison.percentageChange > 0 ?'+' :''}{comparison.percentageChange.toFixed(1)}%
  </p>
  <p className="text-xs text-muted-foreground">
- {comparison.difference >= 0 ?'+' :''}${comparison.difference.toFixed(2)}
+ {comparison.difference >= 0 ?'+' :''}{Formatters.currency(comparison.difference)}
  </p>
  </div>
  </div>

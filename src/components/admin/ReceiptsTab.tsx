@@ -19,6 +19,7 @@ import { Check, X, Eye, Loader2, Search, FileText, Store, Receipt, ShieldCheck }
 import { toast } from"sonner";
 import { format } from"date-fns";
 
+import { Formatters } from "@/utils/formatters";
 type ReceiptSubmission = {
  id: string;
  user_id: string;
@@ -333,7 +334,7 @@ export const ReceiptsTab = () => {
  </TableCell>
  <TableCell className="font-medium">{receipt.merchant_name}</TableCell>
  <TableCell>{getTypeBadge(receipt.submission_type)}</TableCell>
- <TableCell>${receipt.purchase_amount.toFixed(2)}</TableCell>
+ <TableCell>{Formatters.currency(receipt.purchase_amount)}</TableCell>
  <TableCell>
  <div className="text-xs">
  <span className="font-medium">{getTierLabel(receipt.subscription_tier)}</span>
@@ -404,7 +405,7 @@ export const ReceiptsTab = () => {
  </div>
  <div>
  <Label className="text-muted-foreground text-xs">Amount</Label>
- <p className="font-medium">${selectedReceipt.purchase_amount.toFixed(2)}</p>
+ <p className="font-medium">{Formatters.currency(selectedReceipt.purchase_amount)}</p>
  </div>
  <div>
  <Label className="text-muted-foreground text-xs">Tier / Rate</Label>
@@ -426,7 +427,7 @@ export const ReceiptsTab = () => {
  </div>
  <p className="text-xs text-muted-foreground">
  Code: {selectedReceipt.merchant_confirmation.confirmation_code} •
- Amount: ${selectedReceipt.merchant_confirmation.amount.toFixed(2)}
+ Amount: {Formatters.currency(selectedReceipt.merchant_confirmation.amount)}
  </p>
  </div>
  )}
@@ -464,21 +465,21 @@ export const ReceiptsTab = () => {
  <DialogHeader>
  <DialogTitle>Review Receipt</DialogTitle>
  <DialogDescription>
- {selectedReceipt?.merchant_name} • ${selectedReceipt?.purchase_amount.toFixed(2)} • {getTierLabel(selectedReceipt?.subscription_tier || null)} ({selectedReceipt?.credit_rate_percent || 1}%)
+ {selectedReceipt?.merchant_name} • {Formatters.currency(selectedReceipt?.purchase_amount)} • {getTierLabel(selectedReceipt?.subscription_tier || null)} ({selectedReceipt?.credit_rate_percent || 1}%)
  </DialogDescription>
  </DialogHeader>
  {selectedReceipt && (
  <div className="space-y-4">
  <div className="bg-muted rounded-lg p-3 text-sm space-y-1">
  <p><strong>Submitter:</strong> {selectedReceipt.user_profile?.full_name} ({selectedReceipt.user_profile?.email})</p>
- <p><strong>Amount:</strong> ${selectedReceipt.purchase_amount.toFixed(2)}</p>
+ <p><strong>Amount:</strong> {Formatters.currency(selectedReceipt.purchase_amount)}</p>
  <p><strong>Type:</strong> {selectedReceipt.submission_type ==="partner" ?"Partner Merchant" :"Non-Partner"}</p>
  <p><strong>Date:</strong> {format(new Date(selectedReceipt.receipt_date),"MMM d, yyyy")}</p>
  {selectedReceipt.merchant_confirmation && (
  <div className="mt-2 p-2 bg-success/10 rounded border border-success/20 flex items-center gap-2">
  <ShieldCheck className="w-4 h-4 text-success" />
  <span className="text-success text-xs font-medium">
- Merchant confirmed: ${selectedReceipt.merchant_confirmation.amount.toFixed(2)}
+ Merchant confirmed: {Formatters.currency(selectedReceipt.merchant_confirmation.amount)}
  </span>
  </div>
  )}
@@ -495,7 +496,7 @@ export const ReceiptsTab = () => {
  />
  <p className="text-xs text-muted-foreground">
  Suggested: {getSuggestedPawBucks(selectedReceipt).toLocaleString()} PB
- ({selectedReceipt.credit_rate_percent || 1}% × ${selectedReceipt.purchase_amount.toFixed(2)} × 10)
+ ({selectedReceipt.credit_rate_percent || 1}% × {Formatters.currency(selectedReceipt.purchase_amount)} × 10)
  </p>
  </div>
 

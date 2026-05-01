@@ -4,6 +4,7 @@ import { Progress } from"@/components/ui/progress";
 import { DollarSign, Users, Zap, Target, TrendingDown, Flame, Sparkles, AlertTriangle } from"lucide-react";
 import type { CommandCenterSummary } from"@/services/api/brandCampaigns.service";
 
+import { Formatters } from "@/utils/formatters";
 interface HeroMetricsProps {
  summary: CommandCenterSummary;
 }
@@ -32,7 +33,7 @@ export function HeroMetrics({ summary }: HeroMetricsProps) {
  </span>
  </div>
  <p className="text-4xl font-bold tabular-nums">
- ${summary.burn_rate_per_day_usd.toFixed(2)}
+ {Formatters.currency(summary.burn_rate_per_day_usd)}
  <span className="text-base font-normal text-muted-foreground">/day</span>
  </p>
  {summary.days_until_depletion !== null ? (
@@ -91,7 +92,7 @@ export function HeroMetrics({ summary }: HeroMetricsProps) {
  <StatCard
  icon={DollarSign}
  label="Cost per Check-in"
- value={`$${summary.cost_per_checkin.toFixed(2)}`}
+ value={`${Formatters.currency(summary.cost_per_checkin)}`}
  accent="text-success"
  />
  <StatCard

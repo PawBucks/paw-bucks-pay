@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from"@/
 import { Coins, Wallet, TrendingUp, TrendingDown, Award } from"lucide-react";
 import { PAWBUCKS_CONVERSION } from"@/lib/constants";
 
+import { Formatters } from "@/utils/formatters";
 type WalletData = {
  balance: number;
  total_spent: number;
@@ -114,12 +115,12 @@ export function UserDetailWallet({ userId }: { userId: string }) {
  <SummaryCard
  icon={<Wallet className="w-5 h-5 text-success" />}
  label="Cashback Balance"
- value={`$${((pawbucksWallet?.balance ?? 0) * PAWBUCKS_CONVERSION.PAWBUCKS_USD_VALUE).toFixed(2)}`}
+ value={`${Formatters.currency(((pawbucksWallet?.balance ?? 0) * PAWBUCKS_CONVERSION.PAWBUCKS_USD_VALUE))}`}
  />
  <SummaryCard
  icon={<TrendingDown className="w-5 h-5 text-destructive" />}
  label={isMerchant ?"Total Revenue" :"Total Spent"}
- value={`$${(wallet?.total_spent ?? 0).toFixed(2)}`}
+ value={`${Formatters.currency((wallet?.total_spent ?? 0))}`}
  />
  <SummaryCard
  icon={<Award className="w-5 h-5 text-warning" />}

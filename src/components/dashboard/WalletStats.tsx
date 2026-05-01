@@ -3,6 +3,7 @@ import { useNavigate } from"react-router-dom";
 import { GradientCard } from"@/components/ui/gradient-card";
 import { Wallet, Gift, TrendingUp, CreditCard } from"lucide-react";
 import { PawBucksInfoTooltip } from"@/components/PawBucksInfoTooltip";
+import { Formatters } from"@/utils/formatters";
 
 type WalletStatsProps = {
  balance: number;
@@ -15,10 +16,10 @@ export const WalletStats = memo(({ balance, rewardsPoints, totalSaved = 0, total
  const navigate = useNavigate();
  
  // Memoize formatted values to prevent recalculation on re-renders
- const formattedBalance = useMemo(() => `$${(balance ?? 0).toFixed(2)}`, [balance]);
- const formattedRewards = useMemo(() => rewardsPoints ?? 0, [rewardsPoints]);
- const formattedSaved = useMemo(() => `$${(totalSaved ?? 0).toFixed(2)}`, [totalSaved]);
- const formattedSpent = useMemo(() => `$${(totalSpent ?? 0).toFixed(2)}`, [totalSpent]);
+  const formattedBalance = useMemo(() => Formatters.currency(balance ?? 0), [balance]);
+  const formattedRewards = useMemo(() => Formatters.number(rewardsPoints ?? 0), [rewardsPoints]);
+  const formattedSaved = useMemo(() => Formatters.currency(totalSaved ?? 0), [totalSaved]);
+  const formattedSpent = useMemo(() => Formatters.currency(totalSpent ?? 0), [totalSpent]);
 
  return (
  <div className="grid gap-4 sm:grid-cols-2">

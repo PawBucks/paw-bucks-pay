@@ -57,6 +57,22 @@ export const Formatters = {
  return new Intl.NumberFormat('en-US').format(value);
  },
 
+  // Number with commas and fixed decimals (e.g. 1,234.50)
+  decimal: (value: number, decimals: number = 2): string => {
+   return new Intl.NumberFormat('en-US', {
+   minimumFractionDigits: decimals,
+   maximumFractionDigits: decimals,
+   }).format(value);
+  },
+
+  // Currency without the symbol, with thousand separators (e.g. 1,234.56)
+  money: (amount: number, decimals: number = 2): string => {
+   return new Intl.NumberFormat('en-US', {
+   minimumFractionDigits: decimals,
+   maximumFractionDigits: decimals,
+   }).format(amount ?? 0);
+  },
+
  // PawBucks to USD conversion (1 PawBuck = $0.001, so 1000 PawBucks = $1)
  pawBucksToUSD: (pawBucks: number): string => {
  const usd = pawBucks * 0.001;

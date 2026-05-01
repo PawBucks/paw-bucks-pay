@@ -1,5 +1,6 @@
 import { memo, useMemo } from"react";
 import { GradientCard } from"@/components/ui/gradient-card";
+import { Formatters } from"@/utils/formatters";
 import {
  DollarSign,
  Gift,
@@ -34,11 +35,11 @@ const MerchantAnalyticsCardsComponent = ({ analytics }: MerchantAnalyticsCardsPr
  const totalRewardsUSD = totalCashbackPawBucks / 1000;
  
  return {
- totalSales: analytics?.total_sales?.toFixed(2) ||"0.00",
- totalRewards: totalRewardsUSD.toFixed(2),
- remainingBalance: analytics?.remaining_balance?.toFixed(2) ||"0.00",
+   totalSales: Formatters.money(analytics?.total_sales ?? 0),
+   totalRewards: Formatters.money(totalRewardsUSD),
+   remainingBalance: Formatters.money(analytics?.remaining_balance ?? 0),
  repaymentRate: analytics?.repayment_rate ? `${analytics.repayment_rate}x` :"N/A",
- totalTransactions: analytics?.total_transactions || 0,
+   totalTransactions: Formatters.number(analytics?.total_transactions ?? 0),
  };
  }, [analytics]);
  return (

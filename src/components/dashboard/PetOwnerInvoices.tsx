@@ -17,6 +17,7 @@ import {
 } from"lucide-react";
 import { format, parseISO, isAfter } from"date-fns";
 
+import { Formatters } from "@/utils/formatters";
 interface PetOwnerInvoice {
  id: string;
  invoice_number: string;
@@ -224,16 +225,16 @@ export function PetOwnerInvoices({ userEmail }: PetOwnerInvoicesProps) {
  <div className="text-right">
  {isPaid ? (
  <span className="text-lg font-semibold text-success">
- ${Number(invoice.total).toFixed(2)}
+ {Formatters.currency(Number(invoice.total))}
  </span>
  ) : (
  <>
  <span className="text-lg font-semibold text-foreground">
- ${Number(invoice.amount_due).toFixed(2)}
+ {Formatters.currency(Number(invoice.amount_due))}
  </span>
  {invoice.amount_paid > 0 && (
  <p className="text-xs text-muted-foreground">
- ${Number(invoice.amount_paid).toFixed(2)} paid
+ {Formatters.currency(Number(invoice.amount_paid))} paid
  </p>
  )}
  </>

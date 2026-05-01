@@ -22,6 +22,7 @@ import { format, subDays } from"date-fns";
 import { toast } from"sonner";
 import jsPDF from"jspdf";
 
+import { Formatters } from "@/utils/formatters";
 const COLORS = ['hsl(var(--primary))','hsl(var(--chart-2))','hsl(var(--chart-3))','hsl(var(--chart-4))','hsl(var(--chart-5))'];
 
 const tooltipStyle = {
@@ -432,7 +433,7 @@ export function PremiumAnalyticsDashboard() {
  <YAxis tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
  <Tooltip 
  contentStyle={tooltipStyle}
- formatter={(value: number) => [`$${value.toFixed(2)}`,'Revenue']}
+ formatter={(value: number) => [`${Formatters.currency(value)}`,'Revenue']}
  labelFormatter={(label) => new Date(label).toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' })}
  />
  <Area 
@@ -544,7 +545,7 @@ export function PremiumAnalyticsDashboard() {
  <YAxis tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
  <Tooltip 
  contentStyle={tooltipStyle}
- formatter={(value: number) => [`$${value.toFixed(2)}`,'Revenue']}
+ formatter={(value: number) => [`${Formatters.currency(value)}`,'Revenue']}
  />
  <Bar dataKey="revenue" fill="hsl(var(--chart-3))" radius={[4, 4, 0, 0]} />
  </BarChart>
@@ -721,12 +722,12 @@ export function PremiumAnalyticsDashboard() {
  {customer.customer_name || `Customer #${customer.user_id.slice(0, 8)}`}
  </p>
  <p className="text-xs text-muted-foreground">
- {customer.purchase_count} purchases · ${customer.avg_order_value.toFixed(2)} avg
+ {customer.purchase_count} purchases · {Formatters.currency(customer.avg_order_value)} avg
  </p>
  </div>
  </div>
  <div className="text-right">
- <p className="font-bold text-primary">${customer.total_spent.toFixed(2)}</p>
+ <p className="font-bold text-primary">{Formatters.currency(customer.total_spent)}</p>
  <p className="text-xs text-muted-foreground">
  {customer.days_since_last_purchase} days ago
  </p>
@@ -828,7 +829,7 @@ export function PremiumAnalyticsDashboard() {
  <YAxis tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
  <Tooltip 
  contentStyle={tooltipStyle}
- formatter={(value: number) => [`$${value.toFixed(2)}`,'Revenue']}
+ formatter={(value: number) => [`${Formatters.currency(value)}`,'Revenue']}
  />
  <Bar dataKey="revenue" fill="hsl(var(--chart-3))" radius={[4, 4, 0, 0]} />
  </BarChart>
@@ -904,7 +905,7 @@ export function PremiumAnalyticsDashboard() {
  </div>
  {opportunity.potential_revenue > 0 && (
  <p className="text-xs text-success mt-2">
- Potential revenue: ${opportunity.potential_revenue.toFixed(2)}
+ Potential revenue: {Formatters.currency(opportunity.potential_revenue)}
  </p>
  )}
  </div>
@@ -974,7 +975,7 @@ export function PremiumAnalyticsDashboard() {
  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
  <div className="text-center p-4 rounded-lg bg-muted">
  <p className="text-sm text-muted-foreground mb-1">Avg Order Value</p>
- <p className="text-2xl font-bold">${competitive_benchmarking.your_avg_transaction.toFixed(2)}</p>
+ <p className="text-2xl font-bold">{Formatters.currency(competitive_benchmarking.your_avg_transaction)}</p>
  <p className="text-xs text-muted-foreground">Industry: ${competitive_benchmarking.industry_avg_transaction}</p>
  <div className={`flex items-center justify-center gap-1 mt-1 ${getGrowthColor(competitive_benchmarking.transaction_value_vs_industry)}`}>
  {getGrowthIcon(competitive_benchmarking.transaction_value_vs_industry)}
@@ -992,7 +993,7 @@ export function PremiumAnalyticsDashboard() {
  </div>
  <div className="text-center p-4 rounded-lg bg-muted">
  <p className="text-sm text-muted-foreground mb-1">Customer Lifetime Value</p>
- <p className="text-2xl font-bold">${competitive_benchmarking.your_ltv.toFixed(2)}</p>
+ <p className="text-2xl font-bold">{Formatters.currency(competitive_benchmarking.your_ltv)}</p>
  <p className="text-xs text-muted-foreground">Industry: ${competitive_benchmarking.industry_avg_ltv}</p>
  <div className={`flex items-center justify-center gap-1 mt-1 ${getGrowthColor(competitive_benchmarking.ltv_vs_industry)}`}>
  {getGrowthIcon(competitive_benchmarking.ltv_vs_industry)}

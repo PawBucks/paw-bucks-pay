@@ -74,6 +74,7 @@ import { SupportTab } from"@/components/support/SupportTab";
 import { MerchantMessagesTab } from"@/components/merchant/MerchantMessagesTab";
 import { MerchantSaleConfirmationsTab } from"@/components/merchant/MerchantSaleConfirmationsTab";
 
+import { Formatters } from "@/utils/formatters";
 type Merchant = {
  id: string;
  business_name: string;
@@ -715,7 +716,7 @@ const MerchantDashboard = () => {
 
  if (error) throw error;
 
- toast.success(`Funding request for $${requestedAmount.toFixed(2)} submitted successfully!`);
+ toast.success(`Funding request for ${Formatters.currency(requestedAmount)} submitted successfully!`);
  setFundingDialogOpen(false);
  } catch (error: any) {
  console.error("Error requesting funding:", error);

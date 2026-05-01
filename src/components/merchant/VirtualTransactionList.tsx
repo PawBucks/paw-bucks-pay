@@ -3,6 +3,7 @@ import { useVirtualizer } from"@tanstack/react-virtual";
 import { format } from"date-fns";
 import { GradientCard } from"@/components/ui/gradient-card";
 import { User, RotateCcw } from"lucide-react";
+import { Formatters } from"@/utils/formatters";
 
 type Transaction = {
  id: string;
@@ -65,12 +66,12 @@ const TransactionItem = ({ transaction }: { transaction: Transaction }) => {
  </div>
  </div>
  <div className="text-right">
- <p className={`font-bold ${isRefunded ?'text-destructive line-through' :'text-accent'}`}>
- +${transaction.amount.toFixed(2)}
+  <p className={`font-bold ${isRefunded ?'text-destructive line-through' :'text-accent'}`}>
+  +{Formatters.currency(transaction.amount)}
  </p>
  <p className={`text-sm ${isRefunded ?'text-destructive line-through' :'text-muted-foreground'}`}>
  {/* Convert PawBucks to USD (1 PawBuck = $0.001) */}
- Rewards: ${((transaction.rewards_earned ?? transaction.cashback_earned ?? 0) * 0.001).toFixed(2)}
+  Rewards: {Formatters.currency((transaction.rewards_earned ?? transaction.cashback_earned ?? 0) * 0.001)}
  </p>
  </div>
  </div>

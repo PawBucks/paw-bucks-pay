@@ -19,6 +19,7 @@ import {
 import { format, subDays, subWeeks, subMonths, startOfWeek, endOfWeek, startOfDay, endOfDay, startOfMonth, endOfMonth } from"date-fns";
 import { TrendingUp, TrendingDown, BarChart3, LineChart } from"lucide-react";
 
+import { Formatters } from "@/utils/formatters";
 type Transaction = {
  id: string;
  amount: number;
@@ -214,7 +215,7 @@ export const EnhancedSpendingChart = memo(({ transactions, medicalRecords = [] }
  <p className="font-medium text-sm mb-1">{payload[0]?.payload?.fullDate || payload[0]?.payload?.fullWeek || payload[0]?.payload?.fullMonth || label}</p>
  {payload.map((p: any, idx: number) => (
  <p key={idx} className="text-sm" style={{ color: p.color }}>
- {p.name}: ${p.value.toFixed(2)}
+ {p.name}: {Formatters.currency(p.value)}
  </p>
  ))}
  </div>
@@ -317,7 +318,7 @@ export const EnhancedSpendingChart = memo(({ transactions, medicalRecords = [] }
  )}
  </ResponsiveContainer>
  <p className="text-xs text-muted-foreground text-center mt-2">
- Daily average: ${dailyAvg.toFixed(2)}
+ Daily average: {Formatters.currency(dailyAvg)}
  </p>
  </div>
  ) : (
@@ -342,7 +343,7 @@ export const EnhancedSpendingChart = memo(({ transactions, medicalRecords = [] }
  </ComposedChart>
  </ResponsiveContainer>
  <p className="text-xs text-muted-foreground text-center mt-2">
- Weekly average: ${weeklyAvg.toFixed(2)}
+ Weekly average: {Formatters.currency(weeklyAvg)}
  </p>
  </div>
  ) : (
@@ -367,7 +368,7 @@ export const EnhancedSpendingChart = memo(({ transactions, medicalRecords = [] }
  </BarChart>
  </ResponsiveContainer>
  <p className="text-xs text-muted-foreground text-center mt-2">
- Monthly average: ${monthlyAvg.toFixed(2)} • Dashed line = average
+ Monthly average: {Formatters.currency(monthlyAvg)} • Dashed line = average
  </p>
  </div>
  ) : (

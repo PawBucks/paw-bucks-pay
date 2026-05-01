@@ -4,6 +4,7 @@ import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, 
 import { format, subDays, subWeeks, startOfWeek, endOfWeek, startOfDay, endOfDay } from"date-fns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
 
+import { Formatters } from "@/utils/formatters";
 type Transaction = {
  id: string;
  amount: number;
@@ -136,7 +137,7 @@ export const SpendingTrendsChart = memo(({ transactions, medicalRecords = [] }: 
  width={50}
  />
  <Tooltip 
- formatter={(value: number) => [`$${value.toFixed(2)}`,'Spent']}
+ formatter={(value: number) => [`${Formatters.currency(value)}`,'Spent']}
  contentStyle={tooltipStyle}
  />
  <Area 
@@ -175,7 +176,7 @@ export const SpendingTrendsChart = memo(({ transactions, medicalRecords = [] }: 
  width={50}
  />
  <Tooltip 
- formatter={(value: number) => [`$${value.toFixed(2)}`,'Spent']}
+ formatter={(value: number) => [`${Formatters.currency(value)}`,'Spent']}
  contentStyle={tooltipStyle}
  />
  <Bar 

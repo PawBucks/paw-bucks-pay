@@ -15,6 +15,7 @@ import { ScarcitySignalWidget } from"./ScarcitySignalWidget";
 import { AccountTypeCard } from"./AccountTypeCard";
 import { PawBucksCapCard } from"./PawBucksCapCard";
 
+import { Formatters } from "@/utils/formatters";
 type Merchant = {
  id: string;
  business_name: string;
@@ -203,7 +204,7 @@ export function MerchantOverviewTab({
  <div className="space-y-2">
  <div className="flex justify-between text-sm mb-2">
  <span className="text-muted-foreground">Funding Balance Remaining</span>
- <span className="font-bold">${analytics.remaining_balance.toFixed(2)}</span>
+ <span className="font-bold">{Formatters.currency(analytics.remaining_balance)}</span>
  </div>
  <div className="w-full bg-muted rounded-full h-4 overflow-hidden">
  <div

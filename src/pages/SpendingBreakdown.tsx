@@ -18,6 +18,7 @@ import { useQueryClient } from"@tanstack/react-query";
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from"recharts";
 import { CATEGORY_CONFIG, getNormalizedCategory } from"@/lib/categoryMapping";
 
+import { Formatters } from "@/utils/formatters";
 type TransactionWithMerchant = {
  id: string;
  amount: number;
@@ -242,7 +243,7 @@ const SpendingBreakdown = () => {
  <div className="grid gap-4 grid-cols-2 mb-6">
  <GradientCard gradient>
  <p className="text-sm text-muted-foreground">Total Spending</p>
- <p className="text-2xl sm:text-3xl font-bold">${totalSpending.toFixed(2)}</p>
+ <p className="text-2xl sm:text-3xl font-bold">{Formatters.currency(totalSpending)}</p>
  </GradientCard>
  <GradientCard>
  <p className="text-sm text-muted-foreground">Rewards Earned</p>
@@ -274,7 +275,7 @@ const SpendingBreakdown = () => {
  ))}
  </Pie>
  <Tooltip 
- formatter={(value: number) => [`$${value.toFixed(2)}`,'Amount']}
+ formatter={(value: number) => [`${Formatters.currency(value)}`,'Amount']}
  contentStyle={{
  backgroundColor:'hsl(var(--card))',
  border:'1px solid hsl(var(--border))',
@@ -306,7 +307,7 @@ const SpendingBreakdown = () => {
  <p className="text-xs text-muted-foreground">{percentage}% of total</p>
  </div>
  </div>
- <p className="font-bold">${cat.value.toFixed(2)}</p>
+ <p className="font-bold">{Formatters.currency(cat.value)}</p>
  </div>
  );
  })}
@@ -339,7 +340,7 @@ const SpendingBreakdown = () => {
  tickFormatter={(value) => `$${value}`}
  />
  <Tooltip 
- formatter={(value: number) => [`$${value.toFixed(2)}`,'Spending']}
+ formatter={(value: number) => [`${Formatters.currency(value)}`,'Spending']}
  contentStyle={{
  backgroundColor:'hsl(var(--card))',
  border:'1px solid hsl(var(--border))',
@@ -415,7 +416,7 @@ const SpendingBreakdown = () => {
  </div>
  </div>
  <div className="text-right">
- <p className="font-bold">-${item.amount.toFixed(2)}</p>
+ <p className="font-bold">-{Formatters.currency(item.amount)}</p>
  {item.rewards > 0 && (
  <p className="text-xs text-accent">+{item.rewards} PawBucks</p>
  )}

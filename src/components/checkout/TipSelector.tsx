@@ -5,6 +5,7 @@ import { Button } from"@/components/ui/button";
 import { Heart } from"lucide-react";
 import { cn } from"@/lib/utils";
 
+import { Formatters } from "@/utils/formatters";
 const TIP_PRESETS = [
  { label:"10%", multiplier: 0.10 },
  { label:"15%", multiplier: 0.15 },
@@ -87,7 +88,7 @@ export const TipSelector = ({
  {preset.label}
  {baseAmount > 0 && (
  <span className="ml-1 opacity-70">
- (${(baseAmount * preset.multiplier).toFixed(2)})
+ ({Formatters.currency((baseAmount * preset.multiplier))})
  </span>
  )}
  </Button>

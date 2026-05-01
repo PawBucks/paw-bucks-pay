@@ -8,6 +8,7 @@ import { Input } from"@/components/ui/input";
 import { Search, Coins } from"lucide-react";
 import { useDebounce } from"@/hooks/useDebounce";
 
+import { Formatters } from "@/utils/formatters";
 type Transaction = {
  id: string;
  amount: number;
@@ -97,7 +98,7 @@ export function UserDetailTransactions({ userId }: { userId: string }) {
  <CardTitle>Transaction History ({transactions.length})</CardTitle>
  <div className="flex gap-4 text-sm">
  <span className="text-muted-foreground">
- {isMerchant ?"Total Revenue" :"Total Spent"}: <strong className="text-foreground">${totalAmount.toFixed(2)}</strong>
+ {isMerchant ?"Total Revenue" :"Total Spent"}: <strong className="text-foreground">{Formatters.currency(totalAmount)}</strong>
  </span>
  <span className="text-muted-foreground flex items-center gap-1">
  <Coins className="w-3 h-3" /> PB Used: <strong className="text-foreground">{totalPawBucksUsed.toLocaleString()}</strong>
@@ -139,8 +140,8 @@ export function UserDetailTransactions({ userId }: { userId: string }) {
  ? (t.profiles?.full_name || t.profiles?.email ||"—")
  : (t.merchants?.business_name ||"—")}
  </TableCell>
- <TableCell className="text-right font-medium">${t.amount.toFixed(2)}</TableCell>
- <TableCell className="text-right text-sm">${(t.stripe_amount ?? t.amount).toFixed(2)}</TableCell>
+ <TableCell className="text-right font-medium">{Formatters.currency(t.amount)}</TableCell>
+ <TableCell className="text-right text-sm">{Formatters.currency((t.stripe_amount ?? t.amount))}</TableCell>
  <TableCell className="text-right text-sm">
  {t.pawbucks_used ? (
  <span className="flex items-center justify-end gap-1">
@@ -148,8 +149,8 @@ export function UserDetailTransactions({ userId }: { userId: string }) {
  </span>
  ) :"—"}
  </TableCell>
- <TableCell className="text-right text-sm">${(t.application_fee ?? 0).toFixed(2)}</TableCell>
- <TableCell className="text-right text-sm">{t.cashback_earned > 0 ? `$${(t.cashback_earned * 0.001).toFixed(2)}` :"—"}</TableCell>
+ <TableCell className="text-right text-sm">{Formatters.currency((t.application_fee ?? 0))}</TableCell>
+ <TableCell className="text-right text-sm">{t.cashback_earned > 0 ? `${Formatters.currency((t.cashback_earned * 0.001))}` :"—"}</TableCell>
  <TableCell className="text-sm">{t.payment_method ||"Card"}</TableCell>
  <TableCell>
  <Badge variant={t.status ==="completed" ?"default" : t.status ==="refunded" ?"destructive" :"secondary"}>

@@ -10,6 +10,7 @@ import {
 import { useMerchantEarnings } from"@/hooks/useMerchantEarnings";
 import { format } from"date-fns";
 
+import { Formatters } from "@/utils/formatters";
 export function MerchantEarningsTab() {
  const navigate = useNavigate();
  const { loading, refreshing, data, fetchEarnings, formatCurrency, getAvailableBalance, getPendingBalance, formatPayoutSchedule } = useMerchantEarnings();
@@ -167,7 +168,7 @@ export function MerchantEarningsTab() {
  {data.summary?.refunds?.count || 0}
  {(data.summary?.refunds?.amount || 0) > 0 && (
  <span className="text-sm font-normal text-destructive ml-2">
- -${data.summary.refunds.amount.toFixed(2)}
+ -{Formatters.currency(data.summary.refunds.amount)}
  </span>
  )}
  </p>

@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from'@/components/ui/tabs';
 import { Calculator, Coins, ArrowRightLeft } from'lucide-react';
 import { POINTS_MULTIPLIER, PAWBUCKS_CONVERSION } from'@/lib/constants';
 
+import { Formatters } from "@/utils/formatters";
 type SubscriptionTier ='free' |'pawpass' |'pawpass_plus';
 
 const TIER_CONFIG: Record<SubscriptionTier, { label: string; multiplier: number; color: string }> = {
@@ -107,7 +108,7 @@ export function PawBucksCalculator() {
  <div className="flex items-center justify-between text-sm text-muted-foreground">
  <span>Calculation:</span>
  <span>
- ${amount.toFixed(2)} × {multiplier} PB/$ = {pawBucksResult.toLocaleString()} PB
+ {Formatters.currency(amount)} × {multiplier} PB/$ = {pawBucksResult.toLocaleString()} PB
  </span>
  </div>
  <div className="flex items-center justify-between">
@@ -152,13 +153,13 @@ export function PawBucksCalculator() {
  <div className="flex items-center justify-between text-sm text-muted-foreground">
  <span>Calculation:</span>
  <span>
- {pbAmount.toLocaleString()} PB × $0.001 = ${usdEquivalent.toFixed(2)}
+ {pbAmount.toLocaleString()} PB × $0.001 = {Formatters.currency(usdEquivalent)}
  </span>
  </div>
  <div className="flex items-center justify-between">
  <span className="font-medium">USD Equivalent:</span>
  <span className="flex items-center gap-2 text-2xl font-bold text-success">
- ${usdEquivalent.toFixed(2)}
+ {Formatters.currency(usdEquivalent)}
  </span>
  </div>
  </div>

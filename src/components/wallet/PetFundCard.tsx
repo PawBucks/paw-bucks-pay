@@ -10,6 +10,7 @@ import { format, formatDistanceToNow } from"date-fns";
 import { useNavigate } from"react-router-dom";
 import { Loader2 } from"lucide-react";
 
+import { Formatters } from "@/utils/formatters";
 interface PetFundCardProps {
  userId: string;
 }
@@ -94,14 +95,14 @@ export const PetFundCard = ({ userId }: PetFundCardProps) => {
  <p className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
  {(totalAmount - totalUsed).toLocaleString()} PB
  </p>
- <p className="text-lg text-muted-foreground">${totalRemainingUsd.toFixed(2)}</p>
+ <p className="text-lg text-muted-foreground">{Formatters.currency(totalRemainingUsd)}</p>
  </div>
 
  {/* Progress Bar */}
  <div className="space-y-2">
  <div className="flex justify-between text-xs text-muted-foreground">
- <span>Used: ${totalUsedUsd.toFixed(2)}</span>
- <span>Total: ${totalAmountUsd.toFixed(2)}</span>
+ <span>Used: {Formatters.currency(totalUsedUsd)}</span>
+ <span>Total: {Formatters.currency(totalAmountUsd)}</span>
  </div>
  <Progress value={usedPercentage} className="h-2" />
  </div>
@@ -113,7 +114,7 @@ export const PetFundCard = ({ userId }: PetFundCardProps) => {
  <CheckCircle className="w-3.5 h-3.5 text-success" />
  <span className="text-xs text-muted-foreground">Available Now</span>
  </div>
- <p className="text-xl font-bold text-success">${availableBalanceUsd.toFixed(2)}</p>
+ <p className="text-xl font-bold text-success">{Formatters.currency(availableBalanceUsd)}</p>
  <p className="text-xs text-success/60">{availableBalance.toLocaleString()} PB</p>
  </div>
  <div className="rounded-lg border border-warning/20 bg-warning/5 p-3">
@@ -121,7 +122,7 @@ export const PetFundCard = ({ userId }: PetFundCardProps) => {
  <Lock className="w-3.5 h-3.5 text-warning" />
  <span className="text-xs text-muted-foreground">In Escrow</span>
  </div>
- <p className="text-xl font-bold text-warning">${escrowBalanceUsd.toFixed(2)}</p>
+ <p className="text-xl font-bold text-warning">{Formatters.currency(escrowBalanceUsd)}</p>
  <p className="text-xs text-warning/60">{escrowBalance.toLocaleString()} PB</p>
  </div>
  </div>

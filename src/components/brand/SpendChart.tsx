@@ -3,6 +3,7 @@ import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianG
 import { TrendingUp } from"lucide-react";
 import type { BrandCampaignDailyStat } from"@/services/api/brandCampaigns.service";
 
+import { Formatters } from "@/utils/formatters";
 interface SpendChartProps {
  stats: BrandCampaignDailyStat[];
 }
@@ -36,7 +37,7 @@ export function SpendChart({ stats }: SpendChartProps) {
  </div>
  <div className="text-right">
  <p className="text-xs text-muted-foreground">Last 30 days</p>
- <p className="text-lg font-bold tabular-nums">${totalSpend.toFixed(2)}</p>
+ <p className="text-lg font-bold tabular-nums">{Formatters.currency(totalSpend)}</p>
  </div>
  </div>
  </CardHeader>
@@ -77,7 +78,7 @@ export function SpendChart({ stats }: SpendChartProps) {
  }}
  labelFormatter={(v) => new Date(v).toLocaleDateString(undefined, { weekday:"short", month:"short", day:"numeric" })}
  formatter={(value: number, name: string) =>
- name ==="spend" ? [`$${value.toFixed(2)}`,"Spend"] : [value,"Check-ins"]
+ name ==="spend" ? [`${Formatters.currency(value)}`,"Spend"] : [value,"Check-ins"]
  }
  />
  <Area
