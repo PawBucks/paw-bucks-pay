@@ -11,6 +11,7 @@ import { Badge } from"@/components/ui/badge";
 import { Separator } from"@/components/ui/separator";
 import { motion, AnimatePresence } from"framer-motion";
 
+import { Formatters } from "@/utils/formatters";
 interface AutoRedeemToggleProps {
  userId: string;
 }
@@ -256,8 +257,8 @@ export const AutoRedeemToggle = ({ userId }: AutoRedeemToggleProps) => {
  <div className="p-2.5 bg-muted rounded-md border border-border">
  <p className="text-[11px] text-muted-foreground">
  <span className="font-semibold text-foreground">Example:</span> On a $100 purchase, PawBucks will auto-apply
- only if you have at least {(100 * minCoverage / 100).toFixed(0)}k PB (${(100 * minCoverage / 100).toFixed(0)}),
- and at most {(100 * maxApply / 100).toFixed(0)}k PB (${(100 * maxApply / 100).toFixed(0)}) will be used.
+ only if you have at least {Formatters.number(Math.round((100 * minCoverage / 100)))}k PB (${Formatters.number(Math.round((100 * minCoverage / 100)))}),
+ and at most {Formatters.number(Math.round((100 * maxApply / 100)))}k PB (${Formatters.number(Math.round((100 * maxApply / 100)))}) will be used.
  </p>
  </div>
  </div>

@@ -34,6 +34,7 @@ import {
  type BrandedPawbucksActivity,
 } from"@/services/api/brandCampaigns.service";
 
+import { Formatters } from "@/utils/formatters";
 const statusColors: Record<string, string> = {
  draft:"bg-muted text-muted-foreground",
  pending_payment:"bg-warning/15 text-warning",
@@ -225,10 +226,10 @@ export const BrandCampaignsTab = () => {
 
  if (selectedCampaign) {
  const distributionPct = selectedCampaign.pawbucks_pool > 0
- ? ((selectedCampaign.total_distributed / selectedCampaign.pawbucks_pool) * 100).toFixed(1)
+ ? Formatters.decimal(((selectedCampaign.total_distributed / selectedCampaign.pawbucks_pool) * 100), 1)
  :"0";
  const redemptionPct = selectedCampaign.total_distributed > 0
- ? ((selectedCampaign.total_redeemed / selectedCampaign.total_distributed) * 100).toFixed(1)
+ ? Formatters.decimal(((selectedCampaign.total_redeemed / selectedCampaign.total_distributed) * 100), 1)
  :"0";
  const brandName = (selectedCampaign as any).brand_accounts?.brand_name ||"Brand";
 
@@ -606,7 +607,7 @@ export const BrandCampaignsTab = () => {
  <div className="space-y-3">
  {campaigns.map((campaign) => {
  const poolPct = campaign.pawbucks_pool > 0
- ? ((campaign.total_distributed / campaign.pawbucks_pool) * 100).toFixed(0)
+ ? Formatters.number(Math.round(((campaign.total_distributed / campaign.pawbucks_pool) * 100)))
  :"0";
  return (
  <Card key={campaign.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setSelectedCampaign(campaign)}>

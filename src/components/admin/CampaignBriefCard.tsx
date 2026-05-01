@@ -17,6 +17,7 @@ import {
 } from"lucide-react";
 import type { BrandCampaign, TargetingRules } from"@/services/api/brandCampaigns.service";
 
+import { Formatters } from "@/utils/formatters";
 interface Props {
  campaign: BrandCampaign & {
  creative_headline?: string | null;
@@ -54,7 +55,7 @@ export function CampaignBriefCard({ campaign }: Props) {
  const fundedDate = campaign.funded_at ? new Date(campaign.funded_at).toLocaleString() : null;
  const createdDate = new Date(campaign.created_at).toLocaleString();
 
- const usdPerCheckin = (campaign.pawbucks_per_checkin / 1000).toFixed(2);
+ const usdPerCheckin = Formatters.money((campaign.pawbucks_per_checkin / 1000));
  const estimatedCheckins = campaign.pawbucks_per_checkin > 0
  ? Math.floor(campaign.pawbucks_pool / campaign.pawbucks_per_checkin)
  : 0;

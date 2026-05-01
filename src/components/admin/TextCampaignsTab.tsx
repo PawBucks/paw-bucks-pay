@@ -54,6 +54,7 @@ import {
 import { toast } from"sonner";
 import { format } from"date-fns";
 
+import { Formatters } from "@/utils/formatters";
 type RecipientType ="all" |"merchants" |"pet_owners" |"individual";
 
 interface Profile {
@@ -264,7 +265,7 @@ export function TextCampaignsTab() {
  const totalSent = campaigns.reduce((sum, c) => sum + c.sent_count, 0);
  const totalFailed = campaigns.reduce((sum, c) => sum + c.failed_count, 0);
  const successRate = totalSent + totalFailed > 0 
- ? ((totalSent / (totalSent + totalFailed)) * 100).toFixed(1)
+ ? Formatters.decimal(((totalSent / (totalSent + totalFailed)) * 100), 1)
  :"0";
  
  return { totalCampaigns, totalSent, totalFailed, successRate };
