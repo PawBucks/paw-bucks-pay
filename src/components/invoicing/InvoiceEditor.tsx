@@ -224,7 +224,9 @@ export function InvoiceEditor({
  form.reset(newDefaults);
  setAttachments(invoice?.attachment_urls || []);
  setRecipients(invoice?.recipients || []);
- }, [invoice?.id]); // Reset when the invoice identity changes
+  // Re-run when invoice identity changes OR when default settings load for a brand-new invoice
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [invoice?.id, invoice ? null : settings?.default_payment_terms, invoice ? null : settings?.default_tax_rate, invoice ? null : settings?.default_notes, invoice ? null : settings?.default_footer]);
 
  const watchDiscountType = form.watch("discount_type");
  const watchDiscountValue = form.watch("discount_value");
