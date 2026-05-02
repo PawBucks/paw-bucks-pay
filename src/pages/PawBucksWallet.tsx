@@ -102,7 +102,7 @@ const UpgradePrompt = ({ totalEarned, onUpgrade, isPawPassSubscriber = false }: 
  onClick={() => setActiveTab('pawpass')}
  className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
  activeTab ==='pawpass' 
- ?'bg-warning text-warning shadow-lg' 
+                 ?'bg-warning text-warning-foreground shadow-lg' 
  :'text-muted-foreground hover:text-foreground'
  }`}
  >
@@ -113,7 +113,7 @@ const UpgradePrompt = ({ totalEarned, onUpgrade, isPawPassSubscriber = false }: 
  onClick={() => setActiveTab('pawpassplus')}
  className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
  activeTab ==='pawpassplus' 
- ?'bg-accent text-white shadow-lg' 
+                 ?'bg-accent text-accent-foreground shadow-lg' 
  :'text-muted-foreground hover:text-foreground'
  }`}
  >
@@ -256,8 +256,8 @@ const UpgradePrompt = ({ totalEarned, onUpgrade, isPawPassSubscriber = false }: 
  onClick={onUpgrade}
  className={`w-full mt-4 font-semibold transition-all duration-300 ${
  activeTab ==='pawpass' && !isPawPassSubscriber
- ?'bg-gradient-to-r from-warning to-warning hover:from-warning hover:to-warning text-warning'
- :'bg-gradient-to-r from-accent to-accent hover:from-accent hover:to-accent text-white'
+               ?'bg-gradient-to-r from-warning to-warning hover:from-warning hover:to-warning text-warning-foreground'
+               :'bg-gradient-to-r from-accent to-accent hover:from-accent hover:to-accent text-accent-foreground'
  }`}
  >
  {activeTab ==='pawpass' && !isPawPassSubscriber ? (
