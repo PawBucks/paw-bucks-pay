@@ -17,6 +17,7 @@ const corsHeaders = {
 const combinedPaymentSchema = z.object({
   totalAmount: z.number().positive({ message: "Amount must be greater than 0" }),
   pawbucksAmount: z.number().min(0).default(0),
+  storeLockedPawbucks: z.number().min(0).default(0), // PB redeemed from this merchant's store-locked balance
   tipAmount: z.number().min(0).default(0), // Tip in USD, always charged to card
   merchantId: z.string().uuid({ message: "Invalid merchant ID" }),
   description: z.string().max(500).optional(),
@@ -114,7 +115,7 @@ serve(async (req) => {
       );
     }
 
-    const { totalAmount, pawbucksAmount: manualPawbucksAmount, tipAmount, merchantId, description, autoRedeem: requestAutoRedeem } = validation.data;
+    const { totalAmount, pawbucksAmount: manualPawbucksAmount, storeLockedPawbucks, tipAmount, merchantId, description, autoRedeem: requestAutoRedeem } = validation.data;
 
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -215,9 +216,34 @@ serve(async (req) => {
       }
     }
 
-    // Calculate USD value of PawBucks - PawBucks apply to base amount ONLY, not tip
+    // Store-locked PawBucks redemption: validate balance & debit BEFORE computing Stripe amount.
+    // These are merchant-specific PB issued via Store Rewards Pro and apply only at the issuing merchant.
+    if (storeLockedPawbucks > 0) {
+      const { data: redeemResult, error: redeemErr } = await supabaseAdmin.rpc(
+        'redeem_store_locked_pawbucks',
+        {
+          p_merchant_id: merchantId,
+          p_user_id: user.id,
+          p_amount_pb: storeLockedPawbucks,
+          p_transaction_id: null,
+          p_description: `In-store PawBucks redemption at ${merchant.business_name}`,
+        }
+      );
+      if (redeemErr || !(redeemResult as any)?.success) {
+        const msg = (redeemResult as any)?.error || redeemErr?.message || 'Could not redeem in-store PawBucks';
+        return new Response(
+          JSON.stringify({ error: msg }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+        );
+      }
+      logStep('Store-locked PawBucks redeemed', { storeLockedPawbucks });
+    }
+
+    // Calculate USD value of PawBucks - both regular and store-locked apply to base amount ONLY, not tip
+    const storeLockedUsdValue = storeLockedPawbucks * PAWBUCKS_TO_USD;
     const pawbucksUsdValue = pawbucksAmount * PAWBUCKS_TO_USD;
-    const stripeAmount = Math.max(0, baseAmount - pawbucksUsdValue) + tipAmount; // Tip always goes to card
+    const totalPbUsdValue = pawbucksUsdValue + storeLockedUsdValue;
+    const stripeAmount = Math.max(0, baseAmount - totalPbUsdValue) + tipAmount; // Tip always goes to card
 
     // Determine how much comes from wallet vs welcome credit
     let walletPawbucks = 0;

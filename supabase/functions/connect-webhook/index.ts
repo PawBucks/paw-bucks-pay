@@ -743,43 +743,72 @@ serve(async (req) => {
 
           // Award PawBucks to user
           if (pawbucksEarned > 0) {
-            // Log activity - MUST be 'earn' type for wallet display
-            await supabaseAdmin.from("pawbucks_activity").insert({
-              user_id: userId,
-              amount: pawbucksEarned,
-              type: "earn",
-              source: "direct_payment",
-              description: `Earned ${pawbucksEarned} PawBucks (${tierName} ${pawbucksMultiplier}x) from $${amountInDollars.toFixed(2)} payment to ${businessName}`,
-              pawbucks_status: "available",
-              partner_id: merchantId,
-              transaction_id: transaction?.id,
-            });
+            // Store Rewards Pro: route earnings to store-locked PB instead of regular wallet
+            let issuedAsStoreLocked = false;
+            if (merchantId) {
+              const { data: hasSrp } = await supabaseAdmin
+                .rpc('merchant_has_store_rewards_pro', { p_merchant_id: merchantId });
+              if (hasSrp) {
+                const { data: issueResult, error: issueErr } = await supabaseAdmin
+                  .rpc('issue_store_locked_pawbucks', {
+                    p_merchant_id: merchantId,
+                    p_user_id: userId,
+                    p_amount_pb: pawbucksEarned,
+                    p_transaction_id: transaction?.id ?? null,
+                    p_description: `Earned ${pawbucksEarned} in-store PawBucks (${tierName} ${pawbucksMultiplier}x) from $${amountInDollars.toFixed(2)} payment to ${businessName}`,
+                  });
+                if (issueErr) {
+                  logStep("Store Rewards Pro issuance FAILED — falling back to regular PB", { error: issueErr.message });
+                } else if ((issueResult as any)?.success) {
+                  issuedAsStoreLocked = true;
+                  logStep("Store-locked PawBucks issued", issueResult as Record<string, unknown>);
+                } else {
+                  logStep("Store Rewards Pro issuance returned error — funding may be depleted; NOT falling back to regular PB", issueResult as Record<string, unknown>);
+                  // Acquisition-only merchants explicitly do not award regular PB; skip silently.
+                  issuedAsStoreLocked = true;
+                }
+              }
+            }
 
-            // Update wallet balance
-            const { data: wallet } = await supabaseAdmin
-              .from('pawbucks_wallet')
-              .select('balance')
-              .eq('user_id', userId)
-              .single();
-
-            if (wallet) {
-              await supabaseAdmin
-                .from('pawbucks_wallet')
-                .update({ balance: wallet.balance + pawbucksEarned })
-                .eq('user_id', userId);
-              
-              logStep("PawBucks wallet updated", { 
-                previousBalance: wallet.balance, 
-                newBalance: wallet.balance + pawbucksEarned 
-              });
-            } else {
-              // Create wallet if doesn't exist
-              await supabaseAdmin.from('pawbucks_wallet').insert({
+            if (!issuedAsStoreLocked) {
+              // Log activity - MUST be 'earn' type for wallet display
+              await supabaseAdmin.from("pawbucks_activity").insert({
                 user_id: userId,
-                balance: pawbucksEarned,
+                amount: pawbucksEarned,
+                type: "earn",
+                source: "direct_payment",
+                description: `Earned ${pawbucksEarned} PawBucks (${tierName} ${pawbucksMultiplier}x) from $${amountInDollars.toFixed(2)} payment to ${businessName}`,
+                pawbucks_status: "available",
+                partner_id: merchantId,
+                transaction_id: transaction?.id,
               });
-              logStep("PawBucks wallet created with initial balance");
-          }
+
+              // Update wallet balance
+              const { data: wallet } = await supabaseAdmin
+                .from('pawbucks_wallet')
+                .select('balance')
+                .eq('user_id', userId)
+                .single();
+
+              if (wallet) {
+                await supabaseAdmin
+                  .from('pawbucks_wallet')
+                  .update({ balance: wallet.balance + pawbucksEarned })
+                  .eq('user_id', userId);
+                
+                logStep("PawBucks wallet updated", { 
+                  previousBalance: wallet.balance, 
+                  newBalance: wallet.balance + pawbucksEarned 
+                });
+              } else {
+                // Create wallet if doesn't exist
+                await supabaseAdmin.from('pawbucks_wallet').insert({
+                  user_id: userId,
+                  balance: pawbucksEarned,
+                });
+                logStep("PawBucks wallet created with initial balance");
+              }
+            }
           }
 
           // ========================================

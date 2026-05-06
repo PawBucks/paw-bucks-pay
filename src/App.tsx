@@ -83,6 +83,7 @@ const MerchantPOSIntegration = lazyWithRetry(() => import("./pages/MerchantPOSIn
 const MerchantScheduling = lazyWithRetry(() => import("./pages/MerchantScheduling"),"MerchantScheduling");
 const MerchantTaxVault = lazyWithRetry(() => import("./pages/MerchantTaxVault"),"MerchantTaxVault");
 const MerchantPawBucksWalletPage = lazyWithRetry(() => import("./pages/MerchantPawBucksWallet"),"MerchantPawBucksWallet");
+const MerchantStoreRewards = lazyWithRetry(() => import("./pages/MerchantStoreRewards"),"MerchantStoreRewards");
 const DirectCheckout = lazyWithRetry(() => import("./pages/DirectCheckout"),"DirectCheckout");
 const ResetPassword = lazyWithRetry(() => import("./pages/ResetPassword"),"ResetPassword");
 const AuthCallback = lazyWithRetry(() => import("./pages/AuthCallback"),"AuthCallback");
@@ -241,6 +242,7 @@ const AppRoutes = () => {
  <Route path="/merchant/scheduling" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantScheduling /></PageTransition></ProtectedRoute>} />
  <Route path="/merchant/tax-vault" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantTaxVault /></PageTransition></ProtectedRoute>} />
  <Route path="/merchant/pawbucks" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantPawBucksWalletPage /></PageTransition></ProtectedRoute>} />
+ <Route path="/merchant/store-rewards" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantStoreRewards /></PageTransition></ProtectedRoute>} />
  <Route path="/merchant/invoicing" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantInvoicing /></PageTransition></ProtectedRoute>} />
  <Route path="/merchant/subscription-plans" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantSubscriptionPlans /></PageTransition></ProtectedRoute>} />
  <Route path="/merchant/available-balance" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantAvailableBalance /></PageTransition></ProtectedRoute>} />

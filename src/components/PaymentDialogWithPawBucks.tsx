@@ -17,6 +17,7 @@ import { Loader2, CreditCard, Coins, Check, AlertCircle, Gift } from"lucide-reac
 import { Alert, AlertTitle, AlertDescription } from"@/components/ui/alert";
 import { PawBucksInfoTooltip } from"@/components/PawBucksInfoTooltip";
 import { useSpendablePawBucks } from"@/hooks/useSpendablePawBucks";
+import { useStoreLockedBalanceForMerchant } from"@/hooks/useStoreLockedPawBucks";
 import { PawBucksSourceSelector, type PawBucksSource } from"@/components/checkout/PawBucksSourceSelector";
 import { getStripeForConnectedAccount } from"@/lib/stripe";
 import { TipSelector } from"@/components/checkout/TipSelector";
@@ -271,6 +272,9 @@ export const PaymentDialogWithPawBucks = ({
  isLoading: loadingBalance,
  } = useSpendablePawBucks(userId);
 
+  // Store-locked PB this user has at THIS merchant (Store Rewards Pro)
+  const { data: storeLockedBalance = 0 } = useStoreLockedBalanceForMerchant(userId, merchantId);
+
  // Auto-redeem preference
  const { data: autoRedeemPref } = useQuery({
  queryKey: ["auto-redeem-preference", userId],
@@ -413,6 +417,7 @@ export const PaymentDialogWithPawBucks = ({
  body: {
  totalAmount: totalAmount + tipAmount, // Total including tip
  pawbucksAmount: pawbucksToUse,
+  storeLockedPawbucks: 0, // Reserved for future split UI; auto-applied below if balance exists
  tipAmount,
  merchantId,
  description: description || `Payment to ${merchantName}`,

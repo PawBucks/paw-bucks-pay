@@ -6571,6 +6571,120 @@ export type Database = {
           },
         ]
       }
+      merchant_store_rewards_funding_activity: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          description: string | null
+          id: string
+          merchant_id: string
+          pb_amount: number | null
+          stripe_payment_intent_id: string | null
+          transaction_id: string | null
+          type: string
+          user_id: string | null
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          merchant_id: string
+          pb_amount?: number | null
+          stripe_payment_intent_id?: string | null
+          transaction_id?: string | null
+          type: string
+          user_id?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          merchant_id?: string
+          pb_amount?: number | null
+          stripe_payment_intent_id?: string | null
+          transaction_id?: string | null
+          type?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_store_rewards_funding_activity_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_store_rewards_funding_activity_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      merchant_store_rewards_wallet: {
+        Row: {
+          auto_reload_amount_cents: number | null
+          auto_reload_enabled: boolean
+          balance_cents: number
+          created_at: string
+          id: string
+          lifetime_funded_cents: number
+          lifetime_issued_pb: number
+          lifetime_redeemed_pb: number
+          low_balance_alert_sent_at: string | null
+          low_balance_threshold_cents: number
+          merchant_id: string
+          updated_at: string
+        }
+        Insert: {
+          auto_reload_amount_cents?: number | null
+          auto_reload_enabled?: boolean
+          balance_cents?: number
+          created_at?: string
+          id?: string
+          lifetime_funded_cents?: number
+          lifetime_issued_pb?: number
+          lifetime_redeemed_pb?: number
+          low_balance_alert_sent_at?: string | null
+          low_balance_threshold_cents?: number
+          merchant_id: string
+          updated_at?: string
+        }
+        Update: {
+          auto_reload_amount_cents?: number | null
+          auto_reload_enabled?: boolean
+          balance_cents?: number
+          created_at?: string
+          id?: string
+          lifetime_funded_cents?: number
+          lifetime_issued_pb?: number
+          lifetime_redeemed_pb?: number
+          low_balance_alert_sent_at?: string | null
+          low_balance_threshold_cents?: number
+          merchant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_store_rewards_wallet_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: true
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_store_rewards_wallet_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: true
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       merchant_subscription_events: {
         Row: {
           amount: number | null
@@ -11392,6 +11506,105 @@ export type Database = {
           },
         ]
       }
+      store_locked_pawbucks: {
+        Row: {
+          balance: number
+          created_at: string
+          id: string
+          last_activity_at: string | null
+          lifetime_earned: number
+          lifetime_redeemed: number
+          merchant_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          created_at?: string
+          id?: string
+          last_activity_at?: string | null
+          lifetime_earned?: number
+          lifetime_redeemed?: number
+          merchant_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          created_at?: string
+          id?: string
+          last_activity_at?: string | null
+          lifetime_earned?: number
+          lifetime_redeemed?: number
+          merchant_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_locked_pawbucks_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "store_locked_pawbucks_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      store_locked_pawbucks_activity: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string | null
+          id: string
+          merchant_id: string
+          transaction_id: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          merchant_id: string
+          transaction_id?: string | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          merchant_id?: string
+          transaction_id?: string | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_locked_pawbucks_activity_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "store_locked_pawbucks_activity_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscription_events: {
         Row: {
           event_type: string
@@ -14964,6 +15177,16 @@ export type Database = {
       is_shared_member_of: { Args: { owner_user_id: string }; Returns: boolean }
       is_superadmin: { Args: { _user_id: string }; Returns: boolean }
       is_user_banned: { Args: { _user_id: string }; Returns: boolean }
+      issue_store_locked_pawbucks: {
+        Args: {
+          p_amount_pb: number
+          p_description?: string
+          p_merchant_id: string
+          p_transaction_id?: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
       issue_welcome_credit: {
         Args: {
           p_device_fingerprint?: string
@@ -14988,6 +15211,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      merchant_has_store_rewards_pro: {
+        Args: { p_merchant_id: string }
+        Returns: boolean
+      }
       normalize_email: { Args: { raw_email: string }; Returns: string }
       process_checkin: {
         Args: { p_token: string; p_user_id: string }
@@ -15004,6 +15231,16 @@ export type Database = {
       redeem_branded_pawbucks: {
         Args: {
           p_amount: number
+          p_description?: string
+          p_merchant_id: string
+          p_transaction_id?: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
+      redeem_store_locked_pawbucks: {
+        Args: {
+          p_amount_pb: number
           p_description?: string
           p_merchant_id: string
           p_transaction_id?: string

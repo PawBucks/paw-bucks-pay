@@ -301,6 +301,66 @@ serve(async (req) => {
       
       // Get metadata - could be from session or subscription_data
       const metadata = session.metadata || {};
+
+      // ========================================
+      // STORE REWARDS PRO — funding wallet top-up
+      // Branches off completely; no other handlers should run.
+      // ========================================
+      if (metadata.purpose === 'store_rewards_funding') {
+        const merchantId = metadata.merchant_id;
+        const amountCents = parseInt(metadata.amount_cents || '0');
+        const paymentIntentId = (session.payment_intent as string) || session.id;
+        try {
+          // Idempotency: skip if we've already recorded this top-up
+          const { data: existing } = await supabaseAdmin
+            .from('merchant_store_rewards_funding_activity')
+            .select('id')
+            .eq('merchant_id', merchantId)
+            .eq('stripe_payment_intent_id', paymentIntentId)
+            .maybeSingle();
+          if (existing) {
+            console.log('[STORE-REWARDS-FUND] duplicate, skipping', { paymentIntentId });
+            return new Response(JSON.stringify({ received: true, skipped: 'duplicate_funding' }), { status: 200 });
+          }
+
+          // Upsert wallet & credit balance
+          const { data: wallet } = await supabaseAdmin
+            .from('merchant_store_rewards_wallet')
+            .select('id, balance_cents, lifetime_funded_cents')
+            .eq('merchant_id', merchantId)
+            .maybeSingle();
+
+          if (wallet) {
+            await supabaseAdmin
+              .from('merchant_store_rewards_wallet')
+              .update({
+                balance_cents: Number(wallet.balance_cents) + amountCents,
+                lifetime_funded_cents: Number(wallet.lifetime_funded_cents) + amountCents,
+                low_balance_alert_sent_at: null,
+              })
+              .eq('merchant_id', merchantId);
+          } else {
+            await supabaseAdmin.from('merchant_store_rewards_wallet').insert({
+              merchant_id: merchantId,
+              balance_cents: amountCents,
+              lifetime_funded_cents: amountCents,
+            });
+          }
+
+          await supabaseAdmin.from('merchant_store_rewards_funding_activity').insert({
+            merchant_id: merchantId,
+            type: 'topup',
+            amount_cents: amountCents,
+            stripe_payment_intent_id: paymentIntentId,
+            description: `Funded $${(amountCents / 100).toFixed(2)} via Stripe`,
+          });
+
+          console.log('[STORE-REWARDS-FUND] top-up applied', { merchantId, amountCents });
+        } catch (e) {
+          console.error('[STORE-REWARDS-FUND] error', e);
+        }
+        return new Response(JSON.stringify({ received: true, type: 'store_rewards_funding' }), { status: 200 });
+      }
       
       // Handle PawBucks auto-redemption deduction (only NOW after payment completes)
       const pawbucksUsed = parseInt(metadata.pawbucks_used || '0');

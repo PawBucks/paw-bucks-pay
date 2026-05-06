@@ -21,6 +21,7 @@ import { BudgetSettings } from"@/components/wallet/BudgetSettings";
 import { YearlySummary } from"@/components/wallet/YearlySummary";
 import { PawBucksBreakdown } from"@/components/wallet/PawBucksBreakdown";
 import { PetFundCard } from"@/components/wallet/PetFundCard";
+import { StoreLockedPawBucksList } from"@/components/wallet/StoreLockedPawBucksList";
 import { SpendingInsights } from"@/components/wallet/SpendingInsights";
 import { RecurringExpenses } from"@/components/wallet/RecurringExpenses";
 import { SpendingGoals } from"@/components/wallet/SpendingGoals";
@@ -294,6 +295,13 @@ const Wallet = () => {
  <PetFundCard userId={effectiveWalletUserId} />
  </div>
  )}
+
+  {/* In-Store Rewards (Store Rewards Pro merchants) */}
+  {effectiveWalletUserId && (
+    <div className="mb-6">
+      <StoreLockedPawBucksList userId={effectiveWalletUserId} />
+    </div>
+  )}
 
  {/* PawBucks Available vs Pending Breakdown */}
  {effectiveWalletUserId && (
