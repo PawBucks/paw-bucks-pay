@@ -17,6 +17,7 @@ const corsHeaders = {
 const combinedPaymentSchema = z.object({
   totalAmount: z.number().positive({ message: "Amount must be greater than 0" }),
   pawbucksAmount: z.number().min(0).default(0),
+  storeLockedPawbucks: z.number().min(0).default(0), // PB redeemed from this merchant's store-locked balance
   tipAmount: z.number().min(0).default(0), // Tip in USD, always charged to card
   merchantId: z.string().uuid({ message: "Invalid merchant ID" }),
   description: z.string().max(500).optional(),
@@ -114,7 +115,7 @@ serve(async (req) => {
       );
     }
 
-    const { totalAmount, pawbucksAmount: manualPawbucksAmount, tipAmount, merchantId, description, autoRedeem: requestAutoRedeem } = validation.data;
+    const { totalAmount, pawbucksAmount: manualPawbucksAmount, storeLockedPawbucks, tipAmount, merchantId, description, autoRedeem: requestAutoRedeem } = validation.data;
 
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
