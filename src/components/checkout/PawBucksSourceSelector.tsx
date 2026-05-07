@@ -1,12 +1,13 @@
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { Coins, Gift, Info } from "lucide-react";
+import { Coins, Gift, Info, Clock } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { differenceInDays, format } from "date-fns";
 
 import { Formatters } from "@/utils/formatters";
 export type PawBucksSource ="earned" |"promotional" |"none";
@@ -19,7 +20,30 @@ interface PawBucksSourceSelectorProps {
  selectedSource: PawBucksSource;
  onSourceChange: (source: PawBucksSource) => void;
  promotionalLabel?: string;
+ /** ISO date when the soonest-expiring earned PawBucks expire. */
+ earnedNextExpiresAt?: string | null;
+ /** ISO date when the soonest-expiring promotional credit expires. */
+ promotionalNextExpiresAt?: string | null;
 }
+
+const ExpiryLine = ({ iso, tone }: { iso: string; tone:"earned" |"promotional" }) => {
+  const date = new Date(iso);
+  const days = differenceInDays(date, new Date());
+  const urgent = days <= 7;
+  const colorClass = urgent
+    ? "text-destructive"
+    : tone === "promotional"
+    ? "text-success"
+    : "text-primary";
+  const label =
+    days <= 0 ? "Expires today" : days === 1 ? "Expires tomorrow" : `Expires in ${days} days`;
+  return (
+    <p className={`text-[11px] flex items-center gap-1 mt-0.5 ${colorClass}`}>
+      <Clock className="w-3 h-3" />
+      {label} · {format(date, "MMM d")}
+    </p>
+  );
+};
 
 export const PawBucksSourceSelector = ({
  earnedBalance,
@@ -27,6 +51,8 @@ export const PawBucksSourceSelector = ({
  selectedSource,
  onSourceChange,
  promotionalLabel ="Pet Fund Credit",
+ earnedNextExpiresAt = null,
+ promotionalNextExpiresAt = null,
 }: PawBucksSourceSelectorProps) => {
  return (
  <div className="bg-muted border border-border rounded-lg p-3 space-y-2">
@@ -101,6 +127,9 @@ export const PawBucksSourceSelector = ({
  <p className="text-xs text-muted-foreground">
  {earnedBalance.toLocaleString()} PB ({Formatters.currency((earnedBalance * PAWBUCKS_TO_USD))})
  </p>
+  {earnedNextExpiresAt && earnedBalance > 0 && (
+    <ExpiryLine iso={earnedNextExpiresAt} tone="earned" />
+  )}
  </div>
  </label>
 
@@ -119,6 +148,9 @@ export const PawBucksSourceSelector = ({
  <p className="text-xs text-muted-foreground">
  {promotionalBalance.toLocaleString()} PB ({Formatters.currency((promotionalBalance * PAWBUCKS_TO_USD))})
  </p>
+  {promotionalNextExpiresAt && promotionalBalance > 0 && (
+    <ExpiryLine iso={promotionalNextExpiresAt} tone="promotional" />
+  )}
  </div>
  </label>
  </RadioGroup>
