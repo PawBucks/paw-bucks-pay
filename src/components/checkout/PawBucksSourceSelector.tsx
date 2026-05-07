@@ -1,6 +1,12 @@
-import { RadioGroup, RadioGroupItem } from"@/components/ui/radio-group";
-import { Label } from"@/components/ui/label";
-import { Coins, Gift } from"lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Coins, Gift, Info } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import { Formatters } from "@/utils/formatters";
 export type PawBucksSource ="earned" |"promotional" |"none";
