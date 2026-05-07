@@ -1,5 +1,5 @@
 import { useState, useEffect } from"react";
-import { useParams, useNavigate } from"react-router-dom";
+import { useParams, useNavigate, useSearchParams } from"react-router-dom";
 import { Elements, PaymentElement, useStripe, useElements } from"@stripe/react-stripe-js";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/components/ui/card";
 import { Button } from"@/components/ui/button";
@@ -175,9 +175,11 @@ function CheckoutForm({
 export default function DirectCheckout() {
  const { merchantId } = useParams<{ merchantId: string }>();
  const navigate = useNavigate();
+ const [searchParams] = useSearchParams();
+ const prefilledAmount = searchParams.get("amount") ?? "";
  const [merchant, setMerchant] = useState<Merchant | null>(null);
  const [loading, setLoading] = useState(true);
- const [amount, setAmount] = useState("");
+ const [amount, setAmount] = useState(prefilledAmount);
  const [description, setDescription] = useState("");
  const [clientSecret, setClientSecret] = useState<string | null>(null);
  const [connectedAccountId, setConnectedAccountId] = useState<string | null>(null);
@@ -185,6 +187,7 @@ export default function DirectCheckout() {
  const [pawbucksEarned, setPawbucksEarned] = useState(0);
  const [creating, setCreating] = useState(false);
  const [success, setSuccess] = useState(false);
+ const [autoStarted, setAutoStarted] = useState(false);
 
  useEffect(() => {
  const fetchMerchant = async () => {
@@ -215,6 +218,28 @@ export default function DirectCheckout() {
 
  fetchMerchant();
  }, [merchantId]);
+
+ // Frictionless: if amount was passed in via query param and merchant is ready,
+ // automatically create the payment intent so the user lands directly on the
+ // Stripe card-entry step.
+ useEffect(() => {
+  if (
+   !autoStarted &&
+   merchant &&
+   merchant.onboarding_complete &&
+   merchant.stripe_account_id &&
+   prefilledAmount &&
+   !clientSecret &&
+   !creating
+  ) {
+   const num = parseFloat(prefilledAmount);
+   if (!isNaN(num) && num >= 0.5) {
+    setAutoStarted(true);
+    handleCreatePayment();
+   }
+  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+ }, [merchant, prefilledAmount, clientSecret, creating, autoStarted]);
 
  const handleCreatePayment = async () => {
  const amountInCents = Math.round(parseFloat(amount) * 100);
