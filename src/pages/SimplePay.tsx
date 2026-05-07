@@ -57,15 +57,18 @@ const SimplePay = () => {
   const { data: merchants, isLoading } = useQuery({
     queryKey: ["simple-pay-merchants", search],
     queryFn: async () => {
-      let q = supabase
+      const term = search.trim();
+      const base = supabase
         .from("merchants_public")
         .select("id, business_name, logo_url, business_type")
         .eq("onboarding_complete", true)
-        .not("stripe_account_id", "is", null)
-        .order("business_name", { ascending: true })
-        .limit(20);
-      if (search.trim()) q = q.ilike("business_name", `%${search.trim()}%`);
-      const { data } = await q;
+        .not("stripe_account_id", "is", null);
+      const { data } = term
+        ? await base
+            .ilike("business_name", `%${term}%`)
+            .order("business_name", { ascending: true })
+            .limit(20)
+        : await base.order("business_name", { ascending: true }).limit(20);
       return (data ?? []) as Merchant[];
     },
     staleTime: 60_000,
