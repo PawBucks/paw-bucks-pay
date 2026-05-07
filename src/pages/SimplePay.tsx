@@ -41,6 +41,8 @@ const SimplePay = () => {
   const [selected, setSelected] = useState<Merchant | null>(null);
   const [search, setSearch] = useState("");
   const [amount, setAmount] = useState("");
+  const [tipPct, setTipPct] = useState<number | "custom" | 0>(0);
+  const [customTip, setCustomTip] = useState("");
 
   // If a merchantId came in via URL, hydrate the merchant
   useEffect(() => {
@@ -72,9 +74,16 @@ const SimplePay = () => {
   });
 
   const amountNum = parseFloat(amount) || 0;
-  // Auto-applied savings preview: clamp to available, never above paid amount.
+  // Tip is computed off the bill (pre-savings) and is USD-only — savings never apply to tip.
+  const tipAmount =
+    tipPct === "custom"
+      ? Math.max(0, parseFloat(customTip) || 0)
+      : tipPct
+        ? +(amountNum * (tipPct / 100)).toFixed(2)
+        : 0;
+  // Auto-applied savings preview: clamp to available, never above the bill (excludes tip).
   const autoApplied = Math.min(availableUsd, amountNum);
-  const dueNow = Math.max(0, amountNum - autoApplied);
+  const dueNow = Math.max(0, amountNum - autoApplied) + tipAmount;
 
   const handleContinue = () => {
     if (!selected) return;
@@ -82,8 +91,11 @@ const SimplePay = () => {
       toast.error("Minimum payment is $0.50");
       return;
     }
-    // Hand off to existing direct-checkout flow (auto-redeem will apply savings server-side)
-    navigate(`/pay/${selected.id}?amount=${amountNum.toFixed(2)}`);
+    // Hand off to existing direct-checkout flow (auto-redeem will apply savings server-side).
+    // Tip is passed through so it can be added on top, USD-only.
+    const qs = new URLSearchParams({ amount: amountNum.toFixed(2) });
+    if (tipAmount > 0) qs.set("tip", tipAmount.toFixed(2));
+    navigate(`/pay/${selected.id}?${qs.toString()}`);
   };
 
   return (
