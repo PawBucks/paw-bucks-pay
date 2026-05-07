@@ -108,12 +108,18 @@ export function InvoiceList({
 
  // Calculate stats
  const stats = useMemo(() => {
- const now = new Date();
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
  return {
  total: invoices.length,
  draft: invoices.filter(i => i.status ==='draft').length,
  sent: invoices.filter(i => ['sent','viewed'].includes(i.status)).length,
- overdue: invoices.filter(i => i.status !=='paid' && i.status !=='cancelled' && isBefore(parseISO(i.due_date), now)).length,
+      overdue: invoices.filter(i => {
+        if (['paid','cancelled','refunded','draft'].includes(i.status)) return false;
+        const due = parseISO(i.due_date);
+        const dueStart = new Date(due.getFullYear(), due.getMonth(), due.getDate());
+        return dueStart.getTime() < todayStart.getTime();
+      }).length,
  paid: invoices.filter(i => i.status ==='paid').length,
  totalOutstanding: invoices
  .filter(i => !['paid','cancelled','refunded'].includes(i.status))
@@ -165,10 +171,13 @@ export function InvoiceList({
  }, [invoices, searchTerm, statusFilter, sortBy]);
 
  const getStatusBadge = (invoice: Invoice) => {
- // Check if overdue
- const now = new Date();
- const isOverdue = !['paid','cancelled','refunded','draft'].includes(invoice.status) && 
- isBefore(parseISO(invoice.due_date), now);
+    // Check if overdue (whole-day comparison; same-day due is "Due today", not overdue)
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const due = parseISO(invoice.due_date);
+    const dueStart = new Date(due.getFullYear(), due.getMonth(), due.getDate());
+    const isOverdue = !['paid','cancelled','refunded','draft'].includes(invoice.status) &&
+      dueStart.getTime() < todayStart.getTime();
  
  const status = isOverdue ?'overdue' : invoice.status;
  const config = statusConfig[status] || statusConfig.draft;
