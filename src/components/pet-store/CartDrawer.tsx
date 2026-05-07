@@ -83,10 +83,11 @@ export function CartDrawer({
  return"split";
  };
 
- // Reset slider when cart changes
- useEffect(() => {
- setPawbucksPercent(0);
- }, [totalUsd, totalPawbucks]);
+  // Default slider to MAX apply when cart changes (reduces friction).
+  // Users can always drag back down if they prefer to save PawBucks.
+  useEffect(() => {
+  setPawbucksPercent(maxPercent);
+  }, [totalUsd, totalPawbucks, maxPercent]);
 
  const canCheckout =
  items.length > 0 &&

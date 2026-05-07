@@ -73,9 +73,10 @@ export function StorefrontCartDrawer({
  return"split";
  };
 
+ // Default slider to MAX apply when cart total changes.
  useEffect(() => {
- setPawbucksPercent(0);
- }, [totalCents]);
+  setPawbucksPercent(maxPercent);
+ }, [totalCents, maxPercent]);
 
  const canCheckout =
  items.length > 0 && !isUpdating && !isCheckingOut && !needsMinStripe;
