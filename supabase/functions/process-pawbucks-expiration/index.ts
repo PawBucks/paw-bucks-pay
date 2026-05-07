@@ -27,6 +27,18 @@ Deno.serve(async (req) => {
       console.log(`Sent ${reminderResult} expiry reminders`);
     }
 
+    // 1b. Send promotional credit (Pet Fund / Welcome) expiry reminders
+    const { data: promoReminderResult, error: promoReminderError } =
+      await supabase.rpc("send_pet_fund_expiry_reminders");
+
+    if (promoReminderError) {
+      console.error("Promotional reminder error:", promoReminderError);
+    } else {
+      console.log(
+        `Sent ${promoReminderResult} promotional expiry reminders`
+      );
+    }
+
     // 2. Expire PawBucks that have passed their midnight-local-time expiration
     const { data: expireResult, error: expireError } = await supabase.rpc(
       "expire_pawbucks"
@@ -42,6 +54,7 @@ Deno.serve(async (req) => {
       JSON.stringify({
         success: true,
         reminders_sent: reminderResult ?? 0,
+        promo_reminders_sent: promoReminderResult ?? 0,
         expired_count: expireResult ?? 0,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
