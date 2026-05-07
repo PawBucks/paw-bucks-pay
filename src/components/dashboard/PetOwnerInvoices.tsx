@@ -15,7 +15,7 @@ import {
  CheckCircle2,
  Clock
 } from"lucide-react";
-import { format, parseISO, isAfter } from"date-fns";
+import { format, parseISO } from"date-fns";
 
 import { Formatters } from "@/utils/formatters";
 interface PetOwnerInvoice {
