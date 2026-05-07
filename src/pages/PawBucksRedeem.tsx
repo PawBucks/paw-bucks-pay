@@ -209,7 +209,7 @@ const PawBucksRedeem = () => {
  size="sm"
  >
  <Gift className="w-4 h-4 mr-1" />
- Redeem
+                        Spend PawBucks
  </Button>
  </div>
  </GradientCard>
