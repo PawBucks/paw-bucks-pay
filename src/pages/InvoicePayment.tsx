@@ -917,20 +917,36 @@ const InvoicePayment = () => {
  {/* Payment Summary */}
  <div className="space-y-2 text-sm">
  <div className="flex justify-between">
- <span className="text-muted-foreground">Subtotal</span>
+                    <span className="text-muted-foreground">Invoice amount</span>
+                    <span>{Formatters.currency(basePaymentAmount)}</span>
+                  </div>
+                  {tipValue > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Tip</span>
+                      <span>{Formatters.currency(tipValue)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between font-medium">
+                    <span>Subtotal</span>
  <span>{Formatters.currency(totalPayment)}</span>
  </div>
  {pawbucksToUse > 0 && (
  <div className="flex justify-between text-success">
- <span>PawBucks ({pawbucksToUse.toLocaleString()} PB)</span>
+                      <span>PawBucks applied ({pawbucksToUse.toLocaleString()} PB)</span>
  <span>-{Formatters.currency(pawbucksValueUSD)}</span>
  </div>
  )}
  <Separator />
  <div className="flex justify-between font-semibold text-base">
- <span>{stripeAmount > 0 ?"Card Payment" :"Total"}</span>
+                    <span>{stripeAmount > 0 ?"Balance to charge card" :"Total"}</span>
  <span>{Formatters.currency(stripeAmount)}</span>
  </div>
+                  {pawbucksToUse > 0 && user && (
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>PawBucks balance after payment</span>
+                      <span>{Math.max(0, pawbucksBalance - pawbucksToUse).toLocaleString()} PB</span>
+                    </div>
+                  )}
  </div>
 
  <Button
