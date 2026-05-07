@@ -446,7 +446,7 @@ const Wallet = () => {
  </div>
  <div>
  <p className="font-medium">
- {activity.description || activity.source}
+                        {activity.description || Formatters.activitySource(activity.source)}
  </p>
  <p className="text-xs text-muted-foreground">
  {format(new Date(activity.created_at),"MMM d, yyyy'at' h:mm a")}
@@ -459,9 +459,9 @@ const Wallet = () => {
  }`}>
  {activity.type ==='earn' ?'+' :'-'}{activity.amount} PawBucks
  </p>
- <p className="text-xs text-muted-foreground capitalize">
- {activity.source.replace(/_/g,'')}
- </p>
+                      <p className="text-xs text-muted-foreground">
+                        {Formatters.activitySource(activity.source)}
+                      </p>
  </div>
  </div>
  ))}

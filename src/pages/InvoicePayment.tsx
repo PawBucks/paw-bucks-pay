@@ -194,32 +194,40 @@ const InvoicePayment = () => {
  console.log("[PawBucks] Wallet found! Balance:", wallet.balance);
  setPawbucksBalance(wallet.balance);
 
- // Auto-redeem: pre-apply PawBucks per user's preference
+              // Default behavior: apply the maximum PawBucks possible to the balance
+              // unless the user has explicitly configured a different auto-redeem strategy.
+              // This removes friction — the CDO feedback was that users shouldn't have to
+              // hunt for a slider to get the discount they already earned.
  try {
  const { data: profile } = await supabase
  .from("profiles")
  .select("auto_redeem_mode, auto_redeem_min_coverage_pct, auto_redeem_max_apply_pct")
  .eq("id", user.id)
  .maybeSingle();
- const mode = (profile?.auto_redeem_mode as string) ||"off";
+                // Treat unset / "off" as "always apply max" by default for invoices.
+                const mode = (profile?.auto_redeem_mode as string) ||"always";
  const minCoverage = profile?.auto_redeem_min_coverage_pct ?? 20;
  const maxApply = profile?.auto_redeem_max_apply_pct ?? 50;
  const baseAmount = Number((invoice as any)?.balance_due ?? invoice?.total ?? 0);
- if (baseAmount > 0 && wallet.balance > 0 && (mode ==="always" || mode ==="smart")) {
+                if (baseAmount > 0 && wallet.balance > 0 && mode !== "off") {
  const PB_TO_USD = 0.001;
  const maxNeededPB = Math.floor(baseAmount / PB_TO_USD);
  let apply = 0;
- if (mode ==="always") {
+                  if (mode ==="always" || mode === "smart_max") {
  apply = Math.min(wallet.balance, maxNeededPB);
  } else {
  const coveragePct = ((wallet.balance * PB_TO_USD) / baseAmount) * 100;
  if (coveragePct >= minCoverage) {
  const capPB = Math.floor(((baseAmount * maxApply) / 100) / PB_TO_USD);
  apply = Math.min(wallet.balance, capPB, maxNeededPB);
+                    } else {
+                      // Even if coverage is below threshold, default to applying max
+                      // (better UX: never silently leave money on the table)
+                      apply = Math.min(wallet.balance, maxNeededPB);
  }
  }
  if (apply > 0) {
- console.log("[PawBucks] Auto-redeem pre-applied:", { mode, apply });
+                    console.log("[PawBucks] Auto-applied (default max):", { mode, apply });
  setPawbucksToUse(apply);
  }
  }
@@ -375,7 +383,15 @@ const InvoicePayment = () => {
  }
 
  const isPaid = invoice.status ==="paid";
- const isOverdue = invoice.status ==="overdue";
+  // Only treat as overdue when the due date is strictly in the past (calendar days),
+  // not when the DB status was flipped on the same day. Avoids "0 days overdue" UX.
+  const dueDateOnly = invoice.due_date ? parseISO(invoice.due_date) : null;
+  const todayStart = new Date(); todayStart.setHours(0,0,0,0);
+  const daysOverdue = dueDateOnly
+    ? Math.floor((todayStart.getTime() - new Date(dueDateOnly.getFullYear(), dueDateOnly.getMonth(), dueDateOnly.getDate()).getTime()) / 86400000)
+    : 0;
+  const isOverdue = !isPaid && daysOverdue > 0;
+  const isDueToday = !isPaid && daysOverdue === 0;
  const amountDue = invoice.amount_due || invoice.total;
  const amountPaid = invoice.amount_paid || 0;
 
@@ -458,7 +474,13 @@ const InvoicePayment = () => {
  variant={isPaid ?"default" : isOverdue ?"destructive" :"secondary"}
  className="text-sm"
  >
- {isPaid ?"Paid" : isOverdue ?"Overdue" : invoice.status}
+                {isPaid
+                  ? "Paid"
+                  : isOverdue
+                  ? `${daysOverdue} day${daysOverdue === 1 ? "" : "s"} overdue`
+                  : isDueToday
+                  ? "Due today"
+                  : invoice.status}
  </Badge>
  </div>
  </CardHeader>
@@ -832,7 +854,7 @@ const InvoicePayment = () => {
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-2">
  <Coins className="h-5 w-5 text-warning" />
- <span className="font-medium text-warning">Pay with PawBucks</span>
+                        <span className="font-medium text-warning">Apply PawBucks</span>
  </div>
  {loadingPawbucks ? (
  <Badge variant="outline" className="bg-white dark:bg-background">
@@ -850,7 +872,7 @@ const InvoicePayment = () => {
  <>
  <div className="space-y-2">
  <div className="flex justify-between text-sm">
- <span className="text-muted-foreground">PawBucks to use</span>
+                            <span className="text-muted-foreground">Applied to this invoice</span>
  <span className="font-medium">
  {pawbucksToUse.toLocaleString()} PB = {Formatters.currency(pawbucksValueUSD)}
  </span>
@@ -895,20 +917,36 @@ const InvoicePayment = () => {
  {/* Payment Summary */}
  <div className="space-y-2 text-sm">
  <div className="flex justify-between">
- <span className="text-muted-foreground">Subtotal</span>
+                    <span className="text-muted-foreground">Invoice amount</span>
+                    <span>{Formatters.currency(basePaymentAmount)}</span>
+                  </div>
+                  {tipValue > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Tip</span>
+                      <span>{Formatters.currency(tipValue)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between font-medium">
+                    <span>Subtotal</span>
  <span>{Formatters.currency(totalPayment)}</span>
  </div>
  {pawbucksToUse > 0 && (
  <div className="flex justify-between text-success">
- <span>PawBucks ({pawbucksToUse.toLocaleString()} PB)</span>
+                      <span>PawBucks applied ({pawbucksToUse.toLocaleString()} PB)</span>
  <span>-{Formatters.currency(pawbucksValueUSD)}</span>
  </div>
  )}
  <Separator />
  <div className="flex justify-between font-semibold text-base">
- <span>{stripeAmount > 0 ?"Card Payment" :"Total"}</span>
+                    <span>{stripeAmount > 0 ?"Balance to charge card" :"Total"}</span>
  <span>{Formatters.currency(stripeAmount)}</span>
  </div>
+                  {pawbucksToUse > 0 && user && (
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>PawBucks balance after payment</span>
+                      <span>{Math.max(0, pawbucksBalance - pawbucksToUse).toLocaleString()} PB</span>
+                    </div>
+                  )}
  </div>
 
  <Button

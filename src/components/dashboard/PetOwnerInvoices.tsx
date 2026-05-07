@@ -15,7 +15,7 @@ import {
  CheckCircle2,
  Clock
 } from"lucide-react";
-import { format, parseISO, isAfter } from"date-fns";
+import { format, parseISO } from"date-fns";
 
 import { Formatters } from "@/utils/formatters";
 interface PetOwnerInvoice {
@@ -135,11 +135,14 @@ export function PetOwnerInvoices({ userEmail }: PetOwnerInvoicesProps) {
  };
 
  const getDisplayStatus = (invoice: PetOwnerInvoice) => {
- // Check if overdue
- if (invoice.status !=="paid" && isAfter(new Date(), parseISO(invoice.due_date))) {
- return"overdue";
- }
- return invoice.status;
+    // Only flag overdue when due date is strictly before today's date (whole-day comparison).
+    // Prevents "Overdue" badge appearing on the same calendar day as the due date.
+    if (invoice.status === "paid") return invoice.status;
+    const due = parseISO(invoice.due_date);
+    const dueDay = new Date(due.getFullYear(), due.getMonth(), due.getDate()).getTime();
+    const todayDay = new Date(); todayDay.setHours(0, 0, 0, 0);
+    if (dueDay < todayDay.getTime()) return "overdue";
+    return invoice.status;
  };
 
  if (loading) {
