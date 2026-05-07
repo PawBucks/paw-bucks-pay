@@ -231,9 +231,9 @@ const PawBucksRedeem = () => {
  <Dialog open={!!selectedOffer} onOpenChange={() => setSelectedOffer(null)}>
  <DialogContent>
  <DialogHeader>
- <DialogTitle>Confirm Redemption</DialogTitle>
+          <DialogTitle>Spend PawBucks?</DialogTitle>
  <DialogDescription>
- Are you sure you want to redeem this offer?
+            You're about to spend PawBucks from your balance on this offer. This cannot be undone.
  </DialogDescription>
  </DialogHeader>
  {selectedOffer && (
@@ -241,17 +241,26 @@ const PawBucksRedeem = () => {
  <div className="bg-muted p-4 rounded-lg">
  <p className="font-semibold text-lg mb-2">{selectedOffer.title}</p>
  <p className="text-sm text-muted-foreground mb-2">{selectedOffer.merchants?.business_name ||'Partner'}</p>
- <div className="flex items-center gap-2 text-warning">
- <Coins className="w-5 h-5" />
- <span className="font-bold text-xl">{selectedOffer.coins_required.toLocaleString()} PawBucks</span>
- </div>
+              <div className="flex items-center justify-between border-t pt-2 mt-2">
+                <span className="text-sm text-muted-foreground">Cost</span>
+                <div className="flex items-center gap-2 text-warning">
+                  <Coins className="w-5 h-5" />
+                  <span className="font-bold text-xl">-{selectedOffer.coins_required.toLocaleString()} PB</span>
+                </div>
+              </div>
+              {wallet && (
+                <div className="flex items-center justify-between text-xs text-muted-foreground mt-1">
+                  <span>New balance after</span>
+                  <span>{Math.max(0, wallet.balance - selectedOffer.coins_required).toLocaleString()} PB</span>
+                </div>
+              )}
  </div>
  <div className="flex gap-3">
  <Button variant="outline" onClick={() => setSelectedOffer(null)} className="flex-1">
  Cancel
  </Button>
  <Button onClick={confirmRedemption} disabled={isRedeeming} className="flex-1">
- {isRedeeming ?"Processing..." :"Confirm"}
+                {isRedeeming ?"Processing..." :`Spend ${selectedOffer.coins_required.toLocaleString()} PB`}
  </Button>
  </div>
  </div>
