@@ -4,6 +4,7 @@ import { useAuth } from"@/hooks/useAuth";
 import { supabase } from"@/integrations/supabase/client";
 import { SEO } from"@/components/SEO";
 import { seoMeta } from"@/lib/seoMeta";
+import { PremiumMerchantsBanner } from"@/components/PremiumMerchantsBanner";
 import logo from"@/assets/logo.png";
 
 const styles = `
