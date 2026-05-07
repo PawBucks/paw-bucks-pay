@@ -185,6 +185,8 @@ export default function DirectCheckout() {
  const [connectedAccountId, setConnectedAccountId] = useState<string | null>(null);
  const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null);
  const [pawbucksEarned, setPawbucksEarned] = useState(0);
+ const [stripeAmount, setStripeAmount] = useState<number>(0);
+ const [pawbucksApplied, setPawbucksApplied] = useState<number>(0);
  const [creating, setCreating] = useState(false);
  const [success, setSuccess] = useState(false);
  const [autoStarted, setAutoStarted] = useState(false);
@@ -278,6 +280,8 @@ export default function DirectCheckout() {
  setConnectedAccountId(data.connectedAccountId);
  setPaymentIntentId(data.paymentIntentId);
  setPawbucksEarned(data.pawbucksEarned ?? 0);
+      setStripeAmount(Number(data.stripeAmount ?? parseFloat(amount)));
+      setPawbucksApplied(Number(data.pawbucksUsdValue ?? 0));
  } catch (error: any) {
  console.error("Error creating payment:", error);
  toast.error(error.message ||"Failed to create payment");
