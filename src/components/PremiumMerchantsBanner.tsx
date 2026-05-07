@@ -135,16 +135,29 @@ const PremiumMerchantsBannerComponent = ({
  )}
  </div>
 
-        <div className="md:grid md:grid-cols-3 md:gap-4 flex gap-3 overflow-x-auto snap-x snap-mandatory scroll-smooth -mx-4 px-4 pb-2 scroll-gpu scroll-snap-x">
-          {(typeof window !== 'undefined' && window.innerWidth < 768 ? shuffledMerchants : visibleMerchants).map((merchant, index) => {
- const isVerifiedPro = verifiedProIds?.includes(merchant.id);
- 
- return (
- <Card
- key={`${merchant.id}-${index}`}
-                className="group p-5 cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-[1.02] border-2 border-accent/20 hover:border-accent/40 bg-gradient-to-br from-card to-accent/5 overflow-hidden relative shrink-0 w-[85%] sm:w-[60%] md:w-auto snap-start scroll-snap-item"
- onClick={() => handleMerchantClick(merchant.id)}
- >
+        {/* Mobile/tablet: horizontal swipe carousel */}
+        <div className="md:hidden flex gap-3 overflow-x-auto snap-x snap-mandatory scroll-smooth -mx-4 px-4 pb-3 scroll-gpu" style={{ WebkitOverflowScrolling: 'touch' }}>
+          {shuffledMerchants.map((merchant, index) => (
+            <MerchantCard
+              key={`m-${merchant.id}-${index}`}
+              merchant={merchant}
+              isVerifiedPro={verifiedProIds?.includes(merchant.id)}
+              onClick={() => handleMerchantClick(merchant.id)}
+              mobile
+            />
+          ))}
+        </div>
+
+        {/* Desktop: 3-up grid with rotation */}
+        <div className="hidden md:grid md:grid-cols-3 gap-4">
+          {visibleMerchants.map((merchant, index) => {
+            const isVerifiedPro = verifiedProIds?.includes(merchant.id);
+            return (
+              <Card
+                key={`${merchant.id}-${index}`}
+                className="group p-5 cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-[1.02] border-2 border-accent/20 hover:border-accent/40 bg-gradient-to-br from-card to-accent/5 overflow-hidden relative"
+                onClick={() => handleMerchantClick(merchant.id)}
+              >
  {/* Premium glow effect */}
  <div className="absolute inset-0 bg-gradient-to-br from-accent/10 via-transparent to-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
  
