@@ -136,7 +136,7 @@ const PremiumMerchantsBannerComponent = ({
  </div>
 
         <div className="md:grid md:grid-cols-3 md:gap-4 flex gap-3 overflow-x-auto snap-x snap-mandatory scroll-smooth -mx-4 px-4 pb-2 scroll-gpu scroll-snap-x">
- {visibleMerchants.map((merchant, index) => {
+          {(typeof window !== 'undefined' && window.innerWidth < 768 ? shuffledMerchants : visibleMerchants).map((merchant, index) => {
  const isVerifiedPro = verifiedProIds?.includes(merchant.id);
  
  return (
