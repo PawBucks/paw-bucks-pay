@@ -87,6 +87,8 @@ const Dashboard = () => {
  navigate("/merchant-dashboard");
  } else if (profile.user_type ==="admin") {
  navigate("/admin");
+  } else if (profile.user_type ==="pet_owner") {
+   navigate("/home", { replace: true });
  }
  }
  }, [user, authLoading, profile, navigate]);
