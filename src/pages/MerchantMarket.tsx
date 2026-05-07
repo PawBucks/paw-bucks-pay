@@ -12,38 +12,8 @@ import { ServicePurchaseDialog } from"@/components/merchant/ServicePurchaseDialo
 import { cn } from"@/lib/utils";
 import { ConsultationScheduleDialog } from"@/components/merchant/ConsultationScheduleDialog";
 import { toast } from"sonner";
-import {
- PawPrint,
- ArrowLeft,
- Search,
- Megaphone,
- Star,
- BarChart3,
- TrendingUp,
- Target,
- Sparkles,
- Users,
- Video,
- BadgeCheck,
- Rocket,
- Zap,
- Crown,
- ShieldCheck,
- Clock,
- DollarSign,
- ChevronRight,
- Gift,
- Building2,
- LineChart,
- PieChart,
- MessageSquare,
- Lightbulb,
- Award,
- CheckCircle2,
- Loader2,
- AlertTriangle,
- MapPin,
-} from"lucide-react";
+import { PawPrint, ArrowLeft, Search, Megaphone, Star, BarChart3, TrendingUp, Target, Users, Video, BadgeCheck, Rocket, Zap, Crown, ShieldCheck, Clock, DollarSign, ChevronRight, Gift, Building2, LineChart, PieChart, MessageSquare, Lightbulb, Award, CheckCircle2, Loader2, AlertTriangle, MapPin } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 
 type ServiceCategory ="visibility" |"analytics" |"growth" |"premium";
 

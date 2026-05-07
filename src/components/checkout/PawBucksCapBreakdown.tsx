@@ -1,4 +1,5 @@
-import { Info, Sparkles, Coins } from "lucide-react";
+import { Info, Coins } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 import {
   effectivePawBucksCapPct,
   isPromoActive,

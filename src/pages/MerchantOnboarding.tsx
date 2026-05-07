@@ -12,11 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from"@/
 import { Textarea } from"@/components/ui/textarea";
 import { Badge } from"@/components/ui/badge";
 import { toast } from"sonner";
-import { 
- Store, Loader2, PawPrint, Stethoscope, Scissors, ShoppingBag, 
- Bone, Home, Sparkles, Dog, Sun, Camera, Shield, Truck, Mountain, 
- Zap, Hand, Brain, Heart, Building2, Car, Users, AlertCircle, Info
-} from"lucide-react";
+import { Store, Loader2, PawPrint, Stethoscope, Scissors, ShoppingBag, Bone, Home, Dog, Sun, Camera, Shield, Truck, Mountain, Zap, Hand, Brain, Heart, Building2, Car, Users, AlertCircle, Info } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { merchantOnboardingSchema, PET_BUSINESS_TYPES, ENTITY_TYPES, WORKING_STYLES } from"@/lib/validation";
 import { MerchantTermsOfService } from"@/components/shared/MerchantTermsOfService";
 

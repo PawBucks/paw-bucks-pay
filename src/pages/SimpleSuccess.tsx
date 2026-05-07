@@ -6,7 +6,8 @@ import { BottomNav } from "@/components/BottomNav";
 import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import { Sparkles, Check } from "lucide-react";
+import { Check } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { Formatters } from "@/utils/formatters";
 
 const SimpleSuccess = () => {

@@ -11,20 +11,8 @@ import {
  SelectTrigger,
  SelectValue,
 } from"@/components/ui/select";
-import {
- Mic,
- MicOff,
- Loader2,
- Sparkles,
- CheckCircle,
- AlertCircle,
- Copy,
- FileText,
- Thermometer,
- Scale,
- Heart,
- Wind,
-} from"lucide-react";
+import { Mic, MicOff, Loader2, CheckCircle, AlertCircle, Copy, FileText, Thermometer, Scale, Heart, Wind } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { toast } from"sonner";
 import { useQuery } from"@tanstack/react-query";
 

@@ -10,7 +10,8 @@ import {
  DialogTitle,
 } from"@/components/ui/dialog";
 import { toast } from"sonner";
-import { Loader2, Coins, Check, Sparkles, CreditCard, Lock, Info, Gift } from"lucide-react";
+import { Loader2, Coins, Check, CreditCard, Lock, Info, Gift } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { PawBucksInfoTooltip } from"@/components/PawBucksInfoTooltip";
 import { useSpendablePawBucks } from"@/hooks/useSpendablePawBucks";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from"@/components/ui/tooltip";

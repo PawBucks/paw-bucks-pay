@@ -4,7 +4,8 @@ import { Button } from"@/components/ui/button";
 import { Card, CardContent } from"@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from"@/components/ui/avatar";
 import { Badge } from"@/components/ui/badge";
-import { Dog, Cat, Bird, Rabbit, PawPrint, Sparkles, ChevronRight } from"lucide-react";
+import { Dog, Cat, Bird, Rabbit, PawPrint, ChevronRight } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { Tables } from"@/integrations/supabase/types";
 
 type PetProfile = Tables<"pet_profiles">;

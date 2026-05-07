@@ -28,33 +28,8 @@ import { useServiceConversionTracking } from"@/hooks/useServiceConversionTrackin
 import { schedulingService } from"@/services/api/scheduling.service";
 import { useQuery, useQueries } from"@tanstack/react-query";
 import { Founding50Badge } from"@/components/shared/Founding50Badge";
-import {
- Star,
- MapPin,
- Phone,
- Globe,
- Coins,
- CreditCard,
- Store,
- Scissors,
- Home,
- Stethoscope,
- Footprints,
- Bone,
- ArrowLeft,
- ShoppingBag,
- MessageSquare,
- Camera,
- ChevronRight,
- BadgeCheck,
- Sparkles,
- CalendarDays,
- Facebook,
- Instagram,
- Twitter,
- Linkedin,
- ThumbsUp,
-} from"lucide-react";
+import { Star, MapPin, Phone, Globe, Coins, CreditCard, Store, Scissors, Home, Stethoscope, Footprints, Bone, ArrowLeft, ShoppingBag, MessageSquare, Camera, ChevronRight, BadgeCheck, CalendarDays, Facebook, Instagram, Twitter, Linkedin, ThumbsUp } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 
 import { Formatters } from "@/utils/formatters";
 const getBusinessIcon = (type: string) => {

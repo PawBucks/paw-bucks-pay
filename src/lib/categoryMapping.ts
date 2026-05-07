@@ -1,22 +1,5 @@
-import { 
- Stethoscope, 
- Scissors, 
- ShoppingBag, 
- Bone, 
- Home,
- Sparkles,
- MoreHorizontal,
- Dog,
- Sun,
- Truck,
- Camera,
- Shield,
- Mountain,
- Zap,
- Hand,
- Brain,
- LucideIcon
-} from"lucide-react";
+import { Stethoscope, Scissors, ShoppingBag, Bone, Home, MoreHorizontal, Dog, Sun, Truck, Camera, Shield, Mountain, Zap, Hand, Brain, LucideIcon } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 
 export type CategoryConfig = {
  icon: LucideIcon;

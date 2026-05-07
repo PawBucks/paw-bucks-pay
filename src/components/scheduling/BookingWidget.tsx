@@ -20,20 +20,8 @@ import { Skeleton } from"@/components/ui/skeleton";
 import { toast } from"sonner";
 import { useQuery, useMutation, useQueryClient } from"@tanstack/react-query";
 import { format, addDays, isSameDay, parseISO, isAfter, startOfDay } from"date-fns";
-import { 
- Calendar as CalendarIcon, 
- Clock, 
- DollarSign, 
- Loader2, 
- CheckCircle2,
- Sparkles,
- ArrowRight,
- Timer,
- Users,
- Zap,
- CreditCard,
- MapPin
-} from"lucide-react";
+import { Calendar as CalendarIcon, Clock, DollarSign, Loader2, CheckCircle2, ArrowRight, Timer, Users, Zap, CreditCard, MapPin } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { Input } from"@/components/ui/input";
 
 import { Formatters } from "@/utils/formatters";

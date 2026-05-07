@@ -9,7 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from"@/
 import { supabase } from"@/integrations/supabase/client";
 import { toast } from"sonner";
 import { format } from"date-fns";
-import { Upload, CalendarIcon, ImageIcon, X, Loader2, Receipt, Sparkles, Store } from"lucide-react";
+import { Upload, CalendarIcon, ImageIcon, X, Loader2, Receipt, Store } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { cn } from"@/lib/utils";
 import { useSubscription } from"@/hooks/useSubscription";
 import { getSubscriptionTier } from"@/lib/constants";

@@ -4,7 +4,8 @@ import { useAdMerchants, useVerifiedProMerchants, merchantHasService, SERVICE_NA
 import { Card } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
 import { Button } from"@/components/ui/button";
-import { MapPin, BadgeCheck, ArrowRight, Sparkles } from"lucide-react";
+import { MapPin, BadgeCheck, ArrowRight } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { Skeleton } from"@/components/ui/skeleton";
 import { useSubscription } from"@/hooks/useSubscription";
 import { getSubscriptionTier } from"@/lib/constants";

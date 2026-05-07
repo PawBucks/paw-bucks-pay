@@ -2,7 +2,8 @@ import { useEffect, useState } from"react";
 import { useNavigate, useSearchParams } from"react-router-dom";
 import { Button } from"@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/components/ui/card";
-import { CheckCircle, ArrowLeft, Home, Sparkles, Gift, ShoppingBag } from"lucide-react";
+import { CheckCircle, ArrowLeft, Home, Gift, ShoppingBag } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { SEO } from"@/components/SEO";
 
 const CheckoutSuccess = () => {

@@ -15,7 +15,8 @@ import {
 import { Button } from"@/components/ui/button";
 import { Badge } from"@/components/ui/badge";
 import { Slider } from"@/components/ui/slider";
-import { Loader2, Check, CreditCard, RefreshCw, Shield, Sparkles, Coins, Lock, Info, Gift } from"lucide-react";
+import { Loader2, Check, CreditCard, RefreshCw, Shield, Coins, Lock, Info, Gift } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { toast } from"sonner";
 import { Elements, CardElement, useStripe, useElements } from"@stripe/react-stripe-js";
 import { useSpendablePawBucks } from"@/hooks/useSpendablePawBucks";

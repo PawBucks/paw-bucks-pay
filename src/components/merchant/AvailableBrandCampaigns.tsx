@@ -7,7 +7,8 @@ import { ScrollArea } from"@/components/ui/scroll-area";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from"@/components/ui/dialog";
 import { Textarea } from"@/components/ui/textarea";
 import { Input } from"@/components/ui/input";
-import { Loader2, Megaphone, Search, Send, Coins, DollarSign, Calendar, CheckCircle2, Clock, XCircle, Sparkles } from"lucide-react";
+import { Loader2, Megaphone, Search, Send, Coins, DollarSign, Calendar, CheckCircle2, Clock, XCircle } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { toast } from"sonner";
 import {
  getAvailableBrandCampaigns,

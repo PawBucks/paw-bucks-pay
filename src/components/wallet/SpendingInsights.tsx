@@ -1,16 +1,8 @@
 import { memo, useMemo } from"react";
 import { GradientCard } from"@/components/ui/gradient-card";
 import { Badge } from"@/components/ui/badge";
-import { 
- Lightbulb, 
- TrendingUp, 
- TrendingDown, 
- AlertTriangle, 
- Sparkles, 
- Target,
- Calendar,
- ArrowRight
-} from"lucide-react";
+import { Lightbulb, TrendingUp, TrendingDown, AlertTriangle, Target, Calendar, ArrowRight } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { startOfMonth, endOfMonth, subMonths, differenceInDays, format } from"date-fns";
 import { CATEGORY_CONFIG, getNormalizedCategory } from"@/lib/categoryMapping";
 

@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
-import { Sparkles, ArrowUpRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { useNavigate } from "react-router-dom";
 import { Formatters } from "@/utils/formatters";
 

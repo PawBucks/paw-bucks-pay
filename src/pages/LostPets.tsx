@@ -40,30 +40,8 @@ import { useToast } from"@/hooks/use-toast";
 import { LoadingSpinner } from"@/components/LoadingSpinner";
 import { SEO } from"@/components/SEO";
 import { seoMeta } from"@/lib/seoMeta";
-import { 
- PlusCircle, 
- Search, 
- MapPin, 
- Calendar, 
- Phone, 
- Mail, 
- DollarSign,
- Dog,
- Cat,
- Bird,
- Rabbit,
- Upload,
- AlertTriangle,
- CheckCircle2,
- Clock,
- Share2,
- PartyPopper,
- Eye,
- X,
- Images,
- Sparkles,
- ArrowLeft,
-} from"lucide-react";
+import { PlusCircle, Search, MapPin, Calendar, Phone, Mail, DollarSign, Dog, Cat, Bird, Rabbit, Upload, AlertTriangle, CheckCircle2, Clock, Share2, PartyPopper, Eye, X, Images, ArrowLeft } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { LostPetShareDialog } from"@/components/LostPetShareDialog";
 import { PetProfileSelector } from"@/components/PetProfileSelector";
 import { format } from"date-fns";

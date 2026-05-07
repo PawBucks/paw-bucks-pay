@@ -4,7 +4,8 @@ import { motion } from"framer-motion";
 import { Card, CardContent } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
 import { Button } from"@/components/ui/button";
-import { MapPin, Star, Navigation, CreditCard, Coins, BadgeCheck, ChevronRight, Sparkles } from"lucide-react";
+import { MapPin, Star, Navigation, CreditCard, Coins, BadgeCheck, ChevronRight } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { PawBucksInfoTooltip } from"@/components/PawBucksInfoTooltip";
 
 import { Formatters } from "@/utils/formatters";

@@ -9,15 +9,8 @@ import { Label } from"@/components/ui/label";
 import { Progress } from"@/components/ui/progress";
 import { Badge } from"@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from"@/components/ui/dialog";
-import { 
- Target, 
- Plus, 
- TrendingDown, 
- Calendar, 
- CheckCircle2,
- Sparkles,
- Clock
-} from"lucide-react";
+import { Target, Plus, TrendingDown, Calendar, CheckCircle2, Clock } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { toast } from"sonner";
 import { useQueryClient } from"@tanstack/react-query";
 import { startOfMonth, endOfMonth, differenceInDays, addMonths, format } from"date-fns";

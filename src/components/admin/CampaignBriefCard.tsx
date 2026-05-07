@@ -1,20 +1,8 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
 import { Separator } from"@/components/ui/separator";
-import {
- Sparkles,
- Target,
- Shield,
- Calendar,
- DollarSign,
- Palette,
- FileText,
- CreditCard,
- MapPin,
- Dog,
- Crown,
- Users,
-} from"lucide-react";
+import { Target, Shield, Calendar, DollarSign, Palette, FileText, CreditCard, MapPin, Dog, Crown, Users } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 import type { BrandCampaign, TargetingRules } from"@/services/api/brandCampaigns.service";
 
 import { Formatters } from "@/utils/formatters";

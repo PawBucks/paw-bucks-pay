@@ -18,7 +18,8 @@ import {
  SelectTrigger,
  SelectValue,
 } from'@/components/ui/select';
-import { Crown, Sparkles, Calendar } from'lucide-react';
+import { Crown, Calendar } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { toast } from'sonner';
 
 type User = {

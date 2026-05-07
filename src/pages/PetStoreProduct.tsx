@@ -10,11 +10,8 @@ import { Badge } from"@/components/ui/badge";
 import { Separator } from"@/components/ui/separator";
 import { Card, CardContent } from"@/components/ui/card";
 import { toast } from"sonner";
-import {
- Coins, ShoppingCart, CreditCard, ChevronLeft, ChevronRight,
- Package, AlertTriangle, TrendingUp, Sparkles, Star, ThumbsUp,
- Check, Shield, Truck, Store,
-} from"lucide-react";
+import { Coins, ShoppingCart, CreditCard, ChevronLeft, ChevronRight, Package, AlertTriangle, TrendingUp, Star, ThumbsUp, Check, Shield, Truck, Store } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { Header } from"@/components/Header";
 import { BottomNav } from"@/components/BottomNav";
 import { SEO } from"@/components/SEO";

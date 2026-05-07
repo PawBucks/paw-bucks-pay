@@ -9,20 +9,8 @@ import { Button } from"@/components/ui/button";
 import { Badge } from"@/components/ui/badge";
 import { Progress } from"@/components/ui/progress";
 import { Separator } from"@/components/ui/separator";
-import {
- AlertCircle,
- CreditCard,
- Coins,
- Calendar,
- ChevronRight,
- Shield,
- Sparkles,
- CheckCircle,
- Loader2,
- ArrowLeft,
- Info,
- Lock,
-} from"lucide-react";
+import { AlertCircle, CreditCard, Coins, Calendar, ChevronRight, Shield, CheckCircle, Loader2, ArrowLeft, Info, Lock } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { toast } from"sonner";
 import { motion, AnimatePresence } from"framer-motion";
 import { getStripePromise } from"@/lib/stripe";

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from"react";
 import { motion } from"framer-motion";
-import { Gift, Clock, ChevronRight, Sparkles } from"lucide-react";
+import { Gift, Clock, ChevronRight } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { useNavigate } from"react-router-dom";
 import { GradientCard } from"@/components/ui/gradient-card";
 import { Button } from"@/components/ui/button";

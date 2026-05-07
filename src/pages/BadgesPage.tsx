@@ -9,7 +9,8 @@ import { BottomNav } from"@/components/BottomNav";
 import { BadgeCollection } from"@/components/badges";
 import { Button } from"@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from"@/components/ui/dialog";
-import { ArrowLeft, Gift, Clock, CheckCircle, Sparkles } from"lucide-react";
+import { ArrowLeft, Gift, Clock, CheckCircle } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { supabase } from"@/integrations/supabase/client";
 import { toast } from"sonner";
 

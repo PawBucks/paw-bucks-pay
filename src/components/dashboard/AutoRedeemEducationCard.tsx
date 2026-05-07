@@ -3,7 +3,8 @@ import { useNavigate } from"react-router-dom";
 import { supabase } from"@/integrations/supabase/client";
 import { GradientCard } from"@/components/ui/gradient-card";
 import { Button } from"@/components/ui/button";
-import { Sparkles, Settings, ArrowRight, X, Coins } from"lucide-react";
+import { Settings, ArrowRight, X, Coins } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { motion, AnimatePresence } from"framer-motion";
 
 import { Formatters } from "@/utils/formatters";

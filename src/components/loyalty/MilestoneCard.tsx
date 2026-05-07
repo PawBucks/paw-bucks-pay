@@ -1,5 +1,6 @@
 import { motion } from"framer-motion";
-import { Gift, Clock, CheckCircle, Store, Sparkles } from"lucide-react";
+import { Gift, Clock, CheckCircle, Store } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { LoyaltyProgressRing } from"./LoyaltyProgressRing";
 import { Button } from"@/components/ui/button";
 import { GradientCard } from"@/components/ui/gradient-card";

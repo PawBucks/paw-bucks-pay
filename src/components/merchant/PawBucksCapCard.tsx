@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { ShieldCheck, Sparkles, Loader2, Info } from "lucide-react";
+import { ShieldCheck, Loader2, Info } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import {

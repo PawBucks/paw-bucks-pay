@@ -7,34 +7,8 @@ import { Badge } from"@/components/ui/badge";
 import { Button } from"@/components/ui/button";
 import { Progress } from"@/components/ui/progress";
 import { Skeleton } from"@/components/ui/skeleton";
-import {
- Eye,
- MousePointerClick,
- ShoppingCart,
- TrendingUp,
- Target,
- Award,
- Lightbulb,
- RefreshCw,
- Download,
- Calendar,
- MapPin,
- Search,
- LayoutGrid,
- Map,
- BarChart3,
- Users,
- Clock,
- Smartphone,
- Monitor,
- Tablet,
- Trophy,
- AlertTriangle,
- CheckCircle,
- ArrowUp,
- ArrowDown,
- Sparkles,
-} from"lucide-react";
+import { Eye, MousePointerClick, ShoppingCart, TrendingUp, Target, Award, Lightbulb, RefreshCw, Download, Calendar, MapPin, Search, LayoutGrid, Map, BarChart3, Users, Clock, Smartphone, Monitor, Tablet, Trophy, AlertTriangle, CheckCircle, ArrowUp, ArrowDown } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 import {
  LineChart,
  Line,

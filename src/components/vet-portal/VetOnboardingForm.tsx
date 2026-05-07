@@ -3,10 +3,8 @@ import { useNavigate } from"react-router-dom";
 import { useForm } from"react-hook-form";
 import { zodResolver } from"@hookform/resolvers/zod";
 import { z } from"zod";
-import { 
- Building2, Stethoscope, ShieldCheck, Wallet, Check, Save, ArrowRight, ArrowLeft,
- User, CreditCard, FileText, Phone, Sparkles, Edit, PartyPopper
-} from"lucide-react";
+import { Building2, Stethoscope, ShieldCheck, Wallet, Check, Save, ArrowRight, ArrowLeft, User, CreditCard, FileText, Phone, Edit, PartyPopper } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { Button } from"@/components/ui/button";
 import { Input } from"@/components/ui/input";
 import { Textarea } from"@/components/ui/textarea";

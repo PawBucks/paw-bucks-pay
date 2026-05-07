@@ -6,7 +6,8 @@ import { GradientCard } from"@/components/ui/gradient-card";
 import { Button } from"@/components/ui/button";
 import { Badge } from"@/components/ui/badge";
 import { BadgeCard } from"./BadgeCard";
-import { Award, ChevronRight, Sparkles, Target } from"lucide-react";
+import { Award, ChevronRight, Target } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 
 interface BadgeDefinition {
  id: string;
