@@ -65,7 +65,7 @@ export const PawBucksSourceSelector = ({
                     <div>
                       <p className="text-sm font-medium text-foreground">Promotional Credits</p>
                       <p className="text-xs text-muted-foreground">
-                        Pet Fund, Welcome credits, and campaign bonuses. Never expire.
+                        Pet Fund, Welcome credits, and campaign bonuses. Expire 30 days after release.
                       </p>
                     </div>
                   </div>
