@@ -15,6 +15,11 @@ import { Formatters } from "@/utils/formatters";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
+import { TimelineTeaser } from "@/components/timeline";
+import { BadgeTeaser } from "@/components/badges";
+import { LoyaltyDashboardWidget } from "@/components/loyalty";
+import { LoyaltyProgramDiscovery } from "@/components/dashboard/LoyaltyProgramDiscovery";
+import { CustomerLoyaltyCards } from "@/components/dashboard/CustomerLoyaltyCards";
 
 const PB_TO_USD = 0.001;
 
@@ -197,6 +202,21 @@ const SimpleHome = () => {
           )}
 
           {/* Quiet mechanics line — only emotional reassurance, no jargon */}
+          {user && (
+            <div className="mt-8 space-y-6">
+              {pets.length > 0 && (
+                <TimelineTeaser
+                  userId={walletId || user.id}
+                  pets={pets.map((p) => ({ id: p.id, name: p.name }))}
+                />
+              )}
+              <LoyaltyDashboardWidget userId={walletId || user.id} />
+              <BadgeTeaser userId={walletId || user.id} />
+              <CustomerLoyaltyCards userId={walletId || user.id} compact />
+              <LoyaltyProgramDiscovery userId={walletId || user.id} />
+            </div>
+          )}
+
           <p className="mt-10 text-center text-xs text-muted-foreground">
             Every payment automatically builds your savings. No points to manage.
           </p>
