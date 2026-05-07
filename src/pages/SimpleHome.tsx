@@ -21,6 +21,7 @@ import { BadgeTeaser } from "@/components/badges";
 import { LoyaltyDashboardWidget } from "@/components/loyalty";
 import { LoyaltyProgramDiscovery } from "@/components/dashboard/LoyaltyProgramDiscovery";
 import { CustomerLoyaltyCards } from "@/components/dashboard/CustomerLoyaltyCards";
+import { MaximusChat } from "@/components/maximus/MaximusChat";
 
 const PB_TO_USD = 0.001;
 
@@ -224,6 +225,7 @@ const SimpleHome = () => {
         </main>
 
         <BottomNav />
+        <MaximusChat />
       </div>
     </>
   );
