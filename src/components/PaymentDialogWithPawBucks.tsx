@@ -332,6 +332,19 @@ export const PaymentDialogWithPawBucks = ({
  setPawbucksToUse(0);
  };
 
+ // Auto-select best source once balances + amount are known.
+ // Prefer earned (expires in 60 days); otherwise fall back to promotional credit.
+ useEffect(() => {
+ if (!open || loadingBalance) return;
+ if (pawbucksSource !=="none") return;
+ if (totalAmount <= 0) return;
+ if (spendableBalance > 0) {
+ setPawbucksSource("earned");
+ } else if (petFundApplicable && petFundCreditBalance > 0) {
+ setPawbucksSource("promotional");
+ }
+ }, [open, loadingBalance, pawbucksSource, totalAmount, spendableBalance, petFundApplicable, petFundCreditBalance]);
+
  const pawbucksUsdValue = pawbucksToUse * PAWBUCKS_TO_USD;
  // PawBucks only apply to the base amount; tip always goes to card
  const stripeAmount = Math.max(0, totalAmount - pawbucksUsdValue) + tipAmount;
@@ -350,6 +363,18 @@ export const PaymentDialogWithPawBucks = ({
       setPawbucksToUse(Math.max(0, maxPawbucks));
     }
   }, [maxPawbucks, pawbucksToUse]);
+
+ // Default slider to MAX apply once a source is active and an amount is entered.
+ // Auto-fills only when the user hasn't set it (pawbucksToUse === 0).
+ useEffect(() => {
+ if (!open || loadingBalance) return;
+ if (totalAmount <= 0) return;
+ if (pawbucksSource ==="none") return;
+ if (pawbucksToUse === 0 && maxPawbucks > 0) {
+ setPawbucksToUse(maxPawbucks);
+ }
+ // eslint-disable-next-line react-hooks/exhaustive-deps
+ }, [open, loadingBalance, totalAmount, pawbucksSource, maxPawbucks]);
 
  // Clear redemption error when user adjusts inputs
  useEffect(() => {
@@ -539,7 +564,8 @@ export const PaymentDialogWithPawBucks = ({
  value={amount}
  onChange={(e) => {
  setAmount(e.target.value);
- setPawbucksToUse(0); // Reset PawBucks when amount changes
+ // Reset to 0 so the default-to-max effect re-fills against the new amount.
+ setPawbucksToUse(0);
  }}
  required
  autoFocus
