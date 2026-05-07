@@ -1,22 +1,22 @@
 import { memo, useCallback } from"react";
 import { NavLink, useLocation } from"react-router-dom";
-import { Compass, User, Coins, Store, Home } from"lucide-react";
+import { Compass, User, Sparkles, Home, CreditCard } from"lucide-react";
 import { cn } from"@/lib/utils";
 
 const navItems = [
- { title:"Home", to:"/dashboard", icon: Home, ariaLabel:"Go to Home Dashboard" },
- { title:"Discover", to:"/discover", icon: Compass, ariaLabel:"Discover Merchants" },
- { title:"Store", to:"/pet-store", icon: Store, ariaLabel:"Browse Pet Store" },
- { title:"PawBucks", to:"/pawbucks/wallet", icon: Coins, ariaLabel:"View PawBucks Wallet" },
- { title:"Profile", to:"/profile", icon: User, ariaLabel:"View Profile" },
+ { title:"Home", to:"/home", icon: Home, ariaLabel:"Home" },
+ { title:"Pay", to:"/pay", icon: CreditCard, ariaLabel:"Pay & save" },
+ { title:"Discover", to:"/discover", icon: Compass, ariaLabel:"Discover places" },
+ { title:"Savings", to:"/savings", icon: Sparkles, ariaLabel:"Your savings" },
+ { title:"Profile", to:"/profile", icon: User, ariaLabel:"Profile" },
 ];
 
 const BottomNavComponent = () => {
  const location = useLocation();
 
  const isActiveRoute = useCallback((path: string) => {
- if (path ==="/dashboard") {
- return location.pathname ==="/dashboard" || location.pathname ==="/";
+  if (path ==="/home") {
+  return location.pathname ==="/home" || location.pathname ==="/dashboard" || location.pathname ==="/";
  }
  return location.pathname.startsWith(path);
  }, [location.pathname]);
