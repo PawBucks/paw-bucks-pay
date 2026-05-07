@@ -596,10 +596,19 @@ const Index = () => {
  <div className="pl-step-body">Every payment grows your savings for the next time you care for your pet.</div>
  </div>
  </div>
- </section>
+  </section>
 
- {/* CTA */}
- <section className="pl-cta">
+  {/* PREMIUM MERCHANTS */}
+  <section className="pl-section" style={{ background:"var(--section-alt)" }}>
+  <PremiumMerchantsBanner
+    title="Premium Partners"
+    rotationInterval={12000}
+    showMultiple={true}
+  />
+  </section>
+
+  {/* CTA */}
+  <section className="pl-cta">
  <p className="pl-eyebrow">Ready when you are</p>
  <h2 className="pl-section-title">Start earning on the spending you'd do anyway.</h2>
  <p className="pl-section-sub">Free forever. No credit card required to sign up. Cancel any paid tier anytime.</p>
