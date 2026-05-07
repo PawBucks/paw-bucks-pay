@@ -191,9 +191,11 @@ export default function DirectCheckout() {
  const navigate = useNavigate();
  const [searchParams] = useSearchParams();
  const prefilledAmount = searchParams.get("amount") ?? "";
+ const prefilledTip = searchParams.get("tip") ?? "";
  const [merchant, setMerchant] = useState<Merchant | null>(null);
  const [loading, setLoading] = useState(true);
  const [amount, setAmount] = useState(prefilledAmount);
+ const [tip, setTip] = useState<string>(prefilledTip);
  const [description, setDescription] = useState("");
  const [clientSecret, setClientSecret] = useState<string | null>(null);
  const [connectedAccountId, setConnectedAccountId] = useState<string | null>(null);
@@ -263,18 +265,20 @@ export default function DirectCheckout() {
  toast.error("Minimum payment is $0.50");
  return;
  }
+ const tipAmt = Math.max(0, parseFloat(tip) || 0);
 
  setCreating(true);
  try {
  // Use Combined Payment with auto-redeem so the user's available
  // PawBucks ($ savings) are automatically applied server-side,
- // reducing the amount actually charged to their card.
+ // reducing the amount actually charged to their card. Tip (if any)
+ // is added on top and is USD-only — savings never apply to tip.
  const { data, error } = await supabase.functions.invoke("create-combined-payment", {
  body: {
  merchantId,
- totalAmount: amt,
+ totalAmount: amt + tipAmt,
  pawbucksAmount: 0,
- tipAmount: 0,
+ tipAmount: tipAmt,
  description: description || undefined,
  autoRedeem: true,
  },

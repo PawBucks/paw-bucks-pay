@@ -41,6 +41,8 @@ const SimplePay = () => {
   const [selected, setSelected] = useState<Merchant | null>(null);
   const [search, setSearch] = useState("");
   const [amount, setAmount] = useState("");
+  const [tipPct, setTipPct] = useState<number | "custom" | 0>(0);
+  const [customTip, setCustomTip] = useState("");
 
   // If a merchantId came in via URL, hydrate the merchant
   useEffect(() => {
@@ -72,9 +74,16 @@ const SimplePay = () => {
   });
 
   const amountNum = parseFloat(amount) || 0;
-  // Auto-applied savings preview: clamp to available, never above paid amount.
+  // Tip is computed off the bill (pre-savings) and is USD-only — savings never apply to tip.
+  const tipAmount =
+    tipPct === "custom"
+      ? Math.max(0, parseFloat(customTip) || 0)
+      : tipPct
+        ? +(amountNum * (tipPct / 100)).toFixed(2)
+        : 0;
+  // Auto-applied savings preview: clamp to available, never above the bill (excludes tip).
   const autoApplied = Math.min(availableUsd, amountNum);
-  const dueNow = Math.max(0, amountNum - autoApplied);
+  const dueNow = Math.max(0, amountNum - autoApplied) + tipAmount;
 
   const handleContinue = () => {
     if (!selected) return;
@@ -82,8 +91,11 @@ const SimplePay = () => {
       toast.error("Minimum payment is $0.50");
       return;
     }
-    // Hand off to existing direct-checkout flow (auto-redeem will apply savings server-side)
-    navigate(`/pay/${selected.id}?amount=${amountNum.toFixed(2)}`);
+    // Hand off to existing direct-checkout flow (auto-redeem will apply savings server-side).
+    // Tip is passed through so it can be added on top, USD-only.
+    const qs = new URLSearchParams({ amount: amountNum.toFixed(2) });
+    if (tipAmount > 0) qs.set("tip", tipAmount.toFixed(2));
+    navigate(`/pay/${selected.id}?${qs.toString()}`);
   };
 
   return (
@@ -256,6 +268,14 @@ const SimplePay = () => {
                         </span>
                       </div>
                     )}
+                    {tipAmount > 0 && (
+                      <div className="px-4 py-3 flex items-center justify-between border-t border-border">
+                        <span className="text-sm text-muted-foreground">Tip</span>
+                        <span className="text-sm font-medium">
+                          +{Formatters.currency(tipAmount)}
+                        </span>
+                      </div>
+                    )}
                     <div className="px-4 py-3 flex items-center justify-between bg-primary/5">
                       <span className="text-sm font-medium">You pay</span>
                       <span className="text-lg font-semibold">
@@ -263,6 +283,51 @@ const SimplePay = () => {
                       </span>
                     </div>
                   </motion.div>
+                )}
+
+                {/* Tip selector — USD only, never applied to PawBucks */}
+                {amountNum >= 0.5 && (
+                  <div className="mb-5">
+                    <Label className="text-xs uppercase tracking-wider text-muted-foreground">
+                      Add a tip (optional)
+                    </Label>
+                    <div className="mt-2 grid grid-cols-5 gap-2">
+                      {([0, 15, 18, 20, "custom"] as const).map((opt) => {
+                        const active = tipPct === opt;
+                        return (
+                          <button
+                            key={String(opt)}
+                            type="button"
+                            onClick={() => setTipPct(opt)}
+                            className={`h-11 rounded-lg border text-sm font-medium transition-colors ${
+                              active
+                                ? "border-primary bg-primary/10 text-primary"
+                                : "border-border bg-card hover:bg-muted/50"
+                            }`}
+                          >
+                            {opt === 0 ? "None" : opt === "custom" ? "Custom" : `${opt}%`}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {tipPct === "custom" && (
+                      <div className="relative mt-2">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                          $
+                        </span>
+                        <Input
+                          type="number"
+                          inputMode="decimal"
+                          step="0.01"
+                          min="0"
+                          placeholder="0.00"
+                          value={customTip}
+                          onChange={(e) => setCustomTip(e.target.value)}
+                          className="pl-7 h-11 rounded-lg"
+                        />
+                      </div>
+                    )}
+                  </div>
                 )}
 
                 <Button
