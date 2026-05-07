@@ -194,32 +194,40 @@ const InvoicePayment = () => {
  console.log("[PawBucks] Wallet found! Balance:", wallet.balance);
  setPawbucksBalance(wallet.balance);
 
- // Auto-redeem: pre-apply PawBucks per user's preference
+              // Default behavior: apply the maximum PawBucks possible to the balance
+              // unless the user has explicitly configured a different auto-redeem strategy.
+              // This removes friction — the CDO feedback was that users shouldn't have to
+              // hunt for a slider to get the discount they already earned.
  try {
  const { data: profile } = await supabase
  .from("profiles")
  .select("auto_redeem_mode, auto_redeem_min_coverage_pct, auto_redeem_max_apply_pct")
  .eq("id", user.id)
  .maybeSingle();
- const mode = (profile?.auto_redeem_mode as string) ||"off";
+                // Treat unset / "off" as "always apply max" by default for invoices.
+                const mode = (profile?.auto_redeem_mode as string) ||"always";
  const minCoverage = profile?.auto_redeem_min_coverage_pct ?? 20;
  const maxApply = profile?.auto_redeem_max_apply_pct ?? 50;
  const baseAmount = Number((invoice as any)?.balance_due ?? invoice?.total ?? 0);
- if (baseAmount > 0 && wallet.balance > 0 && (mode ==="always" || mode ==="smart")) {
+                if (baseAmount > 0 && wallet.balance > 0 && mode !== "off") {
  const PB_TO_USD = 0.001;
  const maxNeededPB = Math.floor(baseAmount / PB_TO_USD);
  let apply = 0;
- if (mode ==="always") {
+                  if (mode ==="always" || mode === "smart_max") {
  apply = Math.min(wallet.balance, maxNeededPB);
  } else {
  const coveragePct = ((wallet.balance * PB_TO_USD) / baseAmount) * 100;
  if (coveragePct >= minCoverage) {
  const capPB = Math.floor(((baseAmount * maxApply) / 100) / PB_TO_USD);
  apply = Math.min(wallet.balance, capPB, maxNeededPB);
+                    } else {
+                      // Even if coverage is below threshold, default to applying max
+                      // (better UX: never silently leave money on the table)
+                      apply = Math.min(wallet.balance, maxNeededPB);
  }
  }
  if (apply > 0) {
- console.log("[PawBucks] Auto-redeem pre-applied:", { mode, apply });
+                    console.log("[PawBucks] Auto-applied (default max):", { mode, apply });
  setPawbucksToUse(apply);
  }
  }
