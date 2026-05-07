@@ -242,30 +242,42 @@ export default function DirectCheckout() {
  }, [merchant, prefilledAmount, clientSecret, creating, autoStarted]);
 
  const handleCreatePayment = async () => {
- const amountInCents = Math.round(parseFloat(amount) * 100);
- 
- if (isNaN(amountInCents) || amountInCents < 50) {
+ const amt = parseFloat(amount);
+ if (isNaN(amt) || amt < 0.5) {
  toast.error("Minimum payment is $0.50");
  return;
  }
 
  setCreating(true);
  try {
- // Use Direct Charge function (Express accounts) - payment created ON connected account
- const { data, error } = await supabase.functions.invoke("create-direct-charge", {
+ // Use Combined Payment with auto-redeem so the user's available
+ // PawBucks ($ savings) are automatically applied server-side,
+ // reducing the amount actually charged to their card.
+ const { data, error } = await supabase.functions.invoke("create-combined-payment", {
  body: {
  merchantId,
- amount: amountInCents,
+ totalAmount: amt,
+ pawbucksAmount: 0,
+ tipAmount: 0,
  description: description || undefined,
+ autoRedeem: true,
  },
  });
 
  if (error) throw error;
+ if (data?.error) throw new Error(data.error);
+
+ // Fully covered by PawBucks — no card charge needed.
+ if (data.paymentMethod === "pawbucks_only") {
+ toast.success("Paid in full with your savings!");
+ navigate("/saved");
+ return;
+ }
 
  setClientSecret(data.clientSecret);
  setConnectedAccountId(data.connectedAccountId);
  setPaymentIntentId(data.paymentIntentId);
- setPawbucksEarned(data.pawbucksEarned);
+ setPawbucksEarned(data.pawbucksEarned ?? 0);
  } catch (error: any) {
  console.error("Error creating payment:", error);
  toast.error(error.message ||"Failed to create payment");
