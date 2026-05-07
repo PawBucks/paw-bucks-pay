@@ -62,8 +62,6 @@ const SimplePay = () => {
       let base = client
         .from("merchants_public")
         .select("id, business_name, logo_url, business_type")
-        .eq("onboarding_complete", true)
-        .not("stripe_account_id", "is", null)
         .order("business_name", { ascending: true })
         .limit(20);
       if (term) base = base.ilike("business_name", `%${term}%`);
