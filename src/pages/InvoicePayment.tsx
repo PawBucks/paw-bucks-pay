@@ -375,7 +375,15 @@ const InvoicePayment = () => {
  }
 
  const isPaid = invoice.status ==="paid";
- const isOverdue = invoice.status ==="overdue";
+  // Only treat as overdue when the due date is strictly in the past (calendar days),
+  // not when the DB status was flipped on the same day. Avoids "0 days overdue" UX.
+  const dueDateOnly = invoice.due_date ? parseISO(invoice.due_date) : null;
+  const todayStart = new Date(); todayStart.setHours(0,0,0,0);
+  const daysOverdue = dueDateOnly
+    ? Math.floor((todayStart.getTime() - new Date(dueDateOnly.getFullYear(), dueDateOnly.getMonth(), dueDateOnly.getDate()).getTime()) / 86400000)
+    : 0;
+  const isOverdue = !isPaid && daysOverdue > 0;
+  const isDueToday = !isPaid && daysOverdue === 0;
  const amountDue = invoice.amount_due || invoice.total;
  const amountPaid = invoice.amount_paid || 0;
 
@@ -458,7 +466,13 @@ const InvoicePayment = () => {
  variant={isPaid ?"default" : isOverdue ?"destructive" :"secondary"}
  className="text-sm"
  >
- {isPaid ?"Paid" : isOverdue ?"Overdue" : invoice.status}
+                {isPaid
+                  ? "Paid"
+                  : isOverdue
+                  ? `${daysOverdue} day${daysOverdue === 1 ? "" : "s"} overdue`
+                  : isDueToday
+                  ? "Due today"
+                  : invoice.status}
  </Badge>
  </div>
  </CardHeader>
