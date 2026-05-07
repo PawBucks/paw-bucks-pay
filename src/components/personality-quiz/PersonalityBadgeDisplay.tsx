@@ -1,7 +1,7 @@
 import { motion } from"framer-motion";
 import { Button } from"@/components/ui/button";
 import { Badge } from"@/components/ui/badge";
-import { Sparkles } from"lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { useNavigate } from"react-router-dom";
 import { useMemo } from"react";
 import { transformPersonalityName } from"./personalityNameUtils";

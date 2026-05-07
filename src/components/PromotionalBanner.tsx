@@ -1,6 +1,6 @@
 import { Card } from"@/components/ui/card";
 import { Button } from"@/components/ui/button";
-import { Sparkles } from"lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 
 export const PromotionalBanner = () => {
  return (

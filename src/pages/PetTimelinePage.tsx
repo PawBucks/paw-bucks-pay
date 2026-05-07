@@ -10,7 +10,8 @@ import { BottomNav } from"@/components/BottomNav";
 import { PetTimeline } from"@/components/timeline";
 import { Button } from"@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
-import { ArrowLeft, Sparkles } from"lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { DashboardSkeleton } from"@/components/LoadingSkeleton";
 
 type PetProfile = {

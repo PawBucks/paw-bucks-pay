@@ -17,24 +17,8 @@ import {
  SelectTrigger,
  SelectValue,
 } from"@/components/ui/select";
-import {
- FileText,
- CreditCard,
- Building2,
- DollarSign,
- CheckCircle,
- AlertCircle,
- Loader2,
- Download,
- Calendar,
- Mail,
- Phone,
- MapPin,
- Coins,
- Sparkles,
- UserX,
- ArrowLeft,
-} from"lucide-react";
+import { FileText, CreditCard, Building2, DollarSign, CheckCircle, AlertCircle, Loader2, Download, Calendar, Mail, Phone, MapPin, Coins, UserX, ArrowLeft } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { format, parseISO } from"date-fns";
 import { toast } from"sonner";
 import { type Invoice } from"@/services/api/invoicing.service";

@@ -1,6 +1,7 @@
 import { useState, useEffect } from"react";
 import { Badge } from"@/components/ui/badge";
-import { Sparkles, Clock } from"lucide-react";
+import { Clock } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 
 type PromotionalBadgeProps = {
  discountPercentage: number;

@@ -6,11 +6,8 @@ import { Badge } from"@/components/ui/badge";
 import { Button } from"@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
 import { GradientCard } from"@/components/ui/gradient-card";
-import { 
- Search, Eye, MousePointerClick, TrendingUp, Loader2, ArrowUp, ArrowDown,
- RefreshCw, Download, Lightbulb, Target, BarChart3, PieChart, 
- AlertTriangle, CheckCircle, Info, Sparkles, ExternalLink
-} from"lucide-react";
+import { Search, Eye, MousePointerClick, TrendingUp, Loader2, ArrowUp, ArrowDown, RefreshCw, Download, Lightbulb, Target, BarChart3, PieChart, AlertTriangle, CheckCircle, Info, ExternalLink } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { 
  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
  LineChart, Line, PieChart as RePieChart, Pie, Cell, Legend, Area, AreaChart

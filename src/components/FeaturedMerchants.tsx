@@ -1,7 +1,8 @@
 import { memo, useCallback } from"react";
 import { Card } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
-import { Star, MapPin, Sparkles, BadgeCheck } from"lucide-react";
+import { Star, MapPin, BadgeCheck } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { Skeleton } from"@/components/ui/skeleton";
 import { useSponsoredMerchants, merchantHasService, SERVICE_NAMES } from"@/hooks/useMerchantServices";
 interface Merchant {

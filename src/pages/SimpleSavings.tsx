@@ -19,7 +19,8 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { Formatters } from "@/utils/formatters";
 import { format, differenceInDays } from "date-fns";
-import { Sparkles, ChevronRight, Clock, Info } from "lucide-react";
+import { ChevronRight, Clock, Info } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 
 const PB_TO_USD = 0.001;
 

@@ -3,16 +3,8 @@ import { Link } from"react-router-dom";
 import { motion } from"framer-motion";
 import { Card, CardContent } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
-import {
- Star,
- MapPin,
- CreditCard,
- Coins,
- BadgeCheck,
- Sparkles,
- ChevronRight,
- Store,
-} from"lucide-react";
+import { Star, MapPin, CreditCard, Coins, BadgeCheck, ChevronRight, Store } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { OpenStatusBadge } from"@/components/merchant/OpenStatusBadge";
 
 import { Formatters } from "@/utils/formatters";

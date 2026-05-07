@@ -14,7 +14,8 @@ import { Textarea } from"@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from"@/components/ui/select";
 import { toast } from"sonner";
-import { Upload, PawPrint, Loader2, Sparkles } from"lucide-react";
+import { Upload, PawPrint, Loader2 } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 
 const CreatePetProfile = () => {
  const navigate = useNavigate();

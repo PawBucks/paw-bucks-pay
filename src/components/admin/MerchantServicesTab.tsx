@@ -9,7 +9,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Badge } from'@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from'@/components/ui/select';
 import { Switch } from'@/components/ui/switch';
-import { Search, Plus, Edit, Trash2, Star, Sparkles, Loader2 } from'lucide-react';
+import { Search, Plus, Edit, Trash2, Star, Loader2 } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { toast } from'sonner';
 
 type MerchantService = {

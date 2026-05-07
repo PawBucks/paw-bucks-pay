@@ -8,7 +8,8 @@ import { Popover, PopoverContent, PopoverTrigger } from"@/components/ui/popover"
 import { supabase } from"@/integrations/supabase/client";
 import { toast } from"sonner";
 import { format, startOfMonth, endOfMonth } from"date-fns";
-import { Upload, CalendarIcon, ImageIcon, X, Loader2, Sparkles, Receipt, AlertTriangle } from"lucide-react";
+import { Upload, CalendarIcon, ImageIcon, X, Loader2, Receipt, AlertTriangle } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { cn } from"@/lib/utils";
 
 import { Formatters } from "@/utils/formatters";

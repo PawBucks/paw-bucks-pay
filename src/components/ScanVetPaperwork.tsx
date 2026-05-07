@@ -22,17 +22,8 @@ import {
 } from"@/components/ui/select";
 import { Card } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
-import {
- Camera,
- Loader2,
- Sparkles,
- Check,
- X,
- Trash2,
- Plus,
- ImageIcon,
- AlertCircle,
-} from"lucide-react";
+import { Camera, Loader2, Check, X, Trash2, Plus, ImageIcon, AlertCircle } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { toast } from"sonner";
 
 type ScanVetPaperworkProps = {

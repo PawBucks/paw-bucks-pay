@@ -2,7 +2,8 @@ import { useEffect } from"react";
 import { useNavigate } from"react-router-dom";
 import { Button } from"@/components/ui/button";
 import { GradientCard } from"@/components/ui/gradient-card";
-import { CheckCircle, Sparkles } from"lucide-react";
+import { CheckCircle } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 
 const SubscriptionSuccess = () => {
  const navigate = useNavigate();

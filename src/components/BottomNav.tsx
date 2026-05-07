@@ -1,6 +1,7 @@
 import { memo, useCallback } from"react";
 import { NavLink, useLocation } from"react-router-dom";
-import { Compass, User, Sparkles, Home, CreditCard } from"lucide-react";
+import { Compass, User, Home, CreditCard } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { cn } from"@/lib/utils";
 
 const navItems = [

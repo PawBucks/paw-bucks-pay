@@ -27,29 +27,8 @@ import { SalesReportGenerator } from"@/components/shared/SalesReportGenerator";
 import { MerchantLoyaltyProgramTab } from"@/components/merchant/MerchantLoyaltyProgramTab";
 import { CheckInDashboard } from"@/components/checkin";
 import { PromotionInvitationsInbox } from"@/components/PromotionInvitationsInbox";
-import {
- Stethoscope,
- Users,
- MessageSquare,
- FileText,
- FileSignature,
- Bell,
- Pill,
- Share2,
- Activity,
- Heart,
- ArrowRightLeft,
- Sparkles,
- Wallet,
- TrendingUp,
- Scale,
- Zap,
- BarChart3,
- Stamp,
- LifeBuoy,
- Settings,
- QrCode,
-} from"lucide-react";
+import { Stethoscope, Users, MessageSquare, FileText, FileSignature, Bell, Pill, Share2, Activity, Heart, ArrowRightLeft, Wallet, TrendingUp, Scale, Zap, BarChart3, Stamp, LifeBuoy, Settings, QrCode } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { toast } from"sonner";
 import { PendingApprovalNotice } from"@/components/PendingApprovalNotice";
 import { SupportTab } from"@/components/support/SupportTab";

@@ -11,7 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Sparkles, Search, Store, Loader2, ArrowRight, Check } from "lucide-react";
+import { Search, Store, Loader2, ArrowRight, Check } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { Formatters } from "@/utils/formatters";
 import { motion, AnimatePresence } from "framer-motion";
 

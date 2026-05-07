@@ -2,7 +2,8 @@ import { Card, CardContent, CardHeader, CardTitle } from'@/components/ui/card';
 import { Progress } from'@/components/ui/progress';
 import { TaxExpense, TaxExpenseCategory, CATEGORY_LABELS, SCHEDULE_C_MAPPING } from'./types';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from'recharts';
-import { TrendingDown, Sparkles, Car } from'lucide-react';
+import { TrendingDown, Car } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 
 import { Formatters } from "@/utils/formatters";
 interface VehicleDeductionData {

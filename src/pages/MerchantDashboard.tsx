@@ -24,29 +24,8 @@ import {
  SheetContent,
  SheetTrigger,
 } from"@/components/ui/sheet";
-import {
- LogOut,
- PawPrint,
- Loader2,
- LayoutDashboard,
- BarChart3,
- Sparkles,
- Zap,
- DollarSign,
- Menu,
- ChevronRight,
- HelpCircle,
- Stamp,
- LifeBuoy,
- MessageSquare,
- Users,
- PauseCircle,
- Mail,
- History,
- ClipboardCheck,
- QrCode,
- Megaphone,
-} from"lucide-react";
+import { LogOut, PawPrint, Loader2, LayoutDashboard, BarChart3, Zap, DollarSign, Menu, ChevronRight, HelpCircle, Stamp, LifeBuoy, MessageSquare, Users, PauseCircle, Mail, History, ClipboardCheck, QrCode, Megaphone } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { toast } from"sonner";
 import { format, startOfMonth, parseISO } from"date-fns";
 import { cn } from"@/lib/utils";

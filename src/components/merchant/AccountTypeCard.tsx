@@ -5,7 +5,8 @@ import { Badge } from"@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from"@/components/ui/dialog";
 import { Textarea } from"@/components/ui/textarea";
 import { Label } from"@/components/ui/label";
-import { Building2, Sparkles, Clock, Loader2 } from"lucide-react";
+import { Building2, Clock, Loader2 } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { supabase } from"@/integrations/supabase/client";
 import { toast } from"sonner";
 

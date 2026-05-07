@@ -19,16 +19,8 @@ import {
 } from"@/components/ui/table";
 import { Badge } from"@/components/ui/badge";
 import { Separator } from"@/components/ui/separator";
-import {
- CreditCard,
- Coins,
- Calendar,
- AlertCircle,
- ChevronRight,
- Shield,
- Sparkles,
- Info,
-} from"lucide-react";
+import { CreditCard, Coins, Calendar, AlertCircle, ChevronRight, Shield, Info } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { toast } from"sonner";
 
 import { Formatters } from "@/utils/formatters";

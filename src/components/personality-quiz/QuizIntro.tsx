@@ -1,6 +1,7 @@
 import { motion } from"framer-motion";
 import { Button } from"@/components/ui/button";
-import { Sparkles, PawPrint } from"lucide-react";
+import { PawPrint } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 
 interface QuizIntroProps {
  petName: string;

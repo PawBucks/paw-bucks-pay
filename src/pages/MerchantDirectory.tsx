@@ -25,34 +25,8 @@ import { useSponsoredTracking } from"@/hooks/useSponsoredTracking";
 import { useSearchRankingTracking } from"@/hooks/useSearchRankingTracking";
 import { DirectoryMerchantCard } from"@/components/directory/DirectoryMerchantCard";
 import { MerchantMap } from"@/components/MerchantMap";
-import {
- Search,
- Store,
- Scissors,
- Home,
- Stethoscope,
- Footprints,
- Bone,
- Coins,
- SlidersHorizontal,
- Mountain,
- Zap,
- Hand,
- Brain,
- MoreHorizontal,
- MapPin,
- X,
- LayoutGrid,
- LayoutList,
- Map,
- Sun,
- Camera,
- Shield,
- Truck,
- Dog,
- Sparkles,
- ShoppingBag,
-} from"lucide-react";
+import { Search, Store, Scissors, Home, Stethoscope, Footprints, Bone, Coins, SlidersHorizontal, Mountain, Zap, Hand, Brain, MoreHorizontal, MapPin, X, LayoutGrid, LayoutList, Map, Sun, Camera, Shield, Truck, Dog, ShoppingBag } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 
 type MerchantWithRating = {
  id: string;

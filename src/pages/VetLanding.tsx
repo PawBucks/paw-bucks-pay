@@ -3,28 +3,8 @@ import { SEO } from"@/components/SEO";
 import { seoMeta } from"@/lib/seoMeta";
 import { Button } from"@/components/ui/button";
 import { Card } from"@/components/ui/card";
-import { 
- Stethoscope, 
- FileText, 
- Sparkles, 
- Shield, 
- TrendingUp, 
- Wallet, 
- Heart, 
- ArrowRight, 
- CheckCircle, 
- Brain, 
- Pill, 
- Users, 
- Clock, 
- DollarSign,
- Bell,
- Share2,
- BarChart3,
- Zap,
- MessageSquare,
- CalendarCheck
-} from"lucide-react";
+import { Stethoscope, FileText, Shield, TrendingUp, Wallet, Heart, ArrowRight, CheckCircle, Brain, Pill, Users, Clock, DollarSign, Bell, Share2, BarChart3, Zap, MessageSquare, CalendarCheck } from "lucide-react";
+import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { SocialFollowLinks } from"@/components/SocialFollowLinks";
 import { PremiumMerchantsBanner } from"@/components/PremiumMerchantsBanner";
 import logo from"@/assets/logo.png";
