@@ -29,6 +29,7 @@ function CheckoutForm({
  amount, 
   originalAmount,
   pawbucksApplied,
+  tipAmount,
  merchantName, 
  pawbucksEarned,
  paymentIntentId,
@@ -38,6 +39,7 @@ function CheckoutForm({
  amount: number; 
   originalAmount: number;
   pawbucksApplied: number;
+  tipAmount: number;
  merchantName: string;
  pawbucksEarned: number;
  paymentIntentId: string;
@@ -125,9 +127,15 @@ function CheckoutForm({
  <span className="font-medium">{merchantName}</span>
  </div>
         <div className="flex justify-between items-center mb-1 text-sm">
-          <span className="text-muted-foreground">Total</span>
-          <span>{Formatters.currency(originalAmount / 100)}</span>
+          <span className="text-muted-foreground">Bill</span>
+          <span>{Formatters.currency(Math.max(0, originalAmount / 100 - tipAmount))}</span>
         </div>
+        {tipAmount > 0 && (
+          <div className="flex justify-between items-center mb-1 text-sm">
+            <span className="text-muted-foreground">Tip</span>
+            <span>+{Formatters.currency(tipAmount)}</span>
+          </div>
+        )}
         {pawbucksApplied > 0 && (
           <div className="flex justify-between items-center mb-1 text-sm text-primary">
             <span>Savings applied</span>
@@ -138,6 +146,11 @@ function CheckoutForm({
           <span className="text-muted-foreground">Charged to card</span>
           <span className="text-2xl font-bold">{Formatters.currency(amount / 100)}</span>
         </div>
+        {tipAmount > 0 && (
+          <p className="text-xs text-muted-foreground -mt-1 mb-2">
+            Tip is paid in cash equivalent — your savings only apply to the bill.
+          </p>
+        )}
  <div className="flex justify-between items-center">
  <span className="text-muted-foreground flex items-center gap-1">
  <Gift className="h-4 w-4" />
