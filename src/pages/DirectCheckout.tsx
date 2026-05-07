@@ -128,7 +128,7 @@ function CheckoutForm({
  </div>
         <div className="flex justify-between items-center mb-1 text-sm">
           <span className="text-muted-foreground">Bill</span>
-          <span>{Formatters.currency(Math.max(0, originalAmount / 100 - tipAmount))}</span>
+          <span>{Formatters.currency(originalAmount / 100)}</span>
         </div>
         {tipAmount > 0 && (
           <div className="flex justify-between items-center mb-1 text-sm">
