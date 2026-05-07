@@ -167,7 +167,11 @@ serve(async (req) => {
         .eq('id', user.id)
         .single();
 
-      const autoRedeemMode = arProfile?.auto_redeem_mode || 'off';
+      // For the simplified pet-owner flow, savings are ALWAYS auto-applied
+      // when the client requests it. Treat missing/off profile setting as 'always'.
+      const autoRedeemMode = arProfile?.auto_redeem_mode && arProfile.auto_redeem_mode !== 'off'
+        ? arProfile.auto_redeem_mode
+        : 'always';
       const minCoveragePct = arProfile?.auto_redeem_min_coverage_pct ?? 20;
       const maxApplyPct = arProfile?.auto_redeem_max_apply_pct ?? 50;
 
