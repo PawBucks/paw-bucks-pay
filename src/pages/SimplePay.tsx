@@ -268,6 +268,14 @@ const SimplePay = () => {
                         </span>
                       </div>
                     )}
+                    {tipAmount > 0 && (
+                      <div className="px-4 py-3 flex items-center justify-between border-t border-border">
+                        <span className="text-sm text-muted-foreground">Tip</span>
+                        <span className="text-sm font-medium">
+                          +{Formatters.currency(tipAmount)}
+                        </span>
+                      </div>
+                    )}
                     <div className="px-4 py-3 flex items-center justify-between bg-primary/5">
                       <span className="text-sm font-medium">You pay</span>
                       <span className="text-lg font-semibold">
@@ -275,6 +283,51 @@ const SimplePay = () => {
                       </span>
                     </div>
                   </motion.div>
+                )}
+
+                {/* Tip selector — USD only, never applied to PawBucks */}
+                {amountNum >= 0.5 && (
+                  <div className="mb-5">
+                    <Label className="text-xs uppercase tracking-wider text-muted-foreground">
+                      Add a tip (optional)
+                    </Label>
+                    <div className="mt-2 grid grid-cols-5 gap-2">
+                      {([0, 15, 18, 20, "custom"] as const).map((opt) => {
+                        const active = tipPct === opt;
+                        return (
+                          <button
+                            key={String(opt)}
+                            type="button"
+                            onClick={() => setTipPct(opt)}
+                            className={`h-11 rounded-lg border text-sm font-medium transition-colors ${
+                              active
+                                ? "border-primary bg-primary/10 text-primary"
+                                : "border-border bg-card hover:bg-muted/50"
+                            }`}
+                          >
+                            {opt === 0 ? "None" : opt === "custom" ? "Custom" : `${opt}%`}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {tipPct === "custom" && (
+                      <div className="relative mt-2">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                          $
+                        </span>
+                        <Input
+                          type="number"
+                          inputMode="decimal"
+                          step="0.01"
+                          min="0"
+                          placeholder="0.00"
+                          value={customTip}
+                          onChange={(e) => setCustomTip(e.target.value)}
+                          className="pl-7 h-11 rounded-lg"
+                        />
+                      </div>
+                    )}
+                  </div>
                 )}
 
                 <Button
