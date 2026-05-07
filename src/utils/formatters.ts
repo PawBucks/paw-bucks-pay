@@ -132,4 +132,41 @@ export const Formatters = {
  }
  return phone;
  },
+
+  // Friendly label for a pawbucks_activity.source value.
+  // DB sources are snake_case enums; the UI should never leak raw tokens.
+  activitySource: (source: string | null | undefined): string => {
+    if (!source) return 'Activity';
+    const map: Record<string, string> = {
+      admin_credit: 'PawBucks Staff Credit',
+      admin_debit: 'PawBucks Staff Adjustment',
+      admin_correction: 'PawBucks Staff Correction',
+      admin_pawbucks: 'PawBucks Staff Credit',
+      'Admin Adjustment': 'PawBucks Staff Adjustment',
+      subscription_renewal: 'Subscription Renewal',
+      subscription_payment: 'Subscription Payment',
+      'Subscription Purchase': 'Subscription Purchase',
+      receipt_submission: 'Receipt Submission',
+      direct_payment: 'Direct Payment',
+      manual_transaction: 'Manual Transaction',
+      Transaction: 'Purchase',
+      payment_recovery: 'Payment Recovery',
+      pet_store: 'Pet Store Purchase',
+      branded: 'Brand Promotion',
+      welcome_credit: 'Welcome Credit',
+      pet_fund: 'Pet Fund',
+      campaign: 'Campaign Reward',
+      referral_bonus: 'Referral Bonus',
+      refund: 'Refund',
+      'Auto-Redemption': 'Auto-Applied to Payment',
+      'Invoice Payment': 'Invoice Payment',
+      invoice_payment: 'Invoice Payment',
+      Redemption: 'Redeemed',
+    };
+    if (map[source]) return map[source];
+    // Fallback: humanize snake_case
+    return source
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, (c) => c.toUpperCase());
+  },
 };
