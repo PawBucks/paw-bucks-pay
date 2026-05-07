@@ -64,6 +64,7 @@ export const PawBucksCheckoutDialog = ({
 }: PawBucksCheckoutDialogProps) => {
  const [pawbucksToUse, setPawbucksToUse] = useState(0);
  const [pawbucksSource, setPawbucksSource] = useState<PawBucksSource>("none");
+ const [autoSelected, setAutoSelected] = useState(false);
 
  // Use the spendable PawBucks hook to get available balance + welcome credit
  const { 
@@ -82,6 +83,7 @@ export const PawBucksCheckoutDialog = ({
  if (!open) {
  setPawbucksToUse(0);
  setPawbucksSource("none");
+ setAutoSelected(false);
  }
  }, [open]);
 
@@ -101,6 +103,7 @@ export const PawBucksCheckoutDialog = ({
  const handleSourceChange = (source: PawBucksSource) => {
  setPawbucksSource(source);
  setPawbucksToUse(0);
+ setAutoSelected(false);
  };
 
  // Auto-select best source when dialog opens (prefer earned — those expire in 60 days)
@@ -108,8 +111,10 @@ export const PawBucksCheckoutDialog = ({
  if (!open || loadingBalance || pawbucksSource !=="none") return;
  if (spendableBalance > 0) {
  setPawbucksSource("earned");
+ setAutoSelected(true);
  } else if (welcomeCreditApplicable && petFundCreditBalance > 0) {
  setPawbucksSource("promotional");
+ setAutoSelected(true);
  }
  }, [open, loadingBalance, spendableBalance, welcomeCreditApplicable, petFundCreditBalance, pawbucksSource]);
 
@@ -214,6 +219,7 @@ export const PawBucksCheckoutDialog = ({
 
  {/* Source Selector - when both earned and promotional are available */}
  {hasBothSources && (
+ <>
  <PawBucksSourceSelector
  earnedBalance={spendableBalance}
  promotionalBalance={petFundCreditBalance}
@@ -221,6 +227,16 @@ export const PawBucksCheckoutDialog = ({
  onSourceChange={handleSourceChange}
  promotionalLabel={hasPetFund ?"Pet Fund Credit" :"Welcome Credit"}
  />
+ {autoSelected && (
+ <div className="text-xs bg-primary/5 border border-primary/20 rounded-md px-3 py-2 text-muted-foreground">
+ <span className="font-medium text-primary">Auto-selected:</span>{" "}
+ {pawbucksSource ==="earned"
+ ?"Earned PawBucks — these expire 60 days after you receive them, so we use them first."
+ : `${hasPetFund ?"Pet Fund" :"Welcome"} credit — applied because you have no earned PawBucks available.`}
+ {" "}You can switch sources above.
+ </div>
+ )}
+ </>
  )}
 
  {/* Pet Fund Credit Banner - only when it's the sole source */}
