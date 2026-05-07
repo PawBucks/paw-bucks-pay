@@ -85,6 +85,18 @@ export const PawBucksCheckoutDialog = ({
  }
  }, [open]);
 
+ // Auto-select best source when dialog opens (prefer earned — those expire in 60 days)
+ useEffect(() => {
+ if (!open || loadingBalance || pawbucksSource !=="none") return;
+ if (hasBothSources) {
+ setPawbucksSource("earned");
+ } else if (spendableBalance > 0) {
+ setPawbucksSource("earned");
+ } else if (welcomeCreditApplicable && petFundCreditBalance > 0) {
+ setPawbucksSource("promotional");
+ }
+ }, [open, loadingBalance, hasBothSources, spendableBalance, welcomeCreditApplicable, petFundCreditBalance, pawbucksSource]);
+
  const petFundMinUsd = petFundMinTransactionUsd || PET_FUND_MIN_USD;
  const petFundCreditBalance = hasPetFund ? petFundBalance : welcomeCreditBalance;
  const welcomeCreditApplicable = (hasPetFund || hasWelcomeCredit) && merchantAcceptsPawBucks && priceAmount >= petFundMinUsd;
@@ -126,6 +138,16 @@ export const PawBucksCheckoutDialog = ({
       setPawbucksToUse(Math.max(0, maxPawBucks));
     }
   }, [maxPawBucks, pawbucksToUse]);
+
+ // Default slider to MAX apply once a source is active and balance is known.
+ // Only auto-fills while the user hasn't touched it (pawbucksToUse === 0).
+ useEffect(() => {
+ if (!open || loadingBalance) return;
+ if (pawbucksToUse === 0 && maxPawBucks > 0) {
+ setPawbucksToUse(maxPawBucks);
+ }
+ // eslint-disable-next-line react-hooks/exhaustive-deps
+ }, [open, loadingBalance, maxPawBucks, pawbucksSource]);
  
  const stripeAmount = Math.max(minStripeForSubscription, priceAmount - pawbucksUsdValue);
  const cashbackPawBucks = stripeAmount > 0 ? Math.round(stripeAmount * cashbackRate) : 0;
