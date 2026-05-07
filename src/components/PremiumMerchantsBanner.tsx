@@ -136,16 +136,46 @@ const PremiumMerchantsBannerComponent = ({
  </div>
 
         {/* Mobile/tablet: horizontal swipe carousel */}
-        <div className="md:hidden flex gap-3 overflow-x-auto snap-x snap-mandatory scroll-smooth -mx-4 px-4 pb-3 scroll-gpu" style={{ WebkitOverflowScrolling: 'touch' }}>
-          {shuffledMerchants.map((merchant, index) => (
-            <MerchantCard
-              key={`m-${merchant.id}-${index}`}
-              merchant={merchant}
-              isVerifiedPro={verifiedProIds?.includes(merchant.id)}
-              onClick={() => handleMerchantClick(merchant.id)}
-              mobile
-            />
-          ))}
+        <div className="md:hidden flex gap-3 overflow-x-auto snap-x snap-mandatory scroll-smooth -mx-4 px-4 pb-3" style={{ WebkitOverflowScrolling: 'touch' }}>
+          {shuffledMerchants.map((merchant, index) => {
+            const isVerifiedPro = verifiedProIds?.includes(merchant.id);
+            return (
+              <Card
+                key={`m-${merchant.id}-${index}`}
+                className="group p-4 cursor-pointer border-2 border-accent/20 bg-gradient-to-br from-card to-accent/5 overflow-hidden relative shrink-0 w-[82%] sm:w-[55%] snap-start"
+                onClick={() => handleMerchantClick(merchant.id)}
+              >
+                <div className="space-y-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-bold text-foreground line-clamp-1">{merchant.business_name}</h4>
+                        {isVerifiedPro && <BadgeCheck className="w-4 h-4 text-info flex-shrink-0" />}
+                      </div>
+                      <Badge variant="outline" className="mt-1.5 text-xs">{merchant.business_type}</Badge>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <div className="text-xl font-bold text-accent">{merchant.cashback_rate || 10}x</div>
+                      <div className="text-xs text-muted-foreground">points</div>
+                    </div>
+                  </div>
+                  {merchant.description && (
+                    <p className="text-sm text-muted-foreground line-clamp-2">{merchant.description}</p>
+                  )}
+                  {merchant.address && (
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
+                      <span className="line-clamp-1">{merchant.address}</span>
+                    </div>
+                  )}
+                  <Button size="sm" variant="ghost" className="w-full mt-1">
+                    Visit Store
+                    <ArrowRight className="w-4 h-4 ml-1" />
+                  </Button>
+                </div>
+              </Card>
+            );
+          })}
         </div>
 
         {/* Desktop: 3-up grid with rotation */}
