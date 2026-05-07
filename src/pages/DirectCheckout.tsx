@@ -27,6 +27,8 @@ interface Merchant {
 
 function CheckoutForm({ 
  amount, 
+  originalAmount,
+  pawbucksApplied,
  merchantName, 
  pawbucksEarned,
  paymentIntentId,
@@ -34,6 +36,8 @@ function CheckoutForm({
  onSuccess 
 }: { 
  amount: number; 
+  originalAmount: number;
+  pawbucksApplied: number;
  merchantName: string;
  pawbucksEarned: number;
  paymentIntentId: string;
@@ -120,10 +124,20 @@ function CheckoutForm({
  <span className="text-muted-foreground">Payment to</span>
  <span className="font-medium">{merchantName}</span>
  </div>
- <div className="flex justify-between items-center mb-2">
- <span className="text-muted-foreground">Amount</span>
- <span className="text-2xl font-bold">{Formatters.currency((amount / 100))}</span>
- </div>
+        <div className="flex justify-between items-center mb-1 text-sm">
+          <span className="text-muted-foreground">Total</span>
+          <span>{Formatters.currency(originalAmount / 100)}</span>
+        </div>
+        {pawbucksApplied > 0 && (
+          <div className="flex justify-between items-center mb-1 text-sm text-primary">
+            <span>Savings applied</span>
+            <span>−{Formatters.currency(pawbucksApplied)}</span>
+          </div>
+        )}
+        <div className="flex justify-between items-center mb-2 pt-2 border-t">
+          <span className="text-muted-foreground">Charged to card</span>
+          <span className="text-2xl font-bold">{Formatters.currency(amount / 100)}</span>
+        </div>
  <div className="flex justify-between items-center">
  <span className="text-muted-foreground flex items-center gap-1">
  <Gift className="h-4 w-4" />
@@ -185,6 +199,8 @@ export default function DirectCheckout() {
  const [connectedAccountId, setConnectedAccountId] = useState<string | null>(null);
  const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null);
  const [pawbucksEarned, setPawbucksEarned] = useState(0);
+ const [stripeAmount, setStripeAmount] = useState<number>(0);
+ const [pawbucksApplied, setPawbucksApplied] = useState<number>(0);
  const [creating, setCreating] = useState(false);
  const [success, setSuccess] = useState(false);
  const [autoStarted, setAutoStarted] = useState(false);
@@ -278,6 +294,8 @@ export default function DirectCheckout() {
  setConnectedAccountId(data.connectedAccountId);
  setPaymentIntentId(data.paymentIntentId);
  setPawbucksEarned(data.pawbucksEarned ?? 0);
+      setStripeAmount(Number(data.stripeAmount ?? parseFloat(amount)));
+      setPawbucksApplied(Number(data.pawbucksUsdValue ?? 0));
  } catch (error: any) {
  console.error("Error creating payment:", error);
  toast.error(error.message ||"Failed to create payment");
@@ -447,7 +465,9 @@ export default function DirectCheckout() {
  }}
  >
  <CheckoutForm 
- amount={Math.round(parseFloat(amount) * 100)}
+              amount={Math.round(stripeAmount * 100)}
+              originalAmount={Math.round(parseFloat(amount) * 100)}
+              pawbucksApplied={pawbucksApplied}
  merchantName={merchant.business_name}
  pawbucksEarned={pawbucksEarned}
  paymentIntentId={paymentIntentId!}
