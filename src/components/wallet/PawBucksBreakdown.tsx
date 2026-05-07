@@ -22,6 +22,7 @@ interface ExpiringPawBucks {
  expires_at: string;
  description: string;
  created_at: string;
+ source?: "earned" | "promotional";
 }
 
 interface PawBucksBreakdownProps {
@@ -33,6 +34,7 @@ export const PawBucksBreakdown = ({ userId }: PawBucksBreakdownProps) => {
  const [pendingBalance, setPendingBalance] = useState<number>(0);
  const [pendingItems, setPendingItems] = useState<PendingPawBucks[]>([]);
  const [expiringItems, setExpiringItems] = useState<ExpiringPawBucks[]>([]);
+ const [promotionalExpiring, setPromotionalExpiring] = useState<ExpiringPawBucks[]>([]);
  const [loading, setLoading] = useState(true);
 
  const sharedAccount = useSharedAccount(userId);
@@ -48,7 +50,7 @@ export const PawBucksBreakdown = ({ userId }: PawBucksBreakdownProps) => {
  if (!effectiveUserId) return;
  
  try {
- const [walletResult, pendingResult, expiringResult] = await Promise.all([
+  const [walletResult, pendingResult, expiringResult, petFundReleasesResult] = await Promise.all([
  supabase
  .from("pawbucks_wallet")
  .select("balance")
@@ -68,7 +70,15 @@ export const PawBucksBreakdown = ({ userId }: PawBucksBreakdownProps) => {
  .eq("type","credit")
  .not("expires_at","is", null)
  .order("expires_at", { ascending: true })
- .limit(20),
+  .limit(50),
+  supabase
+  .from("pet_fund_releases")
+  .select("id, amount, expires_at, month_number, released_at")
+  .eq("user_id", effectiveUserId)
+  .eq("status","released")
+  .is("used_at", null)
+  .not("expires_at","is", null)
+  .order("expires_at", { ascending: true }),
  ]);
 
  setAvailableBalance(walletResult.data?.balance || 0);
@@ -79,13 +89,26 @@ export const PawBucksBreakdown = ({ userId }: PawBucksBreakdownProps) => {
  }
 
  if (expiringResult.data) {
- // Only show items expiring within 30 days
- const soonExpiring = expiringResult.data.filter(item => {
- const daysLeft = differenceInDays(new Date(item.expires_at), new Date());
- return daysLeft <= 30 && daysLeft >= 0;
- });
- setExpiringItems(soonExpiring);
+  // Show all upcoming expirations (not yet expired)
+  const upcoming = expiringResult.data
+    .filter(item => differenceInDays(new Date(item.expires_at), new Date()) >= 0)
+    .map(item => ({ ...item, source: "earned" as const }));
+  setExpiringItems(upcoming);
  }
+
+  if (petFundReleasesResult.data) {
+  const promo = petFundReleasesResult.data
+    .filter((r: any) => r.expires_at && differenceInDays(new Date(r.expires_at), new Date()) >= 0)
+    .map((r: any) => ({
+      id: r.id,
+      amount: r.amount,
+      expires_at: r.expires_at,
+      description: `Pet Fund credit (Month ${r.month_number})`,
+      created_at: r.released_at,
+      source: "promotional" as const,
+    }));
+  setPromotionalExpiring(promo);
+  }
  } catch (error) {
  console.error("Error loading PawBucks breakdown:", error);
  } finally {
@@ -102,6 +125,7 @@ export const PawBucksBreakdown = ({ userId }: PawBucksBreakdownProps) => {
  }
 
  const totalExpiring = expiringItems.reduce((sum, item) => sum + item.amount, 0);
+ const totalPromoExpiring = promotionalExpiring.reduce((sum, item) => sum + item.amount, 0);
 
  return (
  <div className="space-y-4">
@@ -138,12 +162,12 @@ export const PawBucksBreakdown = ({ userId }: PawBucksBreakdownProps) => {
  </Card>
  </div>
 
- {/* Expiring Soon Alert */}
- {expiringItems.length > 0 && (
+  {/* Earned PawBucks expirations (60-day) */}
+  {expiringItems.length > 0 && (
  <Card className="p-4 border-warning/30 bg-warning/5">
  <h4 className="font-medium mb-3 flex items-center gap-2">
  <AlertTriangle className="w-4 h-4 text-warning" />
- Expiring Soon
+  Earned PawBucks — Upcoming Expirations
  <Badge variant="outline" className="text-xs bg-warning/10 text-warning border-warning/30">
  {Formatters.number(totalExpiring)} PB
  </Badge>
@@ -193,6 +217,62 @@ export const PawBucksBreakdown = ({ userId }: PawBucksBreakdownProps) => {
  </div>
  </Card>
  )}
+
+  {/* Promotional credits expirations (30-day) */}
+  {promotionalExpiring.length > 0 && (
+   <Card className="p-4 border-success/30 bg-success/5">
+   <h4 className="font-medium mb-3 flex items-center gap-2">
+   <AlertTriangle className="w-4 h-4 text-success" />
+   Pet Fund / Welcome Credits — Upcoming Expirations
+   <Badge variant="outline" className="text-xs bg-success/10 text-success border-success/30">
+   {Formatters.number(totalPromoExpiring)} PB
+   </Badge>
+   </h4>
+   <div className="space-y-2">
+   {promotionalExpiring.map((item) => {
+   const daysLeft = differenceInDays(new Date(item.expires_at), new Date());
+   const isUrgent = daysLeft <= 3;
+   return (
+   <div
+   key={item.id}
+   className={`flex items-center justify-between p-3 rounded-lg border ${
+   isUrgent
+   ? 'bg-destructive/10 border-destructive/30'
+   : 'bg-muted/30 border-border/50'
+   }`}
+   >
+   <div className="flex-1">
+   <p className="text-sm font-medium">{item.description}</p>
+   <p className={`text-xs ${isUrgent ? 'text-destructive font-medium' : 'text-muted-foreground'}`}>
+   {daysLeft === 0
+   ? 'Expires today!'
+   : daysLeft === 1
+   ? 'Expires tomorrow!'
+   : `Expires in ${daysLeft} days`}
+   </p>
+   </div>
+   <div className="text-right">
+   <p className={`font-semibold ${isUrgent ? 'text-destructive' : 'text-success'}`}>
+   {Formatters.number(item.amount)}
+   </p>
+   <p className="text-xs text-muted-foreground">
+   {format(new Date(item.expires_at), 'MMM d')}
+   </p>
+   </div>
+   </div>
+   );
+   })}
+   </div>
+   <div className="mt-3 p-3 bg-muted/30 rounded-lg">
+   <div className="flex items-start gap-2">
+   <Info className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+   <p className="text-xs text-muted-foreground">
+   Pet Fund and Welcome credits expire 30 days after release. Apply them at checkout before they expire!
+   </p>
+   </div>
+   </div>
+   </Card>
+  )}
 
  {/* Pending Items List */}
  {pendingItems.length > 0 && (

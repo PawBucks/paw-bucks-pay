@@ -75,6 +75,8 @@ export const PawBucksCheckoutDialog = ({
  hasPetFund,
  petFundBalance,
  petFundMinTransactionUsd,
+ earnedNextExpiresAt,
+ promotionalNextExpiresAt,
  isLoading: loadingBalance 
  } = useSpendablePawBucks(userId);
 
@@ -226,6 +228,8 @@ export const PawBucksCheckoutDialog = ({
  selectedSource={pawbucksSource}
  onSourceChange={handleSourceChange}
  promotionalLabel={hasPetFund ?"Pet Fund Credit" :"Welcome Credit"}
+  earnedNextExpiresAt={earnedNextExpiresAt}
+  promotionalNextExpiresAt={promotionalNextExpiresAt}
  />
   {autoSelected && (
   <div className="text-xs bg-primary/5 border border-primary/20 rounded-md px-3 py-2 text-muted-foreground">
