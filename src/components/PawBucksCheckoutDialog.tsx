@@ -85,18 +85,6 @@ export const PawBucksCheckoutDialog = ({
  }
  }, [open]);
 
- // Auto-select best source when dialog opens (prefer earned — those expire in 60 days)
- useEffect(() => {
- if (!open || loadingBalance || pawbucksSource !=="none") return;
- if (hasBothSources) {
- setPawbucksSource("earned");
- } else if (spendableBalance > 0) {
- setPawbucksSource("earned");
- } else if (welcomeCreditApplicable && petFundCreditBalance > 0) {
- setPawbucksSource("promotional");
- }
- }, [open, loadingBalance, hasBothSources, spendableBalance, welcomeCreditApplicable, petFundCreditBalance, pawbucksSource]);
-
  const petFundMinUsd = petFundMinTransactionUsd || PET_FUND_MIN_USD;
  const petFundCreditBalance = hasPetFund ? petFundBalance : welcomeCreditBalance;
  const welcomeCreditApplicable = (hasPetFund || hasWelcomeCredit) && merchantAcceptsPawBucks && priceAmount >= petFundMinUsd;
@@ -114,6 +102,16 @@ export const PawBucksCheckoutDialog = ({
  setPawbucksSource(source);
  setPawbucksToUse(0);
  };
+
+ // Auto-select best source when dialog opens (prefer earned — those expire in 60 days)
+ useEffect(() => {
+ if (!open || loadingBalance || pawbucksSource !=="none") return;
+ if (spendableBalance > 0) {
+ setPawbucksSource("earned");
+ } else if (welcomeCreditApplicable && petFundCreditBalance > 0) {
+ setPawbucksSource("promotional");
+ }
+ }, [open, loadingBalance, spendableBalance, welcomeCreditApplicable, petFundCreditBalance, pawbucksSource]);
 
  // Calculate values
  const pawbucksUsdValue = pawbucksToUse * PAWBUCKS_TO_USD;
