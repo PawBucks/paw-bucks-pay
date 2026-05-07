@@ -854,7 +854,7 @@ const InvoicePayment = () => {
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-2">
  <Coins className="h-5 w-5 text-warning" />
- <span className="font-medium text-warning">Pay with PawBucks</span>
+                        <span className="font-medium text-warning">Apply PawBucks</span>
  </div>
  {loadingPawbucks ? (
  <Badge variant="outline" className="bg-white dark:bg-background">
@@ -872,7 +872,7 @@ const InvoicePayment = () => {
  <>
  <div className="space-y-2">
  <div className="flex justify-between text-sm">
- <span className="text-muted-foreground">PawBucks to use</span>
+                            <span className="text-muted-foreground">Applied to this invoice</span>
  <span className="font-medium">
  {pawbucksToUse.toLocaleString()} PB = {Formatters.currency(pawbucksValueUSD)}
  </span>
