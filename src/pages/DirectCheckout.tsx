@@ -451,7 +451,9 @@ export default function DirectCheckout() {
  }}
  >
  <CheckoutForm 
- amount={Math.round(parseFloat(amount) * 100)}
+              amount={Math.round(stripeAmount * 100)}
+              originalAmount={Math.round(parseFloat(amount) * 100)}
+              pawbucksApplied={pawbucksApplied}
  merchantName={merchant.business_name}
  pawbucksEarned={pawbucksEarned}
  paymentIntentId={paymentIntentId!}
