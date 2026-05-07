@@ -11,6 +11,10 @@ interface SpendablePawBucksResult {
  petFundBalance: number;
  hasPetFund: boolean;
  petFundMinTransactionUsd: number;
+ /** Soonest-expiring date for earned PawBucks (ISO string), if any. */
+ earnedNextExpiresAt: string | null;
+ /** Soonest-expiring date for promotional credit (ISO string), if any. */
+ promotionalNextExpiresAt: string | null;
  isLoading: boolean;
  error: Error | null;
  refresh: () => Promise<void>;
@@ -29,6 +33,8 @@ export function useSpendablePawBucks(userId: string | undefined): SpendablePawBu
  const [petFundMinTransactionUsd, setPetFundMinTransactionUsd] = useState(20);
  const [welcomeCreditBalance, setWelcomeCreditBalance] = useState(0);
  const [hasWelcomeCredit, setHasWelcomeCredit] = useState(false);
+ const [earnedNextExpiresAt, setEarnedNextExpiresAt] = useState<string | null>(null);
+ const [promotionalNextExpiresAt, setPromotionalNextExpiresAt] = useState<string | null>(null);
  const [isLoading, setIsLoading] = useState(true);
  const [error, setError] = useState<Error | null>(null);
 
@@ -43,6 +49,8 @@ export function useSpendablePawBucks(userId: string | undefined): SpendablePawBu
  setHasPetFund(false);
  setWelcomeCreditBalance(0);
  setHasWelcomeCredit(false);
+ setEarnedNextExpiresAt(null);
+ setPromotionalNextExpiresAt(null);
  setIsLoading(false);
  return;
  }
@@ -52,7 +60,7 @@ export function useSpendablePawBucks(userId: string | undefined): SpendablePawBu
  setError(null);
 
  // Fetch wallet balance, locked rewards, pet fund, and legacy welcome credit in parallel
- const [walletResult, lockedResult, petFundResult, legacyResult] = await Promise.all([
+  const [walletResult, lockedResult, petFundResult, legacyResult, earnedExpiryResult] = await Promise.all([
  supabase
  .from("pawbucks_wallet")
  .select("balance")
@@ -77,6 +85,16 @@ export function useSpendablePawBucks(userId: string | undefined): SpendablePawBu
  .eq("user_id", effectiveUserId)
  .eq("status","active")
  .maybeSingle(),
+  supabase
+  .from("pawbucks_activity")
+  .select("expires_at")
+  .eq("user_id", effectiveUserId)
+  .eq("pawbucks_status","available")
+  .eq("type","credit")
+  .not("expires_at","is", null)
+  .gt("expires_at", new Date().toISOString())
+  .order("expires_at", { ascending: true })
+  .limit(1),
  ]);
 
  if (walletResult.error && walletResult.error.code !=="PGRST116") {
@@ -89,24 +107,32 @@ export function useSpendablePawBucks(userId: string | undefined): SpendablePawBu
  setSpendableBalance(spendable);
  setLockedBalance(locked);
 
+  setEarnedNextExpiresAt(earnedExpiryResult.data?.[0]?.expires_at ?? null);
+
  // Check Pet Fund (new system)
  if (petFundResult.data && petFundResult.data.status ==="active") {
  const pfBalance = petFundResult.data.available_balance || 0;
  setPetFundBalance(pfBalance);
  setHasPetFund(pfBalance > 0);
 
- // Determine min transaction: query releases to check if month 0 is still available
- const { data: releases } = await supabase
- .from("pet_fund_releases")
- .select("month_number, used_at")
- .eq("user_id", effectiveUserId)
- .eq("status","released")
- .is("used_at", null)
- .order("month_number", { ascending: true })
- .limit(1);
+  // Determine min transaction + soonest promotional expiration
+  const { data: releases } = await supabase
+  .from("pet_fund_releases")
+  .select("month_number, used_at, expires_at")
+  .eq("user_id", effectiveUserId)
+  .eq("status","released")
+  .is("used_at", null)
+  .order("month_number", { ascending: true });
 
- const oldestAvailable = releases?.[0];
- setPetFundMinTransactionUsd(oldestAvailable?.month_number === 0 ? 40 : 20);
+  const oldestAvailable = releases?.[0];
+  setPetFundMinTransactionUsd(oldestAvailable?.month_number === 0 ? 40 : 20);
+
+  const now = new Date();
+  const soonestPromo = (releases || [])
+  .map(r => r.expires_at)
+  .filter((d): d is string => !!d && new Date(d) > now)
+  .sort()[0] ?? null;
+  setPromotionalNextExpiresAt(soonestPromo);
 
  // Map pet fund to welcome credit interface for backwards compatibility
  setWelcomeCreditBalance(pfBalance);
@@ -125,6 +151,7 @@ export function useSpendablePawBucks(userId: string | undefined): SpendablePawBu
  }
  setWelcomeCreditBalance(wcBalance);
  setHasWelcomeCredit(wcBalance > 0);
+  setPromotionalNextExpiresAt(legacyResult.data.expires_at ?? null);
  }
  setPetFundBalance(0);
  setHasPetFund(false);
@@ -133,6 +160,7 @@ export function useSpendablePawBucks(userId: string | undefined): SpendablePawBu
  setHasWelcomeCredit(false);
  setPetFundBalance(0);
  setHasPetFund(false);
+  setPromotionalNextExpiresAt(null);
  }
  } catch (err) {
  console.error("Error loading PawBucks balances:", err);
@@ -157,6 +185,8 @@ export function useSpendablePawBucks(userId: string | undefined): SpendablePawBu
  petFundBalance,
  hasPetFund,
  petFundMinTransactionUsd,
+ earnedNextExpiresAt,
+ promotionalNextExpiresAt,
  isLoading: isLoading || sharedAccount.isLoading,
  error,
  refresh: loadBalances,
