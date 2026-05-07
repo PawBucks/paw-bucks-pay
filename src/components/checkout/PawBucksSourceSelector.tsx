@@ -65,13 +65,13 @@ export const PawBucksSourceSelector = ({
                     <div>
                       <p className="text-sm font-medium text-foreground">Promotional Credits</p>
                       <p className="text-xs text-muted-foreground">
-                        Pet Fund, Welcome credits, and campaign bonuses. Never expire.
+                        Pet Fund, Welcome credits, and campaign bonuses. Expire 30 days after release.
                       </p>
                     </div>
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground pt-1 border-t border-border">
-                  You can only use one source per purchase. We recommend using earned PawBucks first since they expire.
+                  You can only use one source per purchase. We recommend using promotional credits first since they expire sooner (30 days vs. 60 days).
                 </p>
               </div>
             </TooltipContent>

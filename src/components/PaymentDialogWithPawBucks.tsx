@@ -334,20 +334,20 @@ export const PaymentDialogWithPawBucks = ({
  setAutoSelected(false);
  };
 
- // Auto-select best source once balances + amount are known.
- // Prefer earned (expires in 60 days); otherwise fall back to promotional credit.
- useEffect(() => {
- if (!open || loadingBalance) return;
- if (pawbucksSource !=="none") return;
- if (totalAmount <= 0) return;
- if (spendableBalance > 0) {
- setPawbucksSource("earned");
- setAutoSelected(true);
- } else if (petFundApplicable && petFundCreditBalance > 0) {
- setPawbucksSource("promotional");
- setAutoSelected(true);
- }
- }, [open, loadingBalance, pawbucksSource, totalAmount, spendableBalance, petFundApplicable, petFundCreditBalance]);
+  // Auto-select best source once balances + amount are known.
+  // Prefer promotional (expires in 30 days — sooner than earned at 60 days); otherwise fall back to earned.
+  useEffect(() => {
+  if (!open || loadingBalance) return;
+  if (pawbucksSource !=="none") return;
+  if (totalAmount <= 0) return;
+  if (petFundApplicable && petFundCreditBalance > 0) {
+  setPawbucksSource("promotional");
+  setAutoSelected(true);
+  } else if (spendableBalance > 0) {
+  setPawbucksSource("earned");
+  setAutoSelected(true);
+  }
+  }, [open, loadingBalance, pawbucksSource, totalAmount, spendableBalance, petFundApplicable, petFundCreditBalance]);
 
  const pawbucksUsdValue = pawbucksToUse * PAWBUCKS_TO_USD;
  // PawBucks only apply to the base amount; tip always goes to card
@@ -605,15 +605,15 @@ export const PaymentDialogWithPawBucks = ({
  onSourceChange={handleSourceChange}
  promotionalLabel={hasPetFund ?"Pet Fund Credit" :"Welcome Credit"}
  />
- {autoSelected && pawbucksSource !=="none" && (
- <div className="text-xs bg-primary/5 border border-primary/20 rounded-md px-3 py-2 text-muted-foreground">
- <span className="font-medium text-primary">Auto-selected:</span>{" "}
- {pawbucksSource ==="earned"
- ?"Earned PawBucks — these expire 60 days after you receive them, so we apply them first."
- : `${hasPetFund ?"Pet Fund" :"Welcome"} credit — used because you have no earned PawBucks available.`}
- {" "}You can switch sources above.
- </div>
- )}
+  {autoSelected && pawbucksSource !=="none" && (
+  <div className="text-xs bg-primary/5 border border-primary/20 rounded-md px-3 py-2 text-muted-foreground">
+  <span className="font-medium text-primary">Auto-selected:</span>{" "}
+  {pawbucksSource ==="promotional"
+  ? `${hasPetFund ?"Pet Fund" :"Welcome"} credit — these expire 30 days after release, so we apply them first.`
+  : "Earned PawBucks — used because you have no promotional credits available."}
+  {" "}You can switch sources above.
+  </div>
+  )}
  </>
  )}
 
