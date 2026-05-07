@@ -135,14 +135,14 @@ const PremiumMerchantsBannerComponent = ({
  )}
  </div>
 
- <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="md:grid md:grid-cols-3 md:gap-4 flex gap-3 overflow-x-auto snap-x snap-mandatory scroll-smooth -mx-4 px-4 pb-2 scroll-gpu scroll-snap-x">
  {visibleMerchants.map((merchant, index) => {
  const isVerifiedPro = verifiedProIds?.includes(merchant.id);
  
  return (
  <Card
  key={`${merchant.id}-${index}`}
- className="group p-5 cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-[1.02] border-2 border-accent/20 hover:border-accent/40 bg-gradient-to-br from-card to-accent/5 overflow-hidden relative"
+                className="group p-5 cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-[1.02] border-2 border-accent/20 hover:border-accent/40 bg-gradient-to-br from-card to-accent/5 overflow-hidden relative shrink-0 w-[85%] sm:w-[60%] md:w-auto snap-start scroll-snap-item"
  onClick={() => handleMerchantClick(merchant.id)}
  >
  {/* Premium glow effect */}
