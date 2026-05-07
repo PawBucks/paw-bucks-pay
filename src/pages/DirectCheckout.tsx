@@ -485,6 +485,7 @@ export default function DirectCheckout() {
               amount={Math.round(stripeAmount * 100)}
               originalAmount={Math.round(parseFloat(amount) * 100)}
               pawbucksApplied={pawbucksApplied}
+             tipAmount={Math.max(0, parseFloat(tip) || 0)}
  merchantName={merchant.business_name}
  pawbucksEarned={pawbucksEarned}
  paymentIntentId={paymentIntentId!}
