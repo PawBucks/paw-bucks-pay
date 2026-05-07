@@ -280,61 +280,12 @@ const Dashboard = () => {
  ) : null;
  })()}
  
- {/* Below-the-fold sections use content-visibility for paint savings */}
- {/* Row 3: Pet Timeline - The emotional hook */}
- {user && pets.length > 0 && (
- <div className="content-auto">
- <motion.div custom={isPawPassSubscriber ? 4 : 3} variants={cardVariants} initial="hidden" animate="visible">
- <TimelineTeaser 
- userId={effectiveWalletUserId || user.id} 
- pets={pets.map(p => ({ id: p.id, name: p.name }))} 
- />
- </motion.div>
- </div>
- )}
- 
- {/* Row 3.5: Loyalty Rewards - Outcome-first rewards */}
- {user && (
- <div className="content-auto-sm">
- <motion.div custom={isPawPassSubscriber ? 4.5 : 3.5} variants={cardVariants} initial="hidden" animate="visible">
- <LoyaltyDashboardWidget userId={effectiveWalletUserId || user.id} />
- </motion.div>
- </div>
- )}
- 
- {/* Row 3.6: Merchant Loyalty Punch Cards */}
- {user && (
- <div className="content-auto-sm">
- <motion.div custom={isPawPassSubscriber ? 4.6 : 3.6} variants={cardVariants} initial="hidden" animate="visible">
- <CustomerLoyaltyCards userId={effectiveWalletUserId || user.id} compact />
- </motion.div>
- </div>
- )}
- 
- {/* Row 3.7: Discover Merchants with Loyalty Programs */}
- {user && (
- <div className="content-auto-sm">
- <motion.div custom={isPawPassSubscriber ? 4.7 : 3.7} variants={cardVariants} initial="hidden" animate="visible">
- <LoyaltyProgramDiscovery userId={effectiveWalletUserId || user.id} />
- </motion.div>
- </div>
- )}
- 
- {/* Row 4: Guilt-Free Badges - Gamification hook */}
- {user && (
- <div className="content-auto-sm">
- <motion.div custom={isPawPassSubscriber ? 5 : 4} variants={cardVariants} initial="hidden" animate="visible">
- <BadgeTeaser userId={effectiveWalletUserId || user.id} />
- </motion.div>
- </div>
- )}
- 
- {/* Row 4: My Invoices - Shows invoices sent to this pet owner */}
- {user?.email && (
- <motion.div custom={isPawPassSubscriber ? 5 : 4} variants={cardVariants} initial="hidden" animate="visible">
- <PetOwnerInvoices userEmail={user.email} />
- </motion.div>
- )}
+  {/* Row 3: My Invoices - Shows invoices sent to this pet owner */}
+  {user?.email && (
+  <motion.div custom={isPawPassSubscriber ? 5 : 4} variants={cardVariants} initial="hidden" animate="visible">
+  <PetOwnerInvoices userEmail={user.email} />
+  </motion.div>
+  )}
  
  {/* Row 5: Share PawBucks - Full Width */}
  <motion.div custom={isPawPassSubscriber ? 6 : 5} variants={cardVariants} initial="hidden" animate="visible">
