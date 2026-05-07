@@ -106,17 +106,17 @@ export const PawBucksCheckoutDialog = ({
  setAutoSelected(false);
  };
 
- // Auto-select best source when dialog opens (prefer earned — those expire in 60 days)
- useEffect(() => {
- if (!open || loadingBalance || pawbucksSource !=="none") return;
- if (spendableBalance > 0) {
- setPawbucksSource("earned");
- setAutoSelected(true);
- } else if (welcomeCreditApplicable && petFundCreditBalance > 0) {
- setPawbucksSource("promotional");
- setAutoSelected(true);
- }
- }, [open, loadingBalance, spendableBalance, welcomeCreditApplicable, petFundCreditBalance, pawbucksSource]);
+  // Auto-select best source when dialog opens (prefer promotional — those expire in 30 days, sooner than earned at 60)
+  useEffect(() => {
+  if (!open || loadingBalance || pawbucksSource !=="none") return;
+  if (welcomeCreditApplicable && petFundCreditBalance > 0) {
+  setPawbucksSource("promotional");
+  setAutoSelected(true);
+  } else if (spendableBalance > 0) {
+  setPawbucksSource("earned");
+  setAutoSelected(true);
+  }
+  }, [open, loadingBalance, spendableBalance, welcomeCreditApplicable, petFundCreditBalance, pawbucksSource]);
 
  // Calculate values
  const pawbucksUsdValue = pawbucksToUse * PAWBUCKS_TO_USD;
@@ -227,15 +227,15 @@ export const PawBucksCheckoutDialog = ({
  onSourceChange={handleSourceChange}
  promotionalLabel={hasPetFund ?"Pet Fund Credit" :"Welcome Credit"}
  />
- {autoSelected && (
- <div className="text-xs bg-primary/5 border border-primary/20 rounded-md px-3 py-2 text-muted-foreground">
- <span className="font-medium text-primary">Auto-selected:</span>{" "}
- {pawbucksSource ==="earned"
- ?"Earned PawBucks — these expire 60 days after you receive them, so we use them first."
- : `${hasPetFund ?"Pet Fund" :"Welcome"} credit — applied because you have no earned PawBucks available.`}
- {" "}You can switch sources above.
- </div>
- )}
+  {autoSelected && (
+  <div className="text-xs bg-primary/5 border border-primary/20 rounded-md px-3 py-2 text-muted-foreground">
+  <span className="font-medium text-primary">Auto-selected:</span>{" "}
+  {pawbucksSource ==="promotional"
+  ? `${hasPetFund ?"Pet Fund" :"Welcome"} credit — these expire 30 days after release, so we use them first.`
+  : "Earned PawBucks — applied because you have no promotional credits available."}
+  {" "}You can switch sources above.
+  </div>
+  )}
  </>
  )}
 

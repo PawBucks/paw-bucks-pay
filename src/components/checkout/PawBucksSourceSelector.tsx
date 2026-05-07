@@ -71,7 +71,7 @@ export const PawBucksSourceSelector = ({
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground pt-1 border-t border-border">
-                  You can only use one source per purchase. We recommend using earned PawBucks first since they expire.
+                  You can only use one source per purchase. We recommend using promotional credits first since they expire sooner (30 days vs. 60 days).
                 </p>
               </div>
             </TooltipContent>
