@@ -8565,6 +8565,7 @@ export type Database = {
           amount: number
           created_at: string
           expires_at: string | null
+          expiry_reminder_sent_days: number[]
           id: string
           ledger_id: string
           min_transaction_usd: number
@@ -8580,6 +8581,7 @@ export type Database = {
           amount: number
           created_at?: string
           expires_at?: string | null
+          expiry_reminder_sent_days?: number[]
           id?: string
           ledger_id: string
           min_transaction_usd?: number
@@ -8595,6 +8597,7 @@ export type Database = {
           amount?: number
           created_at?: string
           expires_at?: string | null
+          expiry_reminder_sent_days?: number[]
           id?: string
           ledger_id?: string
           min_transaction_usd?: number
@@ -15309,6 +15312,7 @@ export type Database = {
       }
       revoke_pet_digital_id_token: { Args: { p_pet_id: string }; Returns: Json }
       send_pawbucks_expiry_reminders: { Args: never; Returns: number }
+      send_pet_fund_expiry_reminders: { Args: never; Returns: number }
       set_system_config: {
         Args: { _key: string; _value: string }
         Returns: undefined
