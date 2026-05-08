@@ -151,7 +151,7 @@ export const DASHBOARD_ROUTE_BY_PERSONA: Record<AuthPersona, string> = {
   brand:"/brand-dashboard",
   vet:"/merchant-dashboard", // vets are stored as merchants
   merchant:"/merchant-dashboard",
-  pet_owner:"/dashboard",
+  pet_owner:"/home",
 };
 
 /**
