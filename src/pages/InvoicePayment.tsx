@@ -24,6 +24,7 @@ import { toast } from"sonner";
 import { type Invoice } from"@/services/api/invoicing.service";
 
 import { Formatters } from "@/utils/formatters";
+import pawbucksLogo from "@/assets/pawbucks-logo.png";
 const PAWBUCKS_TO_USD = 0.001; // 1 PawBuck = $0.001
 
 const InvoicePayment = () => {
@@ -556,13 +557,13 @@ const InvoicePayment = () => {
  <span className="text-muted-foreground">Subtotal</span>
  <span>{Formatters.currency(Number(invoice.subtotal))}</span>
  </div>
- {invoice.discount_amount && invoice.discount_amount > 0 && (
+                  {Number(invoice.discount_amount) > 0 && (
  <div className="flex justify-between text-success">
  <span>Discount</span>
  <span>-{Formatters.currency(Number(invoice.discount_amount))}</span>
  </div>
  )}
- {invoice.tax_amount && invoice.tax_amount > 0 && (
+                  {Number(invoice.tax_amount) > 0 && (
  <div className="flex justify-between">
  <span className="text-muted-foreground">
  Tax {invoice.tax_rate ? `(${invoice.tax_rate}%)` :""}
@@ -570,7 +571,7 @@ const InvoicePayment = () => {
  <span>{Formatters.currency(Number(invoice.tax_amount))}</span>
  </div>
  )}
- {invoice.shipping_amount && invoice.shipping_amount > 0 && (
+                  {Number(invoice.shipping_amount) > 0 && (
  <div className="flex justify-between">
  <span className="text-muted-foreground">Shipping</span>
  <span>{Formatters.currency(Number(invoice.shipping_amount))}</span>
@@ -650,10 +651,8 @@ const InvoicePayment = () => {
  ) : !user && !guestCheckoutConfirmed ? (
  /* Login Recommended - But can proceed as guest */
  <Card className="border-primary">
- <CardHeader className="text-center pb-2">
- <div className="h-16 w-16 rounded-full bg-gradient-to-br from-warning to-warning flex items-center justify-center mx-auto mb-3">
- <Coins className="h-8 w-8 text-warning" />
- </div>
+                <CardHeader className="text-center pb-2">
+                  <img src={pawbucksLogo} alt="PawBucks" className="h-16 w-16 mx-auto mb-3 object-contain" />
  <CardTitle>Sign In to Earn Rewards</CardTitle>
  <CardDescription>
  Sign in to earn up to 30x PawBucks on this purchase
@@ -833,20 +832,20 @@ const InvoicePayment = () => {
  )}
 
  {/* PawBucks Payment Option - Only show for logged-in users when invoice OR merchant accepts PawBucks */}
- {user && (invoice.accept_pawbucks || merchant?.accepts_pawbucks) && (
- <div className="space-y-3 p-4 bg-gradient-to-br from-warning to-warning rounded-lg border border-warning/20">
+                {user && (invoice.accept_pawbucks || merchant?.accepts_pawbucks) && (
+                  <div className="space-y-3 p-4 bg-muted/40 rounded-lg border border-border">
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-2">
- <Coins className="h-5 w-5 text-warning" />
-                        <span className="font-medium text-warning">Apply PawBucks</span>
+                        <Coins className="h-5 w-5 text-primary" />
+                        <span className="font-medium text-foreground">Apply PawBucks</span>
  </div>
  {loadingPawbucks ? (
- <Badge variant="outline" className="bg-white dark:bg-background">
+                        <Badge variant="outline" className="bg-background">
  <Loader2 className="h-3 w-3 animate-spin mr-1" />
  Loading...
  </Badge>
  ) : (
- <Badge variant="outline" className="bg-white dark:bg-background">
+                        <Badge variant="outline" className="bg-background">
  Balance: {pawbucksBalance.toLocaleString()} PB
  </Badge>
  )}
@@ -887,7 +886,7 @@ const InvoicePayment = () => {
  <p className="text-sm text-muted-foreground">
  You don't have any PawBucks yet. Pay with card and earn up to 30x PawBucks rewards on this purchase!
  </p>
- <div className="flex items-center gap-2 text-xs text-warning">
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
  <Sparkles className="h-3 w-3" />
  <span>Use earned PawBucks on future invoices</span>
  </div>
