@@ -169,20 +169,26 @@ serve(async (req) => {
         .single();
 
       if (merchantWallet) {
-        await supabase
+        const { error: creditError } = await supabase
           .from("merchant_pawbucks_wallet")
           .update({ 
             balance: merchantWallet.balance + pawbucksUsed,
-            total_earned: (merchantWallet.total_earned || 0) + pawbucksUsed,
-            updated_at: new Date().toISOString()
+            last_updated: new Date().toISOString()
           })
           .eq("merchant_id", merchant.id);
+        if (creditError) {
+          console.error("Merchant wallet credit error:", creditError);
+          throw new Error(`Failed to credit merchant PawBucks: ${creditError.message}`);
+        }
       } else {
-        await supabase.from("merchant_pawbucks_wallet").insert({
+        const { error: createError } = await supabase.from("merchant_pawbucks_wallet").insert({
           merchant_id: merchant.id,
           balance: pawbucksUsed,
-          total_earned: pawbucksUsed,
         });
+        if (createError) {
+          console.error("Merchant wallet create error:", createError);
+          throw new Error(`Failed to create merchant PawBucks wallet: ${createError.message}`);
+        }
       }
 
       // Log merchant PawBucks activity
