@@ -613,43 +613,43 @@ const Discover = () => {
  className="flex-1"
  >
 
- {/* ── Hero Section ── */}
- <div className="border-b bg-card">
- <div className="container mx-auto px-4 py-5 sm:py-8 max-w-4xl lg:max-w-7xl">
- <div className="max-w-2xl">
- <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight mb-1.5">
- Find the best pet services
- </h1>
- <p className="text-sm sm:text-base text-muted-foreground mb-5">
- Trusted merchants · Earn rewards on every visit
- </p>
- </div>
+              {/* ── Top Ad ── */}
+              <div className="container mx-auto px-4 pt-3 max-w-4xl lg:max-w-7xl">
+                <AdPlacement position="top" />
+              </div>
 
- {/* Search Bar — Yelp-style prominent */}
- <div className="flex gap-2 sm:gap-3">
- <div className="relative flex-1">
- <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-muted-foreground" />
- <Input
- placeholder="Groomers, vets, pet stores..."
- value={searchTerm}
- onChange={(e) => setSearchTerm(e.target.value)}
- className="pl-10 pr-4 h-11 sm:h-12 bg-background border-border shadow-sm text-sm sm:text-base rounded-lg"
- />
- </div>
- <Button asChild variant="outline" className="h-11 sm:h-12 gap-2 rounded-lg">
- <Link to="/directory">
- <BookOpen className="w-4 h-4" />
- <span className="hidden sm:inline">Directory</span>
- </Link>
- </Button>
- </div>
- </div>
- </div>
+              {/* ── Hero Section ── */}
+              <div className="border-b bg-card">
+                <div className="container mx-auto px-4 py-5 sm:py-8 max-w-4xl lg:max-w-7xl">
+                  <div className="max-w-2xl">
+                    <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight mb-1.5">
+                      Find the best pet services
+                    </h1>
+                    <p className="text-sm sm:text-base text-muted-foreground mb-5">
+                      Trusted merchants · Earn rewards on every visit
+                    </p>
+                  </div>
 
- {/* ── Top Ad ── */}
- <div className="container mx-auto px-4 pt-3 max-w-4xl lg:max-w-7xl">
- <AdPlacement position="top" />
- </div>
+                  {/* Search Bar — Yelp-style prominent */}
+                  <div className="flex gap-2 sm:gap-3">
+                    <div className="relative flex-1">
+                      <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-muted-foreground" />
+                      <Input
+                        placeholder="Groomers, vets, pet stores..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10 pr-4 h-11 sm:h-12 bg-background border-border shadow-sm text-sm sm:text-base rounded-lg"
+                      />
+                    </div>
+                    <Button asChild variant="outline" className="h-11 sm:h-12 gap-2 rounded-lg">
+                      <Link to="/directory">
+                        <BookOpen className="w-4 h-4" />
+                        <span className="hidden sm:inline">Directory</span>
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+              </div>
 
  {/* ── Main Content ── */}
  <div className="container mx-auto px-4 py-4 max-w-4xl lg:max-w-7xl">

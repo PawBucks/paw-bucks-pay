@@ -172,9 +172,9 @@ const Profile = () => {
  </Avatar>
  <div>
        <h2 className="text-2xl lg:text-3xl font-bold">{profile.full_name}</h2>
- <p className="text-sm text-muted-foreground capitalize">
- {profile.user_type.replace("_","")}
- </p>
+                <p className="text-sm text-muted-foreground capitalize">
+                  {profile.user_type === "pet_owner" ? "Pet Owner" : profile.user_type.replace("_", " ")}
+                </p>
  </div>
  {subscription.subscribed && (
  <Badge className="bg-gradient-to-r from-warning to-warning border-0">
