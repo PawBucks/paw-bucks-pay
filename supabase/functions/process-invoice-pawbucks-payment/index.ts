@@ -85,7 +85,12 @@ serve(async (req) => {
     }
 
     const appUrl = Deno.env.get("APP_URL") || "https://pawbucks.app";
-    const stripeAmountCents = totalAmountCents - pawbucksAmountCents;
+    // totalAmountCents from the client = base + tip (in cents).
+    // Stripe will charge the invoice line item PLUS a separate tip line item,
+    // so the invoice line item must NOT include the tip (otherwise tip is double-charged).
+    const tipCents = Number(tipAmountCents || 0);
+    const invoiceLineCents = Math.max(0, totalAmountCents - pawbucksAmountCents - tipCents);
+    const stripeAmountCents = invoiceLineCents; // backwards-compat alias
     const pawbucksUsed = Math.round(pawbucksAmountCents / PAWBUCKS_TO_USD / 100);
 
     // Validate Stripe Connect account if merchant has one
@@ -111,8 +116,8 @@ serve(async (req) => {
       }
     }
 
-    // If paying entirely with PawBucks
-    if (stripeAmountCents <= 0 && pawbucksAmountCents > 0) {
+    // If paying entirely with PawBucks (no tip — tips can't be paid with PawBucks)
+    if (stripeAmountCents <= 0 && tipCents <= 0 && pawbucksAmountCents > 0) {
       logStep("Processing full PawBucks payment");
       
       if (!userId) {
