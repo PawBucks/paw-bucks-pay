@@ -7914,6 +7914,7 @@ export type Database = {
           expires_at: string | null
           expiry_reminder_sent_days: number[] | null
           id: string
+          offer_id: string | null
           partner_id: string | null
           pawbucks_status: string | null
           receipt_id: string | null
@@ -7933,6 +7934,7 @@ export type Database = {
           expires_at?: string | null
           expiry_reminder_sent_days?: number[] | null
           id?: string
+          offer_id?: string | null
           partner_id?: string | null
           pawbucks_status?: string | null
           receipt_id?: string | null
@@ -7952,6 +7954,7 @@ export type Database = {
           expires_at?: string | null
           expiry_reminder_sent_days?: number[] | null
           id?: string
+          offer_id?: string | null
           partner_id?: string | null
           pawbucks_status?: string | null
           receipt_id?: string | null
@@ -7965,6 +7968,13 @@ export type Database = {
           vest_date?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "pawbucks_activity_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "partner_offers"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "pawbucks_activity_partner_id_fkey"
             columns: ["partner_id"]
