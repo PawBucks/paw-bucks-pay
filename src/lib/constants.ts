@@ -26,8 +26,8 @@ export const PET_FUND_TIERS = {
  monthlyUsd: 10,
  totalMonths: 24, // 1 upfront + 23 monthly
  monthlyCount: 23,
- minFirstUsd: 40,
- minMonthlyUsd: 20,
+    minFirstUsd: 60,
+    minMonthlyUsd: 30,
  },
  series_b: {
  label:'Series B',
@@ -40,8 +40,8 @@ export const PET_FUND_TIERS = {
  monthlyUsd: 15,
  totalMonths: 10, // 1 upfront + 9 monthly
  monthlyCount: 9,
- minFirstUsd: 30,
- minMonthlyUsd: 30,
+    minFirstUsd: 45,
+    minMonthlyUsd: 45,
  },
  series_c: {
  label:'Series C',
@@ -54,8 +54,8 @@ export const PET_FUND_TIERS = {
  monthlyUsd: 10,
  totalMonths: 7, // 1 upfront + 6 monthly
  monthlyCount: 6,
- minFirstUsd: 30,
- minMonthlyUsd: 20,
+    minFirstUsd: 45,
+    minMonthlyUsd: 30,
  },
  standard: {
  label:'Standard',
@@ -68,8 +68,8 @@ export const PET_FUND_TIERS = {
  monthlyUsd: 10,
  totalMonths: 5, // 1 upfront + 4 monthly
  monthlyCount: 4,
- minFirstUsd: 20,
- minMonthlyUsd: 20,
+    minFirstUsd: 30,
+    minMonthlyUsd: 30,
  },
 } as const;
 

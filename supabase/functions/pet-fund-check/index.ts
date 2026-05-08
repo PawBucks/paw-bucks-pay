@@ -83,7 +83,9 @@ serve(async (req) => {
 
     // Current min transaction based on oldest available release
     const oldestAvailable = availableReleases[0];
-    const currentMinTransactionUsd = oldestAvailable ? Number(oldestAvailable.min_transaction_usd) : tierInfo.upfrontUsd >= 15 ? 30 : 20;
+    const currentMinTransactionUsd = oldestAvailable
+      ? Number(oldestAvailable.min_transaction_usd)
+      : tierInfo.upfrontUsd * 3;
 
     return new Response(JSON.stringify({
       hasPetFund: true,
