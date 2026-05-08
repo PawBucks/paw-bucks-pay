@@ -96,12 +96,23 @@ serve(async (req) => {
     const items = invoice.invoice_items || [];
     const itemsHtml = items.map((item: any) => `
       <tr>
-        <td style="padding: 12px; border-bottom: 1px solid #eee;">${item.description}</td>
-        <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
-        <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right;">$${Number(item.unit_price).toFixed(2)}</td>
-        <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right;">$${(Number(item.quantity) * Number(item.unit_price)).toFixed(2)}</td>
+        <td style="padding: 12px 8px; border-bottom: 1px solid #e6f5f3; color:#1a1a1a; font-size:14px;">${item.description}</td>
+        <td style="padding: 12px 8px; border-bottom: 1px solid #e6f5f3; text-align: center; color:#4a4a4a; font-size:14px;">${item.quantity}</td>
+        <td style="padding: 12px 8px; border-bottom: 1px solid #e6f5f3; text-align: right; color:#4a4a4a; font-size:14px;">$${Number(item.unit_price).toFixed(2)}</td>
+        <td style="padding: 12px 8px; border-bottom: 1px solid #e6f5f3; text-align: right; color:#1a1a1a; font-size:14px; font-weight:600;">$${(Number(item.quantity) * Number(item.unit_price)).toFixed(2)}</td>
       </tr>
     `).join("");
+
+    // Status badge
+    const amountDueNum = Number(invoice.amount_due ?? invoice.total ?? 0);
+    const isPaid = invoice.status === "paid" || amountDueNum <= 0;
+    const pastDue = !isPaid && isDatePastDue(invoice.due_date);
+    const dueToday = !isPaid && !pastDue && invoice.due_date === new Date().toISOString().slice(0, 10);
+    let badgeText = "Due " + formatLocalDateOnly(invoice.due_date);
+    let badgeBg = "#e6f5f3"; let badgeColor = "#2E9E8F";
+    if (isPaid) { badgeText = "✓ Paid"; badgeBg = "#dcfce7"; badgeColor = "#15803d"; }
+    else if (pastDue) { badgeText = "⚠ Past Due"; badgeBg = "#fee2e2"; badgeColor = "#dc2626"; }
+    else if (dueToday) { badgeText = "⏰ Due Today"; badgeBg = "#fef3c7"; badgeColor = "#b45309"; }
 
     const emailHtml = `
 <!DOCTYPE html>
@@ -111,107 +122,113 @@ serve(async (req) => {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Invoice from ${merchant.business_name}</title>
 </head>
-<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5;">
-  <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-    <div style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+<body style="margin:0; padding:0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color:#f5f7f7; color:#1a1a1a;">
+  <div style="max-width:600px; margin:0 auto; padding:20px;">
+    <div style="background:#ffffff; border-radius:16px; overflow:hidden; box-shadow:0 2px 12px rgba(46,158,143,0.08);">
       <!-- Header -->
-      <div style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); padding: 30px; text-align: center;">
-        ${merchant.logo_url ? `<img src="${merchant.logo_url}" alt="${merchant.business_name}" style="height: 60px; margin-bottom: 15px;">` : ""}
-        <h1 style="color: white; margin: 0; font-size: 24px;">${merchant.business_name}</h1>
-        <p style="color: rgba(255,255,255,0.9); margin: 5px 0 0 0; font-size: 14px;">${merchant.address || ""}</p>
+      <div style="background:linear-gradient(135deg, #2E9E8F 0%, #247d72 100%); padding:32px 24px; text-align:center;">
+        ${merchant.logo_url
+          ? `<img src="${merchant.logo_url}" alt="${merchant.business_name}" style="height:64px; width:64px; border-radius:50%; background:#fff; padding:4px; margin-bottom:14px; object-fit:cover;">`
+          : `<div style="height:64px; width:64px; line-height:64px; border-radius:50%; background:rgba(255,255,255,0.18); color:#fff; font-weight:800; font-size:22px; margin:0 auto 14px;">${(merchant.business_name || "?").slice(0,2).toUpperCase()}</div>`
+        }
+        <h1 style="color:#ffffff; margin:0; font-size:22px; font-weight:700;">${merchant.business_name}</h1>
+        ${merchant.address ? `<p style="color:rgba(255,255,255,0.9); margin:6px 0 0; font-size:13px;">${merchant.address}</p>` : ""}
       </div>
 
-      <!-- Invoice Info -->
-      <div style="padding: 30px;">
-        <div style="text-align: center; margin-bottom: 30px;">
-          <h2 style="margin: 0 0 5px 0; color: #333;">Invoice #${invoice.invoice_number}</h2>
-          ${invoice.title ? `<p style="margin: 0; color: #666;">${invoice.title}</p>` : ""}
-        </div>
+      <!-- Invoice meta -->
+      <div style="padding:28px 24px 8px; text-align:center;">
+        <p style="margin:0; font-size:12px; letter-spacing:0.12em; color:#2E9E8F; text-transform:uppercase; font-weight:600;">Invoice</p>
+        <h2 style="margin:6px 0 4px; color:#1a1a1a; font-size:24px; font-weight:700;">#${invoice.invoice_number}</h2>
+        ${invoice.title ? `<p style="margin:0 0 12px; color:#6b7280; font-size:14px;">${invoice.title}</p>` : `<div style="height:8px;"></div>`}
+        <span style="display:inline-block; background:${badgeBg}; color:${badgeColor}; font-weight:600; font-size:13px; padding:6px 14px; border-radius:999px;">${badgeText}</span>
+      </div>
 
-        <div style="display: flex; justify-content: space-between; margin-bottom: 25px; padding: 15px; background: #f9f9f9; border-radius: 8px;">
-          <div>
-            <p style="margin: 0; font-size: 12px; color: #999; text-transform: uppercase;">Issue Date</p>
-            <p style="margin: 5px 0 0 0; font-weight: 600;">${formatLocalDateOnly(invoice.issue_date)}</p>
-          </div>
-          <div style="text-align: right;">
-            <p style="margin: 0; font-size: 12px; color: #999; text-transform: uppercase;">Due Date</p>
-            <p style="margin: 5px 0 0 0; font-weight: 600; color: ${isDatePastDue(invoice.due_date) ? "#dc2626" : "#333"};">
-              ${formatLocalDateOnly(invoice.due_date)}
-            </p>
-          </div>
-        </div>
+      <!-- Dates -->
+      <div style="padding:20px 24px;">
+        <table role="presentation" width="100%" style="background:#f7fbfa; border-radius:12px; padding:16px;">
+          <tr>
+            <td style="padding:12px 16px; vertical-align:top;">
+              <p style="margin:0; font-size:11px; color:#6b7280; text-transform:uppercase; letter-spacing:0.08em;">Issue Date</p>
+              <p style="margin:4px 0 0; font-weight:600; color:#1a1a1a; font-size:14px;">${formatLocalDateOnly(invoice.issue_date)}</p>
+            </td>
+            <td style="padding:12px 16px; vertical-align:top; text-align:right;">
+              <p style="margin:0; font-size:11px; color:#6b7280; text-transform:uppercase; letter-spacing:0.08em;">Due Date</p>
+              <p style="margin:4px 0 0; font-weight:600; color:${pastDue ? "#dc2626" : "#1a1a1a"}; font-size:14px;">${formatLocalDateOnly(invoice.due_date)}</p>
+            </td>
+          </tr>
+        </table>
+      </div>
 
-        <!-- Bill To -->
-        <div style="margin-bottom: 25px;">
-          <p style="margin: 0; font-size: 12px; color: #999; text-transform: uppercase;">Bill To</p>
-          <p style="margin: 5px 0 0 0; font-weight: 600;">${invoice.client_name}</p>
-          ${invoice.client_company ? `<p style="margin: 2px 0 0 0; color: #666;">${invoice.client_company}</p>` : ""}
-          <p style="margin: 2px 0 0 0; color: #666;">${invoice.client_email}</p>
-          ${invoice.client_phone ? `<p style="margin: 2px 0 0 0; color: #666;">${invoice.client_phone}</p>` : ""}
-        </div>
+      <!-- Bill To -->
+      <div style="padding:0 24px 20px;">
+        <p style="margin:0 0 8px; font-size:11px; color:#6b7280; text-transform:uppercase; letter-spacing:0.08em; font-weight:600;">Bill To</p>
+        <p style="margin:0; font-weight:600; color:#1a1a1a; font-size:15px;">${invoice.client_name}</p>
+        ${invoice.client_company ? `<p style="margin:2px 0 0; color:#6b7280; font-size:13px;">${invoice.client_company}</p>` : ""}
+        <p style="margin:2px 0 0; color:#6b7280; font-size:13px;">${invoice.client_email}</p>
+        ${invoice.client_phone ? `<p style="margin:2px 0 0; color:#6b7280; font-size:13px;">${invoice.client_phone}</p>` : ""}
+      </div>
 
-        <!-- Items Table -->
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px;">
+      <!-- Items -->
+      <div style="padding:0 24px;">
+        <p style="margin:0 0 8px; font-size:11px; color:#6b7280; text-transform:uppercase; letter-spacing:0.08em; font-weight:600;">Items</p>
+        <table style="width:100%; border-collapse:collapse;">
           <thead>
-            <tr style="background: #f5f5f5;">
-              <th style="padding: 12px; text-align: left; font-size: 12px; text-transform: uppercase; color: #666;">Description</th>
-              <th style="padding: 12px; text-align: center; font-size: 12px; text-transform: uppercase; color: #666;">Qty</th>
-              <th style="padding: 12px; text-align: right; font-size: 12px; text-transform: uppercase; color: #666;">Rate</th>
-              <th style="padding: 12px; text-align: right; font-size: 12px; text-transform: uppercase; color: #666;">Amount</th>
+            <tr>
+              <th style="padding:10px 8px; text-align:left; font-size:11px; text-transform:uppercase; color:#6b7280; border-bottom:2px solid #e6f5f3; letter-spacing:0.06em;">Description</th>
+              <th style="padding:10px 8px; text-align:center; font-size:11px; text-transform:uppercase; color:#6b7280; border-bottom:2px solid #e6f5f3; letter-spacing:0.06em;">Qty</th>
+              <th style="padding:10px 8px; text-align:right; font-size:11px; text-transform:uppercase; color:#6b7280; border-bottom:2px solid #e6f5f3; letter-spacing:0.06em;">Rate</th>
+              <th style="padding:10px 8px; text-align:right; font-size:11px; text-transform:uppercase; color:#6b7280; border-bottom:2px solid #e6f5f3; letter-spacing:0.06em;">Amount</th>
             </tr>
           </thead>
-          <tbody>
-            ${itemsHtml}
-          </tbody>
+          <tbody>${itemsHtml}</tbody>
         </table>
-
-        <!-- Totals -->
-        <div style="border-top: 2px solid #eee; padding-top: 15px;">
-          <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-            <span style="color: #666;">Subtotal</span>
-            <span>$${Number(invoice.subtotal).toFixed(2)}</span>
-          </div>
-          ${invoice.discount_amount && invoice.discount_amount > 0 ? `
-          <div style="display: flex; justify-content: space-between; margin-bottom: 8px; color: #16a34a;">
-            <span>Discount</span>
-            <span>-$${Number(invoice.discount_amount).toFixed(2)}</span>
-          </div>
-          ` : ""}
-          ${invoice.tax_amount && invoice.tax_amount > 0 ? `
-          <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-            <span style="color: #666;">Tax ${invoice.tax_rate ? `(${invoice.tax_rate}%)` : ""}</span>
-            <span>$${Number(invoice.tax_amount).toFixed(2)}</span>
-          </div>
-          ` : ""}
-          <div style="display: flex; justify-content: space-between; font-size: 20px; font-weight: 700; padding-top: 10px; border-top: 1px solid #eee;">
-            <span>Amount Due</span>
-            <span style="color: #f97316;">$${Number(invoice.amount_due || invoice.total).toFixed(2)}</span>
-          </div>
-        </div>
-
-        <!-- Pay Button -->
-        <div style="text-align: center; margin-top: 30px;">
-          <a href="${paymentUrl}" style="display: inline-block; background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; text-decoration: none; padding: 16px 40px; border-radius: 8px; font-weight: 600; font-size: 16px;">
-            Pay Now
-          </a>
-        </div>
-
-        ${invoice.notes ? `
-        <div style="margin-top: 30px; padding: 15px; background: #f9f9f9; border-radius: 8px;">
-          <p style="margin: 0 0 5px 0; font-weight: 600; font-size: 14px;">Notes</p>
-          <p style="margin: 0; color: #666; font-size: 14px; white-space: pre-wrap;">${invoice.notes}</p>
-        </div>
-        ` : ""}
       </div>
 
-      <!-- Footer -->
-      <div style="background: #f9f9f9; padding: 20px; text-align: center; border-top: 1px solid #eee;">
-        <p style="margin: 0; color: #999; font-size: 12px;">
-          ${invoice.footer || `Thank you for your business!`}
-        </p>
-        <p style="margin: 10px 0 0 0; color: #999; font-size: 11px;">
-          Powered by PawBucks
-        </p>
+      <!-- Totals -->
+      <div style="padding:20px 24px;">
+        <table role="presentation" width="100%" style="background:#f7fbfa; border-radius:12px;">
+          <tr><td style="padding:12px 16px 6px; color:#6b7280; font-size:14px;">Subtotal</td>
+              <td style="padding:12px 16px 6px; text-align:right; color:#1a1a1a; font-size:14px;">$${Number(invoice.subtotal).toFixed(2)}</td></tr>
+          ${invoice.discount_amount && Number(invoice.discount_amount) > 0 ? `
+          <tr><td style="padding:6px 16px; color:#15803d; font-size:14px;">Discount</td>
+              <td style="padding:6px 16px; text-align:right; color:#15803d; font-size:14px;">-$${Number(invoice.discount_amount).toFixed(2)}</td></tr>` : ""}
+          ${invoice.tax_amount && Number(invoice.tax_amount) > 0 ? `
+          <tr><td style="padding:6px 16px; color:#6b7280; font-size:14px;">Tax ${invoice.tax_rate ? `(${invoice.tax_rate}%)` : ""}</td>
+              <td style="padding:6px 16px; text-align:right; color:#1a1a1a; font-size:14px;">$${Number(invoice.tax_amount).toFixed(2)}</td></tr>` : ""}
+          <tr><td colspan="2" style="padding:0 16px;"><div style="border-top:1px solid #e6f5f3;"></div></td></tr>
+          <tr>
+            <td style="padding:12px 16px 14px; font-weight:700; font-size:16px; color:#1a1a1a;">${isPaid ? "Total Paid" : "Amount Due"}</td>
+            <td style="padding:12px 16px 14px; text-align:right; font-weight:800; font-size:22px; color:#2E9E8F;">$${amountDueNum.toFixed(2)}</td>
+          </tr>
+        </table>
+      </div>
+
+      ${!isPaid ? `
+      <!-- Pay Button -->
+      <div style="padding:8px 24px 28px; text-align:center;">
+        <a href="${paymentUrl}" style="display:inline-block; background:linear-gradient(135deg, #2E9E8F 0%, #247d72 100%); color:#ffffff; text-decoration:none; padding:16px 44px; border-radius:12px; font-weight:700; font-size:16px; box-shadow:0 4px 14px rgba(46,158,143,0.35);">Pay Now →</a>
+        <p style="margin:14px 0 0; color:#6b7280; font-size:12px;">Secure payment via pawbucks.app</p>
+        <p style="margin:4px 0 0; color:#9ca3af; font-size:12px;">Pay with PawBucks, card, cash, Venmo or Zelle</p>
+      </div>` : ""}
+
+      ${invoice.notes ? `
+      <div style="margin:0 24px 24px; padding:14px 16px; background:#f7fbfa; border-radius:12px;">
+        <p style="margin:0 0 4px; font-weight:600; font-size:13px; color:#1a1a1a;">Notes</p>
+        <p style="margin:0; color:#4a4a4a; font-size:13px; white-space:pre-wrap;">${invoice.notes}</p>
+      </div>` : ""}
+
+      <!-- Thank you -->
+      <div style="padding:8px 24px 20px; text-align:center;">
+        <p style="margin:0; color:#1a1a1a; font-size:14px; font-weight:600;">${invoice.footer || "Thank you for your business! 🐾"}</p>
+      </div>
+
+      <!-- Footer / contact -->
+      <div style="background:#f7fbfa; padding:22px 24px; text-align:center; border-top:1px solid #e6f5f3;">
+        <p style="margin:0; color:#1a1a1a; font-size:13px; font-weight:600;">Questions about this invoice?</p>
+        ${merchant.phone ? `<p style="margin:6px 0 0;"><a href="tel:${merchant.phone}" style="color:#2E9E8F; text-decoration:none; font-weight:600; font-size:14px;">${merchant.phone}</a></p>` : ""}
+        ${merchant.email ? `<p style="margin:4px 0 0;"><a href="mailto:${merchant.email}" style="color:#2E9E8F; text-decoration:none; font-size:13px;">${merchant.email}</a></p>` : ""}
+        <p style="margin:14px 0 0; color:#6b7280; font-size:12px;">${merchant.business_name} accepts PawBucks, Cash, Checks,<br>Credit Cards, Venmo and Zelle</p>
+        <p style="margin:14px 0 0; color:#9ca3af; font-size:12px;">🐾 Powered by <a href="https://pawbucks.app" style="color:#2E9E8F; text-decoration:none; font-weight:600;">pawbucks.app</a></p>
       </div>
     </div>
   </div>
