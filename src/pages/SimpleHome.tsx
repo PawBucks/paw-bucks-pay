@@ -67,52 +67,91 @@ const SimpleHome = () => {
       <div className="min-h-[100dvh] bg-background flex flex-col">
         <Header isAuthenticated onLogout={signOut} userId={user?.id} />
 
-        <main className="flex-1 container mx-auto px-4 pt-6 pb-28 md:pb-10 max-w-2xl">
+        <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 pt-6 lg:pt-12 pb-28 md:pb-10 max-w-6xl">
           {/* Greeting */}
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-5"
+            className="mb-6 lg:mb-10"
           >
             <p className="text-sm text-muted-foreground">Hi {firstName} 👋</p>
-            <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">
+            <h1 className="text-2xl sm:text-3xl lg:text-5xl font-semibold tracking-tight lg:leading-tight max-w-3xl">
               Pay for pet care. Save automatically.
             </h1>
           </motion.div>
 
-          {/* Savings hero */}
-          <SavingsHero
-            availableUsd={availableUsd}
-            helperText={
-              availableUsd > 0
-                ? "Auto-applied next time you pay"
-                : "Your savings grow every time you pay"
-            }
-          />
+          <div className="grid gap-6 lg:gap-10 lg:grid-cols-5">
+            {/* Left column — hero + actions */}
+            <div className="lg:col-span-3 space-y-5 lg:space-y-6">
+              <SavingsHero
+                availableUsd={availableUsd}
+                helperText={
+                  availableUsd > 0
+                    ? "Auto-applied next time you pay"
+                    : "Your savings grow every time you pay"
+                }
+              />
 
-          {/* Primary actions */}
-          <div className="mt-5 grid grid-cols-2 gap-3">
-            <Button
-              size="lg"
-              className="h-16 text-base rounded-xl shadow-[var(--shadow-medium)]"
-              onClick={() => navigate("/pay")}
-            >
-              <Sparkles className="h-5 w-5 mr-2" />
-              Pay & save
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="h-16 text-base rounded-xl"
-              onClick={() => navigate("/discover")}
-            >
-              <Search className="h-5 w-5 mr-2" />
-              Find a place
-            </Button>
-          </div>
+              {/* Primary actions */}
+              <div className="grid grid-cols-2 gap-3 lg:gap-4">
+                <Button
+                  size="lg"
+                  className="h-16 lg:h-20 text-base lg:text-lg rounded-xl shadow-[var(--shadow-medium)]"
+                  onClick={() => navigate("/pay")}
+                >
+                  <Sparkles className="h-5 w-5 mr-2" />
+                  Pay & save
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="h-16 lg:h-20 text-base lg:text-lg rounded-xl"
+                  onClick={() => navigate("/discover")}
+                >
+                  <Search className="h-5 w-5 mr-2" />
+                  Find a place
+                </Button>
+              </div>
 
-          {/* Recent saves */}
-          <section className="mt-8">
+              {/* Pets — moves under actions on desktop */}
+              {pets.length > 0 && (
+                <section className="hidden lg:block pt-2">
+                  <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">
+                    Your pets
+                  </h2>
+                  <div className="flex gap-3 flex-wrap">
+                    {pets.map((p) => (
+                      <button
+                        key={p.id}
+                        onClick={() => navigate(`/pet-health/${p.id}`)}
+                        className="flex flex-col items-center gap-2 min-w-[80px]"
+                      >
+                        <div className="h-20 w-20 rounded-full bg-muted overflow-hidden flex items-center justify-center ring-1 ring-border">
+                          {p.photo_url ? (
+                            <img src={p.photo_url} alt={p.name} className="h-full w-full object-cover" />
+                          ) : (
+                            <PawPrint className="h-8 w-8 text-muted-foreground" />
+                          )}
+                        </div>
+                        <span className="text-xs font-medium truncate max-w-[80px]">{p.name}</span>
+                      </button>
+                    ))}
+                    <button
+                      onClick={() => navigate("/create-pet-profile")}
+                      className="flex flex-col items-center gap-2 min-w-[80px]"
+                    >
+                      <div className="h-20 w-20 rounded-full border-2 border-dashed border-border flex items-center justify-center text-muted-foreground">
+                        +
+                      </div>
+                      <span className="text-xs text-muted-foreground">Add pet</span>
+                    </button>
+                  </div>
+                </section>
+              )}
+            </div>
+
+            {/* Right column — recent visits */}
+            <section className="lg:col-span-2 mt-2 lg:mt-0">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
                 Recent visits
@@ -160,11 +199,12 @@ const SimpleHome = () => {
                 })}
               </ul>
             )}
-          </section>
+            </section>
+          </div>
 
-          {/* Pets — kept ultra simple */}
+          {/* Pets — mobile/tablet only; desktop renders inside left column above */}
           {pets.length > 0 && (
-            <section className="mt-8">
+            <section className="mt-8 lg:hidden">
               <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">
                 Your pets
               </h2>
@@ -198,7 +238,7 @@ const SimpleHome = () => {
             </section>
           )}
 
-          <p className="mt-10 text-center text-xs text-muted-foreground">
+          <p className="mt-10 lg:mt-16 text-center text-xs text-muted-foreground">
             Every payment automatically builds your savings. No points to manage.
           </p>
         </main>

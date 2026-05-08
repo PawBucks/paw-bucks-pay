@@ -105,7 +105,9 @@ const SimplePay = () => {
       <div className="min-h-[100dvh] bg-background flex flex-col">
         <Header isAuthenticated onLogout={signOut} userId={user?.id} />
 
-        <main className="flex-1 container mx-auto px-4 pt-6 pb-28 md:pb-10 max-w-xl">
+        <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 pt-6 lg:pt-12 pb-28 md:pb-10 max-w-6xl">
+          <div className="lg:grid lg:grid-cols-5 lg:gap-10">
+          <div className="lg:col-span-3">
           {/* Step indicator */}
           <div className="flex items-center gap-2 text-xs text-muted-foreground mb-4">
             <span className={step === "merchant" ? "text-foreground font-medium" : ""}>
@@ -215,7 +217,7 @@ const SimplePay = () => {
                   <span className="text-xs text-primary">Change</span>
                 </button>
 
-                <h1 className="text-2xl font-semibold tracking-tight mb-1">
+                <h1 className="text-2xl lg:text-4xl font-semibold tracking-tight mb-1">
                   How much?
                 </h1>
                 <p className="text-sm text-muted-foreground mb-5">
@@ -333,7 +335,7 @@ const SimplePay = () => {
 
                 <Button
                   size="lg"
-                  className="w-full h-14 rounded-xl text-base"
+                  className="w-full h-14 lg:h-16 rounded-xl text-base lg:text-lg"
                   onClick={handleContinue}
                   disabled={amountNum < 0.5}
                 >
@@ -349,6 +351,38 @@ const SimplePay = () => {
               </motion.div>
             )}
           </AnimatePresence>
+          </div>
+
+          {/* Right rail — desktop reassurance / preview panel */}
+          <aside className="hidden lg:block lg:col-span-2 lg:pl-2">
+            <div className="sticky top-24 space-y-4">
+              <div className="rounded-2xl border border-border bg-card p-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <Sparkles className="h-5 w-5 text-primary" />
+                  <h3 className="text-base font-semibold">Your savings</h3>
+                </div>
+                <p className="text-3xl font-semibold tracking-tight mb-1">
+                  {Formatters.currency(availableUsd)}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Auto-applied to this payment, up to the bill total.
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-dashed border-border p-6 space-y-3 text-sm text-muted-foreground">
+                <p className="font-medium text-foreground">How it works</p>
+                <ol className="space-y-2 list-decimal list-inside">
+                  <li>Pick a place you're paying.</li>
+                  <li>Enter the amount on your bill.</li>
+                  <li>We apply your savings, you cover the rest.</li>
+                </ol>
+                <p className="text-xs">
+                  Tips are USD only and never come out of your savings.
+                </p>
+              </div>
+            </div>
+          </aside>
+          </div>
         </main>
 
         <BottomNav />
