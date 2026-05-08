@@ -43,35 +43,30 @@ serve(async (req) => {
       throw new Error("Redemption code required");
     }
 
-    // Find redemption
-    const { data: redemption, error: redemptionError } = await supabaseClient
-      .from("offer_redemptions")
-      .select("*, partner_offers!inner(*)")
+    // Look up the redemption in pawbucks_activity (source of truth).
+    const { data: activity, error: activityError } = await supabaseClient
+      .from("pawbucks_activity")
+      .select("id, partner_id, offer_id, redemption_used, user_id, amount")
       .eq("redemption_code", redemption_code)
-      .single();
+      .eq("type", "redeem")
+      .maybeSingle();
 
-    if (redemptionError || !redemption) {
+    if (activityError || !activity) {
       throw new Error("Redemption code not found");
     }
 
-    // Verify this offer belongs to the merchant
-    if (redemption.partner_offers.partner_id !== merchant.id) {
+    if (activity.partner_id && activity.partner_id !== merchant.id) {
       throw new Error("This redemption does not belong to your offers");
     }
 
-    // Check if already confirmed
-    if (redemption.partner_confirmed) {
+    if (activity.redemption_used) {
       throw new Error("Redemption already confirmed");
     }
 
-    // Confirm redemption
     const { data: confirmed, error: confirmError } = await supabaseClient
-      .from("offer_redemptions")
-      .update({
-        partner_confirmed: true,
-        redeemed_at: new Date().toISOString()
-      })
-      .eq("id", redemption.id)
+      .from("pawbucks_activity")
+      .update({ redemption_used: true })
+      .eq("id", activity.id)
       .select()
       .single();
 
@@ -79,22 +74,32 @@ serve(async (req) => {
       throw confirmError;
     }
 
-    // Increment redemption count
-    await supabaseClient
-      .from("partner_offers")
-      .update({
-        redemption_count: redemption.partner_offers.redemption_count + 1
-      })
-      .eq("id", redemption.offer_id);
+    // Best-effort: increment redemption_count on the offer.
+    const targetOfferId = activity.offer_id ?? offer_id ?? null;
+    if (targetOfferId) {
+      const { data: offerRow } = await supabaseClient
+        .from("partner_offers")
+        .select("redemption_count")
+        .eq("id", targetOfferId)
+        .maybeSingle();
+      if (offerRow) {
+        await supabaseClient
+          .from("partner_offers")
+          .update({ redemption_count: (offerRow.redemption_count ?? 0) + 1 })
+          .eq("id", targetOfferId);
+      }
 
-    // Log activity
-    await supabaseClient.from("offer_activity").insert({
-      offer_id: redemption.offer_id,
-      merchant_id: merchant.id,
-      action: "confirmed_redemption",
-      actor_id: user.id,
-      details: { redemption_code, redemption_id: redemption.id }
-    });
+      // Best-effort activity log; ignore failures (table may not exist in all envs).
+      try {
+        await supabaseClient.from("offer_activity").insert({
+          offer_id: targetOfferId,
+          merchant_id: merchant.id,
+          action: "confirmed_redemption",
+          actor_id: user.id,
+          details: { redemption_code, activity_id: activity.id },
+        });
+      } catch (_) { /* non-fatal */ }
+    }
 
     console.log(`Confirmed redemption ${redemption_code} for merchant ${merchant.id}`);
 
