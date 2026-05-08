@@ -315,7 +315,7 @@ const MerchantDirectory = () => {
         className="pointer-events-none absolute -top-32 -right-24 w-[420px] h-[420px] rounded-full opacity-60"
         style={{ background:"radial-gradient(circle, hsl(var(--primary) / 0.18) 0%, transparent 70%)" }}
        />
-       <div className="container mx-auto px-4 pt-10 pb-6 max-w-4xl relative">
+       <div className="container mx-auto px-4 pt-10 pb-6 max-w-7xl relative">
         <div className="text-[0.7rem] font-medium tracking-[0.18em] uppercase text-primary mb-3 flex items-center gap-2">
          <MapPin className="w-3.5 h-3.5" />
          The Directory
@@ -326,12 +326,12 @@ const MerchantDirectory = () => {
         >
          Find pet services <em className="italic text-primary font-black">worth loving</em>.
         </h1>
-        <p className="text-base text-muted-foreground mb-6 max-w-xl leading-relaxed">
+        <p className="text-base text-muted-foreground mb-6 max-w-3xl leading-relaxed">
          {merchants.length} hand-picked merchants. Real reviews. Rewards on every visit.
         </p>
 
- {/* Search Bar */}
- <div className="relative max-w-2xl ml-0">
+  {/* Search Bar */}
+  <div className="relative max-w-3xl ml-0">
  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
  <Input
  placeholder="Search by name, service, or location…"
@@ -354,7 +354,7 @@ const MerchantDirectory = () => {
 
  {/* ── Category Pills ── */}
  <div className="border-b border-border/30 bg-background/80 backdrop-blur-sm sticky top-0 z-20">
- <div className="container mx-auto px-4 max-w-4xl">
+ <div className="container mx-auto px-4 max-w-7xl">
  <div className="flex gap-1.5 overflow-x-auto py-3 scrollbar-hide -mx-1 px-1">
  {businessTypes.map((type) => {
  const Icon = type.icon;
@@ -378,7 +378,7 @@ const MerchantDirectory = () => {
  </div>
  </div>
 
- <div className={`container mx-auto px-4 py-4 ${viewMode ==="map" || showMobileMap ?"max-w-7xl" :"max-w-4xl"}`}>
+ <div className="container mx-auto px-4 py-4 max-w-7xl">
  {/* Top Ad */}
  <AdPlacement position="top" />
 
