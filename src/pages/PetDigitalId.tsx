@@ -7,7 +7,8 @@ import { Button } from"@/components/ui/button";
 import { Card, CardContent } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
 import { Skeleton } from"@/components/ui/skeleton";
-import { ArrowLeft, Share2, Download, ShieldCheck, PawPrint, Syringe, AlertTriangle, Copy, Check, RefreshCw, Ban } from"lucide-react";
+import { ArrowLeft, Share2, Download, ShieldCheck, Syringe, AlertTriangle, Copy, Check, RefreshCw, Ban } from"lucide-react";
+import pawbucksLogo from "@/assets/pawbucks-logo.png";
 import { toast } from"@/hooks/use-toast";
 import { SEO } from"@/components/SEO";
 import {
