@@ -4,7 +4,8 @@ import { supabase } from"@/integrations/supabase/client";
 import { Card, CardContent } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
 import { Skeleton } from"@/components/ui/skeleton";
-import { ShieldCheck, PawPrint, Syringe, AlertTriangle, ShieldX } from"lucide-react";
+import { ShieldCheck, Syringe, AlertTriangle, ShieldX } from"lucide-react";
+import pawbucksLogo from "@/assets/pawbucks-logo.png";
 import { SEO } from"@/components/SEO";
 
 type DigitalId = {
