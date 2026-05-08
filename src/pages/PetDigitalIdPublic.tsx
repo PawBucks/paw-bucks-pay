@@ -96,7 +96,7 @@ export default function PetDigitalIdPublic() {
  <div className="bg-gradient-to-br from-primary via-primary/90 to-primary/70 text-primary-foreground p-6">
  <div className="flex items-center justify-between mb-4">
  <div className="flex items-center gap-2">
- <PawPrint className="w-6 h-6" />
+ <img src={pawbucksLogo} alt="PawBucks" className="w-6 h-6 object-contain" />
  <span className="font-bold tracking-wide text-sm uppercase">PawBucks Digital Pet ID</span>
  </div>
  <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
@@ -108,7 +108,7 @@ export default function PetDigitalIdPublic() {
  <img src={pet.photo_url} alt={pet.name} className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg" />
  ) : (
  <div className="w-24 h-24 rounded-full bg-white/20 border-4 border-white flex items-center justify-center">
- <PawPrint className="w-12 h-12" />
+ <img src={pawbucksLogo} alt="PawBucks" className="w-12 h-12 object-contain" />
  </div>
  )}
  <div>
