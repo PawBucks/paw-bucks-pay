@@ -152,7 +152,7 @@ const Profile = () => {
  progress={progress}
  className="flex-1 overflow-auto"
  >
- <div className="container mx-auto px-4 pt-4 pb-24 md:pb-8 max-w-4xl lg:max-w-5xl">
+     <div className="container mx-auto px-4 pt-4 pb-24 md:pb-8 max-w-4xl lg:max-w-6xl">
  {/* Ad Placement for Free Users */}
  <div className="mb-4 sm:mb-6">
  <AdPlacement />
@@ -160,22 +160,24 @@ const Profile = () => {
 
  {/* Header */}
  <div className="flex justify-between items-center mb-6">
- <h1 className="text-2xl sm:text-3xl font-bold">Profile</h1>
+      <h1 className="text-2xl sm:text-3xl lg:text-5xl font-bold tracking-tight">Profile</h1>
  <Button variant="ghost" size="icon" onClick={handleSignOut} className="min-h-10 min-w-10">
  <LogOut className="w-5 h-5" />
  </Button>
  </div>
 
- {/* Profile Card */}
- <GradientCard gradient className="mb-6">
+     <div className="lg:grid lg:grid-cols-5 lg:gap-8">
+      <div className="lg:col-span-2 lg:space-y-6">
+      {/* Profile Card */}
+      <GradientCard gradient className="mb-6 lg:mb-0">
  <div className="flex flex-col items-center text-center space-y-4">
- <Avatar className="w-24 h-24 bg-primary/20 border-4 border-background">
- <AvatarFallback className="text-2xl font-bold bg-gradient-to-br from-primary to-primary/60 text-primary-foreground">
+       <Avatar className="w-24 h-24 lg:w-32 lg:h-32 bg-primary/20 border-4 border-background">
+        <AvatarFallback className="text-2xl lg:text-4xl font-bold bg-gradient-to-br from-primary to-primary/60 text-primary-foreground">
  {initials}
  </AvatarFallback>
  </Avatar>
  <div>
- <h2 className="text-2xl font-bold">{profile.full_name}</h2>
+       <h2 className="text-2xl lg:text-3xl font-bold">{profile.full_name}</h2>
  <p className="text-sm text-muted-foreground capitalize">
  {profile.user_type.replace("_","")}
  </p>
@@ -187,7 +189,38 @@ const Profile = () => {
  </Badge>
  )}
  </div>
- </GradientCard>
+      </GradientCard>
+
+      {/* Information Cards (desktop: stacked under profile) */}
+      <div className="hidden lg:block space-y-4">
+       <GradientCard>
+        <div className="flex items-center gap-3">
+         <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+          <Mail className="w-5 h-5 text-primary" />
+         </div>
+         <div className="flex-1 min-w-0">
+          <Label className="text-xs text-muted-foreground">Email</Label>
+          <p className="text-sm font-medium truncate">{profile.email}</p>
+         </div>
+        </div>
+       </GradientCard>
+       <GradientCard>
+        <div className="flex items-center gap-3">
+         <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+          <Calendar className="w-5 h-5 text-primary" />
+         </div>
+         <div className="flex-1">
+          <Label className="text-xs text-muted-foreground">Member Since</Label>
+          <p className="text-sm font-medium">
+           {format(new Date(profile.created_at),"MMMM d, yyyy")}
+          </p>
+         </div>
+        </div>
+       </GradientCard>
+      </div>
+      </div>
+
+      <div className="lg:col-span-3">
 
  {/* Subscription Cards */}
  {profile.user_type ==="pet_owner" && !subscription.subscribed && (
@@ -475,7 +508,7 @@ const Profile = () => {
  </div>
 
  {/* Action Buttons */}
- <div className="mt-8 space-y-3 mb-6">
+      <div className="mt-8 space-y-3 mb-6 lg:grid lg:grid-cols-2 lg:gap-3 lg:space-y-0">
  <Button
  variant="outline"
  className="w-full"
@@ -509,8 +542,12 @@ const Profile = () => {
  <LogOut className="w-4 h-4 mr-2" />
  Sign Out
  </Button>
- <DeleteMyAccountCard />
+       <div className="lg:col-span-2">
+        <DeleteMyAccountCard />
+       </div>
  </div>
+      </div>
+     </div>
  </div>
  </PullToRefresh>
  <BottomNav />
