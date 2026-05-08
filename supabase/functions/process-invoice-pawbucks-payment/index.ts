@@ -116,8 +116,8 @@ serve(async (req) => {
       }
     }
 
-    // If paying entirely with PawBucks
-    if (stripeAmountCents <= 0 && pawbucksAmountCents > 0) {
+    // If paying entirely with PawBucks (no tip — tips can't be paid with PawBucks)
+    if (stripeAmountCents <= 0 && tipCents <= 0 && pawbucksAmountCents > 0) {
       logStep("Processing full PawBucks payment");
       
       if (!userId) {
