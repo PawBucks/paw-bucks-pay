@@ -226,9 +226,6 @@ const Profile = () => {
         </GradientCard>
        </div>
 
-        {/* Subscription / Plans — full width */}
-        <div>
-
  {/* Subscription Cards */}
  {profile.user_type ==="pet_owner" && !subscription.subscribed && (
  <div className="space-y-4 mb-6">
@@ -464,8 +461,6 @@ const Profile = () => {
  </div>
  </GradientCard>
  )}
-
-       </div>
 
       {/* Action Buttons (full width below both columns) */}
       <div className="mt-8 space-y-3 mb-6 lg:grid lg:grid-cols-2 lg:gap-3 lg:space-y-0">
