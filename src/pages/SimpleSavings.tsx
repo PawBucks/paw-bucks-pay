@@ -78,31 +78,31 @@ const SimpleSavings = () => {
       <div className="min-h-[100dvh] bg-background flex flex-col">
         <Header isAuthenticated onLogout={signOut} userId={user?.id} />
 
-        <main className="flex-1 container mx-auto px-4 pt-6 pb-28 md:pb-10 max-w-2xl">
-          <h1 className="text-2xl font-semibold tracking-tight mb-4">
+        <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 pt-6 lg:pt-12 pb-28 md:pb-10 max-w-6xl">
+          <h1 className="text-2xl lg:text-4xl font-semibold tracking-tight mb-4 lg:mb-8">
             Your savings
           </h1>
 
-          <SavingsHero
-            availableUsd={availableUsd}
-            lifetimeUsd={lifetimeUsd}
-            onClick={() => navigate("/pay")}
-          />
+          <div className="grid gap-6 lg:gap-10 lg:grid-cols-5">
+          <div className="lg:col-span-3 space-y-4 lg:space-y-6">
+            <SavingsHero
+              availableUsd={availableUsd}
+              lifetimeUsd={lifetimeUsd}
+              onClick={() => navigate("/pay")}
+            />
 
-          <div className="mt-4">
             <Button
               size="lg"
-              className="w-full h-14 rounded-xl"
+              className="w-full h-14 lg:h-16 rounded-xl text-base lg:text-lg"
               onClick={() => navigate("/pay")}
             >
               <Sparkles className="h-5 w-5 mr-2" />
               Use my savings — pay a place
             </Button>
-          </div>
 
-          {/* Expiry reassurance — friendly, never alarming */}
-          {(earnedNextExpiresAt || promotionalNextExpiresAt) && availableUsd > 0 && (
-            <div className="mt-4 rounded-xl border border-border bg-card p-4">
+            {/* Expiry reassurance — friendly, never alarming */}
+            {(earnedNextExpiresAt || promotionalNextExpiresAt) && availableUsd > 0 && (
+            <div className="rounded-xl border border-border bg-card p-4">
               <div className="flex items-center gap-2 text-sm font-medium mb-2">
                 <Clock className="h-4 w-4 text-muted-foreground" />
                 Use it before it expires
@@ -126,10 +126,11 @@ const SimpleSavings = () => {
                 )}
               </ul>
             </div>
-          )}
+            )}
+          </div>
 
           {/* History */}
-          <section className="mt-8">
+          <section className="lg:col-span-2 mt-2 lg:mt-0">
             <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">
               Savings history
             </h2>
@@ -138,7 +139,7 @@ const SimpleSavings = () => {
                 Pay a pet care place to start saving.
               </div>
             ) : (
-              <ul className="divide-y divide-border rounded-xl border border-border bg-card overflow-hidden">
+              <ul className="divide-y divide-border rounded-xl border border-border bg-card overflow-hidden lg:max-h-[640px] lg:overflow-y-auto">
                 {history.map((t: any) => {
                   const saved = (t.cashback_earned ?? 0) * PB_TO_USD;
                   return (
@@ -164,11 +165,12 @@ const SimpleSavings = () => {
               </ul>
             )}
           </section>
+          </div>
 
           {/* Hidden mechanics — opens drawer */}
           <Sheet open={detailsOpen} onOpenChange={setDetailsOpen}>
             <SheetTrigger asChild>
-              <button className="mt-8 w-full flex items-center justify-between text-xs text-muted-foreground hover:text-foreground py-3">
+              <button className="mt-8 lg:mt-12 w-full max-w-2xl mx-auto flex items-center justify-between text-xs text-muted-foreground hover:text-foreground py-3">
                 <span className="inline-flex items-center gap-1.5">
                   <Info className="h-3.5 w-3.5" />
                   How does this work?
