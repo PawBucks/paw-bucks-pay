@@ -377,8 +377,8 @@ const InvoicePayment = () => {
     : 0;
   const isOverdue = !isPaid && daysOverdue > 0;
   const isDueToday = !isPaid && daysOverdue === 0;
- const amountDue = invoice.amount_due || invoice.total;
- const amountPaid = invoice.amount_paid || 0;
+  const amountDue = Number(invoice.amount_due ?? invoice.total ?? 0);
+  const amountPaid = Number(invoice.amount_paid ?? 0);
 
  // Payment success page
  if (paymentSuccess) {
@@ -530,16 +530,20 @@ const InvoicePayment = () => {
           </div>
         )}
         <Separator className="my-1" />
-        <div className="flex justify-between items-baseline pt-1">
-          <span className="text-base font-semibold">{amountPaid > 0 ? "Amount Due" : "Total"}</span>
-          <span className="text-2xl font-bold text-primary">{Formatters.currency(Number(amountDue))}</span>
-        </div>
         {amountPaid > 0 && (
-          <div className="flex justify-between text-xs text-muted-foreground">
+          <div className="flex justify-between text-muted-foreground">
             <span>Amount paid</span>
-            <span>{Formatters.currency(Number(amountPaid))}</span>
+            <span>-{Formatters.currency(amountPaid)}</span>
           </div>
         )}
+        <div className="flex justify-between items-baseline pt-1">
+          <span className="text-base font-semibold">
+            {isPaid ? "Total Paid" : amountPaid > 0 ? "Balance Due" : "Total"}
+          </span>
+          <span className="text-2xl font-bold text-primary">
+            {Formatters.currency(isPaid ? Number(invoice.total ?? 0) : amountDue)}
+          </span>
+        </div>
       </div>
     </div>
 
