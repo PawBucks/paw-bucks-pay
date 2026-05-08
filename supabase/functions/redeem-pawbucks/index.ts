@@ -132,6 +132,7 @@ serve(async (req) => {
         amount: -offer.coins_required,
         source: "Redemption",
         partner_id: offer.partner_id,
+        offer_id: offer_id,
         redemption_code: redemptionCode,
         redemption_used: false,
         description: `Redeemed: ${offer.title}`,
