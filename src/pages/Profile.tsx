@@ -466,7 +466,6 @@ const Profile = () => {
  )}
 
        </div>
-      </div>
 
       {/* Action Buttons (full width below both columns) */}
       <div className="mt-8 space-y-3 mb-6 lg:grid lg:grid-cols-2 lg:gap-3 lg:space-y-0">
