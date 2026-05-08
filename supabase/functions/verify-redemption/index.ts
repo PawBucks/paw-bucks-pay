@@ -82,14 +82,10 @@ serve(async (req) => {
     // Find redemption activity
     const { data: activity, error: activityError } = await serviceClient
       .from("pawbucks_activity")
-      .select(`
-        *,
-        profiles!inner(full_name, email),
-        partner_offers(title, description)
-      `)
+      .select("*")
       .eq("redemption_code", redemption_code)
       .eq("type", "redeem")
-      .single();
+      .maybeSingle();
 
     if (activityError || !activity) {
       return new Response(
@@ -103,6 +99,14 @@ serve(async (req) => {
         }
       );
     }
+
+    // Hydrate profile + offer in parallel.
+    const [{ data: profile }, { data: offer }] = await Promise.all([
+      serviceClient.from("profiles").select("full_name, email").eq("id", activity.user_id).maybeSingle(),
+      activity.offer_id
+        ? serviceClient.from("partner_offers").select("title, description").eq("id", activity.offer_id).maybeSingle()
+        : Promise.resolve({ data: null }),
+    ]);
 
     // Check if already used
     if (activity.redemption_used) {
@@ -151,9 +155,9 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         valid: true,
-        user_name: activity.profiles?.full_name || "Customer",
-        user_email: activity.profiles?.email,
-        offer_title: activity.partner_offers?.title || activity.description,
+        user_name: profile?.full_name || "Customer",
+        user_email: profile?.email,
+        offer_title: offer?.title || activity.description,
         coins_spent: Math.abs(activity.amount),
         redeemed_at: activity.created_at,
         message: "Redemption verified successfully"
