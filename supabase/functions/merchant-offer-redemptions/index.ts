@@ -61,35 +61,62 @@ serve(async (req) => {
       throw new Error("Offer not found");
     }
 
-    // Build query
+    // Read redemptions from pawbucks_activity (the actual source of truth
+    // populated by the redeem-pawbucks edge function).
     let query = supabaseClient
-      .from("offer_redemptions")
-      .select("*, profiles!inner(full_name, email)", { count: "exact" })
-      .eq("offer_id", offerId)
+      .from("pawbucks_activity")
+      .select(
+        "id, user_id, redemption_code, redemption_used, amount, description, created_at, offer_id, partner_id",
+        { count: "exact" }
+      )
+      .eq("type", "redeem")
+      .not("redemption_code", "is", null)
       .order("created_at", { ascending: false })
       .range(offset, offset + limit - 1);
 
-    if (startDate) {
-      query = query.gte("created_at", startDate);
-    }
+    // Prefer filtering by offer_id (new rows). Fall back to partner_id for
+    // legacy rows that were inserted before offer_id existed.
+    query = query.or(`offer_id.eq.${offerId},and(offer_id.is.null,partner_id.eq.${offer.partner_id ?? ""})`);
 
-    if (endDate) {
-      query = query.lte("created_at", endDate);
-    }
+    if (startDate) query = query.gte("created_at", startDate);
+    if (endDate) query = query.lte("created_at", endDate);
 
     if (status === "confirmed") {
-      query = query.eq("partner_confirmed", true);
+      query = query.eq("redemption_used", true);
     } else if (status === "pending") {
-      query = query.eq("partner_confirmed", false);
+      query = query.eq("redemption_used", false);
     }
 
-    const { data: redemptions, error: redemptionsError, count } = await query;
+    const { data: rawRedemptions, error: redemptionsError, count } = await query;
 
     if (redemptionsError) {
       throw redemptionsError;
     }
 
-    console.log(`Listed ${redemptions?.length || 0} redemptions for offer ${offerId}`);
+    // Hydrate profile info for each user_id in a single follow-up query.
+    const userIds = Array.from(new Set((rawRedemptions ?? []).map((r) => r.user_id).filter(Boolean)));
+    let profilesById: Record<string, { full_name: string; email: string }> = {};
+    if (userIds.length > 0) {
+      const { data: profiles } = await supabaseClient
+        .from("profiles")
+        .select("id, full_name, email")
+        .in("id", userIds);
+      profilesById = Object.fromEntries((profiles ?? []).map((p) => [p.id, { full_name: p.full_name, email: p.email }]));
+    }
+
+    const redemptions = (rawRedemptions ?? []).map((r) => ({
+      id: r.id,
+      user_id: r.user_id,
+      redemption_code: r.redemption_code,
+      partner_confirmed: !!r.redemption_used,
+      redeemed_at: r.created_at,
+      created_at: r.created_at,
+      coins_spent: Math.abs(r.amount ?? 0),
+      description: r.description,
+      profiles: profilesById[r.user_id] ?? null,
+    }));
+
+    console.log(`Listed ${redemptions.length} redemptions for offer ${offerId}`);
 
     return new Response(
       JSON.stringify({
