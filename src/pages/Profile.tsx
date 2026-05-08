@@ -310,6 +310,7 @@ const Profile = () => {
  <p className="text-sm text-muted-foreground">$10/month</p>
  </div>
  </div>
+ </div>
 
  <div className="bg-primary/10 rounded-lg p-3">
  <p className="text-sm font-semibold mb-2">Included Benefits:</p>
