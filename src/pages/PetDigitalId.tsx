@@ -7,7 +7,8 @@ import { Button } from"@/components/ui/button";
 import { Card, CardContent } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
 import { Skeleton } from"@/components/ui/skeleton";
-import { ArrowLeft, Share2, Download, ShieldCheck, PawPrint, Syringe, AlertTriangle, Copy, Check, RefreshCw, Ban } from"lucide-react";
+import { ArrowLeft, Share2, Download, ShieldCheck, Syringe, AlertTriangle, Copy, Check, RefreshCw, Ban } from"lucide-react";
+import pawbucksLogo from "@/assets/pawbucks-logo.png";
 import { toast } from"@/hooks/use-toast";
 import { SEO } from"@/components/SEO";
 import {
@@ -215,10 +216,10 @@ export default function PetDigitalId() {
  {/* Header banner */}
  <div className="bg-gradient-to-br from-primary via-primary/90 to-primary/70 text-primary-foreground p-6">
  <div className="flex items-center justify-between mb-4">
- <div className="flex items-center gap-2">
- <PawPrint className="w-6 h-6" />
- <span className="font-bold tracking-wide text-sm uppercase">PawBucks Digital Pet ID</span>
- </div>
+  <div className="flex items-center gap-2">
+  <img src={pawbucksLogo} alt="PawBucks" className="w-6 h-6 object-contain" />
+  <span className="font-bold tracking-wide text-sm uppercase">PawBucks Digital Pet ID</span>
+  </div>
  <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
  <ShieldCheck className="w-3 h-3 mr-1" /> Verified
  </Badge>
@@ -231,9 +232,9 @@ export default function PetDigitalId() {
  className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg"
  />
  ) : (
- <div className="w-24 h-24 rounded-full bg-white/20 border-4 border-white flex items-center justify-center">
- <PawPrint className="w-12 h-12" />
- </div>
+  <div className="w-24 h-24 rounded-full bg-white/20 border-4 border-white flex items-center justify-center">
+  <img src={pawbucksLogo} alt="PawBucks" className="w-12 h-12 object-contain" />
+  </div>
  )}
  <div>
  <h1 className="text-3xl font-bold leading-tight">{pet.name}</h1>
