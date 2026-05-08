@@ -15,7 +15,6 @@ import { BottomNav } from"@/components/BottomNav";
 import { AdPlacement } from"@/components/AdPlacement";
 import { FeedbackButton } from"@/components/FeedbackButton";
 import { PullToRefresh } from"@/components/PullToRefresh";
-import { AutoRedeemToggle } from"@/components/AutoRedeemToggle";
 import { DeleteMyAccountCard } from"@/components/profile/DeleteMyAccountCard";
 import { LogOut, User, Mail, Calendar, Crown, Settings, Loader2, Info, Bell, MessageSquare } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
@@ -166,10 +165,8 @@ const Profile = () => {
  </Button>
  </div>
 
-     <div className="lg:grid lg:grid-cols-5 lg:gap-8">
-      <div className="lg:col-span-2 lg:space-y-6">
-      {/* Profile Card */}
-      <GradientCard gradient className="mb-6 lg:mb-0">
+      {/* Profile Card (full width header) */}
+      <GradientCard gradient className="mb-6">
  <div className="flex flex-col items-center text-center space-y-4">
        <Avatar className="w-24 h-24 lg:w-32 lg:h-32 bg-primary/20 border-4 border-background">
         <AvatarFallback className="text-2xl lg:text-4xl font-bold bg-gradient-to-br from-primary to-primary/60 text-primary-foreground">
@@ -191,36 +188,51 @@ const Profile = () => {
  </div>
       </GradientCard>
 
-      {/* Information Cards (desktop: stacked under profile) */}
-      <div className="hidden lg:block space-y-4">
-       <GradientCard>
-        <div className="flex items-center gap-3">
-         <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-          <Mail className="w-5 h-5 text-primary" />
+      {/* Two-column layout: info on left, plans on right */}
+      <div className="lg:grid lg:grid-cols-2 lg:gap-8">
+       {/* Left column: Pet Owner information */}
+       <div className="space-y-4 mb-6 lg:mb-0">
+        <GradientCard>
+         <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+           <Mail className="w-5 h-5 text-primary" />
+          </div>
+          <div className="flex-1 min-w-0">
+           <Label className="text-xs text-muted-foreground">Email</Label>
+           <p className="text-sm font-medium truncate">{profile.email}</p>
+          </div>
          </div>
-         <div className="flex-1 min-w-0">
-          <Label className="text-xs text-muted-foreground">Email</Label>
-          <p className="text-sm font-medium truncate">{profile.email}</p>
+        </GradientCard>
+        <GradientCard>
+         <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+           <User className="w-5 h-5 text-primary" />
+          </div>
+          <div className="flex-1">
+           <Label className="text-xs text-muted-foreground">Account Type</Label>
+           <p className="text-sm font-medium capitalize">
+            {profile.user_type.replace("_","")}
+           </p>
+          </div>
          </div>
-        </div>
-       </GradientCard>
-       <GradientCard>
-        <div className="flex items-center gap-3">
-         <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-          <Calendar className="w-5 h-5 text-primary" />
+        </GradientCard>
+        <GradientCard>
+         <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+           <Calendar className="w-5 h-5 text-primary" />
+          </div>
+          <div className="flex-1">
+           <Label className="text-xs text-muted-foreground">Member Since</Label>
+           <p className="text-sm font-medium">
+            {format(new Date(profile.created_at),"MMMM d, yyyy")}
+           </p>
+          </div>
          </div>
-         <div className="flex-1">
-          <Label className="text-xs text-muted-foreground">Member Since</Label>
-          <p className="text-sm font-medium">
-           {format(new Date(profile.created_at),"MMMM d, yyyy")}
-          </p>
-         </div>
-        </div>
-       </GradientCard>
-      </div>
-      </div>
+        </GradientCard>
+       </div>
 
-      <div className="lg:col-span-3">
+       {/* Right column: Subscription / Plans */}
+       <div>
 
  {/* Subscription Cards */}
  {profile.user_type ==="pet_owner" && !subscription.subscribed && (
@@ -459,55 +471,10 @@ const Profile = () => {
  </GradientCard>
  )}
 
- {/* Information Cards */}
- <div className="space-y-4 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
- <GradientCard>
- <div className="flex items-center gap-3">
- <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
- <Mail className="w-5 h-5 text-primary" />
- </div>
- <div className="flex-1">
- <Label className="text-xs text-muted-foreground">Email</Label>
- <p className="text-sm font-medium">{profile.email}</p>
- </div>
- </div>
- </GradientCard>
+       </div>
+      </div>
 
- <GradientCard>
- <div className="flex items-center gap-3">
- <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
- <User className="w-5 h-5 text-primary" />
- </div>
- <div className="flex-1">
- <Label className="text-xs text-muted-foreground">Account Type</Label>
- <p className="text-sm font-medium capitalize">
- {profile.user_type.replace("_","")}
- </p>
- </div>
- </div>
- </GradientCard>
-
- <GradientCard>
- <div className="flex items-center gap-3">
- <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
- <Calendar className="w-5 h-5 text-primary" />
- </div>
- <div className="flex-1">
- <Label className="text-xs text-muted-foreground">Member Since</Label>
- <p className="text-sm font-medium">
- {format(new Date(profile.created_at),"MMMM d, yyyy")}
- </p>
- </div>
- </div>
- </GradientCard>
-
- {/* Auto-Redeem PawBucks Toggle (Pet Owners Only) */}
- {profile.user_type ==="pet_owner" && user && (
- <AutoRedeemToggle userId={user.id} />
- )}
- </div>
-
- {/* Action Buttons */}
+      {/* Action Buttons (full width below both columns) */}
       <div className="mt-8 space-y-3 mb-6 lg:grid lg:grid-cols-2 lg:gap-3 lg:space-y-0">
  <Button
  variant="outline"
@@ -520,9 +487,9 @@ const Profile = () => {
  <Button
  variant="outline"
  className="w-full"
- onClick={() => navigate("/dashboard")}
+  onClick={() => navigate("/home")}
  >
- Back to Dashboard
+ Back to Home
  </Button>
  <FeedbackButton open={feedbackOpen} onOpenChange={setFeedbackOpen} trigger={
  <Button
@@ -545,9 +512,7 @@ const Profile = () => {
        <div className="lg:col-span-2">
         <DeleteMyAccountCard />
        </div>
- </div>
       </div>
-     </div>
  </div>
  </PullToRefresh>
  <BottomNav />
