@@ -157,13 +157,10 @@ const Profile = () => {
  <AdPlacement />
  </div>
 
- {/* Header */}
- <div className="flex justify-between items-center mb-6">
-      <h1 className="text-2xl sm:text-3xl lg:text-5xl font-bold tracking-tight">Profile</h1>
- <Button variant="ghost" size="icon" onClick={handleSignOut} className="min-h-10 min-w-10">
- <LogOut className="w-5 h-5" />
- </Button>
- </div>
+  {/* Header */}
+  <div className="mb-6">
+   <h1 className="text-2xl sm:text-3xl lg:text-5xl font-bold tracking-tight">Profile</h1>
+  </div>
 
       {/* Profile Card (full width header) */}
       <GradientCard gradient className="mb-6">
@@ -188,10 +185,8 @@ const Profile = () => {
  </div>
       </GradientCard>
 
-      {/* Two-column layout: info on left, plans on right */}
-      <div className="lg:grid lg:grid-cols-2 lg:gap-8">
-       {/* Left column: Pet Owner information */}
-       <div className="space-y-4 mb-6 lg:mb-0">
+       {/* Pet Owner information — 3 cards spanning full width */}
+       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <GradientCard>
          <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
@@ -230,9 +225,6 @@ const Profile = () => {
          </div>
         </GradientCard>
        </div>
-
-       {/* Right column: Subscription / Plans */}
-       <div>
 
  {/* Subscription Cards */}
  {profile.user_type ==="pet_owner" && !subscription.subscribed && (
@@ -470,9 +462,6 @@ const Profile = () => {
  </div>
  </GradientCard>
  )}
-
-       </div>
-      </div>
 
       {/* Action Buttons (full width below both columns) */}
       <div className="mt-8 space-y-3 mb-6 lg:grid lg:grid-cols-2 lg:gap-3 lg:space-y-0">
