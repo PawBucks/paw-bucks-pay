@@ -52,7 +52,7 @@ serve(async (req) => {
     // Verify offer belongs to merchant
     const { data: offer, error: offerError } = await supabaseClient
       .from("partner_offers")
-      .select("id")
+      .select("id, partner_id")
       .eq("id", offerId)
       .eq("partner_id", merchant.id)
       .single();
