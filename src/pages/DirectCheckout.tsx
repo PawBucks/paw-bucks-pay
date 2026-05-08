@@ -390,31 +390,35 @@ export default function DirectCheckout() {
  }
 
  return (
- <div className="min-h-screen flex items-center justify-center p-4 bg-muted/30">
+ <div className="min-h-screen flex items-start lg:items-center justify-center p-4 lg:p-8 bg-muted/30">
  <SEO 
  title={`Pay ${merchant.business_name}`} 
  description={`Make a payment to ${merchant.business_name}`}
  />
  
- <Card className="max-w-md w-full">
- <CardHeader className="text-center">
+  <Card className="w-full max-w-md lg:max-w-5xl lg:grid lg:grid-cols-5 lg:gap-0 lg:overflow-hidden">
+   <CardHeader className="text-center lg:col-span-2 lg:text-left lg:bg-gradient-to-br lg:from-primary/5 lg:to-accent/5 lg:p-10 lg:flex lg:flex-col lg:justify-center lg:border-r">
  {merchant.logo_url && (
  <img 
  src={merchant.logo_url} 
  alt={merchant.business_name}
- className="h-16 w-16 object-cover rounded-full mx-auto mb-2"
+      className="h-16 w-16 lg:h-24 lg:w-24 object-cover rounded-full mx-auto lg:mx-0 mb-2 lg:mb-4"
  />
  )}
- <CardTitle className="flex items-center justify-center gap-2">
+    <CardTitle className="flex items-center justify-center lg:justify-start gap-2 lg:text-3xl">
  <Store className="h-5 w-5" />
  {merchant.business_name}
  </CardTitle>
- <CardDescription>
+    <CardDescription className="lg:text-base lg:mt-2">
  {merchant.description || `Pay ${merchant.business_name}`}
  </CardDescription>
+    <div className="hidden lg:flex items-center gap-2 mt-6 text-sm text-muted-foreground">
+     <Gift className="h-4 w-4 text-primary" />
+     <span>Earn PawBucks on every purchase</span>
+    </div>
  </CardHeader>
 
- <CardContent>
+   <CardContent className="lg:col-span-3 lg:p-10">
  {!clientSecret ? (
  <div className="space-y-4">
  <div>
