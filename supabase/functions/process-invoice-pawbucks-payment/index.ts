@@ -143,12 +143,13 @@ serve(async (req) => {
         .from("pawbucks_wallet")
         .update({ 
           balance: wallet.balance - pawbucksUsed,
-          updated_at: new Date().toISOString()
+          last_updated: new Date().toISOString()
         })
         .eq("user_id", userId);
 
       if (deductError) {
-        throw new Error("Failed to deduct PawBucks");
+        console.error("Deduct error:", deductError);
+        throw new Error(`Failed to deduct PawBucks: ${deductError.message}`);
       }
 
       // Log user PawBucks activity
