@@ -11,18 +11,38 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Search, Store, Loader2, ArrowRight, Check } from "lucide-react";
+import { Search, Store, Loader2, ArrowRight, Check, X, Clock } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { Formatters } from "@/utils/formatters";
 import { motion, AnimatePresence } from "framer-motion";
+import { useDebounce } from "@/hooks/useDebounce";
+import {
+  BUSINESS_TYPE_MAP,
+  CATEGORY_CONFIG,
+  getCategoryLabel,
+  merchantMatchesCategory,
+} from "@/lib/categoryMapping";
 
 const PB_TO_USD = 0.001;
+const RECENT_KEY = "simple-pay:recent-merchants";
+const MAX_RECENT = 5;
+
+const QUICK_CATEGORIES: Array<{ key: string; label: string }> = [
+  { key: "veterinary", label: "Vets" },
+  { key: "grooming", label: "Grooming" },
+  { key: "pet_store", label: "Pet stores" },
+  { key: "boarding", label: "Boarding" },
+  { key: "training", label: "Training" },
+  { key: "daycare", label: "Daycare" },
+];
 
 type Merchant = {
   id: string;
   business_name: string;
   logo_url: string | null;
   business_type: string | null;
+  business_categories?: string[] | null;
+  address?: string | null;
 };
 
 const SimplePay = () => {
@@ -41,6 +61,16 @@ const SimplePay = () => {
   );
   const [selected, setSelected] = useState<Merchant | null>(null);
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 200);
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [recent, setRecent] = useState<Merchant[]>(() => {
+    try {
+      const raw = localStorage.getItem(RECENT_KEY);
+      return raw ? (JSON.parse(raw) as Merchant[]) : [];
+    } catch {
+      return [];
+    }
+  });
   const [amount, setAmount] = useState("");
   const [tipPct, setTipPct] = useState<number | "custom" | 0>(0);
   const [customTip, setCustomTip] = useState("");
@@ -50,29 +80,90 @@ const SimplePay = () => {
     if (initialMerchantId && !selected) {
       supabase
         .from("merchants_public")
-        .select("id, business_name, logo_url, business_type")
+        .select("id, business_name, logo_url, business_type, business_categories, address")
         .eq("id", initialMerchantId)
         .maybeSingle()
         .then(({ data }) => data && setSelected(data as Merchant));
     }
   }, [initialMerchantId, selected]);
 
-  const { data: merchants, isLoading } = useQuery({
-    queryKey: ["simple-pay-merchants", search],
+  const { data: merchants, isLoading, isFetching } = useQuery({
+    queryKey: ["simple-pay-merchants", debouncedSearch, activeCategory],
     queryFn: async () => {
-      const term = search.trim();
+      const term = debouncedSearch.trim();
       const client: any = supabase;
       let base = client
         .from("merchants_public")
-        .select("id, business_name, logo_url, business_type")
+        .select("id, business_name, logo_url, business_type, business_categories, address")
         .order("business_name", { ascending: true })
-        .limit(20);
-      if (term) base = base.ilike("business_name", `%${term}%`);
-      const { data } = await base;
-      return (data ?? []) as Merchant[];
+        .limit(50);
+
+      if (term) {
+        // Expand search term across synonyms (e.g. "vet" -> veterinary, vets, vet clinic, ...).
+        const lower = term.toLowerCase();
+        const canonical = BUSINESS_TYPE_MAP[lower];
+        const synonyms = new Set<string>([lower]);
+        if (canonical) {
+          synonyms.add(canonical);
+          for (const [key, cat] of Object.entries(BUSINESS_TYPE_MAP)) {
+            if (cat === canonical) synonyms.add(key);
+          }
+        }
+        const escape = (s: string) => s.replace(/[%,()]/g, " ").trim();
+        const ors: string[] = [];
+        ors.push(`business_name.ilike.%${escape(term)}%`);
+        ors.push(`address.ilike.%${escape(term)}%`);
+        for (const s of synonyms) {
+          const e = escape(s);
+          if (!e) continue;
+          ors.push(`business_type.ilike.%${e}%`);
+          ors.push(`business_categories.cs.{${e}}`);
+        }
+        base = base.or(ors.join(","));
+      }
+
+      const { data, error } = await base;
+      if (error) throw error;
+      let rows = (data ?? []) as Merchant[];
+      if (activeCategory) {
+        rows = rows.filter((m) =>
+          merchantMatchesCategory(activeCategory, m.business_type, m.business_categories),
+        );
+      }
+      // Rank: name starts-with > name contains > category > address.
+      if (term) {
+        const t = term.toLowerCase();
+        const score = (m: Merchant) => {
+          const n = m.business_name.toLowerCase();
+          if (n.startsWith(t)) return 0;
+          if (n.includes(t)) return 1;
+          if ((m.business_type ?? "").toLowerCase().includes(t)) return 2;
+          if ((m.business_categories ?? []).some((c) => c.toLowerCase().includes(t))) return 2;
+          if ((m.address ?? "").toLowerCase().includes(t)) return 3;
+          return 4;
+        };
+        rows = [...rows].sort((a, b) => score(a) - score(b));
+      }
+      return rows.slice(0, 25);
     },
     staleTime: 60_000,
   });
+
+  const pickMerchant = (m: Merchant) => {
+    setSelected(m);
+    setStep("amount");
+    try {
+      const trimmed: Merchant = {
+        id: m.id,
+        business_name: m.business_name,
+        logo_url: m.logo_url,
+        business_type: m.business_type,
+      };
+      const next = [trimmed, ...recent.filter((r) => r.id !== m.id)].slice(0, MAX_RECENT);
+      setRecent(next);
+      localStorage.setItem(RECENT_KEY, JSON.stringify(next));
+    } catch {}
+  };
 
   const amountNum = parseFloat(amount) || 0;
   // Tip is computed off the bill (pre-savings) and is USD-only — savings never apply to tip.
