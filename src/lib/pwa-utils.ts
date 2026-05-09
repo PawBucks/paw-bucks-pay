@@ -91,6 +91,101 @@ export const checkForUpdates = async (callback: () => void) => {
  });
  }
  });
+
+      // Actively poll for updates so users don't sit on stale builds.
+      const triggerUpdate = () => {
+        registration.update().catch((err) => {
+          console.warn('[PWA] update() failed:', err);
+        });
+      };
+
+      // Check immediately, then every 60 seconds.
+      triggerUpdate();
+      const interval = window.setInterval(triggerUpdate, 60_000);
+
+      // Check whenever the tab regains focus / visibility (covers users who
+      // leave the tab open for hours/days).
+      const onVisible = () => {
+        if (document.visibilityState === 'visible') triggerUpdate();
+      };
+      document.addEventListener('visibilitychange', onVisible);
+      window.addEventListener('focus', triggerUpdate);
+      window.addEventListener('online', triggerUpdate);
+
+      // When a new SW takes control, force a reload so all open tabs sync.
+      let refreshing = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (refreshing) return;
+        refreshing = true;
+        console.log('[PWA] Controller changed, reloading for fresh version...');
+        window.location.reload();
+      });
+
+      return () => {
+        window.clearInterval(interval);
+        document.removeEventListener('visibilitychange', onVisible);
+        window.removeEventListener('focus', triggerUpdate);
+        window.removeEventListener('online', triggerUpdate);
+      };
  }
  }
+};
+
+// Fallback for non-PWA / no-SW environments: poll index.html and detect a new
+// build by hashing its contents. If the hash changes, hard-reload.
+export const startBuildVersionPolling = () => {
+  if (typeof window === 'undefined') return;
+
+  let lastHash: string | null = null;
+  let stopped = false;
+
+  const hashString = async (s: string) => {
+    if (window.crypto?.subtle) {
+      const buf = new TextEncoder().encode(s);
+      const digest = await window.crypto.subtle.digest('SHA-256', buf);
+      return Array.from(new Uint8Array(digest))
+        .map((b) => b.toString(16).padStart(2, '0'))
+        .join('');
+    }
+    // Cheap fallback hash
+    let h = 0;
+    for (let i = 0; i < s.length; i++) h = ((h << 5) - h + s.charCodeAt(i)) | 0;
+    return String(h);
+  };
+
+  const check = async () => {
+    if (stopped || document.visibilityState !== 'visible') return;
+    try {
+      const res = await fetch('/index.html', { cache: 'no-store' });
+      if (!res.ok) return;
+      const text = await res.text();
+      const hash = await hashString(text);
+      if (lastHash && lastHash !== hash) {
+        console.log('[PWA] New build detected via index.html hash, reloading...');
+        stopped = true;
+        window.location.reload();
+        return;
+      }
+      lastHash = hash;
+    } catch (err) {
+      // Network failures are fine; try again later.
+    }
+  };
+
+  check();
+  const interval = window.setInterval(check, 60_000);
+  const onVisible = () => {
+    if (document.visibilityState === 'visible') check();
+  };
+  document.addEventListener('visibilitychange', onVisible);
+  window.addEventListener('focus', check);
+  window.addEventListener('online', check);
+
+  return () => {
+    stopped = true;
+    window.clearInterval(interval);
+    document.removeEventListener('visibilitychange', onVisible);
+    window.removeEventListener('focus', check);
+    window.removeEventListener('online', check);
+  };
 };
