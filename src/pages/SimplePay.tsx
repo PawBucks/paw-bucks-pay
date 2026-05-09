@@ -232,25 +232,110 @@ const SimplePay = () => {
                     placeholder="Search vets, groomers, pet stores…"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="pl-9 h-12 rounded-xl"
+                    className="pl-9 pr-10 h-12 rounded-xl"
+                    autoFocus
+                    enterKeyHint="search"
+                    autoCapitalize="off"
+                    autoCorrect="off"
+                    spellCheck={false}
                   />
+                  {search && (
+                    <button
+                      type="button"
+                      onClick={() => setSearch("")}
+                      aria-label="Clear search"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 h-6 w-6 inline-flex items-center justify-center rounded-full text-muted-foreground hover:bg-muted"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  )}
                 </div>
+
+                {/* Quick category chips */}
+                <div className="-mx-4 px-4 mb-4 overflow-x-auto">
+                  <div className="flex gap-2 w-max">
+                    {QUICK_CATEGORIES.map((c) => {
+                      const active = activeCategory === c.key;
+                      return (
+                        <button
+                          key={c.key}
+                          type="button"
+                          onClick={() => setActiveCategory(active ? null : c.key)}
+                          className={`whitespace-nowrap rounded-full border px-3 h-8 text-xs font-medium transition-colors ${
+                            active
+                              ? "border-primary bg-primary/10 text-primary"
+                              : "border-border bg-card hover:bg-muted/50"
+                          }`}
+                        >
+                          {c.label}
+                        </button>
+                      );
+                    })}
+                    {activeCategory && (
+                      <button
+                        type="button"
+                        onClick={() => setActiveCategory(null)}
+                        className="whitespace-nowrap rounded-full px-3 h-8 text-xs text-muted-foreground hover:text-foreground"
+                      >
+                        Clear
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Recent merchants — show when no query and no filter */}
+                {!debouncedSearch && !activeCategory && recent.length > 0 && (
+                  <div className="mb-4">
+                    <div className="flex items-center gap-1.5 text-xs uppercase tracking-wider text-muted-foreground mb-2">
+                      <Clock className="h-3 w-3" /> Recent
+                    </div>
+                    <ul className="divide-y divide-border rounded-xl border border-border bg-card overflow-hidden">
+                      {recent.map((m) => (
+                        <li key={`recent-${m.id}`}>
+                          <button
+                            className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-muted/50 active:bg-muted transition-colors"
+                            onClick={() => pickMerchant(m)}
+                          >
+                            <div className="h-9 w-9 rounded-full bg-muted overflow-hidden flex items-center justify-center flex-shrink-0">
+                              {m.logo_url ? (
+                                <img src={m.logo_url} alt="" className="h-full w-full object-cover" />
+                              ) : (
+                                <Store className="h-4 w-4 text-muted-foreground" />
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium truncate">{m.business_name}</p>
+                              {m.business_type && (
+                                <p className="text-xs text-muted-foreground truncate">
+                                  {getCategoryLabel(m.business_type)}
+                                </p>
+                              )}
+                            </div>
+                            <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
 
                 {isLoading ? (
                   <div className="flex items-center justify-center py-10">
                     <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                   </div>
                 ) : (
-                  <ul className="divide-y divide-border rounded-xl border border-border bg-card overflow-hidden">
+                  <ul className="divide-y divide-border rounded-xl border border-border bg-card overflow-hidden relative">
+                    {isFetching && (
+                      <li className="absolute right-3 top-3">
+                        <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
+                      </li>
+                    )}
                     {merchants?.length ? (
                       merchants.map((m) => (
                         <li key={m.id}>
                           <button
                             className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-muted/50 active:bg-muted transition-colors"
-                            onClick={() => {
-                              setSelected(m);
-                              setStep("amount");
-                            }}
+                            onClick={() => pickMerchant(m)}
                           >
                             <div className="h-10 w-10 rounded-full bg-muted overflow-hidden flex items-center justify-center flex-shrink-0">
                               {m.logo_url ? (
@@ -261,11 +346,14 @@ const SimplePay = () => {
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-medium truncate">{m.business_name}</p>
-                              {m.business_type && (
-                                <p className="text-xs text-muted-foreground capitalize truncate">
-                                  {m.business_type.replace(/_/g, " ")}
-                                </p>
-                              )}
+                              <p className="text-xs text-muted-foreground truncate">
+                                {[
+                                  m.business_type ? getCategoryLabel(m.business_type) : null,
+                                  m.address,
+                                ]
+                                  .filter(Boolean)
+                                  .join(" · ")}
+                              </p>
                             </div>
                             <ArrowRight className="h-4 w-4 text-muted-foreground" />
                           </button>
@@ -273,7 +361,9 @@ const SimplePay = () => {
                       ))
                     ) : (
                       <li className="px-4 py-8 text-center text-sm text-muted-foreground">
-                        No places found. Try another search.
+                        {debouncedSearch || activeCategory
+                          ? "No places match. Try a different name or category."
+                          : "Start typing to find a place to pay."}
                       </li>
                     )}
                   </ul>
