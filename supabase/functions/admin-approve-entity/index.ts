@@ -183,9 +183,9 @@ serve(async (req) => {
       .eq('id', entityId);
 
     if (updateError) {
-      console.error('Update error:', updateError);
+      console.error('[Admin Approve] Update error:', updateError);
       return new Response(
-        JSON.stringify({ error: 'Failed to update entity status' }),
+        JSON.stringify({ error: `Failed to update entity status: ${updateError.message}` }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
       );
     }
@@ -231,17 +231,22 @@ serve(async (req) => {
         ? `Congratulations! Your ${entityType === 'merchant' ? 'merchant' : 'veterinary practice'} "${entityName}" has been approved. You now have full access to all platform features.`
         : `Your application for "${entityName}" has been reviewed. Please contact support for more information.`;
 
-      await serviceClient
-        .from('notifications')
-        .insert({
-          user_id: entityUserId,
-          title: notificationTitle,
-          message: notificationMessage,
-          category: 'transactional',
-          link_url: action === 'approve'
-            ? (entityType === 'merchant' ? '/merchant-dashboard' : '/vet-dashboard')
-            : null,
-        });
+      try {
+        const { error: notifErr } = await serviceClient
+          .from('notifications')
+          .insert({
+            user_id: entityUserId,
+            title: notificationTitle,
+            message: notificationMessage,
+            category: 'transactional',
+            link_url: action === 'approve'
+              ? (entityType === 'merchant' ? '/merchant-dashboard' : '/vet-dashboard')
+              : null,
+          });
+        if (notifErr) console.error('[Admin Approve] Owner notification error:', notifErr);
+      } catch (e) {
+        console.error('[Admin Approve] Owner notification exception:', e);
+      }
     }
 
     // Send branded email notification
@@ -319,31 +324,40 @@ serve(async (req) => {
           category: 'promotional',
         }));
 
-        // Insert in batches of 500 to avoid payload limits
-        for (let i = 0; i < notifications.length; i += 500) {
-          await serviceClient
-            .from('notifications')
-            .insert(notifications.slice(i, i + 500));
+        // Insert in batches of 500 to avoid payload limits — never fail the approval
+        try {
+          for (let i = 0; i < notifications.length; i += 500) {
+            const { error: batchErr } = await serviceClient
+              .from('notifications')
+              .insert(notifications.slice(i, i + 500));
+            if (batchErr) console.error('[Admin Approve] Pet owner batch error:', batchErr);
+          }
+          console.log(`[Admin Approve] Sent new ${entityLabel} notifications to ${petOwnerIds.length} pet owners`);
+        } catch (e) {
+          console.error('[Admin Approve] Pet owner notifications exception:', e);
         }
-
-        console.log(`[Admin Approve] Sent new ${entityLabel} notifications to ${petOwnerIds.length} pet owners`);
       }
     }
 
-    // Log the admin action
-    await serviceClient
-      .from('audit_logs')
-      .insert({
-        admin_id: user.id,
-        action: `${action.toUpperCase()}_${entityType.toUpperCase()}`,
-        entity_type: entityType,
-        entity_id: entityId,
-        changes: {
-          new_status: newStatus,
-          entity_name: entityName,
-          denial_reason: action === 'deny' ? denialReason : null,
-        },
-      });
+    // Log the admin action — never fail the approval if audit insert fails
+    try {
+      const { error: auditErr } = await serviceClient
+        .from('audit_logs')
+        .insert({
+          admin_id: user.id,
+          action: `${action.toUpperCase()}_${entityType.toUpperCase()}`,
+          entity_type: entityType,
+          entity_id: entityId,
+          changes: {
+            new_status: newStatus,
+            entity_name: entityName,
+            denial_reason: action === 'deny' ? denialReason : null,
+          },
+        });
+      if (auditErr) console.error('[Admin Approve] Audit log error:', auditErr);
+    } catch (e) {
+      console.error('[Admin Approve] Audit log exception:', e);
+    }
 
     console.log(`[Admin Approve] ${action} ${entityType} ${entityId} by admin ${user.email}`);
 
@@ -357,9 +371,10 @@ serve(async (req) => {
     );
 
   } catch (error: unknown) {
-    console.error('Admin approve entity error:', error);
+    console.error('[Admin Approve] Unexpected error:', error);
+    const message = error instanceof Error ? error.message : 'An unexpected error occurred';
     return new Response(
-      JSON.stringify({ error: 'An unexpected error occurred' }),
+      JSON.stringify({ error: message }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
     );
   }
