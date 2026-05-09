@@ -34,6 +34,9 @@ import { PendingApprovalNotice } from"@/components/PendingApprovalNotice";
 import { SupportTab } from"@/components/support/SupportTab";
 import { PolicyDocumentUpload } from"@/components/merchant/PolicyDocumentUpload";
 import { EditorialPageHeader } from"@/components/shared/EditorialPageHeader";
+import { EditVetProfileDialog } from"@/components/vet-portal/EditVetProfileDialog";
+import { Button } from"@/components/ui/button";
+import { Pencil } from"lucide-react";
 
 type VetInfo = {
  id: string;
@@ -46,6 +49,9 @@ type VetInfo = {
  tos_url?: string | null;
  privacy_policy_url?: string | null;
  shipping_returns_policy_url?: string | null;
+ clinic_phone?: string | null;
+ website_url?: string | null;
+ clinic_bio?: string | null;
 };
 
 export default function VetDashboard() {
@@ -58,6 +64,7 @@ export default function VetDashboard() {
  pendingRefills: 0,
  unreadMessages: 0,
  });
+ const [editProfileOpen, setEditProfileOpen] = useState(false);
 
  useEffect(() => {
  const checkAuth = async () => {
@@ -397,7 +404,25 @@ export default function VetDashboard() {
   </TabsContent>
  <TabsContent value="settings">
  <Card className="p-6">
- <h3 className="text-lg font-semibold mb-4">Practice Settings</h3>
+ <div className="flex items-start justify-between mb-4 gap-3 flex-wrap">
+   <div>
+     <h3 className="text-lg font-semibold">Practice Profile</h3>
+     <p className="text-sm text-muted-foreground">
+       Update your practice name, contact info, logo, and "About" description.
+     </p>
+   </div>
+   <Button onClick={() => setEditProfileOpen(true)} className="gap-2">
+     <Pencil className="w-4 h-4" />
+     Edit Profile
+   </Button>
+ </div>
+ {vetInfo.clinic_bio && (
+   <div className="mb-6 p-4 rounded-lg bg-muted/40 border border-border">
+     <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">About</p>
+     <p className="text-sm whitespace-pre-wrap">{vetInfo.clinic_bio}</p>
+   </div>
+ )}
+ <h3 className="text-lg font-semibold mb-4">Policy Documents</h3>
  {user && vetInfo && (
  <PolicyDocumentUpload
  userId={user.id}
@@ -412,6 +437,15 @@ export default function VetDashboard() {
  </Card>
  </TabsContent>
  </Tabs>
+ {user && (
+   <EditVetProfileDialog
+     open={editProfileOpen}
+     onOpenChange={setEditProfileOpen}
+     vet={vetInfo}
+     userId={user.id}
+     onSaved={() => loadVetInfo(user.id)}
+   />
+ )}
  </div>
  </div>
  );
