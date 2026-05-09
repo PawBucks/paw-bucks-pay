@@ -208,6 +208,7 @@ serve(async (req) => {
         title,
         message,
         category: "promotional",
+        link_url: "/pet-store?cart=open",
       });
 
       // Log the abandoned cart notification
