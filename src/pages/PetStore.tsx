@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from"react";
+import { useState, useCallback, useMemo, useEffect } from"react";
 import { useAuth } from"@/hooks/useAuth";
 import { useQuery, useMutation, useQueryClient } from"@tanstack/react-query";
 import { usePullToRefresh } from"@/hooks/usePullToRefresh";
@@ -19,7 +19,7 @@ import { Input } from"@/components/ui/input";
 import { Separator } from"@/components/ui/separator";
 import { toast } from"sonner";
 import { Coins, CreditCard, Store, Search, SlidersHorizontal, Grid3X3, LayoutList, X } from"lucide-react";
-import { useNavigate } from"react-router-dom";
+import { useNavigate, useSearchParams } from"react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from"@/components/ui/dialog";
 import { Elements, PaymentElement, useStripe, useElements } from"@stripe/react-stripe-js";
 import { Loader2 } from"lucide-react";
@@ -157,6 +157,17 @@ export default function PetStore() { const { user, signOut } = useAuth();
  const [isCreatingIntent, setIsCreatingIntent] = useState(false);
  const [cartOpen, setCartOpen] = useState(false);
  const [showFilters, setShowFilters] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Auto-open cart drawer when navigated with ?cart=open (e.g. from abandoned cart notification)
+  useEffect(() => {
+    if (searchParams.get("cart") === "open") {
+      setCartOpen(true);
+      const next = new URLSearchParams(searchParams);
+      next.delete("cart");
+      setSearchParams(next, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
  // Shopping cart
  const {
