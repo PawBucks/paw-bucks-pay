@@ -87,7 +87,10 @@ export default defineConfig(({ mode }) => ({
         icons: PWA_ICONS,
       },
       workbox: {
-        globPatterns: ["**/*.{js,css,html,ico,png,svg,woff,woff2}"],
+        // Exclude html from precache — index.html must always come from
+        // the network (NetworkFirst rule below) so the latest JS bundle
+        // hashes are served. Precaching HTML is the #1 cause of stale PWAs.
+        globPatterns: ["**/*.{js,css,ico,png,svg,woff,woff2}"],
         maximumFileSizeToCacheInBytes: 3000000,
         cleanupOutdatedCaches: true,
         skipWaiting: true,
