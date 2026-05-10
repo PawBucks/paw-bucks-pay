@@ -79,14 +79,25 @@ export const checkForUpdates = async (callback: () => void) => {
  if ('serviceWorker' in navigator) {
  const registration = await navigator.serviceWorker.getRegistration();
  if (registration) {
+    // If a new SW is ALREADY waiting when this code runs (deploy happened
+    // while tab was closed/backgrounded), activate it immediately.
+    const activateWaiting = (worker: ServiceWorker | null) => {
+      if (worker && worker.state === 'installed' && navigator.serviceWorker.controller) {
+        console.log('[PWA] Waiting worker found, activating...');
+        worker.postMessage({ type: 'SKIP_WAITING' });
+      }
+    };
+    activateWaiting(registration.waiting);
+
  registration.addEventListener('updatefound', () => {
  const newWorker = registration.installing;
  if (newWorker) {
  newWorker.addEventListener('statechange', () => {
  if (newWorker.state ==='installed' && navigator.serviceWorker.controller) {
- // Auto-reload to activate new version
- console.log('[PWA] New version detected, auto-updating...');
- hardReload();
+                 // New worker installed; tell it to skip waiting so the
+                 // controllerchange handler below fires a fresh reload.
+                 console.log('[PWA] New version detected, activating...');
+                 newWorker.postMessage({ type: 'SKIP_WAITING' });
  }
  });
  }
@@ -99,11 +110,13 @@ export const checkForUpdates = async (callback: () => void) => {
         registration.update().catch(() => {
           // Benign — typically "newestWorker is null" on first load.
         });
+        // Re-check for an already-waiting worker on every poll.
+        activateWaiting(registration.waiting);
       };
 
-      // Check immediately, then every 30 seconds.
+      // Check immediately, then every 15 seconds.
       triggerUpdate();
-      const interval = window.setInterval(triggerUpdate, 30_000);
+      const interval = window.setInterval(triggerUpdate, 15_000);
 
       // Check whenever the tab regains focus / visibility (covers users who
       // leave the tab open for hours/days).
@@ -186,7 +199,7 @@ export const startBuildVersionPolling = () => {
   };
 
   check();
-  const interval = window.setInterval(check, 30_000);
+  const interval = window.setInterval(check, 15_000);
   const onVisible = () => {
     if (document.visibilityState === 'visible') check();
   };
