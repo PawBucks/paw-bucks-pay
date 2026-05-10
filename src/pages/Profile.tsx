@@ -178,7 +178,7 @@ const Profile = () => {
  </div>
  {subscription.subscribed && (
  <Badge className="bg-gradient-to-r from-warning to-warning border-0">
-                  <Crown className="w-3 h-3 mr-1" />
+                  <span className="text-xs mr-1">👑</span>
  Premium Member
  </Badge>
  )}
@@ -333,7 +333,7 @@ const Profile = () => {
  </>
  ) : (
  <>
-                      <Crown className="w-4 h-4 mr-2" />
+                      <span className="text-base mr-2">👑</span>
  Start 7-Day Free Trial
  </>
  )}
@@ -383,7 +383,7 @@ const Profile = () => {
  </>
  ) : (
  <>
-                      <Crown className="w-4 h-4 mr-2" />
+                      <span className="text-base mr-2">👑</span>
  Start 7-Day Free Trial
  </>
  )}
