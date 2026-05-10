@@ -406,7 +406,7 @@ const MerchantDirectory = () => {
  :"text-muted-foreground hover:text-foreground hover:bg-muted"
  }`}
  >
- <span className="w-3 h-3" aria-hidden="true">🪙</span>
+ <span className="w-3 h-3" aria-hidden="true">🐾</span>
  PawBucks
  </button>
  </div>

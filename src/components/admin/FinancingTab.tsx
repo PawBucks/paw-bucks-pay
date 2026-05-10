@@ -11,7 +11,7 @@ import { Textarea } from'@/components/ui/textarea';
 import { Separator } from'@/components/ui/separator';
 import { Progress } from'@/components/ui/progress';
 import { toast } from'sonner';
-import { TrendingUp, DollarSign, Users, Calendar, CheckCircle2, XCircle, AlertTriangle, Shield, ArrowRight, ChevronRight, ExternalLink, Activity, CreditCard, Landmark, FileText, ShoppingBag, CircleDot } from "lucide-react";
+import { TrendingUp, DollarSign, Users, Calendar, CheckCircle2, XCircle, AlertTriangle, Shield, ArrowRight, ChevronRight, ExternalLink, Activity, CreditCard, Landmark, FileText, ShoppingBag, CircleDot, BadgeCheck } from "lucide-react";
 import { UnderwritingSignalsCard } from'./UnderwritingSignalsCard';
 import { format, formatDistanceToNow, differenceInDays } from'date-fns';
 
@@ -581,7 +581,7 @@ function VetLoanDetailPanel({
  <h2 className="text-2xl font-bold text-foreground">{loan.clinic_name || loan.name ||'Vet Clinic'}</h2>
  <div className="flex items-center gap-2 mt-1 flex-wrap">
  {loan.practice_type && <Badge variant="outline" className="capitalize">{loan.practice_type.replace(/_/g,'')}</Badge>}
- {loan.is_verified && <Badge variant="default" className="gap-1"><span className="w-3 h-3" aria-hidden="true">✅</span> Verified</Badge>}
+                                                {loan.is_verified && <Badge variant="default" className="gap-1"><BadgeCheck className="w-3 h-3" /> Verified</Badge>}
  {loan.subscription_tier && <Badge variant="outline">Tier: {loan.subscription_tier}</Badge>}
  <StatusBadge status={loan.status} />
  </div>

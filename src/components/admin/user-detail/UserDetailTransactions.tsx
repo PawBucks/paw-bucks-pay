@@ -101,7 +101,7 @@ export function UserDetailTransactions({ userId }: { userId: string }) {
  {isMerchant ?"Total Revenue" :"Total Spent"}: <strong className="text-foreground">{Formatters.currency(totalAmount)}</strong>
  </span>
  <span className="text-muted-foreground flex items-center gap-1">
- <span className="w-3 h-3" aria-hidden="true">🪙</span> PB Used: <strong className="text-foreground">{totalPawBucksUsed.toLocaleString()}</strong>
+ <span className="w-3 h-3" aria-hidden="true">🐾</span> PB Used: <strong className="text-foreground">{totalPawBucksUsed.toLocaleString()}</strong>
  </span>
  </div>
  </div>
@@ -145,7 +145,7 @@ export function UserDetailTransactions({ userId }: { userId: string }) {
  <TableCell className="text-right text-sm">
  {t.pawbucks_used ? (
  <span className="flex items-center justify-end gap-1">
- <span className="w-3 h-3 text-primary" aria-hidden="true">🪙</span>{t.pawbucks_used.toLocaleString()}
+ <span className="w-3 h-3 text-primary" aria-hidden="true">🐾</span>{t.pawbucks_used.toLocaleString()}
  </span>
  ) :"—"}
  </TableCell>

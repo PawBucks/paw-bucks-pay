@@ -371,7 +371,7 @@ export function UsersTab() {
  </TableCell>
  <TableCell>
  <span className="flex items-center gap-1 text-primary font-medium">
- <span className="w-3 h-3" aria-hidden="true">🪙</span>
+ <span className="w-3 h-3" aria-hidden="true">🐾</span>
  {(user.pawbucks_balance ?? 0).toLocaleString()}
  {user.shared_with_owner && (
  <span className="text-xs text-muted-foreground ml-1">(shared)</span>

@@ -4,7 +4,7 @@ import { useAdMerchants, useVerifiedProMerchants, merchantHasService, SERVICE_NA
 import { Card } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
 import { Button } from"@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, BadgeCheck } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { Skeleton } from"@/components/ui/skeleton";
 import { useSubscription } from"@/hooks/useSubscription";
@@ -151,7 +151,7 @@ const PremiumMerchantsBannerComponent = ({
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <h4 className="font-bold text-foreground line-clamp-1">{merchant.business_name}</h4>
-                        {isVerifiedPro && <span className="w-4 h-4 text-info flex-shrink-0" aria-hidden="true">✅</span>}
+                        {isVerifiedPro && <BadgeCheck className="w-4 h-4 text-info flex-shrink-0" />}
                       </div>
                       <Badge variant="outline" className="mt-1.5 text-xs">{merchant.business_type}</Badge>
                     </div>
@@ -200,7 +200,7 @@ const PremiumMerchantsBannerComponent = ({
  {merchant.business_name}
  </h4>
  {isVerifiedPro && (
-                              <span className="w-4 h-4 text-info flex-shrink-0" aria-hidden="true">✅</span>
+                              <BadgeCheck className="w-4 h-4 text-info flex-shrink-0" />
  )}
  </div>
  <Badge variant="outline" className="mt-1.5 text-xs">

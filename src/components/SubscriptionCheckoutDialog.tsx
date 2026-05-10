@@ -380,7 +380,7 @@ const CheckoutForm = ({
  <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 space-y-3">
  <div className="flex items-center justify-between">
  <span className="text-sm font-medium flex items-center gap-2">
- <span className="w-4 h-4 text-primary" aria-hidden="true">🪙</span>
+ <span className="w-4 h-4 text-primary" aria-hidden="true">🐾</span>
  Apply PawBucks
  <PawBucksInfoTooltip variant="redemption" />
  </span>
@@ -442,7 +442,7 @@ const CheckoutForm = ({
  {/* Info when merchant accepts PawBucks but user has none */}
  {merchantAcceptsPawBucks && pawbucksBalance === 0 && !hasWelcomeCredit && (
  <div className="text-sm text-muted-foreground bg-muted p-3 rounded-lg flex items-start gap-2">
- <span className="w-4 h-4 mt-0.5 flex-shrink-0" aria-hidden="true">🪙</span>
+ <span className="w-4 h-4 mt-0.5 flex-shrink-0" aria-hidden="true">🐾</span>
  <span>This merchant accepts PawBucks, but you don't have any spendable yet. Earn PawBucks by making purchases!</span>
  </div>
  )}

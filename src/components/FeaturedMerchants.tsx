@@ -1,3 +1,4 @@
+import { BadgeCheck } from "lucide-react";
 import { memo, useCallback } from"react";
 import { Card } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
@@ -72,7 +73,7 @@ const FeaturedMerchantsComponent = ({ onMerchantClick }: { onMerchantClick: (mer
  </h3>
  {hasVerifiedBadge && (
  <Badge className="bg-info/10 text-info border-info/20 gap-1 text-xs">
- <span className="w-3 h-3" aria-hidden="true">✅</span>
+ <BadgeCheck className="w-3 h-3" />
  Verified
  </Badge>
  )}

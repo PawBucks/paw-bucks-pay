@@ -431,7 +431,7 @@ export function ClaimResolutionScreen({
  {selectedOption ==="pawbucks" && !canPayFullWithPawBucks && (
  <div className="mb-4 p-3 bg-success/10 rounded-lg border border-success/20">
  <p className="text-sm text-success">
- <span className="h-4 w-4 inline mr-1" aria-hidden="true">🪙</span>
+ <span className="h-4 w-4 inline mr-1" aria-hidden="true">🐾</span>
  {Formatters.currency(pawBucksToApply)} in PawBucks applied.
  Remaining: {Formatters.currency(remainingAfterPawBucks)}
  </p>
@@ -548,7 +548,7 @@ export function ClaimResolutionScreen({
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-3">
  <div className="p-2.5 rounded-lg bg-success/10">
- <span className="h-6 w-6 text-success" aria-hidden="true">🪙</span>
+ <span className="h-6 w-6 text-success" aria-hidden="true">🐾</span>
  </div>
  <div>
  <div className="flex items-center gap-2">

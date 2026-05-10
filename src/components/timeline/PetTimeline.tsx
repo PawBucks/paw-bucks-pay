@@ -154,7 +154,7 @@ const MomentCard = ({
  )}
  {moment.pawbucks_earned > 0 && (
  <Badge className="bg-gradient-to-r from-primary to-accent text-white text-xs gap-1">
- <span className="w-3 h-3" aria-hidden="true">🪙</span>
+ <span className="w-3 h-3" aria-hidden="true">🐾</span>
  +{moment.pawbucks_earned.toLocaleString()} PawBucks
  </Badge>
  )}

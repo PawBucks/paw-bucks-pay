@@ -295,7 +295,7 @@ export function PawBucksManagementTool() {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <span className="w-5 h-5 text-primary" aria-hidden="true">🪙</span>
+ <span className="w-5 h-5 text-primary" aria-hidden="true">🐾</span>
  PawBucks Management
  </CardTitle>
  <CardDescription>
