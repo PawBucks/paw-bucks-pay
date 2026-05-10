@@ -30,7 +30,7 @@ const BUSINESS_TYPE_OPTIONS: { key: string; label: string }[] = [
  { key:"sitter", label:"Pet Sitter" },
  { key:"photography", label:"Photography" },
  { key:"insurance", label:"Insurance" },
- { key:"delivery", label:"Delivery" },
+ { key:"delivery", label:"Transportation" },
  { key:"hiker", label:"Hiker" },
  { key:"runner", label:"Runner" },
  { key:"masseuse", label:"Masseuse" },
