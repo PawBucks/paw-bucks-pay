@@ -12,7 +12,6 @@ import { Scene2SignUp } from "./scenes/Scene2SignUp";
 import { Scene3Earn } from "./scenes/Scene3Earn";
 import { Scene4Save } from "./scenes/Scene4Save";
 import { Scene5CTA } from "./scenes/Scene5CTA";
-import { theme } from "./theme";
 
 const display = loadDisplay("normal", { weights: ["600", "700", "800"], subsets: ["latin"] });
 const body = loadBody("normal", { weights: ["400", "500", "600"], subsets: ["latin"] });
