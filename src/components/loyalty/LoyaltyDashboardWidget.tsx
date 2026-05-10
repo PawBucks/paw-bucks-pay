@@ -118,7 +118,7 @@ export const LoyaltyDashboardWidget = ({ userId }: LoyaltyDashboardWidgetProps) 
  </div>
  <div className="text-center">
  <div className="flex items-center justify-center gap-1 text-secondary mb-1">
- <Crown className="w-4 h-4" />
+ <span className="text-base">👑</span>
  <span className="font-bold capitalize">{tier}</span>
  </div>
  <p className="text-[10px] text-muted-foreground">Your Tier</p>

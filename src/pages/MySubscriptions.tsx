@@ -221,7 +221,7 @@ const MySubscriptions = () => {
  {/* Empty State */}
  {!loading && subscriptions.length === 0 && (
  <GradientCard className="text-center py-12">
- <Crown className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+ <span className="text-5xl block text-center mb-4 text-muted-foreground">👑</span>
  <h3 className="text-lg font-semibold mb-2">No Active Subscriptions</h3>
  <p className="text-muted-foreground mb-6">
  You don't have any active subscriptions yet.
@@ -241,7 +241,7 @@ const MySubscriptions = () => {
  <div className="flex items-center gap-3">
  {subscription.type ==="platform" ? (
  <div className="w-12 h-12 rounded-full flex items-center justify-center bg-gradient-to-br from-accent to-accent">
- <Crown className="w-6 h-6 text-white" />
+ <span className="text-xl leading-none">👑</span>
  </div>
  ) : subscription.logo_url ? (
  <img

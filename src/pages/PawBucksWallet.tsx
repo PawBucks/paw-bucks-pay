@@ -118,7 +118,7 @@ const UpgradePrompt = ({ totalEarned, onUpgrade, isPawPassSubscriber = false }: 
  :'text-muted-foreground hover:text-foreground'
  }`}
  >
- <Crown className="w-4 h-4 inline mr-1" />
+ <span className="text-base inline mr-1">👑</span>
  PawPass+
  </button>
  </div>
@@ -240,7 +240,7 @@ const UpgradePrompt = ({ totalEarned, onUpgrade, isPawPassSubscriber = false }: 
  </div>
 
  <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
- <Crown className="w-4 h-4 text-accent" />
+ <span className="text-base text-accent">👑</span>
  <span>
  {isPawPassSubscriber 
  ? <>Only $10/month more • <span className="text-accent font-medium">Ad-Free!</span></>
@@ -268,7 +268,7 @@ const UpgradePrompt = ({ totalEarned, onUpgrade, isPawPassSubscriber = false }: 
  </>
  ) : (
  <>
- <Crown className="w-4 h-4 mr-2" />
+ <span className="text-base mr-2">👑</span>
  Upgrade to PawPass+
  </>
  )}
