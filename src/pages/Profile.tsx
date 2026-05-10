@@ -350,7 +350,7 @@ const Profile = () => {
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-3">
  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-accent to-accent flex items-center justify-center">
- <Crown className="w-6 h-6 text-white" />
+  <span className="text-xl leading-none">👑</span>
  </div>
  <div>
  <h3 className="font-semibold text-lg">PawPass+</h3>
@@ -405,7 +405,7 @@ const Profile = () => {
  :'bg-gradient-to-br from-warning to-warning'
  }`}>
  {getSubscriptionTier(subscription.product_id, subscription.subscription_tier) ==='pawpass_plus' ? (
- <Crown className="w-6 h-6 text-white" />
+ <span className="text-xl leading-none">👑</span>
  ) : (
  <Sparkles className="w-6 h-6 text-white" />
  )}

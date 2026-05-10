@@ -158,7 +158,7 @@ const SponsoredMerchantCardComponent = ({
  <div className="flex items-center gap-2">
  {merchant.address && (
  <p className="text-[11px] text-muted-foreground/70 line-clamp-1 flex items-center gap-1">
- <MapPin className="w-2.5 h-2.5 flex-shrink-0" />
+ <span className="text-[10px] flex-shrink-0">📍</span>
  {merchant.address}
  </p>
  )}
