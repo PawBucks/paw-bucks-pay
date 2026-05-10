@@ -16,9 +16,9 @@
     "@remotion/google-fonts": "^4.0.459",
     "@remotion/renderer": "^4.0.459",
     "@remotion/transitions": "^4.0.459",
-    "@types/react": "^19.2.14",
-    "react": "^19.2.6",
-    "react-dom": "^19.2.6",
+    "@types/react": "18.3.12",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
     "remotion": "^4.0.459"
   }
 }
