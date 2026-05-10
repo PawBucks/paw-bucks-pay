@@ -20,7 +20,7 @@ import {
  DialogHeader,
  DialogTitle,
 } from"@/components/ui/dialog";
-import { Scan, Upload, Loader2, AlertCircle, CheckCircle, Eye, ThumbsUp, ThumbsDown, ImageIcon, FileText } from "lucide-react";
+import { Scan, Upload, Loader2, AlertCircle, CheckCircle } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { toast } from"sonner";
 import { useQuery, useMutation, useQueryClient } from"@tanstack/react-query";
@@ -393,7 +393,7 @@ export const DiagnosticOverlayTool = ({ vetId }: DiagnosticOverlayToolProps) => 
  className="w-full h-full object-cover rounded-lg"
  />
  ) : (
- <ImageIcon className="w-6 h-6 text-muted-foreground" />
+ <span className="w-6 h-6 text-muted-foreground" aria-hidden="true">🖼️</span>
  )}
  </div>
  <div>
@@ -612,7 +612,7 @@ export const DiagnosticOverlayTool = ({ vetId }: DiagnosticOverlayToolProps) => 
  }
  disabled={reviewMutation.isPending}
  >
- <ThumbsUp className="w-4 h-4 mr-2" />
+ <span className="w-4 h-4 mr-2" aria-hidden="true">👍</span>
  Confirm Findings
  </Button>
  <Button
@@ -627,7 +627,7 @@ export const DiagnosticOverlayTool = ({ vetId }: DiagnosticOverlayToolProps) => 
  }
  disabled={reviewMutation.isPending}
  >
- <ThumbsDown className="w-4 h-4 mr-2" />
+ <span className="w-4 h-4 mr-2" aria-hidden="true">👎</span>
  Dispute / Correct
  </Button>
  </div>

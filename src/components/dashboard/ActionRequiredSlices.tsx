@@ -3,7 +3,7 @@ import { supabase } from"@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from"@/components/ui/card";
 import { Button } from"@/components/ui/button";
 import { Badge } from"@/components/ui/badge";
-import { AlertCircle, ChevronRight, Shield, Loader2 } from"lucide-react";
+import { AlertCircle, ChevronRight, Loader2 } from "lucide-react";
 import { Dialog, DialogContent } from"@/components/ui/dialog";
 import { ClaimResolutionScreen } from"@/components/ClaimResolutionScreen";
 
@@ -144,7 +144,7 @@ export function ActionRequiredSlices({ userId }: ActionRequiredSlicesProps) {
  >
  <div className="flex items-center gap-3">
  <div className="p-2 rounded-full bg-warning/10">
- <Shield className="h-4 w-4 text-warning" />
+ <span className="h-4 w-4 text-warning" aria-hidden="true">🛡️</span>
  </div>
  <div>
  <p className="font-medium text-warning">

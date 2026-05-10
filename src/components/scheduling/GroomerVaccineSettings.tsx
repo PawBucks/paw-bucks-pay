@@ -19,7 +19,7 @@ import {
  SelectTrigger,
  SelectValue,
 } from"@/components/ui/select";
-import { Plus, Edit, Trash2, ShieldCheck, Loader2 } from"lucide-react";
+import { Plus, Edit, Trash2, Loader2 } from "lucide-react";
 import { toast } from"sonner";
 
 const ENFORCEMENT_LEVELS = [
@@ -151,7 +151,7 @@ export function GroomerVaccineSettings({ merchantId }: GroomerVaccineSettingsPro
  <div className="flex items-center justify-between">
  <div>
  <h3 className="text-lg font-semibold flex items-center gap-2">
- <ShieldCheck className="w-5 h-5 text-primary" />
+ <span className="w-5 h-5 text-primary" aria-hidden="true">🛡️</span>
  Vaccine Requirements
  </h3>
  <p className="text-sm text-muted-foreground">
@@ -169,7 +169,7 @@ export function GroomerVaccineSettings({ merchantId }: GroomerVaccineSettingsPro
  </div>
  ) : requirements.length === 0 ? (
  <GradientCard className="p-8 text-center">
- <ShieldCheck className="w-12 h-12 mx-auto mb-3 text-muted-foreground opacity-50" />
+ <span className="w-12 h-12 mx-auto mb-3 text-muted-foreground opacity-50" aria-hidden="true">🛡️</span>
  <h4 className="font-semibold mb-1">No Vaccine Rules Set</h4>
  <p className="text-sm text-muted-foreground mb-4">
  Add vaccine requirements to automatically check pet records during booking.

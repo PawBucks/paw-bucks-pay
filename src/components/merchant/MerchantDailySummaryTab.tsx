@@ -20,7 +20,7 @@ import {
  SelectTrigger,
  SelectValue,
 } from"@/components/ui/select";
-import { Calendar, Download, Mail, MailX, TrendingUp, DollarSign, CreditCard, Users, RefreshCw } from"lucide-react";
+import { Download, MailX, RefreshCw } from "lucide-react";
 import { toast } from"sonner";
 import { format, subDays, startOfMonth, endOfMonth, subMonths, parseISO } from"date-fns";
 import jsPDF from"jspdf";
@@ -196,7 +196,7 @@ export const MerchantDailySummaryTab = ({ merchantId, merchantName }: MerchantDa
  <Card>
  <CardContent className="p-4">
  <div className="flex items-center gap-2 mb-1">
- <TrendingUp className="h-4 w-4 text-primary" />
+ <span className="h-4 w-4 text-primary" aria-hidden="true">📈</span>
  <span className="text-xs font-medium text-muted-foreground">Total Sales</span>
  </div>
  <p className="text-lg font-bold text-foreground">{formatCurrency(totalSales)}</p>
@@ -205,7 +205,7 @@ export const MerchantDailySummaryTab = ({ merchantId, merchantName }: MerchantDa
  <Card>
  <CardContent className="p-4">
  <div className="flex items-center gap-2 mb-1">
- <DollarSign className="h-4 w-4 text-success" />
+ <span className="h-4 w-4 text-success" aria-hidden="true">💵</span>
  <span className="text-xs font-medium text-muted-foreground">USD Processed</span>
  </div>
  <p className="text-lg font-bold text-foreground">{formatCurrency(totalUsd)}</p>
@@ -214,7 +214,7 @@ export const MerchantDailySummaryTab = ({ merchantId, merchantName }: MerchantDa
  <Card>
  <CardContent className="p-4">
  <div className="flex items-center gap-2 mb-1">
- <CreditCard className="h-4 w-4 text-accent" />
+ <span className="h-4 w-4 text-accent" aria-hidden="true">💳</span>
  <span className="text-xs font-medium text-muted-foreground">PB Credits</span>
  </div>
  <p className="text-lg font-bold text-foreground">{formatPawBucks(totalPB)}</p>
@@ -223,7 +223,7 @@ export const MerchantDailySummaryTab = ({ merchantId, merchantName }: MerchantDa
  <Card>
  <CardContent className="p-4">
  <div className="flex items-center gap-2 mb-1">
- <Users className="h-4 w-4 text-info" />
+ <span className="h-4 w-4 text-info" aria-hidden="true">👥</span>
  <span className="text-xs font-medium text-muted-foreground">Transactions</span>
  </div>
  <p className="text-lg font-bold text-foreground">{totalTx}</p>
@@ -235,7 +235,7 @@ export const MerchantDailySummaryTab = ({ merchantId, merchantName }: MerchantDa
  <Card>
  <CardHeader className="pb-3">
  <CardTitle className="text-base flex items-center gap-2">
- <Calendar className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">📅</span>
  Daily Breakdown
  </CardTitle>
  </CardHeader>
@@ -246,7 +246,7 @@ export const MerchantDailySummaryTab = ({ merchantId, merchantName }: MerchantDa
  </div>
  ) : summaries.length === 0 ? (
  <div className="text-center py-12 text-muted-foreground">
- <Calendar className="h-10 w-10 mx-auto mb-3 opacity-40" />
+ <span className="h-10 w-10 mx-auto mb-3 opacity-40" aria-hidden="true">📅</span>
  <p className="font-medium">No daily summaries yet</p>
  <p className="text-sm mt-1">Summaries are generated automatically each evening at 9:00 PM.</p>
  </div>
@@ -286,7 +286,7 @@ export const MerchantDailySummaryTab = ({ merchantId, merchantName }: MerchantDa
  <TableCell className="text-center">
  {row.email_sent ? (
  <Badge variant="secondary" className="text-xs gap-1">
- <Mail className="h-3 w-3" /> Sent
+ <span className="h-3 w-3" aria-hidden="true">📧</span> Sent
  </Badge>
  ) : (
  <Badge variant="outline" className="text-xs gap-1 text-muted-foreground">

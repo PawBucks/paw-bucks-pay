@@ -12,7 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from"@/
 import { Badge } from"@/components/ui/badge";
 import { Calendar } from"@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from"@/components/ui/popover";
-import { CalendarIcon, Download, Search, X, RotateCcw } from"lucide-react";
+import { Download, Search, X, RotateCcw } from "lucide-react";
 import { format } from"date-fns";
 import { toast } from"sonner";
 import { cn } from"@/lib/utils";
@@ -319,7 +319,7 @@ const MerchantTransactions = () => { const { user, loading, signOut } = useAuth(
  <Popover>
  <PopoverTrigger asChild>
  <Button variant="outline" className="w-full justify-start text-left font-normal">
- <CalendarIcon className="mr-2 h-4 w-4" />
+ <span className="mr-2 h-4 w-4" aria-hidden="true">📅</span>
  {startDate ? format(startDate,"MM/dd/yy") :"Start Date"}
  </Button>
  </PopoverTrigger>
@@ -336,7 +336,7 @@ const MerchantTransactions = () => { const { user, loading, signOut } = useAuth(
  <Popover>
  <PopoverTrigger asChild>
  <Button variant="outline" className="w-full justify-start text-left font-normal">
- <CalendarIcon className="mr-2 h-4 w-4" />
+ <span className="mr-2 h-4 w-4" aria-hidden="true">📅</span>
  {endDate ? format(endDate,"MM/dd/yy") :"End Date"}
  </Button>
  </PopoverTrigger>

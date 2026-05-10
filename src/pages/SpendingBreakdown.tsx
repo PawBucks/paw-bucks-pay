@@ -12,7 +12,7 @@ import { BottomNav } from"@/components/BottomNav";
 import { AdPlacement } from"@/components/AdPlacement";
 import { DashboardSkeleton } from"@/components/LoadingSkeleton";
 import { PullToRefresh } from"@/components/PullToRefresh";
-import { ArrowLeft, ArrowUpRight, ShoppingBag } from"lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { format, subMonths, startOfMonth, endOfMonth } from"date-fns";
 import { useQueryClient } from"@tanstack/react-query";
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from"recharts";
@@ -428,7 +428,7 @@ const SpendingBreakdown = () => {
  ) : (
  <div className="text-center py-12">
  <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-3">
- <ShoppingBag className="w-8 h-8 text-muted-foreground" />
+ <span className="w-8 h-8 text-muted-foreground" aria-hidden="true">🛍️</span>
  </div>
  <p className="text-muted-foreground mb-4">No spending recorded yet</p>
  <Button onClick={() => navigate("/discover")}>

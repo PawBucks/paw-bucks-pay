@@ -2,7 +2,7 @@ import { useOptimizedQuery } from"@/hooks/useOptimizedQuery";
 import { supabase } from"@/integrations/supabase/client";
 import { Card } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
-import { Gift, Coins } from"lucide-react";
+
 import { Skeleton } from"@/components/ui/skeleton";
 
 interface PartnerOffer {
@@ -31,7 +31,7 @@ export const PartnerOffers = () => {
  return (
  <div className="space-y-3">
  <div className="flex items-center gap-2">
- <Gift className="w-5 h-5 text-primary" />
+ <span className="w-5 h-5 text-primary" aria-hidden="true">🎁</span>
  <h2 className="text-lg font-semibold">Exclusive Offers</h2>
  </div>
  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -48,7 +48,7 @@ export const PartnerOffers = () => {
  return (
  <div className="space-y-3">
  <div className="flex items-center gap-2">
- <Gift className="w-5 h-5 text-primary" />
+ <span className="w-5 h-5 text-primary" aria-hidden="true">🎁</span>
  <h2 className="text-lg font-semibold">Exclusive Offers</h2>
  <Badge variant="secondary" className="ml-auto">Limited Time</Badge>
  </div>
@@ -64,7 +64,7 @@ export const PartnerOffers = () => {
  {offer.merchants.business_type}
  </Badge>
  <div className="flex items-center gap-1 text-primary font-semibold">
- <Coins className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">🪙</span>
  <span className="text-sm">{offer.coins_required}</span>
  </div>
  </div>

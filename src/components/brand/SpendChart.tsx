@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from"@/components/ui/card";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid } from"recharts";
-import { TrendingUp } from"lucide-react";
+
 import type { BrandCampaignDailyStat } from"@/services/api/brandCampaigns.service";
 
 import { Formatters } from "@/utils/formatters";
@@ -30,7 +30,7 @@ export function SpendChart({ stats }: SpendChartProps) {
  <div className="flex items-start justify-between gap-2 flex-wrap">
  <div>
  <CardTitle className="text-base flex items-center gap-2">
- <TrendingUp className="h-4 w-4 text-primary" />
+ <span className="h-4 w-4 text-primary" aria-hidden="true">📈</span>
  Spend Over Time
  </CardTitle>
  <CardDescription>Daily PawBucks spend across all campaigns</CardDescription>

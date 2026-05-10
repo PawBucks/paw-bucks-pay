@@ -10,7 +10,7 @@ import { Badge } from"@/components/ui/badge";
 import { Separator } from"@/components/ui/separator";
 import { Card, CardContent } from"@/components/ui/card";
 import { toast } from"sonner";
-import { Coins, ShoppingCart, CreditCard, ChevronLeft, ChevronRight, Package, AlertTriangle, TrendingUp, Star, ThumbsUp, Check, Shield, Truck, Store } from "lucide-react";
+import { ChevronLeft, ChevronRight, AlertTriangle, Check, Store } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { Header } from"@/components/Header";
 import { BottomNav } from"@/components/BottomNav";
@@ -134,7 +134,7 @@ export default function PetStoreProduct() {
  <div className="min-h-[100dvh] bg-background flex flex-col">
  <Header isAuthenticated={!!user} onLogout={handleSignOut} />
  <div className="flex-1 flex flex-col items-center justify-center gap-4 px-4">
- <Package className="h-16 w-16 text-muted-foreground/30" />
+ <span className="h-16 w-16 text-muted-foreground/30" aria-hidden="true">📦</span>
  <h2 className="text-xl font-semibold">Product not found</h2>
  <Button onClick={() => navigate("/pet-store")}>Back to Store</Button>
  </div>
@@ -188,7 +188,7 @@ export default function PetStoreProduct() {
  />
  ) : (
  <div className="w-full h-full flex items-center justify-center">
- <Package className="h-20 w-20 text-muted-foreground/20" />
+ <span className="h-20 w-20 text-muted-foreground/20" aria-hidden="true">📦</span>
  </div>
  )}
  {images.length > 1 && (
@@ -241,7 +241,7 @@ export default function PetStoreProduct() {
  )}
  {ratingCount >= 10 && ratingAvg >= 4.0 && (
  <Badge variant="secondary" className="bg-warning/90 text-white border-0 text-xs">
- <TrendingUp className="h-3 w-3 mr-1" /> Best Seller
+ <span className="h-3 w-3 mr-1" aria-hidden="true">📈</span> Best Seller
  </Badge>
  )}
  </div>
@@ -259,7 +259,7 @@ export default function PetStoreProduct() {
  {/* Merchant */}
  {merchant?.business_name && (
  <p className="text-sm text-muted-foreground flex items-center gap-1.5">
- <Store className="h-3.5 w-3.5" />
+ <span className="h-3.5 w-3.5" aria-hidden="true">🏪</span>
  Sold by{""}
  {merchant.storefront_slug ? (
  <button onClick={() => navigate(`/storefront/${merchant.storefront_slug}`)} className="text-primary hover:underline font-medium">
@@ -325,9 +325,9 @@ export default function PetStoreProduct() {
  disabled={outOfStock || addToCart.isPending}
  >
  {outOfStock ?"Out of Stock" : inCart ? (
- <><ShoppingCart className="mr-2 h-5 w-5" /> Add More ({inCart.quantity} in cart)</>
+ <><span className="mr-2 h-5 w-5" aria-hidden="true">🛒</span> Add More ({inCart.quantity} in cart)</>
  ) : (
- <><ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart</>
+ <><span className="mr-2 h-5 w-5" aria-hidden="true">🛒</span> Add to Cart</>
  )}
  </Button>
  <Button
@@ -339,7 +339,7 @@ export default function PetStoreProduct() {
  }}
  disabled={outOfStock}
  >
- <CreditCard className="mr-2 h-4 w-4" />
+ <span className="mr-2 h-4 w-4" aria-hidden="true">💳</span>
  Buy Now — {Formatters.currency((discountedPrice / 100))}
  </Button>
  </>
@@ -352,9 +352,9 @@ export default function PetStoreProduct() {
 
  {/* Trust badges */}
  <div className="flex flex-wrap gap-4 text-xs text-muted-foreground pt-2">
- <span className="flex items-center gap-1"><Shield className="h-3.5 w-3.5" /> Secure Checkout</span>
- <span className="flex items-center gap-1"><Truck className="h-3.5 w-3.5" /> Fast Delivery</span>
- <span className="flex items-center gap-1"><Coins className="h-3.5 w-3.5 text-primary" /> Earn Rewards</span>
+ <span className="flex items-center gap-1"><span className="h-3.5 w-3.5" aria-hidden="true">🛡️</span> Secure Checkout</span>
+ <span className="flex items-center gap-1"><span className="h-3.5 w-3.5" aria-hidden="true">🚚</span> Fast Delivery</span>
+ <span className="flex items-center gap-1"><span className="h-3.5 w-3.5 text-primary" aria-hidden="true">🪙</span> Earn Rewards</span>
  </div>
  </div>
  </div>
@@ -423,7 +423,7 @@ export default function PetStoreProduct() {
  </p>
  {review.helpful_count > 0 && (
  <span className="text-xs text-muted-foreground flex items-center gap-1">
- <ThumbsUp className="h-3 w-3" /> {review.helpful_count} found helpful
+ <span className="h-3 w-3" aria-hidden="true">👍</span> {review.helpful_count} found helpful
  </span>
  )}
  </div>
@@ -434,7 +434,7 @@ export default function PetStoreProduct() {
  </div>
  ) : (
  <div className="text-center py-8 text-muted-foreground">
- <Star className="h-8 w-8 mx-auto mb-2 text-muted-foreground/30" />
+ <span className="h-8 w-8 mx-auto mb-2 text-muted-foreground/30" aria-hidden="true">⭐</span>
  <p className="text-sm">No reviews yet. Be the first to review this product!</p>
  </div>
  )}

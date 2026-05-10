@@ -6,7 +6,7 @@ import { Badge } from"@/components/ui/badge";
 import { Input } from"@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
 import { QRCodeSVG } from"qrcode.react";
-import { Download, Users, Calendar, Search, Clock, Mail, Phone, User } from"lucide-react";
+import { Download, Search } from "lucide-react";
 import { format, subMonths, startOfDay, endOfDay } from"date-fns";
 import { toast } from"sonner";
 
@@ -222,7 +222,7 @@ export function CheckInDashboard({ entityId, entityType, entityName }: CheckInDa
  <GradientCard className="p-6">
  <div className="flex items-center gap-3 mb-4">
  <div className="p-2 bg-primary/10 rounded-lg">
- <Users className="w-5 h-5 text-primary" />
+ <span className="w-5 h-5 text-primary" aria-hidden="true">👥</span>
  </div>
  <div>
  <p className="text-2xl font-bold">{todayCheckins.length}</p>
@@ -238,7 +238,7 @@ export function CheckInDashboard({ entityId, entityType, entityName }: CheckInDa
  <GradientCard className="p-6">
  <div className="flex items-center gap-3 mb-4">
  <div className="p-2 bg-accent/10 rounded-lg">
- <Calendar className="w-5 h-5 text-accent" />
+ <span className="w-5 h-5 text-accent" aria-hidden="true">📅</span>
  </div>
  <div>
  <p className="text-2xl font-bold">{checkins.length}</p>
@@ -304,7 +304,7 @@ function CheckInList({ checkins, loading, emptyMessage }: { checkins: CheckIn[];
  if (checkins.length === 0) {
  return (
  <GradientCard className="p-8 text-center">
- <Users className="w-10 h-10 mx-auto mb-3 text-muted-foreground" />
+ <span className="w-10 h-10 mx-auto mb-3 text-muted-foreground" aria-hidden="true">👥</span>
  <p className="text-muted-foreground">{emptyMessage}</p>
  </GradientCard>
  );
@@ -320,7 +320,7 @@ function CheckInList({ checkins, loading, emptyMessage }: { checkins: CheckIn[];
  {checkin.profile?.avatar_url ? (
  <img src={checkin.profile.avatar_url} alt="" className="w-10 h-10 rounded-full object-cover" />
  ) : (
- <User className="w-5 h-5 text-primary" />
+ <span className="w-5 h-5 text-primary" aria-hidden="true">👤</span>
  )}
  </div>
  <div className="min-w-0">
@@ -330,13 +330,13 @@ function CheckInList({ checkins, loading, emptyMessage }: { checkins: CheckIn[];
  <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
  {checkin.profile?.email && (
  <span className="flex items-center gap-1">
- <Mail className="w-3 h-3" />
+ <span className="w-3 h-3" aria-hidden="true">📧</span>
  {checkin.profile.email}
  </span>
  )}
  {checkin.profile?.phone && (
  <span className="flex items-center gap-1">
- <Phone className="w-3 h-3" />
+ <span className="w-3 h-3" aria-hidden="true">📞</span>
  {checkin.profile.phone}
  </span>
  )}
@@ -345,7 +345,7 @@ function CheckInList({ checkins, loading, emptyMessage }: { checkins: CheckIn[];
  </div>
  <div className="text-right flex-shrink-0">
  <Badge variant="outline" className="text-xs">
- <Clock className="w-3 h-3 mr-1" />
+ <span className="w-3 h-3 mr-1" aria-hidden="true">⏰</span>
  {format(new Date(checkin.checked_in_at),"h:mm a")}
  </Badge>
  <p className="text-xs text-muted-foreground mt-1">

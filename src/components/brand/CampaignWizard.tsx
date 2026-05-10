@@ -9,7 +9,7 @@ import { Slider } from"@/components/ui/slider";
 import { Separator } from"@/components/ui/separator";
 import { Progress } from"@/components/ui/progress";
 import { Badge } from"@/components/ui/badge";
-import { Megaphone, DollarSign, Target, Palette, Zap, CheckCircle2, ArrowRight, ArrowLeft, Loader2, Eye } from "lucide-react";
+import { Megaphone, DollarSign, Target, Palette, CheckCircle2, ArrowRight, ArrowLeft, Loader2, Eye } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { toast } from"sonner";
 import {
@@ -382,7 +382,7 @@ export function CampaignWizard({ open, onOpenChange, brandId, brandName, brandLo
  <>
  <div className="space-y-3 p-4 rounded-lg bg-muted border">
  <h3 className="font-semibold flex items-center gap-2">
- <Zap className="h-4 w-4" /> When are PawBucks released?
+ <span className="h-4 w-4" aria-hidden="true">⚡</span> When are PawBucks released?
  </h3>
  <div className="grid grid-cols-3 gap-2">
  {([
@@ -424,7 +424,7 @@ export function CampaignWizard({ open, onOpenChange, brandId, brandName, brandLo
 
  <div className="space-y-4 p-4 rounded-lg bg-muted border">
  <h3 className="font-semibold flex items-center gap-2">
- <DollarSign className="h-4 w-4" /> Budget Calculator
+ <span className="h-4 w-4" aria-hidden="true">💵</span> Budget Calculator
  </h3>
  <div className="space-y-2">
  <Label>Campaign Budget (USD)</Label>
@@ -475,7 +475,7 @@ export function CampaignWizard({ open, onOpenChange, brandId, brandName, brandLo
 
  <div className="space-y-3 p-4 rounded-lg bg-muted border">
  <h3 className="font-semibold flex items-center gap-2">
- <Zap className="h-4 w-4" /> Guardrails
+ <span className="h-4 w-4" aria-hidden="true">⚡</span> Guardrails
  </h3>
  <div className="space-y-2">
  <Label>Daily Spend Cap (USD, 0 = none)</Label>

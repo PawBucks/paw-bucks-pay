@@ -14,7 +14,7 @@ import { PageLoader } from"@/components/PageLoader";
 import { Header } from"@/components/Header";
 import { AdPlacement } from"@/components/AdPlacement";
 import { PullToRefresh } from"@/components/PullToRefresh";
-import { Search, Store, Scissors, Home, Stethoscope, Footprints, Bone, BookOpen, Star, MapPin, SlidersHorizontal, X, List, Map, Navigation, ArrowUpDown, Mountain, Zap, Hand, Brain, MoreHorizontal, Sun, Camera, Shield, Truck, Dog, ShoppingBag } from "lucide-react";
+import { Search, SlidersHorizontal, X, List, Map, ArrowUpDown } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { MerchantMap } from"@/components/MerchantMap";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem } from"@/components/ui/dropdown-menu";
@@ -642,7 +642,7 @@ const Discover = () => {
                     </div>
                     <Button asChild variant="outline" className="h-11 sm:h-12 gap-2 rounded-lg">
                       <Link to="/directory">
-                        <BookOpen className="w-4 h-4" />
+                        <span className="w-4 h-4" aria-hidden="true">📖</span>
                         <span className="hidden sm:inline">Directory</span>
                       </Link>
                     </Button>
@@ -681,7 +681,7 @@ const Discover = () => {
  <button className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border transition-colors ${
  minRating > 0 ?'bg-primary/10 border-primary/30 text-primary' :'bg-card border-border text-muted-foreground hover:text-foreground'
  }`}>
- <Star className="w-3 h-3" />
+ <span className="w-3 h-3" aria-hidden="true">⭐</span>
  {minRating > 0 ? `${minRating}+` :"Rating"}
  </button>
  </DropdownMenuTrigger>
@@ -732,7 +732,7 @@ const Discover = () => {
  } ${locationLoading ?'opacity-60' :''}`}
  disabled={locationLoading}
  >
- <Navigation className={`w-3 h-3 ${locationLoading ?'animate-spin' :''}`} />
+ <span className={`w-3 h-3 ${locationLoading ?'animate-spin' :''}`} aria-hidden="true">🧭</span>
  {locationLoading ?'Locating...' : maxDistance > 0 ? `${maxDistance} mi` :"Near Me"}
  </button>
  </DropdownMenuTrigger>
@@ -807,7 +807,7 @@ const Discover = () => {
  viewMode ==='map' ?'bg-primary text-primary-foreground' :'text-muted-foreground hover:text-foreground'
  }`}
  >
- <Map className="w-3.5 h-3.5" />
+ <span className="w-3.5 h-3.5" aria-hidden="true">🗺️</span>
  Map
  </button>
  </div>
@@ -824,7 +824,7 @@ const Discover = () => {
  {/* ── Results Area ── */}
  {totalMerchants === 0 ? (
  <div className="text-center py-20">
- <Store className="w-12 h-12 mx-auto text-muted-foreground/30 mb-3" />
+ <span className="w-12 h-12 mx-auto text-muted-foreground/30 mb-3" aria-hidden="true">🏪</span>
  <h3 className="text-base font-semibold mb-1">No merchants found</h3>
  <p className="text-sm text-muted-foreground">Try adjusting your search or filters</p>
  </div>

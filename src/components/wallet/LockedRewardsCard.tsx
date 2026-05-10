@@ -3,7 +3,7 @@ import { supabase } from"@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from"@/components/ui/tooltip";
-import { Lock, Unlock, Info, Loader2, Shield, Clock, CheckCircle2 } from"lucide-react";
+import { Info, Loader2, CheckCircle2 } from "lucide-react";
 import { Formatters } from"@/utils/formatters";
 import { formatDistanceToNow } from"date-fns";
 import { useSharedAccount, getEffectiveWalletUserId } from"@/hooks/useSharedAccount";
@@ -113,9 +113,9 @@ export const LockedRewardsCard = ({ userId, onBalanceUpdate }: LockedRewardsCard
  case"funded":
  return <CheckCircle2 className="w-3 h-3 text-success" />;
  case"action_required":
- return <Clock className="w-3 h-3 text-warning" />;
+ return <span className="w-3 h-3 text-warning" aria-hidden="true">⏰</span>;
  default:
- return <Lock className="w-3 h-3 text-muted-foreground" />;
+ return <span className="w-3 h-3 text-muted-foreground" aria-hidden="true">🔒</span>;
  }
  };
 
@@ -160,7 +160,7 @@ export const LockedRewardsCard = ({ userId, onBalanceUpdate }: LockedRewardsCard
  {/* Spendable Balance - Primary Display */}
  <div className="text-center p-4 rounded-md bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20">
  <div className="flex items-center justify-center gap-2 mb-1">
- <Unlock className="w-5 h-5 text-primary" />
+ <span className="w-5 h-5 text-primary" aria-hidden="true">🔓</span>
  <span className="text-sm text-muted-foreground">Spendable</span>
  </div>
  <p className="text-4xl font-bold text-primary mb-1">
@@ -183,7 +183,7 @@ export const LockedRewardsCard = ({ userId, onBalanceUpdate }: LockedRewardsCard
  className="w-full flex items-center justify-between text-left"
  >
  <div className="flex items-center gap-2">
- <Lock className="w-4 h-4 text-warning" />
+ <span className="w-4 h-4 text-warning" aria-hidden="true">🔒</span>
  <span className="text-sm font-medium text-warning">
  Locked Rewards
  </span>
@@ -235,7 +235,7 @@ export const LockedRewardsCard = ({ userId, onBalanceUpdate }: LockedRewardsCard
 
  {/* Vesting Info */}
  <div className="mt-3 flex items-start gap-2 text-xs text-warning/70">
- <Shield className="w-3 h-3 mt-0.5 flex-shrink-0" />
+ <span className="w-3 h-3 mt-0.5 flex-shrink-0" aria-hidden="true">🛡️</span>
  <span>
  These rewards vest once your insurance claim is fully processed. 
  Track progress in your dashboard.

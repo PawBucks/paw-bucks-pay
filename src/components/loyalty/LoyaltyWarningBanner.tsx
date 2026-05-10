@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from"framer-motion";
-import { AlertTriangle, X, ChevronRight, Clock } from"lucide-react";
+import { AlertTriangle, X, ChevronRight } from "lucide-react";
 import { cn } from"@/lib/utils";
 import { Button } from"@/components/ui/button";
 import type { LoyaltyWarning } from"@/services/api/loyalty.service";
@@ -73,7 +73,7 @@ export const LoyaltyWarningBanner = ({ warnings, onDismiss, onAction }: LoyaltyW
  </p>
  {warning.action_deadline && (
  <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
- <Clock className="w-3 h-3" />
+ <span className="w-3 h-3" aria-hidden="true">⏰</span>
  <span>
  Act {formatDistanceToNow(new Date(warning.action_deadline), { addSuffix: true })}
  </span>

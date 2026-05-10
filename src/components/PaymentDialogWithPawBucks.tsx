@@ -13,7 +13,7 @@ import {
 import { supabase } from"@/integrations/supabase/client";
 import { Elements, PaymentElement, useStripe, useElements } from"@stripe/react-stripe-js";
 import { toast } from"sonner";
-import { Loader2, CreditCard, Coins, Check, AlertCircle, Gift } from"lucide-react";
+import { Loader2, Check, AlertCircle } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from"@/components/ui/alert";
 import { PawBucksInfoTooltip } from"@/components/PawBucksInfoTooltip";
 import { useSpendablePawBucks } from"@/hooks/useSpendablePawBucks";
@@ -174,7 +174,7 @@ const StripePaymentForm = ({
  {pawbucksAmount > 0 && (
  <div className="flex justify-between text-sm">
  <span className="text-muted-foreground flex items-center gap-1">
- <Coins className="w-3 h-3" /> PawBucks Used:
+ <span className="w-3 h-3" aria-hidden="true">🪙</span> PawBucks Used:
  </span>
  <span className="font-medium text-primary">
  {pawbucksAmount} (−{Formatters.currency((pawbucksAmount * PAWBUCKS_TO_USD))})
@@ -193,7 +193,7 @@ const StripePaymentForm = ({
 
  <div className="space-y-2">
  <Label className="flex items-center gap-2">
- <CreditCard className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">💳</span>
  Payment Details
  </Label>
  <div className="min-h-[200px] relative">
@@ -624,7 +624,7 @@ export const PaymentDialogWithPawBucks = ({
  {/* Pet Fund Credit Banner - only when sole source */}
  {petFundApplicable && !hasBothSources && totalAmount > 0 && (
  <div className="bg-success/10 border border-success/20 rounded-lg p-3 flex items-start gap-2">
- <Gift className="w-4 h-4 text-success mt-0.5 flex-shrink-0" />
+ <span className="w-4 h-4 text-success mt-0.5 flex-shrink-0" aria-hidden="true">🎁</span>
  <div>
  <p className="text-sm font-medium text-success">
  🎉 Pet Fund Credit Available: {petFundCreditBalance.toLocaleString()} PB ({Formatters.currency((petFundCreditBalance * PAWBUCKS_TO_USD))})
@@ -639,7 +639,7 @@ export const PaymentDialogWithPawBucks = ({
  {/* Pet Fund not applicable - below minimum */}
  {(hasPetFund || hasWelcomeCredit) && acceptsPawbucks && totalAmount > 0 && totalAmount < petFundMinUsd && (
  <div className="bg-warning/10 border border-warning/20 rounded-lg p-3 flex items-start gap-2">
- <Gift className="w-4 h-4 text-warning mt-0.5 flex-shrink-0" />
+ <span className="w-4 h-4 text-warning mt-0.5 flex-shrink-0" aria-hidden="true">🎁</span>
  <div>
  <p className="text-sm font-medium text-warning">
  Pet Fund: {Formatters.currency((petFundCreditBalance * PAWBUCKS_TO_USD))} available
@@ -668,7 +668,7 @@ export const PaymentDialogWithPawBucks = ({
  <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 space-y-3">
  <div className="flex items-center justify-between">
  <Label className="flex items-center gap-2">
- <Coins className="w-4 h-4 text-primary" />
+ <span className="w-4 h-4 text-primary" aria-hidden="true">🪙</span>
  Use PawBucks
  </Label>
  <span className="text-sm text-muted-foreground">
@@ -728,7 +728,7 @@ export const PaymentDialogWithPawBucks = ({
 
  {acceptsPawbucks && pawbucksBalance === 0 && totalAmount > 0 && !hasWelcomeCredit && (
  <div className="text-sm text-muted-foreground bg-muted p-3 rounded-lg">
- <Coins className="w-4 h-4 inline mr-1" />
+ <span className="w-4 h-4 inline mr-1" aria-hidden="true">🪙</span>
  This merchant accepts PawBucks, but you don't have any yet. Earn PawBucks by making purchases!
  </div>
  )}

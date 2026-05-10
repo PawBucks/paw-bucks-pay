@@ -25,7 +25,7 @@ import { useSponsoredTracking } from"@/hooks/useSponsoredTracking";
 import { useSearchRankingTracking } from"@/hooks/useSearchRankingTracking";
 import { DirectoryMerchantCard } from"@/components/directory/DirectoryMerchantCard";
 import { MerchantMap } from"@/components/MerchantMap";
-import { Search, Store, Scissors, Home, Stethoscope, Footprints, Bone, Coins, SlidersHorizontal, Mountain, Zap, Hand, Brain, MoreHorizontal, MapPin, X, LayoutGrid, LayoutList, Map, Sun, Camera, Shield, Truck, Dog, ShoppingBag } from "lucide-react";
+import { Search, SlidersHorizontal, X, LayoutGrid, LayoutList, Map } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 
 type MerchantWithRating = {
@@ -316,7 +316,7 @@ const MerchantDirectory = () => {
        />
        <div className="container mx-auto px-4 pt-10 pb-6 max-w-7xl relative">
         <div className="text-[0.7rem] font-medium tracking-[0.18em] uppercase text-primary mb-3 flex items-center gap-2">
-         <MapPin className="w-3.5 h-3.5" />
+         <span className="w-3.5 h-3.5" aria-hidden="true">📍</span>
          The Directory
         </div>
         <h1
@@ -406,7 +406,7 @@ const MerchantDirectory = () => {
  :"text-muted-foreground hover:text-foreground hover:bg-muted"
  }`}
  >
- <Coins className="w-3 h-3" />
+ <span className="w-3 h-3" aria-hidden="true">🪙</span>
  PawBucks
  </button>
  </div>
@@ -432,7 +432,7 @@ const MerchantDirectory = () => {
  className={`p-1.5 transition-colors ${viewMode ==="map" || showMobileMap ?"bg-muted text-foreground" :"text-muted-foreground hover:text-foreground"}`}
  aria-label="Map view"
  >
- <Map className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">🗺️</span>
  </button>
  </div>
  </div>
@@ -467,7 +467,7 @@ const MerchantDirectory = () => {
  {filteredMerchants.length === 0 ? (
  <div className="text-center py-20">
  <div className="w-16 h-16 rounded-full bg-muted mx-auto flex items-center justify-center mb-4">
- <Store className="w-8 h-8 text-muted-foreground/40" />
+ <span className="w-8 h-8 text-muted-foreground/40" aria-hidden="true">🏪</span>
  </div>
  <h3 className="text-lg font-semibold mb-1">No merchants found</h3>
  <p className="text-sm text-muted-foreground mb-4">Try adjusting your search or filters</p>
@@ -583,7 +583,7 @@ const MerchantDirectory = () => {
  onClick={() => { setViewMode("map"); setShowMobileMap(true); }}
  className="sm:hidden fixed bottom-24 left-1/2 -translate-x-1/2 z-30 bg-foreground text-background px-4 py-2.5 rounded-full shadow-lg flex items-center gap-2 text-sm font-medium hover:scale-105 transition-transform"
  >
- <Map className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">🗺️</span>
  Map
  </button>
  )}

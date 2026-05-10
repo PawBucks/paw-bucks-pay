@@ -20,7 +20,7 @@ import {
  SelectTrigger,
  SelectValue,
 } from"@/components/ui/select";
-import { FileSignature, Plus, Loader2, Send, CheckCircle, Clock, XCircle } from"lucide-react";
+import { FileSignature, Plus, Loader2, Send, CheckCircle, XCircle } from "lucide-react";
 import { toast } from"sonner";
 import { format } from"date-fns";
 import type { ConsentRequest, ConsentStatus } from"./types";
@@ -167,9 +167,9 @@ export const ConsentManagement = ({ vetId }: ConsentManagementProps) => {
  case"declined":
  return <XCircle className="w-4 h-4 text-destructive" />;
  case"expired":
- return <Clock className="w-4 h-4 text-muted-foreground" />;
+ return <span className="w-4 h-4 text-muted-foreground" aria-hidden="true">⏰</span>;
  default:
- return <Clock className="w-4 h-4 text-warning" />;
+ return <span className="w-4 h-4 text-warning" aria-hidden="true">⏰</span>;
  }
  };
 

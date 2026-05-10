@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from"react";
 import { motion, AnimatePresence } from"framer-motion";
-import { X, Send, Dog, Loader2 } from"lucide-react";
+import { X, Send, Loader2 } from "lucide-react";
 import { Button } from"@/components/ui/button";
 import { useAuth } from"@/hooks/useAuth";
 import ReactMarkdown from"react-markdown";
@@ -158,7 +158,7 @@ export const MaximusChat = () => {
  <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
  {messages.length === 0 && (
  <div className="flex flex-col items-center justify-center h-full text-center gap-2 text-muted-foreground">
- <Dog className="h-10 w-10 text-primary/60" />
+ <span className="h-10 w-10 text-primary/60" aria-hidden="true">🐕</span>
  <p className="text-sm font-medium">Woof! I'm Maximus! 🐾</p>
  <p className="text-xs">Ask me about your spending, PawBucks, transactions, or anything about your account!</p>
  </div>

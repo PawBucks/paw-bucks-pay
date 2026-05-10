@@ -16,7 +16,7 @@ import {
 } from"@/components/ui/alert-dialog";
 import { toast } from"sonner";
 import { format } from"date-fns";
-import { Star, Trash2, Loader2, X } from"lucide-react";
+import { Star, Trash2, Loader2, X } from "lucide-react";
 
 type ReviewPhoto = {
  id: string;

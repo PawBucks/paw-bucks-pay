@@ -1,5 +1,5 @@
 import { motion } from"framer-motion";
-import { CreditCard, Store, Clock, CheckCircle } from"lucide-react";
+import { CheckCircle } from "lucide-react";
 import { cn } from"@/lib/utils";
 import type { ServiceCredit } from"@/services/api/loyalty.service";
 import { formatDistanceToNow, isPast } from"date-fns";
@@ -34,12 +34,12 @@ export const ServiceCreditCard = ({ credit, onClick, compact = false }: ServiceC
  >
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-2">
- <CreditCard className="w-4 h-4 text-primary" />
+ <span className="w-4 h-4 text-primary" aria-hidden="true">💳</span>
  <span className="font-semibold">${Formatters.number(Math.round(credit.remaining_value))}</span>
  </div>
  {!isUsed && !isExpired && (
  <div className="flex items-center gap-1 text-xs text-muted-foreground">
- <Clock className="w-3 h-3" />
+ <span className="w-3 h-3" aria-hidden="true">⏰</span>
  <span className={isExpiringSoon ?"text-warning" :""}>
  {formatDistanceToNow(expiresAt, { addSuffix: true })}
  </span>
@@ -96,7 +96,7 @@ export const ServiceCreditCard = ({ credit, onClick, compact = false }: ServiceC
  className="w-4 h-4 rounded-full object-cover"
  />
  ) : (
- <Store className="w-4 h-4 text-muted-foreground" />
+ <span className="w-4 h-4 text-muted-foreground" aria-hidden="true">🏪</span>
  )}
  <span className="text-xs text-muted-foreground">{merchantName}</span>
  </div>
@@ -104,7 +104,7 @@ export const ServiceCreditCard = ({ credit, onClick, compact = false }: ServiceC
  {/* Expiry */}
  {!isUsed && (
  <div className="flex items-center gap-1 text-xs">
- <Clock className="w-3 h-3" />
+ <span className="w-3 h-3" aria-hidden="true">⏰</span>
  {isExpired ? (
  <span className="text-destructive">Expired</span>
  ) : isExpiringSoon ? (

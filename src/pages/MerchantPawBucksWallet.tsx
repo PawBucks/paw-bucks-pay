@@ -7,7 +7,7 @@ import { SEO } from"@/components/SEO";
 import { Button } from"@/components/ui/button";
 import { GradientCard } from"@/components/ui/gradient-card";
 import { PageLoader } from"@/components/PageLoader";
-import { Coins, TrendingUp, ArrowUpRight, ArrowDownRight, ArrowLeft, Store, ShoppingBag } from"lucide-react";
+import { ArrowUpRight, ArrowDownRight, ArrowLeft } from "lucide-react";
 import { Formatters } from"@/utils/formatters";
 import { format, parseISO } from"date-fns";
 
@@ -152,7 +152,7 @@ const MerchantPawBucksWallet = () => {
  </Button>
  <div className="flex items-center gap-3">
  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
- <Coins className="w-5 h-5 text-primary" />
+ <span className="w-5 h-5 text-primary" aria-hidden="true">🪙</span>
  </div>
  <div>
  <h1 className="text-lg font-bold">Merchant PawBucks</h1>
@@ -167,7 +167,7 @@ const MerchantPawBucksWallet = () => {
  <GradientCard gradient className="mb-6">
  <div className="text-center">
  <div className="flex items-center justify-center gap-2 mb-2">
- <Coins className="w-8 h-8 text-warning" />
+ <span className="w-8 h-8 text-warning" aria-hidden="true">🪙</span>
  <p className="text-sm text-muted-foreground">Current Balance</p>
  </div>
  <p className="text-5xl font-bold mb-2">{Formatters.number(balance)}</p>
@@ -182,7 +182,7 @@ const MerchantPawBucksWallet = () => {
  <GradientCard>
  <div className="flex items-center gap-3">
  <div className="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center">
- <TrendingUp className="w-5 h-5 text-success" />
+ <span className="w-5 h-5 text-success" aria-hidden="true">📈</span>
  </div>
  <div>
  <p className="text-xs text-muted-foreground">Total Earned</p>
@@ -194,7 +194,7 @@ const MerchantPawBucksWallet = () => {
  <GradientCard>
  <div className="flex items-center gap-3">
  <div className="w-10 h-10 rounded-full bg-info/10 flex items-center justify-center">
- <ShoppingBag className="w-5 h-5 text-info" />
+ <span className="w-5 h-5 text-info" aria-hidden="true">🛍️</span>
  </div>
  <div>
  <p className="text-xs text-muted-foreground">Total Spent</p>
@@ -207,7 +207,7 @@ const MerchantPawBucksWallet = () => {
  {/* How Merchants Earn PawBucks */}
  <GradientCard className="mb-6">
  <h3 className="font-semibold mb-3 flex items-center gap-2">
- <Store className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">🏪</span>
  How You Earn PawBucks
  </h3>
  <ul className="text-sm text-muted-foreground space-y-2">
@@ -225,7 +225,7 @@ const MerchantPawBucksWallet = () => {
  className="w-full mt-4"
  onClick={() => navigate('/merchant/market')}
  >
- <ShoppingBag className="w-4 h-4 mr-2" />
+ <span className="w-4 h-4 mr-2" aria-hidden="true">🛍️</span>
  Browse Merchant Market
  </Button>
  </GradientCard>
@@ -278,7 +278,7 @@ const MerchantPawBucksWallet = () => {
  </div>
  ) : (
  <div className="text-center py-8 text-muted-foreground">
- <Coins className="w-12 h-12 mx-auto mb-3 opacity-50" />
+ <span className="w-12 h-12 mx-auto mb-3 opacity-50" aria-hidden="true">🪙</span>
  <p>No activity yet</p>
  <p className="text-sm mt-1">PawBucks will appear here when customers pay with them</p>
  </div>

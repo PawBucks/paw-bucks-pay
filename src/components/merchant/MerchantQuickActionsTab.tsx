@@ -1,21 +1,7 @@
 import { useState, useEffect } from"react";
 import { Button } from"@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from"@/components/ui/card";
-import {
- FileText,
- CreditCard,
- Edit,
- Package,
- ShoppingCart,
- Store,
- PlugZap,
- CalendarDays,
- Vault,
- ArrowRight,
- Receipt,
- RefreshCw,
- Megaphone,
-} from"lucide-react";
+import { FileText, CreditCard, Edit, Package, ShoppingCart, Store, PlugZap, CalendarDays, Vault, ArrowRight, Receipt, RefreshCw, Megaphone } from "lucide-react";
 import { FundingRequestTracker } from"@/components/shared/FundingRequestTracker";
 import { merchantsService } from"@/services/api/merchants.service";
 

@@ -12,17 +12,7 @@ import {
  TableHeader,
  TableRow,
 } from"@/components/ui/table";
-import {
- AlertCircle,
- FileText,
- Send,
- CheckCircle,
- Clock,
- DollarSign,
- TrendingDown,
- FileDown,
- RefreshCw,
-} from"lucide-react";
+import { AlertCircle, Send, CheckCircle, Clock, DollarSign, FileDown, RefreshCw } from "lucide-react";
 import { toast } from"sonner";
 
 import { Formatters } from "@/utils/formatters";
@@ -184,7 +174,7 @@ export function ClaimRecoveryDashboard({ vetId }: ClaimRecoveryDashboardProps) {
  <CardContent className="p-4">
  <div className="flex items-center gap-3">
  <div className="p-2 rounded-lg bg-destructive/10">
- <TrendingDown className="h-5 w-5 text-destructive" />
+ <span className="h-5 w-5 text-destructive" aria-hidden="true">📉</span>
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Total Gap Amount</p>
@@ -198,7 +188,7 @@ export function ClaimRecoveryDashboard({ vetId }: ClaimRecoveryDashboardProps) {
  <CardContent className="p-4">
  <div className="flex items-center gap-3">
  <div className="p-2 rounded-lg bg-warning/10">
- <Clock className="h-5 w-5 text-warning" />
+ <span className="h-5 w-5 text-warning" aria-hidden="true">⏰</span>
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Pending Action</p>

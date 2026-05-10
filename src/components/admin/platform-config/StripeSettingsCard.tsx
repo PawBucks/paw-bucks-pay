@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from'@/comp
 import { Button } from'@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from'@/components/ui/select';
 import { Badge } from'@/components/ui/badge';
-import { CreditCard, Eye, EyeOff, Loader2, CheckCircle2 } from'lucide-react';
+import { Eye, EyeOff, Loader2, CheckCircle2 } from "lucide-react";
 import { supabase } from'@/integrations/supabase/client';
 import { toast } from'sonner';
 
@@ -44,7 +44,7 @@ export function StripeSettingsCard({ payoutSchedule, onPayoutScheduleChange, sav
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <CreditCard className="w-5 h-5 text-primary" />
+ <span className="w-5 h-5 text-primary" aria-hidden="true">💳</span>
  Stripe Configuration
  </CardTitle>
  <CardDescription>

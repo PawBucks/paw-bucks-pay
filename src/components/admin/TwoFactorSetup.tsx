@@ -6,7 +6,7 @@ import { Label } from"@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/components/ui/card";
 import { Alert, AlertDescription } from"@/components/ui/alert";
 import { toast } from"sonner";
-import { Shield, ShieldCheck, ShieldOff, Loader2, Copy, Check } from"lucide-react";
+import { ShieldOff, Loader2, Copy, Check } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from"@/components/ui/dialog";
 
 interface TwoFactorSetupProps {
@@ -182,7 +182,7 @@ export const TwoFactorSetup = ({ onSetupComplete }: TwoFactorSetupProps) => {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <Shield className="h-5 w-5" />
+ <span className="h-5 w-5" aria-hidden="true">🛡️</span>
  Set Up Two-Factor Authentication
  </CardTitle>
  <CardDescription>
@@ -273,7 +273,7 @@ export const TwoFactorSetup = ({ onSetupComplete }: TwoFactorSetupProps) => {
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
  {is2FAEnabled ? (
- <ShieldCheck className="h-5 w-5 text-success" />
+ <span className="h-5 w-5 text-success" aria-hidden="true">🛡️</span>
  ) : (
  <ShieldOff className="h-5 w-5 text-warning" />
  )}
@@ -290,7 +290,7 @@ export const TwoFactorSetup = ({ onSetupComplete }: TwoFactorSetupProps) => {
  {is2FAEnabled ? (
  <div className="space-y-4">
  <Alert className="border-success/30 bg-success/10">
- <ShieldCheck className="h-4 w-4 text-success" />
+ <span className="h-4 w-4 text-success" aria-hidden="true">🛡️</span>
  <AlertDescription className="text-success">
  Two-factor authentication is enabled. Your account is more secure.
  </AlertDescription>
@@ -359,7 +359,7 @@ export const TwoFactorSetup = ({ onSetupComplete }: TwoFactorSetupProps) => {
  ) : (
  <div className="space-y-4">
  <Alert>
- <Shield className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">🛡️</span>
  <AlertDescription>
  Use an authenticator app like Google Authenticator, Authy, or 1Password to generate verification codes.
  </AlertDescription>
@@ -376,7 +376,7 @@ export const TwoFactorSetup = ({ onSetupComplete }: TwoFactorSetupProps) => {
  </>
  ) : (
  <>
- <Shield className="h-4 w-4 mr-2" />
+ <span className="h-4 w-4 mr-2" aria-hidden="true">🛡️</span>
  Enable Two-Factor Authentication
  </>
  )}

@@ -1,7 +1,7 @@
 import { memo, useMemo } from"react";
 import { useNavigate } from"react-router-dom";
 import { GradientCard } from"@/components/ui/gradient-card";
-import { Wallet, Gift, TrendingUp, CreditCard } from"lucide-react";
+import { Wallet } from "lucide-react";
 import { PawBucksInfoTooltip } from"@/components/PawBucksInfoTooltip";
 import { Formatters } from"@/utils/formatters";
 
@@ -31,7 +31,7 @@ export const WalletStats = memo(({ balance, rewardsPoints, totalSaved = 0, total
  >
  <div className="flex items-center gap-4">
  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
- <Wallet className="w-6 h-6 text-primary" />
+ <span className="w-6 h-6 text-primary" aria-hidden="true">👛</span>
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Wallet Balance</p>
@@ -47,7 +47,7 @@ export const WalletStats = memo(({ balance, rewardsPoints, totalSaved = 0, total
  >
  <div className="flex items-center gap-4">
  <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center">
- <Gift className="w-6 h-6 text-accent" />
+ <span className="w-6 h-6 text-accent" aria-hidden="true">🎁</span>
  </div>
  <div className="flex-1">
  <div className="flex items-center gap-1">
@@ -66,7 +66,7 @@ export const WalletStats = memo(({ balance, rewardsPoints, totalSaved = 0, total
  >
  <div className="flex items-center gap-4">
  <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center">
- <TrendingUp className="w-6 h-6 text-secondary" />
+ <span className="w-6 h-6 text-secondary" aria-hidden="true">📈</span>
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Total Saved</p>
@@ -82,7 +82,7 @@ export const WalletStats = memo(({ balance, rewardsPoints, totalSaved = 0, total
  >
  <div className="flex items-center gap-4">
  <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center">
- <CreditCard className="w-6 h-6 text-destructive" />
+ <span className="w-6 h-6 text-destructive" aria-hidden="true">💳</span>
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Total Spending</p>

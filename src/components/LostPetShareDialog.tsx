@@ -8,20 +8,7 @@ import {
 } from"@/components/ui/dialog";
 import { Button } from"@/components/ui/button";
 import { useToast } from"@/hooks/use-toast";
-import {
- Share2,
- MessageSquare,
- Mail,
- Facebook,
- Twitter,
- Link2,
- Printer,
- Smartphone,
- Copy,
- Check,
- MessageCircle,
- Users,
-} from"lucide-react";
+import { MessageSquare, Mail, Facebook, Twitter, Link2, Printer, Smartphone, Copy, Check, MessageCircle, Users } from "lucide-react";
 import { generateHighReadabilityFlyer } from"@/components/HighReadabilityFlyer";
 
 interface LostPetPost {
@@ -213,7 +200,7 @@ export const LostPetShareDialog = ({ post, children }: LostPetShareDialogProps) 
  <DialogTrigger asChild>
  {children || (
  <Button variant="outline" size="sm" className="gap-2">
- <Share2 className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">🔗</span>
  Share
  </Button>
  )}
@@ -221,7 +208,7 @@ export const LostPetShareDialog = ({ post, children }: LostPetShareDialogProps) 
 <DialogContent className="max-w-md w-[calc(100vw-2rem)] lg:max-w-4xl lg:w-auto max-h-[90vh] overflow-y-auto">
  <DialogHeader>
  <DialogTitle className="flex items-center gap-2">
- <Share2 className="w-5 h-5 text-primary" />
+ <span className="w-5 h-5 text-primary" aria-hidden="true">🔗</span>
  Share {post.pet_name}'s Flyer
  </DialogTitle>
  </DialogHeader>

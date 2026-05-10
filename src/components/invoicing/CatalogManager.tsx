@@ -2,15 +2,7 @@ import { useState, useMemo } from"react";
 import { useForm } from"react-hook-form";
 import { zodResolver } from"@hookform/resolvers/zod";
 import { z } from"zod";
-import {
- Plus,
- Search,
- Package,
- Edit2,
- Trash2,
- DollarSign,
- MoreHorizontal,
-} from"lucide-react";
+import { Plus, Search, Edit2, Trash2, MoreHorizontal } from "lucide-react";
 import { Button } from"@/components/ui/button";
 import { Input } from"@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from"@/components/ui/card";
@@ -240,7 +232,7 @@ export function CatalogManager({
  {/* Items Grid */}
  {filteredItems.length === 0 ? (
  <Card className="p-8 text-center">
- <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+ <span className="h-12 w-12 mx-auto text-muted-foreground mb-4" aria-hidden="true">📦</span>
  <h3 className="font-semibold mb-2">No catalog items</h3>
  <p className="text-muted-foreground mb-4">
  {searchTerm
@@ -366,7 +358,7 @@ export function CatalogManager({
  <FormLabel>Price *</FormLabel>
  <FormControl>
  <div className="relative">
- <DollarSign className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+ <span className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true">💵</span>
  <Input
  type="number"
  step="0.01"

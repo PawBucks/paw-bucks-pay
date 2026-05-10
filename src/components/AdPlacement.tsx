@@ -2,7 +2,7 @@ import { memo, useCallback, useMemo, useState, useEffect } from"react";
 import { useSubscription } from"@/hooks/useSubscription";
 import { Card } from"@/components/ui/card";
 import { Button } from"@/components/ui/button";
-import { Crown, X, MapPin, Tag, BadgeCheck } from"lucide-react";
+import { X } from "lucide-react";
 import { useNavigate } from"react-router-dom";
 import { Badge } from"@/components/ui/badge";
 import { getSubscriptionTier } from"@/lib/constants";
@@ -85,12 +85,12 @@ const AdPlacementComponent = ({ position ='top' }: AdPlacementProps) => {
  <h3 className="text-lg font-bold text-foreground">{currentMerchant.business_name}</h3>
  {hasVerifiedBadge && (
  <Badge className="bg-info/10 text-info border-info/20 gap-1">
- <BadgeCheck className="w-3 h-3" />
+ <span className="w-3 h-3" aria-hidden="true">✅</span>
  Verified Pro
  </Badge>
  )}
  <Badge variant="secondary" className="text-xs">
- <Tag className="w-3 h-3 mr-1" />
+ <span className="w-3 h-3 mr-1" aria-hidden="true">🏷️</span>
  {currentMerchant.cashback_rate}x points
  </Badge>
  </div>

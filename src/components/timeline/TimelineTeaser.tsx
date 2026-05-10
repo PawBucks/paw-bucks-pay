@@ -3,7 +3,7 @@ import { motion } from"framer-motion";
 import { useNavigate } from"react-router-dom";
 import { supabase } from"@/integrations/supabase/client";
 import { format } from"date-fns";
-import { ChevronRight, BookOpen, Coins, Camera } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { Card, CardContent } from"@/components/ui/card";
 import { Button } from"@/components/ui/button";
@@ -187,7 +187,7 @@ export const TimelineTeaser = ({ userId, pets }: TimelineTeaserProps) => {
  
  {latestMoment.pawbucks_earned > 0 && (
  <Badge className="bg-gradient-to-r from-primary to-accent text-white text-xs gap-1">
- <Coins className="w-3 h-3" />
+ <span className="w-3 h-3" aria-hidden="true">🪙</span>
  +{latestMoment.pawbucks_earned.toLocaleString()} PawBucks
  </Badge>
  )}
@@ -204,7 +204,7 @@ export const TimelineTeaser = ({ userId, pets }: TimelineTeaserProps) => {
  {/* Decorative footer */}
  <div className="mt-3 pt-3 border-t border-primary/10 flex items-center justify-between">
  <div className="flex items-center gap-2 text-xs text-muted-foreground">
- <BookOpen className="w-3.5 h-3.5" />
+ <span className="w-3.5 h-3.5" aria-hidden="true">📖</span>
  <span>
  {getPetName(latestMoment.pet_id)}'s timeline has {momentCount} {momentCount === 1 ?'moment' :'moments'}
  </span>

@@ -5,16 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from"@/components/ui/card";
 import { Button } from"@/components/ui/button";
 import { Badge } from"@/components/ui/badge";
 import { Skeleton } from"@/components/ui/skeleton";
-import { 
- FileText, 
- CreditCard, 
- Calendar,
- ChevronRight,
- Building2,
- AlertCircle,
- CheckCircle2,
- Clock
-} from"lucide-react";
+import { FileText, ChevronRight, AlertCircle, CheckCircle2, Clock } from "lucide-react";
 import { format, parseISO } from"date-fns";
 
 import { Formatters } from "@/utils/formatters";
@@ -150,7 +141,7 @@ export function PetOwnerInvoices({ userEmail }: PetOwnerInvoicesProps) {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <FileText className="h-5 w-5 text-primary" />
+ <span className="h-5 w-5 text-primary" aria-hidden="true">📄</span>
  My Invoices
  </CardTitle>
  </CardHeader>
@@ -171,7 +162,7 @@ export function PetOwnerInvoices({ userEmail }: PetOwnerInvoicesProps) {
  <Card>
  <CardHeader className="pb-3">
  <CardTitle className="flex items-center gap-2 text-lg">
- <FileText className="h-5 w-5 text-primary" />
+ <span className="h-5 w-5 text-primary" aria-hidden="true">📄</span>
  My Invoices
  </CardTitle>
  </CardHeader>
@@ -198,7 +189,7 @@ export function PetOwnerInvoices({ userEmail }: PetOwnerInvoicesProps) {
  />
  ) : (
  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
- <Building2 className="w-5 h-5 text-primary" />
+ <span className="w-5 h-5 text-primary" aria-hidden="true">🏢</span>
  </div>
  )}
  </div>
@@ -217,7 +208,7 @@ export function PetOwnerInvoices({ userEmail }: PetOwnerInvoicesProps) {
  <div className="text-sm text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-1">
  <span>#{invoice.invoice_number}</span>
  <span className="flex items-center gap-1">
- <Calendar className="w-3 h-3" />
+ <span className="w-3 h-3" aria-hidden="true">📅</span>
  Due {format(parseISO(invoice.due_date),"MMM d, yyyy")}
  </span>
  </div>
@@ -250,7 +241,7 @@ export function PetOwnerInvoices({ userEmail }: PetOwnerInvoicesProps) {
  onClick={() => handlePayInvoice(invoice)}
  className="gap-1"
  >
- <CreditCard className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">💳</span>
  Pay
  </Button>
  ) : (

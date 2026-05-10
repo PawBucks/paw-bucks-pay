@@ -3,7 +3,7 @@ import { Elements, PaymentElement, useStripe, useElements } from"@stripe/react-s
 import { getStripeForConnectedAccount } from"@/lib/stripe";
 import { supabase } from"@/integrations/supabase/client";
 import { Button } from"@/components/ui/button";
-import { Loader2, CreditCard, Shield, CheckCircle2 } from"lucide-react";
+import { Loader2 } from "lucide-react";
 
 import { Formatters } from "@/utils/formatters";
 interface DepositCardFormProps {
@@ -66,7 +66,7 @@ function CardFormInner({
  return (
  <form onSubmit={handleSubmit} className="space-y-4">
  <div className="flex items-start gap-2 p-3 rounded-lg bg-info/10 border border-info/20 text-sm">
- <Shield className="w-4 h-4 text-info mt-0.5 flex-shrink-0" />
+ <span className="w-4 h-4 text-info mt-0.5 flex-shrink-0" aria-hidden="true">🛡️</span>
  <div className="text-info">
  <p className="font-medium">Card Required for This Booking</p>
  <p className="mt-1 text-xs">
@@ -96,7 +96,7 @@ function CardFormInner({
  {submitting ? (
  <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Saving...</>
  ) : (
- <><CreditCard className="w-4 h-4 mr-2" /> Save Card & Book</>
+ <><span className="w-4 h-4 mr-2" aria-hidden="true">💳</span> Save Card & Book</>
  )}
  </Button>
  </div>

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from"react";
 import { motion } from"framer-motion";
-import { Gift, Clock, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { useNavigate } from"react-router-dom";
 import { GradientCard } from"@/components/ui/gradient-card";
@@ -155,7 +155,7 @@ export const WelcomeCreditCard = ({ userId }: WelcomeCreditCardProps) => {
  {waitingForPhase2 ? (
  <Sparkles className="w-7 h-7 text-white" />
  ) : (
- <Gift className="w-7 h-7 text-white" />
+ <span className="w-7 h-7 text-white" aria-hidden="true">🎁</span>
  )}
  </div>
  
@@ -186,7 +186,7 @@ export const WelcomeCreditCard = ({ userId }: WelcomeCreditCardProps) => {
  {/* Countdown Timer */}
  <div className="flex items-center gap-4 mb-3">
  <div className="flex items-center gap-2">
- <Clock className={`w-4 h-4 ${isCritical ?'text-destructive animate-pulse' : isUrgent ?'text-warning' :'text-muted-foreground'}`} />
+ <span className={`w-4 h-4 ${isCritical ?'text-destructive animate-pulse' : isUrgent ?'text-warning' :'text-muted-foreground'}`} aria-hidden="true">⏰</span>
  <span className={`text-sm font-medium ${
  isCritical ?'text-destructive' : isUrgent ?'text-warning' :'text-foreground'
  }`}>

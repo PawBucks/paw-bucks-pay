@@ -24,7 +24,7 @@ import {
 } from"@/components/ui/table";
 import { Checkbox } from"@/components/ui/checkbox";
 import { ScrollArea } from"@/components/ui/scroll-area";
-import { Mail, Send, Loader2, Users, Store, Search, X } from"lucide-react";
+import { Send, Loader2, Users, Search, X } from "lucide-react";
 import { toast } from"sonner";
 
 type RecipientType ="all" |"merchants" |"pet_owners" |"individual";
@@ -153,7 +153,7 @@ export function EmailTab() {
  return (
  <div className="space-y-6">
  <div className="flex items-center gap-2 mb-4">
- <Mail className="h-5 w-5 text-primary" />
+ <span className="h-5 w-5 text-primary" aria-hidden="true">📧</span>
  <h2 className="text-xl font-semibold">Email Users</h2>
  </div>
 
@@ -175,25 +175,25 @@ export function EmailTab() {
  <SelectContent>
  <SelectItem value="all">
  <div className="flex items-center gap-2">
- <Users className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">👥</span>
  All Users
  </div>
  </SelectItem>
  <SelectItem value="merchants">
  <div className="flex items-center gap-2">
- <Store className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">🏪</span>
  Merchants Only
  </div>
  </SelectItem>
  <SelectItem value="pet_owners">
  <div className="flex items-center gap-2">
- <Users className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">👥</span>
  Pet Owners Only
  </div>
  </SelectItem>
  <SelectItem value="individual">
  <div className="flex items-center gap-2">
- <Mail className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">📧</span>
  Individual Selection
  </div>
  </SelectItem>

@@ -10,22 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from"@/components/ui/popover"
 import { Separator } from"@/components/ui/separator";
 import { toast } from"sonner";
 import { format, startOfDay, isSameDay } from"date-fns";
-import { 
- MapPin, 
- Navigation, 
- Clock, 
- Route as RouteIcon, 
- Loader2, 
- CalendarIcon, 
- Fuel, 
- TrendingDown, 
- CheckCircle2, 
- Car,
- Play,
- SkipForward,
- ArrowRight,
- Users
-} from"lucide-react";
+import { Route as RouteIcon, Loader2, CheckCircle2, Play, SkipForward, ArrowRight } from "lucide-react";
 import mapboxgl from"mapbox-gl";
 import { Formatters } from "@/utils/formatters";
 import"mapbox-gl/dist/mapbox-gl.css";
@@ -325,7 +310,7 @@ export function SmartScheduleTab({ merchantId }: Props) {
  <div className="flex items-center justify-between flex-wrap gap-3">
  <div>
  <CardTitle className="flex items-center gap-2">
- <Navigation className="w-5 h-5 text-primary" />
+ <span className="w-5 h-5 text-primary" aria-hidden="true">🧭</span>
  Smart Schedule
  </CardTitle>
  <CardDescription>
@@ -335,7 +320,7 @@ export function SmartScheduleTab({ merchantId }: Props) {
  <Popover>
  <PopoverTrigger asChild>
  <Button variant="outline" size="sm">
- <CalendarIcon className="w-4 h-4 mr-2" />
+ <span className="w-4 h-4 mr-2" aria-hidden="true">📅</span>
  {format(selectedDate,"MMM d, yyyy")}
  </Button>
  </PopoverTrigger>
@@ -358,7 +343,7 @@ export function SmartScheduleTab({ merchantId }: Props) {
  ) : stops.length === 0 ? (
  <Card>
  <CardContent className="py-12 text-center">
- <MapPin className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4" />
+ <span className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4" aria-hidden="true">📍</span>
  <h3 className="font-semibold text-lg mb-1">No mobile appointments</h3>
  <p className="text-muted-foreground text-sm">
  No confirmed mobile service bookings with client addresses for this date.
@@ -379,14 +364,14 @@ export function SmartScheduleTab({ merchantId }: Props) {
  </Card>
  <Card className="p-4">
  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
- <Car className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">🚗</span>
  Drive Time
  </div>
  <p className="text-xl font-bold">{routePlan.total_duration_minutes ||"—"} min</p>
  </Card>
  <Card className="p-4">
  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
- <TrendingDown className="w-4 h-4 text-success" />
+ <span className="w-4 h-4 text-success" aria-hidden="true">📉</span>
  Time Saved
  </div>
  <p className="text-xl font-bold text-success">
@@ -395,7 +380,7 @@ export function SmartScheduleTab({ merchantId }: Props) {
  </Card>
  <Card className="p-4">
  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
- <Users className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">👥</span>
  Stops
  </div>
  <p className="text-xl font-bold">{stops.length}</p>
@@ -424,7 +409,7 @@ export function SmartScheduleTab({ merchantId }: Props) {
  {optimizing ? (
  <Loader2 className="w-4 h-4 animate-spin mr-2" />
  ) : (
- <Navigation className="w-4 h-4 mr-2" />
+ <span className="w-4 h-4 mr-2" aria-hidden="true">🧭</span>
  )}
  {optimizing ?"Optimizing..." :"Optimize Route"}
  </Button>
@@ -504,7 +489,7 @@ export function SmartScheduleTab({ merchantId }: Props) {
  onClick={() => handleUpdateStopStatus(stop.id,"arrived")}
  title="Arrived"
  >
- <MapPin className="w-3.5 h-3.5" />
+ <span className="w-3.5 h-3.5" aria-hidden="true">📍</span>
  </Button>
  )}
  {stop.status ==="arrived" && (

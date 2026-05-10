@@ -5,7 +5,7 @@ import { Badge } from"@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from"@/components/ui/dialog";
 import { Textarea } from"@/components/ui/textarea";
 import { Label } from"@/components/ui/label";
-import { Building2, Clock, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { supabase } from"@/integrations/supabase/client";
 import { toast } from"sonner";
@@ -105,7 +105,7 @@ export function AccountTypeCard({ merchantId, feeModel, acquisitionFeeRate }: Pr
  <div className="flex items-start gap-4">
  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
  {isAcq ? (
- <Building2 className="w-6 h-6 text-primary" />
+ <span className="w-6 h-6 text-primary" aria-hidden="true">🏢</span>
  ) : (
  <Sparkles className="w-6 h-6 text-primary" />
  )}
@@ -126,7 +126,7 @@ export function AccountTypeCard({ merchantId, feeModel, acquisitionFeeRate }: Pr
  {pending ? (
  <>
  <Badge variant="outline" className="gap-1">
- <Clock className="w-3 h-3" />
+ <span className="w-3 h-3" aria-hidden="true">⏰</span>
  Pending: {labelFor(pending.requested_fee_model)}
  </Badge>
  <Button size="sm" variant="ghost" onClick={cancelRequest} disabled={submitting}>

@@ -14,7 +14,7 @@ import {
 import { Card } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
 import { toast } from"sonner";
-import { Share2, Copy, Trash2, Plus, Key, Clock, User, Building } from"lucide-react";
+import { Copy, Trash2, Plus } from "lucide-react";
 import { format } from"date-fns";
 
 interface AccessCode {
@@ -166,14 +166,14 @@ export function ShareHealthRecordsDialog({ petId, petName }: ShareHealthRecordsD
  <Dialog open={isOpen} onOpenChange={setIsOpen}>
  <DialogTrigger asChild>
  <Button variant="outline" className="gap-2">
- <Share2 className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">🔗</span>
  Share Records
  </Button>
  </DialogTrigger>
  <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
  <DialogHeader>
  <DialogTitle className="flex items-center gap-2">
- <Key className="w-5 h-5 text-primary" />
+ <span className="w-5 h-5 text-primary" aria-hidden="true">🔑</span>
  Share Health Records
  </DialogTitle>
  <DialogDescription>
@@ -259,7 +259,7 @@ export function ShareHealthRecordsDialog({ petId, petName }: ShareHealthRecordsD
  <div className="flex items-start justify-between gap-2">
  <div className="flex-1 min-w-0">
  <div className="flex items-center gap-2 mb-1">
- <User className="w-4 h-4 text-muted-foreground" />
+ <span className="w-4 h-4 text-muted-foreground" aria-hidden="true">👤</span>
  <span className="font-medium truncate">{code.vet_name}</span>
  {!code.is_active && (
  <Badge variant="secondary">Revoked</Badge>
@@ -267,7 +267,7 @@ export function ShareHealthRecordsDialog({ petId, petName }: ShareHealthRecordsD
  </div>
  {code.vet_clinic && (
  <div className="flex items-center gap-2 text-sm text-muted-foreground">
- <Building className="w-3 h-3" />
+ <span className="w-3 h-3" aria-hidden="true">🏢</span>
  <span className="truncate">{code.vet_clinic}</span>
  </div>
  )}
@@ -288,7 +288,7 @@ export function ShareHealthRecordsDialog({ petId, petName }: ShareHealthRecordsD
 
  <div className="flex items-center justify-between text-xs text-muted-foreground">
  <div className="flex items-center gap-1">
- <Clock className="w-3 h-3" />
+ <span className="w-3 h-3" aria-hidden="true">⏰</span>
  Created {format(new Date(code.created_at),"MMM d, yyyy")}
  </div>
  {code.expires_at && (

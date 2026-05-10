@@ -2,7 +2,7 @@ import { useState, useEffect } from"react";
 import { motion, AnimatePresence } from"framer-motion";
 import { supabase } from"@/integrations/supabase/client";
 import { format, isToday, isYesterday, isThisWeek } from"date-fns";
-import { Calendar, ChevronRight, Camera, Heart, Coins } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { Card, CardContent, CardHeader, CardTitle } from"@/components/ui/card";
 import { Button } from"@/components/ui/button";
@@ -154,7 +154,7 @@ const MomentCard = ({
  )}
  {moment.pawbucks_earned > 0 && (
  <Badge className="bg-gradient-to-r from-primary to-accent text-white text-xs gap-1">
- <Coins className="w-3 h-3" />
+ <span className="w-3 h-3" aria-hidden="true">🪙</span>
  +{moment.pawbucks_earned.toLocaleString()} PawBucks
  </Badge>
  )}

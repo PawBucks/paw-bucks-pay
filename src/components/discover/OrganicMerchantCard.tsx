@@ -4,7 +4,7 @@ import { motion } from"framer-motion";
 import { Card, CardContent } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
 import { Button } from"@/components/ui/button";
-import { MapPin, Star, Navigation, CreditCard, Coins, BadgeCheck, ChevronRight } from"lucide-react";
+import { MapPin, Star, ChevronRight } from "lucide-react";
 import { PawBucksInfoTooltip } from"@/components/PawBucksInfoTooltip";
 
 import { Formatters } from "@/utils/formatters";
@@ -97,7 +97,7 @@ const OrganicMerchantCardComponent = ({
  {merchant.business_name}
  </h3>
  {isVerifiedPro && (
- <BadgeCheck className="w-4 h-4 text-info flex-shrink-0 mt-0.5" />
+ <span className="w-4 h-4 text-info flex-shrink-0 mt-0.5" aria-hidden="true">✅</span>
  )}
  </div>
 
@@ -156,7 +156,7 @@ const OrganicMerchantCardComponent = ({
  {merchant.accepts_pawbucks && (
  <>
  <span className="text-muted-foreground/40">·</span>
- <Coins className="w-3 h-3 text-primary" />
+ <span className="w-3 h-3 text-primary" aria-hidden="true">🪙</span>
  </>
  )}
  </div>
@@ -171,7 +171,7 @@ const OrganicMerchantCardComponent = ({
  )}
  {showDistance && merchant.distance !== undefined && (
  <span className="text-[11px] text-muted-foreground/70 flex items-center gap-0.5 flex-shrink-0">
- <Navigation className="w-2.5 h-2.5" />
+ <span className="w-2.5 h-2.5" aria-hidden="true">🧭</span>
  {formatDistance(merchant.distance)}
  </span>
  )}

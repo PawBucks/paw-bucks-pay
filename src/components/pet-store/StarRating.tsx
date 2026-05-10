@@ -1,5 +1,4 @@
 import { memo } from"react";
-import { Star } from"lucide-react";
 
 interface StarRatingProps {
  rating: number;
@@ -19,7 +18,7 @@ export const StarRating = memo(({ rating, count, size ="sm", showCount = true }:
  const filled = rating >= star;
  const halfFilled = rating >= star - 0.5 && rating < star;
  return (
- <Star
+ <span 
  key={star}
  className={`${starSize} ${
  filled
@@ -27,8 +26,7 @@ export const StarRating = memo(({ rating, count, size ="sm", showCount = true }:
  : halfFilled
  ?"fill-gold text-gold"
  :"fill-muted text-muted-foreground/30"
- }`}
- />
+ }`} aria-hidden="true">⭐</span>
  );
  })}
  </div>

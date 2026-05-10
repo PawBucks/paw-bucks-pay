@@ -1,6 +1,6 @@
 import { memo, useMemo } from"react";
 import { GradientCard } from"@/components/ui/gradient-card";
-import { TrendingUp, TrendingDown, Minus } from"lucide-react";
+import { Minus } from "lucide-react";
 import { startOfMonth, endOfMonth, subMonths } from"date-fns";
 
 import { Formatters } from "@/utils/formatters";
@@ -78,9 +78,9 @@ export const MonthlyComparison = memo(({ transactions, medicalRecords = [] }: Mo
 
  const getTrendIcon = () => {
  if (comparison.percentageChange > 5) {
- return <TrendingUp className="w-5 h-5 text-destructive" />;
+ return <span className="w-5 h-5 text-destructive" aria-hidden="true">📈</span>;
  } else if (comparison.percentageChange < -5) {
- return <TrendingDown className="w-5 h-5 text-accent" />;
+ return <span className="w-5 h-5 text-accent" aria-hidden="true">📉</span>;
  }
  return <Minus className="w-5 h-5 text-muted-foreground" />;
  };

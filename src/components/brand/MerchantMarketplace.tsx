@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from"@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
 import { ScrollArea } from"@/components/ui/scroll-area";
-import { Store, Search, Send, Loader2, Users, CheckCircle2, Clock, XCircle } from"lucide-react";
+import { Store, Search, Send, Loader2, CheckCircle2, Clock, XCircle } from "lucide-react";
 import { toast } from"sonner";
 import {
  getMarketplaceMerchants,
@@ -126,7 +126,7 @@ export function MerchantMarketplace({ brandId, campaigns }: MerchantMarketplaceP
  <Tabs defaultValue="browse">
  <TabsList className="w-full justify-start">
  <TabsTrigger value="browse" className="gap-1.5">
- <Store className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">🏪</span>
  Browse Merchants
  </TabsTrigger>
  <TabsTrigger value="invitations" className="gap-1.5">
@@ -140,7 +140,7 @@ export function MerchantMarketplace({ brandId, campaigns }: MerchantMarketplaceP
  <Card>
  <CardHeader className="pb-3">
  <CardTitle className="text-base flex items-center gap-2">
- <Store className="h-4 w-4 text-primary" />
+ <span className="h-4 w-4 text-primary" aria-hidden="true">🏪</span>
  Merchant Marketplace
  </CardTitle>
  <CardDescription>
@@ -208,7 +208,7 @@ export function MerchantMarketplace({ brandId, campaigns }: MerchantMarketplaceP
  <img src={m.logo_url} alt={m.business_name} className="w-10 h-10 rounded-lg object-cover" />
  ) : (
  <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
- <Store className="h-5 w-5 text-muted-foreground" />
+ <span className="h-5 w-5 text-muted-foreground" aria-hidden="true">🏪</span>
  </div>
  )}
  <div className="flex-1 min-w-0">
@@ -228,7 +228,7 @@ export function MerchantMarketplace({ brandId, campaigns }: MerchantMarketplaceP
  {status ==="enrolled" ? (
  <><CheckCircle2 className="h-2.5 w-2.5" /> {c.name}</>
  ) : (
- <><Clock className="h-2.5 w-2.5" /> Invited</>
+ <><span className="h-2.5 w-2.5" aria-hidden="true">⏰</span> Invited</>
  )}
  </Badge>
  );

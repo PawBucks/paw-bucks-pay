@@ -7,7 +7,7 @@ import { Textarea } from'@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from'@/components/ui/select';
 import { Calendar } from'@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from'@/components/ui/popover';
-import { CalendarIcon, Upload, Loader2, Info, Camera } from "lucide-react";
+import { Upload, Loader2, Info } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { format, parse } from'date-fns';
 import { cn } from'@/lib/utils';
@@ -148,7 +148,7 @@ export function ExpenseEntryDialog({ open, onOpenChange, merchantId, onExpenseAd
  >
  <div className="flex items-center gap-3">
  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
- <Camera className="h-5 w-5 text-primary" />
+ <span className="h-5 w-5 text-primary" aria-hidden="true">📸</span>
  </div>
  <div className="text-left">
  <p className="font-medium flex items-center gap-1.5">
@@ -220,7 +220,7 @@ export function ExpenseEntryDialog({ open, onOpenChange, merchantId, onExpenseAd
  <Popover>
  <PopoverTrigger asChild>
  <Button variant="outline" className={cn("w-full justify-start text-left font-normal")}>
- <CalendarIcon className="mr-2 h-4 w-4" />
+ <span className="mr-2 h-4 w-4" aria-hidden="true">📅</span>
  {format(date,'PPP')}
  </Button>
  </PopoverTrigger>

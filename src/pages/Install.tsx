@@ -1,7 +1,7 @@
 import { useState, useEffect } from"react";
 import { Button } from"@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/components/ui/card";
-import { Download, Smartphone, Zap, Shield, Wifi, CheckCircle2 } from"lucide-react";
+import { Download, Smartphone, Wifi, CheckCircle2 } from "lucide-react";
 import { SEO } from"@/components/SEO";
 import { seoMeta } from"@/lib/seoMeta";
 
@@ -58,7 +58,7 @@ export default function Install() {
 
  const features = [
  {
- icon: <Zap className="w-6 h-6" />,
+ icon: <span className="w-6 h-6" aria-hidden="true">⚡</span>,
  title:"Lightning Fast",
  description:"Instant loading with optimized performance"
  },
@@ -68,7 +68,7 @@ export default function Install() {
  description:"Access your wallet even without internet"
  },
  {
- icon: <Shield className="w-6 h-6" />,
+ icon: <span className="w-6 h-6" aria-hidden="true">🛡️</span>,
  title:"Secure & Safe",
  description:"Bank-level security for all transactions"
  },

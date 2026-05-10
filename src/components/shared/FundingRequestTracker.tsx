@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
-import { CheckCircle2, Clock, Search, XCircle, FileText, ArrowRight, DollarSign, CalendarDays } from"lucide-react";
+import { CheckCircle2, Search, XCircle, FileText, DollarSign } from "lucide-react";
 import { format } from"date-fns";
 import { cn } from"@/lib/utils";
 import { useEffect, useRef } from"react";
@@ -40,13 +40,13 @@ function getStepIndex(status: string): number {
 function getStatusBadge(status: string) {
  switch (status) {
  case"pending":
- return <Badge variant="secondary" className="gap-1"><Clock className="w-3 h-3" /> Submitted</Badge>;
+ return <Badge variant="secondary" className="gap-1"><span className="w-3 h-3" aria-hidden="true">⏰</span> Submitted</Badge>;
  case"in_review":
  return <Badge className="gap-1 bg-warning/15 text-warning border-warning/30 hover:bg-warning/20"><Search className="w-3 h-3" /> In Review</Badge>;
  case"approved":
  return <Badge className="gap-1 bg-success/15 text-success border-success/30 hover:bg-success/20"><CheckCircle2 className="w-3 h-3" /> Approved</Badge>;
  case"funded":
- return <Badge className="gap-1 bg-info/15 text-info border-info/30 hover:bg-info/20"><DollarSign className="w-3 h-3" /> Funded</Badge>;
+ return <Badge className="gap-1 bg-info/15 text-info border-info/30 hover:bg-info/20"><span className="w-3 h-3" aria-hidden="true">💵</span> Funded</Badge>;
  case"denied":
  return <Badge variant="destructive" className="gap-1"><XCircle className="w-3 h-3" /> Denied</Badge>;
  default:
@@ -142,14 +142,14 @@ function RequestCard({ request, entityType }: { request: FundingRequest; entityT
  <div className="flex items-start justify-between gap-4">
  <div className="space-y-1 min-w-0">
  <div className="flex items-center gap-2">
- <DollarSign className="w-4 h-4 text-primary flex-shrink-0" />
+ <span className="w-4 h-4 text-primary flex-shrink-0" aria-hidden="true">💵</span>
  <span className="font-bold text-lg">${request.requested_amount.toLocaleString("en-US", { minimumFractionDigits: 2 })}</span>
  {getStatusBadge(request.status)}
  </div>
  <p className="text-sm text-muted-foreground truncate">{reason}</p>
  </div>
  <div className="flex items-center gap-1.5 text-xs text-muted-foreground flex-shrink-0">
- <CalendarDays className="w-3.5 h-3.5" />
+ <span className="w-3.5 h-3.5" aria-hidden="true">📅</span>
  {format(new Date(request.created_at),"MMM d, yyyy")}
  </div>
  </div>
@@ -206,7 +206,7 @@ export function FundingRequestTracker({ requests, loading, entityType }: Funding
  return (
  <Card>
  <CardContent className="py-12 text-center space-y-2">
- <FileText className="w-10 h-10 text-muted-foreground/40 mx-auto" />
+ <span className="w-10 h-10 text-muted-foreground/40 mx-auto" aria-hidden="true">📄</span>
  <p className="text-muted-foreground font-medium">No Funding Requests</p>
  <p className="text-sm text-muted-foreground">
  {entityType ==="merchant"

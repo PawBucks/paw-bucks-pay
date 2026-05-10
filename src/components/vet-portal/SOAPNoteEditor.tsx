@@ -13,16 +13,7 @@ import {
  SelectTrigger,
  SelectValue,
 } from"@/components/ui/select";
-import {
- ArrowLeft,
- Save,
- CheckCircle,
- FileText,
- Stethoscope,
- ClipboardList,
- Pill,
- Loader2,
-} from"lucide-react";
+import { ArrowLeft, Save, CheckCircle, ClipboardList, Pill, Loader2 } from "lucide-react";
 import { toast } from"sonner";
 import type { SOAPNote, SOAPNoteStatus } from"./types";
 
@@ -175,7 +166,7 @@ export const SOAPNoteEditor = ({
  <Card className="p-6">
  <div className="flex items-center gap-2 mb-4">
  <div className="w-8 h-8 rounded-full bg-info/10 /30 flex items-center justify-center">
- <FileText className="w-4 h-4 text-info" />
+ <span className="w-4 h-4 text-info" aria-hidden="true">📄</span>
  </div>
  <h3 className="text-lg font-semibold">Subjective</h3>
  <span className="text-sm text-muted-foreground">- Owner's observations and history</span>
@@ -227,7 +218,7 @@ export const SOAPNoteEditor = ({
  <Card className="p-6">
  <div className="flex items-center gap-2 mb-4">
  <div className="w-8 h-8 rounded-full bg-success/10 /30 flex items-center justify-center">
- <Stethoscope className="w-4 h-4 text-success" />
+ <span className="w-4 h-4 text-success" aria-hidden="true">🩺</span>
  </div>
  <h3 className="text-lg font-semibold">Objective</h3>
  <span className="text-sm text-muted-foreground">- Clinical findings and vitals</span>

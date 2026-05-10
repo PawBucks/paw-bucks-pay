@@ -2,7 +2,7 @@ import { motion } from"framer-motion";
 import { Button } from"@/components/ui/button";
 import { Badge } from"@/components/ui/badge";
 import { PersonalityResult } from"./types";
-import { ArrowRight, Star, Lightbulb } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import confetti from"canvas-confetti";
 import { useEffect, useMemo } from"react";
@@ -110,7 +110,7 @@ export const QuizResult = ({ petName, petType, result, onContinue }: QuizResultP
  className="text-center"
  >
  <h3 className="font-semibold mb-3 flex items-center justify-center gap-2">
- <Star className="w-4 h-4 text-warning" />
+ <span className="w-4 h-4 text-warning" aria-hidden="true">⭐</span>
  Key Traits
  </h3>
  <div className="flex flex-wrap justify-center gap-2">
@@ -141,7 +141,7 @@ export const QuizResult = ({ petName, petType, result, onContinue }: QuizResultP
  className="bg-muted rounded-md p-5"
  >
  <h3 className="font-semibold mb-3 flex items-center gap-2">
- <Lightbulb className="w-4 h-4 text-warning" />
+ <span className="w-4 h-4 text-warning" aria-hidden="true">💡</span>
  Tips for {transformedResult.name} Parents
  </h3>
  <ul className="space-y-2">

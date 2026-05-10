@@ -1,4 +1,4 @@
-import { ShoppingCart } from"lucide-react";
+
 import { Button } from"@/components/ui/button";
 import { motion, AnimatePresence } from"framer-motion";
 
@@ -16,7 +16,7 @@ export function CartIcon({ itemCount, onClick }: CartIconProps) {
  onClick={onClick}
  aria-label={`Shopping cart with ${itemCount} items`}
  >
- <ShoppingCart className="h-5 w-5" />
+ <span className="h-5 w-5" aria-hidden="true">🛒</span>
  <AnimatePresence>
  {itemCount > 0 && (
  <motion.span

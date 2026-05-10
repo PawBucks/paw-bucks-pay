@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from'@/
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from'@/components/ui/dialog';
 import { Label } from'@/components/ui/label';
 import { Badge } from'@/components/ui/badge';
-import { Search, Edit, Coins, RefreshCw, PauseCircle, PlayCircle } from'lucide-react';
+import { Search, Edit, RefreshCw, PauseCircle, PlayCircle } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from'@/components/ui/alert-dialog';
 import { Textarea } from'@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from'@/components/ui/select';
@@ -270,7 +270,7 @@ export function MerchantsTab() {
  </TableCell>
  <TableCell>
  <span className="flex items-center gap-1 text-primary font-medium">
- <Coins className="w-3 h-3" />
+ <span className="w-3 h-3" aria-hidden="true">🪙</span>
  {(merchant.pawbucks_balance ?? 0).toLocaleString()}
  </span>
  </TableCell>

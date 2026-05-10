@@ -11,7 +11,7 @@ import { Badge } from'@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from'@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from'@/components/ui/tabs';
 import { Switch } from'@/components/ui/switch';
-import { Plus, Edit, Trash2, GraduationCap, BookOpen, FileText, Loader2 } from'lucide-react';
+import { Plus, Edit, Trash2, Loader2 } from "lucide-react";
 import { toast } from'sonner';
 
 type Module = {
@@ -368,7 +368,7 @@ export function TrainingCourseManagementTab() {
  <div className="flex justify-between items-center">
  <div>
  <h2 className="text-3xl font-bold flex items-center gap-2">
- <GraduationCap className="h-8 w-8" />
+ <span className="h-8 w-8" aria-hidden="true">🎓</span>
  Training Course Management
  </h2>
  <p className="text-muted-foreground">Manage modules, lessons, and resources for the Exclusive Training Course</p>
@@ -409,13 +409,13 @@ export function TrainingCourseManagementTab() {
  <Tabs defaultValue="modules" className="w-full">
  <TabsList>
  <TabsTrigger value="modules" className="gap-2">
- <BookOpen className="h-4 w-4" /> Modules
+ <span className="h-4 w-4" aria-hidden="true">📖</span> Modules
  </TabsTrigger>
  <TabsTrigger value="lessons" className="gap-2">
- <GraduationCap className="h-4 w-4" /> Lessons
+ <span className="h-4 w-4" aria-hidden="true">🎓</span> Lessons
  </TabsTrigger>
  <TabsTrigger value="resources" className="gap-2">
- <FileText className="h-4 w-4" /> Resources
+ <span className="h-4 w-4" aria-hidden="true">📄</span> Resources
  </TabsTrigger>
  </TabsList>
 

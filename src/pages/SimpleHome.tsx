@@ -10,7 +10,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { SEO } from "@/components/SEO";
 import { SavingsHero } from "@/components/simple/SavingsHero";
 import { Button } from "@/components/ui/button";
-import { Search, Receipt, PawPrint, ChevronRight } from "lucide-react";
+import { Search, ChevronRight } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { Formatters } from "@/utils/formatters";
 import { supabase } from "@/integrations/supabase/client";
@@ -130,7 +130,7 @@ const SimpleHome = () => {
                           {p.photo_url ? (
                             <img src={p.photo_url} alt={p.name} className="h-full w-full object-cover" />
                           ) : (
-                            <PawPrint className="h-8 w-8 text-muted-foreground" />
+                            <span className="h-8 w-8 text-muted-foreground" aria-hidden="true">🐾</span>
                           )}
                         </div>
                         <span className="text-xs font-medium truncate max-w-[80px]">{p.name}</span>
@@ -166,7 +166,7 @@ const SimpleHome = () => {
 
             {(!recentSaves || recentSaves.length === 0) ? (
               <div className="rounded-xl border border-dashed border-border p-6 text-center">
-                <Receipt className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                <span className="h-8 w-8 text-muted-foreground mx-auto mb-2" aria-hidden="true">🧾</span>
                 <p className="text-sm text-muted-foreground">
                   No visits yet. Your first payment starts your savings.
                 </p>
@@ -219,7 +219,7 @@ const SimpleHome = () => {
                       {p.photo_url ? (
                         <img src={p.photo_url} alt={p.name} className="h-full w-full object-cover" />
                       ) : (
-                        <PawPrint className="h-7 w-7 text-muted-foreground" />
+                        <span className="h-7 w-7 text-muted-foreground" aria-hidden="true">🐾</span>
                       )}
                     </div>
                     <span className="text-xs font-medium truncate max-w-[72px]">{p.name}</span>

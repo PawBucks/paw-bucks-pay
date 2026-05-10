@@ -378,7 +378,7 @@ const MerchantOnboarding = () => {
  <CardHeader className="text-center pb-4">
  <div className="flex justify-center mb-4">
  <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center">
- <Store className="w-8 h-8 text-primary-foreground" />
+ <span className="w-8 h-8 text-primary-foreground" aria-hidden="true">🏪</span>
  </div>
  </div>
  <CardTitle className="text-3xl font-bold">Set Up Your Pet Business</CardTitle>
@@ -648,7 +648,7 @@ const MerchantOnboarding = () => {
  <CardContent className="pt-4">
  <div className="flex items-start gap-3">
  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
- <PawPrint className="w-4 h-4 text-primary" />
+ <span className="w-4 h-4 text-primary" aria-hidden="true">🐾</span>
  </div>
  <div>
  <p className="font-medium mb-2">Tailored for Your Business:</p>
@@ -748,7 +748,7 @@ const MerchantOnboarding = () => {
 
  <div className="bg-muted rounded-lg p-4">
  <h3 className="font-semibold mb-2 flex items-center gap-2">
- <PawPrint className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">🐾</span>
  Banking Setup (Stripe Connect)
  </h3>
  <p className="text-sm text-muted-foreground">

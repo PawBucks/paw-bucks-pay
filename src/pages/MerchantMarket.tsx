@@ -12,7 +12,7 @@ import { ServicePurchaseDialog } from"@/components/merchant/ServicePurchaseDialo
 import { cn } from"@/lib/utils";
 import { ConsultationScheduleDialog } from"@/components/merchant/ConsultationScheduleDialog";
 import { toast } from"sonner";
-import { PawPrint, ArrowLeft, Search, Megaphone, Star, BarChart3, TrendingUp, Target, Users, Video, BadgeCheck, Rocket, Zap, Crown, ShieldCheck, Clock, DollarSign, ChevronRight, Gift, Building2, LineChart, PieChart, MessageSquare, Lightbulb, Award, CheckCircle2, Loader2, AlertTriangle, MapPin } from "lucide-react";
+import { ArrowLeft, Search, Megaphone, Star, BarChart3, TrendingUp, Target, Users, Video, BadgeCheck, Rocket, Zap, Crown, ShieldCheck, ChevronRight, Building2, LineChart, PieChart, MessageSquare, CheckCircle2, Loader2, AlertTriangle } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 
 type ServiceCategory ="visibility" |"analytics" |"growth" |"premium";
@@ -42,50 +42,50 @@ type GeoCellAvailability = {
 
 // Icon mapping for dynamic rendering
 const iconMap: Record<string, React.ReactNode> = {
- Megaphone: <Megaphone className="w-6 h-6" />,
- Star: <Star className="w-6 h-6" />,
- TrendingUp: <TrendingUp className="w-6 h-6" />,
- BadgeCheck: <BadgeCheck className="w-6 h-6" />,
- BarChart3: <BarChart3 className="w-6 h-6" />,
- Users: <Users className="w-6 h-6" />,
- Brain: <Lightbulb className="w-6 h-6" />,
+ Megaphone: <span className="w-6 h-6" aria-hidden="true">📣</span>,
+ Star: <span className="w-6 h-6" aria-hidden="true">⭐</span>,
+ TrendingUp: <span className="w-6 h-6" aria-hidden="true">📈</span>,
+ BadgeCheck: <span className="w-6 h-6" aria-hidden="true">✅</span>,
+ BarChart3: <span className="w-6 h-6" aria-hidden="true">📊</span>,
+ Users: <span className="w-6 h-6" aria-hidden="true">👥</span>,
+ Brain: <span className="w-6 h-6" aria-hidden="true">💡</span>,
  Search: <Search className="w-6 h-6" />,
  Sparkles: <Sparkles className="w-6 h-6" />,
- Target: <Target className="w-6 h-6" />,
- GraduationCap: <Award className="w-6 h-6" />,
+ Target: <span className="w-6 h-6" aria-hidden="true">🎯</span>,
+ GraduationCap: <span className="w-6 h-6" aria-hidden="true">🏆</span>,
  Palette: <Sparkles className="w-6 h-6" />,
- Crown: <Crown className="w-6 h-6" />,
- Code: <Zap className="w-6 h-6" />,
- Building2: <Building2 className="w-6 h-6" />,
- LineChart: <LineChart className="w-6 h-6" />,
- Rocket: <Rocket className="w-6 h-6" />,
+ Crown: <span className="w-6 h-6" aria-hidden="true">👑</span>,
+ Code: <span className="w-6 h-6" aria-hidden="true">⚡</span>,
+ Building2: <span className="w-6 h-6" aria-hidden="true">🏢</span>,
+ LineChart: <span className="w-6 h-6" aria-hidden="true">📈</span>,
+ Rocket: <span className="w-6 h-6" aria-hidden="true">🚀</span>,
  Video: <Video className="w-6 h-6" />,
- ShieldCheck: <ShieldCheck className="w-6 h-6" />,
- Zap: <Zap className="w-6 h-6" />,
- PieChart: <PieChart className="w-6 h-6" />,
- MessageSquare: <MessageSquare className="w-6 h-6" />,
+ ShieldCheck: <span className="w-6 h-6" aria-hidden="true">🛡️</span>,
+ Zap: <span className="w-6 h-6" aria-hidden="true">⚡</span>,
+ PieChart: <span className="w-6 h-6" aria-hidden="true">📊</span>,
+ MessageSquare: <span className="w-6 h-6" aria-hidden="true">💬</span>,
 };
 
 const categoryInfo: Record<ServiceCategory, { name: string; description: string; icon: React.ReactNode }> = {
  visibility: {
  name:"Visibility & Promotion",
  description:"Boost your presence and get discovered by more pet owners",
- icon: <Megaphone className="w-5 h-5" />,
+ icon: <span className="w-5 h-5" aria-hidden="true">📣</span>,
  },
  analytics: {
  name:"Analytics & Insights",
  description:"Data-driven tools to understand and grow your business",
- icon: <LineChart className="w-5 h-5" />,
+ icon: <span className="w-5 h-5" aria-hidden="true">📈</span>,
  },
  growth: {
  name:"Growth & Optimization",
  description:"Expert services to accelerate your business growth",
- icon: <TrendingUp className="w-5 h-5" />,
+ icon: <span className="w-5 h-5" aria-hidden="true">📈</span>,
  },
  premium: {
  name:"Premium & Exclusive",
  description:"Elite benefits for serious merchants",
- icon: <Crown className="w-5 h-5" />,
+ icon: <span className="w-5 h-5" aria-hidden="true">👑</span>,
  },
 };
 
@@ -319,7 +319,7 @@ const MerchantMarket = () => {
  </Button>
  <div className="flex items-center gap-2">
  <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
- <Building2 className="w-6 h-6 text-primary-foreground" />
+ <span className="w-6 h-6 text-primary-foreground" aria-hidden="true">🏢</span>
  </div>
  <div>
  <h1 className="text-xl font-bold">Merchant Market</h1>
@@ -419,7 +419,7 @@ const MerchantMarket = () => {
  scarcityMap[service.id].availableSlots <= 1 && scarcityMap[service.id].availableSlots > 0 &&"bg-warning/15 text-warning border-warning/30"
  )}
  >
- <MapPin className="w-3 h-3 mr-1" />
+ <span className="w-3 h-3 mr-1" aria-hidden="true">📍</span>
  {scarcityMap[service.id].availableSlots === 0
  ?"Sold Out"
  : `${scarcityMap[service.id].availableSlots} of ${scarcityMap[service.id].maxSlots} left`}
@@ -575,7 +575,7 @@ const MerchantMarket = () => {
  })}
  >
  Get Bundle
- <Gift className="w-4 h-4 ml-2" />
+ <span className="w-4 h-4 ml-2" aria-hidden="true">🎁</span>
  </Button>
  </div>
  </GradientCard>
@@ -612,7 +612,7 @@ const MerchantMarket = () => {
  })}
  >
  Get Bundle
- <Crown className="w-4 h-4 ml-2" />
+ <span className="w-4 h-4 ml-2" aria-hidden="true">👑</span>
  </Button>
  </div>
  </GradientCard>
@@ -629,21 +629,21 @@ const MerchantMarket = () => {
  <div className="grid gap-6 md:grid-cols-3">
  <div className="text-center p-6 rounded-md bg-muted/30 border">
  <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
- <TrendingUp className="w-7 h-7 text-primary" />
+ <span className="w-7 h-7 text-primary" aria-hidden="true">📈</span>
  </div>
  <p className="text-3xl font-bold text-primary mb-2">3.2x</p>
  <p className="text-muted-foreground">Average increase in visibility</p>
  </div>
  <div className="text-center p-6 rounded-md bg-muted/30 border">
  <div className="w-14 h-14 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-4">
- <DollarSign className="w-7 h-7 text-accent" />
+ <span className="w-7 h-7 text-accent" aria-hidden="true">💵</span>
  </div>
  <p className="text-3xl font-bold text-accent mb-2">47%</p>
  <p className="text-muted-foreground">Average revenue growth</p>
  </div>
  <div className="text-center p-6 rounded-md bg-muted/30 border">
  <div className="w-14 h-14 rounded-full bg-secondary/10 flex items-center justify-center mx-auto mb-4">
- <Star className="w-7 h-7 text-secondary" />
+ <span className="w-7 h-7 text-secondary" aria-hidden="true">⭐</span>
  </div>
  <p className="text-3xl font-bold text-secondary mb-2">89%</p>
  <p className="text-muted-foreground">Merchant satisfaction rate</p>
@@ -653,7 +653,7 @@ const MerchantMarket = () => {
 
  {/* CTA Section */}
  <div className="mt-16 text-center p-8 rounded-md bg-gradient-to-r from-primary/10 via-accent/10 to-secondary/10 border">
- <Lightbulb className="w-12 h-12 text-primary mx-auto mb-4" />
+ <span className="w-12 h-12 text-primary mx-auto mb-4" aria-hidden="true">💡</span>
  <h2 className="text-2xl font-bold mb-2">Not sure where to start?</h2>
  <p className="text-muted-foreground mb-6 max-w-lg mx-auto">
  Book a free 15-minute consultation with our merchant success team to find the perfect services for your business goals.

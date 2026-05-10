@@ -20,18 +20,7 @@ import {
  TableHeader,
  TableRow,
 } from"@/components/ui/table";
-import {
- Activity,
- TrendingDown,
- TrendingUp,
- DollarSign,
- Calendar,
- AlertTriangle,
- Search,
- Dog,
- Heart,
- Footprints,
-} from"lucide-react";
+import { Activity, AlertTriangle, Search } from "lucide-react";
 import { format, subDays, differenceInDays } from"date-fns";
 
 import { Formatters } from "@/utils/formatters";
@@ -162,7 +151,7 @@ export function MerchantDataSyncTab({ vetId }: MerchantDataSyncTabProps) {
  <div className="space-y-6">
  <div>
  <h2 className="text-xl font-semibold flex items-center gap-2">
- <Activity className="h-5 w-5 text-primary" />
+ <span className="h-5 w-5 text-primary" aria-hidden="true">📊</span>
  Merchant Data Sync
  </h2>
  <p className="text-sm text-muted-foreground">
@@ -189,7 +178,7 @@ export function MerchantDataSyncTab({ vetId }: MerchantDataSyncTabProps) {
  variant="outline" 
  className="bg-warning/10 border-warning/40"
  >
- <Dog className="h-3 w-3 mr-1" />
+ <span className="h-3 w-3 mr-1" aria-hidden="true">🐕</span>
  {pet.name}
  </Badge>
  ))}
@@ -245,7 +234,7 @@ export function MerchantDataSyncTab({ vetId }: MerchantDataSyncTabProps) {
  <div>
  <p className="text-xs text-muted-foreground">This Week</p>
  <div className="flex items-center gap-1">
- <Footprints className="h-4 w-4 text-primary" />
+ <span className="h-4 w-4 text-primary" aria-hidden="true">👣</span>
  <span className="text-lg font-bold">{recentWeek}</span>
  </div>
  </div>
@@ -253,9 +242,9 @@ export function MerchantDataSyncTab({ vetId }: MerchantDataSyncTabProps) {
  <p className="text-xs text-muted-foreground">vs Last Week</p>
  <div className="flex items-center gap-1">
  {trend > 0 ? (
- <TrendingUp className="h-4 w-4 text-success" />
+ <span className="h-4 w-4 text-success" aria-hidden="true">📈</span>
  ) : trend < 0 ? (
- <TrendingDown className="h-4 w-4 text-destructive" />
+ <span className="h-4 w-4 text-destructive" aria-hidden="true">📉</span>
  ) : (
  <span className="h-4 w-4 text-muted-foreground">—</span>
  )}
@@ -278,7 +267,7 @@ export function MerchantDataSyncTab({ vetId }: MerchantDataSyncTabProps) {
  <Card>
  <div className="p-4 border-b">
  <h3 className="font-semibold flex items-center gap-2">
- <DollarSign className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">💵</span>
  Owner Health Expense History (Last 90 Days)
  </h3>
  </div>
@@ -304,7 +293,7 @@ export function MerchantDataSyncTab({ vetId }: MerchantDataSyncTabProps) {
  <TableRow key={expense.id}>
  <TableCell>
  <div className="flex items-center gap-2">
- <Calendar className="h-4 w-4 text-muted-foreground" />
+ <span className="h-4 w-4 text-muted-foreground" aria-hidden="true">📅</span>
  {format(new Date(expense.created_at),"MMM d, yyyy")}
  </div>
  </TableCell>
@@ -327,7 +316,7 @@ export function MerchantDataSyncTab({ vetId }: MerchantDataSyncTabProps) {
  ) : (
  <TableRow>
  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
- <Heart className="h-8 w-8 mx-auto mb-2 opacity-50" />
+ <span className="h-8 w-8 mx-auto mb-2 opacity-50" aria-hidden="true">❤️</span>
  No expense data available for your patients' owners
  </TableCell>
  </TableRow>
@@ -339,7 +328,7 @@ export function MerchantDataSyncTab({ vetId }: MerchantDataSyncTabProps) {
  {/* Info Card */}
  <Card className="p-4 bg-info/10 /30 border-info/20">
  <div className="flex items-start gap-3">
- <Activity className="h-5 w-5 text-info mt-0.5" />
+ <span className="h-5 w-5 text-info mt-0.5" aria-hidden="true">📊</span>
  <div>
  <h4 className="font-medium text-info">
  Proactive Health Monitoring

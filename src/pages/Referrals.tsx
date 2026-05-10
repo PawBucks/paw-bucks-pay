@@ -9,7 +9,7 @@ import { Button } from"@/components/ui/button";
 import { GradientCard } from"@/components/ui/gradient-card";
 import { Input } from"@/components/ui/input";
 import { BottomNav } from"@/components/BottomNav";
-import { Gift, Copy, Check, Users, DollarSign } from"lucide-react";
+import { Gift, Copy, Check } from "lucide-react";
 import { toast } from"sonner";
 import { format } from"date-fns";
 import { buildAppUrl } from"@/lib/url";
@@ -162,7 +162,7 @@ const Referrals = () => {
  <GradientCard gradient>
  <div className="flex items-center gap-3">
  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
- <Users className="w-6 h-6 text-primary" />
+ <span className="w-6 h-6 text-primary" aria-hidden="true">👥</span>
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Total Referrals</p>
@@ -174,7 +174,7 @@ const Referrals = () => {
  <GradientCard>
  <div className="flex items-center gap-3">
  <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center">
- <DollarSign className="w-6 h-6 text-accent" />
+ <span className="w-6 h-6 text-accent" aria-hidden="true">💵</span>
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Total Earned</p>
@@ -188,7 +188,7 @@ const Referrals = () => {
  <GradientCard className="mb-6">
  <div className="flex items-center gap-2 mb-4">
  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
- <Gift className="w-5 h-5 text-white" />
+ <span className="w-5 h-5 text-white" aria-hidden="true">🎁</span>
  </div>
  <div>
  <h3 className="font-semibold">Your Referral Code</h3>
@@ -249,7 +249,7 @@ const Referrals = () => {
  ) : (
  <div className="text-center py-8">
  <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-3">
- <Users className="w-8 h-8 text-muted-foreground" />
+ <span className="w-8 h-8 text-muted-foreground" aria-hidden="true">👥</span>
  </div>
  <p className="text-muted-foreground mb-2">No referrals yet</p>
  <p className="text-sm text-muted-foreground">

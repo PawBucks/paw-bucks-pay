@@ -1,4 +1,4 @@
-import { Phone, MapPin, Globe, Share2, CalendarDays } from"lucide-react";
+import { Phone, MapPin, Globe, Share2, CalendarDays } from "lucide-react";
 import { toast } from"sonner";
 
 type Props = {

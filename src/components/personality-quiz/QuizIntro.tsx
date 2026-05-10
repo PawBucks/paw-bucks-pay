@@ -1,6 +1,6 @@
 import { motion } from"framer-motion";
 import { Button } from"@/components/ui/button";
-import { PawPrint } from "lucide-react";
+
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 
 interface QuizIntroProps {
@@ -24,7 +24,7 @@ export const QuizIntro = ({ petName, onStart }: QuizIntroProps) => {
  animate={{ opacity: 1, scale: 1, rotate: 0 }}
  transition={{ delay: i * 0.2, type:"spring", stiffness: 200 }}
  >
- <PawPrint className="w-8 h-8 text-primary" />
+ <span className="w-8 h-8 text-primary" aria-hidden="true">🐾</span>
  </motion.div>
  ))}
  </div>

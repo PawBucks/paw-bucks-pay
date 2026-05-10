@@ -5,20 +5,7 @@ import { Input } from'@/components/ui/input';
 import { Label } from'@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from'@/components/ui/radio-group';
 import { Progress } from'@/components/ui/progress';
-import { 
- Home, 
- Calculator, 
- ChevronRight, 
- ChevronLeft, 
- CheckCircle2, 
- Info,
- DollarSign,
- Percent,
- AlertTriangle,
- Building,
- Dog,
- Scissors
-} from'lucide-react';
+import { Home, Calculator, ChevronRight, ChevronLeft, CheckCircle2, Info, Percent, AlertTriangle, Building, Dog, Scissors } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from'@/components/ui/alert';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from'@/components/ui/tooltip';
 
@@ -153,7 +140,7 @@ export function HomeOfficeCalculator() {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <Home className="h-5 w-5 text-primary" />
+ <span className="h-5 w-5 text-primary" aria-hidden="true">🏠</span>
  Home Office & Boarding Space Calculator
  </CardTitle>
  <CardDescription>
@@ -311,7 +298,7 @@ export function HomeOfficeCalculator() {
  <div className="space-y-2">
  <Label htmlFor="monthlyRent">Monthly Rent or Mortgage Interest</Label>
  <div className="relative">
- <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+ <span className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true">💵</span>
  <Input
  id="monthlyRent"
  type="number"
@@ -331,7 +318,7 @@ export function HomeOfficeCalculator() {
  <div className="space-y-2">
  <Label htmlFor="monthlyUtilities">Monthly Utilities</Label>
  <div className="relative">
- <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+ <span className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true">💵</span>
  <Input
  id="monthlyUtilities"
  type="number"
@@ -507,12 +494,12 @@ export function HomeOfficeCalculator() {
  <p className="text-xs text-muted-foreground">Monthly Savings</p>
  </div>
  <div className="text-center p-3 bg-muted rounded-lg">
- <Home className="h-5 w-5 mx-auto mb-1 text-primary" />
+ <span className="h-5 w-5 mx-auto mb-1 text-primary" aria-hidden="true">🏠</span>
  <p className="text-lg font-bold">{businessSqFt}</p>
  <p className="text-xs text-muted-foreground">Business Sq Ft</p>
  </div>
  <div className="text-center p-3 bg-muted rounded-lg">
- <DollarSign className="h-5 w-5 mx-auto mb-1 text-primary" />
+ <span className="h-5 w-5 mx-auto mb-1 text-primary" aria-hidden="true">💵</span>
  <p className="text-lg font-bold">
  ${Math.max(result.totalAnnualDeduction, result.simplifiedDeduction).toLocaleString()}
  </p>

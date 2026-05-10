@@ -10,7 +10,7 @@ import { Input } from"@/components/ui/input";
 import { Badge } from"@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from"@/components/ui/select";
-import { Plus, Search, Edit, Pause, Play, Archive, ArchiveRestore, BarChart3, QrCode } from"lucide-react";
+import { Plus, Search, Edit, Pause, Play, Archive, ArchiveRestore, QrCode } from "lucide-react";
 import { toast } from"sonner";
 import { ErrorHandler } from"@/utils/errorHandler";
 import { MerchantOfferImport } from"@/components/MerchantOfferImport";
@@ -272,7 +272,7 @@ const handleSignOut = async () => {
  size="sm"
  onClick={() => navigate(`/merchant/offers/${offer.id}`)}
  >
- <BarChart3 className="mr-2 h-4 w-4" />
+ <span className="mr-2 h-4 w-4" aria-hidden="true">📊</span>
  View Details
  </Button>
  <Button

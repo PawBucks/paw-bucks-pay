@@ -6,18 +6,7 @@ import { Input } from"@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
 import { Badge } from"@/components/ui/badge";
 import { ScrollArea } from"@/components/ui/scroll-area";
-import {
- Search,
- User,
- FileText,
- Syringe,
- AlertTriangle,
- Scissors,
- FlaskConical,
- ImageIcon,
- Clock,
- PawPrint,
-} from"lucide-react";
+import { Search, Syringe, AlertTriangle, FlaskConical } from "lucide-react";
 import { toast } from"sonner";
 import { format } from"date-fns";
 import type { EMRPatient, SOAPNote, Vaccination, PetAllergy, SurgicalNote, LabResult, ImagingRecord } from"./types";
@@ -231,7 +220,7 @@ export const EMRDashboard = ({ vetId }: EMRDashboardProps) => {
  </div>
  ) : filteredPatients.length === 0 ? (
  <div className="text-center py-8 text-muted-foreground">
- <PawPrint className="w-12 h-12 mx-auto mb-2 opacity-50" />
+ <span className="w-12 h-12 mx-auto mb-2 opacity-50" aria-hidden="true">🐾</span>
  <p>No patients found</p>
  </div>
  ) : (
@@ -245,7 +234,7 @@ export const EMRDashboard = ({ vetId }: EMRDashboardProps) => {
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-3">
  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
- <PawPrint className="w-5 h-5 text-primary" />
+ <span className="w-5 h-5 text-primary" aria-hidden="true">🐾</span>
  </div>
  <div>
  <h3 className="font-semibold">{patient.pet_name}</h3>
@@ -257,12 +246,12 @@ export const EMRDashboard = ({ vetId }: EMRDashboardProps) => {
  </div>
  <div className="text-right">
  <p className="text-sm font-medium flex items-center gap-1">
- <User className="w-3 h-3" />
+ <span className="w-3 h-3" aria-hidden="true">👤</span>
  {patient.owner_name}
  </p>
  {patient.last_visit && (
  <p className="text-xs text-muted-foreground flex items-center gap-1 justify-end">
- <Clock className="w-3 h-3" />
+ <span className="w-3 h-3" aria-hidden="true">⏰</span>
  Last visit: {format(new Date(patient.last_visit),"MMM d, yyyy")}
  </p>
  )}
@@ -279,7 +268,7 @@ export const EMRDashboard = ({ vetId }: EMRDashboardProps) => {
  {/* Recent Activity */}
  <Card className="p-4">
  <h3 className="font-semibold mb-4 flex items-center gap-2">
- <Clock className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">⏰</span>
  Recent Activity
  </h3>
  <ScrollArea className="h-[450px]">
@@ -296,7 +285,7 @@ export const EMRDashboard = ({ vetId }: EMRDashboardProps) => {
  >
  <div className="flex items-start gap-2">
  {activity.type ==="soap" ? (
- <FileText className="w-4 h-4 mt-0.5 text-info" />
+ <span className="w-4 h-4 mt-0.5 text-info" aria-hidden="true">📄</span>
  ) : (
  <FlaskConical className="w-4 h-4 mt-0.5 text-success" />
  )}
@@ -334,7 +323,7 @@ export const EMRDashboard = ({ vetId }: EMRDashboardProps) => {
  <Card className="p-4">
  <div className="flex items-center gap-3">
  <div className="w-10 h-10 rounded-full bg-info/10 /30 flex items-center justify-center">
- <FileText className="w-5 h-5 text-info" />
+ <span className="w-5 h-5 text-info" aria-hidden="true">📄</span>
  </div>
  <div>
  <p className="text-2xl font-bold">{patients.length}</p>

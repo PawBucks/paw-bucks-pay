@@ -21,14 +21,7 @@ import {
  CollapsibleContent,
  CollapsibleTrigger,
 } from"@/components/ui/collapsible";
-import { 
- Zap, 
- Clock, 
- TrendingDown,
- ChevronDown,
- ChevronUp,
- Bell
-} from"lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { format } from"date-fns";
 import { 
  type MerchantService,
@@ -113,7 +106,7 @@ export function FlashSaleSection({ service, onUpdate }: FlashSaleSectionProps) {
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-3">
  <div className="p-2 bg-warning/10 rounded-lg">
- <Zap className="w-5 h-5 text-warning" />
+ <span className="w-5 h-5 text-warning" aria-hidden="true">⚡</span>
  </div>
  <div className="text-left">
  <div className="flex items-center gap-2">
@@ -203,7 +196,7 @@ export function FlashSaleSection({ service, onUpdate }: FlashSaleSectionProps) {
  </FormControl>
  {previewSavings > 0 && (
  <div className="flex items-center gap-2 mt-2">
- <TrendingDown className="w-4 h-4 text-success" />
+ <span className="w-4 h-4 text-success" aria-hidden="true">📉</span>
  <span className="text-sm text-success font-medium">
  {previewSavings}% off with PawBucks!
  </span>
@@ -221,7 +214,7 @@ export function FlashSaleSection({ service, onUpdate }: FlashSaleSectionProps) {
  render={({ field }) => (
  <FormItem>
  <FormLabel className="flex items-center gap-1">
- <Clock className="w-3.5 h-3.5" />
+ <span className="w-3.5 h-3.5" aria-hidden="true">⏰</span>
  Start Time
  </FormLabel>
  <FormControl>
@@ -243,7 +236,7 @@ export function FlashSaleSection({ service, onUpdate }: FlashSaleSectionProps) {
  render={({ field }) => (
  <FormItem>
  <FormLabel className="flex items-center gap-1">
- <Clock className="w-3.5 h-3.5" />
+ <span className="w-3.5 h-3.5" aria-hidden="true">⏰</span>
  End Time
  </FormLabel>
  <FormControl>
@@ -262,7 +255,7 @@ export function FlashSaleSection({ service, onUpdate }: FlashSaleSectionProps) {
 
  <div className="p-3 rounded-lg bg-info/10 border border-info/20">
  <div className="flex items-start gap-2">
- <Bell className="w-4 h-4 text-info mt-0.5" />
+ <span className="w-4 h-4 text-info mt-0.5" aria-hidden="true">🔔</span>
  <div className="text-sm">
  <p className="font-medium text-info">
  Push Notification

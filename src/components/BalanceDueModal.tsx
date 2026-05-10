@@ -19,7 +19,7 @@ import {
 } from"@/components/ui/table";
 import { Badge } from"@/components/ui/badge";
 import { Separator } from"@/components/ui/separator";
-import { CreditCard, Coins, Calendar, AlertCircle, ChevronRight, Shield, Info } from "lucide-react";
+import { AlertCircle, ChevronRight, Info } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { toast } from"sonner";
 
@@ -267,7 +267,7 @@ export function BalanceDueModal({
  >
  <div className="flex items-center gap-3">
  <div className="p-2 rounded-lg bg-warning/10">
- <CreditCard className="h-5 w-5 text-warning" />
+ <span className="h-5 w-5 text-warning" aria-hidden="true">💳</span>
  </div>
  <div className="text-left">
  <p className="font-medium text-warning">Pay Now</p>
@@ -290,7 +290,7 @@ export function BalanceDueModal({
  >
  <div className="flex items-center gap-3">
  <div className="p-2 rounded-lg bg-success/10">
- <Coins className="h-5 w-5 text-success" />
+ <span className="h-5 w-5 text-success" aria-hidden="true">🪙</span>
  </div>
  <div className="text-left">
  <p className="font-medium text-success">Use PawBucks</p>
@@ -313,7 +313,7 @@ export function BalanceDueModal({
  >
  <div className="flex items-center gap-3">
  <div className="p-2 rounded-lg bg-accent/10">
- <Calendar className="h-5 w-5 text-accent" />
+ <span className="h-5 w-5 text-accent" aria-hidden="true">📅</span>
  </div>
  <div className="text-left">
  <p className="font-medium text-accent">Split into 3 Payments</p>
@@ -331,7 +331,7 @@ export function BalanceDueModal({
  <CardContent className="p-3">
  <div className="flex items-start gap-3">
  <div className="p-1.5 rounded-full bg-success/10">
- <Shield className="h-4 w-4 text-success" />
+ <span className="h-4 w-4 text-success" aria-hidden="true">🛡️</span>
  </div>
  <div className="flex-1">
  <div className="flex items-center gap-1.5">

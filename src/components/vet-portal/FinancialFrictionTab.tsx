@@ -3,7 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
 import { WellnessPlanArchitect } from"./WellnessPlanArchitect";
 import { InsuranceClaimSplitter } from"./InsuranceClaimSplitter";
 import { FundingRequestTracker } from"@/components/shared/FundingRequestTracker";
-import { Heart, Shield, DollarSign } from"lucide-react";
+
 import { supabase } from"@/integrations/supabase/client";
 
 interface FinancialFrictionTabProps {
@@ -50,11 +50,11 @@ export function FinancialFrictionTab({ vetId }: FinancialFrictionTabProps) {
  <Tabs defaultValue="wellness" className="space-y-4">
  <TabsList className="grid w-full grid-cols-2 max-w-md">
  <TabsTrigger value="wellness" className="flex items-center gap-2">
- <Heart className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">❤️</span>
  Wellness Plans
  </TabsTrigger>
  <TabsTrigger value="insurance" className="flex items-center gap-2">
- <Shield className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">🛡️</span>
  Insurance Claims
  </TabsTrigger>
  </TabsList>

@@ -2,7 +2,7 @@ import { useState } from"react";
 import { Label } from"@/components/ui/label";
 import { Input } from"@/components/ui/input";
 import { Button } from"@/components/ui/button";
-import { Heart } from"lucide-react";
+
 import { cn } from"@/lib/utils";
 
 import { Formatters } from "@/utils/formatters";
@@ -59,7 +59,7 @@ export const TipSelector = ({
  return (
  <div className={cn("space-y-2", className)}>
  <Label className="flex items-center gap-2 text-sm font-medium">
- <Heart className="w-4 h-4 text-accent" />
+ <span className="w-4 h-4 text-accent" aria-hidden="true">❤️</span>
  Add a Tip (USD only)
  </Label>
  <p className="text-xs text-muted-foreground">

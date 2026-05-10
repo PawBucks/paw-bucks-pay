@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, memo } from"react";
 import { useNavigate } from"react-router-dom";
 import { renderMessageLinks } from"@/lib/renderMessageLinks";
-import { Bell, BellRing, Settings, History } from"lucide-react";
+import { Settings, History } from "lucide-react";
 import { Button } from"@/components/ui/button";
 import {
  DropdownMenu,
@@ -299,7 +299,7 @@ const NotificationsDropdownComponent = ({ userId }: { userId: string }) => {
  <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
  <DropdownMenuTrigger asChild>
  <Button variant="ghost" size="icon" className="relative min-h-[44px] min-w-[44px]">
- <Bell className="h-5 w-5" />
+ <span className="h-5 w-5" aria-hidden="true">🔔</span>
  {unreadCount > 0 && (
  <Badge
  variant="destructive"
@@ -331,7 +331,7 @@ const NotificationsDropdownComponent = ({ userId }: { userId: string }) => {
  className="text-xs h-7 gap-1"
  title="Enable browser notifications"
  >
- <BellRing className="h-3 w-3" />
+ <span className="h-3 w-3" aria-hidden="true">🔔</span>
  Enable
  </Button>
  )}

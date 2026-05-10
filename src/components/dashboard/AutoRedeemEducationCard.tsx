@@ -3,7 +3,7 @@ import { useNavigate } from"react-router-dom";
 import { supabase } from"@/integrations/supabase/client";
 import { GradientCard } from"@/components/ui/gradient-card";
 import { Button } from"@/components/ui/button";
-import { Settings, ArrowRight, X, Coins } from "lucide-react";
+import { Settings, ArrowRight, X } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { motion, AnimatePresence } from"framer-motion";
 
@@ -87,7 +87,7 @@ export const AutoRedeemEducationCard = ({ userId, pawbucksBalance }: AutoRedeemE
  animate={{ scale: [1, 1.1, 1] }}
  transition={{ duration: 2, repeat: Infinity }}
  >
- <Coins className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-accent-foreground" />
+ <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-accent-foreground" aria-hidden="true">🪙</span>
  </motion.div>
  </div>
 

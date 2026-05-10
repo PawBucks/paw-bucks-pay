@@ -7,7 +7,7 @@ import { Input } from"@/components/ui/input";
 import { Label } from"@/components/ui/label";
 import { Badge } from"@/components/ui/badge";
 import { Skeleton } from"@/components/ui/skeleton";
-import { Loader2, Store, DollarSign, Gift, CheckCircle2 } from"lucide-react";
+import { Loader2, CheckCircle2 } from "lucide-react";
 import { supabase } from"@/integrations/supabase/client";
 import { toast } from"sonner";
 import { SEO } from"@/components/SEO";
@@ -153,7 +153,7 @@ function CheckoutForm({
         )}
  <div className="flex justify-between items-center">
  <span className="text-muted-foreground flex items-center gap-1">
- <Gift className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">🎁</span>
  PawBucks Earned
  </span>
  <Badge variant="secondary" className="bg-primary/10 text-primary">
@@ -190,7 +190,7 @@ function CheckoutForm({
  </>
  ) : (
  <>
- <DollarSign className="h-4 w-4 mr-2" />
+ <span className="h-4 w-4 mr-2" aria-hidden="true">💵</span>
  Pay {Formatters.currency((amount / 100))}
  </>
  )}
@@ -378,7 +378,7 @@ export default function DirectCheckout() {
  <SEO title={`Pay ${merchant.business_name}`} />
  <Card className="max-w-md w-full">
  <CardContent className="pt-6 text-center">
- <Store className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+ <span className="h-12 w-12 mx-auto text-muted-foreground mb-4" aria-hidden="true">🏪</span>
  <h2 className="text-xl font-semibold mb-2">{merchant.business_name}</h2>
  <p className="text-muted-foreground">
  This merchant hasn't completed their payment setup yet.
@@ -406,14 +406,14 @@ export default function DirectCheckout() {
  />
  )}
     <CardTitle className="flex items-center justify-center lg:justify-start gap-2 lg:text-3xl">
- <Store className="h-5 w-5" />
+ <span className="h-5 w-5" aria-hidden="true">🏪</span>
  {merchant.business_name}
  </CardTitle>
     <CardDescription className="lg:text-base lg:mt-2">
  {merchant.description || `Pay ${merchant.business_name}`}
  </CardDescription>
     <div className="hidden lg:flex items-center gap-2 mt-6 text-sm text-muted-foreground">
-     <Gift className="h-4 w-4 text-primary" />
+     <span className="h-4 w-4 text-primary" aria-hidden="true">🎁</span>
      <span>Earn PawBucks on every purchase</span>
     </div>
  </CardHeader>
@@ -424,7 +424,7 @@ export default function DirectCheckout() {
  <div>
  <Label htmlFor="amount">Amount (USD)</Label>
  <div className="relative mt-1">
- <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+ <span className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true">💵</span>
  <Input
  id="amount"
  type="number"
@@ -452,7 +452,7 @@ export default function DirectCheckout() {
  {amount && parseFloat(amount) >= 0.5 && (
  <div className="p-3 bg-primary/5 rounded-lg flex items-center justify-between">
  <span className="text-sm flex items-center gap-1">
- <Gift className="h-4 w-4 text-primary" />
+ <span className="h-4 w-4 text-primary" aria-hidden="true">🎁</span>
  You'll earn
  </span>
  <Badge variant="secondary" className="bg-primary/10 text-primary">

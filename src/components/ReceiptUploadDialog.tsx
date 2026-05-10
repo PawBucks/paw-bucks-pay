@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from"@/
 import { supabase } from"@/integrations/supabase/client";
 import { toast } from"sonner";
 import { format } from"date-fns";
-import { Upload, CalendarIcon, ImageIcon, X, Loader2, Receipt, Store } from "lucide-react";
+import { Upload, X, Loader2, Receipt, Store } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { cn } from"@/lib/utils";
 import { useSubscription } from"@/hooks/useSubscription";
@@ -245,7 +245,7 @@ export const ReceiptUploadDialog = ({ open, onOpenChange, userId }: ReceiptUploa
  <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
  <DialogHeader>
  <DialogTitle className="flex items-center gap-2">
- <Receipt className="h-5 w-5 text-primary" />
+ <span className="h-5 w-5 text-primary" aria-hidden="true">🧾</span>
  Submit Receipt for PawBucks
  </DialogTitle>
  <DialogDescription>
@@ -278,7 +278,7 @@ export const ReceiptUploadDialog = ({ open, onOpenChange, userId }: ReceiptUploa
  onClick={() => setSubmissionType("partner")}
  className="w-full"
  >
- <Store className="w-4 h-4 mr-1" />
+ <span className="w-4 h-4 mr-1" aria-hidden="true">🏪</span>
  PawBucks Partner
  </Button>
  {currentTier ==='pawpass_plus' && (
@@ -289,7 +289,7 @@ export const ReceiptUploadDialog = ({ open, onOpenChange, userId }: ReceiptUploa
  onClick={() => setSubmissionType("non_partner")}
  className="w-full"
  >
- <Receipt className="w-4 h-4 mr-1" />
+ <span className="w-4 h-4 mr-1" aria-hidden="true">🧾</span>
  Other Pet Store
  </Button>
  )}
@@ -343,7 +343,7 @@ export const ReceiptUploadDialog = ({ open, onOpenChange, userId }: ReceiptUploa
  {!imagePreview ? (
  <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-muted-foreground/25 rounded-lg cursor-pointer hover:bg-muted transition-colors">
  <div className="flex flex-col items-center justify-center pt-5 pb-6">
- <ImageIcon className="w-8 h-8 text-muted-foreground mb-2" />
+ <span className="w-8 h-8 text-muted-foreground mb-2" aria-hidden="true">🖼️</span>
  <p className="text-sm text-muted-foreground">Click to upload a clear photo</p>
  <p className="text-xs text-muted-foreground">AI will auto-fill details</p>
  </div>
@@ -394,7 +394,7 @@ export const ReceiptUploadDialog = ({ open, onOpenChange, userId }: ReceiptUploa
  variant="outline"
  className={cn("w-full justify-start text-left font-normal", !receiptDate &&"text-muted-foreground")}
  >
- <CalendarIcon className="mr-2 h-4 w-4" />
+ <span className="mr-2 h-4 w-4" aria-hidden="true">📅</span>
  {receiptDate ? format(receiptDate,"PPP") :"Select date"}
  </Button>
  </PopoverTrigger>

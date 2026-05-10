@@ -4,7 +4,7 @@ import { supabase } from"@/integrations/supabase/client";
 import { Card, CardContent } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
 import { Skeleton } from"@/components/ui/skeleton";
-import { ShieldCheck, Syringe, AlertTriangle, ShieldX } from"lucide-react";
+import { Syringe, AlertTriangle, ShieldX } from "lucide-react";
 import pawbucksLogo from "@/assets/pawbucks-logo.png";
 import { SEO } from"@/components/SEO";
 
@@ -100,7 +100,7 @@ export default function PetDigitalIdPublic() {
  <span className="font-bold tracking-wide text-sm uppercase">PawBucks Digital Pet ID</span>
  </div>
  <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
- <ShieldCheck className="w-3 h-3 mr-1" /> Verified
+ <span className="w-3 h-3 mr-1" aria-hidden="true">🛡️</span> Verified
  </Badge>
  </div>
  <div className="flex items-center gap-4">

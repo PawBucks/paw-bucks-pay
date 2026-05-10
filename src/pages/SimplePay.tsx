@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Search, Store, Loader2, ArrowRight, Check, X, Clock } from "lucide-react";
+import { Search, Loader2, ArrowRight, Check, X } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { Formatters } from "@/utils/formatters";
 import { motion, AnimatePresence } from "framer-motion";
@@ -287,7 +287,7 @@ const SimplePay = () => {
                 {!debouncedSearch && !activeCategory && recent.length > 0 && (
                   <div className="mb-4">
                     <div className="flex items-center gap-1.5 text-xs uppercase tracking-wider text-muted-foreground mb-2">
-                      <Clock className="h-3 w-3" /> Recent
+                      <span className="h-3 w-3" aria-hidden="true">⏰</span> Recent
                     </div>
                     <ul className="divide-y divide-border rounded-xl border border-border bg-card overflow-hidden">
                       {recent.map((m) => (
@@ -300,7 +300,7 @@ const SimplePay = () => {
                               {m.logo_url ? (
                                 <img src={m.logo_url} alt="" className="h-full w-full object-cover" />
                               ) : (
-                                <Store className="h-4 w-4 text-muted-foreground" />
+                                <span className="h-4 w-4 text-muted-foreground" aria-hidden="true">🏪</span>
                               )}
                             </div>
                             <div className="flex-1 min-w-0">
@@ -341,7 +341,7 @@ const SimplePay = () => {
                               {m.logo_url ? (
                                 <img src={m.logo_url} alt="" className="h-full w-full object-cover" />
                               ) : (
-                                <Store className="h-5 w-5 text-muted-foreground" />
+                                <span className="h-5 w-5 text-muted-foreground" aria-hidden="true">🏪</span>
                               )}
                             </div>
                             <div className="flex-1 min-w-0">
@@ -388,7 +388,7 @@ const SimplePay = () => {
                     {selected.logo_url ? (
                       <img src={selected.logo_url} alt="" className="h-full w-full object-cover" />
                     ) : (
-                      <Store className="h-5 w-5 text-muted-foreground" />
+                      <span className="h-5 w-5 text-muted-foreground" aria-hidden="true">🏪</span>
                     )}
                   </div>
                   <div className="flex-1 min-w-0">

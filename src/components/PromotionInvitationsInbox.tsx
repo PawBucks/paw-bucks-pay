@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Gift, CheckCircle2, XCircle, Clock, Calendar, DollarSign } from "lucide-react";
+import { Loader2, CheckCircle2, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import {
   getMerchantPromotionInvitations,
@@ -52,7 +52,7 @@ export function PromotionInvitationsInbox({ recipientType, recipientId }: Props)
     <Card>
       <CardHeader className="pb-3">
         <CardTitle className="text-base flex items-center gap-2">
-          <Gift className="h-4 w-4 text-primary" />
+          <span className="h-4 w-4 text-primary" aria-hidden="true">🎁</span>
           Platform Promotions
           {pending.length > 0 && <Badge>{pending.length} new</Badge>}
         </CardTitle>
@@ -63,7 +63,7 @@ export function PromotionInvitationsInbox({ recipientType, recipientId }: Props)
           <div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
         ) : list.length === 0 ? (
           <div className="py-10 text-center text-sm text-muted-foreground">
-            <Gift className="h-10 w-10 mx-auto mb-2 opacity-40" />
+            <span className="h-10 w-10 mx-auto mb-2 opacity-40" aria-hidden="true">🎁</span>
             No promotion invitations yet. We'll notify you when one arrives.
           </div>
         ) : (
@@ -105,7 +105,7 @@ function InvitationCard({
   ) : i.status === "declined" ? (
     <Badge variant="outline"><XCircle className="h-3 w-3 mr-1" /> Declined</Badge>
   ) : (
-    <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" /> Pending</Badge>
+    <Badge variant="secondary"><span className="h-3 w-3 mr-1" aria-hidden="true">⏰</span> Pending</Badge>
   );
 
   return (
@@ -127,10 +127,10 @@ function InvitationCard({
 
       <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
         {p.reward_amount_usd != null && (
-          <span className="flex items-center gap-1"><DollarSign className="h-3 w-3" /> {Formatters.currency(Number(p.reward_amount_usd))}</span>
+          <span className="flex items-center gap-1"><span className="h-3 w-3" aria-hidden="true">💵</span> {Formatters.currency(Number(p.reward_amount_usd))}</span>
         )}
         {p.end_date && (
-          <span className="flex items-center gap-1"><Calendar className="h-3 w-3" /> Ends {new Date(p.end_date).toLocaleDateString()}</span>
+          <span className="flex items-center gap-1"><span className="h-3 w-3" aria-hidden="true">📅</span> Ends {new Date(p.end_date).toLocaleDateString()}</span>
         )}
       </div>
 

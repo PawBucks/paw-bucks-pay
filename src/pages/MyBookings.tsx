@@ -31,19 +31,7 @@ import { Textarea } from"@/components/ui/textarea";
 import { Calendar } from"@/components/ui/calendar";
 import { Skeleton } from"@/components/ui/skeleton";
 import { toast } from"sonner";
-import {
- Calendar as CalendarIcon,
- Clock,
- MapPin,
- ArrowLeft,
- XCircle,
- RefreshCw,
- CheckCircle2,
- AlertTriangle,
- Download,
- Store,
- PawPrint,
-} from"lucide-react";
+import { Calendar as CalendarIcon, Clock, ArrowLeft, XCircle, RefreshCw, CheckCircle2, AlertTriangle, Download } from "lucide-react";
 import { useNavigate } from"react-router-dom";
 import { cn } from"@/lib/utils";
 import { GroomingReportCardView } from"@/components/scheduling/GroomingReportCardView";
@@ -205,7 +193,7 @@ export default function MyBookings() {
  <img src={merchant.logo_url} alt="" className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
  ) : (
  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
- <Store className="w-5 h-5 text-primary" />
+ <span className="w-5 h-5 text-primary" aria-hidden="true">🏪</span>
  </div>
  )}
  <div className="min-w-0">
@@ -225,18 +213,18 @@ export default function MyBookings() {
  {format(parseLocalDate(booking.booking_date),"EEE, MMM d")}
  </div>
  <div className="flex items-center gap-1.5 text-muted-foreground">
- <Clock className="w-3.5 h-3.5" />
+ <span className="w-3.5 h-3.5" aria-hidden="true">⏰</span>
  {formatTime(booking.start_time)} - {formatTime(booking.end_time)}
  </div>
  {booking.pet_profiles && (
  <div className="flex items-center gap-1.5 text-muted-foreground">
- <PawPrint className="w-3.5 h-3.5" />
+ <span className="w-3.5 h-3.5" aria-hidden="true">🐾</span>
  {booking.pet_profiles.name}
  </div>
  )}
  {merchant?.address && (
  <div className="flex items-center gap-1.5 text-muted-foreground">
- <MapPin className="w-3.5 h-3.5" />
+ <span className="w-3.5 h-3.5" aria-hidden="true">📍</span>
  <span className="truncate">{merchant.address}</span>
  </div>
  )}
@@ -245,7 +233,7 @@ export default function MyBookings() {
  {/* Pending approval notice */}
  {status ==="pending" && isUpcoming && (
  <div className="flex items-center gap-2 p-2.5 rounded-lg bg-warning/10 border border-warning/20 text-xs text-warning mb-3">
- <Clock className="w-3.5 h-3.5 flex-shrink-0" />
+ <span className="w-3.5 h-3.5 flex-shrink-0" aria-hidden="true">⏰</span>
  <span>Awaiting confirmation from {merchant?.business_name ||'the business'}</span>
  </div>
  )}

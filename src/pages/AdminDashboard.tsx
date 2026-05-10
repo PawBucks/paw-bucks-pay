@@ -50,38 +50,7 @@ import {
  SheetContent,
  SheetTrigger,
 } from"@/components/ui/sheet";
-import {
- LogOut,
- Users,
- Store,
- DollarSign,
- FileText,
- Bell,
- Loader2,
- ShieldAlert,
- CalendarDays,
- MessageSquare,
- Receipt,
- Mail,
- LayoutDashboard,
- Settings,
- BarChart3,
- Package,
- FileEdit,
- Banknote,
- History,
- Menu,
- ChevronRight,
- HelpCircle,
- GraduationCap,
- ExternalLink,
- Clock,
- Gift,
- UserSearch,
- MapPin,
- ThumbsDown,
- Megaphone,
-} from"lucide-react";
+import { LogOut, Users, Store, DollarSign, FileText, Bell, Loader2, ShieldAlert, CalendarDays, MessageSquare, Receipt, Mail, LayoutDashboard, Settings, BarChart3, Package, FileEdit, Banknote, History, Menu, ChevronRight, HelpCircle, GraduationCap, ExternalLink, Clock, Gift, UserSearch, MapPin, ThumbsDown, Megaphone } from "lucide-react";
 import { toast } from"sonner";
 import { cn } from"@/lib/utils";
 
@@ -833,7 +802,7 @@ const NotificationsTab = () => {
  </>
  ) : (
  <>
- <Bell className="w-4 h-4 mr-2" />
+ <span className="w-4 h-4 mr-2" aria-hidden="true">🔔</span>
  Send Notification
  </>
  )}

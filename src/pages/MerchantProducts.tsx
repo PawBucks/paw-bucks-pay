@@ -25,7 +25,7 @@ import {
  AlertDialogTitle,
 } from"@/components/ui/alert-dialog";
 import { toast } from"sonner";
-import { Package, Plus, ExternalLink, Loader2, ArrowLeft, DollarSign, Store, Coins, RefreshCw, Trash2, Pencil } from"lucide-react";
+import { Plus, ExternalLink, Loader2, ArrowLeft, Store, RefreshCw, Trash2, Pencil } from "lucide-react";
 import { ProductImageUpload } from"@/components/shared/ProductImageUpload";
 import { PricingCalculator } from"@/components/merchant/PricingCalculator";
 import { Switch } from"@/components/ui/switch";
@@ -525,7 +525,7 @@ const MerchantProducts = () => {
  {products.length === 0 && subscriptionPlans.length === 0 ? (
  <Card className="border-dashed">
  <CardContent className="flex flex-col items-center justify-center py-12">
- <Package className="h-12 w-12 text-muted-foreground mb-4" />
+ <span className="h-12 w-12 text-muted-foreground mb-4" aria-hidden="true">📦</span>
  <h3 className="text-lg font-semibold mb-2">No products yet</h3>
  <p className="text-muted-foreground text-center mb-4">
  Create your first product to start selling
@@ -587,7 +587,7 @@ const MerchantProducts = () => {
  <div className="flex items-center justify-between">
  <div className="flex items-baseline gap-1">
  <div className="flex items-center gap-1 text-2xl font-bold text-primary">
- <DollarSign className="h-5 w-5" />
+ <span className="h-5 w-5" aria-hidden="true">💵</span>
  {Formatters.money((plan.amount / 100))}
  </div>
  <span className="text-sm text-muted-foreground">
@@ -648,7 +648,7 @@ const MerchantProducts = () => {
  <CardContent>
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-2 text-2xl font-bold text-primary">
- <DollarSign className="h-6 w-6" />
+ <span className="h-6 w-6" aria-hidden="true">💵</span>
  {product.price?.formatted ||"N/A"}
  </div>
  <div className={`px-3 py-1 rounded-full text-xs font-medium ${
@@ -740,7 +740,7 @@ const MerchantProducts = () => {
  <div className="border rounded-lg p-4 space-y-4 bg-muted/30">
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-3">
- <Store className="h-5 w-5 text-primary" />
+ <span className="h-5 w-5 text-primary" aria-hidden="true">🏪</span>
  <div>
  <Label htmlFor="pet-store-toggle" className="font-medium">
  List in Pet Store
@@ -760,7 +760,7 @@ const MerchantProducts = () => {
  {listInPetStore && (
  <div className="pt-2 border-t space-y-3">
  <div className="flex items-center gap-2 text-sm text-warning">
- <Coins className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">🪙</span>
  <span>Products in Pet Store must accept both USD and PawBucks</span>
  </div>
  <div>

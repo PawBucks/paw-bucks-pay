@@ -8,7 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from"@/components/ui/popover"
 import { supabase } from"@/integrations/supabase/client";
 import { toast } from"sonner";
 import { format, startOfMonth, endOfMonth } from"date-fns";
-import { Upload, CalendarIcon, ImageIcon, X, Loader2, Receipt, AlertTriangle } from "lucide-react";
+import { Upload, X, Loader2, Receipt, AlertTriangle } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { cn } from"@/lib/utils";
 
@@ -185,7 +185,7 @@ export const NonPartnerReceiptDialog = ({ open, onOpenChange, userId }: NonPartn
  <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
  <DialogHeader>
  <DialogTitle className="flex items-center gap-2">
- <Receipt className="h-5 w-5 text-primary" />
+ <span className="h-5 w-5 text-primary" aria-hidden="true">🧾</span>
  Other Pet Store Receipt
  </DialogTitle>
  <DialogDescription>
@@ -237,7 +237,7 @@ export const NonPartnerReceiptDialog = ({ open, onOpenChange, userId }: NonPartn
  {!imagePreview ? (
  <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-muted-foreground/25 rounded-lg cursor-pointer hover:bg-muted transition-colors">
  <div className="flex flex-col items-center justify-center pt-5 pb-6">
- <ImageIcon className="w-8 h-8 text-muted-foreground mb-2" />
+ <span className="w-8 h-8 text-muted-foreground mb-2" aria-hidden="true">🖼️</span>
  <p className="text-sm text-muted-foreground">Click to upload a clear photo</p>
  <p className="text-xs text-muted-foreground">AI will auto-fill details</p>
  </div>
@@ -274,7 +274,7 @@ export const NonPartnerReceiptDialog = ({ open, onOpenChange, userId }: NonPartn
  <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
  <PopoverTrigger asChild>
  <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !receiptDate &&"text-muted-foreground")}>
- <CalendarIcon className="mr-2 h-4 w-4" />
+ <span className="mr-2 h-4 w-4" aria-hidden="true">📅</span>
  {receiptDate ? format(receiptDate,"PPP") :"Select date"}
  </Button>
  </PopoverTrigger>

@@ -1,4 +1,4 @@
-import { Info, Coins } from "lucide-react";
+import { Info } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import {
   effectivePawBucksCapPct,
@@ -107,7 +107,7 @@ export const PawBucksCapBreakdown = ({
           On {Formatters.currency(safeSubtotal)} subtotal
         </span>
         <span className="flex items-center gap-1 font-semibold text-foreground tabular-nums">
-          <Coins className="w-3 h-3 text-primary" />
+          <span className="w-3 h-3 text-primary" aria-hidden="true">🪙</span>
           max {Formatters.currency(maxUsd)}
           <span className="text-muted-foreground font-normal">
             ({maxPb.toLocaleString()} PB)

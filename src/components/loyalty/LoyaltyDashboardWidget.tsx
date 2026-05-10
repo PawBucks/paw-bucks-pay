@@ -1,6 +1,6 @@
 import { useNavigate } from"react-router-dom";
 import { motion } from"framer-motion";
-import { Trophy, ChevronRight, Gift, Zap, Crown, AlertCircle } from"lucide-react";
+import { ChevronRight, AlertCircle } from "lucide-react";
 import { GradientCard } from"@/components/ui/gradient-card";
 import { Button } from"@/components/ui/button";
 import { LoyaltyProgressRing } from"./LoyaltyProgressRing";
@@ -55,7 +55,7 @@ export const LoyaltyDashboardWidget = ({ userId }: LoyaltyDashboardWidgetProps) 
  animate={{ opacity: 1, scale: 1 }}
  className="p-4 rounded-md bg-gradient-to-r from-primary/20 to-accent/20 border border-primary/30 text-center"
  >
- <Gift className="w-10 h-10 mx-auto text-primary mb-2" />
+ <span className="w-10 h-10 mx-auto text-primary mb-2" aria-hidden="true">🎁</span>
  <p className="text-lg font-bold text-primary mb-1">
  🎉 Free ${completedMilestone.credit_value} Credit Ready!
  </p>
@@ -90,7 +90,7 @@ export const LoyaltyDashboardWidget = ({ userId }: LoyaltyDashboardWidgetProps) 
  </div>
  ) : (
  <div className="text-center py-4">
- <Trophy className="w-10 h-10 mx-auto text-muted-foreground/50 mb-2" />
+ <span className="w-10 h-10 mx-auto text-muted-foreground/50 mb-2" aria-hidden="true">🏆</span>
  <p className="text-sm text-muted-foreground">
  Start earning rewards with your first purchase!
  </p>
@@ -104,14 +104,14 @@ export const LoyaltyDashboardWidget = ({ userId }: LoyaltyDashboardWidgetProps) 
  <div className="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-border/50">
  <div className="text-center">
  <div className="flex items-center justify-center gap-1 text-primary mb-1">
- <Gift className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">🎁</span>
                 <span className="font-bold">{Formatters.currency(summary?.totalCredits || 0)}</span>
  </div>
  <p className="text-[10px] text-muted-foreground">Credits Available</p>
  </div>
  <div className="text-center">
  <div className="flex items-center justify-center gap-1 text-accent mb-1">
- <Zap className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">⚡</span>
  <span className="font-bold">{summary?.monthlyStreak || 0}</span>
  </div>
  <p className="text-[10px] text-muted-foreground">Month Streak</p>

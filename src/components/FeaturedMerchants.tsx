@@ -1,7 +1,7 @@
 import { memo, useCallback } from"react";
 import { Card } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
-import { Star, MapPin, BadgeCheck } from "lucide-react";
+
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { Skeleton } from"@/components/ui/skeleton";
 import { useSponsoredMerchants, merchantHasService, SERVICE_NAMES } from"@/hooks/useMerchantServices";
@@ -72,7 +72,7 @@ const FeaturedMerchantsComponent = ({ onMerchantClick }: { onMerchantClick: (mer
  </h3>
  {hasVerifiedBadge && (
  <Badge className="bg-info/10 text-info border-info/20 gap-1 text-xs">
- <BadgeCheck className="w-3 h-3" />
+ <span className="w-3 h-3" aria-hidden="true">✅</span>
  Verified
  </Badge>
  )}

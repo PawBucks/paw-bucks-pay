@@ -6,7 +6,7 @@ import { Textarea } from"@/components/ui/textarea";
 import { Input } from"@/components/ui/input";
 import { Badge } from"@/components/ui/badge";
 import { ScrollArea } from"@/components/ui/scroll-area";
-import { MessageSquare, Send, Loader2, Image, Paperclip, Check, CheckCheck, Search, UserPlus } from"lucide-react";
+import { Send, Loader2, Paperclip, Check, CheckCheck, Search } from "lucide-react";
 import { format, parseISO } from"date-fns";
 import { toast } from"sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from"@/components/ui/dialog";
@@ -345,7 +345,7 @@ export const MerchantMessagesTab = ({ merchantId }: MerchantMessagesTabProps) =>
  <div className="flex items-center justify-between">
  <div>
  <h2 className="text-xl font-semibold flex items-center gap-2">
- <MessageSquare className="w-5 h-5" />
+ <span className="w-5 h-5" aria-hidden="true">💬</span>
  Customer Messages
  {totalUnread > 0 && (
  <Badge variant="destructive">{totalUnread}</Badge>
@@ -361,7 +361,7 @@ export const MerchantMessagesTab = ({ merchantId }: MerchantMessagesTabProps) =>
  }}>
  <DialogTrigger asChild>
  <Button size="sm" variant="outline">
- <UserPlus className="w-4 h-4 mr-2" />
+ <span className="w-4 h-4 mr-2" aria-hidden="true">👤</span>
  New Message
  </Button>
  </DialogTrigger>
@@ -402,7 +402,7 @@ export const MerchantMessagesTab = ({ merchantId }: MerchantMessagesTabProps) =>
 
  {conversations.length === 0 && !selectedUserId ? (
  <Card className="p-8 text-center text-muted-foreground">
- <MessageSquare className="w-12 h-12 mx-auto mb-4 opacity-50" />
+ <span className="w-12 h-12 mx-auto mb-4 opacity-50" aria-hidden="true">💬</span>
  <p>No conversations yet.</p>
  <p className="text-sm mt-1">Messages from customers will appear here, or start a new conversation.</p>
  </Card>

@@ -11,7 +11,7 @@ import {
 } from"@/components/ui/table";
 import { Badge } from"@/components/ui/badge";
 import { Button } from"@/components/ui/button";
-import { Loader2, RefreshCw, Coins } from"lucide-react";
+import { Loader2, RefreshCw } from "lucide-react";
 import { format } from"date-fns";
 
 type CreditLog = {
@@ -99,7 +99,7 @@ export const PawBucksCreditLogsTab = () => {
  <GradientCard>
  <div className="flex items-center justify-between mb-4">
  <div className="flex items-center gap-2">
- <Coins className="w-5 h-5 text-primary" />
+ <span className="w-5 h-5 text-primary" aria-hidden="true">🪙</span>
  <h3 className="text-xl font-semibold">Manual PawBucks Credit Log</h3>
  </div>
  <Button variant="outline" size="sm" onClick={loadLogs} disabled={loading}>

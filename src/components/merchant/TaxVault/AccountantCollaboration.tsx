@@ -11,21 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Alert, AlertDescription, AlertTitle } from'@/components/ui/alert';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from'@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from'@/components/ui/tabs';
-import { 
- UserPlus, 
- Mail, 
- Shield, 
- Clock, 
- Eye, 
- Trash2, 
- Copy, 
- CheckCircle2,
- AlertTriangle,
- History,
- Users,
- Link as LinkIcon,
- RefreshCw
-} from'lucide-react';
+import { Eye, Trash2, Copy, CheckCircle2, AlertTriangle, History, RefreshCw } from "lucide-react";
 import { supabase } from'@/integrations/supabase/client';
 import { toast } from'sonner';
 import { LoadingSpinner } from'@/components/LoadingSpinner';
@@ -215,13 +201,13 @@ export function AccountantCollaboration({ merchantId, businessName }: Accountant
  const getStatusBadge = (status: string) => {
  switch (status) {
  case'pending':
- return <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" /> Pending</Badge>;
+ return <Badge variant="secondary"><span className="h-3 w-3 mr-1" aria-hidden="true">⏰</span> Pending</Badge>;
  case'accepted':
  return <Badge variant="default" className="bg-success"><CheckCircle2 className="h-3 w-3 mr-1" /> Active</Badge>;
  case'revoked':
  return <Badge variant="destructive"><AlertTriangle className="h-3 w-3 mr-1" /> Revoked</Badge>;
  case'expired':
- return <Badge variant="outline"><Clock className="h-3 w-3 mr-1" /> Expired</Badge>;
+ return <Badge variant="outline"><span className="h-3 w-3 mr-1" aria-hidden="true">⏰</span> Expired</Badge>;
  default:
  return <Badge variant="outline">{status}</Badge>;
  }
@@ -244,7 +230,7 @@ export function AccountantCollaboration({ merchantId, businessName }: Accountant
  <div className="flex items-center justify-between">
  <div>
  <h3 className="text-lg font-semibold flex items-center gap-2">
- <Users className="h-5 w-5 text-primary" />
+ <span className="h-5 w-5 text-primary" aria-hidden="true">👥</span>
  Accountant Collaboration
  </h3>
  <p className="text-sm text-muted-foreground">
@@ -255,7 +241,7 @@ export function AccountantCollaboration({ merchantId, businessName }: Accountant
  <Dialog open={isInviteOpen} onOpenChange={setIsInviteOpen}>
  <DialogTrigger asChild>
  <Button>
- <UserPlus className="h-4 w-4 mr-2" />
+ <span className="h-4 w-4 mr-2" aria-hidden="true">👤</span>
  Invite Accountant
  </Button>
  </DialogTrigger>
@@ -346,7 +332,7 @@ export function AccountantCollaboration({ merchantId, businessName }: Accountant
  </>
  ) : (
  <>
- <Mail className="h-4 w-4 mr-2" />
+ <span className="h-4 w-4 mr-2" aria-hidden="true">📧</span>
  Send Invitation
  </>
  )}
@@ -359,7 +345,7 @@ export function AccountantCollaboration({ merchantId, businessName }: Accountant
  {/* Active Access */}
  {activeInvitations.length > 0 && (
  <Alert className="border-success/30 bg-success/10">
- <Shield className="h-4 w-4 text-success" />
+ <span className="h-4 w-4 text-success" aria-hidden="true">🛡️</span>
  <AlertTitle className="text-success">Active Accountant Access</AlertTitle>
  <AlertDescription className="text-success">
  {activeInvitations.length} accountant(s) currently have access to your tax data
@@ -384,7 +370,7 @@ export function AccountantCollaboration({ merchantId, businessName }: Accountant
  <CardContent>
  {invitations.length === 0 ? (
  <div className="text-center py-8 text-muted-foreground">
- <Users className="h-12 w-12 mx-auto mb-3 opacity-50" />
+ <span className="h-12 w-12 mx-auto mb-3 opacity-50" aria-hidden="true">👥</span>
  <p>No accountants invited yet</p>
  <p className="text-sm">Invite your accountant for easy year-end collaboration</p>
  </div>
@@ -434,7 +420,7 @@ export function AccountantCollaboration({ merchantId, businessName }: Accountant
  onClick={() => revokeInvitation.mutate(invitation.id)}
  title="Revoke access"
  >
- <Shield className="h-4 w-4 text-warning" />
+ <span className="h-4 w-4 text-warning" aria-hidden="true">🛡️</span>
  </Button>
  )}
  <Button
@@ -504,7 +490,7 @@ export function AccountantCollaboration({ merchantId, businessName }: Accountant
 
  {/* Security Info */}
  <Alert>
- <Shield className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">🛡️</span>
  <AlertTitle>Secure Access</AlertTitle>
  <AlertDescription className="text-xs text-muted-foreground">
  Accountant access is read-only by default. They cannot delete data or make payments. 

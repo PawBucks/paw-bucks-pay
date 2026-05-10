@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
-import { Clock, AlertCircle, CheckCircle2, XCircle, Mail } from"lucide-react";
+import { AlertCircle, CheckCircle2, XCircle } from "lucide-react";
 
 type PendingApprovalNoticeProps = {
  entityType:'merchant' |'vet';
@@ -39,7 +39,7 @@ export function PendingApprovalNotice({ entityType, approvalStatus, denialReason
  </div>
  )}
  <div className="flex items-center gap-2 text-sm text-muted-foreground">
- <Mail className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">📧</span>
  <span>Please contact <a href="mailto:support@pawbucks.app" className="text-primary hover:underline">support@pawbucks.app</a> for more information.</span>
  </div>
  </CardContent>
@@ -53,7 +53,7 @@ export function PendingApprovalNotice({ entityType, approvalStatus, denialReason
  <CardHeader className="pb-3">
  <div className="flex items-center gap-3">
  <div className="w-12 h-12 rounded-full bg-warning/10 flex items-center justify-center animate-pulse">
- <Clock className="w-6 h-6 text-warning" />
+ <span className="w-6 h-6 text-warning" aria-hidden="true">⏰</span>
  </div>
  <div className="flex-1">
  <div className="flex items-center gap-2">
@@ -78,7 +78,7 @@ export function PendingApprovalNotice({ entityType, approvalStatus, denialReason
  </div>
  </div>
  <div className="flex items-start gap-3 p-3 bg-warning/5 rounded-lg border border-warning/30">
- <Clock className="w-5 h-5 text-warning mt-0.5" />
+ <span className="w-5 h-5 text-warning mt-0.5" aria-hidden="true">⏰</span>
  <div>
  <p className="text-sm font-medium text-warning">Admin Review</p>
  <p className="text-xs text-muted-foreground">Typically takes 1-2 business days</p>

@@ -7,11 +7,7 @@ import { Button } from"@/components/ui/button";
 import { Progress } from"@/components/ui/progress";
 import { GradientCard } from"@/components/ui/gradient-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
-import { 
- Search, TrendingUp, Loader2, CheckCircle2, XCircle, AlertCircle,
- Target, Lightbulb, Zap, ArrowUpRight, Star, BarChart3, Rocket,
- MapPin, Tag, Brain, FileText, Plus, X
-} from"lucide-react";
+import { Search, Loader2, CheckCircle2, AlertCircle, Plus } from "lucide-react";
 import { SERVICE_NAMES, merchantHasActiveService } from"@/services/api/merchantServices.service";
 import { Link } from"react-router-dom";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from"recharts";
@@ -152,7 +148,7 @@ export function SearchRankingBoosterWidget() {
  return (
  <Card className="border-dashed">
  <CardContent className="py-12 text-center">
- <Rocket className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+ <span className="h-12 w-12 text-muted-foreground mx-auto mb-4" aria-hidden="true">🚀</span>
  <h3 className="font-semibold mb-2">Search Ranking Booster</h3>
  <p className="text-muted-foreground text-sm mb-4">
  Boost your search ranking to appear higher in results. Includes keyword optimization, 
@@ -173,13 +169,13 @@ export function SearchRankingBoosterWidget() {
  <div className="flex items-center justify-between">
  <div>
  <h2 className="text-2xl font-bold flex items-center gap-2">
- <Rocket className="h-6 w-6 text-primary" />
+ <span className="h-6 w-6 text-primary" aria-hidden="true">🚀</span>
  Search Ranking Booster
  </h2>
  <p className="text-muted-foreground">Visibility enhanced by {analyticsData.visibilityIncrease}%</p>
  </div>
  <Badge className="bg-gradient-to-r from-success to-success text-white gap-1">
- <Zap className="h-3 w-3" /> Boost Active
+ <span className="h-3 w-3" aria-hidden="true">⚡</span> Boost Active
  </Badge>
  </div>
 
@@ -187,7 +183,7 @@ export function SearchRankingBoosterWidget() {
  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
  <GradientCard gradient>
  <div className="flex items-center gap-3">
- <div className="p-3 rounded-md bg-primary/10"><TrendingUp className="h-5 w-5 text-primary" /></div>
+ <div className="p-3 rounded-md bg-primary/10"><span className="h-5 w-5 text-primary" aria-hidden="true">📈</span></div>
  <div>
  <p className="text-sm text-muted-foreground">Boost Multiplier</p>
  <p className="text-2xl font-bold">{analyticsData.boostMultiplier}x</p>
@@ -196,7 +192,7 @@ export function SearchRankingBoosterWidget() {
  </GradientCard>
  <GradientCard gradient>
  <div className="flex items-center gap-3">
- <div className="p-3 rounded-md bg-success/10"><Target className="h-5 w-5 text-success" /></div>
+ <div className="p-3 rounded-md bg-success/10"><span className="h-5 w-5 text-success" aria-hidden="true">🎯</span></div>
  <div>
  <p className="text-sm text-muted-foreground">Avg Position</p>
  <p className="text-2xl font-bold">#{metrics.avgPosition ||'-'}</p>
@@ -214,7 +210,7 @@ export function SearchRankingBoosterWidget() {
  </GradientCard>
  <GradientCard gradient>
  <div className="flex items-center gap-3">
- <div className="p-3 rounded-md bg-accent/10"><Star className="h-5 w-5 text-accent" /></div>
+ <div className="p-3 rounded-md bg-accent/10"><span className="h-5 w-5 text-accent" aria-hidden="true">⭐</span></div>
  <div>
  <p className="text-sm text-muted-foreground">CTR</p>
  <p className="text-2xl font-bold">{metrics.ctr}%</p>
@@ -225,11 +221,11 @@ export function SearchRankingBoosterWidget() {
 
  <Tabs defaultValue="overview" className="space-y-4">
  <TabsList className="grid w-full grid-cols-5">
- <TabsTrigger value="overview"><BarChart3 className="h-4 w-4 mr-1" /> Overview</TabsTrigger>
- <TabsTrigger value="keywords"><Tag className="h-4 w-4 mr-1" /> Keywords</TabsTrigger>
- <TabsTrigger value="sources"><MapPin className="h-4 w-4 mr-1" /> Sources</TabsTrigger>
- <TabsTrigger value="ai"><Brain className="h-4 w-4 mr-1" /> AI Insights</TabsTrigger>
- <TabsTrigger value="report"><FileText className="h-4 w-4 mr-1" /> Report</TabsTrigger>
+ <TabsTrigger value="overview"><span className="h-4 w-4 mr-1" aria-hidden="true">📊</span> Overview</TabsTrigger>
+ <TabsTrigger value="keywords"><span className="h-4 w-4 mr-1" aria-hidden="true">🏷️</span> Keywords</TabsTrigger>
+ <TabsTrigger value="sources"><span className="h-4 w-4 mr-1" aria-hidden="true">📍</span> Sources</TabsTrigger>
+ <TabsTrigger value="ai"><span className="h-4 w-4 mr-1" aria-hidden="true">🧠</span> AI Insights</TabsTrigger>
+ <TabsTrigger value="report"><span className="h-4 w-4 mr-1" aria-hidden="true">📄</span> Report</TabsTrigger>
  </TabsList>
 
  <TabsContent value="overview" className="space-y-4">
@@ -278,7 +274,7 @@ export function SearchRankingBoosterWidget() {
  <TabsContent value="keywords" className="space-y-4">
  <Card>
  <CardHeader>
- <CardTitle className="flex items-center gap-2"><Lightbulb className="h-5 w-5 text-warning" /> Keyword Recommendations</CardTitle>
+ <CardTitle className="flex items-center gap-2"><span className="h-5 w-5 text-warning" aria-hidden="true">💡</span> Keyword Recommendations</CardTitle>
  <CardDescription>Implement these keywords to improve ranking</CardDescription>
  </CardHeader>
  <CardContent className="space-y-3">
@@ -341,7 +337,7 @@ export function SearchRankingBoosterWidget() {
  <TabsContent value="ai" className="space-y-4">
  <Card>
  <CardHeader>
- <CardTitle className="flex items-center gap-2"><Brain className="h-5 w-5 text-accent" /> AI Recommendations</CardTitle>
+ <CardTitle className="flex items-center gap-2"><span className="h-5 w-5 text-accent" aria-hidden="true">🧠</span> AI Recommendations</CardTitle>
  <CardDescription>Health Score: {healthScore}/100</CardDescription>
  </CardHeader>
  <CardContent className="space-y-3">

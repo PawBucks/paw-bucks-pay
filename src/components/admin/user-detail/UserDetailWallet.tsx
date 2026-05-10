@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
 import { Skeleton } from"@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from"@/components/ui/table";
-import { Coins, Wallet, TrendingUp, TrendingDown, Award } from"lucide-react";
+
 import { PAWBUCKS_CONVERSION } from"@/lib/constants";
 
 import { Formatters } from "@/utils/formatters";
@@ -108,22 +108,22 @@ export function UserDetailWallet({ userId }: { userId: string }) {
  {/* Summary Cards */}
  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
  <SummaryCard
- icon={<Coins className="w-5 h-5 text-primary" />}
+ icon={<span className="w-5 h-5 text-primary" aria-hidden="true">🪙</span>}
  label="PawBucks Balance"
  value={(pawbucksWallet?.balance ?? 0).toLocaleString()}
  />
  <SummaryCard
- icon={<Wallet className="w-5 h-5 text-success" />}
+ icon={<span className="w-5 h-5 text-success" aria-hidden="true">👛</span>}
  label="Cashback Balance"
  value={`${Formatters.currency(((pawbucksWallet?.balance ?? 0) * PAWBUCKS_CONVERSION.PAWBUCKS_USD_VALUE))}`}
  />
  <SummaryCard
- icon={<TrendingDown className="w-5 h-5 text-destructive" />}
+ icon={<span className="w-5 h-5 text-destructive" aria-hidden="true">📉</span>}
  label={isMerchant ?"Total Revenue" :"Total Spent"}
  value={`${Formatters.currency((wallet?.total_spent ?? 0))}`}
  />
  <SummaryCard
- icon={<Award className="w-5 h-5 text-warning" />}
+ icon={<span className="w-5 h-5 text-warning" aria-hidden="true">🏆</span>}
  label="Badges Earned"
  value={badges.length.toString()}
  />
@@ -174,9 +174,9 @@ export function UserDetailWallet({ userId }: { userId: string }) {
  <TableCell>
  <div className="flex items-center gap-1">
  {a.type ==="credit" || a.type ==="earn" ? (
- <TrendingUp className="w-3 h-3 text-success" />
+ <span className="w-3 h-3 text-success" aria-hidden="true">📈</span>
  ) : (
- <TrendingDown className="w-3 h-3 text-destructive" />
+ <span className="w-3 h-3 text-destructive" aria-hidden="true">📉</span>
  )}
  <span className="text-sm">{a.type}</span>
  </div>

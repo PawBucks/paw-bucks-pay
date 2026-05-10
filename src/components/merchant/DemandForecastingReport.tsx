@@ -5,11 +5,7 @@ import { Badge } from"@/components/ui/badge";
 import { GradientCard } from"@/components/ui/gradient-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
 import { Button } from"@/components/ui/button";
-import { 
- TrendingUp, DollarSign, Calendar, Loader2, 
- Crown, Download, RefreshCw, Target, Lightbulb,
- Clock, Package, Users, BarChart3, Zap
-} from"lucide-react";
+import { TrendingUp, Loader2, Download, RefreshCw } from "lucide-react";
 import { 
  AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, 
  Tooltip, ResponsiveContainer, LineChart, Line, Legend
@@ -147,7 +143,7 @@ export function DemandForecastingReport() {
  return (
  <Card className="border-dashed">
  <CardContent className="py-12 text-center">
- <TrendingUp className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+ <span className="h-12 w-12 text-muted-foreground mx-auto mb-4" aria-hidden="true">📈</span>
  <h3 className="font-semibold mb-2">Predictive Demand Forecasting</h3>
  <p className="text-muted-foreground text-sm max-w-md mx-auto">
  {reportData?.message ||'This premium feature must be assigned by an admin. Contact support for access to AI-powered demand forecasting.'}
@@ -185,7 +181,7 @@ export function DemandForecastingReport() {
  Export
  </Button>
  <Badge className="bg-gradient-to-r from-primary to-primary/60 gap-1">
- <Crown className="h-3 w-3" /> Premium
+ <span className="h-3 w-3" aria-hidden="true">👑</span> Premium
  </Badge>
  </div>
  </div>
@@ -195,7 +191,7 @@ export function DemandForecastingReport() {
  <GradientCard gradient>
  <div className="flex items-center gap-3">
  <div className="p-3 rounded-md bg-primary/10">
- <DollarSign className="h-5 w-5 text-primary" />
+ <span className="h-5 w-5 text-primary" aria-hidden="true">💵</span>
  </div>
  <div>
  <p className="text-sm text-muted-foreground">90-Day Forecast</p>
@@ -219,7 +215,7 @@ export function DemandForecastingReport() {
  <GradientCard gradient>
  <div className="flex items-center gap-3">
  <div className="p-3 rounded-md bg-info/10">
- <Target className="h-5 w-5 text-info" />
+ <span className="h-5 w-5 text-info" aria-hidden="true">🎯</span>
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Confidence Level</p>
@@ -231,7 +227,7 @@ export function DemandForecastingReport() {
  <GradientCard gradient>
  <div className="flex items-center gap-3">
  <div className="p-3 rounded-md bg-accent/10">
- <BarChart3 className="h-5 w-5 text-accent" />
+ <span className="h-5 w-5 text-accent" aria-hidden="true">📊</span>
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Avg Daily Revenue</p>
@@ -245,7 +241,7 @@ export function DemandForecastingReport() {
  <Card className="border-primary/20 bg-primary/5">
  <CardHeader className="pb-3">
  <CardTitle className="flex items-center gap-2 text-lg">
- <Zap className="h-5 w-5 text-primary" />
+ <span className="h-5 w-5 text-primary" aria-hidden="true">⚡</span>
  AI-Powered Insights
  </CardTitle>
  </CardHeader>
@@ -275,7 +271,7 @@ export function DemandForecastingReport() {
  <Card key={month.month}>
  <CardHeader className="pb-2">
  <CardTitle className="text-base flex items-center gap-2">
- <Calendar className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">📅</span>
  {month.month}
  </CardTitle>
  </CardHeader>
@@ -295,7 +291,7 @@ export function DemandForecastingReport() {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <TrendingUp className="h-5 w-5" />
+ <span className="h-5 w-5" aria-hidden="true">📈</span>
  13-Week Revenue Forecast
  </CardTitle>
  <CardDescription>Predicted weekly revenue for the next 90 days</CardDescription>
@@ -403,7 +399,7 @@ export function DemandForecastingReport() {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <Calendar className="h-5 w-5" />
+ <span className="h-5 w-5" aria-hidden="true">📅</span>
  Monthly Revenue Patterns
  </CardTitle>
  <CardDescription>Historical revenue by month to identify seasonal trends</CardDescription>
@@ -454,7 +450,7 @@ export function DemandForecastingReport() {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <DollarSign className="h-5 w-5" />
+ <span className="h-5 w-5" aria-hidden="true">💵</span>
  Pricing Recommendations
  </CardTitle>
  <CardDescription>AI-generated pricing strategies based on demand patterns</CardDescription>
@@ -473,7 +469,7 @@ export function DemandForecastingReport() {
  </div>
  <p className="text-sm text-muted-foreground mb-2">{rec.recommendation}</p>
  <div className="flex items-center gap-2 text-sm">
- <Lightbulb className="h-4 w-4 text-warning" />
+ <span className="h-4 w-4 text-warning" aria-hidden="true">💡</span>
  <span className="text-warning">{rec.impact}</span>
  </div>
  </div>
@@ -492,7 +488,7 @@ export function DemandForecastingReport() {
  <Card>
  <CardHeader className="pb-2">
  <CardTitle className="text-base flex items-center gap-2">
- <Calendar className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">📅</span>
  Peak Day
  </CardTitle>
  </CardHeader>
@@ -504,7 +500,7 @@ export function DemandForecastingReport() {
  <Card>
  <CardHeader className="pb-2">
  <CardTitle className="text-base flex items-center gap-2">
- <Clock className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">⏰</span>
  Peak Hours
  </CardTitle>
  </CardHeader>
@@ -519,7 +515,7 @@ export function DemandForecastingReport() {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <Package className="h-5 w-5" />
+ <span className="h-5 w-5" aria-hidden="true">📦</span>
  Operational Recommendations
  </CardTitle>
  <CardDescription>Staffing, inventory, and capacity planning suggestions</CardDescription>
@@ -538,7 +534,7 @@ export function DemandForecastingReport() {
  </div>
  <p className="text-sm mb-2">{rec.recommendation}</p>
  <p className="text-xs text-muted-foreground">
- <Clock className="h-3 w-3 inline mr-1" />
+ <span className="h-3 w-3 inline mr-1" aria-hidden="true">⏰</span>
  Timing: {rec.timing}
  </p>
  </div>
@@ -620,7 +616,7 @@ export function DemandForecastingReport() {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <BarChart3 className="h-5 w-5" />
+ <span className="h-5 w-5" aria-hidden="true">📊</span>
  Last 30 Days Performance
  </CardTitle>
  <CardDescription>Daily revenue and transaction count</CardDescription>

@@ -7,7 +7,7 @@ import { Badge } from"@/components/ui/badge";
 import { Button } from"@/components/ui/button";
 import { Progress } from"@/components/ui/progress";
 import { Skeleton } from"@/components/ui/skeleton";
-import { Eye, MousePointerClick, ShoppingCart, TrendingUp, Target, Award, Lightbulb, RefreshCw, Download, Calendar, MapPin, Search, LayoutGrid, Map, BarChart3, Users, Clock, Smartphone, Monitor, Tablet, Trophy, AlertTriangle, CheckCircle, ArrowUp, ArrowDown } from "lucide-react";
+import { Eye, MousePointerClick, TrendingUp, Target, Lightbulb, RefreshCw, Download, Search, LayoutGrid, Map, Smartphone, Monitor, Tablet, AlertTriangle, CheckCircle, ArrowUp, ArrowDown } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import {
  LineChart,
@@ -225,7 +225,7 @@ export function SponsoredPlacementDashboard({ merchantId, serviceType ='sponsore
 
  {/* Date Range Selector */}
  <div className="flex items-center gap-2">
- <Calendar className="w-4 h-4 text-muted-foreground" />
+ <span className="w-4 h-4 text-muted-foreground" aria-hidden="true">📅</span>
  {datePresets.map((preset) => (
  <Button
  key={preset.days}
@@ -245,7 +245,7 @@ export function SponsoredPlacementDashboard({ merchantId, serviceType ='sponsore
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-4">
  <div className="p-2 rounded-full bg-primary/10">
- <Award className="w-5 h-5 text-primary" />
+ <span className="w-5 h-5 text-primary" aria-hidden="true">🏆</span>
  </div>
  <div>
  <p className="font-medium">Sponsored Placement Active</p>
@@ -330,7 +330,7 @@ export function SponsoredPlacementDashboard({ merchantId, serviceType ='sponsore
  </p>
  </div>
  <div className="p-3 rounded-full bg-accent/10">
- <ShoppingCart className="w-6 h-6 text-accent" />
+ <span className="w-6 h-6 text-accent" aria-hidden="true">🛒</span>
  </div>
  </div>
  </CardContent>
@@ -345,7 +345,7 @@ export function SponsoredPlacementDashboard({ merchantId, serviceType ='sponsore
  <p className="text-xs text-muted-foreground mt-1">in search results</p>
  </div>
  <div className="p-3 rounded-full bg-warning/10">
- <Trophy className="w-6 h-6 text-warning" />
+ <span className="w-6 h-6 text-warning" aria-hidden="true">🏆</span>
  </div>
  </div>
  </CardContent>
@@ -560,7 +560,7 @@ export function SponsoredPlacementDashboard({ merchantId, serviceType ='sponsore
  <p className="text-xs text-muted-foreground mt-1">from sponsored placement</p>
  </div>
  <div className="p-3 rounded-full bg-success/10">
- <TrendingUp className="w-6 h-6 text-success" />
+ <span className="w-6 h-6 text-success" aria-hidden="true">📈</span>
  </div>
  </div>
  </CardContent>
@@ -575,7 +575,7 @@ export function SponsoredPlacementDashboard({ merchantId, serviceType ='sponsore
  <p className="text-xs text-muted-foreground mt-1">sponsored placement cost</p>
  </div>
  <div className="p-3 rounded-full bg-info/10">
- <Target className="w-6 h-6 text-info" />
+ <span className="w-6 h-6 text-info" aria-hidden="true">🎯</span>
  </div>
  </div>
  </CardContent>

@@ -5,11 +5,7 @@ import { Badge } from"@/components/ui/badge";
 import { GradientCard } from"@/components/ui/gradient-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
 import { Button } from"@/components/ui/button";
-import { 
- Users, TrendingUp, DollarSign, Activity, Repeat, 
- Calendar, Loader2, UserCheck, Crown, Target,
- ArrowUpRight, ArrowDownRight, Download, RefreshCw
-} from"lucide-react";
+import { Repeat, Loader2, Target, Download, RefreshCw } from "lucide-react";
 import { 
  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
  LineChart, Line
@@ -135,7 +131,7 @@ export function CohortAnalysisReport() {
  return (
  <Card className="border-dashed">
  <CardContent className="py-12 text-center">
- <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+ <span className="h-12 w-12 text-muted-foreground mx-auto mb-4" aria-hidden="true">👥</span>
  <h3 className="font-semibold mb-2">Customer Cohort Analysis</h3>
  <p className="text-muted-foreground text-sm max-w-md mx-auto">
  {reportData?.message ||'This premium feature must be assigned by an admin. Contact support for access to detailed customer cohort analysis.'}
@@ -173,7 +169,7 @@ export function CohortAnalysisReport() {
  Export
  </Button>
  <Badge className="bg-gradient-to-r from-primary to-primary/60 gap-1">
- <Crown className="h-3 w-3" /> Premium
+ <span className="h-3 w-3" aria-hidden="true">👑</span> Premium
  </Badge>
  </div>
  </div>
@@ -183,7 +179,7 @@ export function CohortAnalysisReport() {
  <GradientCard gradient>
  <div className="flex items-center gap-3">
  <div className="p-3 rounded-md bg-primary/10">
- <Users className="h-5 w-5 text-primary" />
+ <span className="h-5 w-5 text-primary" aria-hidden="true">👥</span>
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Total Customers</p>
@@ -195,7 +191,7 @@ export function CohortAnalysisReport() {
  <GradientCard gradient>
  <div className="flex items-center gap-3">
  <div className="p-3 rounded-md bg-success/10">
- <DollarSign className="h-5 w-5 text-success" />
+ <span className="h-5 w-5 text-success" aria-hidden="true">💵</span>
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Avg Lifetime Value</p>
@@ -207,7 +203,7 @@ export function CohortAnalysisReport() {
  <GradientCard gradient>
  <div className="flex items-center gap-3">
  <div className="p-3 rounded-md bg-info/10">
- <Activity className="h-5 w-5 text-info" />
+ <span className="h-5 w-5 text-info" aria-hidden="true">📊</span>
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Avg Order Value</p>
@@ -243,7 +239,7 @@ export function CohortAnalysisReport() {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <DollarSign className="h-5 w-5" />
+ <span className="h-5 w-5" aria-hidden="true">💵</span>
  Lifetime Value by Cohort
  </CardTitle>
  <CardDescription>Average customer lifetime value grouped by acquisition month</CardDescription>
@@ -323,7 +319,7 @@ export function CohortAnalysisReport() {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <Calendar className="h-5 w-5" />
+ <span className="h-5 w-5" aria-hidden="true">📅</span>
  Cohort Details
  </CardTitle>
  <CardDescription>Detailed metrics for each customer acquisition cohort</CardDescription>
@@ -375,7 +371,7 @@ export function CohortAnalysisReport() {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <Target className="h-5 w-5" />
+ <span className="h-5 w-5" aria-hidden="true">🎯</span>
  Cohort Retention Matrix
  </CardTitle>
  <CardDescription>Month-over-month customer retention by acquisition cohort</CardDescription>
@@ -476,7 +472,7 @@ export function CohortAnalysisReport() {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <UserCheck className="h-5 w-5" />
+ <span className="h-5 w-5" aria-hidden="true">👤</span>
  Customer Value Segments
  </CardTitle>
  <CardDescription>Breakdown of your customer base by value tier</CardDescription>
@@ -542,7 +538,7 @@ export function CohortAnalysisReport() {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <TrendingUp className="h-5 w-5" />
+ <span className="h-5 w-5" aria-hidden="true">📈</span>
  Strategic Recommendations
  </CardTitle>
  <CardDescription>AI-generated insights based on your cohort data</CardDescription>
@@ -556,7 +552,7 @@ export function CohortAnalysisReport() {
  className="flex items-start gap-3 p-4 rounded-lg bg-muted border-l-4 border-primary"
  >
  <div className="p-2 rounded-full bg-primary/10">
- <TrendingUp className="h-4 w-4 text-primary" />
+ <span className="h-4 w-4 text-primary" aria-hidden="true">📈</span>
  </div>
  <p className="text-sm">{rec}</p>
  </div>

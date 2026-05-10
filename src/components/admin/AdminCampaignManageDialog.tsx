@@ -7,7 +7,7 @@ import { Input } from"@/components/ui/input";
 import { Label } from"@/components/ui/label";
 import { Separator } from"@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
-import { Loader2, Settings, Gift, Search } from"lucide-react";
+import { Loader2, Settings, Search } from "lucide-react";
 import { toast } from"sonner";
 import {
  adminUpdateBrandCampaign,
@@ -125,7 +125,7 @@ export const AdminCampaignManageDialog = ({ open, onOpenChange, campaign }: Prop
  <Tabs defaultValue="params">
  <TabsList>
  <TabsTrigger value="params"><Settings className="h-4 w-4 mr-1" /> Parameters</TabsTrigger>
- <TabsTrigger value="grant"><Gift className="h-4 w-4 mr-1" /> Manual PB Grant</TabsTrigger>
+ <TabsTrigger value="grant"><span className="h-4 w-4 mr-1" aria-hidden="true">🎁</span> Manual PB Grant</TabsTrigger>
  </TabsList>
 
  <TabsContent value="params" className="space-y-4 pt-3">
@@ -287,7 +287,7 @@ export const AdminCampaignManageDialog = ({ open, onOpenChange, campaign }: Prop
  onClick={() => grantMutation.mutate()}
  disabled={grantMutation.isPending || !grantSelected || grantAmount <= 0}
  >
- {grantMutation.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Gift className="h-4 w-4 mr-2" />}
+ {grantMutation.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <span className="h-4 w-4 mr-2" aria-hidden="true">🎁</span>}
  Grant {grantAmount.toLocaleString()} PB
  </Button>
  </TabsContent>

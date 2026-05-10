@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Label } from'@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from'@/components/ui/select';
 import { Badge } from'@/components/ui/badge';
-import { Search, Edit, Shield, Coins, RefreshCw, Crown, Gift } from'lucide-react';
+import { Search, Edit, RefreshCw } from "lucide-react";
 import { toast } from'sonner';
 import { UpgradeSubscriptionDialog } from'./UpgradeSubscriptionDialog';
 
@@ -371,7 +371,7 @@ export function UsersTab() {
  </TableCell>
  <TableCell>
  <span className="flex items-center gap-1 text-primary font-medium">
- <Coins className="w-3 h-3" />
+ <span className="w-3 h-3" aria-hidden="true">🪙</span>
  {(user.pawbucks_balance ?? 0).toLocaleString()}
  {user.shared_with_owner && (
  <span className="text-xs text-muted-foreground ml-1">(shared)</span>
@@ -393,7 +393,7 @@ export function UsersTab() {
  :'bg-destructive/10 text-destructive border-destructive/30'
  }
  >
- <Gift className="w-3 h-3 mr-1" />
+ <span className="w-3 h-3 mr-1" aria-hidden="true">🎁</span>
  {user.welcome_credit_status ==='active' ? `$${Formatters.number(Math.round(((user.welcome_credit_amount ?? 0) / 1000)))} Active` : user.welcome_credit_status.charAt(0).toUpperCase() + user.welcome_credit_status.slice(1)}
  </Badge>
  {user.welcome_credit_status ==='active' && user.welcome_credit_expires && (
@@ -434,7 +434,7 @@ export function UsersTab() {
  setRoleDialogOpen(true);
  }}
  >
- <Shield className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">🛡️</span>
  </Button>
  {user.user_type ==='pet_owner' && (
  <Button
@@ -446,7 +446,7 @@ export function UsersTab() {
  }}
  title="Upgrade Subscription"
  >
- <Crown className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">👑</span>
  </Button>
  )}
  </TableCell>

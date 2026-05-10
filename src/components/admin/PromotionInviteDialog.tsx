@@ -9,7 +9,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Send, Search, Users, Stethoscope, Store } from "lucide-react";
+import { Loader2, Send, Search } from "lucide-react";
 import { toast } from "sonner";
 import { bulkInviteToPromotion, searchMerchants, searchPartnerVets, type PlatformPromotion } from "@/services/api/platformPromotions.service";
 
@@ -97,15 +97,15 @@ export function PromotionInviteDialog({ promotion, open, onOpenChange }: Props) 
 
         <Tabs value={tab} onValueChange={(v) => { setTab(v as any); setSearch(""); }}>
           <TabsList>
-            {allowMerchants && <TabsTrigger value="merchant"><Store className="h-3 w-3 mr-1" /> Merchants</TabsTrigger>}
-            {allowVets && <TabsTrigger value="vet"><Stethoscope className="h-3 w-3 mr-1" /> Vets</TabsTrigger>}
+            {allowMerchants && <TabsTrigger value="merchant"><span className="h-3 w-3 mr-1" aria-hidden="true">🏪</span> Merchants</TabsTrigger>}
+            {allowVets && <TabsTrigger value="vet"><span className="h-3 w-3 mr-1" aria-hidden="true">🩺</span> Vets</TabsTrigger>}
           </TabsList>
 
           {(["merchant", "vet"] as const).map((kind) => (
             <TabsContent key={kind} value={kind} className="space-y-3">
               <div className="flex gap-2">
                 <Button size="sm" variant={scope === "all" ? "default" : "outline"} onClick={() => setScope("all")}>
-                  <Users className="h-3 w-3 mr-1" /> All {kind}s
+                  <span className="h-3 w-3 mr-1" aria-hidden="true">👥</span> All {kind}s
                 </Button>
                 <Button size="sm" variant={scope === "specific" ? "default" : "outline"} onClick={() => setScope("specific")}>
                   Pick specific

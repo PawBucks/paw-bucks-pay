@@ -1,13 +1,7 @@
 import { GradientCard } from"@/components/ui/gradient-card";
 import { Button } from"@/components/ui/button";
 import { Switch } from"@/components/ui/switch";
-import {
- CreditCard,
- AlertCircle,
- Coins,
- Loader2,
- ExternalLink,
-} from"lucide-react";
+import { AlertCircle, Loader2, ExternalLink } from "lucide-react";
 import { MerchantAnalyticsCards } from"./MerchantAnalyticsCards";
 import { MerchantCharts } from"./MerchantCharts";
 import { MerchantTransactionList } from"./MerchantTransactionList";
@@ -142,7 +136,7 @@ export function MerchantOverviewTab({
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-4">
  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
- <Coins className="w-6 h-6 text-primary" />
+ <span className="w-6 h-6 text-primary" aria-hidden="true">🪙</span>
  </div>
  <div>
  <h3 className="font-semibold">Accept PawBucks</h3>
@@ -168,7 +162,7 @@ export function MerchantOverviewTab({
  size="sm" 
  onClick={onViewWallet}
  >
- <Coins className="w-4 h-4 mr-2" />
+ <span className="w-4 h-4 mr-2" aria-hidden="true">🪙</span>
  View Wallet
  </Button>
  </div>
@@ -221,7 +215,7 @@ export function MerchantOverviewTab({
 
  {!analytics?.funding_deal_status && (
  <GradientCard className="text-center py-8">
- <CreditCard className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
+ <span className="w-12 h-12 mx-auto mb-3 text-muted-foreground" aria-hidden="true">💳</span>
  <p className="text-muted-foreground">No active funding deal</p>
  </GradientCard>
  )}

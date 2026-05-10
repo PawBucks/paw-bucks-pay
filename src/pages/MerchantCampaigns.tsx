@@ -11,7 +11,7 @@ import { Label } from"@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from"@/components/ui/select";
 import { Badge } from"@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from"@/components/ui/dialog";
-import { ArrowLeft, Bell, Mail, MessageSquare, Send, Settings, Plus, Users, CheckCircle, XCircle, Clock } from"lucide-react";
+import { ArrowLeft, Bell, Mail, MessageSquare, Send, Settings, Plus, CheckCircle, XCircle } from "lucide-react";
 import { toast } from"sonner";
 
 interface Campaign {
@@ -275,7 +275,7 @@ export default function MerchantCampaigns() {
  const getStatusBadge = (status: string) => {
  switch (status) {
  case"sent": return <Badge className="bg-success/10 text-success border-success/30"><CheckCircle className="w-3 h-3 mr-1" />Sent</Badge>;
- case"partial": return <Badge className="bg-warning/10 text-warning border-warning/30"><Clock className="w-3 h-3 mr-1" />Partial</Badge>;
+ case"partial": return <Badge className="bg-warning/10 text-warning border-warning/30"><span className="w-3 h-3 mr-1" aria-hidden="true">⏰</span>Partial</Badge>;
  case"failed": return <Badge className="bg-destructive/10 text-destructive border-destructive/30"><XCircle className="w-3 h-3 mr-1" />Failed</Badge>;
  case"sending": return <Badge className="bg-info/10 text-info border-info/30"><Send className="w-3 h-3 mr-1" />Sending</Badge>;
  default: return <Badge variant="outline">{status}</Badge>;
@@ -284,9 +284,9 @@ export default function MerchantCampaigns() {
 
  const getChannelIcon = (ch: string) => {
  switch (ch) {
- case"push": return <Bell className="w-4 h-4" />;
- case"email": return <Mail className="w-4 h-4" />;
- case"sms": return <MessageSquare className="w-4 h-4" />;
+ case"push": return <span className="w-4 h-4" aria-hidden="true">🔔</span>;
+ case"email": return <span className="w-4 h-4" aria-hidden="true">📧</span>;
+ case"sms": return <span className="w-4 h-4" aria-hidden="true">💬</span>;
  default: return null;
  }
  };
@@ -349,7 +349,7 @@ export default function MerchantCampaigns() {
  <p className="text-sm text-muted-foreground line-clamp-1 mt-0.5">{c.message}</p>
  <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
  <span className="flex items-center gap-1">
- <Users className="w-3 h-3" />{c.recipient_count} recipients
+ <span className="w-3 h-3" aria-hidden="true">👥</span>{c.recipient_count} recipients
  </span>
  <span className="text-success">{c.sent_count} sent</span>
  {c.failed_count > 0 && <span className="text-destructive">{c.failed_count} failed</span>}
@@ -426,7 +426,7 @@ export default function MerchantCampaigns() {
 
  <div className="bg-muted rounded-lg p-3">
  <div className="flex items-center gap-2 text-sm font-medium mb-1">
- <Users className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">👥</span>
  Recipients
  </div>
  {loadingRecipients ? (

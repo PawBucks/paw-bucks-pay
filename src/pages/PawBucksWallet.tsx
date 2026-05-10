@@ -15,7 +15,7 @@ import { AdPlacement } from"@/components/AdPlacement";
 import { PageLoader } from"@/components/PageLoader";
 import { EmptyState } from"@/components/EmptyState";
 import { PawBucksInfoTooltip } from"@/components/PawBucksInfoTooltip";
-import { Coins, TrendingUp, Gift, ArrowUpRight, ArrowDownRight, Zap, Crown, Lock, Unlock, Receipt, Store } from "lucide-react";
+import { Coins, ArrowUpRight, ArrowDownRight, Receipt, Store } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { Formatters } from"@/utils/formatters";
 import { PAWBUCKS_CONVERSION, ROUTES, CASHBACK_RATES, getSubscriptionTier } from"@/lib/constants";
@@ -107,7 +107,7 @@ const UpgradePrompt = ({ totalEarned, onUpgrade, isPawPassSubscriber = false }: 
  :'text-muted-foreground hover:text-foreground'
  }`}
  >
- <Zap className="w-4 h-4 inline mr-1" />
+ <span className="w-4 h-4 inline mr-1" aria-hidden="true">⚡</span>
  PawPass
  </button>
  <button
@@ -263,7 +263,7 @@ const UpgradePrompt = ({ totalEarned, onUpgrade, isPawPassSubscriber = false }: 
  >
  {activeTab ==='pawpass' && !isPawPassSubscriber ? (
  <>
- <Zap className="w-4 h-4 mr-2" />
+ <span className="w-4 h-4 mr-2" aria-hidden="true">⚡</span>
  Upgrade to PawPass
  </>
  ) : (
@@ -373,7 +373,7 @@ const PawBucksWallet = () => {
  {/* Header */}
  <div className="mb-8 text-center">
  <div className="flex items-center justify-center gap-3 mb-2">
- <Coins className="w-10 h-10 text-warning" />
+ <span className="w-10 h-10 text-warning" aria-hidden="true">🪙</span>
  <h2 className="text-4xl font-bold">Your PawBucks Wallet</h2>
  <PawBucksInfoTooltip variant="earning" className="ml-1" />
  </div>
@@ -391,7 +391,7 @@ const PawBucksWallet = () => {
  <GradientCard gradient className="mb-8">
  <div className="text-center mb-6">
  <div className="flex items-center justify-center gap-2 mb-2">
- <Unlock className="w-6 h-6 text-primary" />
+ <span className="w-6 h-6 text-primary" aria-hidden="true">🔓</span>
  <p className="text-sm text-muted-foreground">Spendable Balance</p>
  </div>
  <p className="text-6xl font-bold mb-2">{Formatters.number(balance)}</p>
@@ -418,7 +418,7 @@ const PawBucksWallet = () => {
  <GradientCard>
  <div className="flex items-center gap-3">
  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
- <TrendingUp className="w-6 h-6 text-primary" />
+ <span className="w-6 h-6 text-primary" aria-hidden="true">📈</span>
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Total Earned</p>
@@ -432,7 +432,7 @@ const PawBucksWallet = () => {
  <GradientCard>
  <div className="flex items-center gap-3">
  <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center">
- <Gift className="w-6 h-6 text-secondary" />
+ <span className="w-6 h-6 text-secondary" aria-hidden="true">🎁</span>
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Total Redeemed</p>
@@ -459,7 +459,7 @@ const PawBucksWallet = () => {
  <div className="flex items-center justify-between gap-4">
  <div className="flex items-center gap-3">
  <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
- <Store className="w-5 h-5 text-primary" />
+ <span className="w-5 h-5 text-primary" aria-hidden="true">🏪</span>
  </div>
  <div>
  <h3 className="font-semibold text-sm">Partner Receipt</h3>
@@ -477,7 +477,7 @@ const PawBucksWallet = () => {
  <div className="flex items-center justify-between gap-4">
  <div className="flex items-center gap-3">
  <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center">
- <Receipt className="w-5 h-5 text-accent-foreground" />
+ <span className="w-5 h-5 text-accent-foreground" aria-hidden="true">🧾</span>
  </div>
  <div>
  <h3 className="font-semibold text-sm">Other Pet Store</h3>
@@ -499,7 +499,7 @@ const PawBucksWallet = () => {
  onClick={() => navigate(ROUTES.PAWBUCKS_REDEEM)}
  className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground font-semibold px-8"
  >
- <Gift className="w-5 h-5 mr-2" />
+ <span className="w-5 h-5 mr-2" aria-hidden="true">🎁</span>
  Redeem PawBucks
  </Button>
  </div>

@@ -19,7 +19,7 @@ import {
  AlertDialogHeader,
  AlertDialogTitle,
 } from"@/components/ui/alert-dialog";
-import { MoreVertical, Edit, Trash2, Clock, DollarSign, Users, Zap, Timer } from"lucide-react";
+import { MoreVertical, Edit, Trash2, Timer } from "lucide-react";
 import { 
  type MerchantService, 
  CATEGORY_LABELS,
@@ -134,7 +134,7 @@ export function ServicesList({ services, onEdit, onDelete, onToggleActive, onMan
  <GradientCard className="p-8 text-center">
  <div className="max-w-md mx-auto">
  <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
- <Clock className="w-8 h-8 text-primary" />
+ <span className="w-8 h-8 text-primary" aria-hidden="true">⏰</span>
  </div>
  <h3 className="text-lg font-semibold mb-2">No Services Yet</h3>
  <p className="text-muted-foreground mb-4">
@@ -164,7 +164,7 @@ export function ServicesList({ services, onEdit, onDelete, onToggleActive, onMan
  )}
  {isFlashActive && (
  <Badge className="bg-gradient-to-r from-warning to-warning text-white border-0 text-xs gap-0.5">
- <Zap className="w-3 h-3" />
+ <span className="w-3 h-3" aria-hidden="true">⚡</span>
  Flash Sale
  </Badge>
  )}
@@ -194,7 +194,7 @@ export function ServicesList({ services, onEdit, onDelete, onToggleActive, onMan
  </DropdownMenuItem>
  {onManageFlashSale && (
  <DropdownMenuItem onClick={() => onManageFlashSale(service)}>
- <Zap className="w-4 h-4 mr-2" />
+ <span className="w-4 h-4 mr-2" aria-hidden="true">⚡</span>
  Flash Sale
  </DropdownMenuItem>
  )}
@@ -217,16 +217,16 @@ export function ServicesList({ services, onEdit, onDelete, onToggleActive, onMan
 
  <div className="flex flex-wrap gap-3 text-sm text-muted-foreground mb-3">
  <div className="flex items-center gap-1">
- <Clock className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">⏰</span>
  <span>{formatDuration(service.duration_minutes, service.category)}</span>
  </div>
  <div className="flex items-center gap-1">
- <DollarSign className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">💵</span>
  <span>{Formatters.currency(service.price)}</span>
  </div>
  {service.max_capacity > 1 && (
  <div className="flex items-center gap-1">
- <Users className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">👥</span>
  <span>Up to {service.max_capacity}</span>
  </div>
  )}

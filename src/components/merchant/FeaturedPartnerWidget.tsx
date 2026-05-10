@@ -7,26 +7,7 @@ import { Button } from"@/components/ui/button";
 import { Progress } from"@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
 import { Skeleton } from"@/components/ui/skeleton";
-import { 
- Crown, 
- Star, 
- Shield, 
- Zap, 
- Calendar, 
- TrendingUp,
- CheckCircle2,
- Clock,
- AlertCircle,
- Megaphone,
- Mail,
- Users,
- Award,
- Target,
- Lightbulb,
- ArrowRight,
- Gift,
- HeartHandshake
-} from"lucide-react";
+import { Crown, Shield, Calendar, TrendingUp, CheckCircle2, AlertCircle, Megaphone, Mail, Users, Award, Target, Lightbulb, ArrowRight, HeartHandshake } from "lucide-react";
 import { format, formatDistanceToNow } from"date-fns";
 
 import { Formatters } from "@/utils/formatters";
@@ -168,7 +149,7 @@ export function FeaturedPartnerWidget() {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <Crown className="h-5 w-5 text-muted-foreground" />
+ <span className="h-5 w-5 text-muted-foreground" aria-hidden="true">👑</span>
  Featured Partner Status
  </CardTitle>
  <CardDescription>
@@ -177,12 +158,12 @@ export function FeaturedPartnerWidget() {
  </CardHeader>
  <CardContent>
  <div className="text-center py-8">
- <Crown className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+ <span className="h-12 w-12 mx-auto text-muted-foreground mb-4" aria-hidden="true">👑</span>
  <p className="text-muted-foreground mb-4">
  You don't have an active Featured Partner subscription
  </p>
  <Button>
- <Crown className="mr-2 h-4 w-4" />
+ <span className="mr-2 h-4 w-4" aria-hidden="true">👑</span>
  Become a Featured Partner
  </Button>
  </div>
@@ -271,22 +252,22 @@ export function FeaturedPartnerWidget() {
  {/* Quick stats */}
  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
  <div className="bg-muted rounded-lg p-4 text-center">
- <TrendingUp className="h-6 w-6 mx-auto mb-2 text-success" />
+ <span className="h-6 w-6 mx-auto mb-2 text-success" aria-hidden="true">📈</span>
  <p className="text-2xl font-bold">${Formatters.number(Math.round(data.metrics?.totalRevenue))}</p>
  <p className="text-xs text-muted-foreground">90-Day Revenue</p>
  </div>
  <div className="bg-muted rounded-lg p-4 text-center">
- <Users className="h-6 w-6 mx-auto mb-2 text-info" />
+ <span className="h-6 w-6 mx-auto mb-2 text-info" aria-hidden="true">👥</span>
  <p className="text-2xl font-bold">{data.metrics?.totalTransactions}</p>
  <p className="text-xs text-muted-foreground">Transactions</p>
  </div>
  <div className="bg-muted rounded-lg p-4 text-center">
- <Star className="h-6 w-6 mx-auto mb-2 text-warning" />
+ <span className="h-6 w-6 mx-auto mb-2 text-warning" aria-hidden="true">⭐</span>
  <p className="text-2xl font-bold">{Formatters.decimal(data.metrics?.avgRating, 1)}</p>
  <p className="text-xs text-muted-foreground">Avg Rating</p>
  </div>
  <div className="bg-muted rounded-lg p-4 text-center">
- <Zap className="h-6 w-6 mx-auto mb-2 text-accent" />
+ <span className="h-6 w-6 mx-auto mb-2 text-accent" aria-hidden="true">⚡</span>
  <p className="text-2xl font-bold">
  {data.metrics?.customerGrowth > 0 ?'+' :''}{Formatters.number(Math.round(data.metrics?.customerGrowth))}%
  </p>
@@ -298,7 +279,7 @@ export function FeaturedPartnerWidget() {
  <div className="border rounded-lg p-4">
  <div className="flex justify-between items-center mb-4">
  <h3 className="font-semibold flex items-center gap-2">
- <Gift className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">🎁</span>
  Benefits Utilization
  </h3>
  <Badge variant="outline">
@@ -325,7 +306,7 @@ export function FeaturedPartnerWidget() {
  </div>
  </Button>
  <Button variant="outline" className="justify-start h-auto py-4">
- <Calendar className="mr-3 h-5 w-5 text-primary" />
+ <span className="mr-3 h-5 w-5 text-primary" aria-hidden="true">📅</span>
  <div className="text-left">
  <p className="font-medium">Schedule Business Review</p>
  <p className="text-xs text-muted-foreground">One-on-one strategy session</p>
@@ -356,7 +337,7 @@ export function FeaturedPartnerWidget() {
  <CheckCircle2 className="h-5 w-5 text-muted-foreground" />
  )}
  {benefit.status ==='pending' && (
- <Clock className="h-5 w-5 text-warning" />
+ <span className="h-5 w-5 text-warning" aria-hidden="true">⏰</span>
  )}
  <div>
  <p className="font-medium">{benefit.name}</p>
@@ -402,7 +383,7 @@ export function FeaturedPartnerWidget() {
  </p>
  {opportunity.reward && (
  <p className="text-sm text-primary mt-2 flex items-center gap-1">
- <Gift className="h-3 w-3" />
+ <span className="h-3 w-3" aria-hidden="true">🎁</span>
  {opportunity.reward}
  </p>
  )}
@@ -446,7 +427,7 @@ export function FeaturedPartnerWidget() {
  >
  <div className="flex items-center justify-between mb-4">
  <div className="flex items-center gap-2">
- <Calendar className="h-5 w-5 text-primary" />
+ <span className="h-5 w-5 text-primary" aria-hidden="true">📅</span>
  <h4 className="font-medium">{review.quarter}</h4>
  </div>
  <Badge 
@@ -485,7 +466,7 @@ export function FeaturedPartnerWidget() {
  {review.status ==='pending' && (
  <div className="mt-4 pt-4 border-t">
  <Button size="sm" variant="outline">
- <Calendar className="mr-2 h-4 w-4" />
+ <span className="mr-2 h-4 w-4" aria-hidden="true">📅</span>
  Schedule Review
  </Button>
  </div>
@@ -497,7 +478,7 @@ export function FeaturedPartnerWidget() {
 
  <TabsContent value="insights" className="m-0 space-y-4">
  <div className="flex items-center gap-2">
- <Lightbulb className="h-5 w-5 text-primary" />
+ <span className="h-5 w-5 text-primary" aria-hidden="true">💡</span>
  <h3 className="font-semibold">AI-Powered Recommendations</h3>
  </div>
 

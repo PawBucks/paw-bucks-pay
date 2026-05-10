@@ -3,7 +3,7 @@ import { motion } from"framer-motion";
 import { GradientCard } from"@/components/ui/gradient-card";
 import { Badge } from"@/components/ui/badge";
 import { Button } from"@/components/ui/button";
-import { Calendar, PawPrint, FileHeart, Pencil, Trash2, IdCard } from "lucide-react";
+import { FileHeart, Pencil, Trash2, IdCard } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from"@/components/ui/alert-dialog";
 import { petsService } from"@/services/api/pets.service";
@@ -116,7 +116,7 @@ const PetProfileCardComponent = ({ pet, onUpdate, index = 0 }: PetProfileCardPro
  />
  ) : (
  <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
- <PawPrint className="w-8 h-8 text-muted-foreground" />
+ <span className="w-8 h-8 text-muted-foreground" aria-hidden="true">🐾</span>
  </div>
  )}
 
@@ -158,7 +158,7 @@ const PetProfileCardComponent = ({ pet, onUpdate, index = 0 }: PetProfileCardPro
  )}
  {age !== null && (
  <p className="text-sm text-muted-foreground flex items-center gap-1">
- <Calendar className="w-3 h-3" />
+ <span className="w-3 h-3" aria-hidden="true">📅</span>
  {age} {age === 1 ?"year" :"years"} old
  </p>
  )}

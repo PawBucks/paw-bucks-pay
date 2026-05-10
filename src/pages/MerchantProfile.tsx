@@ -28,7 +28,7 @@ import { useServiceConversionTracking } from"@/hooks/useServiceConversionTrackin
 import { schedulingService } from"@/services/api/scheduling.service";
 import { useQuery, useQueries } from"@tanstack/react-query";
 import { Founding50Badge } from"@/components/shared/Founding50Badge";
-import { Star, MapPin, Phone, Globe, Coins, CreditCard, Store, Scissors, Home, Stethoscope, Footprints, Bone, ArrowLeft, ShoppingBag, MessageSquare, Camera, ChevronRight, BadgeCheck, CalendarDays, Facebook, Instagram, Twitter, Linkedin, ThumbsUp } from "lucide-react";
+import { Star, Store, Scissors, Home, Stethoscope, Footprints, Bone, ArrowLeft, Facebook, Instagram, Twitter, Linkedin } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 
 import { Formatters } from "@/utils/formatters";
@@ -267,7 +267,7 @@ const MerchantProfile = memo(() => {
   <div className="relative">
   {/* Eyebrow */}
   <div className="text-[0.7rem] font-medium tracking-[0.18em] uppercase text-primary mb-3 flex items-center gap-2">
-   <Store className="w-3.5 h-3.5" />
+   <span className="w-3.5 h-3.5" aria-hidden="true">🏪</span>
    The Profile
   </div>
 
@@ -299,7 +299,7 @@ const MerchantProfile = memo(() => {
    {merchant.business_name}
   </h1>
  {hasVerifiedPro && (
- <BadgeCheck className="w-6 h-6 text-info flex-shrink-0" />
+ <span className="w-6 h-6 text-info flex-shrink-0" aria-hidden="true">✅</span>
  )}
  {merchantId && (
  <Founding50Badge entityType="merchant" entityId={merchantId} size="md" />
@@ -324,7 +324,7 @@ const MerchantProfile = memo(() => {
  )}
  {merchant.accepts_pawbucks && (
  <Badge variant="outline" className="gap-1 text-xs bg-warning/10 text-warning border-warning/30">
- <Coins className="w-3 h-3" /> PawBucks
+ <span className="w-3 h-3" aria-hidden="true">🪙</span> PawBucks
  </Badge>
  )}
  </div>
@@ -376,12 +376,12 @@ const MerchantProfile = memo(() => {
  {/* ═══ Primary CTA ═══ */}
  <div className="flex gap-2 mt-2">
  <Button size="lg" className="flex-1 h-12 text-base font-semibold" onClick={handleOpenPaymentDialog}>
- <ShoppingBag className="w-5 h-5 mr-2" />
+ <span className="w-5 h-5 mr-2" aria-hidden="true">🛍️</span>
  Pay & Earn PawBucks
  </Button>
  {user && !userHasReviewed && (
  <Button variant="outline" size="lg" className="h-12" onClick={handleOpenReviewDialog}>
- <Camera className="w-5 h-5 mr-1" />
+ <span className="w-5 h-5 mr-1" aria-hidden="true">📸</span>
  Review
  </Button>
  )}
@@ -389,7 +389,7 @@ const MerchantProfile = memo(() => {
  {merchant?.storefront_slug && (
  <Button variant="outline" className="w-full mt-2" asChild>
  <Link to={`/storefront/${merchant.storefront_slug}`}>
- <Store className="w-4 h-4 mr-2" /> View Storefront
+ <span className="w-4 h-4 mr-2" aria-hidden="true">🏪</span> View Storefront
  </Link>
  </Button>
  )}
@@ -434,7 +434,7 @@ const MerchantProfile = memo(() => {
  {featuredReview && (
  <div className="bg-muted rounded-md p-4 mb-6 border border-border/50">
  <div className="flex items-start gap-3">
- <ThumbsUp className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+ <span className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" aria-hidden="true">👍</span>
  <div>
  <p className="text-sm italic text-foreground line-clamp-3">
 "{featuredReview.review_text}"
@@ -484,7 +484,7 @@ const MerchantProfile = memo(() => {
  {merchant.phone && (
  <a href={`tel:${merchant.phone}`} className="flex items-center gap-3 group py-1">
  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
- <Phone className="w-4 h-4 text-primary" />
+ <span className="w-4 h-4 text-primary" aria-hidden="true">📞</span>
  </div>
  <div>
  <p className="text-sm font-medium group-hover:text-primary transition-colors">{merchant.phone}</p>
@@ -533,7 +533,7 @@ const MerchantProfile = memo(() => {
  className="flex items-center gap-3 group py-1"
  >
  <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0">
- <Globe className="w-4 h-4 text-accent" />
+ <span className="w-4 h-4 text-accent" aria-hidden="true">🌐</span>
  </div>
  <div>
  <p className="text-sm font-medium group-hover:text-primary transition-colors">
@@ -590,14 +590,14 @@ const MerchantProfile = memo(() => {
  <div className="space-y-2">
  <div className="flex items-center justify-between p-3 bg-muted/40 rounded-lg">
  <div className="flex items-center gap-3">
- <CreditCard className="w-5 h-5 text-muted-foreground" />
+ <span className="w-5 h-5 text-muted-foreground" aria-hidden="true">💳</span>
  <span className="text-sm font-medium">Credit/Debit Card</span>
  </div>
  <Badge variant="outline" className="text-xs">Available</Badge>
  </div>
  <div className="flex items-center justify-between p-3 bg-muted/40 rounded-lg">
  <div className="flex items-center gap-3">
- <Coins className="w-5 h-5 text-primary" />
+ <span className="w-5 h-5 text-primary" aria-hidden="true">🪙</span>
  <div>
  <span className="text-sm font-medium">PawBucks</span>
  <p className="text-xs text-muted-foreground">1000 PawBucks = $1.00</p>
@@ -622,7 +622,7 @@ const MerchantProfile = memo(() => {
  {hasBookableServices && (
  <section id="section-booking" ref={bookingRef}>
   <div className="text-[0.7rem] font-medium tracking-[0.18em] uppercase text-primary mb-2 flex items-center gap-2">
-   <CalendarDays className="w-3.5 h-3.5" />
+   <span className="w-3.5 h-3.5" aria-hidden="true">📅</span>
    Booking
   </div>
   <h2
@@ -645,7 +645,7 @@ const MerchantProfile = memo(() => {
  {/* ─── Reviews Section ─── */}
  <section id="section-reviews">
   <div className="text-[0.7rem] font-medium tracking-[0.18em] uppercase text-primary mb-2 flex items-center gap-2">
-   <Star className="w-3.5 h-3.5 fill-current" />
+   <span className="w-3.5 h-3.5 fill-current" aria-hidden="true">⭐</span>
    Reviews
   </div>
   <h2
@@ -701,7 +701,7 @@ const MerchantProfile = memo(() => {
  {user && !userHasReviewed && (
  <div className="mt-5 pt-4 border-t">
  <Button onClick={handleOpenReviewDialog} className="w-full">
- <Camera className="w-4 h-4 mr-2" />
+ <span className="w-4 h-4 mr-2" aria-hidden="true">📸</span>
  Write a Review
  </Button>
  </div>
@@ -713,7 +713,7 @@ const MerchantProfile = memo(() => {
  {reviews.length === 0 ? (
  <Card>
  <CardContent className="py-12 text-center">
- <MessageSquare className="w-12 h-12 mx-auto text-muted-foreground/30 mb-4" />
+ <span className="w-12 h-12 mx-auto text-muted-foreground/30 mb-4" aria-hidden="true">💬</span>
  <h3 className="font-semibold mb-2">No reviews yet</h3>
  <p className="text-sm text-muted-foreground mb-4">Be the first to share your experience!</p>
  {user && (

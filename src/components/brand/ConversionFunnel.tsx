@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from"@/components/ui/card";
-import { Filter, Eye, Zap, Gift, Repeat } from"lucide-react";
+import { Filter, Eye, Zap, Gift, Repeat } from "lucide-react";
 import { cn } from"@/lib/utils";
 import type { CommandCenterSummary } from"@/services/api/brandCampaigns.service";
 

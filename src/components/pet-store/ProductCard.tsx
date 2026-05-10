@@ -2,7 +2,7 @@ import { memo } from"react";
 import { Card, CardContent, CardFooter } from"@/components/ui/card";
 import { Button } from"@/components/ui/button";
 import { Badge } from"@/components/ui/badge";
-import { ShoppingCart, Coins, CreditCard, Plus, Store, Package, TrendingUp, AlertTriangle } from "lucide-react";
+import { Plus, AlertTriangle } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { Formatters } from"@/utils/formatters";
 import { StarRating } from"./StarRating";
@@ -86,7 +86,7 @@ export const ProductCard = memo(({
  />
  ) : (
  <div className="w-full h-full flex items-center justify-center">
- <Package className="h-12 w-12 text-muted-foreground/30" />
+ <span className="h-12 w-12 text-muted-foreground/30" aria-hidden="true">📦</span>
  </div>
  )}
 
@@ -103,7 +103,7 @@ export const ProductCard = memo(({
  {ratingCount >= 10 && ratingAvg >= 4.0 && (
  <div className="absolute bottom-2 left-2">
  <Badge variant="secondary" className="text-[10px] px-1.5 py-0.5 bg-warning/90 text-white border-0">
- <TrendingUp className="h-2.5 w-2.5 mr-0.5" /> Best Seller
+ <span className="h-2.5 w-2.5 mr-0.5" aria-hidden="true">📈</span> Best Seller
  </Badge>
  </div>
  )}
@@ -203,7 +203,7 @@ export const ProductCard = memo(({
  </>
  ) : (
  <>
- <ShoppingCart className="mr-1 h-3.5 w-3.5" />
+ <span className="mr-1 h-3.5 w-3.5" aria-hidden="true">🛒</span>
  Add to Cart
  </>
  )}
@@ -215,7 +215,7 @@ export const ProductCard = memo(({
  onClick={() => onBuyNow({ ...item, price: discountedPrice })}
  disabled={outOfStock}
  >
- <CreditCard className="mr-1 h-3 w-3" />
+ <span className="mr-1 h-3 w-3" aria-hidden="true">💳</span>
  Buy Now {Formatters.currency((discountedPrice / 100))}
  </Button>
  </>

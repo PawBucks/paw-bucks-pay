@@ -4,7 +4,7 @@ import { motion } from"framer-motion";
 import { Card, CardContent } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
 import { Button } from"@/components/ui/button";
-import { Crown, MapPin, Star, Navigation, Coins, BadgeCheck } from"lucide-react";
+import { Star } from "lucide-react";
 import { PawBucksInfoTooltip } from"@/components/PawBucksInfoTooltip";
 
 import { Formatters } from "@/utils/formatters";
@@ -75,7 +75,7 @@ const FeaturedPartnerCardComponent = ({
  Featured Partner
  </Badge>
  {isVerifiedPro && (
- <BadgeCheck className="w-4 h-4 text-info" />
+ <span className="w-4 h-4 text-info" aria-hidden="true">✅</span>
  )}
  </div>
 
@@ -147,7 +147,7 @@ const FeaturedPartnerCardComponent = ({
  {merchant.accepts_pawbucks && (
  <>
  <span className="text-muted-foreground/40">·</span>
- <Coins className="w-3 h-3 text-primary" />
+ <span className="w-3 h-3 text-primary" aria-hidden="true">🪙</span>
  </>
  )}
  </div>
@@ -168,7 +168,7 @@ const FeaturedPartnerCardComponent = ({
  )}
  {showDistance && merchant.distance !== undefined && (
  <span className="text-[11px] text-muted-foreground/60 flex items-center gap-0.5 flex-shrink-0">
- <Navigation className="w-2.5 h-2.5" />
+ <span className="w-2.5 h-2.5" aria-hidden="true">🧭</span>
  {formatDistance(merchant.distance)}
  </span>
  )}

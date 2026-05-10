@@ -14,7 +14,7 @@ import { Textarea } from"@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from"@/components/ui/select";
 import { toast } from"sonner";
-import { Upload, PawPrint, Loader2 } from "lucide-react";
+import { Upload, Loader2 } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 
 const CreatePetProfile = () => {
@@ -143,7 +143,7 @@ const CreatePetProfile = () => {
  <CardHeader className="text-center">
  <div className="flex justify-center mb-4">
  <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center">
- <PawPrint className="w-8 h-8 text-primary-foreground" />
+ <span className="w-8 h-8 text-primary-foreground" aria-hidden="true">🐾</span>
  </div>
  </div>
  <CardTitle className="text-3xl font-bold flex items-center justify-center gap-2">

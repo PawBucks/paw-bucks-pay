@@ -1,13 +1,6 @@
 import { memo, useMemo } from"react";
 import { GradientCard } from"@/components/ui/gradient-card";
 import { Formatters } from"@/utils/formatters";
-import {
- DollarSign,
- Gift,
- TrendingUp,
- CreditCard,
- ShoppingCart,
-} from"lucide-react";
 
 type Analytics = {
  total_sales: number;
@@ -47,7 +40,7 @@ const MerchantAnalyticsCardsComponent = ({ analytics }: MerchantAnalyticsCardsPr
  <GradientCard gradient>
  <div className="flex items-center gap-4">
  <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center">
- <DollarSign className="w-6 h-6 text-accent" />
+ <span className="w-6 h-6 text-accent" aria-hidden="true">💵</span>
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Total Sales</p>
@@ -61,7 +54,7 @@ const MerchantAnalyticsCardsComponent = ({ analytics }: MerchantAnalyticsCardsPr
  <GradientCard>
  <div className="flex items-center gap-4">
  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
- <Gift className="w-6 h-6 text-primary" />
+ <span className="w-6 h-6 text-primary" aria-hidden="true">🎁</span>
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Total Rewards Given</p>
@@ -75,7 +68,7 @@ const MerchantAnalyticsCardsComponent = ({ analytics }: MerchantAnalyticsCardsPr
  <GradientCard>
  <div className="flex items-center gap-4">
  <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center">
- <CreditCard className="w-6 h-6 text-secondary" />
+ <span className="w-6 h-6 text-secondary" aria-hidden="true">💳</span>
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Repayment Remaining</p>
@@ -89,7 +82,7 @@ const MerchantAnalyticsCardsComponent = ({ analytics }: MerchantAnalyticsCardsPr
  <GradientCard>
  <div className="flex items-center gap-4">
  <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
- <TrendingUp className="w-6 h-6 text-muted-foreground" />
+ <span className="w-6 h-6 text-muted-foreground" aria-hidden="true">📈</span>
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Repayment Rate</p>
@@ -103,7 +96,7 @@ const MerchantAnalyticsCardsComponent = ({ analytics }: MerchantAnalyticsCardsPr
  <GradientCard>
  <div className="flex items-center gap-4">
  <div className="w-12 h-12 rounded-full bg-warning/10 flex items-center justify-center">
- <ShoppingCart className="w-6 h-6 text-warning" />
+ <span className="w-6 h-6 text-warning" aria-hidden="true">🛒</span>
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Total Transactions</p>

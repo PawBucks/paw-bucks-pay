@@ -5,7 +5,6 @@ import { Input } from"@/components/ui/input";
 import { Switch } from"@/components/ui/switch";
 import { Button } from"@/components/ui/button";
 import { toast } from"sonner";
-import { Clock } from"lucide-react";
 
 const DAY_NAMES = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 
@@ -102,7 +101,7 @@ export function BusinessHoursEditor({ merchantId, vetId }: Props) {
  return (
  <div className="space-y-4 pt-4 border-t">
  <div className="flex items-center gap-2">
- <Clock className="w-5 h-5 text-muted-foreground" />
+ <span className="w-5 h-5 text-muted-foreground" aria-hidden="true">⏰</span>
  <Label className="text-base font-semibold">Hours of Operation</Label>
  </div>
  <div className="space-y-3">

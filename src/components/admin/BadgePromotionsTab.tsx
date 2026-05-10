@@ -33,7 +33,7 @@ import { Checkbox } from"@/components/ui/checkbox";
 import { ScrollArea } from"@/components/ui/scroll-area";
 import { Slider } from"@/components/ui/slider";
 import { toast } from"sonner";
-import { Plus, Edit, Trash2, Gift, Tag, Clock, Package, AlertCircle } from "lucide-react";
+import { Plus, Edit, Trash2, AlertCircle } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { format } from"date-fns";
 
@@ -419,7 +419,7 @@ export function BadgePromotionsTab() {
  <div className="space-y-4">
  <div className="flex justify-between items-center">
  <Label className="flex items-center gap-2">
- <Tag className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">🏷️</span>
  Discount Percentage
  </Label>
  <span className="text-2xl font-bold text-primary">
@@ -444,7 +444,7 @@ export function BadgePromotionsTab() {
  <div className="space-y-4">
  <div className="flex justify-between items-center">
  <Label className="flex items-center gap-2">
- <Clock className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">⏰</span>
  Duration
  </Label>
  <span className="text-2xl font-bold text-primary">
@@ -471,7 +471,7 @@ export function BadgePromotionsTab() {
  <div className="space-y-3">
  <div className="flex justify-between items-center">
  <Label className="flex items-center gap-2">
- <Package className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">📦</span>
  Select Pet Store Items
  </Label>
  <Badge variant="outline">
@@ -602,7 +602,7 @@ export function BadgePromotionsTab() {
  <div className="text-center py-8">Loading promotions...</div>
  ) : promotions?.length === 0 ? (
  <div className="text-center py-12">
- <Gift className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+ <span className="h-12 w-12 text-muted-foreground mx-auto mb-4" aria-hidden="true">🎁</span>
  <h3 className="text-lg font-semibold mb-2">No promotions yet</h3>
  <p className="text-muted-foreground mb-4">
  Create your first promotion to reward badge earners with Pet Store discounts
@@ -656,7 +656,7 @@ export function BadgePromotionsTab() {
  </TableCell>
  <TableCell>
  <span className="flex items-center gap-1 text-sm">
- <Clock className="h-3 w-3" />
+ <span className="h-3 w-3" aria-hidden="true">⏰</span>
  {promo.duration_hours}hrs
  </span>
  </TableCell>
