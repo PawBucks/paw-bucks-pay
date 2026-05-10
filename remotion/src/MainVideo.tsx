@@ -25,47 +25,11 @@ export const fonts = {
 const SCENE = 180; // 6s each
 const TRANS = 18; // 0.6s
 
-const SceneFrame: React.FC<{ index: number; title: string; children: React.ReactNode }> = ({ index, title, children }) => {
-  const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-  const start = (index - 1) * 6;
-  const end = index * 6;
-  const fmt = (s: number) => `0:${String(s).padStart(2, "0")}`;
-  const o = interpolate(frame, [4, 16, SCENE - 16, SCENE - 4], [0, 1, 1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+const SceneFrame: React.FC<{ index: number; children: React.ReactNode }> = ({ index, children }) => {
   return (
     <>
       <Audio src={staticFile(`audio/scene${index}.mp3`)} volume={0.95} />
       {children}
-      <AbsoluteFill style={{ pointerEvents: "none" }}>
-        <div
-          style={{
-            position: "absolute",
-            top: "4%",
-            left: "50%",
-            transform: "translateX(-50%)",
-            opacity: o,
-            display: "flex",
-            alignItems: "center",
-            gap: 12,
-            background: "rgba(255,255,255,0.92)",
-            border: `1px solid ${theme.teal}33`,
-            borderRadius: 999,
-            padding: "10px 20px",
-            boxShadow: "0 8px 24px rgba(15,27,45,0.08)",
-            fontFamily: fonts.body,
-            fontSize: 22,
-            color: theme.ink,
-            fontWeight: 600,
-            whiteSpace: "nowrap",
-          }}
-        >
-          <span style={{ color: theme.teal, fontWeight: 800 }}>0{index}</span>
-          <span style={{ color: theme.inkSoft }}>·</span>
-          <span>{title}</span>
-          <span style={{ color: theme.inkSoft }}>·</span>
-          <span style={{ fontVariantNumeric: "tabular-nums", color: theme.tealDeep }}>{fmt(start)}–{fmt(end)}</span>
-        </div>
-      </AbsoluteFill>
     </>
   );
 };
@@ -82,31 +46,31 @@ export const MainVideo: React.FC = () => {
       <Backdrop drift={drift} />
       <TransitionSeries>
         <TransitionSeries.Sequence durationInFrames={SCENE}>
-          <SceneFrame index={1} title="The promise">
+          <SceneFrame index={1}>
             <Scene1Hook width={width} height={height} />
           </SceneFrame>
         </TransitionSeries.Sequence>
         <TransitionSeries.Transition presentation={fade()} timing={springTiming({ config: { damping: 200 }, durationInFrames: TRANS })} />
         <TransitionSeries.Sequence durationInFrames={SCENE}>
-          <SceneFrame index={2} title="Sign up free">
+          <SceneFrame index={2}>
             <Scene2SignUp width={width} height={height} />
           </SceneFrame>
         </TransitionSeries.Sequence>
         <TransitionSeries.Transition presentation={wipe({ direction: "from-right" })} timing={springTiming({ config: { damping: 200 }, durationInFrames: TRANS })} />
         <TransitionSeries.Sequence durationInFrames={SCENE}>
-          <SceneFrame index={3} title="Earn cashback">
+          <SceneFrame index={3}>
             <Scene3Earn width={width} height={height} />
           </SceneFrame>
         </TransitionSeries.Sequence>
         <TransitionSeries.Transition presentation={fade()} timing={springTiming({ config: { damping: 200 }, durationInFrames: TRANS })} />
         <TransitionSeries.Sequence durationInFrames={SCENE}>
-          <SceneFrame index={4} title="Auto-apply savings">
+          <SceneFrame index={4}>
             <Scene4Save width={width} height={height} />
           </SceneFrame>
         </TransitionSeries.Sequence>
         <TransitionSeries.Transition presentation={wipe({ direction: "from-left" })} timing={springTiming({ config: { damping: 200 }, durationInFrames: TRANS })} />
         <TransitionSeries.Sequence durationInFrames={SCENE + 4 * TRANS}>
-          <SceneFrame index={5} title="Join the pack">
+          <SceneFrame index={5}>
             <Scene5CTA width={width} height={height} />
           </SceneFrame>
         </TransitionSeries.Sequence>
