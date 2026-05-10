@@ -43,31 +43,31 @@ export const MerchantVideo: React.FC = () => {
       <Backdrop drift={drift} />
       <TransitionSeries>
         <TransitionSeries.Sequence durationInFrames={SCENE}>
-          <SceneFrame index={1} title="Loyal regulars">
+          <SceneFrame index={1}>
             <MerchantScene1Hook width={width} height={height} />
           </SceneFrame>
         </TransitionSeries.Sequence>
         <TransitionSeries.Transition presentation={fade()} timing={springTiming({ config: { damping: 200 }, durationInFrames: TRANS })} />
         <TransitionSeries.Sequence durationInFrames={SCENE}>
-          <SceneFrame index={2} title="Set up fast">
+          <SceneFrame index={2}>
             <MerchantScene2Setup width={width} height={height} />
           </SceneFrame>
         </TransitionSeries.Sequence>
         <TransitionSeries.Transition presentation={wipe({ direction: "from-right" })} timing={springTiming({ config: { damping: 200 }, durationInFrames: TRANS })} />
         <TransitionSeries.Sequence durationInFrames={SCENE}>
-          <SceneFrame index={3} title="Live dashboard">
+          <SceneFrame index={3}>
             <MerchantScene3Dashboard width={width} height={height} />
           </SceneFrame>
         </TransitionSeries.Sequence>
         <TransitionSeries.Transition presentation={fade()} timing={springTiming({ config: { damping: 200 }, durationInFrames: TRANS })} />
         <TransitionSeries.Sequence durationInFrames={SCENE}>
-          <SceneFrame index={4} title="Rewards Wallet">
+          <SceneFrame index={4}>
             <MerchantScene4Wallet width={width} height={height} />
           </SceneFrame>
         </TransitionSeries.Sequence>
         <TransitionSeries.Transition presentation={wipe({ direction: "from-left" })} timing={springTiming({ config: { damping: 200 }, durationInFrames: TRANS })} />
         <TransitionSeries.Sequence durationInFrames={SCENE + 4 * TRANS}>
-          <SceneFrame index={5} title="Become a partner">
+          <SceneFrame index={5}>
             <MerchantScene5CTA width={width} height={height} />
           </SceneFrame>
         </TransitionSeries.Sequence>
