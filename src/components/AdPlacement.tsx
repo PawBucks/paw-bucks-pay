@@ -100,7 +100,7 @@ const AdPlacementComponent = ({ position ='top' }: AdPlacementProps) => {
  )}
  {currentMerchant.address && (
  <div className="flex items-center gap-1 text-sm text-muted-foreground">
- <MapPin className="w-3 h-3" />
+ <span className="text-xs">📍</span>
  <span>{currentMerchant.address}</span>
  </div>
  )}
@@ -123,7 +123,7 @@ const AdPlacementComponent = ({ position ='top' }: AdPlacementProps) => {
  size="sm"
  className="whitespace-nowrap"
  >
- <Crown className="w-3 h-3 mr-1" />
+ <span className="text-xs mr-1">👑</span>
  Remove Ads
  </Button>
  </div>
@@ -167,7 +167,7 @@ const AdPlacementComponent = ({ position ='top' }: AdPlacementProps) => {
  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 pr-8">
  <div className="flex-1">
  <div className="flex items-center gap-2 mb-1">
- <Crown className="w-5 h-5 text-primary" />
+ <span className="text-lg text-primary">👑</span>
  <h4 className="font-semibold text-foreground">Upgrade to Remove Ads</h4>
  </div>
  <p className="text-sm text-muted-foreground">
@@ -178,7 +178,7 @@ const AdPlacementComponent = ({ position ='top' }: AdPlacementProps) => {
  onClick={handleNavigateToProfile}
  className="bg-primary hover:bg-primary/90 whitespace-nowrap"
  >
- <Crown className="w-4 h-4 mr-2" />
+ <span className="text-base mr-2">👑</span>
  Upgrade Now
  </Button>
  </div>

@@ -910,7 +910,7 @@ const LostPets = () => {
  <CardContent className="space-y-3">
  {/* Last Seen */}
  <div className="flex items-start gap-2 text-sm">
- <MapPin className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
+ <span className="text-base text-destructive shrink-0 mt-0.5">📍</span>
  <div>
  <p className="font-medium">Last seen: {post.last_seen_location}</p>
  <p className="text-muted-foreground">
