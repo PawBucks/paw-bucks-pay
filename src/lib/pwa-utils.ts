@@ -86,7 +86,7 @@ export const checkForUpdates = async (callback: () => void) => {
  if (newWorker.state ==='installed' && navigator.serviceWorker.controller) {
  // Auto-reload to activate new version
  console.log('[PWA] New version detected, auto-updating...');
- window.location.reload();
+ hardReload();
  }
  });
  }
@@ -94,14 +94,16 @@ export const checkForUpdates = async (callback: () => void) => {
 
       // Actively poll for updates so users don't sit on stale builds.
       const triggerUpdate = () => {
-        registration.update().catch((err) => {
-          console.warn('[PWA] update() failed:', err);
+        // Guard: update() throws InvalidStateError if no worker installed yet.
+        if (!registration.installing && !registration.waiting && !registration.active) return;
+        registration.update().catch(() => {
+          // Benign — typically "newestWorker is null" on first load.
         });
       };
 
-      // Check immediately, then every 60 seconds.
+      // Check immediately, then every 30 seconds.
       triggerUpdate();
-      const interval = window.setInterval(triggerUpdate, 60_000);
+      const interval = window.setInterval(triggerUpdate, 30_000);
 
       // Check whenever the tab regains focus / visibility (covers users who
       // leave the tab open for hours/days).
@@ -118,7 +120,7 @@ export const checkForUpdates = async (callback: () => void) => {
         if (refreshing) return;
         refreshing = true;
         console.log('[PWA] Controller changed, reloading for fresh version...');
-        window.location.reload();
+        hardReload();
       });
 
       return () => {
@@ -129,6 +131,17 @@ export const checkForUpdates = async (callback: () => void) => {
       };
  }
  }
+};
+
+// Force a cache-busting reload so the browser refetches HTML + assets.
+const hardReload = () => {
+  try {
+    const url = new URL(window.location.href);
+    url.searchParams.set('_v', Date.now().toString());
+    window.location.replace(url.toString());
+  } catch {
+    window.location.reload();
+  }
 };
 
 // Fallback for non-PWA / no-SW environments: poll index.html and detect a new
@@ -163,7 +176,7 @@ export const startBuildVersionPolling = () => {
       if (lastHash && lastHash !== hash) {
         console.log('[PWA] New build detected via index.html hash, reloading...');
         stopped = true;
-        window.location.reload();
+        hardReload();
         return;
       }
       lastHash = hash;
@@ -173,7 +186,7 @@ export const startBuildVersionPolling = () => {
   };
 
   check();
-  const interval = window.setInterval(check, 60_000);
+  const interval = window.setInterval(check, 30_000);
   const onVisible = () => {
     if (document.visibilityState === 'visible') check();
   };
