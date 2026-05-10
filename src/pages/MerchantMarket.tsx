@@ -1,686 +1,527 @@
-import { useState, useEffect } from"react";
-import { useNavigate, useSearchParams } from"react-router-dom";
-import { useAuth } from"@/hooks/useAuth";
-import { supabase } from"@/integrations/supabase/client";
-import { SEO } from"@/components/SEO";
-import { Button } from"@/components/ui/button";
-import { Badge } from"@/components/ui/badge";
-import { Checkbox } from"@/components/ui/checkbox";
-import { ServicePurchaseDialog } from"@/components/merchant/ServicePurchaseDialog";
-import { cn } from"@/lib/utils";
-import { ConsultationScheduleDialog } from"@/components/merchant/ConsultationScheduleDialog";
-import { toast } from"sonner";
-import { ArrowLeft, Loader2, AlertTriangle, MapPin } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { SEO } from "@/components/SEO";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ServicePurchaseDialog } from "@/components/merchant/ServicePurchaseDialog";
+import { ConsultationScheduleDialog } from "@/components/merchant/ConsultationScheduleDialog";
+import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import { ArrowLeft, Loader2, AlertTriangle, MapPin, Tag } from "lucide-react";
 
-type ServiceCategory ="visibility" |"analytics" |"growth" |"premium";
+type ServiceCategory = "visibility" | "analytics" | "growth" | "premium";
 
 type Service = {
- id: string;
- name: string;
- description: string | null;
- short_description: string | null;
- benefits: string[];
- priceUSD: number;
- pricePawBucks: number;
- category: ServiceCategory;
- icon: string | null;
- popular?: boolean;
- newService?: boolean;
- billingPeriod?:"one_time" |"monthly" |"quarterly" |"yearly";
+  id: string;
+  name: string;
+  description: string | null;
+  short_description: string | null;
+  benefits: string[];
+  priceUSD: number;
+  pricePawBucks: number;
+  category: ServiceCategory;
+  icon: string | null;
+  popular?: boolean;
+  newService?: boolean;
+  billingPeriod?: "one_time" | "monthly" | "quarterly" | "yearly";
 };
 
 type GeoCellAvailability = {
- serviceId: string;
- maxSlots: number;
- usedSlots: number;
- availableSlots: number;
- cellName: string;
+  serviceId: string;
+  maxSlots: number;
+  usedSlots: number;
+  availableSlots: number;
+  cellName: string;
 };
 
-// Icon mapping for dynamic rendering
-const iconMap: Record<string, React.ReactNode> = {
- Megaphone: <span className="w-6 h-6" aria-hidden="true">📣</span>,
- Star: <span className="w-6 h-6" aria-hidden="true">⭐</span>,
- TrendingUp: <span className="w-6 h-6" aria-hidden="true">📈</span>,
- BadgeCheck: <BadgeCheck className="w-6 h-6" />,
- BarChart3: <span className="w-6 h-6" aria-hidden="true">📊</span>,
- Users: <span className="w-6 h-6" aria-hidden="true">👥</span>,
- Brain: <span className="w-6 h-6" aria-hidden="true">💡</span>,
- Search: <Search className="w-6 h-6" />,
- Sparkles: <Sparkles className="w-6 h-6" />,
- Target: <span className="w-6 h-6" aria-hidden="true">🎯</span>,
- GraduationCap: <span className="w-6 h-6" aria-hidden="true">🏆</span>,
- Palette: <Sparkles className="w-6 h-6" />,
- Crown: <span className="w-6 h-6" aria-hidden="true">👑</span>,
- Code: <span className="w-6 h-6" aria-hidden="true">⚡</span>,
- Building2: <span className="w-6 h-6" aria-hidden="true">🏢</span>,
- LineChart: <span className="w-6 h-6" aria-hidden="true">📈</span>,
- Rocket: <span className="w-6 h-6" aria-hidden="true">🚀</span>,
- Video: <Video className="w-6 h-6" />,
- ShieldCheck: <span className="w-6 h-6" aria-hidden="true">🛡️</span>,
- Zap: <span className="w-6 h-6" aria-hidden="true">⚡</span>,
- PieChart: <span className="w-6 h-6" aria-hidden="true">📊</span>,
- MessageSquare: <span className="w-6 h-6" aria-hidden="true">💬</span>,
+type Merchant = { id: string; business_name: string };
+
+const CATEGORY_META: Record<ServiceCategory, { label: string; icon: string; desc: string }> = {
+  visibility: { label: "Visibility & Promotion", icon: "📣", desc: "Boost your presence and get discovered by more pet owners" },
+  analytics:  { label: "Analytics & Insights",   icon: "📈", desc: "Data-driven tools to understand and grow your business" },
+  growth:     { label: "Growth & Optimization",  icon: "🚀", desc: "Expert services to accelerate your business growth" },
+  premium:    { label: "Premium & Exclusive",    icon: "👑", desc: "Elite benefits for serious merchants" },
 };
 
-const categoryInfo: Record<ServiceCategory, { name: string; description: string; icon: React.ReactNode }> = {
- visibility: {
- name:"Visibility & Promotion",
- description:"Boost your presence and get discovered by more pet owners",
- icon: <span className="w-5 h-5" aria-hidden="true">📣</span>,
- },
- analytics: {
- name:"Analytics & Insights",
- description:"Data-driven tools to understand and grow your business",
- icon: <span className="w-5 h-5" aria-hidden="true">📈</span>,
- },
- growth: {
- name:"Growth & Optimization",
- description:"Expert services to accelerate your business growth",
- icon: <span className="w-5 h-5" aria-hidden="true">📈</span>,
- },
- premium: {
- name:"Premium & Exclusive",
- description:"Elite benefits for serious merchants",
- icon: <span className="w-5 h-5" aria-hidden="true">👑</span>,
- },
+const CATEGORY_ORDER: ServiceCategory[] = ["visibility", "analytics", "growth", "premium"];
+
+const formatBillingFreq = (period?: string) => {
+  switch (period) {
+    case "monthly":   return "Monthly · Recurring";
+    case "quarterly": return "Quarterly · Recurring";
+    case "yearly":    return "Annual · Recurring";
+    case "one_time":  return "One-Time Purchase";
+    default:          return "One-Time Purchase";
+  }
 };
 
-type Merchant = {
- id: string;
- business_name: string;
+const formatBillingSuffix = (period?: string) => {
+  switch (period) {
+    case "monthly":   return "/mo";
+    case "quarterly": return "/qtr";
+    case "yearly":    return "/yr";
+    default:          return "";
+  }
 };
 
 const MerchantMarket = () => {
- const navigate = useNavigate();
- const [searchParams] = useSearchParams();
- const { user, loading: authLoading } = useAuth();
- const [searchQuery, setSearchQuery] = useState("");
- const [selectedCategory, setSelectedCategory] = useState<ServiceCategory |"all">("all");
- const [selectedService, setSelectedService] = useState<Service | null>(null);
- const [showPurchaseDialog, setShowPurchaseDialog] = useState(false);
- const [showConsultationDialog, setShowConsultationDialog] = useState(false);
- const [merchant, setMerchant] = useState<Merchant | null>(null);
- const [loading, setLoading] = useState(true);
- const [services, setServices] = useState<Service[]>([]);
- const [expandedBenefits, setExpandedBenefits] = useState<Set<string>>(new Set());
- const [scarcityMap, setScarcityMap] = useState<Record<string, GeoCellAvailability>>({});
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { user, loading: authLoading } = useAuth();
+  const [selectedCategory, setSelectedCategory] = useState<ServiceCategory | "all">("all");
+  const [activeOnly, setActiveOnly] = useState(false);
+  const [selectedService, setSelectedService] = useState<Service | null>(null);
+  const [showPurchaseDialog, setShowPurchaseDialog] = useState(false);
+  const [showConsultationDialog, setShowConsultationDialog] = useState(false);
+  const [merchant, setMerchant] = useState<Merchant | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [services, setServices] = useState<Service[]>([]);
+  const [scarcityMap, setScarcityMap] = useState<Record<string, GeoCellAvailability>>({});
+  const [activeServiceIds, setActiveServiceIds] = useState<Set<string>>(new Set());
+  const [pricePref, setPricePref] = useState<Record<string, "usd" | "pb">>({});
 
- // Redirect if not authenticated
- useEffect(() => {
- if (!authLoading && !user) {
- navigate("/auth");
- }
- }, [user, authLoading, navigate]);
+  // Auth gate
+  useEffect(() => {
+    if (!authLoading && !user) navigate("/auth");
+  }, [user, authLoading, navigate]);
 
- // Load merchant data
- useEffect(() => {
- const loadMerchant = async () => {
- if (!user) return;
- 
- try {
- const { data, error } = await supabase
- .from("merchants")
- .select("id, business_name")
- .eq("user_id", user.id)
- .single();
+  // Load merchant + services + active services
+  useEffect(() => {
+    const load = async () => {
+      if (!user) return;
+      try {
+        const { data, error } = await supabase
+          .from("merchants")
+          .select("id, business_name")
+          .eq("user_id", user.id)
+          .single();
+        if (error) {
+          if (error.code === "PGRST116") { navigate("/merchant-onboarding"); return; }
+          throw error;
+        }
+        setMerchant(data);
 
- if (error) {
- if (error.code ==="PGRST116") {
- // No merchant found - redirect to onboarding
- navigate("/merchant-onboarding");
- return;
- }
- throw error;
- }
+        const { data: svcRows } = await supabase
+          .from("merchant_market_services")
+          .select("*")
+          .eq("is_active", true)
+          .order("display_order", { ascending: true });
 
- setMerchant(data);
- } catch (error) {
- console.error("Error loading merchant:", error);
- toast.error("Failed to load merchant data");
- } finally {
- setLoading(false);
- }
- };
+        const transformed: Service[] = (svcRows || []).map((s: any) => ({
+          id: s.id,
+          name: s.name,
+          description: s.description,
+          short_description: s.short_description,
+          benefits: Array.isArray(s.features) ? (s.features as string[]) : [],
+          priceUSD: Number(s.price_usd),
+          pricePawBucks: s.price_pawbucks,
+          category: s.category as ServiceCategory,
+          icon: s.icon,
+          popular: s.is_popular,
+          newService: s.is_new,
+          billingPeriod: s.billing_type as Service["billingPeriod"],
+        }));
+        setServices(transformed);
 
- if (user) {
- loadMerchant();
- loadServices();
- }
- }, [user, navigate]);
+        // Active services for this merchant
+        const { data: activeRows } = await supabase
+          .from("merchant_active_services_public")
+          .select("service_id")
+          .eq("merchant_id", data.id);
+        setActiveServiceIds(new Set((activeRows || []).map((r: any) => r.service_id)));
+      } catch (err) {
+        console.error("MerchantMarket load error", err);
+        toast.error("Failed to load marketplace");
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, [user, navigate]);
 
- // Load geo-cell scarcity data for visibility services
- useEffect(() => {
- const loadScarcity = async () => {
- if (!merchant) return;
- 
- try {
- // Find the merchant's geo cell
- const { data: cellId } = await supabase.rpc('get_merchant_geo_cell', { p_merchant_id: merchant.id });
- 
- if (!cellId) return; // No geo cell = no scarcity limits
- 
- // Get the cell name
- const { data: cellData } = await supabase
- .from('geo_cells')
- .select('name')
- .eq('id', cellId)
- .single();
- 
- const cellName = cellData?.name ||'your area';
- 
- // Get all limits for this cell
- const { data: limits } = await supabase
- .from('geo_cell_service_limits')
- .select('service_id, max_slots')
- .eq('geo_cell_id', cellId)
- .eq('is_active', true);
- 
- if (!limits || limits.length === 0) return;
- 
- // Get active reservations for this cell
- const { data: reservations } = await supabase
- .from('geo_cell_slot_reservations')
- .select('service_id')
- .eq('geo_cell_id', cellId)
- .eq('is_active', true)
- .gt('expires_at', new Date().toISOString());
- 
- // Build the scarcity map
- const map: Record<string, GeoCellAvailability> = {};
- for (const limit of limits) {
- const usedSlots = (reservations || []).filter(r => r.service_id === limit.service_id).length;
- map[limit.service_id] = {
- serviceId: limit.service_id,
- maxSlots: limit.max_slots,
- usedSlots,
- availableSlots: Math.max(0, limit.max_slots - usedSlots),
- cellName,
- };
- }
- 
- setScarcityMap(map);
- } catch (error) {
- console.error('Error loading scarcity data:', error);
- }
- };
- 
- loadScarcity();
- }, [merchant]);
+  // Geo-cell scarcity
+  useEffect(() => {
+    const loadScarcity = async () => {
+      if (!merchant) return;
+      try {
+        const { data: cellId } = await supabase.rpc("get_merchant_geo_cell", { p_merchant_id: merchant.id });
+        if (!cellId) return;
+        const { data: cellData } = await supabase.from("geo_cells").select("name").eq("id", cellId).single();
+        const cellName = cellData?.name || "your area";
+        const { data: limits } = await supabase
+          .from("geo_cell_service_limits")
+          .select("service_id, max_slots")
+          .eq("geo_cell_id", cellId)
+          .eq("is_active", true);
+        if (!limits?.length) return;
+        const { data: reservations } = await supabase
+          .from("geo_cell_slot_reservations")
+          .select("service_id")
+          .eq("geo_cell_id", cellId)
+          .eq("is_active", true)
+          .gt("expires_at", new Date().toISOString());
+        const map: Record<string, GeoCellAvailability> = {};
+        for (const limit of limits) {
+          const usedSlots = (reservations || []).filter((r: any) => r.service_id === limit.service_id).length;
+          map[limit.service_id] = {
+            serviceId: limit.service_id,
+            maxSlots: limit.max_slots,
+            usedSlots,
+            availableSlots: Math.max(0, limit.max_slots - usedSlots),
+            cellName,
+          };
+        }
+        setScarcityMap(map);
+      } catch (err) {
+        console.error("scarcity error", err);
+      }
+    };
+    loadScarcity();
+  }, [merchant]);
 
- // Load services from database
- const loadServices = async () => {
- try {
- const { data, error } = await supabase
- .from('merchant_market_services')
- .select('*')
- .eq('is_active', true)
- .order('display_order', { ascending: true });
+  useEffect(() => {
+    if (searchParams.get("purchase") === "success") {
+      toast.success("Service purchased successfully!");
+      navigate("/merchant/market", { replace: true });
+    }
+  }, [searchParams, navigate]);
 
- if (error) throw error;
+  const handlePurchase = (service: Service) => {
+    if (!user) { toast.error("Please log in to purchase services"); return; }
+    setSelectedService(service);
+    setShowPurchaseDialog(true);
+  };
 
- const transformed: Service[] = (data || []).map(s => ({
- id: s.id,
- name: s.name,
- description: s.description,
- short_description: s.short_description,
- benefits: Array.isArray(s.features) ? (s.features as string[]) : [],
- priceUSD: Number(s.price_usd),
- pricePawBucks: s.price_pawbucks,
- category: s.category as ServiceCategory,
- icon: s.icon,
- popular: s.is_popular,
- newService: s.is_new,
- billingPeriod: s.billing_type as Service['billingPeriod'],
- }));
+  const handlePurchaseSuccess = () => {
+    toast.success(`${selectedService?.name} has been activated for your account!`);
+    setSelectedService(null);
+    setShowPurchaseDialog(false);
+  };
 
- setServices(transformed);
- } catch (error) {
- console.error('Error loading services:', error);
- }
- };
+  const filteredServices = useMemo(() => services.filter((s) => {
+    if (selectedCategory !== "all" && s.category !== selectedCategory) return false;
+    if (activeOnly && !activeServiceIds.has(s.id)) return false;
+    return true;
+  }), [services, selectedCategory, activeOnly, activeServiceIds]);
 
- // Check for successful purchase from redirect
- useEffect(() => {
- if (searchParams.get('purchase') ==='success') {
- toast.success('Service purchased successfully!');
- // Clear the query param
- navigate('/merchant/market', { replace: true });
- }
- }, [searchParams, navigate]);
+  const grouped = useMemo(() => {
+    const map: Record<ServiceCategory, Service[]> = { visibility: [], analytics: [], growth: [], premium: [] };
+    filteredServices.forEach((s) => { map[s.category]?.push(s); });
+    return map;
+  }, [filteredServices]);
 
- const handlePurchase = (service: Service) => {
- if (!user) {
- toast.error('Please log in to purchase services');
- return;
- }
- setSelectedService(service);
- setShowPurchaseDialog(true);
- };
+  if (authLoading || loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+  if (!merchant) return null;
 
- const handlePurchaseSuccess = () => {
- toast.success(`${selectedService?.name} has been activated for your account!`);
- setSelectedService(null);
- setShowPurchaseDialog(false);
- };
+  const totalCount = filteredServices.length;
+  const activeCount = services.filter((s) => activeServiceIds.has(s.id)).length;
 
- const filteredServices = services.filter((service) => {
- const matchesSearch =
- service.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
- service.description.toLowerCase().includes(searchQuery.toLowerCase());
- const matchesCategory = selectedCategory ==="all" || service.category === selectedCategory;
- return matchesSearch && matchesCategory;
- });
+  return (
+    <div className="min-h-screen bg-background">
+      <SEO title="Merchant Services Marketplace — PawBucks" description="Spend earned PawBucks on tools, analytics, and growth services for your pet business." />
 
- const formatBillingPeriod = (period?: string) => {
- switch (period) {
- case"monthly":
- return"/mo";
- case"quarterly":
- return"/qtr";
- case"annual":
- return"/yr";
- case"one-time":
- return"";
- default:
- return"";
- }
- };
+      {/* NAV */}
+      <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-md border-b border-border safe-area-inset-top">
+        <div className="max-w-7xl mx-auto h-16 px-4 md:px-10 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="sm" onClick={() => navigate("/merchant-dashboard")} className="text-muted-foreground">
+              <ArrowLeft className="w-4 h-4 mr-1" />
+              Back
+            </Button>
+          </div>
+          <div className="flex items-center gap-4">
+            <span className="hidden sm:inline-flex items-center gap-2 rounded-full border border-border bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+              <Tag className="w-3.5 h-3.5" /> Marketplace
+            </span>
+          </div>
+        </div>
+      </header>
 
- const getCategoryIcon = (category: ServiceCategory) => {
- return categoryInfo[category].icon;
- };
+      <main className="max-w-7xl mx-auto pb-24">
+        {/* PAGE HEADER */}
+        <section className="px-4 md:px-10 pt-10 md:pt-14">
+          <p className="text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-primary mb-3">
+            Merchant Marketplace
+          </p>
+          <h1 className="font-display text-3xl md:text-5xl font-black leading-[1.05] tracking-tight text-foreground mb-3">
+            Grow your business with <em className="not-italic md:italic text-primary">earned PawBucks</em>.
+          </h1>
+          <p className="text-base text-muted-foreground max-w-2xl leading-relaxed">
+            Spend your earned PawBucks on tools, analytics, advertising, and support to grow your pet business.
+          </p>
+        </section>
 
- // Loading state
- if (authLoading || loading) {
- return (
- <div className="min-h-screen flex items-center justify-center bg-background">
- <Loader2 className="w-8 h-8 animate-spin text-primary" />
- </div>
- );
- }
+        {/* DISCOUNT BANNER */}
+        <section className="px-4 md:px-10 mt-8">
+          <div className="rounded-md bg-foreground text-background px-5 md:px-8 py-5 flex flex-wrap items-center justify-between gap-5">
+            <div className="flex items-center gap-4 min-w-0">
+              <span className="text-2xl" aria-hidden>🐾</span>
+              <p className="text-sm md:text-[0.95rem] leading-snug">
+                Pay with PawBucks and get <strong className="text-primary">50% off every service</strong>.
+                Earn PawBucks from every customer transaction — then reinvest them here.
+              </p>
+            </div>
+            <div className="rounded border border-primary/30 bg-primary/10 px-4 py-2 text-xs text-primary">
+              Example: <strong>$100</strong> service = <strong>50,000 PB</strong> ($50)
+            </div>
+          </div>
+        </section>
 
- // No merchant found
- if (!merchant) {
- return null;
- }
+        {/* FILTER BAR */}
+        <section className="px-4 md:px-10 mt-8 border-b border-border pb-4 flex flex-wrap items-center gap-2">
+          <FilterPill active={selectedCategory === "all"} onClick={() => setSelectedCategory("all")}>
+            All Services
+          </FilterPill>
+          {CATEGORY_ORDER.map((cat) => (
+            <FilterPill
+              key={cat}
+              active={selectedCategory === cat}
+              onClick={() => setSelectedCategory(cat)}
+            >
+              <span className="mr-1.5" aria-hidden>{CATEGORY_META[cat].icon}</span>
+              {CATEGORY_META[cat].label}
+            </FilterPill>
+          ))}
+          <label className="ml-auto flex items-center gap-2 text-sm text-muted-foreground cursor-pointer select-none">
+            <Checkbox
+              checked={activeOnly}
+              onCheckedChange={(v) => setActiveOnly(Boolean(v))}
+            />
+            Show only my active services {activeCount > 0 && <span className="text-xs">({activeCount})</span>}
+          </label>
+        </section>
 
- return (
- <div className="min-h-screen bg-background">
- {/* Header */}
- <header className="border-b bg-card/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm safe-area-inset-top">
- <div className="container mx-auto px-4 py-4 flex items-center justify-between">
- <div className="flex items-center gap-3">
- <Button variant="ghost" size="icon" onClick={() => navigate("/merchant-dashboard")}>
- <ArrowLeft className="w-5 h-5" />
- </Button>
- <div className="flex items-center gap-2">
- <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
- <span className="w-6 h-6 text-primary-foreground" aria-hidden="true">🏢</span>
- </div>
- <div>
- <h1 className="text-xl font-bold">Merchant Market</h1>
- <p className="text-xs text-muted-foreground">Grow your business</p>
- </div>
- </div>
- </div>
- </div>
- </header>
+        {/* CATEGORY GROUPS */}
+        <section className="px-4 md:px-10 mt-10 space-y-14">
+          {totalCount === 0 ? (
+            <EmptyState onClear={() => { setSelectedCategory("all"); setActiveOnly(false); }} />
+          ) : (
+            CATEGORY_ORDER
+              .filter((cat) => selectedCategory === "all" || selectedCategory === cat)
+              .map((cat) => {
+                const items = grouped[cat];
+                if (!items || items.length === 0) return null;
+                const meta = CATEGORY_META[cat];
+                return (
+                  <div key={cat}>
+                    <div className="flex items-center gap-3 pb-3 border-b border-border mb-5">
+                      <span className="text-xl" aria-hidden>{meta.icon}</span>
+                      <h2 className="font-display text-xl md:text-2xl font-bold text-foreground">{meta.label}</h2>
+                      <span className="rounded-full border border-border bg-primary/10 text-primary px-2 py-0.5 text-[0.7rem] font-medium">
+                        {items.length}
+                      </span>
+                      <span className="hidden md:inline ml-auto text-sm text-muted-foreground">{meta.desc}</span>
+                    </div>
+                    <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))" }}>
+                      {items.map((service) => (
+                        <ServiceCard
+                          key={service.id}
+                          service={service}
+                          isActive={activeServiceIds.has(service.id)}
+                          scarcity={scarcityMap[service.id]}
+                          pref={pricePref[service.id] || "usd"}
+                          onPrefChange={(p) => setPricePref((m) => ({ ...m, [service.id]: p }))}
+                          onPurchase={() => handlePurchase(service)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                );
+              })
+          )}
+        </section>
 
- <main className="container mx-auto px-4 py-8 pb-24">
- {/* Hero Section */}
- <div className="text-center mb-10">
- <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
- <Sparkles className="w-4 h-4" />
- Exclusive Merchant Services
- </div>
- <h1 className="text-4xl md:text-5xl font-bold mb-4">
- Supercharge Your <span className="text-primary">Business</span>
- </h1>
- <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
- Access premium tools, analytics, and promotional services designed to help you attract more customers and grow your revenue on PawBucks.
- </p>
- </div>
+        {/* CONSULTATION CTA */}
+        <section className="px-4 md:px-10 mt-16">
+          <div className="rounded-md border border-border bg-muted/30 p-8 text-center">
+            <h2 className="font-display text-2xl font-bold mb-2">Not sure where to start?</h2>
+            <p className="text-muted-foreground mb-5 max-w-lg mx-auto text-sm">
+              Book a free 15-minute consultation with our merchant success team to find the perfect services for your business goals.
+            </p>
+            <Button size="lg" onClick={() => setShowConsultationDialog(true)}>
+              Schedule Free Consultation
+            </Button>
+          </div>
+        </section>
+      </main>
 
- {/* Search and Filters */}
- <div className="flex flex-col md:flex-row gap-4 mb-8">
- <div className="relative flex-1">
- <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
- <Input
- placeholder="Search services..."
- value={searchQuery}
- onChange={(e) => setSearchQuery(e.target.value)}
- className="pl-10"
- />
- </div>
- </div>
-
- {/* Category Tabs */}
- <Tabs value={selectedCategory} onValueChange={(v) => setSelectedCategory(v as ServiceCategory |"all")} className="mb-8">
- <TabsList className="w-full flex-wrap h-auto gap-2 bg-transparent p-0">
- <TabsTrigger
- value="all"
- className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
- >
- All Services
- </TabsTrigger>
- {Object.entries(categoryInfo).map(([key, info]) => (
- <TabsTrigger
- key={key}
- value={key}
- className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-2"
- >
- {info.icon}
- <span className="hidden sm:inline">{info.name}</span>
- <span className="sm:hidden">{info.name.split("")[0]}</span>
- </TabsTrigger>
- ))}
- </TabsList>
- </Tabs>
-
- {/* Category Description */}
- {selectedCategory !=="all" && (
- <div className="mb-8 p-4 rounded-lg bg-muted border">
- <div className="flex items-center gap-3">
- <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
- {categoryInfo[selectedCategory].icon}
- </div>
- <div>
- <h3 className="font-semibold">{categoryInfo[selectedCategory].name}</h3>
- <p className="text-sm text-muted-foreground">{categoryInfo[selectedCategory].description}</p>
- </div>
- </div>
- </div>
- )}
-
- {/* Services Grid */}
- <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
- {filteredServices.map((service, index) => (
- <GradientCard
- key={service.id}
- className="group hover:shadow-lg transition-all duration-300 flex flex-col"
- gradient={service.popular}
- >
- <div className="flex-1">
- {/* Header */}
- <div className="flex items-start justify-between mb-4">
- <div className="w-12 h-12 rounded-md bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
- {service.icon && iconMap[service.icon] ? iconMap[service.icon] : <Sparkles className="w-6 h-6" />}
- </div>
- <div className="flex flex-wrap gap-2">
- {scarcityMap[service.id] && (
- <Badge 
- variant={scarcityMap[service.id].availableSlots === 0 ?"destructive" :"secondary"}
- className={cn(
-"text-xs font-medium",
- scarcityMap[service.id].availableSlots <= 1 && scarcityMap[service.id].availableSlots > 0 &&"bg-warning/15 text-warning border-warning/30"
- )}
- >
- <span className="w-3 h-3 mr-1" aria-hidden="true">📍</span>
- {scarcityMap[service.id].availableSlots === 0
- ?"Sold Out"
- : `${scarcityMap[service.id].availableSlots} of ${scarcityMap[service.id].maxSlots} left`}
- </Badge>
- )}
- {service.popular && (
- <Badge variant="default" className="bg-primary/90">
- Popular
- </Badge>
- )}
- {service.newService && (
- <Badge variant="secondary" className="bg-accent text-accent-foreground">
- New
- </Badge>
- )}
- </div>
- </div>
-
- {/* Content */}
- <h3 className="text-lg font-semibold mb-2">{service.name}</h3>
- <p className="text-sm text-muted-foreground mb-4">{service.description}</p>
-
- {/* Benefits */}
- <div className="space-y-2 mb-4">
- {(expandedBenefits.has(service.id) ? service.benefits : service.benefits.slice(0, 3)).map((benefit, i) => (
- <div key={i} className="flex items-center gap-2 text-sm">
- <CheckCircle2 className="w-4 h-4 text-accent flex-shrink-0" />
- <span className="text-muted-foreground">{benefit}</span>
- </div>
- ))}
- {service.benefits.length > 3 && (
- <button
- onClick={() => {
- setExpandedBenefits(prev => {
- const newSet = new Set(prev);
- if (newSet.has(service.id)) {
- newSet.delete(service.id);
- } else {
- newSet.add(service.id);
- }
- return newSet;
- });
- }}
- className="text-xs text-primary hover:text-primary/80 pl-6 cursor-pointer transition-colors"
- >
- {expandedBenefits.has(service.id) 
- ?"Show less" 
- : `+${service.benefits.length - 3} more benefits`}
- </button>
- )}
- </div>
- </div>
-
- {/* Pricing & CTA */}
- <div className="pt-4 border-t mt-auto">
- <div className="flex items-end justify-between mb-4">
- <div>
- <p className="text-2xl font-bold text-foreground">
- ${service.priceUSD}
- <span className="text-sm font-normal text-muted-foreground">
- {formatBillingPeriod(service.billingPeriod)}
- </span>
- </p>
- <p className="text-xs text-muted-foreground">
- or {service.pricePawBucks.toLocaleString()} PawBucks
- </p>
- </div>
- <Badge variant="outline" className="text-xs">
- {getCategoryIcon(service.category)}
- <span className="ml-1 capitalize">{service.category}</span>
- </Badge>
- </div>
- {(() => {
- const isSoldOut = scarcityMap[service.id]?.availableSlots === 0;
- return (
- <Button 
- className="w-full group-hover:bg-primary group-hover:text-primary-foreground"
- onClick={() => handlePurchase(service)}
- disabled={isSoldOut}
- >
- {isSoldOut ? (
- <>
- <AlertTriangle className="w-4 h-4 mr-1" />
- Sold Out in Your Zone
- </>
- ) : (
- <>
- Get Started
- <ChevronRight className="w-4 h-4 ml-1" />
- </>
- )}
- </Button>
- );
- })()}
- </div>
- </GradientCard>
- ))}
- </div>
-
- {/* Empty State */}
- {filteredServices.length === 0 && (
- <div className="text-center py-16">
- <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
- <Search className="w-8 h-8 text-muted-foreground" />
- </div>
- <h3 className="text-lg font-semibold mb-2">No services found</h3>
- <p className="text-muted-foreground mb-4">
- Try adjusting your search or filter to find what you're looking for.
- </p>
- <Button variant="outline" onClick={() => { setSearchQuery(""); setSelectedCategory("all"); }}>
- Clear Filters
- </Button>
- </div>
- )}
-
- {/* Featured Bundle Section */}
- <div className="mt-16">
- <div className="text-center mb-8">
- <h2 className="text-2xl font-bold mb-2">Featured Bundles</h2>
- <p className="text-muted-foreground">Save more with curated service packages</p>
- </div>
-
- <div className="grid gap-6 md:grid-cols-2">
- {/* Growth Bundle */}
- <GradientCard gradient className="relative overflow-hidden">
- <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full -translate-y-1/2 translate-x-1/2" />
- <div className="relative">
- <Badge className="mb-4 bg-accent text-accent-foreground">Save 20%</Badge>
- <h3 className="text-xl font-bold mb-2">Growth Starter Bundle</h3>
- <p className="text-muted-foreground mb-4">
- Everything you need to start growing: Premium Analytics + Sponsored Placement + Profile Optimization
- </p>
- <div className="flex items-center gap-4 mb-4">
- <div>
- <p className="text-sm text-muted-foreground line-through">$547</p>
- <p className="text-2xl font-bold">$437</p>
- </div>
- <Badge variant="outline">Save $110</Badge>
- </div>
- <Button 
- className="w-full"
- onClick={() => handlePurchase({
- id:'growth-starter-bundle',
- name:'Growth Starter Bundle',
- description:'Premium Analytics + Sponsored Placement + Profile Optimization',
- short_description:'Everything you need to start growing on PawBucks.',
- benefits: ['Premium Analytics Dashboard','Sponsored Merchant Placement','Profile Optimization'],
- priceUSD: 437,
- pricePawBucks: 437000,
- category:'growth',
- icon: null,
- billingPeriod:'one_time',
- })}
- >
- Get Bundle
- <span className="w-4 h-4 ml-2" aria-hidden="true">🎁</span>
- </Button>
- </div>
- </GradientCard>
-
- {/* Premium Bundle */}
- <GradientCard className="relative overflow-hidden border-2 border-primary/20">
- <div className="absolute top-0 right-0 w-32 h-32 bg-accent/10 rounded-full -translate-y-1/2 translate-x-1/2" />
- <div className="relative">
- <Badge className="mb-4 bg-primary text-primary-foreground">Best Value</Badge>
- <h3 className="text-xl font-bold mb-2">Pro Merchant Bundle</h3>
- <p className="text-muted-foreground mb-4">
- Full suite: Verified Pro Badge + Premium Analytics + Strategy Consultation + Priority Support
- </p>
- <div className="flex items-center gap-4 mb-4">
- <div>
- <p className="text-sm text-muted-foreground line-through">$1,026</p>
- <p className="text-2xl font-bold">$769</p>
- </div>
- <Badge variant="outline">Save $257</Badge>
- </div>
- <Button 
- className="w-full"
- onClick={() => handlePurchase({
- id:'pro-merchant-bundle',
- name:'Pro Merchant Bundle',
- description:'Verified Pro Badge + Premium Analytics + Strategy Consultation + Priority Support',
- short_description:'Full suite for serious merchants.',
- benefits: ['Verified Pro Badge','Premium Analytics Dashboard','Strategy Consultation','Priority Support'],
- priceUSD: 769,
- pricePawBucks: 769000,
- category:'premium',
- icon: null,
- billingPeriod:'one_time',
- })}
- >
- Get Bundle
- <span className="w-4 h-4 ml-2" aria-hidden="true">👑</span>
- </Button>
- </div>
- </GradientCard>
- </div>
- </div>
-
- {/* Why Invest Section */}
- <div className="mt-16">
- <div className="text-center mb-8">
- <h2 className="text-2xl font-bold mb-2">Why Invest in Your Business?</h2>
- <p className="text-muted-foreground">Merchants who use our growth services see significant results</p>
- </div>
-
- <div className="grid gap-6 md:grid-cols-3">
- <div className="text-center p-6 rounded-md bg-muted/30 border">
- <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
- <span className="w-7 h-7 text-primary" aria-hidden="true">📈</span>
- </div>
- <p className="text-3xl font-bold text-primary mb-2">3.2x</p>
- <p className="text-muted-foreground">Average increase in visibility</p>
- </div>
- <div className="text-center p-6 rounded-md bg-muted/30 border">
- <div className="w-14 h-14 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-4">
- <span className="w-7 h-7 text-accent" aria-hidden="true">💵</span>
- </div>
- <p className="text-3xl font-bold text-accent mb-2">47%</p>
- <p className="text-muted-foreground">Average revenue growth</p>
- </div>
- <div className="text-center p-6 rounded-md bg-muted/30 border">
- <div className="w-14 h-14 rounded-full bg-secondary/10 flex items-center justify-center mx-auto mb-4">
- <span className="w-7 h-7 text-secondary" aria-hidden="true">⭐</span>
- </div>
- <p className="text-3xl font-bold text-secondary mb-2">89%</p>
- <p className="text-muted-foreground">Merchant satisfaction rate</p>
- </div>
- </div>
- </div>
-
- {/* CTA Section */}
- <div className="mt-16 text-center p-8 rounded-md bg-gradient-to-r from-primary/10 via-accent/10 to-secondary/10 border">
- <span className="w-12 h-12 text-primary mx-auto mb-4" aria-hidden="true">💡</span>
- <h2 className="text-2xl font-bold mb-2">Not sure where to start?</h2>
- <p className="text-muted-foreground mb-6 max-w-lg mx-auto">
- Book a free 15-minute consultation with our merchant success team to find the perfect services for your business goals.
- </p>
- <Button size="lg" onClick={() => setShowConsultationDialog(true)}>
- Schedule Free Consultation
- <ChevronRight className="w-5 h-5 ml-2" />
- </Button>
- </div>
-
- {/* Consultation Dialog */}
- <ConsultationScheduleDialog
- open={showConsultationDialog}
- onOpenChange={setShowConsultationDialog}
- merchantName={merchant?.business_name}
- />
- </main>
-
- {/* Purchase Dialog */}
- {user && (
- <ServicePurchaseDialog
- open={showPurchaseDialog}
- onOpenChange={setShowPurchaseDialog}
- service={selectedService}
- userId={user.id}
- onSuccess={handlePurchaseSuccess}
- />
- )}
- </div>
- );
+      <ConsultationScheduleDialog
+        open={showConsultationDialog}
+        onOpenChange={setShowConsultationDialog}
+        merchantName={merchant?.business_name}
+      />
+      {user && (
+        <ServicePurchaseDialog
+          open={showPurchaseDialog}
+          onOpenChange={setShowPurchaseDialog}
+          service={selectedService}
+          userId={user.id}
+          onSuccess={handlePurchaseSuccess}
+        />
+      )}
+    </div>
+  );
 };
+
+/* ─── Sub-components ─────────────────────────────────────────────────── */
+
+const FilterPill = ({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) => (
+  <button
+    onClick={onClick}
+    className={cn(
+      "rounded-full border px-4 py-1.5 text-sm font-medium transition-colors",
+      active
+        ? "bg-primary text-primary-foreground border-primary"
+        : "bg-card text-muted-foreground border-border hover:border-primary hover:text-primary",
+    )}
+  >
+    {children}
+  </button>
+);
+
+const EmptyState = ({ onClear }: { onClear: () => void }) => (
+  <div className="rounded-md border border-dashed border-border py-16 text-center">
+    <div className="text-4xl mb-3" aria-hidden>🔍</div>
+    <h3 className="font-display text-lg text-foreground mb-1">No services match these filters</h3>
+    <p className="text-sm text-muted-foreground mb-4">Try clearing filters to see the full marketplace.</p>
+    <Button variant="outline" onClick={onClear}>Clear filters</Button>
+  </div>
+);
+
+const ServiceCard = ({
+  service,
+  isActive,
+  scarcity,
+  pref,
+  onPrefChange,
+  onPurchase,
+}: {
+  service: Service;
+  isActive: boolean;
+  scarcity?: GeoCellAvailability;
+  pref: "usd" | "pb";
+  onPrefChange: (p: "usd" | "pb") => void;
+  onPurchase: () => void;
+}) => {
+  const soldOut = scarcity?.availableSlots === 0;
+  const lowSlots = scarcity && scarcity.availableSlots > 0 && scarcity.availableSlots <= 2;
+
+  return (
+    <div className={cn(
+      "relative bg-card border border-border rounded-md p-6 flex flex-col transition-all hover:-translate-y-0.5 hover:shadow-lg",
+      isActive && "border-success",
+    )}>
+      {isActive && (
+        <span className="absolute -top-2.5 right-4 rounded-full bg-success text-success-foreground text-[0.65rem] font-semibold uppercase tracking-wider px-2.5 py-0.5">
+          Active
+        </span>
+      )}
+
+      <p className="text-[0.68rem] font-medium uppercase tracking-[0.12em] text-muted-foreground mb-1.5">
+        {formatBillingFreq(service.billingPeriod)}
+      </p>
+      <div className="flex items-start justify-between gap-2 mb-2">
+        <h3 className="font-display text-lg font-bold text-foreground leading-tight">{service.name}</h3>
+        <div className="flex flex-col gap-1 items-end shrink-0">
+          {service.popular && <Badge className="bg-primary/90 text-[0.65rem]">Popular</Badge>}
+          {service.newService && <Badge variant="secondary" className="text-[0.65rem]">New</Badge>}
+        </div>
+      </div>
+      <p className="text-sm text-muted-foreground leading-relaxed mb-5 flex-1">
+        {service.short_description || service.description}
+      </p>
+
+      {scarcity && (
+        <div className={cn(
+          "rounded border px-3 py-2 mb-4 text-xs font-medium flex items-center gap-2",
+          soldOut
+            ? "bg-destructive/10 border-destructive/30 text-destructive"
+            : "bg-warning/10 border-warning/30 text-warning",
+        )}>
+          <MapPin className="w-3.5 h-3.5 shrink-0" />
+          {soldOut
+            ? `Sold out in ${scarcity.cellName}`
+            : `${scarcity.availableSlots} of ${scarcity.maxSlots} slots left in ${scarcity.cellName}`}
+          <span className="ml-auto flex gap-1">
+            {Array.from({ length: scarcity.maxSlots }).map((_, i) => (
+              <span
+                key={i}
+                className={cn(
+                  "w-2 h-2 rounded-full",
+                  i < scarcity.usedSlots ? "bg-warning" : "bg-border",
+                )}
+              />
+            ))}
+          </span>
+        </div>
+      )}
+
+      {/* Pricing dual options */}
+      <div className="flex items-stretch gap-2 mt-auto">
+        <PriceOption
+          label="Pay USD"
+          amount={`$${service.priceUSD}`}
+          sub={formatBillingSuffix(service.billingPeriod) || "one-time"}
+          selected={pref === "usd"}
+          onClick={() => onPrefChange("usd")}
+        />
+        <PriceOption
+          label="Pay PawBucks · 50% off"
+          amount={`${service.pricePawBucks.toLocaleString()} PB`}
+          sub={`≈ $${(service.pricePawBucks / 1000).toFixed(2)}`}
+          selected={pref === "pb"}
+          isPB
+          onClick={() => onPrefChange("pb")}
+        />
+      </div>
+
+      <Button
+        className="w-full mt-3"
+        variant={isActive ? "outline" : "default"}
+        disabled={soldOut}
+        onClick={onPurchase}
+      >
+        {soldOut ? (
+          <><AlertTriangle className="w-4 h-4 mr-1.5" /> Sold out in your area</>
+        ) : isActive ? (
+          "Manage / Renew"
+        ) : (
+          "Get Started"
+        )}
+      </Button>
+    </div>
+  );
+};
+
+const PriceOption = ({
+  label, amount, sub, selected, isPB, onClick,
+}: {
+  label: string; amount: string; sub: string; selected: boolean; isPB?: boolean; onClick: () => void;
+}) => (
+  <button
+    onClick={onClick}
+    className={cn(
+      "flex-1 rounded border px-3 py-2.5 flex flex-col items-center gap-0.5 transition-colors text-center",
+      selected ? "border-primary bg-primary/10" : "border-border bg-card hover:border-primary hover:bg-primary/5",
+    )}
+  >
+    <span className="text-[0.62rem] uppercase tracking-[0.08em] font-medium text-muted-foreground leading-tight">
+      {label}
+    </span>
+    <span className={cn("font-display text-base font-bold leading-none", isPB ? "text-primary" : "text-foreground")}>
+      {isPB ? "🐾 " : ""}{amount}
+    </span>
+    <span className="text-[0.65rem] text-muted-foreground">{sub}</span>
+  </button>
+);
 
 export default MerchantMarket;
