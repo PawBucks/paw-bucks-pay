@@ -1,9 +1,9 @@
 import React from "react";
-import { AbsoluteFill, useVideoConfig } from "remotion";
+import { AbsoluteFill } from "remotion";
 import { theme } from "../theme";
+import { Paw } from "./Paw";
 
 export const Backdrop: React.FC<{ drift: number }> = ({ drift }) => {
-  const { width, height } = useVideoConfig();
   const a = drift * 60;
   return (
     <AbsoluteFill style={{ pointerEvents: "none" }}>
@@ -18,10 +18,10 @@ export const Backdrop: React.FC<{ drift: number }> = ({ drift }) => {
       />
       {/* Soft floating paw motifs */}
       {[
-        { x: 6, y: 12, s: 70, o: 0.06 },
-        { x: 88, y: 18, s: 90, o: 0.07 },
-        { x: 12, y: 80, s: 110, o: 0.05 },
-        { x: 82, y: 72, s: 60, o: 0.06 },
+        { x: 6, y: 12, s: 110, o: 0.07 },
+        { x: 88, y: 18, s: 140, o: 0.08 },
+        { x: 12, y: 80, s: 170, o: 0.06 },
+        { x: 82, y: 72, s: 90, o: 0.07 },
       ].map((p, i) => (
         <div
           key={i}
@@ -29,13 +29,10 @@ export const Backdrop: React.FC<{ drift: number }> = ({ drift }) => {
             position: "absolute",
             left: `${p.x}%`,
             top: `${p.y}%`,
-            fontSize: p.s,
-            opacity: p.o,
             transform: `translate(${Math.sin(drift * Math.PI * 2 + i) * 12}px, ${Math.cos(drift * Math.PI * 2 + i) * 10}px) rotate(${i * 18 - 30}deg)`,
-            color: theme.teal,
           }}
         >
-          🐾
+          <Paw size={p.s} color={theme.teal} opacity={p.o} />
         </div>
       ))}
     </AbsoluteFill>

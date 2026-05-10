@@ -3,6 +3,7 @@ import { AbsoluteFill, Img, staticFile, useCurrentFrame, useVideoConfig, spring,
 import { theme } from "../theme";
 import { fonts } from "../MainVideo";
 import { scale } from "../components/utils";
+import { Paw } from "../components/Paw";
 
 export const Scene5CTA: React.FC<{ width: number; height: number }> = ({ width, height }) => {
   const frame = useCurrentFrame();
@@ -57,8 +58,8 @@ export const Scene5CTA: React.FC<{ width: number; height: number }> = ({ width, 
         >
           pawbucks.app
         </div>
-        <div style={{ opacity: tagO, fontSize: 30 * s, color: theme.inkSoft, fontWeight: 500 }}>
-          Free to join · Welcome credit inside 🐾
+        <div style={{ opacity: tagO, fontSize: 30 * s, color: theme.inkSoft, fontWeight: 500, display: "flex", alignItems: "center", gap: 10 * s }}>
+          Free to join · Welcome credit inside <Paw size={32 * s} color={theme.teal} />
         </div>
       </div>
     </AbsoluteFill>

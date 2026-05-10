@@ -3,6 +3,7 @@ import { AbsoluteFill, useCurrentFrame, useVideoConfig, spring, interpolate } fr
 import { theme } from "../theme";
 import { fonts } from "../MainVideo";
 import { scale } from "../components/utils";
+import { Paw } from "../components/Paw";
 
 export const Scene4Save: React.FC<{ width: number; height: number }> = ({ width, height }) => {
   const frame = useCurrentFrame();
@@ -61,8 +62,8 @@ export const Scene4Save: React.FC<{ width: number; height: number }> = ({ width,
           }}
         >
           <div style={{ position: "absolute", top: -120, right: -120, width: 360, height: 360, borderRadius: "50%", background: "rgba(255,255,255,0.12)" }} />
-          <div style={{ display: "flex", alignItems: "center", gap: 14 * s, opacity: 0.9, fontSize: 22 * s, textTransform: "uppercase", letterSpacing: 2 }}>
-            🐾 PawBucks Wallet
+          <div style={{ display: "flex", alignItems: "center", gap: 12 * s, opacity: 0.95, fontSize: 22 * s, textTransform: "uppercase", letterSpacing: 2 }}>
+            <Paw size={28 * s} color="white" /> PawBucks Wallet
           </div>
           <div style={{ fontFamily: fonts.display, fontWeight: 800, fontSize: 200 * s, lineHeight: 1, marginTop: 8 * s, fontVariantNumeric: "tabular-nums" }}>
             ${value}
