@@ -4,7 +4,7 @@ import { Button } from"@/components/ui/button";
 import { GradientCard } from"@/components/ui/gradient-card";
 import { Input } from"@/components/ui/input";
 import { Label } from"@/components/ui/label";
-import { X, Receipt, DollarSign, Upload, Eye, Search, Tag, Info, Coins } from "lucide-react";
+import { X, Receipt, Upload, Eye, Search, Tag, Info } from "lucide-react";
 import { toast } from"sonner";
 import { PartnerReceiptDialog } from"@/components/receipts/PartnerReceiptDialog";
 import { NonPartnerReceiptDialog } from"@/components/receipts/NonPartnerReceiptDialog";
@@ -273,7 +273,7 @@ export const CheckInFollowupBanner = ({ userId }: CheckInFollowupBannerProps) =>
  <div className="space-y-3 pt-1">
  <Label className="text-sm font-medium">How much did you spend?</Label>
  <div className="relative">
- <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+ <span className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true">💵</span>
  <Input
  type="number"
  step="0.01"
@@ -287,7 +287,7 @@ export const CheckInFollowupBanner = ({ userId }: CheckInFollowupBannerProps) =>
  </div>
  <Label className="text-sm font-medium">How many PawBucks did you use?</Label>
  <div className="relative">
- <Coins className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+ <span className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true">🪙</span>
  <Input
  type="number"
  step="1"

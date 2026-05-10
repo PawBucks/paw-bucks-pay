@@ -6,7 +6,7 @@ import { GradientCard } from"@/components/ui/gradient-card";
 import { Button } from"@/components/ui/button";
 import { Badge } from"@/components/ui/badge";
 import { BadgeCard } from"./BadgeCard";
-import { ChevronRight, Target } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 
 interface BadgeDefinition {
@@ -196,7 +196,7 @@ export const BadgeTeaser = ({ userId }: BadgeTeaserProps) => {
  </div>
  ) : (
  <div className="text-center py-4">
- <Target className="w-10 h-10 mx-auto text-muted-foreground/50 mb-2" />
+ <span className="w-10 h-10 mx-auto text-muted-foreground/50 mb-2" aria-hidden="true">🎯</span>
  <p className="text-sm text-muted-foreground">
  Start spending at partner merchants to earn badges!
  </p>

@@ -4,7 +4,7 @@ import { useForm, useFieldArray } from"react-hook-form";
 import { zodResolver } from"@hookform/resolvers/zod";
 import { z } from"zod";
 import { format, addDays, parseISO } from"date-fns";
-import { Plus, Trash2, Save, Send, Eye, ArrowLeft, Calendar, Percent, DollarSign, Paperclip } from "lucide-react";
+import { Plus, Trash2, Save, Send, Eye, ArrowLeft, Calendar, Percent, Paperclip } from "lucide-react";
 import { Button } from"@/components/ui/button";
 import { Input } from"@/components/ui/input";
 import { Textarea } from"@/components/ui/textarea";
@@ -635,7 +635,7 @@ export function InvoiceEditor({
  <FormLabel className="text-xs">Price</FormLabel>
  <FormControl>
  <div className="relative">
- <DollarSign className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+ <span className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true">💵</span>
  <Input 
  type="number"
  step="0.01"
@@ -981,7 +981,7 @@ export function InvoiceEditor({
  <FormLabel>Shipping / Handling</FormLabel>
  <FormControl>
  <div className="relative">
- <DollarSign className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+ <span className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true">💵</span>
  <Input
  type="number"
  step="0.01"

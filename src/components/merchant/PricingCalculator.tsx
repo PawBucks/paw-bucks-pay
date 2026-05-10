@@ -2,7 +2,7 @@ import { useState, useMemo } from"react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/components/ui/card";
 import { Input } from"@/components/ui/input";
 import { Label } from"@/components/ui/label";
-import { Calculator, ArrowRight, DollarSign, Info, Settings2 } from "lucide-react";
+import { Calculator, ArrowRight, Info, Settings2 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from"@/components/ui/tooltip";
 import { Button } from"@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from"@/components/ui/collapsible";
@@ -107,7 +107,7 @@ export const PricingCalculator = ({ onApplyPrice, compact = false }: PricingCalc
  Fixed Fee ($)
  </Label>
  <div className="relative">
- <DollarSign className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+ <span className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" aria-hidden="true">💵</span>
  <Input
  id="fixed-fee-compact"
  type="number"
@@ -129,7 +129,7 @@ export const PricingCalculator = ({ onApplyPrice, compact = false }: PricingCalc
  I want to receive
  </Label>
  <div className="relative">
- <DollarSign className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+ <span className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true">💵</span>
  <Input
  id="desired-amount-compact"
  type="number"
@@ -223,7 +223,7 @@ export const PricingCalculator = ({ onApplyPrice, compact = false }: PricingCalc
  <div>
  <Label htmlFor="fixed-fee">Fixed Fee ($)</Label>
  <div className="relative mt-1.5">
- <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+ <span className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true">💵</span>
  <Input
  id="fixed-fee"
  type="number"
@@ -244,7 +244,7 @@ export const PricingCalculator = ({ onApplyPrice, compact = false }: PricingCalc
  <div>
  <Label htmlFor="desired-amount">Amount you want to receive</Label>
  <div className="relative mt-1.5">
- <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+ <span className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true">💵</span>
  <Input
  id="desired-amount"
  type="number"

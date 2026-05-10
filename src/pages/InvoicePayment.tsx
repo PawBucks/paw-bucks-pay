@@ -17,7 +17,7 @@ import {
  SelectTrigger,
  SelectValue,
 } from"@/components/ui/select";
-import { DollarSign, CheckCircle, AlertCircle, Loader2, Download, UserX, ArrowLeft } from "lucide-react";
+import { CheckCircle, AlertCircle, Loader2, Download, UserX, ArrowLeft } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { format, parseISO } from"date-fns";
 import { toast } from"sonner";
@@ -725,7 +725,7 @@ const InvoicePayment = () => {
  <div className="space-y-2">
  <Label htmlFor="paymentAmount">Payment Amount</Label>
  <div className="relative">
- <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+ <span className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true">💵</span>
  <Input
  id="paymentAmount"
  type="number"

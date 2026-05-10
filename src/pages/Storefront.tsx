@@ -5,7 +5,7 @@ import { Button } from"@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
 import { toast } from"sonner";
-import { ShoppingCart, Store, ArrowLeft, CreditCard, Package, RefreshCw, Check, Plus } from "lucide-react";
+import { Store, ArrowLeft, RefreshCw, Check, Plus } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { SEO } from"@/components/SEO";
 import { useAuth } from"@/hooks/useAuth";
@@ -524,7 +524,7 @@ const Storefront = memo(() => {
  )}
 
  <Button onClick={() => handleSubscribe(plan)} className="w-full group/btn shadow-lg shadow-primary/20" size="lg">
- <CreditCard className="h-4 w-4 mr-2 group-hover/btn:scale-110 transition-transform" /> Subscribe
+ <span className="h-4 w-4 mr-2 group-hover/btn:scale-110 transition-transform" aria-hidden="true">💳</span> Subscribe
  </Button>
  </CardContent>
  </Card>
@@ -549,7 +549,7 @@ const Storefront = memo(() => {
  <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" width={400} height={400} />
  ) : (
  <div className="w-full h-full flex items-center justify-center">
- <Package className="h-16 w-16 text-muted-foreground/50" />
+ <span className="h-16 w-16 text-muted-foreground/50" aria-hidden="true">📦</span>
  </div>
  )}
  {estimatedPawBucks > 0 && (
@@ -586,7 +586,7 @@ const Storefront = memo(() => {
  </>
  ) : (
  <>
- <ShoppingCart className="h-4 w-4 mr-2 group-hover/btn:scale-110 transition-transform" />
+ <span className="h-4 w-4 mr-2 group-hover/btn:scale-110 transition-transform" aria-hidden="true">🛒</span>
  Add to Cart
  </>
  )}

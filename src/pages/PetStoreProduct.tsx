@@ -10,7 +10,7 @@ import { Badge } from"@/components/ui/badge";
 import { Separator } from"@/components/ui/separator";
 import { Card, CardContent } from"@/components/ui/card";
 import { toast } from"sonner";
-import { ChevronLeft, ChevronRight, Package, AlertTriangle, Star, Check, Store } from "lucide-react";
+import { ChevronLeft, ChevronRight, AlertTriangle, Check, Store } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { Header } from"@/components/Header";
 import { BottomNav } from"@/components/BottomNav";
@@ -134,7 +134,7 @@ export default function PetStoreProduct() {
  <div className="min-h-[100dvh] bg-background flex flex-col">
  <Header isAuthenticated={!!user} onLogout={handleSignOut} />
  <div className="flex-1 flex flex-col items-center justify-center gap-4 px-4">
- <Package className="h-16 w-16 text-muted-foreground/30" />
+ <span className="h-16 w-16 text-muted-foreground/30" aria-hidden="true">📦</span>
  <h2 className="text-xl font-semibold">Product not found</h2>
  <Button onClick={() => navigate("/pet-store")}>Back to Store</Button>
  </div>
@@ -188,7 +188,7 @@ export default function PetStoreProduct() {
  />
  ) : (
  <div className="w-full h-full flex items-center justify-center">
- <Package className="h-20 w-20 text-muted-foreground/20" />
+ <span className="h-20 w-20 text-muted-foreground/20" aria-hidden="true">📦</span>
  </div>
  )}
  {images.length > 1 && (
@@ -434,7 +434,7 @@ export default function PetStoreProduct() {
  </div>
  ) : (
  <div className="text-center py-8 text-muted-foreground">
- <Star className="h-8 w-8 mx-auto mb-2 text-muted-foreground/30" />
+ <span className="h-8 w-8 mx-auto mb-2 text-muted-foreground/30" aria-hidden="true">⭐</span>
  <p className="text-sm">No reviews yet. Be the first to review this product!</p>
  </div>
  )}

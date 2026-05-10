@@ -2,7 +2,7 @@ import { memo } from"react";
 import { Card, CardContent, CardFooter } from"@/components/ui/card";
 import { Button } from"@/components/ui/button";
 import { Badge } from"@/components/ui/badge";
-import { Plus, Package, AlertTriangle } from "lucide-react";
+import { Plus, AlertTriangle } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { Formatters } from"@/utils/formatters";
 import { StarRating } from"./StarRating";
@@ -86,7 +86,7 @@ export const ProductCard = memo(({
  />
  ) : (
  <div className="w-full h-full flex items-center justify-center">
- <Package className="h-12 w-12 text-muted-foreground/30" />
+ <span className="h-12 w-12 text-muted-foreground/30" aria-hidden="true">📦</span>
  </div>
  )}
 

@@ -14,7 +14,7 @@ import { PageLoader } from"@/components/PageLoader";
 import { Header } from"@/components/Header";
 import { AdPlacement } from"@/components/AdPlacement";
 import { PullToRefresh } from"@/components/PullToRefresh";
-import { Search, Store, SlidersHorizontal, X, List, Map, ArrowUpDown } from "lucide-react";
+import { Search, SlidersHorizontal, X, List, Map, ArrowUpDown } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { MerchantMap } from"@/components/MerchantMap";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem } from"@/components/ui/dropdown-menu";
@@ -824,7 +824,7 @@ const Discover = () => {
  {/* ── Results Area ── */}
  {totalMerchants === 0 ? (
  <div className="text-center py-20">
- <Store className="w-12 h-12 mx-auto text-muted-foreground/30 mb-3" />
+ <span className="w-12 h-12 mx-auto text-muted-foreground/30 mb-3" aria-hidden="true">🏪</span>
  <h3 className="text-base font-semibold mb-1">No merchants found</h3>
  <p className="text-sm text-muted-foreground">Try adjusting your search or filters</p>
  </div>

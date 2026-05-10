@@ -5,7 +5,7 @@ import { Input } from'@/components/ui/input';
 import { Label } from'@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from'@/components/ui/radio-group';
 import { Progress } from'@/components/ui/progress';
-import { Home, Calculator, ChevronRight, ChevronLeft, CheckCircle2, Info, DollarSign, Percent, AlertTriangle, Building, Dog, Scissors } from "lucide-react";
+import { Home, Calculator, ChevronRight, ChevronLeft, CheckCircle2, Info, Percent, AlertTriangle, Building, Dog, Scissors } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from'@/components/ui/alert';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from'@/components/ui/tooltip';
 
@@ -298,7 +298,7 @@ export function HomeOfficeCalculator() {
  <div className="space-y-2">
  <Label htmlFor="monthlyRent">Monthly Rent or Mortgage Interest</Label>
  <div className="relative">
- <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+ <span className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true">💵</span>
  <Input
  id="monthlyRent"
  type="number"
@@ -318,7 +318,7 @@ export function HomeOfficeCalculator() {
  <div className="space-y-2">
  <Label htmlFor="monthlyUtilities">Monthly Utilities</Label>
  <div className="relative">
- <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+ <span className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true">💵</span>
  <Input
  id="monthlyUtilities"
  type="number"

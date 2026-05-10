@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/comp
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from"@/components/ui/select";
 import { supabase } from"@/integrations/supabase/client";
 import { toast } from"sonner";
-import { Loader2, Plus, Search, DollarSign } from "lucide-react";
+import { Loader2, Plus, Search } from "lucide-react";
 
 type Merchant = {
  id: string;
@@ -190,7 +190,7 @@ export const AddTransactionTool = () => {
  <div className="space-y-2">
  <Label>Transaction Amount (USD)</Label>
  <div className="relative">
- <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+ <span className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true">💵</span>
  <Input
  type="number"
  step="0.01"

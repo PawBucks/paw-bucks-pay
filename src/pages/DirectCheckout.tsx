@@ -7,7 +7,7 @@ import { Input } from"@/components/ui/input";
 import { Label } from"@/components/ui/label";
 import { Badge } from"@/components/ui/badge";
 import { Skeleton } from"@/components/ui/skeleton";
-import { Loader2, DollarSign, CheckCircle2 } from "lucide-react";
+import { Loader2, CheckCircle2 } from "lucide-react";
 import { supabase } from"@/integrations/supabase/client";
 import { toast } from"sonner";
 import { SEO } from"@/components/SEO";
@@ -424,7 +424,7 @@ export default function DirectCheckout() {
  <div>
  <Label htmlFor="amount">Amount (USD)</Label>
  <div className="relative mt-1">
- <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+ <span className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true">💵</span>
  <Input
  id="amount"
  type="number"

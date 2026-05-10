@@ -4,7 +4,7 @@ import { Input } from'@/components/ui/input';
 import { Label } from'@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from'@/components/ui/radio-group';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from'@/components/ui/tabs';
-import { Calculator, Coins, ArrowRightLeft } from "lucide-react";
+import { Calculator, ArrowRightLeft } from "lucide-react";
 import { POINTS_MULTIPLIER, PAWBUCKS_CONVERSION } from'@/lib/constants';
 
 import { Formatters } from "@/utils/formatters";
@@ -135,7 +135,7 @@ export function PawBucksCalculator() {
  <div className="space-y-2">
  <Label htmlFor="pawbucks-amount">PawBucks Amount</Label>
  <div className="relative">
- <Coins className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+ <span className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true">🪙</span>
  <Input
  id="pawbucks-amount"
  type="number"

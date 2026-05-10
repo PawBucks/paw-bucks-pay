@@ -10,7 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from"@/components/ui/popover"
 import { Separator } from"@/components/ui/separator";
 import { toast } from"sonner";
 import { format, startOfDay, isSameDay } from"date-fns";
-import { MapPin, Route as RouteIcon, Loader2, CheckCircle2, Play, SkipForward, ArrowRight } from "lucide-react";
+import { Route as RouteIcon, Loader2, CheckCircle2, Play, SkipForward, ArrowRight } from "lucide-react";
 import mapboxgl from"mapbox-gl";
 import { Formatters } from "@/utils/formatters";
 import"mapbox-gl/dist/mapbox-gl.css";
@@ -343,7 +343,7 @@ export function SmartScheduleTab({ merchantId }: Props) {
  ) : stops.length === 0 ? (
  <Card>
  <CardContent className="py-12 text-center">
- <MapPin className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4" />
+ <span className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4" aria-hidden="true">📍</span>
  <h3 className="font-semibold text-lg mb-1">No mobile appointments</h3>
  <p className="text-muted-foreground text-sm">
  No confirmed mobile service bookings with client addresses for this date.

@@ -25,7 +25,7 @@ import { useSponsoredTracking } from"@/hooks/useSponsoredTracking";
 import { useSearchRankingTracking } from"@/hooks/useSearchRankingTracking";
 import { DirectoryMerchantCard } from"@/components/directory/DirectoryMerchantCard";
 import { MerchantMap } from"@/components/MerchantMap";
-import { Search, Store, SlidersHorizontal, X, LayoutGrid, LayoutList, Map } from "lucide-react";
+import { Search, SlidersHorizontal, X, LayoutGrid, LayoutList, Map } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 
 type MerchantWithRating = {
@@ -467,7 +467,7 @@ const MerchantDirectory = () => {
  {filteredMerchants.length === 0 ? (
  <div className="text-center py-20">
  <div className="w-16 h-16 rounded-full bg-muted mx-auto flex items-center justify-center mb-4">
- <Store className="w-8 h-8 text-muted-foreground/40" />
+ <span className="w-8 h-8 text-muted-foreground/40" aria-hidden="true">🏪</span>
  </div>
  <h3 className="text-lg font-semibold mb-1">No merchants found</h3>
  <p className="text-sm text-muted-foreground mb-4">Try adjusting your search or filters</p>

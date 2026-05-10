@@ -1,7 +1,7 @@
 import { memo } from "react";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
-import { Star } from "lucide-react";
+
 import { supabase } from "@/integrations/supabase/client";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -64,11 +64,10 @@ const Founding50BadgeComponent = ({ entityType, entityId, size = "md" }: Foundin
               className="pointer-events-none absolute inset-0 animate-shimmer bg-[linear-gradient(110deg,transparent_30%,hsl(0_0%_100%/0.45)_50%,transparent_70%)]"
               style={{ backgroundSize: "200% 100%" }}
             />
-            <Star
+            <span 
               size={iconSizes[size]}
               strokeWidth={2.5}
-              className="relative fill-warning-foreground text-warning-foreground drop-shadow-[0_1px_1px_hsl(32_88%_28%/0.55)]"
-            />
+              className="relative fill-warning-foreground text-warning-foreground drop-shadow-[0_1px_1px_hsl(32_88%_28%/0.55)]" aria-hidden="true">⭐</span>
             <span className="relative whitespace-nowrap tracking-[0.08em] drop-shadow-[0_1px_1px_hsl(32_88%_28%/0.45)]">
               FOUNDING 50
             </span>

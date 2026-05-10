@@ -206,7 +206,7 @@ export function FundingRequestTracker({ requests, loading, entityType }: Funding
  return (
  <Card>
  <CardContent className="py-12 text-center space-y-2">
- <FileText className="w-10 h-10 text-muted-foreground/40 mx-auto" />
+ <span className="w-10 h-10 text-muted-foreground/40 mx-auto" aria-hidden="true">📄</span>
  <p className="text-muted-foreground font-medium">No Funding Requests</p>
  <p className="text-sm text-muted-foreground">
  {entityType ==="merchant"

@@ -28,7 +28,7 @@ import { useServiceConversionTracking } from"@/hooks/useServiceConversionTrackin
 import { schedulingService } from"@/services/api/scheduling.service";
 import { useQuery, useQueries } from"@tanstack/react-query";
 import { Founding50Badge } from"@/components/shared/Founding50Badge";
-import { Star, Store, Scissors, Home, Stethoscope, Footprints, Bone, ArrowLeft, MessageSquare, Facebook, Instagram, Twitter, Linkedin } from "lucide-react";
+import { Star, Store, Scissors, Home, Stethoscope, Footprints, Bone, ArrowLeft, Facebook, Instagram, Twitter, Linkedin } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 
 import { Formatters } from "@/utils/formatters";
@@ -713,7 +713,7 @@ const MerchantProfile = memo(() => {
  {reviews.length === 0 ? (
  <Card>
  <CardContent className="py-12 text-center">
- <MessageSquare className="w-12 h-12 mx-auto text-muted-foreground/30 mb-4" />
+ <span className="w-12 h-12 mx-auto text-muted-foreground/30 mb-4" aria-hidden="true">💬</span>
  <h3 className="font-semibold mb-2">No reviews yet</h3>
  <p className="text-sm text-muted-foreground mb-4">Be the first to share your experience!</p>
  {user && (

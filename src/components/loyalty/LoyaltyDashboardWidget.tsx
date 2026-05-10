@@ -1,6 +1,6 @@
 import { useNavigate } from"react-router-dom";
 import { motion } from"framer-motion";
-import { Trophy, ChevronRight, AlertCircle } from "lucide-react";
+import { ChevronRight, AlertCircle } from "lucide-react";
 import { GradientCard } from"@/components/ui/gradient-card";
 import { Button } from"@/components/ui/button";
 import { LoyaltyProgressRing } from"./LoyaltyProgressRing";
@@ -90,7 +90,7 @@ export const LoyaltyDashboardWidget = ({ userId }: LoyaltyDashboardWidgetProps) 
  </div>
  ) : (
  <div className="text-center py-4">
- <Trophy className="w-10 h-10 mx-auto text-muted-foreground/50 mb-2" />
+ <span className="w-10 h-10 mx-auto text-muted-foreground/50 mb-2" aria-hidden="true">🏆</span>
  <p className="text-sm text-muted-foreground">
  Start earning rewards with your first purchase!
  </p>
