@@ -11,7 +11,7 @@ import { Textarea } from'@/components/ui/textarea';
 import { Separator } from'@/components/ui/separator';
 import { Progress } from'@/components/ui/progress';
 import { toast } from'sonner';
-import { TrendingUp, DollarSign, Users, Calendar, CheckCircle2, XCircle, AlertTriangle, Shield, ArrowRight, ChevronRight, ExternalLink, Activity, CreditCard, Landmark, FileText, ShoppingBag, CircleDot } from "lucide-react";
+import { TrendingUp, DollarSign, Users, Calendar, CheckCircle2, XCircle, AlertTriangle, Shield, ArrowRight, ChevronRight, ExternalLink, Activity, CreditCard, Landmark, FileText, ShoppingBag, CircleDot, BadgeCheck } from "lucide-react";
 import { UnderwritingSignalsCard } from'./UnderwritingSignalsCard';
 import { format, formatDistanceToNow, differenceInDays } from'date-fns';
 
