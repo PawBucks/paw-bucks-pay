@@ -37,6 +37,10 @@ const PWA_ICONS = [
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  // Use a project-specific Vite cache path so optimized dependency URLs are
+  // invalidated when React bundling rules change. This prevents browsers/CDNs
+  // from reusing an older `node_modules/.vite/deps` React graph in preview.
+  cacheDir: "node_modules/.vite-pawbucks",
   server: {
     host: "::",
     port: 8080,
@@ -66,7 +70,11 @@ export default defineConfig(({ mode }) => ({
   },
   // Optimize dependencies
   optimizeDeps: {
-    include: ['react', 'react-dom', 'react-dom/client', 'react/jsx-runtime', 'react-router-dom', '@tanstack/react-query'],
+    // Keep every React entry point in the same optimized dependency graph.
+    // Missing jsx-dev-runtime/react-dom-client dedupe can produce duplicate
+    // React internals and the `dispatcher.useEffect` invalid-hook-call crash.
+    include: ['react', 'react-dom', 'react-dom/client', 'react/jsx-runtime', 'react/jsx-dev-runtime', 'react-router-dom', '@tanstack/react-query'],
+    force: mode === "development",
   },
   plugins: [
     react(),
@@ -168,6 +176,6 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
     // Prevent duplicate React instances causing "Invalid hook call" errors
-    dedupe: ["react", "react-dom", "react/jsx-runtime"],
+    dedupe: ["react", "react-dom", "react-dom/client", "react/jsx-runtime", "react/jsx-dev-runtime"],
   },
 }));
