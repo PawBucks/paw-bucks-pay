@@ -24,46 +24,11 @@ export const fonts = {
 const SCENE = 180;
 const TRANS = 18;
 
-const SceneFrame: React.FC<{ index: number; title: string; children: React.ReactNode }> = ({ index, title, children }) => {
-  const frame = useCurrentFrame();
-  const start = (index - 1) * 6;
-  const end = index * 6;
-  const fmt = (s: number) => `0:${String(s).padStart(2, "0")}`;
-  const o = interpolate(frame, [4, 16, SCENE - 16, SCENE - 4], [0, 1, 1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+const SceneFrame: React.FC<{ index: number; children: React.ReactNode }> = ({ index, children }) => {
   return (
     <>
       <Audio src={staticFile(`audio/merchant${index}.mp3`)} volume={0.95} />
       {children}
-      <AbsoluteFill style={{ pointerEvents: "none" }}>
-        <div
-          style={{
-            position: "absolute",
-            top: "4%",
-            left: "50%",
-            transform: "translateX(-50%)",
-            opacity: o,
-            display: "flex",
-            alignItems: "center",
-            gap: 12,
-            background: "rgba(255,255,255,0.92)",
-            border: `1px solid ${theme.teal}33`,
-            borderRadius: 999,
-            padding: "10px 20px",
-            boxShadow: "0 8px 24px rgba(15,27,45,0.08)",
-            fontFamily: body.fontFamily,
-            fontSize: 22,
-            color: theme.ink,
-            fontWeight: 600,
-            whiteSpace: "nowrap",
-          }}
-        >
-          <span style={{ color: theme.teal, fontWeight: 800 }}>0{index}</span>
-          <span style={{ color: theme.inkSoft }}>·</span>
-          <span>{title}</span>
-          <span style={{ color: theme.inkSoft }}>·</span>
-          <span style={{ fontVariantNumeric: "tabular-nums", color: theme.tealDeep }}>{fmt(start)}–{fmt(end)}</span>
-        </div>
-      </AbsoluteFill>
     </>
   );
 };
