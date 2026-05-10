@@ -258,6 +258,12 @@ export const getCategoryIcon = (businessType: string | undefined | null): Lucide
  return CATEGORY_CONFIG[category]?.icon || CATEGORY_CONFIG.other.icon;
 };
 
+// Get the emoji for a business_type
+export const getCategoryEmoji = (businessType: string | undefined | null): string => {
+ const category = getNormalizedCategory(businessType);
+ return CATEGORY_CONFIG[category]?.emoji || CATEGORY_CONFIG.other.emoji;
+};
+
 /**
  * Check if a category filter (e.g."grooming") matches any of a merchant's categories.
  * Looks at the merchant's full business_categories array first, falling back to business_type.
