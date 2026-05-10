@@ -199,7 +199,7 @@ export const startBuildVersionPolling = () => {
   };
 
   check();
-  const interval = window.setInterval(check, 30_000);
+  const interval = window.setInterval(check, 15_000);
   const onVisible = () => {
     if (document.visibilityState === 'visible') check();
   };
