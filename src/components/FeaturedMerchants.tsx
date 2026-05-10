@@ -95,7 +95,7 @@ const FeaturedMerchantsComponent = ({ onMerchantClick }: { onMerchantClick: (mer
  )}
  {merchant.address && (
  <div className="flex items-center gap-1 text-xs text-muted-foreground">
- <MapPin className="w-3 h-3" />
+ <span className="text-xs">📍</span>
  <span className="line-clamp-1">{merchant.address}</span>
  </div>
  )}

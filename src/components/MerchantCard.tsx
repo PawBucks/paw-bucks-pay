@@ -86,7 +86,7 @@ const MerchantCardComponent = ({ merchant, distance, onPayNow }: MerchantCardPro
 
  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
  <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
- <MapPin className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
+ <span className="text-base flex-shrink-0" aria-hidden="true">📍</span>
  {distance !== undefined ? (
  <span>{Formatters.decimal(distance, 1)} miles away</span>
  ) : (

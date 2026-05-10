@@ -71,7 +71,7 @@ const FeaturedPartnerCardComponent = ({
  {/* Top badges row */}
  <div className="flex items-center gap-2 mb-3">
  <Badge className="gap-1 bg-gradient-to-r from-warning/15 to-warning/15 text-warning border-warning/25 text-[10px] font-semibold uppercase tracking-wider">
- <Crown className="w-3 h-3" />
+ <span className="text-xs">👑</span>
  Featured Partner
  </Badge>
  {isVerifiedPro && (
@@ -94,7 +94,7 @@ const FeaturedPartnerCardComponent = ({
  </div>
  ) : (
  <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-md bg-gradient-to-br from-warning/10 to-warning/5 flex items-center justify-center border border-warning/20">
- <Crown className="w-10 h-10 text-warning/60" />
+ <span className="text-4xl opacity-60">👑</span>
  </div>
  )}
  </div>
@@ -162,7 +162,7 @@ const FeaturedPartnerCardComponent = ({
  <div className="flex items-center gap-2">
  {merchant.address && (
  <p className="text-[11px] text-muted-foreground/60 line-clamp-1 flex items-center gap-1">
- <MapPin className="w-2.5 h-2.5 flex-shrink-0" />
+ <span className="text-[10px] flex-shrink-0">📍</span>
  {merchant.address}
  </p>
  )}
@@ -184,7 +184,7 @@ const FeaturedPartnerCardComponent = ({
  className="w-full bg-gradient-to-r from-warning to-warning hover:from-warning hover:to-warning text-white shadow-sm"
  onClick={onPayClick}
  >
- <Crown className="w-4 h-4 mr-2" />
+ <span className="text-base mr-2">👑</span>
  Pay & Earn Points
  </Button>
  </div>

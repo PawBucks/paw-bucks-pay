@@ -154,7 +154,7 @@ export default function PublicBookingPage() {
  <div className="mt-4 space-y-2">
  {merchant.address && (
  <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(merchant.address)}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors">
- <MapPin className="w-4 h-4 flex-shrink-0" />
+              <span className="text-base flex-shrink-0">📍</span>
  <span className="truncate">{merchant.address}</span>
  </a>
  )}
@@ -272,7 +272,7 @@ export default function PublicBookingPage() {
 
  {merchant.address && (
  <div className="flex items-center gap-2 mt-3 text-sm text-muted-foreground">
- <MapPin className="w-4 h-4 flex-shrink-0" />
+ <span className="text-base flex-shrink-0">📍</span>
  <span>{merchant.address}</span>
  </div>
  )}
@@ -328,7 +328,7 @@ export default function PublicBookingPage() {
  <Card className="shadow-sm">
  <CardContent className="p-5">
  <div className="flex items-center gap-2 mb-3">
- <MapPin className="w-4 h-4 text-muted-foreground" />
+ <span className="text-base text-muted-foreground">📍</span>
  <h3 className="font-semibold text-sm">Location</h3>
  </div>
  <p className="text-sm text-muted-foreground">{merchant.address}</p>
