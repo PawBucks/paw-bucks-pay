@@ -4,7 +4,7 @@ import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { title: "Home", to: "/home", emoji: "📍", ariaLabel: "Home" },
+  { title: "Home", to: "/home", emoji: "🏠", ariaLabel: "Home" },
   { title: "Pay", to: "/pay", emoji: "💳", ariaLabel: "Pay & save" },
   { title: "Discover", to: "/discover", emoji: "🧭", ariaLabel: "Discover places" },
   { title: "Savings", to: "/savings", icon: Sparkles, ariaLabel: "Your savings" },
