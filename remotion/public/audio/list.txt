@@ -1,0 +1,5 @@
+file 'pad1.mp3'
+file 'pad2.mp3'
+file 'pad3.mp3'
+file 'pad4.mp3'
+file 'pad5.mp3'
