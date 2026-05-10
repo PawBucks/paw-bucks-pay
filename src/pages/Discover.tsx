@@ -7,7 +7,7 @@ import { useDebounce } from"@/hooks/useDebounce";
 import { useOptimizedQuery } from"@/hooks/useOptimizedQuery";
 import { usePullToRefresh } from"@/hooks/usePullToRefresh";
 import { supabase } from"@/integrations/supabase/client";
-import { searchMatchesCategory, searchMatchesAnyCategory, merchantMatchesCategory } from"@/lib/categoryMapping";
+import { searchMatchesCategory, searchMatchesAnyCategory, merchantMatchesCategory, getCategoryEmoji } from"@/lib/categoryMapping";
 import { PaymentDialogWithPawBucks } from"@/components/PaymentDialogWithPawBucks";
 import { BottomNav } from"@/components/BottomNav";
 import { PageLoader } from"@/components/PageLoader";
