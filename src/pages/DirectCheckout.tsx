@@ -153,8 +153,8 @@ function CheckoutForm({
         )}
  <div className="flex justify-between items-center">
  <span className="text-muted-foreground flex items-center gap-1">
- <span className="h-4 w-4" aria-hidden="true">🎁</span>
- PawBucks Earned
+ <span aria-hidden="true">🎁</span>
+ <span>PawBucks Earned</span>
  </span>
  <Badge variant="secondary" className="bg-primary/10 text-primary">
  +{pawbucksEarned} PB
@@ -406,7 +406,6 @@ export default function DirectCheckout() {
  />
  )}
     <CardTitle className="flex items-center justify-center lg:justify-start gap-2 lg:text-3xl">
- <span className="h-5 w-5" aria-hidden="true">🏪</span>
  {merchant.business_name}
  </CardTitle>
     <CardDescription className="lg:text-base lg:mt-2">
