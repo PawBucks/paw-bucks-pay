@@ -87,14 +87,38 @@ export default defineConfig(({ mode }) => ({
         icons: PWA_ICONS,
       },
       workbox: {
-        globPatterns: ["**/*.{js,css,html,ico,png,svg,woff,woff2}"],
+        // Exclude html from precache — index.html must always come from
+        // the network (NetworkFirst rule below) so the latest JS bundle
+        // hashes are served. Precaching HTML is the #1 cause of stale PWAs.
+        globPatterns: ["**/*.{js,css,ico,png,svg,woff,woff2}"],
         maximumFileSizeToCacheInBytes: 3000000,
         cleanupOutdatedCaches: true,
         skipWaiting: true,
         clientsClaim: true,
+        // Don't precache index.html — we want fresh HTML on every navigation.
+        // Precaching it locks users into the build at install time.
+        navigateFallback: null,
         // Never intercept auth callbacks or OAuth redirects
         navigateFallbackDenylist: [/^\/auth\/callback/, /^\/~oauth/, /^\/reset-password/],
         runtimeCaching: [
+          {
+            // Always fetch fresh HTML when online; fall back to cache offline.
+            // This is THE fix for "users stuck on old version" — without it,
+            // the precached index.html shell pins clients to old JS bundle
+            // hashes until the SW completes a full background update cycle
+            // (which on iOS PWAs can take days due to tab suspension).
+            urlPattern: ({ request }) => request.mode === "navigate",
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "html-navigations",
+              networkTimeoutSeconds: 3,
+              expiration: {
+                maxEntries: 20,
+                maxAgeSeconds: 60 * 60 * 24,
+              },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
             handler: "CacheFirst",
