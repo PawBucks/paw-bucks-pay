@@ -46,31 +46,31 @@ export const MainVideo: React.FC = () => {
       <Backdrop drift={drift} />
       <TransitionSeries>
         <TransitionSeries.Sequence durationInFrames={SCENE}>
-          <SceneFrame index={1} title="The promise">
+          <SceneFrame index={1}>
             <Scene1Hook width={width} height={height} />
           </SceneFrame>
         </TransitionSeries.Sequence>
         <TransitionSeries.Transition presentation={fade()} timing={springTiming({ config: { damping: 200 }, durationInFrames: TRANS })} />
         <TransitionSeries.Sequence durationInFrames={SCENE}>
-          <SceneFrame index={2} title="Sign up free">
+          <SceneFrame index={2}>
             <Scene2SignUp width={width} height={height} />
           </SceneFrame>
         </TransitionSeries.Sequence>
         <TransitionSeries.Transition presentation={wipe({ direction: "from-right" })} timing={springTiming({ config: { damping: 200 }, durationInFrames: TRANS })} />
         <TransitionSeries.Sequence durationInFrames={SCENE}>
-          <SceneFrame index={3} title="Earn cashback">
+          <SceneFrame index={3}>
             <Scene3Earn width={width} height={height} />
           </SceneFrame>
         </TransitionSeries.Sequence>
         <TransitionSeries.Transition presentation={fade()} timing={springTiming({ config: { damping: 200 }, durationInFrames: TRANS })} />
         <TransitionSeries.Sequence durationInFrames={SCENE}>
-          <SceneFrame index={4} title="Auto-apply savings">
+          <SceneFrame index={4}>
             <Scene4Save width={width} height={height} />
           </SceneFrame>
         </TransitionSeries.Sequence>
         <TransitionSeries.Transition presentation={wipe({ direction: "from-left" })} timing={springTiming({ config: { damping: 200 }, durationInFrames: TRANS })} />
         <TransitionSeries.Sequence durationInFrames={SCENE + 4 * TRANS}>
-          <SceneFrame index={5} title="Join the pack">
+          <SceneFrame index={5}>
             <Scene5CTA width={width} height={height} />
           </SceneFrame>
         </TransitionSeries.Sequence>
