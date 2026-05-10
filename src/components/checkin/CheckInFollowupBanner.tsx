@@ -287,7 +287,7 @@ export const CheckInFollowupBanner = ({ userId }: CheckInFollowupBannerProps) =>
  </div>
  <Label className="text-sm font-medium">How many PawBucks did you use?</Label>
  <div className="relative">
- <span className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true">🪙</span>
+ <span className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true">🐾</span>
  <Input
  type="number"
  step="1"

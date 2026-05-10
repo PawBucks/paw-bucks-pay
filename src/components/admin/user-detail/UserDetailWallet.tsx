@@ -108,7 +108,7 @@ export function UserDetailWallet({ userId }: { userId: string }) {
  {/* Summary Cards */}
  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
  <SummaryCard
- icon={<span className="w-5 h-5 text-primary" aria-hidden="true">🪙</span>}
+ icon={<span className="w-5 h-5 text-primary" aria-hidden="true">🐾</span>}
  label="PawBucks Balance"
  value={(pawbucksWallet?.balance ?? 0).toLocaleString()}
  />

@@ -373,7 +373,7 @@ const PawBucksWallet = () => {
  {/* Header */}
  <div className="mb-8 text-center">
  <div className="flex items-center justify-center gap-3 mb-2">
- <span className="w-10 h-10 text-warning" aria-hidden="true">🪙</span>
+ <span className="w-10 h-10 text-warning" aria-hidden="true">🐾</span>
  <h2 className="text-4xl font-bold">Your PawBucks Wallet</h2>
  <PawBucksInfoTooltip variant="earning" className="ml-1" />
  </div>

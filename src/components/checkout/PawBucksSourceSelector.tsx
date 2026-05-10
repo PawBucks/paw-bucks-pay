@@ -78,7 +78,7 @@ export const PawBucksSourceSelector = ({
                 <p className="font-semibold text-foreground">PawBucks Sources</p>
                 <div className="space-y-1.5">
                   <div className="flex items-start gap-2">
-                    <span className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" aria-hidden="true">🪙</span>
+                    <span className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" aria-hidden="true">🐾</span>
                     <div>
                       <p className="text-sm font-medium text-foreground">Earned PawBucks</p>
                       <p className="text-xs text-muted-foreground">
@@ -121,7 +121,7 @@ export const PawBucksSourceSelector = ({
  }`}
  >
  <RadioGroupItem value="earned" id="source-earned" />
- <span className="w-4 h-4 text-primary flex-shrink-0" aria-hidden="true">🪙</span>
+ <span className="w-4 h-4 text-primary flex-shrink-0" aria-hidden="true">🐾</span>
  <div className="flex-1 min-w-0">
  <p className="text-sm font-medium">Earned PawBucks</p>
  <p className="text-xs text-muted-foreground">

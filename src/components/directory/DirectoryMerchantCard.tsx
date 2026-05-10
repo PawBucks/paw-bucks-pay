@@ -3,7 +3,7 @@ import { Link } from"react-router-dom";
 import { motion } from"framer-motion";
 import { Card, CardContent } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
-import { Star, ChevronRight, Store } from "lucide-react";
+import { Star, ChevronRight, Store, BadgeCheck } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { OpenStatusBadge } from"@/components/merchant/OpenStatusBadge";
 
@@ -100,7 +100,7 @@ const DirectoryMerchantCardComponent = ({
  {merchant.business_name}
  </h3>
  {isVerified && (
- <span className="w-4 h-4 text-info flex-shrink-0" aria-hidden="true">✅</span>
+ <BadgeCheck className="w-4 h-4 text-info flex-shrink-0" />
  )}
  </div>
  </div>
@@ -161,7 +161,7 @@ const DirectoryMerchantCardComponent = ({
  </Badge>
  {merchant.accepts_pawbucks && (
  <Badge variant="outline" className="text-[10px] h-5 px-1.5 gap-0.5 text-primary border-primary/20">
- <span className="w-3 h-3" aria-hidden="true">🪙</span>
+ <span className="w-3 h-3" aria-hidden="true">🐾</span>
  PawBucks
  </Badge>
  )}

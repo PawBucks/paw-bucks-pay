@@ -160,7 +160,7 @@ const PawBucksRedeem = () => {
  </div>
  <GradientCard className="px-6 py-4">
  <div className="flex items-center gap-2">
- <span className="w-6 h-6 text-warning" aria-hidden="true">🪙</span>
+ <span className="w-6 h-6 text-warning" aria-hidden="true">🐾</span>
  <div>
  <p className="text-sm text-muted-foreground">Your Balance</p>
  <p className="text-2xl font-bold">{wallet?.balance.toLocaleString() || 0}</p>
@@ -199,7 +199,7 @@ const PawBucksRedeem = () => {
 
  <div className="flex items-center justify-between mt-4 pt-4 border-t border-border/50">
  <div className="flex items-center gap-1">
- <span className="w-5 h-5 text-warning" aria-hidden="true">🪙</span>
+ <span className="w-5 h-5 text-warning" aria-hidden="true">🐾</span>
  <span className="font-bold text-lg">{offer.coins_required.toLocaleString()}</span>
  <span className="text-sm text-muted-foreground">PawBucks</span>
  </div>
@@ -244,7 +244,7 @@ const PawBucksRedeem = () => {
               <div className="flex items-center justify-between border-t pt-2 mt-2">
                 <span className="text-sm text-muted-foreground">Cost</span>
                 <div className="flex items-center gap-2 text-warning">
-                  <span className="w-5 h-5" aria-hidden="true">🪙</span>
+                  <span className="w-5 h-5" aria-hidden="true">🐾</span>
                   <span className="font-bold text-xl">-{selectedOffer.coins_required.toLocaleString()} PB</span>
                 </div>
               </div>

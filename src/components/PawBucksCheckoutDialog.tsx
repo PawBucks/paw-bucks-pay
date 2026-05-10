@@ -183,7 +183,7 @@ export const PawBucksCheckoutDialog = ({
  </>
  ) : (
  <>
- <span className="w-5 h-5 text-primary" aria-hidden="true">🪙</span>
+ <span className="w-5 h-5 text-primary" aria-hidden="true">🐾</span>
  Use PawBucks?
  </>
  )}
@@ -285,7 +285,7 @@ export const PawBucksCheckoutDialog = ({
  <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 space-y-3">
  <div className="flex items-center justify-between">
  <span className="text-sm font-medium flex items-center gap-2">
- <span className="w-4 h-4 text-primary" aria-hidden="true">🪙</span>
+ <span className="w-4 h-4 text-primary" aria-hidden="true">🐾</span>
  Apply PawBucks
  </span>
  <span className="text-sm text-muted-foreground">
@@ -352,7 +352,7 @@ export const PawBucksCheckoutDialog = ({
  {/* Info when no PawBucks available */}
  {merchantAcceptsPawBucks && pawbucksBalance === 0 && !hasWelcomeCredit && (
  <div className="text-sm text-muted-foreground bg-muted p-3 rounded-lg flex items-start gap-2">
- <span className="w-4 h-4 mt-0.5 flex-shrink-0" aria-hidden="true">🪙</span>
+ <span className="w-4 h-4 mt-0.5 flex-shrink-0" aria-hidden="true">🐾</span>
  <span>This merchant accepts PawBucks, but you don't have any spendable yet. Earn PawBucks by making purchases!</span>
  </div>
  )}
@@ -401,7 +401,7 @@ export const PawBucksCheckoutDialog = ({
  {pawbucksSource ==="promotional" ? (
  <span className="w-3 h-3 text-success" aria-hidden="true">🎁</span>
  ) : (
- <span className="w-3 h-3 text-primary" aria-hidden="true">🪙</span>
+ <span className="w-3 h-3 text-primary" aria-hidden="true">🐾</span>
  )}
  {pawbucksSource ==="promotional" ?"Credit Discount:" :"PawBucks Discount:"}
  </span>

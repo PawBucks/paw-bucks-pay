@@ -133,7 +133,7 @@ export const AutoRedeemToggle = ({ userId }: AutoRedeemToggleProps) => {
  <GradientCard>
  <div className="flex items-center gap-3 mb-4">
  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
- <span className="w-5 h-5 text-primary" aria-hidden="true">🪙</span>
+ <span className="w-5 h-5 text-primary" aria-hidden="true">🐾</span>
  </div>
  <div>
  <div className="flex items-center gap-2">

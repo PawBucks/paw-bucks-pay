@@ -28,7 +28,7 @@ import { useServiceConversionTracking } from"@/hooks/useServiceConversionTrackin
 import { schedulingService } from"@/services/api/scheduling.service";
 import { useQuery, useQueries } from"@tanstack/react-query";
 import { Founding50Badge } from"@/components/shared/Founding50Badge";
-import { Star, Store, Scissors, Home, Stethoscope, Footprints, Bone, ArrowLeft, Facebook, Instagram, Twitter, Linkedin } from "lucide-react";
+import { Star, Store, Scissors, Home, Stethoscope, Footprints, Bone, ArrowLeft, Facebook, Instagram, Twitter, Linkedin, BadgeCheck } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 
 import { Formatters } from "@/utils/formatters";
@@ -299,7 +299,7 @@ const MerchantProfile = memo(() => {
    {merchant.business_name}
   </h1>
  {hasVerifiedPro && (
- <span className="w-6 h-6 text-info flex-shrink-0" aria-hidden="true">✅</span>
+ <BadgeCheck className="w-6 h-6 text-info flex-shrink-0" />
  )}
  {merchantId && (
  <Founding50Badge entityType="merchant" entityId={merchantId} size="md" />
@@ -324,7 +324,7 @@ const MerchantProfile = memo(() => {
  )}
  {merchant.accepts_pawbucks && (
  <Badge variant="outline" className="gap-1 text-xs bg-warning/10 text-warning border-warning/30">
- <span className="w-3 h-3" aria-hidden="true">🪙</span> PawBucks
+ <span className="w-3 h-3" aria-hidden="true">🐾</span> PawBucks
  </Badge>
  )}
  </div>
@@ -597,7 +597,7 @@ const MerchantProfile = memo(() => {
  </div>
  <div className="flex items-center justify-between p-3 bg-muted/40 rounded-lg">
  <div className="flex items-center gap-3">
- <span className="w-5 h-5 text-primary" aria-hidden="true">🪙</span>
+ <span className="w-5 h-5 text-primary" aria-hidden="true">🐾</span>
  <div>
  <span className="text-sm font-medium">PawBucks</span>
  <p className="text-xs text-muted-foreground">1000 PawBucks = $1.00</p>

@@ -45,7 +45,7 @@ const iconMap: Record<string, React.ReactNode> = {
  Megaphone: <span className="w-6 h-6" aria-hidden="true">📣</span>,
  Star: <span className="w-6 h-6" aria-hidden="true">⭐</span>,
  TrendingUp: <span className="w-6 h-6" aria-hidden="true">📈</span>,
- BadgeCheck: <span className="w-6 h-6" aria-hidden="true">✅</span>,
+ BadgeCheck: <BadgeCheck className="w-6 h-6" />,
  BarChart3: <span className="w-6 h-6" aria-hidden="true">📊</span>,
  Users: <span className="w-6 h-6" aria-hidden="true">👥</span>,
  Brain: <span className="w-6 h-6" aria-hidden="true">💡</span>,
