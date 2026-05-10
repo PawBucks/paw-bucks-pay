@@ -4,16 +4,13 @@ import { useAuth } from"@/hooks/useAuth";
 import { supabase } from"@/integrations/supabase/client";
 import { SEO } from"@/components/SEO";
 import { Button } from"@/components/ui/button";
-import { GradientCard } from"@/components/ui/gradient-card";
 import { Badge } from"@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
-import { Input } from"@/components/ui/input";
+import { Checkbox } from"@/components/ui/checkbox";
 import { ServicePurchaseDialog } from"@/components/merchant/ServicePurchaseDialog";
 import { cn } from"@/lib/utils";
 import { ConsultationScheduleDialog } from"@/components/merchant/ConsultationScheduleDialog";
 import { toast } from"sonner";
-import { ArrowLeft, Search, Megaphone, Star, BarChart3, TrendingUp, Target, Users, Video, BadgeCheck, Rocket, Zap, Crown, ShieldCheck, ChevronRight, Building2, LineChart, PieChart, MessageSquare, CheckCircle2, Loader2, AlertTriangle } from "lucide-react";
-import { Sparkles } from "@/components/ui/sparkles-emoji";
+import { ArrowLeft, Loader2, AlertTriangle, MapPin } from "lucide-react";
 
 type ServiceCategory ="visibility" |"analytics" |"growth" |"premium";
 
