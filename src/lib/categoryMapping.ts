@@ -5,30 +5,31 @@ export type CategoryConfig = {
  icon: LucideIcon;
  color: string;
  label: string;
+ emoji: string;
 };
 
 // Comprehensive category configuration with icons, colors, and labels
 export const CATEGORY_CONFIG: Record<string, CategoryConfig> = {
- veterinary: { icon: Stethoscope, color:"hsl(0, 70%, 55%)", label:"Veterinary" },
- grooming: { icon: Scissors, color:"hsl(320, 70%, 55%)", label:"Grooming" },
- mobile_groomer: { icon: Scissors, color:"hsl(320, 60%, 50%)", label:"Mobile Groomer" },
- pet_store: { icon: ShoppingBag, color:"hsl(150, 70%, 45%)", label:"Pet Store" },
- food: { icon: Bone, color:"hsl(25, 80%, 55%)", label:"Food & Treats" },
- boarding: { icon: Home, color:"hsl(180, 60%, 45%)", label:"Boarding" },
- training: { icon: Sparkles, color:"hsl(var(--primary))", label:"Training" },
- walker: { icon: Dog, color:"hsl(210, 80%, 55%)", label:"Walker" },
- daycare: { icon: Sun, color:"hsl(45, 90%, 50%)", label:"Daycare" },
- sitter: { icon: Home, color:"hsl(180, 50%, 50%)", label:"Pet Sitter" },
- photography: { icon: Camera, color:"hsl(270, 60%, 55%)", label:"Photography" },
- insurance: { icon: Shield, color:"hsl(220, 60%, 50%)", label:"Insurance" },
- delivery: { icon: Truck, color:"hsl(30, 70%, 50%)", label:"Delivery" },
- hiker: { icon: Mountain, color:"hsl(140, 60%, 45%)", label:"Hiker" },
- runner: { icon: Zap, color:"hsl(50, 85%, 50%)", label:"Runner" },
- masseuse: { icon: Hand, color:"hsl(340, 65%, 55%)", label:"Masseuse" },
- behaviorist: { icon: Brain, color:"hsl(280, 60%, 50%)", label:"Behaviorist" },
- breeder: { icon: Dog, color:"hsl(10, 70%, 55%)", label:"Breeder" },
- rescue_nonprofit: { icon: Shield, color:"hsl(200, 70%, 50%)", label:"Rescue / Nonprofit" },
- other: { icon: MoreHorizontal, color:"hsl(var(--muted-foreground))", label:"Other" },
+ veterinary: { icon: Stethoscope, color:"hsl(0, 70%, 55%)", label:"Veterinary", emoji:"🩺" },
+ grooming: { icon: Scissors, color:"hsl(320, 70%, 55%)", label:"Grooming", emoji:"✂️" },
+ mobile_groomer: { icon: Scissors, color:"hsl(320, 60%, 50%)", label:"Mobile Groomer", emoji:"🚐" },
+ pet_store: { icon: ShoppingBag, color:"hsl(150, 70%, 45%)", label:"Pet Store", emoji:"🛍️" },
+ food: { icon: Bone, color:"hsl(25, 80%, 55%)", label:"Food & Treats", emoji:"🦴" },
+ boarding: { icon: Home, color:"hsl(180, 60%, 45%)", label:"Boarding", emoji:"🏨" },
+ training: { icon: Sparkles, color:"hsl(var(--primary))", label:"Training", emoji:"🎓" },
+ walker: { icon: Dog, color:"hsl(210, 80%, 55%)", label:"Walker", emoji:"🦮" },
+ daycare: { icon: Sun, color:"hsl(45, 90%, 50%)", label:"Daycare", emoji:"🏫" },
+ sitter: { icon: Home, color:"hsl(180, 50%, 50%)", label:"Pet Sitter", emoji:"🏫" },
+ photography: { icon: Camera, color:"hsl(270, 60%, 55%)", label:"Photography", emoji:"📸" },
+ insurance: { icon: Shield, color:"hsl(220, 60%, 50%)", label:"Insurance", emoji:"🛡️" },
+ delivery: { icon: Truck, color:"hsl(30, 70%, 50%)", label:"Transportation", emoji:"✈️" },
+ hiker: { icon: Mountain, color:"hsl(140, 60%, 45%)", label:"Hiker", emoji:"🏔️" },
+ runner: { icon: Zap, color:"hsl(50, 85%, 50%)", label:"Runner", emoji:"🏃" },
+ masseuse: { icon: Hand, color:"hsl(340, 65%, 55%)", label:"Masseuse", emoji:"💆" },
+ behaviorist: { icon: Brain, color:"hsl(280, 60%, 50%)", label:"Behaviorist", emoji:"🧠" },
+ breeder: { icon: Dog, color:"hsl(10, 70%, 55%)", label:"Breeder", emoji:"🧬" },
+ rescue_nonprofit: { icon: Shield, color:"hsl(200, 70%, 50%)", label:"Rescue / Nonprofit", emoji:"🧡" },
+ other: { icon: MoreHorizontal, color:"hsl(var(--muted-foreground))", label:"Other", emoji:"🧩" },
 };
 
 // Map business_type values to category keys (handles variations)
@@ -131,6 +132,11 @@ export const BUSINESS_TYPE_MAP: Record<string, string> = {
  // Delivery
  delivery:'delivery',
 'pet delivery':'delivery',
+ transport:'delivery',
+ transportation:'delivery',
+'pet transport':'delivery',
+'pet transportation':'delivery',
+'animal transport':'delivery',
  // Hiker
  hiker:'hiker',
  hikers:'hiker',
@@ -250,6 +256,12 @@ export const getCategoryColor = (businessType: string | undefined | null): strin
 export const getCategoryIcon = (businessType: string | undefined | null): LucideIcon => {
  const category = getNormalizedCategory(businessType);
  return CATEGORY_CONFIG[category]?.icon || CATEGORY_CONFIG.other.icon;
+};
+
+// Get the emoji for a business_type
+export const getCategoryEmoji = (businessType: string | undefined | null): string => {
+ const category = getNormalizedCategory(businessType);
+ return CATEGORY_CONFIG[category]?.emoji || CATEGORY_CONFIG.other.emoji;
 };
 
 /**

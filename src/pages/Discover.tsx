@@ -7,7 +7,7 @@ import { useDebounce } from"@/hooks/useDebounce";
 import { useOptimizedQuery } from"@/hooks/useOptimizedQuery";
 import { usePullToRefresh } from"@/hooks/usePullToRefresh";
 import { supabase } from"@/integrations/supabase/client";
-import { searchMatchesCategory, searchMatchesAnyCategory, merchantMatchesCategory } from"@/lib/categoryMapping";
+import { searchMatchesCategory, searchMatchesAnyCategory, merchantMatchesCategory, getCategoryEmoji } from"@/lib/categoryMapping";
 import { PaymentDialogWithPawBucks } from"@/components/PaymentDialogWithPawBucks";
 import { BottomNav } from"@/components/BottomNav";
 import { PageLoader } from"@/components/PageLoader";
@@ -91,42 +91,41 @@ const formatDistance = (distance?: number): string => {
 };
 
 const businessTypes = [
- { label:"All", value:"all", icon: Store },
- { label:"Vets", value:"veterinary", icon: Stethoscope },
- { label:"Groomers", value:"grooming", icon: Scissors },
- { label:"Mobile Groomers", value:"mobile_groomer", icon: Scissors },
- { label:"Pet Stores", value:"pet_store", icon: ShoppingBag },
- { label:"Food & Treats", value:"food", icon: Bone },
- { label:"Boarding", value:"boarding", icon: Home },
- { label:"Daycare", value:"daycare", icon: Sun },
- { label:"Trainers", value:"training", icon: Sparkles },
- { label:"Walkers", value:"walker", icon: Footprints },
- { label:"Hikers", value:"hiker", icon: Mountain },
- { label:"Runners", value:"runner", icon: Zap },
- { label:"Masseuses", value:"masseuse", icon: Hand },
- { label:"Behaviorists", value:"behaviorist", icon: Brain },
- { label:"Photographers", value:"photography", icon: Camera },
- { label:"Insurance", value:"insurance", icon: Shield },
- { label:"Delivery", value:"delivery", icon: Truck },
- { label:"Breeders", value:"breeder", icon: Dog },
- { label:"Rescue / Nonprofit", value:"rescue_nonprofit", icon: Shield },
- { label:"Other", value:"other", icon: MoreHorizontal },
+ { label:"All", value:"all", emoji:"🌟" },
+ { label:"Vets", value:"veterinary", emoji:"🩺" },
+ { label:"Groomers", value:"grooming", emoji:"✂️" },
+ { label:"Mobile Groomers", value:"mobile_groomer", emoji:"🚐" },
+ { label:"Pet Stores", value:"pet_store", emoji:"🛍️" },
+ { label:"Food & Treats", value:"food", emoji:"🦴" },
+ { label:"Boarding", value:"boarding", emoji:"🏨" },
+ { label:"Daycare", value:"daycare", emoji:"🏫" },
+ { label:"Trainers", value:"training", emoji:"🎓" },
+ { label:"Walkers", value:"walker", emoji:"🦮" },
+ { label:"Hikers", value:"hiker", emoji:"🏔️" },
+ { label:"Runners", value:"runner", emoji:"🏃" },
+ { label:"Masseuses", value:"masseuse", emoji:"💆" },
+ { label:"Behaviorists", value:"behaviorist", emoji:"🧠" },
+ { label:"Photographers", value:"photography", emoji:"📸" },
+ { label:"Insurance", value:"insurance", emoji:"🛡️" },
+ { label:"Transportation", value:"delivery", emoji:"✈️" },
+ { label:"Breeders", value:"breeder", emoji:"🧬" },
+ { label:"Rescue / Nonprofit", value:"rescue_nonprofit", emoji:"🧡" },
+ { label:"Other", value:"other", emoji:"🧩" },
 ];
 
 const getBusinessIcon = (type: string) => {
- const lowerType = type.toLowerCase();
- if (lowerType.includes("store") || lowerType.includes("shop")) return Store;
- if (lowerType.includes("groom")) return Scissors;
- if (lowerType.includes("sitter") || lowerType.includes("boarding")) return Home;
- if (lowerType.includes("vet") || lowerType.includes("clinic")) return Stethoscope;
- if (lowerType.includes("walker") || lowerType.includes("walking")) return Footprints;
- if (lowerType.includes("trainer") || lowerType.includes("training")) return Bone;
- if (lowerType.includes("hiker") || lowerType.includes("hiking")) return Mountain;
- if (lowerType.includes("runner") || lowerType.includes("running") || lowerType.includes("jogger")) return Zap;
- if (lowerType.includes("masseuse") || lowerType.includes("massage")) return Hand;
- if (lowerType.includes("behaviorist") || lowerType.includes("behavior")) return Brain;
- if (lowerType.includes("other")) return MoreHorizontal;
- return Store;
+ const emoji = getCategoryEmoji(type);
+ const Comp = ({ className }: { className?: string }) => (
+ <span
+ className={`inline-flex items-center justify-center text-2xl leading-none ${className ?? ""}`}
+ role="img"
+ aria-hidden="true"
+ >
+ {emoji}
+ </span>
+ );
+ Comp.displayName ="BusinessEmojiIcon";
+ return Comp;
 };
 
 
@@ -656,9 +655,8 @@ const Discover = () => {
 
  {/* Category Chips — horizontal scroll */}
  <div className="flex gap-1.5 mb-3 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
- {businessTypes.map((type) => {
- const Icon = type.icon;
- const isSelected = selectedCategory === type.value;
+                {businessTypes.map((type) => {
+                  const isSelected = selectedCategory === type.value;
  return (
  <button
  key={type.value}
@@ -669,7 +667,7 @@ const Discover = () => {
  :"bg-card text-muted-foreground border-border hover:border-primary/40 hover:text-foreground"
  }`}
  >
- <Icon className="w-3.5 h-3.5" />
+                      <span className="text-base leading-none" role="img" aria-hidden="true">{type.emoji}</span>
  {type.label}
  </button>
  );
