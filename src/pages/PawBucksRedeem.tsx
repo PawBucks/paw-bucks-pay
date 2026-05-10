@@ -9,7 +9,7 @@ import { Button } from"@/components/ui/button";
 import { GradientCard } from"@/components/ui/gradient-card";
 import { BottomNav } from"@/components/BottomNav";
 import { DashboardSkeleton } from"@/components/LoadingSkeleton";
-import { Coins, Gift, Store, Check, Copy } from"lucide-react";
+import { Check, Copy } from "lucide-react";
 import { toast } from"sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from"@/components/ui/dialog";
 
@@ -160,7 +160,7 @@ const PawBucksRedeem = () => {
  </div>
  <GradientCard className="px-6 py-4">
  <div className="flex items-center gap-2">
- <Coins className="w-6 h-6 text-warning" />
+ <span className="w-6 h-6 text-warning" aria-hidden="true">🪙</span>
  <div>
  <p className="text-sm text-muted-foreground">Your Balance</p>
  <p className="text-2xl font-bold">{wallet?.balance.toLocaleString() || 0}</p>
@@ -186,7 +186,7 @@ const PawBucksRedeem = () => {
  
  <div className="flex items-start gap-3 mb-4">
  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
- <Store className="w-6 h-6 text-primary" />
+ <span className="w-6 h-6 text-primary" aria-hidden="true">🏪</span>
  </div>
  <div>
  <h3 className="font-semibold text-lg">{offer.merchants?.business_name ||'Partner'}</h3>
@@ -199,7 +199,7 @@ const PawBucksRedeem = () => {
 
  <div className="flex items-center justify-between mt-4 pt-4 border-t border-border/50">
  <div className="flex items-center gap-1">
- <Coins className="w-5 h-5 text-warning" />
+ <span className="w-5 h-5 text-warning" aria-hidden="true">🪙</span>
  <span className="font-bold text-lg">{offer.coins_required.toLocaleString()}</span>
  <span className="text-sm text-muted-foreground">PawBucks</span>
  </div>
@@ -208,7 +208,7 @@ const PawBucksRedeem = () => {
  disabled={!canAfford}
  size="sm"
  >
- <Gift className="w-4 h-4 mr-1" />
+ <span className="w-4 h-4 mr-1" aria-hidden="true">🎁</span>
                         Spend PawBucks
  </Button>
  </div>
@@ -219,7 +219,7 @@ const PawBucksRedeem = () => {
  ) : (
  <div className="text-center py-16">
  <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
- <Gift className="w-10 h-10 text-muted-foreground" />
+ <span className="w-10 h-10 text-muted-foreground" aria-hidden="true">🎁</span>
  </div>
  <h3 className="text-xl font-semibold mb-2">No Offers Available Yet</h3>
  <p className="text-muted-foreground mb-4">Check back soon for exciting redemption offers!</p>
@@ -244,7 +244,7 @@ const PawBucksRedeem = () => {
               <div className="flex items-center justify-between border-t pt-2 mt-2">
                 <span className="text-sm text-muted-foreground">Cost</span>
                 <div className="flex items-center gap-2 text-warning">
-                  <Coins className="w-5 h-5" />
+                  <span className="w-5 h-5" aria-hidden="true">🪙</span>
                   <span className="font-bold text-xl">-{selectedOffer.coins_required.toLocaleString()} PB</span>
                 </div>
               </div>

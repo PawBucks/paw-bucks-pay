@@ -9,7 +9,7 @@ import { GradientCard } from"@/components/ui/gradient-card";
 import { Switch } from"@/components/ui/switch";
 import { Label } from"@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from"@/components/ui/radio-group";
-import { ArrowLeft, Bell, ShieldAlert, Megaphone, Receipt, Loader2, Crown, Settings } from"lucide-react";
+import { ArrowLeft, ShieldAlert, Loader2, Settings } from "lucide-react";
 import { toast } from"sonner";
 
 type NotificationPreferences = {
@@ -177,7 +177,7 @@ const NotificationPreferences = () => {
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-3">
  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
- <Megaphone className="w-5 h-5 text-primary" />
+ <span className="w-5 h-5 text-primary" aria-hidden="true">📣</span>
  </div>
  <div>
  <Label className="font-medium">Marketing</Label>
@@ -196,7 +196,7 @@ const NotificationPreferences = () => {
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-3">
  <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center">
- <Receipt className="w-5 h-5 text-accent" />
+ <span className="w-5 h-5 text-accent" aria-hidden="true">🧾</span>
  </div>
  <div>
  <Label className="font-medium">Transactional</Label>
@@ -262,7 +262,7 @@ const NotificationPreferences = () => {
  className="w-full"
  onClick={() => navigate("/my-subscriptions")}
  >
- <Crown className="w-4 h-4 mr-2" />
+ <span className="w-4 h-4 mr-2" aria-hidden="true">👑</span>
  Manage Subscriptions
  </Button>
  </GradientCard>

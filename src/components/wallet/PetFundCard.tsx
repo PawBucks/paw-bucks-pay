@@ -4,12 +4,12 @@ import { Button } from"@/components/ui/button";
 import { Badge } from"@/components/ui/badge";
 import { Progress } from"@/components/ui/progress";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from"@/components/ui/collapsible";
-import { Gift, Calendar, Clock, CheckCircle, Lock, ChevronDown, ChevronUp, Users, TrendingUp } from "lucide-react";
+import { Gift, CheckCircle, ChevronDown, ChevronUp } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { usePetFund, type PetFundRelease } from"@/hooks/usePetFund";
 import { format, formatDistanceToNow } from"date-fns";
 import { useNavigate } from"react-router-dom";
-import { Loader2 } from"lucide-react";
+import { Loader2 } from "lucide-react";
 
 import { Formatters } from "@/utils/formatters";
 interface PetFundCardProps {
@@ -57,8 +57,8 @@ export const PetFundCard = ({ userId }: PetFundCardProps) => {
  switch (status) {
  case'released': return <CheckCircle className="w-3.5 h-3.5 text-success" />;
  case'used': return <CheckCircle className="w-3.5 h-3.5 text-muted-foreground" />;
- case'pending': return <Lock className="w-3.5 h-3.5 text-warning" />;
- default: return <Clock className="w-3.5 h-3.5 text-muted-foreground" />;
+ case'pending': return <span className="w-3.5 h-3.5 text-warning" aria-hidden="true">🔒</span>;
+ default: return <span className="w-3.5 h-3.5 text-muted-foreground" aria-hidden="true">⏰</span>;
  }
  };
 
@@ -80,7 +80,7 @@ export const PetFundCard = ({ userId }: PetFundCardProps) => {
  <CardTitle className="flex items-center justify-between">
  <span className="flex items-center gap-2 text-lg">
  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
- <Gift className="w-4 h-4 text-primary-foreground" />
+ <span className="w-4 h-4 text-primary-foreground" aria-hidden="true">🎁</span>
  </div>
  Welcome Credit Fund
  </span>
@@ -120,7 +120,7 @@ export const PetFundCard = ({ userId }: PetFundCardProps) => {
  </div>
  <div className="rounded-lg border border-warning/20 bg-warning/5 p-3">
  <div className="flex items-center gap-1.5 mb-1">
- <Lock className="w-3.5 h-3.5 text-warning" />
+ <span className="w-3.5 h-3.5 text-warning" aria-hidden="true">🔒</span>
  <span className="text-xs text-muted-foreground">In Escrow</span>
  </div>
  <p className="text-xl font-bold text-warning">{Formatters.currency(escrowBalanceUsd)}</p>
@@ -132,7 +132,7 @@ export const PetFundCard = ({ userId }: PetFundCardProps) => {
  {nextRelease && (
  <div className="flex items-center gap-3 p-3 rounded-lg bg-primary/5 border border-primary/10">
  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
- <Calendar className="w-5 h-5 text-primary" />
+ <span className="w-5 h-5 text-primary" aria-hidden="true">📅</span>
  </div>
  <div className="flex-1">
  <p className="text-sm font-medium">Next Release: ${Formatters.number(Math.round((nextRelease.amount / 1000)))}</p>
@@ -153,7 +153,7 @@ export const PetFundCard = ({ userId }: PetFundCardProps) => {
  <CollapsibleTrigger asChild>
  <Button variant="ghost" className="w-full flex items-center justify-between text-sm">
  <span className="flex items-center gap-2">
- <TrendingUp className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">📈</span>
  Release Schedule ({releases.filter(r => r.usedAt).length}/{releases.length} used)
  </span>
  {showTimeline ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -200,7 +200,7 @@ export const PetFundCard = ({ userId }: PetFundCardProps) => {
  onClick={() => navigate('/referrals')}>
  <CardContent className="flex items-center gap-4 py-4">
  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-accent to-primary flex items-center justify-center flex-shrink-0">
- <Users className="w-6 h-6 text-primary-foreground" />
+ <span className="w-6 h-6 text-primary-foreground" aria-hidden="true">👥</span>
  </div>
  <div className="flex-1">
  <p className="font-semibold flex items-center gap-1">
@@ -220,7 +220,7 @@ export const PetFundCard = ({ userId }: PetFundCardProps) => {
  <Card>
  <CardHeader className="pb-2">
  <CardTitle className="text-sm flex items-center gap-2">
- <Gift className="w-4 h-4 text-accent" />
+ <span className="w-4 h-4 text-accent" aria-hidden="true">🎁</span>
  Referral Bonuses
  </CardTitle>
  </CardHeader>

@@ -4,7 +4,7 @@ import { Button } from"@/components/ui/button";
 import { Badge } from"@/components/ui/badge";
 import { Separator } from"@/components/ui/separator";
 import { Slider } from"@/components/ui/slider";
-import { Minus, Plus, Trash2, ShoppingCart, Coins, CreditCard, Loader2, Package } from"lucide-react";
+import { Minus, Plus, Trash2, Loader2 } from "lucide-react";
 import { CartItem } from"@/hooks/useShoppingCart";
 import { Formatters } from"@/utils/formatters";
 import { motion, AnimatePresence } from"framer-motion";
@@ -112,7 +112,7 @@ export function CartDrawer({
  <SheetContent className="flex flex-col w-full sm:max-w-lg">
  <SheetHeader>
  <SheetTitle className="flex items-center gap-2">
- <ShoppingCart className="h-5 w-5" />
+ <span className="h-5 w-5" aria-hidden="true">🛒</span>
  Shopping Cart
  {items.length > 0 && (
  <Badge variant="secondary" className="ml-1">
@@ -125,7 +125,7 @@ export function CartDrawer({
  {items.length === 0 ? (
  <div className="flex-1 flex flex-col items-center justify-center gap-4 text-center px-4">
  <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center">
- <Package className="w-10 h-10 text-muted-foreground" />
+ <span className="w-10 h-10 text-muted-foreground" aria-hidden="true">📦</span>
  </div>
  <div>
  <h3 className="font-semibold text-lg">Your cart is empty</h3>
@@ -162,7 +162,7 @@ export function CartDrawer({
  />
  ) : (
  <div className="w-16 h-16 rounded-md bg-muted flex items-center justify-center flex-shrink-0">
- <Package className="w-6 h-6 text-muted-foreground" />
+ <span className="w-6 h-6 text-muted-foreground" aria-hidden="true">📦</span>
  </div>
  )}
 
@@ -240,7 +240,7 @@ export function CartDrawer({
  <div className="bg-muted border border-border rounded-lg p-3 space-y-3">
  <div className="flex justify-between items-center text-sm">
  <span className="font-medium flex items-center gap-1.5">
- <Coins className="h-4 w-4 text-primary" />
+ <span className="h-4 w-4 text-primary" aria-hidden="true">🪙</span>
  Use PawBucks
  </span>
  <span className="text-xs text-muted-foreground">
@@ -288,7 +288,7 @@ export function CartDrawer({
 
  {pawbucksBalance > 0 && !meetsMinOrder && (
  <div className="bg-muted/40 border border-dashed border-border rounded-lg p-3 text-xs text-muted-foreground flex items-start gap-2">
- <Coins className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
+ <span className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" aria-hidden="true">🪙</span>
  <span>
  Add {Formatters.currency((MIN_ORDER_USD_FOR_PAWBUCKS - totalUsdDollars))} more to use PawBucks. PawBucks
  are available on orders of ${MIN_ORDER_USD_FOR_PAWBUCKS}+ and may cover up to 33% of the total.
@@ -303,7 +303,7 @@ export function CartDrawer({
  {actualPawbucks > 0 && (
  <div className="flex justify-between items-center">
  <span className="text-muted-foreground flex items-center gap-1">
- <Coins className="h-3.5 w-3.5" /> PawBucks
+ <span className="h-3.5 w-3.5" aria-hidden="true">🪙</span> PawBucks
  </span>
  <span className="font-medium text-primary">
  {Formatters.number(actualPawbucks)} PB (−{Formatters.currency(pawbucksUsdValue)})
@@ -313,7 +313,7 @@ export function CartDrawer({
  {cardAmountCents > 0 && (
  <div className="flex justify-between items-center">
  <span className="text-muted-foreground flex items-center gap-1">
- <CreditCard className="h-3.5 w-3.5" /> Card
+ <span className="h-3.5 w-3.5" aria-hidden="true">💳</span> Card
  </span>
  <span className="font-medium">
  {Formatters.currency(cardAmountDollars)}
@@ -336,17 +336,17 @@ export function CartDrawer({
  </>
  ) : getMode() ==="pawbucks" ? (
  <>
- <Coins className="mr-2 h-4 w-4" />
+ <span className="mr-2 h-4 w-4" aria-hidden="true">🪙</span>
  Pay with PawBucks
  </>
  ) : getMode() ==="split" ? (
  <>
- <CreditCard className="mr-2 h-4 w-4" />
+ <span className="mr-2 h-4 w-4" aria-hidden="true">💳</span>
  Pay {Formatters.currency(cardAmountDollars)} + {Formatters.number(actualPawbucks)} PB
  </>
  ) : (
  <>
- <CreditCard className="mr-2 h-4 w-4" />
+ <span className="mr-2 h-4 w-4" aria-hidden="true">💳</span>
  Pay {Formatters.currency(totalUsdDollars)} with Card
  </>
  )}

@@ -3,7 +3,7 @@ import { supabase } from"@/integrations/supabase/client";
 import { GradientCard } from"@/components/ui/gradient-card";
 import { Button } from"@/components/ui/button";
 import { Input } from"@/components/ui/input";
-import { Users, UserPlus, Mail, Check, X, Clock, Trash2, Info } from"lucide-react";
+import { Check, X, Trash2, Info } from "lucide-react";
 import { toast } from"sonner";
 import { useSharedAccount } from"@/hooks/useSharedAccount";
 import {
@@ -234,7 +234,7 @@ const SharePawBucksCardComponent = () => {
  const getStatusBadge = (status: string) => {
  switch (status) {
  case"pending":
- return <Badge variant="secondary" className="gap-1"><Clock className="w-3 h-3" /> Pending</Badge>;
+ return <Badge variant="secondary" className="gap-1"><span className="w-3 h-3" aria-hidden="true">⏰</span> Pending</Badge>;
  case"accepted":
  return <Badge variant="default" className="gap-1 bg-success"><Check className="w-3 h-3" /> Accepted</Badge>;
  case"declined":
@@ -253,7 +253,7 @@ const SharePawBucksCardComponent = () => {
  <div className="flex items-center justify-between mb-4">
  <div className="flex items-center gap-2">
  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
- <Users className="w-5 h-5 text-primary" />
+ <span className="w-5 h-5 text-primary" aria-hidden="true">👥</span>
  </div>
  <div>
  <h3 className="text-xl font-semibold">Share The PawBucks</h3>
@@ -268,7 +268,7 @@ const SharePawBucksCardComponent = () => {
  <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
  <DialogTrigger asChild>
  <Button size="sm" className="gap-1" disabled={sharedMembers.length >= 2}>
- <UserPlus className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">👤</span>
  Add Member
  </Button>
  </DialogTrigger>
@@ -281,7 +281,7 @@ const SharePawBucksCardComponent = () => {
  </DialogHeader>
  <div className="space-y-4 py-4">
  <div className="flex items-center gap-2">
- <Mail className="w-4 h-4 text-muted-foreground" />
+ <span className="w-4 h-4 text-muted-foreground" aria-hidden="true">📧</span>
  <Input
  placeholder="Enter email address"
  type="email"
@@ -352,7 +352,7 @@ const SharePawBucksCardComponent = () => {
  {sharedMembers.length > 0 ? (
  <div className="space-y-2">
  <p className="text-sm font-medium flex items-center gap-2">
- <Users className="w-4 h-4 text-muted-foreground" />
+ <span className="w-4 h-4 text-muted-foreground" aria-hidden="true">👥</span>
  Your Shared Members ({sharedMembers.length})
  </p>
  <div className="space-y-2">
@@ -363,7 +363,7 @@ const SharePawBucksCardComponent = () => {
  >
  <div className="flex items-center gap-3">
  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
- <Mail className="w-4 h-4 text-primary" />
+ <span className="w-4 h-4 text-primary" aria-hidden="true">📧</span>
  </div>
  <div>
  <span className="text-sm font-medium">{member.member_email}</span>

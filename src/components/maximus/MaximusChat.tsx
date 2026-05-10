@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from"react";
 import { motion, AnimatePresence } from"framer-motion";
-import { X, Send, Dog, Loader2 } from"lucide-react";
+import { X, Send, Dog, Loader2 } from "lucide-react";
 import { Button } from"@/components/ui/button";
 import { useAuth } from"@/hooks/useAuth";
 import ReactMarkdown from"react-markdown";

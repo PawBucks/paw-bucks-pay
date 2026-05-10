@@ -1,6 +1,6 @@
 import { useState, useEffect } from"react";
 import { Badge } from"@/components/ui/badge";
-import { Zap, Timer } from"lucide-react";
+import { Timer } from "lucide-react";
 import { 
  type MerchantService,
  calculateRegularPawbucksPrice,
@@ -76,7 +76,7 @@ export function FlashSalePriceDisplay({
  className="bg-gradient-to-r from-warning to-warning text-white border-0 gap-1"
  variant="outline"
  >
- <Zap className="w-3 h-3" />
+ <span className="w-3 h-3" aria-hidden="true">⚡</span>
  Flash Sale
  </Badge>
  

@@ -1,7 +1,7 @@
 import { memo, useMemo } from"react";
 import { GradientCard } from"@/components/ui/gradient-card";
 import { Badge } from"@/components/ui/badge";
-import { Lightbulb, TrendingUp, TrendingDown, AlertTriangle, Target, Calendar, ArrowRight } from "lucide-react";
+import { Lightbulb, TrendingUp, TrendingDown, AlertTriangle, Target, Calendar } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { startOfMonth, endOfMonth, subMonths, differenceInDays, format } from"date-fns";
 import { CATEGORY_CONFIG, getNormalizedCategory } from"@/lib/categoryMapping";
@@ -282,7 +282,7 @@ export const SpendingInsights = memo(({
  <GradientCard>
  <div className="flex items-center gap-2 mb-4">
  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
- <Lightbulb className="w-4 h-4 text-primary" />
+ <span className="w-4 h-4 text-primary" aria-hidden="true">💡</span>
  </div>
  <div>
  <h3 className="text-lg font-semibold">Smart Insights</h3>

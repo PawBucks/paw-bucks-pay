@@ -4,17 +4,7 @@ import { GradientCard } from"@/components/ui/gradient-card";
 import { Badge } from"@/components/ui/badge";
 import { Button } from"@/components/ui/button";
 import { Progress } from"@/components/ui/progress";
-import {
- Flame,
- Lock,
- Clock,
- Users,
- AlertTriangle,
- Crown,
- Gem,
- Megaphone,
- TrendingUp,
-} from"lucide-react";
+import { AlertTriangle, Crown, Gem, Megaphone } from "lucide-react";
 import { useState, useEffect } from"react";
 import { useNavigate } from"react-router-dom";
 
@@ -65,7 +55,7 @@ function CountdownTimer({ expiresAt }: { expiresAt: string }) {
 
  return (
  <span className="text-xs font-mono text-warning flex items-center gap-1">
- <Clock className="h-3 w-3" />
+ <span className="h-3 w-3" aria-hidden="true">⏰</span>
  {timeLeft}
  </span>
  );
@@ -196,7 +186,7 @@ export function ScarcitySignalWidget({ merchantId, businessType }: ScarcitySigna
  <div className="space-y-4">
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-2">
- <Flame className="h-5 w-5 text-destructive" />
+ <span className="h-5 w-5 text-destructive" aria-hidden="true">🔥</span>
  <h3 className="font-bold text-lg">
  Visibility Slots — {scarcityData.cellName}
  </h3>
@@ -208,7 +198,7 @@ export function ScarcitySignalWidget({ merchantId, businessType }: ScarcitySigna
 
  {scarcityData.competitorCount > 1 && (
  <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted rounded-lg px-3 py-2">
- <Users className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">👥</span>
  <span>
  <strong className="text-foreground">{scarcityData.competitorCount}</strong>{""}
  merchants competing in {categoryLabel}
@@ -241,7 +231,7 @@ export function ScarcitySignalWidget({ merchantId, businessType }: ScarcitySigna
  </div>
  {isSoldOut ? (
  <Badge variant="destructive" className="text-xs flex items-center gap-1">
- <Lock className="h-3 w-3" />
+ <span className="h-3 w-3" aria-hidden="true">🔒</span>
  Sold Out
  </Badge>
  ) : remaining === 1 ? (
@@ -290,7 +280,7 @@ export function ScarcitySignalWidget({ merchantId, businessType }: ScarcitySigna
  className="h-7 text-xs"
  onClick={() => navigate("/merchant/market")}
  >
- <TrendingUp className="h-3 w-3 mr-1" />
+ <span className="h-3 w-3 mr-1" aria-hidden="true">📈</span>
  Get Slot
  </Button>
  )}

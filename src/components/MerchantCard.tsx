@@ -2,7 +2,7 @@ import { memo, useCallback } from"react";
 import { GradientCard } from"@/components/ui/gradient-card";
 import { Button } from"@/components/ui/button";
 import { Badge } from"@/components/ui/badge";
-import { Store, MapPin, Percent, Info } from"lucide-react";
+import { Percent, Info } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from"@/components/ui/tooltip";
 import { WelcomeCreditBadge } from"@/components/shared/WelcomeCreditBadge";
 
@@ -48,7 +48,7 @@ const MerchantCardComponent = ({ merchant, distance, onPayNow }: MerchantCardPro
  className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center flex-shrink-0 shadow-sm"
  aria-hidden="true"
  >
- <Store className="w-6 h-6 sm:w-7 sm:h-7 text-primary" />
+ <span className="w-6 h-6 sm:w-7 sm:h-7 text-primary" aria-hidden="true">🏪</span>
  </div>
  <div className="flex-1 min-w-0">
  <h3 className="font-bold text-base sm:text-lg mb-1 truncate">{merchant.business_name}</h3>

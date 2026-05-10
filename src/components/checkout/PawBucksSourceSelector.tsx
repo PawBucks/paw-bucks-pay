@@ -1,6 +1,6 @@
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { Coins, Gift, Info, Clock } from "lucide-react";
+import { Info } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -39,7 +39,7 @@ const ExpiryLine = ({ iso, tone }: { iso: string; tone:"earned" |"promotional" }
     days <= 0 ? "Expires today" : days === 1 ? "Expires tomorrow" : `Expires in ${days} days`;
   return (
     <p className={`text-[11px] flex items-center gap-1 mt-0.5 ${colorClass}`}>
-      <Clock className="w-3 h-3" />
+      <span className="w-3 h-3" aria-hidden="true">⏰</span>
       {label} · {format(date, "MMM d")}
     </p>
   );
@@ -78,7 +78,7 @@ export const PawBucksSourceSelector = ({
                 <p className="font-semibold text-foreground">PawBucks Sources</p>
                 <div className="space-y-1.5">
                   <div className="flex items-start gap-2">
-                    <Coins className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                    <span className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" aria-hidden="true">🪙</span>
                     <div>
                       <p className="text-sm font-medium text-foreground">Earned PawBucks</p>
                       <p className="text-xs text-muted-foreground">
@@ -87,7 +87,7 @@ export const PawBucksSourceSelector = ({
                     </div>
                   </div>
                   <div className="flex items-start gap-2">
-                    <Gift className="w-4 h-4 text-success mt-0.5 flex-shrink-0" />
+                    <span className="w-4 h-4 text-success mt-0.5 flex-shrink-0" aria-hidden="true">🎁</span>
                     <div>
                       <p className="text-sm font-medium text-foreground">Promotional Credits</p>
                       <p className="text-xs text-muted-foreground">
@@ -121,7 +121,7 @@ export const PawBucksSourceSelector = ({
  }`}
  >
  <RadioGroupItem value="earned" id="source-earned" />
- <Coins className="w-4 h-4 text-primary flex-shrink-0" />
+ <span className="w-4 h-4 text-primary flex-shrink-0" aria-hidden="true">🪙</span>
  <div className="flex-1 min-w-0">
  <p className="text-sm font-medium">Earned PawBucks</p>
  <p className="text-xs text-muted-foreground">
@@ -142,7 +142,7 @@ export const PawBucksSourceSelector = ({
  }`}
  >
  <RadioGroupItem value="promotional" id="source-promotional" />
- <Gift className="w-4 h-4 text-success flex-shrink-0" />
+ <span className="w-4 h-4 text-success flex-shrink-0" aria-hidden="true">🎁</span>
  <div className="flex-1 min-w-0">
  <p className="text-sm font-medium">{promotionalLabel}</p>
  <p className="text-xs text-muted-foreground">

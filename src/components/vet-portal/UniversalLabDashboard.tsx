@@ -27,20 +27,7 @@ import {
  DialogHeader,
  DialogTitle,
 } from"@/components/ui/dialog";
-import {
- FlaskConical,
- Search,
- Filter,
- CheckCircle,
- AlertTriangle,
- Clock,
- Eye,
- Link,
- FileText,
- Image,
- Download,
- RefreshCw,
-} from"lucide-react";
+import { FlaskConical, Search, Filter, CheckCircle, AlertTriangle, Eye, Link, Download, RefreshCw } from "lucide-react";
 import { format } from"date-fns";
 import { toast } from"sonner";
 
@@ -165,7 +152,7 @@ export function UniversalLabDashboard({ vetId }: UniversalLabDashboardProps) {
  case"final":
  return <Badge className="bg-success/10 text-success"><CheckCircle className="h-3 w-3 mr-1" />Final</Badge>;
  case"preliminary":
- return <Badge className="bg-warning/10 text-warning"><Clock className="h-3 w-3 mr-1" />Preliminary</Badge>;
+ return <Badge className="bg-warning/10 text-warning"><span className="h-3 w-3 mr-1" aria-hidden="true">⏰</span>Preliminary</Badge>;
  default:
  return <Badge variant="secondary">{status}</Badge>;
  }
@@ -192,7 +179,7 @@ export function UniversalLabDashboard({ vetId }: UniversalLabDashboardProps) {
  <Card className="p-4">
  <div className="flex items-center gap-3">
  <div className="w-10 h-10 rounded-full bg-warning/10 flex items-center justify-center">
- <Clock className="h-5 w-5 text-warning" />
+ <span className="h-5 w-5 text-warning" aria-hidden="true">⏰</span>
  </div>
  <div>
  <p className="text-2xl font-bold">{pendingLabCount}</p>
@@ -214,7 +201,7 @@ export function UniversalLabDashboard({ vetId }: UniversalLabDashboardProps) {
  <Card className="p-4">
  <div className="flex items-center gap-3">
  <div className="w-10 h-10 rounded-full bg-info/10 flex items-center justify-center">
- <Image className="h-5 w-5 text-info" />
+ <span className="h-5 w-5 text-info" aria-hidden="true">🖼️</span>
  </div>
  <div>
  <p className="text-2xl font-bold">{pendingImagingCount}</p>
@@ -246,7 +233,7 @@ export function UniversalLabDashboard({ vetId }: UniversalLabDashboardProps) {
  )}
  </TabsTrigger>
  <TabsTrigger value="imaging" className="flex items-center gap-2">
- <Image className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">🖼️</span>
  Imaging (DICOM)
  {pendingImagingCount > 0 && (
  <Badge variant="secondary" className="ml-1">{pendingImagingCount}</Badge>
@@ -343,7 +330,7 @@ export function UniversalLabDashboard({ vetId }: UniversalLabDashboardProps) {
  {result.is_reviewed ? (
  <CheckCircle className="h-4 w-4 text-success" />
  ) : (
- <Clock className="h-4 w-4 text-warning" />
+ <span className="h-4 w-4 text-warning" aria-hidden="true">⏰</span>
  )}
  </TableCell>
  <TableCell className="text-right">
@@ -459,7 +446,7 @@ export function UniversalLabDashboard({ vetId }: UniversalLabDashboardProps) {
  asChild
  >
  <a href={result.dicom_viewer_url} target="_blank" rel="noopener noreferrer">
- <Image className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">🖼️</span>
  </a>
  </Button>
  )}
@@ -479,7 +466,7 @@ export function UniversalLabDashboard({ vetId }: UniversalLabDashboardProps) {
  ) : (
  <TableRow>
  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
- <Image className="h-8 w-8 mx-auto mb-2 opacity-50" />
+ <span className="h-8 w-8 mx-auto mb-2 opacity-50" aria-hidden="true">🖼️</span>
  No imaging results found
  </TableCell>
  </TableRow>
@@ -498,7 +485,7 @@ export function UniversalLabDashboard({ vetId }: UniversalLabDashboardProps) {
  {selectedResult?.type ==="lab" ? (
  <FlaskConical className="h-5 w-5" />
  ) : (
- <Image className="h-5 w-5" />
+ <span className="h-5 w-5" aria-hidden="true">🖼️</span>
  )}
  {selectedResult?.type ==="lab" ? selectedResult?.test_name : selectedResult?.study_description}
  </DialogTitle>

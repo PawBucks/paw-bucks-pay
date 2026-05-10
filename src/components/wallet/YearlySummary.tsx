@@ -4,7 +4,7 @@ import { supabase } from"@/integrations/supabase/client";
 import { GradientCard } from"@/components/ui/gradient-card";
 import { Button } from"@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from"@/components/ui/select";
-import { FileDown, Calendar, TrendingUp, DollarSign, Store, Loader2 } from"lucide-react";
+import { FileDown, Loader2 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from"recharts";
 import jsPDF from"jspdf";
 import { getCategoryLabel, getNormalizedCategory, CATEGORY_CONFIG } from"@/lib/categoryMapping";
@@ -265,7 +265,7 @@ export function YearlySummary() {
  <GradientCard className="p-6">
  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
  <div className="flex items-center gap-2">
- <Calendar className="h-5 w-5 text-primary" />
+ <span className="h-5 w-5 text-primary" aria-hidden="true">📅</span>
  <h3 className="text-lg font-semibold">Yearly Spending Summary</h3>
  </div>
  <div className="flex items-center gap-3">
@@ -290,21 +290,21 @@ export function YearlySummary() {
  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
  <div className="bg-primary/10 rounded-lg p-4">
  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
- <DollarSign className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">💵</span>
  Total Spent
  </div>
  <p className="text-2xl font-bold">${Formatters.money(yearlyData?.totalSpent) ||'0.00'}</p>
  </div>
  <div className="bg-info/10 rounded-lg p-4">
  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
- <TrendingUp className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">📈</span>
  Avg Monthly
  </div>
  <p className="text-2xl font-bold">${Formatters.money(yearlyData?.avgMonthly) ||'0.00'}</p>
  </div>
  <div className="bg-success/10 rounded-lg p-4">
  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
- <Store className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">🏪</span>
  Transactions
  </div>
  <p className="text-2xl font-bold">{yearlyData?.transactionCount || 0}</p>

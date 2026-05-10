@@ -11,7 +11,7 @@ import {
 } from"@/components/ui/dialog";
 import { Badge } from"@/components/ui/badge";
 import { toast } from"sonner";
-import { Clock, CalendarDays, CheckCircle2, Loader2 } from"lucide-react";
+import { CheckCircle2, Loader2 } from "lucide-react";
 import { cn } from"@/lib/utils";
 import { supabase } from"@/integrations/supabase/client";
 import { useAuth } from"@/hooks/useAuth";
@@ -194,7 +194,7 @@ export function ConsultationScheduleDialog({
  <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
  <DialogHeader>
  <DialogTitle className="flex items-center gap-2">
- <CalendarDays className="w-5 h-5 text-primary" />
+ <span className="w-5 h-5 text-primary" aria-hidden="true">📅</span>
  Schedule Free Consultation
  </DialogTitle>
  <DialogDescription>
@@ -217,7 +217,7 @@ export function ConsultationScheduleDialog({
  </p>
  <p className="text-primary font-medium">{selectedTime}</p>
  <Badge variant="outline" className="mt-2">
- <Clock className="w-3 h-3 mr-1" />
+ <span className="w-3 h-3 mr-1" aria-hidden="true">⏰</span>
  15 minutes
  </Badge>
  </div>
@@ -301,7 +301,7 @@ export function ConsultationScheduleDialog({
  <p className="text-sm text-muted-foreground">at {selectedTimeLabel} PT</p>
  </div>
  <Badge>
- <Clock className="w-3 h-3 mr-1" />
+ <span className="w-3 h-3 mr-1" aria-hidden="true">⏰</span>
  15 min
  </Badge>
  </div>

@@ -14,15 +14,7 @@ import {
  SelectTrigger,
  SelectValue,
 } from"@/components/ui/select";
-import {
- AlertTriangle,
- Clock,
- CheckCircle,
- Send,
- Loader2,
- Stethoscope,
- Camera,
-} from"lucide-react";
+import { AlertTriangle, CheckCircle, Send, Loader2 } from "lucide-react";
 import { toast } from"sonner";
 import { useQuery, useMutation } from"@tanstack/react-query";
 import { useAuth } from"@/hooks/useAuth";

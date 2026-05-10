@@ -3,7 +3,7 @@ import { supabase } from"@/integrations/supabase/client";
 import { Card } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from"@/components/ui/tooltip";
-import { Coins, Clock, CheckCircle, Info, Loader2, AlertTriangle } from"lucide-react";
+import { CheckCircle, Info, Loader2, AlertTriangle } from "lucide-react";
 import { Formatters } from"@/utils/formatters";
 import { format, formatDistanceToNow, differenceInDays } from"date-fns";
 import { useSharedAccount, getEffectiveWalletUserId } from"@/hooks/useSharedAccount";
@@ -143,7 +143,7 @@ export const PawBucksBreakdown = ({ userId }: PawBucksBreakdownProps) => {
  
  <Card className="p-4 bg-warning/10 border-warning/20">
  <div className="flex items-center gap-2 mb-1">
- <Clock className="w-4 h-4 text-warning" />
+ <span className="w-4 h-4 text-warning" aria-hidden="true">⏰</span>
  <span className="text-sm text-muted-foreground">Pending</span>
  <TooltipProvider>
  <Tooltip>
@@ -278,7 +278,7 @@ export const PawBucksBreakdown = ({ userId }: PawBucksBreakdownProps) => {
  {pendingItems.length > 0 && (
  <Card className="p-4">
  <h4 className="font-medium mb-3 flex items-center gap-2">
- <Clock className="w-4 h-4 text-warning" />
+ <span className="w-4 h-4 text-warning" aria-hidden="true">⏰</span>
  Pending PawBucks
  </h4>
  <div className="space-y-2">

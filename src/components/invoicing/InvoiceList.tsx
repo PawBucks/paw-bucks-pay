@@ -1,30 +1,6 @@
 import { useState, useMemo } from"react";
 import { format, parseISO, isAfter, isBefore, addDays, formatDistanceToNow } from"date-fns";
-import { 
- FileText, 
- Plus, 
- Search, 
- Filter, 
- MoreHorizontal,
- Send,
- Eye,
- EyeOff,
- Edit,
- Trash2,
- Copy,
- Download,
- Share2,
- Link,
- Clock,
- CheckCircle,
- AlertCircle,
- XCircle,
- DollarSign,
- RefreshCw,
- CreditCard,
- Mail,
- Printer
-} from"lucide-react";
+import { FileText, Plus, Search, Filter, MoreHorizontal, Send, Eye, EyeOff, Edit, Trash2, Copy, Download, Link, CheckCircle, AlertCircle, XCircle, DollarSign, RefreshCw, Printer } from "lucide-react";
 import { toast } from"sonner";
 import { Button } from"@/components/ui/button";
 import { Input } from"@/components/ui/input";
@@ -215,7 +191,7 @@ export function InvoiceList({
  <p className="text-2xl font-bold">{Formatters.currency(stats.totalOutstanding)}</p>
  </div>
  <div className="h-10 w-10 rounded-full bg-warning/10 flex items-center justify-center">
- <Clock className="h-5 w-5 text-warning" />
+ <span className="h-5 w-5 text-warning" aria-hidden="true">⏰</span>
  </div>
  </div>
  </CardContent>
@@ -254,7 +230,7 @@ export function InvoiceList({
  <p className="text-2xl font-bold">{stats.draft}</p>
  </div>
  <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
- <FileText className="h-5 w-5 text-muted-foreground" />
+ <span className="h-5 w-5 text-muted-foreground" aria-hidden="true">📄</span>
  </div>
  </div>
  </CardContent>
@@ -317,7 +293,7 @@ export function InvoiceList({
  {filteredInvoices.length === 0 ? (
  <Card>
  <CardContent className="py-12 text-center">
- <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+ <span className="h-12 w-12 mx-auto text-muted-foreground mb-4" aria-hidden="true">📄</span>
  <h3 className="text-lg font-semibold mb-2">No invoices found</h3>
  <p className="text-muted-foreground mb-4">
  {searchTerm || statusFilter !=="all" 
@@ -428,7 +404,7 @@ export function InvoiceList({
  )}
  {!['paid','cancelled','refunded','draft'].includes(invoice.status) && (
  <DropdownMenuItem onClick={() => onRecordPayment(invoice)}>
- <CreditCard className="h-4 w-4 mr-2" />
+ <span className="h-4 w-4 mr-2" aria-hidden="true">💳</span>
  Record Payment
  </DropdownMenuItem>
  )}
@@ -440,7 +416,7 @@ export function InvoiceList({
  )}
  {['paid','partially_paid'].includes(invoice.status) && onResendReceipt && (
  <DropdownMenuItem onClick={() => onResendReceipt(invoice)}>
- <Mail className="h-4 w-4 mr-2" />
+ <span className="h-4 w-4 mr-2" aria-hidden="true">📧</span>
  Resend Receipt
  </DropdownMenuItem>
  )}

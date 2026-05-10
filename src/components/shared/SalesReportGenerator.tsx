@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from"@/
 import { Calendar } from"@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from"@/components/ui/popover";
 import { Separator } from"@/components/ui/separator";
-import { BarChart3, Download, CalendarIcon, Loader2, TrendingUp, DollarSign, Users, FileText } from"lucide-react";
+import { Download, Loader2 } from "lucide-react";
 import { supabase } from"@/integrations/supabase/client";
 import { format, subDays, subMonths, subYears, startOfDay, endOfDay } from"date-fns";
 import { cn } from"@/lib/utils";
@@ -285,7 +285,7 @@ export function SalesReportGenerator({ entityId, entityType, entityName }: Sales
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <BarChart3 className="h-5 w-5" />
+ <span className="h-5 w-5" aria-hidden="true">📊</span>
  Sales Report
  </CardTitle>
  <CardDescription>Generate detailed sales reports for any time period</CardDescription>
@@ -309,7 +309,7 @@ export function SalesReportGenerator({ entityId, entityType, entityName }: Sales
  <Popover>
  <PopoverTrigger asChild>
  <Button variant="outline" className={cn("w-[150px] justify-start text-left font-normal", !customStart &&"text-muted-foreground")}>
- <CalendarIcon className="mr-2 h-4 w-4" />
+ <span className="mr-2 h-4 w-4" aria-hidden="true">📅</span>
  {customStart ? format(customStart,"MMM d, yyyy") :"Start date"}
  </Button>
  </PopoverTrigger>
@@ -320,7 +320,7 @@ export function SalesReportGenerator({ entityId, entityType, entityName }: Sales
  <Popover>
  <PopoverTrigger asChild>
  <Button variant="outline" className={cn("w-[150px] justify-start text-left font-normal", !customEnd &&"text-muted-foreground")}>
- <CalendarIcon className="mr-2 h-4 w-4" />
+ <span className="mr-2 h-4 w-4" aria-hidden="true">📅</span>
  {customEnd ? format(customEnd,"MMM d, yyyy") :"End date"}
  </Button>
  </PopoverTrigger>
@@ -332,7 +332,7 @@ export function SalesReportGenerator({ entityId, entityType, entityName }: Sales
  )}
 
  <Button onClick={generateReport} disabled={isLoading || (timeframe ==="custom" && (!customStart || !customEnd))}>
- {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <BarChart3 className="mr-2 h-4 w-4" />}
+ {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <span className="mr-2 h-4 w-4" aria-hidden="true">📊</span>}
  Generate Report
  </Button>
  </div>
@@ -346,25 +346,25 @@ export function SalesReportGenerator({ entityId, entityType, entityName }: Sales
  <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
  <Card className="p-4">
  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
- <DollarSign className="h-4 w-4" /> Net Sales
+ <span className="h-4 w-4" aria-hidden="true">💵</span> Net Sales
  </div>
  <p className="text-2xl font-bold">{Formatters.currency(reportData.netSales)}</p>
  </Card>
  <Card className="p-4">
  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
- <FileText className="h-4 w-4" /> Transactions
+ <span className="h-4 w-4" aria-hidden="true">📄</span> Transactions
  </div>
  <p className="text-2xl font-bold">{reportData.totalTransactions}</p>
  </Card>
  <Card className="p-4">
  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
- <Users className="h-4 w-4" /> Customers
+ <span className="h-4 w-4" aria-hidden="true">👥</span> Customers
  </div>
  <p className="text-2xl font-bold">{reportData.uniqueCustomers}</p>
  </Card>
  <Card className="p-4">
  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
- <TrendingUp className="h-4 w-4" /> Avg. Sale
+ <span className="h-4 w-4" aria-hidden="true">📈</span> Avg. Sale
  </div>
  <p className="text-2xl font-bold">{Formatters.currency(reportData.avgTransactionAmount)}</p>
  </Card>

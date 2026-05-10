@@ -1,5 +1,5 @@
 import { useState } from"react";
-import { Plus, X, Users, Mail, UserPlus } from"lucide-react";
+import { Plus, X } from "lucide-react";
 import { Button } from"@/components/ui/button";
 import { Input } from"@/components/ui/input";
 import { Label } from"@/components/ui/label";
@@ -94,13 +94,13 @@ export function InvoiceRecipients({
  <div className="space-y-3">
  <div className="flex items-center justify-between">
  <Label className="flex items-center gap-2 text-sm font-medium">
- <Users className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">👥</span>
  Additional Recipients
  </Label>
  <Popover open={isAdding} onOpenChange={setIsAdding}>
  <PopoverTrigger asChild>
  <Button variant="outline" size="sm" className="h-8">
- <UserPlus className="h-3.5 w-3.5 mr-1.5" />
+ <span className="h-3.5 w-3.5 mr-1.5" aria-hidden="true">👤</span>
  Add Recipient
  </Button>
  </PopoverTrigger>
@@ -192,7 +192,7 @@ export function InvoiceRecipients({
  variant="secondary"
  className="flex items-center gap-1.5 py-1.5 px-3"
  >
- <Mail className="h-3 w-3" />
+ <span className="h-3 w-3" aria-hidden="true">📧</span>
  <span className="max-w-[180px] truncate">
  {recipient.name || recipient.email}
  </span>

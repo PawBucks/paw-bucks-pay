@@ -3,7 +3,7 @@ import { SEO } from"@/components/SEO";
 import { seoMeta } from"@/lib/seoMeta";
 import { Button } from"@/components/ui/button";
 import { Card } from"@/components/ui/card";
-import { Stethoscope, FileText, Shield, TrendingUp, Wallet, Heart, ArrowRight, CheckCircle, Brain, Pill, Users, Clock, DollarSign, Bell, Share2, BarChart3, Zap, MessageSquare, CalendarCheck } from "lucide-react";
+import { FileText, Shield, TrendingUp, Heart, ArrowRight, CheckCircle, Pill, Users, Clock, DollarSign, Share2 } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { SocialFollowLinks } from"@/components/SocialFollowLinks";
 import { PremiumMerchantsBanner } from"@/components/PremiumMerchantsBanner";
@@ -121,7 +121,7 @@ const VetLanding = () => {
  
  <div className="relative max-w-5xl mx-auto text-center space-y-8 animate-fade-in">
  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary font-medium mb-4">
- <Stethoscope className="w-5 h-5" />
+ <span className="w-5 h-5" aria-hidden="true">🩺</span>
  Built for Veterinary Practices
  </div>
  
@@ -252,7 +252,7 @@ const VetLanding = () => {
  <div className="grid lg:grid-cols-2 gap-12 items-center">
  <div>
  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 text-accent font-medium mb-6">
- <Brain className="w-5 h-5" />
+ <span className="w-5 h-5" aria-hidden="true">🧠</span>
  AI-Powered
  </div>
  <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6">
@@ -264,7 +264,7 @@ const VetLanding = () => {
  <ul className="space-y-4">
  <li className="flex items-start gap-4">
  <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0">
- <MessageSquare className="w-5 h-5 text-accent" />
+ <span className="w-5 h-5 text-accent" aria-hidden="true">💬</span>
  </div>
  <div>
  <h4 className="font-bold">Voice-to-SOAP Notes</h4>
@@ -273,7 +273,7 @@ const VetLanding = () => {
  </li>
  <li className="flex items-start gap-4">
  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
- <Zap className="w-5 h-5 text-primary" />
+ <span className="w-5 h-5 text-primary" aria-hidden="true">⚡</span>
  </div>
  <div>
  <h4 className="font-bold">Symptom Triage Scoring</h4>
@@ -282,7 +282,7 @@ const VetLanding = () => {
  </li>
  <li className="flex items-start gap-4">
  <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center flex-shrink-0">
- <BarChart3 className="w-5 h-5 text-secondary" />
+ <span className="w-5 h-5 text-secondary" aria-hidden="true">📊</span>
  </div>
  <div>
  <h4 className="font-bold">Diagnostic Overlays</h4>
@@ -349,7 +349,7 @@ const VetLanding = () => {
  {/* Text Content */}
  <div className="order-1 lg:order-2">
  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary font-medium mb-6">
- <Heart className="w-5 h-5" />
+ <span className="w-5 h-5" aria-hidden="true">❤️</span>
  Client Care
  </div>
  <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6">
@@ -382,7 +382,7 @@ const VetLanding = () => {
  <div className="max-w-6xl mx-auto">
  <div className="text-center mb-12">
  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary font-medium mb-6">
- <Wallet className="w-5 h-5" />
+ <span className="w-5 h-5" aria-hidden="true">👛</span>
  Financial Tools
  </div>
  <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
@@ -396,7 +396,7 @@ const VetLanding = () => {
  <div className="grid md:grid-cols-2 gap-8">
  <Card className="p-8 border-2 hover:shadow-xl transition-all">
  <div className="w-16 h-16 rounded-md bg-primary/10 flex items-center justify-center mb-6">
- <Shield className="w-8 h-8 text-primary" />
+ <span className="w-8 h-8 text-primary" aria-hidden="true">🛡️</span>
  </div>
  <h3 className="text-2xl font-bold mb-4">Insurance Claim-Splicing</h3>
  <p className="text-muted-foreground mb-6">
@@ -421,7 +421,7 @@ const VetLanding = () => {
 
  <Card className="p-8 border-2 hover:shadow-xl transition-all">
  <div className="w-16 h-16 rounded-md bg-accent/10 flex items-center justify-center mb-6">
- <Heart className="w-8 h-8 text-accent" />
+ <span className="w-8 h-8 text-accent" aria-hidden="true">❤️</span>
  </div>
  <h3 className="text-2xl font-bold mb-4">Wellness Plan Architect</h3>
  <p className="text-muted-foreground mb-6">
@@ -453,7 +453,7 @@ const VetLanding = () => {
  <div className="max-w-6xl mx-auto">
  <div className="text-center mb-12">
  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/10 text-secondary font-medium mb-6">
- <TrendingUp className="w-5 h-5" />
+ <span className="w-5 h-5" aria-hidden="true">📈</span>
  Practice Growth
  </div>
  <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
@@ -467,7 +467,7 @@ const VetLanding = () => {
  <div className="grid md:grid-cols-2 gap-8">
  <Card className="p-8 border-2 hover:shadow-xl transition-all">
  <div className="w-16 h-16 rounded-md bg-secondary/10 flex items-center justify-center mb-6">
- <CalendarCheck className="w-8 h-8 text-secondary" />
+ <span className="w-8 h-8 text-secondary" aria-hidden="true">📅</span>
  </div>
  <h3 className="text-2xl font-bold mb-4">The"Gap Filler" Tool</h3>
  <p className="text-muted-foreground mb-6">
@@ -556,7 +556,7 @@ const VetLanding = () => {
  <section className="relative bg-gradient-to-br from-accent/10 to-primary/10 py-16 sm:py-20 lg:py-28">
  <div className="container mx-auto px-4 sm:px-6 lg:px-8">
  <div className="max-w-3xl mx-auto text-center">
- <Stethoscope className="w-16 h-16 text-primary mx-auto mb-6" />
+ <span className="w-16 h-16 text-primary mx-auto mb-6" aria-hidden="true">🩺</span>
  <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6">
  Ready to Transform Your Practice?
  </h2>

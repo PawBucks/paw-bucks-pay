@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from"@/
 import { Textarea } from"@/components/ui/textarea";
 import { ScrollArea } from"@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
-import { Plus, Building2, Megaphone, Users, DollarSign, TrendingUp, Store, Eye, CheckCircle2, Clock, Loader2, Mail, Trash2, Settings } from"lucide-react";
+import { Plus, Eye, CheckCircle2, Loader2, Trash2, Settings } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from"@/components/ui/alert-dialog";
 import { toast } from"sonner";
 import { supabase } from"@/integrations/supabase/client";
@@ -251,7 +251,7 @@ export const BrandCampaignsTab = () => {
  <Card>
  <CardContent className="pt-4">
  <div className="flex items-center gap-2 text-muted-foreground text-sm">
- <DollarSign className="h-4 w-4" />Budget
+ <span className="h-4 w-4" aria-hidden="true">💵</span>Budget
  </div>
  <p className="text-2xl font-bold">${selectedCampaign.budget_usd.toLocaleString()}</p>
  </CardContent>
@@ -259,7 +259,7 @@ export const BrandCampaignsTab = () => {
  <Card>
  <CardContent className="pt-4">
  <div className="flex items-center gap-2 text-muted-foreground text-sm">
- <TrendingUp className="h-4 w-4" />Distributed
+ <span className="h-4 w-4" aria-hidden="true">📈</span>Distributed
  </div>
  <p className="text-2xl font-bold">{selectedCampaign.total_distributed.toLocaleString()} PB</p>
  <p className="text-xs text-muted-foreground">{distributionPct}% of pool</p>
@@ -277,7 +277,7 @@ export const BrandCampaignsTab = () => {
  <Card>
  <CardContent className="pt-4">
  <div className="flex items-center gap-2 text-muted-foreground text-sm">
- <Users className="h-4 w-4" />Check-ins
+ <span className="h-4 w-4" aria-hidden="true">👥</span>Check-ins
  </div>
  <p className="text-2xl font-bold">{selectedCampaign.total_checkins.toLocaleString()}</p>
  </CardContent>
@@ -352,7 +352,7 @@ export const BrandCampaignsTab = () => {
  {searchedMerchants.map((m: any) => (
  <div key={m.id} className="flex items-center justify-between p-3 rounded-lg border">
  <div className="flex items-center gap-2">
- <Store className="h-4 w-4 text-muted-foreground" />
+ <span className="h-4 w-4 text-muted-foreground" aria-hidden="true">🏪</span>
  <span className="font-medium">{m.business_name}</span>
  </div>
  <Button
@@ -377,7 +377,7 @@ export const BrandCampaignsTab = () => {
  {campaignMerchants.length === 0 ? (
  <Card>
  <CardContent className="py-8 text-center text-muted-foreground">
- <Store className="h-8 w-8 mx-auto mb-2 opacity-50" />
+ <span className="h-8 w-8 mx-auto mb-2 opacity-50" aria-hidden="true">🏪</span>
  <p>No merchants added yet</p>
  </CardContent>
  </Card>
@@ -387,7 +387,7 @@ export const BrandCampaignsTab = () => {
  <Card key={cm.id}>
  <CardContent className="py-3 flex items-center justify-between">
  <div className="flex items-center gap-3">
- <Store className="h-5 w-5 text-muted-foreground" />
+ <span className="h-5 w-5 text-muted-foreground" aria-hidden="true">🏪</span>
  <div>
  <p className="font-medium">{(cm as any).merchants?.business_name ||"Unknown"}</p>
  <p className="text-xs text-muted-foreground">
@@ -409,7 +409,7 @@ export const BrandCampaignsTab = () => {
  {campaignActivity.length === 0 ? (
  <Card>
  <CardContent className="py-8 text-center text-muted-foreground">
- <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" />
+ <span className="h-8 w-8 mx-auto mb-2 opacity-50" aria-hidden="true">⏰</span>
  <p>No activity yet</p>
  </CardContent>
  </Card>
@@ -503,12 +503,12 @@ export const BrandCampaignsTab = () => {
  {/* Brand accounts */}
  <div>
  <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
- <Building2 className="h-5 w-5" /> Brand Accounts ({brands.length})
+ <span className="h-5 w-5" aria-hidden="true">🏢</span> Brand Accounts ({brands.length})
  </h3>
  {brands.length === 0 ? (
  <Card>
  <CardContent className="py-8 text-center text-muted-foreground">
- <Building2 className="h-8 w-8 mx-auto mb-2 opacity-50" />
+ <span className="h-8 w-8 mx-auto mb-2 opacity-50" aria-hidden="true">🏢</span>
  <p>No brand accounts yet. Create one to get started.</p>
  </CardContent>
  </Card>
@@ -530,7 +530,7 @@ export const BrandCampaignsTab = () => {
  {(brand as any).setup_completed_at ? (
  <Badge variant="outline" className="text-xs"><CheckCircle2 className="h-3 w-3 mr-1" />Setup done</Badge>
  ) : (
- <Badge variant="outline" className="text-xs"><Clock className="h-3 w-3 mr-1" />Setup pending</Badge>
+ <Badge variant="outline" className="text-xs"><span className="h-3 w-3 mr-1" aria-hidden="true">⏰</span>Setup pending</Badge>
  )}
  </div>
  </div>
@@ -538,7 +538,7 @@ export const BrandCampaignsTab = () => {
  <p className="text-sm text-muted-foreground mb-2 line-clamp-2">{brand.description}</p>
  )}
  <div className="flex items-center gap-2 text-sm mb-3">
- <Megaphone className="h-4 w-4 text-muted-foreground" />
+ <span className="h-4 w-4 text-muted-foreground" aria-hidden="true">📣</span>
  <span>{brandCampaigns.length} campaign{brandCampaigns.length !== 1 ?"s" :""}</span>
  {activeCampaigns.length > 0 && (
  <Badge variant="outline" className="text-success">{activeCampaigns.length} active</Badge>
@@ -552,7 +552,7 @@ export const BrandCampaignsTab = () => {
  disabled={!brand.contact_email || resendInvitationMutation.isPending}
  onClick={() => resendInvitationMutation.mutate(brand.id)}
  >
- <Mail className="h-3 w-3 mr-1" />
+ <span className="h-3 w-3 mr-1" aria-hidden="true">📧</span>
  {(brand as any).setup_completed_at ?"Resend" :"Send Invite"}
  </Button>
  <AlertDialog>
@@ -594,12 +594,12 @@ export const BrandCampaignsTab = () => {
  {/* Campaigns */}
  <div>
  <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
- <Megaphone className="h-5 w-5" /> All Campaigns ({campaigns.length})
+ <span className="h-5 w-5" aria-hidden="true">📣</span> All Campaigns ({campaigns.length})
  </h3>
  {campaigns.length === 0 ? (
  <Card>
  <CardContent className="py-8 text-center text-muted-foreground">
- <Megaphone className="h-8 w-8 mx-auto mb-2 opacity-50" />
+ <span className="h-8 w-8 mx-auto mb-2 opacity-50" aria-hidden="true">📣</span>
  <p>No campaigns yet. Brands can create campaigns from their dashboard.</p>
  </CardContent>
  </Card>

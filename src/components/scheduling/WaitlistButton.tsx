@@ -14,7 +14,7 @@ import {
  DialogHeader,
  DialogTitle,
 } from"@/components/ui/dialog";
-import { Bell, Loader2, CheckCircle2 } from"lucide-react";
+import { Loader2, CheckCircle2 } from "lucide-react";
 import { toast } from"sonner";
 import { format, addDays } from"date-fns";
 
@@ -76,7 +76,7 @@ export function WaitlistButton({ merchantId, serviceId, serviceName, date }: Wai
  className="gap-1.5"
  onClick={() => setDialogOpen(true)}
  >
- <Bell className="w-3.5 h-3.5" />
+ <span className="w-3.5 h-3.5" aria-hidden="true">🔔</span>
  Join Waitlist
  </Button>
 
@@ -126,7 +126,7 @@ export function WaitlistButton({ merchantId, serviceId, serviceName, date }: Wai
  {joinWaitlist.isPending ? (
  <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Joining...</>
  ) : (
- <><Bell className="w-4 h-4 mr-2" /> Join Waitlist</>
+ <><span className="w-4 h-4 mr-2" aria-hidden="true">🔔</span> Join Waitlist</>
  )}
  </Button>
  </DialogFooter>

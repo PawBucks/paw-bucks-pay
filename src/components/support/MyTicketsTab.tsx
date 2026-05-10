@@ -20,7 +20,7 @@ import {
 } from'@/components/ui/select';
 import { toast } from'sonner';
 import { format } from'date-fns';
-import { Ticket, Clock, CheckCircle, AlertCircle, MessageSquare, Send, Eye, Loader2 } from'lucide-react';
+import { Ticket, Send, Eye, Loader2 } from "lucide-react";
 import { LoadingSpinner } from'@/components/LoadingSpinner';
 
 const STATUS_CONFIG: Record<string, { label: string; variant:'default' |'secondary' |'destructive' |'outline' }> = {
@@ -281,7 +281,7 @@ export const MyTicketsTab = () => {
  {/* Replies Thread */}
  <div className="border-t pt-4">
  <p className="text-sm font-semibold mb-3 flex items-center gap-2">
- <MessageSquare className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">💬</span>
  Conversation
  </p>
 

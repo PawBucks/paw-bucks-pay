@@ -24,7 +24,7 @@ import {
  SheetContent,
  SheetTrigger,
 } from"@/components/ui/sheet";
-import { LogOut, PawPrint, Loader2, LayoutDashboard, BarChart3, Zap, DollarSign, Menu, ChevronRight, HelpCircle, Stamp, LifeBuoy, MessageSquare, Users, PauseCircle, Mail, History, ClipboardCheck, QrCode, Megaphone } from "lucide-react";
+import { LogOut, Loader2, LayoutDashboard, BarChart3, Zap, DollarSign, Menu, ChevronRight, HelpCircle, Stamp, LifeBuoy, MessageSquare, Users, PauseCircle, History, ClipboardCheck, QrCode, Megaphone } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { toast } from"sonner";
 import { format, startOfMonth, parseISO } from"date-fns";
@@ -917,7 +917,7 @@ const MerchantDashboard = () => {
   <img src={merchant.logo_url} alt={merchant.business_name} className="w-10 h-10 rounded-lg object-cover border border-border" />
   ) : (
   <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-  <PawPrint className="w-5 h-5 text-primary" />
+  <span className="w-5 h-5 text-primary" aria-hidden="true">🐾</span>
   </div>
   )}
   <div className="min-w-0">
@@ -1047,7 +1047,7 @@ const MerchantDashboard = () => {
  className="w-full"
  onClick={() => window.location.href ='mailto:support@pawbucks.app?subject=Merchant Account Paused - Request to Resume&body=Merchant:' + encodeURIComponent(merchant.business_name)}
  >
- <Mail className="w-4 h-4 mr-2" />
+ <span className="w-4 h-4 mr-2" aria-hidden="true">📧</span>
  Contact Support
  </Button>
  <Button variant="ghost" className="w-full" onClick={() => signOut()}>

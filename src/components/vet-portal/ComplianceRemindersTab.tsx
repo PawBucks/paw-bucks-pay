@@ -9,7 +9,7 @@ import { Switch } from"@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from"@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from"@/components/ui/dialog";
 import { Badge } from"@/components/ui/badge";
-import { Bell, Plus, Calendar, Trash2, Edit, Send, Loader2 } from"lucide-react";
+import { Plus, Trash2, Edit, Send, Loader2 } from "lucide-react";
 import { format, parseISO, addMonths } from"date-fns";
 import { toast } from"sonner";
 
@@ -314,7 +314,7 @@ export const ComplianceRemindersTab = ({ vetId }: ComplianceRemindersTabProps) =
  <div className="flex justify-between items-center">
  <div>
  <h2 className="text-xl font-semibold flex items-center gap-2">
- <Bell className="w-5 h-5" />
+ <span className="w-5 h-5" aria-hidden="true">🔔</span>
  Compliance Reminders
  </h2>
  <p className="text-sm text-muted-foreground">
@@ -447,7 +447,7 @@ export const ComplianceRemindersTab = ({ vetId }: ComplianceRemindersTabProps) =
 
  {reminders.length === 0 ? (
  <Card className="p-8 text-center text-muted-foreground">
- <Bell className="w-12 h-12 mx-auto mb-4 opacity-50" />
+ <span className="w-12 h-12 mx-auto mb-4 opacity-50" aria-hidden="true">🔔</span>
  <p>No compliance reminders set up yet.</p>
  <p className="text-sm mt-1">Create reminders for vaccinations, exams, and preventive care.</p>
  </Card>
@@ -499,7 +499,7 @@ export const ComplianceRemindersTab = ({ vetId }: ComplianceRemindersTabProps) =
  onClick={() => handleToggleActive(reminder)}
  title={reminder.is_active ?"Pause" :"Activate"}
  >
- <Calendar className={`w-4 h-4 ${reminder.is_active ?"" :"text-muted-foreground"}`} />
+ <span className={`w-4 h-4 ${reminder.is_active ?"" :"text-muted-foreground"}`} aria-hidden="true">📅</span>
  </Button>
  <Button
  variant="ghost"

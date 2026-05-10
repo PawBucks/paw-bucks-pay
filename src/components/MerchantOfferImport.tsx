@@ -2,7 +2,7 @@ import { useState } from"react";
 import { Button } from"@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from"@/components/ui/dialog";
-import { Upload, Download, FileText } from"lucide-react";
+import { Upload, Download } from "lucide-react";
 import { toast } from"sonner";
 import { supabase } from"@/integrations/supabase/client";
 import { ErrorHandler } from"@/utils/errorHandler";
@@ -177,7 +177,7 @@ export function MerchantOfferImport({ onImportComplete }: { onImportComplete: ()
  </CardHeader>
  <CardContent>
  <div className="border-2 border-dashed rounded-lg p-8 text-center">
- <FileText className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+ <span className="h-12 w-12 mx-auto mb-4 text-muted-foreground" aria-hidden="true">📄</span>
  <label htmlFor="csv-upload" className="cursor-pointer">
  <input
  id="csv-upload"

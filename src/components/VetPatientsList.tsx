@@ -7,7 +7,7 @@ import { Input } from"@/components/ui/input";
 import { Label } from"@/components/ui/label";
 import { Textarea } from"@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from"@/components/ui/select";
-import { PawPrint, Upload, Loader2 } from"lucide-react";
+import { Upload, Loader2 } from "lucide-react";
 import { toast } from"sonner";
 
 type Patient = {
@@ -161,7 +161,7 @@ export const VetPatientsList = ({ vetId }: VetPatientsListProps) => {
  if (patients.length === 0) {
  return (
  <Card className="p-8 text-center text-muted-foreground">
- <PawPrint className="w-12 h-12 mx-auto mb-2 opacity-50" />
+ <span className="w-12 h-12 mx-auto mb-2 opacity-50" aria-hidden="true">🐾</span>
  <p>No patients yet. Patients will appear here once they message you.</p>
  </Card>
  );

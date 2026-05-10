@@ -30,7 +30,7 @@ import { PersonalityQuizCTA } from "@/components/dashboard/PersonalityQuizCTA";
 import { WelcomeCreditCard } from "@/components/dashboard/WelcomeCreditCard";
 import { MaximusChat } from"@/components/maximus/MaximusChat";
 import { QRScannerDialog, CheckInFollowupBanner } from"@/components/checkin";
-import { Store, Users, TrendingUp, Receipt, QrCode } from"lucide-react";
+import { Store, Users, Receipt, QrCode } from "lucide-react";
 import { EditorialPageHeader } from"@/components/shared/EditorialPageHeader";
 
 const cardVariants = {
@@ -149,7 +149,7 @@ const Dashboard = () => {
     actions={
       sharedAccount.isSharedMember && sharedAccount.ownerName ? (
         <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-medium">
-          <Users className="w-4 h-4" />
+          <span className="w-4 h-4" aria-hidden="true">👥</span>
           Shared with {sharedAccount.ownerName}
         </div>
       ) : undefined
@@ -206,7 +206,7 @@ const Dashboard = () => {
  <div className="flex items-center justify-between gap-4">
  <div className="flex items-center gap-4">
  <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
- <Store className="w-6 h-6 text-primary" />
+ <span className="w-6 h-6 text-primary" aria-hidden="true">🏪</span>
  </div>
  <div>
  <h3 className="font-semibold">Partner Receipt</h3>
@@ -227,7 +227,7 @@ const Dashboard = () => {
  <div className="flex items-center justify-between gap-4">
  <div className="flex items-center gap-4">
  <div className="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center">
- <Receipt className="w-6 h-6 text-accent-foreground" />
+ <span className="w-6 h-6 text-accent-foreground" aria-hidden="true">🧾</span>
  </div>
  <div>
  <h3 className="font-semibold">Other Pet Store</h3>
@@ -308,7 +308,7 @@ const Dashboard = () => {
  <GradientCard gradient>
  <div className="flex items-center gap-4">
  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
- <TrendingUp className="w-6 h-6 text-primary" />
+ <span className="w-6 h-6 text-primary" aria-hidden="true">📈</span>
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Total Earnings</p>
@@ -320,7 +320,7 @@ const Dashboard = () => {
  <GradientCard>
  <div className="flex items-center gap-4">
  <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center">
- <Users className="w-6 h-6 text-accent" />
+ <span className="w-6 h-6 text-accent" aria-hidden="true">👥</span>
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Total Customers</p>
@@ -332,7 +332,7 @@ const Dashboard = () => {
  <GradientCard>
  <div className="flex items-center gap-4">
  <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center">
- <Store className="w-6 h-6 text-secondary" />
+ <span className="w-6 h-6 text-secondary" aria-hidden="true">🏪</span>
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Transactions</p>

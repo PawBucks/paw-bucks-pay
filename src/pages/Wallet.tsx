@@ -26,7 +26,7 @@ import { SpendingInsights } from"@/components/wallet/SpendingInsights";
 import { RecurringExpenses } from"@/components/wallet/RecurringExpenses";
 import { SpendingGoals } from"@/components/wallet/SpendingGoals";
 import { CategoryComparison } from"@/components/wallet/CategoryComparison";
-import { Wallet as WalletIcon, TrendingUp, Gift, ArrowUpRight, ArrowDownRight, Coins, PieChart, Calendar, RotateCcw } from "lucide-react";
+import { Wallet as WalletIcon, ArrowUpRight, ArrowDownRight, RotateCcw } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { format } from"date-fns";
 import { Formatters } from"@/utils/formatters";
@@ -268,7 +268,7 @@ const Wallet = () => {
  <GradientCard>
  <div className="flex items-center gap-3">
  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
- <TrendingUp className="w-6 h-6 text-primary" />
+ <span className="w-6 h-6 text-primary" aria-hidden="true">📈</span>
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Total Spent</p>
@@ -280,7 +280,7 @@ const Wallet = () => {
  <GradientCard>
  <div className="flex items-center gap-3">
  <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center">
- <Gift className="w-6 h-6 text-secondary" />
+ <span className="w-6 h-6 text-secondary" aria-hidden="true">🎁</span>
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Points</p>
@@ -319,7 +319,7 @@ const Wallet = () => {
  className="w-full justify-between"
  >
  <span className="flex items-center gap-2">
- <PieChart className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">📊</span>
  View Detailed Spending Breakdown
  </span>
  <ArrowUpRight className="w-4 h-4" />
@@ -425,7 +425,7 @@ const Wallet = () => {
  {/* PawBucks Earning History */}
  <GradientCard className="mt-6">
  <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
- <Coins className="w-5 h-5 text-accent" />
+ <span className="w-5 h-5 text-accent" aria-hidden="true">🪙</span>
  PawBucks History
  </h3>
  {pawbucksActivity.length > 0 ? (
@@ -470,7 +470,7 @@ const Wallet = () => {
  ) : (
  <div className="text-center py-12">
  <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-3">
- <Coins className="w-8 h-8 text-muted-foreground" />
+ <span className="w-8 h-8 text-muted-foreground" aria-hidden="true">🪙</span>
  </div>
  <p className="text-muted-foreground mb-4">No PawBucks activity yet</p>
  <p className="text-sm text-muted-foreground">

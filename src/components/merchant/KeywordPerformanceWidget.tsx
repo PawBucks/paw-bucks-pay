@@ -6,7 +6,7 @@ import { Badge } from"@/components/ui/badge";
 import { Button } from"@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
 import { GradientCard } from"@/components/ui/gradient-card";
-import { Search, Eye, MousePointerClick, TrendingUp, Loader2, ArrowUp, ArrowDown, RefreshCw, Download, Lightbulb, Target, BarChart3, PieChart, AlertTriangle, CheckCircle, Info, ExternalLink } from "lucide-react";
+import { Search, Eye, MousePointerClick, Loader2, ArrowUp, ArrowDown, RefreshCw, Download, PieChart, AlertTriangle, CheckCircle, Info, ExternalLink } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { 
  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -216,7 +216,7 @@ export function KeywordPerformanceWidget() {
  <GradientCard gradient>
  <div className="flex items-center gap-3">
  <div className="p-3 rounded-md bg-success/10">
- <TrendingUp className="h-5 w-5 text-success" />
+ <span className="h-5 w-5 text-success" aria-hidden="true">📈</span>
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Avg CTR</p>
@@ -228,7 +228,7 @@ export function KeywordPerformanceWidget() {
  <GradientCard gradient>
  <div className="flex items-center gap-3">
  <div className="p-3 rounded-md bg-accent/10">
- <Target className="h-5 w-5 text-accent" />
+ <span className="h-5 w-5 text-accent" aria-hidden="true">🎯</span>
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Conversions</p>
@@ -253,7 +253,7 @@ export function KeywordPerformanceWidget() {
  {insight.type ==='success' && <CheckCircle className="h-5 w-5 text-success shrink-0 mt-0.5" />}
  {insight.type ==='warning' && <AlertTriangle className="h-5 w-5 text-warning shrink-0 mt-0.5" />}
  {insight.type ==='info' && <Info className="h-5 w-5 text-info shrink-0 mt-0.5" />}
- {insight.type ==='opportunity' && <Lightbulb className="h-5 w-5 text-accent shrink-0 mt-0.5" />}
+ {insight.type ==='opportunity' && <span className="h-5 w-5 text-accent shrink-0 mt-0.5" aria-hidden="true">💡</span>}
  <div className="space-y-1">
  <p className="font-medium">{insight.title}</p>
  <p className="text-sm text-muted-foreground">{insight.description}</p>
@@ -282,7 +282,7 @@ export function KeywordPerformanceWidget() {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <BarChart3 className="h-5 w-5" />
+ <span className="h-5 w-5" aria-hidden="true">📊</span>
  Search Trends (Last 90 Days)
  </CardTitle>
  </CardHeader>
@@ -334,7 +334,7 @@ export function KeywordPerformanceWidget() {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <PieChart className="h-5 w-5" />
+ <span className="h-5 w-5" aria-hidden="true">📊</span>
  Traffic Source Breakdown
  </CardTitle>
  </CardHeader>
@@ -526,7 +526,7 @@ export function KeywordPerformanceWidget() {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <Lightbulb className="h-5 w-5 text-warning" />
+ <span className="h-5 w-5 text-warning" aria-hidden="true">💡</span>
  Recommended Keywords
  </CardTitle>
  <CardDescription>Keywords you should target based on your business type</CardDescription>
@@ -558,7 +558,7 @@ export function KeywordPerformanceWidget() {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <Target className="h-5 w-5 text-destructive" />
+ <span className="h-5 w-5 text-destructive" aria-hidden="true">🎯</span>
  Competitor Keyword Gaps
  </CardTitle>
  <CardDescription>Keywords your competitors are ranking for that you're missing</CardDescription>

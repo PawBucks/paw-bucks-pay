@@ -743,7 +743,7 @@ export const VetOnboardingForm = () => {
  <Card className="bg-card border-border rounded-lg shadow-sm">
  <CardHeader className="border-b border-border">
  <CardTitle className="flex items-center gap-2 text-muted-foreground">
- <Building2 className="h-5 w-5 text-primary" />
+ <span className="h-5 w-5 text-primary" aria-hidden="true">🏢</span>
  Practice Identity
  </CardTitle>
  <CardDescription>Tell us about your veterinary practice</CardDescription>
@@ -912,7 +912,7 @@ export const VetOnboardingForm = () => {
  <Card className="bg-card border-border rounded-lg shadow-sm">
  <CardHeader className="border-b border-border">
  <CardTitle className="flex items-center gap-2 text-muted-foreground">
- <Stethoscope className="h-5 w-5 text-primary" />
+ <span className="h-5 w-5 text-primary" aria-hidden="true">🩺</span>
  Medical Authority & Verification
  </CardTitle>
  <CardDescription>Verify your professional credentials</CardDescription>
@@ -1059,7 +1059,7 @@ export const VetOnboardingForm = () => {
  <Card className="bg-card border-border rounded-lg shadow-sm">
  <CardHeader className="border-b border-border">
  <CardTitle className="flex items-center gap-2 text-muted-foreground">
- <ShieldCheck className="h-5 w-5 text-primary" />
+ <span className="h-5 w-5 text-primary" aria-hidden="true">🛡️</span>
  Claim-Splicing Configuration
  </CardTitle>
  <CardDescription>Set up your insurance processing preferences</CardDescription>
@@ -1187,7 +1187,7 @@ export const VetOnboardingForm = () => {
  <Card className="bg-card border-border rounded-lg shadow-sm">
  <CardHeader className="border-b border-border">
  <CardTitle className="flex items-center gap-2 text-muted-foreground">
- <Wallet className="h-5 w-5 text-primary" />
+ <span className="h-5 w-5 text-primary" aria-hidden="true">👛</span>
  Platform Integration
  </CardTitle>
  <CardDescription>Connect your practice management systems</CardDescription>
@@ -1270,7 +1270,7 @@ export const VetOnboardingForm = () => {
  <Card className="bg-card border-border rounded-lg shadow-sm">
  <CardHeader className="border-b border-border">
  <CardTitle className="flex items-center gap-2 text-muted-foreground">
- <User className="h-5 w-5 text-primary" />
+ <span className="h-5 w-5 text-primary" aria-hidden="true">👤</span>
  Public Profile & Merchant Display
  </CardTitle>
  <CardDescription>How pet owners will see your practice</CardDescription>
@@ -1360,7 +1360,7 @@ export const VetOnboardingForm = () => {
 
  <div className="space-y-4 rounded-lg border border-border p-4">
  <div className="flex items-center gap-2 text-muted-foreground font-medium">
- <Phone className="h-5 w-5 text-primary" />
+ <span className="h-5 w-5 text-primary" aria-hidden="true">📞</span>
  Emergency Protocol
  </div>
  
@@ -1405,7 +1405,7 @@ export const VetOnboardingForm = () => {
  className="w-full rounded-lg border-primary/20 text-primary hover:bg-primary/10"
  onClick={() => window.open(`tel:${values.emergency_phone}`)}
  >
- <Phone className="h-4 w-4 mr-2" />
+ <span className="h-4 w-4 mr-2" aria-hidden="true">📞</span>
  Call Emergency Line: {values.emergency_phone}
  </Button>
  </div>
@@ -1420,7 +1420,7 @@ export const VetOnboardingForm = () => {
  <Card className="bg-card border-border rounded-lg shadow-sm">
  <CardHeader className="border-b border-border">
  <CardTitle className="flex items-center gap-2 text-muted-foreground">
- <CreditCard className="h-5 w-5 text-primary" />
+ <span className="h-5 w-5 text-primary" aria-hidden="true">💳</span>
  Financial Onboarding
  </CardTitle>
  <CardDescription>Set up your payment processing and subscription</CardDescription>
@@ -1429,7 +1429,7 @@ export const VetOnboardingForm = () => {
  {/* Stripe Connect Card */}
  <div className="rounded-lg border-2 border-dashed border-border p-6 text-center">
  <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-primary/20 to-primary/20 rounded-full flex items-center justify-center">
- <CreditCard className="h-8 w-8 text-primary-foreground" />
+ <span className="h-8 w-8 text-primary-foreground" aria-hidden="true">💳</span>
  </div>
  <h3 className="text-lg font-semibold text-muted-foreground mb-2">Stripe Connect</h3>
  <p className="text-muted-foreground mb-4">
@@ -1566,7 +1566,7 @@ export const VetOnboardingForm = () => {
  <Card className="bg-card border-border rounded-lg shadow-sm">
  <CardHeader className="border-b border-border">
  <CardTitle className="flex items-center gap-2 text-muted-foreground">
- <FileText className="h-5 w-5 text-primary" />
+ <span className="h-5 w-5 text-primary" aria-hidden="true">📄</span>
  Legal & Compliance
  </CardTitle>
  <CardDescription>Review and agree to our terms and policies</CardDescription>
@@ -1731,7 +1731,7 @@ export const VetOnboardingForm = () => {
  <div className="rounded-lg border border-border p-4">
  <div className="flex items-center justify-between mb-3">
  <h4 className="font-semibold text-muted-foreground flex items-center gap-2">
- <Building2 className="h-4 w-4 text-primary" />
+ <span className="h-4 w-4 text-primary" aria-hidden="true">🏢</span>
  Practice Identity
  </h4>
  <Button type="button" variant="ghost" size="sm" onClick={() => goToStep(1)}>
@@ -1750,7 +1750,7 @@ export const VetOnboardingForm = () => {
  <div className="rounded-lg border border-border p-4">
  <div className="flex items-center justify-between mb-3">
  <h4 className="font-semibold text-muted-foreground flex items-center gap-2">
- <Stethoscope className="h-4 w-4 text-primary" />
+ <span className="h-4 w-4 text-primary" aria-hidden="true">🩺</span>
  Medical Verification
  </h4>
  <Button type="button" variant="ghost" size="sm" onClick={() => goToStep(2)}>
@@ -1769,7 +1769,7 @@ export const VetOnboardingForm = () => {
  <div className="rounded-lg border border-border p-4">
  <div className="flex items-center justify-between mb-3">
  <h4 className="font-semibold text-muted-foreground flex items-center gap-2">
- <ShieldCheck className="h-4 w-4 text-primary" />
+ <span className="h-4 w-4 text-primary" aria-hidden="true">🛡️</span>
  Insurance Setup
  </h4>
  <Button type="button" variant="ghost" size="sm" onClick={() => goToStep(3)}>
@@ -1788,7 +1788,7 @@ export const VetOnboardingForm = () => {
  <div className="rounded-lg border border-border p-4">
  <div className="flex items-center justify-between mb-3">
  <h4 className="font-semibold text-muted-foreground flex items-center gap-2">
- <Wallet className="h-4 w-4 text-primary" />
+ <span className="h-4 w-4 text-primary" aria-hidden="true">👛</span>
  Integration
  </h4>
  <Button type="button" variant="ghost" size="sm" onClick={() => goToStep(4)}>
@@ -1805,7 +1805,7 @@ export const VetOnboardingForm = () => {
  <div className="rounded-lg border border-border p-4">
  <div className="flex items-center justify-between mb-3">
  <h4 className="font-semibold text-muted-foreground flex items-center gap-2">
- <User className="h-4 w-4 text-primary" />
+ <span className="h-4 w-4 text-primary" aria-hidden="true">👤</span>
  Public Profile
  </h4>
  <Button type="button" variant="ghost" size="sm" onClick={() => goToStep(5)}>
@@ -1823,7 +1823,7 @@ export const VetOnboardingForm = () => {
  <div className="rounded-lg border border-border p-4">
  <div className="flex items-center justify-between mb-3">
  <h4 className="font-semibold text-muted-foreground flex items-center gap-2">
- <CreditCard className="h-4 w-4 text-primary" />
+ <span className="h-4 w-4 text-primary" aria-hidden="true">💳</span>
  Financial Setup
  </h4>
  <Button type="button" variant="ghost" size="sm" onClick={() => goToStep(6)}>
@@ -1840,7 +1840,7 @@ export const VetOnboardingForm = () => {
  <div className="rounded-lg border border-border p-4">
  <div className="flex items-center justify-between mb-3">
  <h4 className="font-semibold text-muted-foreground flex items-center gap-2">
- <FileText className="h-4 w-4 text-primary" />
+ <span className="h-4 w-4 text-primary" aria-hidden="true">📄</span>
  Legal & Compliance
  </h4>
  <Button type="button" variant="ghost" size="sm" onClick={() => goToStep(7)}>

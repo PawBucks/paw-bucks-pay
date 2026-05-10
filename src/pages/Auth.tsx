@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/comp
 import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from"@/components/ui/dialog";
 import { toast } from"sonner";
-import { Eye, EyeOff, Home, KeyRound, Users, Shield, Lock, CheckCircle2 } from"lucide-react";
+import { Eye, EyeOff, KeyRound } from "lucide-react";
 import logo from"@/assets/logo.png";
 import { useAuth } from"@/hooks/useAuth";
 import { signUpSchema, signInSchema } from"@/lib/validation";
@@ -526,7 +526,7 @@ const Auth = () => {
  onClick={() => navigate("/")}
  className="gap-2 text-muted-foreground"
  >
- <Home className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">🏠</span>
  Back
  </Button>
  </div>
@@ -548,7 +548,7 @@ const Auth = () => {
  </div>
  <div className="flex flex-col items-center gap-1 text-xs text-muted-foreground sm:flex-row sm:flex-wrap sm:justify-center sm:gap-x-4">
  <span className="inline-flex items-center gap-1 whitespace-nowrap">
- <Lock className="w-3 h-3 text-primary" />
+ <span className="w-3 h-3 text-primary" aria-hidden="true">🔒</span>
  <span>
  Payments by{""}
  <a
@@ -576,7 +576,7 @@ const Auth = () => {
  {/* Show invite banner if accessing via invite link */}
  {inviteInfo && (
  <Alert className="mb-4 bg-warning/10 border-warning/20">
- <Users className="h-4 w-4 text-warning" />
+ <span className="h-4 w-4 text-warning" aria-hidden="true">👥</span>
  <AlertDescription className="text-warning">
  <strong>{inviteInfo.ownerName}</strong> has invited you to share their PawBucks account! 
  Sign up or sign in to accept the invitation automatically.

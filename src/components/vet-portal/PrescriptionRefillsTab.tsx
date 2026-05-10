@@ -7,7 +7,7 @@ import { Textarea } from"@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from"@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from"@/components/ui/dialog";
 import { Label } from"@/components/ui/label";
-import { Pill, Check, X, Loader2, Clock, Package } from"lucide-react";
+import { Pill, Check, X, Loader2 } from "lucide-react";
 import { format, parseISO } from"date-fns";
 import { toast } from"sonner";
 
@@ -179,13 +179,13 @@ export const PrescriptionRefillsTab = ({ vetId }: PrescriptionRefillsTabProps) =
  const getStatusBadge = (status: string) => {
  switch (status) {
  case"pending":
- return <Badge className="bg-warning"><Clock className="w-3 h-3 mr-1" />Pending</Badge>;
+ return <Badge className="bg-warning"><span className="w-3 h-3 mr-1" aria-hidden="true">⏰</span>Pending</Badge>;
  case"approved":
  return <Badge className="bg-info"><Check className="w-3 h-3 mr-1" />Approved</Badge>;
  case"denied":
  return <Badge variant="destructive"><X className="w-3 h-3 mr-1" />Denied</Badge>;
  case"fulfilled":
- return <Badge className="bg-success"><Package className="w-3 h-3 mr-1" />Fulfilled</Badge>;
+ return <Badge className="bg-success"><span className="w-3 h-3 mr-1" aria-hidden="true">📦</span>Fulfilled</Badge>;
  default:
  return <Badge variant="secondary">{status}</Badge>;
  }
@@ -316,7 +316,7 @@ export const PrescriptionRefillsTab = ({ vetId }: PrescriptionRefillsTabProps) =
  <Loader2 className="w-4 h-4 animate-spin" />
  ) : (
  <>
- <Package className="w-4 h-4 mr-1" />
+ <span className="w-4 h-4 mr-1" aria-hidden="true">📦</span>
  Mark Fulfilled
  </>
  )}

@@ -18,11 +18,11 @@ import { Badge } from"@/components/ui/badge";
 import { Input } from"@/components/ui/input";
 import { Separator } from"@/components/ui/separator";
 import { toast } from"sonner";
-import { Coins, CreditCard, Store, Search, SlidersHorizontal, Grid3X3, LayoutList, X } from"lucide-react";
+import { Store, Search, SlidersHorizontal, X } from "lucide-react";
 import { useNavigate, useSearchParams } from"react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from"@/components/ui/dialog";
 import { Elements, PaymentElement, useStripe, useElements } from"@stripe/react-stripe-js";
-import { Loader2 } from"lucide-react";
+import { Loader2 } from "lucide-react";
 import { BottomNav } from"@/components/BottomNav";
 import { AdPlacement } from"@/components/AdPlacement";
 import { Header } from"@/components/Header";
@@ -126,7 +126,7 @@ const PetStorePaymentForm = ({
  <div className="flex justify-between text-sm">
  <span className="text-muted-foreground">You'll earn ({cashbackRate}x):</span>
  <span className="font-bold text-accent flex items-center gap-1">
- <Coins className="h-3 w-3" />
+ <span className="h-3 w-3" aria-hidden="true">🪙</span>
  {pawbucksEarned} PawBucks
  </span>
  </div>
@@ -470,7 +470,7 @@ export default function PetStore() { const { user, signOut } = useAuth();
  <div className="flex items-center gap-2">
  {user && wallet && (
  <div className="flex items-center gap-1.5 bg-primary/10 px-2.5 py-1 rounded-lg">
- <Coins className="h-3.5 w-3.5 text-primary" />
+ <span className="h-3.5 w-3.5 text-primary" aria-hidden="true">🪙</span>
  <span className="text-xs font-semibold">{Formatters.number(wallet.balance)} PB</span>
  </div>
  )}
@@ -610,7 +610,7 @@ export default function PetStore() { const { user, signOut } = useAuth();
  ) : filteredItems.length === 0 ? (
  <div className="text-center py-16 px-4">
  <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
- <Store className="w-8 h-8 text-muted-foreground" />
+ <span className="w-8 h-8 text-muted-foreground" aria-hidden="true">🏪</span>
  </div>
  <h3 className="text-xl font-semibold mb-2">No items found</h3>
  <p className="text-muted-foreground mb-4">Try adjusting your search or filters.</p>

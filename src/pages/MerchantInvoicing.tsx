@@ -7,7 +7,7 @@ import { SEO } from"@/components/SEO";
 import { Button } from"@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from"@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
-import { ArrowLeft, Plus, Users, Settings, FileText, LayoutTemplate, Package, CalendarClock } from"lucide-react";
+import { ArrowLeft, Plus, Settings, LayoutTemplate, CalendarClock } from "lucide-react";
 import { toast } from"sonner";
 import { InvoiceList, InvoiceEditor, InvoicePreview, ClientManager, InvoiceSettingsComponent, CatalogManager, TemplateManager, ScheduledInvoices } from"@/components/invoicing";
 import { RecordPaymentDialog } from"@/components/invoicing/RecordPaymentDialog";
@@ -897,7 +897,7 @@ const MerchantInvoicing = () => {
  <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
  <TabsList className="grid w-full grid-cols-6 lg:w-auto lg:inline-grid">
  <TabsTrigger value="invoices" className="flex items-center gap-2">
- <FileText className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">📄</span>
  <span className="hidden sm:inline">Invoices</span>
  </TabsTrigger>
  <TabsTrigger value="scheduled" className="flex items-center gap-2">
@@ -905,11 +905,11 @@ const MerchantInvoicing = () => {
  <span className="hidden sm:inline">Scheduled</span>
  </TabsTrigger>
  <TabsTrigger value="clients" className="flex items-center gap-2">
- <Users className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">👥</span>
  <span className="hidden sm:inline">Clients</span>
  </TabsTrigger>
  <TabsTrigger value="catalog" className="flex items-center gap-2">
- <Package className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">📦</span>
  <span className="hidden sm:inline">Catalog</span>
  </TabsTrigger>
  <TabsTrigger value="templates" className="flex items-center gap-2">

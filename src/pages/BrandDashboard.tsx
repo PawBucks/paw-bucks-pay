@@ -14,11 +14,7 @@ import { Textarea } from"@/components/ui/textarea";
 import { Slider } from"@/components/ui/slider";
 import { ScrollArea } from"@/components/ui/scroll-area";
 import { Progress } from"@/components/ui/progress";
-import {
- Megaphone, DollarSign, TrendingUp, Users, Store, Plus, ArrowRight,
- Calendar, CheckCircle2, Clock, Loader2, LogOut, Building2, BarChart3,
- Target, Zap, PieChart, LayoutDashboard, Inbox,
-} from"lucide-react";
+import { Plus, ArrowRight, Loader2, LogOut, LayoutDashboard, Inbox } from "lucide-react";
 import { toast } from"sonner";
 import {
  getBrandAccountForUser,
@@ -232,7 +228,7 @@ const BrandDashboard = () => {
  <div className="min-h-screen flex items-center justify-center bg-background p-4">
  <Card className="max-w-md w-full">
  <CardHeader className="text-center">
- <Building2 className="h-12 w-12 mx-auto text-muted-foreground mb-2" />
+ <span className="h-12 w-12 mx-auto text-muted-foreground mb-2" aria-hidden="true">🏢</span>
  <CardTitle>No Brand Account</CardTitle>
  <CardDescription>
  Your account doesn't have a brand profile yet. Please contact the PawBucks team to get set up as a Brand/Manufacturer.
@@ -253,7 +249,7 @@ const BrandDashboard = () => {
  <div className="min-h-screen flex items-center justify-center bg-background p-4">
  <Card className="max-w-md w-full">
  <CardHeader className="text-center">
- <Building2 className="h-12 w-12 mx-auto text-primary mb-2" />
+ <span className="h-12 w-12 mx-auto text-primary mb-2" aria-hidden="true">🏢</span>
  <CardTitle>Finish Brand Setup</CardTitle>
  <CardDescription>
  Complete your brand profile to unlock campaign funding, audience targeting, and the Brand Command Center.
@@ -299,26 +295,26 @@ const BrandDashboard = () => {
  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
  <Card>
  <CardContent className="pt-4 pb-3">
- <p className="text-xs text-muted-foreground flex items-center gap-1"><DollarSign className="h-3 w-3" />Budget</p>
+ <p className="text-xs text-muted-foreground flex items-center gap-1"><span className="h-3 w-3" aria-hidden="true">💵</span>Budget</p>
  <p className="text-xl font-bold">${selectedCampaign.budget_usd.toLocaleString()}</p>
  </CardContent>
  </Card>
  <Card>
  <CardContent className="pt-4 pb-3">
- <p className="text-xs text-muted-foreground flex items-center gap-1"><Target className="h-3 w-3" />PB Pool</p>
+ <p className="text-xs text-muted-foreground flex items-center gap-1"><span className="h-3 w-3" aria-hidden="true">🎯</span>PB Pool</p>
  <p className="text-xl font-bold">{selectedCampaign.pawbucks_pool.toLocaleString()}</p>
  <Progress value={distributionPct} className="h-1 mt-1" />
  </CardContent>
  </Card>
  <Card>
  <CardContent className="pt-4 pb-3">
- <p className="text-xs text-muted-foreground flex items-center gap-1"><Zap className="h-3 w-3" />Per Check-in</p>
+ <p className="text-xs text-muted-foreground flex items-center gap-1"><span className="h-3 w-3" aria-hidden="true">⚡</span>Per Check-in</p>
  <p className="text-xl font-bold">{selectedCampaign.pawbucks_per_checkin} PB</p>
  </CardContent>
  </Card>
  <Card>
  <CardContent className="pt-4 pb-3">
- <p className="text-xs text-muted-foreground flex items-center gap-1"><Users className="h-3 w-3" />Check-ins</p>
+ <p className="text-xs text-muted-foreground flex items-center gap-1"><span className="h-3 w-3" aria-hidden="true">👥</span>Check-ins</p>
  <p className="text-xl font-bold">{selectedCampaign.total_checkins.toLocaleString()}</p>
  </CardContent>
  </Card>
@@ -329,7 +325,7 @@ const BrandDashboard = () => {
  <Card>
  <CardHeader className="pb-2">
  <CardTitle className="text-base flex items-center gap-2">
- <TrendingUp className="h-4 w-4 text-success" /> Distribution
+ <span className="h-4 w-4 text-success" aria-hidden="true">📈</span> Distribution
  </CardTitle>
  </CardHeader>
  <CardContent>
@@ -341,7 +337,7 @@ const BrandDashboard = () => {
  <Card>
  <CardHeader className="pb-2">
  <CardTitle className="text-base flex items-center gap-2">
- <PieChart className="h-4 w-4 text-info" /> Redemption
+ <span className="h-4 w-4 text-info" aria-hidden="true">📊</span> Redemption
  </CardTitle>
  </CardHeader>
  <CardContent>
@@ -356,10 +352,10 @@ const BrandDashboard = () => {
  <Tabs defaultValue="merchants">
  <TabsList className="w-full justify-start">
  <TabsTrigger value="merchants">
- <Store className="h-4 w-4 mr-1" /> Merchants ({campaignMerchants.length})
+ <span className="h-4 w-4 mr-1" aria-hidden="true">🏪</span> Merchants ({campaignMerchants.length})
  </TabsTrigger>
  <TabsTrigger value="activity">
- <BarChart3 className="h-4 w-4 mr-1" /> Activity
+ <span className="h-4 w-4 mr-1" aria-hidden="true">📊</span> Activity
  </TabsTrigger>
  </TabsList>
 
@@ -367,7 +363,7 @@ const BrandDashboard = () => {
  {campaignMerchants.length === 0 ? (
  <Card>
  <CardContent className="py-8 text-center text-muted-foreground">
- <Store className="h-8 w-8 mx-auto mb-2 opacity-50" />
+ <span className="h-8 w-8 mx-auto mb-2 opacity-50" aria-hidden="true">🏪</span>
  <p>Merchants will be added by the PawBucks team</p>
  </CardContent>
  </Card>
@@ -378,7 +374,7 @@ const BrandDashboard = () => {
  <CardContent className="py-3 flex items-center justify-between">
  <div className="flex items-center gap-3">
  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
- <Store className="h-4 w-4 text-primary" />
+ <span className="h-4 w-4 text-primary" aria-hidden="true">🏪</span>
  </div>
  <div>
  <p className="font-medium text-sm">{(cm as any).merchants?.business_name ||"Merchant"}</p>
@@ -399,7 +395,7 @@ const BrandDashboard = () => {
  {campaignActivity.length === 0 ? (
  <Card>
  <CardContent className="py-8 text-center text-muted-foreground">
- <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" />
+ <span className="h-8 w-8 mx-auto mb-2 opacity-50" aria-hidden="true">⏰</span>
  <p>No activity yet. PawBucks will be distributed when pet owners check in at participating merchants.</p>
  </CardContent>
  </Card>
@@ -448,7 +444,7 @@ const BrandDashboard = () => {
  <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
  <div className="flex items-center gap-3">
  <div className="w-10 h-10 rounded-md bg-primary flex items-center justify-center">
- <Building2 className="h-5 w-5 text-primary-foreground" />
+ <span className="h-5 w-5 text-primary-foreground" aria-hidden="true">🏢</span>
  </div>
  <div>
  <h1 className="font-bold text-lg">{brandAccount.brand_name}</h1>
@@ -469,11 +465,11 @@ const BrandDashboard = () => {
  Command Center
  </TabsTrigger>
  <TabsTrigger value="campaigns" className="gap-1.5">
- <Megaphone className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">📣</span>
  Campaigns ({campaigns.length})
  </TabsTrigger>
  <TabsTrigger value="marketplace" className="gap-1.5">
- <Store className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">🏪</span>
  Marketplace
  </TabsTrigger>
  <TabsTrigger value="requests" className="gap-1.5">
@@ -533,7 +529,7 @@ const BrandDashboard = () => {
  ) : campaigns.length === 0 ? (
  <Card>
  <CardContent className="py-12 text-center">
- <Megaphone className="h-12 w-12 mx-auto text-muted-foreground mb-3 opacity-50" />
+ <span className="h-12 w-12 mx-auto text-muted-foreground mb-3 opacity-50" aria-hidden="true">📣</span>
  <h3 className="font-semibold text-lg mb-1">No campaigns yet</h3>
  <p className="text-muted-foreground mb-4">Create your first funded PawBucks campaign to reach pet owners.</p>
  <Button onClick={() => setShowCreate(true)}>
@@ -588,7 +584,7 @@ const BrandDashboard = () => {
  {(campaign.status ==="draft" || campaign.status ==="pending_payment") && (
  <div className="flex gap-2 mt-3" onClick={(e) => e.stopPropagation()}>
  <Button size="sm" className="flex-1" onClick={() => setFundingCampaign(campaign)}>
- <DollarSign className="h-3.5 w-3.5 mr-1" /> Fund Campaign
+ <span className="h-3.5 w-3.5 mr-1" aria-hidden="true">💵</span> Fund Campaign
  </Button>
  </div>
  )}
@@ -638,7 +634,7 @@ const BrandDashboard = () => {
  <Card className="cursor-pointer hover:border-primary transition-all" onClick={() => fundingCampaign && handleFundWithCard(fundingCampaign.id)}>
  <CardContent className="py-4 flex items-center gap-3">
  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
- <DollarSign className="h-5 w-5 text-primary" />
+ <span className="h-5 w-5 text-primary" aria-hidden="true">💵</span>
  </div>
  <div className="flex-1">
  <p className="font-semibold text-sm">Pay with Card (Instant)</p>
@@ -650,7 +646,7 @@ const BrandDashboard = () => {
  <Card className="cursor-pointer hover:border-primary transition-all" onClick={() => fundingCampaign && handleRequestInvoice(fundingCampaign.id)}>
  <CardContent className="py-4 flex items-center gap-3">
  <div className="w-10 h-10 rounded-lg bg-warning/10 flex items-center justify-center">
- <Calendar className="h-5 w-5 text-warning" />
+ <span className="h-5 w-5 text-warning" aria-hidden="true">📅</span>
  </div>
  <div className="flex-1">
  <p className="font-semibold text-sm">Request Invoice (Net 14)</p>

@@ -9,7 +9,7 @@ import { Label } from"@/components/ui/label";
 import { Switch } from"@/components/ui/switch";
 import { Progress } from"@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from"@/components/ui/dialog";
-import { Settings, AlertTriangle, Check, Plus, ShoppingBag } from"lucide-react";
+import { Settings, AlertTriangle, Check, Plus, ShoppingBag } from "lucide-react";
 import { toast } from"sonner";
 import { useQueryClient } from"@tanstack/react-query";
 import { startOfMonth, endOfMonth } from"date-fns";

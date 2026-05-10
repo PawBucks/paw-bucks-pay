@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
 import { Button } from"@/components/ui/button";
 import { Progress } from"@/components/ui/progress";
-import { Stamp, Gift, Loader2, ChevronRight, Trophy } from"lucide-react";
+import { Stamp, Loader2, ChevronRight } from "lucide-react";
 import { useNavigate } from"react-router-dom";
 
 type PunchCardWithProgram = {
@@ -122,7 +122,7 @@ export function CustomerLoyaltyCards({ userId, compact = false }: CustomerLoyalt
  <CardContent className="space-y-3">
  {totalRewards > 0 && (
  <div className="bg-primary/10 rounded-lg p-3 flex items-center gap-3">
- <Gift className="w-5 h-5 text-primary" />
+ <span className="w-5 h-5 text-primary" aria-hidden="true">🎁</span>
  <div>
  <p className="text-sm font-semibold">
  {totalRewards} reward{totalRewards > 1 ?"s" :""} ready!
@@ -165,7 +165,7 @@ export function CustomerLoyaltyCards({ userId, compact = false }: CustomerLoyalt
  {availableRewards.length > 0 && (
  <div className="space-y-3">
  <h3 className="text-lg font-semibold flex items-center gap-2">
- <Trophy className="w-5 h-5 text-primary" />
+ <span className="w-5 h-5 text-primary" aria-hidden="true">🏆</span>
  Your Rewards
  </h3>
  <div className="grid gap-3 sm:grid-cols-2">
@@ -246,7 +246,7 @@ export function CustomerLoyaltyCards({ userId, compact = false }: CustomerLoyalt
  </div>
  ))}
  <div className="w-6 h-6 rounded-full bg-accent flex items-center justify-center">
- <Gift className="w-3 h-3 text-accent-foreground" />
+ <span className="w-3 h-3 text-accent-foreground" aria-hidden="true">🎁</span>
  </div>
  </div>
 

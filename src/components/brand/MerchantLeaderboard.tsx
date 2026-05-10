@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from"@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from"@/components/ui/avatar";
-import { Trophy, Store, Crown, Medal, Award } from"lucide-react";
+import { Crown, Medal, Award } from "lucide-react";
 import { cn } from"@/lib/utils";
 import type { MerchantLeaderboardEntry } from"@/services/api/brandCampaigns.service";
 
@@ -19,7 +19,7 @@ export function MerchantLeaderboard({ entries }: MerchantLeaderboardProps) {
  <Card>
  <CardHeader className="pb-2">
  <CardTitle className="text-base flex items-center gap-2">
- <Trophy className="h-4 w-4 text-warning" />
+ <span className="h-4 w-4 text-warning" aria-hidden="true">🏆</span>
  Top Performing Merchants
  </CardTitle>
  <CardDescription>Driving the most check-ins for your campaigns</CardDescription>
@@ -27,7 +27,7 @@ export function MerchantLeaderboard({ entries }: MerchantLeaderboardProps) {
  <CardContent className="space-y-2">
  {entries.length === 0 ? (
  <div className="py-8 text-center text-sm text-muted-foreground">
- <Store className="h-8 w-8 mx-auto mb-2 opacity-40" />
+ <span className="h-8 w-8 mx-auto mb-2 opacity-40" aria-hidden="true">🏪</span>
  No merchant activity yet
  </div>
  ) : (

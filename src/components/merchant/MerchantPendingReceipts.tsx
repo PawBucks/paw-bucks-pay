@@ -10,7 +10,7 @@ import {
 import {
  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from"@/components/ui/dialog";
-import { Check, Clock, Eye, Loader2, Receipt } from"lucide-react";
+import { Check, Eye, Loader2, Receipt } from "lucide-react";
 import { toast } from"sonner";
 import { format } from"date-fns";
 
@@ -115,7 +115,7 @@ export const MerchantPendingReceipts = ({ merchantId }: MerchantPendingReceiptsP
  const getStatusBadge = (status: string, hasConfirmation: boolean) => {
  if (hasConfirmation) return <Badge className="bg-success">Confirmed</Badge>;
  switch (status) {
- case"pending": return <Badge variant="secondary"><Clock className="w-3 h-3 mr-1" />Pending Review</Badge>;
+ case"pending": return <Badge variant="secondary"><span className="w-3 h-3 mr-1" aria-hidden="true">⏰</span>Pending Review</Badge>;
  case"approved": return <Badge className="bg-success">Approved</Badge>;
  case"rejected": return <Badge variant="destructive">Rejected</Badge>;
  default: return <Badge variant="outline">{status}</Badge>;
@@ -128,7 +128,7 @@ export const MerchantPendingReceipts = ({ merchantId }: MerchantPendingReceiptsP
  <div className="space-y-4">
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-2">
- <Receipt className="w-5 h-5 text-primary" />
+ <span className="w-5 h-5 text-primary" aria-hidden="true">🧾</span>
  <h3 className="text-lg font-semibold">Customer Receipts</h3>
  {pendingCount > 0 && (
  <Badge variant="destructive" className="ml-1">{pendingCount} pending</Badge>
@@ -143,7 +143,7 @@ export const MerchantPendingReceipts = ({ merchantId }: MerchantPendingReceiptsP
  ) : receipts.length === 0 ? (
  <Card>
  <CardContent className="py-8 text-center">
- <Receipt className="w-10 h-10 mx-auto text-muted-foreground mb-2" />
+ <span className="w-10 h-10 mx-auto text-muted-foreground mb-2" aria-hidden="true">🧾</span>
  <p className="text-sm text-muted-foreground">No customer receipt submissions yet.</p>
  </CardContent>
  </Card>

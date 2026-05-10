@@ -1,17 +1,6 @@
 import { Button } from"@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from"@/components/ui/card";
-import {
- FileText,
- Edit,
- Store,
- PlugZap,
- CalendarDays,
- Vault,
- ArrowRight,
- Receipt,
- Wallet,
- Megaphone,
-} from"lucide-react";
+import { FileText, Edit, Store, PlugZap, CalendarDays, Vault, ArrowRight, Receipt, Wallet, Megaphone } from "lucide-react";
 import { useNavigate } from"react-router-dom";
 
 type VetQuickActionsTabProps = {

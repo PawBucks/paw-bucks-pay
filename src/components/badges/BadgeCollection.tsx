@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from"framer-motion";
 import { supabase } from"@/integrations/supabase/client";
 import { BadgeCard } from"./BadgeCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
-import { Award, Target, Clock } from"lucide-react";
 
 interface BadgeDefinition {
  id: string;
@@ -142,17 +141,17 @@ export const BadgeCollection = ({ userId, onBadgeClick }: BadgeCollectionProps) 
  {/* Stats Header */}
  <div className="grid grid-cols-3 gap-3">
  <div className="p-3 rounded-md bg-gradient-to-br from-primary/10 to-accent/10 border border-primary/20 text-center">
- <Award className="w-5 h-5 mx-auto text-primary mb-1" />
+ <span className="w-5 h-5 mx-auto text-primary mb-1" aria-hidden="true">🏆</span>
  <div className="text-2xl font-bold text-primary">{totalEarned}</div>
  <div className="text-xs text-muted-foreground">Earned</div>
  </div>
  <div className="p-3 rounded-md bg-muted border border-border text-center">
- <Target className="w-5 h-5 mx-auto text-muted-foreground mb-1" />
+ <span className="w-5 h-5 mx-auto text-muted-foreground mb-1" aria-hidden="true">🎯</span>
  <div className="text-2xl font-bold">{totalBadges - totalEarned}</div>
  <div className="text-xs text-muted-foreground">To Unlock</div>
  </div>
  <div className="p-3 rounded-md bg-gradient-to-br from-accent/10 to-secondary/10 border border-accent/20 text-center">
- <Clock className="w-5 h-5 mx-auto text-accent mb-1" />
+ <span className="w-5 h-5 mx-auto text-accent mb-1" aria-hidden="true">⏰</span>
  <div className="text-2xl font-bold text-accent">{activeRewardBadges.length}</div>
  <div className="text-xs text-muted-foreground">Active Rewards</div>
  </div>
@@ -196,7 +195,7 @@ export const BadgeCollection = ({ userId, onBadgeClick }: BadgeCollectionProps) 
  <AnimatePresence>
  {earnedBadgeList.length === 0 ? (
  <div className="text-center py-8 text-muted-foreground">
- <Award className="w-12 h-12 mx-auto mb-3 opacity-30" />
+ <span className="w-12 h-12 mx-auto mb-3 opacity-30" aria-hidden="true">🏆</span>
  <p>No badges earned yet!</p>
  <p className="text-sm">Keep spending at partner merchants to unlock badges.</p>
  </div>
@@ -226,7 +225,7 @@ export const BadgeCollection = ({ userId, onBadgeClick }: BadgeCollectionProps) 
  <AnimatePresence>
  {inProgressBadges.length === 0 ? (
  <div className="text-center py-8 text-muted-foreground">
- <Target className="w-12 h-12 mx-auto mb-3 opacity-30" />
+ <span className="w-12 h-12 mx-auto mb-3 opacity-30" aria-hidden="true">🎯</span>
  <p>You've earned all available badges!</p>
  <p className="text-sm">Check back next week for new opportunities.</p>
  </div>

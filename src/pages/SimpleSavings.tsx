@@ -19,7 +19,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { Formatters } from "@/utils/formatters";
 import { format, differenceInDays } from "date-fns";
-import { ChevronRight, Clock, Info } from "lucide-react";
+import { ChevronRight, Info } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 
 const PB_TO_USD = 0.001;
@@ -104,7 +104,7 @@ const SimpleSavings = () => {
             {(earnedNextExpiresAt || promotionalNextExpiresAt) && availableUsd > 0 && (
             <div className="rounded-xl border border-border bg-card p-4">
               <div className="flex items-center gap-2 text-sm font-medium mb-2">
-                <Clock className="h-4 w-4 text-muted-foreground" />
+                <span className="h-4 w-4 text-muted-foreground" aria-hidden="true">⏰</span>
                 Use it before it expires
               </div>
               <ul className="text-xs text-muted-foreground space-y-1">

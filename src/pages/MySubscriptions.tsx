@@ -18,16 +18,7 @@ import {
  AlertDialogHeader,
  AlertDialogTitle,
 } from"@/components/ui/alert-dialog";
-import { 
- ArrowLeft, 
- Crown, 
- Store, 
- Calendar, 
- Loader2,
- XCircle,
- RefreshCw,
- AlertTriangle
-} from"lucide-react";
+import { ArrowLeft, Loader2, XCircle, RefreshCw, AlertTriangle } from "lucide-react";
 import { toast } from"sonner";
 import { format } from"date-fns";
 
@@ -251,7 +242,7 @@ const MySubscriptions = () => {
  />
  ) : (
  <div className="w-12 h-12 rounded-full flex items-center justify-center bg-gradient-to-br from-info to-info">
- <Store className="w-6 h-6 text-white" />
+ <span className="w-6 h-6 text-white" aria-hidden="true">🏪</span>
  </div>
  )}
  <div>
@@ -280,7 +271,7 @@ const MySubscriptions = () => {
  {subscription.cancel_at_period_end ?"Ends on:" :"Renews on:"}
  </span>
  <span className="font-medium flex items-center gap-1">
- <Calendar className="w-3 h-3" />
+ <span className="w-3 h-3" aria-hidden="true">📅</span>
  {format(new Date(subscription.current_period_end),"MMM d, yyyy")}
  </span>
  </div>

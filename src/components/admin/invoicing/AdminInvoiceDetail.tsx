@@ -1,6 +1,6 @@
 import { useState, useEffect } from"react";
 import { format } from"date-fns";
-import { ArrowLeft, Send, Edit, DollarSign, Loader2, Printer } from"lucide-react";
+import { ArrowLeft, Send, Edit, Loader2 } from "lucide-react";
 import { Button } from"@/components/ui/button";
 import { Badge } from"@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from"@/components/ui/card";
@@ -155,7 +155,7 @@ export function AdminInvoiceDetail({ invoice, onBack, onEdit, onRefresh }: Props
  )}
  {["sent","partially_paid","overdue"].includes(invoice.status) && (
  <Button size="sm" onClick={() => { setPayAmount(String(invoice.amount_due)); setPaymentOpen(true); }}>
- <DollarSign className="w-4 h-4 mr-1" /> Record Payment
+ <span className="w-4 h-4 mr-1" aria-hidden="true">💵</span> Record Payment
  </Button>
  )}
  {!["paid","void","cancelled"].includes(invoice.status) && (

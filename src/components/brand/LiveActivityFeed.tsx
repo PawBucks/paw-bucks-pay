@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from"@/components/ui/card";
 import { ScrollArea } from"@/components/ui/scroll-area";
-import { Activity, ArrowUpRight, ArrowDownRight } from"lucide-react";
+import { Activity, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { formatDistanceToNow } from"date-fns";
 import type { BrandedPawbucksActivity } from"@/services/api/brandCampaigns.service";
 
@@ -13,7 +13,7 @@ export function LiveActivityFeed({ activity }: LiveActivityFeedProps) {
  <Card>
  <CardHeader className="pb-2">
  <CardTitle className="text-base flex items-center gap-2">
- <Activity className="h-4 w-4 text-primary" />
+ <span className="h-4 w-4 text-primary" aria-hidden="true">📊</span>
  Live Activity Feed
  <span className="relative flex h-2 w-2 ml-1">
  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
@@ -25,7 +25,7 @@ export function LiveActivityFeed({ activity }: LiveActivityFeedProps) {
  <CardContent className="p-0">
  {activity.length === 0 ? (
  <div className="py-8 text-center text-sm text-muted-foreground px-4">
- <Activity className="h-8 w-8 mx-auto mb-2 opacity-40" />
+ <span className="h-8 w-8 mx-auto mb-2 opacity-40" aria-hidden="true">📊</span>
  Activity will appear here as pet owners check in
  </div>
  ) : (

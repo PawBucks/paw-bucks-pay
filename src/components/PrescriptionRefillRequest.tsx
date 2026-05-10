@@ -8,7 +8,7 @@ import { Label } from"@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from"@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from"@/components/ui/dialog";
 import { Badge } from"@/components/ui/badge";
-import { Pill, Plus, Loader2, Clock, Check, X, Package } from"lucide-react";
+import { Pill, Plus, Loader2, Check, X } from "lucide-react";
 import { format, parseISO } from"date-fns";
 import { toast } from"sonner";
 
@@ -159,13 +159,13 @@ export const PrescriptionRefillRequest = () => {
  const getStatusBadge = (status: string) => {
  switch (status) {
  case"pending":
- return <Badge className="bg-warning"><Clock className="w-3 h-3 mr-1" />Pending</Badge>;
+ return <Badge className="bg-warning"><span className="w-3 h-3 mr-1" aria-hidden="true">⏰</span>Pending</Badge>;
  case"approved":
  return <Badge className="bg-info"><Check className="w-3 h-3 mr-1" />Approved</Badge>;
  case"denied":
  return <Badge variant="destructive"><X className="w-3 h-3 mr-1" />Denied</Badge>;
  case"fulfilled":
- return <Badge className="bg-success"><Package className="w-3 h-3 mr-1" />Fulfilled</Badge>;
+ return <Badge className="bg-success"><span className="w-3 h-3 mr-1" aria-hidden="true">📦</span>Fulfilled</Badge>;
  default:
  return <Badge variant="secondary">{status}</Badge>;
  }

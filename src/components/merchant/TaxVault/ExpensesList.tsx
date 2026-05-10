@@ -2,7 +2,7 @@ import { useState } from'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from'@/components/ui/table';
 import { Button } from'@/components/ui/button';
 import { Badge } from'@/components/ui/badge';
-import { Trash2, Receipt, ExternalLink, TrendingDown } from "lucide-react";
+import { Trash2, ExternalLink } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { TaxExpense, CATEGORY_LABELS } from'./types';
 import { formatLocalDate } from'@/utils/formatters';
@@ -88,7 +88,7 @@ export function ExpensesList({ expenses, onExpenseDeleted }: ExpensesListProps) 
  if (expenses.length === 0) {
  return (
  <div className="text-center py-12 text-muted-foreground">
- <Receipt className="h-12 w-12 mx-auto mb-4 opacity-50" />
+ <span className="h-12 w-12 mx-auto mb-4 opacity-50" aria-hidden="true">🧾</span>
  <p>No expenses recorded yet</p>
  <p className="text-sm">Start adding your business expenses to track them for tax purposes</p>
  </div>
@@ -149,7 +149,7 @@ export function ExpensesList({ expenses, onExpenseDeleted }: ExpensesListProps) 
  <TableCell className="text-right">
  {expense.savings_amount && expense.savings_amount > 0 ? (
  <div className="flex items-center justify-end gap-1 text-success">
- <TrendingDown className="h-3.5 w-3.5" />
+ <span className="h-3.5 w-3.5" aria-hidden="true">📉</span>
  <span className="font-medium">{Formatters.currency(expense.savings_amount)}</span>
  </div>
  ) : (

@@ -5,10 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/comp
 import { Badge } from"@/components/ui/badge";
 import { Button } from"@/components/ui/button";
 import { GradientCard } from"@/components/ui/gradient-card";
-import { 
- CalendarDays, Clock, CheckCircle2, Loader2, Brain, 
- FileText, Download, RefreshCw, Lightbulb, Target, Users, Crown
-} from"lucide-react";
+import { CheckCircle2, Loader2, RefreshCw } from "lucide-react";
 import { ConsultationScheduleDialog } from"./ConsultationScheduleDialog";
 import { toast } from"sonner";
 import { format } from"date-fns";
@@ -112,7 +109,7 @@ export function StrategyConsultationWidget() {
  </p>
  </div>
  <Badge className="bg-gradient-to-r from-primary to-primary/60 gap-1 w-fit">
- <Crown className="h-3 w-3" /> Premium
+ <span className="h-3 w-3" aria-hidden="true">👑</span> Premium
  </Badge>
  </div>
 
@@ -121,7 +118,7 @@ export function StrategyConsultationWidget() {
  <GradientCard gradient>
  <div className="flex items-center gap-3">
  <div className="p-3 rounded-md bg-primary/10">
- <CalendarDays className="h-5 w-5 text-primary" />
+ <span className="h-5 w-5 text-primary" aria-hidden="true">📅</span>
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Upcoming Sessions</p>
@@ -145,7 +142,7 @@ export function StrategyConsultationWidget() {
  <GradientCard gradient>
  <div className="flex items-center gap-3">
  <div className="p-3 rounded-md bg-accent/10">
- <Brain className="h-5 w-5 text-accent" />
+ <span className="h-5 w-5 text-accent" aria-hidden="true">🧠</span>
  </div>
  <div>
  <p className="text-sm text-muted-foreground">AI Report</p>
@@ -161,7 +158,7 @@ export function StrategyConsultationWidget() {
  <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
  <div className="flex items-center gap-4">
  <div className="p-3 rounded-md bg-primary/10">
- <Users className="h-6 w-6 text-primary" />
+ <span className="h-6 w-6 text-primary" aria-hidden="true">👥</span>
  </div>
  <div>
  <h3 className="font-semibold text-lg">Schedule a Consultation</h3>
@@ -171,7 +168,7 @@ export function StrategyConsultationWidget() {
  </div>
  </div>
  <Button onClick={() => setScheduleOpen(true)}>
- <CalendarDays className="h-4 w-4 mr-2" />
+ <span className="h-4 w-4 mr-2" aria-hidden="true">📅</span>
  Book Session
  </Button>
  </div>
@@ -183,7 +180,7 @@ export function StrategyConsultationWidget() {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <Clock className="h-5 w-5" />
+ <span className="h-5 w-5" aria-hidden="true">⏰</span>
  Upcoming Sessions
  </CardTitle>
  </CardHeader>
@@ -209,7 +206,7 @@ export function StrategyConsultationWidget() {
  <div className="flex items-center justify-between">
  <div>
  <CardTitle className="flex items-center gap-2">
- <Brain className="h-5 w-5" />
+ <span className="h-5 w-5" aria-hidden="true">🧠</span>
  AI Strategy Report
  </CardTitle>
  <CardDescription>
@@ -254,7 +251,7 @@ export function StrategyConsultationWidget() {
  {/* Opportunities */}
  <div>
  <h4 className="font-semibold mb-3 flex items-center gap-2">
- <Lightbulb className="h-4 w-4 text-warning" />
+ <span className="h-4 w-4 text-warning" aria-hidden="true">💡</span>
  Growth Opportunities
  </h4>
  <div className="space-y-2">
@@ -267,7 +264,7 @@ export function StrategyConsultationWidget() {
  {/* Action Items */}
  <div>
  <h4 className="font-semibold mb-3 flex items-center gap-2">
- <Target className="h-4 w-4 text-primary" />
+ <span className="h-4 w-4 text-primary" aria-hidden="true">🎯</span>
  Recommended Actions
  </h4>
  <div className="space-y-3">
@@ -288,7 +285,7 @@ export function StrategyConsultationWidget() {
  {/* Projected Impact */}
  <div className="p-4 rounded-lg bg-primary/5 border border-primary/20">
  <h4 className="font-semibold mb-2 flex items-center gap-2">
- <FileText className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">📄</span>
  Projected Impact
  </h4>
  <p className="text-sm">{aiReport.projectedImpact}</p>
@@ -296,7 +293,7 @@ export function StrategyConsultationWidget() {
  </div>
  ) : (
  <div className="text-center py-8">
- <Brain className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+ <span className="h-12 w-12 text-muted-foreground mx-auto mb-4" aria-hidden="true">🧠</span>
  <p className="text-muted-foreground mb-4">
  Click"Generate" to create your personalized AI strategy report based on your business data.
  </p>

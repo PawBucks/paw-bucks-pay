@@ -1,7 +1,7 @@
 import { useState } from"react";
 import { Button } from"@/components/ui/button";
 import { Label } from"@/components/ui/label";
-import { FileText, Upload, X, ExternalLink } from"lucide-react";
+import { Upload, X, ExternalLink } from "lucide-react";
 import { supabase } from"@/integrations/supabase/client";
 import { toast } from"sonner";
 
@@ -124,7 +124,7 @@ export const PolicyDocumentUpload = ({
 
  return (
  <div key={key} className="flex items-center gap-3 p-3 rounded-lg border border-border bg-muted/30">
- <FileText className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+ <span className="w-5 h-5 text-muted-foreground flex-shrink-0" aria-hidden="true">📄</span>
  <div className="flex-1 min-w-0">
  <p className="text-sm font-medium">{config.label}</p>
  {url ? (

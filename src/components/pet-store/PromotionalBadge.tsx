@@ -1,6 +1,6 @@
 import { useState, useEffect } from"react";
 import { Badge } from"@/components/ui/badge";
-import { Clock } from "lucide-react";
+
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 
 type PromotionalBadgeProps = {
@@ -62,7 +62,7 @@ export function PromotionalBadge({
  )}
  {timeRemaining && (
  <Badge variant="outline" className="text-xs bg-background/80 backdrop-blur-sm">
- <Clock className="h-3 w-3 mr-1" />
+ <span className="h-3 w-3 mr-1" aria-hidden="true">⏰</span>
  {timeRemaining} left
  </Badge>
  )}
@@ -83,7 +83,7 @@ export function PromotionalBadge({
  )}
  {timeRemaining && (
  <Badge variant="outline" className="text-xs">
- <Clock className="h-3 w-3 mr-1" />
+ <span className="h-3 w-3 mr-1" aria-hidden="true">⏰</span>
  {timeRemaining}
  </Badge>
  )}

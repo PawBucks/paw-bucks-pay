@@ -9,7 +9,7 @@ import { Label } from"@/components/ui/label";
 import { Textarea } from"@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from"@/components/ui/select";
 import { toast } from"sonner";
-import { Upload, PawPrint, Loader2 } from"lucide-react";
+import { Upload, Loader2 } from "lucide-react";
 
 type PetProfile = {
  id: string;
@@ -167,7 +167,7 @@ export const EditPetProfileDialog = ({ pet, open, onOpenChange, onSuccess }: Edi
  />
  ) : (
  <div className="w-32 h-32 rounded-full bg-muted flex items-center justify-center border-2 border-dashed border-border">
- <PawPrint className="w-8 h-8 text-muted-foreground" />
+ <span className="w-8 h-8 text-muted-foreground" aria-hidden="true">🐾</span>
  </div>
  )}
  <Input

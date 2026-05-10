@@ -1,5 +1,5 @@
 import { memo } from"react";
-import { Star } from"lucide-react";
+import { Star } from "lucide-react";
 
 interface StarRatingProps {
  rating: number;

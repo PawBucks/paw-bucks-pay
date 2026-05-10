@@ -6,7 +6,7 @@ import { GradientCard } from"@/components/ui/gradient-card";
 import { Badge } from"@/components/ui/badge";
 import { Button } from"@/components/ui/button";
 import { Skeleton } from"@/components/ui/skeleton";
-import { Gift, ArrowRight, Star } from"lucide-react";
+import { ArrowRight } from "lucide-react";
 
 interface LoyaltyMerchant {
  id: string;
@@ -77,11 +77,11 @@ const LoyaltyProgramDiscoveryComponent = ({ userId }: LoyaltyProgramDiscoveryPro
  <GradientCard>
  <div className="flex items-center justify-between mb-4">
  <div className="flex items-center gap-2">
- <Gift className="w-5 h-5 text-primary" />
+ <span className="w-5 h-5 text-primary" aria-hidden="true">🎁</span>
  <h3 className="font-semibold text-base sm:text-lg">Merchants with Loyalty Rewards</h3>
  </div>
  <Badge variant="secondary" className="text-xs">
- <Star className="w-3 h-3 mr-1" />
+ <span className="w-3 h-3 mr-1" aria-hidden="true">⭐</span>
  Earn Free Services
  </Badge>
  </div>

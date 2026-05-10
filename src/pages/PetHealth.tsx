@@ -13,7 +13,7 @@ import { VetCommunication } from"@/components/VetCommunication";
 import { PetProfileCard } from"@/components/PetProfileCard";
 import { ShareHealthRecordsDialog } from"@/components/ShareHealthRecordsDialog";
 import { PetEmailInbox } from"@/components/pet-health/PetEmailInbox";
-import { ArrowLeft, FileHeart, MessageCircle, Users, Mail } from"lucide-react";
+import { ArrowLeft, FileHeart } from "lucide-react";
 import { Button } from"@/components/ui/button";
 import { toast } from"sonner";
 
@@ -133,7 +133,7 @@ export default function PetHealth() {
  {/* Shared Account Banner */}
  {sharedAccount.isSharedMember && sharedAccount.ownerName && (
  <div className="p-3 bg-primary/10 border border-primary/20 rounded-lg flex items-center gap-2">
- <Users className="w-4 h-4 text-primary" />
+ <span className="w-4 h-4 text-primary" aria-hidden="true">👥</span>
  <span className="text-sm">
  Viewing shared account with <strong>{sharedAccount.ownerName}</strong>
  </span>
@@ -164,11 +164,11 @@ export default function PetHealth() {
  Medical Records
  </TabsTrigger>
  <TabsTrigger value="inbox" className="flex items-center gap-2">
- <Mail className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">📧</span>
  Email Inbox
  </TabsTrigger>
  <TabsTrigger value="vets" className="flex items-center gap-2">
- <MessageCircle className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">💬</span>
  Vet Messages
  </TabsTrigger>
  </TabsList>

@@ -1,5 +1,5 @@
 import { useState, useRef } from"react";
-import { Camera, Upload, X, Loader2, Plus } from"lucide-react";
+import { Camera, Upload, X, Loader2 } from "lucide-react";
 import { Button } from"@/components/ui/button";
 import { supabase } from"@/integrations/supabase/client";
 import { toast } from"sonner";
@@ -157,7 +157,7 @@ export function ProductImageUpload({
  className="h-8 w-8"
  onClick={() => cameraInputRef.current?.click()}
  >
- <Camera className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">📸</span>
  </Button>
  </div>
  <span className="text-[10px] text-muted-foreground">
@@ -191,7 +191,7 @@ export function ProductImageUpload({
  size="sm"
  onClick={() => cameraInputRef.current?.click()}
  >
- <Camera className="h-4 w-4 mr-1.5" />
+ <span className="h-4 w-4 mr-1.5" aria-hidden="true">📸</span>
  Camera
  </Button>
  </div>

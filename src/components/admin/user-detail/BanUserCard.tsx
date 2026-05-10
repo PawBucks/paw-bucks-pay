@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from"@/components/ui/card";
 import { Button } from"@/components/ui/button";
 import { Textarea } from"@/components/ui/textarea";
 import { Badge } from"@/components/ui/badge";
-import { Ban, ShieldCheck, AlertTriangle } from"lucide-react";
+import { Ban, AlertTriangle } from "lucide-react";
 import {
  AlertDialog,
  AlertDialogAction,
@@ -65,7 +65,7 @@ export function BanUserCard({ userId, isBanned, bannedAt, bannedReason, onChange
  </>
  ) : (
  <>
- <ShieldCheck className="w-5 h-5 text-success" />
+ <span className="w-5 h-5 text-success" aria-hidden="true">🛡️</span>
  Account Status
  </>
  )}
@@ -104,7 +104,7 @@ export function BanUserCard({ userId, isBanned, bannedAt, bannedReason, onChange
  >
  {isBanned ? (
  <>
- <ShieldCheck className="w-4 h-4 mr-2" />
+ <span className="w-4 h-4 mr-2" aria-hidden="true">🛡️</span>
  Unban User
  </>
  ) : (

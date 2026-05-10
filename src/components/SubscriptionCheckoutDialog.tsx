@@ -15,7 +15,7 @@ import {
 import { Button } from"@/components/ui/button";
 import { Badge } from"@/components/ui/badge";
 import { Slider } from"@/components/ui/slider";
-import { Loader2, Check, CreditCard, RefreshCw, Shield, Coins, Lock, Info, Gift } from "lucide-react";
+import { Loader2, Check, RefreshCw, Info } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { toast } from"sonner";
 import { Elements, CardElement, useStripe, useElements } from"@stripe/react-stripe-js";
@@ -343,7 +343,7 @@ const CheckoutForm = ({
  {/* Welcome Credit Banner - only when sole source */}
  {welcomeCreditApplicable && !hasBothSources && (
  <div className="bg-success/10 border border-success/20 rounded-lg p-3 flex items-start gap-2">
- <Gift className="w-4 h-4 text-success mt-0.5 flex-shrink-0" />
+ <span className="w-4 h-4 text-success mt-0.5 flex-shrink-0" aria-hidden="true">🎁</span>
  <div>
  <p className="text-sm font-medium text-success">
  🎉 Welcome Credit Available: {welcomeCreditBalance.toLocaleString()} PB ({Formatters.currency((welcomeCreditBalance * PAWBUCKS_TO_USD))})
@@ -358,7 +358,7 @@ const CheckoutForm = ({
  {/* Pet Fund not applicable - below minimum */}
  {(hasPetFund || hasWelcomeCredit) && merchantAcceptsPawBucks && priceAmount < petFundMinUsd && (
  <div className="bg-warning/10 border border-warning/20 rounded-lg p-3 flex items-start gap-2">
- <Gift className="w-4 h-4 text-warning mt-0.5 flex-shrink-0" />
+ <span className="w-4 h-4 text-warning mt-0.5 flex-shrink-0" aria-hidden="true">🎁</span>
  <div>
  <p className="text-sm font-medium text-warning">
  Pet Fund: {Formatters.currency((petFundCreditBalance * PAWBUCKS_TO_USD))} available
@@ -380,7 +380,7 @@ const CheckoutForm = ({
  <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 space-y-3">
  <div className="flex items-center justify-between">
  <span className="text-sm font-medium flex items-center gap-2">
- <Coins className="w-4 h-4 text-primary" />
+ <span className="w-4 h-4 text-primary" aria-hidden="true">🪙</span>
  Apply PawBucks
  <PawBucksInfoTooltip variant="redemption" />
  </span>
@@ -442,7 +442,7 @@ const CheckoutForm = ({
  {/* Info when merchant accepts PawBucks but user has none */}
  {merchantAcceptsPawBucks && pawbucksBalance === 0 && !hasWelcomeCredit && (
  <div className="text-sm text-muted-foreground bg-muted p-3 rounded-lg flex items-start gap-2">
- <Coins className="w-4 h-4 mt-0.5 flex-shrink-0" />
+ <span className="w-4 h-4 mt-0.5 flex-shrink-0" aria-hidden="true">🪙</span>
  <span>This merchant accepts PawBucks, but you don't have any spendable yet. Earn PawBucks by making purchases!</span>
  </div>
  )}
@@ -450,7 +450,7 @@ const CheckoutForm = ({
  {/* Info about locked rewards */}
  {merchantAcceptsPawBucks && lockedBalance > 0 && pawbucksBalance === 0 && (
  <div className="text-sm text-warning bg-warning/10 p-3 rounded-lg flex items-start gap-2 border border-warning/20">
- <Lock className="w-4 h-4 mt-0.5 flex-shrink-0" />
+ <span className="w-4 h-4 mt-0.5 flex-shrink-0" aria-hidden="true">🔒</span>
  <div>
  <span className="font-medium">You have {lockedBalance.toLocaleString()} PawBucks locked</span>
  <p className="text-xs mt-1 text-warning/80">
@@ -466,7 +466,7 @@ const CheckoutForm = ({
  <Tooltip>
  <TooltipTrigger asChild>
  <div className="flex items-center gap-1 text-xs text-warning cursor-help">
- <Lock className="w-3 h-3" />
+ <span className="w-3 h-3" aria-hidden="true">🔒</span>
  <span>+{lockedBalance.toLocaleString()} PB locked (vesting)</span>
  <Info className="w-3 h-3" />
  </div>
@@ -543,7 +543,7 @@ const CheckoutForm = ({
 
  {/* Security Notice */}
  <div className="flex items-center gap-2 text-xs text-muted-foreground">
- <Shield className="h-4 w-4 text-success" />
+ <span className="h-4 w-4 text-success" aria-hidden="true">🛡️</span>
  <span>Secure payment powered by Stripe. Cancel anytime.</span>
  </div>
  </>
@@ -561,7 +561,7 @@ const CheckoutForm = ({
  </>
  ) : (
  <>
- <CreditCard className="h-4 w-4 mr-2" />
+ <span className="h-4 w-4 mr-2" aria-hidden="true">💳</span>
  {pawbucksToUse > 0 ? `Pay ${Formatters.currency(stripeAmount)}` :"Subscribe"}
  </>
  )}

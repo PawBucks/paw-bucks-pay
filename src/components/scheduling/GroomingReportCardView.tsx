@@ -3,7 +3,7 @@ import { supabase } from"@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
 import { Separator } from"@/components/ui/separator";
-import { FileText, PawPrint, Scissors, Heart, Lightbulb, ImageIcon, Loader2 } from"lucide-react";
+import { Loader2 } from "lucide-react";
 import {
  Dialog,
  DialogContent,
@@ -71,11 +71,11 @@ export function GroomingReportCardView({ bookingId }: GroomingReportCardViewProp
  <Card className="border-primary/20 bg-primary/5">
  <CardHeader className="pb-3">
  <CardTitle className="text-base flex items-center gap-2">
- <FileText className="w-4 h-4 text-primary" />
+ <span className="w-4 h-4 text-primary" aria-hidden="true">📄</span>
  Grooming Report Card
  {report.pet_name && (
  <Badge variant="outline" className="text-xs gap-1">
- <PawPrint className="w-3 h-3" />
+ <span className="w-3 h-3" aria-hidden="true">🐾</span>
  {report.pet_name}
  </Badge>
  )}
@@ -86,7 +86,7 @@ export function GroomingReportCardView({ bookingId }: GroomingReportCardViewProp
  {photos.length > 0 && (
  <div>
  <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
- <ImageIcon className="w-3 h-3" /> Photos
+ <span className="w-3 h-3" aria-hidden="true">🖼️</span> Photos
  </p>
  <div className="grid grid-cols-3 gap-2">
  {photos.map((photo: any) => (
@@ -117,7 +117,7 @@ export function GroomingReportCardView({ bookingId }: GroomingReportCardViewProp
  {report.overall_notes && (
  <div>
  <p className="text-xs font-medium text-muted-foreground mb-1 flex items-center gap-1">
- <Scissors className="w-3 h-3" /> Overall
+ <span className="w-3 h-3" aria-hidden="true">✂️</span> Overall
  </p>
  <p className="text-sm">{report.overall_notes}</p>
  </div>
@@ -126,7 +126,7 @@ export function GroomingReportCardView({ bookingId }: GroomingReportCardViewProp
  {report.behavior_notes && (
  <div>
  <p className="text-xs font-medium text-muted-foreground mb-1 flex items-center gap-1">
- <Heart className="w-3 h-3" /> Behavior
+ <span className="w-3 h-3" aria-hidden="true">❤️</span> Behavior
  </p>
  <p className="text-sm">{report.behavior_notes}</p>
  </div>
@@ -135,7 +135,7 @@ export function GroomingReportCardView({ bookingId }: GroomingReportCardViewProp
  {report.skin_coat_notes && (
  <div>
  <p className="text-xs font-medium text-muted-foreground mb-1 flex items-center gap-1">
- <PawPrint className="w-3 h-3" /> Skin & Coat
+ <span className="w-3 h-3" aria-hidden="true">🐾</span> Skin & Coat
  </p>
  <p className="text-sm">{report.skin_coat_notes}</p>
  </div>
@@ -144,7 +144,7 @@ export function GroomingReportCardView({ bookingId }: GroomingReportCardViewProp
  {report.recommendations && (
  <div>
  <p className="text-xs font-medium text-muted-foreground mb-1 flex items-center gap-1">
- <Lightbulb className="w-3 h-3" /> Recommendations
+ <span className="w-3 h-3" aria-hidden="true">💡</span> Recommendations
  </p>
  <p className="text-sm">{report.recommendations}</p>
  </div>

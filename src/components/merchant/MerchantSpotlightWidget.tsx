@@ -6,7 +6,7 @@ import { GradientCard } from"@/components/ui/gradient-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
 import { Button } from"@/components/ui/button";
 import { Progress } from"@/components/ui/progress";
-import { Loader2, Eye, MousePointer, Users, Heart, TrendingUp, DollarSign, Calendar, MapPin, Mail, Bell, Crown, CheckCircle, Lightbulb, ArrowUpRight, BarChart3 } from "lucide-react";
+import { Loader2, Eye, MousePointer, CheckCircle, ArrowUpRight } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { 
  AreaChart, Area, XAxis, YAxis, CartesianGrid, 
@@ -129,7 +129,7 @@ export function MerchantSpotlightWidget() {
  <Sparkles className="h-3 w-3" /> Featured
  </Badge>
  <Badge className="bg-gradient-to-r from-primary to-primary/60 gap-1">
- <Crown className="h-3 w-3" /> Premium
+ <span className="h-3 w-3" aria-hidden="true">👑</span> Premium
  </Badge>
  </div>
  </div>
@@ -175,28 +175,28 @@ export function MerchantSpotlightWidget() {
  </Card>
  <Card>
  <CardContent className="pt-4 text-center">
- <TrendingUp className="h-5 w-5 text-accent mx-auto mb-2" />
+ <span className="h-5 w-5 text-accent mx-auto mb-2" aria-hidden="true">📈</span>
  <p className="text-2xl font-bold">{Formatters.decimal(performance.click_through_rate, 1)}%</p>
  <p className="text-xs text-muted-foreground">CTR</p>
  </CardContent>
  </Card>
  <Card>
  <CardContent className="pt-4 text-center">
- <Users className="h-5 w-5 text-warning mx-auto mb-2" />
+ <span className="h-5 w-5 text-warning mx-auto mb-2" aria-hidden="true">👥</span>
  <p className="text-2xl font-bold">{performance.new_customers}</p>
  <p className="text-xs text-muted-foreground">New Customers</p>
  </CardContent>
  </Card>
  <Card>
  <CardContent className="pt-4 text-center">
- <BarChart3 className="h-5 w-5 text-info mx-auto mb-2" />
+ <span className="h-5 w-5 text-info mx-auto mb-2" aria-hidden="true">📊</span>
  <p className="text-2xl font-bold">{Formatters.decimal((performance.profile_views / 1000), 1)}K</p>
  <p className="text-xs text-muted-foreground">Profile Views</p>
  </CardContent>
  </Card>
  <Card>
  <CardContent className="pt-4 text-center">
- <Heart className="h-5 w-5 text-destructive mx-auto mb-2" />
+ <span className="h-5 w-5 text-destructive mx-auto mb-2" aria-hidden="true">❤️</span>
  <p className="text-2xl font-bold">{performance.saves_to_favorites}</p>
  <p className="text-xs text-muted-foreground">Saves</p>
  </CardContent>
@@ -264,7 +264,7 @@ export function MerchantSpotlightWidget() {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <MapPin className="h-5 w-5" />
+ <span className="h-5 w-5" aria-hidden="true">📍</span>
  Active Placements
  </CardTitle>
  <CardDescription>Where your business is being featured</CardDescription>
@@ -278,9 +278,9 @@ export function MerchantSpotlightWidget() {
  placement.status ==='active' ?'bg-success/10' :
  placement.status ==='featured' ?'bg-warning/10' :'bg-info/10'
  }`}>
- {placement.location.includes('Email') ? <Mail className="h-5 w-5 text-accent" /> :
- placement.location.includes('Push') ? <Bell className="h-5 w-5 text-info" /> :
- <MapPin className={`h-5 w-5 ${placement.status ==='active' ?'text-success' :'text-warning'}`} />}
+ {placement.location.includes('Email') ? <span className="h-5 w-5 text-accent" aria-hidden="true">📧</span> :
+ placement.location.includes('Push') ? <span className="h-5 w-5 text-info" aria-hidden="true">🔔</span> :
+ <span className={`h-5 w-5 ${placement.status ==='active' ?'text-success' :'text-warning'}`} aria-hidden="true">📍</span>}
  </div>
  <div>
  <p className="font-medium">{placement.location}</p>
@@ -322,7 +322,7 @@ export function MerchantSpotlightWidget() {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <TrendingUp className="h-5 w-5" />
+ <span className="h-5 w-5" aria-hidden="true">📈</span>
  Daily Performance
  </CardTitle>
  <CardDescription>Impressions, clicks, and conversions over time</CardDescription>
@@ -386,8 +386,8 @@ export function MerchantSpotlightWidget() {
  insight.type ==='tip' ?'bg-info/10' :'bg-muted'
  }`}>
  {insight.type ==='success' ? <CheckCircle className="h-5 w-5 text-success" /> :
- insight.type ==='tip' ? <Lightbulb className="h-5 w-5 text-info" /> :
- <TrendingUp className="h-5 w-5 text-muted-foreground" />}
+ insight.type ==='tip' ? <span className="h-5 w-5 text-info" aria-hidden="true">💡</span> :
+ <span className="h-5 w-5 text-muted-foreground" aria-hidden="true">📈</span>}
  </div>
  <p className="text-sm leading-relaxed">{insight.insight}</p>
  </div>
@@ -402,7 +402,7 @@ export function MerchantSpotlightWidget() {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <Lightbulb className="h-5 w-5" />
+ <span className="h-5 w-5" aria-hidden="true">💡</span>
  Optimization Checklist
  </CardTitle>
  <CardDescription>Maximize your spotlight impact</CardDescription>

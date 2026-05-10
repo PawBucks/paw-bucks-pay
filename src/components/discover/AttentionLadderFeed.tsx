@@ -1,5 +1,5 @@
 import { memo } from"react";
-import { Crown, Gem } from"lucide-react";
+
 import { FeaturedPartnerCard } from"./FeaturedPartnerCard";
 import { PremiumAdCard } from"./PremiumAdCard";
 import { SponsoredMerchantCard } from"./SponsoredMerchantCard";

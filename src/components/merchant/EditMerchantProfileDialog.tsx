@@ -12,7 +12,7 @@ import {
  DialogHeader,
  DialogTitle,
 } from"@/components/ui/dialog";
-import { Facebook, Instagram, Twitter, Linkedin, Globe, Info } from"lucide-react";
+import { Facebook, Instagram, Twitter, Linkedin, Info } from "lucide-react";
 import { PolicyDocumentUpload } from"./PolicyDocumentUpload";
 import { BusinessHoursEditor } from"./BusinessHoursEditor";
 
@@ -269,7 +269,7 @@ export const EditMerchantProfileDialog = ({
  <div className="space-y-3 pt-4 border-t">
  <Label className="text-base font-semibold">Website</Label>
  <div className="flex items-center gap-3">
- <Globe className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+ <span className="w-5 h-5 text-muted-foreground flex-shrink-0" aria-hidden="true">🌐</span>
  <Input
  id="websiteUrl"
  name="websiteUrl"

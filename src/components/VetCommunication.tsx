@@ -5,7 +5,7 @@ import { Button } from"@/components/ui/button";
 import { Textarea } from"@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from"@/components/ui/select";
 import { Label } from"@/components/ui/label";
-import { MessageCircle, Send, Loader2, Image, Check, CheckCheck } from"lucide-react";
+import { Send, Loader2, Check, CheckCheck } from "lucide-react";
 import { format, parseISO } from"date-fns";
 import { toast } from"sonner";
 
@@ -200,7 +200,7 @@ export const VetCommunication = ({ petId }: VetCommunicationProps) => {
  if (vets.length === 0) {
  return (
  <Card className="p-6 text-center text-muted-foreground">
- <MessageCircle className="w-12 h-12 mx-auto mb-2 opacity-50" />
+ <span className="w-12 h-12 mx-auto mb-2 opacity-50" aria-hidden="true">💬</span>
  <p>No partner vets available at this time.</p>
  </Card>
  );
@@ -315,7 +315,7 @@ export const VetCommunication = ({ petId }: VetCommunicationProps) => {
  {isUploading ? (
  <Loader2 className="w-4 h-4 animate-spin" />
  ) : (
- <Image className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">🖼️</span>
  )}
  </Button>
  <Textarea

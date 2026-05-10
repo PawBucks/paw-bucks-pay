@@ -5,7 +5,7 @@ import { Input } from'@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from'@/components/ui/table';
 import { Badge } from'@/components/ui/badge';
 import { Button } from'@/components/ui/button';
-import { Search, RotateCcw, ChevronDown, ChevronRight, CreditCard, Coins, DollarSign, Receipt, User, Store, Clock, Hash } from'lucide-react';
+import { Search, RotateCcw, ChevronDown, ChevronRight, CreditCard, Coins, DollarSign, Receipt, User, Store, Clock, Hash } from "lucide-react";
 import { toast } from'sonner';
 import { RefundPaymentDialog } from'@/components/shared/RefundPaymentDialog';
 import { format } from'date-fns';
@@ -273,7 +273,7 @@ export function TransactionsTab() {
  <TableCell className="text-right">
  {hasPawbucks ? (
  <div className="flex items-center justify-end gap-1">
- <Coins className="w-3.5 h-3.5 text-warning" />
+ <span className="w-3.5 h-3.5 text-warning" aria-hidden="true">🪙</span>
  <span className="text-sm font-medium text-warning">
  {pawbucksUsed.toLocaleString()} PB
  </span>

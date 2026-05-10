@@ -19,7 +19,7 @@ import {
  SelectTrigger,
  SelectValue,
 } from"@/components/ui/select";
-import { Syringe, Plus, Calendar, Loader2 } from"lucide-react";
+import { Syringe, Plus, Loader2 } from "lucide-react";
 import { toast } from"sonner";
 import { format } from"date-fns";
 import type { Vaccination } from"./types";
@@ -309,7 +309,7 @@ export const VaccinationsTab = ({ petId, vetId }: VaccinationsTabProps) => {
  <div className="text-right">
  {vax.next_due_date && (
  <div className="flex items-center gap-1">
- <Calendar className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">📅</span>
  <span className="text-sm">
  Due: {format(new Date(vax.next_due_date),"MMM d, yyyy")}
  </span>

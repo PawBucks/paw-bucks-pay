@@ -2,7 +2,7 @@ import { useState, useEffect } from"react";
 import { Button } from"@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
-import { Loader2, ExternalLink, CheckCircle2, AlertCircle, CreditCard } from"lucide-react";
+import { Loader2, ExternalLink, CheckCircle2, AlertCircle } from "lucide-react";
 import { supabase } from"@/integrations/supabase/client";
 import { toast } from"sonner";
 
@@ -150,7 +150,7 @@ export function StripeConnectButton({ onStatusChange }: StripeConnectButtonProps
  <Card>
  <CardHeader className="pb-3">
  <CardTitle className="text-lg flex items-center gap-2">
- <CreditCard className="h-5 w-5" />
+ <span className="h-5 w-5" aria-hidden="true">💳</span>
  Connect Stripe
  </CardTitle>
  <CardDescription>

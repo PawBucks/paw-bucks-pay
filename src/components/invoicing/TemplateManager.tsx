@@ -2,18 +2,7 @@ import { useState } from"react";
 import { useForm, useFieldArray } from"react-hook-form";
 import { zodResolver } from"@hookform/resolvers/zod";
 import { z } from"zod";
-import { 
- LayoutTemplate, 
- Plus, 
- Search, 
- MoreHorizontal, 
- Edit, 
- Trash2,
- Copy,
- Star,
- FileText,
- Package
-} from"lucide-react";
+import { LayoutTemplate, Plus, Search, MoreHorizontal, Edit, Trash2, Copy } from "lucide-react";
 import { Button } from"@/components/ui/button";
 import { Input } from"@/components/ui/input";
 import { Card, CardContent } from"@/components/ui/card";
@@ -333,7 +322,7 @@ export function TemplateManager({
  <h3 className="font-semibold truncate">{template.name}</h3>
  {template.is_default && (
  <Badge variant="secondary" className="shrink-0">
- <Star className="h-3 w-3 mr-1 fill-current" />
+ <span className="h-3 w-3 mr-1 fill-current" aria-hidden="true">⭐</span>
  Default
  </Badge>
  )}
@@ -352,7 +341,7 @@ export function TemplateManager({
  </DropdownMenuTrigger>
  <DropdownMenuContent align="end">
  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onUseTemplate(template); }}>
- <FileText className="h-4 w-4 mr-2" />
+ <span className="h-4 w-4 mr-2" aria-hidden="true">📄</span>
  Use Template
  </DropdownMenuItem>
  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); openEditDialog(template); }}>
@@ -365,7 +354,7 @@ export function TemplateManager({
  </DropdownMenuItem>
  {!template.is_default && (
  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onSetDefault(template.id); }}>
- <Star className="h-4 w-4 mr-2" />
+ <span className="h-4 w-4 mr-2" aria-hidden="true">⭐</span>
  Set as Default
  </DropdownMenuItem>
  )}
@@ -392,7 +381,7 @@ export function TemplateManager({
  )}
  {itemCount > 0 && (
  <Badge variant="outline">
- <Package className="h-3 w-3 mr-1" />
+ <span className="h-3 w-3 mr-1" aria-hidden="true">📦</span>
  {itemCount} item{itemCount !== 1 ?'s' :''}
  </Badge>
  )}

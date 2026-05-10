@@ -2,7 +2,7 @@ import { useState, useMemo } from"react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/components/ui/card";
 import { Input } from"@/components/ui/input";
 import { Label } from"@/components/ui/label";
-import { Calculator, ArrowRight, CreditCard, DollarSign, Info, Settings2 } from"lucide-react";
+import { Calculator, ArrowRight, DollarSign, Info, Settings2 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from"@/components/ui/tooltip";
 import { Button } from"@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from"@/components/ui/collapsible";
@@ -274,7 +274,7 @@ export const PricingCalculator = ({ onApplyPrice, compact = false }: PricingCalc
 
  <div className="rounded-lg border bg-muted p-4 space-y-3">
  <h4 className="font-medium text-sm flex items-center gap-2">
- <CreditCard className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">💳</span>
  Breakdown
  </h4>
  <div className="space-y-2 text-sm">

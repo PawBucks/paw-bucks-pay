@@ -9,7 +9,7 @@ import { Button } from"@/components/ui/button";
 import { Badge } from"@/components/ui/badge";
 import { Progress } from"@/components/ui/progress";
 import { Separator } from"@/components/ui/separator";
-import { AlertCircle, CreditCard, Coins, Calendar, ChevronRight, Shield, CheckCircle, Loader2, ArrowLeft, Info, Lock } from "lucide-react";
+import { AlertCircle, ChevronRight, CheckCircle, Loader2, ArrowLeft, Info } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { toast } from"sonner";
 import { motion, AnimatePresence } from"framer-motion";
@@ -423,7 +423,7 @@ export function ClaimResolutionScreen({
  <Card className="border-info/20">
  <CardHeader className="border-b border-info/20">
  <CardTitle className="flex items-center gap-2 text-info">
- <CreditCard className="h-5 w-5" />
+ <span className="h-5 w-5" aria-hidden="true">💳</span>
  Complete Payment
  </CardTitle>
  </CardHeader>
@@ -431,7 +431,7 @@ export function ClaimResolutionScreen({
  {selectedOption ==="pawbucks" && !canPayFullWithPawBucks && (
  <div className="mb-4 p-3 bg-success/10 rounded-lg border border-success/20">
  <p className="text-sm text-success">
- <Coins className="h-4 w-4 inline mr-1" />
+ <span className="h-4 w-4 inline mr-1" aria-hidden="true">🪙</span>
  {Formatters.currency(pawBucksToApply)} in PawBucks applied.
  Remaining: {Formatters.currency(remainingAfterPawBucks)}
  </p>
@@ -548,7 +548,7 @@ export function ClaimResolutionScreen({
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-3">
  <div className="p-2.5 rounded-lg bg-success/10">
- <Coins className="h-6 w-6 text-success" />
+ <span className="h-6 w-6 text-success" aria-hidden="true">🪙</span>
  </div>
  <div>
  <div className="flex items-center gap-2">
@@ -580,7 +580,7 @@ export function ClaimResolutionScreen({
  <CardContent className="p-4">
  <div className="flex items-start gap-3">
  <div className="p-2 rounded-lg bg-warning/10">
- <Lock className="h-5 w-5 text-warning" />
+ <span className="h-5 w-5 text-warning" aria-hidden="true">🔒</span>
  </div>
  <div>
  <p className="font-medium text-warning">
@@ -605,7 +605,7 @@ export function ClaimResolutionScreen({
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-3">
  <div className="p-2.5 rounded-lg bg-warning/10">
- <CreditCard className="h-6 w-6 text-warning" />
+ <span className="h-6 w-6 text-warning" aria-hidden="true">💳</span>
  </div>
  <div>
  <p className="font-semibold text-warning">Pay Full Balance</p>
@@ -632,7 +632,7 @@ export function ClaimResolutionScreen({
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-3">
  <div className="p-2.5 rounded-lg bg-info/10">
- <Calendar className="h-6 w-6 text-info" />
+ <span className="h-6 w-6 text-info" aria-hidden="true">📅</span>
  </div>
  <div>
  <p className="font-semibold text-info">Split into 3 Payments</p>
@@ -662,7 +662,7 @@ export function ClaimResolutionScreen({
  <CardContent className="p-4">
  <div className="flex items-start gap-3">
  <div className="p-2 rounded-full bg-info/10">
- <Shield className="h-5 w-5 text-info" />
+ <span className="h-5 w-5 text-info" aria-hidden="true">🛡️</span>
  </div>
  <div className="flex-1">
  <div className="flex items-center gap-2">

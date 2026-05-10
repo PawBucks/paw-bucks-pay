@@ -1,7 +1,7 @@
 import { motion } from"framer-motion";
 import { cn } from"@/lib/utils";
 import { Badge } from"@/components/ui/badge";
-import { Clock, Gift, CheckCircle } from"lucide-react";
+import { CheckCircle } from "lucide-react";
 
 import { Formatters } from "@/utils/formatters";
 interface BadgeCardProps {
@@ -101,12 +101,12 @@ export const BadgeCard = ({ badge, earned, progress, onClick, compact = false }:
  {isEarned ? (
  <div className="mt-3 p-2 rounded-lg bg-primary/10 border border-primary/20">
  <div className="flex items-center gap-2 text-sm">
- <Gift className="w-4 h-4 text-primary" />
+ <span className="w-4 h-4 text-primary" aria-hidden="true">🎁</span>
  <span className="text-primary font-medium">{badge.reward_description}</span>
  </div>
  {timeRemaining && !rewardExpired && !earned.reward_claimed && (
  <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
- <Clock className="w-3 h-3" />
+ <span className="w-3 h-3" aria-hidden="true">⏰</span>
  <span>{timeRemaining} left to claim</span>
  </div>
  )}

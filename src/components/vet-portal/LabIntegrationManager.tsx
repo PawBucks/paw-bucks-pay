@@ -21,16 +21,7 @@ import {
  DialogTitle,
  DialogTrigger,
 } from"@/components/ui/dialog";
-import {
- FlaskConical,
- Plus,
- Settings,
- CheckCircle,
- XCircle,
- Trash2,
- Image,
- FileText,
-} from"lucide-react";
+import { FlaskConical, Plus, Trash2 } from "lucide-react";
 import { format } from"date-fns";
 import { toast } from"sonner";
 
@@ -280,13 +271,13 @@ export function LabIntegrationManager({ vetId }: LabIntegrationManagerProps) {
  <div className="flex items-center gap-2 mb-3">
  {integration.supports_dicom && (
  <Badge variant="outline" className="text-xs">
- <Image className="h-3 w-3 mr-1" />
+ <span className="h-3 w-3 mr-1" aria-hidden="true">🖼️</span>
  DICOM
  </Badge>
  )}
  {integration.auto_import && (
  <Badge variant="outline" className="text-xs">
- <FileText className="h-3 w-3 mr-1" />
+ <span className="h-3 w-3 mr-1" aria-hidden="true">📄</span>
  Auto-Import
  </Badge>
  )}

@@ -2,18 +2,7 @@ import { useState } from"react";
 import { useForm } from"react-hook-form";
 import { zodResolver } from"@hookform/resolvers/zod";
 import { z } from"zod";
-import { 
- Users, 
- Plus, 
- Search, 
- MoreHorizontal, 
- Edit, 
- Trash2,
- Mail,
- Phone,
- Building2,
- MapPin
-} from"lucide-react";
+import { Plus, Search, MoreHorizontal, Edit, Trash2, Phone } from "lucide-react";
 import { Button } from"@/components/ui/button";
 import { Input } from"@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from"@/components/ui/card";
@@ -219,7 +208,7 @@ export function ClientManager({
  {filteredClients.length === 0 ? (
  <Card>
  <CardContent className="py-12 text-center">
- <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+ <span className="h-12 w-12 mx-auto text-muted-foreground mb-4" aria-hidden="true">👥</span>
  <h3 className="text-lg font-semibold mb-2">No clients found</h3>
  <p className="text-muted-foreground mb-4">
  {searchTerm ?"Try adjusting your search" :"Add your first client to get started"}
@@ -242,7 +231,7 @@ export function ClientManager({
  <h3 className="font-semibold truncate">{client.name}</h3>
  {client.company_name && (
  <p className="text-sm text-muted-foreground flex items-center gap-1">
- <Building2 className="h-3 w-3" />
+ <span className="h-3 w-3" aria-hidden="true">🏢</span>
  {client.company_name}
  </p>
  )}
@@ -271,18 +260,18 @@ export function ClientManager({
 
  <div className="mt-4 space-y-2 text-sm">
  <p className="flex items-center gap-2 text-muted-foreground">
- <Mail className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">📧</span>
  <span className="truncate">{client.email}</span>
  </p>
  {client.phone && (
  <p className="flex items-center gap-2 text-muted-foreground">
- <Phone className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">📞</span>
  {client.phone}
  </p>
  )}
  {(client.city || client.state) && (
  <p className="flex items-center gap-2 text-muted-foreground">
- <MapPin className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">📍</span>
  {[client.city, client.state].filter(Boolean).join(",")}
  </p>
  )}

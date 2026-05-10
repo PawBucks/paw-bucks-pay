@@ -4,7 +4,7 @@ import { Button } from"@/components/ui/button";
 import { Card, CardContent } from"@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from"@/components/ui/avatar";
 import { Badge } from"@/components/ui/badge";
-import { Dog, Cat, Bird, Rabbit, PawPrint, ChevronRight } from "lucide-react";
+import { Bird, Rabbit, ChevronRight } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { Tables } from"@/integrations/supabase/types";
 
@@ -17,11 +17,11 @@ interface PetProfileSelectorProps {
 }
 
 const petTypeIcons: Record<string, React.ReactNode> = {
- dog: <Dog className="w-5 h-5" />,
- cat: <Cat className="w-5 h-5" />,
+ dog: <span className="w-5 h-5" aria-hidden="true">🐕</span>,
+ cat: <span className="w-5 h-5" aria-hidden="true">🐈</span>,
  bird: <Bird className="w-5 h-5" />,
  rabbit: <Rabbit className="w-5 h-5" />,
- other: <PawPrint className="w-5 h-5" />,
+ other: <span className="w-5 h-5" aria-hidden="true">🐾</span>,
 };
 
 export const PetProfileSelector = ({ userId, onSelect, onSkip }: PetProfileSelectorProps) => {
@@ -47,7 +47,7 @@ export const PetProfileSelector = ({ userId, onSelect, onSkip }: PetProfileSelec
  return (
  <div className="text-center py-6 space-y-4">
  <div className="w-16 h-16 mx-auto bg-muted rounded-full flex items-center justify-center">
- <PawPrint className="w-8 h-8 text-muted-foreground" />
+ <span className="w-8 h-8 text-muted-foreground" aria-hidden="true">🐾</span>
  </div>
  <div>
  <p className="font-medium">No pet profiles found</p>
@@ -84,7 +84,7 @@ export const PetProfileSelector = ({ userId, onSelect, onSkip }: PetProfileSelec
  <Avatar className="h-14 w-14 border-2 border-muted">
  <AvatarImage src={pet.photo_url || undefined} alt={pet.name} />
  <AvatarFallback className="bg-primary/10">
- {petTypeIcons[pet.type] || <PawPrint className="w-6 h-6" />}
+ {petTypeIcons[pet.type] || <span className="w-6 h-6" aria-hidden="true">🐾</span>}
  </AvatarFallback>
  </Avatar>
  

@@ -40,7 +40,7 @@ import { useToast } from"@/hooks/use-toast";
 import { LoadingSpinner } from"@/components/LoadingSpinner";
 import { SEO } from"@/components/SEO";
 import { seoMeta } from"@/lib/seoMeta";
-import { PlusCircle, Search, MapPin, Calendar, Phone, Mail, DollarSign, Dog, Cat, Bird, Rabbit, Upload, AlertTriangle, CheckCircle2, Clock, Share2, PartyPopper, Eye, X, Images, ArrowLeft } from "lucide-react";
+import { PlusCircle, Search, Phone, Dog, Cat, Bird, Rabbit, Upload, AlertTriangle, CheckCircle2, PartyPopper, Eye, X, Images, ArrowLeft } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { LostPetShareDialog } from"@/components/LostPetShareDialog";
 import { PetProfileSelector } from"@/components/PetProfileSelector";
@@ -79,8 +79,8 @@ interface LostPetPost {
 }
 
 const petTypeIcons: Record<string, React.ReactNode> = {
- dog: <Dog className="w-5 h-5" />,
- cat: <Cat className="w-5 h-5" />,
+ dog: <span className="w-5 h-5" aria-hidden="true">🐕</span>,
+ cat: <span className="w-5 h-5" aria-hidden="true">🐈</span>,
  bird: <Bird className="w-5 h-5" />,
  rabbit: <Rabbit className="w-5 h-5" />,
 };
@@ -93,7 +93,7 @@ const statusColors: Record<string, string> = {
 
 const statusIcons: Record<string, React.ReactNode> = {
  lost: <AlertTriangle className="w-4 h-4" />,
- found: <Clock className="w-4 h-4" />,
+ found: <span className="w-4 h-4" aria-hidden="true">⏰</span>,
  reunited: <CheckCircle2 className="w-4 h-4" />,
 };
 
@@ -844,7 +844,7 @@ const LostPets = () => {
  </div>
  ) : filteredPosts?.length === 0 ? (
  <div className="text-center py-12">
- <Dog className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+ <span className="w-16 h-16 text-muted-foreground mx-auto mb-4" aria-hidden="true">🐕</span>
  <h2 className="text-xl font-semibold mb-2">No lost pet flyers found</h2>
  <p className="text-muted-foreground">
  {searchTerm || statusFilter !=="all" 
@@ -876,7 +876,7 @@ const LostPets = () => {
  </>
  ) : (
  <div className="w-full h-full flex items-center justify-center">
- {petTypeIcons[post.pet_type] || <Dog className="w-16 h-16 text-muted-foreground" />}
+ {petTypeIcons[post.pet_type] || <span className="w-16 h-16 text-muted-foreground" aria-hidden="true">🐕</span>}
  </div>
  )}
  
@@ -889,7 +889,7 @@ const LostPets = () => {
  {/* Reward Badge */}
  {post.reward_amount && (
  <Badge className="absolute top-3 right-3 bg-success text-white gap-1">
- <DollarSign className="w-3 h-3" />
+ <span className="w-3 h-3" aria-hidden="true">💵</span>
  ${post.reward_amount} Reward
  </Badge>
  )}
@@ -930,14 +930,14 @@ const LostPets = () => {
  {/* Contact Info */}
  <div className="pt-3 border-t space-y-2">
  <div className="flex items-center gap-2 text-sm">
- <Phone className="w-4 h-4 text-primary" />
+ <span className="w-4 h-4 text-primary" aria-hidden="true">📞</span>
  <a href={`tel:${post.contact_phone}`} className="hover:underline">
  {post.contact_phone}
  </a>
  </div>
  {post.contact_email && (
  <div className="flex items-center gap-2 text-sm">
- <Mail className="w-4 h-4 text-primary" />
+ <span className="w-4 h-4 text-primary" aria-hidden="true">📧</span>
  <a href={`mailto:${post.contact_email}`} className="hover:underline truncate">
  {post.contact_email}
  </a>
@@ -949,7 +949,7 @@ const LostPets = () => {
  <div className="flex flex-col gap-2 pt-2 border-t">
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-2 text-xs text-muted-foreground">
- <Calendar className="w-3 h-3" />
+ <span className="w-3 h-3" aria-hidden="true">📅</span>
  Posted {format(new Date(post.created_at),"MMM d, yyyy")}
  </div>
  <div className="flex items-center gap-1">
@@ -964,7 +964,7 @@ const LostPets = () => {
  </Button>
  <LostPetShareDialog post={post}>
  <Button variant="outline" size="sm" className="gap-1.5 h-8">
- <Share2 className="w-3.5 h-3.5" />
+ <span className="w-3.5 h-3.5" aria-hidden="true">🔗</span>
  Share
  </Button>
  </LostPetShareDialog>

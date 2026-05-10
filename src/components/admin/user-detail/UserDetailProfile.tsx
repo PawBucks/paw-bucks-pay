@@ -3,7 +3,7 @@ import { supabase } from"@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
 import { Skeleton } from"@/components/ui/skeleton";
-import { User, Mail, Phone, Calendar, Shield, Crown, Gift, Users, Ban } from"lucide-react";
+import { User, Phone, Ban } from "lucide-react";
 import { BanUserCard } from"./BanUserCard";
 import { DeleteUserCard } from"./DeleteUserCard";
 
@@ -116,7 +116,7 @@ export function UserDetailProfile({ userId }: { userId: string }) {
  <CardHeader>
  <CardTitle className="flex items-center gap-3 text-2xl">
  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
- <User className="w-6 h-6 text-primary" />
+ <span className="w-6 h-6 text-primary" aria-hidden="true">👤</span>
  </div>
  <div className="flex-1">
  <div className="flex items-center gap-2">
@@ -134,14 +134,14 @@ export function UserDetailProfile({ userId }: { userId: string }) {
  </CardHeader>
  <CardContent>
  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
- <InfoItem icon={<Calendar className="w-4 h-4" />} label="Joined" value={new Date(profile.created_at).toLocaleDateString("en-US", { year:"numeric", month:"long", day:"numeric" })} />
- <InfoItem icon={<Phone className="w-4 h-4" />} label="Phone" value={profile.phone ||"N/A"} />
- <InfoItem icon={<Shield className="w-4 h-4" />} label="User Type">
+ <InfoItem icon={<span className="w-4 h-4" aria-hidden="true">📅</span>} label="Joined" value={new Date(profile.created_at).toLocaleDateString("en-US", { year:"numeric", month:"long", day:"numeric" })} />
+ <InfoItem icon={<span className="w-4 h-4" aria-hidden="true">📞</span>} label="Phone" value={profile.phone ||"N/A"} />
+ <InfoItem icon={<span className="w-4 h-4" aria-hidden="true">🛡️</span>} label="User Type">
  <Badge variant={profile.user_type ==="merchant" ?"default" :"secondary"}>
  {profile.user_type}
  </Badge>
  </InfoItem>
- <InfoItem icon={<Crown className="w-4 h-4" />} label="Roles">
+ <InfoItem icon={<span className="w-4 h-4" aria-hidden="true">👑</span>} label="Roles">
  <div className="flex gap-1 flex-wrap">
  {roles.length > 0
  ? roles.map(r => <Badge key={r.role} variant="outline">{r.role}</Badge>)
@@ -150,15 +150,15 @@ export function UserDetailProfile({ userId }: { userId: string }) {
  </InfoItem>
 
  {profile.subscription_tier && (
- <InfoItem icon={<Crown className="w-4 h-4" />} label="Subscription" value={profile.subscription_tier} />
+ <InfoItem icon={<span className="w-4 h-4" aria-hidden="true">👑</span>} label="Subscription" value={profile.subscription_tier} />
  )}
 
  {profile.referral_code && (
- <InfoItem icon={<Mail className="w-4 h-4" />} label="Referral Code" value={profile.referral_code} />
+ <InfoItem icon={<span className="w-4 h-4" aria-hidden="true">📧</span>} label="Referral Code" value={profile.referral_code} />
  )}
 
  {welcomeCredit && (
- <InfoItem icon={<Gift className="w-4 h-4" />} label="Welcome Credit">
+ <InfoItem icon={<span className="w-4 h-4" aria-hidden="true">🎁</span>} label="Welcome Credit">
  <div className="space-y-1">
  <Badge variant="outline" className={
  welcomeCredit.status ==="active"
@@ -180,11 +180,11 @@ export function UserDetailProfile({ userId }: { userId: string }) {
  )}
 
  {sharedWith && (
- <InfoItem icon={<Users className="w-4 h-4" />} label="Shared With Owner" value={sharedWith} />
+ <InfoItem icon={<span className="w-4 h-4" aria-hidden="true">👥</span>} label="Shared With Owner" value={sharedWith} />
  )}
 
  {sharedMembers.length > 0 && (
- <InfoItem icon={<Users className="w-4 h-4" />} label="Shared Members">
+ <InfoItem icon={<span className="w-4 h-4" aria-hidden="true">👥</span>} label="Shared Members">
  <div className="space-y-0.5">
  {sharedMembers.map(email => (
  <p key={email} className="text-sm">{email}</p>

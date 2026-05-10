@@ -5,7 +5,7 @@ import { Button } from"@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from"@/components/ui/table";
 import { supabase } from"@/integrations/supabase/client";
-import { Shield, AlertTriangle, Activity, CheckCircle, XCircle, Eye, Clock, MapPin } from"lucide-react";
+import { AlertTriangle, CheckCircle, XCircle } from "lucide-react";
 import { format } from"date-fns";
 import { toast } from"sonner";
 
@@ -158,9 +158,9 @@ export const SecurityMonitoringTab = () => {
  case"brute_force_account":
  return <AlertTriangle className="h-4 w-4" />;
  case"rapid_requests":
- return <Activity className="h-4 w-4" />;
+ return <span className="h-4 w-4" aria-hidden="true">📊</span>;
  default:
- return <Shield className="h-4 w-4" />;
+ return <span className="h-4 w-4" aria-hidden="true">🛡️</span>;
  }
  };
 
@@ -179,7 +179,7 @@ export const SecurityMonitoringTab = () => {
  <Card>
  <CardHeader className="flex flex-row items-center justify-between pb-2">
  <CardTitle className="text-sm font-medium">Total Auth Events</CardTitle>
- <Activity className="h-4 w-4 text-muted-foreground" />
+ <span className="h-4 w-4 text-muted-foreground" aria-hidden="true">📊</span>
  </CardHeader>
  <CardContent>
  <div className="text-2xl font-bold">{stats.totalEvents}</div>
@@ -212,7 +212,7 @@ export const SecurityMonitoringTab = () => {
  <Card>
  <CardHeader className="flex flex-row items-center justify-between pb-2">
  <CardTitle className="text-sm font-medium">Unique IPs</CardTitle>
- <MapPin className="h-4 w-4 text-muted-foreground" />
+ <span className="h-4 w-4 text-muted-foreground" aria-hidden="true">📍</span>
  </CardHeader>
  <CardContent>
  <div className="text-2xl font-bold">{stats.uniqueIPs}</div>
@@ -224,7 +224,7 @@ export const SecurityMonitoringTab = () => {
  <Tabs defaultValue="alerts" className="w-full">
  <TabsList>
  <TabsTrigger value="alerts" className="flex items-center gap-2">
- <Shield className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">🛡️</span>
  Security Alerts
  {stats.unresolvedAlerts > 0 && (
  <Badge variant="destructive" className="ml-1">
@@ -233,7 +233,7 @@ export const SecurityMonitoringTab = () => {
  )}
  </TabsTrigger>
  <TabsTrigger value="events" className="flex items-center gap-2">
- <Activity className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">📊</span>
  Auth Events
  </TabsTrigger>
  </TabsList>
@@ -246,7 +246,7 @@ export const SecurityMonitoringTab = () => {
  <CardContent>
  {alerts.length === 0 ? (
  <div className="text-center py-8 text-muted-foreground">
- <Shield className="h-12 w-12 mx-auto mb-4 opacity-50" />
+ <span className="h-12 w-12 mx-auto mb-4 opacity-50" aria-hidden="true">🛡️</span>
  <p>No security alerts detected</p>
  </div>
  ) : (
@@ -286,7 +286,7 @@ export const SecurityMonitoringTab = () => {
  </TableCell>
  <TableCell>
  <div className="flex items-center gap-1 text-sm text-muted-foreground">
- <Clock className="h-3 w-3" />
+ <span className="h-3 w-3" aria-hidden="true">⏰</span>
  {format(new Date(alert.created_at),"MMM d, HH:mm")}
  </div>
  </TableCell>
@@ -328,7 +328,7 @@ export const SecurityMonitoringTab = () => {
  <CardContent>
  {events.length === 0 ? (
  <div className="text-center py-8 text-muted-foreground">
- <Activity className="h-12 w-12 mx-auto mb-4 opacity-50" />
+ <span className="h-12 w-12 mx-auto mb-4 opacity-50" aria-hidden="true">📊</span>
  <p>No authentication events recorded</p>
  </div>
  ) : (
@@ -371,7 +371,7 @@ export const SecurityMonitoringTab = () => {
  </TableCell>
  <TableCell>
  <div className="flex items-center gap-1 text-sm text-muted-foreground">
- <Clock className="h-3 w-3" />
+ <span className="h-3 w-3" aria-hidden="true">⏰</span>
  {format(new Date(event.created_at),"MMM d, HH:mm:ss")}
  </div>
  </TableCell>

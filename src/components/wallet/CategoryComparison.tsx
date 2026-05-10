@@ -2,7 +2,7 @@ import { memo, useMemo } from"react";
 import { GradientCard } from"@/components/ui/gradient-card";
 import { Badge } from"@/components/ui/badge";
 import { Progress } from"@/components/ui/progress";
-import { ArrowUp, ArrowDown, Minus, BarChart2 } from"lucide-react";
+import { ArrowUp, ArrowDown, Minus } from "lucide-react";
 import { startOfMonth, endOfMonth, subMonths } from"date-fns";
 import { CATEGORY_CONFIG, getNormalizedCategory } from"@/lib/categoryMapping";
 
@@ -128,7 +128,7 @@ export const CategoryComparison = memo(({ transactions, medicalRecords = [] }: C
  <GradientCard>
  <div className="flex items-center gap-2 mb-4">
  <div className="w-8 h-8 rounded-full bg-chart-3/10 flex items-center justify-center">
- <BarChart2 className="w-4 h-4 text-chart-3" />
+ <span className="w-4 h-4 text-chart-3" aria-hidden="true">📊</span>
  </div>
  <div>
  <h3 className="text-lg font-semibold">Category Comparison</h3>

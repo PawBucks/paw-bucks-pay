@@ -1,7 +1,7 @@
 import { useEffect, useState } from"react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from"@/components/ui/card";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid, Bar, BarChart, ComposedChart, Line } from"recharts";
-import { Activity, Loader2 } from"lucide-react";
+import { Loader2 } from "lucide-react";
 import { supabase } from"@/integrations/supabase/client";
 import { useQuery } from"@tanstack/react-query";
 
@@ -74,7 +74,7 @@ export function RealtimeRoiChart({ brandId }: RealtimeRoiChartProps) {
  <div className="flex items-start justify-between">
  <div>
  <CardTitle className="text-base flex items-center gap-2">
- <Activity className="h-4 w-4 text-primary" />
+ <span className="h-4 w-4 text-primary" aria-hidden="true">📊</span>
  Real-Time ROI (Last 24h)
  <span className="relative flex h-2 w-2 ml-1">
  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />

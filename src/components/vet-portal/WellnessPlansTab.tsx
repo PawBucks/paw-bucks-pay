@@ -32,21 +32,7 @@ import {
 } from"@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
 import { toast } from"sonner";
-import {
- Heart,
- Plus,
- Edit,
- Trash2,
- DollarSign,
- Coins,
- Package,
- Users,
- CheckCircle,
- Clock,
- Dog,
- Cat,
- Bird,
-} from"lucide-react";
+import { Heart, Plus, Edit, Trash2, CheckCircle, Dog, Cat, Bird } from "lucide-react";
 import { format } from"date-fns";
 
 interface WellnessPlansTabProps {
@@ -256,7 +242,7 @@ export function WellnessPlansTab({ vetId }: WellnessPlansTabProps) {
  <div className="flex items-center justify-between">
  <div>
  <h2 className="text-xl font-semibold flex items-center gap-2">
- <Heart className="h-5 w-5 text-primary" />
+ <span className="h-5 w-5 text-primary" aria-hidden="true">❤️</span>
  Wellness Plans
  </h2>
  <p className="text-sm text-muted-foreground">
@@ -340,7 +326,7 @@ export function WellnessPlansTab({ vetId }: WellnessPlansTabProps) {
  <div className="grid grid-cols-2 gap-4">
  <div className="space-y-2">
  <Label className="flex items-center gap-1">
- <DollarSign className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">💵</span>
  Price (USD) *
  </Label>
  <Input
@@ -353,7 +339,7 @@ export function WellnessPlansTab({ vetId }: WellnessPlansTabProps) {
  </div>
  <div className="space-y-2">
  <Label className="flex items-center gap-1">
- <Coins className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">🪙</span>
  Price (PawBucks) *
  </Label>
  <Input
@@ -419,11 +405,11 @@ export function WellnessPlansTab({ vetId }: WellnessPlansTabProps) {
  <Tabs defaultValue="plans">
  <TabsList>
  <TabsTrigger value="plans" className="flex items-center gap-2">
- <Package className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">📦</span>
  Plans ({plans?.length || 0})
  </TabsTrigger>
  <TabsTrigger value="purchases" className="flex items-center gap-2">
- <Users className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">👥</span>
  Purchases ({purchases?.length || 0})
  </TabsTrigger>
  </TabsList>
@@ -469,11 +455,11 @@ export function WellnessPlansTab({ vetId }: WellnessPlansTabProps) {
 
  <div className="flex items-center gap-4 mt-4">
  <div className="flex items-center gap-1">
- <DollarSign className="h-4 w-4 text-success" />
+ <span className="h-4 w-4 text-success" aria-hidden="true">💵</span>
  <span className="font-bold">${plan.price_usd}</span>
  </div>
  <div className="flex items-center gap-1">
- <Coins className="h-4 w-4 text-warning" />
+ <span className="h-4 w-4 text-warning" aria-hidden="true">🪙</span>
  <span className="font-bold">{plan.price_pawbucks.toLocaleString()}</span>
  </div>
  {!plan.is_active && (
@@ -504,7 +490,7 @@ export function WellnessPlansTab({ vetId }: WellnessPlansTabProps) {
  </div>
  ) : (
  <Card className="p-8 text-center text-muted-foreground">
- <Package className="h-12 w-12 mx-auto mb-4 opacity-50" />
+ <span className="h-12 w-12 mx-auto mb-4 opacity-50" aria-hidden="true">📦</span>
  <h3 className="font-medium">No Wellness Plans Yet</h3>
  <p className="text-sm">Create your first plan to start offering reward-funded wellness packages.</p>
  </Card>
@@ -549,23 +535,23 @@ export function WellnessPlansTab({ vetId }: WellnessPlansTabProps) {
  <div className="text-sm">
  {purchase.payment_method ==='pawbucks' ? (
  <span className="flex items-center gap-1">
- <Coins className="h-3 w-3 text-warning" />
+ <span className="h-3 w-3 text-warning" aria-hidden="true">🪙</span>
  {purchase.amount_pawbucks?.toLocaleString()}
  </span>
  ) : purchase.payment_method ==='combined' ? (
  <div>
  <span className="flex items-center gap-1">
- <DollarSign className="h-3 w-3" />
+ <span className="h-3 w-3" aria-hidden="true">💵</span>
  ${purchase.amount_usd}
  </span>
  <span className="flex items-center gap-1 text-muted-foreground">
- <Coins className="h-3 w-3" />
+ <span className="h-3 w-3" aria-hidden="true">🪙</span>
  {purchase.amount_pawbucks?.toLocaleString()}
  </span>
  </div>
  ) : (
  <span className="flex items-center gap-1">
- <DollarSign className="h-3 w-3" />
+ <span className="h-3 w-3" aria-hidden="true">💵</span>
  ${purchase.amount_usd}
  </span>
  )}
@@ -595,7 +581,7 @@ export function WellnessPlansTab({ vetId }: WellnessPlansTabProps) {
  ) : (
  <TableRow>
  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
- <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" />
+ <span className="h-8 w-8 mx-auto mb-2 opacity-50" aria-hidden="true">⏰</span>
  No purchases yet
  </TableCell>
  </TableRow>
@@ -609,7 +595,7 @@ export function WellnessPlansTab({ vetId }: WellnessPlansTabProps) {
  {/* Info Card */}
  <Card className="p-4 bg-warning/10 /30 border-warning/20">
  <div className="flex items-start gap-3">
- <Coins className="h-5 w-5 text-warning mt-0.5" />
+ <span className="h-5 w-5 text-warning mt-0.5" aria-hidden="true">🪙</span>
  <div>
  <h4 className="font-medium text-warning">
  PawBucks Integration

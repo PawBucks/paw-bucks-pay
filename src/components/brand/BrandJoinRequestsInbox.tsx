@@ -6,7 +6,7 @@ import { Badge } from"@/components/ui/badge";
 import { ScrollArea } from"@/components/ui/scroll-area";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from"@/components/ui/dialog";
 import { Textarea } from"@/components/ui/textarea";
-import { Inbox, CheckCircle2, XCircle, Loader2, Store, Clock } from"lucide-react";
+import { Inbox, CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import { toast } from"sonner";
 import {
  getBrandJoinRequests,
@@ -60,7 +60,7 @@ export function BrandJoinRequestsInbox({ brandId }: BrandJoinRequestsInboxProps)
  if (s ==="approved") return <Badge className="bg-[hsl(var(--success))] text-white">Approved</Badge>;
  if (s ==="declined") return <Badge variant="outline">Declined</Badge>;
  if (s ==="cancelled") return <Badge variant="secondary">Cancelled</Badge>;
- return <Badge><Clock className="h-3 w-3 mr-1" />Pending</Badge>;
+ return <Badge><span className="h-3 w-3 mr-1" aria-hidden="true">⏰</span>Pending</Badge>;
  };
 
  return (
@@ -84,7 +84,7 @@ export function BrandJoinRequestsInbox({ brandId }: BrandJoinRequestsInboxProps)
  </div>
  ) : requests.length === 0 ? (
  <div className="py-8 text-center text-sm text-muted-foreground">
- <Store className="h-10 w-10 mx-auto mb-2 opacity-40" />
+ <span className="h-10 w-10 mx-auto mb-2 opacity-40" aria-hidden="true">🏪</span>
  No join requests yet
  </div>
  ) : (

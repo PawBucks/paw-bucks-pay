@@ -4,7 +4,7 @@ import { supabase } from"@/integrations/supabase/client";
 import { SEO } from"@/components/SEO";
 import { Button } from"@/components/ui/button";
 import { Card, CardContent } from"@/components/ui/card";
-import { CheckCircle, Loader2, Download, Home, AlertCircle } from"lucide-react";
+import { CheckCircle, Loader2, Download, Home, AlertCircle } from "lucide-react";
 
 import { Formatters } from "@/utils/formatters";
 const InvoicePaymentSuccess = () => {
@@ -73,7 +73,7 @@ const InvoicePaymentSuccess = () => {
  <p className="text-muted-foreground mb-4">{error}</p>
  <Link to="/">
  <Button>
- <Home className="h-4 w-4 mr-2" />
+ <span className="h-4 w-4 mr-2" aria-hidden="true">🏠</span>
  Go Home
  </Button>
  </Link>
@@ -132,7 +132,7 @@ const InvoicePaymentSuccess = () => {
  </Button>
  <Link to="/">
  <Button>
- <Home className="h-4 w-4 mr-2" />
+ <span className="h-4 w-4 mr-2" aria-hidden="true">🏠</span>
  Go to Home
  </Button>
  </Link>

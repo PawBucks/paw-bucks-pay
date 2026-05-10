@@ -1,8 +1,7 @@
 import { memo } from"react";
-import { RotateCcw } from"lucide-react";
+import { RotateCcw } from "lucide-react";
 import { GradientCard } from"@/components/ui/gradient-card";
 import { format } from"date-fns";
-import { User } from"lucide-react";
 
 import { Formatters } from "@/utils/formatters";
 type Transaction = {
@@ -53,7 +52,7 @@ const MerchantTransactionListComponent = ({
  {isRefunded ? (
  <RotateCcw className="w-4 h-4 text-destructive" />
  ) : (
- <User className="w-4 h-4 text-primary" />
+ <span className="w-4 h-4 text-primary" aria-hidden="true">👤</span>
  )}
  </div>
  <div>

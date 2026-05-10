@@ -6,27 +6,7 @@ import { Button } from"@/components/ui/button";
 import { Input } from"@/components/ui/input";
 import { Label } from"@/components/ui/label";
 import { ScrollArea } from"@/components/ui/scroll-area";
-import {
- Mail,
- Copy,
- Check,
- FileText,
- Syringe,
- FlaskConical,
- Pill,
- ImageIcon,
- Scissors,
- Heart,
- Shield,
- Receipt,
- HelpCircle,
- ExternalLink,
- Inbox,
- Loader2,
- Pencil,
- AlertCircle,
- CheckCircle2,
-} from"lucide-react";
+import { Copy, Check, FileText, Syringe, FlaskConical, Pill, ImageIcon, Scissors, Heart, Shield, Receipt, HelpCircle, ExternalLink, Inbox, Loader2, Pencil, AlertCircle, CheckCircle2 } from "lucide-react";
 import { toast } from"sonner";
 import { format } from"date-fns";
 
@@ -198,7 +178,7 @@ export const PetEmailInbox = ({ petId, petName }: PetEmailInboxProps) => {
  <Card className="p-4 bg-primary/5 border-primary/20">
  <div className="flex items-start gap-3">
  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
- <Mail className="w-5 h-5 text-primary" />
+ <span className="w-5 h-5 text-primary" aria-hidden="true">📧</span>
  </div>
  <div className="flex-1 min-w-0">
  <h3 className="font-semibold text-sm mb-1">{petName}'s Health Email</h3>

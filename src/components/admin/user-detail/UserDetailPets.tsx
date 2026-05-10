@@ -3,7 +3,7 @@ import { supabase } from"@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
 import { Skeleton } from"@/components/ui/skeleton";
-import { PawPrint, Calendar, Weight, Heart } from"lucide-react";
+import { Weight } from "lucide-react";
 
 type Pet = {
  id: string;
@@ -64,7 +64,7 @@ export function UserDetailPets({ userId }: { userId: string }) {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <PawPrint className="w-5 h-5" /> Pet Profiles ({pets.length})
+ <span className="w-5 h-5" aria-hidden="true">🐾</span> Pet Profiles ({pets.length})
  </CardTitle>
  </CardHeader>
  <CardContent>
@@ -80,7 +80,7 @@ export function UserDetailPets({ userId }: { userId: string }) {
  <img src={pet.photo_url} alt={pet.name} className="w-12 h-12 rounded-full object-cover" />
  ) : (
  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
- <PawPrint className="w-6 h-6 text-primary" />
+ <span className="w-6 h-6 text-primary" aria-hidden="true">🐾</span>
  </div>
  )}
  <div>
@@ -93,7 +93,7 @@ export function UserDetailPets({ userId }: { userId: string }) {
  <div className="grid grid-cols-2 gap-2 text-sm">
  {pet.age != null && (
  <div className="flex items-center gap-1 text-muted-foreground">
- <Calendar className="w-3 h-3" /> {pet.age} years
+ <span className="w-3 h-3" aria-hidden="true">📅</span> {pet.age} years
  </div>
  )}
  {pet.weight != null && (
@@ -112,7 +112,7 @@ export function UserDetailPets({ userId }: { userId: string }) {
  <div className="border-t pt-2 space-y-1">
  {pet.medical_conditions && (
  <div className="flex items-start gap-1 text-sm">
- <Heart className="w-3 h-3 mt-0.5 text-destructive" />
+ <span className="w-3 h-3 mt-0.5 text-destructive" aria-hidden="true">❤️</span>
  <span>{pet.medical_conditions}</span>
  </div>
  )}

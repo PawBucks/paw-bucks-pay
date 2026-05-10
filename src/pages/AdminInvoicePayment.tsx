@@ -5,7 +5,7 @@ import { Button } from"@/components/ui/button";
 import { Card, CardContent } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
 import { Separator } from"@/components/ui/separator";
-import { Loader2, CreditCard, CheckCircle, AlertCircle } from"lucide-react";
+import { Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import logo from"@/assets/logo.png";
 
 import { Formatters } from "@/utils/formatters";
@@ -197,7 +197,7 @@ export default function AdminInvoicePayment() {
  {paying ? (
  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
  ) : (
- <CreditCard className="w-4 h-4 mr-2" />
+ <span className="w-4 h-4 mr-2" aria-hidden="true">💳</span>
  )}
  Pay {Formatters.currency(amountDue)}
  </Button>

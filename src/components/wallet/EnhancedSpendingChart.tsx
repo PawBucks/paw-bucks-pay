@@ -17,7 +17,6 @@ import {
  Line
 } from"recharts";
 import { format, subDays, subWeeks, subMonths, startOfWeek, endOfWeek, startOfDay, endOfDay, startOfMonth, endOfMonth } from"date-fns";
-import { TrendingUp, TrendingDown, BarChart3, LineChart } from"lucide-react";
 
 import { Formatters } from "@/utils/formatters";
 type Transaction = {
@@ -238,9 +237,9 @@ export const EnhancedSpendingChart = memo(({ transactions, medicalRecords = [] }
  className="gap-1"
  >
  {weeklyTrend < 0 ? (
- <TrendingDown className="w-3 h-3" />
+ <span className="w-3 h-3" aria-hidden="true">📉</span>
  ) : (
- <TrendingUp className="w-3 h-3" />
+ <span className="w-3 h-3" aria-hidden="true">📈</span>
  )}
  {Formatters.number(Math.round(Math.abs(weeklyTrend)))}%
  </Badge>
@@ -250,13 +249,13 @@ export const EnhancedSpendingChart = memo(({ transactions, medicalRecords = [] }
  onClick={() => setChartType('area')}
  className={`p-1.5 ${chartType ==='area' ?'bg-primary/20' :'bg-muted'}`}
  >
- <LineChart className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">📈</span>
  </button>
  <button
  onClick={() => setChartType('bar')}
  className={`p-1.5 ${chartType ==='bar' ?'bg-primary/20' :'bg-muted'}`}
  >
- <BarChart3 className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">📊</span>
  </button>
  </div>
  </div>

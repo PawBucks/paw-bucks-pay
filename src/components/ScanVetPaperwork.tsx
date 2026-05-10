@@ -22,7 +22,7 @@ import {
 } from"@/components/ui/select";
 import { Card } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
-import { Camera, Loader2, Check, X, Trash2, Plus, ImageIcon, AlertCircle } from "lucide-react";
+import { Loader2, Check, X, Trash2, Plus, AlertCircle } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { toast } from"sonner";
 
@@ -302,7 +302,7 @@ export const ScanVetPaperwork = ({
  >
  <DialogTrigger asChild>
  <Button variant="outline">
- <Camera className="w-4 h-4 mr-2" />
+ <span className="w-4 h-4 mr-2" aria-hidden="true">📸</span>
  Scan Paperwork
  </Button>
  </DialogTrigger>
@@ -346,7 +346,7 @@ export const ScanVetPaperwork = ({
  className="p-8 flex flex-col items-center justify-center gap-3 cursor-pointer hover:bg-accent transition-colors border-dashed border-2"
  onClick={() => cameraInputRef.current?.click()}
  >
- <Camera className="w-10 h-10 text-primary" />
+ <span className="w-10 h-10 text-primary" aria-hidden="true">📸</span>
  <span className="text-sm font-medium">Take Photo</span>
  <span className="text-xs text-muted-foreground text-center">
  Use your camera to capture the document
@@ -356,7 +356,7 @@ export const ScanVetPaperwork = ({
  className="p-8 flex flex-col items-center justify-center gap-3 cursor-pointer hover:bg-accent transition-colors border-dashed border-2"
  onClick={() => fileInputRef.current?.click()}
  >
- <ImageIcon className="w-10 h-10 text-primary" />
+ <span className="w-10 h-10 text-primary" aria-hidden="true">🖼️</span>
  <span className="text-sm font-medium">Upload Image</span>
  <span className="text-xs text-muted-foreground text-center">
  Select a photo from your device

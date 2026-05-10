@@ -2,7 +2,7 @@ import { useState, useCallback } from"react";
 import { Checkbox } from"@/components/ui/checkbox";
 import { Label } from"@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from"@/components/ui/card";
-import { AlertCircle, Stethoscope } from"lucide-react";
+import { AlertCircle } from "lucide-react";
 import { cn } from"@/lib/utils";
 
 export const VET_ADDENDUM_CONTENT = `PAWBUCKS
@@ -229,7 +229,7 @@ export const VetServicesAddendum = ({
  <Card className="border-border">
  <CardHeader className="pb-3">
  <CardTitle className="text-lg flex items-center gap-2">
- <Stethoscope className="w-5 h-5 text-primary" />
+ <span className="w-5 h-5 text-primary" aria-hidden="true">🩺</span>
  Veterinary Services Disclosure Addendum
  </CardTitle>
  </CardHeader>

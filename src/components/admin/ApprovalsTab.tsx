@@ -11,10 +11,7 @@ import { Textarea } from'@/components/ui/textarea';
 import { Label } from'@/components/ui/label';
 import { ScrollArea } from'@/components/ui/scroll-area';
 import { VerificationChecklist } from'./VerificationChecklist';
-import { 
- CheckCircle2, XCircle, Clock, Store, Stethoscope, RefreshCw,
- AlertCircle, Mail, Phone, MapPin, Calendar, ClipboardCheck
-} from'lucide-react';
+import { CheckCircle2, XCircle, RefreshCw, AlertCircle, Phone, ClipboardCheck } from "lucide-react";
 import { toast } from'sonner';
 import { format } from'date-fns';
 
@@ -200,7 +197,7 @@ export function ApprovalsTab() {
  </CardHeader>
  <CardContent>
  <div className="flex items-center gap-2">
- <Store className="w-5 h-5 text-warning" />
+ <span className="w-5 h-5 text-warning" aria-hidden="true">🏪</span>
  <span className="text-3xl font-bold">{pendingMerchants.length}</span>
  </div>
  </CardContent>
@@ -211,7 +208,7 @@ export function ApprovalsTab() {
  </CardHeader>
  <CardContent>
  <div className="flex items-center gap-2">
- <Stethoscope className="w-5 h-5 text-info" />
+ <span className="w-5 h-5 text-info" aria-hidden="true">🩺</span>
  <span className="text-3xl font-bold">{pendingVets.length}</span>
  </div>
  </CardContent>
@@ -222,7 +219,7 @@ export function ApprovalsTab() {
  </CardHeader>
  <CardContent>
  <div className="flex items-center gap-2">
- <Clock className="w-5 h-5 text-warning" />
+ <span className="w-5 h-5 text-warning" aria-hidden="true">⏰</span>
  <span className="text-3xl font-bold">{totalPending}</span>
  </div>
  </CardContent>
@@ -233,14 +230,14 @@ export function ApprovalsTab() {
  <Tabs defaultValue="merchants" className="space-y-4">
  <TabsList>
  <TabsTrigger value="merchants" className="flex items-center gap-2">
- <Store className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">🏪</span>
  Merchants
  {pendingMerchants.length > 0 && (
  <Badge variant="secondary" className="ml-1">{pendingMerchants.length}</Badge>
  )}
  </TabsTrigger>
  <TabsTrigger value="vets" className="flex items-center gap-2">
- <Stethoscope className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">🩺</span>
  Veterinarians
  {pendingVets.length > 0 && (
  <Badge variant="secondary" className="ml-1">{pendingVets.length}</Badge>
@@ -284,7 +281,7 @@ export function ApprovalsTab() {
  <div className="font-medium">{merchant.business_name}</div>
  {merchant.address && (
  <div className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
- <MapPin className="w-3 h-3" />
+ <span className="w-3 h-3" aria-hidden="true">📍</span>
  {merchant.address}
  </div>
  )}
@@ -299,7 +296,7 @@ export function ApprovalsTab() {
  )}
  {merchant.email && (
  <div className="text-xs text-muted-foreground flex items-center gap-1">
- <Mail className="w-3 h-3" />
+ <span className="w-3 h-3" aria-hidden="true">📧</span>
  {merchant.email}
  </div>
  )}
@@ -307,7 +304,7 @@ export function ApprovalsTab() {
  </TableCell>
  <TableCell>
  <div className="flex items-center gap-1 text-sm text-muted-foreground">
- <Calendar className="w-3 h-3" />
+ <span className="w-3 h-3" aria-hidden="true">📅</span>
  {format(new Date(merchant.created_at),'MMM d, yyyy')}
  </div>
  </TableCell>
@@ -375,12 +372,12 @@ export function ApprovalsTab() {
  <TableCell>
  <div className="space-y-1">
  <div className="text-xs text-muted-foreground flex items-center gap-1">
- <Mail className="w-3 h-3" />
+ <span className="w-3 h-3" aria-hidden="true">📧</span>
  {vet.contact_email}
  </div>
  {vet.clinic_phone && (
  <div className="text-xs text-muted-foreground flex items-center gap-1">
- <Phone className="w-3 h-3" />
+ <span className="w-3 h-3" aria-hidden="true">📞</span>
  {vet.clinic_phone}
  </div>
  )}
@@ -388,13 +385,13 @@ export function ApprovalsTab() {
  </TableCell>
  <TableCell>
  <div className="flex items-center gap-1 text-sm text-muted-foreground">
- <MapPin className="w-3 h-3" />
+ <span className="w-3 h-3" aria-hidden="true">📍</span>
  {vet.location}
  </div>
  </TableCell>
  <TableCell>
  <div className="flex items-center gap-1 text-sm text-muted-foreground">
- <Calendar className="w-3 h-3" />
+ <span className="w-3 h-3" aria-hidden="true">📅</span>
  {format(new Date(vet.created_at),'MMM d, yyyy')}
  </div>
  </TableCell>
@@ -423,7 +420,7 @@ export function ApprovalsTab() {
  <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
  <DialogHeader>
  <DialogTitle className="flex items-center gap-2">
- <Store className="w-5 h-5" />
+ <span className="w-5 h-5" aria-hidden="true">🏪</span>
  Review: {reviewingMerchant?.business_name}
  </DialogTitle>
  <DialogDescription>
@@ -480,7 +477,7 @@ export function ApprovalsTab() {
  <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
  <DialogHeader>
  <DialogTitle className="flex items-center gap-2">
- <Stethoscope className="w-5 h-5" />
+ <span className="w-5 h-5" aria-hidden="true">🩺</span>
  Review: {reviewingVet?.clinic_name || reviewingVet?.name}
  </DialogTitle>
  <DialogDescription>

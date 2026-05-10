@@ -309,7 +309,7 @@ export function MerchantServicesTab() {
  <span className="font-medium">{service.name}</span>
  {service.is_popular && (
  <Badge variant="secondary" className="text-xs">
- <Star className="w-3 h-3 mr-1" />Popular
+ <span className="w-3 h-3 mr-1" aria-hidden="true">⭐</span>Popular
  </Badge>
  )}
  {service.is_new && (

@@ -18,23 +18,10 @@ import {
 } from"@/components/ui/dialog";
 import { format, isSameDay, startOfToday } from"date-fns";
 import { parseLocalDate } from'@/utils/formatters';
-import { 
- CheckCircle, 
- XCircle, 
- Clock, 
- User, 
- Phone, 
- Mail,
- PawPrint,
- Calendar as CalendarIcon,
- AlertCircle,
- CreditCard,
- Loader2,
- DollarSign,
-} from"lucide-react";
+import { CheckCircle, XCircle, Calendar as CalendarIcon, AlertCircle, Loader2 } from "lucide-react";
 import { type BookingWithDetails, type BookingStatus } from"@/services/api/scheduling.service";
 import { GroomingReportCardForm } from"./GroomingReportCardForm";
-import { FileText } from"lucide-react";
+
 import { supabase } from"@/integrations/supabase/client";
 import { toast } from"sonner";
 
@@ -104,7 +91,7 @@ function NoShowChargeButton({ booking, onCharged }: { booking: BookingWithDetail
  return (
  <div className="pt-4 border-t space-y-2">
  <div className="flex items-center gap-2 p-2 rounded-lg bg-warning/10 text-warning text-xs">
- <CreditCard className="w-3.5 h-3.5 flex-shrink-0" />
+ <span className="w-3.5 h-3.5 flex-shrink-0" aria-hidden="true">💳</span>
  <span>Card on file available — charge no-show fee</span>
  </div>
  <Button
@@ -116,7 +103,7 @@ function NoShowChargeButton({ booking, onCharged }: { booking: BookingWithDetail
  {charging ? (
  <><Loader2 className="w-4 h-4 animate-spin" /> Charging...</>
  ) : (
- <><DollarSign className="w-4 h-4" /> Charge {Formatters.currency(feeAmount)} No-Show Fee</>
+ <><span className="w-4 h-4" aria-hidden="true">💵</span> Charge {Formatters.currency(feeAmount)} No-Show Fee</>
  )}
  </Button>
  </div>
@@ -234,13 +221,13 @@ export function BookingsCalendar({ bookings, merchantId, onUpdateStatus }: Booki
  <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
  {booking.customer_name && (
  <span className="flex items-center gap-1">
- <User className="w-3 h-3" />
+ <span className="w-3 h-3" aria-hidden="true">👤</span>
  {booking.customer_name}
  </span>
  )}
  {booking.pet_profiles && (
  <span className="flex items-center gap-1">
- <PawPrint className="w-3 h-3" />
+ <span className="w-3 h-3" aria-hidden="true">🐾</span>
  {booking.pet_profiles.name}
  </span>
  )}
@@ -295,7 +282,7 @@ export function BookingsCalendar({ bookings, merchantId, onUpdateStatus }: Booki
  <div>
  <p className="text-sm text-muted-foreground">Time</p>
  <p className="font-medium flex items-center gap-1">
- <Clock className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">⏰</span>
  {formatTime(selectedBooking.start_time)} - {formatTime(selectedBooking.end_time)}
  </p>
  </div>
@@ -306,19 +293,19 @@ export function BookingsCalendar({ bookings, merchantId, onUpdateStatus }: Booki
  <div className="space-y-1">
  {selectedBooking.customer_name && (
  <p className="font-medium flex items-center gap-2">
- <User className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">👤</span>
  {selectedBooking.customer_name}
  </p>
  )}
  {selectedBooking.customer_phone && (
  <p className="text-sm flex items-center gap-2">
- <Phone className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">📞</span>
  {selectedBooking.customer_phone}
  </p>
  )}
  {selectedBooking.customer_email && (
  <p className="text-sm flex items-center gap-2">
- <Mail className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">📧</span>
  {selectedBooking.customer_email}
  </p>
  )}
@@ -329,7 +316,7 @@ export function BookingsCalendar({ bookings, merchantId, onUpdateStatus }: Booki
  <div>
  <p className="text-sm text-muted-foreground">Pet</p>
  <p className="font-medium flex items-center gap-2">
- <PawPrint className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">🐾</span>
  {selectedBooking.pet_profiles.name} ({selectedBooking.pet_profiles.type})
  </p>
  </div>
@@ -431,7 +418,7 @@ export function BookingsCalendar({ bookings, merchantId, onUpdateStatus }: Booki
  setSelectedBooking(null);
  }}
  >
- <FileText className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">📄</span>
  Grooming Report Card
  </Button>
  </div>

@@ -9,7 +9,7 @@ import {
  AccordionItem,
  AccordionTrigger,
 } from"@/components/ui/accordion";
-import { FileText, Edit, Clock, CheckCircle, AlertCircle } from"lucide-react";
+import { Edit, CheckCircle, AlertCircle } from "lucide-react";
 import { format } from"date-fns";
 import type { SOAPNote } from"./types";
 
@@ -52,7 +52,7 @@ export const SOAPNotesList = ({ petId, vetId, refreshTrigger, onEdit }: SOAPNote
  case"amended":
  return <AlertCircle className="w-4 h-4 text-warning" />;
  default:
- return <Clock className="w-4 h-4 text-muted-foreground" />;
+ return <span className="w-4 h-4 text-muted-foreground" aria-hidden="true">⏰</span>;
  }
  };
 
@@ -63,7 +63,7 @@ export const SOAPNotesList = ({ petId, vetId, refreshTrigger, onEdit }: SOAPNote
  if (notes.length === 0) {
  return (
  <Card className="p-8 text-center text-muted-foreground">
- <FileText className="w-12 h-12 mx-auto mb-2 opacity-50" />
+ <span className="w-12 h-12 mx-auto mb-2 opacity-50" aria-hidden="true">📄</span>
  <p>No SOAP notes yet. Create a new note to get started.</p>
  </Card>
  );

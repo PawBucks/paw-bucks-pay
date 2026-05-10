@@ -3,7 +3,7 @@ import { supabase } from"@/integrations/supabase/client";
 import { GradientCard } from"@/components/ui/gradient-card";
 import { Button } from"@/components/ui/button";
 import { Input } from"@/components/ui/input";
-import { Gift, Copy, Check, Users } from"lucide-react";
+import { Copy, Check } from "lucide-react";
 import { toast } from"sonner";
 import { buildAppUrl } from"@/lib/url";
 
@@ -114,7 +114,7 @@ const ReferralCardComponent = () => {
  <GradientCard className="md:col-span-3">
  <div className="flex items-center gap-2 mb-4">
  <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center">
- <Gift className="w-5 h-5 text-accent" />
+ <span className="w-5 h-5 text-accent" aria-hidden="true">🎁</span>
  </div>
  <div>
  <h3 className="text-xl font-semibold">Referral Program</h3>
@@ -140,7 +140,7 @@ const ReferralCardComponent = () => {
  {referrals.length > 0 && (
  <div className="space-y-2">
  <div className="flex items-center gap-2">
- <Users className="w-4 h-4 text-muted-foreground" />
+ <span className="w-4 h-4 text-muted-foreground" aria-hidden="true">👥</span>
  <p className="text-sm font-medium">
  Your Referrals ({referrals.length})
  </p>

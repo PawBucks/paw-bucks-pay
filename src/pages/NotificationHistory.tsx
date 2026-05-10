@@ -8,7 +8,7 @@ import { Badge } from"@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from"@/components/ui/select";
 import { Calendar } from"@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from"@/components/ui/popover";
-import { ArrowLeft, Bell, Calendar as CalendarIcon, Filter, Check, X } from"lucide-react";
+import { ArrowLeft, Bell, Calendar as CalendarIcon, Filter, Check, X } from "lucide-react";
 import { useNavigate } from"react-router-dom";
 import { format, subDays, startOfDay, endOfDay } from"date-fns";
 import { cn } from"@/lib/utils";
@@ -309,7 +309,7 @@ export default function NotificationHistory() {
  <Card>
  <CardHeader className="pb-3">
  <CardTitle className="flex items-center gap-2">
- <Bell className="h-5 w-5" />
+ <span className="h-5 w-5" aria-hidden="true">🔔</span>
  Notifications
  {unreadCount > 0 && (
  <Badge variant="secondary" className="ml-2">

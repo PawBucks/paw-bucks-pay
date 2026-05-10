@@ -8,21 +8,7 @@ import { Progress } from"@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
 import { ScrollArea } from"@/components/ui/scroll-area";
 import { GradientCard } from"@/components/ui/gradient-card";
-import { 
- GraduationCap, 
- PlayCircle, 
- CheckCircle2, 
- Clock, 
- FileText, 
- Download,
- BookOpen,
- Award,
- ChevronRight,
- Loader2,
- Lock,
- Star,
- Trophy
-} from"lucide-react";
+import { PlayCircle, CheckCircle2, FileText, Download, BookOpen, ChevronRight, Loader2 } from "lucide-react";
 import { toast } from"sonner";
 
 type Lesson = {
@@ -119,7 +105,7 @@ export function TrainingCourseWidget() {
  return (
  <Card className="border-dashed">
  <CardContent className="py-12 text-center">
- <GraduationCap className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+ <span className="h-12 w-12 text-muted-foreground mx-auto mb-4" aria-hidden="true">🎓</span>
  <h3 className="font-semibold mb-2">Exclusive Training Course</h3>
  <p className="text-muted-foreground text-sm max-w-md mx-auto">
  {data?.message ||'Purchase this course from the Merchant Market to access comprehensive training on growing your business on PawBucks.'}
@@ -140,7 +126,7 @@ export function TrainingCourseWidget() {
  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
  <div>
  <h2 className="text-2xl font-bold flex items-center gap-2">
- <GraduationCap className="h-6 w-6 text-primary" />
+ <span className="h-6 w-6 text-primary" aria-hidden="true">🎓</span>
  {course.title}
  </h2>
  <p className="text-muted-foreground">
@@ -149,7 +135,7 @@ export function TrainingCourseWidget() {
  </div>
  {course.certificate_earned && (
  <Badge className="bg-gradient-to-r from-warning to-warning text-white gap-1 self-start">
- <Trophy className="h-3 w-3" /> Certificate Earned
+ <span className="h-3 w-3" aria-hidden="true">🏆</span> Certificate Earned
  </Badge>
  )}
  </div>
@@ -159,7 +145,7 @@ export function TrainingCourseWidget() {
  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
  <div className="flex-1">
  <div className="flex items-center gap-2 mb-2">
- <Award className="h-5 w-5 text-primary" />
+ <span className="h-5 w-5 text-primary" aria-hidden="true">🏆</span>
  <span className="font-semibold">Course Progress</span>
  </div>
  <div className="flex items-center gap-4">
@@ -244,7 +230,7 @@ export function TrainingCourseWidget() {
  <PlayCircle className="h-4 w-4" /> Lessons
  </TabsTrigger>
  <TabsTrigger value="resources" className="gap-2">
- <FileText className="h-4 w-4" /> Resources
+ <span className="h-4 w-4" aria-hidden="true">📄</span> Resources
  </TabsTrigger>
  </TabsList>
 
@@ -292,7 +278,7 @@ export function TrainingCourseWidget() {
  {lesson.title}
  </p>
  <div className="flex items-center gap-2 text-xs text-muted-foreground">
- <Clock className="h-3 w-3" />
+ <span className="h-3 w-3" aria-hidden="true">⏰</span>
  {lesson.duration_minutes} min
  </div>
  </div>
@@ -348,13 +334,13 @@ export function TrainingCourseWidget() {
  {/* Certificate Section */}
  {course.progress_percent === 100 && (
  <GradientCard gradient className="text-center">
- <Trophy className="h-12 w-12 text-warning mx-auto mb-4" />
+ <span className="h-12 w-12 text-warning mx-auto mb-4" aria-hidden="true">🏆</span>
  <h3 className="text-xl font-bold mb-2">Congratulations!</h3>
  <p className="text-muted-foreground mb-4">
  You've completed the PawBucks Merchant Training Course
  </p>
  <Button className="gap-2">
- <Award className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">🏆</span>
  Download Certificate
  </Button>
  </GradientCard>

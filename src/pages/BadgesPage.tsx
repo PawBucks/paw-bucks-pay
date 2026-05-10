@@ -9,7 +9,7 @@ import { BottomNav } from"@/components/BottomNav";
 import { BadgeCollection } from"@/components/badges";
 import { Button } from"@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from"@/components/ui/dialog";
-import { ArrowLeft, Gift, Clock, CheckCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { supabase } from"@/integrations/supabase/client";
 import { toast } from"sonner";
@@ -227,7 +227,7 @@ const BadgesPage = () => {
  {selectedBadge.reward_description && selectedEarned && (
  <div className="p-4 rounded-md bg-gradient-to-r from-primary/5 to-accent/5 border border-primary/10">
  <div className="flex items-center gap-2 mb-2">
- <Gift className="w-5 h-5 text-primary" />
+ <span className="w-5 h-5 text-primary" aria-hidden="true">🎁</span>
  <span className="font-semibold">Your Reward</span>
  </div>
  <p className="text-sm mb-3">{selectedBadge.reward_description}</p>
@@ -245,7 +245,7 @@ const BadgesPage = () => {
  <>
  {selectedEarned.reward_expires_at && (
  <div className="flex items-center gap-1 text-xs text-muted-foreground mb-3">
- <Clock className="w-3 h-3" />
+ <span className="w-3 h-3" aria-hidden="true">⏰</span>
  <span>Expires: {new Date(selectedEarned.reward_expires_at).toLocaleString()}</span>
  </div>
  )}

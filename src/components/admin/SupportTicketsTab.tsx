@@ -22,10 +22,7 @@ import {
 } from'@/components/ui/select';
 import { toast } from'sonner';
 import { format } from'date-fns';
-import {
- Ticket, Clock, CheckCircle, AlertCircle, MessageSquare, Send, Eye, Loader2,
- Bug, CreditCard, UserCog, Lightbulb, HelpCircle, AlertTriangle, Search, User
-} from'lucide-react';
+import { Ticket, Clock, CheckCircle, AlertCircle, MessageSquare, Send, Eye, Loader2, Bug, CreditCard, UserCog, Lightbulb, HelpCircle, AlertTriangle, Search, User } from "lucide-react";
 import { LoadingSpinner } from'@/components/LoadingSpinner';
 
 const STATUS_CONFIG: Record<string, { label: string; variant:'default' |'secondary' |'destructive' |'outline'; icon: typeof Clock }> = {
@@ -219,8 +216,8 @@ export const SupportTicketsTab = () => {
  {/* Summary Cards */}
  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
  <Card><CardContent className="pt-4"><div className="flex items-center gap-2"><AlertCircle className="h-4 w-4 text-destructive" /><span className="text-sm text-muted-foreground">Open</span></div><p className="text-2xl font-bold">{counts.open}</p></CardContent></Card>
- <Card><CardContent className="pt-4"><div className="flex items-center gap-2"><Clock className="h-4 w-4 text-primary" /><span className="text-sm text-muted-foreground">In Progress</span></div><p className="text-2xl font-bold">{counts.in_progress}</p></CardContent></Card>
- <Card><CardContent className="pt-4"><div className="flex items-center gap-2"><MessageSquare className="h-4 w-4 text-muted-foreground" /><span className="text-sm text-muted-foreground">Awaiting</span></div><p className="text-2xl font-bold">{counts.awaiting}</p></CardContent></Card>
+ <Card><CardContent className="pt-4"><div className="flex items-center gap-2"><span className="h-4 w-4 text-primary" aria-hidden="true">⏰</span><span className="text-sm text-muted-foreground">In Progress</span></div><p className="text-2xl font-bold">{counts.in_progress}</p></CardContent></Card>
+ <Card><CardContent className="pt-4"><div className="flex items-center gap-2"><span className="h-4 w-4 text-muted-foreground" aria-hidden="true">💬</span><span className="text-sm text-muted-foreground">Awaiting</span></div><p className="text-2xl font-bold">{counts.awaiting}</p></CardContent></Card>
  <Card><CardContent className="pt-4"><div className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-success" /><span className="text-sm text-muted-foreground">Resolved</span></div><p className="text-2xl font-bold">{counts.resolved}</p></CardContent></Card>
  </div>
 
@@ -276,7 +273,7 @@ export const SupportTicketsTab = () => {
  <Badge variant={statusCfg.variant}>{statusCfg.label}</Badge>
  <span className={`text-xs px-2 py-0.5 rounded-full ${priorityCfg.className}`}>{priorityCfg.label}</span>
  <span className="text-xs flex items-center gap-1 text-muted-foreground"><CategoryIcon className="w-3 h-3" />{categoryCfg.label}</span>
- <Badge variant="outline" className="text-xs"><User className="w-3 h-3 mr-1" />{SUBMITTER_LABELS[ticket.submitter_type] || ticket.submitter_type}</Badge>
+ <Badge variant="outline" className="text-xs"><span className="w-3 h-3 mr-1" aria-hidden="true">👤</span>{SUBMITTER_LABELS[ticket.submitter_type] || ticket.submitter_type}</Badge>
  </div>
  <p className="font-medium text-sm truncate">{ticket.subject}</p>
  <p className="text-xs text-muted-foreground line-clamp-1 mt-1">{ticket.description}</p>
@@ -308,7 +305,7 @@ export const SupportTicketsTab = () => {
  <DialogTitle className="flex items-center gap-2 flex-wrap">
  <span className="font-mono text-sm text-muted-foreground">{selectedTicket?.ticket_number}</span>
  {selectedTicket && <Badge variant={STATUS_CONFIG[selectedTicket.status]?.variant}>{STATUS_CONFIG[selectedTicket.status]?.label}</Badge>}
- {selectedTicket && <Badge variant="outline"><User className="w-3 h-3 mr-1" />{SUBMITTER_LABELS[selectedTicket.submitter_type]}</Badge>}
+ {selectedTicket && <Badge variant="outline"><span className="w-3 h-3 mr-1" aria-hidden="true">👤</span>{SUBMITTER_LABELS[selectedTicket.submitter_type]}</Badge>}
  </DialogTitle>
  </DialogHeader>
 
@@ -349,7 +346,7 @@ export const SupportTicketsTab = () => {
 
  {/* Replies */}
  <div className="border-t pt-4">
- <p className="text-sm font-semibold mb-3 flex items-center gap-2"><MessageSquare className="w-4 h-4" />Conversation</p>
+ <p className="text-sm font-semibold mb-3 flex items-center gap-2"><span className="w-4 h-4" aria-hidden="true">💬</span>Conversation</p>
  {repliesLoading ? (
  <div className="flex justify-center py-4"><Loader2 className="w-4 h-4 animate-spin" /></div>
  ) : !ticketReplies?.length ? (

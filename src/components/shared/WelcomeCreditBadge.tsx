@@ -1,4 +1,4 @@
-import { Gift } from"lucide-react";
+
 import { Badge } from"@/components/ui/badge";
 import {
  Tooltip,
@@ -34,7 +34,7 @@ export const WelcomeCreditBadge = ({
  <Badge 
  className={`bg-gradient-to-r from-warning/20 to-warning/20 text-warning border-warning/30 hover:from-warning/30 hover:to-warning/30 ${sizeClasses[size]} ${className}`}
  >
- <Gift className={`${iconSizes[size]} mr-1`} />
+ <span className={`${iconSizes[size]} mr-1`} aria-hidden="true">🎁</span>
  Welcome Credit Accepted
  </Badge>
  );

@@ -3,7 +3,7 @@ import { useForm } from"react-hook-form";
 import { zodResolver } from"@hookform/resolvers/zod";
 import { z } from"zod";
 import { format } from"date-fns";
-import { Calendar, DollarSign } from"lucide-react";
+import { Calendar, DollarSign } from "lucide-react";
 import { Button } from"@/components/ui/button";
 import { Input } from"@/components/ui/input";
 import { Textarea } from"@/components/ui/textarea";
@@ -216,7 +216,7 @@ export function RecordPaymentDialog({
  !field.value &&"text-muted-foreground"
  )}
  >
- <Calendar className="mr-2 h-4 w-4" />
+ <span className="mr-2 h-4 w-4" aria-hidden="true">📅</span>
  {field.value ? format(field.value,"PPP") :"Pick a date"}
  </Button>
  </FormControl>

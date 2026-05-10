@@ -26,26 +26,7 @@ import { LostPetShareDialog } from"@/components/LostPetShareDialog";
 import { PhotoLightbox, PhotoThumbnail } from"@/components/PhotoLightbox";
 import { format } from"date-fns";
 import { jsPDF } from"jspdf";
-import {
- ArrowLeft,
- MapPin,
- Calendar,
- Phone,
- Mail,
- DollarSign,
- Dog,
- Cat,
- Bird,
- Rabbit,
- AlertTriangle,
- CheckCircle2,
- Clock,
- Share2,
- PartyPopper,
- Images,
- Download,
- Loader2,
-} from"lucide-react";
+import { ArrowLeft, Bird, Rabbit, AlertTriangle, CheckCircle2, PartyPopper, Images, Download, Loader2 } from "lucide-react";
 
 interface LostPetPost {
  id: string;
@@ -77,8 +58,8 @@ interface LostPetPost {
 }
 
 const petTypeIcons: Record<string, React.ReactNode> = {
- dog: <Dog className="w-6 h-6" />,
- cat: <Cat className="w-6 h-6" />,
+ dog: <span className="w-6 h-6" aria-hidden="true">🐕</span>,
+ cat: <span className="w-6 h-6" aria-hidden="true">🐈</span>,
  bird: <Bird className="w-6 h-6" />,
  rabbit: <Rabbit className="w-6 h-6" />,
 };
@@ -91,7 +72,7 @@ const statusColors: Record<string, string> = {
 
 const statusIcons: Record<string, React.ReactNode> = {
  lost: <AlertTriangle className="w-4 h-4" />,
- found: <Clock className="w-4 h-4" />,
+ found: <span className="w-4 h-4" aria-hidden="true">⏰</span>,
  reunited: <CheckCircle2 className="w-4 h-4" />,
 };
 
@@ -367,7 +348,7 @@ const LostPetDetail = () => {
  <div className="min-h-screen bg-background">
  <Header />
  <main className="container mx-auto px-4 py-12 text-center">
- <Dog className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+ <span className="w-16 h-16 text-muted-foreground mx-auto mb-4" aria-hidden="true">🐕</span>
  <h1 className="text-2xl font-bold mb-2">Post Not Found</h1>
  <p className="text-muted-foreground mb-6">
  This lost pet flyer may have been removed or doesn't exist.
@@ -448,7 +429,7 @@ const LostPetDetail = () => {
  ) : (
  <div className="w-full h-64 md:h-96 bg-muted flex items-center justify-center">
  {petTypeIcons[post.pet_type] || (
- <Dog className="w-24 h-24 text-muted-foreground" />
+ <span className="w-24 h-24 text-muted-foreground" aria-hidden="true">🐕</span>
  )}
  </div>
  )}
@@ -462,7 +443,7 @@ const LostPetDetail = () => {
  </Badge>
  {post.reward_amount && (
  <Badge className="absolute top-4 right-4 bg-success text-white gap-1 text-base px-3 py-1">
- <DollarSign className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">💵</span>
  ${post.reward_amount} Reward
  </Badge>
  )}
@@ -494,7 +475,7 @@ const LostPetDetail = () => {
  {/* Last Seen */}
  <div className="p-4 bg-destructive/10 rounded-lg border border-destructive/20">
  <div className="flex items-start gap-3">
- <MapPin className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
+ <span className="w-5 h-5 text-destructive shrink-0 mt-0.5" aria-hidden="true">📍</span>
  <div>
  <p className="font-semibold text-lg">
  Last seen: {post.last_seen_location}
@@ -542,7 +523,7 @@ const LostPetDetail = () => {
 
  {/* Posted Date */}
  <div className="flex items-center gap-2 text-sm text-muted-foreground pt-4 border-t">
- <Calendar className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">📅</span>
  Posted {format(new Date(post.created_at),"MMMM d, yyyy")}
  </div>
  </CardContent>
@@ -562,7 +543,7 @@ const LostPetDetail = () => {
  href={`tel:${post.contact_phone}`}
  className="flex items-center gap-3 p-3 bg-primary/10 rounded-lg hover:bg-primary/20 transition-colors"
  >
- <Phone className="w-5 h-5 text-primary" />
+ <span className="w-5 h-5 text-primary" aria-hidden="true">📞</span>
  <span className="font-medium">{post.contact_phone}</span>
  </a>
  {post.contact_email && (
@@ -570,7 +551,7 @@ const LostPetDetail = () => {
  href={`mailto:${post.contact_email}`}
  className="flex items-center gap-3 p-3 bg-muted rounded-lg hover:bg-muted/80 transition-colors"
  >
- <Mail className="w-5 h-5 text-primary" />
+ <span className="w-5 h-5 text-primary" aria-hidden="true">📧</span>
  <span className="truncate">{post.contact_email}</span>
  </a>
  )}
@@ -597,7 +578,7 @@ const LostPetDetail = () => {
  
  <LostPetShareDialog post={post}>
  <Button className="w-full gap-2" size="lg" variant="outline">
- <Share2 className="w-5 h-5" />
+ <span className="w-5 h-5" aria-hidden="true">🔗</span>
  Share Flyer
  </Button>
  </LostPetShareDialog>
@@ -654,7 +635,7 @@ const LostPetDetail = () => {
  {post.reward_amount && (
  <Card className="bg-success/10 border-success/20">
  <CardContent className="pt-6 text-center">
- <DollarSign className="w-10 h-10 text-success mx-auto mb-2" />
+ <span className="w-10 h-10 text-success mx-auto mb-2" aria-hidden="true">💵</span>
  <p className="text-2xl font-bold text-success">
  ${post.reward_amount} Reward
  </p>

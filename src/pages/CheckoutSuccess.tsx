@@ -2,7 +2,7 @@ import { useEffect, useState } from"react";
 import { useNavigate, useSearchParams } from"react-router-dom";
 import { Button } from"@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/components/ui/card";
-import { CheckCircle, ArrowLeft, Home, Gift, ShoppingBag } from "lucide-react";
+import { CheckCircle, ArrowLeft } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { SEO } from"@/components/SEO";
 
@@ -99,7 +99,7 @@ const CheckoutSuccess = () => {
  }`}
  >
  <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
- <Gift className="h-5 w-5 text-primary" />
+ <span className="h-5 w-5 text-primary" aria-hidden="true">🎁</span>
  <div className="text-sm">
  <p className="font-medium">Confirmation email sent</p>
  <p className="text-muted-foreground">Check your inbox for details</p>
@@ -127,7 +127,7 @@ const CheckoutSuccess = () => {
  className="w-full"
  size="lg"
  >
- <Home className="h-4 w-4 mr-2" />
+ <span className="h-4 w-4 mr-2" aria-hidden="true">🏠</span>
  Go to Dashboard
  </Button>
 
@@ -147,7 +147,7 @@ const CheckoutSuccess = () => {
  onClick={() => navigate(`/store/${storeId}`)} 
  className="w-full"
  >
- <ShoppingBag className="h-4 w-4 mr-2" />
+ <span className="h-4 w-4 mr-2" aria-hidden="true">🛍️</span>
  Continue Shopping
  </Button>
  )}

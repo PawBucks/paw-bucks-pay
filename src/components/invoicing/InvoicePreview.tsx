@@ -1,5 +1,5 @@
 import { format, parseISO } from"date-fns";
-import { Download, Send, ArrowLeft, Printer, Link as LinkIcon, Mail, Copy, FileText, Image, Eye, Receipt } from"lucide-react";
+import { Download, Send, ArrowLeft, Printer, Link as LinkIcon, Copy, Eye, Receipt } from "lucide-react";
 import { Button } from"@/components/ui/button";
 import { Card, CardContent } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
@@ -98,7 +98,7 @@ export function InvoicePreview({
  )}
  {['paid','partially_paid'].includes(invoice.status) && onResendReceipt && (
  <Button variant="outline" onClick={onResendReceipt}>
- <Receipt className="h-4 w-4 mr-2" />
+ <span className="h-4 w-4 mr-2" aria-hidden="true">🧾</span>
  Resend Receipt
  </Button>
  )}
@@ -330,9 +330,9 @@ export function InvoicePreview({
  onClick={handleView}
  >
  {isImage ? (
- <Image className="h-4 w-4 text-info" />
+ <span className="h-4 w-4 text-info" aria-hidden="true">🖼️</span>
  ) : (
- <FileText className="h-4 w-4 text-destructive" />
+ <span className="h-4 w-4 text-destructive" aria-hidden="true">📄</span>
  )}
  <span className="text-sm flex-1 truncate">{displayName}</span>
  <Eye className="h-4 w-4 text-muted-foreground" />

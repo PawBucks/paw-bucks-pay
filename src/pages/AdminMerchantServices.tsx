@@ -6,7 +6,7 @@ import { MerchantServicesTab } from"@/components/admin/MerchantServicesTab";
 import { MerchantServiceAssignments } from"@/components/admin/MerchantServiceAssignments";
 import { Button } from"@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
-import { Loader2, Shield, ArrowLeft, LogOut, Settings, Store } from"lucide-react";
+import { Loader2, ArrowLeft, LogOut, Settings } from "lucide-react";
 import { toast } from"sonner";
 
 const AdminMerchantServices = () => {
@@ -84,7 +84,7 @@ const AdminMerchantServices = () => {
  </Button>
  <div className="flex items-center gap-2">
  <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
- <Shield className="w-6 h-6 text-primary-foreground" />
+ <span className="w-6 h-6 text-primary-foreground" aria-hidden="true">🛡️</span>
  </div>
  <div>
  <h1 className="text-xl font-bold">Merchant Services</h1>
@@ -102,7 +102,7 @@ const AdminMerchantServices = () => {
  <Tabs value={activeTab} onValueChange={setActiveTab}>
  <TabsList className="mb-6">
  <TabsTrigger value="assignments" className="gap-2">
- <Store className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">🏪</span>
  Merchant Assignments
  </TabsTrigger>
  <TabsTrigger value="catalog" className="gap-2">

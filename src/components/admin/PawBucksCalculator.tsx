@@ -4,7 +4,7 @@ import { Input } from'@/components/ui/input';
 import { Label } from'@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from'@/components/ui/radio-group';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from'@/components/ui/tabs';
-import { Calculator, Coins, ArrowRightLeft } from'lucide-react';
+import { Calculator, Coins, ArrowRightLeft } from "lucide-react";
 import { POINTS_MULTIPLIER, PAWBUCKS_CONVERSION } from'@/lib/constants';
 
 import { Formatters } from "@/utils/formatters";
@@ -48,7 +48,7 @@ export function PawBucksCalculator() {
  <Tabs defaultValue="credit" className="w-full">
  <TabsList className="grid w-full grid-cols-2">
  <TabsTrigger value="credit" className="flex items-center gap-2">
- <Coins className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">🪙</span>
  Credit (USD → PB)
  </TabsTrigger>
  <TabsTrigger value="debit" className="flex items-center gap-2">
@@ -114,7 +114,7 @@ export function PawBucksCalculator() {
  <div className="flex items-center justify-between">
  <span className="font-medium">PawBucks to Credit:</span>
  <span className="flex items-center gap-2 text-2xl font-bold text-primary">
- <Coins className="h-6 w-6" />
+ <span className="h-6 w-6" aria-hidden="true">🪙</span>
  {pawBucksResult.toLocaleString()}
  </span>
  </div>

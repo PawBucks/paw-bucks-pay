@@ -9,7 +9,7 @@ import { Label } from"@/components/ui/label";
 import { Progress } from"@/components/ui/progress";
 import { Badge } from"@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from"@/components/ui/dialog";
-import { Target, Plus, TrendingDown, Calendar, CheckCircle2, Clock } from "lucide-react";
+import { Target, Plus, CheckCircle2 } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { toast } from"sonner";
 import { useQueryClient } from"@tanstack/react-query";
@@ -154,7 +154,7 @@ export const SpendingGoals = memo(({ transactions, medicalRecords = [] }: Spendi
  <div className="flex items-center justify-between mb-4">
  <div className="flex items-center gap-2">
  <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center">
- <Target className="w-4 h-4 text-accent" />
+ <span className="w-4 h-4 text-accent" aria-hidden="true">🎯</span>
  </div>
  <div>
  <h3 className="text-lg font-semibold">Spending Goal</h3>
@@ -178,7 +178,7 @@ export const SpendingGoals = memo(({ transactions, medicalRecords = [] }: Spendi
  {isOnTrack ? (
  <CheckCircle2 className="w-5 h-5 text-accent" />
  ) : (
- <TrendingDown className="w-5 h-5 text-destructive" />
+ <span className="w-5 h-5 text-destructive" aria-hidden="true">📉</span>
  )}
  <span className="font-medium">
  {isOnTrack ?'On Track!' :'Over Budget'}
@@ -205,7 +205,7 @@ export const SpendingGoals = memo(({ transactions, medicalRecords = [] }: Spendi
  <div className="grid grid-cols-2 gap-3 mt-4">
  <div className="p-3 rounded-lg bg-background/50">
  <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
- <Clock className="w-3 h-3" />
+ <span className="w-3 h-3" aria-hidden="true">⏰</span>
  Remaining
  </div>
  <p className="font-bold text-lg">
@@ -214,7 +214,7 @@ export const SpendingGoals = memo(({ transactions, medicalRecords = [] }: Spendi
  </div>
  <div className="p-3 rounded-lg bg-background/50">
  <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
- <TrendingDown className="w-3 h-3" />
+ <span className="w-3 h-3" aria-hidden="true">📉</span>
  Projected
  </div>
  <p className={`font-bold text-lg ${projectedSpending > localGoal.monthlyTarget ?'text-destructive' :'text-accent'}`}>
@@ -262,7 +262,7 @@ export const SpendingGoals = memo(({ transactions, medicalRecords = [] }: Spendi
  ) : (
  <div className="text-center py-6">
  <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mx-auto mb-3">
- <Target className="w-6 h-6 text-muted-foreground" />
+ <span className="w-6 h-6 text-muted-foreground" aria-hidden="true">🎯</span>
  </div>
  <p className="text-sm text-muted-foreground mb-2">No spending goal set</p>
  <p className="text-xs text-muted-foreground mb-4">
@@ -305,7 +305,7 @@ export const SpendingGoals = memo(({ transactions, medicalRecords = [] }: Spendi
  </div>
 
  <Button onClick={handleCreateGoal} className="w-full">
- <Target className="w-4 h-4 mr-2" />
+ <span className="w-4 h-4 mr-2" aria-hidden="true">🎯</span>
  Set Goal
  </Button>
  </div>

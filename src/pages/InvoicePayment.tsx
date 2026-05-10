@@ -17,7 +17,7 @@ import {
  SelectTrigger,
  SelectValue,
 } from"@/components/ui/select";
-import { FileText, CreditCard, Building2, DollarSign, CheckCircle, AlertCircle, Loader2, Download, Calendar, Mail, Phone, MapPin, Coins, UserX, ArrowLeft } from "lucide-react";
+import { DollarSign, CheckCircle, AlertCircle, Loader2, Download, UserX, ArrowLeft } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { format, parseISO } from"date-fns";
 import { toast } from"sonner";
@@ -425,7 +425,7 @@ const InvoicePayment = () => {
         <img src={merchant.logo_url} alt={merchant.business_name} className="h-14 w-14 rounded-xl object-cover shadow-sm shrink-0" />
       ) : (
         <div className="h-14 w-14 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-          <Building2 className="h-7 w-7 text-primary" />
+          <span className="h-7 w-7 text-primary" aria-hidden="true">🏢</span>
         </div>
       )}
       <div className="min-w-0">
@@ -681,7 +681,7 @@ const InvoicePayment = () => {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <CreditCard className="h-5 w-5" />
+ <span className="h-5 w-5" aria-hidden="true">💳</span>
  Pay Invoice
  </CardTitle>
  <CardDescription>
@@ -772,7 +772,7 @@ const InvoicePayment = () => {
                   <div className="space-y-3 p-4 bg-muted/40 rounded-lg border border-border">
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-2">
-                        <Coins className="h-5 w-5 text-primary" />
+                        <span className="h-5 w-5 text-primary" aria-hidden="true">🪙</span>
                         <span className="font-medium text-foreground">Apply PawBucks</span>
  </div>
  {loadingPawbucks ? (
@@ -881,12 +881,12 @@ const InvoicePayment = () => {
  </>
  ) : stripeAmount > 0 ? (
  <>
- <CreditCard className="h-4 w-4 mr-2" />
+ <span className="h-4 w-4 mr-2" aria-hidden="true">💳</span>
  Pay {Formatters.currency(stripeAmount)} Now
  </>
  ) : (
  <>
- <Coins className="h-4 w-4 mr-2" />
+ <span className="h-4 w-4 mr-2" aria-hidden="true">🪙</span>
  Pay with PawBucks
  </>
  )}

@@ -4,7 +4,7 @@ import { Label } from"@/components/ui/label";
 import { Input } from"@/components/ui/input";
 import { Badge } from"@/components/ui/badge";
 import { Checkbox } from"@/components/ui/checkbox";
-import { Target, Users, Loader2, MapPin, Dog, Cat, Crown } from"lucide-react";
+import { Loader2 } from "lucide-react";
 import { supabase } from"@/integrations/supabase/client";
 import type { TargetingRules } from"@/services/api/brandCampaigns.service";
 
@@ -60,7 +60,7 @@ export function TargetingRulesEditor({ value, onChange }: TargetingRulesEditorPr
  <div className="flex items-center justify-between">
  <div>
  <CardTitle className="text-base flex items-center gap-2">
- <Target className="h-4 w-4 text-primary" />
+ <span className="h-4 w-4 text-primary" aria-hidden="true">🎯</span>
  Audience Targeting
  </CardTitle>
  <CardDescription>Reach the exact pet owners that matter to your brand</CardDescription>
@@ -73,7 +73,7 @@ export function TargetingRulesEditor({ value, onChange }: TargetingRulesEditorPr
  <CardContent className="space-y-5">
  {/* Geo */}
  <div className="space-y-2">
- <Label className="flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" />Geography</Label>
+ <Label className="flex items-center gap-1.5"><span className="h-3.5 w-3.5" aria-hidden="true">📍</span>Geography</Label>
  <div className="grid grid-cols-2 gap-2">
  <Input
  placeholder="Center ZIP (e.g. 10001)"
@@ -99,7 +99,7 @@ export function TargetingRulesEditor({ value, onChange }: TargetingRulesEditorPr
 
  {/* Species */}
  <div className="space-y-2">
- <Label className="flex items-center gap-1.5"><Dog className="h-3.5 w-3.5" />Pet Species</Label>
+ <Label className="flex items-center gap-1.5"><span className="h-3.5 w-3.5" aria-hidden="true">🐕</span>Pet Species</Label>
  <div className="flex flex-wrap gap-1.5">
  {SPECIES.map((sp) => {
  const active = (value.species || []).includes(sp);
@@ -110,7 +110,7 @@ export function TargetingRulesEditor({ value, onChange }: TargetingRulesEditorPr
  className="cursor-pointer capitalize"
  onClick={() => toggleArray("species", sp)}
  >
- {sp ==="cat" ? <Cat className="h-3 w-3 mr-1" /> : <Dog className="h-3 w-3 mr-1" />}
+ {sp ==="cat" ? <span className="h-3 w-3 mr-1" aria-hidden="true">🐈</span> : <span className="h-3 w-3 mr-1" aria-hidden="true">🐕</span>}
  {sp}
  </Badge>
  );
@@ -152,7 +152,7 @@ export function TargetingRulesEditor({ value, onChange }: TargetingRulesEditorPr
 
  {/* Consumer tier */}
  <div className="space-y-2">
- <Label className="flex items-center gap-1.5"><Crown className="h-3.5 w-3.5" />Consumer Tier</Label>
+ <Label className="flex items-center gap-1.5"><span className="h-3.5 w-3.5" aria-hidden="true">👑</span>Consumer Tier</Label>
  <div className="flex flex-wrap gap-1.5">
  {CONSUMER_TIERS.map((t) => {
  const active = (value.consumer_tiers || []).includes(t);
@@ -200,7 +200,7 @@ export function TargetingRulesEditor({ value, onChange }: TargetingRulesEditorPr
 
  {/* Reach */}
  <div className="rounded-lg border-2 border-primary/30 bg-primary/5 p-4 flex items-center gap-3">
- <Users className="h-5 w-5 text-primary" />
+ <span className="h-5 w-5 text-primary" aria-hidden="true">👥</span>
  <div className="flex-1">
  <p className="text-xs text-muted-foreground">Estimated Audience</p>
  {loading ? (

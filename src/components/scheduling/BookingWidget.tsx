@@ -20,7 +20,7 @@ import { Skeleton } from"@/components/ui/skeleton";
 import { toast } from"sonner";
 import { useQuery, useMutation, useQueryClient } from"@tanstack/react-query";
 import { format, addDays, isSameDay, parseISO, isAfter, startOfDay } from"date-fns";
-import { Calendar as CalendarIcon, Clock, DollarSign, Loader2, CheckCircle2, ArrowRight, Timer, Users, Zap, CreditCard, MapPin } from "lucide-react";
+import { Calendar as CalendarIcon, Loader2, CheckCircle2, ArrowRight, Timer } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { Input } from"@/components/ui/input";
 
@@ -491,13 +491,13 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
  </Badge>
  {(service as any).is_mobile_service && (
  <Badge variant="outline" className="text-xs gap-0.5">
- <MapPin className="w-3 h-3" />
+ <span className="w-3 h-3" aria-hidden="true">📍</span>
  Mobile
  </Badge>
  )}
  {hasFlashSale && (
  <Badge className="bg-gradient-to-r from-warning to-warning text-white border-0 text-xs gap-0.5">
- <Zap className="w-3 h-3" />
+ <span className="w-3 h-3" aria-hidden="true">⚡</span>
  Flash Sale
  </Badge>
  )}
@@ -514,7 +514,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
  </span>
  {service.max_capacity > 1 && (
  <span className="flex items-center gap-1 text-muted-foreground">
- <Users className="w-3.5 h-3.5" />
+ <span className="w-3.5 h-3.5" aria-hidden="true">👥</span>
  Up to {service.max_capacity}
  </span>
  )}
@@ -600,7 +600,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
  
  {availableSlots.length === 0 ? (
  <div className="text-center py-8 text-muted-foreground space-y-3">
- <Clock className="w-12 h-12 mx-auto mb-3 opacity-50" />
+ <span className="w-12 h-12 mx-auto mb-3 opacity-50" aria-hidden="true">⏰</span>
  <p>No available slots for this date.</p>
  <Button variant="link" onClick={() => setStep("date")}>
  Select another date
@@ -673,7 +673,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
 
  {/* Pending approval notice */}
  <div className="flex items-start gap-2 p-3 rounded-lg bg-warning/10 border border-warning/20 text-sm">
- <Clock className="w-4 h-4 text-warning mt-0.5 flex-shrink-0" />
+ <span className="w-4 h-4 text-warning mt-0.5 flex-shrink-0" aria-hidden="true">⏰</span>
  <p className="text-warning">
  Your booking will be submitted as a <strong>request</strong>. {merchantName} will review and confirm it fits their schedule and location.
  </p>
@@ -694,7 +694,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
  {isMobileService && (
  <div className="space-y-2">
  <Label htmlFor="service-address" className="flex items-center gap-1.5">
- <MapPin className="w-3.5 h-3.5" />
+ <span className="w-3.5 h-3.5" aria-hidden="true">📍</span>
  Your Address (Required)
  </Label>
  <Input
@@ -724,7 +724,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
  {/* Deposit Notice */}
  {(selectedServiceData as any).require_deposit && (
  <div className="flex items-start gap-2 p-3 rounded-lg bg-info/10 border border-info/20 text-sm">
- <CreditCard className="w-4 h-4 text-info mt-0.5 flex-shrink-0" />
+ <span className="w-4 h-4 text-info mt-0.5 flex-shrink-0" aria-hidden="true">💳</span>
  <p className="text-info">
  This service requires a <strong>card on file</strong> to book.
  {(selectedServiceData as any).no_show_fee_amount > 0 && (

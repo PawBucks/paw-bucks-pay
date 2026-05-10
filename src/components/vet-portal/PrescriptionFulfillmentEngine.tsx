@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from"@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
 import { toast } from"sonner";
-import { Pill, Package, DollarSign, CheckCircle, Clock, Truck, Search, Plus, AlertCircle } from"lucide-react";
+import { Pill, CheckCircle, Search, AlertCircle } from "lucide-react";
 import { format } from"date-fns";
 
 import { Formatters } from "@/utils/formatters";
@@ -258,13 +258,13 @@ export function PrescriptionFulfillmentEngine({ vetId }: PrescriptionFulfillment
  const getStatusBadge = (status: string) => {
  switch (status) {
  case"pending_approval":
- return <Badge variant="outline" className="bg-warning/10 text-warning"><Clock className="h-3 w-3 mr-1" /> Pending</Badge>;
+ return <Badge variant="outline" className="bg-warning/10 text-warning"><span className="h-3 w-3 mr-1" aria-hidden="true">⏰</span> Pending</Badge>;
  case"approved":
  return <Badge className="bg-info/10 text-info"><CheckCircle className="h-3 w-3 mr-1" /> Approved</Badge>;
  case"shipped":
- return <Badge className="bg-primary/10 text-primary"><Truck className="h-3 w-3 mr-1" /> Shipped</Badge>;
+ return <Badge className="bg-primary/10 text-primary"><span className="h-3 w-3 mr-1" aria-hidden="true">🚚</span> Shipped</Badge>;
  case"delivered":
- return <Badge className="bg-success/10 text-success"><Package className="h-3 w-3 mr-1" /> Delivered</Badge>;
+ return <Badge className="bg-success/10 text-success"><span className="h-3 w-3 mr-1" aria-hidden="true">📦</span> Delivered</Badge>;
  case"cancelled":
  return <Badge variant="destructive"><AlertCircle className="h-3 w-3 mr-1" /> Cancelled</Badge>;
  default:
@@ -300,7 +300,7 @@ export function PrescriptionFulfillmentEngine({ vetId }: PrescriptionFulfillment
  <p className="text-sm text-muted-foreground">Total Earnings</p>
  <p className="text-2xl font-bold text-success">{Formatters.currency(earnings.total)}</p>
  </div>
- <DollarSign className="h-8 w-8 text-success opacity-50" />
+ <span className="h-8 w-8 text-success opacity-50" aria-hidden="true">💵</span>
  </div>
  </CardContent>
  </Card>
@@ -311,7 +311,7 @@ export function PrescriptionFulfillmentEngine({ vetId }: PrescriptionFulfillment
  <p className="text-sm text-muted-foreground">Pending</p>
  <p className="text-2xl font-bold text-info">{Formatters.currency(earnings.pending)}</p>
  </div>
- <Clock className="h-8 w-8 text-info opacity-50" />
+ <span className="h-8 w-8 text-info opacity-50" aria-hidden="true">⏰</span>
  </div>
  </CardContent>
  </Card>
@@ -322,7 +322,7 @@ export function PrescriptionFulfillmentEngine({ vetId }: PrescriptionFulfillment
  <p className="text-sm text-muted-foreground">Fulfilled Orders</p>
  <p className="text-2xl font-bold text-primary">{fulfillments.length}</p>
  </div>
- <Package className="h-8 w-8 text-primary opacity-50" />
+ <span className="h-8 w-8 text-primary opacity-50" aria-hidden="true">📦</span>
  </div>
  </CardContent>
  </Card>
@@ -331,11 +331,11 @@ export function PrescriptionFulfillmentEngine({ vetId }: PrescriptionFulfillment
  <Tabs defaultValue="pending" className="space-y-4">
  <TabsList>
  <TabsTrigger value="pending" className="flex items-center gap-2">
- <Clock className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">⏰</span>
  Pending Requests ({pendingRefills.length})
  </TabsTrigger>
  <TabsTrigger value="fulfillments" className="flex items-center gap-2">
- <Package className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">📦</span>
  Fulfillments
  </TabsTrigger>
  </TabsList>
@@ -488,7 +488,7 @@ export function PrescriptionFulfillmentEngine({ vetId }: PrescriptionFulfillment
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <Package className="h-5 w-5" />
+ <span className="h-5 w-5" aria-hidden="true">📦</span>
  Prescription Fulfillments
  </CardTitle>
  <CardDescription>
@@ -508,7 +508,7 @@ export function PrescriptionFulfillmentEngine({ vetId }: PrescriptionFulfillment
 
  {filteredFulfillments.length === 0 ? (
  <div className="text-center py-8 text-muted-foreground">
- <Package className="h-12 w-12 mx-auto mb-4 opacity-50" />
+ <span className="h-12 w-12 mx-auto mb-4 opacity-50" aria-hidden="true">📦</span>
  <p>No fulfillments yet</p>
  <p className="text-sm">Approve prescriptions to start earning</p>
  </div>

@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from'@/comp
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from'@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from'@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from'@/components/ui/tooltip';
-import { ArrowLeft, Plus, Vault, DollarSign, Receipt, TrendingUp, Car, Home, Calculator, Download, Users, Info, RefreshCw } from'lucide-react';
+import { ArrowLeft, Plus, Vault, Home, Calculator, Download, Info, RefreshCw } from "lucide-react";
 import { supabase } from'@/integrations/supabase/client';
 import { useAuth } from'@/hooks/useAuth';
 import { ExpenseEntryDialog, ExpensesList, CategorySummary, ReportGenerator, MileageLog, HomeOfficeCalculator, TaxLiabilityEstimator, YearEndExports, AccountantCollaboration, TaxExpense, TaxExpenseCategory } from'@/components/merchant/TaxVault';
@@ -284,7 +284,7 @@ export default function MerchantTaxVault() {
  </div>
  <p className="text-2xl font-bold">{Formatters.currency(deductionBreakdown.totalDeductions)}</p>
  </div>
- <DollarSign className="h-8 w-8 text-success opacity-80" />
+ <span className="h-8 w-8 text-success opacity-80" aria-hidden="true">💵</span>
  </div>
  </CardContent>
  </Card>
@@ -296,7 +296,7 @@ export default function MerchantTaxVault() {
  <p className="text-sm text-muted-foreground">Logged Expenses</p>
  <p className="text-2xl font-bold">{expenses.length}</p>
  </div>
- <Receipt className="h-8 w-8 text-info opacity-80" />
+ <span className="h-8 w-8 text-info opacity-80" aria-hidden="true">🧾</span>
  </div>
  </CardContent>
  </Card>
@@ -333,7 +333,7 @@ export default function MerchantTaxVault() {
  </div>
  <p className="text-2xl font-bold">{Formatters.currency(deductionBreakdown.vehicleDeduction)}</p>
  </div>
- <Car className="h-8 w-8 text-warning opacity-80" />
+ <span className="h-8 w-8 text-warning opacity-80" aria-hidden="true">🚗</span>
  </div>
  </CardContent>
  </Card>
@@ -349,11 +349,11 @@ export default function MerchantTaxVault() {
  </TabsTrigger>
  <TabsTrigger value="expenses">Expenses</TabsTrigger>
  <TabsTrigger value="mileage" className="flex items-center gap-1">
- <Car className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">🚗</span>
  Mileage Log
  </TabsTrigger>
  <TabsTrigger value="home-office" className="flex items-center gap-1">
- <Home className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">🏠</span>
  Home Office
  </TabsTrigger>
  <TabsTrigger value="summary">Category Summary</TabsTrigger>
@@ -362,7 +362,7 @@ export default function MerchantTaxVault() {
  Year-End Exports
  </TabsTrigger>
  <TabsTrigger value="accountant" className="flex items-center gap-1">
- <Users className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">👥</span>
  Accountant
  </TabsTrigger>
  </TabsList>

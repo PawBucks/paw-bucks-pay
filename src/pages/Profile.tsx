@@ -16,7 +16,7 @@ import { AdPlacement } from"@/components/AdPlacement";
 import { FeedbackButton } from"@/components/FeedbackButton";
 import { PullToRefresh } from"@/components/PullToRefresh";
 import { DeleteMyAccountCard } from"@/components/profile/DeleteMyAccountCard";
-import { LogOut, User, Mail, Calendar, Crown, Settings, Loader2, Info, Bell, MessageSquare } from "lucide-react";
+import { LogOut, Settings, Loader2, Info } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from"@/components/ui/tooltip";
 import { toast } from"sonner";
@@ -190,7 +190,7 @@ const Profile = () => {
         <GradientCard>
          <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-           <Mail className="w-5 h-5 text-primary" />
+           <span className="w-5 h-5 text-primary" aria-hidden="true">📧</span>
           </div>
           <div className="flex-1 min-w-0">
            <Label className="text-xs text-muted-foreground">Email</Label>
@@ -201,7 +201,7 @@ const Profile = () => {
         <GradientCard>
          <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-           <User className="w-5 h-5 text-primary" />
+           <span className="w-5 h-5 text-primary" aria-hidden="true">👤</span>
           </div>
           <div className="flex-1">
            <Label className="text-xs text-muted-foreground">Account Type</Label>
@@ -214,7 +214,7 @@ const Profile = () => {
         <GradientCard>
          <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-           <Calendar className="w-5 h-5 text-primary" />
+           <span className="w-5 h-5 text-primary" aria-hidden="true">📅</span>
           </div>
           <div className="flex-1">
            <Label className="text-xs text-muted-foreground">Member Since</Label>
@@ -486,7 +486,7 @@ const Profile = () => {
  className="w-full"
  onClick={() => setFeedbackOpen(true)}
  >
- <MessageSquare className="w-4 h-4 mr-2" />
+ <span className="w-4 h-4 mr-2" aria-hidden="true">💬</span>
  Support & Feedback
  </Button>
  } />

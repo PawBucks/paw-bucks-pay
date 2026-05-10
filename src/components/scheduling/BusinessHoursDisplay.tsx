@@ -1,6 +1,5 @@
 import { useQuery } from"@tanstack/react-query";
 import { supabase } from"@/integrations/supabase/client";
-import { Clock } from"lucide-react";
 
 const DAY_NAMES = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 const SHORT_DAYS = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
@@ -52,7 +51,7 @@ export function BusinessHoursDisplay({ merchantId, vetId }: Props) {
  return (
  <div className="rounded-md border bg-card p-4">
  <div className="flex items-center gap-2 mb-3">
- <Clock className="w-4 h-4 text-primary" />
+ <span className="w-4 h-4 text-primary" aria-hidden="true">⏰</span>
  <h3 className="font-semibold text-sm">Hours of Operation</h3>
  </div>
  <div className="space-y-1.5">

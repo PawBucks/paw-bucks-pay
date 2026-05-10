@@ -20,7 +20,7 @@ import {
 } from"@/components/ui/dialog";
 import { toast } from"sonner";
 import { format } from"date-fns";
-import { MessageSquare, User, Mail, Clock, CheckCircle, AlertCircle, Eye } from"lucide-react";
+import { User, CheckCircle, AlertCircle, Eye } from "lucide-react";
 
 interface FeedbackSubmission {
  id: string;
@@ -179,7 +179,7 @@ export default function FeedbackTab() {
  <Card>
  <CardContent className="pt-4">
  <div className="flex items-center gap-2">
- <Clock className="h-4 w-4 text-warning" />
+ <span className="h-4 w-4 text-warning" aria-hidden="true">⏰</span>
  <span className="text-sm text-muted-foreground">In Progress</span>
  </div>
  <p className="text-2xl font-bold">{counts.in_progress}</p>
@@ -197,7 +197,7 @@ export default function FeedbackTab() {
  <Card>
  <CardContent className="pt-4">
  <div className="flex items-center gap-2">
- <MessageSquare className="h-4 w-4 text-muted-foreground" />
+ <span className="h-4 w-4 text-muted-foreground" aria-hidden="true">💬</span>
  <span className="text-sm text-muted-foreground">Dismissed</span>
  </div>
  <p className="text-2xl font-bold">{counts.dismissed}</p>
@@ -211,7 +211,7 @@ export default function FeedbackTab() {
  ) : feedbackList?.length === 0 ? (
  <Card>
  <CardContent className="py-12 text-center">
- <MessageSquare className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+ <span className="h-12 w-12 mx-auto text-muted-foreground mb-4" aria-hidden="true">💬</span>
  <p className="text-muted-foreground">No feedback submissions yet</p>
  </CardContent>
  </Card>
@@ -233,12 +233,12 @@ export default function FeedbackTab() {
  
  <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
  <div className="flex items-center gap-1">
- <User className="h-3 w-3" />
+ <span className="h-3 w-3" aria-hidden="true">👤</span>
  <span>{feedback.user_name ||"Anonymous"}</span>
  </div>
  {feedback.user_email && (
  <div className="flex items-center gap-1">
- <Mail className="h-3 w-3" />
+ <span className="h-3 w-3" aria-hidden="true">📧</span>
  <span>{feedback.user_email}</span>
  </div>
  )}

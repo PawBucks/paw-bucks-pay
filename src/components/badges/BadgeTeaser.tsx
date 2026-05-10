@@ -6,7 +6,7 @@ import { GradientCard } from"@/components/ui/gradient-card";
 import { Button } from"@/components/ui/button";
 import { Badge } from"@/components/ui/badge";
 import { BadgeCard } from"./BadgeCard";
-import { Award, ChevronRight, Target } from "lucide-react";
+import { ChevronRight, Target } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 
 interface BadgeDefinition {
@@ -140,7 +140,7 @@ export const BadgeTeaser = ({ userId }: BadgeTeaserProps) => {
  <div className="flex items-center justify-between mb-4">
  <div className="flex items-center gap-3">
  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
- <Award className="w-5 h-5 text-primary-foreground" />
+ <span className="w-5 h-5 text-primary-foreground" aria-hidden="true">🏆</span>
  </div>
  <div>
  <h3 className="font-semibold flex items-center gap-2">

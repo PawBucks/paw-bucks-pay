@@ -17,7 +17,7 @@ import {
  SelectTrigger,
  SelectValue,
 } from'@/components/ui/select';
-import { MessageSquare, Send, Bug, CreditCard, Lightbulb, HelpCircle } from'lucide-react';
+import { Send, Bug, CreditCard, Lightbulb, HelpCircle } from "lucide-react";
 import { toast } from'sonner';
 import { supabase } from'@/integrations/supabase/client';
 import { LoadingSpinner } from'./LoadingSpinner';

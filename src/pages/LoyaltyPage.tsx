@@ -9,17 +9,7 @@ import { BottomNav } from"@/components/BottomNav";
 import { Button } from"@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
 import { GradientCard } from"@/components/ui/gradient-card";
-import { 
- ArrowLeft, 
- Gift, 
- Trophy, 
- Crown, 
- Zap, 
- Star,
- CheckCircle,
- Lock,
- ChevronRight
-} from"lucide-react";
+import { ArrowLeft, CheckCircle, ChevronRight } from "lucide-react";
 import { 
  TierBadge, 
  MilestoneCard, 
@@ -158,14 +148,14 @@ const LoyaltyPage = () => {
  {/* Stats Cards */}
  <div className="grid grid-cols-2 gap-4">
  <GradientCard className="text-center">
- <Gift className="w-8 h-8 mx-auto text-primary mb-2" />
+ <span className="w-8 h-8 mx-auto text-primary mb-2" aria-hidden="true">🎁</span>
  <div className="text-2xl font-bold text-primary">
                   {Formatters.currency(summary?.totalCredits || 0)}
  </div>
  <p className="text-sm text-muted-foreground">Available Credits</p>
  </GradientCard>
  <GradientCard className="text-center">
- <Zap className="w-8 h-8 mx-auto text-accent mb-2" />
+ <span className="w-8 h-8 mx-auto text-accent mb-2" aria-hidden="true">⚡</span>
  <div className="text-2xl font-bold text-accent">
  {summary?.monthlyStreak || 0}
  </div>
@@ -177,7 +167,7 @@ const LoyaltyPage = () => {
  {(summary?.activeMilestone || summary?.completedMilestone) && (
  <div>
  <h3 className="font-semibold mb-3 flex items-center gap-2">
- <Trophy className="w-5 h-5 text-primary" />
+ <span className="w-5 h-5 text-primary" aria-hidden="true">🏆</span>
  Loyal Pet Parent Guarantee
  </h3>
  <MilestoneCard 
@@ -214,7 +204,7 @@ const LoyaltyPage = () => {
  <GradientCard gradient>
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-3">
- <Star className="w-8 h-8 text-primary" />
+ <span className="w-8 h-8 text-primary" aria-hidden="true">⭐</span>
  <div>
  <h4 className="font-semibold">Personality Perks Active</h4>
  <p className="text-sm text-muted-foreground">
@@ -233,7 +223,7 @@ const LoyaltyPage = () => {
  {/* Milestones Tab */}
  <TabsContent value="milestones" className="mt-6 space-y-4">
  <div className="text-center p-4 rounded-md bg-muted/30 border border-border mb-4">
- <Trophy className="w-10 h-10 mx-auto text-primary mb-2" />
+ <span className="w-10 h-10 mx-auto text-primary mb-2" aria-hidden="true">🏆</span>
  <h3 className="font-semibold">Loyal Pet Parent Guarantee</h3>
  <p className="text-sm text-muted-foreground">
  Complete 12 qualifying visits in 12 months to unlock a <strong>free $50 service credit</strong>
@@ -248,7 +238,7 @@ const LoyaltyPage = () => {
  </div>
  ) : (
  <div className="text-center py-8 text-muted-foreground">
- <Trophy className="w-12 h-12 mx-auto mb-3 opacity-30" />
+ <span className="w-12 h-12 mx-auto mb-3 opacity-30" aria-hidden="true">🏆</span>
  <p>No active milestones yet</p>
  <p className="text-sm">Make your first purchase to start tracking!</p>
  </div>
@@ -275,7 +265,7 @@ const LoyaltyPage = () => {
  </div>
  ) : (
  <div className="text-center py-8 text-muted-foreground">
- <Gift className="w-12 h-12 mx-auto mb-3 opacity-30" />
+ <span className="w-12 h-12 mx-auto mb-3 opacity-30" aria-hidden="true">🎁</span>
  <p>No credits available yet</p>
  <p className="text-sm">Complete milestones and earn badges to get free credits!</p>
  </div>
@@ -315,7 +305,7 @@ const LoyaltyPage = () => {
  </span>
  )}
  {isLocked && (
- <Lock className="w-4 h-4 text-muted-foreground" />
+ <span className="w-4 h-4 text-muted-foreground" aria-hidden="true">🔒</span>
  )}
  </div>
  <p className="text-sm text-muted-foreground mb-3">
@@ -335,17 +325,17 @@ const LoyaltyPage = () => {
  <ul className="text-xs space-y-1">
  {tierDef.annual_free_credit_value > 0 && (
  <li className="flex items-center gap-2">
- <Gift className="w-3 h-3 text-primary" />
+ <span className="w-3 h-3 text-primary" aria-hidden="true">🎁</span>
  <span>${tierDef.annual_free_credit_value} annual free credit</span>
  </li>
  )}
  <li className="flex items-center gap-2">
- <Zap className="w-3 h-3 text-accent" />
+ <span className="w-3 h-3 text-accent" aria-hidden="true">⚡</span>
  <span>{tierDef.reward_multiplier}x reward multiplier</span>
  </li>
  {tierDef.priority_offers && (
  <li className="flex items-center gap-2">
- <Star className="w-3 h-3 text-secondary" />
+ <span className="w-3 h-3 text-secondary" aria-hidden="true">⭐</span>
  <span>Priority merchant offers</span>
  </li>
  )}

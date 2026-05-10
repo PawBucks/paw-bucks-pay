@@ -27,7 +27,7 @@ import { SalesReportGenerator } from"@/components/shared/SalesReportGenerator";
 import { MerchantLoyaltyProgramTab } from"@/components/merchant/MerchantLoyaltyProgramTab";
 import { CheckInDashboard } from"@/components/checkin";
 import { PromotionInvitationsInbox } from"@/components/PromotionInvitationsInbox";
-import { Stethoscope, Users, MessageSquare, FileText, FileSignature, Bell, Pill, Share2, Activity, Heart, ArrowRightLeft, Wallet, TrendingUp, Scale, Zap, BarChart3, Stamp, LifeBuoy, Settings, QrCode } from "lucide-react";
+import { FileSignature, Pill, ArrowRightLeft, Scale, Stamp, LifeBuoy, Settings, QrCode } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { toast } from"sonner";
 import { PendingApprovalNotice } from"@/components/PendingApprovalNotice";
@@ -36,7 +36,7 @@ import { PolicyDocumentUpload } from"@/components/merchant/PolicyDocumentUpload"
 import { EditorialPageHeader } from"@/components/shared/EditorialPageHeader";
 import { EditVetProfileDialog } from"@/components/vet-portal/EditVetProfileDialog";
 import { Button } from"@/components/ui/button";
-import { Pencil } from"lucide-react";
+import { Pencil } from "lucide-react";
 
 type VetInfo = {
  id: string;
@@ -168,7 +168,7 @@ export default function VetDashboard() {
           <img src={vetInfo.logo_url} alt={vetInfo.name} className="w-10 h-10 md:w-12 md:h-12 rounded-lg object-cover border border-border" />
         ) : (
           <span className="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-            <Stethoscope className="w-5 h-5 md:w-6 md:h-6 text-primary" />
+            <span className="w-5 h-5 md:w-6 md:h-6 text-primary" aria-hidden="true">🩺</span>
           </span>
         )}
         <span>{vetInfo.name}</span>
@@ -194,7 +194,7 @@ export default function VetDashboard() {
  <Card className="p-5">
  <div className="flex items-center gap-3">
  <div className="w-10 h-10 rounded-lg bg-primary/8 flex items-center justify-center">
- <Users className="w-5 h-5 text-primary" />
+ <span className="w-5 h-5 text-primary" aria-hidden="true">👥</span>
  </div>
  <div>
  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Patients</p>
@@ -218,7 +218,7 @@ export default function VetDashboard() {
  <Card className="p-5">
  <div className="flex items-center gap-3">
  <div className="w-10 h-10 rounded-lg bg-[hsl(var(--info))]/10 flex items-center justify-center">
- <MessageSquare className="w-5 h-5 text-[hsl(var(--info))]" />
+ <span className="w-5 h-5 text-[hsl(var(--info))]" aria-hidden="true">💬</span>
  </div>
  <div>
  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Unread</p>
@@ -230,7 +230,7 @@ export default function VetDashboard() {
  <Card className="p-5">
  <div className="flex items-center gap-3">
  <div className="w-10 h-10 rounded-lg bg-[hsl(var(--success))]/10 flex items-center justify-center">
- <FileText className="w-5 h-5 text-[hsl(var(--success))]" />
+ <span className="w-5 h-5 text-[hsl(var(--success))]" aria-hidden="true">📄</span>
  </div>
  <div>
  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Location</p>
@@ -243,7 +243,7 @@ export default function VetDashboard() {
  <Tabs defaultValue="emr" className="space-y-4">
  <TabsList className="grid w-full grid-cols-8 lg:grid-cols-16">
  <TabsTrigger value="emr" className="flex items-center gap-1">
- <FileText className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">📄</span>
  <span className="hidden sm:inline">EMR</span>
  </TabsTrigger>
  <TabsTrigger value="ai-assistant" className="flex items-center gap-1">
@@ -251,7 +251,7 @@ export default function VetDashboard() {
  <span className="hidden sm:inline">AI</span>
  </TabsTrigger>
  <TabsTrigger value="messages" className="flex items-center gap-1">
- <MessageSquare className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">💬</span>
  <span className="hidden sm:inline">Messages</span>
  {stats.unreadMessages > 0 && (
  <span className="bg-destructive text-white text-xs rounded-full px-1.5 py-0.5 ml-1">
@@ -264,7 +264,7 @@ export default function VetDashboard() {
  <span className="hidden sm:inline">Refills</span>
  </TabsTrigger>
  <TabsTrigger value="reminders" className="flex items-center gap-1">
- <Bell className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">🔔</span>
  <span className="hidden sm:inline">Reminders</span>
  </TabsTrigger>
  <TabsTrigger value="consent" className="flex items-center gap-1">
@@ -272,11 +272,11 @@ export default function VetDashboard() {
  <span className="hidden sm:inline">Consent</span>
  </TabsTrigger>
  <TabsTrigger value="care-network" className="flex items-center gap-1">
- <Share2 className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">🔗</span>
  <span className="hidden sm:inline">Network</span>
  </TabsTrigger>
  <TabsTrigger value="data-sync" className="flex items-center gap-1">
- <Activity className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">📊</span>
  <span className="hidden sm:inline">Sync</span>
  </TabsTrigger>
  <TabsTrigger value="data-bridge" className="flex items-center gap-1">
@@ -284,15 +284,15 @@ export default function VetDashboard() {
  <span className="hidden sm:inline">Bridge</span>
  </TabsTrigger>
  <TabsTrigger value="financial" className="flex items-center gap-1">
- <Wallet className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">👛</span>
  <span className="hidden sm:inline">Financial</span>
  </TabsTrigger>
  <TabsTrigger value="growth" className="flex items-center gap-1">
- <TrendingUp className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">📈</span>
  <span className="hidden sm:inline">Growth</span>
  </TabsTrigger>
  <TabsTrigger value="wellness" className="flex items-center gap-1">
- <Heart className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">❤️</span>
  <span className="hidden sm:inline">Wellness</span>
  </TabsTrigger>
  <TabsTrigger value="claim-recovery" className="flex items-center gap-1">
@@ -300,7 +300,7 @@ export default function VetDashboard() {
  <span className="hidden sm:inline">Recovery</span>
  </TabsTrigger>
  <TabsTrigger value="quick-actions" className="flex items-center gap-1">
- <Zap className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">⚡</span>
  <span className="hidden sm:inline">Actions</span>
  </TabsTrigger>
  <TabsTrigger value="loyalty-program" className="flex items-center gap-1">
@@ -308,7 +308,7 @@ export default function VetDashboard() {
  <span className="hidden sm:inline">Loyalty</span>
  </TabsTrigger>
  <TabsTrigger value="sales-report" className="flex items-center gap-1">
- <BarChart3 className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">📊</span>
  <span className="hidden sm:inline">Reports</span>
  </TabsTrigger>
  <TabsTrigger value="support" className="flex items-center gap-1">

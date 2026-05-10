@@ -34,23 +34,7 @@ import {
  DialogTrigger,
  DialogFooter,
 } from"@/components/ui/dialog";
-import { 
- MessageSquare, 
- Send, 
- Loader2, 
- Users, 
- Store, 
- Search, 
- X, 
- Phone,
- Clock,
- CheckCircle,
- XCircle,
- AlertCircle,
- Plus,
- History,
- BarChart3
-} from"lucide-react";
+import { Send, Loader2, Users, Search, X, Phone, CheckCircle, XCircle, AlertCircle, Plus, History } from "lucide-react";
 import { toast } from"sonner";
 import { format } from"date-fns";
 
@@ -253,7 +237,7 @@ export function TextCampaignsTab() {
  case"partial":
  return <Badge className="bg-warning/10 text-warning border-warning/20"><AlertCircle className="w-3 h-3 mr-1" />Partial</Badge>;
  case"scheduled":
- return <Badge variant="secondary"><Clock className="w-3 h-3 mr-1" />Scheduled</Badge>;
+ return <Badge variant="secondary"><span className="w-3 h-3 mr-1" aria-hidden="true">⏰</span>Scheduled</Badge>;
  default:
  return <Badge variant="outline">{status}</Badge>;
  }
@@ -275,7 +259,7 @@ export function TextCampaignsTab() {
  <div className="space-y-6">
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-2">
- <MessageSquare className="h-5 w-5 text-primary" />
+ <span className="h-5 w-5 text-primary" aria-hidden="true">💬</span>
  <h2 className="text-xl font-semibold">Text Campaigns</h2>
  </div>
  <div className="flex gap-2">
@@ -300,7 +284,7 @@ export function TextCampaignsTab() {
  size="sm"
  onClick={() => setActiveView("analytics")}
  >
- <BarChart3 className="h-4 w-4 mr-1" />
+ <span className="h-4 w-4 mr-1" aria-hidden="true">📊</span>
  Analytics
  </Button>
  </div>
@@ -330,25 +314,25 @@ export function TextCampaignsTab() {
  <SelectContent>
  <SelectItem value="all">
  <div className="flex items-center gap-2">
- <Users className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">👥</span>
  All Users with Phone
  </div>
  </SelectItem>
  <SelectItem value="merchants">
  <div className="flex items-center gap-2">
- <Store className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">🏪</span>
  Merchants Only
  </div>
  </SelectItem>
  <SelectItem value="pet_owners">
  <div className="flex items-center gap-2">
- <Users className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">👥</span>
  Pet Owners Only
  </div>
  </SelectItem>
  <SelectItem value="individual">
  <div className="flex items-center gap-2">
- <Phone className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">📞</span>
  Individual Selection
  </div>
  </SelectItem>
@@ -361,7 +345,7 @@ export function TextCampaignsTab() {
  Recipients: <span className="font-medium text-foreground">{recipientCount}</span>
  </p>
  <Badge variant="outline" className="text-xs">
- <Phone className="h-3 w-3 mr-1" />
+ <span className="h-3 w-3 mr-1" aria-hidden="true">📞</span>
  Phone numbers only
  </Badge>
  </div>
@@ -546,7 +530,7 @@ export function TextCampaignsTab() {
  </div>
  ) : campaigns.length === 0 ? (
  <div className="text-center py-8 text-muted-foreground">
- <MessageSquare className="h-12 w-12 mx-auto mb-2 opacity-50" />
+ <span className="h-12 w-12 mx-auto mb-2 opacity-50" aria-hidden="true">💬</span>
  <p>No campaigns yet</p>
  <Button variant="link" onClick={() => setActiveView("compose")}>
  Create your first campaign

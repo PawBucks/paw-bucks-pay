@@ -7,7 +7,7 @@ import { Input } from"@/components/ui/input";
 import { Label } from"@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/components/ui/card";
 import { toast } from"sonner";
-import { KeyRound, Eye, EyeOff, CheckCircle, Home } from"lucide-react";
+import { KeyRound, Eye, EyeOff, CheckCircle, Home } from "lucide-react";
 import logo from"@/assets/logo.png";
 
 const ResetPassword = () => {
@@ -285,7 +285,7 @@ const ResetPassword = () => {
  onClick={() => navigate("/")}
  className="gap-2"
  >
- <Home className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">🏠</span>
  Back Home
  </Button>
  </div>

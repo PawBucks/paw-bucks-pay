@@ -5,21 +5,7 @@ import { Button } from"@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
 import { Badge } from"@/components/ui/badge";
 import { ScrollArea } from"@/components/ui/scroll-area";
-import {
- ArrowLeft,
- FileText,
- Syringe,
- AlertTriangle,
- Scissors,
- FlaskConical,
- ImageIcon,
- Plus,
- PawPrint,
- User,
- Phone,
- Mail,
- Calendar,
-} from"lucide-react";
+import { ArrowLeft, Syringe, AlertTriangle, FlaskConical, Plus } from "lucide-react";
 import { toast } from"sonner";
 import { format } from"date-fns";
 import type { EMRPatient, SOAPNote, Vaccination, PetAllergy, SurgicalNote, LabResult, ImagingRecord } from"./types";
@@ -92,7 +78,7 @@ export const PatientEMRView = ({ patient, vetId, onBack }: PatientEMRViewProps) 
  <div>
  <div className="flex items-center gap-3">
  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
- <PawPrint className="w-6 h-6 text-primary" />
+ <span className="w-6 h-6 text-primary" aria-hidden="true">🐾</span>
  </div>
  <div>
  <h2 className="text-2xl font-bold">{patient.pet_name}</h2>
@@ -118,24 +104,24 @@ export const PatientEMRView = ({ patient, vetId, onBack }: PatientEMRViewProps) 
  <Card className="p-4">
  <div className="flex items-center gap-6">
  <div className="flex items-center gap-2">
- <User className="w-4 h-4 text-muted-foreground" />
+ <span className="w-4 h-4 text-muted-foreground" aria-hidden="true">👤</span>
  <span className="font-medium">{patient.owner_name}</span>
  </div>
  {patient.owner_email && (
  <div className="flex items-center gap-2">
- <Mail className="w-4 h-4 text-muted-foreground" />
+ <span className="w-4 h-4 text-muted-foreground" aria-hidden="true">📧</span>
  <span className="text-sm">{patient.owner_email}</span>
  </div>
  )}
  {patient.owner_phone && (
  <div className="flex items-center gap-2">
- <Phone className="w-4 h-4 text-muted-foreground" />
+ <span className="w-4 h-4 text-muted-foreground" aria-hidden="true">📞</span>
  <span className="text-sm">{patient.owner_phone}</span>
  </div>
  )}
  {patient.last_visit && (
  <div className="flex items-center gap-2">
- <Calendar className="w-4 h-4 text-muted-foreground" />
+ <span className="w-4 h-4 text-muted-foreground" aria-hidden="true">📅</span>
  <span className="text-sm">
  Last Visit: {format(new Date(patient.last_visit),"MMM d, yyyy")}
  </span>
@@ -163,7 +149,7 @@ export const PatientEMRView = ({ patient, vetId, onBack }: PatientEMRViewProps) 
  <Tabs value={activeTab} onValueChange={setActiveTab}>
  <TabsList className="grid w-full grid-cols-6">
  <TabsTrigger value="soap" className="flex items-center gap-1">
- <FileText className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">📄</span>
  <span className="hidden sm:inline">SOAP Notes</span>
  </TabsTrigger>
  <TabsTrigger value="vaccines" className="flex items-center gap-1">
@@ -175,7 +161,7 @@ export const PatientEMRView = ({ patient, vetId, onBack }: PatientEMRViewProps) 
  <span className="hidden sm:inline">Allergies</span>
  </TabsTrigger>
  <TabsTrigger value="surgical" className="flex items-center gap-1">
- <Scissors className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">✂️</span>
  <span className="hidden sm:inline">Surgical</span>
  </TabsTrigger>
  <TabsTrigger value="labs" className="flex items-center gap-1">
@@ -183,7 +169,7 @@ export const PatientEMRView = ({ patient, vetId, onBack }: PatientEMRViewProps) 
  <span className="hidden sm:inline">Labs</span>
  </TabsTrigger>
  <TabsTrigger value="imaging" className="flex items-center gap-1">
- <ImageIcon className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">🖼️</span>
  <span className="hidden sm:inline">Imaging</span>
  </TabsTrigger>
  </TabsList>

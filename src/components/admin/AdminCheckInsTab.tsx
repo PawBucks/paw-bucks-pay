@@ -19,7 +19,7 @@ import {
  SelectTrigger,
  SelectValue,
 } from"@/components/ui/select";
-import { Search, Users, Calendar, MapPin, Clock, ChevronLeft, ChevronRight, User, Store } from"lucide-react";
+import { Search, ChevronLeft, ChevronRight, User } from "lucide-react";
 import { format, parse, subMonths, startOfDay, endOfDay, startOfMonth, endOfMonth } from"date-fns";
 import { toast } from"sonner";
 
@@ -193,7 +193,7 @@ export function AdminCheckInsTab() {
  <Card>
  <CardContent className="p-4 flex items-center gap-3">
  <div className="p-2 bg-primary/10 rounded-lg">
- <Users className="w-5 h-5 text-primary" />
+ <span className="w-5 h-5 text-primary" aria-hidden="true">👥</span>
  </div>
  <div>
  <p className="text-2xl font-bold">{todayCount}</p>
@@ -204,7 +204,7 @@ export function AdminCheckInsTab() {
  <Card>
  <CardContent className="p-4 flex items-center gap-3">
  <div className="p-2 bg-accent/10 rounded-lg">
- <Calendar className="w-5 h-5 text-accent-foreground" />
+ <span className="w-5 h-5 text-accent-foreground" aria-hidden="true">📅</span>
  </div>
  <div>
  <p className="text-2xl font-bold">{monthCount}</p>
@@ -217,7 +217,7 @@ export function AdminCheckInsTab() {
  <Card>
  <CardContent className="p-4 flex items-center gap-3">
  <div className="p-2 bg-secondary rounded-lg">
- <MapPin className="w-5 h-5 text-secondary-foreground" />
+ <span className="w-5 h-5 text-secondary-foreground" aria-hidden="true">📍</span>
  </div>
  <div>
  <p className="text-2xl font-bold">{totalCount}</p>
@@ -274,7 +274,7 @@ export function AdminCheckInsTab() {
  </div>
  ) : filtered.length === 0 ? (
  <div className="text-center py-12 text-muted-foreground">
- <Users className="w-10 h-10 mx-auto mb-3 opacity-50" />
+ <span className="w-10 h-10 mx-auto mb-3 opacity-50" aria-hidden="true">👥</span>
  <p>No check-ins found</p>
  </div>
  ) : (
@@ -296,7 +296,7 @@ export function AdminCheckInsTab() {
  <TableCell>
  <div className="flex items-center gap-2">
  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
- <User className="w-4 h-4 text-primary" />
+ <span className="w-4 h-4 text-primary" aria-hidden="true">👤</span>
  </div>
  <span className="font-medium text-sm">
  {checkin.profile_name ||"Unknown User"}
@@ -305,7 +305,7 @@ export function AdminCheckInsTab() {
  </TableCell>
  <TableCell>
  <div className="flex items-center gap-2">
- <Store className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+ <span className="w-4 h-4 text-muted-foreground flex-shrink-0" aria-hidden="true">🏪</span>
  <span className="text-sm">{checkin.entity_name}</span>
  </div>
  </TableCell>
@@ -317,7 +317,7 @@ export function AdminCheckInsTab() {
  <TableCell>
  <div className="text-sm">
  <div className="flex items-center gap-1">
- <Clock className="w-3 h-3 text-muted-foreground" />
+ <span className="w-3 h-3 text-muted-foreground" aria-hidden="true">⏰</span>
  {format(new Date(checkin.checked_in_at),"h:mm a")}
  </div>
  <p className="text-xs text-muted-foreground">

@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Store, Lock } from "lucide-react";
+import { Store } from "lucide-react";
 import { Formatters } from "@/utils/formatters";
 import { useStoreLockedPawBucks } from "@/hooks/useStoreLockedPawBucks";
 
@@ -17,10 +17,10 @@ export function StoreLockedPawBucksList({ userId }: Props) {
     <Card>
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-base">
-          <Store className="h-4 w-4 text-primary" />
+          <span className="h-4 w-4 text-primary" aria-hidden="true">🏪</span>
           In-Store Rewards
           <Badge variant="secondary" className="ml-auto text-xs">
-            <Lock className="h-3 w-3 mr-1" />
+            <span className="h-3 w-3 mr-1" aria-hidden="true">🔒</span>
             Store-locked
           </Badge>
         </CardTitle>

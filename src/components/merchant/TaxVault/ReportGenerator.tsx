@@ -2,7 +2,7 @@ import { useState } from'react';
 import { Button } from'@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from'@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from'@/components/ui/select';
-import { FileText, Download, FileSpreadsheet, Upload } from'lucide-react';
+import { Download, FileSpreadsheet, Upload } from "lucide-react";
 import { TaxExpense, CATEGORY_LABELS, SCHEDULE_C_MAPPING, TaxExpenseCategory } from'./types';
 import { format } from'date-fns';
 import { parseLocalDate } from'@/utils/formatters';
@@ -203,7 +203,7 @@ export function ReportGenerator({ expenses, businessName, taxYear }: ReportGener
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <FileText className="h-5 w-5" />
+ <span className="h-5 w-5" aria-hidden="true">📄</span>
  Generate Tax Report
  </CardTitle>
  <CardDescription>
@@ -219,7 +219,7 @@ export function ReportGenerator({ expenses, businessName, taxYear }: ReportGener
  <SelectContent>
  <SelectItem value="pdf">
  <div className="flex items-center gap-2">
- <FileText className="h-4 w-4" />
+ <span className="h-4 w-4" aria-hidden="true">📄</span>
  PDF Report (Schedule C Ready)
  </div>
  </SelectItem>

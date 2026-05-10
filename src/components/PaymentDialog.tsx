@@ -12,7 +12,7 @@ import {
 import { supabase } from"@/integrations/supabase/client";
 import { Elements, PaymentElement, useStripe, useElements } from"@stripe/react-stripe-js";
 import { toast } from"sonner";
-import { Loader2, CreditCard } from"lucide-react";
+import { Loader2 } from "lucide-react";
 import { getStripeForConnectedAccount } from"@/lib/stripe";
 import { TipSelector } from"@/components/checkout/TipSelector";
 import { buildAppUrl } from"@/lib/url";
@@ -104,7 +104,7 @@ const PaymentForm = ({
 
  <div className="space-y-2">
  <Label className="flex items-center gap-2">
- <CreditCard className="w-4 h-4" />
+ <span className="w-4 h-4" aria-hidden="true">💳</span>
  Payment Details
  </Label>
  <PaymentElement 
