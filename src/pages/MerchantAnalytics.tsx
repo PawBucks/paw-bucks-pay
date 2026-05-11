@@ -177,7 +177,7 @@ export default function MerchantAnalytics() {
  onClick={() => setSelectedPayment('pawbucks')}
  className="flex-1"
  >
- <span className="mr-2 h-4 w-4" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="mr-2 h-4 w-4" />
  Pay with PawBucks
  </Button>
  </CardContent>

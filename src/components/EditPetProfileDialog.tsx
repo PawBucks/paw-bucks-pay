@@ -167,7 +167,7 @@ export const EditPetProfileDialog = ({ pet, open, onOpenChange, onSuccess }: Edi
  />
  ) : (
  <div className="w-32 h-32 rounded-full bg-muted flex items-center justify-center border-2 border-dashed border-border">
- <span className="w-8 h-8 text-muted-foreground" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="w-8 h-8 text-muted-foreground" />
  </div>
  )}
  <Input

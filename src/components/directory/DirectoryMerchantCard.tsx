@@ -161,7 +161,7 @@ const DirectoryMerchantCardComponent = ({
  </Badge>
  {merchant.accepts_pawbucks && (
  <Badge variant="outline" className="text-[10px] h-5 px-1.5 gap-0.5 text-primary border-primary/20">
- <span className="w-3 h-3" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="w-3 h-3" />
  PawBucks
  </Badge>
  )}

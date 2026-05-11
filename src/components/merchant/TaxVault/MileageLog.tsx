@@ -574,7 +574,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
  <p className="text-sm text-muted-foreground">Business</p>
  <p className="text-2xl font-bold">{Formatters.decimal(petCommuteMiles, 1)} mi</p>
  </div>
- <span className="h-8 w-8 text-success opacity-80" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="h-8 w-8 text-success opacity-80" />
  </div>
  </CardContent>
  </Card>
@@ -635,7 +635,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
  <SelectContent>
  <SelectItem value="pet_commute">
  <span className="flex items-center gap-2">
- <span className="h-4 w-4 text-success" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="h-4 w-4 text-success" />
  Business
  </span>
  </SelectItem>
@@ -872,7 +872,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
  )}
  >
  {entry.trip_type ==='pet_commute' ? (
- <><span className="h-3 w-3 mr-1" aria-hidden="true">🐾</span> Business</>
+ <><PawBucksLogo className="h-3 w-3 mr-1" /> Business</>
  ) : (
  <><span className="h-3 w-3 mr-1" aria-hidden="true">👤</span> Personal</>
  )}

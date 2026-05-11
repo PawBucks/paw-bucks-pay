@@ -116,7 +116,7 @@ const PetProfileCardComponent = ({ pet, onUpdate, index = 0 }: PetProfileCardPro
  />
  ) : (
  <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
- <span className="w-8 h-8 text-muted-foreground" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="w-8 h-8 text-muted-foreground" />
  </div>
  )}
 

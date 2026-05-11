@@ -398,7 +398,7 @@ const MerchantTransactions = () => { const { user, loading, signOut } = useAuth(
  <CardContent className="p-0">
  {paginatedTransactions.length === 0 ? (
  <div className="flex flex-col items-center justify-center py-16 text-center">
- <span className="text-6xl mb-4">🐾</span>
+ <PawBucksLogo className="text-6xl mb-4" />
  <p className="text-lg text-muted-foreground">
  No transactions yet — your PawBucks journey starts with your first sale!
  </p>

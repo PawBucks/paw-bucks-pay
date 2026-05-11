@@ -64,7 +64,7 @@ export function UserDetailPets({ userId }: { userId: string }) {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <span className="w-5 h-5" aria-hidden="true">🐾</span> Pet Profiles ({pets.length})
+ <PawBucksLogo className="w-5 h-5" /> Pet Profiles ({pets.length})
  </CardTitle>
  </CardHeader>
  <CardContent>
@@ -80,7 +80,7 @@ export function UserDetailPets({ userId }: { userId: string }) {
  <img src={pet.photo_url} alt={pet.name} className="w-12 h-12 rounded-full object-cover" />
  ) : (
  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
- <span className="w-6 h-6 text-primary" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="w-6 h-6 text-primary" />
  </div>
  )}
  <div>

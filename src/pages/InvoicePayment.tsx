@@ -772,7 +772,7 @@ const InvoicePayment = () => {
                   <div className="space-y-3 p-4 bg-muted/40 rounded-lg border border-border">
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-2">
-                        <span className="h-5 w-5 text-primary" aria-hidden="true">🐾</span>
+                        <PawBucksLogo className="h-5 w-5 text-primary" />
                         <span className="font-medium text-foreground">Apply PawBucks</span>
  </div>
  {loadingPawbucks ? (
@@ -886,7 +886,7 @@ const InvoicePayment = () => {
  </>
  ) : (
  <>
- <span className="h-4 w-4 mr-2" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="h-4 w-4 mr-2" />
  Pay with PawBucks
  </>
  )}

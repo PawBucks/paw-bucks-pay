@@ -87,7 +87,7 @@ export const AutoRedeemEducationCard = ({ userId, pawbucksBalance }: AutoRedeemE
  animate={{ scale: [1, 1.1, 1] }}
  transition={{ duration: 2, repeat: Infinity }}
  >
- <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-accent-foreground" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-accent-foreground" />
  </motion.div>
  </div>
 

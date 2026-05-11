@@ -339,7 +339,7 @@ export function WellnessPlansTab({ vetId }: WellnessPlansTabProps) {
  </div>
  <div className="space-y-2">
  <Label className="flex items-center gap-1">
- <span className="h-4 w-4" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="h-4 w-4" />
  Price (PawBucks) *
  </Label>
  <Input
@@ -459,7 +459,7 @@ export function WellnessPlansTab({ vetId }: WellnessPlansTabProps) {
  <span className="font-bold">${plan.price_usd}</span>
  </div>
  <div className="flex items-center gap-1">
- <span className="h-4 w-4 text-warning" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="h-4 w-4 text-warning" />
  <span className="font-bold">{plan.price_pawbucks.toLocaleString()}</span>
  </div>
  {!plan.is_active && (
@@ -535,7 +535,7 @@ export function WellnessPlansTab({ vetId }: WellnessPlansTabProps) {
  <div className="text-sm">
  {purchase.payment_method ==='pawbucks' ? (
  <span className="flex items-center gap-1">
- <span className="h-3 w-3 text-warning" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="h-3 w-3 text-warning" />
  {purchase.amount_pawbucks?.toLocaleString()}
  </span>
  ) : purchase.payment_method ==='combined' ? (
@@ -545,7 +545,7 @@ export function WellnessPlansTab({ vetId }: WellnessPlansTabProps) {
  ${purchase.amount_usd}
  </span>
  <span className="flex items-center gap-1 text-muted-foreground">
- <span className="h-3 w-3" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="h-3 w-3" />
  {purchase.amount_pawbucks?.toLocaleString()}
  </span>
  </div>
@@ -595,7 +595,7 @@ export function WellnessPlansTab({ vetId }: WellnessPlansTabProps) {
  {/* Info Card */}
  <Card className="p-4 bg-warning/10 /30 border-warning/20">
  <div className="flex items-start gap-3">
- <span className="h-5 w-5 text-warning mt-0.5" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="h-5 w-5 text-warning mt-0.5" />
  <div>
  <h4 className="font-medium text-warning">
  PawBucks Integration

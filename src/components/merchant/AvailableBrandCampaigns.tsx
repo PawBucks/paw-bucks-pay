@@ -149,7 +149,7 @@ export function AvailableBrandCampaigns({ merchantId }: AvailableBrandCampaignsP
  </div>
  <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
  <span className="flex items-center gap-1">
- <span className="h-3 w-3" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="h-3 w-3" />
  {c.pawbucks_per_checkin?.toLocaleString() || 0} PB / check-in
  </span>
  <span className="flex items-center gap-1">

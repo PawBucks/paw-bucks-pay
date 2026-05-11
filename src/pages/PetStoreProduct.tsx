@@ -354,7 +354,7 @@ export default function PetStoreProduct() {
  <div className="flex flex-wrap gap-4 text-xs text-muted-foreground pt-2">
  <span className="flex items-center gap-1"><span className="h-3.5 w-3.5" aria-hidden="true">🛡️</span> Secure Checkout</span>
  <span className="flex items-center gap-1"><span className="h-3.5 w-3.5" aria-hidden="true">🚚</span> Fast Delivery</span>
- <span className="flex items-center gap-1"><span className="h-3.5 w-3.5 text-primary" aria-hidden="true">🐾</span> Earn Rewards</span>
+ <span className="flex items-center gap-1"><PawBucksLogo className="h-3.5 w-3.5 text-primary" /> Earn Rewards</span>
  </div>
  </div>
  </div>

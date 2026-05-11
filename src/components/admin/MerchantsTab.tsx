@@ -270,7 +270,7 @@ export function MerchantsTab() {
  </TableCell>
  <TableCell>
  <span className="flex items-center gap-1 text-primary font-medium">
- <span className="w-3 h-3" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="w-3 h-3" />
  {(merchant.pawbucks_balance ?? 0).toLocaleString()}
  </span>
  </TableCell>

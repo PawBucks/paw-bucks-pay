@@ -220,7 +220,7 @@ export const EMRDashboard = ({ vetId }: EMRDashboardProps) => {
  </div>
  ) : filteredPatients.length === 0 ? (
  <div className="text-center py-8 text-muted-foreground">
- <span className="w-12 h-12 mx-auto mb-2 opacity-50" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="w-12 h-12 mx-auto mb-2 opacity-50" />
  <p>No patients found</p>
  </div>
  ) : (
@@ -234,7 +234,7 @@ export const EMRDashboard = ({ vetId }: EMRDashboardProps) => {
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-3">
  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
- <span className="w-5 h-5 text-primary" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="w-5 h-5 text-primary" />
  </div>
  <div>
  <h3 className="font-semibold">{patient.pet_name}</h3>

@@ -156,7 +156,7 @@ const OrganicMerchantCardComponent = ({
  {merchant.accepts_pawbucks && (
  <>
  <span className="text-muted-foreground/40">·</span>
- <span className="w-3 h-3 text-primary" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="w-3 h-3 text-primary" />
  </>
  )}
  </div>

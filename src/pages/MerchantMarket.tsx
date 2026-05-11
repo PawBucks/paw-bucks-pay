@@ -264,7 +264,7 @@ const MerchantMarket = () => {
         <section className="px-4 md:px-10 mt-8">
           <div className="rounded-md bg-foreground text-background px-5 md:px-8 py-5 flex flex-wrap items-center justify-between gap-5">
             <div className="flex items-center gap-4 min-w-0">
-              <span className="text-2xl" aria-hidden>🐾</span>
+              <PawBucksLogo className="text-2xl" aria-hidden />
               <p className="text-sm md:text-[0.95rem] leading-snug">
                 Pay with PawBucks and get <strong className="text-primary">50% off every service</strong>.
                 Earn PawBucks from every customer transaction — then reinvest them here.

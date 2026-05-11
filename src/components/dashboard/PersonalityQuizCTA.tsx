@@ -22,7 +22,7 @@ export const PersonalityQuizCTA = ({ petId, petName }: PersonalityQuizCTAProps) 
  <GradientCard className="relative overflow-hidden">
  {/* Background decoration */}
  <div className="absolute -right-4 -top-4 opacity-10">
- <span className="w-32 h-32 text-primary rotate-12" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="w-32 h-32 text-primary rotate-12" />
  </div>
  
  <div className="relative z-10">

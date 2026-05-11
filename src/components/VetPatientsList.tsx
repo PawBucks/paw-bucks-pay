@@ -161,7 +161,7 @@ export const VetPatientsList = ({ vetId }: VetPatientsListProps) => {
  if (patients.length === 0) {
  return (
  <Card className="p-8 text-center text-muted-foreground">
- <span className="w-12 h-12 mx-auto mb-2 opacity-50" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="w-12 h-12 mx-auto mb-2 opacity-50" />
  <p>No patients yet. Patients will appear here once they message you.</p>
  </Card>
  );

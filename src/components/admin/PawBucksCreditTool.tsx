@@ -188,7 +188,7 @@ export function PawBucksCreditTool() {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <span className="w-5 h-5 text-primary" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="w-5 h-5 text-primary" />
  Manual PawBucks Credit
  </CardTitle>
  <CardDescription>
@@ -278,7 +278,7 @@ export function PawBucksCreditTool() {
  </>
  ) : (
  <>
- <span className="w-4 h-4 mr-2" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="w-4 h-4 mr-2" />
  Credit {creditAmount ||'0'} PawBucks
  </>
  )}

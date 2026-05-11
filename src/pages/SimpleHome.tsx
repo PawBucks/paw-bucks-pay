@@ -130,7 +130,7 @@ const SimpleHome = () => {
                           {p.photo_url ? (
                             <img src={p.photo_url} alt={p.name} className="h-full w-full object-cover" />
                           ) : (
-                            <span className="h-8 w-8 text-muted-foreground" aria-hidden="true">🐾</span>
+                            <PawBucksLogo className="h-8 w-8 text-muted-foreground" />
                           )}
                         </div>
                         <span className="text-xs font-medium truncate max-w-[80px]">{p.name}</span>
@@ -219,7 +219,7 @@ const SimpleHome = () => {
                       {p.photo_url ? (
                         <img src={p.photo_url} alt={p.name} className="h-full w-full object-cover" />
                       ) : (
-                        <span className="h-7 w-7 text-muted-foreground" aria-hidden="true">🐾</span>
+                        <PawBucksLogo className="h-7 w-7 text-muted-foreground" />
                       )}
                     </div>
                     <span className="text-xs font-medium truncate max-w-[72px]">{p.name}</span>
