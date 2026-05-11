@@ -319,7 +319,9 @@ export function WorkspaceOverview() {
                 </PieChart>
               </ResponsiveContainer>
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                <p className="text-2xl font-bold">$1,742</p>
+                <p className="text-2xl font-bold">
+                  ${rewardsTotal.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                </p>
                 <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Total</p>
               </div>
               <div className="flex items-center justify-center gap-4 mt-2 text-xs">
