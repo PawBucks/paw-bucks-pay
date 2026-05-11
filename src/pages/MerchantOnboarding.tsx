@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from"@/
 import { Textarea } from"@/components/ui/textarea";
 import { Badge } from"@/components/ui/badge";
 import { toast } from"sonner";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 import { Store, Loader2, PawPrint, Stethoscope, Scissors, ShoppingBag, Bone, Home, Dog, Sun, Camera, Shield, Truck, Mountain, Zap, Hand, Brain, Heart, Building2, Car, Users, AlertCircle, Info } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { merchantOnboardingSchema, PET_BUSINESS_TYPES, ENTITY_TYPES, WORKING_STYLES } from"@/lib/validation";
@@ -647,9 +648,9 @@ const MerchantOnboarding = () => {
  <Card className="bg-primary/5 border-primary/20">
  <CardContent className="pt-4">
  <div className="flex items-start gap-3">
- <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
- <span className="w-4 h-4 text-primary" aria-hidden="true">🐾</span>
- </div>
+                      <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                        <PawBucksLogo className="w-4 h-4 text-primary" />
+                      </div>
  <div>
  <p className="font-medium mb-2">Tailored for Your Business:</p>
  <ul className="space-y-1">
@@ -747,10 +748,10 @@ const MerchantOnboarding = () => {
  </div>
 
  <div className="bg-muted rounded-lg p-4">
- <h3 className="font-semibold mb-2 flex items-center gap-2">
- <span className="w-4 h-4" aria-hidden="true">🐾</span>
- Banking Setup (Stripe Connect)
- </h3>
+                    <h3 className="font-semibold mb-2 flex items-center gap-2">
+                      <PawBucksLogo className="w-4 h-4" />
+                      Banking Setup (Stripe Connect)
+                    </h3>
  <p className="text-sm text-muted-foreground">
  After creating your profile, you'll connect your bank account through Stripe to receive payments directly.
  </p>
