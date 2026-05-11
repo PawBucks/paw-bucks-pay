@@ -47,6 +47,7 @@ const MerchantLanding = lazyWithRetry(() => import("./pages/MerchantLanding"),"M
 const MerchantOnboarding = lazyWithRetry(() => import("./pages/MerchantOnboarding"),"MerchantOnboarding");
 const MerchantDashboard = lazyWithRetry(() => import("./pages/MerchantDashboard"),"MerchantDashboard");
 const MerchantWorkspace = lazyWithRetry(() => import("./pages/MerchantWorkspace"),"MerchantWorkspace");
+const MerchantSupport = lazyWithRetry(() => import("./pages/MerchantSupport"),"MerchantSupport");
 const MerchantTransactions = lazyWithRetry(() => import("./pages/MerchantTransactions"),"MerchantTransactions");
 const VetLoanApply = lazyWithRetry(() => import("./pages/VetLoanApply"),"VetLoanApply");
 const AdminDashboard = lazyWithRetry(() => import("./pages/AdminDashboard"),"AdminDashboard");
@@ -238,6 +239,7 @@ const AppRoutes = () => {
  <Route path="/merchant-onboarding" element={<ProtectedRoute><PageTransition><MerchantOnboarding /></PageTransition></ProtectedRoute>} />
  <Route path="/merchant-dashboard" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantDashboard /></PageTransition></ProtectedRoute>} />
 <Route path="/merchant/workspace" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantWorkspace /></PageTransition></ProtectedRoute>} />
+<Route path="/merchant/support" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantSupport /></PageTransition></ProtectedRoute>} />
  <Route path="/merchant/transactions" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantTransactions /></PageTransition></ProtectedRoute>} />
  <Route path="/merchant/products" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantProducts /></PageTransition></ProtectedRoute>} />
  <Route path="/merchant/offers" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantOffers /></PageTransition></ProtectedRoute>} />
