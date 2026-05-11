@@ -79,9 +79,85 @@ function StatCard({ label, value, sub, badge, accent = "default" }: StatCardProp
 
 export function WorkspaceOverview() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [acceptPB, setAcceptPB] = useState(true);
   const [capEnabled, setCapEnabled] = useState(false);
   const [capPct, setCapPct] = useState("50");
+  const [salesTx, setSalesTx] = useState<{ amount: number; created_at: string }[]>([]);
+  const [rewardsTotals, setRewardsTotals] = useState({ given: 0, received: 0 });
+  const [chartsLoading, setChartsLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    (async () => {
+      setChartsLoading(true);
+      try {
+        const { data: merchant } = await supabase
+          .from("merchants")
+          .select("id")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (!merchant?.id || cancelled) return;
+
+        const sixMonthsAgo = startOfMonth(subMonths(new Date(), 5)).toISOString();
+
+        const [{ data: recentTxs }, { data: allTxs }] = await Promise.all([
+          supabase
+            .from("transactions")
+            .select("amount, created_at")
+            .eq("merchant_id", merchant.id)
+            .eq("status", "completed")
+            .gte("created_at", sixMonthsAgo),
+          supabase
+            .from("transactions")
+            .select("rewards_earned, pawbucks_used")
+            .eq("merchant_id", merchant.id)
+            .eq("status", "completed"),
+        ]);
+
+        if (cancelled) return;
+        setSalesTx(recentTxs || []);
+        const given = (allTxs || []).reduce(
+          (s, t: any) => s + (Number(t.rewards_earned) || 0) * 0.001,
+          0,
+        );
+        const received = (allTxs || []).reduce(
+          (s, t: any) => s + (Number(t.pawbucks_used) || 0) * 0.001,
+          0,
+        );
+        setRewardsTotals({ given, received });
+      } finally {
+        if (!cancelled) setChartsLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
+
+  const salesData = useMemo(() => {
+    const buckets: Record<string, number> = {};
+    // Seed last 6 months with zeros so empty months still appear
+    for (let i = 5; i >= 0; i--) {
+      const key = format(subMonths(startOfMonth(new Date()), i), "MMM yy");
+      buckets[key] = 0;
+    }
+    salesTx.forEach((t) => {
+      const key = format(startOfMonth(parseISO(t.created_at)), "MMM yy");
+      if (key in buckets) buckets[key] += Number(t.amount) || 0;
+    });
+    return Object.entries(buckets).map(([month, value]) => ({ month, value }));
+  }, [salesTx]);
+
+  const rewardsData = useMemo(
+    () => [
+      { name: "PawBucks Received", value: rewardsTotals.received },
+      { name: "Rewards Given", value: rewardsTotals.given },
+    ],
+    [rewardsTotals],
+  );
+  const rewardsTotal = rewardsTotals.given + rewardsTotals.received;
 
   return (
     <div className="flex flex-col">
