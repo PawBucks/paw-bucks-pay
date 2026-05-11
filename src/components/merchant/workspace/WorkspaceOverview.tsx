@@ -27,21 +27,10 @@ import {
 } from "lucide-react";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
 import { WorkspacePageHeader } from "./MerchantWorkspaceLayout";
-import { useState } from "react";
-
-const salesData = [
-  { month: "Dec 25", value: 1800 },
-  { month: "Jan 26", value: 4500 },
-  { month: "Feb 26", value: 5200 },
-  { month: "Mar 26", value: 5000 },
-  { month: "Apr 26", value: 4700 },
-  { month: "May 26", value: 310 },
-];
-
-const rewardsData = [
-  { name: "PawBucks Received", value: 1551.89 },
-  { name: "Rewards Given", value: 190.61 },
-];
+import { useEffect, useMemo, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { format, parseISO, startOfMonth, subMonths } from "date-fns";
 
 const recentTx = [
   { initials: "MG", name: "Markus Gerdemann", id: "IHD01082", date: "May 8", method: "USD", amount: "+$300.00", rewards: "$3.00" },
@@ -90,9 +79,85 @@ function StatCard({ label, value, sub, badge, accent = "default" }: StatCardProp
 
 export function WorkspaceOverview() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [acceptPB, setAcceptPB] = useState(true);
   const [capEnabled, setCapEnabled] = useState(false);
   const [capPct, setCapPct] = useState("50");
+  const [salesTx, setSalesTx] = useState<{ amount: number; created_at: string }[]>([]);
+  const [rewardsTotals, setRewardsTotals] = useState({ given: 0, received: 0 });
+  const [chartsLoading, setChartsLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    (async () => {
+      setChartsLoading(true);
+      try {
+        const { data: merchant } = await supabase
+          .from("merchants")
+          .select("id")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (!merchant?.id || cancelled) return;
+
+        const sixMonthsAgo = startOfMonth(subMonths(new Date(), 5)).toISOString();
+
+        const [{ data: recentTxs }, { data: allTxs }] = await Promise.all([
+          supabase
+            .from("transactions")
+            .select("amount, created_at")
+            .eq("merchant_id", merchant.id)
+            .eq("status", "completed")
+            .gte("created_at", sixMonthsAgo),
+          supabase
+            .from("transactions")
+            .select("rewards_earned, pawbucks_used")
+            .eq("merchant_id", merchant.id)
+            .eq("status", "completed"),
+        ]);
+
+        if (cancelled) return;
+        setSalesTx(recentTxs || []);
+        const given = (allTxs || []).reduce(
+          (s, t: any) => s + (Number(t.rewards_earned) || 0) * 0.001,
+          0,
+        );
+        const received = (allTxs || []).reduce(
+          (s, t: any) => s + (Number(t.pawbucks_used) || 0) * 0.001,
+          0,
+        );
+        setRewardsTotals({ given, received });
+      } finally {
+        if (!cancelled) setChartsLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
+
+  const salesData = useMemo(() => {
+    const buckets: Record<string, number> = {};
+    // Seed last 6 months with zeros so empty months still appear
+    for (let i = 5; i >= 0; i--) {
+      const key = format(subMonths(startOfMonth(new Date()), i), "MMM yy");
+      buckets[key] = 0;
+    }
+    salesTx.forEach((t) => {
+      const key = format(startOfMonth(parseISO(t.created_at)), "MMM yy");
+      if (key in buckets) buckets[key] += Number(t.amount) || 0;
+    });
+    return Object.entries(buckets).map(([month, value]) => ({ month, value }));
+  }, [salesTx]);
+
+  const rewardsData = useMemo(
+    () => [
+      { name: "PawBucks Received", value: rewardsTotals.received },
+      { name: "Rewards Given", value: rewardsTotals.given },
+    ],
+    [rewardsTotals],
+  );
+  const rewardsTotal = rewardsTotals.given + rewardsTotals.received;
 
   return (
     <div className="flex flex-col">
@@ -254,7 +319,9 @@ export function WorkspaceOverview() {
                 </PieChart>
               </ResponsiveContainer>
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                <p className="text-2xl font-bold">$1,742</p>
+                <p className="text-2xl font-bold">
+                  ${rewardsTotal.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                </p>
                 <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Total</p>
               </div>
               <div className="flex items-center justify-center gap-4 mt-2 text-xs">
