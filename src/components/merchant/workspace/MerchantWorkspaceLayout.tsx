@@ -33,6 +33,8 @@ import {
   LogOut,
   Bell,
   User,
+  Package,
+  Tag,
 } from "lucide-react";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
 import { useAuth } from "@/hooks/useAuth";
@@ -47,7 +49,7 @@ const NAV: NavSection[] = [
       { id: "overview", label: "Overview", icon: LayoutGrid, to: "/merchant/workspace" },
       { id: "earnings", label: "Earnings", icon: DollarSign, to: "/merchant/total-earnings" },
       { id: "sales-report", label: "Sales Report", icon: BarChart3, to: "/merchant-analytics" },
-      { id: "daily-history", label: "Daily History", icon: CalendarDays, to: "/merchant/transactions" },
+      { id: "transactions", label: "Transactions", icon: CalendarDays, to: "/merchant/transactions" },
     ],
   },
   {
@@ -61,6 +63,8 @@ const NAV: NavSection[] = [
   {
     section: "Services",
     items: [
+      { id: "products", label: "Products", icon: Package, to: "/merchant/products" },
+      { id: "offers", label: "Partner Offers", icon: Tag, to: "/merchant/offers" },
       { id: "loyalty", label: "Loyalty Program", icon: Heart, to: "/merchant-dashboard" },
       { id: "marketplace", label: "Services Marketplace", icon: Star, to: "/merchant/market" },
       { id: "quick-actions", label: "Quick Actions", icon: Zap, to: "/merchant-dashboard" },
@@ -76,7 +80,7 @@ const NAV: NavSection[] = [
   },
   {
     section: "Support",
-    items: [{ id: "support", label: "Support Center", icon: HelpCircle, to: "/merchant-dashboard" }],
+    items: [{ id: "support", label: "Support Center", icon: HelpCircle, to: "/merchant/support" }],
   },
 ];
 
