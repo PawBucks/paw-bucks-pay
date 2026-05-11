@@ -239,10 +239,10 @@ export function CartDrawer({
  {pawbucksBalance > 0 && meetsMinOrder && (
  <div className="bg-muted border border-border rounded-lg p-3 space-y-3">
  <div className="flex justify-between items-center text-sm">
- <span className="font-medium flex items-center gap-1.5">
- <span className="h-4 w-4 text-primary" aria-hidden="true">🐾</span>
- Use PawBucks
- </span>
+                      <span className="font-medium flex items-center gap-1.5">
+                        <PawBucksLogo className="h-4 w-4 text-primary" />
+                        Use PawBucks
+                      </span>
  <span className="text-xs text-muted-foreground">
  Balance: {Formatters.number(pawbucksBalance)} PB
  </span>
@@ -287,9 +287,9 @@ export function CartDrawer({
  )}
 
  {pawbucksBalance > 0 && !meetsMinOrder && (
- <div className="bg-muted/40 border border-dashed border-border rounded-lg p-3 text-xs text-muted-foreground flex items-start gap-2">
- <span className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" aria-hidden="true">🐾</span>
- <span>
+                    <div className="bg-muted/40 border border-dashed border-border rounded-lg p-3 text-xs text-muted-foreground flex items-start gap-2">
+                      <PawBucksLogo className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
+                      <span>
  Add {Formatters.currency((MIN_ORDER_USD_FOR_PAWBUCKS - totalUsdDollars))} more to use PawBucks. PawBucks
  are available on orders of ${MIN_ORDER_USD_FOR_PAWBUCKS}+ and may cover up to 33% of the total.
  </span>
@@ -302,9 +302,9 @@ export function CartDrawer({
  <div className="space-y-1.5 text-sm">
  {actualPawbucks > 0 && (
  <div className="flex justify-between items-center">
- <span className="text-muted-foreground flex items-center gap-1">
- <span className="h-3.5 w-3.5" aria-hidden="true">🐾</span> PawBucks
- </span>
+                      <span className="text-muted-foreground flex items-center gap-1">
+                        <PawBucksLogo className="h-3.5 w-3.5" /> PawBucks
+                      </span>
  <span className="font-medium text-primary">
  {Formatters.number(actualPawbucks)} PB (−{Formatters.currency(pawbucksUsdValue)})
  </span>
@@ -334,11 +334,11 @@ export function CartDrawer({
  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
  Processing...
  </>
- ) : getMode() ==="pawbucks" ? (
- <>
- <span className="mr-2 h-4 w-4" aria-hidden="true">🐾</span>
- Pay with PawBucks
- </>
+                    ) : getMode() === "pawbucks" ? (
+                      <>
+                        <PawBucksLogo className="mr-2 h-4 w-4" />
+                        Pay with PawBucks
+                      </>
  ) : getMode() ==="split" ? (
  <>
  <span className="mr-2 h-4 w-4" aria-hidden="true">💳</span>
