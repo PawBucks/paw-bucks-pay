@@ -27,6 +27,7 @@ import { DirectoryMerchantCard } from"@/components/directory/DirectoryMerchantCa
 import { MerchantMap } from"@/components/MerchantMap";
 import { Search, SlidersHorizontal, X, LayoutGrid, LayoutList, Map } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 
 type MerchantWithRating = {
  id: string;
@@ -406,7 +407,7 @@ const MerchantDirectory = () => {
  :"text-muted-foreground hover:text-foreground hover:bg-muted"
  }`}
  >
- <span className="w-3 h-3" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="w-3 h-3" />
  PawBucks
  </button>
  </div>

@@ -10,6 +10,7 @@ import {
 import { differenceInDays, format } from "date-fns";
 
 import { Formatters } from "@/utils/formatters";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 export type PawBucksSource ="earned" |"promotional" |"none";
 
 const PAWBUCKS_TO_USD = 0.001;
@@ -78,7 +79,7 @@ export const PawBucksSourceSelector = ({
                 <p className="font-semibold text-foreground">PawBucks Sources</p>
                 <div className="space-y-1.5">
                   <div className="flex items-start gap-2">
-                    <span className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" aria-hidden="true">🐾</span>
+                    <PawBucksLogo className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
                     <div>
                       <p className="text-sm font-medium text-foreground">Earned PawBucks</p>
                       <p className="text-xs text-muted-foreground">
@@ -121,7 +122,7 @@ export const PawBucksSourceSelector = ({
  }`}
  >
  <RadioGroupItem value="earned" id="source-earned" />
- <span className="w-4 h-4 text-primary flex-shrink-0" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="w-4 h-4 text-primary flex-shrink-0" />
  <div className="flex-1 min-w-0">
  <p className="text-sm font-medium">Earned PawBucks</p>
  <p className="text-xs text-muted-foreground">

@@ -10,10 +10,11 @@ import { Input } from"@/components/ui/input";
 import { Loader2, Search, Send, CheckCircle2, XCircle } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { toast } from"sonner";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 import {
- getAvailableBrandCampaigns,
- requestToJoinBrandCampaign,
- type AvailableBrandCampaign,
+  getAvailableBrandCampaigns,
+  requestToJoinBrandCampaign,
+  type AvailableBrandCampaign,
 } from"@/services/api/brandCampaigns.service";
 
 interface AvailableBrandCampaignsProps {
@@ -149,7 +150,7 @@ export function AvailableBrandCampaigns({ merchantId }: AvailableBrandCampaignsP
  </div>
  <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
  <span className="flex items-center gap-1">
- <span className="h-3 w-3" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="h-3 w-3" />
  {c.pawbucks_per_checkin?.toLocaleString() || 0} PB / check-in
  </span>
  <span className="flex items-center gap-1">

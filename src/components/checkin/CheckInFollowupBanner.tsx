@@ -12,6 +12,7 @@ import { useSubscription } from"@/hooks/useSubscription";
 import { getSubscriptionTier } from"@/lib/constants";
 
 import { Formatters } from "@/utils/formatters";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 interface Followup {
  id: string;
  entity_name: string;
@@ -287,7 +288,7 @@ export const CheckInFollowupBanner = ({ userId }: CheckInFollowupBannerProps) =>
  </div>
  <Label className="text-sm font-medium">How many PawBucks did you use?</Label>
  <div className="relative">
- <span className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
  <Input
  type="number"
  step="1"

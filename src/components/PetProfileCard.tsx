@@ -12,6 +12,7 @@ import { useNavigate } from"react-router-dom";
 import { EditPetProfileDialog } from"./EditPetProfileDialog";
 import { usePetPersonality } from"@/hooks/usePersonalityBadges";
 import { transformPersonalityName } from"@/components/personality-quiz/personalityNameUtils";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 
 type PetProfile = {
  id: string;
@@ -116,7 +117,7 @@ const PetProfileCardComponent = ({ pet, onUpdate, index = 0 }: PetProfileCardPro
  />
  ) : (
  <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
- <span className="w-8 h-8 text-muted-foreground" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="w-8 h-8 text-muted-foreground" />
  </div>
  )}
 

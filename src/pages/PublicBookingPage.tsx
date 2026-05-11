@@ -14,6 +14,7 @@ import { toast } from"sonner";
 import { useIsMobile } from"@/hooks/use-mobile";
 
 import { Formatters } from "@/utils/formatters";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 export default function PublicBookingPage() {
  const { slug } = useParams<{ slug: string }>();
  const navigate = useNavigate();
@@ -142,7 +143,7 @@ export default function PublicBookingPage() {
  <>
  <span className="text-muted-foreground">·</span>
  <span className="flex items-center gap-1 text-primary text-xs font-medium">
- <span className="w-3.5 h-3.5" aria-hidden="true">🐾</span> PawBucks
+ <PawBucksLogo className="w-3.5 h-3.5" /> PawBucks
  </span>
  </>
  )}
@@ -229,7 +230,7 @@ export default function PublicBookingPage() {
  <PriceRangeDisplay priceRange={merchant.price_range} />
  {merchant.accepts_pawbucks && (
  <span className="flex items-center gap-1 text-primary text-sm font-medium">
- <span className="w-4 h-4" aria-hidden="true">🐾</span> Accepts PawBucks
+ <PawBucksLogo className="w-4 h-4" /> Accepts PawBucks
  </span>
  )}
  </div>
@@ -303,7 +304,7 @@ export default function PublicBookingPage() {
  <Card className="shadow-sm border-primary/20 bg-primary/5">
  <CardContent className="p-5 text-center">
  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
- <span className="w-5 h-5 text-primary" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="w-5 h-5 text-primary" />
  </div>
  <p className="font-semibold text-primary">
  Earn {merchant.cashback_rate}x PawBucks

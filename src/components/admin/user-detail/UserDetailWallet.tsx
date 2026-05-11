@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from"@/
 import { PAWBUCKS_CONVERSION } from"@/lib/constants";
 
 import { Formatters } from "@/utils/formatters";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 type WalletData = {
  balance: number;
  total_spent: number;
@@ -108,7 +109,7 @@ export function UserDetailWallet({ userId }: { userId: string }) {
  {/* Summary Cards */}
  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
  <SummaryCard
- icon={<span className="w-5 h-5 text-primary" aria-hidden="true">🐾</span>}
+ icon={<PawBucksLogo className="w-5 h-5 text-primary" />}
  label="PawBucks Balance"
  value={(pawbucksWallet?.balance ?? 0).toLocaleString()}
  />

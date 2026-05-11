@@ -31,6 +31,7 @@ import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { format } from"date-fns";
 import { Formatters } from"@/utils/formatters";
 import { useQueryClient } from"@tanstack/react-query";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 
 type WalletData = {
  balance: number;
@@ -425,7 +426,7 @@ const Wallet = () => {
  {/* PawBucks Earning History */}
  <GradientCard className="mt-6">
  <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
- <span className="w-5 h-5 text-accent" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="w-5 h-5 text-accent" />
  PawBucks History
  </h3>
  {pawbucksActivity.length > 0 ? (
@@ -470,7 +471,7 @@ const Wallet = () => {
  ) : (
  <div className="text-center py-12">
  <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-3">
- <span className="w-8 h-8 text-muted-foreground" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="w-8 h-8 text-muted-foreground" />
  </div>
  <p className="text-muted-foreground mb-4">No PawBucks activity yet</p>
  <p className="text-sm text-muted-foreground">

@@ -25,6 +25,7 @@ import { type Invoice } from"@/services/api/invoicing.service";
 
 import { Formatters } from "@/utils/formatters";
 import pawbucksLogo from "@/assets/pawbucks-logo.png";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 const PAWBUCKS_TO_USD = 0.001; // 1 PawBuck = $0.001
 
 const InvoicePayment = () => {
@@ -772,7 +773,7 @@ const InvoicePayment = () => {
                   <div className="space-y-3 p-4 bg-muted/40 rounded-lg border border-border">
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-2">
-                        <span className="h-5 w-5 text-primary" aria-hidden="true">🐾</span>
+                        <PawBucksLogo className="h-5 w-5 text-primary" />
                         <span className="font-medium text-foreground">Apply PawBucks</span>
  </div>
  {loadingPawbucks ? (
@@ -886,7 +887,7 @@ const InvoicePayment = () => {
  </>
  ) : (
  <>
- <span className="h-4 w-4 mr-2" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="h-4 w-4 mr-2" />
  Pay with PawBucks
  </>
  )}

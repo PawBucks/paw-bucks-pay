@@ -25,6 +25,7 @@ import { PawBucksInfoTooltip } from"@/components/PawBucksInfoTooltip";
 import { PawBucksSourceSelector, type PawBucksSource } from"@/components/checkout/PawBucksSourceSelector";
 
 import { Formatters } from "@/utils/formatters";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 // Pet Owner conversion rate: 1000 PawBucks = $1.00 (1 PawBuck = $0.001)
 const PAWBUCKS_TO_USD = 0.001;
 // Minimum Stripe charge for subscriptions
@@ -380,7 +381,7 @@ const CheckoutForm = ({
  <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 space-y-3">
  <div className="flex items-center justify-between">
  <span className="text-sm font-medium flex items-center gap-2">
- <span className="w-4 h-4 text-primary" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="w-4 h-4 text-primary" />
  Apply PawBucks
  <PawBucksInfoTooltip variant="redemption" />
  </span>
@@ -442,7 +443,7 @@ const CheckoutForm = ({
  {/* Info when merchant accepts PawBucks but user has none */}
  {merchantAcceptsPawBucks && pawbucksBalance === 0 && !hasWelcomeCredit && (
  <div className="text-sm text-muted-foreground bg-muted p-3 rounded-lg flex items-start gap-2">
- <span className="w-4 h-4 mt-0.5 flex-shrink-0" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="w-4 h-4 mt-0.5 flex-shrink-0" />
  <span>This merchant accepts PawBucks, but you don't have any spendable yet. Earn PawBucks by making purchases!</span>
  </div>
  )}

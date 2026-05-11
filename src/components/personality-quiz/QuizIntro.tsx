@@ -1,5 +1,6 @@
-import { motion } from"framer-motion";
-import { Button } from"@/components/ui/button";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 
@@ -24,7 +25,7 @@ export const QuizIntro = ({ petName, onStart }: QuizIntroProps) => {
  animate={{ opacity: 1, scale: 1, rotate: 0 }}
  transition={{ delay: i * 0.2, type:"spring", stiffness: 200 }}
  >
- <span className="w-8 h-8 text-primary" aria-hidden="true">🐾</span>
+              <PawBucksLogo className="w-8 h-8 text-primary" />
  </motion.div>
  ))}
  </div>

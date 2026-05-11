@@ -9,6 +9,7 @@ import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { PawBucksInfoTooltip } from"@/components/PawBucksInfoTooltip";
 
 import { Formatters } from "@/utils/formatters";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 type MerchantWithRating = {
  id: string;
  business_name: string;
@@ -142,7 +143,7 @@ const SponsoredMerchantCardComponent = ({
  {merchant.accepts_pawbucks && (
  <>
  <span className="text-muted-foreground/40">·</span>
- <span className="w-3 h-3 text-primary" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="w-3 h-3 text-primary" />
  </>
  )}
  </div>

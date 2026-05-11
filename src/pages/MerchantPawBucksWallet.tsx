@@ -10,6 +10,7 @@ import { PageLoader } from"@/components/PageLoader";
 import { ArrowUpRight, ArrowDownRight, ArrowLeft } from "lucide-react";
 import { Formatters } from"@/utils/formatters";
 import { format, parseISO } from"date-fns";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 
 type MerchantPawBucksWallet = {
  id: string;
@@ -152,7 +153,7 @@ const MerchantPawBucksWallet = () => {
  </Button>
  <div className="flex items-center gap-3">
  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
- <span className="w-5 h-5 text-primary" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="w-5 h-5 text-primary" />
  </div>
  <div>
  <h1 className="text-lg font-bold">Merchant PawBucks</h1>
@@ -167,7 +168,7 @@ const MerchantPawBucksWallet = () => {
  <GradientCard gradient className="mb-6">
  <div className="text-center">
  <div className="flex items-center justify-center gap-2 mb-2">
- <span className="w-8 h-8 text-warning" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="w-8 h-8 text-warning" />
  <p className="text-sm text-muted-foreground">Current Balance</p>
  </div>
  <p className="text-5xl font-bold mb-2">{Formatters.number(balance)}</p>
@@ -278,7 +279,7 @@ const MerchantPawBucksWallet = () => {
  </div>
  ) : (
  <div className="text-center py-8 text-muted-foreground">
- <span className="w-12 h-12 mx-auto mb-3 opacity-50" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="w-12 h-12 mx-auto mb-3 opacity-50" />
  <p>No activity yet</p>
  <p className="text-sm mt-1">PawBucks will appear here when customers pay with them</p>
  </div>

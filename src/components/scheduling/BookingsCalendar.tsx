@@ -26,6 +26,7 @@ import { supabase } from"@/integrations/supabase/client";
 import { toast } from"sonner";
 
 import { Formatters } from "@/utils/formatters";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 interface BookingsCalendarProps {
  bookings: BookingWithDetails[];
  merchantId?: string;
@@ -227,7 +228,7 @@ export function BookingsCalendar({ bookings, merchantId, onUpdateStatus }: Booki
  )}
  {booking.pet_profiles && (
  <span className="flex items-center gap-1">
- <span className="w-3 h-3" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="w-3 h-3" />
  {booking.pet_profiles.name}
  </span>
  )}
@@ -316,7 +317,7 @@ export function BookingsCalendar({ bookings, merchantId, onUpdateStatus }: Booki
  <div>
  <p className="text-sm text-muted-foreground">Pet</p>
  <p className="font-medium flex items-center gap-2">
- <span className="w-4 h-4" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="w-4 h-4" />
  {selectedBooking.pet_profiles.name} ({selectedBooking.pet_profiles.type})
  </p>
  </div>

@@ -13,6 +13,7 @@ import { Skeleton } from"@/components/ui/skeleton";
 import { PhotoLightbox } from"@/components/PhotoLightbox";
 
 import { Formatters } from "@/utils/formatters";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 interface TimelineMoment {
  id: string;
  pet_id: string;
@@ -154,7 +155,7 @@ const MomentCard = ({
  )}
  {moment.pawbucks_earned > 0 && (
  <Badge className="bg-gradient-to-r from-primary to-accent text-white text-xs gap-1">
- <span className="w-3 h-3" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="w-3 h-3" />
  +{moment.pawbucks_earned.toLocaleString()} PawBucks
  </Badge>
  )}

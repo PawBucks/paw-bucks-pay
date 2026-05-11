@@ -16,6 +16,7 @@ import { AllergiesTab } from"./AllergiesTab";
 import { SurgicalNotesTab } from"./SurgicalNotesTab";
 import { LabResultsTab } from"./LabResultsTab";
 import { ImagingTab } from"./ImagingTab";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 
 interface PatientEMRViewProps {
  patient: EMRPatient;
@@ -78,7 +79,7 @@ export const PatientEMRView = ({ patient, vetId, onBack }: PatientEMRViewProps) 
  <div>
  <div className="flex items-center gap-3">
  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
- <span className="w-6 h-6 text-primary" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="w-6 h-6 text-primary" />
  </div>
  <div>
  <h2 className="text-2xl font-bold">{patient.pet_name}</h2>

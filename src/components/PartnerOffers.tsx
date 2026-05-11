@@ -4,6 +4,7 @@ import { Card } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
 
 import { Skeleton } from"@/components/ui/skeleton";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 
 interface PartnerOffer {
  id: string;
@@ -64,7 +65,7 @@ export const PartnerOffers = () => {
  {offer.merchants.business_type}
  </Badge>
  <div className="flex items-center gap-1 text-primary font-semibold">
- <span className="w-4 h-4" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="w-4 h-4" />
  <span className="text-sm">{offer.coins_required}</span>
  </div>
  </div>

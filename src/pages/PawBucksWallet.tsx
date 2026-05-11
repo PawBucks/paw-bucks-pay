@@ -24,6 +24,7 @@ import { LockedRewardsCard } from"@/components/wallet/LockedRewardsCard";
 import { useSpendablePawBucks } from"@/hooks/useSpendablePawBucks";
 import { PartnerReceiptDialog } from"@/components/receipts/PartnerReceiptDialog";
 import { NonPartnerReceiptDialog } from"@/components/receipts/NonPartnerReceiptDialog";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 
 type PawBucksWallet = {
  id: string;
@@ -373,11 +374,11 @@ const PawBucksWallet = () => {
  {/* Header */}
  <div className="mb-8 text-center">
  <div className="flex items-center justify-center gap-3 mb-2">
- <span className="w-10 h-10 text-warning" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="w-10 h-10 text-warning" />
  <h2 className="text-4xl font-bold">Your PawBucks Wallet</h2>
  <PawBucksInfoTooltip variant="earning" className="ml-1" />
  </div>
- <p className="text-muted-foreground text-lg">Free: $1 = 10 PawBucks • PawPass: $1 = 20 PawBucks • PawPass+: $1 = 30 PawBucks 🐾</p>
+ <p className="text-muted-foreground text-lg">Free: $1 = 10 PawBucks • PawPass: $1 = 20 PawBucks • PawPass+: $1 = 30 PawBucks <PawBucksLogo className="w-5 h-5 inline" /></p>
  </div>
 
  {/* Locked Rewards Card - Shows spendable vs locked breakdown */}

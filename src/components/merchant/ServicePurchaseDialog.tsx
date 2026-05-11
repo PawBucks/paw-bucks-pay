@@ -22,6 +22,7 @@ import { getStripePromise } from"@/lib/stripe";
 import { buildAppUrl } from"@/lib/url";
 
 import { Formatters } from "@/utils/formatters";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 // Merchant PawBucks conversion: 1000 PawBucks = $1.00
 const PAWBUCKS_TO_USD = 0.001;
 
@@ -105,7 +106,7 @@ const StripePaymentForm = ({
  {pawbucksAmount > 0 && (
  <div className="flex justify-between text-sm">
  <span className="text-muted-foreground flex items-center gap-1">
- <span className="w-3 h-3" aria-hidden="true">🐾</span> PawBucks Applied:
+ <PawBucksLogo className="w-3 h-3" /> PawBucks Applied:
  </span>
  <span className="font-medium text-primary">
  {pawbucksAmount.toLocaleString()} (−{Formatters.currency((pawbucksAmount * PAWBUCKS_TO_USD))})
@@ -562,7 +563,7 @@ export const ServicePurchaseDialog = ({
  ?"bg-primary text-primary-foreground"
  :"bg-muted"
  )}>
- <span className="w-5 h-5" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="w-5 h-5" />
  </div>
  <div>
  <p className="font-medium flex items-center gap-2">
@@ -665,7 +666,7 @@ export const ServicePurchaseDialog = ({
  <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Loading...</>
  ) : paymentMethod ==='pawbucks' ? (
  <>
- <span className="w-4 h-4 mr-2" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="w-4 h-4 mr-2" />
  Pay with PawBucks
  </>
  ) : (

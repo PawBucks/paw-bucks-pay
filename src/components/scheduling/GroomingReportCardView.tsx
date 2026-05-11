@@ -4,9 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
 import { Separator } from"@/components/ui/separator";
 import { Loader2 } from "lucide-react";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 import {
- Dialog,
- DialogContent,
+  Dialog,
+  DialogContent,
 } from"@/components/ui/dialog";
 
 interface GroomingReportCardViewProps {
@@ -75,7 +76,7 @@ export function GroomingReportCardView({ bookingId }: GroomingReportCardViewProp
  Grooming Report Card
  {report.pet_name && (
  <Badge variant="outline" className="text-xs gap-1">
- <span className="w-3 h-3" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="w-3 h-3" />
  {report.pet_name}
  </Badge>
  )}
@@ -135,7 +136,7 @@ export function GroomingReportCardView({ bookingId }: GroomingReportCardViewProp
  {report.skin_coat_notes && (
  <div>
  <p className="text-xs font-medium text-muted-foreground mb-1 flex items-center gap-1">
- <span className="w-3 h-3" aria-hidden="true">🐾</span> Skin & Coat
+ <PawBucksLogo className="w-3 h-3" /> Skin & Coat
  </p>
  <p className="text-sm">{report.skin_coat_notes}</p>
  </div>

@@ -15,6 +15,7 @@ import { toast } from'sonner';
 import { UpgradeSubscriptionDialog } from'./UpgradeSubscriptionDialog';
 
 import { Formatters } from "@/utils/formatters";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 type User = {
  id: string;
  email: string;
@@ -371,7 +372,7 @@ export function UsersTab() {
  </TableCell>
  <TableCell>
  <span className="flex items-center gap-1 text-primary font-medium">
- <span className="w-3 h-3" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="w-3 h-3" />
  {(user.pawbucks_balance ?? 0).toLocaleString()}
  {user.shared_with_owner && (
  <span className="text-xs text-muted-foreground ml-1">(shared)</span>

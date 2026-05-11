@@ -8,6 +8,7 @@ import { Calculator, ArrowRightLeft } from "lucide-react";
 import { POINTS_MULTIPLIER, PAWBUCKS_CONVERSION } from'@/lib/constants';
 
 import { Formatters } from "@/utils/formatters";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 type SubscriptionTier ='free' |'pawpass' |'pawpass_plus';
 
 const TIER_CONFIG: Record<SubscriptionTier, { label: string; multiplier: number; color: string }> = {
@@ -48,7 +49,7 @@ export function PawBucksCalculator() {
  <Tabs defaultValue="credit" className="w-full">
  <TabsList className="grid w-full grid-cols-2">
  <TabsTrigger value="credit" className="flex items-center gap-2">
- <span className="h-4 w-4" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="h-4 w-4" />
  Credit (USD → PB)
  </TabsTrigger>
  <TabsTrigger value="debit" className="flex items-center gap-2">
@@ -114,7 +115,7 @@ export function PawBucksCalculator() {
  <div className="flex items-center justify-between">
  <span className="font-medium">PawBucks to Credit:</span>
  <span className="flex items-center gap-2 text-2xl font-bold text-primary">
- <span className="h-6 w-6" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="h-6 w-6" />
  {pawBucksResult.toLocaleString()}
  </span>
  </div>
@@ -135,7 +136,7 @@ export function PawBucksCalculator() {
  <div className="space-y-2">
  <Label htmlFor="pawbucks-amount">PawBucks Amount</Label>
  <div className="relative">
- <span className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
  <Input
  id="pawbucks-amount"
  type="number"

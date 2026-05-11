@@ -32,6 +32,7 @@ import {
 import { PawBucksCapBreakdown } from"@/components/checkout/PawBucksCapBreakdown";
 
 import { Formatters } from "@/utils/formatters";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 // Pet Owner conversion rate: 1000 PawBucks = $1.00 (1 PawBuck = $0.001)
 const PAWBUCKS_TO_USD = 0.001;
 // Minimum transaction for Pet Fund credits (dynamic, but defaults)
@@ -174,7 +175,7 @@ const StripePaymentForm = ({
  {pawbucksAmount > 0 && (
  <div className="flex justify-between text-sm">
  <span className="text-muted-foreground flex items-center gap-1">
- <span className="w-3 h-3" aria-hidden="true">🐾</span> PawBucks Used:
+ <PawBucksLogo className="w-3 h-3" /> PawBucks Used:
  </span>
  <span className="font-medium text-primary">
  {pawbucksAmount} (−{Formatters.currency((pawbucksAmount * PAWBUCKS_TO_USD))})
@@ -668,7 +669,7 @@ export const PaymentDialogWithPawBucks = ({
  <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 space-y-3">
  <div className="flex items-center justify-between">
  <Label className="flex items-center gap-2">
- <span className="w-4 h-4 text-primary" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="w-4 h-4 text-primary" />
  Use PawBucks
  </Label>
  <span className="text-sm text-muted-foreground">
@@ -728,7 +729,7 @@ export const PaymentDialogWithPawBucks = ({
 
  {acceptsPawbucks && pawbucksBalance === 0 && totalAmount > 0 && !hasWelcomeCredit && (
  <div className="text-sm text-muted-foreground bg-muted p-3 rounded-lg">
- <span className="w-4 h-4 inline mr-1" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="w-4 h-4 inline mr-1" />
  This merchant accepts PawBucks, but you don't have any yet. Earn PawBucks by making purchases!
  </div>
  )}

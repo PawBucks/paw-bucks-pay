@@ -11,6 +11,7 @@ import { RefundPaymentDialog } from'@/components/shared/RefundPaymentDialog';
 import { format } from'date-fns';
 
 import { Formatters } from "@/utils/formatters";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 type Transaction = {
  id: string;
  amount: number;
@@ -273,7 +274,7 @@ export function TransactionsTab() {
  <TableCell className="text-right">
  {hasPawbucks ? (
  <div className="flex items-center justify-end gap-1">
- <span className="w-3.5 h-3.5 text-warning" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="w-3.5 h-3.5 text-warning" />
  <span className="text-sm font-medium text-warning">
  {pawbucksUsed.toLocaleString()} PB
  </span>

@@ -9,6 +9,7 @@ import { Textarea } from"@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from"@/components/ui/select";
 import { Upload, Loader2 } from "lucide-react";
 import { toast } from"sonner";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 
 type Patient = {
  pet_id: string;
@@ -161,7 +162,7 @@ export const VetPatientsList = ({ vetId }: VetPatientsListProps) => {
  if (patients.length === 0) {
  return (
  <Card className="p-8 text-center text-muted-foreground">
- <span className="w-12 h-12 mx-auto mb-2 opacity-50" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="w-12 h-12 mx-auto mb-2 opacity-50" />
  <p>No patients yet. Patients will appear here once they message you.</p>
  </Card>
  );

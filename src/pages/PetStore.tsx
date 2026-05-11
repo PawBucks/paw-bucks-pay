@@ -36,6 +36,7 @@ import { usePromotionalItems } from"@/hooks/usePromotionalItems";
 import { useShoppingCart } from"@/hooks/useShoppingCart";
 import { getStripePromise } from"@/lib/stripe";
 import { buildAppUrl } from"@/lib/url";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 
 const CATEGORIES = ["All","Food","Treats","Toys","Bedding","Accessories","Healthcare","Grooming","Sanitation"];
 const ITEM_TYPES = ["All","Product","Service"] as const;
@@ -126,7 +127,7 @@ const PetStorePaymentForm = ({
  <div className="flex justify-between text-sm">
  <span className="text-muted-foreground">You'll earn ({cashbackRate}x):</span>
  <span className="font-bold text-accent flex items-center gap-1">
- <span className="h-3 w-3" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="h-3 w-3" />
  {pawbucksEarned} PawBucks
  </span>
  </div>
@@ -470,7 +471,7 @@ export default function PetStore() { const { user, signOut } = useAuth();
  <div className="flex items-center gap-2">
  {user && wallet && (
  <div className="flex items-center gap-1.5 bg-primary/10 px-2.5 py-1 rounded-lg">
- <span className="h-3.5 w-3.5 text-primary" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="h-3.5 w-3.5 text-primary" />
  <span className="text-xs font-semibold">{Formatters.number(wallet.balance)} PB</span>
  </div>
  )}

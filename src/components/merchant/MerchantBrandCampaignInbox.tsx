@@ -9,6 +9,7 @@ import { Separator } from"@/components/ui/separator";
 import { Inbox, CheckCircle2, XCircle, Loader2, ExternalLink, Info } from "lucide-react";
 import { toast } from"sonner";
 import { getMerchantInvitations, respondToCampaignInvitation } from"@/services/api/brandCampaigns.service";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 
 interface MerchantBrandCampaignInboxProps {
  merchantId: string;
@@ -212,7 +213,7 @@ export function MerchantBrandCampaignInbox({ merchantId }: MerchantBrandCampaign
  <p className="text-xs uppercase tracking-wide text-muted-foreground">Terms & Rewards</p>
  <div className="grid grid-cols-2 gap-3">
  <div className="p-3 rounded-lg border bg-card">
- <p className="text-xs text-muted-foreground flex items-center gap-1"><span className="h-3 w-3" aria-hidden="true">🐾</span> Per Check-in</p>
+ <p className="text-xs text-muted-foreground flex items-center gap-1"><PawBucksLogo className="h-3 w-3" /> Per Check-in</p>
  <p className="text-base font-bold mt-1">
  {selectedCampaign?.pawbucks_per_checkin?.toLocaleString() || 0} PB
  </p>
@@ -224,7 +225,7 @@ export function MerchantBrandCampaignInbox({ merchantId }: MerchantBrandCampaign
  </p>
  </div>
  <div className="p-3 rounded-lg border bg-card">
- <p className="text-xs text-muted-foreground flex items-center gap-1"><span className="h-3 w-3" aria-hidden="true">🐾</span> Pool Available</p>
+ <p className="text-xs text-muted-foreground flex items-center gap-1"><PawBucksLogo className="h-3 w-3" /> Pool Available</p>
  <p className="text-base font-bold mt-1">
  {selectedCampaign?.pawbucks_pool?.toLocaleString() || 0} PB
  </p>

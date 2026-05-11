@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from'@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from'@/components/ui/select';
 import { toast } from'sonner';
 import { Search, Loader2, CheckCircle, User, Plus, Minus } from "lucide-react";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 
 type UserResult = {
  id: string;
@@ -295,7 +296,7 @@ export function PawBucksManagementTool() {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <span className="w-5 h-5 text-primary" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="w-5 h-5 text-primary" />
  PawBucks Management
  </CardTitle>
  <CardDescription>

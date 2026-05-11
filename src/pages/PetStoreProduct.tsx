@@ -21,6 +21,7 @@ import { CartIcon } from"@/components/pet-store/CartIcon";
 import { CartDrawer, type CartCheckoutParams } from"@/components/pet-store/CartDrawer";
 import { usePromotionalItems } from"@/hooks/usePromotionalItems";
 import { useShoppingCart } from"@/hooks/useShoppingCart";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 
 export default function PetStoreProduct() {
  const { itemId } = useParams<{ itemId: string }>();
@@ -354,7 +355,7 @@ export default function PetStoreProduct() {
  <div className="flex flex-wrap gap-4 text-xs text-muted-foreground pt-2">
  <span className="flex items-center gap-1"><span className="h-3.5 w-3.5" aria-hidden="true">🛡️</span> Secure Checkout</span>
  <span className="flex items-center gap-1"><span className="h-3.5 w-3.5" aria-hidden="true">🚚</span> Fast Delivery</span>
- <span className="flex items-center gap-1"><span className="h-3.5 w-3.5 text-primary" aria-hidden="true">🐾</span> Earn Rewards</span>
+ <span className="flex items-center gap-1"><PawBucksLogo className="h-3.5 w-3.5 text-primary" /> Earn Rewards</span>
  </div>
  </div>
  </div>

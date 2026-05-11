@@ -54,6 +54,7 @@ import { MerchantMessagesTab } from"@/components/merchant/MerchantMessagesTab";
 import { MerchantSaleConfirmationsTab } from"@/components/merchant/MerchantSaleConfirmationsTab";
 
 import { Formatters } from "@/utils/formatters";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 type Merchant = {
  id: string;
  business_name: string;
@@ -917,7 +918,7 @@ const MerchantDashboard = () => {
   <img src={merchant.logo_url} alt={merchant.business_name} className="w-10 h-10 rounded-lg object-cover border border-border" />
   ) : (
   <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-  <span className="w-5 h-5 text-primary" aria-hidden="true">🐾</span>
+  <PawBucksLogo className="w-5 h-5 text-primary" />
   </div>
   )}
   <div className="min-w-0">

@@ -3,6 +3,7 @@ import { SEO } from "@/components/SEO";
 import { seoMeta } from "@/lib/seoMeta";
 import logo from "@/assets/logo.png";
 import founderPhoto from "@/assets/founder-jonathan.jpeg";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 
 const styles = `
 .pa-root {
@@ -587,7 +588,7 @@ const About = () => {
             </p>
           </div>
           <div className="pa-value-card">
-            <span className="pa-value-icon">🐾</span>
+            <PawBucksLogo className="pa-value-icon" />
             <h3 className="pa-value-name">Pet Life Cycle</h3>
             <p className="pa-value-desc">
               We think about the full life of a pet — from adoption through every stage

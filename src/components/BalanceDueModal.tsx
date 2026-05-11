@@ -24,6 +24,7 @@ import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { toast } from"sonner";
 
 import { Formatters } from "@/utils/formatters";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 interface BalanceDueModalProps {
  open: boolean;
  onOpenChange: (open: boolean) => void;
@@ -290,7 +291,7 @@ export function BalanceDueModal({
  >
  <div className="flex items-center gap-3">
  <div className="p-2 rounded-lg bg-success/10">
- <span className="h-5 w-5 text-success" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="h-5 w-5 text-success" />
  </div>
  <div className="text-left">
  <p className="font-medium text-success">Use PawBucks</p>

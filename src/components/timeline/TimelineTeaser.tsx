@@ -8,6 +8,7 @@ import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { Card, CardContent } from"@/components/ui/card";
 import { Button } from"@/components/ui/button";
 import { Badge } from"@/components/ui/badge";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 
 interface TimelineMoment {
  id: string;
@@ -187,7 +188,7 @@ export const TimelineTeaser = ({ userId, pets }: TimelineTeaserProps) => {
  
  {latestMoment.pawbucks_earned > 0 && (
  <Badge className="bg-gradient-to-r from-primary to-accent text-white text-xs gap-1">
- <span className="w-3 h-3" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="w-3 h-3" />
  +{latestMoment.pawbucks_earned.toLocaleString()} PawBucks
  </Badge>
  )}

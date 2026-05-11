@@ -36,6 +36,7 @@ import { merchantSubscriptionPlansService } from"@/services/api/merchantSubscrip
 import { buildAppUrl } from"@/lib/url";
 
 import { Formatters } from "@/utils/formatters";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 type Product = {
  id: string;
  name: string;
@@ -760,7 +761,7 @@ const MerchantProducts = () => {
  {listInPetStore && (
  <div className="pt-2 border-t space-y-3">
  <div className="flex items-center gap-2 text-sm text-warning">
- <span className="h-4 w-4" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="h-4 w-4" />
  <span>Products in Pet Store must accept both USD and PawBucks</span>
  </div>
  <div>

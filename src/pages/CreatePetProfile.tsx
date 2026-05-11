@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from"@/
 import { toast } from"sonner";
 import { Upload, Loader2 } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 
 const CreatePetProfile = () => {
  const navigate = useNavigate();
@@ -143,7 +144,7 @@ const CreatePetProfile = () => {
  <CardHeader className="text-center">
  <div className="flex justify-center mb-4">
  <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center">
- <span className="w-8 h-8 text-primary-foreground" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="w-8 h-8 text-primary-foreground" />
  </div>
  </div>
  <CardTitle className="text-3xl font-bold flex items-center justify-center gap-2">

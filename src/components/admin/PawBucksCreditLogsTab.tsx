@@ -13,6 +13,7 @@ import { Badge } from"@/components/ui/badge";
 import { Button } from"@/components/ui/button";
 import { Loader2, RefreshCw } from "lucide-react";
 import { format } from"date-fns";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 
 type CreditLog = {
  id: string;
@@ -99,7 +100,7 @@ export const PawBucksCreditLogsTab = () => {
  <GradientCard>
  <div className="flex items-center justify-between mb-4">
  <div className="flex items-center gap-2">
- <span className="w-5 h-5 text-primary" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="w-5 h-5 text-primary" />
  <h3 className="text-xl font-semibold">Manual PawBucks Credit Log</h3>
  </div>
  <Button variant="outline" size="sm" onClick={loadLogs} disabled={loading}>

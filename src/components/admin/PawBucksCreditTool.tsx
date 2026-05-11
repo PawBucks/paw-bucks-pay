@@ -8,6 +8,7 @@ import { Textarea } from'@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from'@/components/ui/card';
 import { toast } from'sonner';
 import { Search, Loader2, CheckCircle, User } from "lucide-react";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 
 type UserResult = {
  id: string;
@@ -188,7 +189,7 @@ export function PawBucksCreditTool() {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <span className="w-5 h-5 text-primary" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="w-5 h-5 text-primary" />
  Manual PawBucks Credit
  </CardTitle>
  <CardDescription>
@@ -278,7 +279,7 @@ export function PawBucksCreditTool() {
  </>
  ) : (
  <>
- <span className="w-4 h-4 mr-2" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="w-4 h-4 mr-2" />
  Credit {creditAmount ||'0'} PawBucks
  </>
  )}

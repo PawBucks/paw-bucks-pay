@@ -8,6 +8,7 @@ import { Minus, Plus, Trash2, Loader2 } from "lucide-react";
 import { Formatters } from"@/utils/formatters";
 import { motion, AnimatePresence } from"framer-motion";
 import type { StorefrontCartItem } from"@/hooks/useStorefrontCart";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 
 const PAWBUCKS_TO_USD = 0.001; // 1000 PB = $1
 
@@ -206,7 +207,7 @@ export function StorefrontCartDrawer({
  <div className="bg-muted border border-border rounded-lg p-3 space-y-3">
  <div className="flex justify-between items-center text-sm">
  <span className="font-medium flex items-center gap-1.5">
- <span className="h-4 w-4 text-primary" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="h-4 w-4 text-primary" />
  Use PawBucks
  </span>
  <span className="text-xs text-muted-foreground">
@@ -255,7 +256,7 @@ export function StorefrontCartDrawer({
  {actualPawbucks > 0 && (
  <div className="flex justify-between items-center">
  <span className="text-muted-foreground flex items-center gap-1">
- <span className="h-3.5 w-3.5" aria-hidden="true">🐾</span> PawBucks
+ <PawBucksLogo className="h-3.5 w-3.5" /> PawBucks
  </span>
  <span className="font-medium text-primary">
  {Formatters.number(actualPawbucks)} PB (−{Formatters.currency(pawbucksUsdValue)})
@@ -286,7 +287,7 @@ export function StorefrontCartDrawer({
  </>
  ) : getMode() ==="pawbucks" ? (
  <>
- <span className="mr-2 h-4 w-4" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="mr-2 h-4 w-4" />
  Pay with PawBucks
  </>
  ) : getMode() ==="split" ? (

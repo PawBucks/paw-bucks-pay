@@ -37,6 +37,7 @@ import { cn } from"@/lib/utils";
 import { GroomingReportCardView } from"@/components/scheduling/GroomingReportCardView";
 
 import { Formatters } from "@/utils/formatters";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 type BookingStatus ="pending" |"confirmed" |"cancelled" |"completed" |"no_show";
 
 const STATUS_CONFIG: Record<BookingStatus, { label: string; color: string; icon: any }> = {
@@ -218,7 +219,7 @@ export default function MyBookings() {
  </div>
  {booking.pet_profiles && (
  <div className="flex items-center gap-1.5 text-muted-foreground">
- <span className="w-3.5 h-3.5" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="w-3.5 h-3.5" />
  {booking.pet_profiles.name}
  </div>
  )}

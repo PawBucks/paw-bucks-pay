@@ -13,6 +13,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Textarea } from'@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from'@/components/ui/select';
 import { toast } from'sonner';
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 
 type Merchant = {
  id: string;
@@ -270,7 +271,7 @@ export function MerchantsTab() {
  </TableCell>
  <TableCell>
  <span className="flex items-center gap-1 text-primary font-medium">
- <span className="w-3 h-3" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="w-3 h-3" />
  {(merchant.pawbucks_balance ?? 0).toLocaleString()}
  </span>
  </TableCell>

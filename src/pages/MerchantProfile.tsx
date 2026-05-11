@@ -32,6 +32,7 @@ import { Star, Store, Scissors, Home, Stethoscope, Footprints, Bone, ArrowLeft, 
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 
 import { Formatters } from "@/utils/formatters";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 const getBusinessIcon = (type: string) => {
  const lowerType = type.toLowerCase();
  if (lowerType.includes("store") || lowerType.includes("shop")) return Store;
@@ -324,7 +325,7 @@ const MerchantProfile = memo(() => {
  )}
  {merchant.accepts_pawbucks && (
  <Badge variant="outline" className="gap-1 text-xs bg-warning/10 text-warning border-warning/30">
- <span className="w-3 h-3" aria-hidden="true">🐾</span> PawBucks
+ <PawBucksLogo className="w-3 h-3" /> PawBucks
  </Badge>
  )}
  </div>
@@ -597,7 +598,7 @@ const MerchantProfile = memo(() => {
  </div>
  <div className="flex items-center justify-between p-3 bg-muted/40 rounded-lg">
  <div className="flex items-center gap-3">
- <span className="w-5 h-5 text-primary" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="w-5 h-5 text-primary" />
  <div>
  <span className="text-sm font-medium">PawBucks</span>
  <p className="text-xs text-muted-foreground">1000 PawBucks = $1.00</p>

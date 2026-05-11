@@ -7,6 +7,7 @@ import { Badge } from"@/components/ui/badge";
 import { Bird, Rabbit, ChevronRight } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { Tables } from"@/integrations/supabase/types";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 
 type PetProfile = Tables<"pet_profiles">;
 
@@ -21,7 +22,7 @@ const petTypeIcons: Record<string, React.ReactNode> = {
  cat: <span className="w-5 h-5" aria-hidden="true">🐈</span>,
  bird: <Bird className="w-5 h-5" />,
  rabbit: <Rabbit className="w-5 h-5" />,
- other: <span className="w-5 h-5" aria-hidden="true">🐾</span>,
+ other: <PawBucksLogo className="w-5 h-5" />,
 };
 
 export const PetProfileSelector = ({ userId, onSelect, onSkip }: PetProfileSelectorProps) => {
@@ -47,7 +48,7 @@ export const PetProfileSelector = ({ userId, onSelect, onSkip }: PetProfileSelec
  return (
  <div className="text-center py-6 space-y-4">
  <div className="w-16 h-16 mx-auto bg-muted rounded-full flex items-center justify-center">
- <span className="w-8 h-8 text-muted-foreground" aria-hidden="true">🐾</span>
+ <PawBucksLogo className="w-8 h-8 text-muted-foreground" />
  </div>
  <div>
  <p className="font-medium">No pet profiles found</p>
@@ -84,7 +85,7 @@ export const PetProfileSelector = ({ userId, onSelect, onSkip }: PetProfileSelec
  <Avatar className="h-14 w-14 border-2 border-muted">
  <AvatarImage src={pet.photo_url || undefined} alt={pet.name} />
  <AvatarFallback className="bg-primary/10">
- {petTypeIcons[pet.type] || <span className="w-6 h-6" aria-hidden="true">🐾</span>}
+ {petTypeIcons[pet.type] || <PawBucksLogo className="w-6 h-6" />}
  </AvatarFallback>
  </Avatar>
  
