@@ -23,6 +23,9 @@ interface Merchant {
  business_type: string;
  onboarding_complete: boolean;
  stripe_account_id: string | null;
+ address: string | null;
+ phone: string | null;
+ email: string | null;
 }
 
 function CheckoutForm({ 
@@ -227,7 +230,7 @@ export default function DirectCheckout() {
  try {
  const { data, error } = await supabase
  .from("merchants")
- .select("id, business_name, description, logo_url, business_type, onboarding_complete, stripe_account_id")
+  .select("id, business_name, description, logo_url, business_type, onboarding_complete, stripe_account_id, address, phone, email")
  .eq("id", merchantId)
  .single();
 
