@@ -158,8 +158,8 @@ const Discover = () => {
  const queryClient = useQueryClient();
  const { subscription } = useSubscription();
  const tier = useMemo(() => getSubscriptionTier(subscription.product_id, subscription.subscription_tier), [subscription.product_id, subscription.subscription_tier]);
- const [searchTerm, setSearchTerm] = usePersistentState<string>('discover-search',"");
- const debouncedSearch = useDebounce(searchTerm, 300);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const debouncedSearch = useDebounce(searchTerm, 300);
  const [selectedCategory, setSelectedCategory] = usePersistentState<string>('discover-category',"all");
  const [minRating, setMinRating] = usePersistentState<number>('discover-min-rating', 0);
  const [selectedPrices, setSelectedPrices] = usePersistentState<number[]>('discover-prices', []);
