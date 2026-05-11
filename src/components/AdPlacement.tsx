@@ -81,19 +81,20 @@ const AdPlacementComponent = ({ position ='top' }: AdPlacementProps) => {
  
  <div className="flex flex-col sm:flex-row items-start gap-4 mt-6">
  <div className="flex-1 space-y-2">
- <div className="flex items-center gap-2 flex-wrap">
- <h3 className="text-lg font-bold text-foreground">{currentMerchant.business_name}</h3>
- {hasVerifiedBadge && (
- <Badge className="bg-info/10 text-info border-info/20 gap-1">
- <BadgeCheck className="w-3 h-3" />
- Verified Pro
- </Badge>
- )}
- <Badge variant="secondary" className="text-xs">
- <span className="w-3 h-3 mr-1" aria-hidden="true">🏷️</span>
- {currentMerchant.cashback_rate}x points
- </Badge>
- </div>
+            <div className="space-y-1.5 sm:space-y-0 sm:flex sm:items-center sm:gap-2 sm:flex-wrap">
+              <h3 className="text-lg font-bold text-foreground">{currentMerchant.business_name}</h3>
+              <div className="flex items-center gap-2 flex-wrap">
+                {hasVerifiedBadge && (
+                  <Badge className="bg-info/10 text-info border-info/20 gap-1">
+                    <BadgeCheck className="w-3 h-3" />
+                    Verified Pro
+                  </Badge>
+                )}
+                <Badge variant="secondary" className="text-xs">
+                  {currentMerchant.cashback_rate}x points
+                </Badge>
+              </div>
+            </div>
  <p className="text-sm text-muted-foreground font-medium">{currentMerchant.business_type}</p>
  {currentMerchant.description && (
  <p className="text-sm text-muted-foreground line-clamp-2">{currentMerchant.description}</p>
