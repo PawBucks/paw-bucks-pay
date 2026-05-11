@@ -11,6 +11,7 @@ import { toast } from"sonner";
 import { format } from"date-fns";
 import type { EMRPatient, SOAPNote, Vaccination, PetAllergy, SurgicalNote, LabResult, ImagingRecord } from"./types";
 import { PatientEMRView } from"./PatientEMRView";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 
 interface EMRDashboardProps {
  vetId: string;

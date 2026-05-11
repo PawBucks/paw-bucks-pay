@@ -10,6 +10,7 @@ import {
 import { differenceInDays, format } from "date-fns";
 
 import { Formatters } from "@/utils/formatters";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 export type PawBucksSource ="earned" |"promotional" |"none";
 
 const PAWBUCKS_TO_USD = 0.001;

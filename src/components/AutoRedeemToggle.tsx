@@ -13,6 +13,7 @@ import { Separator } from"@/components/ui/separator";
 import { motion, AnimatePresence } from"framer-motion";
 
 import { Formatters } from "@/utils/formatters";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 interface AutoRedeemToggleProps {
  userId: string;
 }

@@ -13,6 +13,7 @@ import { Badge } from"@/components/ui/badge";
 import { Button } from"@/components/ui/button";
 import { Loader2, RefreshCw } from "lucide-react";
 import { format } from"date-fns";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 
 type CreditLog = {
  id: string;

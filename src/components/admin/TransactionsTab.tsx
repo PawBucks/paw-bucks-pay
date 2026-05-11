@@ -11,6 +11,7 @@ import { RefundPaymentDialog } from'@/components/shared/RefundPaymentDialog';
 import { format } from'date-fns';
 
 import { Formatters } from "@/utils/formatters";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 type Transaction = {
  id: string;
  amount: number;

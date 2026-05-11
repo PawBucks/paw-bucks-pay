@@ -24,6 +24,7 @@ import { LockedRewardsCard } from"@/components/wallet/LockedRewardsCard";
 import { useSpendablePawBucks } from"@/hooks/useSpendablePawBucks";
 import { PartnerReceiptDialog } from"@/components/receipts/PartnerReceiptDialog";
 import { NonPartnerReceiptDialog } from"@/components/receipts/NonPartnerReceiptDialog";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 
 type PawBucksWallet = {
  id: string;

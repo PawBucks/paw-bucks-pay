@@ -37,6 +37,7 @@ import { cn } from"@/lib/utils";
 import { GroomingReportCardView } from"@/components/scheduling/GroomingReportCardView";
 
 import { Formatters } from "@/utils/formatters";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 type BookingStatus ="pending" |"confirmed" |"cancelled" |"completed" |"no_show";
 
 const STATUS_CONFIG: Record<BookingStatus, { label: string; color: string; icon: any }> = {

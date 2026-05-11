@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from"@/
 import { toast } from"sonner";
 import { Upload, Loader2 } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 
 const CreatePetProfile = () => {
  const navigate = useNavigate();

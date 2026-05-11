@@ -36,6 +36,7 @@ import { merchantSubscriptionPlansService } from"@/services/api/merchantSubscrip
 import { buildAppUrl } from"@/lib/url";
 
 import { Formatters } from "@/utils/formatters";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 type Product = {
  id: string;
  name: string;

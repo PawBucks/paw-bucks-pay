@@ -22,6 +22,7 @@ import { getStripePromise } from"@/lib/stripe";
 import { buildAppUrl } from"@/lib/url";
 
 import { Formatters } from "@/utils/formatters";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 // Merchant PawBucks conversion: 1000 PawBucks = $1.00
 const PAWBUCKS_TO_USD = 0.001;
 

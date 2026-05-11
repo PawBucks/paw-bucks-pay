@@ -7,6 +7,7 @@ import { Badge } from"@/components/ui/badge";
 import { Bird, Rabbit, ChevronRight } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { Tables } from"@/integrations/supabase/types";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 
 type PetProfile = Tables<"pet_profiles">;
 

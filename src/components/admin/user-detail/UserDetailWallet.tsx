@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from"@/
 import { PAWBUCKS_CONVERSION } from"@/lib/constants";
 
 import { Formatters } from "@/utils/formatters";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 type WalletData = {
  balance: number;
  total_spent: number;

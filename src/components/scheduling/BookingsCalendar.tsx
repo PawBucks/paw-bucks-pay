@@ -26,6 +26,7 @@ import { supabase } from"@/integrations/supabase/client";
 import { toast } from"sonner";
 
 import { Formatters } from "@/utils/formatters";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 interface BookingsCalendarProps {
  bookings: BookingWithDetails[];
  merchantId?: string;

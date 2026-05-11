@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from'@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from'@/components/ui/select';
 import { toast } from'sonner';
 import { Search, Loader2, CheckCircle, User, Plus, Minus } from "lucide-react";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 
 type UserResult = {
  id: string;

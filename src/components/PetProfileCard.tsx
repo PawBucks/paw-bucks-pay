@@ -12,6 +12,7 @@ import { useNavigate } from"react-router-dom";
 import { EditPetProfileDialog } from"./EditPetProfileDialog";
 import { usePetPersonality } from"@/hooks/usePersonalityBadges";
 import { transformPersonalityName } from"@/components/personality-quiz/personalityNameUtils";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 
 type PetProfile = {
  id: string;

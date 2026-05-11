@@ -15,6 +15,7 @@ import { toast } from'sonner';
 import { UpgradeSubscriptionDialog } from'./UpgradeSubscriptionDialog';
 
 import { Formatters } from "@/utils/formatters";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 type User = {
  id: string;
  email: string;

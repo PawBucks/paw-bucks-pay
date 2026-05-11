@@ -8,6 +8,7 @@ import { Calculator, ArrowRightLeft } from "lucide-react";
 import { POINTS_MULTIPLIER, PAWBUCKS_CONVERSION } from'@/lib/constants';
 
 import { Formatters } from "@/utils/formatters";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 type SubscriptionTier ='free' |'pawpass' |'pawpass_plus';
 
 const TIER_CONFIG: Record<SubscriptionTier, { label: string; multiplier: number; color: string }> = {

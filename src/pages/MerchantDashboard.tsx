@@ -54,6 +54,7 @@ import { MerchantMessagesTab } from"@/components/merchant/MerchantMessagesTab";
 import { MerchantSaleConfirmationsTab } from"@/components/merchant/MerchantSaleConfirmationsTab";
 
 import { Formatters } from "@/utils/formatters";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 type Merchant = {
  id: string;
  business_name: string;

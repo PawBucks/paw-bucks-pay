@@ -9,6 +9,7 @@ import { Search } from "lucide-react";
 import { useDebounce } from"@/hooks/useDebounce";
 
 import { Formatters } from "@/utils/formatters";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 type Transaction = {
  id: string;
  amount: number;

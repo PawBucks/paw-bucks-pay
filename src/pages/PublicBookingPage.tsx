@@ -14,6 +14,7 @@ import { toast } from"sonner";
 import { useIsMobile } from"@/hooks/use-mobile";
 
 import { Formatters } from "@/utils/formatters";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 export default function PublicBookingPage() {
  const { slug } = useParams<{ slug: string }>();
  const navigate = useNavigate();

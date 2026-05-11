@@ -16,6 +16,7 @@ import { AllergiesTab } from"./AllergiesTab";
 import { SurgicalNotesTab } from"./SurgicalNotesTab";
 import { LabResultsTab } from"./LabResultsTab";
 import { ImagingTab } from"./ImagingTab";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 
 interface PatientEMRViewProps {
  patient: EMRPatient;

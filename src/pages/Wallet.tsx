@@ -31,6 +31,7 @@ import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { format } from"date-fns";
 import { Formatters } from"@/utils/formatters";
 import { useQueryClient } from"@tanstack/react-query";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 
 type WalletData = {
  balance: number;

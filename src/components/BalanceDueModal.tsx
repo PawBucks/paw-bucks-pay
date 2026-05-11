@@ -24,6 +24,7 @@ import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { toast } from"sonner";
 
 import { Formatters } from "@/utils/formatters";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 interface BalanceDueModalProps {
  open: boolean;
  onOpenChange: (open: boolean) => void;

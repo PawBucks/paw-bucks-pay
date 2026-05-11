@@ -19,6 +19,7 @@ import { toast } from'sonner';
 import { cn } from'@/lib/utils';
 
 import { Formatters } from "@/utils/formatters";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 // Helper to format date without timezone issues
 const formatDateLocal = (date: Date): string => {
  const year = date.getFullYear();

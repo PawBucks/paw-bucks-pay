@@ -19,6 +19,7 @@ import { cn } from"@/lib/utils";
 import { RefundPaymentDialog } from"@/components/shared/RefundPaymentDialog";
 
 import { Formatters } from "@/utils/formatters";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 interface Transaction {
  transaction_id: string;
  date: string;

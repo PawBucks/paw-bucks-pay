@@ -25,6 +25,7 @@ import { PawBucksInfoTooltip } from"@/components/PawBucksInfoTooltip";
 import { PawBucksSourceSelector, type PawBucksSource } from"@/components/checkout/PawBucksSourceSelector";
 
 import { Formatters } from "@/utils/formatters";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 // Pet Owner conversion rate: 1000 PawBucks = $1.00 (1 PawBuck = $0.001)
 const PAWBUCKS_TO_USD = 0.001;
 // Minimum Stripe charge for subscriptions

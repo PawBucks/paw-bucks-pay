@@ -10,6 +10,7 @@ import { PageLoader } from"@/components/PageLoader";
 import { ArrowUpRight, ArrowDownRight, ArrowLeft } from "lucide-react";
 import { Formatters } from"@/utils/formatters";
 import { format, parseISO } from"date-fns";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 
 type MerchantPawBucksWallet = {
  id: string;

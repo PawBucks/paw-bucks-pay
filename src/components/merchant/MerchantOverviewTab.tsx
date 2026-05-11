@@ -10,6 +10,7 @@ import { AccountTypeCard } from"./AccountTypeCard";
 import { PawBucksCapCard } from"./PawBucksCapCard";
 
 import { Formatters } from "@/utils/formatters";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 type Merchant = {
  id: string;
  business_name: string;

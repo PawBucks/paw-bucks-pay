@@ -9,6 +9,7 @@ import { Separator } from"@/components/ui/separator";
 import { Inbox, CheckCircle2, XCircle, Loader2, ExternalLink, Info } from "lucide-react";
 import { toast } from"sonner";
 import { getMerchantInvitations, respondToCampaignInvitation } from"@/services/api/brandCampaigns.service";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 
 interface MerchantBrandCampaignInboxProps {
  merchantId: string;

@@ -5,6 +5,7 @@ import { Badge } from"@/components/ui/badge";
 import { Separator } from"@/components/ui/separator";
 import { Loader2 } from "lucide-react";
 import {
+import { PawBucksLogo } from "@/components/PawBucksLogo";
  Dialog,
  DialogContent,
 } from"@/components/ui/dialog";

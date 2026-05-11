@@ -3,6 +3,7 @@ import { SEO } from "@/components/SEO";
 import { seoMeta } from "@/lib/seoMeta";
 import logo from "@/assets/logo.png";
 import founderPhoto from "@/assets/founder-jonathan.jpeg";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 
 const styles = `
 .pa-root {

@@ -8,6 +8,7 @@ import { Star, Gem, ChevronRight, BadgeCheck } from "lucide-react";
 import { PawBucksInfoTooltip } from"@/components/PawBucksInfoTooltip";
 
 import { Formatters } from "@/utils/formatters";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 type MerchantWithRating = {
  id: string;
  business_name: string;

@@ -1,4 +1,5 @@
 import React from "react";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 
 interface PawBucksLogoProps {
   className?: string;

@@ -32,6 +32,7 @@ import {
 import { PawBucksCapBreakdown } from"@/components/checkout/PawBucksCapBreakdown";
 
 import { Formatters } from "@/utils/formatters";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 // Pet Owner conversion rate: 1000 PawBucks = $1.00 (1 PawBuck = $0.001)
 const PAWBUCKS_TO_USD = 0.001;
 // Minimum transaction for Pet Fund credits (dynamic, but defaults)

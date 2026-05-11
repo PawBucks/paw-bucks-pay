@@ -14,6 +14,7 @@ import { PremiumAnalyticsDashboard } from"@/components/merchant/PremiumAnalytics
 import { CohortAnalysisReport } from"@/components/merchant/CohortAnalysisReport";
 import { KeywordPerformanceWidget } from"@/components/merchant/KeywordPerformanceWidget";
 import { DemandForecastingReport } from"@/components/merchant/DemandForecastingReport";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 
 export default function MerchantAnalytics() {
  const [selectedPayment, setSelectedPayment] = useState<'usd' |'pawbucks'>('usd');

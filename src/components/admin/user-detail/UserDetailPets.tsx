@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
 import { Skeleton } from"@/components/ui/skeleton";
 import { Weight } from "lucide-react";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 
 type Pet = {
  id: string;

@@ -8,6 +8,7 @@ import { Textarea } from'@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from'@/components/ui/card';
 import { toast } from'sonner';
 import { Search, Loader2, CheckCircle, User } from "lucide-react";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 
 type UserResult = {
  id: string;

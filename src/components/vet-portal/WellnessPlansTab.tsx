@@ -34,6 +34,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
 import { toast } from"sonner";
 import { Heart, Plus, Edit, Trash2, CheckCircle, Dog, Cat, Bird } from "lucide-react";
 import { format } from"date-fns";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 
 interface WellnessPlansTabProps {
  vetId: string;

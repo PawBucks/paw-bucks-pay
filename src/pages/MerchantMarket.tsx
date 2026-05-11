@@ -11,6 +11,7 @@ import { ConsultationScheduleDialog } from "@/components/merchant/ConsultationSc
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { ArrowLeft, Loader2, AlertTriangle, MapPin, Tag } from "lucide-react";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 
 type ServiceCategory = "visibility" | "analytics" | "growth" | "premium";
 

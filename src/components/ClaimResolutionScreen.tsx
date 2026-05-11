@@ -18,6 +18,7 @@ import { Elements, PaymentElement, useStripe, useElements } from"@stripe/react-s
 import { buildAppUrl } from"@/lib/url";
 
 import { Formatters } from "@/utils/formatters";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 interface ActionRequiredSlice {
  id: string;
  invoice_id: string;

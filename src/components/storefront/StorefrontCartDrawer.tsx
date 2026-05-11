@@ -8,6 +8,7 @@ import { Minus, Plus, Trash2, Loader2 } from "lucide-react";
 import { Formatters } from"@/utils/formatters";
 import { motion, AnimatePresence } from"framer-motion";
 import type { StorefrontCartItem } from"@/hooks/useStorefrontCart";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 
 const PAWBUCKS_TO_USD = 0.001; // 1000 PB = $1
 

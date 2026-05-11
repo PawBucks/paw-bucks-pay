@@ -27,6 +27,7 @@ import { DirectoryMerchantCard } from"@/components/directory/DirectoryMerchantCa
 import { MerchantMap } from"@/components/MerchantMap";
 import { Search, SlidersHorizontal, X, LayoutGrid, LayoutList, Map } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 
 type MerchantWithRating = {
  id: string;

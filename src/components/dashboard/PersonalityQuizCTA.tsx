@@ -4,6 +4,7 @@ import { GradientCard } from"@/components/ui/gradient-card";
 import { ArrowRight } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { useNavigate } from"react-router-dom";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 
 interface PersonalityQuizCTAProps {
  petId: string;

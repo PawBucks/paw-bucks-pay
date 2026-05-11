@@ -12,6 +12,7 @@ import { DashboardSkeleton } from"@/components/LoadingSkeleton";
 import { Check, Copy } from "lucide-react";
 import { toast } from"sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from"@/components/ui/dialog";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 
 type PartnerOffer = {
  id: string;

@@ -13,6 +13,7 @@ import { Skeleton } from"@/components/ui/skeleton";
 import { PhotoLightbox } from"@/components/PhotoLightbox";
 
 import { Formatters } from "@/utils/formatters";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 interface TimelineMoment {
  id: string;
  pet_id: string;

@@ -21,6 +21,7 @@ import { CartIcon } from"@/components/pet-store/CartIcon";
 import { CartDrawer, type CartCheckoutParams } from"@/components/pet-store/CartDrawer";
 import { usePromotionalItems } from"@/hooks/usePromotionalItems";
 import { useShoppingCart } from"@/hooks/useShoppingCart";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 
 export default function PetStoreProduct() {
  const { itemId } = useParams<{ itemId: string }>();

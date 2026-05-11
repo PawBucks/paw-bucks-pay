@@ -8,6 +8,7 @@ import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { OpenStatusBadge } from"@/components/merchant/OpenStatusBadge";
 
 import { Formatters } from "@/utils/formatters";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 type DirectoryMerchant = {
  id: string;
  business_name: string;

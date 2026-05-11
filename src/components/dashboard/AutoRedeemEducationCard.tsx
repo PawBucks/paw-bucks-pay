@@ -8,6 +8,7 @@ import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { motion, AnimatePresence } from"framer-motion";
 
 import { Formatters } from "@/utils/formatters";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 interface AutoRedeemEducationCardProps {
  userId: string;
  pawbucksBalance: number;

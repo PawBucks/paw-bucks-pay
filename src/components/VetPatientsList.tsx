@@ -9,6 +9,7 @@ import { Textarea } from"@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from"@/components/ui/select";
 import { Upload, Loader2 } from "lucide-react";
 import { toast } from"sonner";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 
 type Patient = {
  pet_id: string;

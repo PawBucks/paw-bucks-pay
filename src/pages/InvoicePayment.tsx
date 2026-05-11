@@ -25,6 +25,7 @@ import { type Invoice } from"@/services/api/invoicing.service";
 
 import { Formatters } from "@/utils/formatters";
 import pawbucksLogo from "@/assets/pawbucks-logo.png";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 const PAWBUCKS_TO_USD = 0.001; // 1 PawBuck = $0.001
 
 const InvoicePayment = () => {

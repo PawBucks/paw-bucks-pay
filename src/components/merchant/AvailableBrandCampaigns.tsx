@@ -11,6 +11,7 @@ import { Loader2, Search, Send, CheckCircle2, XCircle } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { toast } from"sonner";
 import {
+import { PawBucksLogo } from "@/components/PawBucksLogo";
  getAvailableBrandCampaigns,
  requestToJoinBrandCampaign,
  type AvailableBrandCampaign,
