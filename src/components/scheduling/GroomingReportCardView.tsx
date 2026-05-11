@@ -4,10 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
 import { Separator } from"@/components/ui/separator";
 import { Loader2 } from "lucide-react";
-import {
 import { PawBucksLogo } from "@/components/PawBucksLogo";
- Dialog,
- DialogContent,
+import {
+  Dialog,
+  DialogContent,
 } from"@/components/ui/dialog";
 
 interface GroomingReportCardViewProps {

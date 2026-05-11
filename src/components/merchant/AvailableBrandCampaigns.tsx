@@ -10,11 +10,11 @@ import { Input } from"@/components/ui/input";
 import { Loader2, Search, Send, CheckCircle2, XCircle } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { toast } from"sonner";
-import {
 import { PawBucksLogo } from "@/components/PawBucksLogo";
- getAvailableBrandCampaigns,
- requestToJoinBrandCampaign,
- type AvailableBrandCampaign,
+import {
+  getAvailableBrandCampaigns,
+  requestToJoinBrandCampaign,
+  type AvailableBrandCampaign,
 } from"@/services/api/brandCampaigns.service";
 
 interface AvailableBrandCampaignsProps {
