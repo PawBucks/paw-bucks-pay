@@ -519,7 +519,7 @@ const PriceOption = ({
       {label}
     </span>
     <span className={cn("font-display text-base font-bold leading-none", isPB ? "text-primary" : "text-foreground")}>
-      {isPB ? "🐾 " : ""}{amount}
+      {isPB ? <PawBucksLogo className="w-4 h-4 inline mr-1" /> : null}{amount}
     </span>
     <span className="text-[0.65rem] text-muted-foreground">{sub}</span>
   </button>
