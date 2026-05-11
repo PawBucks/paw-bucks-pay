@@ -93,8 +93,8 @@ const MerchantDirectory = () => {
  const { user, signOut } = useAuth();
  const navigate = useNavigate();
  const queryClient = useQueryClient();
- const [searchTerm, setSearchTerm] = usePersistentState<string>("directory-search","");
- const debouncedSearch = useDebounce(searchTerm, 300);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const debouncedSearch = useDebounce(searchTerm, 300);
  const [selectedCategory, setSelectedCategory] = usePersistentState<string>("directory-category","all");
  const [sortBy, setSortBy] = usePersistentState<string>("directory-sort","rating");
  const [pawbucksOnly, setPawbucksOnly] = usePersistentState<boolean>("directory-pawbucks", false);
