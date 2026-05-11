@@ -411,9 +411,26 @@ export default function DirectCheckout() {
     <CardTitle className="flex items-center justify-center lg:justify-start gap-2 lg:text-3xl">
  {merchant.business_name}
  </CardTitle>
-    <CardDescription className="lg:text-base lg:mt-2">
- {merchant.description || `Pay ${merchant.business_name}`}
- </CardDescription>
+    <div className="mt-3 space-y-1.5 text-sm text-muted-foreground">
+      {merchant.address && (
+        <div className="flex items-start justify-center lg:justify-start gap-2">
+          <span aria-hidden="true">📍</span>
+          <span className="break-words">{merchant.address}</span>
+        </div>
+      )}
+      {merchant.phone && (
+        <div className="flex items-center justify-center lg:justify-start gap-2">
+          <span aria-hidden="true">📞</span>
+          <a href={`tel:${merchant.phone}`} className="hover:text-foreground break-all">{merchant.phone}</a>
+        </div>
+      )}
+      {merchant.email && (
+        <div className="flex items-center justify-center lg:justify-start gap-2">
+          <span aria-hidden="true">✉️</span>
+          <a href={`mailto:${merchant.email}`} className="hover:text-foreground break-all">{merchant.email}</a>
+        </div>
+      )}
+    </div>
     <div className="hidden lg:flex items-center gap-2 mt-6 text-sm text-muted-foreground">
      <span className="h-4 w-4 text-primary" aria-hidden="true">🎁</span>
      <span>Earn PawBucks on every purchase</span>
