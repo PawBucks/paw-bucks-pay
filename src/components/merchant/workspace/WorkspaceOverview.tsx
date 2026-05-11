@@ -27,21 +27,10 @@ import {
 } from "lucide-react";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
 import { WorkspacePageHeader } from "./MerchantWorkspaceLayout";
-import { useState } from "react";
-
-const salesData = [
-  { month: "Dec 25", value: 1800 },
-  { month: "Jan 26", value: 4500 },
-  { month: "Feb 26", value: 5200 },
-  { month: "Mar 26", value: 5000 },
-  { month: "Apr 26", value: 4700 },
-  { month: "May 26", value: 310 },
-];
-
-const rewardsData = [
-  { name: "PawBucks Received", value: 1551.89 },
-  { name: "Rewards Given", value: 190.61 },
-];
+import { useEffect, useMemo, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { format, parseISO, startOfMonth, subMonths } from "date-fns";
 
 const recentTx = [
   { initials: "MG", name: "Markus Gerdemann", id: "IHD01082", date: "May 8", method: "USD", amount: "+$300.00", rewards: "$3.00" },
