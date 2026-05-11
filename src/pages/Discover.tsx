@@ -381,21 +381,48 @@ const Discover = () => {
  filtered = filtered.filter(m => m.distance !== undefined && m.distance <= maxDistance);
  }
 
+ // Tie-breaker: blends distance, rating, review volume, and availability
+ // Used to rank merchants within the same visibility tier when the primary sort ties.
+ const tieBreak = (a: typeof filtered[number], b: typeof filtered[number]) => {
+ if (a.distance !== undefined && b.distance !== undefined) {
+ const dDiff = a.distance - b.distance;
+ if (Math.abs(dDiff) > 0.1) return dDiff;
+ } else if (a.distance !== undefined) {
+ return -1;
+ } else if (b.distance !== undefined) {
+ return 1;
+ }
+ const rDiff = (b.avg_rating || 0) - (a.avg_rating || 0);
+ if (Math.abs(rDiff) > 0.05) return rDiff;
+ const vDiff = (b.review_count || 0) - (a.review_count || 0);
+ if (vDiff !== 0) return vDiff;
+ const availDiff = (b.accepts_pawbucks ? 1 : 0) - (a.accepts_pawbucks ? 1 : 0);
+ if (availDiff !== 0) return availDiff;
+ return a.business_name.localeCompare(b.business_name);
+ };
+
  // Sort function for organic/regular merchants
  const sortMerchants = (merchants: typeof filtered) => {
  return [...merchants].sort((a, b) => {
+ let primary = 0;
  switch (sortBy) {
  case'distance':
- if (a.distance === undefined && b.distance === undefined) return 0;
- if (a.distance === undefined) return 1;
- if (b.distance === undefined) return -1;
- return a.distance - b.distance;
+ if (a.distance === undefined && b.distance === undefined) primary = 0;
+ else if (a.distance === undefined) primary = 1;
+ else if (b.distance === undefined) primary = -1;
+ else primary = a.distance - b.distance;
+ break;
  case'name':
- return a.business_name.localeCompare(b.business_name);
+ primary = a.business_name.localeCompare(b.business_name);
+ break;
  case'rating':
  default:
- return b.avg_rating - a.avg_rating;
+ primary = (b.avg_rating || 0) - (a.avg_rating || 0);
+ break;
  }
+ const threshold = sortBy === 'rating' ? 0.05 : sortBy === 'distance' ? 0.1 : 0;
+ if (primary !== 0 && Math.abs(primary) > threshold) return primary;
+ return tieBreak(a, b);
  });
  };
 
