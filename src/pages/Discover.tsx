@@ -451,6 +451,17 @@ const Discover = () => {
  const interspersedResults = useMemo(() => {
  const combined = [...boostedMerchants, ...organicMerchants];
  if (sponsoredMerchants.length === 0) return combined;
+
+    // When the user is actively searching, group ALL paid-visibility merchants
+    // (Sponsored + Search Boosted) at the TOP of results, ahead of organic
+    // listings. Featured + Premium already render above this list.
+    if (debouncedSearch && debouncedSearch.trim().length > 0) {
+      return [
+        ...sponsoredMerchants.map((m) => ({ ...m, _isSponsored: true })),
+        ...boostedMerchants,
+        ...organicMerchants,
+      ];
+    }
  
  const result: (typeof combined[0] & { _isSponsored?: boolean })[] = [];
  let sponsoredIndex = 0;
@@ -470,7 +481,7 @@ const Discover = () => {
  sponsoredIndex++;
  }
  return result;
- }, [boostedMerchants, organicMerchants, sponsoredMerchants]);
+  }, [boostedMerchants, organicMerchants, sponsoredMerchants, debouncedSearch]);
 
  const deferredInterspersed = useDeferredValue(interspersedResults);
 
