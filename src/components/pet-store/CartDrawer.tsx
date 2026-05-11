@@ -7,6 +7,7 @@ import { Slider } from"@/components/ui/slider";
 import { Minus, Plus, Trash2, Loader2 } from "lucide-react";
 import { CartItem } from"@/hooks/useShoppingCart";
 import { Formatters } from"@/utils/formatters";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
 import { motion, AnimatePresence } from"framer-motion";
 
 const PAWBUCKS_TO_USD = 0.001;
