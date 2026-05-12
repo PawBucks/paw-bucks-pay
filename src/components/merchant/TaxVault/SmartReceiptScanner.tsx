@@ -251,7 +251,7 @@ export function SmartReceiptScanner({ open, onOpenChange, onDataExtracted }: Sma
  <div>
  <p className="text-muted-foreground text-xs">Category</p>
  <p className="font-medium capitalize">
- {extractedData.suggested_category.replace(/_/g,'')}
+ {extractedData.suggested_category.replace(/_/g, ' ')}
  </p>
  </div>
  </div>
