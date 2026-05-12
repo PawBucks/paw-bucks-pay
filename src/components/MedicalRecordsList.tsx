@@ -482,7 +482,7 @@ export const MedicalRecordsList = ({ petId, refreshTrigger }: MedicalRecordsList
  <TableCell className="font-medium">{record.title}</TableCell>
  <TableCell>
  <Badge variant="outline" className={recordTypeColors[record.record_type]}>
- {record.record_type.replace("_","")}
+ {record.record_type.replace(/_/g, " ")}
  </Badge>
  </TableCell>
  <TableCell className="text-right">{record.quantity ||"-"}</TableCell>

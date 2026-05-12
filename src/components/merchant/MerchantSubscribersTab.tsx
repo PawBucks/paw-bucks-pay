@@ -257,7 +257,7 @@ export function MerchantSubscribersTab({ merchantId }: MerchantSubscribersTabPro
  <Badge variant={statusVariant(sub.status)}>
  {sub.status ==="active" && sub.cancel_at_period_end
  ?"Canceling"
- : sub.status.replace("_","")}
+ : sub.status.replace(/_/g, " ")}
  </Badge>
  </TableCell>
  <TableCell className="text-sm">

@@ -235,7 +235,7 @@ export function GroomingPetSelector({
  </div>
  <div>
  <Label className="text-sm">Coat Type</Label>
- <p className="text-sm font-medium mt-1 capitalize">{groomingData.coatType?.replace("_","") ||"Not specified"}</p>
+ <p className="text-sm font-medium mt-1 capitalize">{groomingData.coatType?.replace(/_/g, " ") ||"Not specified"}</p>
  </div>
  </div>
 
