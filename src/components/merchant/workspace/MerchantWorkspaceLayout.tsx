@@ -149,11 +149,11 @@ export function MerchantWorkspaceLayout({
   const navigate = useNavigate();
   const { user } = useAuth();
   const [merchant, setMerchant] = useState<{
+    id: string;
     business_name: string | null;
     logo_url: string | null;
-    pawbucks_balance: number | null;
-    is_premium: boolean | null;
   } | null>(null);
+  const [walletBalance, setWalletBalance] = useState<number>(0);
 
   useEffect(() => {
     if (!user) return;
@@ -161,10 +161,17 @@ export function MerchantWorkspaceLayout({
     (async () => {
       const { data } = await supabase
         .from("merchants")
-        .select("business_name, logo_url, pawbucks_balance, is_premium")
+        .select("id, business_name, logo_url")
         .eq("user_id", user.id)
         .maybeSingle();
-      if (!cancelled && data) setMerchant(data as any);
+      if (cancelled || !data) return;
+      setMerchant(data as any);
+      const { data: wallet } = await supabase
+        .from("merchant_pawbucks_wallet")
+        .select("balance")
+        .eq("merchant_id", data.id)
+        .maybeSingle();
+      if (!cancelled && wallet) setWalletBalance(Number(wallet.balance) || 0);
     })();
     return () => {
       cancelled = true;
@@ -173,8 +180,8 @@ export function MerchantWorkspaceLayout({
 
   const businessName = businessNameProp ?? merchant?.business_name ?? "Your Business";
   const logoUrl = logoUrlProp ?? merchant?.logo_url ?? null;
-  const pawBucksBalance = pawBucksBalanceProp ?? Number(merchant?.pawbucks_balance ?? 0);
-  const isPremium = isPremiumProp ?? !!merchant?.is_premium;
+  const pawBucksBalance = pawBucksBalanceProp ?? walletBalance;
+  const isPremium = isPremiumProp ?? false;
   const initials = businessName
     .split(" ")
     .map((w) => w[0])
