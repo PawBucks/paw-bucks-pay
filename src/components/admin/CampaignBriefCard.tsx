@@ -28,7 +28,7 @@ function ChipList({ items }: { items?: string[] | null }) {
  return (
  <div className="flex flex-wrap gap-1 mt-1">
  {items.map((i) => (
- <Badge key={i} variant="secondary" className="capitalize text-xs">{i.replace(/_/g,"")}</Badge>
+ <Badge key={i} variant="secondary" className="capitalize text-xs">{i.replace(/_/g," ")}</Badge>
  ))}
  </div>
  );
@@ -67,7 +67,7 @@ export function CampaignBriefCard({ campaign }: Props) {
  </h4>
  <div className="grid sm:grid-cols-2 gap-4">
  <Field label="Campaign Name" value={campaign.name} />
- <Field label="Status" value={<Badge className="capitalize">{campaign.status.replace(/_/g,"")}</Badge>} />
+ <Field label="Status" value={<Badge className="capitalize">{campaign.status.replace(/_/g," ")}</Badge>} />
  <div className="sm:col-span-2">
  <Field label="Description / Goal" value={campaign.description} />
  </div>

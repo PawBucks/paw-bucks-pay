@@ -138,7 +138,7 @@ const OrganicMerchantCardComponent = ({
  <>
  {visible.map((cat, i) => (
  <span key={`${cat}-${i}`} className="text-xs text-muted-foreground capitalize">
- {(cat ||"").replace(/_/g,"")}
+ {(cat ||"").replace(/_/g," ")}
  {i < visible.length - 1 && <span className="text-muted-foreground/40 ml-1.5">·</span>}
  </span>
  ))}

@@ -169,7 +169,7 @@ export function ScarcitySignalWidget({ merchantId, businessType }: ScarcitySigna
  if (isLoading || !scarcityData || !scarcityData.slots.length) return null;
 
  const formatCategory = (type: string) =>
- type.charAt(0).toUpperCase() + type.slice(1).replace(/_/g,"") +"s";
+ type.charAt(0).toUpperCase() + type.slice(1).replace(/_/g," ") +"s";
 
  const getTimeSince = (dateStr: string) => {
  const diff = Date.now() - new Date(dateStr).getTime();

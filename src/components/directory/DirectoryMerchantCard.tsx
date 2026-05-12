@@ -154,7 +154,7 @@ const DirectoryMerchantCardComponent = ({
  {/* Row 3: Category + Status + Rewards */}
  <div className="flex items-center gap-1.5 mb-1.5 flex-wrap">
  <Badge variant="outline" className="text-[11px] capitalize h-5 px-1.5">
- {merchant.business_type.replace(/_/g,"")}
+ {merchant.business_type.replace(/_/g," ")}
  </Badge>
  <OpenStatusBadge merchantId={merchant.id} />
  <Badge className="bg-success/10 text-success border-success/20 text-[10px] h-5 px-1.5 gap-0.5">

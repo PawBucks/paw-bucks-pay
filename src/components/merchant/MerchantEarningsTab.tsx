@@ -210,13 +210,13 @@ export function MerchantEarningsTab() {
  <div key={dispute.id} className="flex items-center justify-between p-3 rounded-lg border bg-background">
  <div>
  <p className="font-medium">{formatCurrency(dispute.amount, dispute.currency)}</p>
- <p className="text-sm text-muted-foreground capitalize">{dispute.reason.replace(/_/g,"")}</p>
+ <p className="text-sm text-muted-foreground capitalize">{dispute.reason.replace(/_/g," ")}</p>
  <p className="text-xs text-muted-foreground">
  {format(new Date(dispute.created * 1000),"MMM d, yyyy")}
  </p>
  </div>
  <Badge variant="destructive" className="capitalize">
- {dispute.status.replace(/_/g,"")}
+ {dispute.status.replace(/_/g," ")}
  </Badge>
  </div>
  ))}

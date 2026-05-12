@@ -691,7 +691,7 @@ export function SponsoredPlacementDashboard({ merchantId, serviceType ='sponsore
  <p className="text-sm text-muted-foreground mb-2">Your Ranking</p>
  <p className="text-4xl font-bold text-primary">#{benchmark.ranking.position}</p>
  <p className="text-sm text-muted-foreground mt-1">
- of {benchmark.ranking.totalCompetitors} {benchmark.businessType.replace(/_/g,"")}s
+ of {benchmark.ranking.totalCompetitors} {benchmark.businessType.replace(/_/g," ")}s
  </p>
  </div>
  </CardContent>

@@ -59,7 +59,7 @@ export const SecurityMonitoringTab = () => {
  (payload) => {
  const newAlert = payload.new as SecurityAlert;
  setAlerts((prev) => [newAlert, ...prev]);
- toast.error(`New Security Alert: ${newAlert.alert_type.replace(/_/g,"")}`, {
+ toast.error(`New Security Alert: ${newAlert.alert_type.replace(/_/g," ")}`, {
  description: (newAlert.details as { description?: string })?.description,
  });
  }
@@ -269,7 +269,7 @@ export const SecurityMonitoringTab = () => {
  <div className="flex items-center gap-2">
  {getAlertTypeIcon(alert.alert_type)}
  <span className="capitalize">
- {alert.alert_type.replace(/_/g,"")}
+ {alert.alert_type.replace(/_/g," ")}
  </span>
  </div>
  </TableCell>

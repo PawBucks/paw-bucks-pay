@@ -445,7 +445,7 @@ const MerchantDirectory = () => {
  <span>{filteredMerchants.length} result{filteredMerchants.length !== 1 ?"s" :""}</span>
  {selectedCategory !=="all" && (
  <Badge variant="secondary" className="text-[10px] h-5 gap-1 cursor-pointer" onClick={() => setSelectedCategory("all")}>
- {selectedCategory.replace(/_/g,"")}
+ {selectedCategory.replace(/_/g," ")}
  <X className="w-2.5 h-2.5" />
  </Badge>
  )}
