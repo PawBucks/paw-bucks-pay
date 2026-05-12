@@ -31,7 +31,7 @@ export function NotificationSettingsCard({ settings, onToggle, saving, loading }
  };
 
  const formatLabel = (key: string) => {
- return key.replace(/_/g,'').replace(/\b\w/g, c => c.toUpperCase());
+ return key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
  };
 
  return (

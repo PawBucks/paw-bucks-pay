@@ -134,7 +134,7 @@ const PremiumAdCardComponent = ({
  {/* Meta */}
  <div className="flex items-center gap-1.5 mb-1.5 flex-wrap">
  <span className="text-xs text-muted-foreground capitalize">
- {merchant.business_type.replace(/_/g,"")}
+ {merchant.business_type.replace(/_/g," ")}
  </span>
  <span className="text-muted-foreground/40">·</span>
  <span className="text-xs text-success font-medium">

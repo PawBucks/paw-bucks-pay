@@ -487,7 +487,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
  <div className="flex items-center gap-2 mb-1 flex-wrap">
  <h4 className="font-semibold">{service.name}</h4>
  <Badge variant="secondary" className="text-xs capitalize">
- {service.category.replace(/_/g,"")}
+ {service.category.replace(/_/g," ")}
  </Badge>
  {(service as any).is_mobile_service && (
  <Badge variant="outline" className="text-xs gap-0.5">

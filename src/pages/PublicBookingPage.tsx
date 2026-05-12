@@ -132,7 +132,7 @@ export default function PublicBookingPage() {
  <h1 className="text-xl font-bold tracking-tight">{merchant.business_name}</h1>
  <div className="flex items-center gap-2 mt-1 flex-wrap">
  <Badge variant="secondary" className="capitalize text-xs">
- {merchant.business_type?.replace(/_/g,"")}
+ {merchant.business_type?.replace(/_/g," ")}
  </Badge>
  <OpenStatusBadge merchantId={merchant.id} />
  </div>
@@ -224,7 +224,7 @@ export default function PublicBookingPage() {
  <h1 className="text-3xl font-bold tracking-tight">{merchant.business_name}</h1>
  <div className="flex items-center gap-3 mt-2 flex-wrap">
  <Badge variant="secondary" className="capitalize">
- {merchant.business_type?.replace(/_/g,"")}
+ {merchant.business_type?.replace(/_/g," ")}
  </Badge>
  <OpenStatusBadge merchantId={merchant.id} />
  <PriceRangeDisplay priceRange={merchant.price_range} />

@@ -37,7 +37,7 @@ interface AttentionLadderFeedProps {
 }
 
 const generateHeadline = (merchant: MerchantWithRating, category: string): string => {
- const type = merchant.business_type.replace(/_/g,'');
+ const type = merchant.business_type.replace(/_/g, ' ');
  const capitalizedType = type.charAt(0).toUpperCase() + type.slice(1);
  const addressParts = merchant.address?.split(',').map(s => s.trim()) || [];
  const city = addressParts.length >= 2 ? addressParts[addressParts.length - 2] : null;

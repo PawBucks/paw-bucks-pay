@@ -580,7 +580,7 @@ function VetLoanDetailPanel({
  <div>
  <h2 className="text-2xl font-bold text-foreground">{loan.clinic_name || loan.name ||'Vet Clinic'}</h2>
  <div className="flex items-center gap-2 mt-1 flex-wrap">
- {loan.practice_type && <Badge variant="outline" className="capitalize">{loan.practice_type.replace(/_/g,'')}</Badge>}
+ {loan.practice_type && <Badge variant="outline" className="capitalize">{loan.practice_type.replace(/_/g, ' ')}</Badge>}
                                                 {loan.is_verified && <Badge variant="default" className="gap-1"><BadgeCheck className="w-3 h-3" /> Verified</Badge>}
  {loan.subscription_tier && <Badge variant="outline">Tier: {loan.subscription_tier}</Badge>}
  <StatusBadge status={loan.status} />
@@ -1076,7 +1076,7 @@ export function FinancingTab() {
  <span className="text-muted-foreground">{loan.term_months}mo</span>
  </div>
  <p className="text-xs text-muted-foreground mt-1">
- {loan.practice_type?.replace(/_/g,'') ||'Veterinary Clinic'}
+ {loan.practice_type?.replace(/_/g, ' ') ||'Veterinary Clinic'}
  </p>
  </button>
  ))}

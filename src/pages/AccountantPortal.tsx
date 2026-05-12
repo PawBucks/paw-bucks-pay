@@ -78,7 +78,7 @@ const TAX_CATEGORIES = [
 ];
 
 const formatCategory = (category: string) => {
- return category.replace(/_/g,'').replace(/\b\w/g, l => l.toUpperCase());
+ return category.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 };
 
 // Fallback IRS rates if database fetch fails (updated annually)

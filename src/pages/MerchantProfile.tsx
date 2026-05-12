@@ -310,7 +310,7 @@ const MerchantProfile = memo(() => {
  {/* Category + Price */}
  <div className="flex items-center gap-2 mt-1 flex-wrap">
  <span className="text-sm text-muted-foreground capitalize">
- {merchant.business_type.replace(/_/g,"")}
+ {merchant.business_type.replace(/_/g," ")}
  </span>
  <PriceRangeDisplay priceRange={merchant.price_range} />
  </div>

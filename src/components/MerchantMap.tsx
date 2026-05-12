@@ -251,7 +251,7 @@ export const MerchantMap = ({ merchants, onMerchantClick, featuredIds, premiumId
  el.appendChild(markerWrapper);
 
  const safeName = escapeHtml(merchant.business_name);
- const safeType = escapeHtml(merchant.business_type.replace(/_/g,''));
+ const safeType = escapeHtml(merchant.business_type.replace(/_/g, ' '));
  const safeAddress = merchant.address ? escapeHtml(merchant.address) :'';
 
  const tierLabel = tier ==='featured' ?'<span style="color:#d97706;font-weight:600;font-size:10px;">★ Featured Partner</span><br/>' :

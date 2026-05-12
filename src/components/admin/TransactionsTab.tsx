@@ -50,7 +50,7 @@ const formatPaymentMethod = (method: string | null): string => {
  zelle:'Zelle',
  other:'Other',
  };
- return map[method] || method.replace(/_/g,'').replace(/\b\w/g, c => c.toUpperCase());
+ return map[method] || method.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 };
 
 const DetailRow = ({ label, value, icon: Icon, className ='' }: { label: string; value: React.ReactNode; icon?: any; className?: string }) => (
