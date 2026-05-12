@@ -161,6 +161,15 @@
     --chart-6: 210 75% 60%;
     --chart-7: 45 93% 55%;
     --chart-8: 290 55% 58%;
+
+    --sidebar-background: 220 18% 10%;
+    --sidebar-foreground: 210 15% 93%;
+    --sidebar-primary: 184 75% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 16% 16%;
+    --sidebar-accent-foreground: 210 15% 93%;
+    --sidebar-border: 220 16% 18%;
+    --sidebar-ring: 184 75% 50%;
   }
 }
 
