@@ -85,6 +85,16 @@
     /* Mobile Layout Variables */
     --bottom-nav-height: 4rem;
     --header-height: 4rem;
+
+    /* Sidebar tokens (shadcn) */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 210 25% 12%;
+    --sidebar-primary: 184 82% 39%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 15% 96%;
+    --sidebar-accent-foreground: 210 25% 12%;
+    --sidebar-border: 210 18% 91%;
+    --sidebar-ring: 184 82% 39%;
   }
 
   .dark {
@@ -151,6 +161,15 @@
     --chart-6: 210 75% 60%;
     --chart-7: 45 93% 55%;
     --chart-8: 290 55% 58%;
+
+    --sidebar-background: 220 18% 10%;
+    --sidebar-foreground: 210 15% 93%;
+    --sidebar-primary: 184 75% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 16% 16%;
+    --sidebar-accent-foreground: 210 15% 93%;
+    --sidebar-border: 220 16% 18%;
+    --sidebar-ring: 184 75% 50%;
   }
 }
 
