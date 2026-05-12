@@ -132,7 +132,7 @@ export function CampaignBriefCard({ campaign }: Props) {
  <Field label="Per Check-in" value={`${campaign.pawbucks_per_checkin.toLocaleString()} PB ($${usdPerCheckin})`} />
  <Field label="Estimated Check-ins" value={estimatedCheckins.toLocaleString()} />
  <Field label="Daily Spend Cap" value={campaign.daily_spend_cap ? `$${campaign.daily_spend_cap.toLocaleString()}` :"No cap"} />
- <Field label="Funding Method" value={<Badge variant="outline" className="capitalize">{(campaign.funding_method ||"self_serve").replace("_", " ")}</Badge>} />
+ <Field label="Funding Method" value={<Badge variant="outline" className="capitalize">{(campaign.funding_method ||"self_serve").replace(/_/g, " ")}</Badge>} />
  </div>
  </section>
 

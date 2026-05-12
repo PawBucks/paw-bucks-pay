@@ -363,7 +363,7 @@ export const SymptomTriageForm = ({ petId, onComplete }: SymptomTriageFormProps)
  {symptomLibrary?.map((category) => (
  <div key={category.category}>
  <h3 className="font-medium capitalize mb-2">
- {category.category.replace("_", " ")}
+ {category.category.replace(/_/g, " ")}
  </h3>
  <div className="flex flex-wrap gap-2">
  {category.symptoms.map((symptom) => (

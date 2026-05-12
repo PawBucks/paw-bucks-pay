@@ -292,12 +292,12 @@ export function ClaimRecoveryDashboard({ vetId }: ClaimRecoveryDashboardProps) {
  <Badge
  className={`${getStatusColor(slice.recovery_status)} text-white text-xs`}
  >
- {slice.recovery_status.replace("_", " ")}
+ {slice.recovery_status.replace(/_/g, " ")}
  </Badge>
  </div>
  {slice.recovery_option && (
  <p className="text-xs text-muted-foreground">
- Option: {slice.recovery_option.replace("_", " ")}
+ Option: {slice.recovery_option.replace(/_/g, " ")}
  </p>
  )}
  </div>

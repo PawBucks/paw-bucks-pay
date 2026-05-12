@@ -261,7 +261,7 @@ export default function MerchantStoreRewards() {
                       className="flex items-center justify-between py-2 border-b last:border-0"
                     >
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium capitalize">{a.type.replace("_", " ")}</p>
+                        <p className="text-sm font-medium capitalize">{a.type.replace(/_/g, " ")}</p>
                         <p className="text-xs text-muted-foreground truncate">
                           {a.description ?? "—"}
                         </p>

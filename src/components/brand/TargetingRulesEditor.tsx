@@ -180,7 +180,7 @@ export function TargetingRulesEditor({ value, onChange }: TargetingRulesEditorPr
  variant={active ?"default" :"outline"}
  className="cursor-pointer capitalize"
  onClick={() => toggleArray("subscription_tiers", t)}
- >{t.replace("_", " ")}</Badge>
+ >{t.replace(/_/g, " ")}</Badge>
  );
  })}
  </div>

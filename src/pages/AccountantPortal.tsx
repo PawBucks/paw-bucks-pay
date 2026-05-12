@@ -644,7 +644,7 @@ export default function AccountantPortal() {
  <TableRow key={entry.id}>
  <TableCell>{formatLocalDate(entry.trip_date,'MMM d, yyyy')}</TableCell>
  <TableCell>
- <Badge variant="outline">{entry.trip_type.replace('_', ' ')}</Badge>
+ <Badge variant="outline">{entry.trip_type.replace(/_/g, ' ')}</Badge>
  </TableCell>
  <TableCell>{entry.destination ||'-'}</TableCell>
  <TableCell className="max-w-xs truncate">{entry.description ||'-'}</TableCell>

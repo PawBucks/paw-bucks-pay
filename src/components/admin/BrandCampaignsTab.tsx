@@ -242,7 +242,7 @@ export const BrandCampaignsTab = () => {
  <p className="text-muted-foreground">by {brandName}</p>
  </div>
  <Badge className={statusColors[selectedCampaign.status] ||""}>
- {selectedCampaign.status.replace("_", " ")}
+ {selectedCampaign.status.replace(/_/g, " ")}
  </Badge>
  </div>
 
@@ -617,7 +617,7 @@ export const BrandCampaignsTab = () => {
  <div className="flex items-center gap-2 mb-1">
  <h4 className="font-bold">{campaign.name}</h4>
  <Badge className={statusColors[campaign.status] ||""}>
- {campaign.status.replace("_", " ")}
+ {campaign.status.replace(/_/g, " ")}
  </Badge>
  </div>
  <p className="text-sm text-muted-foreground">

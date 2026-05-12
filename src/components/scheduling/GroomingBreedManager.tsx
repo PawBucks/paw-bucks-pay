@@ -219,7 +219,7 @@ export function GroomingBreedManager({ merchantId }: GroomingBreedManagerProps) 
  {bp.size_category}
  </Badge>
  <Badge variant="secondary" className="text-xs capitalize">
- {bp.coat_type.replace("_", " ")}
+ {bp.coat_type.replace(/_/g, " ")}
  </Badge>
  </div>
  </div>
