@@ -285,7 +285,7 @@ export function InvoicePreview({
  {payments.map((payment) => (
  <tr key={payment.id} className="border-t">
  <td className="p-2">{format(parseISO(payment.payment_date),"MMM d, yyyy")}</td>
- <td className="p-2 capitalize">{payment.payment_method.replace('_','')}</td>
+ <td className="p-2 capitalize">{payment.payment_method.replace('_', ' ')}</td>
  <td className="p-2">{payment.reference_number ||'-'}</td>
  <td className="p-2 text-right font-medium text-success">
  {Formatters.currency(Number(payment.amount))}

@@ -187,11 +187,11 @@ export function AdminInvoiceList({ invoices, loading, onCreateNew, onView, onEdi
  </div>
  </TableCell>
  <TableCell>
- <span className="text-xs capitalize">{inv.invoice_type?.replace("_","") ||"Ad-hoc"}</span>
+ <span className="text-xs capitalize">{inv.invoice_type?.replace("_", " ") ||"Ad-hoc"}</span>
  </TableCell>
  <TableCell>
  <Badge className={`${statusColors[inv.status] ||""} capitalize text-xs`}>
- {inv.status.replace("_","")}
+ {inv.status.replace("_", " ")}
  </Badge>
  </TableCell>
  <TableCell className="text-right font-medium">{Formatters.currency(Number(inv.total))}</TableCell>

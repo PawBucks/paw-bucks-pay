@@ -106,7 +106,7 @@ export default function AdminInvoicePayment() {
  <h1 className="text-2xl font-bold">{invoice.invoice_number}</h1>
  {invoice.title && <p className="text-muted-foreground">{invoice.title}</p>}
  <Badge className={`capitalize ${isPaid ?"bg-success/15 text-success" :"bg-info/15 text-info"}`}>
- {isPaid ?"Paid" : invoice.status.replace("_","")}
+ {isPaid ?"Paid" : invoice.status.replace("_", " ")}
  </Badge>
  </div>
 

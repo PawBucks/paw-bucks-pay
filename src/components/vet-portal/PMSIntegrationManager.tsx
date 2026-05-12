@@ -353,7 +353,7 @@ export function PMSIntegrationManager({ vetId }: PMSIntegrationManagerProps) {
  <h4 className="font-medium">{integration.provider_name}</h4>
  <p className="text-xs text-muted-foreground flex items-center gap-1">
  {getSyncDirectionIcon(integration.sync_direction)}
- {integration.sync_direction.replace("_","")}
+ {integration.sync_direction.replace("_", " ")}
  </p>
  </div>
  </div>

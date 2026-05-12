@@ -141,7 +141,7 @@ export function AdminInvoiceDetail({ invoice, onBack, onEdit, onRefresh }: Props
  <h2 className="text-lg font-semibold">{invoice.invoice_number}</h2>
  <p className="text-sm text-muted-foreground">{invoice.title ||"Admin Invoice"}</p>
  </div>
- <Badge className={`${statusColors[invoice.status]} capitalize`}>{invoice.status.replace("_","")}</Badge>
+ <Badge className={`${statusColors[invoice.status]} capitalize`}>{invoice.status.replace("_", " ")}</Badge>
  </div>
  <div className="flex gap-2">
  {!["paid","void"].includes(invoice.status) && (
@@ -178,7 +178,7 @@ export function AdminInvoiceDetail({ invoice, onBack, onEdit, onRefresh }: Props
  </div>
  <div className="text-right">
  <p className="text-muted-foreground">Invoice Type</p>
- <p className="font-medium capitalize">{invoice.invoice_type?.replace("_","") ||"Ad-hoc"}</p>
+ <p className="font-medium capitalize">{invoice.invoice_type?.replace("_", " ") ||"Ad-hoc"}</p>
  <p className="text-muted-foreground mt-2">Issue Date</p>
  <p>{format(new Date(invoice.issue_date +"T00:00:00"),"MMM d, yyyy")}</p>
  <p className="text-muted-foreground mt-2">Due Date</p>
@@ -265,7 +265,7 @@ export function AdminInvoiceDetail({ invoice, onBack, onEdit, onRefresh }: Props
  <div key={p.id} className="p-3 rounded-md bg-muted text-sm">
  <div className="flex justify-between items-center">
  <span className="font-medium text-success">{Formatters.currency(Number(p.amount))}</span>
- <Badge variant="outline" className="text-xs capitalize">{p.payment_method.replace("_","")}</Badge>
+ <Badge variant="outline" className="text-xs capitalize">{p.payment_method.replace("_", " ")}</Badge>
  </div>
  <p className="text-xs text-muted-foreground mt-1">{format(new Date(p.paid_at),"MMM d, yyyy h:mm a")}</p>
  {p.reference_number && <p className="text-xs text-muted-foreground">Ref: {p.reference_number}</p>}

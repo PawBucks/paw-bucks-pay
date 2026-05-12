@@ -206,7 +206,7 @@ const Profile = () => {
           <div className="flex-1">
            <Label className="text-xs text-muted-foreground">Account Type</Label>
            <p className="text-sm font-medium capitalize">
-            {profile.user_type.replace("_","")}
+            {profile.user_type.replace("_", " ")}
            </p>
           </div>
          </div>

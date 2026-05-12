@@ -54,7 +54,7 @@ const MerchantCardComponent = ({ merchant, distance, onPayNow }: MerchantCardPro
  <h3 className="font-bold text-base sm:text-lg mb-1 truncate">{merchant.business_name}</h3>
  <div className="flex flex-wrap gap-1">
  <Badge variant="outline" className={`${getTypeColor(merchant.business_type)} text-xs`}>
- {merchant.business_type.replace("_","").toUpperCase()}
+ {merchant.business_type.replace("_", " ").toUpperCase()}
  </Badge>
  <WelcomeCreditBadge size="sm" />
  </div>
