@@ -386,7 +386,9 @@ const Storefront = memo(() => {
       </div>
 
       {merchantDescription && (
-       <p className="text-base text-muted-foreground max-w-xl leading-relaxed">{merchantDescription}</p>
+       <p className="text-[15px] text-muted-foreground max-w-xl leading-relaxed whitespace-pre-line">
+        {merchantDescription}
+       </p>
       )}
 
       <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
