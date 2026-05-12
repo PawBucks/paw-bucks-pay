@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   Sidebar,
@@ -38,6 +38,7 @@ import {
 } from "lucide-react";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 type NavItem = { id: string; label: string; icon: typeof LayoutGrid; to: string };
 type NavSection = { section: string; items: NavItem[] };
@@ -134,16 +135,46 @@ interface MerchantWorkspaceLayoutProps {
   businessName?: string;
   pawBucksBalance?: number;
   isPremium?: boolean;
+  logoUrl?: string | null;
   children: ReactNode;
 }
 
 export function MerchantWorkspaceLayout({
-  businessName = "iHikeDogs LLC",
-  pawBucksBalance = 1551890,
-  isPremium = true,
+  businessName: businessNameProp,
+  pawBucksBalance: pawBucksBalanceProp,
+  isPremium: isPremiumProp,
+  logoUrl: logoUrlProp,
   children,
 }: MerchantWorkspaceLayoutProps) {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [merchant, setMerchant] = useState<{
+    business_name: string | null;
+    logo_url: string | null;
+    pawbucks_balance: number | null;
+    is_premium: boolean | null;
+  } | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("merchants")
+        .select("business_name, logo_url, pawbucks_balance, is_premium")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (!cancelled && data) setMerchant(data as any);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
+
+  const businessName = businessNameProp ?? merchant?.business_name ?? "Your Business";
+  const logoUrl = logoUrlProp ?? merchant?.logo_url ?? null;
+  const pawBucksBalance = pawBucksBalanceProp ?? Number(merchant?.pawbucks_balance ?? 0);
+  const isPremium = isPremiumProp ?? !!merchant?.is_premium;
   const initials = businessName
     .split(" ")
     .map((w) => w[0])
@@ -160,9 +191,17 @@ export function MerchantWorkspaceLayout({
           {/* Topbar */}
           <header className="h-14 flex items-center gap-3 border-b bg-card px-3 md:px-4 sticky top-0 z-30">
             <SidebarTrigger />
-            <div className="h-8 w-8 rounded-md bg-gradient-to-br from-primary to-accent text-primary-foreground flex items-center justify-center text-xs font-bold">
-              {initials}
-            </div>
+            {logoUrl ? (
+              <img
+                src={logoUrl}
+                alt={`${businessName} logo`}
+                className="h-8 w-8 rounded-md object-cover border border-border bg-card"
+              />
+            ) : (
+              <div className="h-8 w-8 rounded-md bg-gradient-to-br from-primary to-accent text-primary-foreground flex items-center justify-center text-xs font-bold">
+                {initials}
+              </div>
+            )}
             <div className="hidden md:block h-5 w-px bg-border" />
             <span className="hidden md:inline text-[10px] font-semibold tracking-[0.1em] uppercase text-muted-foreground">
               Merchant Workspace
