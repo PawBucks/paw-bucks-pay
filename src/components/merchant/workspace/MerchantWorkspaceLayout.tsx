@@ -39,6 +39,7 @@ import {
 import { PawBucksLogo } from "@/components/PawBucksLogo";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { useMerchantPawBucksRealtime } from "@/hooks/usePawBucksRealtime";
 
 type NavItem = { id: string; label: string; icon: typeof LayoutGrid; to: string };
 type NavSection = { section: string; items: NavItem[] };
@@ -166,17 +167,73 @@ export function MerchantWorkspaceLayout({
         .maybeSingle();
       if (cancelled || !data) return;
       setMerchant(data as any);
-      const { data: wallet } = await supabase
-        .from("merchant_pawbucks_wallet")
-        .select("balance")
-        .eq("merchant_id", data.id)
-        .maybeSingle();
-      if (!cancelled && wallet) setWalletBalance(Number(wallet.balance) || 0);
     })();
     return () => {
       cancelled = true;
     };
   }, [user]);
+
+  // Fetch wallet balance + re-fetch on realtime events
+  useEffect(() => {
+    if (!merchant?.id) return;
+    let cancelled = false;
+    const fetchBalance = async () => {
+      const { data: wallet } = await supabase
+        .from("merchant_pawbucks_wallet")
+        .select("balance")
+        .eq("merchant_id", merchant.id)
+        .maybeSingle();
+      if (!cancelled) setWalletBalance(Number(wallet?.balance) || 0);
+    };
+    fetchBalance();
+
+    const channel = supabase
+      .channel(`workspace-merchant-wallet-${merchant.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "merchant_pawbucks_wallet",
+          filter: `merchant_id=eq.${merchant.id}`,
+        },
+        () => fetchBalance()
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "merchant_pawbucks_activity",
+          filter: `merchant_id=eq.${merchant.id}`,
+        },
+        () => fetchBalance()
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "transactions",
+          filter: `merchant_id=eq.${merchant.id}`,
+        },
+        () => fetchBalance()
+      )
+      .subscribe();
+
+    // Refresh when tab regains focus
+    const onFocus = () => fetchBalance();
+    window.addEventListener("focus", onFocus);
+
+    return () => {
+      cancelled = true;
+      supabase.removeChannel(channel);
+      window.removeEventListener("focus", onFocus);
+    };
+  }, [merchant?.id]);
+
+  // Also invalidate any react-query caches for merchant wallet
+  useMerchantPawBucksRealtime(merchant?.id);
 
   const businessName = businessNameProp ?? merchant?.business_name ?? "Your Business";
   const logoUrl = logoUrlProp ?? merchant?.logo_url ?? null;
