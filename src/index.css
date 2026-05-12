@@ -85,6 +85,16 @@
     /* Mobile Layout Variables */
     --bottom-nav-height: 4rem;
     --header-height: 4rem;
+
+    /* Sidebar tokens (shadcn) */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 210 25% 12%;
+    --sidebar-primary: 184 82% 39%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 15% 96%;
+    --sidebar-accent-foreground: 210 25% 12%;
+    --sidebar-border: 210 18% 91%;
+    --sidebar-ring: 184 82% 39%;
   }
 
   .dark {
