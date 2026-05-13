@@ -40,6 +40,7 @@ import {
   Calendar,
   Megaphone,
   Store,
+  Sparkles,
 } from "lucide-react";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
 import { useAuth } from "@/hooks/useAuth";
