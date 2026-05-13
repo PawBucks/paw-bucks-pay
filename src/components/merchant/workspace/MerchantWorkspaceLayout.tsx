@@ -99,8 +99,9 @@ const NAV: NavSection[] = [
 ];
 
 function WorkspaceSidebar() {
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
   const { signOut } = useAuth();
+  const fullPath = pathname + search;
   return (
     <Sidebar collapsible="icon">
       <SidebarContent>
@@ -112,7 +113,7 @@ function WorkspaceSidebar() {
             <SidebarGroupContent>
               <SidebarMenu>
                 {group.items.map((item) => {
-                  const active = pathname === item.to;
+                  const active = fullPath === item.to || pathname === item.to;
                   const Icon = item.icon;
                   return (
                     <SidebarMenuItem key={item.id}>
