@@ -374,19 +374,31 @@ const MerchantProfile = memo(() => {
  />
  </div>
 
- {/* ═══ Primary CTA ═══ */}
- <div className="flex gap-2 mt-2">
- <Button size="lg" className="flex-1 h-12 text-base font-semibold" onClick={handleOpenPaymentDialog}>
- <span className="w-5 h-5 mr-2" aria-hidden="true">🛍️</span>
- Pay & Earn PawBucks
- </Button>
- {user && !userHasReviewed && (
- <Button variant="outline" size="lg" className="h-12" onClick={handleOpenReviewDialog}>
- <span className="w-5 h-5 mr-1" aria-hidden="true">📸</span>
- Review
- </Button>
- )}
- </div>
+  {/* ═══ Primary CTA ═══ */}
+  <div className="flex gap-2 mt-2">
+  {merchant.accepts_pawbucks ? (
+  <Button size="lg" className="flex-1 h-12 text-base font-semibold" onClick={handleOpenPaymentDialog}>
+  <span className="w-5 h-5 mr-2" aria-hidden="true">🛍️</span>
+  Pay & Earn PawBucks
+  </Button>
+  ) : (
+  <Button size="lg" className="flex-1 h-12 text-base font-semibold" disabled variant="secondary">
+  <span className="w-5 h-5 mr-2" aria-hidden="true">🚫</span>
+  Doesn't Accept PawBucks
+  </Button>
+  )}
+  {user && !userHasReviewed && (
+  <Button variant="outline" size="lg" className="h-12" onClick={handleOpenReviewDialog}>
+  <span className="w-5 h-5 mr-1" aria-hidden="true">📸</span>
+  Review
+  </Button>
+  )}
+  </div>
+  {!merchant.accepts_pawbucks && (
+  <p className="text-xs text-muted-foreground mt-2 px-1">
+  This merchant hasn't enabled PawBucks payments yet. You can still visit their storefront or contact them directly.
+  </p>
+  )}
  {merchant?.storefront_slug && (
  <Button variant="outline" className="w-full mt-2" asChild>
  <Link to={`/storefront/${merchant.storefront_slug}`}>
