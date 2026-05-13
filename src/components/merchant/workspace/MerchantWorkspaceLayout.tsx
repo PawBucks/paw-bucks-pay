@@ -82,6 +82,7 @@ const NAV: NavSection[] = [
       { id: "subscription-plans", label: "Subscription Plans", icon: Users, to: "/merchant/subscription-plans" },
       { id: "marketplace", label: "Services Marketplace", icon: Star, to: "/merchant/market" },
       { id: "pos", label: "POS Integration", icon: Store, to: "/merchant/pos-integration" },
+      { id: "loyalty", label: "Loyalty Program", icon: Stamp, to: "/merchant-dashboard?tab=loyalty" },
     ],
   },
   {
