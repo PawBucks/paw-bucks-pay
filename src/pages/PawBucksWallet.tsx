@@ -21,6 +21,7 @@ import { Formatters } from"@/utils/formatters";
 import { PAWBUCKS_CONVERSION, ROUTES, CASHBACK_RATES, getSubscriptionTier } from"@/lib/constants";
 import { Progress } from"@/components/ui/progress";
 import { LockedRewardsCard } from"@/components/wallet/LockedRewardsCard";
+import { RefundStatusTimeline } from"@/components/wallet/RefundStatusTimeline";
 import { useSpendablePawBucks } from"@/hooks/useSpendablePawBucks";
 import { PartnerReceiptDialog } from"@/components/receipts/PartnerReceiptDialog";
 import { NonPartnerReceiptDialog } from"@/components/receipts/NonPartnerReceiptDialog";
@@ -387,6 +388,14 @@ const PawBucksWallet = () => {
  <LockedRewardsCard userId={effectiveWalletUserId} />
  </div>
  )}
+
+        {/* Refund Status Timeline - shows recent refund credits with confirmed balance */}
+        {effectiveWalletUserId && (
+          <RefundStatusTimeline
+            userId={effectiveWalletUserId}
+            currentBalance={balance}
+          />
+        )}
 
  {/* Main Wallet Card */}
  <GradientCard gradient className="mb-8">
