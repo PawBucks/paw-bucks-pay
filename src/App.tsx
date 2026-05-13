@@ -48,6 +48,16 @@ const MerchantOnboarding = lazyWithRetry(() => import("./pages/MerchantOnboardin
 const MerchantDashboard = lazyWithRetry(() => import("./pages/MerchantDashboard"),"MerchantDashboard");
 const MerchantWorkspace = lazyWithRetry(() => import("./pages/MerchantWorkspace"),"MerchantWorkspace");
 const MerchantSupport = lazyWithRetry(() => import("./pages/MerchantSupport"),"MerchantSupport");
+const MerchantSaleConfirmations = lazyWithRetry(() => import("./pages/MerchantSaleConfirmations"),"MerchantSaleConfirmations");
+const MerchantCheckIns = lazyWithRetry(() => import("./pages/MerchantCheckIns"),"MerchantCheckIns");
+const MerchantSubscribers = lazyWithRetry(() => import("./pages/MerchantSubscribers"),"MerchantSubscribers");
+const MerchantSalesReport = lazyWithRetry(() => import("./pages/MerchantSalesReport"),"MerchantSalesReport");
+const MerchantDailyHistory = lazyWithRetry(() => import("./pages/MerchantDailyHistory"),"MerchantDailyHistory");
+const MerchantLoyalty = lazyWithRetry(() => import("./pages/MerchantLoyalty"),"MerchantLoyalty");
+const MerchantPromotions = lazyWithRetry(() => import("./pages/MerchantPromotions"),"MerchantPromotions");
+const MerchantBrandCampaigns = lazyWithRetry(() => import("./pages/MerchantBrandCampaigns"),"MerchantBrandCampaigns");
+const MerchantPremiumServices = lazyWithRetry(() => import("./pages/MerchantPremiumServices"),"MerchantPremiumServices");
+const MerchantQuickActions = lazyWithRetry(() => import("./pages/MerchantQuickActions"),"MerchantQuickActions");
 const MerchantTransactions = lazyWithRetry(() => import("./pages/MerchantTransactions"),"MerchantTransactions");
 const VetLoanApply = lazyWithRetry(() => import("./pages/VetLoanApply"),"VetLoanApply");
 const AdminDashboard = lazyWithRetry(() => import("./pages/AdminDashboard"),"AdminDashboard");
@@ -240,6 +250,16 @@ const AppRoutes = () => {
  <Route path="/merchant-dashboard" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantDashboard /></PageTransition></ProtectedRoute>} />
 <Route path="/merchant/workspace" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantWorkspace /></PageTransition></ProtectedRoute>} />
 <Route path="/merchant/support" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantSupport /></PageTransition></ProtectedRoute>} />
+ <Route path="/merchant/sale-confirmations" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantSaleConfirmations /></PageTransition></ProtectedRoute>} />
+ <Route path="/merchant/check-ins" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantCheckIns /></PageTransition></ProtectedRoute>} />
+ <Route path="/merchant/subscribers" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantSubscribers /></PageTransition></ProtectedRoute>} />
+ <Route path="/merchant/sales-report" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantSalesReport /></PageTransition></ProtectedRoute>} />
+ <Route path="/merchant/daily-history" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantDailyHistory /></PageTransition></ProtectedRoute>} />
+ <Route path="/merchant/loyalty" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantLoyalty /></PageTransition></ProtectedRoute>} />
+ <Route path="/merchant/promotions" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantPromotions /></PageTransition></ProtectedRoute>} />
+ <Route path="/merchant/brand-campaigns" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantBrandCampaigns /></PageTransition></ProtectedRoute>} />
+ <Route path="/merchant/premium-services" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantPremiumServices /></PageTransition></ProtectedRoute>} />
+ <Route path="/merchant/quick-actions" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantQuickActions /></PageTransition></ProtectedRoute>} />
  <Route path="/merchant/transactions" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantTransactions /></PageTransition></ProtectedRoute>} />
  <Route path="/merchant/products" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantProducts /></PageTransition></ProtectedRoute>} />
  <Route path="/merchant/offers" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantOffers /></PageTransition></ProtectedRoute>} />
