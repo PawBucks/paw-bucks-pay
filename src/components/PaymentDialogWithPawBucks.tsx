@@ -458,17 +458,35 @@ export const PaymentDialogWithPawBucks = ({
  });
 
  if (error) {
- // Extract the actual error message from the edge function response
- const errorBody = typeof error ==='object' && error?.context?.body ? error.context.body : null;
- if (errorBody) {
- try {
- const parsed = typeof errorBody ==='string' ? JSON.parse(errorBody) : errorBody;
- if (parsed?.error) throw new Error(parsed.error);
- } catch (parseErr) {
- // If parsing fails, fall through to generic error
- }
- }
- throw new Error(error.message ||"Payment failed. Please try again.");
+  // Extract the actual error message from the edge function response.
+  // supabase-js v2 exposes the raw Response on `error.context`, so we
+  // need to read it asynchronously to surface the server's friendly message
+  // instead of the generic "Edge Function returned a non-2xx status code".
+  let serverMessage: string | null = null;
+  const ctx: any = (error as any)?.context;
+  if (ctx) {
+    try {
+      if (typeof ctx.json === "function") {
+        const parsed = await ctx.clone().json();
+        if (parsed?.error) serverMessage = String(parsed.error);
+      } else if (typeof ctx.text === "function") {
+        const txt = await ctx.clone().text();
+        try {
+          const parsed = JSON.parse(txt);
+          if (parsed?.error) serverMessage = String(parsed.error);
+          else if (txt) serverMessage = txt;
+        } catch {
+          if (txt) serverMessage = txt;
+        }
+      } else if (ctx.body) {
+        const parsed = typeof ctx.body === "string" ? JSON.parse(ctx.body) : ctx.body;
+        if (parsed?.error) serverMessage = String(parsed.error);
+      }
+    } catch {
+      // ignore parse failures and fall back below
+    }
+  }
+  throw new Error(serverMessage || error.message || "Payment failed. Please try again.");
  }
  if (data?.error) throw new Error(data.error);
 
