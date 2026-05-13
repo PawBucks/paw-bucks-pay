@@ -6,7 +6,7 @@ import { z } from "https://esm.sh/zod@3.22.4";
 const querySchema = z.object({
   start_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
   end_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
-  status: z.enum(['completed', 'pending', 'refunded', 'all']).optional(),
+  status: z.enum(['completed', 'pending', 'refunded', 'partially_refunded', 'all']).optional(),
   search: z.string().max(100).optional(),
 });
 
@@ -93,7 +93,8 @@ serve(async (req) => {
         description,
         stripe_payment_intent_id,
         user_id,
-        payment_method
+        payment_method,
+        amount_refunded
       `)
       .eq('merchant_id', merchant.id)
       .order('created_at', { ascending: false });
@@ -184,6 +185,7 @@ serve(async (req) => {
         customer_name: profile?.full_name || 'Unknown',
         customer_email: profile?.email || '',
         amount: amount,
+        amount_refunded: parseFloat(t.amount_refunded || 0),
         cashback_given: cashbackGivenPawBucks, // PawBucks given to customer (for display only)
         platform_fee: platformFee, // Platform's 3% fee
         repayment_deducted: repaymentDeducted,

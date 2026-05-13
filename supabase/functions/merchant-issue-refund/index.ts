@@ -9,6 +9,7 @@ const refundSchema = z.object({
   reason: z.enum(['duplicate', 'fraudulent', 'requested_by_customer']).optional(),
   note: z.string().max(500).optional(),
   refundApplicationFee: z.boolean().optional().default(true),
+  idempotencyKey: z.string().min(8).max(100),
 });
 
 const corsHeaders = {
@@ -18,6 +19,13 @@ const corsHeaders = {
 
 function logStep(step: string, details?: Record<string, unknown>) {
   console.log(`[MERCHANT-REFUND] ${step}`, details ? JSON.stringify(details) : '');
+}
+
+function jsonResponse(body: unknown, status = 200) {
+  return new Response(JSON.stringify(body), {
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    status,
+  });
 }
 
 serve(async (req) => {
@@ -31,17 +39,13 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Authenticate user
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) throw new Error('No authorization header');
-
     const token = authHeader.replace('Bearer ', '');
     const { data: { user }, error: userError } = await supabaseAdmin.auth.getUser(token);
     if (userError || !user) throw new Error('User not authenticated');
-
     logStep('User authenticated', { userId: user.id });
 
-    // Get merchant for this user
     const { data: merchant, error: merchantError } = await supabaseAdmin
       .from('merchants')
       .select('id, stripe_account_id, business_name, user_id')
@@ -49,251 +53,316 @@ serve(async (req) => {
       .single();
 
     if (merchantError || !merchant) {
-      return new Response(
-        JSON.stringify({ error: 'Merchant account not found' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 404 }
-      );
+      return jsonResponse({ error: 'Merchant account not found' }, 404);
     }
 
-    logStep('Merchant found', { merchantId: merchant.id, hasStripeAccount: !!merchant.stripe_account_id });
-
-    // Parse and validate input
     const body = await req.json();
     const validation = refundSchema.safeParse(body);
     if (!validation.success) {
-      return new Response(
-        JSON.stringify({ error: validation.error.errors[0]?.message || 'Invalid input' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
-      );
+      return jsonResponse({ error: validation.error.errors[0]?.message || 'Invalid input' }, 400);
+    }
+    const { transactionId, amount: requestedAmount, reason, note, refundApplicationFee, idempotencyKey } = validation.data;
+
+    // Idempotency short-circuit: same key already processed → return prior result
+    const { data: existingAttempt } = await supabaseAdmin
+      .from('refund_attempts')
+      .select('*')
+      .eq('idempotency_key', idempotencyKey)
+      .maybeSingle();
+
+    if (existingAttempt) {
+      logStep('Duplicate refund request — returning prior result', { attemptId: existingAttempt.id });
+      return jsonResponse({
+        success: true,
+        duplicate: true,
+        refund: {
+          id: existingAttempt.stripe_refund_id || `internal_${transactionId}`,
+          amount: Number(existingAttempt.refund_amount),
+          status: existingAttempt.status,
+          pawbucks_deducted: existingAttempt.pawbucks_earned_reversed,
+          pawbucks_returned: existingAttempt.pawbucks_spent_returned,
+        },
+      });
     }
 
-    const { transactionId, amount: requestedAmount, reason, note, refundApplicationFee } = validation.data;
-
-    // Get the transaction - verify it belongs to this merchant
+    // Load transaction
     const { data: transaction, error: txError } = await supabaseAdmin
       .from('transactions')
-      .select('id, stripe_payment_intent_id, amount, status, user_id, rewards_earned, merchant_id')
+      .select('id, stripe_payment_intent_id, amount, status, user_id, rewards_earned, pawbucks_used, amount_refunded, pawbucks_refunded, merchant_id, description')
       .eq('id', transactionId)
       .eq('merchant_id', merchant.id)
       .single();
 
     if (txError || !transaction) {
-      return new Response(
-        JSON.stringify({ error: 'Transaction not found or does not belong to your account' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 404 }
-      );
+      return jsonResponse({ error: 'Transaction not found or does not belong to your account' }, 404);
     }
-
-    logStep('Transaction found', { transactionId, status: transaction.status, amount: transaction.amount });
+    logStep('Transaction loaded', { txId: transactionId, amount: transaction.amount, alreadyRefunded: transaction.amount_refunded });
 
     if (transaction.status === 'refunded') {
-      return new Response(
-        JSON.stringify({ error: 'Transaction has already been refunded' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
-      );
+      return jsonResponse({ error: 'Transaction has already been fully refunded' }, 400);
+    }
+    if (transaction.status !== 'completed' && transaction.status !== 'partially_refunded') {
+      return jsonResponse({ error: 'Only completed transactions can be refunded' }, 400);
     }
 
-    if (transaction.status !== 'completed') {
-      return new Response(
-        JSON.stringify({ error: 'Only completed transactions can be refunded' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
-      );
+    const totalAmount = Number(transaction.amount);
+    const alreadyRefunded = Number(transaction.amount_refunded || 0);
+    const refundAmount = Number(requestedAmount ?? (totalAmount - alreadyRefunded));
+    const remaining = totalAmount - alreadyRefunded;
+
+    if (refundAmount <= 0 || refundAmount > remaining + 0.001) {
+      return jsonResponse({ error: `Refund amount exceeds remaining refundable balance ($${remaining.toFixed(2)})` }, 400);
     }
 
-    let stripeRefund = null;
-    const refundAmount = requestedAmount || transaction.amount;
+    // Pro-rated PawBucks reversals
+    const ratio = refundAmount / totalAmount;
+    const totalEarned = transaction.rewards_earned || 0;
+    const totalSpent = transaction.pawbucks_used || 0;
+    const earnedAlreadyReversed = transaction.pawbucks_refunded || 0; // we reuse this column? No — that's spent. Track earned via activity sum.
 
-    // Attempt Stripe refund if there's a valid payment intent
+    // Get earned PB already deducted from prior refunds for this tx
+    const { data: priorEarnedDeductions } = await supabaseAdmin
+      .from('pawbucks_activity')
+      .select('amount')
+      .eq('transaction_id', transactionId)
+      .eq('source', 'refund')
+      .eq('type', 'redeem');
+    const earnedDeductedSoFar = (priorEarnedDeductions || []).reduce((s, r) => s + Math.abs(r.amount || 0), 0);
+    const spentReturnedSoFar = transaction.pawbucks_refunded || 0;
+
+    const isFinalRefund = Math.abs((alreadyRefunded + refundAmount) - totalAmount) < 0.01;
+    const earnedToReverse = isFinalRefund
+      ? Math.max(0, totalEarned - earnedDeductedSoFar)
+      : Math.min(totalEarned - earnedDeductedSoFar, Math.round(totalEarned * ratio));
+    const spentToReturn = isFinalRefund
+      ? Math.max(0, totalSpent - spentReturnedSoFar)
+      : Math.min(totalSpent - spentReturnedSoFar, Math.round(totalSpent * ratio));
+
+    // Reserve idempotency row early (unique constraint prevents concurrent dupes)
+    const { data: attemptRow, error: attemptError } = await supabaseAdmin
+      .from('refund_attempts')
+      .insert({
+        idempotency_key: idempotencyKey,
+        transaction_id: transactionId,
+        merchant_id: merchant.id,
+        initiated_by: user.id,
+        refund_amount: refundAmount,
+        pawbucks_earned_reversed: earnedToReverse,
+        pawbucks_spent_returned: spentToReturn,
+        reason: reason || 'requested_by_customer',
+        note: note || null,
+        status: 'processing',
+      })
+      .select()
+      .single();
+
+    if (attemptError) {
+      // Race: another request inserted with the same key
+      if (attemptError.code === '23505') {
+        const { data: winner } = await supabaseAdmin
+          .from('refund_attempts').select('*').eq('idempotency_key', idempotencyKey).maybeSingle();
+        if (winner) {
+          return jsonResponse({
+            success: true,
+            duplicate: true,
+            refund: {
+              id: winner.stripe_refund_id || `internal_${transactionId}`,
+              amount: Number(winner.refund_amount),
+              status: winner.status,
+              pawbucks_deducted: winner.pawbucks_earned_reversed,
+              pawbucks_returned: winner.pawbucks_spent_returned,
+            },
+          });
+        }
+      }
+      return jsonResponse({ error: 'Failed to record refund attempt' }, 500);
+    }
+
+    // Stripe refund
+    let stripeRefund: Stripe.Response<Stripe.Refund> | null = null;
     if (
       transaction.stripe_payment_intent_id &&
       !transaction.stripe_payment_intent_id.startsWith('checkout_') &&
       !transaction.stripe_payment_intent_id.startsWith('sub_')
     ) {
-      logStep('Attempting Stripe refund', { paymentIntentId: transaction.stripe_payment_intent_id });
-
-      const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
-        apiVersion: '2023-10-16',
-      });
-
-      const refundAmountCents = Math.round(refundAmount * 100);
-
+      const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', { apiVersion: '2023-10-16' });
+      const refundParams: Record<string, unknown> = {
+        payment_intent: transaction.stripe_payment_intent_id,
+        amount: Math.round(refundAmount * 100),
+        reason: reason || 'requested_by_customer',
+        reverse_transfer: true,
+        refund_application_fee: refundApplicationFee !== false,
+      };
       try {
-        // For Direct Charges, refunds are issued on the connected account
-        const refundParams: Record<string, unknown> = {
-          payment_intent: transaction.stripe_payment_intent_id,
-          amount: refundAmountCents,
-          reason: reason || 'requested_by_customer',
-          reverse_transfer: true,
-          refund_application_fee: refundApplicationFee !== false,
-        };
-
-        if (merchant.stripe_account_id) {
-          // Direct Charge refund: issue on connected account
-          stripeRefund = await stripe.refunds.create(
-            refundParams as Stripe.RefundCreateParams,
-            { stripeAccount: merchant.stripe_account_id }
-          );
-        } else {
-          // Platform charge refund (fallback)
-          stripeRefund = await stripe.refunds.create(refundParams as Stripe.RefundCreateParams);
+        const opts: Stripe.RequestOptions = { idempotencyKey: `refund_${idempotencyKey}` };
+        if (merchant.stripe_account_id) opts.stripeAccount = merchant.stripe_account_id;
+        stripeRefund = await stripe.refunds.create(refundParams as Stripe.RefundCreateParams, opts);
+        logStep('Stripe refund OK', { id: stripeRefund.id, status: stripeRefund.status });
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Unknown';
+        logStep('Stripe refund error', { msg });
+        if (!msg.includes('already been refunded') && !msg.includes('No such payment_intent')) {
+          await supabaseAdmin.from('refund_attempts').update({ status: 'failed' }).eq('id', attemptRow.id);
+          return jsonResponse({ error: `Stripe refund failed: ${msg}` }, 400);
         }
-
-        logStep('Stripe refund created', { refundId: stripeRefund.id, status: stripeRefund.status });
-      } catch (stripeError: unknown) {
-        const errorMessage = stripeError instanceof Error ? stripeError.message : 'Unknown Stripe error';
-        logStep('Stripe refund error', { error: errorMessage });
-
-        // Allow processing if already refunded in Stripe
-        if (!errorMessage.includes('already been refunded') && !errorMessage.includes('No such payment_intent')) {
-          return new Response(
-            JSON.stringify({ error: `Stripe refund failed: ${errorMessage}` }),
-            { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
-          );
-        }
-        logStep('Continuing with database updates despite Stripe error');
       }
-    } else {
-      logStep('No valid Stripe payment intent, processing as internal refund');
     }
 
-    // Update transaction status
-    const { error: updateError } = await supabaseAdmin
+    // Update transaction (partial vs full)
+    const newAmountRefunded = alreadyRefunded + refundAmount;
+    const newPbRefunded = spentReturnedSoFar + spentToReturn;
+    const newStatus = isFinalRefund ? 'refunded' : 'partially_refunded';
+    await supabaseAdmin
       .from('transactions')
-      .update({ status: 'refunded' })
+      .update({ status: newStatus, amount_refunded: newAmountRefunded, pawbucks_refunded: newPbRefunded })
       .eq('id', transactionId);
+    logStep('Transaction updated', { newStatus, newAmountRefunded });
 
-    if (updateError) {
-      logStep('Failed to update transaction status', { error: updateError });
-    } else {
-      logStep('Transaction status updated to refunded');
-    }
-
-    // Auto-cancel any merchant subscription linked to this refunded payment
-    if (transaction.stripe_payment_intent_id && transaction.user_id) {
-      const { data: linkedSubs, error: subError } = await supabaseAdmin
-        .from('merchant_subscriptions')
-        .select('id')
+    // Auto-cancel linked subscription on full refund only
+    if (isFinalRefund && transaction.stripe_payment_intent_id && transaction.user_id) {
+      const { data: linkedSubs } = await supabaseAdmin
+        .from('merchant_subscriptions').select('id')
         .eq('last_payment_intent_id', transaction.stripe_payment_intent_id)
         .eq('user_id', transaction.user_id)
         .in('status', ['active', 'past_due']);
-      
-      if (!subError && linkedSubs && linkedSubs.length > 0) {
-        for (const sub of linkedSubs) {
-          await supabaseAdmin
-            .from('merchant_subscriptions')
-            .update({ status: 'canceled', canceled_at: new Date().toISOString() })
-            .eq('id', sub.id);
-          
-          await supabaseAdmin
-            .from('merchant_subscription_events')
-            .insert({
-              subscription_id: sub.id,
-              event_type: 'canceled',
-              amount: 0,
-              metadata: { reason: 'payment_refunded', refunded_transaction_id: transactionId },
-            });
-          
-          logStep('Auto-canceled linked subscription', { subId: sub.id });
-        }
-      }
-    }
-
-    // Deduct PawBucks earned from this transaction
-    const pawbucksEarned = transaction.rewards_earned || 0;
-    if (pawbucksEarned > 0 && transaction.user_id) {
-      logStep('Deducting PawBucks', { amount: pawbucksEarned, userId: transaction.user_id });
-
-      const { error: pawbucksError } = await supabaseAdmin
-        .from('pawbucks_activity')
-        .insert({
-          user_id: transaction.user_id,
-          amount: -pawbucksEarned,
-          type: 'redeem',
-          source: 'refund',
-          description: `PawBucks deducted due to refund by ${merchant.business_name}`,
-          transaction_id: transactionId,
-          pawbucks_status: 'available',
+      for (const sub of linkedSubs || []) {
+        await supabaseAdmin.from('merchant_subscriptions')
+          .update({ status: 'canceled', canceled_at: new Date().toISOString() }).eq('id', sub.id);
+        await supabaseAdmin.from('merchant_subscription_events').insert({
+          subscription_id: sub.id, event_type: 'canceled', amount: 0,
+          metadata: { reason: 'payment_refunded', refunded_transaction_id: transactionId },
         });
-
-      if (pawbucksError) {
-        logStep('Failed to deduct PawBucks', { error: pawbucksError });
-      } else {
-        logStep('PawBucks deducted successfully');
-
-        // Update wallet balance
-        const { data: wallet } = await supabaseAdmin
-          .from('pawbucks_wallet')
-          .select('balance')
-          .eq('user_id', transaction.user_id)
-          .single();
-
-        if (wallet) {
-          await supabaseAdmin
-            .from('pawbucks_wallet')
-            .update({ balance: Math.max(0, wallet.balance - pawbucksEarned) })
-            .eq('user_id', transaction.user_id);
-          logStep('Wallet balance updated', { previousBalance: wallet.balance, deducted: pawbucksEarned });
-        }
       }
     }
 
-    // Notify the user about the refund
+    // Reverse earned PawBucks
+    if (earnedToReverse > 0 && transaction.user_id) {
+      await supabaseAdmin.from('pawbucks_activity').insert({
+        user_id: transaction.user_id,
+        amount: -earnedToReverse,
+        type: 'redeem',
+        source: 'refund',
+        description: `PawBucks reversed due to refund by ${merchant.business_name}`,
+        transaction_id: transactionId,
+        pawbucks_status: 'available',
+      });
+      const { data: wallet } = await supabaseAdmin
+        .from('pawbucks_wallet').select('balance').eq('user_id', transaction.user_id).single();
+      if (wallet) {
+        await supabaseAdmin.from('pawbucks_wallet')
+          .update({ balance: Math.max(0, wallet.balance - earnedToReverse) })
+          .eq('user_id', transaction.user_id);
+      }
+    }
+
+    // Return spent PawBucks back to wallet
+    if (spentToReturn > 0 && transaction.user_id) {
+      await supabaseAdmin.from('pawbucks_activity').insert({
+        user_id: transaction.user_id,
+        amount: spentToReturn,
+        type: 'earn',
+        source: 'refund',
+        description: `PawBucks returned from refund by ${merchant.business_name}`,
+        transaction_id: transactionId,
+        pawbucks_status: 'available',
+      });
+      const { data: wallet } = await supabaseAdmin
+        .from('pawbucks_wallet').select('balance').eq('user_id', transaction.user_id).single();
+      if (wallet) {
+        await supabaseAdmin.from('pawbucks_wallet')
+          .update({ balance: wallet.balance + spentToReturn })
+          .eq('user_id', transaction.user_id);
+      }
+    }
+
+    // Notify customer (in-app)
+    if (transaction.user_id) {
+      const pbNoteParts: string[] = [];
+      if (earnedToReverse > 0) pbNoteParts.push(`${earnedToReverse} earned PawBucks were reversed`);
+      if (spentToReturn > 0) pbNoteParts.push(`${spentToReturn} spent PawBucks were returned to your wallet`);
+      const pbNote = pbNoteParts.length ? ` ${pbNoteParts.join(' and ')}.` : '';
+      await supabaseAdmin.from('notifications').insert({
+        user_id: transaction.user_id,
+        title: isFinalRefund ? '💸 Refund Issued' : '💸 Partial Refund Issued',
+        message: `${merchant.business_name} issued a $${refundAmount.toFixed(2)} refund.${pbNote}`,
+        category: 'transactional',
+      });
+    }
+
+    // Notify merchant (in-app confirmation)
+    await supabaseAdmin.from('notifications').insert({
+      user_id: merchant.user_id,
+      title: isFinalRefund ? 'Refund processed' : 'Partial refund processed',
+      message: `You issued a $${refundAmount.toFixed(2)} refund on transaction ${transactionId.slice(0, 8)}.`,
+      category: 'transactional',
+    });
+
+    // Customer email
     if (transaction.user_id) {
       try {
-        await supabaseAdmin.from('notifications').insert({
-          user_id: transaction.user_id,
-          title: '💸 Refund Issued',
-          message: `${merchant.business_name} has issued a $${refundAmount.toFixed(2)} refund.${pawbucksEarned > 0 ? ` ${pawbucksEarned} PawBucks were also adjusted.` : ''}`,
-          category: 'transactional',
-        });
-        logStep('User notification created');
-      } catch (notifError) {
-        logStep('Failed to create user notification', { error: String(notifError) });
+        const { data: profile } = await supabaseAdmin
+          .from('profiles').select('email, full_name').eq('id', transaction.user_id).single();
+        if (profile?.email) {
+          await supabaseAdmin.functions.invoke('send-refund-email', {
+            body: {
+              email: profile.email,
+              customerName: profile.full_name,
+              merchantName: merchant.business_name,
+              refundAmount,
+              isFullRefund: isFinalRefund,
+              originalAmount: totalAmount,
+              earnedReversed: earnedToReverse,
+              spentReturned: spentToReturn,
+              transactionId,
+              reason: reason || 'requested_by_customer',
+            },
+          });
+        }
+      } catch (e) {
+        logStep('Customer email failed (non-fatal)', { error: String(e) });
       }
     }
 
-    // Log the merchant action in audit_logs
-    try {
-      await supabaseAdmin.from('audit_logs').insert({
-        admin_id: user.id,
-        action: 'merchant_refund_issued',
-        entity_type: 'transaction',
-        entity_id: transactionId,
-        changes: {
-          refund_amount: refundAmount,
-          reason: reason || 'requested_by_customer',
-          note: note || null,
-          refund_application_fee: refundApplicationFee !== false,
-          stripe_refund_id: stripeRefund?.id || null,
-          pawbucks_deducted: pawbucksEarned,
-          merchant_id: merchant.id,
-        },
-      });
-      logStep('Audit log created');
-    } catch (logError) {
-      logStep('Failed to create audit log', { error: String(logError) });
-    }
+    // Mark attempt succeeded
+    await supabaseAdmin
+      .from('refund_attempts')
+      .update({ status: 'succeeded', stripe_refund_id: stripeRefund?.id || null })
+      .eq('id', attemptRow.id);
 
-    logStep('Refund completed successfully');
+    // Audit log
+    await supabaseAdmin.from('audit_logs').insert({
+      admin_id: user.id,
+      action: 'merchant_refund_issued',
+      entity_type: 'transaction',
+      entity_id: transactionId,
+      changes: {
+        refund_amount: refundAmount,
+        partial: !isFinalRefund,
+        reason: reason || 'requested_by_customer',
+        note: note || null,
+        refund_application_fee: refundApplicationFee !== false,
+        stripe_refund_id: stripeRefund?.id || null,
+        pawbucks_earned_reversed: earnedToReverse,
+        pawbucks_spent_returned: spentToReturn,
+        merchant_id: merchant.id,
+        idempotency_key: idempotencyKey,
+      },
+    });
 
-    return new Response(
-      JSON.stringify({
-        success: true,
-        refund: {
-          id: stripeRefund?.id || `internal_${transactionId}`,
-          amount: refundAmount,
-          status: stripeRefund?.status || 'succeeded',
-          pawbucks_deducted: pawbucksEarned,
-        },
-      }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
-    );
+    return jsonResponse({
+      success: true,
+      refund: {
+        id: stripeRefund?.id || `internal_${transactionId}`,
+        amount: refundAmount,
+        status: stripeRefund?.status || 'succeeded',
+        partial: !isFinalRefund,
+        pawbucks_deducted: earnedToReverse,
+        pawbucks_returned: spentToReturn,
+      },
+    });
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    logStep('Error', { error: errorMessage });
-    return new Response(
-      JSON.stringify({ error: errorMessage }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
-    );
+    const msg = error instanceof Error ? error.message : 'Unknown error';
+    logStep('Error', { msg });
+    return jsonResponse({ error: msg }, 400);
   }
 });
