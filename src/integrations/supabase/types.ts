@@ -10569,6 +10569,76 @@ export type Database = {
           },
         ]
       }
+      refund_attempts: {
+        Row: {
+          created_at: string
+          id: string
+          idempotency_key: string
+          initiated_by: string | null
+          merchant_id: string | null
+          note: string | null
+          pawbucks_earned_reversed: number
+          pawbucks_spent_returned: number
+          reason: string | null
+          refund_amount: number
+          status: string
+          stripe_refund_id: string | null
+          transaction_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          idempotency_key: string
+          initiated_by?: string | null
+          merchant_id?: string | null
+          note?: string | null
+          pawbucks_earned_reversed?: number
+          pawbucks_spent_returned?: number
+          reason?: string | null
+          refund_amount: number
+          status?: string
+          stripe_refund_id?: string | null
+          transaction_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          idempotency_key?: string
+          initiated_by?: string | null
+          merchant_id?: string | null
+          note?: string | null
+          pawbucks_earned_reversed?: number
+          pawbucks_spent_returned?: number
+          reason?: string | null
+          refund_amount?: number
+          status?: string
+          stripe_refund_id?: string | null
+          transaction_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "refund_attempts_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "refund_attempts_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "refund_attempts_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       review_photos: {
         Row: {
           created_at: string
@@ -12254,12 +12324,14 @@ export type Database = {
       transactions: {
         Row: {
           amount: number
+          amount_refunded: number
           application_fee: number | null
           cashback_earned: number
           created_at: string
           description: string | null
           id: string
           merchant_id: string | null
+          pawbucks_refunded: number
           pawbucks_used: number | null
           payment_method: string | null
           rewards_earned: number
@@ -12271,12 +12343,14 @@ export type Database = {
         }
         Insert: {
           amount: number
+          amount_refunded?: number
           application_fee?: number | null
           cashback_earned?: number
           created_at?: string
           description?: string | null
           id?: string
           merchant_id?: string | null
+          pawbucks_refunded?: number
           pawbucks_used?: number | null
           payment_method?: string | null
           rewards_earned?: number
@@ -12288,12 +12362,14 @@ export type Database = {
         }
         Update: {
           amount?: number
+          amount_refunded?: number
           application_fee?: number | null
           cashback_earned?: number
           created_at?: string
           description?: string | null
           id?: string
           merchant_id?: string | null
+          pawbucks_refunded?: number
           pawbucks_used?: number | null
           payment_method?: string | null
           rewards_earned?: number
