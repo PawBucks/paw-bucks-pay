@@ -29,6 +29,8 @@ interface MerchantMapProps {
  premiumIds?: Set<string>;
  /** Set of Sponsored merchant IDs */
  sponsoredIds?: Set<string>;
+ /** Optional user location to center the map on initial load. */
+ userLocation?: { latitude: number; longitude: number } | null;
 }
 
 const TIER_CONFIG: Record<MerchantTier, { size: number; color: string; borderColor: string; zIndex: number }> = {
@@ -39,10 +41,14 @@ const TIER_CONFIG: Record<MerchantTier, { size: number; color: string; borderCol
  organic: { size: 24, color:'hsl(var(--muted-foreground))', borderColor:'hsl(var(--border))', zIndex: 10 },
 };
 
-export const MerchantMap = ({ merchants, onMerchantClick, featuredIds, premiumIds, sponsoredIds }: MerchantMapProps) => {
+export const MerchantMap = ({ merchants, onMerchantClick, featuredIds, premiumIds, sponsoredIds, userLocation }: MerchantMapProps) => {
  const mapContainer = useRef<HTMLDivElement>(null);
  const map = useRef<mapboxgl.Map | null>(null);
  const markersRef = useRef<mapboxgl.Marker[]>([]);
+ const userInteractedRef = useRef(false);
+ const hasFitInitialRef = useRef(false);
+ const userLocationRef = useRef<{ latitude: number; longitude: number } | null>(null);
+ userLocationRef.current = userLocation ?? null;
  const [loading, setLoading] = useState(true);
  const [mapboxToken, setMapboxToken] = useState<string | null>(null);
  const [error, setError] = useState<string | null>(null);
@@ -72,8 +78,10 @@ export const MerchantMap = ({ merchants, onMerchantClick, featuredIds, premiumId
 
  mapboxgl.accessToken = mapboxToken;
 
- const defaultCenter: [number, number] = [-118.4695, 33.9850]; // LA area for launch zones
- const defaultZoom = 11;
+  const defaultCenter: [number, number] = userLocation
+    ? [userLocation.longitude, userLocation.latitude]
+    : [-118.4695, 33.9850]; // LA area for launch zones
+  const defaultZoom = userLocation ? 12 : 11;
 
  let timeoutId: ReturnType<typeof setTimeout>;
 
@@ -102,6 +110,14 @@ export const MerchantMap = ({ merchants, onMerchantClick, featuredIds, premiumId
  };
 
  map.current.on('load', handleMapReady);
+
+  // Detect user-initiated interaction so we stop auto-fitting bounds.
+  const markInteracted = (e: any) => {
+   if (e?.originalEvent) userInteractedRef.current = true;
+  };
+  map.current.on('dragstart', markInteracted);
+  map.current.on('zoomstart', markInteracted);
+  map.current.on('rotatestart', markInteracted);
 
  map.current.on('error', (e) => {
  console.error('Mapbox error:', e);
@@ -183,7 +199,7 @@ export const MerchantMap = ({ merchants, onMerchantClick, featuredIds, premiumId
  visibleMerchants = [...featured, ...topOrganic];
  }
 
- visibleMerchants.forEach(merchant => {
+  visibleMerchants.forEach(merchant => {
  const tier = getMerchantTier(merchant);
  const config = TIER_CONFIG[tier];
 
@@ -287,17 +303,33 @@ export const MerchantMap = ({ merchants, onMerchantClick, featuredIds, premiumId
  markersRef.current.push(marker);
  });
 
- // Fit bounds
- if (visibleMerchants.length > 0) {
- const bounds = new mapboxgl.LngLatBounds();
- visibleMerchants.forEach(m => {
- bounds.extend([m.longitude!, m.latitude!]);
- });
- map.current.fitBounds(bounds, {
- padding: 50,
- maxZoom: 14,
- });
- }
+  // Fit bounds ONLY on the initial render and only if the user hasn't
+  // interacted with the map yet. Subsequent merchant/filter changes must
+  // not yank the camera away from where the user is looking.
+  if (
+   visibleMerchants.length > 0 &&
+   !hasFitInitialRef.current &&
+   !userInteractedRef.current
+  ) {
+   if (userLocationRef.current) {
+    // Keep the user-centered view; do not auto-fit to all merchants.
+    map.current.easeTo({
+     center: [userLocationRef.current.longitude, userLocationRef.current.latitude],
+     zoom: 12,
+     duration: 0,
+    });
+   } else {
+    const bounds = new mapboxgl.LngLatBounds();
+    visibleMerchants.forEach(m => {
+     bounds.extend([m.longitude!, m.latitude!]);
+    });
+    map.current.fitBounds(bounds, {
+     padding: 50,
+     maxZoom: 14,
+    });
+   }
+   hasFitInitialRef.current = true;
+  }
 
  // Re-filter on zoom change
  const handleZoom = () => {
