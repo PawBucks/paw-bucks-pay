@@ -75,7 +75,7 @@ const NAV: NavSection[] = [
     section: "Catalog & Services",
     items: [
       { id: "products", label: "Products", icon: Package, to: "/merchant/products" },
-      { id: "offers", label: "Offers & Promotions", icon: Tag, to: "/merchant/offers" },
+      { id: "offers", label: "Offers", icon: Tag, to: "/merchant/offers" },
       { id: "scheduling", label: "Scheduling", icon: Calendar, to: "/merchant/scheduling" },
       { id: "invoicing", label: "Invoicing", icon: FileText, to: "/merchant/invoicing" },
       { id: "subscription-plans", label: "Subscription Plans", icon: Users, to: "/merchant/subscription-plans" },
@@ -88,6 +88,8 @@ const NAV: NavSection[] = [
     items: [
       { id: "messages", label: "Messages", icon: MessageSquare, to: "/merchant/messages" },
       { id: "campaigns", label: "Campaigns", icon: Megaphone, to: "/merchant/campaigns" },
+      { id: "promotions", label: "Promotions", icon: Sparkles, to: "/merchant-dashboard?tab=promotions" },
+      { id: "brand-campaigns", label: "Brand Campaigns", icon: Star, to: "/merchant-dashboard?tab=brand-campaigns" },
     ],
   },
   {
