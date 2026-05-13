@@ -66,6 +66,8 @@ const NAV: NavSection[] = [
       { id: "sale-confirmations", label: "Sale Confirmations", icon: CheckCircle2, to: "/merchant-dashboard?tab=sale-confirmations" },
       { id: "check-ins", label: "Check-Ins", icon: Activity, to: "/merchant-dashboard?tab=check-ins" },
       { id: "subscribers", label: "Subscribers", icon: Users, to: "/merchant-dashboard?tab=subscribers" },
+      { id: "reports", label: "Sales Report", icon: BarChart3, to: "/merchant-dashboard?tab=reports" },
+      { id: "history", label: "Daily History", icon: History, to: "/merchant-dashboard?tab=history" },
       { id: "tax-vault", label: "Tax Vault", icon: Receipt, to: "/merchant/tax-vault" },
     ],
   },
