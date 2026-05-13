@@ -371,3 +371,6 @@ verify_jwt = false
 
 [functions.clover-pos-webhook]
 verify_jwt = false
+
+[functions.auto-detect-no-shows]
+verify_jwt = false
