@@ -42,6 +42,7 @@ import {
   Store,
   Sparkles,
   Stamp,
+  History,
 } from "lucide-react";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
 import { useAuth } from "@/hooks/useAuth";
