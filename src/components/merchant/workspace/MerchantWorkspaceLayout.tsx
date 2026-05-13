@@ -35,6 +35,11 @@ import {
   User,
   Package,
   Tag,
+  Wallet,
+  Receipt,
+  Calendar,
+  Megaphone,
+  Store,
 } from "lucide-react";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
 import { useAuth } from "@/hooks/useAuth";
@@ -49,35 +54,39 @@ const NAV: NavSection[] = [
     section: "Dashboard",
     items: [
       { id: "overview", label: "Overview", icon: LayoutGrid, to: "/merchant/workspace" },
-      { id: "earnings", label: "Earnings", icon: DollarSign, to: "/merchant/total-earnings" },
-      { id: "sales-report", label: "Sales Report", icon: BarChart3, to: "/merchant-analytics" },
-      { id: "transactions", label: "Transactions", icon: CalendarDays, to: "/merchant/transactions" },
+      { id: "dashboard", label: "Full Dashboard", icon: LayoutGrid, to: "/merchant-dashboard" },
+      { id: "earnings", label: "Total Earnings", icon: DollarSign, to: "/merchant/total-earnings" },
+      { id: "available-balance", label: "Available Balance", icon: Wallet, to: "/merchant/available-balance" },
+      { id: "pending-balance", label: "Pending Balance", icon: CalendarDays, to: "/merchant/pending-balance" },
+      { id: "sales-report", label: "Analytics", icon: BarChart3, to: "/merchant-analytics" },
+      { id: "transactions", label: "Transactions", icon: FileText, to: "/merchant/transactions" },
+      { id: "tax-vault", label: "Tax Vault", icon: Receipt, to: "/merchant/tax-vault" },
     ],
   },
   {
-    section: "Customers",
+    section: "Wallet",
     items: [
-      { id: "confirmations", label: "Sale Confirmations", icon: FileText, to: "/merchant/transactions" },
-      { id: "checkins", label: "Check-Ins", icon: CheckCircle2, to: "/merchant-dashboard" },
-      { id: "subscribers", label: "Subscribers", icon: Users, to: "/merchant/subscription-plans" },
+      { id: "pawbucks-wallet", label: "PawBucks Wallet", icon: Wallet, to: "/merchant/pawbucks" },
+      { id: "store-rewards", label: "Store Rewards", icon: Gift, to: "/merchant/store-rewards" },
     ],
   },
   {
-    section: "Services",
+    section: "Catalog & Services",
     items: [
       { id: "products", label: "Products", icon: Package, to: "/merchant/products" },
-      { id: "offers", label: "Partner Offers", icon: Tag, to: "/merchant/offers" },
-      { id: "loyalty", label: "Loyalty Program", icon: Heart, to: "/merchant-dashboard" },
+      { id: "offers", label: "Offers & Promotions", icon: Tag, to: "/merchant/offers" },
+      { id: "scheduling", label: "Scheduling", icon: Calendar, to: "/merchant/scheduling" },
+      { id: "invoicing", label: "Invoicing", icon: FileText, to: "/merchant/invoicing" },
+      { id: "subscription-plans", label: "Subscription Plans", icon: Users, to: "/merchant/subscription-plans" },
       { id: "marketplace", label: "Services Marketplace", icon: Star, to: "/merchant/market" },
-      { id: "quick-actions", label: "Quick Actions", icon: Zap, to: "/merchant-dashboard" },
+      { id: "pos", label: "POS Integration", icon: Store, to: "/merchant/pos-integration" },
     ],
   },
   {
-    section: "Communication",
+    section: "Marketing",
     items: [
       { id: "messages", label: "Messages", icon: MessageSquare, to: "/merchant/messages" },
-      { id: "brand-campaigns", label: "Brand Campaigns", icon: Activity, to: "/merchant/campaigns" },
-      { id: "promotions", label: "Promotions", icon: Gift, to: "/merchant/offers" },
+      { id: "campaigns", label: "Campaigns", icon: Megaphone, to: "/merchant/campaigns" },
     ],
   },
   {
