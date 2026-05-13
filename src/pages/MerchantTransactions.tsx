@@ -213,6 +213,10 @@ const MerchantTransactions = () => { const { user, loading, signOut } = useAuth(
  const { data: { session } } = await supabase.auth.getSession();
  if (!session) throw new Error('Not authenticated');
 
+  // Generate a per-attempt idempotency key so accidental duplicate clicks
+  // (or network retries) cannot result in two Stripe refunds.
+  const idempotencyKey = `mref_${selectedTransaction.transaction_id}_${crypto.randomUUID()}`;
+
  const { data, error } = await supabase.functions.invoke('merchant-issue-refund', {
  body: {
  transactionId: selectedTransaction.transaction_id,
@@ -220,6 +224,7 @@ const MerchantTransactions = () => { const { user, loading, signOut } = useAuth(
  reason: params.reason,
  note: params.note,
  refundApplicationFee: params.refundApplicationFee,
+  idempotencyKey,
  },
  headers: {
  Authorization: `Bearer ${session.access_token}`,
@@ -229,7 +234,11 @@ const MerchantTransactions = () => { const { user, loading, signOut } = useAuth(
  if (error) throw error;
  if (data?.error) throw new Error(data.error);
 
- toast.success(`Refund of ${Formatters.currency(params.amount)} processed successfully`);
+  toast.success(
+    data?.refund?.partial
+      ? `Partial refund of ${Formatters.currency(params.amount)} processed`
+      : `Refund of ${Formatters.currency(params.amount)} processed successfully`
+  );
  fetchTransactions();
  } catch (error: unknown) {
  const errorMessage = error instanceof Error ? error.message :'Failed to process refund';
@@ -249,6 +258,8 @@ const MerchantTransactions = () => { const { user, loading, signOut } = useAuth(
  return"bg-warning/10 text-warning border-warning/20";
  case"refunded":
  return"bg-destructive/10 text-destructive border-destructive/20";
+  case"partially_refunded":
+  return"bg-warning/10 text-warning border-warning/20";
  default:
  return"bg-muted text-muted-foreground";
  }
