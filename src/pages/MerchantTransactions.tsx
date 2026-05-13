@@ -516,7 +516,10 @@ const MerchantTransactions = () => { const { user, loading, signOut } = useAuth(
  <RefundPaymentDialog
  open={refundDialogOpen}
  onOpenChange={setRefundDialogOpen}
- transactionAmount={selectedTransaction?.amount || 0}
+  transactionAmount={Math.max(
+    0,
+    (selectedTransaction?.amount || 0) - (selectedTransaction?.amount_refunded || 0)
+  )}
  customerName={selectedTransaction?.customer_name}
  onRefund={handleRefund}
  isRefunding={!!refundingId}
