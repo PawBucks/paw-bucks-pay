@@ -26,6 +26,7 @@ interface Transaction {
  customer_name: string;
  customer_email: string;
  amount: number;
+  amount_refunded?: number;
  cashback_given: number; // PawBucks given to customer (informational)
  platform_fee: number; // Platform's 3% fee on Stripe portion
  repayment_deducted: number; // Funding deal repayment (if applicable)
