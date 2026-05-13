@@ -906,6 +906,7 @@ const Discover = () => {
  featuredIds={featuredPartnerIds}
  premiumIds={premiumAdIds}
  sponsoredIds={sponsoredMerchantIds}
+  userLocation={userLocation}
  />
  </div>
  </div>
@@ -920,6 +921,7 @@ const Discover = () => {
  featuredIds={featuredPartnerIds}
  premiumIds={premiumAdIds}
  sponsoredIds={sponsoredMerchantIds}
+  userLocation={userLocation}
  />
  <p className="text-xs text-muted-foreground text-center">
  Tap a pin to view details
