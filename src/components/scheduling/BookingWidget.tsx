@@ -109,6 +109,22 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
  queryFn: () => schedulingService.getOverrides(merchantId),
  });
 
+  // Pre-check: does this merchant have Stripe Connect set up?
+  // Required for any service that needs a deposit or has a no-show fee.
+  const { data: merchantPaymentInfo } = useQuery({
+    queryKey: ["merchant-payment-info", merchantId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("merchants")
+        .select("stripe_account_id")
+        .eq("id", merchantId)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+  const merchantAcceptsCards = !!merchantPaymentInfo?.stripe_account_id;
+
  // Fetch existing bookings for the selected date
  const { data: existingBookings = [] } = useQuery({
  queryKey: ["date-bookings", merchantId, selectedDate?.toISOString()],
@@ -723,15 +739,25 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
 
  {/* Deposit Notice */}
  {(selectedServiceData as any).require_deposit && (
- <div className="flex items-start gap-2 p-3 rounded-lg bg-info/10 border border-info/20 text-sm">
- <span className="w-4 h-4 text-info mt-0.5 flex-shrink-0" aria-hidden="true">💳</span>
- <p className="text-info">
- This service requires a <strong>card on file</strong> to book.
- {(selectedServiceData as any).no_show_fee_amount > 0 && (
- <> A {Formatters.currency(Number((selectedServiceData as any).no_show_fee_amount))} no-show fee applies if you miss your appointment.</>
- )}
- </p>
- </div>
+            merchantAcceptsCards ? (
+              <div className="flex items-start gap-2 p-3 rounded-lg bg-info/10 border border-info/20 text-sm">
+                <span className="w-4 h-4 text-info mt-0.5 flex-shrink-0" aria-hidden="true">💳</span>
+                <p className="text-info">
+                  This service requires a <strong>card on file</strong> to book.
+                  {(selectedServiceData as any).no_show_fee_amount > 0 && (
+                    <> A {Formatters.currency(Number((selectedServiceData as any).no_show_fee_amount))} no-show fee applies if you miss your appointment.</>
+                  )}
+                </p>
+              </div>
+            ) : (
+              <div className="flex items-start gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-sm">
+                <span className="w-4 h-4 text-destructive mt-0.5 flex-shrink-0" aria-hidden="true">🚫</span>
+                <p className="text-destructive">
+                  <strong>This service can't be booked online yet.</strong> {merchantName} hasn't finished setting up payment processing,
+                  so we can't securely save a card on file. Please contact them directly to book.
+                </p>
+              </div>
+            )
  )}
 
  {/* Book Button */}
@@ -746,7 +772,12 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
  createBooking.mutate();
  }
  }}
- disabled={createBooking.isPending || (isGroomingService && groomingData.hasBlockingVaccineIssue) || (isMobileService && !serviceAddress.trim())}
+              disabled={
+                createBooking.isPending ||
+                (isGroomingService && groomingData.hasBlockingVaccineIssue) ||
+                (isMobileService && !serviceAddress.trim()) ||
+                ((selectedServiceData as any).require_deposit && !merchantAcceptsCards)
+              }
  >
  {createBooking.isPending ? (
  <>
