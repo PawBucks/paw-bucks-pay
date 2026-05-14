@@ -10966,6 +10966,9 @@ export type Database = {
         Row: {
           booking_date: string
           cancellation_reason: string | null
+          cancelled_at: string | null
+          completed_at: string | null
+          confirmed_at: string | null
           created_at: string
           customer_email: string | null
           customer_name: string | null
@@ -10977,6 +10980,7 @@ export type Database = {
           is_recurring: boolean
           location_notes: string | null
           merchant_id: string
+          no_show_at: string | null
           notes: string | null
           payment_status: string
           pet_id: string | null
@@ -11002,6 +11006,9 @@ export type Database = {
         Insert: {
           booking_date: string
           cancellation_reason?: string | null
+          cancelled_at?: string | null
+          completed_at?: string | null
+          confirmed_at?: string | null
           created_at?: string
           customer_email?: string | null
           customer_name?: string | null
@@ -11013,6 +11020,7 @@ export type Database = {
           is_recurring?: boolean
           location_notes?: string | null
           merchant_id: string
+          no_show_at?: string | null
           notes?: string | null
           payment_status?: string
           pet_id?: string | null
@@ -11038,6 +11046,9 @@ export type Database = {
         Update: {
           booking_date?: string
           cancellation_reason?: string | null
+          cancelled_at?: string | null
+          completed_at?: string | null
+          confirmed_at?: string | null
           created_at?: string
           customer_email?: string | null
           customer_name?: string | null
@@ -11049,6 +11060,7 @@ export type Database = {
           is_recurring?: boolean
           location_notes?: string | null
           merchant_id?: string
+          no_show_at?: string | null
           notes?: string | null
           payment_status?: string
           pet_id?: string | null
