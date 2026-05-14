@@ -89,20 +89,39 @@ const SimpleHome = () => {
               </h2>
               <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1">
                 {pets.map((p) => (
-                  <button
-                    key={p.id}
-                    onClick={() => navigate(`/pet-health/${p.id}`)}
-                    className="flex flex-col items-center gap-2 min-w-[72px]"
-                  >
-                    <div className="h-16 w-16 rounded-full bg-muted overflow-hidden flex items-center justify-center ring-1 ring-border">
-                      {p.photo_url ? (
-                        <img src={p.photo_url} alt={p.name} className="h-full w-full object-cover" />
-                      ) : (
-                        <PawBucksLogo className="h-7 w-7 text-muted-foreground" />
-                      )}
+                  <div key={p.id} className="flex flex-col items-center gap-2 min-w-[72px]">
+                    <button
+                      onClick={() => navigate(`/pet-health/${p.id}`)}
+                      className="flex flex-col items-center gap-2"
+                    >
+                      <div className="h-16 w-16 rounded-full bg-muted overflow-hidden flex items-center justify-center ring-1 ring-border">
+                        {p.photo_url ? (
+                          <img src={p.photo_url} alt={p.name} className="h-full w-full object-cover" />
+                        ) : (
+                          <PawBucksLogo className="h-7 w-7 text-muted-foreground" />
+                        )}
+                      </div>
+                      <span className="text-xs font-medium truncate max-w-[72px]">{p.name}</span>
+                    </button>
+                    <div className="flex gap-1">
+                      <button
+                        onClick={() => navigate(`/pet-health/${p.id}`)}
+                        className="p-1 rounded-md bg-muted hover:bg-accent/20 transition-colors"
+                        aria-label={`View health for ${p.name}`}
+                        title="Health history"
+                      >
+                        <FileText className="h-3 w-3 text-muted-foreground" />
+                      </button>
+                      <button
+                        onClick={() => navigate(`/book-visit?pet=${p.id}`)}
+                        className="p-1 rounded-md bg-muted hover:bg-accent/20 transition-colors"
+                        aria-label={`Schedule visit for ${p.name}`}
+                        title="Schedule visit"
+                      >
+                        <CalendarPlus className="h-3 w-3 text-muted-foreground" />
+                      </button>
                     </div>
-                    <span className="text-xs font-medium truncate max-w-[72px]">{p.name}</span>
-                  </button>
+                  </div>
                 ))}
                 <button
                   onClick={() => navigate("/create-pet-profile")}
