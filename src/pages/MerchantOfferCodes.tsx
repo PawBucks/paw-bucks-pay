@@ -2,7 +2,7 @@ import { useState, useEffect } from"react";
 import { useAuth } from"@/hooks/useAuth";
 import { useNavigate, useParams } from"react-router-dom";
 import { supabase } from"@/integrations/supabase/client";
-import { Header } from"@/components/Header";
+import { MerchantWorkspaceLayout, WorkspacePageHeader } from "@/components/merchant/workspace/MerchantWorkspaceLayout";
 import { SEO } from"@/components/SEO";
 import { Button } from"@/components/ui/button";
 import { Input } from"@/components/ui/input";
@@ -100,10 +100,9 @@ export default function MerchantOfferCodes() {
  description="Generate and manage redemption codes for your offer"
  keywords={["merchant","codes","redemption"]}
  />
- <div className="min-h-screen bg-background">
- <Header isAuthenticated={!!user} onLogout={handleSignOut} userId={user?.id} variant="merchant" />
- 
- <main className="container mx-auto px-4 py-8 pb-24 max-w-4xl lg:max-w-6xl">
+ <MerchantWorkspaceLayout>
+ <WorkspacePageHeader section="Catalog & Services" title="Redemption Codes" subtitle="Generate and manage redemption codes for your offer" />
+ <main className="container mx-auto px-4 py-6 pb-24 max-w-4xl lg:max-w-6xl">
  <Button variant="ghost" onClick={() => navigate(`/merchant/offers/${id}`)} className="mb-4">
  <ArrowLeft className="mr-2 h-4 w-4" />
  Back to Offer Details
@@ -260,7 +259,7 @@ export default function MerchantOfferCodes() {
  </Card>
  </div>
  </main>
- </div>
+ </MerchantWorkspaceLayout>
  </>
  );
 }

@@ -2,7 +2,7 @@ import { useState, useEffect } from"react";
 import { useAuth } from"@/hooks/useAuth";
 import { useNavigate, useParams } from"react-router-dom";
 import { supabase } from"@/integrations/supabase/client";
-import { Header } from"@/components/Header";
+import { MerchantWorkspaceLayout, WorkspacePageHeader } from "@/components/merchant/workspace/MerchantWorkspaceLayout";
 import { SEO } from"@/components/SEO";
 import { Button } from"@/components/ui/button";
 import { Badge } from"@/components/ui/badge";
@@ -241,10 +241,9 @@ export default function MerchantOfferDetails() {
  description="View offer details, analytics, and redemptions"
  keywords={["merchant","offers","analytics"]}
  />
- <div className="min-h-screen bg-background">
- <Header isAuthenticated={!!user} onLogout={handleSignOut} userId={user?.id} variant="merchant" />
- 
- <main className="container mx-auto px-4 py-8 pb-24 max-w-7xl">
+ <MerchantWorkspaceLayout>
+ <WorkspacePageHeader section="Catalog & Services" title="Offer Details" subtitle="View offer details, analytics, and redemptions" />
+ <main className="container mx-auto px-4 py-6 pb-24 max-w-7xl">
  <Button variant="ghost" onClick={() => navigate("/merchant/offers")} className="mb-4">
  <ArrowLeft className="mr-2 h-4 w-4" />
  Back to Offers
@@ -432,7 +431,7 @@ export default function MerchantOfferDetails() {
  </CardContent>
  </Card>
  </main>
- </div>
+ </MerchantWorkspaceLayout>
  </>
  );
 }

@@ -436,6 +436,6 @@ export default function MerchantTaxVault() {
  onExpenseAdded={refetch}
  />
  )}
- </div>
+ </MerchantWorkspaceLayout>
  );
 }
