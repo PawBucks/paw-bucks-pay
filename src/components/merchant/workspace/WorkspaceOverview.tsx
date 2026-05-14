@@ -457,25 +457,52 @@ export function WorkspaceOverview() {
               </Button>
             </CardHeader>
             <CardContent className="p-0">
-              <ul className="divide-y">
-                {recentTx.map((tx) => (
-                  <li key={tx.id} className="flex items-center gap-3 p-3">
-                    <div className="h-9 w-9 rounded-full bg-muted flex items-center justify-center text-xs font-semibold text-muted-foreground shrink-0">
-                      {tx.initials}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{tx.name}</p>
-                      <p className="text-[11px] text-muted-foreground truncate">
-                        {tx.id} · {tx.date} · {tx.method}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-semibold text-[hsl(var(--success))]">{tx.amount}</p>
-                      <p className="text-[11px] text-muted-foreground">Rewards: {tx.rewards}</p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
+              {recentLoading ? (
+                <div className="p-6 text-center text-xs text-muted-foreground">
+                  Loading transactions…
+                </div>
+              ) : recentTx.length === 0 ? (
+                <div className="p-6 text-center text-xs text-muted-foreground">
+                  No transactions yet.
+                </div>
+              ) : (
+                <ul className="divide-y">
+                  {recentTx.map((tx) => (
+                    <li key={tx.id} className="flex items-center gap-3 p-3">
+                      <div className="h-9 w-9 rounded-full bg-muted flex items-center justify-center text-xs font-semibold text-muted-foreground shrink-0">
+                        {tx.initials}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">
+                          {tx.name}
+                          {tx.isRefunded && (
+                            <span className="ml-2 text-[10px] font-semibold text-destructive bg-destructive/10 px-1.5 py-0.5 rounded">
+                              Refunded
+                            </span>
+                          )}
+                        </p>
+                        <p className="text-[11px] text-muted-foreground truncate">
+                          {tx.short_id} · {tx.date} · {tx.method}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p
+                          className={`text-sm font-semibold ${
+                            tx.isRefunded
+                              ? "text-destructive line-through"
+                              : "text-[hsl(var(--success))]"
+                          }`}
+                        >
+                          {tx.amount}
+                        </p>
+                        <p className="text-[11px] text-muted-foreground">
+                          Rewards: {tx.rewards}
+                        </p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </CardContent>
           </Card>
 
