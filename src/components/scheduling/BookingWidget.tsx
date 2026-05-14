@@ -624,6 +624,12 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
  <div>
  <h3 className="font-medium text-sm text-muted-foreground">Select a Time</h3>
  <p className="text-sm font-medium">{format(selectedDate,"EEEE, MMMM d, yyyy")}</p>
+                 <p className="text-xs text-muted-foreground mt-0.5">
+                   Times shown in {tzAbbr(selectedDate, merchantTz)} ({merchantTz.replace("_", " ").split("/")[1]})
+                   {showViewerLocal && (
+                     <> · your local time in <span className="font-medium">{tzAbbr(selectedDate, viewerTz)}</span> shown beneath each slot</>
+                   )}
+                 </p>
  </div>
  <Button variant="ghost" size="sm" onClick={() => setStep("date")}>
  Change Date
@@ -640,20 +646,30 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
  </div>
  ) : (
  <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
- {availableSlots.map((slot) => (
- <Button
- key={slot}
- variant={selectedSlot === slot ?"default" :"outline"}
- size="sm"
- onClick={() => {
- setSelectedSlot(slot);
- setStep("confirm");
- }}
- className="text-sm"
- >
- {formatTime(slot)}
- </Button>
- ))}
+                {availableSlots.map((slot) => {
+                  const localLabel = showViewerLocal
+                    ? viewerLocalTimeFor(selectedDate, slot, merchantTz, viewerTz)
+                    : null;
+                  return (
+                    <Button
+                      key={slot}
+                      variant={selectedSlot === slot ?"default" :"outline"}
+                      size="sm"
+                      onClick={() => {
+                        setSelectedSlot(slot);
+                        setStep("confirm");
+                      }}
+                      className="text-sm flex flex-col h-auto py-2 leading-tight"
+                    >
+                      <span>{formatTime(slot)}</span>
+                      {localLabel && (
+                        <span className="text-[10px] opacity-70 font-normal">
+                          {localLabel} local
+                        </span>
+                      )}
+                    </Button>
+                  );
+                })}
  </div>
  )}
  </div>
