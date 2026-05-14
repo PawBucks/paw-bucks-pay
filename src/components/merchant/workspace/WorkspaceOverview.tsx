@@ -357,6 +357,23 @@ export function WorkspaceOverview() {
 
       <div className="p-4 md:p-6 space-y-4 max-w-7xl w-full mx-auto">
         {/* Funding banner */}
+        {funding.status === "active" ? (
+          <Card className="border-[hsl(var(--success)/0.4)] bg-[hsl(var(--success)/0.08)] shadow-none">
+            <CardContent className="p-4 flex items-center gap-3 flex-wrap">
+              <Sparkles className="h-5 w-5 text-[hsl(var(--success))] shrink-0" />
+              <div className="flex-1 min-w-[200px]">
+                <p className="font-semibold text-sm">Active Funding Deal</p>
+                <p className="text-xs text-muted-foreground">
+                  Remaining balance {fmtUsd(funding.remaining)}
+                  {funding.rate != null ? ` · ${funding.rate}% repayment rate` : ""}
+                </p>
+              </div>
+              <Button size="sm" variant="outline" onClick={() => navigate("/merchant/quick-actions")}>
+                Manage
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
         <Card className="border-[hsl(var(--warning)/0.4)] bg-[hsl(var(--warning)/0.08)] shadow-none">
           <CardContent className="p-4 flex items-center gap-3 flex-wrap">
             <Sparkles className="h-5 w-5 text-[hsl(var(--warning))] shrink-0" />
@@ -377,6 +394,7 @@ export function WorkspaceOverview() {
             </Button>
           </CardContent>
         </Card>
+        )}
 
         {/* Account type */}
         <Card className="shadow-none">
@@ -386,12 +404,13 @@ export function WorkspaceOverview() {
               <div className="flex items-center gap-2 flex-wrap">
                 <p className="font-semibold text-sm">Account Type</p>
                 <Badge className="bg-primary/10 text-primary hover:bg-primary/10 border-primary/20 text-[10px]">
-                  Full Ecosystem
+                  {feeModel === "acquisition_only" ? "Acquisition Only" : "Full Ecosystem"}
                 </Badge>
               </div>
               <p className="text-xs text-muted-foreground mt-0.5">
-                You pay a 3% Success Fee on every USD transaction and participate in the full
-                PawBucks rewards ecosystem.
+                {feeModel === "acquisition_only"
+                  ? "You pay only an acquisition fee on new customers — no per-transaction Success Fee."
+                  : "You pay a 3% Success Fee on every USD transaction and participate in the full PawBucks rewards ecosystem."}
               </p>
             </div>
             <Button
@@ -399,7 +418,7 @@ export function WorkspaceOverview() {
               variant="outline"
               onClick={() => navigate("/merchant/support")}
             >
-              Request Acquisition-Only
+              {feeModel === "acquisition_only" ? "Switch to Full Ecosystem" : "Request Acquisition-Only"}
             </Button>
           </CardContent>
         </Card>
@@ -422,7 +441,7 @@ export function WorkspaceOverview() {
                   Allow customers to pay with their PawBucks balance (1,000 PawBucks = $1.00).
                 </p>
               </div>
-              <Switch checked={acceptPB} onCheckedChange={setAcceptPB} />
+              <Switch checked={acceptPB} onCheckedChange={handleAcceptPB} disabled={savingSetting || !merchantId} />
             </div>
             <div className="border-t pt-4 flex items-start justify-between gap-4">
               <div className="flex-1">
@@ -436,11 +455,12 @@ export function WorkspaceOverview() {
                   type="number"
                   value={capPct}
                   onChange={(e) => setCapPct(e.target.value)}
+                  onBlur={handleCapBlur}
                   className="w-16 h-8 text-sm"
-                  disabled={!capEnabled}
+                  disabled={!capEnabled || savingSetting}
                 />
                 <span className="text-xs text-muted-foreground">% max</span>
-                <Switch checked={capEnabled} onCheckedChange={setCapEnabled} />
+                <Switch checked={capEnabled} onCheckedChange={handleCapToggle} disabled={savingSetting || !merchantId} />
               </div>
             </div>
           </CardContent>
@@ -450,41 +470,41 @@ export function WorkspaceOverview() {
         <div className="grid gap-3 grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
           <StatCard
             label="Total Sales"
-            value="$25,439"
-            sub=".03 all-time"
-            badge={{ label: "93 transactions", tone: "success" }}
+            value={fmtUsd(stats.totalSalesUsd)}
+            sub="All-time completed"
+            badge={{ label: `${stats.txCount} transactions`, tone: "success" }}
             onClick={() => navigate("/merchant/total-earnings")}
           />
           <StatCard
             label="Avg Transaction"
-            value="$273"
-            sub=".54 per transaction"
+            value={fmtUsd(stats.avg)}
+            sub="Per transaction"
             onClick={() => navigate("/merchant/transactions")}
           />
           <StatCard
             label="Rewards Given"
-            value="$190.61"
-            sub="190,610 PawBucks"
+            value={fmtUsd(stats.rewardsGivenUsd)}
+            sub={`${Math.round(stats.rewardsGivenPb).toLocaleString()} PawBucks`}
             accent="success"
             onClick={() => navigate("/merchant-analytics")}
           />
           <StatCard
             label="PawBucks Received"
-            value="$1,551.89"
-            sub="Spent in March"
+            value={fmtUsd(stats.pbReceivedUsd)}
+            sub={`${fmtUsd(stats.monthPbReceivedUsd)} this month`}
             onClick={() => navigate("/merchant/pawbucks")}
           />
           <StatCard
             label="Success Fees Paid"
-            value="$465.36"
-            sub="3% of USD transactions"
+            value={fmtUsd(stats.successFees)}
+            sub={feeModel === "acquisition_only" ? "Acquisition-only plan" : "3% of USD transactions"}
             accent="warning"
             onClick={() => navigate("/merchant/tax-vault")}
           />
           <StatCard
             label="Merchant Funding"
-            value="No Loan"
-            sub="Repayment: $0.00"
+            value={funding.status === "active" ? "Active" : "No Loan"}
+            sub={funding.status === "active" ? `Remaining: ${fmtUsd(funding.remaining)}` : "Repayment: $0.00"}
             onClick={() => navigate("/merchant/quick-actions")}
           />
         </div>
