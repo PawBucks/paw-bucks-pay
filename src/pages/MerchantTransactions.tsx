@@ -524,7 +524,7 @@ const MerchantTransactions = () => { const { user, loading, signOut } = useAuth(
  onRefund={handleRefund}
  isRefunding={!!refundingId}
  />
- </div>
+ </MerchantWorkspaceLayout>
  );
 };
 
