@@ -48,6 +48,37 @@ Deno.serve(async (req) => {
                        "unknown";
     const user_agent = req.headers.get("user-agent") || "unknown";
 
+    // Verify caller identity from JWT to prevent email/user_id spoofing.
+    // For unauthenticated callers (e.g. failed-login attempts) we still log
+    // the event for security analytics, but we do NOT trust the supplied
+    // email and we do NOT send any email alerts (which would otherwise be
+    // an open spoofing/phishing vector).
+    const authHeader = req.headers.get("Authorization");
+    let verifiedUserId: string | null = null;
+    let verifiedEmail: string | null = null;
+    if (authHeader?.startsWith("Bearer ")) {
+      const anonClient = createClient(
+        Deno.env.get("SUPABASE_URL") ?? "",
+        Deno.env.get("SUPABASE_ANON_KEY") ?? ""
+      );
+      const token = authHeader.replace("Bearer ", "");
+      const { data: userData } = await anonClient.auth.getUser(token);
+      if (userData?.user) {
+        verifiedUserId = userData.user.id;
+        verifiedEmail = userData.user.email ?? null;
+      }
+    }
+    const isAuthenticated = !!verifiedUserId;
+    // Override any client-supplied identity with verified values
+    if (isAuthenticated) {
+      payload.user_id = verifiedUserId!;
+      payload.email = verifiedEmail ?? null;
+    } else {
+      // Untrusted: do not store the spoofable email on the event row
+      payload.user_id = null as unknown as string | undefined;
+      // Keep payload.email only for brute-force detection (not stored)
+    }
+
     console.log(`[Auth Event] ${payload.event_type} for ${payload.email || payload.user_id || "unknown"} - Success: ${payload.success}`);
 
     // Insert the auth event
@@ -58,7 +89,7 @@ Deno.serve(async (req) => {
         event_type: payload.event_type,
         ip_address,
         user_agent,
-        email: payload.email || null,
+        email: isAuthenticated ? (payload.email || null) : null,
         success: payload.success,
         failure_reason: payload.failure_reason || null,
         metadata: payload.metadata || {},
@@ -78,7 +109,9 @@ Deno.serve(async (req) => {
     await checkForRapidRequests(supabaseAdmin, ip_address);
 
     // Send email notification for critical security events
-    if (payload.email && shouldSendEmailAlert(payload)) {
+    // Only send if we have a verified authenticated user — otherwise the
+    // email field is attacker-controlled and would enable phishing.
+    if (isAuthenticated && payload.email && shouldSendEmailAlert(payload)) {
       await sendSecurityEmailAlert(payload, ip_address, user_agent);
     }
 
