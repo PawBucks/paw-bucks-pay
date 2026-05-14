@@ -25,6 +25,13 @@ import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { Input } from"@/components/ui/input";
 
 import { Formatters } from "@/utils/formatters";
+import {
+  DEFAULT_MERCHANT_TZ,
+  getViewerTimeZone,
+  merchantWallClockToInstant,
+  viewerLocalTimeFor,
+  tzAbbr,
+} from "@/lib/timezone";
 // Flash Sale Countdown component for service listings
 function FlashSaleCountdown({ endAt }: { endAt: string }) {
  const [timeRemaining, setTimeRemaining] = useState<string>("");
@@ -116,7 +123,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
     queryFn: async () => {
       const { data, error } = await supabase
         .from("merchants")
-        .select("stripe_account_id")
+        .select("stripe_account_id, timezone")
         .eq("id", merchantId)
         .maybeSingle();
       if (error) throw error;
@@ -124,6 +131,9 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
     },
   });
   const merchantAcceptsCards = !!merchantPaymentInfo?.stripe_account_id;
+  const merchantTz = merchantPaymentInfo?.timezone || DEFAULT_MERCHANT_TZ;
+  const viewerTz = getViewerTimeZone();
+  const showViewerLocal = viewerTz !== merchantTz;
 
  // Fetch existing bookings for the selected date
  const { data: existingBookings = [] } = useQuery({
@@ -198,9 +208,15 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
 
  // Check minimum notice period
  const minNotice = selectedServiceData.min_notice_hours || 2;
- const now = new Date();
- const slotDateTime = new Date(`${format(selectedDate,"yyyy-MM-dd")}T${slotStart}:00`);
- const tooSoon = slotDateTime.getTime() - now.getTime() < minNotice * 60 * 60 * 1000;
+      const now = new Date();
+      // Treat the slot as wall-clock in the merchant's timezone so a Pacific
+      // viewer doesn't see slots blocked (or allowed) by their own offset.
+      const slotDateTime = merchantWallClockToInstant(
+        format(selectedDate, "yyyy-MM-dd"),
+        slotStart,
+        merchantTz,
+      );
+      const tooSoon = slotDateTime.getTime() - now.getTime() < minNotice * 60 * 60 * 1000;
 
  if (!hasConflict && !tooSoon) {
  slots.push(slotStart);
@@ -211,7 +227,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
  });
 
  return slots;
- }, [selectedDate, selectedServiceData, availability, overrides, existingBookings]);
+  }, [selectedDate, selectedServiceData, availability, overrides, existingBookings, merchantTz]);
 
  // Check if a date has availability
  const isDateAvailable = (date: Date) => {
@@ -608,6 +624,12 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
  <div>
  <h3 className="font-medium text-sm text-muted-foreground">Select a Time</h3>
  <p className="text-sm font-medium">{format(selectedDate,"EEEE, MMMM d, yyyy")}</p>
+                 <p className="text-xs text-muted-foreground mt-0.5">
+                   Times shown in {tzAbbr(selectedDate, merchantTz)} ({merchantTz.replace("_", " ").split("/")[1]})
+                   {showViewerLocal && (
+                     <> · your local time in <span className="font-medium">{tzAbbr(selectedDate, viewerTz)}</span> shown beneath each slot</>
+                   )}
+                 </p>
  </div>
  <Button variant="ghost" size="sm" onClick={() => setStep("date")}>
  Change Date
@@ -624,20 +646,30 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
  </div>
  ) : (
  <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
- {availableSlots.map((slot) => (
- <Button
- key={slot}
- variant={selectedSlot === slot ?"default" :"outline"}
- size="sm"
- onClick={() => {
- setSelectedSlot(slot);
- setStep("confirm");
- }}
- className="text-sm"
- >
- {formatTime(slot)}
- </Button>
- ))}
+                {availableSlots.map((slot) => {
+                  const localLabel = showViewerLocal
+                    ? viewerLocalTimeFor(selectedDate, slot, merchantTz, viewerTz)
+                    : null;
+                  return (
+                    <Button
+                      key={slot}
+                      variant={selectedSlot === slot ?"default" :"outline"}
+                      size="sm"
+                      onClick={() => {
+                        setSelectedSlot(slot);
+                        setStep("confirm");
+                      }}
+                      className="text-sm flex flex-col h-auto py-2 leading-tight"
+                    >
+                      <span>{formatTime(slot)}</span>
+                      {localLabel && (
+                        <span className="text-[10px] opacity-70 font-normal">
+                          {localLabel} local
+                        </span>
+                      )}
+                    </Button>
+                  );
+                })}
  </div>
  )}
  </div>
@@ -665,7 +697,14 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
  </div>
  <div className="flex items-center justify-between">
  <span className="text-muted-foreground">Time</span>
- <span className="font-medium">{formatTime(selectedSlot)}</span>
+               <span className="font-medium text-right">
+                 {formatTime(selectedSlot)} {tzAbbr(selectedDate, merchantTz)}
+                 {showViewerLocal && (
+                   <span className="block text-xs text-muted-foreground font-normal">
+                     {viewerLocalTimeFor(selectedDate, selectedSlot, merchantTz, viewerTz)} {tzAbbr(selectedDate, viewerTz)} (your time)
+                   </span>
+                 )}
+               </span>
  </div>
  <div className="flex items-center justify-between">
  <span className="text-muted-foreground">Duration</span>

@@ -7252,6 +7252,7 @@ export type Database = {
           stripe_account_id: string | null
           stripe_account_status: string | null
           submission_email_sent_at: string | null
+          timezone: string
           tos_url: string | null
           twitter_url: string | null
           updated_at: string
@@ -7314,6 +7315,7 @@ export type Database = {
           stripe_account_id?: string | null
           stripe_account_status?: string | null
           submission_email_sent_at?: string | null
+          timezone?: string
           tos_url?: string | null
           twitter_url?: string | null
           updated_at?: string
@@ -7376,6 +7378,7 @@ export type Database = {
           stripe_account_id?: string | null
           stripe_account_status?: string | null
           submission_email_sent_at?: string | null
+          timezone?: string
           tos_url?: string | null
           twitter_url?: string | null
           updated_at?: string
