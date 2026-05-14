@@ -653,20 +653,32 @@ export function WorkspaceOverview() {
               <p className="text-[11px] uppercase tracking-wide text-muted-foreground font-semibold">
                 Your Invitations
               </p>
-              <div
-                className="rounded-md border p-3 flex items-center justify-between gap-3 cursor-pointer hover:bg-muted/40 transition-colors"
-                onClick={() => navigate("/merchant/brand-campaigns")}
-              >
-                <div className="min-w-0">
-                  <p className="text-sm font-medium truncate">Test Campaign 2</p>
-                  <p className="text-[11px] text-muted-foreground truncate">
-                    Brand-funded · accepted 4/23/2026
-                  </p>
+              {latestInvite ? (
+                <div
+                  className="rounded-md border p-3 flex items-center justify-between gap-3 cursor-pointer hover:bg-muted/40 transition-colors"
+                  onClick={() => navigate("/merchant/brand-campaigns")}
+                >
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium truncate">{latestInvite.name}</p>
+                    <p className="text-[11px] text-muted-foreground truncate">
+                      Brand-funded · {latestInvite.status} {latestInvite.date}
+                    </p>
+                  </div>
+                  <Badge
+                    className={
+                      latestInvite.status === "accepted"
+                        ? "bg-[hsl(var(--success)/0.12)] text-[hsl(var(--success))] hover:bg-[hsl(var(--success)/0.12)] capitalize"
+                        : "capitalize"
+                    }
+                  >
+                    {latestInvite.status}
+                  </Badge>
                 </div>
-                <Badge className="bg-[hsl(var(--success)/0.12)] text-[hsl(var(--success))] hover:bg-[hsl(var(--success)/0.12)]">
-                  Accepted
-                </Badge>
-              </div>
+              ) : (
+                <div className="rounded-md border border-dashed p-3 text-xs text-muted-foreground text-center">
+                  No campaign invitations yet.
+                </div>
+              )}
               <div className="rounded-md bg-muted/50 p-3 text-xs text-muted-foreground flex gap-2">
                 <TrendingUp className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                 <span>
