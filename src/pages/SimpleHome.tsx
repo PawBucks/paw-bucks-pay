@@ -181,20 +181,48 @@ const SimpleHome = () => {
                   <div className="rounded-xl border border-border bg-card p-4">
                     <div className="flex gap-3 flex-wrap">
                       {pets.map((p) => (
-                        <button
-                          key={p.id}
-                          onClick={() => navigate(`/pet-health/${p.id}`)}
-                          className="flex flex-col items-center gap-2 min-w-[80px]"
-                        >
-                          <div className="h-20 w-20 rounded-full bg-muted overflow-hidden flex items-center justify-center ring-1 ring-border">
-                            {p.photo_url ? (
-                              <img src={p.photo_url} alt={p.name} className="h-full w-full object-cover" />
-                            ) : (
-                              <PawBucksLogo className="h-8 w-8 text-muted-foreground" />
-                            )}
+                        <div key={p.id} className="flex flex-col items-center gap-2 min-w-[80px]">
+                          <div className="relative group">
+                            <button
+                              onClick={() => navigate(`/pet-health/${p.id}`)}
+                              className="flex flex-col items-center gap-2"
+                            >
+                              <div className="h-20 w-20 rounded-full bg-muted overflow-hidden flex items-center justify-center ring-1 ring-border">
+                                {p.photo_url ? (
+                                  <img src={p.photo_url} alt={p.name} className="h-full w-full object-cover" />
+                                ) : (
+                                  <PawBucksLogo className="h-8 w-8 text-muted-foreground" />
+                                )}
+                              </div>
+                            </button>
+                            {/* Hover quick actions */}
+                            <div className="absolute inset-0 rounded-full bg-background/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(`/pet-health/${p.id}`);
+                                }}
+                                className="p-2 rounded-full bg-accent/90 hover:bg-accent text-accent-foreground shadow-sm transition-colors"
+                                aria-label={`View health for ${p.name}`}
+                                title="Health history"
+                              >
+                                <FileText className="h-4 w-4" />
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(`/book-visit?pet=${p.id}`);
+                                }}
+                                className="p-2 rounded-full bg-primary/90 hover:bg-primary text-primary-foreground shadow-sm transition-colors"
+                                aria-label={`Schedule visit for ${p.name}`}
+                                title="Schedule visit"
+                              >
+                                <CalendarPlus className="h-4 w-4" />
+                              </button>
+                            </div>
                           </div>
                           <span className="text-xs font-medium truncate max-w-[80px]">{p.name}</span>
-                        </button>
+                        </div>
                       ))}
                       <button
                         onClick={() => navigate("/create-pet-profile")}
