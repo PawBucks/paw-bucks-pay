@@ -1,4 +1,5 @@
 import { useState, useMemo } from"react";
+import { useNavigate } from "react-router-dom";
 import { Button } from"@/components/ui/button";
 import { GradientCard } from"@/components/ui/gradient-card";
 import { Badge } from"@/components/ui/badge";
@@ -468,6 +469,19 @@ export function BookingsCalendar({ bookings, merchantId, onUpdateStatus }: Booki
  </Button>
  </div>
  )}
+ <div className="pt-2">
+   <Button
+     variant="ghost"
+     className="w-full"
+     onClick={() => {
+       const id = selectedBooking.id;
+       setSelectedBooking(null);
+       navigate(`/bookings/${id}`);
+     }}
+   >
+     View status timeline
+   </Button>
+ </div>
  </div>
  )}
  </DialogContent>
