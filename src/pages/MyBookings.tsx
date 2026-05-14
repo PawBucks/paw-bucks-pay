@@ -35,6 +35,7 @@ import { Calendar as CalendarIcon, Clock, ArrowLeft, XCircle, RefreshCw, CheckCi
 import { useNavigate } from"react-router-dom";
 import { cn } from"@/lib/utils";
 import { GroomingReportCardView } from"@/components/scheduling/GroomingReportCardView";
+import { RescheduleBookingDialog } from"@/components/scheduling/RescheduleBookingDialog";
 
 import { Formatters } from "@/utils/formatters";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
@@ -266,6 +267,20 @@ export default function MyBookings() {
  Cancel
  </Button>
  )}
+                {canReschedule(booking) && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-8 text-xs"
+                    onClick={() => {
+                      setSelectedBooking(booking);
+                      setRescheduleDialogOpen(true);
+                    }}
+                  >
+                    <RefreshCw className="w-3 h-3 mr-1" />
+                    Reschedule
+                  </Button>
+                )}
  </div>
  )}
  {status ==="completed" && merchant?.storefront_slug && (
@@ -394,6 +409,17 @@ export default function MyBookings() {
  </AlertDialogFooter>
  </AlertDialogContent>
  </AlertDialog>
+
+      <RescheduleBookingDialog
+        open={rescheduleDialogOpen}
+        onOpenChange={(o) => {
+          setRescheduleDialogOpen(o);
+          if (!o) setSelectedBooking(null);
+        }}
+        booking={selectedBooking}
+        initiator="customer"
+        onRescheduled={() => queryClient.invalidateQueries({ queryKey: ["my-bookings"] })}
+      />
  </div>
  );
 }

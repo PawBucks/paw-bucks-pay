@@ -18,9 +18,10 @@ import {
 } from"@/components/ui/dialog";
 import { format, isSameDay, startOfToday } from"date-fns";
 import { parseLocalDate } from'@/utils/formatters';
-import { CheckCircle, XCircle, Calendar as CalendarIcon, AlertCircle, Loader2 } from "lucide-react";
+import { CheckCircle, XCircle, Calendar as CalendarIcon, AlertCircle, Loader2, RefreshCw } from "lucide-react";
 import { type BookingWithDetails, type BookingStatus } from"@/services/api/scheduling.service";
 import { GroomingReportCardForm } from"./GroomingReportCardForm";
+import { RescheduleBookingDialog } from"./RescheduleBookingDialog";
 
 import { supabase } from"@/integrations/supabase/client";
 import { toast } from"sonner";
@@ -116,6 +117,7 @@ export function BookingsCalendar({ bookings, merchantId, onUpdateStatus }: Booki
  const [statusFilter, setStatusFilter] = useState<BookingStatus |'all'>('all');
  const [selectedBooking, setSelectedBooking] = useState<BookingWithDetails | null>(null);
  const [reportCardBooking, setReportCardBooking] = useState<BookingWithDetails | null>(null);
+  const [rescheduleBooking, setRescheduleBooking] = useState<BookingWithDetails | null>(null);
 
  // Get dates that have bookings
  const datesWithBookings = useMemo(() => {
@@ -388,8 +390,50 @@ export function BookingsCalendar({ bookings, merchantId, onUpdateStatus }: Booki
  Complete
  </Button>
  </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => {
+                  setRescheduleBooking(selectedBooking);
+                  setSelectedBooking(null);
+                }}
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Reschedule
+              </Button>
+              <Button
+                variant="outline"
+                className="flex-1 text-destructive hover:bg-destructive/10"
+                onClick={() => {
+                  if (window.confirm("Cancel this appointment? The slot will be released immediately.")) {
+                    onUpdateStatus(selectedBooking.id,'cancelled');
+                    setSelectedBooking(null);
+                  }
+                }}
+              >
+                <XCircle className="w-4 h-4 mr-2" />
+                Cancel Appointment
+              </Button>
+            </div>
  </div>
  )}
+
+        {selectedBooking.status ==='pending' && (
+          <div className="pt-2">
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => {
+                setRescheduleBooking(selectedBooking);
+                setSelectedBooking(null);
+              }}
+            >
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Reschedule
+            </Button>
+          </div>
+        )}
 
  {/* No-Show Fee Charge Button */}
  {selectedBooking.status ==='no_show' && (selectedBooking as any).stripe_payment_method_id && (
@@ -449,6 +493,14 @@ export function BookingsCalendar({ bookings, merchantId, onUpdateStatus }: Booki
  )}
  </DialogContent>
  </Dialog>
+
+      {/* Reschedule Dialog */}
+      <RescheduleBookingDialog
+        open={!!rescheduleBooking}
+        onOpenChange={(o) => !o && setRescheduleBooking(null)}
+        booking={rescheduleBooking as any}
+        initiator="merchant"
+      />
  </div>
  );
 }
