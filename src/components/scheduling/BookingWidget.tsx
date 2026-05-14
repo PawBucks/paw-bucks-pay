@@ -208,9 +208,15 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
 
  // Check minimum notice period
  const minNotice = selectedServiceData.min_notice_hours || 2;
- const now = new Date();
- const slotDateTime = new Date(`${format(selectedDate,"yyyy-MM-dd")}T${slotStart}:00`);
- const tooSoon = slotDateTime.getTime() - now.getTime() < minNotice * 60 * 60 * 1000;
+      const now = new Date();
+      // Treat the slot as wall-clock in the merchant's timezone so a Pacific
+      // viewer doesn't see slots blocked (or allowed) by their own offset.
+      const slotDateTime = merchantWallClockToInstant(
+        format(selectedDate, "yyyy-MM-dd"),
+        slotStart,
+        merchantTz,
+      );
+      const tooSoon = slotDateTime.getTime() - now.getTime() < minNotice * 60 * 60 * 1000;
 
  if (!hasConflict && !tooSoon) {
  slots.push(slotStart);
@@ -221,7 +227,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
  });
 
  return slots;
- }, [selectedDate, selectedServiceData, availability, overrides, existingBookings]);
+  }, [selectedDate, selectedServiceData, availability, overrides, existingBookings, merchantTz]);
 
  // Check if a date has availability
  const isDateAvailable = (date: Date) => {
