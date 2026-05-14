@@ -252,14 +252,84 @@ export function WorkspaceOverview() {
     return Object.entries(buckets).map(([month, value]) => ({ month, value }));
   }, [salesTx]);
 
+  const stats = useMemo(() => {
+    let totalSalesUsd = 0;
+    let totalPbReceived = 0; // PawBucks units used by customers
+    let totalRewardsGivenPb = 0; // PawBucks units rewarded to customers
+    let txCount = 0;
+    let monthPbReceived = 0;
+    const monthStart = startOfMonth(new Date()).getTime();
+    allTxRows.forEach((t) => {
+      const usd = Number(t.amount) || 0;
+      const pbUsed = Number(t.pawbucks_used) || 0;
+      const rewards = Number(t.rewards_earned ?? t.cashback_earned) || 0;
+      totalSalesUsd += usd;
+      totalPbReceived += pbUsed;
+      totalRewardsGivenPb += rewards;
+      txCount += 1;
+      const ts = parseISO(t.created_at).getTime();
+      if (ts >= monthStart) monthPbReceived += pbUsed;
+    });
+    const avg = txCount > 0 ? totalSalesUsd / txCount : 0;
+    const successFees = feeModel === "full_ecosystem" ? totalSalesUsd * 0.03 : 0;
+    return {
+      totalSalesUsd,
+      avg,
+      txCount,
+      rewardsGivenUsd: totalRewardsGivenPb / 1000,
+      rewardsGivenPb: totalRewardsGivenPb,
+      pbReceivedUsd: totalPbReceived / 1000,
+      monthPbReceivedUsd: monthPbReceived / 1000,
+      successFees,
+    };
+  }, [allTxRows, feeModel]);
+
   const rewardsData = useMemo(
     () => [
-      { name: "PawBucks Received", value: rewardsTotals.received },
-      { name: "Rewards Given", value: rewardsTotals.given },
+      { name: "PawBucks Received", value: stats.pbReceivedUsd },
+      { name: "Rewards Given", value: stats.rewardsGivenUsd },
     ],
-    [rewardsTotals],
+    [stats],
   );
-  const rewardsTotal = rewardsTotals.given + rewardsTotals.received;
+  const rewardsTotal = stats.pbReceivedUsd + stats.rewardsGivenUsd;
+
+  const fmtUsd = (n: number) =>
+    `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+  const updateMerchantSetting = async (patch: Record<string, unknown>) => {
+    if (!merchantId) return;
+    setSavingSetting(true);
+    const { error } = await supabase.from("merchants").update(patch).eq("id", merchantId);
+    setSavingSetting(false);
+    if (error) {
+      toast({ title: "Couldn't save", description: error.message, variant: "destructive" });
+      return false;
+    }
+    return true;
+  };
+
+  const handleAcceptPB = async (checked: boolean) => {
+    const prev = acceptPB;
+    setAcceptPB(checked);
+    const ok = await updateMerchantSetting({ accepts_pawbucks: checked });
+    if (!ok) setAcceptPB(prev);
+  };
+
+  const handleCapToggle = async (checked: boolean) => {
+    const prev = capEnabled;
+    setCapEnabled(checked);
+    const ok = await updateMerchantSetting({ pawbucks_cap_enabled: checked });
+    if (!ok) setCapEnabled(prev);
+  };
+
+  const handleCapBlur = async () => {
+    const n = Number(capPct);
+    if (!Number.isFinite(n) || n < 0 || n > 100) {
+      toast({ title: "Enter a value between 0 and 100", variant: "destructive" });
+      return;
+    }
+    await updateMerchantSetting({ pawbucks_cap_pct: n });
+  };
 
   return (
     <div className="flex flex-col">
