@@ -1,7 +1,7 @@
 import { useState } from"react";
 import { useQuery } from"@tanstack/react-query";
 import { supabase } from"@/integrations/supabase/client";
-import { Header } from"@/components/Header";
+import { MerchantWorkspaceLayout, WorkspacePageHeader } from "@/components/merchant/workspace/MerchantWorkspaceLayout";
 import { SEO } from"@/components/SEO";
 import { Button } from"@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/components/ui/card";
@@ -120,16 +120,13 @@ export default function MerchantAnalytics() {
  };
 
  return (
- <div className="min-h-screen bg-background pb-20">
- <Header variant="merchant" isAuthenticated={true} />
- 
- <main className="container mx-auto px-4 pt-24 pb-8 max-w-7xl">
- <div className="mb-8">
- <h1 className="text-4xl font-bold mb-2">Business Intelligence & Analytics</h1>
- <p className="text-muted-foreground">
- Unlock powerful insights to grow your business
- </p>
- </div>
+ <MerchantWorkspaceLayout>
+ <WorkspacePageHeader
+   section="Dashboard"
+   title="Analytics"
+   subtitle="Business intelligence and insights to grow your business"
+ />
+ <main className="p-4 md:p-6 max-w-7xl mx-auto">
 
  <Tabs defaultValue="dashboard" className="space-y-6">
  <TabsList className="flex-wrap">
@@ -328,6 +325,6 @@ export default function MerchantAnalytics() {
  </TabsContent>
  </Tabs>
  </main>
- </div>
+ </MerchantWorkspaceLayout>
  );
 }

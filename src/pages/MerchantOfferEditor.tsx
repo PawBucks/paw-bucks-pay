@@ -1,7 +1,7 @@
 import { useState, useEffect } from"react";
 import { useNavigate, useParams } from"react-router-dom";
 import { supabase } from"@/integrations/supabase/client";
-import { Header } from"@/components/Header";
+import { MerchantWorkspaceLayout, WorkspacePageHeader } from "@/components/merchant/workspace/MerchantWorkspaceLayout";
 import { SEO } from"@/components/SEO";
 import { useAuth } from"@/hooks/useAuth";
 import { Button } from"@/components/ui/button";
@@ -168,10 +168,9 @@ const handleSignOut = async () => {
  description="Create or edit partner offers for PawBucks redemption"
  keywords={["merchant","offers","create","edit"]}
  />
- <div className="min-h-screen bg-background">
- <Header isAuthenticated={!!user} onLogout={handleSignOut} userId={user?.id} variant="merchant" />
- 
- <main className="container mx-auto px-4 py-8 pb-24 max-w-4xl lg:max-w-6xl">
+ <MerchantWorkspaceLayout>
+ <WorkspacePageHeader section="Catalog & Services" title={isEditMode ? "Edit Offer" : "Create Offer"} subtitle={isEditMode ? "Update your offer details" : "Create a new PawBucks redemption offer"} />
+ <main className="container mx-auto px-4 py-6 pb-24 max-w-4xl lg:max-w-6xl">
  <Button variant="ghost" onClick={() => navigate("/merchant/offers")} className="mb-4">
  <ArrowLeft className="mr-2 h-4 w-4" />
  Back to Offers
@@ -314,7 +313,7 @@ const handleSignOut = async () => {
  </CardContent>
  </Card>
  </main>
- </div>
+ </MerchantWorkspaceLayout>
  </>
  );
 }

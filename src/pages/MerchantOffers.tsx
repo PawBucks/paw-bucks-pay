@@ -2,7 +2,7 @@ import { useState, useEffect } from"react";
 import { useNavigate } from"react-router-dom";
 import { supabase } from"@/integrations/supabase/client";
 import { useDebounce } from"@/hooks/useDebounce";
-import { Header } from"@/components/Header";
+import { MerchantWorkspaceLayout, WorkspacePageHeader } from "@/components/merchant/workspace/MerchantWorkspaceLayout";
 import { SEO } from"@/components/SEO";
 import { useAuth } from"@/hooks/useAuth";
 import { Button } from"@/components/ui/button";
@@ -154,27 +154,23 @@ const handleSignOut = async () => {
  description="Create and manage PawBucks redemption offers for your customers"
  keywords={["merchant","offers","rewards","management"]}
  />
- <div className="min-h-screen bg-background">
- <Header isAuthenticated={!!user} onLogout={handleSignOut} userId={user?.id} variant="merchant" />
- 
- <main className="container mx-auto px-4 py-8 pb-24 max-w-7xl">
+ <MerchantWorkspaceLayout>
+ <WorkspacePageHeader
+   section="Catalog & Services"
+   title="Partner Offers"
+   subtitle="Create and manage PawBucks redemption offers"
+   actions={
+     <>
+       <MerchantOfferImport onImportComplete={fetchOffers} />
+       <Button onClick={() => navigate("/merchant/offers/new")}>
+         <Plus className="mr-2 h-4 w-4" />
+         Create Offer
+       </Button>
+     </>
+   }
+ />
+ <main className="container mx-auto px-4 py-6 pb-24 max-w-7xl">
  <div className="flex flex-col gap-6">
- {/* Header Section */}
- <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
- <div>
- <h1 className="text-3xl font-bold">Partner Offers</h1>
- <p className="text-muted-foreground mt-1">
- Create and manage PawBucks redemption offers
- </p>
- </div>
- <div className="flex gap-2">
- <MerchantOfferImport onImportComplete={fetchOffers} />
- <Button onClick={() => navigate("/merchant/offers/new")}>
- <Plus className="mr-2 h-4 w-4" />
- Create Offer
- </Button>
- </div>
- </div>
 
  {/* Filters */}
  <Card>
@@ -363,7 +359,7 @@ const handleSignOut = async () => {
  )}
  </div>
  </main>
- </div>
+ </MerchantWorkspaceLayout>
  </>
  );
 }

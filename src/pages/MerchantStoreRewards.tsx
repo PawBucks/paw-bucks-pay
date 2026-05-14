@@ -16,7 +16,7 @@ import {
   useMerchantStoreRewardsWallet,
   useMerchantStoreRewardsActivity,
 } from "@/hooks/useMerchantStoreRewardsWallet";
-import { Header } from "@/components/Header";
+import { MerchantWorkspaceLayout, WorkspacePageHeader } from "@/components/merchant/workspace/MerchantWorkspaceLayout";
 
 export default function MerchantStoreRewards() {
   const navigate = useNavigate();
@@ -108,8 +108,8 @@ export default function MerchantStoreRewards() {
 
   if (!hasService) {
     return (
-      <div className="min-h-screen bg-background">
-        <Header />
+      <MerchantWorkspaceLayout>
+        <WorkspacePageHeader section="Wallet" title="Store Rewards Pro" subtitle="In-store PawBucks rewards program" />
         <div className="container max-w-4xl mx-auto p-6">
           <Button variant="ghost" onClick={() => navigate("/merchant/market")} className="mb-4">
             <ArrowLeft className="h-4 w-4 mr-2" /> Back to Merchant Market
@@ -135,7 +135,7 @@ export default function MerchantStoreRewards() {
             </CardContent>
           </Card>
         </div>
-      </div>
+      </MerchantWorkspaceLayout>
     );
   }
 
@@ -145,20 +145,13 @@ export default function MerchantStoreRewards() {
   const isLowBalance = balanceUsd <= lowBalanceUsd;
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
+    <MerchantWorkspaceLayout>
+      <WorkspacePageHeader
+        section="Wallet"
+        title="Store Rewards Pro"
+        subtitle="Issue in-store PawBucks to your customers — redeemable only at your business."
+      />
       <div className="container max-w-4xl mx-auto p-6 space-y-6">
-        <div>
-          <Button variant="ghost" onClick={() => navigate(-1)} className="mb-2">
-            <ArrowLeft className="h-4 w-4 mr-2" /> Back
-          </Button>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Gift className="h-7 w-7 text-primary" aria-hidden="true" /> Store Rewards Pro
-          </h1>
-          <p className="text-muted-foreground">
-            Issue in-store PawBucks to your customers — redeemable only at your business.
-          </p>
-        </div>
 
         {/* Funding balance */}
         <Card className={isLowBalance ? "border-destructive" : undefined}>
@@ -294,6 +287,6 @@ export default function MerchantStoreRewards() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </MerchantWorkspaceLayout>
   );
 }
