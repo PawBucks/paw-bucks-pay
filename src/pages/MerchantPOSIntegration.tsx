@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from"@/components/ui/dialog";
 import { Checkbox } from"@/components/ui/checkbox";
 import { toast } from"sonner";
-import { ArrowLeft, Key, Plus, Copy, Trash2, AlertTriangle, CheckCircle, ExternalLink, Webhook, Code, Send, RefreshCw, Unlock, History } from "lucide-react";
+import { AlertTriangle, ArrowLeft, BookOpen, CheckCircle, Clock, Code, Copy, ExternalLink, History, Key, Lock, Plus, RefreshCw, Send, Shield, Trash2, Unlock, Webhook, Zap } from "lucide-react";
 import { Header } from"@/components/Header";
 import { BottomNav } from"@/components/BottomNav";
 
@@ -322,7 +322,7 @@ export default function MerchantPOSIntegration() {
  case"matched":
  return <Badge className="bg-info text-info-foreground"><CheckCircle className="w-3 h-3 mr-1" />Matched</Badge>;
  case"pending":
- return <Badge variant="secondary"><span className="w-3 h-3 mr-1" aria-hidden="true">⏰</span>Pending</Badge>;
+ return <Badge variant="secondary"><Clock className="w-3 h-3 mr-1" aria-hidden="true" />Pending</Badge>;
  case"failed":
  return <Badge variant="destructive"><AlertTriangle className="w-3 h-3 mr-1" />Failed</Badge>;
  default:
@@ -354,7 +354,7 @@ export default function MerchantPOSIntegration() {
  <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-accent/5">
  <CardHeader className="text-center pb-4">
  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
- <span className="w-8 h-8 text-primary" aria-hidden="true">⚡</span>
+ <Zap className="w-8 h-8 text-primary" aria-hidden="true" />
  </div>
  <CardTitle className="text-2xl">Unlock POS & API Integration</CardTitle>
  <CardDescription className="text-base max-w-lg mx-auto">
@@ -364,7 +364,7 @@ export default function MerchantPOSIntegration() {
  <CardContent className="space-y-6">
  <div className="grid gap-4 md:grid-cols-2">
  <div className="flex items-start gap-3 p-4 rounded-lg bg-card border">
- <span className="w-5 h-5 text-primary mt-0.5" aria-hidden="true">🔑</span>
+ <Key className="w-5 h-5 text-primary mt-0.5" aria-hidden="true" />
  <div>
  <p className="font-medium">Unlimited API Transactions</p>
  <p className="text-sm text-muted-foreground">No limits on transaction volume</p>
@@ -378,14 +378,14 @@ export default function MerchantPOSIntegration() {
  </div>
  </div>
  <div className="flex items-start gap-3 p-4 rounded-lg bg-card border">
- <span className="w-5 h-5 text-primary mt-0.5" aria-hidden="true">🛡️</span>
+ <Shield className="w-5 h-5 text-primary mt-0.5" aria-hidden="true" />
  <div>
  <p className="font-medium">Secure Authentication</p>
  <p className="text-sm text-muted-foreground">HMAC signed webhooks</p>
  </div>
  </div>
  <div className="flex items-start gap-3 p-4 rounded-lg bg-card border">
- <span className="w-5 h-5 text-primary mt-0.5" aria-hidden="true">📖</span>
+ <BookOpen className="w-5 h-5 text-primary mt-0.5" aria-hidden="true" />
  <div>
  <p className="font-medium">Developer Support</p>
  <p className="text-sm text-muted-foreground">Priority integration assistance</p>
@@ -430,7 +430,7 @@ export default function MerchantPOSIntegration() {
  <Tabs defaultValue="api-keys" className="space-y-6">
  <TabsList className="grid w-full grid-cols-4">
  <TabsTrigger value="api-keys" className="flex items-center gap-2">
- <span className="w-4 h-4" aria-hidden="true">🔑</span>
+ <Key className="w-4 h-4" aria-hidden="true" />
  <span className="hidden sm:inline">API Keys</span>
  </TabsTrigger>
  <TabsTrigger value="webhooks" className="flex items-center gap-2">
@@ -454,7 +454,7 @@ export default function MerchantPOSIntegration() {
  <div className="flex items-center justify-between">
  <div>
  <CardTitle className="flex items-center gap-2">
- <span className="h-5 w-5" aria-hidden="true">🔑</span>
+ <Key className="h-5 w-5" aria-hidden="true" />
  API Keys
  </CardTitle>
  <CardDescription>Manage your POS integration API keys</CardDescription>
@@ -468,7 +468,7 @@ export default function MerchantPOSIntegration() {
  <CardContent>
  {integrations.length === 0 ? (
  <div className="text-center py-8 text-muted-foreground">
- <span className="h-12 w-12 mx-auto mb-4 opacity-50" aria-hidden="true">🔑</span>
+ <Key className="h-12 w-12 mx-auto mb-4 opacity-50" aria-hidden="true" />
  <p>No API keys created yet</p>
  <p className="text-sm">Create an API key to start integrating your POS system</p>
  </div>
@@ -484,11 +484,11 @@ export default function MerchantPOSIntegration() {
  <span className="font-medium">{integration.name}</span>
  {integration.is_active ? (
  <Badge variant="outline" className="text-success border-success/40">
- <span className="w-3 h-3 mr-1" aria-hidden="true">🔓</span>Active
+ <Unlock className="w-3 h-3 mr-1" aria-hidden="true" />Active
  </Badge>
  ) : (
  <Badge variant="secondary">
- <span className="w-3 h-3 mr-1" aria-hidden="true">🔒</span>Inactive
+ <Lock className="w-3 h-3 mr-1" aria-hidden="true" />Inactive
  </Badge>
  )}
  </div>
@@ -654,7 +654,7 @@ export default function MerchantPOSIntegration() {
  <CardContent>
  {transactions.length === 0 ? (
  <div className="text-center py-8 text-muted-foreground">
- <span className="h-12 w-12 mx-auto mb-4 opacity-50" aria-hidden="true">⏰</span>
+ <Clock className="h-12 w-12 mx-auto mb-4 opacity-50" aria-hidden="true" />
  <p>No transactions yet</p>
  <p className="text-sm">Transactions will appear here once you start sending them from your POS</p>
  </div>
@@ -808,7 +808,7 @@ x-api-key: pk_live_XXXXXXXX...`}
  for custom integration assistance.
  </p>
  <Button variant="outline" onClick={() => navigate("/merchant-dashboard")}>
- <span className="h-4 w-4 mr-2" aria-hidden="true">📖</span>
+ <BookOpen className="h-4 w-4 mr-2" aria-hidden="true" />
  Contact Developer Support
  </Button>
  </div>

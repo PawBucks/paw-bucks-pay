@@ -2,7 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/comp
 import { Badge } from"@/components/ui/badge";
 import { Button } from"@/components/ui/button";
 import { GradientCard } from"@/components/ui/gradient-card";
-import { Code, Key, Webhook, ExternalLink, Shield } from "lucide-react";
+import { BookOpen, Code, Crown, ExternalLink, Key, Shield, Webhook, Zap } from "lucide-react";
 import { useNavigate } from"react-router-dom";
 
 export function PosApiWidget() {
@@ -26,7 +26,7 @@ export function PosApiWidget() {
  </p>
  </div>
  <Badge className="bg-gradient-to-r from-primary to-primary/60 gap-1 w-fit">
- <span className="h-3 w-3" aria-hidden="true">👑</span> Premium
+ <Crown className="h-3 w-3" aria-hidden="true" /> Premium
  </Badge>
  </div>
 
@@ -51,7 +51,7 @@ export function PosApiWidget() {
  <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <span className="h-5 w-5 text-primary" aria-hidden="true">⚡</span>
+ <Zap className="h-5 w-5 text-primary" aria-hidden="true" />
  Quick Start Guide
  </CardTitle>
  <CardDescription>Get your POS integration running in minutes</CardDescription>
@@ -84,7 +84,7 @@ export function PosApiWidget() {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <span className="h-5 w-5" aria-hidden="true">📖</span>
+ <BookOpen className="h-5 w-5" aria-hidden="true" />
  Integration Resources
  </CardTitle>
  </CardHeader>
@@ -94,7 +94,7 @@ export function PosApiWidget() {
  className="w-full flex items-center justify-between p-4 rounded-lg border hover:bg-muted transition-colors text-left"
  >
  <div className="flex items-center gap-3">
- <span className="h-5 w-5 text-muted-foreground" aria-hidden="true">🔑</span>
+ <Key className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
  <div>
  <p className="font-medium">API Key Management</p>
  <p className="text-sm text-muted-foreground">Create, rotate, and manage your API credentials</p>

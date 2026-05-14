@@ -23,7 +23,7 @@ import {
  TableHeader,
  TableRow,
 } from"@/components/ui/table";
-import { Plus, Stamp, Pencil, Loader2 } from "lucide-react";
+import { Gift, Loader2, Pencil, Plus, Stamp, Trophy, Users } from "lucide-react";
 import { toast } from"sonner";
 import { format } from"date-fns";
 
@@ -331,7 +331,7 @@ export function MerchantLoyaltyProgramTab({ merchantId }: MerchantLoyaltyProgram
  {programs.length === 0 ? (
  <Card className="border-dashed">
  <CardContent className="py-12 text-center">
- <span className="w-12 h-12 text-muted-foreground mx-auto mb-4" aria-hidden="true">🎁</span>
+ <Gift className="w-12 h-12 text-muted-foreground mx-auto mb-4" aria-hidden="true" />
  <h3 className="text-lg font-semibold mb-2">No Loyalty Programs Yet</h3>
  <p className="text-muted-foreground text-sm mb-4">
  Create your first punch card program to start rewarding loyal customers
@@ -391,7 +391,7 @@ export function MerchantLoyaltyProgramTab({ merchantId }: MerchantLoyaltyProgram
  </div>
  ))}
  <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
- <span className="w-3 h-3 text-primary-foreground" aria-hidden="true">🎁</span>
+ <Gift className="w-3 h-3 text-primary-foreground" aria-hidden="true" />
  </div>
  </div>
  {program.qualifying_description && (
@@ -405,7 +405,7 @@ export function MerchantLoyaltyProgramTab({ merchantId }: MerchantLoyaltyProgram
  <div className="grid grid-cols-3 gap-3 text-center">
  <div>
  <div className="flex items-center justify-center gap-1 text-muted-foreground">
- <span className="w-3.5 h-3.5" aria-hidden="true">👥</span>
+ <Users className="w-3.5 h-3.5" aria-hidden="true" />
  </div>
  <p className="text-lg font-bold">{programStats.active_cards}</p>
  <p className="text-xs text-muted-foreground">Customers</p>
@@ -419,7 +419,7 @@ export function MerchantLoyaltyProgramTab({ merchantId }: MerchantLoyaltyProgram
  </div>
  <div>
  <div className="flex items-center justify-center gap-1 text-muted-foreground">
- <span className="w-3.5 h-3.5" aria-hidden="true">🏆</span>
+ <Trophy className="w-3.5 h-3.5" aria-hidden="true" />
  </div>
  <p className="text-lg font-bold">{programStats.rewards_earned}</p>
  <p className="text-xs text-muted-foreground">Rewards</p>

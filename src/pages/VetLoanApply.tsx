@@ -12,7 +12,7 @@ import { Textarea } from"@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from"@/components/ui/select";
 import { Checkbox } from"@/components/ui/checkbox";
 import { toast } from"sonner";
-import { Upload, CheckCircle, XCircle } from "lucide-react";
+import { CheckCircle, Clock, Crown, Upload, XCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from"@/components/ui/alert";
 
 import { Formatters } from "@/utils/formatters";
@@ -231,7 +231,7 @@ const VetLoanApply = () => { const { user, loading, signOut } = useAuth();
  {/* Premium Required Notice */}
  {!subscription.subscribed && (
  <Alert className="border-accent bg-accent/10">
- <span className="h-5 w-5 text-accent" aria-hidden="true">👑</span>
+ <Crown className="h-5 w-5 text-accent" aria-hidden="true" />
  <AlertTitle className="text-lg font-bold">PawPass Required</AlertTitle>
  <AlertDescription className="space-y-4">
  <p>
@@ -250,7 +250,7 @@ const VetLoanApply = () => { const { user, loading, signOut } = useAuth();
  </div>
  <div className="flex gap-3">
  <Button onClick={handleUpgradeToPremium} className="gap-2">
- <span className="h-4 w-4" aria-hidden="true">👑</span>
+ <Crown className="h-4 w-4" aria-hidden="true" />
  Upgrade to PawPass
  </Button>
  <Button onClick={() => navigate('/dashboard')} variant="outline">
@@ -273,7 +273,7 @@ const VetLoanApply = () => { const { user, loading, signOut } = useAuth();
  <XCircle className="h-12 w-12 text-destructive flex-shrink-0" />
  )}
  {result.status ==='pending' && (
- <span className="h-12 w-12 text-warning flex-shrink-0" aria-hidden="true">⏰</span>
+ <Clock className="h-12 w-12 text-warning flex-shrink-0" aria-hidden="true" />
  )}
  
  <div className="flex-1 space-y-2">

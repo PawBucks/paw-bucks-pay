@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Info } from "lucide-react";
+import { Info, Loader2, Shield } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -129,7 +129,7 @@ export function PawBucksCapCard({
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div className="flex items-start gap-3">
           <div className="w-10 h-10 rounded-full bg-info/10 flex items-center justify-center shrink-0">
-            <span className="w-5 h-5 text-info" aria-hidden="true">🛡️</span>
+            <Shield className="w-5 h-5 text-info" aria-hidden="true" />
           </div>
           <div>
             <h3 className="font-semibold leading-tight">PawBucks Acceptance Cap</h3>

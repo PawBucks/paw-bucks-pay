@@ -20,7 +20,7 @@ import {
  SelectTrigger,
  SelectValue,
 } from"@/components/ui/select";
-import { Plus, Loader2, ZoomIn, AlertTriangle } from "lucide-react";
+import { AlertTriangle, Image, Loader2, Plus, ZoomIn } from "lucide-react";
 import { toast } from"sonner";
 import { format } from"date-fns";
 import type { ImagingRecord, ImagingType } from"./types";
@@ -320,7 +320,7 @@ export const ImagingTab = ({ petId, vetId }: ImagingTabProps) => {
 
  {records.length === 0 ? (
  <Card className="p-8 text-center text-muted-foreground">
- <span className="w-12 h-12 mx-auto mb-2 opacity-50" aria-hidden="true">🖼️</span>
+ <Image className="w-12 h-12 mx-auto mb-2 opacity-50" aria-hidden="true" />
  <p>No imaging records yet.</p>
  </Card>
  ) : (

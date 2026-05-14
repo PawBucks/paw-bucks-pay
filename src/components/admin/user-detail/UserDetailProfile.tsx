@@ -3,7 +3,7 @@ import { supabase } from"@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
 import { Skeleton } from"@/components/ui/skeleton";
-import { User, Phone, Ban } from "lucide-react";
+import { Ban, Calendar, Crown, Gift, Mail, Phone, Shield, User, Users } from "lucide-react";
 import { BanUserCard } from"./BanUserCard";
 import { DeleteUserCard } from"./DeleteUserCard";
 
@@ -116,7 +116,7 @@ export function UserDetailProfile({ userId }: { userId: string }) {
  <CardHeader>
  <CardTitle className="flex items-center gap-3 text-2xl">
  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
- <span className="w-6 h-6 text-primary" aria-hidden="true">👤</span>
+ <User className="w-6 h-6 text-primary" aria-hidden="true" />
  </div>
  <div className="flex-1">
  <div className="flex items-center gap-2">
@@ -134,14 +134,14 @@ export function UserDetailProfile({ userId }: { userId: string }) {
  </CardHeader>
  <CardContent>
  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
- <InfoItem icon={<span className="w-4 h-4" aria-hidden="true">📅</span>} label="Joined" value={new Date(profile.created_at).toLocaleDateString("en-US", { year:"numeric", month:"long", day:"numeric" })} />
- <InfoItem icon={<span className="w-4 h-4" aria-hidden="true">📞</span>} label="Phone" value={profile.phone ||"N/A"} />
- <InfoItem icon={<span className="w-4 h-4" aria-hidden="true">🛡️</span>} label="User Type">
+ <InfoItem icon={<Calendar className="w-4 h-4" aria-hidden="true" />} label="Joined" value={new Date(profile.created_at).toLocaleDateString("en-US", { year:"numeric", month:"long", day:"numeric" })} />
+ <InfoItem icon={<Phone className="w-4 h-4" aria-hidden="true" />} label="Phone" value={profile.phone ||"N/A"} />
+ <InfoItem icon={<Shield className="w-4 h-4" aria-hidden="true" />} label="User Type">
  <Badge variant={profile.user_type ==="merchant" ?"default" :"secondary"}>
  {profile.user_type}
  </Badge>
  </InfoItem>
- <InfoItem icon={<span className="w-4 h-4" aria-hidden="true">👑</span>} label="Roles">
+ <InfoItem icon={<Crown className="w-4 h-4" aria-hidden="true" />} label="Roles">
  <div className="flex gap-1 flex-wrap">
  {roles.length > 0
  ? roles.map(r => <Badge key={r.role} variant="outline">{r.role}</Badge>)
@@ -150,15 +150,15 @@ export function UserDetailProfile({ userId }: { userId: string }) {
  </InfoItem>
 
  {profile.subscription_tier && (
- <InfoItem icon={<span className="w-4 h-4" aria-hidden="true">👑</span>} label="Subscription" value={profile.subscription_tier} />
+ <InfoItem icon={<Crown className="w-4 h-4" aria-hidden="true" />} label="Subscription" value={profile.subscription_tier} />
  )}
 
  {profile.referral_code && (
- <InfoItem icon={<span className="w-4 h-4" aria-hidden="true">📧</span>} label="Referral Code" value={profile.referral_code} />
+ <InfoItem icon={<Mail className="w-4 h-4" aria-hidden="true" />} label="Referral Code" value={profile.referral_code} />
  )}
 
  {welcomeCredit && (
- <InfoItem icon={<span className="w-4 h-4" aria-hidden="true">🎁</span>} label="Welcome Credit">
+ <InfoItem icon={<Gift className="w-4 h-4" aria-hidden="true" />} label="Welcome Credit">
  <div className="space-y-1">
  <Badge variant="outline" className={
  welcomeCredit.status ==="active"
@@ -180,11 +180,11 @@ export function UserDetailProfile({ userId }: { userId: string }) {
  )}
 
  {sharedWith && (
- <InfoItem icon={<span className="w-4 h-4" aria-hidden="true">👥</span>} label="Shared With Owner" value={sharedWith} />
+ <InfoItem icon={<Users className="w-4 h-4" aria-hidden="true" />} label="Shared With Owner" value={sharedWith} />
  )}
 
  {sharedMembers.length > 0 && (
- <InfoItem icon={<span className="w-4 h-4" aria-hidden="true">👥</span>} label="Shared Members">
+ <InfoItem icon={<Users className="w-4 h-4" aria-hidden="true" />} label="Shared Members">
  <div className="space-y-0.5">
  {sharedMembers.map(email => (
  <p key={email} className="text-sm">{email}</p>

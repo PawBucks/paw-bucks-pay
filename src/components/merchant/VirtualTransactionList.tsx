@@ -2,7 +2,7 @@ import { useRef } from"react";
 import { useVirtualizer } from"@tanstack/react-virtual";
 import { format } from"date-fns";
 import { GradientCard } from"@/components/ui/gradient-card";
-import { RotateCcw } from "lucide-react";
+import { RotateCcw, User } from "lucide-react";
 import { Formatters } from"@/utils/formatters";
 
 type Transaction = {
@@ -42,7 +42,7 @@ const TransactionItem = ({ transaction }: { transaction: Transaction }) => {
  {isRefunded ? (
  <RotateCcw className="w-4 h-4 text-destructive" />
  ) : (
- <span className="w-4 h-4 text-primary" aria-hidden="true">👤</span>
+ <User className="w-4 h-4 text-primary" aria-hidden="true" />
  )}
  </div>
  <div>

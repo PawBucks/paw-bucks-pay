@@ -8,7 +8,7 @@ import { Button } from"@/components/ui/button";
 import { GradientCard } from"@/components/ui/gradient-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
 import { Badge } from"@/components/ui/badge";
-import { Loader2, ArrowLeft, Plus, Settings } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, Compass, Dog, Loader2, Plus, Settings, Users, Zap } from "lucide-react";
 import { toast } from"sonner";
 import { ServicesList } from"@/components/scheduling/ServicesList";
 import { AvailabilityManager } from"@/components/scheduling/AvailabilityManager";
@@ -259,7 +259,7 @@ const MerchantScheduling = () => {
  <GradientCard className="p-4">
  <div className="flex items-center gap-3">
  <div className="p-2 bg-accent/10 rounded-lg">
- <span className="w-5 h-5 text-accent" aria-hidden="true">📅</span>
+ <Calendar className="w-5 h-5 text-accent" aria-hidden="true" />
  </div>
  <div>
  <p className="text-2xl font-bold">{todayBookings}</p>
@@ -270,7 +270,7 @@ const MerchantScheduling = () => {
  <GradientCard className="p-4">
  <div className="flex items-center gap-3">
  <div className="p-2 bg-warning/10 rounded-lg">
- <span className="w-5 h-5 text-warning" aria-hidden="true">⏰</span>
+ <Clock className="w-5 h-5 text-warning" aria-hidden="true" />
  </div>
  <div>
  <p className="text-2xl font-bold">{pendingBookings}</p>
@@ -281,7 +281,7 @@ const MerchantScheduling = () => {
  <GradientCard className="p-4">
  <div className="flex items-center gap-3">
  <div className="p-2 bg-success/10 rounded-lg">
- <span className="w-5 h-5 text-success" aria-hidden="true">👥</span>
+ <Users className="w-5 h-5 text-success" aria-hidden="true" />
  </div>
  <div>
  <p className="text-2xl font-bold">{bookings.filter(b => b.status ==='completed').length}</p>
@@ -293,7 +293,7 @@ const MerchantScheduling = () => {
  <GradientCard className="p-4 md:col-span-1 col-span-2">
  <div className="flex items-center gap-3">
  <div className="p-2 bg-warning/10 rounded-lg">
- <span className="w-5 h-5 text-warning" aria-hidden="true">⚡</span>
+ <Zap className="w-5 h-5 text-warning" aria-hidden="true" />
  </div>
  <div>
  <p className="text-2xl font-bold">{services.filter(s => isFlashSaleActive(s)).length}</p>
@@ -309,13 +309,13 @@ const MerchantScheduling = () => {
  <TabsTrigger value="availability">Availability</TabsTrigger>
  <TabsTrigger value="bookings">Bookings</TabsTrigger>
  <TabsTrigger value="routes" className="gap-1">
- <span className="w-3.5 h-3.5" aria-hidden="true">🧭</span>
+ <Compass className="w-3.5 h-3.5" aria-hidden="true" />
  Routes
  </TabsTrigger>
  <TabsTrigger value="intake">Intake Forms</TabsTrigger>
  {getNormalizedCategory(businessType) ==='grooming' && (
  <TabsTrigger value="grooming" className="gap-1">
- <span className="w-3.5 h-3.5" aria-hidden="true">🐕</span>
+ <Dog className="w-3.5 h-3.5" aria-hidden="true" />
  Grooming
  </TabsTrigger>
  )}

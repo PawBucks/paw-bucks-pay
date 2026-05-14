@@ -11,7 +11,7 @@ import {
  SelectTrigger,
  SelectValue,
 } from"@/components/ui/select";
-import { MicOff, Loader2, AlertCircle, Copy, Thermometer, Scale, Wind } from "lucide-react";
+import { AlertCircle, Copy, FileText, Heart, Loader2, Mic, MicOff, Scale, Thermometer, Wind } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { toast } from"sonner";
 import { useQuery } from"@tanstack/react-query";
@@ -246,7 +246,7 @@ export const AutoSOAPGenerator = ({ vetId }: AutoSOAPGeneratorProps) => {
  <Card className="p-6">
  <div className="flex items-center gap-3 mb-6">
  <div className="w-10 h-10 rounded-full bg-info/10 /30 flex items-center justify-center">
- <span className="w-5 h-5 text-info" aria-hidden="true">🎤</span>
+ <Mic className="w-5 h-5 text-info" aria-hidden="true" />
  </div>
  <div>
  <h3 className="text-lg font-semibold">Voice-to-SOAP Generator</h3>
@@ -277,7 +277,7 @@ export const AutoSOAPGenerator = ({ vetId }: AutoSOAPGeneratorProps) => {
  disabled={!selectedPetId}
  className="bg-destructive hover:bg-destructive"
  >
- <span className="w-4 h-4 mr-2" aria-hidden="true">🎤</span>
+ <Mic className="w-4 h-4 mr-2" aria-hidden="true" />
  Start Recording
  </Button>
  ) : (
@@ -336,7 +336,7 @@ export const AutoSOAPGenerator = ({ vetId }: AutoSOAPGeneratorProps) => {
  >
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-3">
- <span className="w-5 h-5 text-muted-foreground" aria-hidden="true">📄</span>
+ <FileText className="w-5 h-5 text-muted-foreground" aria-hidden="true" />
  <div>
  <p className="font-medium">{draft.pet?.name}</p>
  <p className="text-xs text-muted-foreground">
@@ -405,7 +405,7 @@ export const AutoSOAPGenerator = ({ vetId }: AutoSOAPGeneratorProps) => {
  )}
  {draft.extracted_vitals.heart_rate && (
  <div className="flex items-center gap-1 text-sm">
- <span className="w-3 h-3" aria-hidden="true">❤️</span>
+ <Heart className="w-3 h-3" aria-hidden="true" />
  {draft.extracted_vitals.heart_rate} bpm
  </div>
  )}
@@ -511,7 +511,7 @@ export const AutoSOAPGenerator = ({ vetId }: AutoSOAPGeneratorProps) => {
  </div>
  ) : (
  <div className="text-center py-8 text-muted-foreground">
- <span className="w-12 h-12 mx-auto mb-2 opacity-50" aria-hidden="true">🎤</span>
+ <Mic className="w-12 h-12 mx-auto mb-2 opacity-50" aria-hidden="true" />
  <p>No recent drafts</p>
  <p className="text-sm">Start a recording to generate AI-assisted SOAP notes</p>
  </div>

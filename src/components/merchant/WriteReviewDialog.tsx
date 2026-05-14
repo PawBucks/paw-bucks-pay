@@ -10,7 +10,7 @@ import {
 import { Button } from"@/components/ui/button";
 import { Textarea } from"@/components/ui/textarea";
 import { toast } from"sonner";
-import { Star, X, Loader2 } from "lucide-react";
+import { Camera, Loader2, Star, X } from "lucide-react";
 
 type WriteReviewDialogProps = {
  open: boolean;
@@ -242,7 +242,7 @@ export const WriteReviewDialog = ({
  onClick={() => fileInputRef.current?.click()}
  className="w-full"
  >
- <span className="w-4 h-4 mr-2" aria-hidden="true">📸</span>
+ <Camera className="w-4 h-4 mr-2" aria-hidden="true" />
  Add Photos ({photos.length}/5)
  </Button>
  )}

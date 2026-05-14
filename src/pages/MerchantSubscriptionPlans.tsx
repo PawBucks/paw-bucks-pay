@@ -25,7 +25,7 @@ import {
  AlertDialogHeader,
  AlertDialogTitle,
 } from"@/components/ui/alert-dialog";
-import { ArrowLeft, Plus, MoreVertical, Edit, Trash2, Upload, Loader2, RefreshCw, CheckCircle } from "lucide-react";
+import { ArrowLeft, Calendar, CheckCircle, Clock, DollarSign, Edit, Loader2, MoreVertical, Plus, RefreshCw, Trash2, Upload, Users } from "lucide-react";
 import { toast } from"sonner";
 import { SubscriptionPlanForm } from"@/components/merchant/SubscriptionPlanForm";
 
@@ -346,7 +346,7 @@ const MerchantSubscriptionPlans = () => {
  </Badge>
  ) : (
  <Badge variant="secondary" className="gap-1">
- <span className="h-3 w-3" aria-hidden="true">⏰</span>
+ <Clock className="h-3 w-3" aria-hidden="true" />
  Draft
  </Badge>
  )}
@@ -408,20 +408,20 @@ const MerchantSubscriptionPlans = () => {
  <CardContent>
  <div className="flex flex-wrap gap-6">
  <div className="flex items-center gap-2">
- <span className="h-4 w-4 text-muted-foreground" aria-hidden="true">💵</span>
+ <DollarSign className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
  <span className="font-semibold">{Formatters.currency((plan.amount / 100))}</span>
  <span className="text-muted-foreground">{formatInterval(plan.billing_interval, plan.billing_interval_count)}</span>
  </div>
  
  {plan.trial_days > 0 && (
  <div className="flex items-center gap-2 text-muted-foreground">
- <span className="h-4 w-4" aria-hidden="true">📅</span>
+ <Calendar className="h-4 w-4" aria-hidden="true" />
  <span>{plan.trial_days} day trial</span>
  </div>
  )}
  
  <div className="flex items-center gap-2 text-muted-foreground">
- <span className="h-4 w-4" aria-hidden="true">👥</span>
+ <Users className="h-4 w-4" aria-hidden="true" />
  <span>{plan.current_subscribers} subscribers</span>
  </div>
  </div>

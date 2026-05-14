@@ -2,7 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from'@/comp
 import { Switch } from'@/components/ui/switch';
 import { Input } from'@/components/ui/input';
 import { Label } from'@/components/ui/label';
-import { Loader2 } from "lucide-react";
+import { Bell, Loader2 } from "lucide-react";
 
 interface NotificationSetting {
  key: string;
@@ -38,7 +38,7 @@ export function NotificationSettingsCard({ settings, onToggle, saving, loading }
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <span className="w-5 h-5 text-primary" aria-hidden="true">🔔</span>
+ <Bell className="w-5 h-5 text-primary" aria-hidden="true" />
  Notification & Email Settings
  </CardTitle>
  <CardDescription>

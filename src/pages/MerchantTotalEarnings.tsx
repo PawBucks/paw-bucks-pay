@@ -4,7 +4,7 @@ import { Formatters } from "@/utils/formatters";
  import { Button } from"@/components/ui/button";
  import { Badge } from"@/components/ui/badge";
  import { Skeleton } from"@/components/ui/skeleton";
- import { ArrowLeft, RefreshCw, ExternalLink, RotateCcw } from "lucide-react";
+ import { ArrowLeft, DollarSign, ExternalLink, Gift, Receipt, RefreshCw, RotateCcw, TrendingUp, Users, Wallet } from "lucide-react";
  import { useMerchantEarnings } from"@/hooks/useMerchantEarnings";
  
  export default function MerchantTotalEarnings() {
@@ -32,7 +32,7 @@ import { Formatters } from "@/utils/formatters";
  </Button>
  <Card>
  <CardContent className="py-12 text-center">
- <span className="h-16 w-16 mx-auto text-muted-foreground mb-4" aria-hidden="true">👛</span>
+ <Wallet className="h-16 w-16 mx-auto text-muted-foreground mb-4" aria-hidden="true" />
  <p className="text-lg text-muted-foreground">Connect your Stripe account to view earnings details</p>
  </CardContent>
  </Card>
@@ -77,7 +77,7 @@ import { Formatters } from "@/utils/formatters";
  <CardHeader>
  <div className="flex items-center gap-3">
  <div className="p-3 rounded-full bg-primary/10">
- <span className="h-6 w-6 text-primary" aria-hidden="true">📈</span>
+ <TrendingUp className="h-6 w-6 text-primary" aria-hidden="true" />
  </div>
  <div>
  <CardTitle className="text-3xl text-primary">
@@ -91,21 +91,21 @@ import { Formatters } from "@/utils/formatters";
  <div className="grid gap-4 md:grid-cols-3">
  <div className="p-4 rounded-lg bg-background border">
  <div className="flex items-center gap-2 mb-2">
- <span className="h-4 w-4 text-muted-foreground" aria-hidden="true">🧾</span>
+ <Receipt className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
  <span className="text-sm text-muted-foreground">Transactions</span>
  </div>
  <p className="text-2xl font-bold">{summary.transactionCount}</p>
  </div>
  <div className="p-4 rounded-lg bg-background border">
  <div className="flex items-center gap-2 mb-2">
- <span className="h-4 w-4 text-muted-foreground" aria-hidden="true">💵</span>
+ <DollarSign className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
  <span className="text-sm text-muted-foreground">Success Fees</span>
  </div>
  <p className="text-2xl font-bold">{Formatters.currency(summary.totalFees)}</p>
  </div>
  <div className="p-4 rounded-lg bg-background border">
  <div className="flex items-center gap-2 mb-2">
- <span className="h-4 w-4 text-muted-foreground" aria-hidden="true">🎁</span>
+ <Gift className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
  <span className="text-sm text-muted-foreground">Rewards Given</span>
  </div>
  <p className="text-2xl font-bold">{summary.totalRewardsGiven} PB</p>
@@ -144,7 +144,7 @@ import { Formatters } from "@/utils/formatters";
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <span className="h-5 w-5 text-primary" aria-hidden="true">👥</span>
+ <Users className="h-5 w-5 text-primary" aria-hidden="true" />
  Revenue Breakdown
  </CardTitle>
  <CardDescription>Detailed view of earnings by source</CardDescription>

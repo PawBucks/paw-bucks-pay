@@ -5,7 +5,7 @@ import { Badge } from"@/components/ui/badge";
 import { GradientCard } from"@/components/ui/gradient-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
 import { Button } from"@/components/ui/button";
-import { Loader2, MessageCircle, Mail, Phone, Monitor, CalendarCheck, AlertTriangle, CheckCircle, ArrowRight, Zap } from "lucide-react";
+import { AlertTriangle, ArrowRight, BookOpen, Calendar, CalendarCheck, CheckCircle, Clock, Crown, Headphones, Loader2, Mail, MessageCircle, MessageSquare, Monitor, Phone, Star, User, Zap } from "lucide-react";
 import { useState } from"react";
 import { toast } from"sonner";
 
@@ -102,7 +102,7 @@ export function PrioritySupportWidget() {
  return (
  <Card className="border-dashed">
  <CardContent className="py-12 text-center">
- <span className="h-12 w-12 text-muted-foreground mx-auto mb-4" aria-hidden="true">🎧</span>
+ <Headphones className="h-12 w-12 text-muted-foreground mx-auto mb-4" aria-hidden="true" />
  <h3 className="font-semibold mb-2">Priority Merchant Support</h3>
  <p className="text-muted-foreground text-sm max-w-md mx-auto">
  {data?.message ||'This premium feature must be assigned by an admin. Get 24/7 dedicated support with priority response times.'}
@@ -121,7 +121,7 @@ export function PrioritySupportWidget() {
  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
  <div>
  <h2 className="text-2xl font-bold flex items-center gap-2">
- <span className="h-6 w-6 text-primary" aria-hidden="true">🎧</span>
+ <Headphones className="h-6 w-6 text-primary" aria-hidden="true" />
  Priority Support
  </h2>
  <p className="text-muted-foreground">
@@ -134,7 +134,7 @@ export function PrioritySupportWidget() {
  Support Active
  </Badge>
  <Badge className="bg-gradient-to-r from-primary to-primary/60 gap-1">
- <span className="h-3 w-3" aria-hidden="true">👑</span> Premium
+ <Crown className="h-3 w-3" aria-hidden="true" /> Premium
  </Badge>
  </div>
  </div>
@@ -143,7 +143,7 @@ export function PrioritySupportWidget() {
  <GradientCard gradient className="flex flex-col md:flex-row items-center justify-between gap-4">
  <div className="flex items-center gap-4">
  <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center">
- <span className="h-7 w-7 text-primary" aria-hidden="true">👤</span>
+ <User className="h-7 w-7 text-primary" aria-hidden="true" />
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Your Dedicated Agent</p>
@@ -153,11 +153,11 @@ export function PrioritySupportWidget() {
  </div>
  <div className="flex gap-2">
  <Button onClick={handleStartChat} className="gap-2">
- <span className="h-4 w-4" aria-hidden="true">💬</span>
+ <MessageSquare className="h-4 w-4" aria-hidden="true" />
  Start Chat
  </Button>
  <Button variant="outline" onClick={handleScheduleCall} className="gap-2">
- <span className="h-4 w-4" aria-hidden="true">📞</span>
+ <Phone className="h-4 w-4" aria-hidden="true" />
  Schedule Call
  </Button>
  </div>
@@ -169,7 +169,7 @@ export function PrioritySupportWidget() {
  <CardContent className="pt-4">
  <div className="flex items-center gap-3">
  <div className="p-2 rounded-lg bg-info/10">
- <span className="h-5 w-5 text-info" aria-hidden="true">⏰</span>
+ <Clock className="h-5 w-5 text-info" aria-hidden="true" />
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Avg Response</p>
@@ -197,7 +197,7 @@ export function PrioritySupportWidget() {
  <CardContent className="pt-4">
  <div className="flex items-center gap-3">
  <div className="p-2 rounded-lg bg-warning/10">
- <span className="h-5 w-5 text-warning" aria-hidden="true">⭐</span>
+ <Star className="h-5 w-5 text-warning" aria-hidden="true" />
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Satisfaction</p>
@@ -211,7 +211,7 @@ export function PrioritySupportWidget() {
  <CardContent className="pt-4">
  <div className="flex items-center gap-3">
  <div className="p-2 rounded-lg bg-accent/10">
- <span className="h-5 w-5 text-accent" aria-hidden="true">📅</span>
+ <Calendar className="h-5 w-5 text-accent" aria-hidden="true" />
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Next Check-in</p>
@@ -277,9 +277,9 @@ export function PrioritySupportWidget() {
  interaction.type ==='chat' ?'bg-info/10' :
  interaction.type ==='email' ?'bg-accent/10' :'bg-success/10'
  }`}>
- {interaction.type ==='chat' ? <span className="h-5 w-5 text-info" aria-hidden="true">💬</span> :
- interaction.type ==='email' ? <span className="h-5 w-5 text-accent" aria-hidden="true">📧</span> :
- <span className="h-5 w-5 text-success" aria-hidden="true">📞</span>}
+ {interaction.type ==='chat' ? <MessageSquare className="h-5 w-5 text-info" aria-hidden="true" /> :
+ interaction.type ==='email' ? <Mail className="h-5 w-5 text-accent" aria-hidden="true" /> :
+ <Phone className="h-5 w-5 text-success" aria-hidden="true" />}
  </div>
  <div>
  <p className="font-medium">{interaction.subject}</p>
@@ -308,7 +308,7 @@ export function PrioritySupportWidget() {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <span className="h-5 w-5" aria-hidden="true">📖</span>
+ <BookOpen className="h-5 w-5" aria-hidden="true" />
  Curated Resources
  </CardTitle>
  <CardDescription>Articles selected for your business type</CardDescription>
@@ -372,7 +372,7 @@ export function PrioritySupportWidget() {
  <CardContent className="pt-4">
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-2">
- <span className="h-5 w-5 text-primary" aria-hidden="true">👑</span>
+ <Crown className="h-5 w-5 text-primary" aria-hidden="true" />
  <span className="text-sm text-muted-foreground">
  Priority Support active • {subscription_status.days_remaining} days remaining
  </span>

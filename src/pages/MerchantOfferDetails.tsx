@@ -7,7 +7,7 @@ import { SEO } from"@/components/SEO";
 import { Button } from"@/components/ui/button";
 import { Badge } from"@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/components/ui/card";
-import { ArrowLeft, Edit, Pause, Play, Archive, QrCode, Download } from "lucide-react";
+import { Archive, ArrowLeft, BarChart3, Download, Edit, Pause, Play, QrCode } from "lucide-react";
 import { toast } from"sonner";
 import { ErrorHandler } from"@/utils/errorHandler";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from"recharts";
@@ -390,7 +390,7 @@ export default function MerchantOfferDetails() {
  className="h-auto py-6"
  onClick={() => navigate(`/merchant/offers/${id}/redemptions`)}
  >
- <span className="mr-2 h-5 w-5" aria-hidden="true">📊</span>
+ <BarChart3 className="mr-2 h-5 w-5" aria-hidden="true" />
  View All Redemptions
  </Button>
  <Button

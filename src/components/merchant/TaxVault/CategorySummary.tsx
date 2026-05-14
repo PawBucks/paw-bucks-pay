@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from'@/components/ui/card';
 import { Progress } from'@/components/ui/progress';
 import { TaxExpense, TaxExpenseCategory, CATEGORY_LABELS, SCHEDULE_C_MAPPING } from'./types';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from'recharts';
-import { Car } from "lucide-react";
+import { Car, TrendingDown } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 
 import { Formatters } from "@/utils/formatters";
@@ -129,7 +129,7 @@ export function CategorySummary({ expenses, vehicleDeduction }: CategorySummaryP
  <div className="space-y-2 pb-3 border-b">
  <div className="flex justify-between items-start">
  <div className="flex items-center gap-2">
- <span className="h-4 w-4 text-warning" aria-hidden="true">🚗</span>
+ <Car className="h-4 w-4 text-warning" aria-hidden="true" />
  <div>
  <p className="font-medium text-sm">
  Vehicle Deduction ({vehicleDeduction.vehicleMethod ==='standard' ?'Standard Mileage' :'Actual Expenses'})
@@ -200,7 +200,7 @@ export function CategorySummary({ expenses, vehicleDeduction }: CategorySummaryP
  {totalSavings > 0 && (
  <div className="flex justify-between items-center text-success bg-success/10 p-3 rounded-lg">
  <div className="flex items-center gap-2">
- <span className="h-4 w-4" aria-hidden="true">📉</span>
+ <TrendingDown className="h-4 w-4" aria-hidden="true" />
  <span className="font-medium">PawBucks Savings</span>
  </div>
  <span className="font-bold">{Formatters.currency(totalSavings)}</span>

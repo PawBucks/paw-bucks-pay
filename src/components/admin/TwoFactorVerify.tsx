@@ -5,7 +5,7 @@ import { Input } from"@/components/ui/input";
 import { Label } from"@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/components/ui/card";
 import { toast } from"sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, Shield } from "lucide-react";
 
 interface TwoFactorVerifyProps {
  factorId: string;
@@ -60,7 +60,7 @@ export const TwoFactorVerify = ({ factorId, onVerified, onCancel }: TwoFactorVer
  <CardHeader className="space-y-1 text-center">
  <div className="flex justify-center mb-4">
  <div className="p-3 bg-primary/10 rounded-full">
- <span className="h-8 w-8 text-primary" aria-hidden="true">🛡️</span>
+ <Shield className="h-8 w-8 text-primary" aria-hidden="true" />
  </div>
  </div>
  <CardTitle className="text-2xl font-bold">Two-Factor Authentication</CardTitle>

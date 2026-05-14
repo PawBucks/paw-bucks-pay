@@ -35,7 +35,7 @@ import {
  TooltipProvider,
  TooltipTrigger,
 } from"@/components/ui/tooltip";
-import { Check, X, Eye, Loader2, Search, AlertTriangle, Info } from "lucide-react";
+import { AlertTriangle, Check, Crown, Eye, FileText, Info, Loader2, Search, X } from "lucide-react";
 import { toast } from"sonner";
 import { format, addDays } from"date-fns";
 
@@ -429,7 +429,7 @@ export const NonPartnerReceiptVerificationTab = () => {
  {filteredReceipts.length === 0 && (
  <TableRow>
  <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
- <span className="w-8 h-8 mx-auto mb-2 opacity-50" aria-hidden="true">📄</span>
+ <FileText className="w-8 h-8 mx-auto mb-2 opacity-50" aria-hidden="true" />
  No receipts found
  </TableCell>
  </TableRow>
@@ -527,7 +527,7 @@ export const NonPartnerReceiptVerificationTab = () => {
  </div>
  {selectedUserInfo.subscription_tier ==="pawpass_plus" ? (
  <Badge className="bg-primary/10 text-primary border-primary/30">
- <span className="w-3 h-3 mr-1" aria-hidden="true">👑</span> PawPass+
+ <Crown className="w-3 h-3 mr-1" aria-hidden="true" /> PawPass+
  </Badge>
  ) : (
  <Badge variant="outline" className="text-muted-foreground">

@@ -29,7 +29,7 @@ import {
  TableHeader,
  TableRow,
 } from"@/components/ui/table";
-import { Database, Plus, RefreshCw, Settings, CheckCircle, XCircle, ArrowLeftRight, ArrowRight, ArrowLeft, Trash2, Activity } from "lucide-react";
+import { Activity, ArrowLeft, ArrowLeftRight, ArrowRight, BarChart3, CheckCircle, Clock, Database, Plus, RefreshCw, Settings, Trash2, XCircle } from "lucide-react";
 import { format } from"date-fns";
 import { toast } from"sonner";
 
@@ -193,7 +193,7 @@ export function PMSIntegrationManager({ vetId }: PMSIntegrationManagerProps) {
  case"in_progress":
  return <Badge className="bg-info/10 text-info"><RefreshCw className="h-3 w-3 mr-1 animate-spin" />In Progress</Badge>;
  default:
- return <Badge variant="secondary"><span className="h-3 w-3 mr-1" aria-hidden="true">⏰</span>Pending</Badge>;
+ return <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" aria-hidden="true" />Pending</Badge>;
  }
  };
 
@@ -443,7 +443,7 @@ export function PMSIntegrationManager({ vetId }: PMSIntegrationManagerProps) {
 
  {/* Sync History */}
  <h5 className="font-medium mb-3 flex items-center gap-2">
- <span className="h-4 w-4" aria-hidden="true">📊</span>
+ <BarChart3 className="h-4 w-4" aria-hidden="true" />
  Recent Sync Activity
  </h5>
  <Table>

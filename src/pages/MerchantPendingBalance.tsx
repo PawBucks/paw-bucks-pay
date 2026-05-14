@@ -4,7 +4,7 @@ import { Button } from"@/components/ui/button";
 import { Badge } from"@/components/ui/badge";
 import { Skeleton } from"@/components/ui/skeleton";
 import { Separator } from"@/components/ui/separator";
-import { ArrowLeft, RefreshCw, CalendarClock, Info } from "lucide-react";
+import { ArrowLeft, CalendarClock, Clock, CreditCard, Info, Receipt, RefreshCw, Wallet } from "lucide-react";
 import { useMerchantEarnings } from"@/hooks/useMerchantEarnings";
 import { format } from"date-fns";
 
@@ -33,7 +33,7 @@ export default function MerchantPendingBalance() {
  </Button>
  <Card>
  <CardContent className="py-12 text-center">
- <span className="h-16 w-16 mx-auto text-muted-foreground mb-4" aria-hidden="true">👛</span>
+ <Wallet className="h-16 w-16 mx-auto text-muted-foreground mb-4" aria-hidden="true" />
  <p className="text-lg text-muted-foreground">Connect your Stripe account to view balance details</p>
  </CardContent>
  </Card>
@@ -72,7 +72,7 @@ export default function MerchantPendingBalance() {
  <CardHeader>
  <div className="flex items-center gap-3">
  <div className="p-3 rounded-full bg-warning/15">
- <span className="h-6 w-6 text-warning" aria-hidden="true">⏰</span>
+ <Clock className="h-6 w-6 text-warning" aria-hidden="true" />
  </div>
  <div>
  <CardTitle className="text-3xl text-warning">
@@ -133,7 +133,7 @@ export default function MerchantPendingBalance() {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <span className="h-5 w-5 text-warning" aria-hidden="true">⏰</span>
+ <Clock className="h-5 w-5 text-warning" aria-hidden="true" />
  In-Transit Payouts
  </CardTitle>
  <CardDescription>Payouts currently being transferred to your bank</CardDescription>
@@ -170,7 +170,7 @@ export default function MerchantPendingBalance() {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <span className="h-5 w-5 text-primary" aria-hidden="true">💳</span>
+ <CreditCard className="h-5 w-5 text-primary" aria-hidden="true" />
  Recent Payments
  </CardTitle>
  <CardDescription>Latest payments with detailed fee breakdown</CardDescription>
@@ -187,7 +187,7 @@ export default function MerchantPendingBalance() {
  <CardContent className="p-4">
  <div className="flex items-center justify-between mb-4">
  <div className="flex items-center gap-2">
- <span className="h-4 w-4 text-muted-foreground" aria-hidden="true">🧾</span>
+ <Receipt className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
  <span className="text-sm text-muted-foreground">
  {format(new Date(charge.created * 1000),"MMM d, yyyy'at' h:mm a")}
  </span>

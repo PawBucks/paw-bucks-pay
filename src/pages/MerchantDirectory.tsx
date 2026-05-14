@@ -25,7 +25,7 @@ import { useSponsoredTracking } from"@/hooks/useSponsoredTracking";
 import { useSearchRankingTracking } from"@/hooks/useSearchRankingTracking";
 import { DirectoryMerchantCard } from"@/components/directory/DirectoryMerchantCard";
 import { MerchantMap } from"@/components/MerchantMap";
-import { Search, SlidersHorizontal, X, LayoutGrid, LayoutList, Map } from "lucide-react";
+import { LayoutGrid, LayoutList, Map, MapPin, Search, SlidersHorizontal, Store, X } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
 
@@ -317,7 +317,7 @@ const MerchantDirectory = () => {
        />
        <div className="container mx-auto px-4 pt-10 pb-6 max-w-7xl relative">
         <div className="text-[0.7rem] font-medium tracking-[0.18em] uppercase text-primary mb-3 flex items-center gap-2">
-         <span className="w-3.5 h-3.5" aria-hidden="true">📍</span>
+         <MapPin className="w-3.5 h-3.5" aria-hidden="true" />
          The Directory
         </div>
         <h1
@@ -433,7 +433,7 @@ const MerchantDirectory = () => {
  className={`p-1.5 transition-colors ${viewMode ==="map" || showMobileMap ?"bg-muted text-foreground" :"text-muted-foreground hover:text-foreground"}`}
  aria-label="Map view"
  >
- <span className="w-4 h-4" aria-hidden="true">🗺️</span>
+ <Map className="w-4 h-4" aria-hidden="true" />
  </button>
  </div>
  </div>
@@ -468,7 +468,7 @@ const MerchantDirectory = () => {
  {filteredMerchants.length === 0 ? (
  <div className="text-center py-20">
  <div className="w-16 h-16 rounded-full bg-muted mx-auto flex items-center justify-center mb-4">
- <span className="w-8 h-8 text-muted-foreground/40" aria-hidden="true">🏪</span>
+ <Store className="w-8 h-8 text-muted-foreground/40" aria-hidden="true" />
  </div>
  <h3 className="text-lg font-semibold mb-1">No merchants found</h3>
  <p className="text-sm text-muted-foreground mb-4">Try adjusting your search or filters</p>
@@ -584,7 +584,7 @@ const MerchantDirectory = () => {
  onClick={() => { setViewMode("map"); setShowMobileMap(true); }}
  className="sm:hidden fixed bottom-24 left-1/2 -translate-x-1/2 z-30 bg-foreground text-background px-4 py-2.5 rounded-full shadow-lg flex items-center gap-2 text-sm font-medium hover:scale-105 transition-transform"
  >
- <span className="w-4 h-4" aria-hidden="true">🗺️</span>
+ <Map className="w-4 h-4" aria-hidden="true" />
  Map
  </button>
  )}

@@ -20,7 +20,7 @@ import {
  DialogHeader,
  DialogTitle,
 } from"@/components/ui/dialog";
-import { Scan, Upload, Loader2, AlertCircle, CheckCircle } from "lucide-react";
+import { AlertCircle, CheckCircle, Image, Loader2, Scan, ThumbsDown, ThumbsUp, Upload } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { toast } from"sonner";
 import { useQuery, useMutation, useQueryClient } from"@tanstack/react-query";
@@ -393,7 +393,7 @@ export const DiagnosticOverlayTool = ({ vetId }: DiagnosticOverlayToolProps) => 
  className="w-full h-full object-cover rounded-lg"
  />
  ) : (
- <span className="w-6 h-6 text-muted-foreground" aria-hidden="true">🖼️</span>
+ <Image className="w-6 h-6 text-muted-foreground" aria-hidden="true" />
  )}
  </div>
  <div>
@@ -612,7 +612,7 @@ export const DiagnosticOverlayTool = ({ vetId }: DiagnosticOverlayToolProps) => 
  }
  disabled={reviewMutation.isPending}
  >
- <span className="w-4 h-4 mr-2" aria-hidden="true">👍</span>
+ <ThumbsUp className="w-4 h-4 mr-2" aria-hidden="true" />
  Confirm Findings
  </Button>
  <Button
@@ -627,7 +627,7 @@ export const DiagnosticOverlayTool = ({ vetId }: DiagnosticOverlayToolProps) => 
  }
  disabled={reviewMutation.isPending}
  >
- <span className="w-4 h-4 mr-2" aria-hidden="true">👎</span>
+ <ThumbsDown className="w-4 h-4 mr-2" aria-hidden="true" />
  Dispute / Correct
  </Button>
  </div>

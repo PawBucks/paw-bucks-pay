@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
 import { Separator } from"@/components/ui/separator";
 import { toast } from"sonner";
-import { FileText, DollarSign, Send, Clock, CheckCircle2, XCircle, AlertTriangle, Plus, Search, Loader2 } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Clock, CreditCard, DollarSign, FileText, Loader2, Plus, Search, Send, Shield, XCircle } from "lucide-react";
 
 import { Formatters } from "@/utils/formatters";
 interface InsuranceClaimSplitterProps {
@@ -269,7 +269,7 @@ export function InsuranceClaimSplitter({ vetId }: InsuranceClaimSplitterProps) {
  <div className="flex items-center justify-between">
  <div>
  <h2 className="text-2xl font-bold flex items-center gap-2">
- <span className="h-6 w-6 text-info" aria-hidden="true">🛡️</span>
+ <Shield className="h-6 w-6 text-info" aria-hidden="true" />
  Insurance Claim Splitter
  </h2>
  <p className="text-muted-foreground">
@@ -384,7 +384,7 @@ export function InsuranceClaimSplitter({ vetId }: InsuranceClaimSplitterProps) {
  <Separator />
  <div className="flex justify-between text-sm">
  <span className="flex items-center gap-1">
- <span className="h-4 w-4 text-info" aria-hidden="true">🛡️</span>
+ <Shield className="h-4 w-4 text-info" aria-hidden="true" />
  Insurance Pays:
  </span>
  <span className="font-medium text-info">
@@ -393,7 +393,7 @@ export function InsuranceClaimSplitter({ vetId }: InsuranceClaimSplitterProps) {
  </div>
  <div className="flex justify-between text-sm">
  <span className="flex items-center gap-1">
- <span className="h-4 w-4 text-warning" aria-hidden="true">💳</span>
+ <CreditCard className="h-4 w-4 text-warning" aria-hidden="true" />
  Owner Copay ({estimatedCoverage.copayPercentage}%):
  </span>
  <span className="font-medium text-warning">
@@ -446,7 +446,7 @@ export function InsuranceClaimSplitter({ vetId }: InsuranceClaimSplitterProps) {
  {claims.length === 0 ? (
  <Card className="border-dashed">
  <CardContent className="flex flex-col items-center justify-center py-12 text-muted-foreground">
- <span className="h-12 w-12 mb-4 opacity-50" aria-hidden="true">🛡️</span>
+ <Shield className="h-12 w-12 mb-4 opacity-50" aria-hidden="true" />
  <h3 className="text-lg font-medium mb-1">No Insurance Claims</h3>
  <p className="text-sm mb-4">Process your first claim to split invoices automatically</p>
  <Button onClick={() => setIsCreateDialogOpen(true)}>
@@ -530,7 +530,7 @@ export function InsuranceClaimSplitter({ vetId }: InsuranceClaimSplitterProps) {
  {claims.filter((c) => ["draft","pending_submission"].includes(c.status)).length === 0 ? (
  <Card className="border-dashed">
  <CardContent className="py-8 text-center text-muted-foreground">
- <span className="h-8 w-8 mx-auto mb-2 opacity-50" aria-hidden="true">⏰</span>
+ <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" aria-hidden="true" />
  <p>No pending claims</p>
  </CardContent>
  </Card>
@@ -588,7 +588,7 @@ export function InsuranceClaimSplitter({ vetId }: InsuranceClaimSplitterProps) {
  <Card className="bg-gradient-to-r from-info/20 to-info/20 /30 /30">
  <CardContent className="py-4">
  <div className="flex items-start gap-3">
- <span className="h-5 w-5 text-info mt-0.5" aria-hidden="true">🛡️</span>
+ <Shield className="h-5 w-5 text-info mt-0.5" aria-hidden="true" />
  <div>
  <p className="font-medium">Direct-to-Vet Insurance Processing</p>
  <p className="text-sm text-muted-foreground mt-1">

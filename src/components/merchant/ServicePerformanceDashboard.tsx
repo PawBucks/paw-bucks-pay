@@ -8,7 +8,7 @@ import {
  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
  ResponsiveContainer, PieChart, Pie, Cell, Legend
 } from"recharts";
-import { Eye, MousePointer, ArrowUpRight, ArrowDownRight, Minus } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, BarChart3, DollarSign, Eye, Minus, MousePointer, Star, TrendingUp, Users } from "lucide-react";
 import { format, subDays } from"date-fns";
 
 import { Formatters } from "@/utils/formatters";
@@ -154,7 +154,7 @@ export function ServicePerformanceDashboard({ merchantId }: { merchantId: string
  return (
  <Card className="text-center py-12">
  <CardContent>
- <span className="h-12 w-12 mx-auto mb-4 text-muted-foreground" aria-hidden="true">📊</span>
+ <BarChart3 className="h-12 w-12 mx-auto mb-4 text-muted-foreground" aria-hidden="true" />
  <h3 className="text-xl font-semibold mb-2">No Active Services</h3>
  <p className="text-muted-foreground">Purchase services from the Merchant Market to see performance data here.</p>
  </CardContent>
@@ -182,7 +182,7 @@ export function ServicePerformanceDashboard({ merchantId }: { merchantId: string
  <div className="space-y-6">
  <div>
  <h2 className="text-3xl font-bold flex items-center gap-2">
- <span className="h-7 w-7 text-primary" aria-hidden="true">📈</span>
+ <TrendingUp className="h-7 w-7 text-primary" aria-hidden="true" />
  Service Performance & ROI
  </h2>
  <p className="text-muted-foreground">30-day overview of all active service outcomes</p>
@@ -207,21 +207,21 @@ export function ServicePerformanceDashboard({ merchantId }: { merchantId: string
  </GradientCard>
  <GradientCard>
  <div className="flex items-center gap-2 mb-2">
- <span className="h-4 w-4 text-muted-foreground" aria-hidden="true">👥</span>
+ <Users className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
  <span className="text-sm text-muted-foreground">Conversions</span>
  </div>
  <p className="text-2xl font-bold">{totalTransactions}</p>
  </GradientCard>
  <GradientCard>
  <div className="flex items-center gap-2 mb-2">
- <span className="h-4 w-4 text-muted-foreground" aria-hidden="true">💵</span>
+ <DollarSign className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
  <span className="text-sm text-muted-foreground">Revenue</span>
  </div>
  <p className="text-2xl font-bold">${Formatters.number(Math.round(totalRevenue))}</p>
  </GradientCard>
  <GradientCard gradient>
  <div className="flex items-center gap-2 mb-2">
- <span className="h-4 w-4 text-muted-foreground" aria-hidden="true">⭐</span>
+ <Star className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
  <span className="text-sm text-muted-foreground">ROI</span>
  </div>
  <p className="text-2xl font-bold">{roiMultiplier(totalRevenue, totalSpend)}</p>

@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from"@/
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from"@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
 import { toast } from"sonner";
-import { Plus, Trash2 } from "lucide-react";
+import { Calendar, DollarSign, Heart, Package, Plus, Trash2, Users } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 
 import { Formatters } from "@/utils/formatters";
@@ -277,7 +277,7 @@ export function WellnessPlanArchitect({ vetId }: WellnessPlanArchitectProps) {
  <div className="flex items-center justify-between">
  <div>
  <h2 className="text-2xl font-bold flex items-center gap-2">
- <span className="h-6 w-6 text-destructive" aria-hidden="true">❤️</span>
+ <Heart className="h-6 w-6 text-destructive" aria-hidden="true" />
  Wellness Plan Architect
  </h2>
  <p className="text-muted-foreground">
@@ -395,7 +395,7 @@ export function WellnessPlanArchitect({ vetId }: WellnessPlanArchitectProps) {
  {planServices.length === 0 ? (
  <Card className="border-dashed">
  <CardContent className="flex flex-col items-center justify-center py-8 text-muted-foreground">
- <span className="h-8 w-8 mb-2" aria-hidden="true">📦</span>
+ <Package className="h-8 w-8 mb-2" aria-hidden="true" />
  <p>No services added yet</p>
  <Button variant="link" onClick={addService}>
  Add your first service
@@ -650,7 +650,7 @@ export function WellnessPlanArchitect({ vetId }: WellnessPlanArchitectProps) {
  {plans.length === 0 ? (
  <Card className="border-dashed">
  <CardContent className="flex flex-col items-center justify-center py-12 text-muted-foreground">
- <span className="h-12 w-12 mb-4 opacity-50" aria-hidden="true">❤️</span>
+ <Heart className="h-12 w-12 mb-4 opacity-50" aria-hidden="true" />
  <h3 className="text-lg font-medium mb-1">No Wellness Plans Yet</h3>
  <p className="text-sm mb-4">Create your first wellness plan to generate recurring revenue</p>
  <Button onClick={() => setIsCreateDialogOpen(true)}>
@@ -727,12 +727,12 @@ export function WellnessPlanArchitect({ vetId }: WellnessPlanArchitectProps) {
 
  <div className="flex items-center gap-4 text-sm text-muted-foreground pt-2 border-t">
  <div className="flex items-center gap-1">
- <span className="h-4 w-4" aria-hidden="true">👥</span>
+ <Users className="h-4 w-4" aria-hidden="true" />
  {plan.current_subscribers || 0} subscribers
  </div>
  {plan.commitment_months && plan.commitment_months > 0 && (
  <div className="flex items-center gap-1">
- <span className="h-4 w-4" aria-hidden="true">📅</span>
+ <Calendar className="h-4 w-4" aria-hidden="true" />
  {plan.commitment_months}mo term
  </div>
  )}
@@ -771,7 +771,7 @@ export function WellnessPlanArchitect({ vetId }: WellnessPlanArchitectProps) {
  <Card className="bg-gradient-to-r from-info/20 to-primary/20 /30 /30">
  <CardContent className="py-4">
  <div className="flex items-start gap-3">
- <span className="h-5 w-5 text-info mt-0.5" aria-hidden="true">💵</span>
+ <DollarSign className="h-5 w-5 text-info mt-0.5" aria-hidden="true" />
  <div>
  <p className="font-medium">How Wellness Plan Billing Works</p>
  <p className="text-sm text-muted-foreground mt-1">

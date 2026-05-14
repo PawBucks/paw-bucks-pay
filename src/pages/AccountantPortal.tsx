@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from'
 import { toast } from'sonner';
 import { format } from'date-fns';
 import { formatLocalDate } from'@/utils/formatters';
-import { Receipt, Eye, Loader2, AlertTriangle } from "lucide-react";
+import { AlertTriangle, Building2, Calendar, Car, DollarSign, Eye, FileText, Loader2, MessageSquare, Receipt, Shield } from "lucide-react";
 
 import { Formatters } from "@/utils/formatters";
 interface InvitationData {
@@ -289,7 +289,7 @@ export default function AccountantPortal() {
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-3">
  <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
- <span className="h-5 w-5 text-primary" aria-hidden="true">🏢</span>
+ <Building2 className="h-5 w-5 text-primary" aria-hidden="true" />
  </div>
  <div>
  <h1 className="font-semibold">{invitation.merchants.business_name}</h1>
@@ -303,7 +303,7 @@ export default function AccountantPortal() {
  </Badge>
  <Select value={selectedYear.toString()} onValueChange={(v) => setSelectedYear(parseInt(v))}>
  <SelectTrigger className="w-32">
- <span className="h-4 w-4 mr-2" aria-hidden="true">📅</span>
+ <Calendar className="h-4 w-4 mr-2" aria-hidden="true" />
  <SelectValue />
  </SelectTrigger>
  <SelectContent>
@@ -324,7 +324,7 @@ export default function AccountantPortal() {
  <Card>
  <CardContent className="pt-6">
  <div className="flex items-center gap-2 text-muted-foreground mb-1">
- <span className="h-4 w-4" aria-hidden="true">💵</span>
+ <DollarSign className="h-4 w-4" aria-hidden="true" />
  <span className="text-sm">Gross Income</span>
  </div>
  <p className="text-2xl font-bold">${incomeData.total.toLocaleString()}</p>
@@ -335,7 +335,7 @@ export default function AccountantPortal() {
  <Card>
  <CardContent className="pt-6">
  <div className="flex items-center gap-2 text-muted-foreground mb-1">
- <span className="h-4 w-4" aria-hidden="true">🧾</span>
+ <Receipt className="h-4 w-4" aria-hidden="true" />
  <span className="text-sm">Total Expenses</span>
  </div>
  <p className="text-2xl font-bold">${totalExpenses.toLocaleString()}</p>
@@ -346,7 +346,7 @@ export default function AccountantPortal() {
  <Card>
  <CardContent className="pt-6">
  <div className="flex items-center gap-2 text-muted-foreground mb-1">
- <span className="h-4 w-4" aria-hidden="true">🚗</span>
+ <Car className="h-4 w-4" aria-hidden="true" />
  <span className="text-sm">Mileage Deduction</span>
  </div>
  <p className="text-2xl font-bold">${mileageDeduction.toLocaleString()}</p>
@@ -358,7 +358,7 @@ export default function AccountantPortal() {
  <Card className="bg-primary/5 border-primary/20">
  <CardContent className="pt-6">
  <div className="flex items-center gap-2 text-muted-foreground mb-1">
- <span className="h-4 w-4" aria-hidden="true">📄</span>
+ <FileText className="h-4 w-4" aria-hidden="true" />
  <span className="text-sm">Net Profit</span>
  </div>
  <p className="text-2xl font-bold text-primary">
@@ -374,19 +374,19 @@ export default function AccountantPortal() {
  <TabsList>
  {permissions.view_expenses && (
  <TabsTrigger value="expenses" className="flex items-center gap-1">
- <span className="h-4 w-4" aria-hidden="true">🧾</span>
+ <Receipt className="h-4 w-4" aria-hidden="true" />
  Expenses
  </TabsTrigger>
  )}
  {permissions.view_income && (
  <TabsTrigger value="income" className="flex items-center gap-1">
- <span className="h-4 w-4" aria-hidden="true">💵</span>
+ <DollarSign className="h-4 w-4" aria-hidden="true" />
  Income
  </TabsTrigger>
  )}
  {permissions.view_mileage && (
  <TabsTrigger value="mileage" className="flex items-center gap-1">
- <span className="h-4 w-4" aria-hidden="true">🚗</span>
+ <Car className="h-4 w-4" aria-hidden="true" />
  Mileage
  </TabsTrigger>
  )}
@@ -462,7 +462,7 @@ export default function AccountantPortal() {
  variant="ghost"
  onClick={() => setSelectedExpenseId(expense.id)}
  >
- <span className="h-4 w-4" aria-hidden="true">💬</span>
+ <MessageSquare className="h-4 w-4" aria-hidden="true" />
  </Button>
  </DialogTrigger>
  <DialogContent>
@@ -675,7 +675,7 @@ export default function AccountantPortal() {
 
  {/* Security Notice */}
  <div className="mt-8 flex items-center gap-3 text-sm text-muted-foreground bg-muted p-4 rounded-lg">
- <span className="h-5 w-5 flex-shrink-0" aria-hidden="true">🛡️</span>
+ <Shield className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
  <div>
  <p className="font-medium">Secure Access</p>
  <p>This portal provides read-only access to {invitation.merchants.business_name}'s tax records. 

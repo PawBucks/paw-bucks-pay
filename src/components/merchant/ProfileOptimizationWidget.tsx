@@ -5,7 +5,7 @@ import { Badge } from'@/components/ui/badge';
 import { Progress } from'@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from'@/components/ui/tabs';
 import { ScrollArea } from'@/components/ui/scroll-area';
-import { CheckCircle, AlertTriangle, Info, ArrowUp, ArrowDown, Minus, RefreshCw, Download } from "lucide-react";
+import { AlertTriangle, ArrowDown, ArrowUp, BarChart3, CheckCircle, Download, FileText, Image, Info, Lightbulb, MapPin, Minus, RefreshCw, Star, Target, TrendingUp, Trophy, Users, Zap } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { supabase } from'@/integrations/supabase/client';
 import { toast } from'@/hooks/use-toast';
@@ -144,18 +144,18 @@ export function ProfileOptimizationWidget() {
  case'success': return <CheckCircle className="h-5 w-5 text-success" />;
  case'warning': return <AlertTriangle className="h-5 w-5 text-warning" />;
  case'info': return <Info className="h-5 w-5 text-info" />;
- case'opportunity': return <span className="h-5 w-5 text-accent" aria-hidden="true">💡</span>;
+ case'opportunity': return <Lightbulb className="h-5 w-5 text-accent" aria-hidden="true" />;
  default: return <Info className="h-5 w-5" />;
  }
  };
 
  const getSectionIcon = (name: string) => {
  switch (name) {
- case'Business Information': return <span className="h-4 w-4" aria-hidden="true">📄</span>;
- case'Visual Branding': return <span className="h-4 w-4" aria-hidden="true">🖼️</span>;
- case'Contact & Location': return <span className="h-4 w-4" aria-hidden="true">📍</span>;
- case'Services & Offers': return <span className="h-4 w-4" aria-hidden="true">🎯</span>;
- case'Reputation': return <span className="h-4 w-4" aria-hidden="true">⭐</span>;
+ case'Business Information': return <FileText className="h-4 w-4" aria-hidden="true" />;
+ case'Visual Branding': return <Image className="h-4 w-4" aria-hidden="true" />;
+ case'Contact & Location': return <MapPin className="h-4 w-4" aria-hidden="true" />;
+ case'Services & Offers': return <Target className="h-4 w-4" aria-hidden="true" />;
+ case'Reputation': return <Star className="h-4 w-4" aria-hidden="true" />;
  default: return <Info className="h-4 w-4" />;
  }
  };
@@ -320,7 +320,7 @@ export function ProfileOptimizationWidget() {
  <div className="pt-2 border-t space-y-1">
  {section.suggestions.slice(0, 2).map((suggestion, i) => (
  <div key={i} className="flex items-start gap-2 text-sm text-primary">
- <span className="h-4 w-4 mt-0.5 shrink-0" aria-hidden="true">💡</span>
+ <Lightbulb className="h-4 w-4 mt-0.5 shrink-0" aria-hidden="true" />
  <span>{suggestion}</span>
  </div>
  ))}
@@ -338,7 +338,7 @@ export function ProfileOptimizationWidget() {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <span className="h-5 w-5 text-primary" aria-hidden="true">⚡</span>
+ <Zap className="h-5 w-5 text-primary" aria-hidden="true" />
  Optimization Actions
  </CardTitle>
  <CardDescription>
@@ -369,7 +369,7 @@ export function ProfileOptimizationWidget() {
  {rec.description}
  </p>
  <div className="flex items-center gap-1 text-sm text-success">
- <span className="h-4 w-4" aria-hidden="true">📈</span>
+ <TrendingUp className="h-4 w-4" aria-hidden="true" />
  <span>{rec.impact}</span>
  </div>
  </div>
@@ -395,7 +395,7 @@ export function ProfileOptimizationWidget() {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <span className="h-5 w-5 text-warning" aria-hidden="true">🏆</span>
+ <Trophy className="h-5 w-5 text-warning" aria-hidden="true" />
  Your Ranking
  </CardTitle>
  </CardHeader>
@@ -428,7 +428,7 @@ export function ProfileOptimizationWidget() {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <span className="h-5 w-5 text-primary" aria-hidden="true">📊</span>
+ <BarChart3 className="h-5 w-5 text-primary" aria-hidden="true" />
  Performance Comparison
  </CardTitle>
  </CardHeader>
@@ -515,7 +515,7 @@ export function ProfileOptimizationWidget() {
  </p>
  {insight.action && (
  <div className="flex items-center gap-2 text-sm font-medium text-primary">
- <span className="h-4 w-4" aria-hidden="true">⚡</span>
+ <Zap className="h-4 w-4" aria-hidden="true" />
  <span>{insight.action}</span>
  </div>
  )}
@@ -535,7 +535,7 @@ export function ProfileOptimizationWidget() {
  <div className="flex items-center justify-between">
  <div>
  <CardTitle className="flex items-center gap-2">
- <span className="h-5 w-5 text-primary" aria-hidden="true">📈</span>
+ <TrendingUp className="h-5 w-5 text-primary" aria-hidden="true" />
  Score History
  </CardTitle>
  <CardDescription>Track your optimization progress over time</CardDescription>
@@ -577,7 +577,7 @@ export function ProfileOptimizationWidget() {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <span className="h-5 w-5 text-primary" aria-hidden="true">👥</span>
+ <Users className="h-5 w-5 text-primary" aria-hidden="true" />
  Visibility Metrics
  </CardTitle>
  <CardDescription>How your profile improvements affect traffic</CardDescription>

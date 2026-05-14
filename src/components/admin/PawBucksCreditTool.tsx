@@ -7,7 +7,7 @@ import { Label } from'@/components/ui/label';
 import { Textarea } from'@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from'@/components/ui/card';
 import { toast } from'sonner';
-import { Search, Loader2, CheckCircle, User } from "lucide-react";
+import { CheckCircle, Loader2, Search, User } from "lucide-react";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
 
 type UserResult = {
@@ -224,7 +224,7 @@ export function PawBucksCreditTool() {
  <div className="p-4 rounded-lg bg-muted border space-y-4">
  <div className="flex items-center gap-3">
  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
- <span className="w-5 h-5 text-primary" aria-hidden="true">👤</span>
+ <User className="w-5 h-5 text-primary" aria-hidden="true" />
  </div>
  <div>
  <p className="font-medium">{foundUser.full_name ||'No name'}</p>

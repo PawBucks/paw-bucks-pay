@@ -6,7 +6,7 @@ import { GradientCard } from"@/components/ui/gradient-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
 import { Button } from"@/components/ui/button";
 import { Progress } from"@/components/ui/progress";
-import { Loader2, Eye, MousePointer, CheckCircle, ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, BarChart3, Bell, CheckCircle, Crown, Eye, Heart, Lightbulb, Loader2, Mail, MapPin, MousePointer, TrendingUp, Users } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { 
  AreaChart, Area, XAxis, YAxis, CartesianGrid, 
@@ -129,7 +129,7 @@ export function MerchantSpotlightWidget() {
  <Sparkles className="h-3 w-3" /> Featured
  </Badge>
  <Badge className="bg-gradient-to-r from-primary to-primary/60 gap-1">
- <span className="h-3 w-3" aria-hidden="true">👑</span> Premium
+ <Crown className="h-3 w-3" aria-hidden="true" /> Premium
  </Badge>
  </div>
  </div>
@@ -175,28 +175,28 @@ export function MerchantSpotlightWidget() {
  </Card>
  <Card>
  <CardContent className="pt-4 text-center">
- <span className="h-5 w-5 text-accent mx-auto mb-2" aria-hidden="true">📈</span>
+ <TrendingUp className="h-5 w-5 text-accent mx-auto mb-2" aria-hidden="true" />
  <p className="text-2xl font-bold">{Formatters.decimal(performance.click_through_rate, 1)}%</p>
  <p className="text-xs text-muted-foreground">CTR</p>
  </CardContent>
  </Card>
  <Card>
  <CardContent className="pt-4 text-center">
- <span className="h-5 w-5 text-warning mx-auto mb-2" aria-hidden="true">👥</span>
+ <Users className="h-5 w-5 text-warning mx-auto mb-2" aria-hidden="true" />
  <p className="text-2xl font-bold">{performance.new_customers}</p>
  <p className="text-xs text-muted-foreground">New Customers</p>
  </CardContent>
  </Card>
  <Card>
  <CardContent className="pt-4 text-center">
- <span className="h-5 w-5 text-info mx-auto mb-2" aria-hidden="true">📊</span>
+ <BarChart3 className="h-5 w-5 text-info mx-auto mb-2" aria-hidden="true" />
  <p className="text-2xl font-bold">{Formatters.decimal((performance.profile_views / 1000), 1)}K</p>
  <p className="text-xs text-muted-foreground">Profile Views</p>
  </CardContent>
  </Card>
  <Card>
  <CardContent className="pt-4 text-center">
- <span className="h-5 w-5 text-destructive mx-auto mb-2" aria-hidden="true">❤️</span>
+ <Heart className="h-5 w-5 text-destructive mx-auto mb-2" aria-hidden="true" />
  <p className="text-2xl font-bold">{performance.saves_to_favorites}</p>
  <p className="text-xs text-muted-foreground">Saves</p>
  </CardContent>
@@ -264,7 +264,7 @@ export function MerchantSpotlightWidget() {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <span className="h-5 w-5" aria-hidden="true">📍</span>
+ <MapPin className="h-5 w-5" aria-hidden="true" />
  Active Placements
  </CardTitle>
  <CardDescription>Where your business is being featured</CardDescription>
@@ -278,9 +278,9 @@ export function MerchantSpotlightWidget() {
  placement.status ==='active' ?'bg-success/10' :
  placement.status ==='featured' ?'bg-warning/10' :'bg-info/10'
  }`}>
- {placement.location.includes('Email') ? <span className="h-5 w-5 text-accent" aria-hidden="true">📧</span> :
- placement.location.includes('Push') ? <span className="h-5 w-5 text-info" aria-hidden="true">🔔</span> :
- <span className={`h-5 w-5 ${placement.status ==='active' ?'text-success' :'text-warning'}`} aria-hidden="true">📍</span>}
+ {placement.location.includes('Email') ? <Mail className="h-5 w-5 text-accent" aria-hidden="true" /> :
+ placement.location.includes('Push') ? <Bell className="h-5 w-5 text-info" aria-hidden="true" /> :
+ <MapPin className={`h-5 w-5 ${placement.status ==='active' ?'text-success' :'text-warning'}`} aria-hidden="true" />}
  </div>
  <div>
  <p className="font-medium">{placement.location}</p>
@@ -322,7 +322,7 @@ export function MerchantSpotlightWidget() {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <span className="h-5 w-5" aria-hidden="true">📈</span>
+ <TrendingUp className="h-5 w-5" aria-hidden="true" />
  Daily Performance
  </CardTitle>
  <CardDescription>Impressions, clicks, and conversions over time</CardDescription>
@@ -386,8 +386,8 @@ export function MerchantSpotlightWidget() {
  insight.type ==='tip' ?'bg-info/10' :'bg-muted'
  }`}>
  {insight.type ==='success' ? <CheckCircle className="h-5 w-5 text-success" /> :
- insight.type ==='tip' ? <span className="h-5 w-5 text-info" aria-hidden="true">💡</span> :
- <span className="h-5 w-5 text-muted-foreground" aria-hidden="true">📈</span>}
+ insight.type ==='tip' ? <Lightbulb className="h-5 w-5 text-info" aria-hidden="true" /> :
+ <TrendingUp className="h-5 w-5 text-muted-foreground" aria-hidden="true" />}
  </div>
  <p className="text-sm leading-relaxed">{insight.insight}</p>
  </div>
@@ -402,7 +402,7 @@ export function MerchantSpotlightWidget() {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <span className="h-5 w-5" aria-hidden="true">💡</span>
+ <Lightbulb className="h-5 w-5" aria-hidden="true" />
  Optimization Checklist
  </CardTitle>
  <CardDescription>Maximize your spotlight impact</CardDescription>

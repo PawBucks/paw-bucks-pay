@@ -3,7 +3,7 @@
  import { Button } from"@/components/ui/button";
  import { Badge } from"@/components/ui/badge";
  import { Skeleton } from"@/components/ui/skeleton";
- import { ArrowLeft, RefreshCw, ExternalLink, CheckCircle } from "lucide-react";
+ import { ArrowLeft, CheckCircle, DollarSign, ExternalLink, RefreshCw, Wallet } from "lucide-react";
  import { useMerchantEarnings } from"@/hooks/useMerchantEarnings";
  import { format } from"date-fns";
  
@@ -32,7 +32,7 @@
  </Button>
  <Card>
  <CardContent className="py-12 text-center">
- <span className="h-16 w-16 mx-auto text-muted-foreground mb-4" aria-hidden="true">👛</span>
+ <Wallet className="h-16 w-16 mx-auto text-muted-foreground mb-4" aria-hidden="true" />
  <p className="text-lg text-muted-foreground">Connect your Stripe account to view balance details</p>
  </CardContent>
  </Card>
@@ -78,7 +78,7 @@
  <CardHeader>
  <div className="flex items-center gap-3">
  <div className="p-3 rounded-full bg-success/15">
- <span className="h-6 w-6 text-success" aria-hidden="true">💵</span>
+ <DollarSign className="h-6 w-6 text-success" aria-hidden="true" />
  </div>
  <div>
  <CardTitle className="text-3xl text-success">

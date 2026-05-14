@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, AlertTriangle, Loader2 } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Gift, Loader2, TrendingUp, Wallet } from "lucide-react";
 import { toast } from "sonner";
 import { Formatters } from "@/utils/formatters";
 import {
@@ -117,7 +117,7 @@ export default function MerchantStoreRewards() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <span className="h-5 w-5 text-primary" aria-hidden="true">🎁</span> Store Rewards Pro
+                <Gift className="h-5 w-5 text-primary" aria-hidden="true" /> Store Rewards Pro
               </CardTitle>
               <CardDescription>
                 Run your own in-store PawBucks cash back rewards program. Available to
@@ -153,7 +153,7 @@ export default function MerchantStoreRewards() {
             <ArrowLeft className="h-4 w-4 mr-2" /> Back
           </Button>
           <h1 className="text-3xl font-bold flex items-center gap-2">
-            <span className="h-7 w-7 text-primary" aria-hidden="true">🎁</span> Store Rewards Pro
+            <Gift className="h-7 w-7 text-primary" aria-hidden="true" /> Store Rewards Pro
           </h1>
           <p className="text-muted-foreground">
             Issue in-store PawBucks to your customers — redeemable only at your business.
@@ -165,7 +165,7 @@ export default function MerchantStoreRewards() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2">
-                <span className="h-5 w-5" aria-hidden="true">👛</span> Funding Balance
+                <Wallet className="h-5 w-5" aria-hidden="true" /> Funding Balance
               </CardTitle>
               {isLowBalance && (
                 <Badge variant="destructive">
@@ -241,7 +241,7 @@ export default function MerchantStoreRewards() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <span className="h-5 w-5" aria-hidden="true">📈</span> Recent Activity
+              <TrendingUp className="h-5 w-5" aria-hidden="true" /> Recent Activity
             </CardTitle>
           </CardHeader>
           <CardContent>

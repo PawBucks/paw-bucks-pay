@@ -18,6 +18,7 @@ import { DemandForecastingReport } from"./DemandForecastingReport";
 import { KeywordPerformanceWidget } from"./KeywordPerformanceWidget";
 import { StrategyConsultationWidget } from"./StrategyConsultationWidget";
 import { PosApiWidget } from"./PosApiWidget";
+import { Store, TrendingUp } from "lucide-react";
 
 type MerchantPremiumServicesTabProps = {
  merchantId: string;
@@ -77,7 +78,7 @@ export function MerchantPremiumServicesTab({
  featured partner status, and more.
  </p>
  <Button onClick={() => onNavigate('/merchant/market')}>
- <span className="w-4 h-4 mr-2" aria-hidden="true">🏪</span>
+ <Store className="w-4 h-4 mr-2" aria-hidden="true" />
  Browse Merchant Market
  </Button>
  </CardContent>
@@ -117,7 +118,7 @@ export function MerchantPremiumServicesTab({
  <Tabs defaultValue="roi" className="w-full">
  <TabsList className="mb-4 flex-wrap h-auto gap-1">
  <TabsTrigger value="roi">
- <span className="h-4 w-4 mr-1" aria-hidden="true">📈</span>
+ <TrendingUp className="h-4 w-4 mr-1" aria-hidden="true" />
  ROI Overview
  </TabsTrigger>
  {hasPremiumAnalytics && (

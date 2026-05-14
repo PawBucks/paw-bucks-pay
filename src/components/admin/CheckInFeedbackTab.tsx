@@ -6,7 +6,7 @@ import { Input } from"@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from"@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from"@/components/ui/table";
 import { Button } from"@/components/ui/button";
-import { Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { BarChart3, ChevronLeft, ChevronRight, Search, Store, ThumbsDown } from "lucide-react";
 import { format } from"date-fns";
 import { toast } from"sonner";
 
@@ -146,7 +146,7 @@ export function CheckInFeedbackTab() {
  <Card>
  <CardHeader className="pb-3">
  <div className="flex items-center gap-2">
- <span className="w-5 h-5 text-destructive" aria-hidden="true">👎</span>
+ <ThumbsDown className="w-5 h-5 text-destructive" aria-hidden="true" />
  <CardTitle className="text-lg">No-Purchase Feedback</CardTitle>
  </div>
  </CardHeader>
@@ -178,7 +178,7 @@ export function CheckInFeedbackTab() {
  <div className="text-center py-12 text-muted-foreground">Loading...</div>
  ) : filtered.length === 0 ? (
  <div className="text-center py-12 text-muted-foreground">
- <span className="w-10 h-10 mx-auto mb-3 opacity-50" aria-hidden="true">📊</span>
+ <BarChart3 className="w-10 h-10 mx-auto mb-3 opacity-50" aria-hidden="true" />
  <p>No feedback found</p>
  </div>
  ) : (
@@ -204,7 +204,7 @@ export function CheckInFeedbackTab() {
  </TableCell>
  <TableCell>
  <div className="flex items-center gap-1.5">
- <span className="w-3.5 h-3.5 text-muted-foreground" aria-hidden="true">🏪</span>
+ <Store className="w-3.5 h-3.5 text-muted-foreground" aria-hidden="true" />
  <span className="text-sm">{row.entity_name}</span>
  </div>
  <Badge variant={row.merchant_id ?"default" :"secondary"} className="text-[10px] mt-1">

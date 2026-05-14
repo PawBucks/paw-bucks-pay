@@ -11,7 +11,7 @@ import {
  DialogHeader,
  DialogTitle,
 } from"@/components/ui/dialog";
-import { AlertTriangle, Clock, CheckCircle, Eye, FileQuestion, TestTube, Loader2, RefreshCw } from "lucide-react";
+import { AlertTriangle, CheckCircle, Clock, Eye, FileQuestion, Loader2, RefreshCw, Stethoscope, TestTube } from "lucide-react";
 import { toast } from"sonner";
 import { useQuery, useMutation, useQueryClient } from"@tanstack/react-query";
 
@@ -183,7 +183,7 @@ export const SymptomTriageQueue = ({ vetId }: SymptomTriageQueueProps) => {
  />
  ) : (
  <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
- <span className="w-6 h-6 text-muted-foreground" aria-hidden="true">🩺</span>
+ <Stethoscope className="w-6 h-6 text-muted-foreground" aria-hidden="true" />
  </div>
  )}
  <div>
@@ -302,7 +302,7 @@ export const SymptomTriageQueue = ({ vetId }: SymptomTriageQueueProps) => {
  />
  ) : (
  <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
- <span className="w-8 h-8 text-muted-foreground" aria-hidden="true">🩺</span>
+ <Stethoscope className="w-8 h-8 text-muted-foreground" aria-hidden="true" />
  </div>
  )}
  <div>
@@ -380,7 +380,7 @@ export const SymptomTriageQueue = ({ vetId }: SymptomTriageQueueProps) => {
  <>
  <div>
  <h4 className="font-semibold mb-2 flex items-center gap-2">
- <span className="w-4 h-4" aria-hidden="true">🩺</span>
+ <Stethoscope className="w-4 h-4" aria-hidden="true" />
  AI Triage Summary
  </h4>
  <p className="p-3 bg-primary/10 /20 rounded-lg">

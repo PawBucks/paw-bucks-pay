@@ -12,7 +12,7 @@ import {
  DialogTitle,
 } from"@/components/ui/dialog";
 import { toast } from"sonner";
-import { AlertTriangle, CheckCircle, X, Dog, Cat, Eye } from "lucide-react";
+import { AlertTriangle, Bell, Calendar, Cat, CheckCircle, Dog, Eye, MapPin, Phone, X } from "lucide-react";
 import { format } from"date-fns";
 
 interface LostPetAlertsWidgetProps {
@@ -178,16 +178,16 @@ export function LostPetAlertsWidget({ vetId }: LostPetAlertsWidgetProps) {
  </Badge>
  </div>
  <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
- <span className="h-3 w-3" aria-hidden="true">📍</span>
+ <MapPin className="h-3 w-3" aria-hidden="true" />
  {alert.last_seen_location}
  </div>
  <div className="flex items-center gap-2 text-sm text-muted-foreground">
- <span className="h-3 w-3" aria-hidden="true">📅</span>
+ <Calendar className="h-3 w-3" aria-hidden="true" />
  Last seen: {format(new Date(alert.last_seen_date),"MMM d, yyyy")}
  </div>
  {alert.contact_phone && (
  <div className="flex items-center gap-2 text-sm mt-1">
- <span className="h-3 w-3" aria-hidden="true">📞</span>
+ <Phone className="h-3 w-3" aria-hidden="true" />
  <a href={`tel:${alert.contact_phone}`} className="text-info hover:underline">
  {alert.contact_phone}
  </a>
@@ -214,7 +214,7 @@ export function LostPetAlertsWidget({ vetId }: LostPetAlertsWidgetProps) {
  <Card>
  <div className="p-4 border-b">
  <div className="flex items-center gap-2">
- <span className="h-5 w-5 text-warning" aria-hidden="true">🔔</span>
+ <Bell className="h-5 w-5 text-warning" aria-hidden="true" />
  <h3 className="font-semibold">Lost Pets in Your Area</h3>
  <Badge variant="outline" className="ml-auto">
  {otherAlerts.length}
@@ -307,16 +307,16 @@ export function LostPetAlertsWidget({ vetId }: LostPetAlertsWidgetProps) {
 
  <div className="space-y-2 text-sm">
  <div className="flex items-center gap-2">
- <span className="h-4 w-4 text-muted-foreground" aria-hidden="true">📍</span>
+ <MapPin className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
  <span>{selectedAlert.last_seen_location}</span>
  </div>
  <div className="flex items-center gap-2">
- <span className="h-4 w-4 text-muted-foreground" aria-hidden="true">📅</span>
+ <Calendar className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
  <span>Last seen: {format(new Date(selectedAlert.last_seen_date),"MMMM d, yyyy")}</span>
  </div>
  {selectedAlert.contact_phone && (
  <div className="flex items-center gap-2">
- <span className="h-4 w-4 text-muted-foreground" aria-hidden="true">📞</span>
+ <Phone className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
  <a href={`tel:${selectedAlert.contact_phone}`} className="text-info hover:underline">
  {selectedAlert.contact_phone}
  </a>

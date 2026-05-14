@@ -13,7 +13,7 @@ import {
 import { supabase } from"@/integrations/supabase/client";
 import { Elements, PaymentElement, useStripe, useElements } from"@stripe/react-stripe-js";
 import { toast } from"sonner";
-import { Loader2, Check, CheckCircle2 } from "lucide-react";
+import { Calendar, Check, CheckCircle2, Clock, CreditCard, Loader2 } from "lucide-react";
 import { Label } from"@/components/ui/label";
 import { cn } from"@/lib/utils";
 import { useAuth } from"@/hooks/useAuth";
@@ -121,7 +121,7 @@ const StripePaymentForm = ({
 
  <div className="space-y-2">
  <Label className="flex items-center gap-2">
- <span className="w-4 h-4" aria-hidden="true">💳</span>
+ <CreditCard className="w-4 h-4" aria-hidden="true" />
  Payment Details
  </Label>
  <PaymentElement onReady={() => setIsReady(true)} />
@@ -424,7 +424,7 @@ export const ServicePurchaseDialog = ({
  )}>
  <DialogHeader>
  <DialogTitle className="flex items-center gap-2">
- {isStrategyConsultation && <span className="w-5 h-5 text-primary" aria-hidden="true">📅</span>}
+ {isStrategyConsultation && <Calendar className="w-5 h-5 text-primary" aria-hidden="true" />}
  Purchase {service.name}
  </DialogTitle>
  <DialogDescription>
@@ -453,7 +453,7 @@ export const ServicePurchaseDialog = ({
  <div className="space-y-4 border rounded-lg p-4 bg-primary/5">
  <div>
  <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
- <span className="w-4 h-4" aria-hidden="true">📅</span>
+ <Calendar className="w-4 h-4" aria-hidden="true" />
  Select Your Consultation Date
  </h4>
  <p className="text-xs text-muted-foreground mb-3">
@@ -528,7 +528,7 @@ export const ServicePurchaseDialog = ({
  <p className="text-xs text-muted-foreground">at {selectedTimeLabel} PT</p>
  </div>
  <Badge variant="secondary">
- <span className="w-3 h-3 mr-1" aria-hidden="true">⏰</span>
+ <Clock className="w-3 h-3 mr-1" aria-hidden="true" />
  60 min
  </Badge>
  </div>
@@ -605,7 +605,7 @@ export const ServicePurchaseDialog = ({
 "w-10 h-10 rounded-full flex items-center justify-center",
  paymentMethod ==='usd' ?"bg-primary text-primary-foreground" :"bg-muted"
  )}>
- <span className="w-5 h-5" aria-hidden="true">💳</span>
+ <CreditCard className="w-5 h-5" aria-hidden="true" />
  </div>
  <div>
  <p className="font-medium">Pay with Card</p>
@@ -671,7 +671,7 @@ export const ServicePurchaseDialog = ({
  </>
  ) : (
  <>
- <span className="w-4 h-4 mr-2" aria-hidden="true">💳</span>
+ <CreditCard className="w-4 h-4 mr-2" aria-hidden="true" />
  Continue to Payment
  </>
  )}
