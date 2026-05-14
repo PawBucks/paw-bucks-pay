@@ -240,42 +240,7 @@ const SimpleHome = () => {
             )}
             </section>
           </div>
-
-          {/* Pets — mobile/tablet only; desktop renders inside left column above */}
-          {pets.length > 0 && (
-            <section className="mt-8 lg:hidden">
-              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">
-                Your pets
-              </h2>
-              <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1">
-                {pets.map((p) => (
-                  <button
-                    key={p.id}
-                    onClick={() => navigate(`/pet-health/${p.id}`)}
-                    className="flex flex-col items-center gap-2 min-w-[72px]"
-                  >
-                    <div className="h-16 w-16 rounded-full bg-muted overflow-hidden flex items-center justify-center ring-1 ring-border">
-                      {p.photo_url ? (
-                        <img src={p.photo_url} alt={p.name} className="h-full w-full object-cover" />
-                      ) : (
-                        <PawBucksLogo className="h-7 w-7 text-muted-foreground" />
-                      )}
-                    </div>
-                    <span className="text-xs font-medium truncate max-w-[72px]">{p.name}</span>
-                  </button>
-                ))}
-                <button
-                  onClick={() => navigate("/create-pet-profile")}
-                  className="flex flex-col items-center gap-2 min-w-[72px]"
-                >
-                  <div className="h-16 w-16 rounded-full border-2 border-dashed border-border flex items-center justify-center text-muted-foreground">
-                    +
-                  </div>
-                  <span className="text-xs text-muted-foreground">Add pet</span>
-                </button>
-              </div>
-            </section>
-          )}
+        </div>
 
           <p className="mt-10 lg:mt-16 text-center text-xs text-muted-foreground">
             Every payment automatically builds your savings. No points to manage.
