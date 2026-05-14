@@ -31,6 +31,7 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { format, parseISO, startOfMonth, subMonths } from "date-fns";
+import { toast } from "@/hooks/use-toast";
 
 type RecentTx = {
   id: string;
@@ -109,14 +110,19 @@ function StatCard({ label, value, sub, badge, accent = "default", onClick }: Sta
 export function WorkspaceOverview() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [acceptPB, setAcceptPB] = useState(true);
+  const [merchantId, setMerchantId] = useState<string | null>(null);
+  const [feeModel, setFeeModel] = useState<"full_ecosystem" | "acquisition_only">("full_ecosystem");
+  const [acceptPB, setAcceptPB] = useState(false);
   const [capEnabled, setCapEnabled] = useState(false);
   const [capPct, setCapPct] = useState("50");
+  const [savingSetting, setSavingSetting] = useState(false);
   const [salesTx, setSalesTx] = useState<{ amount: number; created_at: string }[]>([]);
-  const [rewardsTotals, setRewardsTotals] = useState({ given: 0, received: 0 });
+  const [allTxRows, setAllTxRows] = useState<{ amount: number; rewards_earned: number | null; cashback_earned: number | null; pawbucks_used: number | null; created_at: string; status: string | null }[]>([]);
   const [chartsLoading, setChartsLoading] = useState(true);
   const [recentTx, setRecentTx] = useState<RecentTx[]>([]);
   const [recentLoading, setRecentLoading] = useState(true);
+  const [funding, setFunding] = useState<{ status: string | null; remaining: number; rate: number | null }>({ status: null, remaining: 0, rate: null });
+  const [latestInvite, setLatestInvite] = useState<{ id: string; name: string; status: string; date: string } | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -126,14 +132,19 @@ export function WorkspaceOverview() {
       try {
         const { data: merchant } = await supabase
           .from("merchants")
-          .select("id")
+          .select("id, accepts_pawbucks, pawbucks_cap_enabled, pawbucks_cap_pct, fee_model")
           .eq("user_id", user.id)
           .maybeSingle();
         if (!merchant?.id || cancelled) return;
+        setMerchantId(merchant.id);
+        setAcceptPB(!!(merchant as any).accepts_pawbucks);
+        setCapEnabled(!!(merchant as any).pawbucks_cap_enabled);
+        if ((merchant as any).pawbucks_cap_pct != null) setCapPct(String((merchant as any).pawbucks_cap_pct));
+        if ((merchant as any).fee_model === "acquisition_only") setFeeModel("acquisition_only");
 
         const sixMonthsAgo = startOfMonth(subMonths(new Date(), 5)).toISOString();
 
-        const [{ data: recentTxs }, { data: allTxs }] = await Promise.all([
+        const [{ data: recentTxs }, { data: allTxs }, deals, invites] = await Promise.all([
           supabase
             .from("transactions")
             .select("amount, created_at")
@@ -142,22 +153,47 @@ export function WorkspaceOverview() {
             .gte("created_at", sixMonthsAgo),
           supabase
             .from("transactions")
-            .select("rewards_earned, pawbucks_used")
+            .select("amount, rewards_earned, cashback_earned, pawbucks_used, created_at, status")
             .eq("merchant_id", merchant.id)
             .eq("status", "completed"),
+          supabase
+            .from("funding_deals")
+            .select("status, remaining_balance, repayment_rate")
+            .eq("merchant_id", merchant.id)
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .maybeSingle(),
+          supabase
+            .from("brand_campaign_invitations")
+            .select("id, status, invited_at, responded_at, brand_campaigns(name)")
+            .eq("merchant_id", merchant.id)
+            .order("invited_at", { ascending: false })
+            .limit(1)
+            .maybeSingle(),
         ]);
 
         if (cancelled) return;
         setSalesTx(recentTxs || []);
-        const given = (allTxs || []).reduce(
-          (s, t: any) => s + (Number(t.rewards_earned) || 0) * 0.001,
-          0,
-        );
-        const received = (allTxs || []).reduce(
-          (s, t: any) => s + (Number(t.pawbucks_used) || 0) * 0.001,
-          0,
-        );
-        setRewardsTotals({ given, received });
+        setAllTxRows((allTxs || []) as any);
+
+        const dealRow: any = (deals as any)?.data ?? null;
+        if (dealRow) {
+          setFunding({
+            status: dealRow.status ?? null,
+            remaining: Number(dealRow.remaining_balance) || 0,
+            rate: dealRow.repayment_rate != null ? Number(dealRow.repayment_rate) : null,
+          });
+        }
+
+        const inviteRow: any = (invites as any)?.data ?? null;
+        if (inviteRow) {
+          setLatestInvite({
+            id: inviteRow.id,
+            name: inviteRow.brand_campaigns?.name || "Brand Campaign",
+            status: inviteRow.status || "pending",
+            date: format(parseISO(inviteRow.responded_at || inviteRow.invited_at), "M/d/yyyy"),
+          });
+        }
 
         // Recent transactions (live)
         setRecentLoading(true);
