@@ -14,12 +14,16 @@ function formatLocalDateOnly(dateString: string): string {
   return `${months[month - 1]} ${day}, ${year}`;
 }
 
+// Compare against today in America/New_York so EST/PST users don't see
+// "due today" invoices flipped to past-due once UTC rolls over.
 function isDatePastDue(dateString: string): boolean {
-  const [year, month, day] = dateString.split('-').map(Number);
-  const dueDate = new Date(year, month - 1, day);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return dueDate < today;
+  const easternToday = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/New_York",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+  return dateString < easternToday;
 }
 
 function buildInvoiceEmailHtml(invoice: any, merchant: any, items: any[], paymentUrl: string): string {
