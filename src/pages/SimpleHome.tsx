@@ -81,176 +81,55 @@ const SimpleHome = () => {
             </h1>
           </motion.div>
 
-          {/* Pets — mobile/tablet */}
-          {pets.length > 0 && (
-            <section className="mb-6 lg:hidden">
-              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">
-                Your pets
+      <div className="grid gap-6 lg:gap-10 lg:grid-cols-5">
+        {/* Left column — hero + actions */}
+        <div className="lg:col-span-3 space-y-5 lg:space-y-6">
+          <SavingsHero
+            availableUsd={availableUsd}
+            helperText={
+              availableUsd > 0
+                ? "Auto-applied next time you pay"
+                : "Your savings grow every time you pay"
+            }
+          />
+
+          {/* Primary actions */}
+          <div className="grid grid-cols-2 gap-3 lg:gap-4">
+            <Button
+              size="lg"
+              className="h-16 lg:h-20 text-base lg:text-lg rounded-xl shadow-[var(--shadow-medium)]"
+              onClick={() => navigate("/pay")}
+            >
+              <Sparkles className="h-5 w-5 mr-2" />
+              Pay & save
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              className="h-16 lg:h-20 text-base lg:text-lg rounded-xl"
+              onClick={() => navigate("/discover")}
+            >
+              <Search className="h-5 w-5 mr-2" />
+              Find a place
+            </Button>
+          </div>
+        </div>
+
+        {/* Right column — recent visits + pets */}
+        <div className="lg:col-span-2 mt-2 lg:mt-0 space-y-6">
+          {/* Recent visits */}
+          <section>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+                Recent visits
               </h2>
-              <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1">
-                {pets.map((p) => (
-                  <div key={p.id} className="flex flex-col items-center gap-2 min-w-[72px]">
-                    <button
-                      onClick={() => navigate(`/pet-health/${p.id}`)}
-                      className="flex flex-col items-center gap-2"
-                    >
-                      <div className="h-16 w-16 rounded-full bg-muted overflow-hidden flex items-center justify-center ring-1 ring-border">
-                        {p.photo_url ? (
-                          <img src={p.photo_url} alt={p.name} className="h-full w-full object-cover" />
-                        ) : (
-                          <PawBucksLogo className="h-7 w-7 text-muted-foreground" />
-                        )}
-                      </div>
-                      <span className="text-xs font-medium truncate max-w-[72px]">{p.name}</span>
-                    </button>
-                    <div className="flex gap-1">
-                      <button
-                        onClick={() => navigate(`/pet-health/${p.id}`)}
-                        className="p-1 rounded-md bg-muted hover:bg-accent/20 transition-colors"
-                        aria-label={`View health for ${p.name}`}
-                        title="Health history"
-                      >
-                        <FileText className="h-3 w-3 text-muted-foreground" />
-                      </button>
-                      <button
-                        onClick={() => navigate(`/book-visit?pet=${p.id}`)}
-                        className="p-1 rounded-md bg-muted hover:bg-accent/20 transition-colors"
-                        aria-label={`Schedule visit for ${p.name}`}
-                        title="Schedule visit"
-                      >
-                        <CalendarPlus className="h-3 w-3 text-muted-foreground" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-                <button
-                  onClick={() => navigate("/create-pet-profile")}
-                  className="flex flex-col items-center gap-2 min-w-[72px]"
-                >
-                  <div className="h-16 w-16 rounded-full border-2 border-dashed border-border flex items-center justify-center text-muted-foreground">
-                    +
-                  </div>
-                  <span className="text-xs text-muted-foreground">Add pet</span>
-                </button>
-              </div>
-            </section>
-          )}
-
-          <div className="grid gap-6 lg:gap-10 lg:grid-cols-5">
-            {/* Left column — hero + actions */}
-            <div className="lg:col-span-3 space-y-5 lg:space-y-6">
-              <SavingsHero
-                availableUsd={availableUsd}
-                helperText={
-                  availableUsd > 0
-                    ? "Auto-applied next time you pay"
-                    : "Your savings grow every time you pay"
-                }
-              />
-
-              {/* Primary actions */}
-              <div className="grid grid-cols-2 gap-3 lg:gap-4">
-                <Button
-                  size="lg"
-                  className="h-16 lg:h-20 text-base lg:text-lg rounded-xl shadow-[var(--shadow-medium)]"
-                  onClick={() => navigate("/pay")}
-                >
-                  <Sparkles className="h-5 w-5 mr-2" />
-                  Pay & save
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="h-16 lg:h-20 text-base lg:text-lg rounded-xl"
-                  onClick={() => navigate("/discover")}
-                >
-                  <Search className="h-5 w-5 mr-2" />
-                  Find a place
-                </Button>
-              </div>
+              <button
+                className="text-sm text-primary inline-flex items-center hover:underline"
+                onClick={() => navigate("/savings")}
+              >
+                View all <ChevronRight className="h-4 w-4" />
+              </button>
             </div>
-
-            {/* Right column — pets + recent visits */}
-            <div className="lg:col-span-2 mt-2 lg:mt-0 space-y-6">
-              {/* Pets — desktop */}
-              {pets.length > 0 && (
-                <section className="hidden lg:block">
-                  <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">
-                    Your pets
-                  </h2>
-                  <div className="rounded-xl border border-border bg-card p-4">
-                    <div className="flex gap-3 flex-wrap">
-                      {pets.map((p) => (
-                        <div key={p.id} className="flex flex-col items-center gap-2 min-w-[80px]">
-                          <div className="relative group">
-                            <button
-                              onClick={() => navigate(`/pet-health/${p.id}`)}
-                              className="flex flex-col items-center gap-2"
-                            >
-                              <div className="h-20 w-20 rounded-full bg-muted overflow-hidden flex items-center justify-center ring-1 ring-border">
-                                {p.photo_url ? (
-                                  <img src={p.photo_url} alt={p.name} className="h-full w-full object-cover" />
-                                ) : (
-                                  <PawBucksLogo className="h-8 w-8 text-muted-foreground" />
-                                )}
-                              </div>
-                            </button>
-                            {/* Hover quick actions */}
-                            <div className="absolute inset-0 rounded-full bg-background/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  navigate(`/pet-health/${p.id}`);
-                                }}
-                                className="p-2 rounded-full bg-accent/90 hover:bg-accent text-accent-foreground shadow-sm transition-colors"
-                                aria-label={`View health for ${p.name}`}
-                                title="Health history"
-                              >
-                                <FileText className="h-4 w-4" />
-                              </button>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  navigate(`/book-visit?pet=${p.id}`);
-                                }}
-                                className="p-2 rounded-full bg-primary/90 hover:bg-primary text-primary-foreground shadow-sm transition-colors"
-                                aria-label={`Schedule visit for ${p.name}`}
-                                title="Schedule visit"
-                              >
-                                <CalendarPlus className="h-4 w-4" />
-                              </button>
-                            </div>
-                          </div>
-                          <span className="text-xs font-medium truncate max-w-[80px]">{p.name}</span>
-                        </div>
-                      ))}
-                      <button
-                        onClick={() => navigate("/create-pet-profile")}
-                        className="flex flex-col items-center gap-2 min-w-[80px]"
-                      >
-                        <div className="h-20 w-20 rounded-full border-2 border-dashed border-border flex items-center justify-center text-muted-foreground">
-                          +
-                        </div>
-                        <span className="text-xs text-muted-foreground">Add pet</span>
-                      </button>
-                    </div>
-                  </div>
-                </section>
-              )}
-
-              {/* Recent visits */}
-              <section>
-                <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-                    Recent visits
-                  </h2>
-                  <button
-                    className="text-sm text-primary inline-flex items-center hover:underline"
-                    onClick={() => navigate("/savings")}
-                  >
-                    View all <ChevronRight className="h-4 w-4" />
-                  </button>
-                </div>
 
             {(!recentSaves || recentSaves.length === 0) ? (
               <div className="rounded-xl border border-dashed border-border p-6 text-center">
@@ -287,9 +166,130 @@ const SimpleHome = () => {
                 })}
               </ul>
             )}
+          </section>
+
+          {/* Pets — desktop */}
+          {pets.length > 0 && (
+            <section className="hidden lg:block">
+              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">
+                Your pets
+              </h2>
+              <div className="rounded-xl border border-border bg-card p-4">
+                <div className="flex gap-3 flex-wrap">
+                  {pets.map((p) => (
+                    <div key={p.id} className="flex flex-col items-center gap-2 min-w-[80px]">
+                      <div className="relative group">
+                        <button
+                          onClick={() => navigate(`/pet-health/${p.id}`)}
+                          className="flex flex-col items-center gap-2"
+                        >
+                          <div className="h-20 w-20 rounded-full bg-muted overflow-hidden flex items-center justify-center ring-1 ring-border">
+                            {p.photo_url ? (
+                              <img src={p.photo_url} alt={p.name} className="h-full w-full object-cover" />
+                            ) : (
+                              <PawBucksLogo className="h-8 w-8 text-muted-foreground" />
+                            )}
+                          </div>
+                        </button>
+                        {/* Hover quick actions */}
+                        <div className="absolute inset-0 rounded-full bg-background/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/pet-health/${p.id}`);
+                            }}
+                            className="p-2 rounded-full bg-accent/90 hover:bg-accent text-accent-foreground shadow-sm transition-colors"
+                            aria-label={`View health for ${p.name}`}
+                            title="Health history"
+                          >
+                            <FileText className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/book-visit?pet=${p.id}`);
+                            }}
+                            className="p-2 rounded-full bg-primary/90 hover:bg-primary text-primary-foreground shadow-sm transition-colors"
+                            aria-label={`Schedule visit for ${p.name}`}
+                            title="Schedule visit"
+                          >
+                            <CalendarPlus className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+                      <span className="text-xs font-medium truncate max-w-[80px]">{p.name}</span>
+                    </div>
+                  ))}
+                  <button
+                    onClick={() => navigate("/create-pet-profile")}
+                    className="flex flex-col items-center gap-2 min-w-[80px]"
+                  >
+                    <div className="h-20 w-20 rounded-full border-2 border-dashed border-border flex items-center justify-center text-muted-foreground">
+                      +
+                    </div>
+                    <span className="text-xs text-muted-foreground">Add pet</span>
+                  </button>
+                </div>
+              </div>
             </section>
-          </div>
+          )}
         </div>
+      </div>
+
+      {/* Pets — mobile/tablet */}
+      {pets.length > 0 && (
+        <section className="mt-6 lg:hidden">
+          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">
+            Your pets
+          </h2>
+          <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1">
+            {pets.map((p) => (
+              <div key={p.id} className="flex flex-col items-center gap-2 min-w-[72px]">
+                <button
+                  onClick={() => navigate(`/pet-health/${p.id}`)}
+                  className="flex flex-col items-center gap-2"
+                >
+                  <div className="h-16 w-16 rounded-full bg-muted overflow-hidden flex items-center justify-center ring-1 ring-border">
+                    {p.photo_url ? (
+                      <img src={p.photo_url} alt={p.name} className="h-full w-full object-cover" />
+                    ) : (
+                      <PawBucksLogo className="h-7 w-7 text-muted-foreground" />
+                    )}
+                  </div>
+                  <span className="text-xs font-medium truncate max-w-[72px]">{p.name}</span>
+                </button>
+                <div className="flex gap-1">
+                  <button
+                    onClick={() => navigate(`/pet-health/${p.id}`)}
+                    className="p-1 rounded-md bg-muted hover:bg-accent/20 transition-colors"
+                    aria-label={`View health for ${p.name}`}
+                    title="Health history"
+                  >
+                    <FileText className="h-3 w-3 text-muted-foreground" />
+                  </button>
+                  <button
+                    onClick={() => navigate(`/book-visit?pet=${p.id}`)}
+                    className="p-1 rounded-md bg-muted hover:bg-accent/20 transition-colors"
+                    aria-label={`Schedule visit for ${p.name}`}
+                    title="Schedule visit"
+                  >
+                    <CalendarPlus className="h-3 w-3 text-muted-foreground" />
+                  </button>
+                </div>
+              </div>
+            ))}
+            <button
+              onClick={() => navigate("/create-pet-profile")}
+              className="flex flex-col items-center gap-2 min-w-[72px]"
+            >
+              <div className="h-16 w-16 rounded-full border-2 border-dashed border-border flex items-center justify-center text-muted-foreground">
+                +
+              </div>
+              <span className="text-xs text-muted-foreground">Add pet</span>
+            </button>
+          </div>
+        </section>
+      )}
 
           <p className="mt-10 lg:mt-16 text-center text-xs text-muted-foreground">
             Every payment automatically builds your savings. No points to manage.
