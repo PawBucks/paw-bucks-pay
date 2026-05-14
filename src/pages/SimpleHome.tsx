@@ -10,7 +10,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { SEO } from "@/components/SEO";
 import { SavingsHero } from "@/components/simple/SavingsHero";
 import { Button } from "@/components/ui/button";
-import { Search, ChevronRight } from "lucide-react";
+import { Search, ChevronRight, FileText, CalendarPlus } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { Formatters } from "@/utils/formatters";
 import { supabase } from "@/integrations/supabase/client";
