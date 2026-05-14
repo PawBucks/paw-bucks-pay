@@ -115,6 +115,7 @@ const MerchantTotalEarnings = lazyWithRetry(() => import("./pages/MerchantTotalE
 const MerchantMessages = lazyWithRetry(() => import("./pages/MerchantMessages"),"MerchantMessages");
 const MerchantCampaigns = lazyWithRetry(() => import("./pages/MerchantCampaigns"),"MerchantCampaigns");
 const MyBookings = lazyWithRetry(() => import("./pages/MyBookings"),"MyBookings");
+const BookingStatus = lazyWithRetry(() => import("./pages/BookingStatus"),"BookingStatus");
 const PublicBookingPage = lazyWithRetry(() => import("./pages/PublicBookingPage"),"PublicBookingPage");
 const PetTimelinePage = lazyWithRetry(() => import("./pages/PetTimelinePage"),"PetTimelinePage");
 const BadgesPage = lazyWithRetry(() => import("./pages/BadgesPage"),"BadgesPage");
@@ -236,6 +237,7 @@ const AppRoutes = () => {
  <Route path="/loyalty" element={<ProtectedRoute><PageTransition><LoyaltyPage /></PageTransition></ProtectedRoute>} />
  <Route path="/loyalty-cards" element={<ProtectedRoute><PageTransition><LoyaltyCardsPage /></PageTransition></ProtectedRoute>} />
  <Route path="/my-bookings" element={<ProtectedRoute><PageTransition><MyBookings /></PageTransition></ProtectedRoute>} />
+ <Route path="/bookings/:id" element={<ProtectedRoute><PageTransition><BookingStatus /></PageTransition></ProtectedRoute>} />
 
  {/* Admin routes - requires admin or superadmin role */}
  <Route path="/admin" element={<PageTransition><AdminLogin /></PageTransition>} />
