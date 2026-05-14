@@ -398,28 +398,19 @@ export default function MerchantPOSIntegration() {
  </CardContent>
  </Card>
  </main>
- <BottomNav />
- </div>
+ </MerchantWorkspaceLayout>
  );
  }
 
  return (
- <div className="min-h-screen bg-background pb-20">
- <Header variant="merchant" isAuthenticated={true} />
- 
+ <MerchantWorkspaceLayout>
+ <WorkspacePageHeader
+   section="Catalog & Services"
+   title="POS & API Integration"
+   subtitle="Connect your systems to award PawBucks automatically"
+   actions={<Badge className="bg-primary">Premium</Badge>}
+ />
  <main className="container max-w-5xl lg:max-w-6xl mx-auto px-4 py-6">
- <div className="flex items-center gap-3 mb-6">
- <Button variant="ghost" size="icon" onClick={() => navigate("/merchant-dashboard")}>
- <ArrowLeft className="h-5 w-5" />
- </Button>
- <div>
- <div className="flex items-center gap-2">
- <h1 className="text-2xl font-bold">POS & API Integration</h1>
- <Badge className="bg-primary">Premium</Badge>
- </div>
- <p className="text-muted-foreground">Connect your systems to award PawBucks automatically</p>
- </div>
- </div>
 
  <Tabs defaultValue="api-keys" className="space-y-6">
  <TabsList className="grid w-full grid-cols-4">
@@ -935,7 +926,6 @@ x-api-key: pk_live_XXXXXXXX...`}
  </DialogContent>
  </Dialog>
 
- <BottomNav />
- </div>
+ </MerchantWorkspaceLayout>
  );
 }
