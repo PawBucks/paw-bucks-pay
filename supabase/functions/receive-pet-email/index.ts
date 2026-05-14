@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { Webhook } from "https://esm.sh/svix@1.21.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -17,12 +18,40 @@ serve(async (req) => {
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
+    // Verify Resend webhook signature (Svix) to prevent forged email injection.
+    // We need the raw body for signature verification, so read it once and
+    // re-parse below.
+    const rawBody = await req.text();
+    const resendWebhookSecret = Deno.env.get("RESEND_WEBHOOK_SECRET");
+    if (resendWebhookSecret) {
+      try {
+        const wh = new Webhook(resendWebhookSecret);
+        const headers: Record<string, string> = {};
+        req.headers.forEach((value, key) => {
+          headers[key] = value;
+        });
+        wh.verify(rawBody, headers);
+      } catch (sigErr) {
+        console.error("Resend webhook signature verification failed:", sigErr);
+        return new Response(
+          JSON.stringify({ error: "Invalid signature" }),
+          { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    } else {
+      console.error("RESEND_WEBHOOK_SECRET not configured — rejecting unsigned inbound email");
+      return new Response(
+        JSON.stringify({ error: "Webhook not configured" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // Resend sends inbound emails as JSON or multipart
     const contentType = req.headers.get("content-type") || "";
     let emailData: any;
 
     if (contentType.includes("application/json")) {
-      const rawPayload = await req.json();
+      const rawPayload = JSON.parse(rawBody);
       console.log("Raw JSON payload keys:", Object.keys(rawPayload));
       
       // Resend webhook wraps email data inside "data" key
@@ -34,8 +63,13 @@ serve(async (req) => {
         emailData = rawPayload;
       }
     } else {
-      // Handle multipart form data from Resend
-      const formData = await req.formData();
+      // Handle multipart form data from Resend (rebuild Request from rawBody)
+      const fakeReq = new Request("http://internal/", {
+        method: "POST",
+        headers: { "content-type": contentType },
+        body: rawBody,
+      });
+      const formData = await fakeReq.formData();
       emailData = {
         from: formData.get("from"),
         to: formData.get("to"),
