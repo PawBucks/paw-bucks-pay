@@ -159,32 +159,34 @@ const SimpleHome = () => {
                   <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">
                     Your pets
                   </h2>
-                  <div className="flex gap-3 flex-wrap">
-                    {pets.map((p) => (
+                  <div className="rounded-xl border border-border bg-card p-4">
+                    <div className="flex gap-3 flex-wrap">
+                      {pets.map((p) => (
+                        <button
+                          key={p.id}
+                          onClick={() => navigate(`/pet-health/${p.id}`)}
+                          className="flex flex-col items-center gap-2 min-w-[80px]"
+                        >
+                          <div className="h-20 w-20 rounded-full bg-muted overflow-hidden flex items-center justify-center ring-1 ring-border">
+                            {p.photo_url ? (
+                              <img src={p.photo_url} alt={p.name} className="h-full w-full object-cover" />
+                            ) : (
+                              <PawBucksLogo className="h-8 w-8 text-muted-foreground" />
+                            )}
+                          </div>
+                          <span className="text-xs font-medium truncate max-w-[80px]">{p.name}</span>
+                        </button>
+                      ))}
                       <button
-                        key={p.id}
-                        onClick={() => navigate(`/pet-health/${p.id}`)}
+                        onClick={() => navigate("/create-pet-profile")}
                         className="flex flex-col items-center gap-2 min-w-[80px]"
                       >
-                        <div className="h-20 w-20 rounded-full bg-muted overflow-hidden flex items-center justify-center ring-1 ring-border">
-                          {p.photo_url ? (
-                            <img src={p.photo_url} alt={p.name} className="h-full w-full object-cover" />
-                          ) : (
-                            <PawBucksLogo className="h-8 w-8 text-muted-foreground" />
-                          )}
+                        <div className="h-20 w-20 rounded-full border-2 border-dashed border-border flex items-center justify-center text-muted-foreground">
+                          +
                         </div>
-                        <span className="text-xs font-medium truncate max-w-[80px]">{p.name}</span>
+                        <span className="text-xs text-muted-foreground">Add pet</span>
                       </button>
-                    ))}
-                    <button
-                      onClick={() => navigate("/create-pet-profile")}
-                      className="flex flex-col items-center gap-2 min-w-[80px]"
-                    >
-                      <div className="h-20 w-20 rounded-full border-2 border-dashed border-border flex items-center justify-center text-muted-foreground">
-                        +
-                      </div>
-                      <span className="text-xs text-muted-foreground">Add pet</span>
-                    </button>
+                    </div>
                   </div>
                 </section>
               )}
