@@ -32,12 +32,25 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { format, parseISO, startOfMonth, subMonths } from "date-fns";
 
-const recentTx = [
-  { initials: "MG", name: "Markus Gerdemann", id: "IHD01082", date: "May 8", method: "USD", amount: "+$300.00", rewards: "$3.00" },
-  { initials: "MC", name: "Matthew Colon", id: "IHD01080", date: "Apr 27", method: "USD", amount: "+$640.00", rewards: "$6.40" },
-  { initials: "BK", name: "Brooke Kain", id: "IHD01079", date: "Apr 25", method: "USD", amount: "+$640.00", rewards: "$6.40" },
-  { initials: "JL", name: "Jamie Lin", id: "IHD01077", date: "Apr 22", method: "PawBucks", amount: "+$120.00", rewards: "$0.00" },
-];
+type RecentTx = {
+  id: string;
+  short_id: string;
+  initials: string;
+  name: string;
+  date: string;
+  method: "USD" | "PawBucks" | "Mixed";
+  amount: string;
+  rewards: string;
+  isRefunded: boolean;
+};
+
+function getInitials(name: string | null | undefined): string {
+  if (!name) return "GU";
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "GU";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
 
 interface StatCardProps {
   label: string;
