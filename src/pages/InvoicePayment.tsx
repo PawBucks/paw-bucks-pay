@@ -930,22 +930,6 @@ const InvoicePayment = () => {
  </Card>
  )}
 
- {/* Contact */}
- <Card>
- <CardContent className="pt-4">
- <p className="text-sm text-muted-foreground text-center">
- Questions about this invoice?
- </p>
- <p className="text-sm font-medium text-center">
- Contact {merchant?.contact_person || merchant?.business_name}
- </p>
- {merchant?.phone && (
- <p className="text-sm text-center text-primary">
- {merchant.phone}
- </p>
- )}
- </CardContent>
- </Card>
     </div>
 
     {/* Contact card */}
