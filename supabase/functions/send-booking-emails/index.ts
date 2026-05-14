@@ -121,7 +121,10 @@ serve(async (req: Request) => {
 
   try {
     const body: BookingEmailRequest = await req.json();
-    const { type } = body;
+    let { type } = body;
+    // Normalize legacy alias
+    if ((type as string) === "reschedule") type = "rescheduled";
+    const initiator = body.initiator || "customer";
 
     let customerEmail = body.customerEmail;
     let customerName = body.customerName;
@@ -133,18 +136,24 @@ serve(async (req: Request) => {
     let totalPrice = body.totalPrice;
     let notes = body.notes;
 
-    // If bookingId provided, fetch details from DB
-    if (body.bookingId && (!customerEmail || !merchantName)) {
-      const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-      const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-      const supabase = createClient(supabaseUrl, supabaseKey);
+    let merchantEmail: string | null = null;
+    let merchantOwnerUserId: string | null = null;
+    let customerUserId: string | null = null;
+    let merchantId: string | null = null;
+    let serviceId: string | null = null;
 
+    // If bookingId provided, fetch details from DB
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    if (body.bookingId) {
       const { data: booking, error } = await supabase
         .from("service_bookings")
         .select(`
           *,
-          merchant_services(name),
-          merchants(business_name)
+          merchant_services(name, merchant_id),
+          merchants(id, business_name, email, user_id)
         `)
         .eq("id", body.bookingId)
         .single();
@@ -164,6 +173,11 @@ serve(async (req: Request) => {
       endTime = endTime || booking.end_time;
       totalPrice = totalPrice ?? booking.total_price;
       notes = notes || booking.notes;
+      merchantEmail = (booking as any).merchants?.email || null;
+      merchantOwnerUserId = (booking as any).merchants?.user_id || null;
+      merchantId = (booking as any).merchants?.id || null;
+      customerUserId = booking.user_id || null;
+      serviceId = booking.service_id || null;
     }
 
     if (!customerEmail || !bookingDate || !startTime) {
