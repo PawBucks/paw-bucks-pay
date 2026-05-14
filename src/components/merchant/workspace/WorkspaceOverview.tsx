@@ -167,7 +167,11 @@ export function WorkspaceOverview() {
         subtitle="Track your PawBucks sales, rewards, and account settings."
         actions={
           <>
-            <Button variant="outline" size="sm">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate("/merchant/sales-report")}
+            >
               <Download className="h-4 w-4 mr-1.5" />
               Export Report
             </Button>
@@ -195,6 +199,7 @@ export function WorkspaceOverview() {
               size="sm"
               variant="outline"
               className="border-[hsl(var(--warning)/0.5)] bg-[hsl(var(--warning)/0.15)] text-[hsl(38_92%_30%)] hover:bg-[hsl(var(--warning)/0.25)]"
+              onClick={() => navigate("/merchant/quick-actions")}
             >
               Join Waitlist
             </Button>
@@ -217,7 +222,11 @@ export function WorkspaceOverview() {
                 PawBucks rewards ecosystem.
               </p>
             </div>
-            <Button size="sm" variant="outline">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => navigate("/merchant/support")}
+            >
               Request Acquisition-Only
             </Button>
           </CardContent>
