@@ -114,6 +114,7 @@ function NoShowChargeButton({ booking, onCharged }: { booking: BookingWithDetail
 }
 
 export function BookingsCalendar({ bookings, merchantId, onUpdateStatus }: BookingsCalendarProps) {
+ const navigate = useNavigate();
  const [selectedDate, setSelectedDate] = useState<Date>(startOfToday());
  const [statusFilter, setStatusFilter] = useState<BookingStatus |'all'>('all');
  const [selectedBooking, setSelectedBooking] = useState<BookingWithDetails | null>(null);
