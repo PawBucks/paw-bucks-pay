@@ -697,7 +697,14 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
  </div>
  <div className="flex items-center justify-between">
  <span className="text-muted-foreground">Time</span>
- <span className="font-medium">{formatTime(selectedSlot)}</span>
+               <span className="font-medium text-right">
+                 {formatTime(selectedSlot)} {tzAbbr(selectedDate, merchantTz)}
+                 {showViewerLocal && (
+                   <span className="block text-xs text-muted-foreground font-normal">
+                     {viewerLocalTimeFor(selectedDate, selectedSlot, merchantTz, viewerTz)} {tzAbbr(selectedDate, viewerTz)} (your time)
+                   </span>
+                 )}
+               </span>
  </div>
  <div className="flex items-center justify-between">
  <span className="text-muted-foreground">Duration</span>
