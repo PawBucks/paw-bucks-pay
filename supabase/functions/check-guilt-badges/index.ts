@@ -98,6 +98,15 @@ serve(async (req) => {
   }
 
   try {
+    const internalSecret = Deno.env.get("INTERNAL_TRIGGER_SECRET");
+    const provided = req.headers.get("x-internal-secret");
+    if (!internalSecret || provided !== internalSecret) {
+      return new Response(JSON.stringify({ error: "unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
