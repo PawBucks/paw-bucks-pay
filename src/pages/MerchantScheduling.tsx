@@ -12,6 +12,9 @@ import { ArrowLeft, Calendar, Clock, Compass, Dog, Loader2, Plus, Settings, User
 import { toast } from"sonner";
 import { ServicesList } from"@/components/scheduling/ServicesList";
 import { AvailabilityManager } from"@/components/scheduling/AvailabilityManager";
+import { Label } from"@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from"@/components/ui/select";
+import { TIMEZONE_OPTIONS, DEFAULT_MERCHANT_TZ } from"@/lib/timezone";
 import { BookingsCalendar } from"@/components/scheduling/BookingsCalendar";
 import { ServiceDialog } from"@/components/scheduling/ServiceDialog";
 import { FlashSaleDialog } from"@/components/scheduling/FlashSaleDialog";
@@ -32,6 +35,8 @@ const MerchantScheduling = () => {
  const navigate = useNavigate();
  const [merchantId, setMerchantId] = useState<string | null>(null);
  const [businessType, setBusinessType] = useState<string>("");
+  const [timezone, setTimezone] = useState<string>(DEFAULT_MERCHANT_TZ);
+  const [savingTz, setSavingTz] = useState(false);
  const [loading, setLoading] = useState(true);
  const [services, setServices] = useState<MerchantService[]>([]);
  const [availability, setAvailability] = useState<MerchantAvailability[]>([]);
@@ -56,7 +61,7 @@ const MerchantScheduling = () => {
  // Get merchant ID
  const { data: merchant, error: merchantError } = await supabase
  .from("merchants")
- .select("id, business_type")
+        .select("id, business_type, timezone")
  .eq("user_id", user.id)
  .single();
 
@@ -70,6 +75,7 @@ const MerchantScheduling = () => {
 
  setMerchantId(merchant.id);
  setBusinessType(merchant.business_type ||"");
+      setTimezone((merchant as any).timezone || DEFAULT_MERCHANT_TZ);
 
  // Load all scheduling data in parallel
  const [servicesData, availabilityData, overridesData, bookingsData] = await Promise.all([
@@ -338,6 +344,47 @@ const MerchantScheduling = () => {
  </TabsContent>
 
  <TabsContent value="availability">
+          <GradientCard className="p-4 mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div>
+                <Label className="text-sm font-semibold">Business timezone</Label>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  All availability hours, slots, and booking reminders use this timezone. Pet owners
+                  in other timezones will also see their local equivalent.
+                </p>
+              </div>
+              <Select
+                value={timezone}
+                disabled={savingTz}
+                onValueChange={async (tz) => {
+                  if (!merchantId || tz === timezone) return;
+                  setSavingTz(true);
+                  const prev = timezone;
+                  setTimezone(tz);
+                  const { error } = await supabase
+                    .from("merchants")
+                    .update({ timezone: tz })
+                    .eq("id", merchantId);
+                  setSavingTz(false);
+                  if (error) {
+                    setTimezone(prev);
+                    toast.error("Failed to update timezone");
+                  } else {
+                    toast.success("Timezone updated");
+                  }
+                }}
+              >
+                <SelectTrigger className="sm:w-[280px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {TIMEZONE_OPTIONS.map((t) => (
+                    <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </GradientCard>
  <AvailabilityManager
  merchantId={merchantId!}
  availability={availability}
