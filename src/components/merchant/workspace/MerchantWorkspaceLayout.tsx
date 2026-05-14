@@ -313,10 +313,22 @@ export function MerchantWorkspaceLayout({
                 <span>{pawBucksBalance.toLocaleString()}</span>
                 <span className="font-normal text-muted-foreground">· ${usd}</span>
               </button>
-              <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Notifications">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                aria-label="Notifications"
+                onClick={() => navigate("/notifications")}
+              >
                 <Bell className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Profile">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                aria-label="Profile"
+                onClick={() => navigate("/merchant-dashboard?tab=profile")}
+              >
                 <User className="h-4 w-4" />
               </Button>
             </div>

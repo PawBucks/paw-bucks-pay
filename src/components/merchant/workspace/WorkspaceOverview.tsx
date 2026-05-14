@@ -45,9 +45,10 @@ interface StatCardProps {
   sub?: string;
   badge?: { label: string; tone?: "success" | "muted" };
   accent?: "default" | "success" | "warning" | "destructive";
+  onClick?: () => void;
 }
 
-function StatCard({ label, value, sub, badge, accent = "default" }: StatCardProps) {
+function StatCard({ label, value, sub, badge, accent = "default", onClick }: StatCardProps) {
   const tone = {
     default: "text-foreground",
     success: "text-[hsl(var(--success))]",
@@ -55,7 +56,22 @@ function StatCard({ label, value, sub, badge, accent = "default" }: StatCardProp
     destructive: "text-destructive",
   }[accent];
   return (
-    <Card className="shadow-none">
+    <Card
+      className={`shadow-none ${onClick ? "cursor-pointer transition-colors hover:border-primary/40 hover:bg-muted/40" : ""}`}
+      onClick={onClick}
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={
+        onClick
+          ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onClick();
+              }
+            }
+          : undefined
+      }
+    >
       <CardContent className="p-4">
         <p className="text-[11px] uppercase tracking-wide text-muted-foreground font-medium">{label}</p>
         <p className={`text-2xl font-bold mt-1 ${tone}`}>{value}</p>
@@ -167,7 +183,11 @@ export function WorkspaceOverview() {
         subtitle="Track your PawBucks sales, rewards, and account settings."
         actions={
           <>
-            <Button variant="outline" size="sm">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate("/merchant/sales-report")}
+            >
               <Download className="h-4 w-4 mr-1.5" />
               Export Report
             </Button>
@@ -195,6 +215,7 @@ export function WorkspaceOverview() {
               size="sm"
               variant="outline"
               className="border-[hsl(var(--warning)/0.5)] bg-[hsl(var(--warning)/0.15)] text-[hsl(38_92%_30%)] hover:bg-[hsl(var(--warning)/0.25)]"
+              onClick={() => navigate("/merchant/quick-actions")}
             >
               Join Waitlist
             </Button>
@@ -217,7 +238,11 @@ export function WorkspaceOverview() {
                 PawBucks rewards ecosystem.
               </p>
             </div>
-            <Button size="sm" variant="outline">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => navigate("/merchant/support")}
+            >
               Request Acquisition-Only
             </Button>
           </CardContent>
@@ -272,12 +297,40 @@ export function WorkspaceOverview() {
             value="$25,439"
             sub=".03 all-time"
             badge={{ label: "93 transactions", tone: "success" }}
+            onClick={() => navigate("/merchant/total-earnings")}
           />
-          <StatCard label="Avg Transaction" value="$273" sub=".54 per transaction" />
-          <StatCard label="Rewards Given" value="$190.61" sub="190,610 PawBucks" accent="success" />
-          <StatCard label="PawBucks Received" value="$1,551.89" sub="Spent in March" />
-          <StatCard label="Success Fees Paid" value="$465.36" sub="3% of USD transactions" accent="warning" />
-          <StatCard label="Merchant Funding" value="No Loan" sub="Repayment: $0.00" />
+          <StatCard
+            label="Avg Transaction"
+            value="$273"
+            sub=".54 per transaction"
+            onClick={() => navigate("/merchant/transactions")}
+          />
+          <StatCard
+            label="Rewards Given"
+            value="$190.61"
+            sub="190,610 PawBucks"
+            accent="success"
+            onClick={() => navigate("/merchant-analytics")}
+          />
+          <StatCard
+            label="PawBucks Received"
+            value="$1,551.89"
+            sub="Spent in March"
+            onClick={() => navigate("/merchant/pawbucks")}
+          />
+          <StatCard
+            label="Success Fees Paid"
+            value="$465.36"
+            sub="3% of USD transactions"
+            accent="warning"
+            onClick={() => navigate("/merchant/tax-vault")}
+          />
+          <StatCard
+            label="Merchant Funding"
+            value="No Loan"
+            sub="Repayment: $0.00"
+            onClick={() => navigate("/merchant/quick-actions")}
+          />
         </div>
 
         {/* Charts */}
@@ -397,7 +450,10 @@ export function WorkspaceOverview() {
               <p className="text-[11px] uppercase tracking-wide text-muted-foreground font-semibold">
                 Your Invitations
               </p>
-              <div className="rounded-md border p-3 flex items-center justify-between gap-3">
+              <div
+                className="rounded-md border p-3 flex items-center justify-between gap-3 cursor-pointer hover:bg-muted/40 transition-colors"
+                onClick={() => navigate("/merchant/brand-campaigns")}
+              >
                 <div className="min-w-0">
                   <p className="text-sm font-medium truncate">Test Campaign 2</p>
                   <p className="text-[11px] text-muted-foreground truncate">
