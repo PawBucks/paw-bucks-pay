@@ -45,6 +45,48 @@ function formatCurrency(amount: number): string {
   return `$${amount.toFixed(2)}`;
 }
 
+function toSafeCurrencyAmount(amount: unknown): number {
+  const numericAmount = typeof amount === 'number' ? amount : Number(amount || 0);
+  if (!Number.isFinite(numericAmount)) return 0;
+  return Math.max(Math.round(numericAmount * 100) / 100, 0);
+}
+
+function getPaymentDisplayAmounts(params: Pick<InvoicePaidNotificationParams, 'amountPaid' | 'tipAmount' | 'pawbucksUsed' | 'paymentMethod' | 'invoiceTotal' | 'platformFee'>) {
+  const amountPaid = toSafeCurrencyAmount(params.amountPaid);
+  const tipAmount = toSafeCurrencyAmount(params.tipAmount || 0);
+  const pawbucksValueUSD = toSafeCurrencyAmount((params.pawbucksUsed || 0) * 0.001);
+  const invoiceTotal = toSafeCurrencyAmount(params.invoiceTotal);
+  const amountLooksLikeCashOnly = amountPaid + pawbucksValueUSD <= invoiceTotal + tipAmount + 0.01;
+
+  let cashPortion = amountPaid;
+  let grossReceived = amountPaid;
+
+  if (params.paymentMethod === 'pawbucks') {
+    cashPortion = 0;
+    grossReceived = pawbucksValueUSD + tipAmount;
+  } else if (params.paymentMethod === 'mixed') {
+    cashPortion = amountLooksLikeCashOnly ? Math.max(amountPaid - tipAmount, 0) : Math.max(amountPaid - pawbucksValueUSD - tipAmount, 0);
+    grossReceived = amountLooksLikeCashOnly ? amountPaid + pawbucksValueUSD : amountPaid;
+  } else {
+    cashPortion = Math.max(amountPaid - tipAmount, 0);
+  }
+
+  const calculatedFee = params.platformFee !== undefined
+    ? toSafeCurrencyAmount(params.platformFee)
+    : cashPortion > 0
+      ? Math.round(cashPortion * 0.03 * 100) / 100
+      : 0;
+
+  return {
+    tipAmount,
+    pawbucksValueUSD,
+    cashPortion: toSafeCurrencyAmount(cashPortion),
+    grossReceived: toSafeCurrencyAmount(grossReceived),
+    calculatedFee,
+    netDeposited: toSafeCurrencyAmount(cashPortion - calculatedFee + tipAmount),
+  };
+}
+
 function getPaymentMethodLabel(method: string, pawbucksUsed?: number, paymentMethodDetail?: string): string {
   if (method === 'manual' && paymentMethodDetail) {
     return paymentMethodDetail.charAt(0).toUpperCase() + paymentMethodDetail.slice(1);
@@ -115,11 +157,18 @@ function generateInvoicePaidEmailHtml(
   const formattedDate = formatDate(paymentDate);
   const displayName = businessName || merchantName;
   const isManualPayment = paymentMethod === 'manual';
-  const pawbucksValueUSD = pawbucksUsed * 0.001;
-  const cashPortion = Math.max(amountPaid - pawbucksValueUSD, 0);
+  const paymentAmounts = getPaymentDisplayAmounts({ amountPaid, tipAmount, pawbucksUsed, paymentMethod, invoiceTotal, platformFee });
+  const { pawbucksValueUSD, cashPortion, grossReceived, calculatedFee, netDeposited } = paymentAmounts;
   const isFullyPaid = amountDue <= 0;
-  const calculatedFee = platformFee ?? (cashPortion > 0 ? Math.round(cashPortion * 0.03 * 100) / 100 : 0);
-  const netDeposited = cashPortion - calculatedFee + tipAmount;
+  const payoutLabel = paymentMethod === 'pawbucks' ? 'PawBucks Credited' : 'Total Deposited';
+  const payoutAmount = paymentMethod === 'pawbucks' ? grossReceived : netDeposited;
+  const payoutNote = isManualPayment
+    ? `Recorded as ${getPaymentMethodLabel(paymentMethod, pawbucksUsed, paymentMethodDetail)} payment.`
+    : paymentMethod === 'pawbucks'
+      ? `${pawbucksUsed.toLocaleString()} PawBucks were credited to your merchant wallet.`
+      : pawbucksUsed > 0
+        ? 'Cash deposit shown after Success Fee; PawBucks were credited separately.'
+        : 'Funds have been sent to your connected Stripe account.';
 
   // Section helper
   const sectionLabel = (text: string) => `
@@ -338,10 +387,10 @@ function generateInvoicePaidEmailHtml(
                   <td style="padding:0 32px;">
                     <table width="100%" cellpadding="20" cellspacing="0" style="background:linear-gradient(135deg,#f0fdf4 0%,#dcfce7 100%);border-radius:12px;border:1px solid #bbf7d0;">
                       <tr><td style="text-align:center;">
-                        <p style="margin:0 0 4px;font-size:11px;font-weight:700;letter-spacing:1.5px;color:#166534;text-transform:uppercase;">Total Deposited</p>
-                        <p style="margin:0;font-size:36px;font-weight:800;color:#16a34a;">${formatCurrency(isManualPayment ? amountPaid : netDeposited)}</p>
+                        <p style="margin:0 0 4px;font-size:11px;font-weight:700;letter-spacing:1.5px;color:#166534;text-transform:uppercase;">${payoutLabel}</p>
+                        <p style="margin:0;font-size:36px;font-weight:800;color:#16a34a;">${formatCurrency(isManualPayment ? amountPaid : payoutAmount)}</p>
                         <p style="margin:8px 0 0;font-size:13px;color:#4ade80;">
-                          ${isManualPayment ? `Recorded as ${getPaymentMethodLabel(paymentMethod, pawbucksUsed, paymentMethodDetail)} payment.` : 'Funds have been sent to your connected Stripe account.'}
+                          ${payoutNote}
                         </p>
                         <div style="margin-top:10px;">${statusBadge}</div>
                       </td></tr>
@@ -431,8 +480,10 @@ serve(async (req) => {
     }
 
     const html = generateInvoicePaidEmailHtml(params, snapshot);
-    const pawbucksVal = (params.pawbucksUsed || 0) * 0.001;
-    const subjectAmount = params.amountPaid - pawbucksVal + (params.tipAmount || 0);
+    const paymentAmounts = getPaymentDisplayAmounts(params);
+    const subjectAmount = params.paymentMethod === 'pawbucks'
+      ? paymentAmounts.grossReceived
+      : paymentAmounts.netDeposited;
 
     const { data, error } = await resend.emails.send({
       from: "PawBucks <noreply@pawbucks.app>",
