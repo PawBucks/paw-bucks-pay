@@ -299,15 +299,19 @@ serve(async (req) => {
         const reminderDays = settings.reminder_days_before || [7, 3, 1];
         shouldSendReminder = reminderDays.includes(daysUntilDue);
         reminderType = "reminder";
-      } else if (daysUntilDue <= 0) {
-        // On or after due date - check overdue_reminder_days
+      } else if (daysUntilDue === 0) {
+        // Due today — send a friendly reminder, NOT an overdue notice.
+        shouldSendReminder = true;
+        reminderType = "reminder";
+      } else {
+        // Strictly after due date - check overdue_reminder_days
         const overdueDays = settings.overdue_reminder_days || [1, 7, 14, 30];
         const daysPastDue = Math.abs(daysUntilDue);
-        shouldSendReminder = overdueDays.includes(daysPastDue) || daysUntilDue === 0;
+        shouldSendReminder = overdueDays.includes(daysPastDue);
         reminderType = "overdue";
 
         // Update invoice status to overdue if not already
-        if (invoice.status !== "overdue" && daysUntilDue < 0) {
+        if (invoice.status !== "overdue") {
           await supabase
             .from("invoices")
             .update({ status: "overdue" })
