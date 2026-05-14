@@ -13,6 +13,34 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Health check: GET request returns webhook configuration status without
+  // exposing the secret value. Use this to verify your Resend inbound
+  // webhook endpoint URL is reachable and that RESEND_WEBHOOK_SECRET is set.
+  // Example: curl https://<project>.functions.supabase.co/receive-pet-email/health
+  const url = new URL(req.url);
+  if (req.method === "GET") {
+    const secret = Deno.env.get("RESEND_WEBHOOK_SECRET");
+    const configured = !!secret;
+    // Validate secret format (Svix secrets start with "whsec_")
+    const validFormat = configured && secret!.startsWith("whsec_");
+    return new Response(
+      JSON.stringify({
+        status: configured && validFormat ? "ok" : "misconfigured",
+        webhook_secret_configured: configured,
+        webhook_secret_format_valid: validFormat,
+        endpoint: "receive-pet-email",
+        signature_verification: "svix",
+        expected_headers: ["svix-id", "svix-timestamp", "svix-signature"],
+        hint: !configured
+          ? "Set RESEND_WEBHOOK_SECRET in your Edge Function secrets to the value shown when creating the Resend webhook."
+          : !validFormat
+          ? "RESEND_WEBHOOK_SECRET should start with 'whsec_'. Copy the signing secret from your Resend webhook settings."
+          : "Webhook is configured. Make sure your Resend inbound webhook in https://resend.com/webhooks points to this function URL and uses this same signing secret.",
+      }),
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
