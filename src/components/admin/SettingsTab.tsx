@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from'@/components/ui/card';
-import { Loader2 } from "lucide-react";
+import { Gift, Loader2, Shield } from "lucide-react";
 import { TwoFactorSetup } from'./TwoFactorSetup';
 import { Separator } from'@/components/ui/separator';
 import { Switch } from'@/components/ui/switch';
@@ -90,7 +90,7 @@ export function SettingsTab() {
  {/* Welcome Credit Program Control */}
  <div className="space-y-4">
  <div className="flex items-center gap-2">
- <span className="h-5 w-5 text-primary" aria-hidden="true">🎁</span>
+ <Gift className="h-5 w-5 text-primary" aria-hidden="true" />
  <h3 className="text-xl font-semibold">Promotions</h3>
  </div>
 
@@ -151,7 +151,7 @@ export function SettingsTab() {
  {/* Security Section */}
  <div className="space-y-4">
  <div className="flex items-center gap-2">
- <span className="h-5 w-5 text-primary" aria-hidden="true">🛡️</span>
+ <Shield className="h-5 w-5 text-primary" aria-hidden="true" />
  <h3 className="text-xl font-semibold">Security Settings</h3>
  </div>
  

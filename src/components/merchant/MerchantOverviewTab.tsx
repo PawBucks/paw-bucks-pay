@@ -1,7 +1,7 @@
 import { GradientCard } from"@/components/ui/gradient-card";
 import { Button } from"@/components/ui/button";
 import { Switch } from"@/components/ui/switch";
-import { AlertCircle, Loader2, ExternalLink } from "lucide-react";
+import { AlertCircle, CreditCard, ExternalLink, Loader2 } from "lucide-react";
 import { MerchantAnalyticsCards } from"./MerchantAnalyticsCards";
 import { MerchantCharts } from"./MerchantCharts";
 import { MerchantTransactionList } from"./MerchantTransactionList";
@@ -216,7 +216,7 @@ export function MerchantOverviewTab({
 
  {!analytics?.funding_deal_status && (
  <GradientCard className="text-center py-8">
- <span className="w-12 h-12 mx-auto mb-3 text-muted-foreground" aria-hidden="true">💳</span>
+ <CreditCard className="w-12 h-12 mx-auto mb-3 text-muted-foreground" aria-hidden="true" />
  <p className="text-muted-foreground">No active funding deal</p>
  </GradientCard>
  )}

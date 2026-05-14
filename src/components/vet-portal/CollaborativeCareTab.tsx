@@ -30,7 +30,7 @@ import {
  TableRow,
 } from"@/components/ui/table";
 import { toast } from"sonner";
-import { Plus, Trash2, AlertCircle, Heart, Brain, Pill, FileText, Shield } from "lucide-react";
+import { AlertCircle, Brain, FileText, Heart, Link2, Pill, Plus, Shield, Trash2, Users } from "lucide-react";
 import { format } from"date-fns";
 import { getCategoryIcon, getCategoryLabel } from"@/lib/categoryMapping";
 
@@ -179,7 +179,7 @@ export function CollaborativeCareTab({ vetId }: CollaborativeCareTabProps) {
  <div className="flex items-center justify-between">
  <div>
  <h2 className="text-xl font-semibold flex items-center gap-2">
- <span className="h-5 w-5 text-primary" aria-hidden="true">🔗</span>
+ <Link2 className="h-5 w-5 text-primary" aria-hidden="true" />
  Collaborative Care Network
  </h2>
  <p className="text-sm text-muted-foreground">
@@ -350,7 +350,7 @@ export function CollaborativeCareTab({ vetId }: CollaborativeCareTabProps) {
  ) : (
  <TableRow>
  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
- <span className="h-8 w-8 mx-auto mb-2 opacity-50" aria-hidden="true">👥</span>
+ <Users className="h-8 w-8 mx-auto mb-2 opacity-50" aria-hidden="true" />
  No active care shares. Share pet information with trainers, groomers, and other providers.
  </TableCell>
  </TableRow>
@@ -362,7 +362,7 @@ export function CollaborativeCareTab({ vetId }: CollaborativeCareTabProps) {
  {/* Info Card */}
  <Card className="p-4 bg-info/10 /30 border-info/20">
  <div className="flex items-start gap-3">
- <span className="h-5 w-5 text-info mt-0.5" aria-hidden="true">🛡️</span>
+ <Shield className="h-5 w-5 text-info mt-0.5" aria-hidden="true" />
  <div>
  <h4 className="font-medium text-info">
  Secure Information Sharing

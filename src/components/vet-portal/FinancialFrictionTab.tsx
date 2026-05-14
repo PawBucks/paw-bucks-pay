@@ -5,6 +5,7 @@ import { InsuranceClaimSplitter } from"./InsuranceClaimSplitter";
 import { FundingRequestTracker } from"@/components/shared/FundingRequestTracker";
 
 import { supabase } from"@/integrations/supabase/client";
+import { Heart, Shield } from "lucide-react";
 
 interface FinancialFrictionTabProps {
  vetId: string;
@@ -50,11 +51,11 @@ export function FinancialFrictionTab({ vetId }: FinancialFrictionTabProps) {
  <Tabs defaultValue="wellness" className="space-y-4">
  <TabsList className="grid w-full grid-cols-2 max-w-md">
  <TabsTrigger value="wellness" className="flex items-center gap-2">
- <span className="h-4 w-4" aria-hidden="true">❤️</span>
+ <Heart className="h-4 w-4" aria-hidden="true" />
  Wellness Plans
  </TabsTrigger>
  <TabsTrigger value="insurance" className="flex items-center gap-2">
- <span className="h-4 w-4" aria-hidden="true">🛡️</span>
+ <Shield className="h-4 w-4" aria-hidden="true" />
  Insurance Claims
  </TabsTrigger>
  </TabsList>

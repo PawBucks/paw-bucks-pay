@@ -26,7 +26,7 @@ import {
  AccordionItem,
  AccordionTrigger,
 } from"@/components/ui/accordion";
-import { Plus, Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import { AlertCircle, Calendar, CheckCircle, Loader2, Plus, Scissors } from "lucide-react";
 import { toast } from"sonner";
 import { format } from"date-fns";
 import type { SurgicalNote } from"./types";
@@ -307,7 +307,7 @@ export const SurgicalNotesTab = ({ petId, vetId }: SurgicalNotesTabProps) => {
 
  {notes.length === 0 ? (
  <Card className="p-8 text-center text-muted-foreground">
- <span className="w-12 h-12 mx-auto mb-2 opacity-50" aria-hidden="true">✂️</span>
+ <Scissors className="w-12 h-12 mx-auto mb-2 opacity-50" aria-hidden="true" />
  <p>No surgical notes recorded.</p>
  </Card>
  ) : (
@@ -342,7 +342,7 @@ export const SurgicalNotesTab = ({ petId, vetId }: SurgicalNotesTabProps) => {
  </Badge>
  {note.follow_up_required && note.follow_up_date && (
  <Badge variant="secondary" className="flex items-center gap-1">
- <span className="w-3 h-3" aria-hidden="true">📅</span>
+ <Calendar className="w-3 h-3" aria-hidden="true" />
  {format(new Date(note.follow_up_date),"MMM d")}
  </Badge>
  )}

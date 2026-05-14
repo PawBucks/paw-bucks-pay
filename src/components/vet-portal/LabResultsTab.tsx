@@ -26,7 +26,7 @@ import {
  AccordionItem,
  AccordionTrigger,
 } from"@/components/ui/accordion";
-import { FlaskConical, Plus, Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import { AlertCircle, CheckCircle, Clock, FileText, FlaskConical, Loader2, Plus } from "lucide-react";
 import { toast } from"sonner";
 import { format } from"date-fns";
 import type { LabResult } from"./types";
@@ -185,7 +185,7 @@ export const LabResultsTab = ({ petId, vetId }: LabResultsTabProps) => {
  case"completed":
  return <AlertCircle className="w-4 h-4 text-warning" />;
  default:
- return <span className="w-4 h-4 text-muted-foreground" aria-hidden="true">⏰</span>;
+ return <Clock className="w-4 h-4 text-muted-foreground" aria-hidden="true" />;
  }
  };
 
@@ -367,7 +367,7 @@ export const LabResultsTab = ({ petId, vetId }: LabResultsTabProps) => {
  {result.status}
  </Badge>
  {result.file_url && (
- <span className="w-4 h-4 text-muted-foreground" aria-hidden="true">📄</span>
+ <FileText className="w-4 h-4 text-muted-foreground" aria-hidden="true" />
  )}
  </div>
  </div>
@@ -409,7 +409,7 @@ export const LabResultsTab = ({ petId, vetId }: LabResultsTabProps) => {
  size="sm"
  onClick={() => window.open(result.file_url!,"_blank")}
  >
- <span className="w-4 h-4 mr-2" aria-hidden="true">📄</span>
+ <FileText className="w-4 h-4 mr-2" aria-hidden="true" />
  View Report
  </Button>
  )}

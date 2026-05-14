@@ -6,7 +6,7 @@ import { Badge } from"@/components/ui/badge";
 import { ScrollArea } from"@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from"@/components/ui/sheet";
 import { Separator } from"@/components/ui/separator";
-import { Inbox, CheckCircle2, XCircle, Loader2, ExternalLink, Info } from "lucide-react";
+import { Calendar, CheckCircle2, DollarSign, ExternalLink, Inbox, Info, Loader2, Mail, Megaphone, Target, XCircle } from "lucide-react";
 import { toast } from"sonner";
 import { getMerchantInvitations, respondToCampaignInvitation } from"@/services/api/brandCampaigns.service";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
@@ -83,7 +83,7 @@ export function MerchantBrandCampaignInbox({ merchantId }: MerchantBrandCampaign
  <div className="py-6 flex justify-center"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
  ) : invitations.length === 0 ? (
  <div className="py-8 text-center text-sm text-muted-foreground">
- <span className="h-10 w-10 mx-auto mb-2 opacity-40" aria-hidden="true">📣</span>
+ <Megaphone className="h-10 w-10 mx-auto mb-2 opacity-40" aria-hidden="true" />
  No campaign invitations yet
  </div>
  ) : (
@@ -184,7 +184,7 @@ export function MerchantBrandCampaignInbox({ merchantId }: MerchantBrandCampaign
  {/* Campaign header */}
  <div className="space-y-2">
  <p className="text-xs uppercase tracking-wide text-muted-foreground flex items-center gap-1">
- <span className="h-3.5 w-3.5" aria-hidden="true">📣</span> Campaign
+ <Megaphone className="h-3.5 w-3.5" aria-hidden="true" /> Campaign
  </p>
  <h3 className="text-lg font-bold leading-tight" style={selectedCampaign?.campaign_color ? { color: selectedCampaign.campaign_color } : undefined}>
  {selectedCampaign?.name ||"—"}
@@ -199,7 +199,7 @@ export function MerchantBrandCampaignInbox({ merchantId }: MerchantBrandCampaign
  <Separator />
  <div className="space-y-2">
  <p className="text-xs uppercase tracking-wide text-muted-foreground flex items-center gap-1">
- <span className="h-3.5 w-3.5" aria-hidden="true">📧</span> Personal Message
+ <Mail className="h-3.5 w-3.5" aria-hidden="true" /> Personal Message
  </p>
  <p className="text-sm italic border-l-2 border-primary/40 pl-3">"{selected.message}"</p>
  </div>
@@ -219,7 +219,7 @@ export function MerchantBrandCampaignInbox({ merchantId }: MerchantBrandCampaign
  </p>
  </div>
  <div className="p-3 rounded-lg border bg-card">
- <p className="text-xs text-muted-foreground flex items-center gap-1"><span className="h-3 w-3" aria-hidden="true">💵</span> Total Budget</p>
+ <p className="text-xs text-muted-foreground flex items-center gap-1"><DollarSign className="h-3 w-3" aria-hidden="true" /> Total Budget</p>
  <p className="text-base font-bold mt-1">
  ${selectedCampaign?.budget_usd?.toLocaleString() || 0}
  </p>
@@ -231,7 +231,7 @@ export function MerchantBrandCampaignInbox({ merchantId }: MerchantBrandCampaign
  </p>
  </div>
  <div className="p-3 rounded-lg border bg-card">
- <p className="text-xs text-muted-foreground flex items-center gap-1"><span className="h-3 w-3" aria-hidden="true">📅</span> Window</p>
+ <p className="text-xs text-muted-foreground flex items-center gap-1"><Calendar className="h-3 w-3" aria-hidden="true" /> Window</p>
  <p className="text-xs font-semibold mt-1">
  {selectedCampaign?.start_date ? new Date(selectedCampaign.start_date).toLocaleDateString() :"—"}
  {" →"}
@@ -246,7 +246,7 @@ export function MerchantBrandCampaignInbox({ merchantId }: MerchantBrandCampaign
  <Separator />
  <div className="space-y-2">
  <p className="text-xs uppercase tracking-wide text-muted-foreground flex items-center gap-1">
- <span className="h-3.5 w-3.5" aria-hidden="true">🎯</span> Targeting Notes
+ <Target className="h-3.5 w-3.5" aria-hidden="true" /> Targeting Notes
  </p>
  <p className="text-sm">{selectedCampaign.targeting_notes}</p>
  </div>
@@ -269,7 +269,7 @@ export function MerchantBrandCampaignInbox({ merchantId }: MerchantBrandCampaign
  )}
  {selectedBrand?.contact_email && (
  <a href={`mailto:${selectedBrand.contact_email}`} className="text-primary hover:underline flex items-center gap-1">
- <span className="h-3 w-3" aria-hidden="true">📧</span> {selectedBrand.contact_email}
+ <Mail className="h-3 w-3" aria-hidden="true" /> {selectedBrand.contact_email}
  </a>
  )}
  </div>

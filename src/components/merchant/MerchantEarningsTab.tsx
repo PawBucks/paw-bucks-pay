@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/comp
 import { Button } from"@/components/ui/button";
 import { Badge } from"@/components/ui/badge";
 import { Skeleton } from"@/components/ui/skeleton";
-import { RefreshCw, ArrowUpRight, ArrowDownRight, ChevronRight, AlertTriangle } from "lucide-react";
+import { AlertTriangle, ArrowDownRight, ArrowUpRight, Calendar, ChevronRight, Clock, DollarSign, Receipt, RefreshCw, Shield, TrendingUp, Wallet } from "lucide-react";
 import { useMerchantEarnings } from"@/hooks/useMerchantEarnings";
 import { format } from"date-fns";
 
@@ -35,7 +35,7 @@ export function MerchantEarningsTab() {
  return (
  <Card>
  <CardContent className="py-8 text-center">
- <span className="h-12 w-12 mx-auto text-muted-foreground mb-4" aria-hidden="true">👛</span>
+ <Wallet className="h-12 w-12 mx-auto text-muted-foreground mb-4" aria-hidden="true" />
  <p className="text-muted-foreground">
  Connect your Stripe account to view earnings
  </p>
@@ -74,7 +74,7 @@ export function MerchantEarningsTab() {
  </CardHeader>
  <CardContent>
  <div className="flex items-center gap-2 mb-1">
- <span className="h-5 w-5 text-success" aria-hidden="true">💵</span>
+ <DollarSign className="h-5 w-5 text-success" aria-hidden="true" />
  <span className="text-2xl font-bold text-success">
  {formatCurrency(getAvailableBalance())}
  </span>
@@ -93,7 +93,7 @@ export function MerchantEarningsTab() {
  </CardHeader>
  <CardContent>
  <div className="flex items-center gap-2 mb-1">
- <span className="h-5 w-5 text-warning" aria-hidden="true">⏰</span>
+ <Clock className="h-5 w-5 text-warning" aria-hidden="true" />
  <span className="text-2xl font-bold text-warning">
  {formatCurrency(pendingBalance)}
  </span>
@@ -118,7 +118,7 @@ export function MerchantEarningsTab() {
  </CardHeader>
  <CardContent>
  <div className="flex items-center gap-2 mb-1">
- <span className="h-5 w-5 text-primary" aria-hidden="true">📈</span>
+ <TrendingUp className="h-5 w-5 text-primary" aria-hidden="true" />
  <span className="text-2xl font-bold">
                 {Formatters.currency(data.summary?.totalEarnings || 0)}
  </span>
@@ -136,7 +136,7 @@ export function MerchantEarningsTab() {
  <Card>
  <CardContent className="pt-6">
  <div className="flex items-center gap-2 mb-2">
- <span className="h-4 w-4 text-muted-foreground" aria-hidden="true">📅</span>
+ <Calendar className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
  <span className="text-sm font-medium">Payout Schedule</span>
  </div>
  <p className="text-sm text-muted-foreground">{formatPayoutSchedule()}</p>
@@ -147,7 +147,7 @@ export function MerchantEarningsTab() {
  <Card>
  <CardContent className="pt-6">
  <div className="flex items-center gap-2 mb-2">
- <span className="h-4 w-4 text-muted-foreground" aria-hidden="true">🧾</span>
+ <Receipt className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
  <span className="text-sm font-medium">Rewards Given</span>
  </div>
  <p className="text-lg font-bold">{data.summary?.totalRewardsGiven || 0} <span className="text-sm font-normal text-muted-foreground">PB</span></p>
@@ -158,7 +158,7 @@ export function MerchantEarningsTab() {
  <Card>
  <CardContent className="pt-6">
  <div className="flex items-center gap-2 mb-2">
- <span className="h-4 w-4 text-muted-foreground" aria-hidden="true">🛡️</span>
+ <Shield className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
  <span className="text-sm font-medium">Refunds</span>
  </div>
  <p className="text-lg font-bold">

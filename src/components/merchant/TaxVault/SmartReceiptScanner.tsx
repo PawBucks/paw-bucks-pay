@@ -2,7 +2,7 @@ import { useState, useRef, useCallback } from'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from'@/components/ui/dialog';
 import { Button } from'@/components/ui/button';
 import { Card, CardContent } from'@/components/ui/card';
-import { Upload, Loader2, CheckCircle2, AlertCircle, RotateCcw } from "lucide-react";
+import { AlertCircle, Camera, CheckCircle2, Loader2, RotateCcw, Upload } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { toast } from'sonner';
 import { supabase } from'@/integrations/supabase/client';
@@ -171,7 +171,7 @@ export function SmartReceiptScanner({ open, onOpenChange, onDataExtracted }: Sma
  >
  <CardContent className="flex flex-col items-center justify-center p-6 text-center">
  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-3">
- <span className="h-6 w-6 text-primary" aria-hidden="true">📸</span>
+ <Camera className="h-6 w-6 text-primary" aria-hidden="true" />
  </div>
  <p className="font-medium">Take Photo</p>
  <p className="text-xs text-muted-foreground mt-1">Use your camera</p>

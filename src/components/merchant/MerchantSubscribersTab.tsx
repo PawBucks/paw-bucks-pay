@@ -26,7 +26,7 @@ import {
  DropdownMenuItem,
  DropdownMenuTrigger,
 } from"@/components/ui/dropdown-menu";
-import { Loader2, RefreshCw, AlertCircle, MoreVertical, XCircle } from "lucide-react";
+import { AlertCircle, Loader2, MoreVertical, RefreshCw, Users, XCircle } from "lucide-react";
 import { Button } from"@/components/ui/button";
 import { Textarea } from"@/components/ui/textarea";
 import { Label } from"@/components/ui/label";
@@ -170,7 +170,7 @@ export function MerchantSubscribersTab({ merchantId }: MerchantSubscribersTabPro
  <GradientCard>
  <div className="flex items-center gap-3">
  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
- <span className="w-5 h-5 text-primary" aria-hidden="true">👥</span>
+ <Users className="w-5 h-5 text-primary" aria-hidden="true" />
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Active Subscribers</p>
@@ -210,7 +210,7 @@ export function MerchantSubscribersTab({ merchantId }: MerchantSubscribersTabPro
  </GradientCard>
  ) : subscribers.length === 0 ? (
  <GradientCard className="text-center py-12">
- <span className="w-12 h-12 mx-auto mb-3 text-muted-foreground" aria-hidden="true">👥</span>
+ <Users className="w-12 h-12 mx-auto mb-3 text-muted-foreground" aria-hidden="true" />
  <p className="text-muted-foreground font-medium">No active subscribers yet</p>
  <p className="text-sm text-muted-foreground mt-1">
  Subscribers will appear here once customers subscribe to your plans.

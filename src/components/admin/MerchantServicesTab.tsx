@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Badge } from'@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from'@/components/ui/select';
 import { Switch } from'@/components/ui/switch';
-import { Search, Plus, Edit, Trash2, Star, Loader2 } from "lucide-react";
+import { Edit, Loader2, Plus, Search, Star, Trash2 } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { toast } from'sonner';
 
@@ -309,7 +309,7 @@ export function MerchantServicesTab() {
  <span className="font-medium">{service.name}</span>
  {service.is_popular && (
  <Badge variant="secondary" className="text-xs">
- <span className="w-3 h-3 mr-1" aria-hidden="true">⭐</span>Popular
+ <Star className="w-3 h-3 mr-1" aria-hidden="true" />Popular
  </Badge>
  )}
  {service.is_new && (

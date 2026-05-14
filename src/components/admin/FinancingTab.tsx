@@ -11,7 +11,7 @@ import { Textarea } from'@/components/ui/textarea';
 import { Separator } from'@/components/ui/separator';
 import { Progress } from'@/components/ui/progress';
 import { toast } from'sonner';
-import { TrendingUp, DollarSign, Users, Calendar, CheckCircle2, XCircle, AlertTriangle, Shield, ArrowRight, ChevronRight, ExternalLink, Activity, CreditCard, Landmark, FileText, ShoppingBag, CircleDot, BadgeCheck } from "lucide-react";
+import { Activity, AlertTriangle, ArrowRight, BadgeCheck, BarChart3, Briefcase, Building2, Calendar, CheckCircle2, ChevronRight, CircleDot, Clock, CreditCard, DollarSign, ExternalLink, FileText, Globe, Landmark, Mail, MapPin, Phone, Shield, ShoppingBag, Star, TrendingUp, Users, XCircle } from "lucide-react";
 import { UnderwritingSignalsCard } from'./UnderwritingSignalsCard';
 import { format, formatDistanceToNow, differenceInDays } from'date-fns';
 
@@ -259,7 +259,7 @@ function MerchantDetailPanel({
  <Card>
  <CardHeader className="pb-3">
  <CardTitle className="text-base flex items-center gap-2">
- <span className="w-4 h-4 text-primary" aria-hidden="true">📊</span> Revenue Performance
+ <BarChart3 className="w-4 h-4 text-primary" aria-hidden="true" /> Revenue Performance
  </CardTitle>
  </CardHeader>
  <CardContent>
@@ -302,7 +302,7 @@ function MerchantDetailPanel({
  <Card>
  <CardHeader className="pb-3">
  <CardTitle className="text-base flex items-center gap-2">
- <span className="w-4 h-4 text-primary" aria-hidden="true">📊</span> Transaction Health
+ <BarChart3 className="w-4 h-4 text-primary" aria-hidden="true" /> Transaction Health
  </CardTitle>
  </CardHeader>
  <CardContent>
@@ -342,45 +342,45 @@ function MerchantDetailPanel({
  <Card>
  <CardHeader className="pb-3">
  <CardTitle className="text-base flex items-center gap-2">
- <span className="w-4 h-4 text-primary" aria-hidden="true">🏢</span> Business Profile
+ <Building2 className="w-4 h-4 text-primary" aria-hidden="true" /> Business Profile
  </CardTitle>
  </CardHeader>
  <CardContent className="space-y-3 text-sm">
  {applicant.owner_name && (
  <div className="flex items-center gap-2">
- <span className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-hidden="true">💼</span>
+ <Briefcase className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-hidden="true" />
  <span className="text-muted-foreground">Owner:</span>
  <span className="font-medium">{applicant.owner_name}</span>
  </div>
  )}
  {applicant.contact_person && applicant.contact_person !== applicant.owner_name && (
  <div className="flex items-center gap-2">
- <span className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-hidden="true">👥</span>
+ <Users className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-hidden="true" />
  <span className="text-muted-foreground">Contact:</span>
  <span className="font-medium">{applicant.contact_person}</span>
  </div>
  )}
  {applicant.address && (
  <div className="flex items-start gap-2">
- <span className="w-3.5 h-3.5 text-muted-foreground shrink-0 mt-0.5" aria-hidden="true">📍</span>
+ <MapPin className="w-3.5 h-3.5 text-muted-foreground shrink-0 mt-0.5" aria-hidden="true" />
  <span>{applicant.address}</span>
  </div>
  )}
  {applicant.phone && (
  <div className="flex items-center gap-2">
- <span className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-hidden="true">📞</span>
+ <Phone className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-hidden="true" />
  <span>{applicant.phone}</span>
  </div>
  )}
  {applicant.email && (
  <div className="flex items-center gap-2">
- <span className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-hidden="true">📧</span>
+ <Mail className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-hidden="true" />
  <span className="truncate">{applicant.email}</span>
  </div>
  )}
  {applicant.website_url && (
  <div className="flex items-center gap-2">
- <span className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-hidden="true">🌐</span>
+ <Globe className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-hidden="true" />
  <a href={applicant.website_url} target="_blank" rel="noopener noreferrer"
  className="text-primary hover:underline truncate flex items-center gap-1">
  {applicant.website_url.replace(/^https?:\/\//,'')}
@@ -390,12 +390,12 @@ function MerchantDetailPanel({
  )}
  <Separator />
  <div className="flex items-center gap-2">
- <span className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-hidden="true">📅</span>
+ <Calendar className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-hidden="true" />
  <span className="text-muted-foreground">On platform since:</span>
  <span className="font-medium">{format(new Date(applicant.merchant_since),'MMM d, yyyy')}</span>
  </div>
  <div className="flex items-center gap-2">
- <span className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-hidden="true">⏰</span>
+ <Clock className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-hidden="true" />
  <span className="text-muted-foreground">Tenure:</span>
  <span className="font-medium">{eligibilityDays} days</span>
  {eligibilityDays < 90 && (
@@ -404,7 +404,7 @@ function MerchantDetailPanel({
  </div>
  {applicant.state_of_incorporation && (
  <div className="flex items-center gap-2">
- <span className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-hidden="true">📄</span>
+ <FileText className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-hidden="true" />
  <span className="text-muted-foreground">Incorporated:</span>
  <span className="font-medium">{applicant.state_of_incorporation}, {applicant.country}</span>
  </div>
@@ -416,7 +416,7 @@ function MerchantDetailPanel({
  <Card>
  <CardHeader className="pb-3">
  <CardTitle className="text-base flex items-center gap-2">
- <span className="w-4 h-4 text-primary" aria-hidden="true">✅</span> Eligibility Checklist
+ <CheckCircle2 className="w-4 h-4 text-primary" aria-hidden="true" /> Eligibility Checklist
  </CardTitle>
  </CardHeader>
  <CardContent className="space-y-3 text-sm">
@@ -476,7 +476,7 @@ function MerchantDetailPanel({
  <Card>
  <CardHeader className="pb-3">
  <CardTitle className="text-base flex items-center gap-2">
- <span className="w-4 h-4 text-primary" aria-hidden="true">📄</span> Use of Funds
+ <FileText className="w-4 h-4 text-primary" aria-hidden="true" /> Use of Funds
  </CardTitle>
  </CardHeader>
  <CardContent>
@@ -491,7 +491,7 @@ function MerchantDetailPanel({
  <Card>
  <CardHeader className="pb-3">
  <CardTitle className="text-base flex items-center gap-2">
- <span className="w-4 h-4 text-primary" aria-hidden="true">💼</span> Business Description
+ <Briefcase className="w-4 h-4 text-primary" aria-hidden="true" /> Business Description
  </CardTitle>
  </CardHeader>
  <CardContent>
@@ -508,7 +508,7 @@ function MerchantDetailPanel({
  <Card>
  <CardHeader className="pb-3">
  <CardTitle className="text-base flex items-center gap-2">
- <span className="w-4 h-4 text-primary" aria-hidden="true">⭐</span> Online Presence
+ <Star className="w-4 h-4 text-primary" aria-hidden="true" /> Online Presence
  </CardTitle>
  </CardHeader>
  <CardContent>
@@ -553,7 +553,7 @@ function MerchantDetailPanel({
  {applicant.status ==='approved' && (
  <div className="flex gap-3 pt-2">
  <Button className="flex-1 gap-2 bg-info hover:bg-info text-white" onClick={onMarkFunded}>
- <span className="w-4 h-4" aria-hidden="true">💵</span> Mark as Funded
+ <DollarSign className="w-4 h-4" aria-hidden="true" /> Mark as Funded
  </Button>
  </div>
  )}
@@ -605,31 +605,31 @@ function VetLoanDetailPanel({
  <Card>
  <CardHeader className="pb-3">
  <CardTitle className="text-base flex items-center gap-2">
- <span className="w-4 h-4 text-primary" aria-hidden="true">🏢</span> Clinic Profile
+ <Building2 className="w-4 h-4 text-primary" aria-hidden="true" /> Clinic Profile
  </CardTitle>
  </CardHeader>
  <CardContent className="space-y-3 text-sm">
  {loan.location && (
  <div className="flex items-start gap-2">
- <span className="w-3.5 h-3.5 text-muted-foreground shrink-0 mt-0.5" aria-hidden="true">📍</span>
+ <MapPin className="w-3.5 h-3.5 text-muted-foreground shrink-0 mt-0.5" aria-hidden="true" />
  <span>{loan.location}</span>
  </div>
  )}
  {loan.clinic_phone && (
  <div className="flex items-center gap-2">
- <span className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-hidden="true">📞</span>
+ <Phone className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-hidden="true" />
  <span>{loan.clinic_phone}</span>
  </div>
  )}
  {loan.contact_email && (
  <div className="flex items-center gap-2">
- <span className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-hidden="true">📧</span>
+ <Mail className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-hidden="true" />
  <span>{loan.contact_email}</span>
  </div>
  )}
  {loan.license_number && (
  <div className="flex items-center gap-2">
- <span className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-hidden="true">🛡️</span>
+ <Shield className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-hidden="true" />
  <span className="text-muted-foreground">License:</span>
  <span className="font-medium font-mono text-xs">{loan.license_number} ({loan.license_state})</span>
  </div>
@@ -648,20 +648,20 @@ function VetLoanDetailPanel({
  <Card>
  <CardHeader className="pb-3">
  <CardTitle className="text-base flex items-center gap-2">
- <span className="w-4 h-4 text-primary" aria-hidden="true">📄</span> Loan Details
+ <FileText className="w-4 h-4 text-primary" aria-hidden="true" /> Loan Details
  </CardTitle>
  </CardHeader>
  <CardContent className="space-y-3 text-sm">
  {loan.patient_name && (
  <div className="flex items-center gap-2">
- <span className="w-3.5 h-3.5 text-muted-foreground" aria-hidden="true">👥</span>
+ <Users className="w-3.5 h-3.5 text-muted-foreground" aria-hidden="true" />
  <span className="text-muted-foreground">Borrower:</span>
  <span className="font-medium">{loan.patient_name}</span>
  </div>
  )}
  {loan.patient_email && (
  <div className="flex items-center gap-2">
- <span className="w-3.5 h-3.5 text-muted-foreground" aria-hidden="true">📧</span>
+ <Mail className="w-3.5 h-3.5 text-muted-foreground" aria-hidden="true" />
  <span>{loan.patient_email}</span>
  </div>
  )}
@@ -686,7 +686,7 @@ function VetLoanDetailPanel({
  <Card>
  <CardHeader className="pb-3">
  <CardTitle className="text-base flex items-center gap-2">
- <span className="w-4 h-4 text-primary" aria-hidden="true">✅</span> Accreditations
+ <CheckCircle2 className="w-4 h-4 text-primary" aria-hidden="true" /> Accreditations
  </CardTitle>
  </CardHeader>
  <CardContent>
@@ -712,7 +712,7 @@ function VetLoanDetailPanel({
  {loan.status ==='approved' && (
  <div className="flex gap-3 pt-2">
  <Button className="flex-1 gap-2 bg-info hover:bg-info text-white" onClick={onMarkFunded}>
- <span className="w-4 h-4" aria-hidden="true">💵</span> Mark as Funded
+ <DollarSign className="w-4 h-4" aria-hidden="true" /> Mark as Funded
  </Button>
  </div>
  )}
@@ -973,13 +973,13 @@ export function FinancingTab() {
  <Tabs value={tab} onValueChange={setTab}>
  <TabsList>
  <TabsTrigger value="merchant" className="gap-1.5">
- <span className="w-4 h-4" aria-hidden="true">🏢</span> Merchant Financing
+ <Building2 className="w-4 h-4" aria-hidden="true" /> Merchant Financing
  {pendingMerchants.length > 0 && (
  <Badge variant="destructive" className="ml-1 text-xs px-1.5 py-0">{pendingMerchants.length}</Badge>
  )}
  </TabsTrigger>
  <TabsTrigger value="vet" className="gap-1.5">
- <span className="w-4 h-4" aria-hidden="true">🛡️</span> Vet Loans
+ <Shield className="w-4 h-4" aria-hidden="true" /> Vet Loans
  {pendingVetLoans.length > 0 && (
  <Badge variant="destructive" className="ml-1 text-xs px-1.5 py-0">{pendingVetLoans.length}</Badge>
  )}
@@ -990,7 +990,7 @@ export function FinancingTab() {
  <TabsContent value="merchant" className="mt-6">
  {fundingApplicants.length === 0 ? (
  <Card className="p-12 text-center">
- <span className="w-12 h-12 text-muted-foreground mx-auto mb-3" aria-hidden="true">💵</span>
+ <DollarSign className="w-12 h-12 text-muted-foreground mx-auto mb-3" aria-hidden="true" />
  <p className="text-muted-foreground">No merchant financing requests</p>
  </Card>
  ) : (
@@ -1047,7 +1047,7 @@ export function FinancingTab() {
  <TabsContent value="vet" className="mt-6">
  {vetLoans.length === 0 ? (
  <Card className="p-12 text-center">
- <span className="w-12 h-12 text-muted-foreground mx-auto mb-3" aria-hidden="true">🛡️</span>
+ <Shield className="w-12 h-12 text-muted-foreground mx-auto mb-3" aria-hidden="true" />
  <p className="text-muted-foreground">No vet loan applications</p>
  </Card>
  ) : (

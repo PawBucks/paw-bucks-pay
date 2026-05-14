@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from'@/comp
 import { Tabs, TabsContent, TabsList, TabsTrigger } from'@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from'@/components/ui/select';
 import { toast } from'sonner';
-import { Search, Loader2, CheckCircle, User, Plus, Minus } from "lucide-react";
+import { CheckCircle, Loader2, Minus, Plus, Search, Store, User } from "lucide-react";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
 
 type UserResult = {
@@ -313,11 +313,11 @@ export function PawBucksManagementTool() {
  }}>
  <TabsList className="grid w-full grid-cols-2">
  <TabsTrigger value="user" className="flex items-center gap-2">
- <span className="w-4 h-4" aria-hidden="true">👤</span>
+ <User className="w-4 h-4" aria-hidden="true" />
  Pet Owner
  </TabsTrigger>
  <TabsTrigger value="merchant" className="flex items-center gap-2">
- <span className="w-4 h-4" aria-hidden="true">🏪</span>
+ <Store className="w-4 h-4" aria-hidden="true" />
  Merchant
  </TabsTrigger>
  </TabsList>
@@ -365,7 +365,7 @@ export function PawBucksManagementTool() {
  <div className="p-4 rounded-lg bg-muted border space-y-4">
  <div className="flex items-center gap-3">
  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
- {targetType ==='user' ? <span className="w-5 h-5 text-primary" aria-hidden="true">👤</span> : <span className="w-5 h-5 text-primary" aria-hidden="true">🏪</span>}
+ {targetType ==='user' ? <User className="w-5 h-5 text-primary" aria-hidden="true" /> : <Store className="w-5 h-5 text-primary" aria-hidden="true" />}
  </div>
  <div>
  <p className="font-medium">

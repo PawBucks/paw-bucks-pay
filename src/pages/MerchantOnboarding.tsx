@@ -13,7 +13,7 @@ import { Textarea } from"@/components/ui/textarea";
 import { Badge } from"@/components/ui/badge";
 import { toast } from"sonner";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
-import { Store, Loader2, PawPrint, Stethoscope, Scissors, ShoppingBag, Bone, Home, Dog, Sun, Camera, Shield, Truck, Mountain, Zap, Hand, Brain, Heart, Building2, Car, Users, AlertCircle, Info } from "lucide-react";
+import { AlertCircle, Bone, Brain, Building2, Camera, Car, Dog, Hand, Heart, Home, Info, Loader2, Mountain, PawPrint, Scissors, Shield, ShoppingBag, Stethoscope, Store, Sun, Truck, Users, Zap } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { merchantOnboardingSchema, PET_BUSINESS_TYPES, ENTITY_TYPES, WORKING_STYLES } from"@/lib/validation";
 import { MerchantTermsOfService } from"@/components/shared/MerchantTermsOfService";
@@ -379,7 +379,7 @@ const MerchantOnboarding = () => {
  <CardHeader className="text-center pb-4">
  <div className="flex justify-center mb-4">
  <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center">
- <span className="w-8 h-8 text-primary-foreground" aria-hidden="true">🏪</span>
+ <Store className="w-8 h-8 text-primary-foreground" aria-hidden="true" />
  </div>
  </div>
  <CardTitle className="text-3xl font-bold">Set Up Your Pet Business</CardTitle>

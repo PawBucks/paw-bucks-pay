@@ -6,7 +6,7 @@ import { Input } from"@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
 import { Badge } from"@/components/ui/badge";
 import { ScrollArea } from"@/components/ui/scroll-area";
-import { Search, Syringe, AlertTriangle, FlaskConical } from "lucide-react";
+import { AlertTriangle, Clock, FileText, FlaskConical, Search, Syringe, User } from "lucide-react";
 import { toast } from"sonner";
 import { format } from"date-fns";
 import type { EMRPatient, SOAPNote, Vaccination, PetAllergy, SurgicalNote, LabResult, ImagingRecord } from"./types";
@@ -247,12 +247,12 @@ export const EMRDashboard = ({ vetId }: EMRDashboardProps) => {
  </div>
  <div className="text-right">
  <p className="text-sm font-medium flex items-center gap-1">
- <span className="w-3 h-3" aria-hidden="true">👤</span>
+ <User className="w-3 h-3" aria-hidden="true" />
  {patient.owner_name}
  </p>
  {patient.last_visit && (
  <p className="text-xs text-muted-foreground flex items-center gap-1 justify-end">
- <span className="w-3 h-3" aria-hidden="true">⏰</span>
+ <Clock className="w-3 h-3" aria-hidden="true" />
  Last visit: {format(new Date(patient.last_visit),"MMM d, yyyy")}
  </p>
  )}
@@ -269,7 +269,7 @@ export const EMRDashboard = ({ vetId }: EMRDashboardProps) => {
  {/* Recent Activity */}
  <Card className="p-4">
  <h3 className="font-semibold mb-4 flex items-center gap-2">
- <span className="w-4 h-4" aria-hidden="true">⏰</span>
+ <Clock className="w-4 h-4" aria-hidden="true" />
  Recent Activity
  </h3>
  <ScrollArea className="h-[450px]">
@@ -286,7 +286,7 @@ export const EMRDashboard = ({ vetId }: EMRDashboardProps) => {
  >
  <div className="flex items-start gap-2">
  {activity.type ==="soap" ? (
- <span className="w-4 h-4 mt-0.5 text-info" aria-hidden="true">📄</span>
+ <FileText className="w-4 h-4 mt-0.5 text-info" aria-hidden="true" />
  ) : (
  <FlaskConical className="w-4 h-4 mt-0.5 text-success" />
  )}
@@ -324,7 +324,7 @@ export const EMRDashboard = ({ vetId }: EMRDashboardProps) => {
  <Card className="p-4">
  <div className="flex items-center gap-3">
  <div className="w-10 h-10 rounded-full bg-info/10 /30 flex items-center justify-center">
- <span className="w-5 h-5 text-info" aria-hidden="true">📄</span>
+ <FileText className="w-5 h-5 text-info" aria-hidden="true" />
  </div>
  <div>
  <p className="text-2xl font-bold">{patients.length}</p>

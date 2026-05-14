@@ -11,7 +11,7 @@ import {
 import {
  Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
 } from"@/components/ui/dialog";
-import { Check, Loader2, Plus, RefreshCw, Receipt } from "lucide-react";
+import { Check, Loader2, Plus, Receipt, RefreshCw, Users } from "lucide-react";
 import { toast } from"sonner";
 import { format } from"date-fns";
 import { MerchantPendingReceipts } from"./MerchantPendingReceipts";
@@ -119,7 +119,7 @@ export const MerchantSaleConfirmationsTab = ({ merchantId }: MerchantSaleConfirm
  <Card className="bg-primary/5 border-primary/20">
  <CardContent className="py-4">
  <div className="flex items-start gap-3">
- <span className="w-5 h-5 text-primary mt-0.5" aria-hidden="true">🧾</span>
+ <Receipt className="w-5 h-5 text-primary mt-0.5" aria-hidden="true" />
  <div>
  <h3 className="font-semibold text-sm">Confirm Customer Sales</h3>
  <p className="text-xs text-muted-foreground mt-1">
@@ -139,7 +139,7 @@ export const MerchantSaleConfirmationsTab = ({ merchantId }: MerchantSaleConfirm
  {/* Actions */}
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-2">
- <span className="w-5 h-5 text-primary" aria-hidden="true">👥</span>
+ <Users className="w-5 h-5 text-primary" aria-hidden="true" />
  <h3 className="text-lg font-semibold">Sale Confirmations</h3>
  </div>
  <div className="flex gap-2">
@@ -162,7 +162,7 @@ export const MerchantSaleConfirmationsTab = ({ merchantId }: MerchantSaleConfirm
  ) : confirmations.length === 0 ? (
  <Card>
  <CardContent className="py-12 text-center">
- <span className="w-12 h-12 mx-auto text-muted-foreground mb-3" aria-hidden="true">🧾</span>
+ <Receipt className="w-12 h-12 mx-auto text-muted-foreground mb-3" aria-hidden="true" />
  <h3 className="font-semibold mb-1">No sale confirmations yet</h3>
  <p className="text-sm text-muted-foreground mb-4">
  When a PawBucks customer makes a purchase, confirm it here for faster rewards.

@@ -9,6 +9,7 @@ import { PAWBUCKS_CONVERSION } from"@/lib/constants";
 
 import { Formatters } from "@/utils/formatters";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
+import { TrendingDown, TrendingUp, Trophy, Wallet } from "lucide-react";
 type WalletData = {
  balance: number;
  total_spent: number;
@@ -114,17 +115,17 @@ export function UserDetailWallet({ userId }: { userId: string }) {
  value={(pawbucksWallet?.balance ?? 0).toLocaleString()}
  />
  <SummaryCard
- icon={<span className="w-5 h-5 text-success" aria-hidden="true">👛</span>}
+ icon={<Wallet className="w-5 h-5 text-success" aria-hidden="true" />}
  label="Cashback Balance"
  value={`${Formatters.currency(((pawbucksWallet?.balance ?? 0) * PAWBUCKS_CONVERSION.PAWBUCKS_USD_VALUE))}`}
  />
  <SummaryCard
- icon={<span className="w-5 h-5 text-destructive" aria-hidden="true">📉</span>}
+ icon={<TrendingDown className="w-5 h-5 text-destructive" aria-hidden="true" />}
  label={isMerchant ?"Total Revenue" :"Total Spent"}
  value={`${Formatters.currency((wallet?.total_spent ?? 0))}`}
  />
  <SummaryCard
- icon={<span className="w-5 h-5 text-warning" aria-hidden="true">🏆</span>}
+ icon={<Trophy className="w-5 h-5 text-warning" aria-hidden="true" />}
  label="Badges Earned"
  value={badges.length.toString()}
  />
@@ -175,9 +176,9 @@ export function UserDetailWallet({ userId }: { userId: string }) {
  <TableCell>
  <div className="flex items-center gap-1">
  {a.type ==="credit" || a.type ==="earn" ? (
- <span className="w-3 h-3 text-success" aria-hidden="true">📈</span>
+ <TrendingUp className="w-3 h-3 text-success" aria-hidden="true" />
  ) : (
- <span className="w-3 h-3 text-destructive" aria-hidden="true">📉</span>
+ <TrendingDown className="w-3 h-3 text-destructive" aria-hidden="true" />
  )}
  <span className="text-sm">{a.type}</span>
  </div>

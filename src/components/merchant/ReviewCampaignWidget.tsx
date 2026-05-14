@@ -6,7 +6,7 @@ import { Progress } from'@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from'@/components/ui/tabs';
 import { ScrollArea } from'@/components/ui/scroll-area';
 import { GradientCard } from'@/components/ui/gradient-card';
-import { Minus, RefreshCw, CheckCircle, AlertTriangle, Info, Send } from "lucide-react";
+import { AlertTriangle, BarChart3, Brain, Camera, CheckCircle, Clock, Info, Lightbulb, Mail, MessageSquare, Minus, RefreshCw, Send, Star, Target, ThumbsDown, ThumbsUp, TrendingUp, Trophy, Users, Zap } from "lucide-react";
 import { supabase } from'@/integrations/supabase/client';
 import { toast } from'@/hooks/use-toast';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from'recharts';
@@ -118,7 +118,7 @@ export function ReviewCampaignWidget() {
  case'success': return <CheckCircle className="h-5 w-5 text-success" />;
  case'warning': return <AlertTriangle className="h-5 w-5 text-warning" />;
  case'info': return <Info className="h-5 w-5 text-info" />;
- case'opportunity': return <span className="h-5 w-5 text-accent" aria-hidden="true">💡</span>;
+ case'opportunity': return <Lightbulb className="h-5 w-5 text-accent" aria-hidden="true" />;
  default: return <Info className="h-5 w-5" />;
  }
  };
@@ -143,8 +143,8 @@ export function ReviewCampaignWidget() {
 
  const getSentimentIcon = (sentiment: string) => {
  switch (sentiment) {
- case'positive': return <span className="h-4 w-4 text-success" aria-hidden="true">👍</span>;
- case'negative': return <span className="h-4 w-4 text-destructive" aria-hidden="true">👎</span>;
+ case'positive': return <ThumbsUp className="h-4 w-4 text-success" aria-hidden="true" />;
+ case'negative': return <ThumbsDown className="h-4 w-4 text-destructive" aria-hidden="true" />;
  default: return <Minus className="h-4 w-4 text-warning" />;
  }
  };
@@ -166,7 +166,7 @@ export function ReviewCampaignWidget() {
  return (
  <Card className="border-dashed">
  <CardContent className="py-12 text-center">
- <span className="h-12 w-12 text-muted-foreground mx-auto mb-4" aria-hidden="true">⭐</span>
+ <Star className="h-12 w-12 text-muted-foreground mx-auto mb-4" aria-hidden="true" />
  <h3 className="font-semibold mb-2">Review Generation Campaign</h3>
  <p className="text-muted-foreground text-sm mb-4 max-w-md mx-auto">
  Boost your reviews with automated follow-up campaigns, AI-powered insights, 
@@ -192,7 +192,7 @@ export function ReviewCampaignWidget() {
  <div className="flex items-center justify-between">
  <div>
  <h2 className="text-2xl font-bold flex items-center gap-2">
- <span className="h-6 w-6 text-primary" aria-hidden="true">⭐</span>
+ <Star className="h-6 w-6 text-primary" aria-hidden="true" />
  Review Generation Campaign
  </h2>
  <p className="text-muted-foreground">
@@ -205,7 +205,7 @@ export function ReviewCampaignWidget() {
  Refresh
  </Button>
  <Badge className="bg-gradient-to-r from-warning to-warning text-white gap-1">
- <span className="h-3 w-3" aria-hidden="true">⚡</span> Campaign Active
+ <Zap className="h-3 w-3" aria-hidden="true" /> Campaign Active
  </Badge>
  </div>
  </div>
@@ -214,7 +214,7 @@ export function ReviewCampaignWidget() {
  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
  <GradientCard gradient>
  <div className="flex items-center gap-3">
- <div className="p-3 rounded-md bg-warning/10"><span className="h-5 w-5 text-warning" aria-hidden="true">⭐</span></div>
+ <div className="p-3 rounded-md bg-warning/10"><Star className="h-5 w-5 text-warning" aria-hidden="true" /></div>
  <div>
  <p className="text-sm text-muted-foreground">Avg Rating</p>
  <p className={`text-2xl font-bold ${getRatingColor(metrics.averageRating)}`}>
@@ -225,7 +225,7 @@ export function ReviewCampaignWidget() {
  </GradientCard>
  <GradientCard gradient>
  <div className="flex items-center gap-3">
- <div className="p-3 rounded-md bg-primary/10"><span className="h-5 w-5 text-primary" aria-hidden="true">💬</span></div>
+ <div className="p-3 rounded-md bg-primary/10"><MessageSquare className="h-5 w-5 text-primary" aria-hidden="true" /></div>
  <div>
  <p className="text-sm text-muted-foreground">Total Reviews</p>
  <p className="text-2xl font-bold">{metrics.totalReviews}</p>
@@ -234,7 +234,7 @@ export function ReviewCampaignWidget() {
  </GradientCard>
  <GradientCard gradient>
  <div className="flex items-center gap-3">
- <div className="p-3 rounded-md bg-success/10"><span className="h-5 w-5 text-success" aria-hidden="true">🎯</span></div>
+ <div className="p-3 rounded-md bg-success/10"><Target className="h-5 w-5 text-success" aria-hidden="true" /></div>
  <div>
  <p className="text-sm text-muted-foreground">Review Rate</p>
  <p className="text-2xl font-bold">{metrics.reviewRate}%</p>
@@ -243,7 +243,7 @@ export function ReviewCampaignWidget() {
  </GradientCard>
  <GradientCard gradient>
  <div className="flex items-center gap-3">
- <div className="p-3 rounded-md bg-accent/10"><span className="h-5 w-5 text-accent" aria-hidden="true">👥</span></div>
+ <div className="p-3 rounded-md bg-accent/10"><Users className="h-5 w-5 text-accent" aria-hidden="true" /></div>
  <div>
  <p className="text-sm text-muted-foreground">Customers</p>
  <p className="text-2xl font-bold">{metrics.uniqueCustomers}</p>
@@ -254,11 +254,11 @@ export function ReviewCampaignWidget() {
 
  <Tabs defaultValue="overview" className="space-y-4">
  <TabsList className="grid w-full grid-cols-5">
- <TabsTrigger value="overview"><span className="h-4 w-4 mr-1" aria-hidden="true">📊</span> Overview</TabsTrigger>
+ <TabsTrigger value="overview"><BarChart3 className="h-4 w-4 mr-1" aria-hidden="true" /> Overview</TabsTrigger>
  <TabsTrigger value="campaigns"><Send className="h-4 w-4 mr-1" /> Campaigns</TabsTrigger>
- <TabsTrigger value="reviews"><span className="h-4 w-4 mr-1" aria-hidden="true">💬</span> Reviews</TabsTrigger>
- <TabsTrigger value="insights"><span className="h-4 w-4 mr-1" aria-hidden="true">🧠</span> AI Insights</TabsTrigger>
- <TabsTrigger value="trends"><span className="h-4 w-4 mr-1" aria-hidden="true">📈</span> Trends</TabsTrigger>
+ <TabsTrigger value="reviews"><MessageSquare className="h-4 w-4 mr-1" aria-hidden="true" /> Reviews</TabsTrigger>
+ <TabsTrigger value="insights"><Brain className="h-4 w-4 mr-1" aria-hidden="true" /> AI Insights</TabsTrigger>
+ <TabsTrigger value="trends"><TrendingUp className="h-4 w-4 mr-1" aria-hidden="true" /> Trends</TabsTrigger>
  </TabsList>
 
  {/* Overview Tab */}
@@ -268,7 +268,7 @@ export function ReviewCampaignWidget() {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <span className="h-5 w-5 text-warning" aria-hidden="true">⭐</span>
+ <Star className="h-5 w-5 text-warning" aria-hidden="true" />
  Rating Distribution
  </CardTitle>
  </CardHeader>
@@ -287,7 +287,7 @@ export function ReviewCampaignWidget() {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <span className="h-5 w-5 text-success" aria-hidden="true">👍</span>
+ <ThumbsUp className="h-5 w-5 text-success" aria-hidden="true" />
  Sentiment Analysis
  </CardTitle>
  </CardHeader>
@@ -328,7 +328,7 @@ export function ReviewCampaignWidget() {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <span className="h-5 w-5 text-primary" aria-hidden="true">📧</span>
+ <Mail className="h-5 w-5 text-primary" aria-hidden="true" />
  Campaign Performance
  </CardTitle>
  </CardHeader>
@@ -384,16 +384,16 @@ export function ReviewCampaignWidget() {
  {getDifficultyBadge(campaign.difficulty)}
  </div>
  <h4 className="font-semibold mb-1 flex items-center gap-2">
- {campaign.id ==='post-visit' && <span className="h-4 w-4" aria-hidden="true">⏰</span>}
- {campaign.id ==='loyalty-program' && <span className="h-4 w-4" aria-hidden="true">🏆</span>}
- {campaign.id ==='photo-reviews' && <span className="h-4 w-4" aria-hidden="true">📸</span>}
+ {campaign.id ==='post-visit' && <Clock className="h-4 w-4" aria-hidden="true" />}
+ {campaign.id ==='loyalty-program' && <Trophy className="h-4 w-4" aria-hidden="true" />}
+ {campaign.id ==='photo-reviews' && <Camera className="h-4 w-4" aria-hidden="true" />}
  {campaign.name}
  </h4>
  <p className="text-sm text-muted-foreground mb-2">
  {campaign.description}
  </p>
  <div className="flex items-center gap-1 text-sm text-success">
- <span className="h-4 w-4" aria-hidden="true">📈</span>
+ <TrendingUp className="h-4 w-4" aria-hidden="true" />
  <span>Expected: {campaign.expectedImpact}</span>
  </div>
  </div>
@@ -416,7 +416,7 @@ export function ReviewCampaignWidget() {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <span className="h-5 w-5 text-primary" aria-hidden="true">⏰</span>
+ <Clock className="h-5 w-5 text-primary" aria-hidden="true" />
  Response Performance
  </CardTitle>
  </CardHeader>
@@ -444,7 +444,7 @@ export function ReviewCampaignWidget() {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <span className="h-5 w-5 text-primary" aria-hidden="true">💬</span>
+ <MessageSquare className="h-5 w-5 text-primary" aria-hidden="true" />
  Recent Reviews
  </CardTitle>
  <CardDescription>
@@ -456,7 +456,7 @@ export function ReviewCampaignWidget() {
  <div className="space-y-4">
  {recentReviews.length === 0 ? (
  <div className="text-center py-8 text-muted-foreground">
- <span className="h-12 w-12 mx-auto mb-3 opacity-50" aria-hidden="true">💬</span>
+ <MessageSquare className="h-12 w-12 mx-auto mb-3 opacity-50" aria-hidden="true" />
  <p>No reviews yet. Start your review campaign to collect feedback!</p>
  </div>
  ) : (
@@ -467,9 +467,7 @@ export function ReviewCampaignWidget() {
  <div className="flex items-center gap-2 mb-2">
  <div className="flex">
  {[1, 2, 3, 4, 5].map((star) => (
- <span 
- key={star}
- className={`h-4 w-4 ${star <= review.rating ?'text-gold fill-gold' :'text-muted'}`} aria-hidden="true">⭐</span>
+ <Star key={star} className={`h-4 w-4 ${star <= review.rating ?'text-gold fill-gold' :'text-muted'}`} aria-hidden="true" />
  ))}
  </div>
  {getSentimentIcon(review.sentiment)}
@@ -498,7 +496,7 @@ export function ReviewCampaignWidget() {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <span className="h-5 w-5 text-accent" aria-hidden="true">🧠</span>
+ <Brain className="h-5 w-5 text-accent" aria-hidden="true" />
  AI-Powered Insights
  </CardTitle>
  <CardDescription>

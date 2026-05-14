@@ -1,6 +1,7 @@
 import { memo, useMemo } from"react";
 import { GradientCard } from"@/components/ui/gradient-card";
 import { Formatters } from"@/utils/formatters";
+import { CreditCard, DollarSign, Gift, ShoppingCart, TrendingUp } from "lucide-react";
 
 type Analytics = {
  total_sales: number;
@@ -40,7 +41,7 @@ const MerchantAnalyticsCardsComponent = ({ analytics }: MerchantAnalyticsCardsPr
  <GradientCard gradient>
  <div className="flex items-center gap-4">
  <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center">
- <span className="w-6 h-6 text-accent" aria-hidden="true">💵</span>
+ <DollarSign className="w-6 h-6 text-accent" aria-hidden="true" />
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Total Sales</p>
@@ -54,7 +55,7 @@ const MerchantAnalyticsCardsComponent = ({ analytics }: MerchantAnalyticsCardsPr
  <GradientCard>
  <div className="flex items-center gap-4">
  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
- <span className="w-6 h-6 text-primary" aria-hidden="true">🎁</span>
+ <Gift className="w-6 h-6 text-primary" aria-hidden="true" />
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Total Rewards Given</p>
@@ -68,7 +69,7 @@ const MerchantAnalyticsCardsComponent = ({ analytics }: MerchantAnalyticsCardsPr
  <GradientCard>
  <div className="flex items-center gap-4">
  <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center">
- <span className="w-6 h-6 text-secondary" aria-hidden="true">💳</span>
+ <CreditCard className="w-6 h-6 text-secondary" aria-hidden="true" />
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Repayment Remaining</p>
@@ -82,7 +83,7 @@ const MerchantAnalyticsCardsComponent = ({ analytics }: MerchantAnalyticsCardsPr
  <GradientCard>
  <div className="flex items-center gap-4">
  <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
- <span className="w-6 h-6 text-muted-foreground" aria-hidden="true">📈</span>
+ <TrendingUp className="w-6 h-6 text-muted-foreground" aria-hidden="true" />
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Repayment Rate</p>
@@ -96,7 +97,7 @@ const MerchantAnalyticsCardsComponent = ({ analytics }: MerchantAnalyticsCardsPr
  <GradientCard>
  <div className="flex items-center gap-4">
  <div className="w-12 h-12 rounded-full bg-warning/10 flex items-center justify-center">
- <span className="w-6 h-6 text-warning" aria-hidden="true">🛒</span>
+ <ShoppingCart className="w-6 h-6 text-warning" aria-hidden="true" />
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Total Transactions</p>

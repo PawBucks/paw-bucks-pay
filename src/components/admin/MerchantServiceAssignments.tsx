@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Badge } from'@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from'@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from'@/components/ui/card';
-import { Search, Plus, Edit, Play, Pause, StopCircle, Loader2, CheckCircle, XCircle, AlertCircle } from "lucide-react";
+import { AlertCircle, Calendar, CheckCircle, Clock, Edit, Loader2, Pause, Play, Plus, Search, StopCircle, Store, XCircle } from "lucide-react";
 import { toast } from'sonner';
 import { format, addDays, addMonths, addYears, isAfter, isBefore, differenceInDays } from'date-fns';
 
@@ -304,7 +304,7 @@ export function MerchantServiceAssignments() {
  const statusOption = STATUS_OPTIONS.find(s => s.value === status);
  const icons: Record<string, React.ReactNode> = {
  active: <CheckCircle className="w-3 h-3 mr-1" />,
- pending: <span className="w-3 h-3 mr-1" aria-hidden="true">⏰</span>,
+ pending: <Clock className="w-3 h-3 mr-1" aria-hidden="true" />,
  paused: <Pause className="w-3 h-3 mr-1" />,
  expired: <AlertCircle className="w-3 h-3 mr-1" />,
  cancelled: <XCircle className="w-3 h-3 mr-1" />,
@@ -478,7 +478,7 @@ export function MerchantServiceAssignments() {
  <TableRow key={assignment.id}>
  <TableCell>
  <div className="flex items-center gap-2">
- <span className="w-4 h-4 text-muted-foreground" aria-hidden="true">🏪</span>
+ <Store className="w-4 h-4 text-muted-foreground" aria-hidden="true" />
  <span className="font-medium">{assignment.merchant?.business_name}</span>
  </div>
  </TableCell>
@@ -501,7 +501,7 @@ export function MerchantServiceAssignments() {
  
  return (
  <div className={`flex items-center gap-1 text-sm ${isExpired ?'text-destructive' : isExpiringSoon ?'text-warning' :''}`}>
- <span className="w-3 h-3" aria-hidden="true">📅</span>
+ <Calendar className="w-3 h-3" aria-hidden="true" />
  <span>{format(expiryDate,'MMM d, yyyy')}</span>
  {isExpiringSoon && !isExpired && (
  <Badge variant="outline" className="ml-1 text-xs bg-warning/10 text-warning border-warning/30">

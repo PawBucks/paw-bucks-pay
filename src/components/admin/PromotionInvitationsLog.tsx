@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Search, CheckCircle2, XCircle, Inbox, Download } from "lucide-react";
+import { CheckCircle2, Clock, Download, Inbox, Loader2, Search, Stethoscope, Store, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   listAllPromotionInvitations,
@@ -30,7 +30,7 @@ function StatusBadge({ status }: { status: string }) {
     return <Badge className="bg-[hsl(var(--success))] text-white"><CheckCircle2 className="h-3 w-3 mr-1" /> Accepted</Badge>;
   if (status === "declined")
     return <Badge variant="outline"><XCircle className="h-3 w-3 mr-1" /> Declined</Badge>;
-  return <Badge variant="secondary"><span className="h-3 w-3 mr-1" aria-hidden="true">⏰</span> Pending</Badge>;
+  return <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" aria-hidden="true" /> Pending</Badge>;
 }
 
 export function PromotionInvitationsLog() {
@@ -151,7 +151,7 @@ export function PromotionInvitationsLog() {
         </div>
         <div className="flex flex-wrap gap-2 pt-3">
           <Badge variant="outline">Total: {counts.total}</Badge>
-          <Badge variant="secondary"><span className="h-3 w-3 mr-1" aria-hidden="true">⏰</span> Pending: {counts.pending}</Badge>
+          <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" aria-hidden="true" /> Pending: {counts.pending}</Badge>
           <Badge className="bg-[hsl(var(--success))] text-white"><CheckCircle2 className="h-3 w-3 mr-1" /> Accepted: {counts.accepted}</Badge>
           <Badge variant="outline"><XCircle className="h-3 w-3 mr-1" /> Declined: {counts.declined}</Badge>
         </div>
@@ -227,9 +227,9 @@ export function PromotionInvitationsLog() {
                     <td className="p-3">
                       <div className="flex items-center gap-2 min-w-0">
                         {r.recipient_type === "merchant" ? (
-                          <span className="h-3.5 w-3.5 text-muted-foreground shrink-0" aria-hidden="true">🏪</span>
+                          <Store className="h-3.5 w-3.5 text-muted-foreground shrink-0" aria-hidden="true" />
                         ) : (
-                          <span className="h-3.5 w-3.5 text-muted-foreground shrink-0" aria-hidden="true">🩺</span>
+                          <Stethoscope className="h-3.5 w-3.5 text-muted-foreground shrink-0" aria-hidden="true" />
                         )}
                         <div className="min-w-0">
                           <p className="font-medium truncate max-w-[200px]">{r.recipient_name}</p>

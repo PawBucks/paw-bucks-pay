@@ -18,7 +18,7 @@ import {
  SelectTrigger,
  SelectValue,
 } from'@/components/ui/select';
-import { Crown } from "lucide-react";
+import { Calendar, Crown } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { toast } from'sonner';
 
@@ -116,7 +116,7 @@ export function UpgradeSubscriptionDialog({
  <DialogContent className="sm:max-w-md">
  <DialogHeader>
  <DialogTitle className="flex items-center gap-2">
- <span className="h-5 w-5 text-primary" aria-hidden="true">👑</span>
+ <Crown className="h-5 w-5 text-primary" aria-hidden="true" />
  Grant Complimentary Subscription
  </DialogTitle>
  <DialogDescription>
@@ -174,7 +174,7 @@ export function UpgradeSubscriptionDialog({
 
  <div className="space-y-2">
  <Label className="flex items-center gap-2">
- <span className="h-4 w-4" aria-hidden="true">📅</span>
+ <Calendar className="h-4 w-4" aria-hidden="true" />
  Subscription Duration
  </Label>
  <Select

@@ -1,7 +1,7 @@
 import { useState } from"react";
 import { useQuery } from"@tanstack/react-query";
 import { supabase } from"@/integrations/supabase/client";
-import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import { Camera, ChevronLeft, ChevronRight, X } from "lucide-react";
 
 type Props = {
  merchantId: string;
@@ -38,7 +38,7 @@ export function PhotoGallery({ merchantId }: Props) {
  <>
  <div className="mb-6">
  <div className="flex items-center gap-2 mb-3">
- <span className="w-4 h-4 text-primary" aria-hidden="true">📸</span>
+ <Camera className="w-4 h-4 text-primary" aria-hidden="true" />
  <h3 className="font-semibold text-sm">Photos & Reviews</h3>
  <span className="text-xs text-muted-foreground">({photos.length})</span>
  </div>

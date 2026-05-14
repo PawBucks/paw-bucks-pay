@@ -6,7 +6,7 @@ import { Textarea } from"@/components/ui/textarea";
 import { Input } from"@/components/ui/input";
 import { Badge } from"@/components/ui/badge";
 import { ScrollArea } from"@/components/ui/scroll-area";
-import { Send, Loader2, Check, CheckCheck, Search } from "lucide-react";
+import { Check, CheckCheck, Image, Loader2, MessageSquare, Search, Send } from "lucide-react";
 import { format, parseISO } from"date-fns";
 import { toast } from"sonner";
 
@@ -311,7 +311,7 @@ export const SecureMessagingTab = ({ vetId }: SecureMessagingTabProps) => {
  <div className="space-y-4">
  <div>
  <h2 className="text-xl font-semibold flex items-center gap-2">
- <span className="w-5 h-5" aria-hidden="true">💬</span>
+ <MessageSquare className="w-5 h-5" aria-hidden="true" />
  Secure Messaging
  </h2>
  <p className="text-sm text-muted-foreground">
@@ -321,7 +321,7 @@ export const SecureMessagingTab = ({ vetId }: SecureMessagingTabProps) => {
 
  {conversations.length === 0 ? (
  <Card className="p-8 text-center text-muted-foreground">
- <span className="w-12 h-12 mx-auto mb-4 opacity-50" aria-hidden="true">💬</span>
+ <MessageSquare className="w-12 h-12 mx-auto mb-4 opacity-50" aria-hidden="true" />
  <p>No conversations yet.</p>
  <p className="text-sm mt-1">Messages from pet owners will appear here.</p>
  </Card>
@@ -455,7 +455,7 @@ export const SecureMessagingTab = ({ vetId }: SecureMessagingTabProps) => {
  {isUploading ? (
  <Loader2 className="w-4 h-4 animate-spin" />
  ) : (
- <span className="w-4 h-4" aria-hidden="true">🖼️</span>
+ <Image className="w-4 h-4" aria-hidden="true" />
  )}
  </Button>
  <Textarea

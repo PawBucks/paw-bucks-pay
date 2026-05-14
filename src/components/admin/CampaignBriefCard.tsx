@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
 import { Separator } from"@/components/ui/separator";
-import { Palette } from "lucide-react";
+import { Calendar, CreditCard, Crown, Dog, DollarSign, FileText, MapPin, Palette, Shield, Target } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import type { BrandCampaign, TargetingRules } from"@/services/api/brandCampaigns.service";
 
@@ -52,7 +52,7 @@ export function CampaignBriefCard({ campaign }: Props) {
  <Card className="border-primary/30">
  <CardHeader className="pb-3">
  <CardTitle className="text-lg flex items-center gap-2">
- <span className="h-5 w-5 text-primary" aria-hidden="true">📄</span>
+ <FileText className="h-5 w-5 text-primary" aria-hidden="true" />
  Campaign Brief
  </CardTitle>
  <CardDescription>
@@ -124,7 +124,7 @@ export function CampaignBriefCard({ campaign }: Props) {
  {/* Budget & Economics */}
  <section>
  <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3 flex items-center gap-1.5">
- <span className="h-3.5 w-3.5" aria-hidden="true">💵</span> Budget & Economics
+ <DollarSign className="h-3.5 w-3.5" aria-hidden="true" /> Budget & Economics
  </h4>
  <div className="grid sm:grid-cols-3 gap-4">
  <Field label="Budget" value={`$${Number(campaign.budget_usd).toLocaleString()}`} />
@@ -141,7 +141,7 @@ export function CampaignBriefCard({ campaign }: Props) {
  {/* Guardrails */}
  <section>
  <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3 flex items-center gap-1.5">
- <span className="h-3.5 w-3.5" aria-hidden="true">🛡️</span> Guardrails & Auto-Replenish
+ <Shield className="h-3.5 w-3.5" aria-hidden="true" /> Guardrails & Auto-Replenish
  </h4>
  <div className="grid sm:grid-cols-2 gap-4">
  <Field
@@ -171,12 +171,12 @@ export function CampaignBriefCard({ campaign }: Props) {
  {/* Targeting */}
  <section>
  <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3 flex items-center gap-1.5">
- <span className="h-3.5 w-3.5" aria-hidden="true">🎯</span> Audience Targeting
+ <Target className="h-3.5 w-3.5" aria-hidden="true" /> Audience Targeting
  </h4>
  <div className="grid sm:grid-cols-2 gap-4">
  <div>
  <p className="text-xs uppercase tracking-wide text-muted-foreground font-medium flex items-center gap-1">
- <span className="h-3 w-3" aria-hidden="true">📍</span> Geography
+ <MapPin className="h-3 w-3" aria-hidden="true" /> Geography
  </p>
  {t.center_zip || t.zip_radius_miles ? (
  <p className="text-sm font-medium mt-0.5">
@@ -195,7 +195,7 @@ export function CampaignBriefCard({ campaign }: Props) {
  </div>
  <div>
  <p className="text-xs uppercase tracking-wide text-muted-foreground font-medium flex items-center gap-1">
- <span className="h-3 w-3" aria-hidden="true">🐕</span> Pet Species
+ <Dog className="h-3 w-3" aria-hidden="true" /> Pet Species
  </p>
  <ChipList items={t.species} />
  </div>
@@ -213,7 +213,7 @@ export function CampaignBriefCard({ campaign }: Props) {
  </div>
  <div>
  <p className="text-xs uppercase tracking-wide text-muted-foreground font-medium flex items-center gap-1">
- <span className="h-3 w-3" aria-hidden="true">👑</span> Consumer Tier
+ <Crown className="h-3 w-3" aria-hidden="true" /> Consumer Tier
  </p>
  <ChipList items={t.consumer_tiers} />
  </div>
@@ -237,7 +237,7 @@ export function CampaignBriefCard({ campaign }: Props) {
  {/* Schedule & Funding */}
  <section>
  <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3 flex items-center gap-1.5">
- <span className="h-3.5 w-3.5" aria-hidden="true">📅</span> Schedule & Funding Status
+ <Calendar className="h-3.5 w-3.5" aria-hidden="true" /> Schedule & Funding Status
  </h4>
  <div className="grid sm:grid-cols-2 gap-4">
  <Field label="Start Date" value={startDate} />
@@ -248,7 +248,7 @@ export function CampaignBriefCard({ campaign }: Props) {
  value={
  fundedDate ? (
  <span className="flex items-center gap-1">
- <span className="h-3.5 w-3.5 text-success" aria-hidden="true">💳</span>
+ <CreditCard className="h-3.5 w-3.5 text-success" aria-hidden="true" />
  {fundedDate}
  </span>
  ) : (

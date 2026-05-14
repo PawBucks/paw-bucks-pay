@@ -8,7 +8,7 @@ import { Badge } from'@/components/ui/badge';
 import { Textarea } from'@/components/ui/textarea';
 import { Label } from'@/components/ui/label';
 import { Separator } from'@/components/ui/separator';
-import { Download, FileSpreadsheet, Receipt, CheckCircle2, Loader2 } from "lucide-react";
+import { Car, CheckCircle2, DollarSign, Download, FileSpreadsheet, FileText, Loader2, Package, Receipt } from "lucide-react";
 import { supabase } from'@/integrations/supabase/client';
 import { toast } from'sonner';
 import jsPDF from'jspdf';
@@ -371,7 +371,7 @@ export function YearEndExports({ merchantId, businessName, taxYear, expenses }: 
  <Card className="border-2 border-primary/20">
  <CardHeader className="pb-3">
  <CardTitle className="text-base flex items-center gap-2">
- <span className="h-5 w-5 text-primary" aria-hidden="true">📄</span>
+ <FileText className="h-5 w-5 text-primary" aria-hidden="true" />
  Tax Summary PDF
  </CardTitle>
  <CardDescription>
@@ -430,7 +430,7 @@ export function YearEndExports({ merchantId, businessName, taxYear, expenses }: 
  {isExporting ==='excel' ? (
  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
  ) : (
- <span className="h-4 w-4 mr-2" aria-hidden="true">📦</span>
+ <Package className="h-4 w-4 mr-2" aria-hidden="true" />
  )}
  Download Bundle
  </Button>
@@ -453,7 +453,7 @@ export function YearEndExports({ merchantId, businessName, taxYear, expenses }: 
  {isExporting ==='expenses' ? (
  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
  ) : (
- <span className="h-4 w-4 mr-2" aria-hidden="true">🧾</span>
+ <Receipt className="h-4 w-4 mr-2" aria-hidden="true" />
  )}
  Expenses ({expenses.length})
  </Button>
@@ -467,7 +467,7 @@ export function YearEndExports({ merchantId, businessName, taxYear, expenses }: 
  {isExporting ==='income' ? (
  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
  ) : (
- <span className="h-4 w-4 mr-2" aria-hidden="true">💵</span>
+ <DollarSign className="h-4 w-4 mr-2" aria-hidden="true" />
  )}
  Income Summary
  </Button>
@@ -481,7 +481,7 @@ export function YearEndExports({ merchantId, businessName, taxYear, expenses }: 
  {isExporting ==='mileage' ? (
  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
  ) : (
- <span className="h-4 w-4 mr-2" aria-hidden="true">🚗</span>
+ <Car className="h-4 w-4 mr-2" aria-hidden="true" />
  )}
  Mileage Log ({mileageEntries.length})
  </Button>

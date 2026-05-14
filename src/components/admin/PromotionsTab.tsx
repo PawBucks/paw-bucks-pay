@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Loader2, Plus, Send, Archive, Edit, CheckCircle2, XCircle, Inbox } from "lucide-react";
+import { Archive, CheckCircle2, Clock, Edit, Inbox, Loader2, Megaphone, Plus, Send, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import {
   listPromotions,
@@ -118,7 +118,7 @@ export function PromotionsTab() {
     <div className="space-y-4">
       <Tabs defaultValue="promotions" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="promotions"><span className="h-4 w-4 mr-1" aria-hidden="true">📣</span> Promotions</TabsTrigger>
+          <TabsTrigger value="promotions"><Megaphone className="h-4 w-4 mr-1" aria-hidden="true" /> Promotions</TabsTrigger>
           <TabsTrigger value="invitations"><Inbox className="h-4 w-4 mr-1" /> Sent Invitations</TabsTrigger>
         </TabsList>
 
@@ -126,7 +126,7 @@ export function PromotionsTab() {
       <Card>
         <CardHeader className="flex flex-row items-start justify-between gap-3">
           <div>
-            <CardTitle className="flex items-center gap-2"><span className="h-5 w-5 text-primary" aria-hidden="true">📣</span> Platform Promotions</CardTitle>
+            <CardTitle className="flex items-center gap-2"><Megaphone className="h-5 w-5 text-primary" aria-hidden="true" /> Platform Promotions</CardTitle>
             <CardDescription>
               Create promotions and invite Merchants and Vets to opt in. Recipients can accept or decline from their dashboards.
             </CardDescription>
@@ -138,7 +138,7 @@ export function PromotionsTab() {
             <div className="flex justify-center py-10"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
           ) : promotions.length === 0 ? (
             <div className="py-12 text-center text-muted-foreground">
-              <span className="h-10 w-10 mx-auto mb-2 opacity-40" aria-hidden="true">📣</span>
+              <Megaphone className="h-10 w-10 mx-auto mb-2 opacity-40" aria-hidden="true" />
               <p>No promotions yet. Create one to start inviting partners.</p>
             </div>
           ) : (
@@ -309,7 +309,7 @@ function PromotionRow({
       {expanded && (
         <div className="border-t p-4 space-y-2 text-sm">
           <div className="flex gap-3 flex-wrap">
-            <Badge variant="secondary"><span className="h-3 w-3 mr-1" aria-hidden="true">⏰</span> Pending: {counts.pending || 0}</Badge>
+            <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" aria-hidden="true" /> Pending: {counts.pending || 0}</Badge>
             <Badge className="bg-[hsl(var(--success))] text-white"><CheckCircle2 className="h-3 w-3 mr-1" /> Accepted: {counts.accepted || 0}</Badge>
             <Badge variant="outline"><XCircle className="h-3 w-3 mr-1" /> Declined: {counts.declined || 0}</Badge>
           </div>

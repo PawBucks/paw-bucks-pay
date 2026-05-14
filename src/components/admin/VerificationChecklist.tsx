@@ -8,7 +8,7 @@ import { Button } from'@/components/ui/button';
 import { Textarea } from'@/components/ui/textarea';
 import { ScrollArea } from'@/components/ui/scroll-area';
 import { Separator } from'@/components/ui/separator';
-import { CheckCircle2, XCircle, MinusCircle, ClipboardCheck, ChevronDown, ChevronUp, Loader2, AlertTriangle, StickyNote } from "lucide-react";
+import { AlertTriangle, CheckCircle2, ChevronDown, ChevronUp, ClipboardCheck, Loader2, MinusCircle, Shield, StickyNote, XCircle } from "lucide-react";
 import { toast } from'sonner';
 import { cn } from'@/lib/utils';
 
@@ -223,7 +223,7 @@ export function VerificationChecklist({ entityType, entityId, onChecklistComplet
  </div>
  {stats.allAnswered && !stats.hasFailures && (
  <div className="mt-2 flex items-center gap-1.5 text-xs text-success font-medium">
- <span className="w-4 h-4" aria-hidden="true">🛡️</span> All checks passed — eligible for approval
+ <Shield className="w-4 h-4" aria-hidden="true" /> All checks passed — eligible for approval
  </div>
  )}
  {stats.hasFailures && (

@@ -13,7 +13,7 @@ import { Calendar } from'@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from'@/components/ui/popover';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from'@/components/ui/tooltip';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from'@/components/ui/tabs';
-import { Plus, Trash2, Calculator, Info, Fuel, Wrench, ChevronRight, Pencil } from "lucide-react";
+import { Calculator, Calendar, Car, ChevronRight, Fuel, Info, MapPin, Pencil, Plus, Trash2, TrendingUp, Trophy, User, Wrench } from "lucide-react";
 import { supabase } from'@/integrations/supabase/client';
 import { toast } from'sonner';
 import { cn } from'@/lib/utils';
@@ -78,13 +78,13 @@ const FALLBACK_IRS_RATES: Record<number, number> = {
 const EXPENSE_TYPE_LABELS: Record<string, { label: string; icon: React.ReactNode }> = {
  gas: { label:'Gas/Fuel', icon: <Fuel className="h-4 w-4" /> },
  repairs: { label:'Repairs', icon: <Wrench className="h-4 w-4" /> },
- tires: { label:'Tires', icon: <span className="h-4 w-4" aria-hidden="true">🚗</span> },
+ tires: { label:'Tires', icon: <Car className="h-4 w-4" aria-hidden="true" /> },
  oil_change: { label:'Oil Change', icon: <Wrench className="h-4 w-4" /> },
- insurance: { label:'Insurance', icon: <span className="h-4 w-4" aria-hidden="true">🚗</span> },
- registration: { label:'Registration', icon: <span className="h-4 w-4" aria-hidden="true">🚗</span> },
- parking: { label:'Parking', icon: <span className="h-4 w-4" aria-hidden="true">📍</span> },
- tolls: { label:'Tolls', icon: <span className="h-4 w-4" aria-hidden="true">📍</span> },
- other: { label:'Other', icon: <span className="h-4 w-4" aria-hidden="true">🚗</span> },
+ insurance: { label:'Insurance', icon: <Car className="h-4 w-4" aria-hidden="true" /> },
+ registration: { label:'Registration', icon: <Car className="h-4 w-4" aria-hidden="true" /> },
+ parking: { label:'Parking', icon: <MapPin className="h-4 w-4" aria-hidden="true" /> },
+ tolls: { label:'Tolls', icon: <MapPin className="h-4 w-4" aria-hidden="true" /> },
+ other: { label:'Other', icon: <Car className="h-4 w-4" aria-hidden="true" /> },
 };
 
 export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
@@ -465,7 +465,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
  {betterMethod ==='standard' && totalMiles > 0 && totalVehicleExpenses > 0 && (
  <div className="absolute top-2 right-2">
  <Badge className="bg-success text-white">
- <span className="h-3 w-3 mr-1" aria-hidden="true">🏆</span>
+ <Trophy className="h-3 w-3 mr-1" aria-hidden="true" />
  Best Option
  </Badge>
  </div>
@@ -507,7 +507,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
  {betterMethod ==='actual' && totalMiles > 0 && totalVehicleExpenses > 0 && (
  <div className="absolute top-2 right-2">
  <Badge className="bg-success text-white">
- <span className="h-3 w-3 mr-1" aria-hidden="true">🏆</span>
+ <Trophy className="h-3 w-3 mr-1" aria-hidden="true" />
  Best Option
  </Badge>
  </div>
@@ -543,7 +543,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
  <Tabs defaultValue="mileage" className="space-y-4">
  <TabsList className="grid w-full grid-cols-2">
  <TabsTrigger value="mileage" className="flex items-center gap-2">
- <span className="h-4 w-4" aria-hidden="true">🚗</span>
+ <Car className="h-4 w-4" aria-hidden="true" />
  Mileage Log ({entries.length})
  </TabsTrigger>
  <TabsTrigger value="expenses" className="flex items-center gap-2">
@@ -563,7 +563,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
  <p className="text-sm text-muted-foreground">Total Miles</p>
  <p className="text-2xl font-bold">{Formatters.decimal(totalMiles, 1)}</p>
  </div>
- <span className="h-8 w-8 text-primary opacity-80" aria-hidden="true">🚗</span>
+ <Car className="h-8 w-8 text-primary opacity-80" aria-hidden="true" />
  </div>
  </CardContent>
  </Card>
@@ -589,7 +589,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
  {isExclusivelyBusiness ?'100%' : `${Formatters.decimal(petCommutePercentage, 1)}%`}
  </p>
  </div>
- <span className="h-8 w-8 text-warning opacity-80" aria-hidden="true">📈</span>
+ <TrendingUp className="h-8 w-8 text-warning opacity-80" aria-hidden="true" />
  </div>
  </CardContent>
  </Card>
@@ -600,7 +600,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
  <div>
  <CardTitle className="flex items-center gap-2">
- <span className="h-5 w-5 text-primary" aria-hidden="true">🚗</span>
+ <Car className="h-5 w-5 text-primary" aria-hidden="true" />
  Mileage Entries
  </CardTitle>
  <CardDescription>Track your business and personal trips</CardDescription>
@@ -642,7 +642,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
  </SelectItem>
  <SelectItem value="personal">
  <span className="flex items-center gap-2">
- <span className="h-4 w-4 text-muted-foreground" aria-hidden="true">👤</span>
+ <User className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
  Personal Use
  </span>
  </SelectItem>
@@ -661,7 +661,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
  !tripDate &&"text-muted-foreground"
  )}
  >
- <span className="mr-2 h-4 w-4" aria-hidden="true">📅</span>
+ <Calendar className="mr-2 h-4 w-4" aria-hidden="true" />
  {tripDate ? format(tripDate,'PPP') :'Select date'}
  </Button>
  </PopoverTrigger>
@@ -679,7 +679,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
  {/* Entry Mode Toggle */}
  <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
  <div className="flex items-center gap-2">
- <span className="h-4 w-4 text-primary" aria-hidden="true">🚗</span>
+ <Car className="h-4 w-4 text-primary" aria-hidden="true" />
  <Label htmlFor="entry-mode" className="text-sm font-medium cursor-pointer">
  Use Odometer Readings
  </Label>
@@ -701,7 +701,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
  <div className="grid grid-cols-2 gap-4">
  <div className="grid gap-2">
  <Label htmlFor="start-odometer" className="flex items-center gap-1">
- <span className="h-3 w-3 text-success" aria-hidden="true">📍</span>
+ <MapPin className="h-3 w-3 text-success" aria-hidden="true" />
  Start Trip
  </Label>
  <Input
@@ -716,7 +716,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
  </div>
  <div className="grid gap-2">
  <Label htmlFor="end-odometer" className="flex items-center gap-1">
- <span className="h-3 w-3 text-destructive" aria-hidden="true">📍</span>
+ <MapPin className="h-3 w-3 text-destructive" aria-hidden="true" />
  End Trip
  </Label>
  <Input
@@ -770,7 +770,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
  <div className="grid grid-cols-2 gap-4">
  <div className="grid gap-2">
  <Label htmlFor="start-location" className="flex items-center gap-1">
- <span className="h-3 w-3 text-success" aria-hidden="true">📍</span>
+ <MapPin className="h-3 w-3 text-success" aria-hidden="true" />
  Start Location
  </Label>
  <Input
@@ -782,7 +782,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
  </div>
  <div className="grid gap-2">
  <Label htmlFor="end-location" className="flex items-center gap-1">
- <span className="h-3 w-3 text-destructive" aria-hidden="true">📍</span>
+ <MapPin className="h-3 w-3 text-destructive" aria-hidden="true" />
  End Location
  </Label>
  <Input
@@ -840,7 +840,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
  </div>
  ) : entries.length === 0 ? (
  <div className="text-center py-12 text-muted-foreground">
- <span className="h-12 w-12 mx-auto mb-4 opacity-50" aria-hidden="true">🚗</span>
+ <Car className="h-12 w-12 mx-auto mb-4 opacity-50" aria-hidden="true" />
  <p className="font-medium">No mileage entries yet</p>
  <p className="text-sm">Start logging your business trips to track deductible miles</p>
  </div>
@@ -875,7 +875,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
  {entry.trip_type ==='pet_commute' ? (
  <><PawBucksLogo className="h-3 w-3 mr-1" /> Business</>
  ) : (
- <><span className="h-3 w-3 mr-1" aria-hidden="true">👤</span> Personal</>
+ <><User className="h-3 w-3 mr-1" aria-hidden="true" /> Personal</>
  )}
  </Badge>
  </TableCell>
@@ -884,13 +884,13 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
  <div className="text-xs space-y-0.5">
  {entry.start_location && (
  <div className="flex items-center gap-1">
- <span className="h-3 w-3 text-success shrink-0" aria-hidden="true">📍</span>
+ <MapPin className="h-3 w-3 text-success shrink-0" aria-hidden="true" />
  <span className="truncate max-w-[120px]" title={entry.start_location}>{entry.start_location}</span>
  </div>
  )}
  {entry.end_location && (
  <div className="flex items-center gap-1">
- <span className="h-3 w-3 text-destructive shrink-0" aria-hidden="true">📍</span>
+ <MapPin className="h-3 w-3 text-destructive shrink-0" aria-hidden="true" />
  <span className="truncate max-w-[120px]" title={entry.end_location}>{entry.end_location}</span>
  </div>
  )}
@@ -1034,7 +1034,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
  !expenseDate &&"text-muted-foreground"
  )}
  >
- <span className="mr-2 h-4 w-4" aria-hidden="true">📅</span>
+ <Calendar className="mr-2 h-4 w-4" aria-hidden="true" />
  {expenseDate ? format(expenseDate,'PPP') :'Select date'}
  </Button>
  </PopoverTrigger>

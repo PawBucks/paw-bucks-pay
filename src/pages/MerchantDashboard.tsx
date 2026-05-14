@@ -24,7 +24,7 @@ import {
  SheetContent,
  SheetTrigger,
 } from"@/components/ui/sheet";
-import { LogOut, Loader2, LayoutDashboard, BarChart3, Zap, DollarSign, Menu, ChevronRight, HelpCircle, Stamp, LifeBuoy, MessageSquare, Users, PauseCircle, History, ClipboardCheck, QrCode, Megaphone } from "lucide-react";
+import { BarChart3, ChevronRight, ClipboardCheck, DollarSign, HelpCircle, History, LayoutDashboard, LifeBuoy, Loader2, LogOut, Mail, Megaphone, Menu, MessageSquare, PauseCircle, QrCode, Stamp, Users, Zap } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { toast } from"sonner";
 import { format, startOfMonth, parseISO } from"date-fns";
@@ -1048,7 +1048,7 @@ const MerchantDashboard = () => {
  className="w-full"
  onClick={() => window.location.href ='mailto:support@pawbucks.app?subject=Merchant Account Paused - Request to Resume&body=Merchant:' + encodeURIComponent(merchant.business_name)}
  >
- <span className="w-4 h-4 mr-2" aria-hidden="true">📧</span>
+ <Mail className="w-4 h-4 mr-2" aria-hidden="true" />
  Contact Support
  </Button>
  <Button variant="ghost" className="w-full" onClick={() => signOut()}>

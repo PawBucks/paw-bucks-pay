@@ -11,7 +11,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from'@/compo
 import { Alert, AlertDescription, AlertTitle } from'@/components/ui/alert';
 import { Switch } from'@/components/ui/switch';
 import { Label } from'@/components/ui/label';
-import { Calculator, AlertTriangle, Info, CheckCircle2, PiggyBank, RefreshCw } from "lucide-react";
+import { AlertTriangle, Bell, Calculator, Calendar, Car, CheckCircle2, DollarSign, Info, PiggyBank, Receipt, RefreshCw, TrendingUp } from "lucide-react";
 import { supabase } from'@/integrations/supabase/client';
 import { toast } from'sonner';
 import { LoadingSpinner } from'@/components/LoadingSpinner';
@@ -344,7 +344,7 @@ export function TaxLiabilityEstimator({ merchantId, taxYear }: TaxLiabilityEstim
  </div>
  
  <div className="flex items-center gap-3">
- <span className="h-5 w-5 text-muted-foreground" aria-hidden="true">🔔</span>
+ <Bell className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
  <div className="flex-1">
  <Label className="text-sm font-medium">Quarterly Tax Reminders</Label>
  <p className="text-xs text-muted-foreground">Get email & in-app notifications</p>
@@ -364,7 +364,7 @@ export function TaxLiabilityEstimator({ merchantId, taxYear }: TaxLiabilityEstim
  <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
  <CardHeader className="pb-2">
  <CardTitle className="text-lg flex items-center gap-2">
- <span className="h-5 w-5 text-primary" aria-hidden="true">💵</span>
+ <DollarSign className="h-5 w-5 text-primary" aria-hidden="true" />
  Estimated Annual Tax
  </CardTitle>
  <CardDescription>Your projected {taxYear} tax liability</CardDescription>
@@ -397,7 +397,7 @@ export function TaxLiabilityEstimator({ merchantId, taxYear }: TaxLiabilityEstim
  <Card className="border-2 border-warning/20 bg-gradient-to-br from-warning/5 to-transparent">
  <CardHeader className="pb-2">
  <CardTitle className="text-lg flex items-center gap-2">
- <span className="h-5 w-5 text-warning" aria-hidden="true">📅</span>
+ <Calendar className="h-5 w-5 text-warning" aria-hidden="true" />
  Quarterly Payment Due
  </CardTitle>
  <CardDescription>
@@ -425,7 +425,7 @@ export function TaxLiabilityEstimator({ merchantId, taxYear }: TaxLiabilityEstim
  <Card>
  <CardHeader>
  <CardTitle className="text-lg flex items-center gap-2">
- <span className="h-5 w-5" aria-hidden="true">🧾</span>
+ <Receipt className="h-5 w-5" aria-hidden="true" />
  Income & Deductions Breakdown
  </CardTitle>
  </CardHeader>
@@ -434,7 +434,7 @@ export function TaxLiabilityEstimator({ merchantId, taxYear }: TaxLiabilityEstim
  {/* Gross Income */}
  <div className="flex items-center justify-between p-3 bg-success/10 rounded-lg border border-success/30">
  <div className="flex items-center gap-3">
- <span className="h-5 w-5 text-success" aria-hidden="true">📈</span>
+ <TrendingUp className="h-5 w-5 text-success" aria-hidden="true" />
  <div>
  <p className="font-medium text-success">Gross Income (Platform Sales)</p>
  <p className="text-xs text-success">Total sales through PawBucks</p>
@@ -451,7 +451,7 @@ export function TaxLiabilityEstimator({ merchantId, taxYear }: TaxLiabilityEstim
  
  <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
  <div className="flex items-center gap-3">
- <span className="h-4 w-4 text-muted-foreground" aria-hidden="true">🧾</span>
+ <Receipt className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
  <span>Business Expenses (Tax Vault)</span>
  </div>
  <span className="font-medium text-destructive">
@@ -461,7 +461,7 @@ export function TaxLiabilityEstimator({ merchantId, taxYear }: TaxLiabilityEstim
 
  <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
  <div className="flex items-center gap-3">
- <span className="h-4 w-4 text-muted-foreground" aria-hidden="true">🚗</span>
+ <Car className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
  <div>
  <span>Vehicle Deduction</span>
  <TooltipProvider>
@@ -519,7 +519,7 @@ export function TaxLiabilityEstimator({ merchantId, taxYear }: TaxLiabilityEstim
  <Card>
  <CardHeader>
  <CardTitle className="text-lg flex items-center gap-2">
- <span className="h-5 w-5" aria-hidden="true">📅</span>
+ <Calendar className="h-5 w-5" aria-hidden="true" />
  {taxYear} Quarterly Payment Schedule
  </CardTitle>
  <CardDescription>

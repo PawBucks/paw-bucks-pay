@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from'@/comp
 import { Badge } from'@/components/ui/badge';
 import { Progress } from'@/components/ui/progress';
 import { Separator } from'@/components/ui/separator';
-import { Activity, Zap, Star, TrendingUp, Clock, Repeat, BarChart3, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { Activity, AlertTriangle, BarChart3, CheckCircle2, Clock, Repeat, Shield, Star, TrendingUp, Zap } from "lucide-react";
 import { cn } from'@/lib/utils';
 
 import { Formatters } from "@/utils/formatters";
@@ -140,7 +140,7 @@ export function UnderwritingSignalsCard({ merchantId }: { merchantId: string }) 
  <div className="flex items-center justify-between">
  <div>
  <CardTitle className="text-base flex items-center gap-2">
- <span className="w-4 h-4 text-primary" aria-hidden="true">🛡️</span>
+ <Shield className="w-4 h-4 text-primary" aria-hidden="true" />
  Proprietary Underwriting Signals
  </CardTitle>
  <CardDescription className="mt-0.5">
@@ -148,7 +148,7 @@ export function UnderwritingSignalsCard({ merchantId }: { merchantId: string }) 
  </CardDescription>
  </div>
  <Badge variant="outline" className="gap-1 text-primary border-primary/30">
- <span className="w-3 h-3" aria-hidden="true">⚡</span> Live
+ <Zap className="w-3 h-3" aria-hidden="true" /> Live
  </Badge>
  </div>
  </CardHeader>
@@ -239,7 +239,7 @@ export function UnderwritingSignalsCard({ merchantId }: { merchantId: string }) 
  {/* Review Scores */}
  <div className="space-y-3">
  <div className="flex items-center gap-2">
- <span className="w-4 h-4 text-primary" aria-hidden="true">⭐</span>
+ <Star className="w-4 h-4 text-primary" aria-hidden="true" />
  <span className="text-sm font-semibold">Review Quality</span>
  </div>
  <div className="flex items-end gap-3">

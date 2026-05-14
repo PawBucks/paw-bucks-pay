@@ -1,6 +1,6 @@
 import { useState } from"react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
-import { ClipboardCheck, Scan } from "lucide-react";
+import { ClipboardCheck, Mic, Scan } from "lucide-react";
 import { AutoSOAPGenerator } from"./AutoSOAPGenerator";
 import { SymptomTriageQueue } from"./SymptomTriageQueue";
 import { DiagnosticOverlayTool } from"./DiagnosticOverlayTool";
@@ -27,7 +27,7 @@ export const AIClinicalAssistant = ({ vetId }: AIClinicalAssistantProps) => {
  <Tabs value={activeTab} onValueChange={setActiveTab}>
  <TabsList className="grid w-full grid-cols-3">
  <TabsTrigger value="soap" className="flex items-center gap-2">
- <span className="w-4 h-4" aria-hidden="true">🎤</span>
+ <Mic className="w-4 h-4" aria-hidden="true" />
  Auto-SOAP
  </TabsTrigger>
  <TabsTrigger value="triage" className="flex items-center gap-2">

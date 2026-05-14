@@ -7,7 +7,7 @@ import { Button } from"@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
-import { BarChart3, TrendingUp, Users, Search, Check } from "lucide-react";
+import { BarChart3, Check, CreditCard, Search, TrendingUp, Users } from "lucide-react";
 import { toast } from"sonner";
 import { GradientCard } from"@/components/ui/gradient-card";
 import { PremiumAnalyticsDashboard } from"@/components/merchant/PremiumAnalyticsDashboard";
@@ -170,7 +170,7 @@ export default function MerchantAnalytics() {
  onClick={() => setSelectedPayment('usd')}
  className="flex-1"
  >
- <span className="mr-2 h-4 w-4" aria-hidden="true">💳</span>
+ <CreditCard className="mr-2 h-4 w-4" aria-hidden="true" />
  Pay with USD
  </Button>
  <Button
@@ -280,7 +280,7 @@ export default function MerchantAnalytics() {
  ) : (
  <Card>
  <CardContent className="py-12 text-center">
- <span className="h-12 w-12 text-muted-foreground mx-auto mb-4" aria-hidden="true">📊</span>
+ <BarChart3 className="h-12 w-12 text-muted-foreground mx-auto mb-4" aria-hidden="true" />
  <p className="text-muted-foreground">No active subscriptions</p>
  </CardContent>
  </Card>
@@ -320,7 +320,7 @@ export default function MerchantAnalytics() {
  ) : (
  <Card>
  <CardContent className="py-12 text-center">
- <span className="h-12 w-12 text-muted-foreground mx-auto mb-4" aria-hidden="true">📈</span>
+ <TrendingUp className="h-12 w-12 text-muted-foreground mx-auto mb-4" aria-hidden="true" />
  <p className="text-muted-foreground">No reports purchased yet</p>
  </CardContent>
  </Card>

@@ -7,7 +7,7 @@ import { ScrollArea } from"@/components/ui/scroll-area";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from"@/components/ui/dialog";
 import { Textarea } from"@/components/ui/textarea";
 import { Input } from"@/components/ui/input";
-import { Loader2, Search, Send, CheckCircle2, XCircle } from "lucide-react";
+import { Calendar, CheckCircle2, Clock, DollarSign, Loader2, Megaphone, Search, Send, XCircle } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { toast } from"sonner";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
@@ -68,7 +68,7 @@ export function AvailableBrandCampaigns({ merchantId }: AvailableBrandCampaignsP
 
  const renderStatus = (c: AvailableBrandCampaign) => {
  if (c.existing_request_status ==="pending") {
- return <Badge variant="secondary"><span className="h-3 w-3 mr-1" aria-hidden="true">⏰</span>Request pending</Badge>;
+ return <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" aria-hidden="true" />Request pending</Badge>;
  }
  if (c.existing_request_status ==="approved") {
  return <Badge className="bg-[hsl(var(--success))] text-white"><CheckCircle2 className="h-3 w-3 mr-1" />Joined</Badge>;
@@ -91,7 +91,7 @@ export function AvailableBrandCampaigns({ merchantId }: AvailableBrandCampaignsP
  <Card>
  <CardHeader className="pb-3">
  <CardTitle className="text-base flex items-center gap-2">
- <span className="h-4 w-4 text-primary" aria-hidden="true">📣</span>
+ <Megaphone className="h-4 w-4 text-primary" aria-hidden="true" />
  Available Brand Campaigns
  {filtered.length > 0 && (
  <Badge variant="secondary">{filtered.length}</Badge>
@@ -118,7 +118,7 @@ export function AvailableBrandCampaigns({ merchantId }: AvailableBrandCampaignsP
  </div>
  ) : filtered.length === 0 ? (
  <div className="py-8 text-center text-sm text-muted-foreground">
- <span className="h-10 w-10 mx-auto mb-2 opacity-40" aria-hidden="true">📣</span>
+ <Megaphone className="h-10 w-10 mx-auto mb-2 opacity-40" aria-hidden="true" />
  {campaigns.length === 0
  ?"No open campaigns to join right now. Check back soon!"
  :"No campaigns match your search."}
@@ -154,12 +154,12 @@ export function AvailableBrandCampaigns({ merchantId }: AvailableBrandCampaignsP
  {c.pawbucks_per_checkin?.toLocaleString() || 0} PB / check-in
  </span>
  <span className="flex items-center gap-1">
- <span className="h-3 w-3" aria-hidden="true">💵</span>
+ <DollarSign className="h-3 w-3" aria-hidden="true" />
  ${Number(c.budget_usd || 0).toLocaleString()} budget
  </span>
  {c.end_date && (
  <span className="flex items-center gap-1">
- <span className="h-3 w-3" aria-hidden="true">📅</span>
+ <Calendar className="h-3 w-3" aria-hidden="true" />
  Ends {new Date(c.end_date).toLocaleDateString()}
  </span>
  )}

@@ -3,7 +3,7 @@ import { supabase } from"@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
 import { Skeleton } from"@/components/ui/skeleton";
-import { Weight } from "lucide-react";
+import { Calendar, Heart, Weight } from "lucide-react";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
 
 type Pet = {
@@ -94,7 +94,7 @@ export function UserDetailPets({ userId }: { userId: string }) {
  <div className="grid grid-cols-2 gap-2 text-sm">
  {pet.age != null && (
  <div className="flex items-center gap-1 text-muted-foreground">
- <span className="w-3 h-3" aria-hidden="true">📅</span> {pet.age} years
+ <Calendar className="w-3 h-3" aria-hidden="true" /> {pet.age} years
  </div>
  )}
  {pet.weight != null && (
@@ -113,7 +113,7 @@ export function UserDetailPets({ userId }: { userId: string }) {
  <div className="border-t pt-2 space-y-1">
  {pet.medical_conditions && (
  <div className="flex items-start gap-1 text-sm">
- <span className="w-3 h-3 mt-0.5 text-destructive" aria-hidden="true">❤️</span>
+ <Heart className="w-3 h-3 mt-0.5 text-destructive" aria-hidden="true" />
  <span>{pet.medical_conditions}</span>
  </div>
  )}

@@ -7,7 +7,7 @@ import { GradientCard } from"@/components/ui/gradient-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
 import { Calendar } from"@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from"@/components/ui/popover";
-import { ArrowUpRight, ArrowDownRight, Calendar as CalendarIcon, AlertCircle, Repeat, Loader2, Download, RefreshCw, AlertTriangle, UserMinus } from "lucide-react";
+import { AlertCircle, AlertTriangle, ArrowDownRight, ArrowUpRight, BarChart3, Brain, Calendar as CalendarIcon, Clock, Crown, DollarSign, Download, Heart, Lightbulb, Loader2, RefreshCw, Repeat, Rocket, Star, Target, TrendingUp, User, UserMinus, Users, Zap } from "lucide-react";
 import { 
  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
  LineChart, Line, PieChart, Pie, Cell, AreaChart, Area, Legend, RadialBarChart, RadialBar
@@ -170,7 +170,7 @@ export function PremiumAnalyticsDashboard() {
  return (
  <Card className="border-dashed">
  <CardContent className="py-12 text-center">
- <span className="h-12 w-12 text-muted-foreground mx-auto mb-4" aria-hidden="true">📊</span>
+ <BarChart3 className="h-12 w-12 text-muted-foreground mx-auto mb-4" aria-hidden="true" />
  <h3 className="font-semibold mb-2">Premium Analytics Dashboard</h3>
  <p className="text-muted-foreground text-sm max-w-md mx-auto">
  {analyticsData?.message ||'This premium feature must be assigned by an admin. Contact support for access to advanced analytics.'}
@@ -235,11 +235,11 @@ export function PremiumAnalyticsDashboard() {
 
  const getInsightIcon = (type: string) => {
  switch (type) {
- case'positive': return <span className="h-5 w-5 text-success" aria-hidden="true">❤️</span>;
+ case'positive': return <Heart className="h-5 w-5 text-success" aria-hidden="true" />;
  case'warning': return <AlertTriangle className="h-5 w-5 text-warning" />;
- case'prediction': return <span className="h-5 w-5 text-info" aria-hidden="true">📈</span>;
- case'opportunity': return <span className="h-5 w-5 text-warning" aria-hidden="true">⚡</span>;
- default: return <span className="h-5 w-5 text-primary" aria-hidden="true">🧠</span>;
+ case'prediction': return <TrendingUp className="h-5 w-5 text-info" aria-hidden="true" />;
+ case'opportunity': return <Zap className="h-5 w-5 text-warning" aria-hidden="true" />;
+ default: return <Brain className="h-5 w-5 text-primary" aria-hidden="true" />;
  }
  };
 
@@ -303,7 +303,7 @@ export function PremiumAnalyticsDashboard() {
  </Popover>
  
  <Badge className="bg-gradient-to-r from-primary to-primary/60 gap-1">
- <span className="h-3 w-3" aria-hidden="true">👑</span> Premium
+ <Crown className="h-3 w-3" aria-hidden="true" /> Premium
  </Badge>
  </div>
  </div>
@@ -325,7 +325,7 @@ export function PremiumAnalyticsDashboard() {
  <GradientCard gradient>
  <div className="flex items-center gap-3">
  <div className="p-3 rounded-md bg-primary/10">
- <span className="h-5 w-5 text-primary" aria-hidden="true">💵</span>
+ <DollarSign className="h-5 w-5 text-primary" aria-hidden="true" />
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Total Revenue</p>
@@ -337,7 +337,7 @@ export function PremiumAnalyticsDashboard() {
  <GradientCard gradient>
  <div className="flex items-center gap-3">
  <div className="p-3 rounded-md bg-success/10">
- <span className="h-5 w-5 text-success" aria-hidden="true">👥</span>
+ <Users className="h-5 w-5 text-success" aria-hidden="true" />
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Total Customers</p>
@@ -349,7 +349,7 @@ export function PremiumAnalyticsDashboard() {
  <GradientCard gradient>
  <div className="flex items-center gap-3">
  <div className="p-3 rounded-md bg-info/10">
- <span className="h-5 w-5 text-info" aria-hidden="true">📊</span>
+ <BarChart3 className="h-5 w-5 text-info" aria-hidden="true" />
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Total Transactions</p>
@@ -361,7 +361,7 @@ export function PremiumAnalyticsDashboard() {
  <GradientCard gradient>
  <div className="flex items-center gap-3">
  <div className="p-3 rounded-md bg-accent/10">
- <span className="h-5 w-5 text-accent" aria-hidden="true">📈</span>
+ <TrendingUp className="h-5 w-5 text-accent" aria-hidden="true" />
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Avg Order Value</p>
@@ -451,7 +451,7 @@ export function PremiumAnalyticsDashboard() {
  <GradientCard gradient>
  <div className="flex items-center gap-3">
  <div className="p-3 rounded-md bg-primary/10">
- <span className="h-5 w-5 text-primary" aria-hidden="true">🚀</span>
+ <Rocket className="h-5 w-5 text-primary" aria-hidden="true" />
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Daily Transactions</p>
@@ -463,7 +463,7 @@ export function PremiumAnalyticsDashboard() {
  <GradientCard gradient>
  <div className="flex items-center gap-3">
  <div className="p-3 rounded-md bg-success/10">
- <span className="h-5 w-5 text-success" aria-hidden="true">💵</span>
+ <DollarSign className="h-5 w-5 text-success" aria-hidden="true" />
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Daily Revenue</p>
@@ -475,7 +475,7 @@ export function PremiumAnalyticsDashboard() {
  <GradientCard gradient>
  <div className="flex items-center gap-3">
  <div className="p-3 rounded-md bg-info/10">
- <span className="h-5 w-5 text-info" aria-hidden="true">📊</span>
+ <BarChart3 className="h-5 w-5 text-info" aria-hidden="true" />
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Weekly Revenue</p>
@@ -487,7 +487,7 @@ export function PremiumAnalyticsDashboard() {
  <GradientCard gradient>
  <div className="flex items-center gap-3">
  <div className="p-3 rounded-md bg-accent/10">
- <span className="h-5 w-5 text-accent" aria-hidden="true">📈</span>
+ <TrendingUp className="h-5 w-5 text-accent" aria-hidden="true" />
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Velocity Growth</p>
@@ -506,7 +506,7 @@ export function PremiumAnalyticsDashboard() {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <span className="h-5 w-5" aria-hidden="true">📈</span>
+ <TrendingUp className="h-5 w-5" aria-hidden="true" />
  Projected Performance
  </CardTitle>
  <CardDescription>Based on current velocity trends</CardDescription>
@@ -556,7 +556,7 @@ export function PremiumAnalyticsDashboard() {
  <GradientCard gradient>
  <div className="flex items-center gap-3">
  <div className="p-3 rounded-md bg-success/10">
- <span className="h-5 w-5 text-success" aria-hidden="true">👤</span>
+ <User className="h-5 w-5 text-success" aria-hidden="true" />
  </div>
  <div>
  <p className="text-sm text-muted-foreground">New Customers</p>
@@ -592,7 +592,7 @@ export function PremiumAnalyticsDashboard() {
  <GradientCard gradient>
  <div className="flex items-center gap-3">
  <div className="p-3 rounded-md bg-primary/10">
- <span className="h-5 w-5 text-primary" aria-hidden="true">💵</span>
+ <DollarSign className="h-5 w-5 text-primary" aria-hidden="true" />
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Avg LTV</p>
@@ -698,7 +698,7 @@ export function PremiumAnalyticsDashboard() {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <span className="h-5 w-5" aria-hidden="true">⭐</span>
+ <Star className="h-5 w-5" aria-hidden="true" />
  Top Customers
  </CardTitle>
  <CardDescription>Your highest-value customers</CardDescription>
@@ -757,7 +757,7 @@ export function PremiumAnalyticsDashboard() {
  <GradientCard gradient>
  <div className="flex items-center gap-3">
  <div className="p-3 rounded-md bg-success/10">
- <span className="h-5 w-5 text-success" aria-hidden="true">⏰</span>
+ <Clock className="h-5 w-5 text-success" aria-hidden="true" />
  </div>
  <div>
  <p className="text-sm text-muted-foreground">Peak Hour</p>
@@ -838,7 +838,7 @@ export function PremiumAnalyticsDashboard() {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <span className="h-5 w-5" aria-hidden="true">🧠</span>
+ <Brain className="h-5 w-5" aria-hidden="true" />
  AI-Powered Insights
  </CardTitle>
  <CardDescription>Intelligent analysis of your business data</CardDescription>
@@ -867,7 +867,7 @@ export function PremiumAnalyticsDashboard() {
  </div>
  ) : (
  <div className="text-center py-8 text-muted-foreground">
- <span className="h-12 w-12 mx-auto mb-4 opacity-50" aria-hidden="true">🧠</span>
+ <Brain className="h-12 w-12 mx-auto mb-4 opacity-50" aria-hidden="true" />
  <p>Gathering insights from your data...</p>
  </div>
  )}
@@ -877,7 +877,7 @@ export function PremiumAnalyticsDashboard() {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <span className="h-5 w-5" aria-hidden="true">💡</span>
+ <Lightbulb className="h-5 w-5" aria-hidden="true" />
  Growth Opportunities
  </CardTitle>
  <CardDescription>Actionable recommendations to grow your business</CardDescription>
@@ -910,7 +910,7 @@ export function PremiumAnalyticsDashboard() {
  </div>
  ) : (
  <div className="text-center py-8 text-muted-foreground">
- <span className="h-12 w-12 mx-auto mb-4 opacity-50" aria-hidden="true">👤</span>
+ <User className="h-12 w-12 mx-auto mb-4 opacity-50" aria-hidden="true" />
  <p>Great job! No critical issues detected.</p>
  <p className="text-sm">Keep up the good work and check back for new insights.</p>
  </div>
@@ -925,7 +925,7 @@ export function PremiumAnalyticsDashboard() {
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <span className="h-5 w-5" aria-hidden="true">🎯</span>
+ <Target className="h-5 w-5" aria-hidden="true" />
  Overall Performance Score
  </CardTitle>
  <CardDescription>How your business compares to industry standards</CardDescription>

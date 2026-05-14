@@ -10,7 +10,7 @@ import { Textarea } from"@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from"@/components/ui/select";
 import { Checkbox } from"@/components/ui/checkbox";
 import { Separator } from"@/components/ui/separator";
-import { Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
+import { AlertCircle, Building2, CheckCircle2, Loader2 } from "lucide-react";
 import { toast } from"sonner";
 
 type Brand = {
@@ -223,7 +223,7 @@ const BrandSetup = () => {
  <Card className="w-full max-w-md">
  <CardHeader className="text-center">
  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
- <span className="h-8 w-8 text-primary" aria-hidden="true">🏢</span>
+ <Building2 className="h-8 w-8 text-primary" aria-hidden="true" />
  </div>
  <CardTitle className="text-2xl">Welcome, {brand?.brand_name}!</CardTitle>
  <CardDescription>
@@ -268,7 +268,7 @@ const BrandSetup = () => {
  <div className="max-w-3xl mx-auto">
  <div className="text-center mb-8">
  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
- <span className="h-8 w-8 text-primary" aria-hidden="true">🏢</span>
+ <Building2 className="h-8 w-8 text-primary" aria-hidden="true" />
  </div>
  <h1 className="text-3xl font-bold">Complete Your Brand Setup</h1>
  <p className="text-muted-foreground mt-2">

@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from"@/components/ui/card";
-import { Loader2, Crown, Medal, Award } from "lucide-react";
+import { Award, Crown, Loader2, Medal, Trophy } from "lucide-react";
 import { useQuery } from"@tanstack/react-query";
 import { supabase } from"@/integrations/supabase/client";
 import { cn } from"@/lib/utils";
@@ -93,7 +93,7 @@ export function MerchantCampaignLeaderboardCard({ merchantId }: MerchantCampaign
  <Card>
  <CardHeader className="pb-2">
  <CardTitle className="text-base flex items-center gap-2">
- <span className="h-4 w-4 text-warning" aria-hidden="true">🏆</span>
+ <Trophy className="h-4 w-4 text-warning" aria-hidden="true" />
  Brand Campaign Rankings
  </CardTitle>
  <CardDescription>Your position in active brand campaigns</CardDescription>

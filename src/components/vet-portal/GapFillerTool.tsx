@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from"@/
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from"@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from"@/components/ui/table";
 import { toast } from"sonner";
-import { Search, Send, AlertTriangle } from "lucide-react";
+import { AlertTriangle, Calendar, Cat, Dog, Gift, Search, Send } from "lucide-react";
 import { format, differenceInDays } from"date-fns";
 
 interface GapFillerToolProps {
@@ -296,7 +296,7 @@ export function GapFillerTool({ vetId }: GapFillerToolProps) {
  <Dialog open={showOfferDialog} onOpenChange={setShowOfferDialog}>
  <DialogTrigger asChild>
  <Button disabled={selectedPatients.size === 0}>
- <span className="h-4 w-4 mr-2" aria-hidden="true">🎁</span>
+ <Gift className="h-4 w-4 mr-2" aria-hidden="true" />
  Send Bonus Offer ({selectedPatients.size})
  </Button>
  </DialogTrigger>
@@ -384,9 +384,9 @@ export function GapFillerTool({ vetId }: GapFillerToolProps) {
  <TableCell>
  <div className="flex items-center gap-2">
  {patient.petSpecies ==="dog" ? (
- <span className="h-4 w-4 text-muted-foreground" aria-hidden="true">🐕</span>
+ <Dog className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
  ) : (
- <span className="h-4 w-4 text-muted-foreground" aria-hidden="true">🐈</span>
+ <Cat className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
  )}
  <span className="font-medium">{patient.petName}</span>
  </div>
@@ -404,7 +404,7 @@ export function GapFillerTool({ vetId }: GapFillerToolProps) {
  </TableCell>
  <TableCell>
  <div className="flex items-center gap-1 text-sm">
- <span className="h-3 w-3" aria-hidden="true">📅</span>
+ <Calendar className="h-3 w-3" aria-hidden="true" />
  {format(new Date(patient.dueDate),"MMM d, yyyy")}
  </div>
  </TableCell>

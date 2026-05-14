@@ -9,7 +9,7 @@ import {
  DialogHeader,
  DialogTitle,
 } from"@/components/ui/dialog";
-import { Loader2 } from "lucide-react";
+import { Clock, Loader2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from"@/components/ui/alert";
 
 import { Formatters } from "@/utils/formatters";
@@ -49,7 +49,7 @@ export const FundingRequestDialog = ({
  {!fundingEligible ? (
  <div className="space-y-4">
  <Alert variant="default" className="border-warning bg-warning/10">
- <span className="h-4 w-4 text-warning" aria-hidden="true">⏰</span>
+ <Clock className="h-4 w-4 text-warning" aria-hidden="true" />
  <AlertTitle className="text-warning">Not Yet Eligible</AlertTitle>
  <AlertDescription className="text-muted-foreground">
  You need <strong>{daysRemaining} more days</strong> of active sales on the platform to request funding. 

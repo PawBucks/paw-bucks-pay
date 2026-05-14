@@ -7,7 +7,7 @@ import { SEO } from"@/components/SEO";
 import { Button } from"@/components/ui/button";
 import { GradientCard } from"@/components/ui/gradient-card";
 import { PageLoader } from"@/components/PageLoader";
-import { ArrowUpRight, ArrowDownRight, ArrowLeft } from "lucide-react";
+import { ArrowDownRight, ArrowLeft, ArrowUpRight, ShoppingBag, Store, TrendingUp } from "lucide-react";
 import { Formatters } from"@/utils/formatters";
 import { format, parseISO } from"date-fns";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
@@ -183,7 +183,7 @@ const MerchantPawBucksWallet = () => {
  <GradientCard>
  <div className="flex items-center gap-3">
  <div className="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center">
- <span className="w-5 h-5 text-success" aria-hidden="true">📈</span>
+ <TrendingUp className="w-5 h-5 text-success" aria-hidden="true" />
  </div>
  <div>
  <p className="text-xs text-muted-foreground">Total Earned</p>
@@ -195,7 +195,7 @@ const MerchantPawBucksWallet = () => {
  <GradientCard>
  <div className="flex items-center gap-3">
  <div className="w-10 h-10 rounded-full bg-info/10 flex items-center justify-center">
- <span className="w-5 h-5 text-info" aria-hidden="true">🛍️</span>
+ <ShoppingBag className="w-5 h-5 text-info" aria-hidden="true" />
  </div>
  <div>
  <p className="text-xs text-muted-foreground">Total Spent</p>
@@ -208,7 +208,7 @@ const MerchantPawBucksWallet = () => {
  {/* How Merchants Earn PawBucks */}
  <GradientCard className="mb-6">
  <h3 className="font-semibold mb-3 flex items-center gap-2">
- <span className="w-4 h-4" aria-hidden="true">🏪</span>
+ <Store className="w-4 h-4" aria-hidden="true" />
  How You Earn PawBucks
  </h3>
  <ul className="text-sm text-muted-foreground space-y-2">
@@ -226,7 +226,7 @@ const MerchantPawBucksWallet = () => {
  className="w-full mt-4"
  onClick={() => navigate('/merchant/market')}
  >
- <span className="w-4 h-4 mr-2" aria-hidden="true">🛍️</span>
+ <ShoppingBag className="w-4 h-4 mr-2" aria-hidden="true" />
  Browse Merchant Market
  </Button>
  </GradientCard>

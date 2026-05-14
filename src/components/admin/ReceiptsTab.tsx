@@ -15,7 +15,7 @@ import {
 import {
  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from"@/components/ui/select";
-import { Check, X, Eye, Loader2, Search, Receipt } from "lucide-react";
+import { Check, Eye, FileText, Loader2, Receipt, Search, Shield, Store, X } from "lucide-react";
 import { toast } from"sonner";
 import { format } from"date-fns";
 
@@ -232,8 +232,8 @@ export const ReceiptsTab = () => {
 
  const getTypeBadge = (type: string) => {
  return type ==="partner"
- ? <Badge variant="secondary" className="text-xs"><span className="w-3 h-3 mr-1" aria-hidden="true">🏪</span>Partner</Badge>
- : <Badge variant="outline" className="text-xs"><span className="w-3 h-3 mr-1" aria-hidden="true">🧾</span>Non-Partner</Badge>;
+ ? <Badge variant="secondary" className="text-xs"><Store className="w-3 h-3 mr-1" aria-hidden="true" />Partner</Badge>
+ : <Badge variant="outline" className="text-xs"><Receipt className="w-3 h-3 mr-1" aria-hidden="true" />Non-Partner</Badge>;
  };
 
  const getTierLabel = (tier: string | null) => {
@@ -344,7 +344,7 @@ export const ReceiptsTab = () => {
  <TableCell>{getStatusBadge(receipt.status)}</TableCell>
  <TableCell>
  {receipt.merchant_confirmation ? (
- <Badge className="bg-success text-xs"><span className="w-3 h-3 mr-1" aria-hidden="true">🛡️</span>Yes</Badge>
+ <Badge className="bg-success text-xs"><Shield className="w-3 h-3 mr-1" aria-hidden="true" />Yes</Badge>
  ) : (
  <span className="text-xs text-muted-foreground">—</span>
  )}
@@ -371,7 +371,7 @@ export const ReceiptsTab = () => {
  {filteredReceipts.length === 0 && (
  <TableRow>
  <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
- <span className="w-8 h-8 mx-auto mb-2 opacity-50" aria-hidden="true">📄</span>
+ <FileText className="w-8 h-8 mx-auto mb-2 opacity-50" aria-hidden="true" />
  No receipts found
  </TableCell>
  </TableRow>
@@ -422,7 +422,7 @@ export const ReceiptsTab = () => {
  {selectedReceipt.merchant_confirmation && (
  <div className="col-span-2 p-3 bg-success/10 rounded-lg border border-success/20">
  <div className="flex items-center gap-2 mb-1">
- <span className="w-4 h-4 text-success" aria-hidden="true">🛡️</span>
+ <Shield className="w-4 h-4 text-success" aria-hidden="true" />
  <span className="font-semibold text-sm text-success">Merchant Confirmed</span>
  </div>
  <p className="text-xs text-muted-foreground">
@@ -477,7 +477,7 @@ export const ReceiptsTab = () => {
  <p><strong>Date:</strong> {format(new Date(selectedReceipt.receipt_date),"MMM d, yyyy")}</p>
  {selectedReceipt.merchant_confirmation && (
  <div className="mt-2 p-2 bg-success/10 rounded border border-success/20 flex items-center gap-2">
- <span className="w-4 h-4 text-success" aria-hidden="true">🛡️</span>
+ <Shield className="w-4 h-4 text-success" aria-hidden="true" />
  <span className="text-success text-xs font-medium">
  Merchant confirmed: {Formatters.currency(selectedReceipt.merchant_confirmation.amount)}
  </span>
