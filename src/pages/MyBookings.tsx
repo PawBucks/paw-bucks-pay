@@ -242,6 +242,15 @@ export default function MyBookings() {
 
  <div className="flex items-center justify-between pt-3 border-t">
  <span className="font-semibold text-primary">{Formatters.currency(booking.total_price)}</span>
+ <div className="flex flex-wrap gap-2 justify-end">
+ <Button
+   size="sm"
+   variant="ghost"
+   className="h-8 text-xs"
+   onClick={() => navigate(`/bookings/${booking.id}`)}
+ >
+   View status
+ </Button>
  {isUpcoming && status !=="cancelled" && (
  <div className="flex gap-2">
  <Button
@@ -294,6 +303,7 @@ export default function MyBookings() {
  Rebook
  </Button>
  )}
+ </div>
  </div>
 
  {/* Grooming Report Card for completed bookings */}
