@@ -76,7 +76,7 @@ export default function BookingStatus() {
           *,
           merchant_services (
             name, duration_minutes, category, price,
-            merchants!inner (id, business_name, address, logo_url, storefront_slug, owner_id)
+            merchants!inner (id, business_name, address, logo_url, storefront_slug, user_id)
           ),
           pet_profiles (id, name, type)
         `)
@@ -91,7 +91,7 @@ export default function BookingStatus() {
   useEffect(() => {
     if (!booking || !user) return;
     if (booking.user_id === user.id) setViewerRole("customer");
-    else if (booking.merchant_services?.merchants?.owner_id === user.id) setViewerRole("merchant");
+    else if (booking.merchant_services?.merchants?.user_id === user.id) setViewerRole("merchant");
     else setViewerRole("unknown");
   }, [booking, user]);
 
