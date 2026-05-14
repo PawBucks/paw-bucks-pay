@@ -338,6 +338,139 @@ serve(async (req: Request) => {
     }
 
     console.log(`Booking ${type} email sent to ${customerEmail}`);
+
+    // ----- Merchant-facing notifications + in-app notifications (best-effort) -----
+    const linkUrl = body.bookingId ? `/bookings/${body.bookingId}` : "/my-bookings";
+
+    const titles: Record<typeof type, { customer: string; merchant: string }> = {
+      confirmation: {
+        customer: "✅ Booking confirmed",
+        merchant: "📋 New booking request",
+      },
+      cancellation: {
+        customer: "❌ Booking cancelled",
+        merchant:
+          initiator === "customer"
+            ? "❌ Customer cancelled a booking"
+            : "❌ Booking cancelled",
+      },
+      rescheduled: {
+        customer: "📅 Booking rescheduled",
+        merchant:
+          initiator === "customer"
+            ? "📅 Customer requested a reschedule"
+            : "📅 Booking rescheduled",
+      },
+      reminder_24h: { customer: "⏰ Appointment tomorrow", merchant: "" },
+      reminder_1h: { customer: "🔔 Appointment in 1 hour", merchant: "" },
+      reschedule: { customer: "", merchant: "" },
+    };
+
+    const summary = `${serviceName} · ${dateFormatted} · ${timeFormatted}${endTimeFormatted ? ` – ${endTimeFormatted}` : ""}`;
+    const customerLabel = customerName || "A customer";
+
+    // Insert in-app notifications for both parties (skip silent reminder types for merchant)
+    try {
+      const rows: Array<{
+        user_id: string;
+        title: string;
+        message: string;
+        category: string;
+        is_read: boolean;
+        link_url: string | null;
+      }> = [];
+
+      if (customerUserId && titles[type].customer) {
+        rows.push({
+          user_id: customerUserId,
+          title: titles[type].customer,
+          message: `${summary} at ${merchantName}`,
+          category: "transactional",
+          is_read: false,
+          link_url: linkUrl,
+        });
+      }
+      if (
+        merchantOwnerUserId &&
+        titles[type].merchant &&
+        type !== "reminder_24h" &&
+        type !== "reminder_1h"
+      ) {
+        rows.push({
+          user_id: merchantOwnerUserId,
+          title: titles[type].merchant,
+          message: `${customerLabel} · ${summary}`,
+          category: "transactional",
+          is_read: false,
+          link_url: linkUrl,
+        });
+      }
+      if (rows.length) {
+        const { error: notifErr } = await supabase.from("notifications").insert(rows);
+        if (notifErr) console.error("In-app notification insert failed:", notifErr);
+      }
+    } catch (e) {
+      console.error("In-app notification block failed:", e);
+    }
+
+    // Send merchant email (only for booking lifecycle events, not reminders)
+    if (
+      merchantEmail &&
+      (type === "confirmation" || type === "cancellation" || type === "rescheduled")
+    ) {
+      const merchantTitle =
+        type === "confirmation"
+          ? "📋 New Booking Request"
+          : type === "cancellation"
+          ? initiator === "customer"
+            ? "❌ Customer Cancelled a Booking"
+            : "Booking Cancelled"
+          : initiator === "customer"
+          ? "📅 Customer Requested a Reschedule"
+          : "Booking Rescheduled";
+
+      const merchantHtml = `
+        <div style="text-align:center;margin-bottom:20px;">
+          <h1 style="margin:0;font-size:22px;color:#111827;">${merchantTitle}</h1>
+        </div>
+        <p style="color:#374151;line-height:1.6;">Hi ${merchantName},</p>
+        <p style="color:#374151;line-height:1.6;">
+          ${
+            type === "confirmation"
+              ? `${customerLabel} just requested a booking. Please review and confirm in your dashboard.`
+              : type === "cancellation"
+              ? `${customerLabel}'s booking has been cancelled${body.cancellationReason ? `: <em>${body.cancellationReason}</em>` : "."}`
+              : `${customerLabel} rescheduled their appointment. The new time is below.`
+          }
+        </p>
+        <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:20px;margin:20px 0;">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr><td style="padding:6px 0;color:#6b7280;font-size:14px;">Customer</td><td style="padding:6px 0;font-weight:600;color:#111827;text-align:right;">${customerLabel}</td></tr>
+            <tr><td style="padding:6px 0;color:#6b7280;font-size:14px;">Service</td><td style="padding:6px 0;font-weight:600;color:#111827;text-align:right;">${serviceName}</td></tr>
+            <tr><td style="padding:6px 0;color:#6b7280;font-size:14px;">Date</td><td style="padding:6px 0;font-weight:600;color:#111827;text-align:right;">${dateFormatted}</td></tr>
+            <tr><td style="padding:6px 0;color:#6b7280;font-size:14px;">Time</td><td style="padding:6px 0;font-weight:600;color:#111827;text-align:right;">${timeFormatted}${endTimeFormatted ? ` – ${endTimeFormatted}` : ""} PT</td></tr>
+            ${priceFormatted ? `<tr><td style="padding:6px 0;color:#6b7280;font-size:14px;">Price</td><td style="padding:6px 0;font-weight:600;color:#111827;text-align:right;">${priceFormatted}</td></tr>` : ""}
+          </table>
+        </div>
+        <p style="color:#6b7280;font-size:14px;">
+          <a href="https://pawbucks.app${linkUrl}" style="color:#0d9488;text-decoration:none;font-weight:600;">View in dashboard →</a>
+        </p>`;
+
+      try {
+        const merchantResponse = await resend.emails.send({
+          from: "PawBucks <noreply@pawbucks.app>",
+          to: [merchantEmail],
+          subject: `${merchantTitle} – ${serviceName}`,
+          html: wrapInBrandedTemplate(merchantHtml),
+        });
+        if (merchantResponse.error) {
+          console.error("Failed to send merchant email:", merchantResponse.error);
+        }
+      } catch (e) {
+        console.error("Merchant email send threw:", e);
+      }
+    }
+
     return new Response(JSON.stringify({ success: true, data: emailResponse.data }), {
       status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
