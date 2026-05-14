@@ -14,7 +14,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Checkbox } from"@/components/ui/checkbox";
 import { toast } from"sonner";
 import { AlertTriangle, ArrowLeft, BookOpen, CheckCircle, Clock, Code, Copy, ExternalLink, History, Key, Lock, Plus, RefreshCw, Send, Shield, Trash2, Unlock, Webhook, Zap } from "lucide-react";
-import { Header } from"@/components/Header";
+import { MerchantWorkspaceLayout, WorkspacePageHeader } from "@/components/merchant/workspace/MerchantWorkspaceLayout";
 import { BottomNav } from"@/components/BottomNav";
 
 import { Formatters } from "@/utils/formatters";
@@ -341,15 +341,9 @@ export default function MerchantPOSIntegration() {
  // Service not purchased - show upsell
  if (!hasAccess) {
  return (
- <div className="min-h-screen bg-background pb-20">
- <Header />
+ <MerchantWorkspaceLayout>
+ <WorkspacePageHeader section="Catalog & Services" title="POS & API Integration" subtitle="Connect your POS to award PawBucks automatically" />
  <main className="container max-w-4xl lg:max-w-6xl mx-auto px-4 py-6">
- <div className="flex items-center gap-3 mb-6">
- <Button variant="ghost" size="icon" onClick={() => navigate("/merchant-dashboard")}>
- <ArrowLeft className="h-5 w-5" />
- </Button>
- <h1 className="text-2xl font-bold">POS & API Integration</h1>
- </div>
 
  <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-accent/5">
  <CardHeader className="text-center pb-4">
