@@ -146,6 +146,7 @@ export default function MyBookings() {
  body: {
  type:"cancellation",
  bookingId: selectedBooking.id,
+ initiator:"customer",
  cancellationReason: variables.reason,
  },
  }).catch((err) => console.error("Failed to send cancellation email:", err));
