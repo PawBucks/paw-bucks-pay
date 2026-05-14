@@ -444,6 +444,7 @@ serve(async (req) => {
     const commonHeaders = {
       "Content-Type": "application/json",
       Authorization: `Bearer ${serviceKey}`,
+      "x-internal-secret": Deno.env.get("INTERNAL_TRIGGER_SECRET") ?? "",
     };
 
     // Loyalty punch card

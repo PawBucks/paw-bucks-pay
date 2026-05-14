@@ -60,7 +60,30 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    const { feedback, userEmail, userName, userId } = validationResult.data;
+    let { feedback, userEmail, userName, userId } = validationResult.data;
+
+    // Verify identity server-side from JWT (do NOT trust client-provided userId/email)
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const authHeader = req.headers.get("Authorization");
+    let verifiedUserId: string | null = null;
+    let verifiedEmail: string | null = null;
+    if (authHeader?.startsWith("Bearer ")) {
+      const token = authHeader.replace("Bearer ", "");
+      const anonClient = createClient(supabaseUrl, anonKey);
+      const { data: userData } = await anonClient.auth.getUser(token);
+      if (userData?.user) {
+        verifiedUserId = userData.user.id;
+        verifiedEmail = userData.user.email ?? null;
+      }
+    }
+    // Override any client-supplied identity with verified values
+    userId = verifiedUserId;
+    userEmail = verifiedEmail ?? null;
+    if (!verifiedUserId) {
+      // Anonymous feedback: ignore client-provided name as well
+      userName = null;
+    }
 
     if (feedback.length === 0) {
       return new Response(

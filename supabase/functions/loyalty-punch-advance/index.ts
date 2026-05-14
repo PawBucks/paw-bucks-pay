@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-internal-secret",
 };
 
 serve(async (req) => {
@@ -12,6 +12,16 @@ serve(async (req) => {
   }
 
   try {
+    // Internal-only endpoint: require shared secret
+    const internalSecret = Deno.env.get("INTERNAL_TRIGGER_SECRET");
+    const provided = req.headers.get("x-internal-secret");
+    if (!internalSecret || provided !== internalSecret) {
+      return new Response(
+        JSON.stringify({ error: "unauthorized" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 401 }
+      );
+    }
+
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
