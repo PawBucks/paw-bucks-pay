@@ -57,7 +57,6 @@ const NAV: NavSection[] = [
     section: "Dashboard",
     items: [
       { id: "overview", label: "Overview", icon: LayoutGrid, to: "/merchant/workspace" },
-      { id: "dashboard", label: "Full Dashboard", icon: LayoutGrid, to: "/merchant-dashboard" },
       { id: "earnings", label: "Total Earnings", icon: DollarSign, to: "/merchant/total-earnings" },
       { id: "available-balance", label: "Available Balance", icon: Wallet, to: "/merchant/available-balance" },
       { id: "pending-balance", label: "Pending Balance", icon: CalendarDays, to: "/merchant/pending-balance" },
@@ -69,6 +68,13 @@ const NAV: NavSection[] = [
       { id: "reports", label: "Sales Report", icon: BarChart3, to: "/merchant/sales-report" },
       { id: "history", label: "Daily History", icon: History, to: "/merchant/daily-history" },
       { id: "tax-vault", label: "Tax Vault", icon: Receipt, to: "/merchant/tax-vault" },
+      { id: "transactions-list", label: "Transaction History", icon: FileText, to: "/merchant/transactions" },
+    ],
+  },
+  {
+    section: "Account",
+    items: [
+      { id: "profile", label: "Business Profile", icon: User, to: "/merchant/quick-actions" },
     ],
   },
   {
@@ -327,7 +333,7 @@ export function MerchantWorkspaceLayout({
                 size="icon"
                 className="h-8 w-8"
                 aria-label="Profile"
-                onClick={() => navigate("/merchant-dashboard?tab=profile")}
+                onClick={() => navigate("/merchant/quick-actions")}
               >
                 <User className="h-4 w-4" />
               </Button>
