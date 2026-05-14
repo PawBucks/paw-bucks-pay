@@ -15,13 +15,27 @@ function formatLocalDateOnly(dateString: string): string {
   return `${months[month - 1]} ${day}, ${year}`;
 }
 
-// Check if a date string (YYYY-MM-DD) is past due (comparing in local time)
+// Get today's date string (YYYY-MM-DD) in America/New_York (EST/PST).
+// Server runs in UTC, so we MUST normalize to Eastern Time before comparing
+// calendar dates — otherwise an invoice "due today" in EST shows as past
+// due once UTC rolls over at 7-8 PM Eastern.
+function getEasternTodayString(): string {
+  const fmt = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/New_York",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  return fmt.format(new Date()); // en-CA returns YYYY-MM-DD
+}
+
+// Strictly past due means due_date < today (Eastern). Due-today is NOT past due.
 function isDatePastDue(dateString: string): boolean {
-  const [year, month, day] = dateString.split('-').map(Number);
-  const dueDate = new Date(year, month - 1, day);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return dueDate < today;
+  return dateString < getEasternTodayString();
+}
+
+function isDateDueToday(dateString: string): boolean {
+  return dateString === getEasternTodayString();
 }
 
 serve(async (req) => {
@@ -107,7 +121,7 @@ serve(async (req) => {
     const amountDueNum = Number(invoice.amount_due ?? invoice.total ?? 0);
     const isPaid = invoice.status === "paid" || amountDueNum <= 0;
     const pastDue = !isPaid && isDatePastDue(invoice.due_date);
-    const dueToday = !isPaid && !pastDue && invoice.due_date === new Date().toISOString().slice(0, 10);
+    const dueToday = !isPaid && !pastDue && isDateDueToday(invoice.due_date);
     let badgeText = "Due " + formatLocalDateOnly(invoice.due_date);
     let badgeBg = "#e6f5f3"; let badgeColor = "#2E9E8F";
     if (isPaid) { badgeText = "✓ Paid"; badgeBg = "#dcfce7"; badgeColor = "#15803d"; }
