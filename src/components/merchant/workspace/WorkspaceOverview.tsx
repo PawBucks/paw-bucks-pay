@@ -32,12 +32,25 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { format, parseISO, startOfMonth, subMonths } from "date-fns";
 
-const recentTx = [
-  { initials: "MG", name: "Markus Gerdemann", id: "IHD01082", date: "May 8", method: "USD", amount: "+$300.00", rewards: "$3.00" },
-  { initials: "MC", name: "Matthew Colon", id: "IHD01080", date: "Apr 27", method: "USD", amount: "+$640.00", rewards: "$6.40" },
-  { initials: "BK", name: "Brooke Kain", id: "IHD01079", date: "Apr 25", method: "USD", amount: "+$640.00", rewards: "$6.40" },
-  { initials: "JL", name: "Jamie Lin", id: "IHD01077", date: "Apr 22", method: "PawBucks", amount: "+$120.00", rewards: "$0.00" },
-];
+type RecentTx = {
+  id: string;
+  short_id: string;
+  initials: string;
+  name: string;
+  date: string;
+  method: "USD" | "PawBucks" | "Mixed";
+  amount: string;
+  rewards: string;
+  isRefunded: boolean;
+};
+
+function getInitials(name: string | null | undefined): string {
+  if (!name) return "GU";
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "GU";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
 
 interface StatCardProps {
   label: string;
@@ -102,6 +115,8 @@ export function WorkspaceOverview() {
   const [salesTx, setSalesTx] = useState<{ amount: number; created_at: string }[]>([]);
   const [rewardsTotals, setRewardsTotals] = useState({ given: 0, received: 0 });
   const [chartsLoading, setChartsLoading] = useState(true);
+  const [recentTx, setRecentTx] = useState<RecentTx[]>([]);
+  const [recentLoading, setRecentLoading] = useState(true);
 
   useEffect(() => {
     if (!user) return;
@@ -143,6 +158,41 @@ export function WorkspaceOverview() {
           0,
         );
         setRewardsTotals({ given, received });
+
+        // Recent transactions (live)
+        setRecentLoading(true);
+        const { data: latest } = await supabase
+          .from("transactions")
+          .select(
+            "id, amount, rewards_earned, cashback_earned, pawbucks_used, created_at, status, profiles!transactions_user_id_fkey(full_name)"
+          )
+          .eq("merchant_id", merchant.id)
+          .order("created_at", { ascending: false })
+          .limit(5);
+        if (cancelled) return;
+        const mapped: RecentTx[] = (latest || []).map((t: any) => {
+          const name = t.profiles?.full_name || "Guest";
+          const usd = Number(t.amount) || 0;
+          const pb = Number(t.pawbucks_used) || 0;
+          const rewardsPB =
+            Number(t.rewards_earned ?? t.cashback_earned) || 0;
+          const method: RecentTx["method"] =
+            pb > 0 && usd > 0 ? "Mixed" : pb > 0 ? "PawBucks" : "USD";
+          const isRefunded = t.status === "refunded";
+          return {
+            id: t.id,
+            short_id: String(t.id).slice(0, 8).toUpperCase(),
+            initials: getInitials(name),
+            name,
+            date: format(parseISO(t.created_at), "MMM d"),
+            method,
+            amount: `${isRefunded ? "-" : "+"}$${usd.toFixed(2)}`,
+            rewards: `$${(rewardsPB * 0.001).toFixed(2)}`,
+            isRefunded,
+          };
+        });
+        setRecentTx(mapped);
+        setRecentLoading(false);
       } finally {
         if (!cancelled) setChartsLoading(false);
       }
@@ -407,25 +457,52 @@ export function WorkspaceOverview() {
               </Button>
             </CardHeader>
             <CardContent className="p-0">
-              <ul className="divide-y">
-                {recentTx.map((tx) => (
-                  <li key={tx.id} className="flex items-center gap-3 p-3">
-                    <div className="h-9 w-9 rounded-full bg-muted flex items-center justify-center text-xs font-semibold text-muted-foreground shrink-0">
-                      {tx.initials}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{tx.name}</p>
-                      <p className="text-[11px] text-muted-foreground truncate">
-                        {tx.id} · {tx.date} · {tx.method}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-semibold text-[hsl(var(--success))]">{tx.amount}</p>
-                      <p className="text-[11px] text-muted-foreground">Rewards: {tx.rewards}</p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
+              {recentLoading ? (
+                <div className="p-6 text-center text-xs text-muted-foreground">
+                  Loading transactions…
+                </div>
+              ) : recentTx.length === 0 ? (
+                <div className="p-6 text-center text-xs text-muted-foreground">
+                  No transactions yet.
+                </div>
+              ) : (
+                <ul className="divide-y">
+                  {recentTx.map((tx) => (
+                    <li key={tx.id} className="flex items-center gap-3 p-3">
+                      <div className="h-9 w-9 rounded-full bg-muted flex items-center justify-center text-xs font-semibold text-muted-foreground shrink-0">
+                        {tx.initials}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">
+                          {tx.name}
+                          {tx.isRefunded && (
+                            <span className="ml-2 text-[10px] font-semibold text-destructive bg-destructive/10 px-1.5 py-0.5 rounded">
+                              Refunded
+                            </span>
+                          )}
+                        </p>
+                        <p className="text-[11px] text-muted-foreground truncate">
+                          {tx.short_id} · {tx.date} · {tx.method}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p
+                          className={`text-sm font-semibold ${
+                            tx.isRefunded
+                              ? "text-destructive line-through"
+                              : "text-[hsl(var(--success))]"
+                          }`}
+                        >
+                          {tx.amount}
+                        </p>
+                        <p className="text-[11px] text-muted-foreground">
+                          Rewards: {tx.rewards}
+                        </p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </CardContent>
           </Card>
 
