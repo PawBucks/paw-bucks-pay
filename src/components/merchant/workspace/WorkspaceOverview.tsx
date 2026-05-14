@@ -115,6 +115,8 @@ export function WorkspaceOverview() {
   const [salesTx, setSalesTx] = useState<{ amount: number; created_at: string }[]>([]);
   const [rewardsTotals, setRewardsTotals] = useState({ given: 0, received: 0 });
   const [chartsLoading, setChartsLoading] = useState(true);
+  const [recentTx, setRecentTx] = useState<RecentTx[]>([]);
+  const [recentLoading, setRecentLoading] = useState(true);
 
   useEffect(() => {
     if (!user) return;
@@ -156,6 +158,41 @@ export function WorkspaceOverview() {
           0,
         );
         setRewardsTotals({ given, received });
+
+        // Recent transactions (live)
+        setRecentLoading(true);
+        const { data: latest } = await supabase
+          .from("transactions")
+          .select(
+            "id, amount, rewards_earned, cashback_earned, pawbucks_used, created_at, status, profiles:user_id(full_name)"
+          )
+          .eq("merchant_id", merchant.id)
+          .order("created_at", { ascending: false })
+          .limit(5);
+        if (cancelled) return;
+        const mapped: RecentTx[] = (latest || []).map((t: any) => {
+          const name = t.profiles?.full_name || "Guest";
+          const usd = Number(t.amount) || 0;
+          const pb = Number(t.pawbucks_used) || 0;
+          const rewardsPB =
+            Number(t.rewards_earned ?? t.cashback_earned) || 0;
+          const method: RecentTx["method"] =
+            pb > 0 && usd > 0 ? "Mixed" : pb > 0 ? "PawBucks" : "USD";
+          const isRefunded = t.status === "refunded";
+          return {
+            id: t.id,
+            short_id: String(t.id).slice(0, 8).toUpperCase(),
+            initials: getInitials(name),
+            name,
+            date: format(parseISO(t.created_at), "MMM d"),
+            method,
+            amount: `${isRefunded ? "-" : "+"}$${usd.toFixed(2)}`,
+            rewards: `$${(rewardsPB * 0.001).toFixed(2)}`,
+            isRefunded,
+          };
+        });
+        setRecentTx(mapped);
+        setRecentLoading(false);
       } finally {
         if (!cancelled) setChartsLoading(false);
       }
