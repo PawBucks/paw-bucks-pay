@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from'react';
 import { useNavigate } from'react-router-dom';
 import { useQuery } from'@tanstack/react-query';
-import { Header } from'@/components/Header';
+import { MerchantWorkspaceLayout, WorkspacePageHeader } from "@/components/merchant/workspace/MerchantWorkspaceLayout";
 import { Button } from'@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from'@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from'@/components/ui/select';
@@ -209,24 +209,14 @@ export default function MerchantTaxVault() {
  }
 
  return (
- <div className="min-h-screen bg-background">
- <Header variant="merchant" isAuthenticated={true} />
- 
+ <MerchantWorkspaceLayout>
+ <WorkspacePageHeader
+   section="Dashboard"
+   title="Tax Vault"
+   subtitle="Track and categorize business expenses for tax filing"
+ />
  <main className="container mx-auto px-4 py-6 max-w-6xl">
- {/* Header Section */}
- <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
- <div className="flex items-center gap-4">
- <Button variant="ghost" size="icon" onClick={() => navigate('/merchant-dashboard')}>
- <ArrowLeft className="h-5 w-5" />
- </Button>
- <div>
- <h1 className="text-2xl font-bold flex items-center gap-2">
- <Vault className="h-6 w-6 text-primary" />
- Tax Vault
- </h1>
- <p className="text-muted-foreground">Track and categorize business expenses for tax filing</p>
- </div>
- </div>
+ <div className="flex justify-end mb-4">
  
  <div className="flex items-center gap-3">
  <Select value={selectedYear.toString()} onValueChange={(v) => setSelectedYear(parseInt(v))}>
