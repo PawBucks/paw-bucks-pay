@@ -164,7 +164,7 @@ export function WorkspaceOverview() {
         const { data: latest } = await supabase
           .from("transactions")
           .select(
-            "id, amount, rewards_earned, cashback_earned, pawbucks_used, created_at, status, profiles:user_id(full_name)"
+            "id, amount, rewards_earned, cashback_earned, pawbucks_used, created_at, status, profiles!transactions_user_id_fkey(full_name)"
           )
           .eq("merchant_id", merchant.id)
           .order("created_at", { ascending: false })
