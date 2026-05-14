@@ -81,6 +81,42 @@ const SimpleHome = () => {
             </h1>
           </motion.div>
 
+          {/* Pets — mobile/tablet */}
+          {pets.length > 0 && (
+            <section className="mb-6 lg:hidden">
+              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">
+                Your pets
+              </h2>
+              <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1">
+                {pets.map((p) => (
+                  <button
+                    key={p.id}
+                    onClick={() => navigate(`/pet-health/${p.id}`)}
+                    className="flex flex-col items-center gap-2 min-w-[72px]"
+                  >
+                    <div className="h-16 w-16 rounded-full bg-muted overflow-hidden flex items-center justify-center ring-1 ring-border">
+                      {p.photo_url ? (
+                        <img src={p.photo_url} alt={p.name} className="h-full w-full object-cover" />
+                      ) : (
+                        <PawBucksLogo className="h-7 w-7 text-muted-foreground" />
+                      )}
+                    </div>
+                    <span className="text-xs font-medium truncate max-w-[72px]">{p.name}</span>
+                  </button>
+                ))}
+                <button
+                  onClick={() => navigate("/create-pet-profile")}
+                  className="flex flex-col items-center gap-2 min-w-[72px]"
+                >
+                  <div className="h-16 w-16 rounded-full border-2 border-dashed border-border flex items-center justify-center text-muted-foreground">
+                    +
+                  </div>
+                  <span className="text-xs text-muted-foreground">Add pet</span>
+                </button>
+              </div>
+            </section>
+          )}
+
           <div className="grid gap-6 lg:gap-10 lg:grid-cols-5">
             {/* Left column — hero + actions */}
             <div className="lg:col-span-3 space-y-5 lg:space-y-6">
