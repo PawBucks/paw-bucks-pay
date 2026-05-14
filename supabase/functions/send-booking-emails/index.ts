@@ -13,7 +13,13 @@ const corsHeaders = {
 const LOGO_URL = "https://yxpnkipcoxksmnsvpvwi.supabase.co/storage/v1/object/public/email-assets/pawbucks-logo-email.png";
 
 interface BookingEmailRequest {
-  type: "confirmation" | "reminder_24h" | "reminder_1h" | "cancellation" | "rescheduled";
+  type:
+    | "confirmation"
+    | "reminder_24h"
+    | "reminder_1h"
+    | "cancellation"
+    | "rescheduled"
+    | "reschedule";
   bookingId?: string;
   // Direct data (for immediate sends from client)
   customerEmail?: string;
@@ -29,6 +35,8 @@ interface BookingEmailRequest {
   previousDate?: string;
   previousTime?: string;
   cancellationReason?: string;
+  /** Who initiated the action (used for merchant-facing copy on reschedule/cancel) */
+  initiator?: "customer" | "merchant" | "system";
 }
 
 const formatTime12 = (time24: string): string => {
