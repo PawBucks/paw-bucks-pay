@@ -113,10 +113,13 @@ const SimpleHome = () => {
                   Find a place
                 </Button>
               </div>
+            </div>
 
-              {/* Pets — moves under actions on desktop */}
+            {/* Right column — pets + recent visits */}
+            <div className="lg:col-span-2 mt-2 lg:mt-0 space-y-6">
+              {/* Pets — desktop */}
               {pets.length > 0 && (
-                <section className="hidden lg:block pt-2">
+                <section className="hidden lg:block">
                   <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">
                     Your pets
                   </h2>
@@ -149,21 +152,20 @@ const SimpleHome = () => {
                   </div>
                 </section>
               )}
-            </div>
 
-            {/* Right column — recent visits */}
-            <section className="lg:col-span-2 mt-2 lg:mt-0">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-                Recent visits
-              </h2>
-              <button
-                className="text-sm text-primary inline-flex items-center hover:underline"
-                onClick={() => navigate("/savings")}
-              >
-                View all <ChevronRight className="h-4 w-4" />
-              </button>
-            </div>
+              {/* Recent visits */}
+              <section>
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+                    Recent visits
+                  </h2>
+                  <button
+                    className="text-sm text-primary inline-flex items-center hover:underline"
+                    onClick={() => navigate("/savings")}
+                  >
+                    View all <ChevronRight className="h-4 w-4" />
+                  </button>
+                </div>
 
             {(!recentSaves || recentSaves.length === 0) ? (
               <div className="rounded-xl border border-dashed border-border p-6 text-center">
