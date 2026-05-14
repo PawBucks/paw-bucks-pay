@@ -313,9 +313,6 @@ export function MerchantWorkspaceLayout({
                 <span>{pawBucksBalance.toLocaleString()}</span>
                 <span className="font-normal text-muted-foreground">· ${usd}</span>
               </button>
-              <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Notifications">
-                <Bell className="h-4 w-4" />
-              </Button>
               <Button
                 variant="ghost"
                 size="icon"
