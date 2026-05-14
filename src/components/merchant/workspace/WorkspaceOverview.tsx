@@ -31,6 +31,7 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { format, parseISO, startOfMonth, subMonths } from "date-fns";
+import { toast } from "@/hooks/use-toast";
 
 type RecentTx = {
   id: string;
@@ -109,14 +110,19 @@ function StatCard({ label, value, sub, badge, accent = "default", onClick }: Sta
 export function WorkspaceOverview() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [acceptPB, setAcceptPB] = useState(true);
+  const [merchantId, setMerchantId] = useState<string | null>(null);
+  const [feeModel, setFeeModel] = useState<"full_ecosystem" | "acquisition_only">("full_ecosystem");
+  const [acceptPB, setAcceptPB] = useState(false);
   const [capEnabled, setCapEnabled] = useState(false);
   const [capPct, setCapPct] = useState("50");
+  const [savingSetting, setSavingSetting] = useState(false);
   const [salesTx, setSalesTx] = useState<{ amount: number; created_at: string }[]>([]);
-  const [rewardsTotals, setRewardsTotals] = useState({ given: 0, received: 0 });
+  const [allTxRows, setAllTxRows] = useState<{ amount: number; rewards_earned: number | null; cashback_earned: number | null; pawbucks_used: number | null; created_at: string; status: string | null }[]>([]);
   const [chartsLoading, setChartsLoading] = useState(true);
   const [recentTx, setRecentTx] = useState<RecentTx[]>([]);
   const [recentLoading, setRecentLoading] = useState(true);
+  const [funding, setFunding] = useState<{ status: string | null; remaining: number; rate: number | null }>({ status: null, remaining: 0, rate: null });
+  const [latestInvite, setLatestInvite] = useState<{ id: string; name: string; status: string; date: string } | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -126,14 +132,19 @@ export function WorkspaceOverview() {
       try {
         const { data: merchant } = await supabase
           .from("merchants")
-          .select("id")
+          .select("id, accepts_pawbucks, pawbucks_cap_enabled, pawbucks_cap_pct, fee_model")
           .eq("user_id", user.id)
           .maybeSingle();
         if (!merchant?.id || cancelled) return;
+        setMerchantId(merchant.id);
+        setAcceptPB(!!(merchant as any).accepts_pawbucks);
+        setCapEnabled(!!(merchant as any).pawbucks_cap_enabled);
+        if ((merchant as any).pawbucks_cap_pct != null) setCapPct(String((merchant as any).pawbucks_cap_pct));
+        if ((merchant as any).fee_model === "acquisition_only") setFeeModel("acquisition_only");
 
         const sixMonthsAgo = startOfMonth(subMonths(new Date(), 5)).toISOString();
 
-        const [{ data: recentTxs }, { data: allTxs }] = await Promise.all([
+        const [{ data: recentTxs }, { data: allTxs }, deals, invites] = await Promise.all([
           supabase
             .from("transactions")
             .select("amount, created_at")
@@ -142,22 +153,47 @@ export function WorkspaceOverview() {
             .gte("created_at", sixMonthsAgo),
           supabase
             .from("transactions")
-            .select("rewards_earned, pawbucks_used")
+            .select("amount, rewards_earned, cashback_earned, pawbucks_used, created_at, status")
             .eq("merchant_id", merchant.id)
             .eq("status", "completed"),
+          supabase
+            .from("funding_deals")
+            .select("status, remaining_balance, repayment_rate")
+            .eq("merchant_id", merchant.id)
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .maybeSingle(),
+          supabase
+            .from("brand_campaign_invitations")
+            .select("id, status, invited_at, responded_at, brand_campaigns(name)")
+            .eq("merchant_id", merchant.id)
+            .order("invited_at", { ascending: false })
+            .limit(1)
+            .maybeSingle(),
         ]);
 
         if (cancelled) return;
         setSalesTx(recentTxs || []);
-        const given = (allTxs || []).reduce(
-          (s, t: any) => s + (Number(t.rewards_earned) || 0) * 0.001,
-          0,
-        );
-        const received = (allTxs || []).reduce(
-          (s, t: any) => s + (Number(t.pawbucks_used) || 0) * 0.001,
-          0,
-        );
-        setRewardsTotals({ given, received });
+        setAllTxRows((allTxs || []) as any);
+
+        const dealRow: any = (deals as any)?.data ?? null;
+        if (dealRow) {
+          setFunding({
+            status: dealRow.status ?? null,
+            remaining: Number(dealRow.remaining_balance) || 0,
+            rate: dealRow.repayment_rate != null ? Number(dealRow.repayment_rate) : null,
+          });
+        }
+
+        const inviteRow: any = (invites as any)?.data ?? null;
+        if (inviteRow) {
+          setLatestInvite({
+            id: inviteRow.id,
+            name: inviteRow.brand_campaigns?.name || "Brand Campaign",
+            status: inviteRow.status || "pending",
+            date: format(parseISO(inviteRow.responded_at || inviteRow.invited_at), "M/d/yyyy"),
+          });
+        }
 
         // Recent transactions (live)
         setRecentLoading(true);
@@ -216,14 +252,84 @@ export function WorkspaceOverview() {
     return Object.entries(buckets).map(([month, value]) => ({ month, value }));
   }, [salesTx]);
 
+  const stats = useMemo(() => {
+    let totalSalesUsd = 0;
+    let totalPbReceived = 0; // PawBucks units used by customers
+    let totalRewardsGivenPb = 0; // PawBucks units rewarded to customers
+    let txCount = 0;
+    let monthPbReceived = 0;
+    const monthStart = startOfMonth(new Date()).getTime();
+    allTxRows.forEach((t) => {
+      const usd = Number(t.amount) || 0;
+      const pbUsed = Number(t.pawbucks_used) || 0;
+      const rewards = Number(t.rewards_earned ?? t.cashback_earned) || 0;
+      totalSalesUsd += usd;
+      totalPbReceived += pbUsed;
+      totalRewardsGivenPb += rewards;
+      txCount += 1;
+      const ts = parseISO(t.created_at).getTime();
+      if (ts >= monthStart) monthPbReceived += pbUsed;
+    });
+    const avg = txCount > 0 ? totalSalesUsd / txCount : 0;
+    const successFees = feeModel === "full_ecosystem" ? totalSalesUsd * 0.03 : 0;
+    return {
+      totalSalesUsd,
+      avg,
+      txCount,
+      rewardsGivenUsd: totalRewardsGivenPb / 1000,
+      rewardsGivenPb: totalRewardsGivenPb,
+      pbReceivedUsd: totalPbReceived / 1000,
+      monthPbReceivedUsd: monthPbReceived / 1000,
+      successFees,
+    };
+  }, [allTxRows, feeModel]);
+
   const rewardsData = useMemo(
     () => [
-      { name: "PawBucks Received", value: rewardsTotals.received },
-      { name: "Rewards Given", value: rewardsTotals.given },
+      { name: "PawBucks Received", value: stats.pbReceivedUsd },
+      { name: "Rewards Given", value: stats.rewardsGivenUsd },
     ],
-    [rewardsTotals],
+    [stats],
   );
-  const rewardsTotal = rewardsTotals.given + rewardsTotals.received;
+  const rewardsTotal = stats.pbReceivedUsd + stats.rewardsGivenUsd;
+
+  const fmtUsd = (n: number) =>
+    `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+  const updateMerchantSetting = async (patch: Record<string, unknown>) => {
+    if (!merchantId) return;
+    setSavingSetting(true);
+    const { error } = await supabase.from("merchants").update(patch).eq("id", merchantId);
+    setSavingSetting(false);
+    if (error) {
+      toast({ title: "Couldn't save", description: error.message, variant: "destructive" });
+      return false;
+    }
+    return true;
+  };
+
+  const handleAcceptPB = async (checked: boolean) => {
+    const prev = acceptPB;
+    setAcceptPB(checked);
+    const ok = await updateMerchantSetting({ accepts_pawbucks: checked });
+    if (!ok) setAcceptPB(prev);
+  };
+
+  const handleCapToggle = async (checked: boolean) => {
+    const prev = capEnabled;
+    setCapEnabled(checked);
+    const ok = await updateMerchantSetting({ pawbucks_cap_enabled: checked });
+    if (!ok) setCapEnabled(prev);
+  };
+
+  const handleCapBlur = async () => {
+    const n = Number(capPct);
+    if (!Number.isFinite(n) || n < 0 || n > 100) {
+      toast({ title: "Enter a value between 0 and 100", variant: "destructive" });
+      return;
+    }
+    await updateMerchantSetting({ pawbucks_cap_pct: n });
+  };
 
   return (
     <div className="flex flex-col">
@@ -251,6 +357,23 @@ export function WorkspaceOverview() {
 
       <div className="p-4 md:p-6 space-y-4 max-w-7xl w-full mx-auto">
         {/* Funding banner */}
+        {funding.status === "active" ? (
+          <Card className="border-[hsl(var(--success)/0.4)] bg-[hsl(var(--success)/0.08)] shadow-none">
+            <CardContent className="p-4 flex items-center gap-3 flex-wrap">
+              <Sparkles className="h-5 w-5 text-[hsl(var(--success))] shrink-0" />
+              <div className="flex-1 min-w-[200px]">
+                <p className="font-semibold text-sm">Active Funding Deal</p>
+                <p className="text-xs text-muted-foreground">
+                  Remaining balance {fmtUsd(funding.remaining)}
+                  {funding.rate != null ? ` · ${funding.rate}% repayment rate` : ""}
+                </p>
+              </div>
+              <Button size="sm" variant="outline" onClick={() => navigate("/merchant/quick-actions")}>
+                Manage
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
         <Card className="border-[hsl(var(--warning)/0.4)] bg-[hsl(var(--warning)/0.08)] shadow-none">
           <CardContent className="p-4 flex items-center gap-3 flex-wrap">
             <Sparkles className="h-5 w-5 text-[hsl(var(--warning))] shrink-0" />
@@ -271,6 +394,7 @@ export function WorkspaceOverview() {
             </Button>
           </CardContent>
         </Card>
+        )}
 
         {/* Account type */}
         <Card className="shadow-none">
@@ -280,12 +404,13 @@ export function WorkspaceOverview() {
               <div className="flex items-center gap-2 flex-wrap">
                 <p className="font-semibold text-sm">Account Type</p>
                 <Badge className="bg-primary/10 text-primary hover:bg-primary/10 border-primary/20 text-[10px]">
-                  Full Ecosystem
+                  {feeModel === "acquisition_only" ? "Acquisition Only" : "Full Ecosystem"}
                 </Badge>
               </div>
               <p className="text-xs text-muted-foreground mt-0.5">
-                You pay a 3% Success Fee on every USD transaction and participate in the full
-                PawBucks rewards ecosystem.
+                {feeModel === "acquisition_only"
+                  ? "You pay only an acquisition fee on new customers — no per-transaction Success Fee."
+                  : "You pay a 3% Success Fee on every USD transaction and participate in the full PawBucks rewards ecosystem."}
               </p>
             </div>
             <Button
@@ -293,7 +418,7 @@ export function WorkspaceOverview() {
               variant="outline"
               onClick={() => navigate("/merchant/support")}
             >
-              Request Acquisition-Only
+              {feeModel === "acquisition_only" ? "Switch to Full Ecosystem" : "Request Acquisition-Only"}
             </Button>
           </CardContent>
         </Card>
@@ -316,7 +441,7 @@ export function WorkspaceOverview() {
                   Allow customers to pay with their PawBucks balance (1,000 PawBucks = $1.00).
                 </p>
               </div>
-              <Switch checked={acceptPB} onCheckedChange={setAcceptPB} />
+              <Switch checked={acceptPB} onCheckedChange={handleAcceptPB} disabled={savingSetting || !merchantId} />
             </div>
             <div className="border-t pt-4 flex items-start justify-between gap-4">
               <div className="flex-1">
@@ -330,11 +455,12 @@ export function WorkspaceOverview() {
                   type="number"
                   value={capPct}
                   onChange={(e) => setCapPct(e.target.value)}
+                  onBlur={handleCapBlur}
                   className="w-16 h-8 text-sm"
-                  disabled={!capEnabled}
+                  disabled={!capEnabled || savingSetting}
                 />
                 <span className="text-xs text-muted-foreground">% max</span>
-                <Switch checked={capEnabled} onCheckedChange={setCapEnabled} />
+                <Switch checked={capEnabled} onCheckedChange={handleCapToggle} disabled={savingSetting || !merchantId} />
               </div>
             </div>
           </CardContent>
@@ -344,41 +470,41 @@ export function WorkspaceOverview() {
         <div className="grid gap-3 grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
           <StatCard
             label="Total Sales"
-            value="$25,439"
-            sub=".03 all-time"
-            badge={{ label: "93 transactions", tone: "success" }}
+            value={fmtUsd(stats.totalSalesUsd)}
+            sub="All-time completed"
+            badge={{ label: `${stats.txCount} transactions`, tone: "success" }}
             onClick={() => navigate("/merchant/total-earnings")}
           />
           <StatCard
             label="Avg Transaction"
-            value="$273"
-            sub=".54 per transaction"
+            value={fmtUsd(stats.avg)}
+            sub="Per transaction"
             onClick={() => navigate("/merchant/transactions")}
           />
           <StatCard
             label="Rewards Given"
-            value="$190.61"
-            sub="190,610 PawBucks"
+            value={fmtUsd(stats.rewardsGivenUsd)}
+            sub={`${Math.round(stats.rewardsGivenPb).toLocaleString()} PawBucks`}
             accent="success"
             onClick={() => navigate("/merchant-analytics")}
           />
           <StatCard
             label="PawBucks Received"
-            value="$1,551.89"
-            sub="Spent in March"
+            value={fmtUsd(stats.pbReceivedUsd)}
+            sub={`${fmtUsd(stats.monthPbReceivedUsd)} this month`}
             onClick={() => navigate("/merchant/pawbucks")}
           />
           <StatCard
             label="Success Fees Paid"
-            value="$465.36"
-            sub="3% of USD transactions"
+            value={fmtUsd(stats.successFees)}
+            sub={feeModel === "acquisition_only" ? "Acquisition-only plan" : "3% of USD transactions"}
             accent="warning"
             onClick={() => navigate("/merchant/tax-vault")}
           />
           <StatCard
             label="Merchant Funding"
-            value="No Loan"
-            sub="Repayment: $0.00"
+            value={funding.status === "active" ? "Active" : "No Loan"}
+            sub={funding.status === "active" ? `Remaining: ${fmtUsd(funding.remaining)}` : "Repayment: $0.00"}
             onClick={() => navigate("/merchant/quick-actions")}
           />
         </div>
@@ -527,20 +653,32 @@ export function WorkspaceOverview() {
               <p className="text-[11px] uppercase tracking-wide text-muted-foreground font-semibold">
                 Your Invitations
               </p>
-              <div
-                className="rounded-md border p-3 flex items-center justify-between gap-3 cursor-pointer hover:bg-muted/40 transition-colors"
-                onClick={() => navigate("/merchant/brand-campaigns")}
-              >
-                <div className="min-w-0">
-                  <p className="text-sm font-medium truncate">Test Campaign 2</p>
-                  <p className="text-[11px] text-muted-foreground truncate">
-                    Brand-funded · accepted 4/23/2026
-                  </p>
+              {latestInvite ? (
+                <div
+                  className="rounded-md border p-3 flex items-center justify-between gap-3 cursor-pointer hover:bg-muted/40 transition-colors"
+                  onClick={() => navigate("/merchant/brand-campaigns")}
+                >
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium truncate">{latestInvite.name}</p>
+                    <p className="text-[11px] text-muted-foreground truncate">
+                      Brand-funded · {latestInvite.status} {latestInvite.date}
+                    </p>
+                  </div>
+                  <Badge
+                    className={
+                      latestInvite.status === "accepted"
+                        ? "bg-[hsl(var(--success)/0.12)] text-[hsl(var(--success))] hover:bg-[hsl(var(--success)/0.12)] capitalize"
+                        : "capitalize"
+                    }
+                  >
+                    {latestInvite.status}
+                  </Badge>
                 </div>
-                <Badge className="bg-[hsl(var(--success)/0.12)] text-[hsl(var(--success))] hover:bg-[hsl(var(--success)/0.12)]">
-                  Accepted
-                </Badge>
-              </div>
+              ) : (
+                <div className="rounded-md border border-dashed p-3 text-xs text-muted-foreground text-center">
+                  No campaign invitations yet.
+                </div>
+              )}
               <div className="rounded-md bg-muted/50 p-3 text-xs text-muted-foreground flex gap-2">
                 <TrendingUp className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                 <span>
