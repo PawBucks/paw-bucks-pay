@@ -68,7 +68,6 @@ const NAV: NavSection[] = [
       { id: "reports", label: "Sales Report", icon: BarChart3, to: "/merchant/sales-report" },
       { id: "history", label: "Daily History", icon: History, to: "/merchant/daily-history" },
       { id: "tax-vault", label: "Tax Vault", icon: Receipt, to: "/merchant/tax-vault" },
-      { id: "transactions-list", label: "Transaction History", icon: FileText, to: "/merchant/transactions" },
     ],
   },
   {
