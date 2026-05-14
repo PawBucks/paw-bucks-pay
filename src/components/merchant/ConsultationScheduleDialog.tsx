@@ -11,7 +11,7 @@ import {
 } from"@/components/ui/dialog";
 import { Badge } from"@/components/ui/badge";
 import { toast } from"sonner";
-import { Calendar, CheckCircle2, Clock, Loader2 } from "lucide-react";
+import { Calendar as CalendarIcon, CheckCircle2, Clock, Loader2 } from "lucide-react";
 import { cn } from"@/lib/utils";
 import { supabase } from"@/integrations/supabase/client";
 import { useAuth } from"@/hooks/useAuth";
@@ -194,7 +194,7 @@ export function ConsultationScheduleDialog({
  <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
  <DialogHeader>
  <DialogTitle className="flex items-center gap-2">
- <Calendar className="w-5 h-5 text-primary" aria-hidden="true" />
+ <CalendarIcon className="w-5 h-5 text-primary" aria-hidden="true" />
  Schedule Free Consultation
  </DialogTitle>
  <DialogDescription>

@@ -13,7 +13,7 @@ import {
 import { supabase } from"@/integrations/supabase/client";
 import { Elements, PaymentElement, useStripe, useElements } from"@stripe/react-stripe-js";
 import { toast } from"sonner";
-import { Calendar, Check, CheckCircle2, Clock, CreditCard, Loader2 } from "lucide-react";
+import { Calendar as CalendarIcon, Check, CheckCircle2, Clock, CreditCard, Loader2 } from "lucide-react";
 import { Label } from"@/components/ui/label";
 import { cn } from"@/lib/utils";
 import { useAuth } from"@/hooks/useAuth";
@@ -424,7 +424,7 @@ export const ServicePurchaseDialog = ({
  )}>
  <DialogHeader>
  <DialogTitle className="flex items-center gap-2">
- {isStrategyConsultation && <Calendar className="w-5 h-5 text-primary" aria-hidden="true" />}
+ {isStrategyConsultation && <CalendarIcon className="w-5 h-5 text-primary" aria-hidden="true" />}
  Purchase {service.name}
  </DialogTitle>
  <DialogDescription>
@@ -453,7 +453,7 @@ export const ServicePurchaseDialog = ({
  <div className="space-y-4 border rounded-lg p-4 bg-primary/5">
  <div>
  <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
- <Calendar className="w-4 h-4" aria-hidden="true" />
+ <CalendarIcon className="w-4 h-4" aria-hidden="true" />
  Select Your Consultation Date
  </h4>
  <p className="text-xs text-muted-foreground mb-3">

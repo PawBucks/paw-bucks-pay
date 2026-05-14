@@ -13,7 +13,7 @@ import { Calendar } from'@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from'@/components/ui/popover';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from'@/components/ui/tooltip';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from'@/components/ui/tabs';
-import { Calculator, Calendar, Car, ChevronRight, Fuel, Info, MapPin, Pencil, Plus, Trash2, TrendingUp, Trophy, User, Wrench } from "lucide-react";
+import { Calculator, Calendar as CalendarIcon, Car, ChevronRight, Fuel, Info, MapPin, Pencil, Plus, Trash2, TrendingUp, Trophy, User, Wrench } from "lucide-react";
 import { supabase } from'@/integrations/supabase/client';
 import { toast } from'sonner';
 import { cn } from'@/lib/utils';
@@ -661,7 +661,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
  !tripDate &&"text-muted-foreground"
  )}
  >
- <Calendar className="mr-2 h-4 w-4" aria-hidden="true" />
+ <CalendarIcon className="mr-2 h-4 w-4" aria-hidden="true" />
  {tripDate ? format(tripDate,'PPP') :'Select date'}
  </Button>
  </PopoverTrigger>
@@ -1034,7 +1034,7 @@ export function MileageLog({ merchantId, taxYear }: MileageLogProps) {
  !expenseDate &&"text-muted-foreground"
  )}
  >
- <Calendar className="mr-2 h-4 w-4" aria-hidden="true" />
+ <CalendarIcon className="mr-2 h-4 w-4" aria-hidden="true" />
  {expenseDate ? format(expenseDate,'PPP') :'Select date'}
  </Button>
  </PopoverTrigger>
