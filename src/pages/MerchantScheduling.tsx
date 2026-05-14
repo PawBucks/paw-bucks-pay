@@ -181,6 +181,8 @@ const MerchantScheduling = () => {
  supabase.functions.invoke("send-booking-emails", {
  body: {
  type: status ==='confirmed' ?'confirmation' :'cancellation',
+ bookingId: booking.id,
+ initiator:'merchant',
  customerEmail: booking.customer_email,
  customerName: booking.customer_name || booking.customer_email,
  merchantName: (booking as any).merchant_services?.merchants?.business_name ||'the business',
