@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from"react";
 import { useNavigate } from"react-router-dom";
 import { useAuth } from"@/hooks/useAuth";
 import { supabase } from"@/integrations/supabase/client";
-import { Header } from"@/components/Header";
+import { MerchantWorkspaceLayout, WorkspacePageHeader } from "@/components/merchant/workspace/MerchantWorkspaceLayout";
 import { SEO } from"@/components/SEO";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/components/ui/card";
 import { Button } from"@/components/ui/button";
@@ -275,14 +275,13 @@ const MerchantTransactions = () => { const { user, loading, signOut } = useAuth(
  }
 
  return (
- <div className="min-h-screen bg-background">
- <Header isAuthenticated={true} onLogout={handleSignOut} userId={user?.id} variant="merchant" />
- <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-6">
- {/* Header */}
- <div className="space-y-2">
- <h1 className="text-3xl font-bold text-foreground">Detailed Transactions</h1>
- <p className="text-muted-foreground">View and manage all PawBucks sales, rewards, and repayments.</p>
- </div>
+ <MerchantWorkspaceLayout>
+ <WorkspacePageHeader
+   section="Dashboard"
+   title="Detailed Transactions"
+   subtitle="View and manage all PawBucks sales, rewards, and repayments."
+ />
+ <div className="max-w-7xl mx-auto p-4 md:p-6 space-y-6">
 
  {/* Summary KPIs */}
  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
