@@ -25,6 +25,13 @@ import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { Input } from"@/components/ui/input";
 
 import { Formatters } from "@/utils/formatters";
+import {
+  DEFAULT_MERCHANT_TZ,
+  getViewerTimeZone,
+  merchantWallClockToInstant,
+  viewerLocalTimeFor,
+  tzAbbr,
+} from "@/lib/timezone";
 // Flash Sale Countdown component for service listings
 function FlashSaleCountdown({ endAt }: { endAt: string }) {
  const [timeRemaining, setTimeRemaining] = useState<string>("");
@@ -116,7 +123,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
     queryFn: async () => {
       const { data, error } = await supabase
         .from("merchants")
-        .select("stripe_account_id")
+        .select("stripe_account_id, timezone")
         .eq("id", merchantId)
         .maybeSingle();
       if (error) throw error;
@@ -124,6 +131,9 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
     },
   });
   const merchantAcceptsCards = !!merchantPaymentInfo?.stripe_account_id;
+  const merchantTz = merchantPaymentInfo?.timezone || DEFAULT_MERCHANT_TZ;
+  const viewerTz = getViewerTimeZone();
+  const showViewerLocal = viewerTz !== merchantTz;
 
  // Fetch existing bookings for the selected date
  const { data: existingBookings = [] } = useQuery({
