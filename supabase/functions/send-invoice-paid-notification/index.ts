@@ -65,8 +65,10 @@ function getPaymentDisplayAmounts(params: Pick<InvoicePaidNotificationParams, 'a
     cashPortion = 0;
     grossReceived = pawbucksValueUSD + tipAmount;
   } else if (params.paymentMethod === 'mixed') {
-    cashPortion = amountLooksLikeCashOnly ? amountPaid : Math.max(amountPaid - pawbucksValueUSD, 0);
+    cashPortion = amountLooksLikeCashOnly ? Math.max(amountPaid - tipAmount, 0) : Math.max(amountPaid - pawbucksValueUSD - tipAmount, 0);
     grossReceived = amountLooksLikeCashOnly ? amountPaid + pawbucksValueUSD : amountPaid;
+  } else {
+    cashPortion = Math.max(amountPaid - tipAmount, 0);
   }
 
   const calculatedFee = params.platformFee !== undefined
