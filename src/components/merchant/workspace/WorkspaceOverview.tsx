@@ -282,7 +282,7 @@ export function WorkspaceOverview() {
     let totalRewardsGivenPb = 0; // PawBucks units rewarded to customers
     let txCount = 0;
     let monthPbReceived = 0;
-    let storedFees = 0; // Sum of stored application_fee (Stripe-authoritative)
+    let storedFeeCents = 0; // Sum of stored application_fee in cents (Stripe-authoritative)
     const monthStart = startOfMonth(new Date()).getTime();
     allTxRows.forEach((t) => {
       const usd = Number(t.amount) || 0;
@@ -292,15 +292,18 @@ export function WorkspaceOverview() {
       totalSalesUsd += usd;
       totalPbReceived += pbUsed;
       totalRewardsGivenPb += rewards;
-      storedFees += fee;
+      storedFeeCents += Math.round(fee * 100);
       txCount += 1;
       const ts = parseISO(t.created_at).getTime();
       if (ts >= monthStart) monthPbReceived += pbUsed;
     });
+    directPaymentRows.forEach((p) => {
+      storedFeeCents += Number(p.application_fee) || 0;
+    });
     const avg = txCount > 0 ? totalSalesUsd / txCount : 0;
-    // Read fees from the actually-stored application_fee (Stripe charge time),
-    // never re-derive 3% locally — manual/invoice payments have no Stripe fee.
-    const successFees = feeModel === "full_ecosystem" ? storedFees : 0;
+    // Match Total Earnings: combine platform transactions + direct payments,
+    // and round each stored fee to cents before summing to mirror Stripe cents.
+    const successFees = feeModel === "full_ecosystem" ? storedFeeCents / 100 : 0;
     return {
       totalSalesUsd,
       avg,
@@ -311,7 +314,7 @@ export function WorkspaceOverview() {
       monthPbReceivedUsd: monthPbReceived / 1000,
       successFees,
     };
-  }, [allTxRows, feeModel]);
+  }, [allTxRows, directPaymentRows, feeModel]);
 
   const rewardsData = useMemo(
     () => [
