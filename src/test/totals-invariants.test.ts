@@ -22,6 +22,11 @@ function successFee(stripeAmountUsd: number) {
   return Math.round(stripeAmountUsd * SUCCESS_FEE_RATE * 100) / 100;
 }
 
+function sumStoredFeesUsd(transactionFeesUsd: number[], directPaymentFeeCents: number[] = []) {
+  const transactionFeeCents = transactionFeesUsd.reduce((sum, fee) => sum + Math.round(fee * 100), 0);
+  return (transactionFeeCents + directPaymentFeeCents.reduce((sum, fee) => sum + fee, 0)) / 100;
+}
+
 function netSales(amount: number, refunded: number) {
   return Math.max(amount - refunded, 0);
 }
@@ -47,6 +52,9 @@ describe("Success Fee", () => {
   it("is never charged on the PawBucks portion", () => {
     // $50 Stripe + $20 PawBucks split should fee only on $50
     expect(successFee(50)).toBe(1.5);
+  });
+  it("sums stored Success Fees in cents across platform and direct payments", () => {
+    expect(sumStoredFeesUsd([13.824, 9.5301, 1.764], [3])).toBe(25.14);
   });
 });
 
