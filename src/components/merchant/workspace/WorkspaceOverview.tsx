@@ -644,7 +644,7 @@ export function WorkspaceOverview() {
                 variant="ghost"
                 size="sm"
                 className="text-primary"
-                onClick={() => navigate("/merchant/campaigns")}
+                onClick={() => navigate("/merchant/brand-campaigns")}
               >
                 View all <ArrowRight className="h-3.5 w-3.5 ml-1" />
               </Button>
