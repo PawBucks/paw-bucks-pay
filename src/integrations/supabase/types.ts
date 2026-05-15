@@ -5758,6 +5758,87 @@ export type Database = {
           },
         ]
       }
+      merchant_funding_waitlist: {
+        Row: {
+          additional_notes: string | null
+          business_name: string
+          contact_email: string
+          contact_name: string | null
+          contact_phone: string | null
+          created_at: string
+          id: string
+          merchant_id: string
+          monthly_revenue_range: string
+          notified_at: string | null
+          position: number | null
+          requested_amount_usd: number
+          status: string
+          time_in_business: string
+          updated_at: string
+          urgency: string
+          use_of_funds: string
+          use_of_funds_details: string | null
+          user_id: string
+        }
+        Insert: {
+          additional_notes?: string | null
+          business_name: string
+          contact_email: string
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          merchant_id: string
+          monthly_revenue_range: string
+          notified_at?: string | null
+          position?: number | null
+          requested_amount_usd: number
+          status?: string
+          time_in_business: string
+          updated_at?: string
+          urgency?: string
+          use_of_funds: string
+          use_of_funds_details?: string | null
+          user_id: string
+        }
+        Update: {
+          additional_notes?: string | null
+          business_name?: string
+          contact_email?: string
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          merchant_id?: string
+          monthly_revenue_range?: string
+          notified_at?: string | null
+          position?: number | null
+          requested_amount_usd?: number
+          status?: string
+          time_in_business?: string
+          updated_at?: string
+          urgency?: string
+          use_of_funds?: string
+          use_of_funds_details?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_funding_waitlist_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: true
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_funding_waitlist_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: true
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       merchant_loyalty_programs: {
         Row: {
           created_at: string
