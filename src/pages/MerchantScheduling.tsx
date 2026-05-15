@@ -457,7 +457,7 @@ const MerchantScheduling = () => {
  }
  }}
  />
- </div>
+ </MerchantWorkspaceLayout>
  );
 };
 
