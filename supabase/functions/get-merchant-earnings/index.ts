@@ -151,14 +151,15 @@ serve(async (req) => {
     if (directPaymentsError) logStep("Error fetching direct payments", { error: directPaymentsError.message });
     if (transactionsError) logStep("Error fetching transactions", { error: transactionsError.message });
 
-    const directPaymentEarnings = directPaymentTotals?.reduce((sum, p) => sum + (p.amount - p.application_fee), 0) || 0;
-    const directPaymentFees = directPaymentTotals?.reduce((sum, p) => sum + p.application_fee, 0) || 0;
+    const directPaymentEarnings = directPaymentTotals?.reduce((sum, p) => sum + (Number(p.amount || 0) - Number(p.application_fee || 0)), 0) || 0;
+    const directPaymentFees = directPaymentTotals?.reduce((sum, p) => sum + Number(p.application_fee || 0), 0) || 0;
     const refundedDirectAmount = refundedDirectPayments?.reduce((sum, p) => sum + p.amount, 0) || 0;
 
     const transactionEarnings = transactionTotals?.reduce((sum, t) => sum + Number(t.amount || 0), 0) || 0;
     const transactionCashback = transactionTotals?.reduce((sum, t) => sum + Number(t.cashback_earned || 0), 0) || 0;
     const transactionRewards = transactionTotals?.reduce((sum, t) => sum + Number(t.rewards_earned || 0), 0) || 0;
-    const transactionFees = transactionTotals?.reduce((sum, t) => sum + Number(t.application_fee || 0), 0) || 0;
+    const transactionFeeCents = transactionTotals?.reduce((sum, t) => sum + Math.round(Number(t.application_fee || 0) * 100), 0) || 0;
+    const transactionFees = transactionFeeCents / 100;
     const transactionCount = transactionTotals?.length || 0;
 
     // Calculate refund totals
