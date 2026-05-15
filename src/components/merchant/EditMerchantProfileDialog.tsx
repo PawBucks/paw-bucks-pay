@@ -1,4 +1,4 @@
-import { useState, useEffect } from"react";
+import { useState, useEffect, useRef } from"react";
 import { useAuth } from"@/hooks/useAuth";
 import { Button } from"@/components/ui/button";
 import { Input } from"@/components/ui/input";
@@ -14,7 +14,7 @@ import {
 } from"@/components/ui/dialog";
 import { Facebook, Globe, Info, Instagram, Linkedin, Twitter } from "lucide-react";
 import { PolicyDocumentUpload } from"./PolicyDocumentUpload";
-import { BusinessHoursEditor } from"./BusinessHoursEditor";
+import { BusinessHoursEditor, type BusinessHoursEditorHandle } from"./BusinessHoursEditor";
 
 import { Formatters } from "@/utils/formatters";
 const BUSINESS_TYPE_OPTIONS: { key: string; label: string }[] = [
@@ -81,6 +81,8 @@ export const EditMerchantProfileDialog = ({
  const [logoPreview, setLogoPreview] = useState<string | null>(null);
  const [logoZoom, setLogoZoom] = useState(1);
  const [categories, setCategories] = useState<string[]>([]);
+ const hoursRef = useRef<BusinessHoursEditorHandle>(null);
+ const [submitting, setSubmitting] = useState(false);
 
  useEffect(() => {
  const initial = (merchant.business_categories && merchant.business_categories.length > 0)
@@ -111,12 +113,23 @@ export const EditMerchantProfileDialog = ({
 
  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
  e.preventDefault();
+  setSubmitting(true);
+  try {
  const formData = new FormData(e.currentTarget);
  // Use the first selected category as the primary business_type
  if (primary) formData.set("businessType", primary);
  await onSubmit(formData, logoFile, categories);
+   // Persist hours alongside the rest of the profile.
+   try {
+    await hoursRef.current?.save({ merchantId: merchant.id });
+   } catch (err) {
+    console.error("Failed to save business hours:", err);
+   }
  setLogoFile(null);
  setLogoPreview(null);
+  } finally {
+   setSubmitting(false);
+  }
  };
 
  return (
@@ -330,7 +343,7 @@ export const EditMerchantProfileDialog = ({
  </div>
  </div>
  {/* Hours of Operation */}
- <BusinessHoursEditor merchantId={merchant.id} />
+   <BusinessHoursEditor ref={hoursRef} merchantId={merchant.id} hideSaveButton />
 
  {/* Policy Documents Section */}
  {user && (
@@ -354,9 +367,9 @@ export const EditMerchantProfileDialog = ({
  >
  Cancel
  </Button>
- <Button type="submit" className="flex-1" disabled={categories.length === 0}>
- Save Changes
- </Button>
+     <Button type="submit" className="flex-1" disabled={categories.length === 0 || submitting}>
+      {submitting ?"Saving..." :"Save Changes"}
+     </Button>
  </div>
  </form>
  </DialogContent>
