@@ -859,12 +859,12 @@ const MerchantProducts = () => {
 
  {/* Edit Subscription Plan Dialog */}
  <Dialog open={editPlanDialogOpen} onOpenChange={setEditPlanDialogOpen}>
- <DialogContent>
+ <DialogContent className="max-h-[calc(100dvh-1rem)] overflow-hidden sm:max-w-xl flex flex-col">
  <DialogHeader>
  <DialogTitle>Edit Subscription Plan</DialogTitle>
  <DialogDescription>Update your plan details. Billing interval cannot be changed after publishing.</DialogDescription>
  </DialogHeader>
- <div className="space-y-4 mt-4">
+ <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain space-y-4 pr-1 pb-2">
  <div>
  <Label htmlFor="edit-plan-name">Name *</Label>
  <Input id="edit-plan-name" value={planName} onChange={(e) => setPlanName(e.target.value)} />
@@ -892,7 +892,7 @@ const MerchantProducts = () => {
  </div>
  <Switch id="edit-plan-active" checked={planActive} onCheckedChange={setPlanActive} />
  </div>
- <div className="flex justify-end gap-2 mt-6">
+ <div className="sticky bottom-0 -mx-4 sm:-mx-6 mt-6 flex flex-col-reverse gap-2 border-t bg-background px-4 py-3 sm:flex-row sm:justify-end sm:px-6">
  <Button variant="outline" onClick={() => setEditPlanDialogOpen(false)} disabled={updatingPlan}>
  Cancel
  </Button>
