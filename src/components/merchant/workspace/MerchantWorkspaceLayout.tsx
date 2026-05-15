@@ -25,7 +25,6 @@ import {
   Users,
   Heart,
   Star,
-  Zap,
   MessageSquare,
   Activity,
   Gift,
