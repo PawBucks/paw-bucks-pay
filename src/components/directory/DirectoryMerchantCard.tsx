@@ -9,6 +9,7 @@ import { OpenStatusBadge } from"@/components/merchant/OpenStatusBadge";
 
 import { Formatters } from "@/utils/formatters";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
+import { formatDistance } from "@/lib/geo";
 type DirectoryMerchant = {
  id: string;
  business_name: string;
@@ -21,6 +22,7 @@ type DirectoryMerchant = {
  average_rating: number;
  review_count: number;
  price_range?: number;
+ distance?: number;
 };
 
 interface DirectoryMerchantCardProps {
@@ -180,6 +182,11 @@ const DirectoryMerchantCardComponent = ({
  <div className="flex items-center gap-1 text-[11px] text-muted-foreground/80">
  <span className="text-xs flex-shrink-0">📍</span>
  <span className="line-clamp-1">{merchant.address}</span>
+ {merchant.distance !== undefined && (
+  <span className="ml-1 font-semibold text-primary whitespace-nowrap">
+   · {formatDistance(merchant.distance)}
+  </span>
+ )}
  </div>
  )}
  </div>
