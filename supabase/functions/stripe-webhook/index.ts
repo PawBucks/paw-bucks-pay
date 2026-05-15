@@ -361,7 +361,73 @@ serve(async (req) => {
         }
         return new Response(JSON.stringify({ received: true, type: 'store_rewards_funding' }), { status: 200 });
       }
-      
+
+      // ========================================
+      // PAWPASS SUBSCRIPTION — deferred PawBucks debit
+      // The `create-subscription-checkout` function intentionally does NOT
+      // debit PawBucks at session-creation time. We deduct here, only after
+      // Stripe confirms the checkout session was completed, so abandoned
+      // checkouts never charge the user's wallet.
+      // ========================================
+      if (
+        metadata.subscription_purpose === 'pawpass_subscription' &&
+        session.mode === 'subscription'
+      ) {
+        const pawpassUserId = metadata.user_id;
+        const pawpassPbToDebit = parseInt(metadata.pawbucks_used || '0');
+        const pawpassTier = metadata.tier === 'plus' ? 'PawPass+' : 'PawPass';
+
+        if (pawpassUserId && pawpassPbToDebit > 0) {
+          try {
+            // Idempotency: skip if we've already debited for this checkout session
+            const { data: existingDebit } = await supabaseAdmin
+              .from('pawbucks_activity')
+              .select('id')
+              .eq('user_id', pawpassUserId)
+              .eq('source', 'subscription')
+              .ilike('description', `%${session.id}%`)
+              .maybeSingle();
+
+            if (existingDebit) {
+              console.log('[PAWPASS-SUB] ⏭️ Duplicate webhook — debit already applied for session', session.id);
+              return new Response(JSON.stringify({ received: true, skipped: 'duplicate_pawpass_debit' }), { status: 200 });
+            }
+
+            const { data: wallet } = await supabaseAdmin
+              .from('pawbucks_wallet')
+              .select('balance')
+              .eq('user_id', pawpassUserId)
+              .single();
+
+            const currentBalance = wallet?.balance || 0;
+            const debitAmount = Math.min(currentBalance, pawpassPbToDebit);
+
+            if (debitAmount > 0) {
+              await supabaseAdmin
+                .from('pawbucks_wallet')
+                .update({ balance: currentBalance - debitAmount, updated_at: new Date().toISOString() })
+                .eq('user_id', pawpassUserId);
+
+              await supabaseAdmin.from('pawbucks_activity').insert({
+                user_id: pawpassUserId,
+                type: 'redeem',
+                amount: debitAmount,
+                source: 'subscription',
+                description: `Applied ${debitAmount.toLocaleString()} PB toward ${pawpassTier} subscription [session:${session.id}]`,
+              });
+
+              console.log('[PAWPASS-SUB] ✅ Deferred debit applied', { pawpassUserId, debitAmount, sessionId: session.id });
+            } else {
+              console.log('[PAWPASS-SUB] ⚠️ Insufficient balance at completion — nothing to debit', { pawpassUserId, currentBalance, pawpassPbToDebit });
+            }
+          } catch (e) {
+            console.error('[PAWPASS-SUB] Error processing deferred debit:', e);
+          }
+        }
+
+        return new Response(JSON.stringify({ received: true, type: 'pawpass_subscription' }), { status: 200 });
+      }
+
       // Handle PawBucks auto-redemption deduction (only NOW after payment completes)
       const pawbucksUsed = parseInt(metadata.pawbucks_used || '0');
       const pawbucksUsdValue = parseFloat(metadata.pawbucks_usd_value || '0');

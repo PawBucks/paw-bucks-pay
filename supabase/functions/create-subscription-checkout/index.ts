@@ -140,18 +140,10 @@ serve(async (req) => {
               couponId = coupon.id;
               pawbucksUsed = maxPBToApply;
 
-              // Deduct PawBucks now
-              const newBalance = availablePB - pawbucksUsed;
-              await supabaseAdmin.from('pawbucks_wallet').update({ balance: newBalance }).eq('user_id', user.id);
-              await supabaseAdmin.from('pawbucks_activity').insert({
-                user_id: user.id,
-                type: 'redeem',
-                amount: pawbucksUsed,
-                source: 'subscription',
-                description: `Applied ${pawbucksUsed.toLocaleString()} PB toward ${tier === 'plus' ? 'PawPass+' : 'PawPass'} subscription`,
-              });
-
-              console.log('Auto-redeem applied to subscription', { pawbucksUsed, discountCents, couponId });
+              // ⚠️ DEFERRED DEBIT: PawBucks are NOT deducted here. The
+              // stripe-webhook deducts them on `checkout.session.completed`
+              // so abandoned checkouts never charge the user's wallet.
+              console.log('Auto-redeem coupon prepared (deferred debit)', { pawbucksUsed, discountCents, couponId });
             } else if (discountCents >= subscriptionPriceCents) {
               // Full coverage - create coupon for 100% off first month
               const coupon = await stripe.coupons.create({
@@ -163,17 +155,8 @@ serve(async (req) => {
               couponId = coupon.id;
               pawbucksUsed = Math.floor(subscriptionPriceUsd * PAWBUCKS_TO_USD_RATE);
 
-              const newBalance = availablePB - pawbucksUsed;
-              await supabaseAdmin.from('pawbucks_wallet').update({ balance: newBalance }).eq('user_id', user.id);
-              await supabaseAdmin.from('pawbucks_activity').insert({
-                user_id: user.id,
-                type: 'redeem',
-                amount: pawbucksUsed,
-                source: 'subscription',
-                description: `Applied ${pawbucksUsed.toLocaleString()} PB to cover first month of ${tier === 'plus' ? 'PawPass+' : 'PawPass'}`,
-              });
-
-              console.log('Full month covered by auto-redeem', { pawbucksUsed, couponId });
+              // ⚠️ DEFERRED DEBIT (see above).
+              console.log('Full-month coupon prepared (deferred debit)', { pawbucksUsed, couponId });
             }
           }
         }
@@ -203,6 +186,7 @@ serve(async (req) => {
           user_id: user.id,
           tier: tier,
           pawbucks_used: pawbucksUsed.toString(),
+          subscription_purpose: 'pawpass_subscription',
         },
       },
       success_url: `${req.headers.get('origin')}/subscription-success`,
@@ -211,6 +195,7 @@ serve(async (req) => {
         user_id: user.id,
         tier: tier,
         pawbucks_used: pawbucksUsed.toString(),
+        subscription_purpose: 'pawpass_subscription',
       },
     });
 
