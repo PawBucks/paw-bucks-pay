@@ -1,43 +1,40 @@
 import { Formatters } from "@/utils/formatters";
- import { useNavigate } from"react-router-dom";
- import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/components/ui/card";
- import { Button } from"@/components/ui/button";
- import { Badge } from"@/components/ui/badge";
- import { Skeleton } from"@/components/ui/skeleton";
- import { ArrowLeft, DollarSign, ExternalLink, Gift, Receipt, RefreshCw, RotateCcw, TrendingUp, Users, Wallet } from "lucide-react";
- import { useMerchantEarnings } from"@/hooks/useMerchantEarnings";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { DollarSign, ExternalLink, Gift, Receipt, RefreshCw, RotateCcw, TrendingUp, Users, Wallet } from "lucide-react";
+import { useMerchantEarnings } from "@/hooks/useMerchantEarnings";
+import { MerchantWorkspaceLayout, WorkspacePageHeader } from "@/components/merchant/workspace/MerchantWorkspaceLayout";
  
  export default function MerchantTotalEarnings() {
- const navigate = useNavigate();
  const { loading, refreshing, data, fetchEarnings } = useMerchantEarnings();
  
  if (loading) {
  return (
- <div className="min-h-screen bg-background p-4 md:p-8">
- <div className="max-w-4xl lg:max-w-6xl mx-auto space-y-6">
- <Skeleton className="h-8 w-48" />
- <Skeleton className="h-[200px] w-full" />
- <Skeleton className="h-[300px] w-full" />
- </div>
- </div>
+ <MerchantWorkspaceLayout>
+   <WorkspacePageHeader section="Dashboard" title="Total Earnings" subtitle="Complete breakdown of your revenue" />
+   <div className="p-4 md:p-6 space-y-6">
+     <Skeleton className="h-[200px] w-full" />
+     <Skeleton className="h-[300px] w-full" />
+   </div>
+ </MerchantWorkspaceLayout>
  );
  }
  
  if (!data?.connected) {
  return (
- <div className="min-h-screen bg-background p-4 md:p-8">
- <div className="max-w-4xl lg:max-w-6xl mx-auto">
- <Button variant="ghost" onClick={() => navigate("/merchant-dashboard")} className="mb-6">
- <ArrowLeft className="h-4 w-4 mr-2" /> Back to Dashboard
- </Button>
- <Card>
- <CardContent className="py-12 text-center">
- <Wallet className="h-16 w-16 mx-auto text-muted-foreground mb-4" aria-hidden="true" />
- <p className="text-lg text-muted-foreground">Connect your Stripe account to view earnings details</p>
- </CardContent>
- </Card>
- </div>
- </div>
+ <MerchantWorkspaceLayout>
+   <WorkspacePageHeader section="Dashboard" title="Total Earnings" subtitle="Complete breakdown of your revenue" />
+   <div className="p-4 md:p-6">
+     <Card>
+       <CardContent className="py-12 text-center">
+         <Wallet className="h-16 w-16 mx-auto text-muted-foreground mb-4" aria-hidden="true" />
+         <p className="text-lg text-muted-foreground">Connect your Stripe account to view earnings details</p>
+       </CardContent>
+     </Card>
+   </div>
+ </MerchantWorkspaceLayout>
  );
  }
  
@@ -45,32 +42,27 @@ import { Formatters } from "@/utils/formatters";
  const breakdown = summary?.breakdown;
  
  return (
- <div className="min-h-screen bg-background p-4 md:p-8">
- <div className="max-w-4xl lg:max-w-6xl mx-auto space-y-6">
- {/* Header */}
- <div className="flex items-center justify-between">
- <div className="flex items-center gap-4">
- <Button variant="ghost" onClick={() => navigate("/merchant-dashboard")} size="icon">
- <ArrowLeft className="h-5 w-5" />
- </Button>
- <div>
- <h1 className="text-2xl font-bold">Total Earnings</h1>
- <p className="text-muted-foreground">Complete breakdown of your revenue</p>
- </div>
- </div>
- <div className="flex gap-2">
- <Button variant="outline" size="sm" onClick={() => fetchEarnings(true)} disabled={refreshing}>
- <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ?"animate-spin" :""}`} />
- Refresh
- </Button>
- {data.dashboardUrl && (
- <Button size="sm" onClick={() => window.open(data.dashboardUrl!,"_blank")}>
- <ExternalLink className="h-4 w-4 mr-2" />
- Stripe Dashboard
- </Button>
- )}
- </div>
- </div>
+ <MerchantWorkspaceLayout>
+   <WorkspacePageHeader
+     section="Dashboard"
+     title="Total Earnings"
+     subtitle="Complete breakdown of your revenue"
+     actions={
+       <>
+         <Button variant="outline" size="sm" onClick={() => fetchEarnings(true)} disabled={refreshing}>
+           <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? "animate-spin" : ""}`} />
+           Refresh
+         </Button>
+         {data.dashboardUrl && (
+           <Button size="sm" onClick={() => window.open(data.dashboardUrl!, "_blank")}>
+             <ExternalLink className="h-4 w-4 mr-2" />
+             Stripe Dashboard
+           </Button>
+         )}
+       </>
+     }
+   />
+   <div className="p-4 md:p-6 space-y-6">
  
  {/* Main Earnings Card */}
  <Card className="border-primary/20 bg-primary/5">
@@ -213,7 +205,7 @@ import { Formatters } from "@/utils/formatters";
  </p>
  </CardContent>
  </Card>
- </div>
- </div>
+   </div>
+ </MerchantWorkspaceLayout>
  );
  }
