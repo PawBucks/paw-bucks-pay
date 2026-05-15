@@ -794,12 +794,12 @@ const MerchantProducts = () => {
 
  {/* Edit Product Dialog */}
  <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
- <DialogContent>
+ <DialogContent className="max-h-[calc(100dvh-1rem)] overflow-hidden sm:max-w-xl flex flex-col">
  <DialogHeader>
  <DialogTitle>Edit Product</DialogTitle>
  <DialogDescription>Update your product details</DialogDescription>
  </DialogHeader>
- <div className="space-y-4 mt-4">
+ <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain space-y-4 pr-1 pb-2">
  <div>
  <Label htmlFor="edit-name">Name *</Label>
  <Input
@@ -838,7 +838,7 @@ const MerchantProducts = () => {
  </div>
  <Switch id="edit-active" checked={editActive} onCheckedChange={setEditActive} />
  </div>
- <div className="flex justify-end gap-2 mt-6">
+ <div className="sticky bottom-0 -mx-4 sm:-mx-6 mt-6 flex flex-col-reverse gap-2 border-t bg-background px-4 py-3 sm:flex-row sm:justify-end sm:px-6">
  <Button variant="outline" onClick={() => setEditDialogOpen(false)} disabled={updating}>
  Cancel
  </Button>
