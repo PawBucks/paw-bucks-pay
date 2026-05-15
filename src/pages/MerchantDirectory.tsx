@@ -327,7 +327,7 @@ const MerchantDirectory = () => {
          Find pet services <em className="italic text-primary font-black">worth loving</em>.
         </h1>
         <p className="text-base text-muted-foreground mb-6 max-w-3xl leading-relaxed">
-         {merchants.length} hand-picked merchants. Real reviews. Rewards on every visit.
+         {merchants.length} hand-picked pet care professionals. Real reviews. Rewards on every visit.
         </p>
 
   {/* Search Bar */}
