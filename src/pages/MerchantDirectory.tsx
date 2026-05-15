@@ -307,6 +307,11 @@ const MerchantDirectory = () => {
  progress={progress}
  className="min-h-screen bg-background pb-24 md:pb-12 overflow-auto"
  >
+        {/* ── Premium Ads (top of page, above hero) ── */}
+        <div className="container mx-auto px-4 pt-4 max-w-7xl">
+          <AdPlacement position="top" />
+        </div>
+
  {/* ── Hero + Search ── */}
       <div className="relative bg-gradient-to-b from-primary/[0.06] via-primary/[0.02] to-transparent border-b border-border/40 overflow-hidden">
        {/* Editorial radial accent */}
@@ -378,11 +383,8 @@ const MerchantDirectory = () => {
  </div>
 
  <div className="container mx-auto px-4 py-4 max-w-7xl">
- {/* Top Ad */}
- <AdPlacement position="top" />
-
  {/* ── Toolbar: Sort, Filters, View Toggle ── */}
- <div className="flex items-center justify-between gap-3 mb-4 mt-2">
+				<div className="flex items-center justify-between gap-3 mb-4">
  <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide flex-1">
  {/* Sort pills */}
  {sortOptions.map((opt) => (
