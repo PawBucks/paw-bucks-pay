@@ -32,6 +32,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { format, parseISO, startOfMonth, subMonths } from "date-fns";
 import { toast } from "@/hooks/use-toast";
+import { MerchantFundingWaitlistDialog } from "@/components/merchant/MerchantFundingWaitlistDialog";
+import { CheckCircle2 } from "lucide-react";
 
 type RecentTx = {
   id: string;
@@ -141,6 +143,14 @@ export function WorkspaceOverview() {
   const [recentLoading, setRecentLoading] = useState(true);
   const [funding, setFunding] = useState<{ status: string | null; remaining: number; rate: number | null }>({ status: null, remaining: 0, rate: null });
   const [latestInvite, setLatestInvite] = useState<{ id: string; name: string; status: string; date: string } | null>(null);
+  const [waitlistEntry, setWaitlistEntry] = useState<any | null>(null);
+  const [waitlistOpen, setWaitlistOpen] = useState(false);
+  const [merchantProfile, setMerchantProfile] = useState<{
+    business_name: string | null;
+    contact_person: string | null;
+    email: string | null;
+    phone: string | null;
+  } | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -150,7 +160,7 @@ export function WorkspaceOverview() {
       try {
         const { data: merchant } = await supabase
           .from("merchants")
-          .select("id, accepts_pawbucks, pawbucks_cap_enabled, pawbucks_cap_pct, fee_model")
+          .select("id, accepts_pawbucks, pawbucks_cap_enabled, pawbucks_cap_pct, fee_model, business_name, contact_person, email, phone")
           .eq("user_id", user.id)
           .maybeSingle();
         if (!merchant?.id || cancelled) return;
@@ -159,6 +169,21 @@ export function WorkspaceOverview() {
         setCapEnabled(!!(merchant as any).pawbucks_cap_enabled);
         if ((merchant as any).pawbucks_cap_pct != null) setCapPct(String((merchant as any).pawbucks_cap_pct));
         if ((merchant as any).fee_model === "acquisition_only") setFeeModel("acquisition_only");
+        setMerchantProfile({
+          business_name: (merchant as any).business_name ?? null,
+          contact_person: (merchant as any).contact_person ?? null,
+          email: (merchant as any).email ?? null,
+          phone: (merchant as any).phone ?? null,
+        });
+
+        supabase
+          .from("merchant_funding_waitlist")
+          .select("*")
+          .eq("merchant_id", merchant.id)
+          .maybeSingle()
+          .then(({ data }) => {
+            if (!cancelled) setWaitlistEntry(data ?? null);
+          });
 
         const sixMonthsAgo = startOfMonth(subMonths(new Date(), 5)).toISOString();
 
@@ -412,21 +437,52 @@ export function WorkspaceOverview() {
             <div className="flex-1 min-w-[200px]">
               <p className="font-semibold text-sm">Merchant Funding — Coming Soon</p>
               <p className="text-xs text-muted-foreground">
-                PawBucks will offer working capital loans to qualified merchants. No equity, no
-                lengthy applications.
+                {waitlistEntry
+                  ? "You're on the waitlist. We'll notify you as soon as Merchant Funding is available in your area."
+                  : "PawBucks will offer working capital loans to qualified merchants. No equity, no lengthy applications."}
               </p>
             </div>
-            <Button
-              size="sm"
-              variant="outline"
-              className="border-[hsl(var(--warning)/0.5)] bg-[hsl(var(--warning)/0.15)] text-[hsl(38_92%_30%)] hover:bg-[hsl(var(--warning)/0.25)]"
-              onClick={() => navigate("/merchant/support")}
-            >
-              Join Waitlist
-            </Button>
+            {waitlistEntry ? (
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-[hsl(var(--success))]">
+                  <CheckCircle2 className="h-4 w-4" /> On the waitlist
+                </span>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setWaitlistOpen(true)}
+                >
+                  Edit details
+                </Button>
+              </div>
+            ) : (
+              <Button
+                size="sm"
+                variant="outline"
+                className="border-[hsl(var(--warning)/0.5)] bg-[hsl(var(--warning)/0.15)] text-[hsl(38_92%_30%)] hover:bg-[hsl(var(--warning)/0.25)]"
+                onClick={() => setWaitlistOpen(true)}
+                disabled={!merchantId}
+              >
+                Join Waitlist
+              </Button>
+            )}
           </CardContent>
         </Card>
         )}
+
+        <MerchantFundingWaitlistDialog
+          open={waitlistOpen}
+          onOpenChange={setWaitlistOpen}
+          merchantId={merchantId}
+          defaults={{
+            business_name: merchantProfile?.business_name ?? null,
+            contact_name: merchantProfile?.contact_person ?? null,
+            contact_email: merchantProfile?.email ?? user?.email ?? null,
+            contact_phone: merchantProfile?.phone ?? null,
+          }}
+          existing={waitlistEntry}
+          onJoined={(entry) => setWaitlistEntry(entry)}
+        />
 
         {/* Account type */}
         <Card className="shadow-none">
