@@ -28,6 +28,8 @@ import { MerchantMap } from"@/components/MerchantMap";
 import { LayoutGrid, LayoutList, Map, MapPin, Search, SlidersHorizontal, Store, X } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
+import { useUserLocation } from "@/hooks/useUserLocation";
+import { calculateDistance } from "@/lib/geo";
 
 type MerchantWithRating = {
  id: string;
@@ -85,6 +87,7 @@ const getBusinessIcon = (type: string) => {
 
 const sortOptions = [
  { value:"rating", label:"Top Rated" },
+ { value:"distance", label:"Nearest" },
  { value:"reviews", label:"Most Reviewed" },
  { value:"cashback", label:"Best Rewards" },
  { value:"name", label:"A – Z" },
@@ -101,6 +104,16 @@ const MerchantDirectory = () => {
  const [pawbucksOnly, setPawbucksOnly] = usePersistentState<boolean>("directory-pawbucks", false);
  const [viewMode, setViewMode] = usePersistentState<"list" |"grid" |"map">("directory-view","list");
  const [showMobileMap, setShowMobileMap] = useState(false);
+
+ // Browser geolocation for "Near Me" + distance ranking
+ const { userLocation, locationLoading, locationError, requestLocation } = useUserLocation();
+
+ // Auto-request location when the user picks the Nearest sort
+ useEffect(() => {
+  if (sortBy === "distance" && !userLocation && !locationLoading && !locationError) {
+   requestLocation();
+  }
+ }, [sortBy, userLocation, locationLoading, locationError, requestLocation]);
 
  // Fetch verified, sponsored, featured, and premium merchants for badge/pin display
  const { data: verifiedProIds = [] } = useVerifiedProMerchants();
@@ -189,7 +202,23 @@ const MerchantDirectory = () => {
  );
  }
 
- const sorted = [...filtered].sort((a, b) => {
+  // Attach distance when location is available
+  const withDistance = userLocation
+   ? filtered.map((m) => {
+      if (m.latitude == null || m.longitude == null) return { ...m, distance: undefined };
+      return {
+       ...m,
+       distance: calculateDistance(
+        userLocation.latitude,
+        userLocation.longitude,
+        m.latitude,
+        m.longitude,
+       ),
+      };
+     })
+   : filtered;
+
+  const sorted = [...withDistance].sort((a, b) => {
  const aIsBoosted = searchBoostedIds.has(a.id);
  const bIsBoosted = searchBoostedIds.has(b.id);
  if (aIsBoosted && !bIsBoosted) return -1;
@@ -202,6 +231,14 @@ const MerchantDirectory = () => {
  return b.cashback_rate - a.cashback_rate;
  case"reviews":
  return b.review_count - a.review_count;
+  case"distance": {
+   const aD = (a as any).distance;
+   const bD = (b as any).distance;
+   if (aD == null && bD == null) return 0;
+   if (aD == null) return 1;
+   if (bD == null) return -1;
+   return aD - bD;
+  }
  case"name":
  default:
  return a.business_name.localeCompare(b.business_name);
@@ -209,7 +246,7 @@ const MerchantDirectory = () => {
  });
 
  return sorted;
- }, [merchants, selectedCategory, debouncedSearch, sortBy, pawbucksOnly, searchBoostedIds]);
+  }, [merchants, selectedCategory, debouncedSearch, sortBy, pawbucksOnly, searchBoostedIds, userLocation]);
 
  // Track search ranking impressions for boosted merchants
  useEffect(() => {
@@ -387,19 +424,28 @@ const MerchantDirectory = () => {
 				<div className="flex items-center justify-between gap-3 mb-4">
  <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide flex-1">
  {/* Sort pills */}
- {sortOptions.map((opt) => (
- <button
- key={opt.value}
- onClick={() => setSortBy(opt.value)}
- className={`text-xs font-medium px-2.5 py-1 rounded-md whitespace-nowrap transition-colors ${
- sortBy === opt.value
- ?"bg-foreground text-background"
- :"text-muted-foreground hover:text-foreground hover:bg-muted"
- }`}
- >
- {opt.label}
- </button>
- ))}
+  {sortOptions.map((opt) => {
+   const isDistance = opt.value === "distance";
+   return (
+    <button
+     key={opt.value}
+     onClick={() => {
+      setSortBy(opt.value);
+      if (isDistance && !userLocation) requestLocation();
+     }}
+     className={`flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-md whitespace-nowrap transition-colors ${
+      sortBy === opt.value
+       ? "bg-foreground text-background"
+       : "text-muted-foreground hover:text-foreground hover:bg-muted"
+     }`}
+    >
+     {isDistance && (
+      <MapPin className={`w-3 h-3 ${locationLoading ? "animate-pulse" : ""}`} />
+     )}
+     {isDistance && locationLoading ? "Locating…" : opt.label}
+    </button>
+   );
+  })}
  <Separator orientation="vertical" className="h-4 mx-1" />
  <button
  onClick={() => setPawbucksOnly(!pawbucksOnly)}
