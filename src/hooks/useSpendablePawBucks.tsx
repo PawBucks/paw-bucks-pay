@@ -134,9 +134,12 @@ export function useSpendablePawBucks(userId: string | undefined): SpendablePawBu
   .sort()[0] ?? null;
   setPromotionalNextExpiresAt(soonestPromo);
 
- // Map pet fund to welcome credit interface for backwards compatibility
- setWelcomeCreditBalance(pfBalance);
- setHasWelcomeCredit(pfBalance > 0);
+    // Pet fund and legacy welcome credit are mutually exclusive sources.
+    // Do NOT mirror pet fund into welcomeCreditBalance, otherwise consumers
+    // that sum both fields would double-count (e.g. SimpleHome shows $40
+    // instead of $20 for a Series A upfront deposit).
+    setWelcomeCreditBalance(0);
+    setHasWelcomeCredit(false);
  } else if (legacyResult.data && legacyResult.data.status ==="active") {
  // Legacy welcome credit fallback
  const expiresAt = new Date(legacyResult.data.expires_at);
