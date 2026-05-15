@@ -14,7 +14,7 @@ import { PageLoader } from"@/components/PageLoader";
 import { Header } from"@/components/Header";
 import { AdPlacement } from"@/components/AdPlacement";
 import { PullToRefresh } from"@/components/PullToRefresh";
-import { Search, SlidersHorizontal, X, List, Map, ArrowUpDown } from "lucide-react";
+import { Search, SlidersHorizontal, X, List, Map, ArrowUpDown, MapPin } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { MerchantMap } from"@/components/MerchantMap";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem } from"@/components/ui/dropdown-menu";
@@ -655,35 +655,78 @@ const Discover = () => {
                 <AdPlacement position="top" />
               </div>
 
-              {/* ── Hero Section ── */}
-              <div className="border-b bg-card">
-                <div className="container mx-auto px-4 py-5 sm:py-8 max-w-4xl lg:max-w-7xl">
-                  <div className="max-w-2xl">
-                    <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight mb-1.5">
-                      Find the best pet services
-                    </h1>
-                    <p className="text-sm sm:text-base text-muted-foreground mb-5">
-                      Trusted merchants · Earn rewards on every visit
-                    </p>
+              {/* ── Editorial Hero + Search ── */}
+              <div className="relative bg-gradient-to-b from-primary/[0.06] via-primary/[0.02] to-transparent border-b border-border/40 overflow-hidden">
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -top-32 -right-24 w-[420px] h-[420px] rounded-full opacity-60"
+                  style={{ background: "radial-gradient(circle, hsl(var(--primary) / 0.18) 0%, transparent 70%)" }}
+                />
+                <div className="container mx-auto px-4 pt-10 pb-6 max-w-4xl lg:max-w-7xl relative">
+                  <div className="text-[0.7rem] font-medium tracking-[0.18em] uppercase text-primary mb-3 flex items-center gap-2">
+                    <MapPin className="w-3.5 h-3.5" aria-hidden="true" />
+                    Discover
                   </div>
+                  <h1
+                    className="font-serif font-black leading-[1.05] tracking-[-0.025em] text-foreground mb-4"
+                    style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: "clamp(2rem, 5vw, 3.25rem)" }}
+                  >
+                    Find pet services <em className="italic text-primary font-black">worth loving</em>.
+                  </h1>
+                  <p className="text-base text-muted-foreground mb-6 max-w-3xl leading-relaxed">
+                    Trusted merchants near you. Real reviews. Rewards on every visit.
+                  </p>
 
-                  {/* Search Bar — Yelp-style prominent */}
-                  <div className="flex gap-2 sm:gap-3">
+                  <div className="flex gap-2 sm:gap-3 max-w-3xl">
                     <div className="relative flex-1">
-                      <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-muted-foreground" />
+                      <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <Input
-                        placeholder="Groomers, vets, pet stores..."
+                        placeholder="Search by name, service, or location…"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10 pr-4 h-11 sm:h-12 bg-background border-border shadow-sm text-sm sm:text-base rounded-lg"
+                        className="pl-10 pr-10 h-11 bg-background/80 backdrop-blur-sm border-border/60 shadow-sm rounded-md focus-visible:ring-primary/30"
                       />
+                      {searchTerm && (
+                        <button
+                          onClick={() => setSearchTerm("")}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-muted transition-colors"
+                          aria-label="Clear search"
+                        >
+                          <X className="w-4 h-4 text-muted-foreground" />
+                        </button>
+                      )}
                     </div>
-                    <Button asChild variant="outline" className="h-11 sm:h-12 gap-2 rounded-lg">
+                    <Button asChild variant="outline" className="h-11 gap-2 rounded-md">
                       <Link to="/directory">
                         <span className="w-4 h-4" aria-hidden="true">📖</span>
                         <span className="hidden sm:inline">Directory</span>
                       </Link>
                     </Button>
+                  </div>
+                </div>
+              </div>
+
+              {/* ── Sticky Category Pills ── */}
+              <div className="border-b border-border/30 bg-background/80 backdrop-blur-sm sticky top-0 z-20">
+                <div className="container mx-auto px-4 max-w-4xl lg:max-w-7xl">
+                  <div className="flex gap-1.5 overflow-x-auto py-3 scrollbar-hide -mx-1 px-1">
+                    {businessTypes.map((type) => {
+                      const isSelected = selectedCategory === type.value;
+                      return (
+                        <button
+                          key={type.value}
+                          onClick={() => setSelectedCategory(type.value)}
+                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all flex-shrink-0 ${
+                            isSelected
+                              ? "bg-primary text-primary-foreground shadow-sm"
+                              : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground"
+                          }`}
+                        >
+                          <span className="text-base leading-none" role="img" aria-hidden="true">{type.emoji}</span>
+                          {type.label}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
