@@ -33,6 +33,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { format, parseISO, startOfMonth, subMonths } from "date-fns";
 import { toast } from "@/hooks/use-toast";
 import { MerchantFundingWaitlistDialog } from "@/components/merchant/MerchantFundingWaitlistDialog";
+import { StripeConnectButton } from "@/components/merchant/StripeConnectButton";
 import { CheckCircle2 } from "lucide-react";
 
 type RecentTx = {
@@ -413,6 +414,9 @@ export function WorkspaceOverview() {
       />
 
       <div className="p-4 md:p-6 space-y-4 max-w-7xl w-full mx-auto">
+        {/* Stripe Connect setup / status */}
+        <StripeConnectButton />
+
         {/* Funding banner */}
         {funding.status === "active" ? (
           <Card className="border-[hsl(var(--success)/0.4)] bg-[hsl(var(--success)/0.08)] shadow-none">
