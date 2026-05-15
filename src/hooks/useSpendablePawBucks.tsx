@@ -118,14 +118,21 @@ export function useSpendablePawBucks(userId: string | undefined): SpendablePawBu
   // Determine min transaction + soonest promotional expiration
   const { data: releases } = await supabase
   .from("pet_fund_releases")
-  .select("month_number, used_at, expires_at")
+  .select("month_number, used_at, expires_at, min_transaction_usd")
   .eq("user_id", effectiveUserId)
   .eq("status","released")
   .is("used_at", null)
   .order("month_number", { ascending: true });
 
   const oldestAvailable = releases?.[0];
-  setPetFundMinTransactionUsd(oldestAvailable?.month_number === 0 ? 40 : 20);
+  // Use the per-release minimum stored in the DB so client always
+  // matches server-side enforcement ($60 for the $20 upfront drip,
+  // $30 for the $10 monthly drips on Series A).
+  setPetFundMinTransactionUsd(
+    oldestAvailable?.min_transaction_usd != null
+      ? Number(oldestAvailable.min_transaction_usd)
+      : (oldestAvailable?.month_number === 0 ? 60 : 30)
+  );
 
   const now = new Date();
   const soonestPromo = (releases || [])

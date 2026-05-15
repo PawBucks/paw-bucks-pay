@@ -293,6 +293,33 @@ serve(async (req) => {
       // Spend from wallet first, then welcome credit
       walletPawbucks = Math.min(walletBalance, pawbucksAmount);
       welcomeCreditPawbucks = pawbucksAmount - walletPawbucks;
+
+      // Enforce Pet Fund per-release minimum spend whenever the requested
+      // PawBucks redemption would tap into the Pet Fund (i.e. the wallet
+      // alone does not cover the requested amount).
+      if (welcomeCreditPawbucks > 0) {
+        const { data: oldestPetFundRelease } = await supabaseAdmin
+          .from('pet_fund_releases')
+          .select('min_transaction_usd, amount, month_number')
+          .eq('user_id', user.id)
+          .eq('status', 'released')
+          .is('used_at', null)
+          .order('month_number', { ascending: true })
+          .limit(1)
+          .maybeSingle();
+
+        if (oldestPetFundRelease) {
+          const minUsd = Number(oldestPetFundRelease.min_transaction_usd);
+          if (totalAmount < minUsd) {
+            return new Response(
+              JSON.stringify({
+                error: `Minimum spend of $${minUsd.toFixed(2)} required to use this Pet Fund credit.`,
+              }),
+              { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+            );
+          }
+        }
+      }
     }
 
     logStep('Payment breakdown', {
