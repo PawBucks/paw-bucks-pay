@@ -368,7 +368,7 @@ export function WorkspaceOverview() {
                   {funding.rate != null ? ` · ${funding.rate}% repayment rate` : ""}
                 </p>
               </div>
-              <Button size="sm" variant="outline" onClick={() => navigate("/merchant/quick-actions")}>
+              <Button size="sm" variant="outline" onClick={() => navigate("/merchant/support")}>
                 Manage
               </Button>
             </CardContent>
@@ -388,7 +388,7 @@ export function WorkspaceOverview() {
               size="sm"
               variant="outline"
               className="border-[hsl(var(--warning)/0.5)] bg-[hsl(var(--warning)/0.15)] text-[hsl(38_92%_30%)] hover:bg-[hsl(var(--warning)/0.25)]"
-              onClick={() => navigate("/merchant/quick-actions")}
+              onClick={() => navigate("/merchant/support")}
             >
               Join Waitlist
             </Button>
@@ -505,7 +505,7 @@ export function WorkspaceOverview() {
             label="Merchant Funding"
             value={funding.status === "active" ? "Active" : "No Loan"}
             sub={funding.status === "active" ? `Remaining: ${fmtUsd(funding.remaining)}` : "Repayment: $0.00"}
-            onClick={() => navigate("/merchant/quick-actions")}
+            onClick={() => navigate("/merchant/support")}
           />
         </div>
 
