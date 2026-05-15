@@ -117,7 +117,7 @@ export function WorkspaceOverview() {
   const [capPct, setCapPct] = useState("50");
   const [savingSetting, setSavingSetting] = useState(false);
   const [salesTx, setSalesTx] = useState<{ amount: number; created_at: string }[]>([]);
-  const [allTxRows, setAllTxRows] = useState<{ amount: number; rewards_earned: number | null; cashback_earned: number | null; pawbucks_used: number | null; created_at: string; status: string | null }[]>([]);
+  const [allTxRows, setAllTxRows] = useState<{ amount: number; stripe_amount: number | null; application_fee: number | null; rewards_earned: number | null; cashback_earned: number | null; pawbucks_used: number | null; created_at: string; status: string | null }[]>([]);
   const [chartsLoading, setChartsLoading] = useState(true);
   const [recentTx, setRecentTx] = useState<RecentTx[]>([]);
   const [recentLoading, setRecentLoading] = useState(true);
@@ -153,7 +153,7 @@ export function WorkspaceOverview() {
             .gte("created_at", sixMonthsAgo),
           supabase
             .from("transactions")
-            .select("amount, rewards_earned, cashback_earned, pawbucks_used, created_at, status")
+            .select("amount, stripe_amount, application_fee, rewards_earned, cashback_earned, pawbucks_used, created_at, status")
             .eq("merchant_id", merchant.id)
             .eq("status", "completed"),
           supabase
@@ -258,20 +258,25 @@ export function WorkspaceOverview() {
     let totalRewardsGivenPb = 0; // PawBucks units rewarded to customers
     let txCount = 0;
     let monthPbReceived = 0;
+    let storedFees = 0; // Sum of stored application_fee (Stripe-authoritative)
     const monthStart = startOfMonth(new Date()).getTime();
     allTxRows.forEach((t) => {
       const usd = Number(t.amount) || 0;
       const pbUsed = Number(t.pawbucks_used) || 0;
       const rewards = Number(t.rewards_earned ?? t.cashback_earned) || 0;
+      const fee = Number(t.application_fee) || 0;
       totalSalesUsd += usd;
       totalPbReceived += pbUsed;
       totalRewardsGivenPb += rewards;
+      storedFees += fee;
       txCount += 1;
       const ts = parseISO(t.created_at).getTime();
       if (ts >= monthStart) monthPbReceived += pbUsed;
     });
     const avg = txCount > 0 ? totalSalesUsd / txCount : 0;
-    const successFees = feeModel === "full_ecosystem" ? totalSalesUsd * 0.03 : 0;
+    // Read fees from the actually-stored application_fee (Stripe charge time),
+    // never re-derive 3% locally — manual/invoice payments have no Stripe fee.
+    const successFees = feeModel === "full_ecosystem" ? storedFees : 0;
     return {
       totalSalesUsd,
       avg,
