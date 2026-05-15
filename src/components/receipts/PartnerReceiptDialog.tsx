@@ -201,7 +201,7 @@ export const PartnerReceiptDialog = ({ open, onOpenChange, userId }: PartnerRece
 
  return (
  <Dialog open={open} onOpenChange={handleClose}>
- <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-md max-h-[calc(100dvh-1rem)] overflow-hidden flex flex-col">
  <DialogHeader>
  <DialogTitle className="flex items-center gap-2">
  <span className="h-5 w-5 text-primary" aria-hidden="true">🏪</span>
@@ -212,7 +212,8 @@ export const PartnerReceiptDialog = ({ open, onOpenChange, userId }: PartnerRece
  </DialogDescription>
  </DialogHeader>
 
- <div className="flex items-center gap-2 p-3 rounded-lg bg-primary/10 border border-primary/20">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain space-y-4 pr-1 sm:pr-2">
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-primary/10 border border-primary/20">
  <Sparkles className="w-4 h-4 text-primary" />
  <span className="text-sm font-medium">
  {tierLabel} Rate: {pbPerDollar} PB per $1
@@ -292,8 +293,9 @@ export const PartnerReceiptDialog = ({ open, onOpenChange, userId }: PartnerRece
  </Popover>
  </div>
  </div>
+        </div>
 
- <div className="flex gap-3">
+        <div className="sticky bottom-0 -mx-4 sm:-mx-6 mt-4 flex flex-col-reverse gap-2 border-t bg-background px-4 py-3 sm:flex-row sm:justify-end sm:px-6">
  <Button variant="outline" onClick={handleClose} className="flex-1">Cancel</Button>
  <Button onClick={handleSubmit} disabled={isSubmitting} className="flex-1">
  {isSubmitting ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" />Submitting...</>) : (<><Upload className="mr-2 h-4 w-4" />Submit Receipt</>)}

@@ -148,12 +148,13 @@ export const EditPetProfileDialog = ({ pet, open, onOpenChange, onSuccess }: Edi
 
  return (
  <Dialog open={open} onOpenChange={onOpenChange}>
- <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
- <DialogHeader>
- <DialogTitle>Edit Pet Profile</DialogTitle>
- <DialogDescription>Update your pet's information</DialogDescription>
- </DialogHeader>
- <form onSubmit={handleSubmit} className="space-y-6">
+      <DialogContent className="max-w-2xl max-h-[calc(100dvh-1rem)] overflow-hidden flex flex-col">
+        <DialogHeader>
+          <DialogTitle>Edit Pet Profile</DialogTitle>
+          <DialogDescription>Update your pet's information</DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain space-y-6 pr-1 pb-2 sm:pr-2">
  {/* Photo Upload */}
  <div className="space-y-2">
  <Label>Pet Photo</Label>
@@ -326,19 +327,20 @@ export const EditPetProfileDialog = ({ pet, open, onOpenChange, onSuccess }: Edi
  rows={2}
  />
  </div>
- </div>
+          </div>
+          </div>
 
- <div className="flex gap-3 pt-4">
+          <div className="sticky bottom-0 -mx-4 sm:-mx-6 mt-4 flex flex-col-reverse gap-2 border-t bg-background px-4 py-3 sm:flex-row sm:justify-end sm:px-6">
  <Button
  type="button"
  variant="outline"
  onClick={() => onOpenChange(false)}
- className="flex-1"
+              className="sm:flex-none"
  disabled={isLoading}
  >
  Cancel
  </Button>
- <Button type="submit" className="flex-1" disabled={isLoading}>
+            <Button type="submit" className="sm:flex-none" disabled={isLoading}>
  {isLoading ? (
  <>
  <Loader2 className="w-4 h-4 mr-2 animate-spin" />

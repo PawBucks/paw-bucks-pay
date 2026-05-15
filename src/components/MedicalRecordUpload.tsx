@@ -205,14 +205,15 @@ export const MedicalRecordUpload = ({ petId, onSuccess }: MedicalRecordUploadPro
  Add Visit Records
  </Button>
  </DialogTrigger>
- <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[calc(100dvh-1rem)] overflow-hidden flex flex-col">
  <DialogHeader>
  <DialogTitle>Add Medical Visit</DialogTitle>
  <DialogDescription>
  Record a vet visit with multiple itemized records. You can add procedures, medications, tests, etc.
  </DialogDescription>
  </DialogHeader>
- <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain space-y-6 pr-1 pb-2 sm:pr-2">
  <div className="space-y-4 pb-4 border-b">
  <div className="space-y-2">
  <Label htmlFor="visit_date">Visit Date *</Label>
@@ -379,8 +380,9 @@ export const MedicalRecordUpload = ({ petId, onSuccess }: MedicalRecordUploadPro
  </Card>
  ))}
  </div>
+          </div>
 
- <DialogFooter>
+          <DialogFooter className="sticky bottom-0 -mx-4 sm:-mx-6 mt-4 flex-col-reverse gap-2 border-t bg-background px-4 py-3 sm:flex-row sm:justify-end sm:px-6">
  <Button type="button" variant="outline" onClick={() => setOpen(false)}>
  Cancel
  </Button>
