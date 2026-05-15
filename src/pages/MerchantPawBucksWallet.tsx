@@ -1,16 +1,17 @@
-import { useEffect, useState, useCallback } from"react";
-import { useNavigate } from"react-router-dom";
-import { useAuth } from"@/hooks/useAuth";
-import { useOptimizedQuery } from"@/hooks/useOptimizedQuery";
-import { supabase } from"@/integrations/supabase/client";
-import { SEO } from"@/components/SEO";
-import { Button } from"@/components/ui/button";
-import { GradientCard } from"@/components/ui/gradient-card";
-import { PageLoader } from"@/components/PageLoader";
-import { ArrowDownRight, ArrowLeft, ArrowUpRight, ShoppingBag, Store, TrendingUp } from "lucide-react";
-import { Formatters } from"@/utils/formatters";
-import { format, parseISO } from"date-fns";
+import { useEffect, useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { useOptimizedQuery } from "@/hooks/useOptimizedQuery";
+import { supabase } from "@/integrations/supabase/client";
+import { SEO } from "@/components/SEO";
+import { Button } from "@/components/ui/button";
+import { GradientCard } from "@/components/ui/gradient-card";
+import { PageLoader } from "@/components/PageLoader";
+import { ArrowDownRight, ArrowUpRight, ShoppingBag, Store, TrendingUp } from "lucide-react";
+import { Formatters } from "@/utils/formatters";
+import { format, parseISO } from "date-fns";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
+import { MerchantWorkspaceLayout, WorkspacePageHeader } from "@/components/merchant/workspace/MerchantWorkspaceLayout";
 
 type MerchantPawBucksWallet = {
  id: string;
@@ -139,31 +140,9 @@ const MerchantPawBucksWallet = () => {
  }
 
  return (
- <div className="min-h-screen bg-background">
- {/* Header */}
- <header className="border-b border-border/50 bg-card/95 backdrop-blur-xl sticky top-0 z-50" style={{ paddingTop:'max(0.5rem, env(safe-area-inset-top))' }}>
- <div className="container mx-auto px-4 py-3 flex items-center gap-4">
- <Button 
- variant="ghost" 
- size="icon" 
- onClick={() => navigate('/merchant-dashboard')}
- className="min-h-[44px] min-w-[44px]"
- >
- <ArrowLeft className="w-5 h-5" />
- </Button>
- <div className="flex items-center gap-3">
- <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
- <PawBucksLogo className="w-5 h-5 text-primary" />
- </div>
- <div>
- <h1 className="text-lg font-bold">Merchant PawBucks</h1>
- <p className="text-xs text-muted-foreground">{merchant.business_name}</p>
- </div>
- </div>
- </div>
- </header>
-
- <main className="container mx-auto px-4 py-6 pb-24 max-w-4xl lg:max-w-5xl">
+ <MerchantWorkspaceLayout>
+ <WorkspacePageHeader section="Wallet" title="Merchant PawBucks" subtitle={merchant.business_name} />
+ <main className="p-4 md:p-6 max-w-4xl lg:max-w-5xl mx-auto w-full">
  {/* Main Balance Card */}
  <GradientCard gradient className="mb-6">
  <div className="text-center">
@@ -286,7 +265,7 @@ const MerchantPawBucksWallet = () => {
  )}
  </GradientCard>
  </main>
- </div>
+ </MerchantWorkspaceLayout>
  );
 };
 

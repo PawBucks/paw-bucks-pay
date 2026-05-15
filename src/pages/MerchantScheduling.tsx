@@ -8,7 +8,7 @@ import { Button } from"@/components/ui/button";
 import { GradientCard } from"@/components/ui/gradient-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
 import { Badge } from"@/components/ui/badge";
-import { ArrowLeft, Calendar, Clock, Compass, Dog, Loader2, Plus, Settings, Users, Zap } from "lucide-react";
+import { Calendar, Clock, Compass, Dog, Loader2, Plus, Settings, Users, Zap } from "lucide-react";
 import { toast } from"sonner";
 import { ServicesList } from"@/components/scheduling/ServicesList";
 import { AvailabilityManager } from"@/components/scheduling/AvailabilityManager";
@@ -21,6 +21,7 @@ import { FlashSaleDialog } from"@/components/scheduling/FlashSaleDialog";
 import { IntakeQuestionsManager } from"@/components/scheduling/IntakeQuestionsManager";
 import { GroomingSettingsTab } from"@/components/scheduling/GroomingSettingsTab";
 import { SmartScheduleTab } from"@/components/scheduling/SmartScheduleTab";
+import { MerchantWorkspaceLayout, WorkspacePageHeader } from "@/components/merchant/workspace/MerchantWorkspaceLayout";
 import { 
  schedulingService, 
  type MerchantService, 
@@ -207,9 +208,12 @@ const MerchantScheduling = () => {
 
  if (authLoading || loading) {
  return (
- <div className="min-h-screen flex items-center justify-center">
- <Loader2 className="w-8 h-8 animate-spin text-primary" />
- </div>
+ <MerchantWorkspaceLayout>
+   <WorkspacePageHeader section="Catalog & Services" title="Scheduling" subtitle="Manage services & bookings" />
+   <div className="flex items-center justify-center py-24">
+     <Loader2 className="w-8 h-8 animate-spin text-primary" />
+   </div>
+ </MerchantWorkspaceLayout>
  );
  }
 
@@ -220,37 +224,27 @@ const MerchantScheduling = () => {
  }).length;
 
  return (
- <div className="min-h-screen bg-background">
- <SEO 
- title="Scheduling - Manage Services & Bookings"
- description="Manage your pet services, set availability, and view customer bookings"
- />
- <header className="border-b border-border/50 bg-card/95 backdrop-blur-xl sticky top-0 z-50" style={{ paddingTop:'max(0.5rem, env(safe-area-inset-top))' }}>
- <div className="container mx-auto px-4 py-3 flex items-center justify-between gap-4">
- <div className="flex items-center gap-3">
- <Button variant="ghost" size="icon" onClick={() => navigate('/merchant-dashboard')}>
- <ArrowLeft className="w-5 h-5" />
- </Button>
- <div>
- <h1 className="text-xl font-bold">Scheduling</h1>
- <p className="text-xs text-muted-foreground">Manage services & bookings</p>
- </div>
- </div>
- <div className="flex items-center gap-2">
- {pendingBookings > 0 && (
- <Badge variant="secondary" className="bg-accent/20 text-accent-foreground">
- {pendingBookings} pending
- </Badge>
- )}
- <Button onClick={() => setServiceDialogOpen(true)} size="sm">
- <Plus className="w-4 h-4 mr-1" />
- Add Service
- </Button>
- </div>
- </div>
- </header>
-
- <main className="container mx-auto px-4 py-6 max-w-7xl">
+ <MerchantWorkspaceLayout>
+   <SEO title="Scheduling · Merchant Workspace" description="Manage your pet services, set availability, and view customer bookings" />
+   <WorkspacePageHeader
+     section="Catalog & Services"
+     title="Scheduling"
+     subtitle="Manage services & bookings"
+     actions={
+       <>
+         {pendingBookings > 0 && (
+           <Badge variant="secondary" className="bg-accent/20 text-accent-foreground">
+             {pendingBookings} pending
+           </Badge>
+         )}
+         <Button onClick={() => setServiceDialogOpen(true)} size="sm">
+           <Plus className="w-4 h-4 mr-1" />
+           Add Service
+         </Button>
+       </>
+     }
+   />
+   <main className="p-4 md:p-6 max-w-7xl mx-auto w-full">
  {/* Quick Stats */}
  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
  <GradientCard className="p-4">
@@ -463,7 +457,7 @@ const MerchantScheduling = () => {
  }
  }}
  />
- </div>
+ </MerchantWorkspaceLayout>
  );
 };
 

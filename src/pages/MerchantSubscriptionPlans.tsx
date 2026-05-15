@@ -1,5 +1,5 @@
 import { useState, useEffect } from"react";
-import { useNavigate } from"react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from"@/hooks/useAuth";
 import { supabase } from"@/integrations/supabase/client";
 import { merchantSubscriptionPlansService } from"@/services/api/merchantSubscriptionPlans.service";
@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/comp
 import { Badge } from"@/components/ui/badge";
 import { Switch } from"@/components/ui/switch";
 import { Skeleton } from"@/components/ui/skeleton";
+import { MerchantWorkspaceLayout, WorkspacePageHeader } from "@/components/merchant/workspace/MerchantWorkspaceLayout";
 import {
  DropdownMenu,
  DropdownMenuContent,
@@ -273,16 +274,16 @@ const MerchantSubscriptionPlans = () => {
 
  if (authLoading || loading) {
  return (
- <div className="min-h-screen bg-background">
- <div className="container max-w-5xl lg:max-w-6xl mx-auto px-4 py-6">
- <Skeleton className="h-10 w-64 mb-6" />
- <div className="grid gap-4">
- {[1, 2, 3].map(i => (
- <Skeleton key={i} className="h-40 w-full" />
- ))}
- </div>
- </div>
- </div>
+ <MerchantWorkspaceLayout>
+   <WorkspacePageHeader section="Catalog & Services" title="Subscription Plans" subtitle="Create recurring billing plans" />
+   <div className="p-4 md:p-6 max-w-5xl lg:max-w-6xl mx-auto w-full">
+     <div className="grid gap-4">
+       {[1, 2, 3].map(i => (
+         <Skeleton key={i} className="h-40 w-full" />
+       ))}
+     </div>
+   </div>
+ </MerchantWorkspaceLayout>
  );
  }
 
@@ -294,26 +295,19 @@ const MerchantSubscriptionPlans = () => {
  noIndex
  />
  
- <div className="min-h-screen bg-background">
- <div className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur">
- <div className="container max-w-5xl lg:max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
- <div className="flex items-center gap-3">
- <Button variant="ghost" size="icon" onClick={() => navigate("/merchant-dashboard")}>
- <ArrowLeft className="h-5 w-5" />
- </Button>
- <div>
- <h1 className="text-xl font-bold">Subscription Plans</h1>
- <p className="text-sm text-muted-foreground">Create recurring billing plans</p>
- </div>
- </div>
- <Button onClick={() => setFormOpen(true)}>
- <Plus className="h-4 w-4 mr-2" />
- New Plan
- </Button>
- </div>
- </div>
-
- <main className="container max-w-5xl lg:max-w-6xl mx-auto px-4 py-6">
+ <MerchantWorkspaceLayout>
+   <WorkspacePageHeader
+     section="Catalog & Services"
+     title="Subscription Plans"
+     subtitle="Create recurring billing plans"
+     actions={
+       <Button onClick={() => setFormOpen(true)}>
+         <Plus className="h-4 w-4 mr-2" />
+         New Plan
+       </Button>
+     }
+   />
+   <main className="p-4 md:p-6 max-w-5xl lg:max-w-6xl mx-auto w-full">
  {plans.length === 0 ? (
  <Card className="border-dashed">
  <CardContent className="flex flex-col items-center justify-center py-16">
@@ -439,7 +433,7 @@ const MerchantSubscriptionPlans = () => {
  </div>
  )}
  </main>
- </div>
+ </MerchantWorkspaceLayout>
 
  <SubscriptionPlanForm
  open={formOpen}

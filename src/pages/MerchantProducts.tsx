@@ -28,6 +28,7 @@ import { toast } from"sonner";
 import { ArrowLeft, DollarSign, ExternalLink, Loader2, Package, Pencil, Plus, RefreshCw, Store, Trash2 } from "lucide-react";
 import { ProductImageUpload } from"@/components/shared/ProductImageUpload";
 import { PricingCalculator } from"@/components/merchant/PricingCalculator";
+import { MerchantWorkspaceLayout, WorkspacePageHeader } from "@/components/merchant/workspace/MerchantWorkspaceLayout";
 import { Switch } from"@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from"@/components/ui/select";
 import { SEO } from"@/components/SEO";
@@ -441,44 +442,30 @@ const MerchantProducts = () => {
 
  if (authLoading || loading) {
  return (
- <div className="flex items-center justify-center min-h-screen">
- <Loader2 className="h-8 w-8 animate-spin text-primary" />
- </div>
+ <MerchantWorkspaceLayout>
+   <WorkspacePageHeader section="Catalog & Services" title="My Products" subtitle="Manage your store products and pricing" />
+   <div className="flex items-center justify-center py-24">
+     <Loader2 className="h-8 w-8 animate-spin text-primary" />
+   </div>
+ </MerchantWorkspaceLayout>
  );
  }
 
  return (
- <div className="container py-8 max-w-6xl">
- <SEO 
- title="My Products - Merchant Dashboard"
- description="Manage your store products and view your storefront"
- />
-
- {/* Header */}
- <div className="flex items-start gap-3 mb-8">
- <Button
- variant="ghost"
- size="icon"
- onClick={() => navigate("/merchant-dashboard")}
- className="flex-shrink-0 mt-1"
- >
- <ArrowLeft className="h-5 w-5" />
- </Button>
- <div className="flex-1 min-w-0">
- <div className="flex items-start justify-between gap-3">
- <div className="min-w-0">
- <h1 className="text-2xl sm:text-3xl font-bold text-foreground">My Products</h1>
- <p className="text-muted-foreground text-sm sm:text-base mt-1">
- Manage your store products and pricing
- </p>
- </div>
- <Button onClick={() => setCreateDialogOpen(true)} className="flex-shrink-0">
- <Plus className="h-4 w-4 sm:mr-2" />
- <span className="hidden sm:inline">Add Product</span>
- </Button>
- </div>
- </div>
- </div>
+ <MerchantWorkspaceLayout>
+   <SEO title="My Products · Merchant Workspace" description="Manage your store products and view your storefront" />
+   <WorkspacePageHeader
+     section="Catalog & Services"
+     title="My Products"
+     subtitle="Manage your store products and pricing"
+     actions={
+       <Button onClick={() => setCreateDialogOpen(true)}>
+         <Plus className="h-4 w-4 sm:mr-2" />
+         <span className="hidden sm:inline">Add Product</span>
+       </Button>
+     }
+   />
+   <div className="p-4 md:p-6 max-w-6xl mx-auto w-full">
 
  {/* Storefront Link Card */}
  {merchant?.storefront_slug && (
@@ -982,7 +969,8 @@ const MerchantProducts = () => {
  </AlertDialogFooter>
  </AlertDialogContent>
  </AlertDialog>
- </div>
+   </div>
+ </MerchantWorkspaceLayout>
  );
 };
 

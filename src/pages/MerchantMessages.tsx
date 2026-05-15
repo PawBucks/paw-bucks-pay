@@ -1,15 +1,13 @@
-import { useEffect, useState } from"react";
-import { useNavigate } from"react-router-dom";
-import { useAuth } from"@/hooks/useAuth";
-import { supabase } from"@/integrations/supabase/client";
-import { SEO } from"@/components/SEO";
-import { Button } from"@/components/ui/button";
-import { Loader2, ArrowLeft } from"lucide-react";
-import { MerchantMessagesTab } from"@/components/merchant/MerchantMessagesTab";
+import { useEffect, useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { SEO } from "@/components/SEO";
+import { Loader2 } from "lucide-react";
+import { MerchantMessagesTab } from "@/components/merchant/MerchantMessagesTab";
+import { MerchantWorkspaceLayout, WorkspacePageHeader } from "@/components/merchant/workspace/MerchantWorkspaceLayout";
 
 const MerchantMessages = () => {
  const { user, loading: authLoading } = useAuth();
- const navigate = useNavigate();
  const [merchantId, setMerchantId] = useState<string | null>(null);
  const [loading, setLoading] = useState(true);
 
@@ -28,37 +26,22 @@ const MerchantMessages = () => {
  loadMerchant();
  }, [user, authLoading]);
 
- if (authLoading || loading) {
  return (
- <div className="min-h-screen flex items-center justify-center">
- <Loader2 className="w-6 h-6 animate-spin" />
- </div>
- );
- }
-
- if (!merchantId) {
- return (
- <div className="min-h-screen flex items-center justify-center">
- <p className="text-muted-foreground">Merchant account not found.</p>
- </div>
- );
- }
-
- return (
- <>
- <SEO title="Messages | Merchant Dashboard" description="Communicate with your customers" />
- <div className="min-h-screen bg-background">
- <div className="container max-w-6xl mx-auto px-4 py-6">
- <div className="flex items-center gap-3 mb-6">
- <Button variant="ghost" size="icon" onClick={() => navigate("/merchant-dashboard")}>
- <ArrowLeft className="h-5 w-5" />
- </Button>
- <h1 className="text-2xl font-bold">Customer Messages</h1>
- </div>
- <MerchantMessagesTab merchantId={merchantId} />
- </div>
- </div>
- </>
+   <>
+     <SEO title="Messages · Merchant Workspace" description="Communicate with your customers" />
+     <MerchantWorkspaceLayout>
+       <WorkspacePageHeader section="Marketing" title="Customer Messages" subtitle="Communicate with your customers" />
+       <div className="p-4 md:p-6">
+         {authLoading || loading ? (
+           <div className="flex items-center justify-center py-16"><Loader2 className="w-6 h-6 animate-spin" /></div>
+         ) : !merchantId ? (
+           <p className="text-muted-foreground text-center py-16">Merchant account not found.</p>
+         ) : (
+           <MerchantMessagesTab merchantId={merchantId} />
+         )}
+       </div>
+     </MerchantWorkspaceLayout>
+   </>
  );
 };
 

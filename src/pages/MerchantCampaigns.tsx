@@ -11,8 +11,9 @@ import { Label } from"@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from"@/components/ui/select";
 import { Badge } from"@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from"@/components/ui/dialog";
-import { ArrowLeft, Bell, CheckCircle, Clock, Mail, MessageSquare, Plus, Send, Settings, Users, XCircle } from "lucide-react";
+import { Bell, CheckCircle, Clock, Mail, MessageSquare, Plus, Send, Settings, Users, XCircle } from "lucide-react";
 import { toast } from"sonner";
+import { MerchantWorkspaceLayout, WorkspacePageHeader } from "@/components/merchant/workspace/MerchantWorkspaceLayout";
 
 interface Campaign {
  id: string;
@@ -292,28 +293,23 @@ export default function MerchantCampaigns() {
  };
 
  return (
- <div className="min-h-screen bg-background">
- <div className="max-w-4xl lg:max-w-6xl mx-auto p-4 space-y-6">
- {/* Header */}
- <div className="flex items-center justify-between">
- <div className="flex items-center gap-3">
- <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
- <ArrowLeft className="w-5 h-5" />
- </Button>
- <div>
- <h1 className="text-2xl font-bold">Campaigns</h1>
- <p className="text-muted-foreground text-sm">Reach your customers via push, email & text</p>
- </div>
- </div>
- <div className="flex gap-2">
- <Button variant="outline" size="sm" onClick={() => setShowSettings(true)}>
- <Settings className="w-4 h-4 mr-1" />SMS Settings
- </Button>
- <Button size="sm" onClick={() => setShowCreate(true)}>
- <Plus className="w-4 h-4 mr-1" />New Campaign
- </Button>
- </div>
- </div>
+ <MerchantWorkspaceLayout>
+   <WorkspacePageHeader
+     section="Marketing"
+     title="Campaigns"
+     subtitle="Reach your customers via push, email & text"
+     actions={
+       <>
+         <Button variant="outline" size="sm" onClick={() => setShowSettings(true)}>
+           <Settings className="w-4 h-4 mr-1" />SMS Settings
+         </Button>
+         <Button size="sm" onClick={() => setShowCreate(true)}>
+           <Plus className="w-4 h-4 mr-1" />New Campaign
+         </Button>
+       </>
+     }
+   />
+   <div className="p-4 md:p-6 max-w-4xl lg:max-w-6xl mx-auto w-full space-y-6">
 
  {/* Campaign History */}
  <div className="space-y-4">
@@ -503,7 +499,7 @@ export default function MerchantCampaigns() {
  </div>
  </DialogContent>
  </Dialog>
- </div>
- </div>
+   </div>
+ </MerchantWorkspaceLayout>
  );
 }

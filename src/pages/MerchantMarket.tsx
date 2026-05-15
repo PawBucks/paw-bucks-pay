@@ -10,8 +10,9 @@ import { ServicePurchaseDialog } from "@/components/merchant/ServicePurchaseDial
 import { ConsultationScheduleDialog } from "@/components/merchant/ConsultationScheduleDialog";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2, AlertTriangle, MapPin, Tag } from "lucide-react";
+import { Loader2, AlertTriangle, MapPin, Tag } from "lucide-react";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
+import { MerchantWorkspaceLayout, WorkspacePageHeader } from "@/components/merchant/workspace/MerchantWorkspaceLayout";
 
 type ServiceCategory = "visibility" | "analytics" | "growth" | "premium";
 
@@ -216,9 +217,12 @@ const MerchantMarket = () => {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
+      <MerchantWorkspaceLayout>
+        <WorkspacePageHeader section="Catalog & Services" title="Services Marketplace" subtitle="Spend earned PawBucks on tools, analytics, and growth services" />
+        <div className="flex items-center justify-center py-24">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      </MerchantWorkspaceLayout>
     );
   }
   if (!merchant) return null;
@@ -227,27 +231,19 @@ const MerchantMarket = () => {
   const activeCount = services.filter((s) => activeServiceIds.has(s.id)).length;
 
   return (
-    <div className="min-h-screen bg-background">
-      <SEO title="Merchant Services Marketplace — PawBucks" description="Spend earned PawBucks on tools, analytics, and growth services for your pet business." />
-
-      {/* NAV */}
-      <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-md border-b border-border safe-area-inset-top">
-        <div className="max-w-7xl mx-auto h-16 px-4 md:px-10 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" onClick={() => navigate("/merchant-dashboard")} className="text-muted-foreground">
-              <ArrowLeft className="w-4 h-4 mr-1" />
-              Back
-            </Button>
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="hidden sm:inline-flex items-center gap-2 rounded-full border border-border bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-              <Tag className="w-3.5 h-3.5" /> Marketplace
-            </span>
-          </div>
-        </div>
-      </header>
-
-      <main className="max-w-7xl mx-auto pb-24">
+    <MerchantWorkspaceLayout>
+      <SEO title="Services Marketplace · Merchant Workspace" description="Spend earned PawBucks on tools, analytics, and growth services for your pet business." />
+      <WorkspacePageHeader
+        section="Catalog & Services"
+        title="Services Marketplace"
+        subtitle="Spend earned PawBucks on tools, analytics, and growth services for your pet business"
+        actions={
+          <span className="hidden sm:inline-flex items-center gap-2 rounded-full border border-border bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+            <Tag className="w-3.5 h-3.5" /> Marketplace
+          </span>
+        }
+      />
+      <main className="max-w-7xl mx-auto pb-24 w-full">
         {/* PAGE HEADER */}
         <section className="px-4 md:px-10 pt-10 md:pt-14">
           <p className="text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-primary mb-3">
@@ -369,7 +365,7 @@ const MerchantMarket = () => {
           onSuccess={handlePurchaseSuccess}
         />
       )}
-    </div>
+    </MerchantWorkspaceLayout>
   );
 };
 
