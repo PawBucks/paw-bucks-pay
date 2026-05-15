@@ -256,11 +256,12 @@ export const EditMerchantProfileDialog = ({
  />
  </div>
  <div className="space-y-2">
- <Label htmlFor="description">Description</Label>
+ <Label htmlFor="description">About</Label>
  <Textarea
  id="description"
  name="description"
  defaultValue={merchant.description ||""}
+ placeholder="Tell customers about your business, services, specialties, and what makes you different."
  rows={3}
  />
  </div>
