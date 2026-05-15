@@ -37,7 +37,7 @@ import { PawBucksLogo } from "@/components/PawBucksLogo";
 const PAWBUCKS_TO_USD = 0.001;
 // Minimum transaction for Pet Fund credits (dynamic, but defaults)
 const PET_FUND_INITIAL_MIN_USD = 40;
-const PET_FUND_MONTHLY_MIN_USD = 20;
+const PET_FUND_MONTHLY_MIN_USD = 30;
 // Server enforces a $75 minimum for legacy Welcome Credit redemption
 // (see public.redeem_welcome_credit RPC). Keep UI in sync.
 const WELCOME_CREDIT_MIN_USD = 75;
