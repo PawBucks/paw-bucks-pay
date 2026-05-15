@@ -424,19 +424,28 @@ const MerchantDirectory = () => {
 				<div className="flex items-center justify-between gap-3 mb-4">
  <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide flex-1">
  {/* Sort pills */}
- {sortOptions.map((opt) => (
- <button
- key={opt.value}
- onClick={() => setSortBy(opt.value)}
- className={`text-xs font-medium px-2.5 py-1 rounded-md whitespace-nowrap transition-colors ${
- sortBy === opt.value
- ?"bg-foreground text-background"
- :"text-muted-foreground hover:text-foreground hover:bg-muted"
- }`}
- >
- {opt.label}
- </button>
- ))}
+  {sortOptions.map((opt) => {
+   const isDistance = opt.value === "distance";
+   return (
+    <button
+     key={opt.value}
+     onClick={() => {
+      setSortBy(opt.value);
+      if (isDistance && !userLocation) requestLocation();
+     }}
+     className={`flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-md whitespace-nowrap transition-colors ${
+      sortBy === opt.value
+       ? "bg-foreground text-background"
+       : "text-muted-foreground hover:text-foreground hover:bg-muted"
+     }`}
+    >
+     {isDistance && (
+      <MapPin className={`w-3 h-3 ${locationLoading ? "animate-pulse" : ""}`} />
+     )}
+     {isDistance && locationLoading ? "Locating…" : opt.label}
+    </button>
+   );
+  })}
  <Separator orientation="vertical" className="h-4 mx-1" />
  <button
  onClick={() => setPawbucksOnly(!pawbucksOnly)}
