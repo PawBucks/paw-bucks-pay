@@ -10,8 +10,9 @@ import { ServicePurchaseDialog } from "@/components/merchant/ServicePurchaseDial
 import { ConsultationScheduleDialog } from "@/components/merchant/ConsultationScheduleDialog";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2, AlertTriangle, MapPin, Tag } from "lucide-react";
+import { Loader2, AlertTriangle, MapPin, Tag } from "lucide-react";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
+import { MerchantWorkspaceLayout, WorkspacePageHeader } from "@/components/merchant/workspace/MerchantWorkspaceLayout";
 
 type ServiceCategory = "visibility" | "analytics" | "growth" | "premium";
 
