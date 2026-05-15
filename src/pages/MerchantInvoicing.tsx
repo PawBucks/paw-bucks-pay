@@ -1,13 +1,14 @@
-import { useState, useEffect, useCallback } from"react";
-import { useNavigate } from"react-router-dom";
-import { addWeeks, addMonths, addYears } from"date-fns";
-import { useAuth } from"@/hooks/useAuth";
-import { supabase } from"@/integrations/supabase/client";
-import { SEO } from"@/components/SEO";
-import { Button } from"@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from"@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
-import { ArrowLeft, CalendarClock, FileText, LayoutTemplate, Package, Plus, Settings, Users } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import { addWeeks, addMonths, addYears } from "date-fns";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { SEO } from "@/components/SEO";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CalendarClock, FileText, LayoutTemplate, Package, Plus, Settings, Users } from "lucide-react";
+import { MerchantWorkspaceLayout, WorkspacePageHeader } from "@/components/merchant/workspace/MerchantWorkspaceLayout";
 import { toast } from"sonner";
 import { InvoiceList, InvoiceEditor, InvoicePreview, ClientManager, InvoiceSettingsComponent, CatalogManager, TemplateManager, ScheduledInvoices } from"@/components/invoicing";
 import { RecordPaymentDialog } from"@/components/invoicing/RecordPaymentDialog";
@@ -812,19 +813,23 @@ const MerchantInvoicing = () => {
 
  if (authLoading || loading) {
  return (
- <div className="min-h-screen bg-background flex items-center justify-center">
- <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
- </div>
+ <MerchantWorkspaceLayout>
+   <WorkspacePageHeader section="Catalog & Services" title="Invoicing" subtitle="Create, send, and manage your invoices" />
+   <div className="flex items-center justify-center py-24">
+     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+   </div>
+ </MerchantWorkspaceLayout>
  );
  }
 
  // Preview mode
  if (viewMode ==="preview" && previewData) {
  return (
- <div className="min-h-screen bg-background">
- <SEO title="Invoice Preview | PawBucks" />
- <div className="container mx-auto py-6 px-4 max-w-7xl">
- <InvoicePreview
+ <MerchantWorkspaceLayout>
+   <SEO title="Invoice Preview | PawBucks" />
+   <WorkspacePageHeader section="Catalog & Services" title="Invoice Preview" />
+   <div className="p-4 md:p-6 max-w-7xl mx-auto w-full">
+     <InvoicePreview
  invoice={previewData.invoice}
  items={previewData.items}
  recipients={previewData.recipients}
@@ -837,19 +842,20 @@ const MerchantInvoicing = () => {
  onBack={() => setViewMode(selectedInvoice ?"edit" :"list")}
  onSend={() => handleSendFromList(previewData.invoice)}
  onDownload={() => handleDownloadPdf(previewData.invoice)}
- />
- </div>
- </div>
+   />
+   </div>
+ </MerchantWorkspaceLayout>
  );
  }
 
  // Create/Edit mode
  if (viewMode ==="create" || viewMode ==="edit") {
  return (
- <div className="min-h-screen bg-background">
- <SEO title={`${viewMode ==="create" ?"Create" :"Edit"} Invoice | PawBucks`} />
- <div className="container mx-auto py-6 px-4 max-w-7xl">
- <InvoiceEditor
+ <MerchantWorkspaceLayout>
+   <SEO title={`${viewMode === "create" ? "Create" : "Edit"} Invoice | PawBucks`} />
+   <WorkspacePageHeader section="Catalog & Services" title={`${viewMode === "create" ? "Create" : "Edit"} Invoice`} />
+   <div className="p-4 md:p-6 max-w-7xl mx-auto w-full">
+     <InvoiceEditor
  invoice={selectedInvoice || undefined}
  invoiceNumber={selectedInvoice?.invoice_number || nextInvoiceNumber}
  merchantId={merchantId!}
@@ -864,34 +870,28 @@ const MerchantInvoicing = () => {
  setSelectedInvoice(null);
  }}
  saving={saving}
- />
- </div>
- </div>
+   />
+   </div>
+ </MerchantWorkspaceLayout>
  );
  }
 
  // Main view with tabs
  return (
- <div className="min-h-screen bg-background">
- <SEO title="Invoicing | PawBucks" description="Manage your business invoices" />
- 
- <div className="container mx-auto py-6 px-4 max-w-7xl">
- {/* Header */}
- <div className="flex items-center justify-between mb-6">
- <div className="flex items-center gap-4">
- <Button variant="ghost" size="icon" onClick={() => navigate("/merchant-dashboard")}>
- <ArrowLeft className="h-5 w-5" />
- </Button>
- <div>
- <h1 className="text-3xl font-bold">Invoicing</h1>
- <p className="text-muted-foreground">Create, send, and manage your invoices</p>
- </div>
- </div>
- <Button onClick={handleCreateInvoice}>
- <Plus className="h-4 w-4 mr-2" />
- New Invoice
- </Button>
- </div>
+ <MerchantWorkspaceLayout>
+   <SEO title="Invoicing · Merchant Workspace" description="Manage your business invoices" />
+   <WorkspacePageHeader
+     section="Catalog & Services"
+     title="Invoicing"
+     subtitle="Create, send, and manage your invoices"
+     actions={
+       <Button onClick={handleCreateInvoice}>
+         <Plus className="h-4 w-4 mr-2" />
+         New Invoice
+       </Button>
+     }
+   />
+   <div className="p-4 md:p-6 max-w-7xl mx-auto w-full">
 
  {/* Tabs */}
  <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
@@ -1038,8 +1038,8 @@ const MerchantInvoicing = () => {
  />
  </TabsContent>
  </Tabs>
- </div>
- </div>
+   </div>
+ </MerchantWorkspaceLayout>
  );
 };
 
