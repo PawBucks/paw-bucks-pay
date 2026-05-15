@@ -1,4 +1,4 @@
-import { useState, useEffect } from"react";
+import { useState, useEffect, forwardRef, useImperativeHandle } from"react";
 import { supabase } from"@/integrations/supabase/client";
 import { Label } from"@/components/ui/label";
 import { Input } from"@/components/ui/input";
@@ -26,9 +26,18 @@ const DEFAULT_HOURS: DayHours[] = Array.from({ length: 7 }, (_, i) => ({
 type Props = {
  merchantId?: string;
  vetId?: string;
+ /** Hide the internal Save button when the parent form will trigger save via ref. */
+ hideSaveButton?: boolean;
 };
 
-export function BusinessHoursEditor({ merchantId, vetId }: Props) {
+export type BusinessHoursEditorHandle = {
+ save: (overrides?: { merchantId?: string; vetId?: string }) => Promise<void>;
+};
+
+export const BusinessHoursEditor = forwardRef<BusinessHoursEditorHandle, Props>(function BusinessHoursEditor(
+ { merchantId, vetId, hideSaveButton }: Props,
+ ref
+) {
  const [hours, setHours] = useState<DayHours[]>(DEFAULT_HOURS);
  const [saving, setSaving] = useState(false);
  const [loaded, setLoaded] = useState(false);
@@ -69,33 +78,46 @@ export function BusinessHoursEditor({ merchantId, vetId }: Props) {
  );
  };
 
+ const persist = async (mid?: string, vid?: string) => {
+  const useMerchant = mid ?? merchantId;
+  const useVet = vid ?? vetId;
+  if (!useMerchant && !useVet) return;
+  const table = useMerchant ?"merchant_business_hours" :"vet_business_hours";
+  const fkField = useMerchant ?"merchant_id" :"vet_id";
+  const fkValue = useMerchant || useVet;
+
+  // Delete existing and re-insert
+  await (supabase.from(table) as any).delete().eq(fkField, fkValue);
+
+  const rows = hours.map((h) => ({
+   [fkField]: fkValue,
+   day_of_week: h.day_of_week,
+   open_time: h.open_time,
+   close_time: h.close_time,
+   is_closed: h.is_closed,
+  }));
+
+  const { error } = await (supabase.from(table) as any).insert(rows);
+  if (error) throw error;
+ };
+
  const handleSave = async () => {
- setSaving(true);
- try {
- const table = merchantId ?"merchant_business_hours" :"vet_business_hours";
- const fkField = merchantId ?"merchant_id" :"vet_id";
- const fkValue = merchantId || vetId;
-
- // Delete existing and re-insert
- await (supabase.from(table) as any).delete().eq(fkField, fkValue);
-
- const rows = hours.map((h) => ({
- [fkField]: fkValue,
- day_of_week: h.day_of_week,
- open_time: h.open_time,
- close_time: h.close_time,
- is_closed: h.is_closed,
- }));
-
- const { error } = await (supabase.from(table) as any).insert(rows);
- if (error) throw error;
- toast.success("Business hours saved!");
+  setSaving(true);
+  try {
+   await persist();
+   toast.success("Business hours saved!");
  } catch (err: any) {
  toast.error("Failed to save hours:" + err.message);
  } finally {
  setSaving(false);
  }
  };
+
+ useImperativeHandle(ref, () => ({
+  save: async (overrides) => {
+   await persist(overrides?.merchantId, overrides?.vetId);
+  },
+ }), [hours, merchantId, vetId]);
 
  if (!loaded) return null;
 
@@ -135,9 +157,11 @@ export function BusinessHoursEditor({ merchantId, vetId }: Props) {
  </div>
  ))}
  </div>
- <Button onClick={handleSave} disabled={saving} size="sm" variant="outline" type="button">
- {saving ?"Saving..." :"Save Hours"}
- </Button>
+   {!hideSaveButton && (
+    <Button onClick={handleSave} disabled={saving} size="sm" variant="outline" type="button">
+     {saving ?"Saving..." :"Save Hours"}
+    </Button>
+   )}
  </div>
  );
-}
+});
