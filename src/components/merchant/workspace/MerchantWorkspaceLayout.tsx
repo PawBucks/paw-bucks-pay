@@ -25,7 +25,6 @@ import {
   Users,
   Heart,
   Star,
-  Zap,
   MessageSquare,
   Activity,
   Gift,
@@ -73,7 +72,7 @@ const NAV: NavSection[] = [
   {
     section: "Account",
     items: [
-      { id: "profile", label: "Business Profile", icon: User, to: "/merchant/quick-actions" },
+      { id: "profile", label: "Business Profile", icon: User, to: "/merchant/business-profile" },
     ],
   },
   {
@@ -95,7 +94,6 @@ const NAV: NavSection[] = [
       { id: "pos", label: "POS Integration", icon: Store, to: "/merchant/pos-integration" },
       { id: "loyalty", label: "Loyalty Program", icon: Stamp, to: "/merchant/loyalty" },
       { id: "premium-services", label: "Premium Services", icon: Sparkles, to: "/merchant/premium-services" },
-      { id: "quick-actions", label: "Quick Actions", icon: Zap, to: "/merchant/quick-actions" },
     ],
   },
   {
@@ -332,7 +330,7 @@ export function MerchantWorkspaceLayout({
                 size="icon"
                 className="h-8 w-8"
                 aria-label="Profile"
-                onClick={() => navigate("/merchant/quick-actions")}
+                onClick={() => navigate("/merchant/business-profile")}
               >
                 <User className="h-4 w-4" />
               </Button>
