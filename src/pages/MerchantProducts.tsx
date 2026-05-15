@@ -28,6 +28,8 @@ import { toast } from"sonner";
 import { ArrowLeft, DollarSign, ExternalLink, Loader2, Package, Pencil, Plus, RefreshCw, Store, Trash2 } from "lucide-react";
 import { ProductImageUpload } from"@/components/shared/ProductImageUpload";
 import { PricingCalculator } from"@/components/merchant/PricingCalculator";
+import { MerchantWorkspaceLayout, WorkspacePageHeader } from "@/components/merchant/workspace/MerchantWorkspaceLayout";
+import { SEO } from "@/components/SEO";
 import { Switch } from"@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from"@/components/ui/select";
 import { SEO } from"@/components/SEO";
@@ -968,7 +970,8 @@ const MerchantProducts = () => {
  </AlertDialogFooter>
  </AlertDialogContent>
  </AlertDialog>
- </div>
+   </div>
+ </MerchantWorkspaceLayout>
  );
 };
 
