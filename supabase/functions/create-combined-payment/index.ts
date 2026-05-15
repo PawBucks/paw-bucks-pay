@@ -267,6 +267,16 @@ serve(async (req) => {
 
       const walletBalance = wallet?.balance || 0;
 
+      // Include Pet Fund available balance (new system) so redemptions
+      // are not falsely rejected as "insufficient PawBucks".
+      const { data: petFundLedgerForBalance } = await supabaseAdmin
+        .from('pet_fund_ledgers')
+        .select('available_balance')
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .maybeSingle();
+      const petFundAvailable = petFundLedgerForBalance?.available_balance || 0;
+
       // Check for active welcome credit
       const { data: welcomeCredit } = await supabaseAdmin
         .from('user_welcome_credits')
@@ -279,18 +289,18 @@ serve(async (req) => {
         welcomeCredit.status === 'active' && 
         new Date(welcomeCredit.expires_at) > new Date();
 
-      // Welcome credit requires $75 minimum transaction
+      // Legacy welcome credit requires $75 minimum transaction
       const welcomeCreditAvailable = hasActiveWelcomeCredit && totalAmount >= 75 
         ? welcomeCredit.credit_amount 
         : 0;
 
-      const totalAvailable = walletBalance + welcomeCreditAvailable;
+      const totalAvailable = walletBalance + petFundAvailable + welcomeCreditAvailable;
 
       if (totalAvailable < pawbucksAmount) {
         throw new Error(`Insufficient PawBucks balance. You have ${totalAvailable} PawBucks available.`);
       }
 
-      // Spend from wallet first, then welcome credit
+      // Spend from wallet first, then Pet Fund / welcome credit
       walletPawbucks = Math.min(walletBalance, pawbucksAmount);
       welcomeCreditPawbucks = pawbucksAmount - walletPawbucks;
 
