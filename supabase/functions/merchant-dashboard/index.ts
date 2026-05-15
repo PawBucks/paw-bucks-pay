@@ -85,6 +85,7 @@ serve(async (req) => {
       total_customers: number;
       total_earnings: number;
       total_cashback: number;
+      total_pawbucks_received: number;
       avg_transaction_amount: number;
       total_fees: number;
       refunded_transactions: number;
@@ -140,6 +141,8 @@ serve(async (req) => {
       total_sales: parseFloat(String(analytics.total_sales || 0)),
       total_cashback: parseFloat(String(analytics.total_cashback || 0)),
       total_earnings: parseFloat(String(analytics.total_earnings || 0)),
+      // PawBucks received from customers (USD equivalent), net of refunds
+      total_pawbucks_received: parseFloat(String(analytics.total_pawbucks_received || 0)),
       // Platform fees - now accurately calculated only on Stripe portion, not PawBucks
       total_fees: parseFloat(String(analytics.total_fees || 0)),
       total_transactions: parseInt(String(analytics.transaction_count || 0)),
