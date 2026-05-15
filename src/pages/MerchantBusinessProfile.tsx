@@ -144,7 +144,7 @@ export default function MerchantBusinessProfile() {
                 <CardContent className="grid sm:grid-cols-2 gap-5">
                   <Field label="Business Name" value={merchant.business_name} />
                   <Field label="Primary Category" value={BUSINESS_TYPE_LABELS[merchant.business_type] || merchant.business_type} />
-                  <div className="sm:col-span-2"><Field label="Description" value={merchant.description} /></div>
+                  <div className="sm:col-span-2"><Field label="About" value={merchant.description} /></div>
                 </CardContent>
               </Card>
 

@@ -121,13 +121,13 @@ export const EditMerchantProfileDialog = ({
 
  return (
  <Dialog open={open} onOpenChange={onOpenChange}>
- <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
+ <DialogContent className="max-w-2xl max-h-[calc(100dvh-1rem)] overflow-hidden flex flex-col">
  <DialogHeader>
  <DialogTitle>Edit Business Profile</DialogTitle>
  <DialogDescription>Update your business information</DialogDescription>
  </DialogHeader>
  <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
- <div className="overflow-y-auto flex-1 space-y-4 pr-2">
+ <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain space-y-4 pr-1 pb-2 sm:pr-2">
  <div className="space-y-2">
  <Label htmlFor="businessName">Business Name</Label>
  <Input
@@ -256,11 +256,12 @@ export const EditMerchantProfileDialog = ({
  />
  </div>
  <div className="space-y-2">
- <Label htmlFor="description">Description</Label>
+ <Label htmlFor="description">About</Label>
  <Textarea
  id="description"
  name="description"
  defaultValue={merchant.description ||""}
+ placeholder="Tell customers about your business, services, specialties, and what makes you different."
  rows={3}
  />
  </div>
@@ -328,8 +329,6 @@ export const EditMerchantProfileDialog = ({
  </div>
  </div>
  </div>
- </div>
-
  {/* Hours of Operation */}
  <BusinessHoursEditor merchantId={merchant.id} />
 
@@ -345,7 +344,8 @@ export const EditMerchantProfileDialog = ({
  onUpdate={() => onRefresh?.()}
  />
  )}
- <div className="flex gap-3 pt-4 border-t mt-4">
+ </div>
+ <div className="flex flex-col-reverse gap-3 pt-4 border-t mt-4 sm:flex-row">
  <Button
  type="button"
  variant="outline"
