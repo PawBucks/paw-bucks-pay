@@ -60,14 +60,18 @@ const CreatePetProfile = () => {
 
  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
  e.preventDefault();
- if (!user) return;
- 
- if (!formData.name.trim()) {
- toast.error("Please enter your pet's name");
- return;
- }
- 
- setIsLoading(true);
+    if (!user) {
+      toast.error("You're signed out. Please sign in again to add your pet.");
+      navigate("/auth");
+      return;
+    }
+
+    if (!formData.name.trim()) {
+      toast.error("Please enter your pet's name");
+      return;
+    }
+
+    setIsLoading(true);
 
  try {
  let photoUrl ="";
@@ -81,7 +85,10 @@ const CreatePetProfile = () => {
  .from("pet-photos")
  .upload(fileName, photoFile);
 
- if (uploadError) throw uploadError;
+        if (uploadError) {
+          console.error("Pet photo upload failed:", uploadError);
+          throw new Error(`Photo upload failed: ${uploadError.message}`);
+        }
 
  const { data: { publicUrl } } = supabase.storage
  .from("pet-photos")
@@ -107,11 +114,14 @@ const CreatePetProfile = () => {
  identifying_features: formData.identifying_features || null,
  });
 
- if (profileError) throw profileError;
- 
- if (!newPet) {
- throw new Error("Failed to create pet profile - no data returned");
- }
+      if (profileError) {
+        console.error("Pet profile insert failed:", profileError);
+        throw new Error(profileError.message || "Could not save pet profile");
+      }
+
+      if (!newPet) {
+        throw new Error("Failed to create pet profile - no data returned");
+      }
 
  toast.success(`${formData.name}'s profile created! Now let's discover their personality! 🐾`);
  
