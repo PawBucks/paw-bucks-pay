@@ -691,27 +691,6 @@ const Discover = () => {
  {/* ── Main Content ── */}
  <div className="container mx-auto px-4 py-4 max-w-4xl lg:max-w-7xl">
 
- {/* Category Chips — horizontal scroll */}
- <div className="flex gap-1.5 mb-3 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
-                {businessTypes.map((type) => {
-                  const isSelected = selectedCategory === type.value;
- return (
- <button
- key={type.value}
- onClick={() => setSelectedCategory(type.value)}
- className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all border ${
- isSelected
- ?"bg-primary text-primary-foreground border-primary shadow-sm"
- :"bg-card text-muted-foreground border-border hover:border-primary/40 hover:text-foreground"
- }`}
- >
-                      <span className="text-base leading-none" role="img" aria-hidden="true">{type.emoji}</span>
- {type.label}
- </button>
- );
- })}
- </div>
-
  {/* Filter Row — compact pills */}
  <div className="flex flex-wrap items-center gap-1.5 mb-4">
  <DropdownMenu>
