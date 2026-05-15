@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { BusinessHoursEditor, type BusinessHoursEditorHandle } from "@/components/merchant/BusinessHoursEditor";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,6 +38,7 @@ export function EditVetProfileDialog({ open, onOpenChange, vet, userId, onSaved 
   const [saving, setSaving] = useState(false);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const hoursRef = useRef<BusinessHoursEditorHandle>(null);
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -83,6 +85,13 @@ export function EditVetProfileDialog({ open, onOpenChange, vet, userId, onSaved 
         .eq("id", vet.id);
 
       if (error) throw error;
+
+      // Persist business hours alongside the profile update.
+      try {
+        await hoursRef.current?.save({ vetId: vet.id });
+      } catch (err) {
+        console.error("Failed to save business hours:", err);
+      }
 
       toast.success("Practice profile updated");
       setLogoFile(null);
@@ -170,6 +179,8 @@ export function EditVetProfileDialog({ open, onOpenChange, vet, userId, onSaved 
                 </div>
               )}
             </div>
+            {/* Hours of Operation */}
+            <BusinessHoursEditor ref={hoursRef} vetId={vet.id} hideSaveButton />
           </div>
           <div className="flex gap-3 pt-4 border-t mt-4">
             <Button
