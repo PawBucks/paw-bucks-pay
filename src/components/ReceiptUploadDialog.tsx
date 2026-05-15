@@ -242,7 +242,7 @@ export const ReceiptUploadDialog = ({ open, onOpenChange, userId }: ReceiptUploa
 
  return (
  <Dialog open={open} onOpenChange={handleClose}>
- <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-md max-h-[calc(100dvh-1rem)] overflow-hidden flex flex-col">
  <DialogHeader>
  <DialogTitle className="flex items-center gap-2">
  <span className="h-5 w-5 text-primary" aria-hidden="true">🧾</span>
@@ -253,8 +253,9 @@ export const ReceiptUploadDialog = ({ open, onOpenChange, userId }: ReceiptUploa
  </DialogDescription>
  </DialogHeader>
 
- {/* Tier Badge */}
- <div className="flex items-center gap-2 p-3 rounded-lg bg-primary/10 border border-primary/20">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1 sm:pr-2">
+        {/* Tier Badge */}
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-primary/10 border border-primary/20">
  <Sparkles className="w-4 h-4 text-primary" />
  <span className="text-sm font-medium">
  Your Rate: {creditRate}% ({tierLabel})
@@ -413,8 +414,9 @@ export const ReceiptUploadDialog = ({ open, onOpenChange, userId }: ReceiptUploa
  </Popover>
  </div>
  </div>
+        </div>
 
- <div className="flex gap-3">
+        <div className="sticky bottom-0 -mx-4 sm:-mx-6 mt-4 flex flex-col-reverse gap-2 border-t bg-background px-4 py-3 sm:flex-row sm:justify-end sm:px-6">
  <Button variant="outline" onClick={handleClose} className="flex-1">
  Cancel
  </Button>
