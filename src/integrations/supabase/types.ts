@@ -15189,6 +15189,7 @@ export type Database = {
           total_customers: number
           total_earnings: number
           total_fees: number
+          total_pawbucks_received: number
           total_sales: number
           transaction_count: number
         }[]
