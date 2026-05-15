@@ -401,7 +401,24 @@ serve(async (req) => {
           .maybeSingle();
 
         if (petFundLedger && petFundLedger.available_balance > 0) {
-          petFundDeduction = Math.min(remaining, petFundLedger.available_balance);
+          // Enforce per-release minimum spend before tapping Pet Fund.
+          const { data: oldestRelease } = await supabaseAdmin
+            .from('pet_fund_releases')
+            .select('min_transaction_usd')
+            .eq('user_id', userId)
+            .eq('status', 'released')
+            .is('used_at', null)
+            .order('month_number', { ascending: true })
+            .limit(1)
+            .maybeSingle();
+
+          const minUsd = oldestRelease ? Number(oldestRelease.min_transaction_usd) : 0;
+          const txnTotal = totalAmount > 0 ? totalAmount : amountInDollars;
+          if (!minUsd || txnTotal >= minUsd) {
+            petFundDeduction = Math.min(remaining, petFundLedger.available_balance);
+          } else {
+            logStep("Pet Fund skipped: below minimum spend", { txnTotal, minUsd });
+          }
         }
 
         // Fall back to legacy welcome credit if pet fund doesn't cover it
