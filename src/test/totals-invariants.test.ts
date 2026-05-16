@@ -62,7 +62,7 @@ describe("Success Fee", () => {
     const naiveFee = successFee(base + tip);
     expect(correctFee).toBe(3);
     expect(naiveFee).toBe(3.6);
-    expect(naiveFee - correctFee).toBe(0.6); // the bug we are guarding against
+    expect(naiveFee - correctFee).toBeCloseTo(0.6, 2); // the bug we are guarding against
   });
   it("sums stored Success Fees in cents across platform and direct payments", () => {
     expect(sumStoredFeesUsd([13.824, 9.5301, 1.764], [3])).toBe(25.14);
