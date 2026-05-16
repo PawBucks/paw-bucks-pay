@@ -54,13 +54,15 @@ describe("Success Fee", () => {
     expect(successFee(50)).toBe(1.5);
   });
   it("is NEVER charged on tips (tips pass through 100% to merchant)", () => {
-    // $100 base + $20 tip → fee is on $100 only, never on the $20 tip
+    // $100 base + $20 tip → fee is on $100 only, never on the $20 tip.
+    // Naive (base+tip)*3% = $3.60 would over-charge the merchant by $0.60.
     const base = 100;
     const tip = 20;
-    expect(successFee(base)).toBe(3);
-    // Even if the card-charged total is base+tip, the fee base is `base`
-    expect(successFee(base + tip) - successFee(tip)).not.toBe(successFee(base)); // sanity: naive (base+tip)*3% is wrong
-    expect(Math.round(base * 0.03 * 100) / 100).toBe(3); // correct formula
+    const correctFee = successFee(base);
+    const naiveFee = successFee(base + tip);
+    expect(correctFee).toBe(3);
+    expect(naiveFee).toBe(3.6);
+    expect(naiveFee - correctFee).toBe(0.6); // the bug we are guarding against
   });
   it("sums stored Success Fees in cents across platform and direct payments", () => {
     expect(sumStoredFeesUsd([13.824, 9.5301, 1.764], [3])).toBe(25.14);
