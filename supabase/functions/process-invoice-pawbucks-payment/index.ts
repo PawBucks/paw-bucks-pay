@@ -484,21 +484,15 @@ serve(async (req) => {
     // We pre-validate balance up front so we can fail fast before sending the user to
     // Stripe if they don't have enough PawBucks.
     if (pawbucksAmountCents > 0 && userId) {
-      const { data: wallet, error: walletError } = await supabase
-        .from("pawbucks_wallet")
-        .select("balance")
-        .eq("user_id", userId)
-        .single();
-
-      if (walletError || !wallet || wallet.balance < pawbucksUsed) {
-        logStep("Insufficient PawBucks for split invoice payment (debit deferred)", {
-          have: wallet?.balance ?? 0,
-          need: pawbucksUsed,
-        });
-        // Note: we still allow the Stripe session to proceed because the front-end
-        // typically validates this; the webhook will guard against over-debit on success.
-      } else {
+      // Include wallet + Pet Fund + legacy welcome credit, and enforce Pet Fund minimum spend.
+      const sources = await getSpendableSources(supabase, userId);
+      const txnTotalUsd = totalAmountCents / 100;
+      try {
+        planPawBucksDebit(sources, pawbucksUsed, txnTotalUsd);
         logStep("PawBucks split invoice queued (debit deferred until Stripe success)", { pawbucksUsed });
+      } catch (e) {
+        // Hard-fail so the user isn't sent to a Stripe session that the webhook will reject.
+        throw new Error((e as Error).message);
       }
     }
 
