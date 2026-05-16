@@ -588,7 +588,7 @@ const About = () => {
             </p>
           </div>
           <div className="pa-value-card">
-            <PawBucksLogo className="pa-value-icon" />
+            <PawBucksLogo className="pa-value-icon" size={32} />
             <h3 className="pa-value-name">Pet Life Cycle</h3>
             <p className="pa-value-desc">
               We think about the full life of a pet — from adoption through every stage
