@@ -100,7 +100,7 @@ export const PurchaseScene5Done: React.FC<{ width: number; height: number }> = (
             fontWeight: 600,
           }}
         >
-          Every purchase pays you back. 🐾
+          Every purchase pays you back.
         </div>
       </div>
     </AbsoluteFill>
