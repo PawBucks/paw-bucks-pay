@@ -18,7 +18,7 @@ const resolveLandingRoute = async (userId: string): Promise<string> => {
     return await resolvePostLoginRoute(userId);
   } catch (err) {
     console.error("AuthCallback: persona resolution failed, defaulting to /dashboard", err);
-    return"/dashboard";
+    return"/home";
   }
 };
 
@@ -159,7 +159,7 @@ const AuthCallback = () => {
   toast.success("Welcome to PawBucks!");
   const { data: sess } = await supabase.auth.getSession();
   const uid = sess?.session?.user?.id;
-  const landing = uid ? await resolveLandingRoute(uid) :"/dashboard";
+  const landing = uid ? await resolveLandingRoute(uid) :"/home";
   navigate(landing, { replace: true });
  return;
  }

@@ -39,7 +39,7 @@ export const useKeyboardShortcuts = () => {
  break;
  case'h':
  event.preventDefault();
- navigate('/dashboard');
+ navigate('/home');
  break;
  }
  }

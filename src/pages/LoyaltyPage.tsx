@@ -93,7 +93,7 @@ const LoyaltyPage = () => {
  <Button
  variant="ghost"
  size="sm"
- onClick={() => navigate('/dashboard')}
+ onClick={() => navigate('/home')}
  className="mb-4 -ml-2"
  >
  <ArrowLeft className="w-4 h-4 mr-1" />

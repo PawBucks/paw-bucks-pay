@@ -32,7 +32,6 @@ import Auth from"./pages/Auth";
 const Index = lazyWithRetry(() => import("./pages/Index"),"Index");
 
 // Lazy-loaded pages with retry logic for resilient loading after deploys
-const Dashboard = lazyWithRetry(() => import("./pages/Dashboard"),"Dashboard");
 const SimpleHome = lazyWithRetry(() => import("./pages/SimpleHome"),"SimpleHome");
 const SimpleSavings = lazyWithRetry(() => import("./pages/SimpleSavings"),"SimpleSavings");
 const SimplePay = lazyWithRetry(() => import("./pages/SimplePay"),"SimplePay");
@@ -197,9 +196,10 @@ const AppRoutes = () => {
  <Route path="/privacy" element={<PageTransition><Privacy /></PageTransition>} />
  <Route path="/terms" element={<PageTransition><Terms /></PageTransition>} />
 
- {/* Authenticated pet owner routes */}
-  <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['pet_owner']}><PageTransition><Dashboard /></PageTransition></ProtectedRoute>} />
- <Route path="/home" element={<ProtectedRoute allowedRoles={['pet_owner']}><PageTransition><SimpleHome /></PageTransition></ProtectedRoute>} />
+  {/* Authenticated pet owner routes */}
+  <Route path="/home" element={<ProtectedRoute allowedRoles={['pet_owner']}><PageTransition><SimpleHome /></PageTransition></ProtectedRoute>} />
+  {/* Legacy redirect — Pet Owner Dashboard retired */}
+  <Route path="/dashboard" element={<Navigate to="/home" replace />} />
  <Route path="/savings" element={<ProtectedRoute allowedRoles={['pet_owner']}><PageTransition><SimpleSavings /></PageTransition></ProtectedRoute>} />
  <Route path="/pay" element={<ProtectedRoute allowedRoles={['pet_owner']}><PageTransition><SimplePay /></PageTransition></ProtectedRoute>} />
  <Route path="/saved" element={<ProtectedRoute allowedRoles={['pet_owner']}><PageTransition><SimpleSuccess /></PageTransition></ProtectedRoute>} />

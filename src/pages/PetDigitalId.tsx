@@ -182,7 +182,7 @@ export default function PetDigitalId() {
  return (
  <div className="container max-w-2xl mx-auto p-4">
  <p>Pet not found.</p>
- <Button onClick={() => navigate("/dashboard")} className="mt-4">Back to Dashboard</Button>
+ <Button onClick={() => navigate("/home")} className="mt-4">Back to Dashboard</Button>
  </div>
  );
  }

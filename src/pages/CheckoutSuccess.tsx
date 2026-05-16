@@ -123,7 +123,7 @@ const CheckoutSuccess = () => {
  }`}
  >
  <Button 
- onClick={() => navigate("/dashboard")} 
+ onClick={() => navigate("/home")} 
  className="w-full"
  size="lg"
  >

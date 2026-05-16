@@ -253,7 +253,7 @@ const VetLoanApply = () => { const { user, loading, signOut } = useAuth();
  <Crown className="h-4 w-4" aria-hidden="true" />
  Upgrade to PawPass
  </Button>
- <Button onClick={() => navigate('/dashboard')} variant="outline">
+ <Button onClick={() => navigate('/home')} variant="outline">
  Back to Dashboard
  </Button>
  </div>
@@ -295,7 +295,7 @@ const VetLoanApply = () => { const { user, loading, signOut } = useAuth();
  )}
 
  <div className="mt-4 flex gap-2">
- <Button onClick={() => navigate('/dashboard')} variant="default">
+ <Button onClick={() => navigate('/home')} variant="default">
  Go to Dashboard
  </Button>
  <Button onClick={() => setResult(null)} variant="outline">

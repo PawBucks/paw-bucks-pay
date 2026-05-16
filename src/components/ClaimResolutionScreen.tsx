@@ -75,7 +75,7 @@ function PaymentForm({
  const { error } = await stripe.confirmPayment({
  elements,
  confirmParams: {
- return_url: buildAppUrl("/dashboard?payment=success"),
+ return_url: buildAppUrl("/home?payment=success"),
  },
  redirect:"if_required",
  });
@@ -320,7 +320,7 @@ export function ClaimResolutionScreen({
  // Navigate back after delay
  setTimeout(() => {
  onComplete?.();
- navigate("/dashboard");
+ navigate("/home");
  }, 3000);
  };
 
@@ -345,7 +345,7 @@ export function ClaimResolutionScreen({
  <p className="text-muted-foreground mb-4">
  This claim may have already been resolved or doesn't exist.
  </p>
- <Button onClick={() => navigate("/dashboard")}>Return to Dashboard</Button>
+ <Button onClick={() => navigate("/home")}>Return to Dashboard</Button>
  </CardContent>
  </Card>
  </div>

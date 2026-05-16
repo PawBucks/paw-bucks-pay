@@ -409,7 +409,7 @@ const InvoicePayment = () => {
   <div className="sticky top-0 z-20 bg-background border-b border-border">
     <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
       {user ? (
-        <Button variant="ghost" size="sm" className="text-primary -ml-2" onClick={() => navigate("/dashboard")}>
+        <Button variant="ghost" size="sm" className="text-primary -ml-2" onClick={() => navigate("/home")}>
           <ArrowLeft className="h-4 w-4 mr-1" /> Dashboard
         </Button>
       ) : <div />}

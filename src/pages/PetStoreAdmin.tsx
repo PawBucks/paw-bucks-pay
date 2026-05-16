@@ -220,7 +220,7 @@ export default function PetStoreAdmin() {
  </CardHeader>
  <CardContent>
  <p className="text-muted-foreground mb-4">You need admin access to view this page.</p>
- <Button onClick={() => navigate("/dashboard")}>Go to Dashboard</Button>
+ <Button onClick={() => navigate("/home")}>Go to Dashboard</Button>
  </CardContent>
  </Card>
  </div>

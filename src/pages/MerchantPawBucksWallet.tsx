@@ -113,7 +113,7 @@ const MerchantPawBucksWallet = () => {
  // Redirect non-merchants
  useEffect(() => {
  if (!merchantLoading && !merchant && user) {
- navigate("/dashboard");
+ navigate("/home");
  }
  }, [merchant, merchantLoading, user, navigate]);
 

@@ -771,7 +771,7 @@ const MerchantOnboarding = () => {
  <Button
  type="button"
  variant="outline"
- onClick={() => navigate("/dashboard")}
+ onClick={() => navigate("/home")}
  className="flex-1"
  disabled={isLoading}
  >

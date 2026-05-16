@@ -335,7 +335,7 @@ export default function DirectCheckout() {
  <p className="text-muted-foreground mb-6">
  Thank you for your payment. PawBucks have been added to your wallet.
  </p>
- <Button onClick={() => navigate("/dashboard")}>
+ <Button onClick={() => navigate("/home")}>
  Go to Dashboard
  </Button>
  </CardContent>

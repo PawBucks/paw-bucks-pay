@@ -438,7 +438,7 @@ const Index = () => {
 
  useEffect(() => {
  if (!loading && user) {
- navigate("/dashboard", { replace: true });
+ navigate("/home", { replace: true });
  supabase.rpc("has_role", { _user_id: user.id, _role:"admin" }).then(({ data: isAdmin }) => {
  if (isAdmin) navigate("/admin", { replace: true });
  });
