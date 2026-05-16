@@ -331,6 +331,19 @@ const Storefront = memo(() => {
  <SEO 
  title={`${merchantName ||"Store"} - Shop Products`}
  description={`Browse and purchase products from ${merchantName ||"this store"}. Earn PawBucks on every purchase!`}
+        ogImage={merchantLogo || undefined}
+        jsonLd={merchantName ? {
+          "@context":"https://schema.org",
+          "@type":"LocalBusiness",
+          name: merchantName,
+          description: merchantData?.description || undefined,
+          image: merchantLogo || undefined,
+          address: merchantData?.address ? {
+            "@type":"PostalAddress",
+            streetAddress: merchantData.address,
+          } : undefined,
+          url: merchantId ? `https://pawbucks.app/storefront/${accountId}` : undefined,
+        } : undefined}
  />
 
  {/* Editorial Hero Header */}
