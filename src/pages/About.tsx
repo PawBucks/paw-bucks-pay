@@ -717,7 +717,7 @@ const About = () => {
         <div className="pa-roadmap-track">
           <div className="pa-roadmap-phase">
             <div className="pa-phase-dot active">Q2</div>
-            <div className="pa-phase-label">Active Now — 2025</div>
+            <div className="pa-phase-label">Active Now — 2026</div>
             <div className="pa-phase-title">Merchant Onboarding</div>
             <div className="pa-phase-desc">
               Signing up groomers, trainers, vets, pet stores, and pet brands across Los
@@ -726,7 +726,7 @@ const About = () => {
           </div>
           <div className="pa-roadmap-phase">
             <div className="pa-phase-dot upcoming">Q3</div>
-            <div className="pa-phase-label muted">Coming Soon — 2025</div>
+            <div className="pa-phase-label muted">Coming Soon — 2026</div>
             <div className="pa-phase-title">Pet Owner Launch</div>
             <div className="pa-phase-desc">
               Opening the platform to pet owners once a strong merchant network is in
