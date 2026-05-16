@@ -402,7 +402,9 @@ serve(async (req) => {
       // DIRECT CHARGE via Checkout Session on Connected Account
       // ============================================================
       const totalStripeAmount = stripeAmountCents + (tipAmountCents || 0);
-      const applicationFee = Math.round(totalStripeAmount * PLATFORM_FEE_PERCENT);
+      // Success Fee: 3% applies ONLY to the non-tip Stripe portion.
+      // Tips are always passed through 100% to the merchant.
+      const applicationFee = Math.round(stripeAmountCents * PLATFORM_FEE_PERCENT);
 
       logStep(`Creating Direct Charge checkout for merchant ${merchant.id}`, { 
         connectedAccountId, 
