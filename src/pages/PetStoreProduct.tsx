@@ -161,7 +161,7 @@ export default function PetStoreProduct() {
           description: item.description || `Shop ${item.name} at PawBucks Pet Store`,
           price: (item.price ?? 0) / 100,
           image: images[0],
-          ...(ratingCount > 0 ? { rating: avgRating, reviewCount: ratingCount } : {}),
+          ...(ratingCount > 0 ? { rating: ratingAvg, reviewCount: ratingCount } : {}),
         })}
  />
  <div className="min-h-[100dvh] bg-background flex flex-col">
