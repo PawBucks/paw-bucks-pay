@@ -2,6 +2,7 @@ import { Composition } from "remotion";
 import { MainVideo } from "./MainVideo";
 import { MerchantVideo } from "./MerchantVideo";
 import { PurchaseVideo } from "./PurchaseVideo";
+import { PaySaveVideo } from "./PaySaveVideo";
 
 const FPS = 30;
 const DURATION = 30 * FPS; // 900 frames, 30s
@@ -76,6 +77,30 @@ export const RemotionRoot: React.FC = () => {
       <Composition
         id="purchase-square"
         component={PurchaseVideo}
+        durationInFrames={DURATION}
+        fps={FPS}
+        width={1080}
+        height={1080}
+      />
+      <Composition
+        id="paysave-horizontal"
+        component={PaySaveVideo}
+        durationInFrames={DURATION}
+        fps={FPS}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="paysave-vertical"
+        component={PaySaveVideo}
+        durationInFrames={DURATION}
+        fps={FPS}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        id="paysave-square"
+        component={PaySaveVideo}
         durationInFrames={DURATION}
         fps={FPS}
         width={1080}
