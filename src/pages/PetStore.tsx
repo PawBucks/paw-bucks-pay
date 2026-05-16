@@ -448,6 +448,17 @@ export default function PetStore() { const { user, signOut } = useAuth();
  description={seoMeta.petStore.description}
  keywords={[...seoMeta.petStore.keywords]}
  canonical={seoMeta.petStore.canonical}
+        jsonLd={{
+          "@context":"https://schema.org",
+          "@type":"CollectionPage",
+          name: seoMeta.petStore.title,
+          description: seoMeta.petStore.description,
+          url: `https://pawbucks.app${seoMeta.petStore.canonical}`,
+          mainEntity: {
+            "@type":"ItemList",
+            numberOfItems: totalResults,
+          },
+        }}
  />
  <div className="min-h-[100dvh] bg-background flex flex-col">
  <Header isAuthenticated={!!user} onLogout={handleSignOut} />

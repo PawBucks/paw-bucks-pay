@@ -14,7 +14,7 @@ import { ChevronLeft, ChevronRight, AlertTriangle, Check, Store } from "lucide-r
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { Header } from"@/components/Header";
 import { BottomNav } from"@/components/BottomNav";
-import { SEO } from"@/components/SEO";
+import { SEO, createProductSchema } from"@/components/SEO";
 import { StarRating } from"@/components/pet-store/StarRating";
 import { PromotionalBadge } from"@/components/pet-store/PromotionalBadge";
 import { CartIcon } from"@/components/pet-store/CartIcon";
@@ -154,6 +154,15 @@ export default function PetStoreProduct() {
  <SEO
  title={`${item.name} | PawBucks Pet Store`}
  description={item.description || `Shop ${item.name} at PawBucks Pet Store`}
+        type="product"
+        ogImage={images[0]}
+        jsonLd={createProductSchema({
+          name: item.name,
+          description: item.description || `Shop ${item.name} at PawBucks Pet Store`,
+          price: (item.price ?? 0) / 100,
+          image: images[0],
+          ...(ratingCount > 0 ? { rating: ratingAvg, reviewCount: ratingCount } : {}),
+        })}
  />
  <div className="min-h-[100dvh] bg-background flex flex-col">
  <Header isAuthenticated={!!user} onLogout={handleSignOut} />

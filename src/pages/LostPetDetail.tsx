@@ -368,6 +368,18 @@ const LostPetDetail = () => {
  <SEO
  title={`${post.status ==="lost" ?"LOST" : post.status.toUpperCase()}: ${post.pet_name} | Lost Pet Flyer`}
  description={`Help find ${post.pet_name}! ${post.breed ? `${post.breed}, ` :""}${post.color_markings}. Last seen: ${post.last_seen_location}`}
+        type="article"
+        ogImage={allPhotos[0]}
+        jsonLd={{
+          "@context":"https://schema.org",
+          "@type":"Article",
+          headline: `${post.status ==="lost" ?"LOST" : post.status.toUpperCase()}: ${post.pet_name}`,
+          description: `Help find ${post.pet_name}! ${post.breed ? `${post.breed}, ` :""}${post.color_markings}. Last seen: ${post.last_seen_location}`,
+          image: allPhotos[0],
+          datePublished: post.created_at,
+          dateModified: post.created_at,
+          author: { "@type":"Person", name: post.contact_name },
+        }}
  />
  <div className="min-h-screen bg-background">
  <Header />

@@ -20,7 +20,7 @@ export const seoMeta = {
  home: {
  title:"PawBucks – Pet Rewards & Local Pet Services",
  description:
-"Earn PawBucks on every dollar you spend on your pet. Find trusted local pet stores, groomers, trainers, and vets — and get rewarded for the care you already give.",
+"Earn PawBucks on every dollar you spend on your pet. Find trusted local pet stores, groomers, trainers, and vets — and get rewarded for everyday care.",
  keywords: [
 "pet rewards",
 "PawBucks",
@@ -48,7 +48,7 @@ export const seoMeta = {
  auth: {
  title:"Sign In or Sign Up – PawBucks",
  description:
-"Create a free PawBucks account or sign in to manage pet expenses, earn rewards on every purchase, and discover trusted local pet services. No credit card required.",
+"Create a free PawBucks account or sign in to manage pet expenses, earn rewards on every purchase, and discover trusted local pet services.",
  keywords: [
 "PawBucks sign up",
 "PawBucks login",
@@ -60,7 +60,7 @@ export const seoMeta = {
  merchants: {
  title:"For Pet Merchants – Grow Your Pet Business with PawBucks",
  description:
-"Get new paying customers for your pet business — pay only when PawBucks delivers them. No discounts, no upfront ad spend. Performance-based customer acquisition.",
+"Get new paying customers for your pet business — pay only when PawBucks delivers them. No discounts, no upfront ad spend.",
  keywords: [
 "pet merchant platform",
 "grow pet business",
@@ -73,7 +73,7 @@ export const seoMeta = {
  vets: {
  title:"For Veterinarians – PawBucks Vet Portal",
  description:
-"The complete veterinary practice platform: EMR, AI clinical tools, insurance automation, wellness plans, and practice growth — all integrated with PawBucks rewards.",
+"The complete veterinary practice platform: EMR, AI clinical tools, insurance automation, wellness plans, and growth — integrated with PawBucks rewards.",
  keywords: [
 "veterinary EMR",
 "vet practice software",
