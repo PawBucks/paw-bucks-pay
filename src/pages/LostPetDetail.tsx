@@ -377,7 +377,7 @@ const LostPetDetail = () => {
           description: `Help find ${post.pet_name}! ${post.breed ? `${post.breed}, ` :""}${post.color_markings}. Last seen: ${post.last_seen_location}`,
           image: allPhotos[0],
           datePublished: post.created_at,
-          dateModified: post.updated_at || post.created_at,
+          dateModified: post.created_at,
           author: { "@type":"Person", name: post.contact_name },
         }}
  />
