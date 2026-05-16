@@ -53,6 +53,17 @@ describe("Success Fee", () => {
     // $50 Stripe + $20 PawBucks split should fee only on $50
     expect(successFee(50)).toBe(1.5);
   });
+  it("is NEVER charged on tips (tips pass through 100% to merchant)", () => {
+    // $100 base + $20 tip → fee is on $100 only, never on the $20 tip.
+    // Naive (base+tip)*3% = $3.60 would over-charge the merchant by $0.60.
+    const base = 100;
+    const tip = 20;
+    const correctFee = successFee(base);
+    const naiveFee = successFee(base + tip);
+    expect(correctFee).toBe(3);
+    expect(naiveFee).toBe(3.6);
+    expect(naiveFee - correctFee).toBeCloseTo(0.6, 2); // the bug we are guarding against
+  });
   it("sums stored Success Fees in cents across platform and direct payments", () => {
     expect(sumStoredFeesUsd([13.824, 9.5301, 1.764], [3])).toBe(25.14);
   });

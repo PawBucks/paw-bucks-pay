@@ -713,8 +713,10 @@ serve(async (req) => {
     // Calculate amounts - PawBucks earned on Stripe portion only
     const stripeAmountInCents = Math.round(stripeAmount * 100);
     const pawbucksEarned = Math.round(stripeAmount * cashbackRate);
-    // Platform fee: 3% on Stripe portion only
-    const platformFeeInCents = Math.round(stripeAmount * PLATFORM_FEE_PERCENT * 100);
+    // Success Fee: 3% applies ONLY to the non-tip Stripe portion.
+    // Tips are always passed through 100% to the merchant (never charged a Success Fee).
+    const feeableStripeAmount = Math.max(0, stripeAmount - tipAmount);
+    const platformFeeInCents = Math.round(feeableStripeAmount * PLATFORM_FEE_PERCENT * 100);
 
     logStep('Stripe payment calculation', {
       stripeAmount,
