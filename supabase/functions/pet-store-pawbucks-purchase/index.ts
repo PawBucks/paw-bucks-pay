@@ -95,7 +95,7 @@ serve(async (req) => {
       itemNames.push(`${dbItem.name} x${reqItem.quantity}`);
     }
 
-    logStep("Totals calculated", { totalPawbucksCost, totalUsdEquivalent, balance: wallet.balance });
+    logStep("Totals calculated", { totalPawbucksCost, totalUsdEquivalent, balance: startingWalletBalance });
 
     // Plan debit across wallet → Pet Fund → legacy welcome credit.
     // Throws if combined eligible balance is insufficient (also enforces Pet Fund min spend).
@@ -252,7 +252,7 @@ serve(async (req) => {
                 cardAmount: 0,
                 totalPaid: totalUsdEquivalent,
                 pawbucksEarned: 0,
-                walletBalance: wallet.balance - totalPawbucksCost,
+                walletBalance: Math.max(0, startingWalletBalance - (debitPlan.walletDeduction || 0)),
                 tierInfo: { tierName: 'PawBucks Payment', multiplier: 0 },
               }),
             });
