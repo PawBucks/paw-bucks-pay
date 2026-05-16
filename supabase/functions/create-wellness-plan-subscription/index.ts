@@ -1,6 +1,10 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import {
+  getSpendableSources,
+  planPawBucksDebit,
+} from "../_shared/pet-fund-debit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -84,17 +88,17 @@ serve(async (req) => {
     
     logStep("Amounts calculated", { monthlyPrice, pawbucksToUse, stripeAmount });
 
-    // Get user's PawBucks balance if using PawBucks
+    // Validate combined PawBucks balance (wallet + Pet Fund + legacy welcome credit)
+    // and enforce Pet Fund minimum-spend if the user is tapping the Pet Fund Welcome Credit.
     if (pawbucksToUse > 0) {
-      const { data: wallet } = await supabaseClient
-        .from("pawbucks_wallet")
-        .select("balance")
-        .eq("user_id", user.id)
-        .single();
-
-      if (!wallet || wallet.balance < pawbucksToUse) {
-        throw new Error("Insufficient PawBucks balance");
-      }
+      const sources = await getSpendableSources(supabaseClient, user.id);
+      planPawBucksDebit(sources, pawbucksToUse, monthlyPrice);
+      logStep("Combined PawBucks balance OK for wellness subscription", {
+        pawbucksToUse,
+        wallet: sources.walletBalance,
+        petFund: sources.petFundAvailable,
+        legacy: sources.legacyCreditBalance,
+      });
     }
 
     // Initialize Stripe
