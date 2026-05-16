@@ -75,7 +75,7 @@ function PaymentForm({
  const { error } = await stripe.confirmPayment({
  elements,
  confirmParams: {
- return_url: buildAppUrl("/dashboard?payment=success"),
+ return_url: buildAppUrl("/home?payment=success"),
  },
  redirect:"if_required",
  });
