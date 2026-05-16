@@ -15211,6 +15211,16 @@ export type Database = {
         }[]
       }
       get_current_user_email: { Args: never; Returns: string }
+      get_customer_profiles_for_merchant: {
+        Args: { p_user_ids: string[] }
+        Returns: {
+          avatar_url: string
+          email: string
+          full_name: string
+          id: string
+          phone: string
+        }[]
+      }
       get_effective_pawbucks_cap_pct: {
         Args: { p_merchant_id: string }
         Returns: number
