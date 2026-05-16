@@ -107,10 +107,8 @@ export function SalesReportGenerator({ entityId, entityType, entityName }: Sales
  const userIds = [...new Set(completed.map(t => t.user_id).filter(Boolean))];
  let profilesMap: Record<string, string> = {};
  if (userIds.length > 0) {
- const { data: profiles } = await supabase
- .from("profiles")
- .select("id, full_name, email")
- .in("id", userIds);
+  const { data: profiles } = await supabase
+  .rpc("get_customer_profiles_for_merchant", { p_user_ids: userIds });
  (profiles || []).forEach(p => {
  profilesMap[p.id] = p.full_name || p.email ||"Unknown";
  });
