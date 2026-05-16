@@ -122,7 +122,9 @@ serve(async (req) => {
 
     if (isConnectValid && connectedAccountId) {
       // Use Stripe Connect destination charges (Express accounts)
-      const applicationFee = Math.round((amount + (tipAmount || 0)) * 0.03); // 3% platform fee
+      // Success Fee: 3% applies ONLY to the invoice amount (Stripe-funded portion),
+      // never to tips. Tips are passed through 100% to the merchant.
+      const applicationFee = Math.round(amount * 0.03);
 
       console.log(`Creating Connect checkout for merchant ${merchant.id} with destination ${connectedAccountId}`);
 
