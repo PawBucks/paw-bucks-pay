@@ -492,7 +492,8 @@ const Index = () => {
  </nav>
 
  {/* HERO */}
- <section className="pl-hero">
+  <main>
+  <section className="pl-hero">
  <div className="pl-hero-left">
  <p className="pl-eyebrow">For Pet Parents</p>
  <h1 className="pl-hero-title">
@@ -617,6 +618,7 @@ const Index = () => {
  <p className="pl-cta-note">New members get a welcome credit on signup.</p>
  )}
  </section>
+  </main>
 
  {/* FOOTER */}
  <footer className="pl-footer">
