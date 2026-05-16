@@ -51,7 +51,7 @@ export default function PetHealth() {
  setUserId(user.id);
 
  if (!petId) {
- navigate("/dashboard");
+ navigate("/home");
  return;
  }
  };
@@ -77,7 +77,7 @@ export default function PetHealth() {
  } catch (error) {
  console.error("Error loading pet:", error);
  toast.error("Failed to load pet information");
- navigate("/dashboard");
+ navigate("/home");
  } finally {
  setIsLoading(false);
  }
@@ -123,7 +123,7 @@ export default function PetHealth() {
  <div className="container max-w-4xl lg:max-w-6xl mx-auto px-4 py-8 space-y-6">
  <Button
  variant="ghost"
- onClick={() => navigate("/dashboard")}
+ onClick={() => navigate("/home")}
  className="mb-4"
  >
  <ArrowLeft className="w-4 h-4 mr-2" />

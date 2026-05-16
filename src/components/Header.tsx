@@ -76,7 +76,7 @@ const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout, userId,
  <div className="hidden md:flex items-center gap-1">
  <Button
  variant="ghost"
- onClick={() => navigate("/dashboard")}
+ onClick={() => navigate("/home")}
  className="text-sm font-medium hover:text-accent"
  >
  Home

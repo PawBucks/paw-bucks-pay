@@ -66,7 +66,7 @@ export default function CheckInPage() {
  }
 
  if (!token) {
- navigate("/dashboard");
+ navigate("/home");
  return;
  }
 
@@ -289,7 +289,7 @@ export default function CheckInPage() {
  </div>
  </>
  )}
- <Button onClick={() => navigate("/dashboard")} className="w-full">
+ <Button onClick={() => navigate("/home")} className="w-full">
  Go to Dashboard
  </Button>
  </>

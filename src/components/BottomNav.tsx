@@ -16,7 +16,7 @@ const BottomNavComponent = () => {
 
   const isActiveRoute = useCallback((path: string) => {
     if (path === "/home") {
-      return location.pathname === "/home" || location.pathname === "/dashboard" || location.pathname === "/";
+      return location.pathname === "/home" || location.pathname === "/home" || location.pathname === "/";
     }
     return location.pathname.startsWith(path);
   }, [location.pathname]);

@@ -45,7 +45,7 @@ export const prefetchRoute = (path: string, options: PrefetchOptions = {}) => {
  */
 export const prefetchCriticalRoutes = () => {
  const criticalRoutes = [
- { path:'/dashboard', priority:'high' as const },
+ { path:'/home', priority:'high' as const },
  { path:'/auth', priority:'high' as const },
  { path:'/discover', priority:'low' as const },
  { path:'/wallet', priority:'low' as const },

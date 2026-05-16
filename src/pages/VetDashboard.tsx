@@ -91,7 +91,7 @@ export default function VetDashboard() {
  if (error) {
  if (error.code ==="PGRST116") {
  toast.error("You are not registered as a partner vet");
- navigate("/dashboard");
+ navigate("/home");
  return;
  }
  throw error;

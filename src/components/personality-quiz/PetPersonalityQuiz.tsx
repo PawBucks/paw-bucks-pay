@@ -219,7 +219,7 @@ export const PetPersonalityQuiz = ({
  if (onComplete) {
  onComplete();
  } else {
- navigate("/dashboard");
+ navigate("/home");
  }
  };
 

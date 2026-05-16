@@ -198,7 +198,7 @@ const AppRoutes = () => {
  <Route path="/terms" element={<PageTransition><Terms /></PageTransition>} />
 
  {/* Authenticated pet owner routes */}
-  <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['pet_owner']}><PageTransition><Dashboard /></PageTransition></ProtectedRoute>} />
+  <Route path="/home" element={<ProtectedRoute allowedRoles={['pet_owner']}><PageTransition><Dashboard /></PageTransition></ProtectedRoute>} />
  <Route path="/home" element={<ProtectedRoute allowedRoles={['pet_owner']}><PageTransition><SimpleHome /></PageTransition></ProtectedRoute>} />
  <Route path="/savings" element={<ProtectedRoute allowedRoles={['pet_owner']}><PageTransition><SimpleSavings /></PageTransition></ProtectedRoute>} />
  <Route path="/pay" element={<ProtectedRoute allowedRoles={['pet_owner']}><PageTransition><SimplePay /></PageTransition></ProtectedRoute>} />

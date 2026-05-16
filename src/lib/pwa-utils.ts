@@ -11,7 +11,7 @@ export const isPWA = (): boolean => {
 // Preload critical routes for offline support
 export const preloadCriticalRoutes = async () => {
  if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
- const criticalRoutes = ['/dashboard','/discover','/wallet','/profile'];
+ const criticalRoutes = ['/home','/discover','/wallet','/profile'];
  
  for (const route of criticalRoutes) {
  try {

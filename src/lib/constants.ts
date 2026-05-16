@@ -141,7 +141,7 @@ export const QUERY_STALE_TIMES = {
 export const ROUTES = {
  HOME:'/',
  AUTH:'/auth',
- DASHBOARD:'/dashboard',
+ DASHBOARD:'/home',
  CREATE_PET_PROFILE:'/create-pet-profile',
  ADMIN:'/admin',
  DISCOVER:'/discover',
