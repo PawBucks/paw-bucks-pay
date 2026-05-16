@@ -1,6 +1,11 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import Stripe from "https://esm.sh/stripe@18.5.0";
+import {
+  getSpendableSources,
+  planPawBucksDebit,
+  applyPawBucksDebit,
+} from "../_shared/pet-fund-debit.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -205,7 +210,13 @@ serve(async (req) => {
     // 2b. Deduct PawBucks if split payment
     if (pawbucksUsedInSplit > 0) {
       const pawbucksUsdValue = pawbucksUsedInSplit * 0.001;
-      
+
+      // Plan + apply debit across wallet → Pet Fund → legacy welcome credit
+      const sources = await getSpendableSources(supabaseAdmin, userId);
+      const plan = planPawBucksDebit(sources, pawbucksUsedInSplit, amountInDollars);
+      await applyPawBucksDebit(supabaseAdmin, userId, plan);
+      logStep("Split PawBucks debit applied", plan);
+
       await supabaseAdmin.from('pawbucks_activity').insert({
         user_id: userId,
         amount: pawbucksUsedInSplit,
@@ -214,20 +225,6 @@ serve(async (req) => {
         description: `Used ${pawbucksUsedInSplit} PawBucks ($${pawbucksUsdValue.toFixed(2)}) for Pet Store purchase: ${itemName}`,
         transaction_id: transaction.id,
       });
-
-      const { data: currentWallet } = await supabaseAdmin
-        .from('pawbucks_wallet')
-        .select('balance')
-        .eq('user_id', userId)
-        .single();
-
-      if (currentWallet) {
-        await supabaseAdmin
-          .from('pawbucks_wallet')
-          .update({ balance: Math.max(currentWallet.balance - pawbucksUsedInSplit, 0) })
-          .eq('user_id', userId);
-        logStep("PawBucks deducted for split payment", { amount: pawbucksUsedInSplit, newBalance: currentWallet.balance - pawbucksUsedInSplit });
-      }
 
       // Track Branded PawBucks redemption (FIFO across active campaigns at this merchant)
       if (item?.merchant_id) {
