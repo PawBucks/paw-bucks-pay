@@ -1,5 +1,10 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import {
+  getSpendableSources,
+  planPawBucksDebit,
+  applyPawBucksDebit,
+} from "../_shared/pet-fund-debit.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -54,14 +59,9 @@ serve(async (req) => {
     const effectiveUserId = (sharedMembership as any)?.shared_accounts?.owner_id || user.id;
     logStep("Effective user", { effectiveUserId });
 
-    // Get wallet
-    const { data: wallet, error: walletErr } = await supabaseAdmin
-      .from('pawbucks_wallet')
-      .select('balance')
-      .eq('user_id', effectiveUserId)
-      .single();
-
-    if (walletErr || !wallet) throw new Error('Wallet not found');
+    // Load all spendable sources (wallet + Pet Fund + legacy welcome credit)
+    const sources = await getSpendableSources(supabaseAdmin, effectiveUserId);
+    const startingWalletBalance = sources.walletBalance;
 
     // Fetch all items from DB to verify prices and stock
     const itemIds = items.map((i: any) => i.itemId);
@@ -97,9 +97,10 @@ serve(async (req) => {
 
     logStep("Totals calculated", { totalPawbucksCost, totalUsdEquivalent, balance: wallet.balance });
 
-    if (wallet.balance < totalPawbucksCost) {
-      throw new Error(`Insufficient PawBucks balance. Need ${totalPawbucksCost}, have ${wallet.balance}`);
-    }
+    // Plan debit across wallet → Pet Fund → legacy welcome credit.
+    // Throws if combined eligible balance is insufficient (also enforces Pet Fund min spend).
+    const debitPlan = planPawBucksDebit(sources, totalPawbucksCost, totalUsdEquivalent);
+    logStep("Debit plan", debitPlan);
 
     // Process the purchase
     for (const { dbItem, quantity } of validatedItems) {
@@ -137,10 +138,8 @@ serve(async (req) => {
         .eq('id', dbItem.id);
     }
 
-    // Deduct wallet balance
-    await supabaseAdmin.from('pawbucks_wallet')
-      .update({ balance: wallet.balance - totalPawbucksCost })
-      .eq('user_id', effectiveUserId);
+    // Apply the debit across all sources
+    await applyPawBucksDebit(supabaseAdmin, effectiveUserId, debitPlan);
 
     // Get user profile for notifications
     const { data: userProfile } = await supabaseAdmin
