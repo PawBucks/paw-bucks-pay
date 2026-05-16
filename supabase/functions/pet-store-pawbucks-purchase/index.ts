@@ -100,7 +100,7 @@ serve(async (req) => {
     // Plan debit across wallet → Pet Fund → legacy welcome credit.
     // Throws if combined eligible balance is insufficient (also enforces Pet Fund min spend).
     const debitPlan = planPawBucksDebit(sources, totalPawbucksCost, totalUsdEquivalent);
-    logStep("Debit plan", debitPlan);
+    logStep("Debit plan", { ...debitPlan });
 
     // Process the purchase
     for (const { dbItem, quantity } of validatedItems) {
