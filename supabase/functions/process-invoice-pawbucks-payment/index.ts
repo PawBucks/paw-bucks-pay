@@ -1,6 +1,11 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import {
+  getSpendableSources,
+  planPawBucksDebit,
+  applyPawBucksDebit,
+} from "../_shared/pet-fund-debit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -124,33 +129,13 @@ serve(async (req) => {
         throw new Error("User ID is required for PawBucks payments");
       }
 
-      const { data: wallet, error: walletError } = await supabase
-        .from("pawbucks_wallet")
-        .select("*")
-        .eq("user_id", userId)
-        .single();
-
-      if (walletError || !wallet) {
-        throw new Error("PawBucks wallet not found");
-      }
-
-      if (wallet.balance < pawbucksUsed) {
-        throw new Error(`Insufficient PawBucks balance. You have ${wallet.balance} but need ${pawbucksUsed}`);
-      }
-
-      // Deduct PawBucks from user's wallet
-      const { error: deductError } = await supabase
-        .from("pawbucks_wallet")
-        .update({ 
-          balance: wallet.balance - pawbucksUsed,
-          last_updated: new Date().toISOString()
-        })
-        .eq("user_id", userId);
-
-      if (deductError) {
-        console.error("Deduct error:", deductError);
-        throw new Error(`Failed to deduct PawBucks: ${deductError.message}`);
-      }
+      // Plan debit across wallet → Pet Fund → legacy welcome credit.
+      // Throws if combined eligible balance is insufficient or Pet Fund min spend not met.
+      const sources = await getSpendableSources(supabase, userId);
+      const invoiceTotalUsd = (pawbucksAmountCents + (tipAmountCents || 0)) / 100;
+      const debitPlan = planPawBucksDebit(sources, pawbucksUsed, invoiceTotalUsd);
+      await applyPawBucksDebit(supabase, userId, debitPlan);
+      logStep("PawBucks debit applied", debitPlan);
 
       // Log user PawBucks activity
       await supabase.from("pawbucks_activity").insert({
@@ -499,21 +484,15 @@ serve(async (req) => {
     // We pre-validate balance up front so we can fail fast before sending the user to
     // Stripe if they don't have enough PawBucks.
     if (pawbucksAmountCents > 0 && userId) {
-      const { data: wallet, error: walletError } = await supabase
-        .from("pawbucks_wallet")
-        .select("balance")
-        .eq("user_id", userId)
-        .single();
-
-      if (walletError || !wallet || wallet.balance < pawbucksUsed) {
-        logStep("Insufficient PawBucks for split invoice payment (debit deferred)", {
-          have: wallet?.balance ?? 0,
-          need: pawbucksUsed,
-        });
-        // Note: we still allow the Stripe session to proceed because the front-end
-        // typically validates this; the webhook will guard against over-debit on success.
-      } else {
+      // Include wallet + Pet Fund + legacy welcome credit, and enforce Pet Fund minimum spend.
+      const sources = await getSpendableSources(supabase, userId);
+      const txnTotalUsd = totalAmountCents / 100;
+      try {
+        planPawBucksDebit(sources, pawbucksUsed, txnTotalUsd);
         logStep("PawBucks split invoice queued (debit deferred until Stripe success)", { pawbucksUsed });
+      } catch (e) {
+        // Hard-fail so the user isn't sent to a Stripe session that the webhook will reject.
+        throw new Error((e as Error).message);
       }
     }
 
