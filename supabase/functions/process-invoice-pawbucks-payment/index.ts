@@ -1,6 +1,11 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import {
+  getSpendableSources,
+  planPawBucksDebit,
+  applyPawBucksDebit,
+} from "../_shared/pet-fund-debit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -124,33 +129,13 @@ serve(async (req) => {
         throw new Error("User ID is required for PawBucks payments");
       }
 
-      const { data: wallet, error: walletError } = await supabase
-        .from("pawbucks_wallet")
-        .select("*")
-        .eq("user_id", userId)
-        .single();
-
-      if (walletError || !wallet) {
-        throw new Error("PawBucks wallet not found");
-      }
-
-      if (wallet.balance < pawbucksUsed) {
-        throw new Error(`Insufficient PawBucks balance. You have ${wallet.balance} but need ${pawbucksUsed}`);
-      }
-
-      // Deduct PawBucks from user's wallet
-      const { error: deductError } = await supabase
-        .from("pawbucks_wallet")
-        .update({ 
-          balance: wallet.balance - pawbucksUsed,
-          last_updated: new Date().toISOString()
-        })
-        .eq("user_id", userId);
-
-      if (deductError) {
-        console.error("Deduct error:", deductError);
-        throw new Error(`Failed to deduct PawBucks: ${deductError.message}`);
-      }
+      // Plan debit across wallet → Pet Fund → legacy welcome credit.
+      // Throws if combined eligible balance is insufficient or Pet Fund min spend not met.
+      const sources = await getSpendableSources(supabase, userId);
+      const invoiceTotalUsd = (pawbucksAmountCents + (tipAmountCents || 0)) / 100;
+      const debitPlan = planPawBucksDebit(sources, pawbucksUsed, invoiceTotalUsd);
+      await applyPawBucksDebit(supabase, userId, debitPlan);
+      logStep("PawBucks debit applied", debitPlan);
 
       // Log user PawBucks activity
       await supabase.from("pawbucks_activity").insert({
