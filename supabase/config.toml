@@ -374,3 +374,9 @@ verify_jwt = false
 
 [functions.auto-detect-no-shows]
 verify_jwt = false
+
+[functions.send-phone-otp]
+verify_jwt = false
+
+[functions.verify-phone-otp]
+verify_jwt = false

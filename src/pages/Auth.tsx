@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/comp
 import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from"@/components/ui/dialog";
 import { toast } from"sonner";
-import { Eye, EyeOff, KeyRound } from "lucide-react";
+import { Eye, EyeOff, KeyRound, CheckCircle2, Loader2 } from "lucide-react";
 import logo from"@/assets/logo.png";
 import { useAuth } from"@/hooks/useAuth";
 import { signUpSchema, signInSchema } from"@/lib/validation";
@@ -54,6 +54,73 @@ const Auth = () => {
  const [biometricEnroll, setBiometricEnroll] = useState<{ open: boolean; email: string; password: string }>({
  open: false, email:"", password:"",
  });
+
+  // Phone OTP verification state
+  const [phoneInput, setPhoneInput] = useState("");
+  const [otpCode, setOtpCode] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [sendingOtp, setSendingOtp] = useState(false);
+  const [verifyingOtp, setVerifyingOtp] = useState(false);
+  const [verifiedPhone, setVerifiedPhone] = useState<string | null>(null);
+  const [phoneVerificationToken, setPhoneVerificationToken] = useState<string | null>(null);
+
+  // Reset OTP state if user edits phone after verifying / sending
+  useEffect(() => {
+    if (verifiedPhone && verifiedPhone !== phoneInput) {
+      setVerifiedPhone(null);
+      setPhoneVerificationToken(null);
+      setOtpSent(false);
+      setOtpCode("");
+    }
+  }, [phoneInput, verifiedPhone]);
+
+  const handleSendOtp = async () => {
+    if (!phoneInput.trim()) {
+      toast.error("Enter a phone number first");
+      return;
+    }
+    setSendingOtp(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("send-phone-otp", {
+        body: { phone: phoneInput },
+      });
+      if (error || (data as any)?.error) {
+        toast.error((data as any)?.error || error?.message || "Could not send code");
+        return;
+      }
+      setOtpSent(true);
+      toast.success("Verification code sent to your phone");
+    } catch (err: any) {
+      toast.error(err?.message || "Could not send code");
+    } finally {
+      setSendingOtp(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (!/^\d{6}$/.test(otpCode)) {
+      toast.error("Enter the 6-digit code");
+      return;
+    }
+    setVerifyingOtp(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("verify-phone-otp", {
+        body: { phone: phoneInput, code: otpCode },
+      });
+      const payload = data as any;
+      if (error || payload?.error || !payload?.verification_token) {
+        toast.error(payload?.error || error?.message || "Verification failed");
+        return;
+      }
+      setVerifiedPhone(phoneInput);
+      setPhoneVerificationToken(payload.verification_token);
+      toast.success("Phone number verified");
+    } catch (err: any) {
+      toast.error(err?.message || "Verification failed");
+    } finally {
+      setVerifyingOtp(false);
+    }
+  };
 
  // Show banned notice if redirected here after a forced sign-out
  useEffect(() => {
@@ -237,7 +304,7 @@ const Auth = () => {
  const password = formData.get("password") as string;
  const confirmPassword = formData.get("confirmPassword") as string;
  const fullName = formData.get("fullName") as string;
- const phone = formData.get("phone") as string;
+  const phone = phoneInput;
 
  try {
  // Check if passwords match
@@ -246,6 +313,13 @@ const Auth = () => {
  setIsLoading(false);
  return;
  }
+
+  // Require completed phone verification
+  if (!phoneVerificationToken || verifiedPhone !== phone) {
+    toast.error("Please verify your phone number before continuing");
+    setIsLoading(false);
+    return;
+  }
 
  // Validate input
  const validatedData = signUpSchema.parse({
@@ -266,6 +340,8 @@ const Auth = () => {
  data: {
  full_name: validatedData.fullName,
  user_type: userType,
+  phone: validatedData.phone,
+  phone_verification_token: phoneVerificationToken,
  },
  },
  });
@@ -743,14 +819,57 @@ const Auth = () => {
  </div>
  <div className="space-y-2">
  <Label htmlFor="phone">Phone Number</Label>
- <Input 
- id="phone" 
- name="phone" 
- type="tel" 
- placeholder="(555) 123-4567"
- autoComplete="tel"
- required
- />
+  <div className="flex gap-2">
+  <Input
+    id="phone"
+    name="phone"
+    type="tel"
+    placeholder="(555) 123-4567"
+    autoComplete="tel"
+    required
+    value={phoneInput}
+    onChange={(e) => setPhoneInput(e.target.value)}
+    disabled={!!verifiedPhone}
+  />
+  {verifiedPhone === phoneInput && verifiedPhone ? (
+    <Button type="button" variant="secondary" disabled className="shrink-0">
+      <CheckCircle2 className="h-4 w-4 mr-1 text-green-600" /> Verified
+    </Button>
+  ) : (
+    <Button
+      type="button"
+      variant="outline"
+      onClick={handleSendOtp}
+      disabled={sendingOtp || !phoneInput.trim()}
+      className="shrink-0"
+    >
+      {sendingOtp ? <Loader2 className="h-4 w-4 animate-spin" /> : otpSent ? "Resend code" : "Send code"}
+    </Button>
+  )}
+  </div>
+  {otpSent && !verifiedPhone && (
+    <div className="flex gap-2 pt-2">
+      <Input
+        inputMode="numeric"
+        pattern="\d{6}"
+        maxLength={6}
+        placeholder="Enter 6-digit code"
+        value={otpCode}
+        onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+      />
+      <Button
+        type="button"
+        onClick={handleVerifyOtp}
+        disabled={verifyingOtp || otpCode.length !== 6}
+        className="shrink-0"
+      >
+        {verifyingOtp ? <Loader2 className="h-4 w-4 animate-spin" /> : "Verify"}
+      </Button>
+    </div>
+  )}
+  <p className="text-xs text-muted-foreground">
+    We'll text you a 6-digit code to confirm your number.
+  </p>
  </div>
  <div className="space-y-2">
  <Label htmlFor="signup-password">Password</Label>
@@ -864,7 +983,7 @@ const Auth = () => {
  <Button 
  type="submit" 
  className="w-full" 
- disabled={isLoading}
+  disabled={isLoading || !phoneVerificationToken || verifiedPhone !== phoneInput}
  aria-label="Create your PawBucks account"
  >
  {isLoading ?"Creating account..." :"Create Account"}
