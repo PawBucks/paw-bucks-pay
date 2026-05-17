@@ -233,9 +233,26 @@ const MerchantProfile = memo(() => {
  return (
  <>
  <SEO
- title={`${merchant.business_name} - PawBucks`}
+ title={merchant.business_name}
  description={merchant.description || `Visit ${merchant.business_name} and earn ${merchant.cashback_rate}x points in PawBucks!`}
  keywords={[merchant.business_name, merchant.business_type,"pet services","PawBucks","rewards"]}
+ jsonLd={{
+   "@context": "https://schema.org",
+   "@type": "LocalBusiness",
+   name: merchant.business_name,
+   description: merchant.description || undefined,
+   image: merchant.logo_url || undefined,
+   telephone: merchant.phone || undefined,
+   address: merchant.address ? { "@type": "PostalAddress", streetAddress: merchant.address } : undefined,
+   url: typeof window !== "undefined" ? window.location.href : undefined,
+   ...(merchant.average_rating && merchant.review_count ? {
+     aggregateRating: {
+       "@type": "AggregateRating",
+       ratingValue: merchant.average_rating,
+       reviewCount: merchant.review_count,
+     },
+   } : {}),
+ }}
  />
  <Header isAuthenticated={!!user} onLogout={user ? handleLogout : undefined} />
  
