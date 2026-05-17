@@ -258,9 +258,12 @@
     }
   }
 
-  /* Performance optimizations */
+  /* Performance optimizations — skip above-fold images marked high priority */
   img {
     content-visibility: auto;
+  }
+  img[fetchpriority="high"] {
+    content-visibility: visible;
   }
 
   /* Better scrollbar styling */

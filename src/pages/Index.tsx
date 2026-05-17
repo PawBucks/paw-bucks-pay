@@ -469,16 +469,11 @@ const Index = () => {
  canonical={seoMeta.home.canonical}
  />
  <style>{styles}</style>
- <link rel="preconnect" href="https://fonts.googleapis.com" />
- <link
- href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap"
- rel="stylesheet"
- />
 
  {/* NAV */}
  <nav className="pl-nav">
  <a href="/" className="pl-nav-logo" aria-label="PawBucks home">
- <img src={logo} alt="PawBucks" />
+ <img src={logo} alt="PawBucks" width="176" height="44" fetchPriority="high" />
  </a>
  <div className="pl-nav-links">
  <a onClick={goDirectory} role="button" tabIndex={0}>Discover</a>
