@@ -334,6 +334,13 @@ const MerchantDirectory = () => {
  description={seoMeta.directory.description}
  keywords={[...seoMeta.directory.keywords]}
  canonical={seoMeta.directory.canonical}
+ jsonLd={{
+   "@context": "https://schema.org",
+   "@type": "CollectionPage",
+   name: seoMeta.directory.title,
+   description: seoMeta.directory.description,
+   url: `https://pawbucks.app${seoMeta.directory.canonical}`,
+ }}
  />
  <Header isAuthenticated={!!user} onLogout={user ? handleLogout : undefined} />
 
