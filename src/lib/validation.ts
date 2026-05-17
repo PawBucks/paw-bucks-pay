@@ -16,6 +16,14 @@ export const signUpSchema = z.object({
  .trim()
  .min(1, { message:"Name is required" })
  .max(100, { message:"Name must be less than 100 characters" }),
+  phone: z.string()
+    .trim()
+    .min(1, { message:"Phone number is required" })
+    .max(20, { message:"Phone number must be less than 20 characters" })
+    .regex(/^[\d\s\-\(\)\+\.]+$/, { message:"Invalid phone number format" })
+    .refine((val) => (val.match(/\d/g) || []).length >= 10, {
+      message:"Phone number must contain at least 10 digits",
+    }),
  referralCode: z.string()
  .trim()
  .toUpperCase()
