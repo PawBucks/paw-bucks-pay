@@ -84,7 +84,7 @@ export const seoMeta = {
  canonical:"/vets",
  },
  directory: {
- title:"Pet Merchant Directory – Find Local Pet Businesses",
+  title:"Pet Merchant Directory – Local Pet Businesses",
  description:
 "Browse our complete directory of trusted pet merchants. Find pet stores, groomers, trainers, vets, and boarding near you. Read reviews and earn PawBucks rewards.",
  keywords: [

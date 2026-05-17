@@ -327,7 +327,7 @@ export default function DirectCheckout() {
  if (success) {
  return (
  <div className="min-h-screen flex items-center justify-center p-4">
- <SEO title="Payment Success" description="Your payment was successful" />
+ <SEO title="Payment Success" description="Your payment was successful" noIndex />
  <Card className="max-w-md w-full">
  <CardContent className="pt-6 text-center">
  <CheckCircle2 className="h-16 w-16 mx-auto text-primary mb-4" />
@@ -378,7 +378,7 @@ export default function DirectCheckout() {
  if (!merchant.onboarding_complete || !merchant.stripe_account_id) {
  return (
  <div className="min-h-screen flex items-center justify-center p-4">
- <SEO title={`Pay ${merchant.business_name}`} />
+ <SEO title={`Pay ${merchant.business_name}`} noIndex />
  <Card className="max-w-md w-full">
  <CardContent className="pt-6 text-center">
  <span className="h-12 w-12 mx-auto text-muted-foreground mb-4" aria-hidden="true">🏪</span>
@@ -397,6 +397,7 @@ export default function DirectCheckout() {
  <SEO 
  title={`Pay ${merchant.business_name}`} 
  description={`Make a payment to ${merchant.business_name}`}
+ noIndex
  />
  
   <Card className="w-full max-w-md lg:max-w-5xl lg:grid lg:grid-cols-5 lg:gap-0 lg:overflow-hidden">

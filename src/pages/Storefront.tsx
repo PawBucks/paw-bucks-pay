@@ -331,6 +331,7 @@ const Storefront = memo(() => {
  <SEO 
  title={`${merchantName ||"Store"} - Shop Products`}
  description={`Browse and purchase products from ${merchantName ||"this store"}. Earn PawBucks on every purchase!`}
+         noIndex
         ogImage={merchantLogo || undefined}
         jsonLd={merchantName ? {
           "@context":"https://schema.org",

@@ -28,6 +28,7 @@ const CheckoutSuccess = () => {
  <SEO 
  title="Payment Successful"
  description="Your payment was processed successfully"
+ noIndex
  />
 
  {/* Animated Confetti Particles */}

@@ -13,6 +13,7 @@ import { toast } from'sonner';
 import { format } from'date-fns';
 import { formatLocalDate } from'@/utils/formatters';
 import { AlertTriangle, Building2, Calendar, Car, DollarSign, Eye, FileText, Loader2, MessageSquare, Receipt, Shield } from "lucide-react";
+import { SEO } from "@/components/SEO";
 
 import { Formatters } from "@/utils/formatters";
 interface InvitationData {
@@ -283,6 +284,7 @@ export default function AccountantPortal() {
 
  return (
  <div className="min-h-screen bg-background">
+ <SEO title="Accountant Portal" description="Secure accountant access portal" noIndex />
  {/* Header */}
  <header className="bg-card border-b sticky top-0 z-10">
  <div className="container mx-auto px-4 py-4">

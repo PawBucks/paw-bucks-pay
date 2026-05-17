@@ -38,8 +38,9 @@ export const SEO = ({
  jsonLd
 }: SEOProps) => {
  useEffect(() => {
- // Update title - keep under 60 characters for optimal display
- const fullTitle = title.length > 50 ? title : `${title} | PawBucks`;
+ // Update title - keep under 60 characters; avoid duplicating brand name
+ const alreadyBranded = /pawbucks/i.test(title);
+ const fullTitle = alreadyBranded || title.length > 50 ? title : `${title} | PawBucks`;
  document.title = fullTitle;
 
  // Update or create meta tags
