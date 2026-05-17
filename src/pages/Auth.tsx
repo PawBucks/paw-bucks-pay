@@ -983,7 +983,7 @@ const Auth = () => {
  <Button 
  type="submit" 
  className="w-full" 
- disabled={isLoading}
+  disabled={isLoading || !phoneVerificationToken || verifiedPhone !== phoneInput}
  aria-label="Create your PawBucks account"
  >
  {isLoading ?"Creating account..." :"Create Account"}
