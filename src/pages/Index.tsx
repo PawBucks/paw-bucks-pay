@@ -469,11 +469,6 @@ const Index = () => {
  canonical={seoMeta.home.canonical}
  />
  <style>{styles}</style>
- <link rel="preconnect" href="https://fonts.googleapis.com" />
- <link
- href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap"
- rel="stylesheet"
- />
 
  {/* NAV */}
  <nav className="pl-nav">
