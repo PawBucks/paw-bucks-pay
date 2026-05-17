@@ -749,6 +749,7 @@ const Auth = () => {
  type="tel" 
  placeholder="(555) 123-4567"
  autoComplete="tel"
+ required
  />
  </div>
  <div className="space-y-2">
