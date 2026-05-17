@@ -245,13 +245,6 @@ const MerchantProfile = memo(() => {
    telephone: merchant.phone || undefined,
    address: merchant.address ? { "@type": "PostalAddress", streetAddress: merchant.address } : undefined,
    url: typeof window !== "undefined" ? window.location.href : undefined,
-   ...(merchant.average_rating && merchant.review_count ? {
-     aggregateRating: {
-       "@type": "AggregateRating",
-       ratingValue: merchant.average_rating,
-       reviewCount: merchant.review_count,
-     },
-   } : {}),
  }}
  />
  <Header isAuthenticated={!!user} onLogout={user ? handleLogout : undefined} />
