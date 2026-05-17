@@ -473,7 +473,7 @@ const Index = () => {
  {/* NAV */}
  <nav className="pl-nav">
  <a href="/" className="pl-nav-logo" aria-label="PawBucks home">
- <img src={logo} alt="PawBucks" width="176" height="44" fetchpriority="high" />
+ <img src={logo} alt="PawBucks" width="176" height="44" fetchPriority="high" />
  </a>
  <div className="pl-nav-links">
  <a onClick={goDirectory} role="button" tabIndex={0}>Discover</a>
