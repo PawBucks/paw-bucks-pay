@@ -10,8 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/comp
 import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from"@/components/ui/dialog";
 import { toast } from"sonner";
-import { Eye, EyeOff, KeyRound } from "lucide-react";
-import { CheckCircle2, Loader2 } from "lucide-react";
+import { Eye, EyeOff, KeyRound, CheckCircle2, Loader2 } from "lucide-react";
 import logo from"@/assets/logo.png";
 import { useAuth } from"@/hooks/useAuth";
 import { signUpSchema, signInSchema } from"@/lib/validation";
