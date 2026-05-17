@@ -252,6 +252,7 @@ const Auth = () => {
  email,
  password,
  fullName,
+ phone,
  referralCode: referralCode ||"",
  });
 
@@ -298,7 +299,7 @@ const Auth = () => {
  user_type: userType,
  full_name: validatedData.fullName,
  email: validatedData.email,
- phone: phone || null,
+ phone: validatedData.phone,
  }, { onConflict:'id' });
 
  if (profileError) {
