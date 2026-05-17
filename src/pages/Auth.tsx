@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from"@/components/ui/dialog";
 import { toast } from"sonner";
 import { Eye, EyeOff, KeyRound } from "lucide-react";
+import { CheckCircle2, Loader2 } from "lucide-react";
 import logo from"@/assets/logo.png";
 import { useAuth } from"@/hooks/useAuth";
 import { signUpSchema, signInSchema } from"@/lib/validation";
@@ -54,6 +55,73 @@ const Auth = () => {
  const [biometricEnroll, setBiometricEnroll] = useState<{ open: boolean; email: string; password: string }>({
  open: false, email:"", password:"",
  });
+
+  // Phone OTP verification state
+  const [phoneInput, setPhoneInput] = useState("");
+  const [otpCode, setOtpCode] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [sendingOtp, setSendingOtp] = useState(false);
+  const [verifyingOtp, setVerifyingOtp] = useState(false);
+  const [verifiedPhone, setVerifiedPhone] = useState<string | null>(null);
+  const [phoneVerificationToken, setPhoneVerificationToken] = useState<string | null>(null);
+
+  // Reset OTP state if user edits phone after verifying / sending
+  useEffect(() => {
+    if (verifiedPhone && verifiedPhone !== phoneInput) {
+      setVerifiedPhone(null);
+      setPhoneVerificationToken(null);
+      setOtpSent(false);
+      setOtpCode("");
+    }
+  }, [phoneInput, verifiedPhone]);
+
+  const handleSendOtp = async () => {
+    if (!phoneInput.trim()) {
+      toast.error("Enter a phone number first");
+      return;
+    }
+    setSendingOtp(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("send-phone-otp", {
+        body: { phone: phoneInput },
+      });
+      if (error || (data as any)?.error) {
+        toast.error((data as any)?.error || error?.message || "Could not send code");
+        return;
+      }
+      setOtpSent(true);
+      toast.success("Verification code sent to your phone");
+    } catch (err: any) {
+      toast.error(err?.message || "Could not send code");
+    } finally {
+      setSendingOtp(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (!/^\d{6}$/.test(otpCode)) {
+      toast.error("Enter the 6-digit code");
+      return;
+    }
+    setVerifyingOtp(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("verify-phone-otp", {
+        body: { phone: phoneInput, code: otpCode },
+      });
+      const payload = data as any;
+      if (error || payload?.error || !payload?.verification_token) {
+        toast.error(payload?.error || error?.message || "Verification failed");
+        return;
+      }
+      setVerifiedPhone(phoneInput);
+      setPhoneVerificationToken(payload.verification_token);
+      toast.success("Phone number verified");
+    } catch (err: any) {
+      toast.error(err?.message || "Verification failed");
+    } finally {
+      setVerifyingOtp(false);
+    }
+  };
 
  // Show banned notice if redirected here after a forced sign-out
  useEffect(() => {
@@ -237,7 +305,7 @@ const Auth = () => {
  const password = formData.get("password") as string;
  const confirmPassword = formData.get("confirmPassword") as string;
  const fullName = formData.get("fullName") as string;
- const phone = formData.get("phone") as string;
+  const phone = phoneInput;
 
  try {
  // Check if passwords match
@@ -246,6 +314,13 @@ const Auth = () => {
  setIsLoading(false);
  return;
  }
+
+  // Require completed phone verification
+  if (!phoneVerificationToken || verifiedPhone !== phone) {
+    toast.error("Please verify your phone number before continuing");
+    setIsLoading(false);
+    return;
+  }
 
  // Validate input
  const validatedData = signUpSchema.parse({
@@ -266,6 +341,8 @@ const Auth = () => {
  data: {
  full_name: validatedData.fullName,
  user_type: userType,
+  phone: validatedData.phone,
+  phone_verification_token: phoneVerificationToken,
  },
  },
  });
