@@ -432,6 +432,12 @@ const MerchantProfile = memo(() => {
                   <Store className="w-3.5 h-3.5" /> Storefront
                 </Link>
               )}
+              <button
+                onClick={handleShare}
+                className="flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-full bg-secondary text-secondary-foreground text-xs font-medium hover:bg-secondary/80 transition-colors"
+              >
+                <Share2 className="w-3.5 h-3.5" /> Share
+              </button>
             </div>
 
             {/* Primary CTAs */}
