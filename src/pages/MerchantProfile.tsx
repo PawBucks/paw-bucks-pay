@@ -269,6 +269,20 @@ const MerchantProfile = memo(() => {
     localStorage.setItem(SAVED_KEY, JSON.stringify([...set]));
   }, [merchantId]);
 
+  const handleShare = useCallback(() => {
+    const url = typeof window !== "undefined" ? window.location.href : "";
+    const shareData = {
+      title: merchant?.business_name || "Check out this merchant on PawBucks",
+      text: merchant?.description || "",
+      url,
+    };
+    if (navigator.share) {
+      navigator.share(shareData).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(url).then(() => toast.success("Link copied to clipboard!"));
+    }
+  }, [merchant]);
+
   const scrollToBooking = useCallback(() => {
     setTab("booking");
     setTimeout(() => bookingRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
