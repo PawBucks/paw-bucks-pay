@@ -9985,6 +9985,48 @@ export type Database = {
           },
         ]
       }
+      phone_verifications: {
+        Row: {
+          attempts: number
+          code_hash: string
+          consumed_at: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          ip_address: string | null
+          phone: string
+          token_expires_at: string | null
+          verification_token: string | null
+          verified_at: string | null
+        }
+        Insert: {
+          attempts?: number
+          code_hash: string
+          consumed_at?: string | null
+          created_at?: string
+          expires_at: string
+          id?: string
+          ip_address?: string | null
+          phone: string
+          token_expires_at?: string | null
+          verification_token?: string | null
+          verified_at?: string | null
+        }
+        Update: {
+          attempts?: number
+          code_hash?: string
+          consumed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          ip_address?: string | null
+          phone?: string
+          token_expires_at?: string | null
+          verification_token?: string | null
+          verified_at?: string | null
+        }
+        Relationships: []
+      }
       platform_notification_settings: {
         Row: {
           created_at: string
@@ -10406,6 +10448,7 @@ export type Database = {
           is_banned: boolean
           normalized_email: string | null
           phone: string | null
+          phone_verified: boolean
           referral_code: string | null
           stripe_customer_id: string | null
           timezone: string | null
@@ -10428,6 +10471,7 @@ export type Database = {
           is_banned?: boolean
           normalized_email?: string | null
           phone?: string | null
+          phone_verified?: boolean
           referral_code?: string | null
           stripe_customer_id?: string | null
           timezone?: string | null
@@ -10450,6 +10494,7 @@ export type Database = {
           is_banned?: boolean
           normalized_email?: string | null
           phone?: string | null
+          phone_verified?: boolean
           referral_code?: string | null
           stripe_customer_id?: string | null
           timezone?: string | null
