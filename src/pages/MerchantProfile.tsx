@@ -33,7 +33,7 @@ import { Founding50Badge } from "@/components/shared/Founding50Badge";
 import {
   ArrowLeft, BadgeCheck, Ban, Bone, Calendar, Camera, Check, CreditCard,
   Facebook, Footprints, Globe, Heart, Home, Instagram, Linkedin, MapPin,
-  MessageSquare, Phone, Scissors, ShoppingBag, Star, Stethoscope, Store, Twitter,
+  MessageSquare, Phone, Scissors, Share2, ShoppingBag, Star, Stethoscope, Store, Twitter,
 } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { Formatters } from "@/utils/formatters";
@@ -269,6 +269,20 @@ const MerchantProfile = memo(() => {
     localStorage.setItem(SAVED_KEY, JSON.stringify([...set]));
   }, [merchantId]);
 
+  const handleShare = useCallback(() => {
+    const url = typeof window !== "undefined" ? window.location.href : "";
+    const shareData = {
+      title: merchant?.business_name || "Check out this merchant on PawBucks",
+      text: merchant?.description || "",
+      url,
+    };
+    if (navigator.share) {
+      navigator.share(shareData).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(url).then(() => toast.success("Link copied to clipboard!"));
+    }
+  }, [merchant]);
+
   const scrollToBooking = useCallback(() => {
     setTab("booking");
     setTimeout(() => bookingRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
@@ -418,6 +432,12 @@ const MerchantProfile = memo(() => {
                   <Store className="w-3.5 h-3.5" /> Storefront
                 </Link>
               )}
+              <button
+                onClick={handleShare}
+                className="flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-full bg-secondary text-secondary-foreground text-xs font-medium hover:bg-secondary/80 transition-colors"
+              >
+                <Share2 className="w-3.5 h-3.5" /> Share
+              </button>
             </div>
 
             {/* Primary CTAs */}
