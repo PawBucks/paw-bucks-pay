@@ -33,7 +33,7 @@ import { Founding50Badge } from "@/components/shared/Founding50Badge";
 import {
   ArrowLeft, BadgeCheck, Ban, Bone, Calendar, Camera, Check, CreditCard,
   Facebook, Footprints, Globe, Heart, Home, Instagram, Linkedin, MapPin,
-  MessageSquare, Phone, Scissors, ShoppingBag, Star, Stethoscope, Store, Twitter,
+  MessageSquare, Phone, Scissors, Share2, ShoppingBag, Star, Stethoscope, Store, Twitter,
 } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { Formatters } from "@/utils/formatters";
