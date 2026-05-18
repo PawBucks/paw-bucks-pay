@@ -634,7 +634,7 @@ const MerchantDirectory = () => {
  {!showMobileMap && viewMode !=="map" && filteredMerchants.length > 0 && (
  <button
  onClick={() => { setViewMode("map"); setShowMobileMap(true); }}
- className="sm:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-30 bg-foreground text-background px-4 py-2.5 rounded-full shadow-lg flex items-center gap-2 text-sm font-medium hover:scale-105 transition-transform"
+ className="sm:hidden fixed bottom-16 left-1/2 -translate-x-1/2 z-30 bg-foreground text-background px-4 py-2.5 rounded-full shadow-lg flex items-center gap-2 text-sm font-medium hover:scale-105 transition-transform"
  >
  <Map className="w-4 h-4" aria-hidden="true" />
  Map
