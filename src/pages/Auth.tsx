@@ -467,66 +467,68 @@ const Auth = () => {
  password,
  });
 
- const { error } = await supabase.auth.signInWithPassword({
- email: validatedData.email,
- password: validatedData.password,
- });
+  const { data: signInData, error } = await supabase.auth.signInWithPassword({
+  email: validatedData.email,
+  password: validatedData.password,
+  });
 
- if (error) {
- // Log failed login attempt
- await supabase.functions.invoke("log-auth-event", {
- body: {
- event_type:"login",
- email: validatedData.email,
- success: false,
- failure_reason: error.message,
- },
- });
- throw error;
- }
+  if (error) {
+  // Fire-and-forget: do NOT block the user on the auth-log edge function.
+  supabase.functions.invoke("log-auth-event", {
+  body: {
+  event_type:"login",
+  email: validatedData.email,
+  success: false,
+  failure_reason: error.message,
+  },
+  }).catch((e) => console.warn("log-auth-event failed:", e));
+  throw error;
+  }
 
- // Log successful login
- await supabase.functions.invoke("log-auth-event", {
- body: {
- event_type:"login",
- email: validatedData.email,
- success: true,
- },
- });
+  // Fire-and-forget: success log should never delay the redirect.
+  supabase.functions.invoke("log-auth-event", {
+  body: {
+  event_type:"login",
+  email: validatedData.email,
+  success: true,
+  },
+  }).catch((e) => console.warn("log-auth-event failed:", e));
 
- // Get the user from the current session for redirect
- const { data: sessionData } = await supabase.auth.getSession();
- const loggedInUser = sessionData?.session?.user;
+  // Use the user returned directly by signInWithPassword — no extra getSession() roundtrip.
+  const loggedInUser = signInData?.user ?? null;
 
- // Accept invitation if signing in via invite link
- if (loggedInUser) {
- await acceptInviteIfPresent(loggedInUser.id, validatedData.email);
- }
+  // Accept invitation in background — don't block the redirect.
+  if (loggedInUser && inviteToken) {
+  acceptInviteIfPresent(loggedInUser.id, validatedData.email)
+  .catch((e) => console.warn("acceptInviteIfPresent failed:", e));
+  }
 
- toast.success("Signed in successfully!");
+  toast.success("Signed in successfully!");
 
- // Prompt biometric enrollment on native platforms
- const { isNativePlatform, isBiometricAvailable: checkBio, isBiometricEnabled: bioEnabled } = await import("@/services/biometricAuth");
- if (isNativePlatform()) {
- const { available } = await checkBio();
- if (available && !bioEnabled()) {
- setBiometricEnroll({ open: true, email: validatedData.email, password: validatedData.password });
- }
- }
- 
- if (loggedInUser) {
- // If there's a specific redirect URL, use it (e.g., invoice payment)
- if (redirectUrl) {
- navigate(redirectUrl);
- } else if (inviteToken) {
- // If they joined via invite, go directly to dashboard
- navigate(ROUTES.DASHBOARD);
- } else {
-   await redirectBasedOnRole(loggedInUser.id, undefined, false);
- }
- } else {
- navigate(redirectUrl || ROUTES.DASHBOARD);
- }
+  // Defer biometric enrollment check — never block redirect on a dynamic import.
+  setTimeout(() => {
+  import("@/services/biometricAuth").then(async ({ isNativePlatform, isBiometricAvailable: checkBio, isBiometricEnabled: bioEnabled }) => {
+  if (!isNativePlatform()) return;
+  const { available } = await checkBio();
+  if (available && !bioEnabled()) {
+  setBiometricEnroll({ open: true, email: validatedData.email, password: validatedData.password });
+  }
+  }).catch(() => {});
+  }, 0);
+
+  if (loggedInUser) {
+  // If there's a specific redirect URL, use it (e.g., invoice payment)
+  if (redirectUrl) {
+  navigate(redirectUrl);
+  } else if (inviteToken) {
+  // If they joined via invite, go directly to dashboard
+  navigate(ROUTES.DASHBOARD);
+  } else {
+    await redirectBasedOnRole(loggedInUser.id, undefined, false);
+  }
+  } else {
+  navigate(redirectUrl || ROUTES.DASHBOARD);
+  }
  } catch (error: any) {
  if (error.errors) {
  // Zod validation error
