@@ -179,11 +179,13 @@ export default function PublicBookingPage() {
  <BusinessHoursDisplay merchantId={merchant.id} />
  </div>
 
- <div className="mb-6 p-3 bg-primary/5 rounded-md border border-primary/10 text-center">
- <p className="text-sm text-primary font-semibold">
- 🎉 Earn {merchant.cashback_rate}x PawBucks on every booking!
- </p>
- </div>
+              {merchant.accepts_pawbucks && (
+                <div className="mb-6 p-3 bg-primary/5 rounded-md border border-primary/10 text-center">
+                  <p className="text-sm text-primary font-semibold">
+                    🎉 Earn {merchant.cashback_rate}x PawBucks on every booking!
+                  </p>
+                </div>
+              )}
 
  <BookingWidget
  merchantId={merchant.id}
