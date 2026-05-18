@@ -83,6 +83,8 @@ const getSavedSet = (): Set<string> => {
 const MerchantProfile = memo(() => {
   const { merchantId } = useParams<{ merchantId: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const shouldOpenMessage = searchParams.get("openMessage") === "1";
   const { user, signOut } = useAuth();
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
