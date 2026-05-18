@@ -62,7 +62,7 @@ const requestNotificationPermission = async (): Promise<{ granted: boolean; alre
  return { granted: permission ==="granted", alreadyDenied: false };
 };
 
-const showBrowserNotification = (title: string, message: string) => {
+const showBrowserNotification = (title: string, message: string, linkUrl?: string | null) => {
  if (Notification.permission ==="granted") {
  const notification = new Notification(title, {
  body: message,
@@ -74,6 +74,9 @@ const showBrowserNotification = (title: string, message: string) => {
 
  notification.onclick = () => {
  window.focus();
+  if (linkUrl) {
+    try { window.location.assign(linkUrl); } catch {}
+  }
  notification.close();
  };
 
@@ -209,15 +212,26 @@ const NotificationsDropdownComponent = ({ userId }: { userId: string }) => {
  setNotifications((prev) => [newNotification, ...prev].slice(0, 10));
  setUnreadCount((prev) => prev + 1);
 
- // Show browser notification if enabled AND user prefers browser notifications
- if (notificationsEnabled && userPrefersBrowser) {
- showBrowserNotification(newNotification.title, newNotification.message);
- }
+          // Always show browser notification when permission is granted so the
+          // user is actually notified (not just a silent in-app toast).
+          if (typeof Notification !== "undefined" && Notification.permission === "granted") {
+            showBrowserNotification(
+              newNotification.title,
+              newNotification.message,
+              newNotification.link_url
+            );
+          }
 
- // Also show in-app toast
- toast.info(newNotification.title, {
- description: newNotification.message,
- });
+          // Always show an in-app toast; clicking it follows the deep link.
+          toast.info(newNotification.title, {
+            description: newNotification.message,
+            action: newNotification.link_url
+              ? {
+                  label: "Open",
+                  onClick: () => navigate(newNotification.link_url as string),
+                }
+              : undefined,
+          });
  }
  )
  .subscribe();

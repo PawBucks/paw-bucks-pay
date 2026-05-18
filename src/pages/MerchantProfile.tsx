@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback, useEffect, memo, useRef } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useOptimizedQuery } from "@/hooks/useOptimizedQuery";
 import { supabase } from "@/integrations/supabase/client";
@@ -83,6 +83,8 @@ const getSavedSet = (): Set<string> => {
 const MerchantProfile = memo(() => {
   const { merchantId } = useParams<{ merchantId: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const shouldOpenMessage = searchParams.get("openMessage") === "1";
   const { user, signOut } = useAuth();
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
@@ -930,6 +932,7 @@ const MerchantProfile = memo(() => {
             <AskQuestionButton
               merchantId={merchant.id}
               merchantName={merchant.business_name}
+              autoOpen={shouldOpenMessage}
               trigger={
                 <button
                   className="flex-1 inline-flex items-center justify-center gap-2 h-12 rounded-xl border border-border bg-card text-sm font-semibold text-foreground hover:bg-muted/40 transition"

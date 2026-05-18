@@ -24,9 +24,10 @@ type AskQuestionButtonProps = {
  merchantId: string;
  merchantName: string;
  trigger?: React.ReactNode;
+ autoOpen?: boolean;
 };
 
-export const AskQuestionButton = ({ merchantId, merchantName, trigger }: AskQuestionButtonProps) => {
+export const AskQuestionButton = ({ merchantId, merchantName, trigger, autoOpen }: AskQuestionButtonProps) => {
  const { user } = useAuth();
  const navigate = useNavigate();
  const location = useLocation();
@@ -38,6 +39,12 @@ export const AskQuestionButton = ({ merchantId, merchantName, trigger }: AskQues
  const [isUploading, setIsUploading] = useState(false);
  const messagesEndRef = useRef<HTMLDivElement>(null);
  const fileInputRef = useRef<HTMLInputElement>(null);
+
+ useEffect(() => {
+   if (autoOpen && user) {
+     setOpen(true);
+   }
+ }, [autoOpen, user]);
 
  useEffect(() => {
  if (open && user) {
