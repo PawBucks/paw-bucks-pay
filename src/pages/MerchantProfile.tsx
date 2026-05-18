@@ -350,6 +350,11 @@ const MerchantProfile = memo(() => {
             </div>
           </div>
 
+          {/* ══════ Stationary top sponsored ad (rotates opposite of bottom) ══════ */}
+          <div className="px-3 pt-3">
+            <SponsoredAdBar variant="top" />
+          </div>
+
           {/* ══════ DARK HERO ══════ */}
           <section className="relative bg-[hsl(218_35%_10%)] text-white px-4 pt-5 pb-4 overflow-hidden">
             <div aria-hidden className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,hsl(var(--primary)/0.18),transparent_60%)]" />
@@ -892,7 +897,7 @@ const MerchantProfile = memo(() => {
         </div>
 
         {/* ══════ Sticky compact sponsored ad (sits above CTA bar) ══════ */}
-        <StickySponsoredAd authed={!!user} />
+        <SponsoredAdBar variant="bottom" authed={!!user} />
 
         {/* ══════ Sticky bottom CTA bar ══════ */}
         <div
@@ -976,23 +981,94 @@ MerchantProfile.displayName = "MerchantProfile";
 export default MerchantProfile;
 
 // ─────────────────────────────────────────────────────────────────────
-// Compact sticky sponsored ad — slim single-row bar above the CTA panel
+// Compact sponsored ad bar — used both at top (stationary) and bottom (fixed).
+// A shared module-level tick keeps the two instances rotating in lockstep
+// while a per-variant offset guarantees they always show different merchants.
 // ─────────────────────────────────────────────────────────────────────
-function StickySponsoredAd({ authed }: { authed: boolean }) {
+let __adTick = 0;
+const __adTickListeners = new Set<() => void>();
+let __adTickInterval: ReturnType<typeof setInterval> | null = null;
+function useAdTick() {
+  const [, force] = useState(0);
+  useEffect(() => {
+    const listener = () => force((n) => n + 1);
+    __adTickListeners.add(listener);
+    if (!__adTickInterval) {
+      __adTickInterval = setInterval(() => {
+        __adTick += 1;
+        __adTickListeners.forEach((l) => l());
+      }, 15000);
+    }
+    return () => {
+      __adTickListeners.delete(listener);
+      if (__adTickListeners.size === 0 && __adTickInterval) {
+        clearInterval(__adTickInterval);
+        __adTickInterval = null;
+      }
+    };
+  }, []);
+  return __adTick;
+}
+
+function SponsoredAdBar({
+  variant,
+  authed = false,
+}: {
+  variant: "top" | "bottom";
+  authed?: boolean;
+}) {
   const navigate = useNavigate();
   const { data: adMerchants = [] } = useAdMerchants();
-  const [idx, setIdx] = useState(0);
+  const tick = useAdTick();
   const [dismissed, setDismissed] = useState(false);
 
-  useEffect(() => {
-    if (adMerchants.length <= 1) return;
-    const t = setInterval(() => setIdx((i) => (i + 1) % adMerchants.length), 15000);
-    return () => clearInterval(t);
-  }, [adMerchants.length]);
-
   if (dismissed || adMerchants.length === 0) return null;
-  const m = adMerchants[idx];
+
+  const n = adMerchants.length;
+  // Offset bottom by half the list so top & bottom never coincide when n >= 2
+  const offset = variant === "bottom" ? Math.max(1, Math.floor(n / 2)) : 0;
+  const m = adMerchants[(tick + offset) % n];
   if (!m) return null;
+
+  const card = (
+    <button
+      type="button"
+      onClick={() => navigate(`/merchant/${m.id}`)}
+      className="w-full flex items-center gap-3 h-14 pl-2 pr-3 rounded-xl bg-card/95 backdrop-blur border border-border shadow-lg hover:shadow-xl transition text-left"
+    >
+      {m.logo_url ? (
+        <img
+          src={m.logo_url}
+          alt=""
+          className="w-10 h-10 rounded-lg object-cover flex-shrink-0"
+          loading="lazy"
+        />
+      ) : (
+        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+          <Store className="w-5 h-5 text-primary" />
+        </div>
+      )}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
+            Sponsored
+          </span>
+          <span className="text-muted-foreground/40 text-[10px]">·</span>
+          <span className="text-[10px] font-semibold text-success">
+            {m.cashback_rate}x points
+          </span>
+        </div>
+        <p className="text-sm font-semibold text-foreground truncate leading-tight">
+          {m.business_name}
+        </p>
+      </div>
+      <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+    </button>
+  );
+
+  if (variant === "top") {
+    return <div className="max-w-4xl mx-auto">{card}</div>;
+  }
 
   return (
     <div
@@ -1002,41 +1078,7 @@ function StickySponsoredAd({ authed }: { authed: boolean }) {
           : "bottom-[calc(72px+env(safe-area-inset-bottom))]"
       }`}
     >
-      <div className="max-w-4xl mx-auto pointer-events-auto">
-        <button
-          type="button"
-          onClick={() => navigate(`/merchant/${m.id}`)}
-          className="w-full flex items-center gap-3 h-14 pl-2 pr-3 rounded-xl bg-card/95 backdrop-blur border border-border shadow-lg hover:shadow-xl transition text-left"
-        >
-          {m.logo_url ? (
-            <img
-              src={m.logo_url}
-              alt=""
-              className="w-10 h-10 rounded-lg object-cover flex-shrink-0"
-              loading="lazy"
-            />
-          ) : (
-            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-              <Store className="w-5 h-5 text-primary" />
-            </div>
-          )}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1.5">
-              <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
-                Sponsored
-              </span>
-              <span className="text-muted-foreground/40 text-[10px]">·</span>
-              <span className="text-[10px] font-semibold text-success">
-                {m.cashback_rate}x points
-              </span>
-            </div>
-            <p className="text-sm font-semibold text-foreground truncate leading-tight">
-              {m.business_name}
-            </p>
-          </div>
-          <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-        </button>
-      </div>
+      <div className="max-w-4xl mx-auto pointer-events-auto">{card}</div>
     </div>
   );
 }
