@@ -36,9 +36,11 @@ function useAdTick() {
 interface SponsoredAdBarProps {
   variant: "top" | "bottom";
   authed?: boolean;
+  /** Extra px to lift the bottom bar above an additional fixed element (e.g. a sticky CTA bar). */
+  ctaBarHeight?: number;
 }
 
-export function SponsoredAdBar({ variant, authed = false }: SponsoredAdBarProps) {
+export function SponsoredAdBar({ variant, authed = false, ctaBarHeight = 0 }: SponsoredAdBarProps) {
   const navigate = useNavigate();
   const { data: adMerchants = [] } = useAdMerchants();
   const { subscription } = useSubscription();
@@ -94,13 +96,15 @@ export function SponsoredAdBar({ variant, authed = false }: SponsoredAdBarProps)
     return <div className="max-w-4xl mx-auto">{card}</div>;
   }
 
+  const navHeight = authed ? 64 : 0;
+  const bottomStyle: React.CSSProperties = {
+    bottom: `calc(${navHeight + ctaBarHeight}px + env(safe-area-inset-bottom) + 12px)`,
+  };
+
   return (
     <div
-      className={`fixed inset-x-0 z-40 px-3 pointer-events-none ${
-        authed
-          ? "bottom-[calc(64px+env(safe-area-inset-bottom)+12px)] md:bottom-[calc(env(safe-area-inset-bottom)+16px)]"
-          : "bottom-[calc(env(safe-area-inset-bottom)+16px)]"
-      }`}
+      className="fixed inset-x-0 z-40 px-3 pointer-events-none"
+      style={bottomStyle}
     >
       <div className="max-w-4xl mx-auto pointer-events-auto">{card}</div>
     </div>
