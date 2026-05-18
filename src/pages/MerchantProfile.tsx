@@ -324,190 +324,216 @@ const MerchantProfile = memo(() => {
       />
       <Header isAuthenticated={!!user} onLogout={user ? handleLogout : undefined} />
 
-      <div className="min-h-screen bg-background pb-32 md:pb-12">
+      <div className="min-h-screen bg-muted/30 pb-32">
         <div className="max-w-4xl mx-auto">
-          {/* Top Ad */}
-          <div className="px-4 pt-4"><AdPlacement position="top" /></div>
-
-          {/* Back */}
-          <div className="px-4 pt-3 flex items-center justify-between">
-            <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="gap-2 text-muted-foreground hover:text-foreground -ml-2">
-              <ArrowLeft className="w-4 h-4" /> Back
-            </Button>
-            <Button
-              variant="ghost" size="icon"
-              onClick={handleToggleSave}
-              aria-label={saved ? "Remove from saved" : "Save merchant"}
-              className={saved ? "text-rose-500" : "text-muted-foreground"}
-            >
-              <Heart className={`w-5 h-5 ${saved ? "fill-current" : ""}`} />
-            </Button>
+          {/* ══════ Sticky top bar ══════ */}
+          <div className="sticky top-0 z-30 bg-card border-b border-border px-3 py-3 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-1 min-w-0 flex-1">
+              <Button variant="ghost" size="icon" onClick={() => navigate(-1)} aria-label="Back" className="h-9 w-9">
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+              <h1 className="font-bold text-base truncate">{merchant.business_name}</h1>
+            </div>
+            <div className="flex items-center gap-0">
+              <Button variant="ghost" size="icon" onClick={handleShare} aria-label="Share" className="h-9 w-9 text-muted-foreground">
+                <Share2 className="w-5 h-5" />
+              </Button>
+              <Button
+                variant="ghost" size="icon"
+                onClick={handleToggleSave}
+                aria-label={saved ? "Remove from saved" : "Save merchant"}
+                className={`h-9 w-9 ${saved ? "text-rose-500" : "text-muted-foreground"}`}
+              >
+                <Heart className={`w-5 h-5 ${saved ? "fill-current" : ""}`} />
+              </Button>
+            </div>
           </div>
 
-          {/* ═══════════════ HERO ═══════════════ */}
-          <section className="px-4 pt-3 pb-5">
-            <div className="flex gap-4 items-start">
-              <div className="flex-shrink-0">
-                {merchant.logo_url ? (
-                  <div className="w-20 h-20 rounded-2xl overflow-hidden border-2 border-border shadow-md">
-                    <img src={merchant.logo_url} alt={merchant.business_name} className="w-full h-full object-cover" loading="eager" />
-                  </div>
-                ) : (
-                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shadow-md border-2 border-border">
-                    <Icon className="w-10 h-10 text-primary" />
-                  </div>
-                )}
-              </div>
-
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  <h1 className="font-bold text-xl sm:text-2xl tracking-tight text-foreground leading-tight">
-                    {merchant.business_name}
-                  </h1>
-                  {hasVerifiedPro && (
-                    <BadgeCheck className="w-5 h-5 text-info flex-shrink-0" aria-label="Verified Pro" />
+          {/* ══════ DARK HERO ══════ */}
+          <section className="relative bg-[hsl(218_35%_10%)] text-white px-4 pt-5 pb-4 overflow-hidden">
+            <div aria-hidden className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,hsl(var(--primary)/0.18),transparent_60%)]" />
+            <div className="relative">
+              <div className="flex gap-4 items-start">
+                <div className="flex-shrink-0">
+                  {merchant.logo_url ? (
+                    <div className="w-20 h-20 rounded-2xl overflow-hidden shadow-lg">
+                      <img src={merchant.logo_url} alt={merchant.business_name} className="w-full h-full object-cover" loading="eager" />
+                    </div>
+                  ) : (
+                    <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-700 to-emerald-900 flex items-center justify-center shadow-lg text-white text-2xl font-bold tracking-tight">
+                      {merchant.business_name.split(" ").map(w => w[0]).slice(0, 2).join("").toUpperCase()}
+                    </div>
                   )}
-                  {merchantId && <Founding50Badge entityType="merchant" entityId={merchantId} size="sm" />}
                 </div>
 
-                <div className="flex items-center gap-2 mt-1.5 flex-wrap text-xs">
-                  <Badge variant="secondary" className="capitalize bg-primary/10 text-primary hover:bg-primary/15 border-none">
-                    {merchant.business_type.replace(/_/g, " ")}
-                  </Badge>
-                  <PriceRangeDisplay priceRange={merchant.price_range} />
-                  <OpenStatusBadge merchantId={merchant.id} />
-                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <h2 className="font-extrabold text-2xl tracking-tight leading-tight">
+                      {merchant.business_name}
+                    </h2>
+                    {hasVerifiedPro && (
+                      <BadgeCheck className="w-5 h-5 text-info flex-shrink-0" aria-label="Verified Pro" />
+                    )}
+                    {merchantId && <Founding50Badge entityType="merchant" entityId={merchantId} size="sm" />}
+                  </div>
 
-                <div className="flex items-center gap-2 mt-2 flex-wrap">
-                  <div className="flex items-center gap-1">
-                    <Star className="w-3.5 h-3.5 fill-warning text-warning" />
-                    <span className="font-semibold text-sm">{Formatters.decimal(ratingStats.average, 1)}</span>
-                    <button onClick={() => setTab("reviews")} className="text-xs text-muted-foreground hover:text-foreground bg-transparent border-none cursor-pointer">
-                      ({ratingStats.total})
+                  <div className="flex items-center gap-2 mt-2 flex-wrap text-xs">
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-full border border-primary/60 text-primary font-medium capitalize">
+                      {merchant.business_type.replace(/_/g, " ")}
+                    </span>
+                    {merchant.address && (
+                      <span className="text-white/80 truncate">{merchant.address.split(",").slice(-3, -1).join(",").trim()}</span>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2 mt-2.5">
+                    <div className="flex items-center gap-0.5">
+                      {[1, 2, 3, 4, 5].map(s => (
+                        <Star
+                          key={s}
+                          className={`w-4 h-4 ${s <= Math.round(ratingStats.average) ? "fill-gold text-gold" : "text-white/25"}`}
+                        />
+                      ))}
+                    </div>
+                    <button
+                      onClick={() => setTab("reviews")}
+                      className="text-xs text-white/70 hover:text-white bg-transparent border-none cursor-pointer"
+                    >
+                      {Formatters.decimal(ratingStats.average, 1)} ({ratingStats.total})
                     </button>
                   </div>
-                  <span className="text-muted-foreground text-xs">·</span>
-                  <Badge className="bg-primary text-primary-foreground text-[10px] font-semibold py-0.5 h-5">
-                    {merchant.cashback_rate}x PawBucks
-                  </Badge>
-                  {isSponsored && (
-                    <Badge variant="secondary" className="text-[10px] gap-1 py-0.5 h-5">
-                      <Sparkles className="w-2.5 h-2.5" /> Sponsored
-                    </Badge>
-                  )}
                 </div>
               </div>
-            </div>
 
-            {/* Quick action chips */}
-            <div className="flex gap-2 mt-4 overflow-x-auto scrollbar-none pb-1">
-              {merchant.phone && (
-                <a href={`tel:${merchant.phone}`} className="flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-full bg-secondary text-secondary-foreground text-xs font-medium hover:bg-secondary/80 transition-colors">
-                  <Phone className="w-3.5 h-3.5" /> Call
-                </a>
-              )}
-              {merchant.address && (
-                <a
-                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(merchant.address)}`}
-                  target="_blank" rel="noopener noreferrer"
-                  className="flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-full bg-secondary text-secondary-foreground text-xs font-medium hover:bg-secondary/80 transition-colors"
-                >
-                  <MapPin className="w-3.5 h-3.5" /> Directions
-                </a>
-              )}
-              {merchant.website_url && (
-                <a
-                  href={merchant.website_url.startsWith("http") ? merchant.website_url : `https://${merchant.website_url}`}
-                  target="_blank" rel="noopener noreferrer"
-                  className="flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-full bg-secondary text-secondary-foreground text-xs font-medium hover:bg-secondary/80 transition-colors"
-                >
-                  <Globe className="w-3.5 h-3.5" /> Website
-                </a>
-              )}
-              {merchant.storefront_slug && (
-                <Link
-                  to={`/storefront/${merchant.storefront_slug}`}
-                  className="flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-full bg-secondary text-secondary-foreground text-xs font-medium hover:bg-secondary/80 transition-colors"
-                >
-                  <Store className="w-3.5 h-3.5" /> Storefront
-                </Link>
-              )}
-              <button
-                onClick={handleShare}
-                className="flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-full bg-secondary text-secondary-foreground text-xs font-medium hover:bg-secondary/80 transition-colors"
-              >
-                <Share2 className="w-3.5 h-3.5" /> Share
-              </button>
-            </div>
+              {/* Status row */}
+              <div className="flex items-center gap-3 mt-4 text-sm">
+                <OpenStatusBadge merchantId={merchant.id} />
+                <span className="text-white/30">·</span>
+                <span className="inline-flex items-center gap-1.5 text-primary font-medium">
+                  <PawBucksLogo className="w-4 h-4" /> Earns PawBucks
+                </span>
+              </div>
 
-            {/* Primary CTAs */}
-            <div className="flex gap-2 mt-4">
-              {merchant.accepts_pawbucks ? (
-                <Button size="lg" className="flex-1 h-12 text-sm font-semibold" onClick={handleOpenPaymentDialog}>
-                  <ShoppingBag className="w-5 h-5 mr-2" /> Pay &amp; Earn PawBucks
-                </Button>
-              ) : (
-                <Button size="lg" className="flex-1 h-12 text-sm font-semibold" disabled variant="secondary">
-                  <Ban className="w-5 h-5 mr-2" /> Doesn't accept PawBucks
-                </Button>
-              )}
-              {hasBookableServices && (
-                <Button size="lg" variant="outline" className="h-12" onClick={scrollToBooking}>
-                  <Calendar className="w-5 h-5 mr-1.5" /> Book
-                </Button>
-              )}
+              <div className="h-px bg-white/10 my-4" />
+
+              {/* Quick action grid - 5 tiles */}
+              <div className="grid grid-cols-5 gap-2">
+                {hasBookableServices && (
+                  <button
+                    onClick={scrollToBooking}
+                    className="flex flex-col items-center justify-center gap-1.5 rounded-xl bg-primary text-primary-foreground py-3 px-1 font-semibold shadow-md active:scale-95 transition-transform"
+                  >
+                    <Calendar className="w-5 h-5" />
+                    <span className="text-[11px]">Book</span>
+                  </button>
+                )}
+                <button
+                  onClick={handleOpenPaymentDialog}
+                  disabled={!merchant.accepts_pawbucks}
+                  className="flex flex-col items-center justify-center gap-1.5 rounded-xl bg-white/[0.07] hover:bg-white/[0.12] text-white py-3 px-1 disabled:opacity-50 active:scale-95 transition"
+                >
+                  <PawBucksLogo className="w-5 h-5" />
+                  <span className="text-[11px] leading-tight text-center">Pay &amp; Earn</span>
+                </button>
+                {merchant.phone && (
+                  <a
+                    href={`tel:${merchant.phone}`}
+                    className="flex flex-col items-center justify-center gap-1.5 rounded-xl bg-white/[0.07] hover:bg-white/[0.12] text-white py-3 px-1 active:scale-95 transition"
+                  >
+                    <Phone className="w-5 h-5" />
+                    <span className="text-[11px]">Call</span>
+                  </a>
+                )}
+                {merchant.address && (
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(merchant.address)}`}
+                    target="_blank" rel="noopener noreferrer"
+                    className="flex flex-col items-center justify-center gap-1.5 rounded-xl bg-white/[0.07] hover:bg-white/[0.12] text-white py-3 px-1 active:scale-95 transition"
+                  >
+                    <MapPin className="w-5 h-5 text-rose-400" />
+                    <span className="text-[11px]">Directions</span>
+                  </a>
+                )}
+                {merchant.website_url && (
+                  <a
+                    href={merchant.website_url.startsWith("http") ? merchant.website_url : `https://${merchant.website_url}`}
+                    target="_blank" rel="noopener noreferrer"
+                    className="flex flex-col items-center justify-center gap-1.5 rounded-xl bg-white/[0.07] hover:bg-white/[0.12] text-white py-3 px-1 active:scale-95 transition"
+                  >
+                    <Globe className="w-5 h-5 text-sky-300" />
+                    <span className="text-[11px]">Website</span>
+                  </a>
+                )}
+              </div>
             </div>
-            {!merchant.accepts_pawbucks && (
-              <p className="text-xs text-muted-foreground mt-2 px-1">
-                This merchant hasn't enabled PawBucks payments yet. You can still visit their storefront or contact them directly.
-              </p>
-            )}
           </section>
 
-          <Separator />
-
-          {/* ═══════════════ TABS ═══════════════ */}
-          <div className="px-4 pt-4">
+          {/* ══════ TABS ══════ */}
+          <div className="bg-card px-4">
             <Tabs value={tab} onValueChange={setTab} className="w-full">
-              <TabsList className="w-full justify-start overflow-x-auto h-auto bg-transparent border-b border-border rounded-none p-0 gap-1 flex-wrap">
+              <TabsList className="w-full justify-around overflow-x-auto h-auto bg-transparent border-b border-border rounded-none p-0 gap-1">
                 <TabsTrigger
                   value="about"
-                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-3 py-2.5 text-sm"
+                  className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-3 py-3 text-sm font-semibold"
                 >
                   About
                 </TabsTrigger>
                 {plans.length > 0 && (
                   <TabsTrigger
                     value="plans"
-                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-3 py-2.5 text-sm"
+                    className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-3 py-3 text-sm font-semibold"
                   >
-                    Plans ({plans.length})
+                    Plans &amp; Pricing
                   </TabsTrigger>
                 )}
                 {hasBookableServices && (
                   <TabsTrigger
                     value="booking"
-                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-3 py-2.5 text-sm"
+                    className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-3 py-3 text-sm font-semibold"
                   >
                     Book
                   </TabsTrigger>
                 )}
                 <TabsTrigger
                   value="reviews"
-                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-3 py-2.5 text-sm"
+                  className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-3 py-3 text-sm font-semibold"
                 >
-                  Reviews ({ratingStats.total})
-                </TabsTrigger>
-                <TabsTrigger
-                  value="hours"
-                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-3 py-2.5 text-sm"
-                >
-                  Hours
+                  Reviews
                 </TabsTrigger>
               </TabsList>
+            </Tabs>
+          </div>
+
+          {/* ══════ TAB CONTENT ══════ */}
+          <div className="px-4 pt-4">
+            <Tabs value={tab} onValueChange={setTab} className="w-full">
 
               {/* ─── ABOUT ─── */}
-              <TabsContent value="about" className="mt-6 space-y-6 focus-visible:ring-0">
+              <TabsContent value="about" className="mt-2 space-y-5 focus-visible:ring-0">
+                {/* Sponsored ad */}
+                <AdPlacement position="top" />
+
+                {/* Earn PawBucks here info card */}
+                <div className="rounded-2xl bg-[hsl(218_35%_10%)] text-white p-4 flex items-start gap-3 shadow-lg">
+                  <div className="w-12 h-12 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center flex-shrink-0">
+                    <PawBucksLogo className="w-6 h-6 text-primary" />
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="font-bold text-base">Earn PawBucks here</h3>
+                    <p className="text-sm text-white/75 leading-relaxed mt-0.5">
+                      10x on Free · 20x on PawPass · 30x on PawPass+ · 1,000 PawBucks = $1
+                    </p>
+                  </div>
+                </div>
+
+                {/* Photos */}
+                {merchantId && (
+                  <div>
+                    <h3 className="text-xl font-extrabold tracking-tight mb-3">Photos</h3>
+                    <PhotoGallery merchantId={merchantId} />
+                  </div>
+                )}
+
                 {/* Featured review */}
                 {featuredReview && (
                   <Card className="bg-primary/5 border-primary/20">
@@ -523,75 +549,72 @@ const MerchantProfile = memo(() => {
                   </Card>
                 )}
 
-                {/* Photo gallery */}
-                {merchantId && <PhotoGallery merchantId={merchantId} />}
-
                 {/* About text */}
                 {merchant.description && (
                   <div>
-                    <h2 className="text-base font-bold mb-2">About</h2>
+                    <h3 className="text-xl font-extrabold tracking-tight mb-3">About</h3>
                     <Card>
-                      <CardContent className="p-4">
-                        <p className="text-sm text-muted-foreground whitespace-pre-line leading-relaxed">{merchant.description}</p>
+                      <CardContent className="p-5">
+                        <p className="text-sm text-foreground/80 whitespace-pre-line leading-relaxed">{merchant.description}</p>
                       </CardContent>
                     </Card>
                   </div>
                 )}
 
-                {/* Hours compact */}
+                {/* Hours */}
                 <div>
-                  <h2 className="text-base font-bold mb-2">Hours</h2>
+                  <h3 className="text-xl font-extrabold tracking-tight mb-3">Hours</h3>
                   <BusinessHoursDisplay merchantId={merchant.id} />
                 </div>
 
                 {/* Location & contact */}
                 <div>
-                  <h2 className="text-base font-bold mb-2">Location & Contact</h2>
+                  <h3 className="text-xl font-extrabold tracking-tight mb-3">Location &amp; Contact</h3>
                   <Card>
-                    <CardContent className="p-4 space-y-3">
+                    <CardContent className="p-0 divide-y">
                       {merchant.address && (
                         <a
                           href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(merchant.address)}`}
                           target="_blank" rel="noopener noreferrer"
-                          className="flex items-start gap-3 group"
+                          className="flex items-center gap-3 group p-4"
                         >
-                          <MapPin className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                          <div>
-                            <p className="text-sm font-medium group-hover:text-primary transition-colors">{merchant.address}</p>
-                            <p className="text-xs text-muted-foreground">Tap for directions</p>
-                          </div>
+                          <MapPin className="w-5 h-5 text-rose-500 flex-shrink-0" />
+                          <p className="text-sm font-medium group-hover:text-primary transition-colors flex-1">{merchant.address}</p>
                         </a>
                       )}
                       {merchant.phone && (
-                        <a href={`tel:${merchant.phone}`} className="flex items-start gap-3 group">
-                          <Phone className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                          <div>
-                            <p className="text-sm font-medium group-hover:text-primary transition-colors">{merchant.phone}</p>
-                            <p className="text-xs text-muted-foreground">Tap to call</p>
-                          </div>
+                        <a href={`tel:${merchant.phone}`} className="flex items-center gap-3 group p-4">
+                          <Phone className="w-5 h-5 text-foreground/70 flex-shrink-0" />
+                          <p className="text-sm font-medium group-hover:text-primary transition-colors flex-1">{merchant.phone}</p>
                         </a>
                       )}
                       {merchant.website_url && (
                         <a
                           href={merchant.website_url.startsWith("http") ? merchant.website_url : `https://${merchant.website_url}`}
                           target="_blank" rel="noopener noreferrer"
-                          className="flex items-start gap-3 group"
+                          className="flex items-center gap-3 group p-4"
                         >
-                          <Globe className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                          <div>
-                            <p className="text-sm font-medium group-hover:text-primary transition-colors break-all">
-                              {merchant.website_url.replace(/^https?:\/\//, "")}
-                            </p>
-                            <p className="text-xs text-muted-foreground">Visit website</p>
-                          </div>
+                          <Globe className="w-5 h-5 text-sky-500 flex-shrink-0" />
+                          <p className="text-sm font-medium group-hover:text-primary transition-colors break-all flex-1">
+                            {merchant.website_url.replace(/^https?:\/\//, "")}
+                          </p>
                         </a>
                       )}
-                      {merchant.address && (
-                        <div className="rounded-lg overflow-hidden border mt-2">
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Location map */}
+                {merchant.address && (
+                  <div>
+                    <h3 className="text-xl font-extrabold tracking-tight mb-3">Location</h3>
+                    <Card className="overflow-hidden">
+                      <CardContent className="p-0">
+                        <div className="bg-primary/5">
                           <iframe
                             title={`Map of ${merchant.business_name}`}
                             width="100%"
-                            height="200"
+                            height="220"
                             style={{ border: 0 }}
                             loading="lazy"
                             allowFullScreen
@@ -599,14 +622,30 @@ const MerchantProfile = memo(() => {
                             src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(merchant.address)}`}
                           />
                         </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                </div>
+                        <div className="p-4 flex items-center gap-3">
+                          <div className="flex-1 min-w-0">
+                            <p className="font-bold text-sm truncate">{merchant.business_name}</p>
+                            <p className="text-xs text-muted-foreground truncate">{merchant.address}</p>
+                          </div>
+                          <a
+                            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(merchant.address)}`}
+                            target="_blank" rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm font-semibold shadow-sm hover:opacity-90"
+                          >
+                            <MapPin className="w-4 h-4" /> Directions
+                          </a>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Bottom sponsored ad */}
+                <AdPlacement position="bottom" />
 
                 {/* Payment options */}
                 <div>
-                  <h2 className="text-base font-bold mb-2">Payment Options</h2>
+                  <h3 className="text-xl font-extrabold tracking-tight mb-3">Payment Options</h3>
                   <Card>
                     <CardContent className="p-4 space-y-2">
                       <div className="flex items-center justify-between p-3 bg-muted/40 rounded-lg">
@@ -852,16 +891,37 @@ const MerchantProfile = memo(() => {
                 )}
               </TabsContent>
 
-              {/* ─── HOURS ─── */}
-              <TabsContent value="hours" className="mt-6 focus-visible:ring-0">
-                <h2 className="text-base font-bold mb-3">Business Hours</h2>
-                <BusinessHoursDisplay merchantId={merchant.id} />
-              </TabsContent>
             </Tabs>
           </div>
 
-          <div className="px-4 py-6">
-            <AdPlacement position="bottom" />
+        </div>
+
+        {/* ══════ Sticky bottom CTA bar ══════ */}
+        <div className="fixed bottom-0 inset-x-0 z-40 bg-card border-t border-border px-3 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:pb-3">
+          <div className="max-w-4xl mx-auto flex gap-2">
+            {merchant.phone ? (
+              <a
+                href={`sms:${merchant.phone}`}
+                className="flex-1 inline-flex items-center justify-center gap-2 h-12 rounded-xl border border-border bg-card text-sm font-semibold text-foreground hover:bg-muted/40 transition"
+              >
+                <MessageSquare className="w-4 h-4" /> Message
+              </a>
+            ) : (
+              <button
+                onClick={handleShare}
+                className="flex-1 inline-flex items-center justify-center gap-2 h-12 rounded-xl border border-border bg-card text-sm font-semibold text-foreground hover:bg-muted/40 transition"
+              >
+                <Share2 className="w-4 h-4" /> Share
+              </button>
+            )}
+            <button
+              onClick={hasBookableServices ? scrollToBooking : handleOpenPaymentDialog}
+              disabled={!hasBookableServices && !merchant.accepts_pawbucks}
+              className="flex-[2] inline-flex items-center justify-center gap-2 h-12 rounded-xl bg-primary text-primary-foreground text-sm font-semibold shadow-md hover:opacity-95 disabled:opacity-50 transition"
+            >
+              <PawBucksLogo className="w-4 h-4" />
+              {hasBookableServices ? "Book & Earn PawBucks" : merchant.accepts_pawbucks ? "Pay & Earn PawBucks" : "Doesn't accept PawBucks"}
+            </button>
           </div>
         </div>
 
