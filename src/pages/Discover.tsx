@@ -12,7 +12,7 @@ import { PaymentDialogWithPawBucks } from"@/components/PaymentDialogWithPawBucks
 import { BottomNav } from"@/components/BottomNav";
 import { PageLoader } from"@/components/PageLoader";
 import { Header } from"@/components/Header";
-import { AdPlacement } from"@/components/AdPlacement";
+import { SponsoredAdBar } from "@/components/SponsoredAdBar";
 import { PullToRefresh } from"@/components/PullToRefresh";
 import { Search, SlidersHorizontal, X, List, Map, ArrowUpDown, MapPin } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
@@ -659,7 +659,7 @@ const Discover = () => {
 
               {/* ── Top Ad ── */}
               <div className="container mx-auto px-4 pt-3 max-w-4xl lg:max-w-7xl">
-                <AdPlacement position="top" />
+                <SponsoredAdBar variant="top" />
               </div>
 
               {/* ── Editorial Hero + Search ── */}
@@ -979,7 +979,7 @@ const Discover = () => {
 
  {/* Bottom Ad */}
  <div className="mt-8 mb-6 pb-24 md:pb-12">
- <AdPlacement position="bottom" />
+ <SponsoredAdBar variant="bottom" authed />
  </div>
  </div>
 

@@ -12,7 +12,7 @@ import { SEO } from"@/components/SEO";
 import { Button } from"@/components/ui/button";
 import { GradientCard } from"@/components/ui/gradient-card";
 import { BottomNav } from"@/components/BottomNav";
-import { AdPlacement } from"@/components/AdPlacement";
+import { SponsoredAdBar } from "@/components/SponsoredAdBar";
 import { DashboardSkeleton } from"@/components/LoadingSkeleton";
 import { PullToRefresh } from"@/components/PullToRefresh";
 import { EnhancedSpendingChart } from"@/components/wallet/EnhancedSpendingChart";
@@ -233,7 +233,7 @@ const Wallet = () => {
  <main className="container mx-auto px-4 pt-4 pb-24 md:pb-8 max-w-7xl">
  {/* Ad Placement for Free Users */}
  <div className="mb-4 sm:mb-6">
- <AdPlacement />
+ <SponsoredAdBar variant="top" />
  </div>
 
  {/* Shared Account Banner */}
@@ -483,7 +483,7 @@ const Wallet = () => {
 
  {/* Bottom Ad Placement */}
  <div className="mt-6 sm:mt-8">
- <AdPlacement position="bottom" />
+ <SponsoredAdBar variant="bottom" authed />
  </div>
  </main>
  </PullToRefresh>

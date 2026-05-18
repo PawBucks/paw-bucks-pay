@@ -24,7 +24,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from"@/components/ui
 import { Elements, PaymentElement, useStripe, useElements } from"@stripe/react-stripe-js";
 import { Loader2 } from "lucide-react";
 import { BottomNav } from"@/components/BottomNav";
-import { AdPlacement } from"@/components/AdPlacement";
+import { SponsoredAdBar } from "@/components/SponsoredAdBar";
 import { Header } from"@/components/Header";
 import { SEO } from"@/components/SEO";
 import { seoMeta } from"@/lib/seoMeta";
@@ -472,7 +472,7 @@ export default function PetStore() { const { user, signOut } = useAuth();
  >
  <main className="container mx-auto px-4 pt-4 pb-24 md:pb-8 max-w-7xl">
  <div className="mb-4 sm:mb-6">
- <AdPlacement />
+ <SponsoredAdBar variant="top" />
  </div>
 
  {/* Top bar: Title + wallet + cart */}
@@ -682,7 +682,7 @@ export default function PetStore() { const { user, signOut } = useAuth();
  </Dialog>
 
  <div className="mt-8 mb-6">
- <AdPlacement position="bottom" />
+ <SponsoredAdBar variant="bottom" authed />
  </div>
  </main>
  </PullToRefresh>

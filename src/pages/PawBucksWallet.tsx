@@ -11,7 +11,7 @@ import { SEO } from"@/components/SEO";
 import { Button } from"@/components/ui/button";
 import { GradientCard } from"@/components/ui/gradient-card";
 import { BottomNav } from"@/components/BottomNav";
-import { AdPlacement } from"@/components/AdPlacement";
+import { SponsoredAdBar } from "@/components/SponsoredAdBar";
 import { PageLoader } from"@/components/PageLoader";
 import { EmptyState } from"@/components/EmptyState";
 import { PawBucksInfoTooltip } from"@/components/PawBucksInfoTooltip";
@@ -369,7 +369,7 @@ const PawBucksWallet = () => {
  <main className="container mx-auto px-4 pt-6 pb-24 md:pb-12 max-w-7xl">
  {/* Ad Placement for Free Users */}
  <div className="mb-6">
- <AdPlacement />
+ <SponsoredAdBar variant="top" />
  </div>
 
  {/* Header */}
@@ -578,7 +578,7 @@ const PawBucksWallet = () => {
 
  {/* Bottom Ad Placement */}
  <div className="mt-8 mb-6">
- <AdPlacement position="bottom" />
+ <SponsoredAdBar variant="bottom" authed />
  </div>
  </main>
 

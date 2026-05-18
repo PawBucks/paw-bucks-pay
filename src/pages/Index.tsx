@@ -4,7 +4,7 @@ import { useAuth } from"@/hooks/useAuth";
 import { supabase } from"@/integrations/supabase/client";
 import { SEO } from"@/components/SEO";
 import { seoMeta } from"@/lib/seoMeta";
-import { PremiumMerchantsBanner } from"@/components/PremiumMerchantsBanner";
+import { SponsoredAdBar } from "@/components/SponsoredAdBar";
 import logo from"@/assets/logo.png";
 
 const styles = `
@@ -596,11 +596,7 @@ const Index = () => {
 
   {/* PREMIUM MERCHANTS */}
   <section className="pl-section" style={{ background:"var(--section-alt)" }}>
-  <PremiumMerchantsBanner
-    title="Premium Partners"
-    rotationInterval={12000}
-    showMultiple={true}
-  />
+  <SponsoredAdBar variant="top" />
   </section>
 
   {/* CTA */}
