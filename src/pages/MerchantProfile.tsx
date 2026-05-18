@@ -6,7 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
 import { BottomNav } from "@/components/BottomNav";
 import { PageLoader } from "@/components/PageLoader";
-import { AdPlacement } from "@/components/AdPlacement";
+import { useAdMerchants } from "@/hooks/useMerchantServices";
+import { ChevronRight } from "lucide-react";
 import { SEO } from "@/components/SEO";
 import { PaymentDialogWithPawBucks } from "@/components/PaymentDialogWithPawBucks";
 import { SubscriptionCheckoutDialog } from "@/components/SubscriptionCheckoutDialog";
@@ -893,18 +894,8 @@ const MerchantProfile = memo(() => {
 
         </div>
 
-        {/* ══════ Sticky bottom sponsored ad (sits above CTA bar) ══════ */}
-        <div
-          className={`fixed inset-x-0 z-40 px-3 pointer-events-none ${
-            user
-              ? "bottom-[calc(64px+76px+env(safe-area-inset-bottom))] md:bottom-[calc(76px+env(safe-area-inset-bottom))]"
-              : "bottom-[calc(76px+env(safe-area-inset-bottom))]"
-          }`}
-        >
-          <div className="max-w-4xl mx-auto pointer-events-auto">
-            <AdPlacement position="bottom" />
-          </div>
-        </div>
+        {/* ══════ Sticky compact sponsored ad (sits above CTA bar) ══════ */}
+        <StickySponsoredAd authed={!!user} />
 
         {/* ══════ Sticky bottom CTA bar ══════ */}
         <div
