@@ -932,6 +932,7 @@ const MerchantProfile = memo(() => {
             <AskQuestionButton
               merchantId={merchant.id}
               merchantName={merchant.business_name}
+              autoOpen={shouldOpenMessage}
               trigger={
                 <button
                   className="flex-1 inline-flex items-center justify-center gap-2 h-12 rounded-xl border border-border bg-card text-sm font-semibold text-foreground hover:bg-muted/40 transition"
