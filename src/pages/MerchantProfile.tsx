@@ -897,7 +897,11 @@ const MerchantProfile = memo(() => {
         </div>
 
         {/* ══════ Sticky bottom CTA bar ══════ */}
-        <div className="fixed bottom-0 inset-x-0 z-40 bg-card border-t border-border px-3 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:pb-3">
+        <div
+          className={`fixed inset-x-0 z-40 bg-card border-t border-border px-3 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:pb-3 ${
+            user ? "bottom-[64px] md:bottom-0" : "bottom-0"
+          }`}
+        >
           <div className="max-w-4xl mx-auto flex gap-2">
             {merchant.phone ? (
               <a
