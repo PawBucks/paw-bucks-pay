@@ -324,7 +324,7 @@ const MerchantProfile = memo(() => {
       />
       <Header isAuthenticated={!!user} onLogout={user ? handleLogout : undefined} />
 
-      <div className="min-h-screen bg-muted/30 pb-32">
+      <div className="min-h-screen bg-muted/30 pb-[260px] md:pb-[200px]">
         <div className="max-w-4xl mx-auto">
           {/* ══════ Sticky top bar ══════ */}
           <div className="sticky top-0 z-30 bg-card border-b border-border px-3 py-3 flex items-center justify-between gap-2">
@@ -640,9 +640,6 @@ const MerchantProfile = memo(() => {
                   </div>
                 )}
 
-                {/* Bottom sponsored ad */}
-                <AdPlacement position="bottom" />
-
                 {/* Payment options */}
                 <div>
                   <h3 className="text-xl font-extrabold tracking-tight mb-3">Payment Options</h3>
@@ -894,6 +891,19 @@ const MerchantProfile = memo(() => {
             </Tabs>
           </div>
 
+        </div>
+
+        {/* ══════ Sticky bottom sponsored ad (sits above CTA bar) ══════ */}
+        <div
+          className={`fixed inset-x-0 z-40 px-3 pointer-events-none ${
+            user
+              ? "bottom-[calc(64px+76px+env(safe-area-inset-bottom))] md:bottom-[calc(76px+env(safe-area-inset-bottom))]"
+              : "bottom-[calc(76px+env(safe-area-inset-bottom))]"
+          }`}
+        >
+          <div className="max-w-4xl mx-auto pointer-events-auto">
+            <AdPlacement position="bottom" />
+          </div>
         </div>
 
         {/* ══════ Sticky bottom CTA bar ══════ */}
