@@ -324,7 +324,7 @@ const MerchantProfile = memo(() => {
       />
       <Header isAuthenticated={!!user} onLogout={user ? handleLogout : undefined} />
 
-      <div className="min-h-screen bg-muted/30 pb-[200px] md:pb-[150px]">
+      <div className="min-h-screen bg-muted/30">
         <div className="max-w-4xl mx-auto">
           {/* ══════ Sticky top bar ══════ */}
           <div className="sticky top-0 z-30 bg-card border-b border-border px-3 py-3 flex items-center justify-between gap-2">
@@ -421,8 +421,8 @@ const MerchantProfile = memo(() => {
 
               <div className="h-px bg-white/10 my-4" />
 
-              {/* Quick action grid - 5 tiles */}
-              <div className="grid grid-cols-5 gap-2">
+              {/* Quick action grid */}
+              <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
                 {hasBookableServices && (
                   <button
                     onClick={scrollToBooking}
@@ -469,6 +469,13 @@ const MerchantProfile = memo(() => {
                     <span className="text-[11px]">Website</span>
                   </a>
                 )}
+                <button
+                  onClick={handleShare}
+                  className="flex flex-col items-center justify-center gap-1.5 rounded-xl bg-white/[0.07] hover:bg-white/[0.12] text-white py-3 px-1 active:scale-95 transition"
+                >
+                  <Share2 className="w-5 h-5 text-amber-300" />
+                  <span className="text-[11px]">Share</span>
+                </button>
               </div>
             </div>
           </section>
@@ -897,8 +904,8 @@ const MerchantProfile = memo(() => {
 
         {/* ══════ Inline sponsored ad (sits just above the sticky CTA bar) ══════ */}
         <div
-          className="px-3 pb-3"
-          style={{ paddingBottom: `calc(${user ? 64 : 0}px + 76px + env(safe-area-inset-bottom) + 12px)` }}
+          className="px-3 pt-8"
+          style={{ paddingBottom: `calc(${user ? 64 : 0}px + 76px + env(safe-area-inset-bottom) + 16px)` }}
         >
           <SponsoredAdBar variant="bottom" />
         </div>
