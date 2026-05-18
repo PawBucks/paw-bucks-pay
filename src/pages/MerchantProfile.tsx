@@ -927,21 +927,17 @@ const MerchantProfile = memo(() => {
           }`}
         >
           <div className="max-w-4xl mx-auto flex gap-2">
-            {merchant.phone ? (
-              <a
-                href={`sms:${merchant.phone}`}
-                className="flex-1 inline-flex items-center justify-center gap-2 h-12 rounded-xl border border-border bg-card text-sm font-semibold text-foreground hover:bg-muted/40 transition"
-              >
-                <MessageSquare className="w-4 h-4" /> Message
-              </a>
-            ) : (
-              <button
-                onClick={handleShare}
-                className="flex-1 inline-flex items-center justify-center gap-2 h-12 rounded-xl border border-border bg-card text-sm font-semibold text-foreground hover:bg-muted/40 transition"
-              >
-                <Share2 className="w-4 h-4" /> Share
-              </button>
-            )}
+            <AskQuestionButton
+              merchantId={merchant.id}
+              merchantName={merchant.business_name}
+              trigger={
+                <button
+                  className="flex-1 inline-flex items-center justify-center gap-2 h-12 rounded-xl border border-border bg-card text-sm font-semibold text-foreground hover:bg-muted/40 transition"
+                >
+                  <MessageSquare className="w-4 h-4" /> Message
+                </button>
+              }
+            />
             <button
               onClick={hasBookableServices ? scrollToBooking : handleOpenPaymentDialog}
               disabled={!hasBookableServices && !merchant.accepts_pawbucks}
