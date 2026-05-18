@@ -673,72 +673,105 @@ const MerchantProfile = memo(() => {
 
               {/* ─── PLANS ─── */}
               {plans.length > 0 && (
-                <TabsContent value="plans" className="mt-6 space-y-4 focus-visible:ring-0">
-                  <div>
-                    <h2 className="text-base font-bold">Subscription Plans</h2>
-                    <p className="text-sm text-muted-foreground mt-0.5">
-                      Subscribe and earn {merchant.cashback_rate}x PawBucks on every billing cycle.
+                <TabsContent value="plans" className="mt-6 focus-visible:ring-0">
+                  {/* Multi-colored premium backdrop */}
+                  <div className="relative overflow-hidden rounded-2xl p-5 sm:p-7 border border-primary/20 shadow-[0_10px_40px_-12px_hsl(var(--primary)/0.25)]">
+                    {/* Animated multi-color gradient */}
+                    <div
+                      aria-hidden
+                      className="absolute inset-0 -z-10 bg-[linear-gradient(135deg,hsl(var(--primary)/0.18),hsl(var(--accent)/0.16)_35%,hsl(var(--gold)/0.18)_65%,hsl(var(--primary)/0.20))]"
+                    />
+                    <div
+                      aria-hidden
+                      className="absolute -top-20 -right-16 -z-10 w-72 h-72 rounded-full blur-3xl bg-gold/20"
+                    />
+                    <div
+                      aria-hidden
+                      className="absolute -bottom-24 -left-20 -z-10 w-80 h-80 rounded-full blur-3xl bg-primary/25"
+                    />
+
+                    <div className="flex items-center gap-2 mb-1">
+                      <Sparkles className="w-4 h-4 text-gold" />
+                      <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-foreground/70">
+                        Premium Memberships
+                      </span>
+                    </div>
+                    <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight">Subscription Plans</h2>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Subscribe and earn <span className="font-semibold text-primary">{merchant.cashback_rate}x PawBucks</span> on every billing cycle.
                     </p>
-                  </div>
 
-                  <div className="space-y-3">
-                    {plans.map(plan => {
-                      const isBest = plan.id === bestPlanId;
-                      const priceUsd = (plan.amount / 100).toFixed(plan.amount % 100 === 0 ? 0 : 2);
-                      return (
-                        <div
-                          key={plan.id}
-                          className={`relative rounded-xl border bg-card p-5 transition-all ${
-                            isBest ? "border-primary shadow-md ring-1 ring-primary/30" : "border-border hover:border-primary/40"
-                          }`}
-                        >
-                          {isBest && (
-                            <div className="absolute -top-2.5 left-4">
-                              <Badge className="bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-wider px-2 py-0.5">
-                                Best Value
-                              </Badge>
-                            </div>
-                          )}
-                          <div className="flex items-start justify-between gap-4">
-                            <div className="min-w-0">
-                              <h3 className="text-base font-bold">{plan.name}</h3>
-                              {plan.description && (
-                                <p className="text-xs text-muted-foreground mt-0.5">{plan.description}</p>
-                              )}
-                            </div>
-                            <div className="text-right flex-shrink-0">
-                              <div className="text-2xl font-extrabold leading-none">${priceUsd}</div>
-                              <div className="text-[11px] text-muted-foreground mt-1">/ {intervalLabel(plan)}</div>
-                            </div>
-                          </div>
-
-                          {plan.features?.length > 0 && (
-                            <ul className="mt-3 space-y-1.5">
-                              {plan.features.map((f, i) => (
-                                <li key={i} className="flex items-start gap-2 text-sm text-foreground">
-                                  <Check className="w-3.5 h-3.5 text-primary mt-1 flex-shrink-0" strokeWidth={3} />
-                                  <span>{f}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          )}
-
-                          {plan.trial_days > 0 && (
-                            <p className="text-xs text-primary mt-3 font-medium">
-                              {plan.trial_days}-day free trial
-                            </p>
-                          )}
-
-                          <Button
-                            onClick={() => handleSubscribe(plan)}
-                            className="w-full mt-4"
-                            variant={isBest ? "default" : "outline"}
+                    <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                      {plans.map(plan => {
+                        const isBest = plan.id === bestPlanId;
+                        const priceUsd = (plan.amount / 100).toFixed(plan.amount % 100 === 0 ? 0 : 2);
+                        return (
+                          <div
+                            key={plan.id}
+                            className={`relative rounded-xl p-5 transition-all backdrop-blur-md ${
+                              isBest
+                                ? "border-2 border-transparent bg-gradient-to-br from-primary/95 via-primary to-primary/80 text-primary-foreground shadow-[0_12px_30px_-10px_hsl(var(--primary)/0.55)] sm:scale-[1.02]"
+                                : "border border-border/60 bg-card/80 hover:border-primary/40 hover:-translate-y-0.5 shadow-sm"
+                            }`}
                           >
-                            Subscribe &amp; Earn PawBucks
-                          </Button>
-                        </div>
-                      );
-                    })}
+                            {isBest && (
+                              <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                                <Badge className="bg-gold text-ink text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 shadow-md border-0">
+                                  ★ Best Value
+                                </Badge>
+                              </div>
+                            )}
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="min-w-0">
+                                <h3 className={`text-base font-bold ${isBest ? "text-primary-foreground" : ""}`}>{plan.name}</h3>
+                                {plan.description && (
+                                  <p className={`text-xs mt-0.5 ${isBest ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
+                                    {plan.description}
+                                  </p>
+                                )}
+                              </div>
+                              <div className="text-right flex-shrink-0">
+                                <div className={`text-2xl font-extrabold leading-none ${isBest ? "text-primary-foreground" : ""}`}>
+                                  ${priceUsd}
+                                </div>
+                                <div className={`text-[11px] mt-1 ${isBest ? "text-primary-foreground/75" : "text-muted-foreground"}`}>
+                                  / {intervalLabel(plan)}
+                                </div>
+                              </div>
+                            </div>
+
+                            {plan.features?.length > 0 && (
+                              <ul className="mt-3 space-y-1.5">
+                                {plan.features.map((f, i) => (
+                                  <li key={i} className={`flex items-start gap-2 text-sm ${isBest ? "text-primary-foreground" : "text-foreground"}`}>
+                                    <Check className={`w-3.5 h-3.5 mt-1 flex-shrink-0 ${isBest ? "text-gold" : "text-primary"}`} strokeWidth={3} />
+                                    <span>{f}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+
+                            {plan.trial_days > 0 && (
+                              <p className={`text-xs mt-3 font-medium ${isBest ? "text-gold" : "text-primary"}`}>
+                                {plan.trial_days}-day free trial
+                              </p>
+                            )}
+
+                            <Button
+                              onClick={() => handleSubscribe(plan)}
+                              className={`w-full mt-4 font-semibold ${
+                                isBest
+                                  ? "bg-gold text-ink hover:bg-gold/90 shadow-md"
+                                  : ""
+                              }`}
+                              variant={isBest ? "default" : "outline"}
+                            >
+                              Subscribe &amp; Earn PawBucks
+                            </Button>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 </TabsContent>
               )}
