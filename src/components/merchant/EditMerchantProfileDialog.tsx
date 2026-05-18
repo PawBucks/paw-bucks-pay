@@ -118,13 +118,14 @@ export const EditMerchantProfileDialog = ({
  const formData = new FormData(e.currentTarget);
  // Use the first selected category as the primary business_type
  if (primary) formData.set("businessType", primary);
- await onSubmit(formData, logoFile, categories);
-   // Persist hours alongside the rest of the profile.
-   try {
-    await hoursRef.current?.save({ merchantId: merchant.id });
-   } catch (err) {
-    console.error("Failed to save business hours:", err);
-   }
+    // Persist hours BEFORE onSubmit, since the parent closes the dialog
+    // (unmounting the hours editor) on success.
+    try {
+     await hoursRef.current?.save({ merchantId: merchant.id });
+    } catch (err) {
+     console.error("Failed to save business hours:", err);
+    }
+  await onSubmit(formData, logoFile, categories);
  setLogoFile(null);
  setLogoPreview(null);
   } finally {
