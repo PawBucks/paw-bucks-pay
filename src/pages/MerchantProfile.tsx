@@ -896,7 +896,7 @@ const MerchantProfile = memo(() => {
         </div>
 
         {/* ══════ Sticky compact sponsored ad (sits above CTA bar) ══════ */}
-        <SponsoredAdBar variant="bottom" authed={!!user} />
+        <SponsoredAdBar variant="bottom" authed={!!user} ctaBarHeight={76} />
 
         {/* ══════ Sticky bottom CTA bar ══════ */}
         <div
