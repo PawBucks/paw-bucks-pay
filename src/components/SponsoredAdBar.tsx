@@ -97,13 +97,9 @@ export function SponsoredAdBar({ variant, authed = false, ctaBarHeight = 0 }: Sp
   }
 
   const navHeight = authed ? 64 : 0;
-  const bottomStyle = {
+  const bottomStyle: React.CSSProperties = {
     bottom: `calc(${navHeight + ctaBarHeight}px + env(safe-area-inset-bottom) + 12px)`,
   };
-  // On desktop (md+), BottomNav is hidden, so drop the nav offset there.
-  const mdBottomStyle = {
-    bottom: `calc(${ctaBarHeight}px + env(safe-area-inset-bottom) + 16px)`,
-  } as React.CSSProperties;
 
   return (
     <div
