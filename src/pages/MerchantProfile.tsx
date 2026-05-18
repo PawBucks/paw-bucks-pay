@@ -6,8 +6,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
 import { BottomNav } from "@/components/BottomNav";
 import { PageLoader } from "@/components/PageLoader";
-import { useAdMerchants } from "@/hooks/useMerchantServices";
-import { ChevronRight } from "lucide-react";
 import { SponsoredAdBar } from "@/components/SponsoredAdBar";
 import { SEO } from "@/components/SEO";
 import { PaymentDialogWithPawBucks } from "@/components/PaymentDialogWithPawBucks";
