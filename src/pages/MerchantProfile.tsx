@@ -9,6 +9,7 @@ import { PageLoader } from "@/components/PageLoader";
 import { SponsoredAdBar } from "@/components/SponsoredAdBar";
 import { SEO } from "@/components/SEO";
 import { PaymentDialogWithPawBucks } from "@/components/PaymentDialogWithPawBucks";
+import { AskQuestionButton } from "@/components/storefront/AskQuestionButton";
 import { SubscriptionCheckoutDialog } from "@/components/SubscriptionCheckoutDialog";
 import { WriteReviewDialog } from "@/components/merchant/WriteReviewDialog";
 import { ReviewCard } from "@/components/merchant/ReviewCard";
