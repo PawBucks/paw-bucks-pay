@@ -416,10 +416,14 @@ const MerchantProfile = memo(() => {
               {/* Status row */}
               <div className="flex items-center gap-3 mt-4 text-sm">
                 <OpenStatusBadge merchantId={merchant.id} />
-                <span className="text-white/30">·</span>
-                <span className="inline-flex items-center gap-1.5 text-primary font-medium">
-                  <PawBucksLogo className="w-4 h-4" /> Earns PawBucks
-                </span>
+                {merchant.accepts_pawbucks && (
+                  <>
+                    <span className="text-white/30">·</span>
+                    <span className="inline-flex items-center gap-1.5 text-primary font-medium">
+                      <PawBucksLogo className="w-4 h-4" /> Earns PawBucks
+                    </span>
+                  </>
+                )}
               </div>
 
               <div className="h-px bg-white/10 my-4" />
@@ -535,17 +539,19 @@ const MerchantProfile = memo(() => {
               {/* ─── ABOUT ─── */}
               <TabsContent value="about" className="mt-2 space-y-5 focus-visible:ring-0">
                 {/* Earn PawBucks here info card */}
-                <div className="rounded-2xl bg-[hsl(218_35%_10%)] text-white p-4 flex items-start gap-3 shadow-lg">
-                  <div className="w-12 h-12 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center flex-shrink-0">
-                    <PawBucksLogo className="w-6 h-6 text-primary" />
+                {merchant.accepts_pawbucks && (
+                  <div className="rounded-2xl bg-[hsl(218_35%_10%)] text-white p-4 flex items-start gap-3 shadow-lg">
+                    <div className="w-12 h-12 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center flex-shrink-0">
+                      <PawBucksLogo className="w-6 h-6 text-primary" />
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="font-bold text-base">Earn PawBucks here</h3>
+                      <p className="text-sm text-white/75 leading-relaxed mt-0.5">
+                        10x on Free · 20x on PawPass · 30x on PawPass+ · 1,000 PawBucks = $1
+                      </p>
+                    </div>
                   </div>
-                  <div className="min-w-0">
-                    <h3 className="font-bold text-base">Earn PawBucks here</h3>
-                    <p className="text-sm text-white/75 leading-relaxed mt-0.5">
-                      10x on Free · 20x on PawPass · 30x on PawPass+ · 1,000 PawBucks = $1
-                    </p>
-                  </div>
-                </div>
+                )}
 
                 {/* Photos */}
                 {merchantId && (
