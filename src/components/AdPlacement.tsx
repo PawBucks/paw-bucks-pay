@@ -69,7 +69,7 @@ const AdPlacementComponent = ({ position ='top' }: AdPlacementProps) => {
  return (
  <Card className={`relative p-4 sm:p-6 bg-gradient-to-r from-primary/10 via-primary/5 to-accent/10 border-primary/30 ${position ==='bottom' ?'mt-8' :'mb-8'}`}>
  <Badge className="absolute top-2 left-2 bg-primary/20 text-primary border-primary/30">
- Sponsored
+ Advertisement
  </Badge>
  <button
  onClick={handleDismiss}
