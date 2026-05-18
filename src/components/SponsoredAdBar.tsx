@@ -109,7 +109,7 @@ export function SponsoredAdBar({ variant }: SponsoredAdBarProps) {
         {/* Sponsored header strip */}
         <div className="flex items-center justify-between px-3 py-1.5 bg-muted/60 rounded-t-xl border border-b-0 border-border">
           <span className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-semibold">
-            Sponsored
+            Advertisement
           </span>
           <button
             type="button"
