@@ -511,9 +511,6 @@ const MerchantProfile = memo(() => {
 
               {/* ─── ABOUT ─── */}
               <TabsContent value="about" className="mt-2 space-y-5 focus-visible:ring-0">
-                {/* Sponsored ad */}
-                <AdPlacement position="top" />
-
                 {/* Earn PawBucks here info card */}
                 <div className="rounded-2xl bg-[hsl(218_35%_10%)] text-white p-4 flex items-start gap-3 shadow-lg">
                   <div className="w-12 h-12 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center flex-shrink-0">
