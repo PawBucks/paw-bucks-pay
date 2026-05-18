@@ -325,7 +325,7 @@ const MerchantProfile = memo(() => {
       />
       <Header isAuthenticated={!!user} onLogout={user ? handleLogout : undefined} />
 
-      <div className="min-h-screen bg-muted/30 pb-[260px] md:pb-[200px]">
+      <div className="min-h-screen bg-muted/30 pb-[200px] md:pb-[150px]">
         <div className="max-w-4xl mx-auto">
           {/* ══════ Sticky top bar ══════ */}
           <div className="sticky top-0 z-30 bg-card border-b border-border px-3 py-3 flex items-center justify-between gap-2">
