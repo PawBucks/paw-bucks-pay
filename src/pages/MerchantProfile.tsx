@@ -350,6 +350,11 @@ const MerchantProfile = memo(() => {
             </div>
           </div>
 
+          {/* ══════ Stationary top sponsored ad (rotates opposite of bottom) ══════ */}
+          <div className="px-3 pt-3">
+            <SponsoredAdBar variant="top" />
+          </div>
+
           {/* ══════ DARK HERO ══════ */}
           <section className="relative bg-[hsl(218_35%_10%)] text-white px-4 pt-5 pb-4 overflow-hidden">
             <div aria-hidden className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,hsl(var(--primary)/0.18),transparent_60%)]" />
