@@ -302,18 +302,20 @@ export default function PublicBookingPage() {
 
  {/* Right: Sidebar */}
  <div className="space-y-6">
- {/* Cashback banner */}
- <Card className="shadow-sm border-primary/20 bg-primary/5">
- <CardContent className="p-5 text-center">
- <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
- <PawBucksLogo className="w-5 h-5 text-primary" />
- </div>
- <p className="font-semibold text-primary">
- Earn {merchant.cashback_rate}x PawBucks
- </p>
- <p className="text-xs text-muted-foreground mt-1">on every booking you make</p>
- </CardContent>
- </Card>
+              {/* Cashback banner */}
+              {merchant.accepts_pawbucks && (
+                <Card className="shadow-sm border-primary/20 bg-primary/5">
+                  <CardContent className="p-5 text-center">
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
+                      <PawBucksLogo className="w-5 h-5 text-primary" />
+                    </div>
+                    <p className="font-semibold text-primary">
+                      Earn {merchant.cashback_rate}x PawBucks
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">on every booking you make</p>
+                  </CardContent>
+                </Card>
+              )}
 
  {/* Hours */}
  <Card className="shadow-sm">
