@@ -486,16 +486,6 @@ const MerchantProfile = memo(() => {
                   <Share2 className="w-5 h-5 text-amber-300" />
                   <span className="text-[11px]">Share</span>
                 </button>
-                <AskQuestionButton
-                  merchantId={merchant.id}
-                  merchantName={merchant.business_name}
-                  trigger={
-                    <button className="flex flex-col items-center justify-center gap-1.5 rounded-xl bg-white/[0.07] hover:bg-white/[0.12] text-white py-3 px-1 active:scale-95 transition">
-                      <MessageSquare className="w-5 h-5 text-emerald-300" />
-                      <span className="text-[11px]">Message</span>
-                    </button>
-                  }
-                />
               </div>
             </div>
           </section>
@@ -937,21 +927,17 @@ const MerchantProfile = memo(() => {
           }`}
         >
           <div className="max-w-4xl mx-auto flex gap-2">
-            {merchant.phone ? (
-              <a
-                href={`sms:${merchant.phone}`}
-                className="flex-1 inline-flex items-center justify-center gap-2 h-12 rounded-xl border border-border bg-card text-sm font-semibold text-foreground hover:bg-muted/40 transition"
-              >
-                <MessageSquare className="w-4 h-4" /> Message
-              </a>
-            ) : (
-              <button
-                onClick={handleShare}
-                className="flex-1 inline-flex items-center justify-center gap-2 h-12 rounded-xl border border-border bg-card text-sm font-semibold text-foreground hover:bg-muted/40 transition"
-              >
-                <Share2 className="w-4 h-4" /> Share
-              </button>
-            )}
+            <AskQuestionButton
+              merchantId={merchant.id}
+              merchantName={merchant.business_name}
+              trigger={
+                <button
+                  className="flex-1 inline-flex items-center justify-center gap-2 h-12 rounded-xl border border-border bg-card text-sm font-semibold text-foreground hover:bg-muted/40 transition"
+                >
+                  <MessageSquare className="w-4 h-4" /> Message
+                </button>
+              }
+            />
             <button
               onClick={hasBookableServices ? scrollToBooking : handleOpenPaymentDialog}
               disabled={!hasBookableServices && !merchant.accepts_pawbucks}
