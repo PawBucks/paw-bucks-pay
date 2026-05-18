@@ -416,10 +416,14 @@ const MerchantProfile = memo(() => {
               {/* Status row */}
               <div className="flex items-center gap-3 mt-4 text-sm">
                 <OpenStatusBadge merchantId={merchant.id} />
-                <span className="text-white/30">·</span>
-                <span className="inline-flex items-center gap-1.5 text-primary font-medium">
-                  <PawBucksLogo className="w-4 h-4" /> Earns PawBucks
-                </span>
+                {merchant.accepts_pawbucks && (
+                  <>
+                    <span className="text-white/30">·</span>
+                    <span className="inline-flex items-center gap-1.5 text-primary font-medium">
+                      <PawBucksLogo className="w-4 h-4" /> Earns PawBucks
+                    </span>
+                  </>
+                )}
               </div>
 
               <div className="h-px bg-white/10 my-4" />
