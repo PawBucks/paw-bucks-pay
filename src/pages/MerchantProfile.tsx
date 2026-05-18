@@ -980,4 +980,3 @@ const MerchantProfile = memo(() => {
 MerchantProfile.displayName = "MerchantProfile";
 
 export default MerchantProfile;
-}
