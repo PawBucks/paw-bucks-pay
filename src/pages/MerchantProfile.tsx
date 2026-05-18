@@ -895,8 +895,13 @@ const MerchantProfile = memo(() => {
 
         </div>
 
-        {/* ══════ Sticky compact sponsored ad (sits above CTA bar) ══════ */}
-        <SponsoredAdBar variant="bottom" authed={!!user} ctaBarHeight={76} />
+        {/* ══════ Inline sponsored ad (sits just above the sticky CTA bar) ══════ */}
+        <div
+          className="px-3 pb-3"
+          style={{ paddingBottom: `calc(${user ? 64 : 0}px + 76px + env(safe-area-inset-bottom) + 12px)` }}
+        >
+          <SponsoredAdBar variant="bottom" />
+        </div>
 
         {/* ══════ Sticky bottom CTA bar ══════ */}
         <div
