@@ -486,6 +486,16 @@ const MerchantProfile = memo(() => {
                   <Share2 className="w-5 h-5 text-amber-300" />
                   <span className="text-[11px]">Share</span>
                 </button>
+                <AskQuestionButton
+                  merchantId={merchant.id}
+                  merchantName={merchant.business_name}
+                  trigger={
+                    <button className="flex flex-col items-center justify-center gap-1.5 rounded-xl bg-white/[0.07] hover:bg-white/[0.12] text-white py-3 px-1 active:scale-95 transition">
+                      <MessageSquare className="w-5 h-5 text-emerald-300" />
+                      <span className="text-[11px]">Message</span>
+                    </button>
+                  }
+                />
               </div>
             </div>
           </section>
