@@ -6,7 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
 import { BottomNav } from "@/components/BottomNav";
 import { PageLoader } from "@/components/PageLoader";
-import { AdPlacement } from "@/components/AdPlacement";
+import { useAdMerchants } from "@/hooks/useMerchantServices";
+import { ChevronRight } from "lucide-react";
 import { SEO } from "@/components/SEO";
 import { PaymentDialogWithPawBucks } from "@/components/PaymentDialogWithPawBucks";
 import { SubscriptionCheckoutDialog } from "@/components/SubscriptionCheckoutDialog";
@@ -324,7 +325,7 @@ const MerchantProfile = memo(() => {
       />
       <Header isAuthenticated={!!user} onLogout={user ? handleLogout : undefined} />
 
-      <div className="min-h-screen bg-muted/30 pb-[260px] md:pb-[200px]">
+      <div className="min-h-screen bg-muted/30 pb-[200px] md:pb-[150px]">
         <div className="max-w-4xl mx-auto">
           {/* ══════ Sticky top bar ══════ */}
           <div className="sticky top-0 z-30 bg-card border-b border-border px-3 py-3 flex items-center justify-between gap-2">
@@ -510,9 +511,6 @@ const MerchantProfile = memo(() => {
 
               {/* ─── ABOUT ─── */}
               <TabsContent value="about" className="mt-2 space-y-5 focus-visible:ring-0">
-                {/* Sponsored ad */}
-                <AdPlacement position="top" />
-
                 {/* Earn PawBucks here info card */}
                 <div className="rounded-2xl bg-[hsl(218_35%_10%)] text-white p-4 flex items-start gap-3 shadow-lg">
                   <div className="w-12 h-12 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center flex-shrink-0">
@@ -893,18 +891,8 @@ const MerchantProfile = memo(() => {
 
         </div>
 
-        {/* ══════ Sticky bottom sponsored ad (sits above CTA bar) ══════ */}
-        <div
-          className={`fixed inset-x-0 z-40 px-3 pointer-events-none ${
-            user
-              ? "bottom-[calc(64px+76px+env(safe-area-inset-bottom))] md:bottom-[calc(76px+env(safe-area-inset-bottom))]"
-              : "bottom-[calc(76px+env(safe-area-inset-bottom))]"
-          }`}
-        >
-          <div className="max-w-4xl mx-auto pointer-events-auto">
-            <AdPlacement position="bottom" />
-          </div>
-        </div>
+        {/* ══════ Sticky compact sponsored ad (sits above CTA bar) ══════ */}
+        <StickySponsoredAd authed={!!user} />
 
         {/* ══════ Sticky bottom CTA bar ══════ */}
         <div
@@ -986,3 +974,69 @@ const MerchantProfile = memo(() => {
 MerchantProfile.displayName = "MerchantProfile";
 
 export default MerchantProfile;
+
+// ─────────────────────────────────────────────────────────────────────
+// Compact sticky sponsored ad — slim single-row bar above the CTA panel
+// ─────────────────────────────────────────────────────────────────────
+function StickySponsoredAd({ authed }: { authed: boolean }) {
+  const navigate = useNavigate();
+  const { data: adMerchants = [] } = useAdMerchants();
+  const [idx, setIdx] = useState(0);
+  const [dismissed, setDismissed] = useState(false);
+
+  useEffect(() => {
+    if (adMerchants.length <= 1) return;
+    const t = setInterval(() => setIdx((i) => (i + 1) % adMerchants.length), 15000);
+    return () => clearInterval(t);
+  }, [adMerchants.length]);
+
+  if (dismissed || adMerchants.length === 0) return null;
+  const m = adMerchants[idx];
+  if (!m) return null;
+
+  return (
+    <div
+      className={`fixed inset-x-0 z-40 px-3 pointer-events-none ${
+        authed
+          ? "bottom-[calc(64px+72px+env(safe-area-inset-bottom))] md:bottom-[calc(72px+env(safe-area-inset-bottom))]"
+          : "bottom-[calc(72px+env(safe-area-inset-bottom))]"
+      }`}
+    >
+      <div className="max-w-4xl mx-auto pointer-events-auto">
+        <button
+          type="button"
+          onClick={() => navigate(`/merchant/${m.id}`)}
+          className="w-full flex items-center gap-3 h-14 pl-2 pr-3 rounded-xl bg-card/95 backdrop-blur border border-border shadow-lg hover:shadow-xl transition text-left"
+        >
+          {m.logo_url ? (
+            <img
+              src={m.logo_url}
+              alt=""
+              className="w-10 h-10 rounded-lg object-cover flex-shrink-0"
+              loading="lazy"
+            />
+          ) : (
+            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <Store className="w-5 h-5 text-primary" />
+            </div>
+          )}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
+                Sponsored
+              </span>
+              <span className="text-muted-foreground/40 text-[10px]">·</span>
+              <span className="text-[10px] font-semibold text-success">
+                {m.cashback_rate}x points
+              </span>
+            </div>
+            <p className="text-sm font-semibold text-foreground truncate leading-tight">
+              {m.business_name}
+            </p>
+          </div>
+          <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+        </button>
+      </div>
+    </div>
+  );
+}
