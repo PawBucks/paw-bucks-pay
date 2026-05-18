@@ -7,7 +7,7 @@ import { usePullToRefresh } from"@/hooks/usePullToRefresh";
 import { Header } from"@/components/Header";
 import { BottomNav } from"@/components/BottomNav";
 import { PageLoader } from"@/components/PageLoader";
-import { AdPlacement } from"@/components/AdPlacement";
+import { SponsoredAdBar } from"@/components/SponsoredAdBar";
 import { SEO } from"@/components/SEO";
 import { seoMeta } from"@/lib/seoMeta";
 import { PullToRefresh } from"@/components/PullToRefresh";
@@ -353,7 +353,7 @@ const MerchantDirectory = () => {
  >
         {/* ── Premium Ads (top of page, above hero) ── */}
         <div className="container mx-auto px-4 pt-4 max-w-7xl">
-          <AdPlacement position="top" />
+          <SponsoredAdBar variant="top" />
         </div>
 
  {/* ── Hero + Search ── */}
@@ -627,10 +627,7 @@ const MerchantDirectory = () => {
  </div>
  )}
 
- {/* Bottom Ad */}
- <div className="mt-8">
- <AdPlacement position="bottom" />
- </div>
+ <SponsoredAdBar variant="bottom" authed={!!user} />
  </div>
 
  {/* Mobile Map FAB (only in list/grid mode) */}
