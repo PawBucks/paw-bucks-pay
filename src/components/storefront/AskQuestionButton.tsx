@@ -23,9 +23,10 @@ type Message = {
 type AskQuestionButtonProps = {
  merchantId: string;
  merchantName: string;
+ trigger?: React.ReactNode;
 };
 
-export const AskQuestionButton = ({ merchantId, merchantName }: AskQuestionButtonProps) => {
+export const AskQuestionButton = ({ merchantId, merchantName, trigger }: AskQuestionButtonProps) => {
  const { user } = useAuth();
  const navigate = useNavigate();
  const location = useLocation();
@@ -190,10 +191,12 @@ export const AskQuestionButton = ({ merchantId, merchantName }: AskQuestionButto
  return (
  <Dialog open={open} onOpenChange={handleOpenChange}>
  <DialogTrigger asChild>
+ {trigger || (
  <Button variant="outline" size="sm" className="gap-2">
  <span className="h-4 w-4" aria-hidden="true">💬</span>
  Ask a Question
  </Button>
+ )}
  </DialogTrigger>
  <DialogContent className="sm:max-w-[500px] h-[70vh] flex flex-col">
  <DialogHeader>
