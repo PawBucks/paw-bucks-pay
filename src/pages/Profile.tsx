@@ -12,7 +12,7 @@ import { Label } from"@/components/ui/label";
 import { Avatar, AvatarFallback } from"@/components/ui/avatar";
 import { Badge } from"@/components/ui/badge";
 import { BottomNav } from"@/components/BottomNav";
-import { AdPlacement } from"@/components/AdPlacement";
+import { SponsoredAdBar } from "@/components/SponsoredAdBar";
 import { FeedbackButton } from"@/components/FeedbackButton";
 import { PullToRefresh } from"@/components/PullToRefresh";
 import { DeleteMyAccountCard } from"@/components/profile/DeleteMyAccountCard";
@@ -154,7 +154,7 @@ const Profile = () => {
      <div className="container mx-auto px-4 pt-4 pb-24 md:pb-8 max-w-4xl lg:max-w-6xl">
  {/* Ad Placement for Free Users */}
  <div className="mb-4 sm:mb-6">
- <AdPlacement />
+ <SponsoredAdBar variant="top" />
  </div>
 
   {/* Header */}
