@@ -858,7 +858,10 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
                   </span>
                   <button
                     type="button"
-                    onClick={() => setPbToApply(0)}
+                    onClick={() => {
+                      pbUserOverrideRef.current = true;
+                      setPbToApply(0);
+                    }}
                     className="text-xs text-destructive font-medium"
                   >
                     Remove
@@ -882,6 +885,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
                     variant="ghost"
                     size="sm"
                     onClick={() => {
+                      pbUserOverrideRef.current = true;
                       setPbToApply(maxPbApplicable);
                       setPbInput("");
                     }}
