@@ -677,6 +677,7 @@ async function handlePaymentSuccess(
   stripeChargeAmount?: number,
 ): Promise<number> {
   const now = new Date();
+  const currentBilling = calculateCurrentBillingInstant(subscription);
   // Use the actual Stripe-charged portion for fee logging and rewards calculation;
   // fall back to the full subscription amount for legacy callers.
   const chargedCents = typeof stripeChargeAmount === "number" ? stripeChargeAmount : subscription.amount;
@@ -685,29 +686,14 @@ async function handlePaymentSuccess(
   const chargedDollars = chargedCents / 100;
   const pawbucksUsdValue = pawbucksValueCents / 100;
   
-  // Calculate next billing date
-  const nextBilling = new Date(now);
-  switch (subscription.billing_interval) {
-    case "day":
-      nextBilling.setDate(nextBilling.getDate() + subscription.billing_interval_count);
-      break;
-    case "week":
-      nextBilling.setDate(nextBilling.getDate() + (7 * subscription.billing_interval_count));
-      break;
-    case "month":
-      nextBilling.setMonth(nextBilling.getMonth() + subscription.billing_interval_count);
-      break;
-    case "year":
-      nextBilling.setFullYear(nextBilling.getFullYear() + subscription.billing_interval_count);
-      break;
-  }
+  const nextBilling = calculateNextBillingInstant(subscription);
 
   // Update subscription
   await supabase
     .from("merchant_subscriptions")
     .update({
       status: "active",
-      current_period_start: now.toISOString(),
+      current_period_start: currentBilling.toISOString(),
       current_period_end: nextBilling.toISOString(),
       next_billing_date: nextBilling.toISOString(),
       last_payment_date: now.toISOString(),
@@ -1056,17 +1042,12 @@ async function handleFullPawBucksRenewal(
   pawbucksValueCents: number,
 ) {
   const now = new Date();
-  const nextBilling = new Date(now);
-  switch (subscription.billing_interval) {
-    case 'day': nextBilling.setDate(nextBilling.getDate() + subscription.billing_interval_count); break;
-    case 'week': nextBilling.setDate(nextBilling.getDate() + (7 * subscription.billing_interval_count)); break;
-    case 'month': nextBilling.setMonth(nextBilling.getMonth() + subscription.billing_interval_count); break;
-    case 'year': nextBilling.setFullYear(nextBilling.getFullYear() + subscription.billing_interval_count); break;
-  }
+  const currentBilling = calculateCurrentBillingInstant(subscription);
+  const nextBilling = calculateNextBillingInstant(subscription);
 
   await supabase.from('merchant_subscriptions').update({
     status: 'active',
-    current_period_start: now.toISOString(),
+    current_period_start: currentBilling.toISOString(),
     current_period_end: nextBilling.toISOString(),
     next_billing_date: nextBilling.toISOString(),
     last_payment_date: now.toISOString(),
