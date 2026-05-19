@@ -12,6 +12,8 @@ const logStep = (step: string, details?: Record<string, unknown>) => {
 };
 
 const PLATFORM_FEE_PERCENT = 0.03; // 3% platform fee
+const DEFAULT_BILLING_TIMEZONE = "America/New_York";
+const BILLING_LOCAL_HOUR = 12; // Noon local time avoids UTC day-boundary drift.
 
 // PawPass product IDs for tier determination
 const PAWPASS_PLUS_PRODUCT_ID = 'prod_TQyZjYzt9DwoIK';
@@ -112,7 +114,106 @@ interface SubscriptionToProcess {
   billing_interval_count: number;
   failed_payment_count: number;
   application_fee_percent: number;
+  next_billing_date: string;
   metadata: Record<string, string> | null;
+  merchants?: { timezone?: string | null } | null;
+  profiles?: { timezone?: string | null } | null;
+}
+
+function safeTimeZone(timeZone?: string | null): string {
+  if (!timeZone) return DEFAULT_BILLING_TIMEZONE;
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone }).format(new Date());
+    return timeZone;
+  } catch {
+    return DEFAULT_BILLING_TIMEZONE;
+  }
+}
+
+function getBillingTimeZone(subscription: Pick<SubscriptionToProcess, "merchants" | "profiles">): string {
+  return safeTimeZone(subscription.merchants?.timezone || subscription.profiles?.timezone || DEFAULT_BILLING_TIMEZONE);
+}
+
+function getDateTimeParts(date: Date, timeZone: string): Record<string, number> {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(date);
+  return Object.fromEntries(parts.filter((p) => p.type !== "literal").map((p) => [p.type, Number(p.value)]));
+}
+
+function formatDateInTimeZone(date: Date, timeZone: string): string {
+  const parts = getDateTimeParts(date, timeZone);
+  return `${parts.year}-${String(parts.month).padStart(2, "0")}-${String(parts.day).padStart(2, "0")}`;
+}
+
+function timeZoneOffsetMs(date: Date, timeZone: string): number {
+  const parts = getDateTimeParts(date, timeZone);
+  const asUtc = Date.UTC(parts.year, parts.month - 1, parts.day, parts.hour, parts.minute, parts.second);
+  return asUtc - date.getTime();
+}
+
+function localDateTimeToUtc(dateString: string, timeZone: string, hour = BILLING_LOCAL_HOUR): Date {
+  const [year, month, day] = dateString.split("-").map(Number);
+  const localAsUtc = Date.UTC(year, month - 1, day, hour, 0, 0);
+  let utcMs = localAsUtc;
+  for (let i = 0; i < 3; i++) {
+    utcMs = localAsUtc - timeZoneOffsetMs(new Date(utcMs), timeZone);
+  }
+  return new Date(utcMs);
+}
+
+function daysInMonth(year: number, month: number): number {
+  return new Date(Date.UTC(year, month, 0)).getUTCDate();
+}
+
+function addBillingIntervalToLocalDate(dateString: string, interval: string, count: number): string {
+  const [year, month, day] = dateString.split("-").map(Number);
+  if (interval === "month") {
+    const targetMonthIndex = month - 1 + count;
+    const targetYear = year + Math.floor(targetMonthIndex / 12);
+    const targetMonth = ((targetMonthIndex % 12) + 12) % 12 + 1;
+    const targetDay = Math.min(day, daysInMonth(targetYear, targetMonth));
+    return `${targetYear}-${String(targetMonth).padStart(2, "0")}-${String(targetDay).padStart(2, "0")}`;
+  }
+  if (interval === "year") {
+    const targetYear = year + count;
+    const targetDay = Math.min(day, daysInMonth(targetYear, month));
+    return `${targetYear}-${String(month).padStart(2, "0")}-${String(targetDay).padStart(2, "0")}`;
+  }
+  const daysToAdd = interval === "week" ? count * 7 : count;
+  const next = new Date(Date.UTC(year, month - 1, day + daysToAdd, 12, 0, 0));
+  return `${next.getUTCFullYear()}-${String(next.getUTCMonth() + 1).padStart(2, "0")}-${String(next.getUTCDate()).padStart(2, "0")}`;
+}
+
+function isSubscriptionDueLocally(subscription: SubscriptionToProcess, now: Date): boolean {
+  const timeZone = getBillingTimeZone(subscription);
+  const dueLocalDate = formatDateInTimeZone(new Date(subscription.next_billing_date), timeZone);
+  const todayLocalDate = formatDateInTimeZone(now, timeZone);
+  return dueLocalDate <= todayLocalDate;
+}
+
+function calculateNextBillingInstant(subscription: SubscriptionToProcess): Date {
+  const timeZone = getBillingTimeZone(subscription);
+  const currentDueLocalDate = formatDateInTimeZone(new Date(subscription.next_billing_date), timeZone);
+  const nextDueLocalDate = addBillingIntervalToLocalDate(
+    currentDueLocalDate,
+    subscription.billing_interval,
+    subscription.billing_interval_count,
+  );
+  return localDateTimeToUtc(nextDueLocalDate, timeZone);
+}
+
+function calculateCurrentBillingInstant(subscription: SubscriptionToProcess): Date {
+  const timeZone = getBillingTimeZone(subscription);
+  const currentDueLocalDate = formatDateInTimeZone(new Date(subscription.next_billing_date), timeZone);
+  return localDateTimeToUtc(currentDueLocalDate, timeZone);
 }
 
 // Helper function to determine user's subscription tier and multiplier
@@ -274,21 +375,30 @@ serve(async (req) => {
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
     const stripe = new Stripe(stripeKey, { apiVersion: "2024-12-18.acacia" });
 
-    // Get all active subscriptions due for billing
+    // Get active subscription candidates, then decide due status by the merchant/user local calendar date.
     const now = new Date();
-    const { data: dueSubscriptions, error: fetchError } = await supabaseAdmin
+    const localDueLookahead = new Date(now.getTime() + 36 * 60 * 60 * 1000);
+    const { data: dueSubscriptionCandidates, error: fetchError } = await supabaseAdmin
       .from("merchant_subscriptions")
-      .select("*")
+      .select("*, merchants(timezone), profiles(timezone)")
       .eq("status", "active")
       .eq("cancel_at_period_end", false)
-      .lte("next_billing_date", now.toISOString())
+      .lte("next_billing_date", localDueLookahead.toISOString())
       .order("next_billing_date", { ascending: true });
 
     if (fetchError) {
       throw new Error(`Failed to fetch subscriptions: ${fetchError.message}`);
     }
 
-    logStep("Found subscriptions due for billing", { count: dueSubscriptions?.length || 0 });
+    const dueSubscriptions = (dueSubscriptionCandidates || []).filter((subscription: SubscriptionToProcess) =>
+      isSubscriptionDueLocally(subscription, now),
+    );
+
+    logStep("Found subscriptions due for billing", {
+      candidates: dueSubscriptionCandidates?.length || 0,
+      due: dueSubscriptions.length,
+      billingMode: "local_date_et_pt",
+    });
 
     if (!dueSubscriptions || dueSubscriptions.length === 0) {
       return new Response(JSON.stringify({ 
@@ -567,6 +677,7 @@ async function handlePaymentSuccess(
   stripeChargeAmount?: number,
 ): Promise<number> {
   const now = new Date();
+  const currentBilling = calculateCurrentBillingInstant(subscription);
   // Use the actual Stripe-charged portion for fee logging and rewards calculation;
   // fall back to the full subscription amount for legacy callers.
   const chargedCents = typeof stripeChargeAmount === "number" ? stripeChargeAmount : subscription.amount;
@@ -575,29 +686,14 @@ async function handlePaymentSuccess(
   const chargedDollars = chargedCents / 100;
   const pawbucksUsdValue = pawbucksValueCents / 100;
   
-  // Calculate next billing date
-  const nextBilling = new Date(now);
-  switch (subscription.billing_interval) {
-    case "day":
-      nextBilling.setDate(nextBilling.getDate() + subscription.billing_interval_count);
-      break;
-    case "week":
-      nextBilling.setDate(nextBilling.getDate() + (7 * subscription.billing_interval_count));
-      break;
-    case "month":
-      nextBilling.setMonth(nextBilling.getMonth() + subscription.billing_interval_count);
-      break;
-    case "year":
-      nextBilling.setFullYear(nextBilling.getFullYear() + subscription.billing_interval_count);
-      break;
-  }
+  const nextBilling = calculateNextBillingInstant(subscription);
 
   // Update subscription
   await supabase
     .from("merchant_subscriptions")
     .update({
       status: "active",
-      current_period_start: now.toISOString(),
+      current_period_start: currentBilling.toISOString(),
       current_period_end: nextBilling.toISOString(),
       next_billing_date: nextBilling.toISOString(),
       last_payment_date: now.toISOString(),
@@ -946,17 +1042,12 @@ async function handleFullPawBucksRenewal(
   pawbucksValueCents: number,
 ) {
   const now = new Date();
-  const nextBilling = new Date(now);
-  switch (subscription.billing_interval) {
-    case 'day': nextBilling.setDate(nextBilling.getDate() + subscription.billing_interval_count); break;
-    case 'week': nextBilling.setDate(nextBilling.getDate() + (7 * subscription.billing_interval_count)); break;
-    case 'month': nextBilling.setMonth(nextBilling.getMonth() + subscription.billing_interval_count); break;
-    case 'year': nextBilling.setFullYear(nextBilling.getFullYear() + subscription.billing_interval_count); break;
-  }
+  const currentBilling = calculateCurrentBillingInstant(subscription);
+  const nextBilling = calculateNextBillingInstant(subscription);
 
   await supabase.from('merchant_subscriptions').update({
     status: 'active',
-    current_period_start: now.toISOString(),
+    current_period_start: currentBilling.toISOString(),
     current_period_end: nextBilling.toISOString(),
     next_billing_date: nextBilling.toISOString(),
     last_payment_date: now.toISOString(),
