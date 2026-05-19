@@ -210,6 +210,12 @@ function calculateNextBillingInstant(subscription: SubscriptionToProcess): Date 
   return localDateTimeToUtc(nextDueLocalDate, timeZone);
 }
 
+function calculateCurrentBillingInstant(subscription: SubscriptionToProcess): Date {
+  const timeZone = getBillingTimeZone(subscription);
+  const currentDueLocalDate = formatDateInTimeZone(new Date(subscription.next_billing_date), timeZone);
+  return localDateTimeToUtc(currentDueLocalDate, timeZone);
+}
+
 // Helper function to determine user's subscription tier and multiplier
 // Uses dual-verification: checks both subscription_tier field (for manual upgrades)
 // and Stripe product IDs (for purchased subscriptions)
@@ -369,21 +375,30 @@ serve(async (req) => {
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
     const stripe = new Stripe(stripeKey, { apiVersion: "2024-12-18.acacia" });
 
-    // Get all active subscriptions due for billing
+    // Get active subscription candidates, then decide due status by the merchant/user local calendar date.
     const now = new Date();
-    const { data: dueSubscriptions, error: fetchError } = await supabaseAdmin
+    const localDueLookahead = new Date(now.getTime() + 36 * 60 * 60 * 1000);
+    const { data: dueSubscriptionCandidates, error: fetchError } = await supabaseAdmin
       .from("merchant_subscriptions")
-      .select("*")
+      .select("*, merchants(timezone), profiles(timezone)")
       .eq("status", "active")
       .eq("cancel_at_period_end", false)
-      .lte("next_billing_date", now.toISOString())
+      .lte("next_billing_date", localDueLookahead.toISOString())
       .order("next_billing_date", { ascending: true });
 
     if (fetchError) {
       throw new Error(`Failed to fetch subscriptions: ${fetchError.message}`);
     }
 
-    logStep("Found subscriptions due for billing", { count: dueSubscriptions?.length || 0 });
+    const dueSubscriptions = (dueSubscriptionCandidates || []).filter((subscription: SubscriptionToProcess) =>
+      isSubscriptionDueLocally(subscription, now),
+    );
+
+    logStep("Found subscriptions due for billing", {
+      candidates: dueSubscriptionCandidates?.length || 0,
+      due: dueSubscriptions.length,
+      billingMode: "local_date_et_pt",
+    });
 
     if (!dueSubscriptions || dueSubscriptions.length === 0) {
       return new Response(JSON.stringify({ 
