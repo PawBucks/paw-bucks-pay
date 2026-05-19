@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { GroomingPetSelector, createDefaultGroomingData, type GroomingPetData } from "./GroomingPetSelector";
 import { DepositCardForm } from "./DepositCardForm";
 import { useAuth } from "@/hooks/useAuth";
@@ -160,6 +160,23 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
   const [serviceAddress, setServiceAddress] = useState("");
   const [pbToApply, setPbToApply] = useState(0);
   const [pbInput, setPbInput] = useState("");
+  const pbUserOverrideRef = useRef(false);
+
+  // Load user's auto-redeem preference (mirrors InvoicePayment / Storefront behavior).
+  // Default to "always" so PawBucks are auto-applied unless the user explicitly opted out.
+  const { data: autoRedeemPrefs } = useQuery({
+    queryKey: ["auto-redeem-prefs", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data } = await supabase
+        .from("profiles")
+        .select("auto_redeem_mode, auto_redeem_min_coverage_pct, auto_redeem_max_apply_pct")
+        .eq("id", user.id)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!user?.id,
+  });
 
   const { data: services = [], isLoading: servicesLoading } = useQuery({
     queryKey: ["merchant-services-active", merchantId],
