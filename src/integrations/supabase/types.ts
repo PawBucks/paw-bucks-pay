@@ -11093,6 +11093,7 @@ export type Database = {
           booking_date: string
           cancellation_reason: string | null
           cancelled_at: string | null
+          cash_due: number | null
           completed_at: string | null
           confirmed_at: string | null
           created_at: string
@@ -11108,6 +11109,8 @@ export type Database = {
           merchant_id: string
           no_show_at: string | null
           notes: string | null
+          pawbucks_applied: number
+          pawbucks_discount_usd: number
           payment_status: string
           pet_id: string | null
           recurring_end_date: string | null
@@ -11133,6 +11136,7 @@ export type Database = {
           booking_date: string
           cancellation_reason?: string | null
           cancelled_at?: string | null
+          cash_due?: number | null
           completed_at?: string | null
           confirmed_at?: string | null
           created_at?: string
@@ -11148,6 +11152,8 @@ export type Database = {
           merchant_id: string
           no_show_at?: string | null
           notes?: string | null
+          pawbucks_applied?: number
+          pawbucks_discount_usd?: number
           payment_status?: string
           pet_id?: string | null
           recurring_end_date?: string | null
@@ -11173,6 +11179,7 @@ export type Database = {
           booking_date?: string
           cancellation_reason?: string | null
           cancelled_at?: string | null
+          cash_due?: number | null
           completed_at?: string | null
           confirmed_at?: string | null
           created_at?: string
@@ -11188,6 +11195,8 @@ export type Database = {
           merchant_id?: string
           no_show_at?: string | null
           notes?: string | null
+          pawbucks_applied?: number
+          pawbucks_discount_usd?: number
           payment_status?: string
           pet_id?: string | null
           recurring_end_date?: string | null
