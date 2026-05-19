@@ -249,9 +249,40 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
     const dollars = parseFloat(pbInput || "0");
     if (!isFinite(dollars) || dollars <= 0) return;
     const raw = Math.round(dollars * 1000);
+    pbUserOverrideRef.current = true;
     setPbToApply(Math.min(Math.max(0, raw), maxPbApplicable));
     setPbInput("");
   };
+
+  // Auto-apply PawBucks based on user's auto-redeem preference (default: always max).
+  // Mirrors the platform-wide behavior in InvoicePayment / Storefront / PetStore so
+  // users don't have to hunt for a slider to spend the rewards they already earned.
+  useEffect(() => {
+    if (pbUserOverrideRef.current) return;
+    if (!user || spendableBalance <= 0 || effectivePrice <= 0) return;
+    const mode = (autoRedeemPrefs?.auto_redeem_mode as string) || "always";
+    if (mode === "off") return;
+    const PB_TO_USD = 0.001;
+    const maxNeededPB = Math.floor(effectivePrice / PB_TO_USD);
+    let apply = 0;
+    if (mode === "always" || mode === "smart_max" || mode === "subscriptions_only") {
+      apply = Math.min(spendableBalance, maxNeededPB);
+    } else if (mode === "smart") {
+      const minCoverage = autoRedeemPrefs?.auto_redeem_min_coverage_pct ?? 20;
+      const maxApply = autoRedeemPrefs?.auto_redeem_max_apply_pct ?? 50;
+      const coveragePct = ((spendableBalance * PB_TO_USD) / effectivePrice) * 100;
+      if (coveragePct >= minCoverage) {
+        const capPB = Math.floor(((effectivePrice * maxApply) / 100) / PB_TO_USD);
+        apply = Math.min(spendableBalance, capPB, maxNeededPB);
+      } else {
+        apply = Math.min(spendableBalance, maxNeededPB);
+      }
+    } else {
+      apply = Math.min(spendableBalance, maxNeededPB);
+    }
+    if (apply !== pbToApply) setPbToApply(apply);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id, spendableBalance, effectivePrice, autoRedeemPrefs]);
 
   const availableSlots = useMemo(() => {
     if (!selectedDate || !selectedServiceData) return [];
