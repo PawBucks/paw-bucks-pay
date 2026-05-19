@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { GroomingPetSelector, createDefaultGroomingData, type GroomingPetData } from "./GroomingPetSelector";
 import { DepositCardForm } from "./DepositCardForm";
 import { useAuth } from "@/hooks/useAuth";
@@ -160,6 +160,23 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
   const [serviceAddress, setServiceAddress] = useState("");
   const [pbToApply, setPbToApply] = useState(0);
   const [pbInput, setPbInput] = useState("");
+  const pbUserOverrideRef = useRef(false);
+
+  // Load user's auto-redeem preference (mirrors InvoicePayment / Storefront behavior).
+  // Default to "always" so PawBucks are auto-applied unless the user explicitly opted out.
+  const { data: autoRedeemPrefs } = useQuery({
+    queryKey: ["auto-redeem-prefs", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data } = await supabase
+        .from("profiles")
+        .select("auto_redeem_mode, auto_redeem_min_coverage_pct, auto_redeem_max_apply_pct")
+        .eq("id", user.id)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!user?.id,
+  });
 
   const { data: services = [], isLoading: servicesLoading } = useQuery({
     queryKey: ["merchant-services-active", merchantId],
@@ -232,9 +249,40 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
     const dollars = parseFloat(pbInput || "0");
     if (!isFinite(dollars) || dollars <= 0) return;
     const raw = Math.round(dollars * 1000);
+    pbUserOverrideRef.current = true;
     setPbToApply(Math.min(Math.max(0, raw), maxPbApplicable));
     setPbInput("");
   };
+
+  // Auto-apply PawBucks based on user's auto-redeem preference (default: always max).
+  // Mirrors the platform-wide behavior in InvoicePayment / Storefront / PetStore so
+  // users don't have to hunt for a slider to spend the rewards they already earned.
+  useEffect(() => {
+    if (pbUserOverrideRef.current) return;
+    if (!user || spendableBalance <= 0 || effectivePrice <= 0) return;
+    const mode = (autoRedeemPrefs?.auto_redeem_mode as string) || "always";
+    if (mode === "off") return;
+    const PB_TO_USD = 0.001;
+    const maxNeededPB = Math.floor(effectivePrice / PB_TO_USD);
+    let apply = 0;
+    if (mode === "always" || mode === "smart_max" || mode === "subscriptions_only") {
+      apply = Math.min(spendableBalance, maxNeededPB);
+    } else if (mode === "smart") {
+      const minCoverage = autoRedeemPrefs?.auto_redeem_min_coverage_pct ?? 20;
+      const maxApply = autoRedeemPrefs?.auto_redeem_max_apply_pct ?? 50;
+      const coveragePct = ((spendableBalance * PB_TO_USD) / effectivePrice) * 100;
+      if (coveragePct >= minCoverage) {
+        const capPB = Math.floor(((effectivePrice * maxApply) / 100) / PB_TO_USD);
+        apply = Math.min(spendableBalance, capPB, maxNeededPB);
+      } else {
+        apply = Math.min(spendableBalance, maxNeededPB);
+      }
+    } else {
+      apply = Math.min(spendableBalance, maxNeededPB);
+    }
+    if (apply !== pbToApply) setPbToApply(apply);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id, spendableBalance, effectivePrice, autoRedeemPrefs]);
 
   const availableSlots = useMemo(() => {
     if (!selectedDate || !selectedServiceData) return [];
@@ -810,7 +858,10 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
                   </span>
                   <button
                     type="button"
-                    onClick={() => setPbToApply(0)}
+                    onClick={() => {
+                      pbUserOverrideRef.current = true;
+                      setPbToApply(0);
+                    }}
                     className="text-xs text-destructive font-medium"
                   >
                     Remove
@@ -834,6 +885,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
                     variant="ghost"
                     size="sm"
                     onClick={() => {
+                      pbUserOverrideRef.current = true;
                       setPbToApply(maxPbApplicable);
                       setPbInput("");
                     }}
