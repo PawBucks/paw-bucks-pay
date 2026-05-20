@@ -13,6 +13,7 @@ import { Badge } from"@/components/ui/badge";
 import { Calendar } from"@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from"@/components/ui/popover";
 import { Calendar as CalendarIcon, Download, RotateCcw, Search, X } from "lucide-react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import { format } from"date-fns";
 import { toast } from"sonner";
 import { cn } from"@/lib/utils";
@@ -26,14 +27,19 @@ interface Transaction {
  customer_name: string;
  customer_email: string;
  amount: number;
+  stripe_amount?: number;
+  pawbucks_used?: number;
+  pawbucks_used_usd?: number;
   amount_refunded?: number;
  cashback_given: number; // PawBucks given to customer (informational)
+  cashback_given_usd?: number;
  platform_fee: number; // Platform's 3% fee on Stripe portion
  repayment_deducted: number; // Funding deal repayment (if applicable)
  net_payout: number; // amount - platform_fee - repayment_deducted
  payment_method: string;
  status: string;
  description: string;
+  stripe_payment_intent_id?: string | null;
 }
 
 const MerchantTransactions = () => { const { user, loading, signOut } = useAuth();
@@ -51,6 +57,7 @@ const MerchantTransactions = () => { const { user, loading, signOut } = useAuth(
  const [refundingId, setRefundingId] = useState<string | null>(null);
  const [refundDialogOpen, setRefundDialogOpen] = useState(false);
  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
  
  const itemsPerPage = 15;
 
