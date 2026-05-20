@@ -107,7 +107,7 @@ export function GroomingReportCardView({ bookingId }: GroomingReportCardViewProp
  {photos.some((p: any) => p.caption) && (
  <div className="mt-2 space-y-1">
  {photos.filter((p: any) => p.caption).map((p: any, i: number) => (
- <p key={i} className="text-xs text-muted-foreground italic">📸 {p.caption}</p>
+ <p key={i} className="text-xs text-muted-foreground italic flex items-center gap-1"><Camera className="h-3 w-3" aria-hidden /> {p.caption}</p>
  ))}
  </div>
  )}

@@ -389,7 +389,7 @@ export default function MerchantCampaigns() {
  </div>
  {channel ==="sms" && !hasTwilio && (
  <p className="text-xs text-warning mt-1">
- ⚠️ Configure your Twilio account in SMS Settings first
+ Configure your Twilio account in SMS Settings first
  </p>
  )}
  </div>
@@ -400,7 +400,7 @@ export default function MerchantCampaigns() {
  id="title"
  value={title}
  onChange={(e) => setTitle(e.target.value)}
- placeholder="e.g., Weekend Special 🐾"
+ placeholder="e.g., Weekend Special"
  />
  </div>
 

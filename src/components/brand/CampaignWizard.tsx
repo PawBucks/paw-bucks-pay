@@ -55,28 +55,28 @@ const TEMPLATES: Array<{
 }> = [
  {
  key:"new_product_launch",
- emoji:"🚀",
+ Icon: Rocket,
  name:"New Product Launch",
  description:"Drive trial of a new SKU with high reward per check-in.",
  preset: { headline:"Try Our Newest Treat!", subtext:"Earn bonus PawBucks when you check in.", cta:"Claim Bonus", color:"#6366f1", pawbucks_per_checkin: 1000, budget_usd: 2500 },
  },
  {
  key:"seasonal_promo",
- emoji:"🎁",
+ Icon: Gift,
  name:"Seasonal Promotion",
  description:"Holiday or seasonal awareness across many merchants.",
  preset: { headline:"Holiday PawBucks Bonus!", subtext:"Limited-time rewards from your favorite brand.", cta:"Get Bonus PB", color:"#ef4444", pawbucks_per_checkin: 500, budget_usd: 5000 },
  },
  {
  key:"loyalty_winback",
- emoji:"💖",
+ Icon: Heart,
  name:"Loyalty Win-Back",
  description:"Re-engage lapsed pet owners with a generous reward.",
  preset: { headline:"We Miss Your Pet!", subtext:"Welcome back — enjoy bonus PawBucks.", cta:"Welcome Back", color:"#10b981", pawbucks_per_checkin: 2000, budget_usd: 1500 },
  },
  {
  key:"always_on",
- emoji:"🔁",
+ Icon: Repeat,
  name:"Always-On Awareness",
  description:"Steady, low-budget brand presence with auto-replenish.",
  preset: { headline:"Brand Bonus PawBucks", subtext:"Earn extra rewards every visit.", cta:"Earn Now", color:"#0ea5e9", pawbucks_per_checkin: 250, budget_usd: 1000 },
@@ -297,7 +297,7 @@ export function CampaignWizard({ open, onOpenChange, brandId, brandName, brandLo
  />
  </div>
  <div className="p-3 rounded-lg bg-muted border text-sm text-muted-foreground">
- 💡 You'll invite specific merchants in the next step (Marketplace tab) — targeting rules apply at the pet-owner level.
+ You'll invite specific merchants in the next step (Marketplace tab) — targeting rules apply at the pet-owner level.
  </div>
  </>
  )}

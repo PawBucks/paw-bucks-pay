@@ -228,7 +228,7 @@ const Storefront = memo(() => {
  currency: product.price.currency,
  formatted: product.price.formatted,
  });
- toast.success("Added to cart! 🛒");
+ toast.success("Added to cart!");
  }, [user, navigate, addToCart]);
 
  // Cart checkout

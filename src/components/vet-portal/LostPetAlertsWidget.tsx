@@ -143,7 +143,7 @@ export function LostPetAlertsWidget({ vetId }: LostPetAlertsWidgetProps) {
  <div className="flex items-center gap-2">
  <AlertTriangle className="h-5 w-5 text-destructive animate-pulse" />
  <h3 className="font-semibold text-destructive">
- ⚠️ YOUR PATIENT IS LOST!
+ YOUR PATIENT IS LOST!
  </h3>
  <Badge className="bg-destructive text-white ml-auto">
  {patientAlerts.length} Alert{patientAlerts.length > 1 ?'s' :''}
@@ -334,7 +334,7 @@ export function LostPetAlertsWidget({ vetId }: LostPetAlertsWidgetProps) {
  {selectedAlert.isPatient && (
  <div className="p-3 bg-warning/10 /30 rounded-lg border border-warning/20">
  <p className="text-sm text-warning font-medium">
- ⚠️ This is one of your patients! If they are brought in, 
+ This is one of your patients! If they are brought in, 
  immediately contact the owner.
  </p>
  </div>

@@ -224,7 +224,7 @@ const VetLoanApply = () => { const { user, loading, signOut } = useAuth();
  Get instant funding for your vet bill — pay over time through PawBucks.
  </p>
  <p className="text-sm text-muted-foreground italic">
- We're here to help you care for your pet — stress-free. 🐾
+ We're here to help you care for your pet — stress-free.
  </p>
  </div>
 

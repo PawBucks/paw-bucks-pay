@@ -130,7 +130,7 @@ export const CheckInFollowupBanner = ({ userId }: CheckInFollowupBannerProps) =>
  setPawbucksUsed("");
  setSubmitting(false);
 
- toast.success(`🎉 +${estimatedPB.toLocaleString()} PawBucks credited provisionally!`);
+ toast.success(`+${estimatedPB.toLocaleString()} PawBucks credited provisionally!`);
  };
 
  const handleStillShopping = async (followupId: string) => {
@@ -163,7 +163,7 @@ export const CheckInFollowupBanner = ({ userId }: CheckInFollowupBannerProps) =>
  });
  }
 
- toast.success("No worries, keep shopping! We'll check back in 15 minutes. 🐾");
+ toast.success("No worries, keep shopping! We'll check back in 15 minutes.");
  setFollowups((prev) => prev.filter((f) => f.id !== followupId));
  setRespondingTo(null);
  };
@@ -200,13 +200,13 @@ export const CheckInFollowupBanner = ({ userId }: CheckInFollowupBannerProps) =>
  {/* Post-credit reward screen */}
  {creditedFollowup && !showReceiptUpload && !receiptUploaded && (
  <GradientCard className="p-6 space-y-4 text-center">
- <div className="text-4xl">🎉</div>
+ <PartyPopper className="h-10 w-10 text-success" aria-hidden />
  <div>
  <p className="text-lg font-bold text-primary">
  You've earned +{creditedFollowup.pawbucks.toLocaleString()} PawBucks!
  </p>
  <p className="text-sm text-muted-foreground mt-2">
- 👉 Upload your receipt to unlock it
+ Upload your receipt to unlock it
  </p>
  </div>
  <Button
@@ -225,7 +225,7 @@ export const CheckInFollowupBanner = ({ userId }: CheckInFollowupBannerProps) =>
  {/* Post-upload confirmation */}
  {receiptUploaded && (
  <GradientCard className="p-6 space-y-3 text-center">
- <div className="text-4xl">✅</div>
+ <CheckCircle2 className="h-10 w-10 text-success" aria-hidden />
  <div>
  <p className="text-lg font-bold">You're all set!</p>
  <p className="text-sm text-muted-foreground mt-2">
@@ -263,7 +263,7 @@ export const CheckInFollowupBanner = ({ userId }: CheckInFollowupBannerProps) =>
  </p>
  {followup.attempt_number > 1 && (
  <p className="text-xs text-muted-foreground mt-1">
- Just checking back in! 🐾
+ Just checking back in!
  </p>
  )}
  </div>

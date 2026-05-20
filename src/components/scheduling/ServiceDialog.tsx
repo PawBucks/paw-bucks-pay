@@ -398,7 +398,7 @@ export function ServiceDialog({ open, onOpenChange, service, onSubmit }: Service
  {/* No-Show Protection Section */}
  <div className="space-y-3 rounded-lg border p-4 bg-muted/30">
  <h4 className="font-medium text-sm flex items-center gap-2">
- 🛡️ No-Show Protection
+ No-Show Protection
  </h4>
  <FormField
  control={form.control}
@@ -478,7 +478,7 @@ export function ServiceDialog({ open, onOpenChange, service, onSubmit }: Service
  render={({ field }) => (
  <FormItem className="flex items-center justify-between rounded-lg border p-3">
  <div className="space-y-0.5">
- <FormLabel>🚗 Mobile Service</FormLabel>
+ <FormLabel>Mobile Service</FormLabel>
  <FormDescription>
  You travel to the client's location
  </FormDescription>

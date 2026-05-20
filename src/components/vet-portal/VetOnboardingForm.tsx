@@ -664,7 +664,7 @@ export const VetOnboardingForm = () => {
  <div className="mx-auto mb-4 w-16 h-16 bg-primary rounded-full flex items-center justify-center">
  <PartyPopper className="h-8 w-8 text-primary-foreground" />
  </div>
- <DialogTitle className="text-2xl">Welcome to the PawBucks Family! 🎉</DialogTitle>
+ <DialogTitle className="text-2xl">Welcome to the PawBucks Family!</DialogTitle>
  <DialogDescription className="text-base mt-4">
  Your veterinary practice has been successfully registered. Our team will review your credentials 
  and you'll be ready to start accepting patients through PawBucks within 24-48 hours.

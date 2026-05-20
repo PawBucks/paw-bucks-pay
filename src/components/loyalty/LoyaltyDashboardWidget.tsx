@@ -57,7 +57,7 @@ export const LoyaltyDashboardWidget = ({ userId }: LoyaltyDashboardWidgetProps) 
  >
  <Gift className="w-10 h-10 mx-auto text-primary mb-2" />
  <p className="text-lg font-bold text-primary mb-1">
- 🎉 Free ${completedMilestone.credit_value} Credit Ready!
+ Free ${completedMilestone.credit_value} Credit Ready!
  </p>
  <p className="text-sm text-muted-foreground">
  Tap to claim your guaranteed reward
@@ -118,7 +118,7 @@ export const LoyaltyDashboardWidget = ({ userId }: LoyaltyDashboardWidgetProps) 
  </div>
  <div className="text-center">
  <div className="flex items-center justify-center gap-1 text-secondary mb-1">
- <span className="text-base">👑</span>
+ <Crown className="h-4 w-4 text-warning" aria-hidden />
  <span className="font-bold capitalize">{tier}</span>
  </div>
  <p className="text-[10px] text-muted-foreground">Your Tier</p>

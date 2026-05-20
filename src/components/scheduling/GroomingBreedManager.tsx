@@ -502,7 +502,7 @@ export function GroomingBreedManager({ merchantId }: GroomingBreedManagerProps) 
                         <span className="truncate">
                           {b.name}
                           {exists && (
-                            <span className="ml-1 text-[10px] text-success">✓ added</span>
+                            <span className="ml-1 text-[10px] text-success">added</span>
                           )}
                         </span>
                         <span className="text-muted-foreground whitespace-nowrap ml-2">

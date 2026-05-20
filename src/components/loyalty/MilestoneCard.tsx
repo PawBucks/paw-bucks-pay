@@ -47,7 +47,7 @@ export const MilestoneCard = ({ milestone, onRedeem, compact = false }: Mileston
  <div className="flex-1 min-w-0">
  <p className="font-medium text-sm">
  {isComplete 
- ? `🎉 Free $${milestone.credit_value} credit ready!` 
+ ? `Free $${milestone.credit_value} credit ready!` 
  : `${remaining} more visit${remaining !== 1 ?'s' :''} → Free $${milestone.credit_value} credit`}
  </p>
  <p className="text-xs text-muted-foreground truncate">

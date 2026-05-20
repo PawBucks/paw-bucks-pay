@@ -178,7 +178,7 @@ export function GapFillerTool({ vetId }: GapFillerToolProps) {
  for (const patient of selectedList) {
  await supabase.from("notifications").insert({
  user_id: patient.ownerId,
- title:"🎁 Bonus PawBucks Offer!",
+ title:"Bonus PawBucks Offer!",
  message: offerMessage || `${patient.petName} is overdue for ${patient.serviceType}. Book now and receive ${bonusAmount} bonus PawBucks!`,
  category:"promotional",
  });

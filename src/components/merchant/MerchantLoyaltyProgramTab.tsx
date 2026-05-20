@@ -267,7 +267,7 @@ export function MerchantLoyaltyProgramTab({ merchantId }: MerchantLoyaltyProgram
  }
  };
 
- const emojiOptions = ["⭐","🐾","🎉","☕","✂️","🏥","🦴","🐕","💈","🎁","🏆","💎"];
+ const emojiOptions: string[] = [];
 
  if (loading) {
  return (

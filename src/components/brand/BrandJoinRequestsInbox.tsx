@@ -38,11 +38,11 @@ export function BrandJoinRequestsInbox({ brandId }: BrandJoinRequestsInboxProps)
  respondToBrandCampaignJoinRequest(id, approve, msg),
  onSuccess: (_, vars) => {
  toast.success(
- vars.approve ?"Merchant approved & added to campaign 🎉" :"Request declined",
+ vars.approve ?"Merchant approved & added to campaign" :"Request declined",
  {
  description: vars.approve
- ?"📧 Approval email sent to the merchant."
- :"📧 Decline email sent to the merchant.",
+ ?"Approval email sent to the merchant."
+ :"Decline email sent to the merchant.",
  },
  );
  queryClient.invalidateQueries({ queryKey: ["brand-join-requests"] });

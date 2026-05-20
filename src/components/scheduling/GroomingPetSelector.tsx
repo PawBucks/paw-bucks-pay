@@ -298,7 +298,7 @@ export function GroomingPetSelector({
  {req.vaccine_name}
  </span>
  <span className="text-xs text-muted-foreground">
- {status?.status ==="valid" ?"✓ Up to date" : status?.status ==="expired" ?"⚠ Expired" :"✗ Missing"}
+ {status?.status ==="valid" ?"Up to date" : status?.status ==="expired" ?"Expired" :"Missing"}
  </span>
  {req.enforcement_level ==="required" && (
  <Badge variant="destructive" className="text-[10px] h-4 px-1">Required</Badge>
@@ -311,7 +311,7 @@ export function GroomingPetSelector({
  {groomingData.vaccineWarnings.length > 0 && (
  <div className={`p-3 rounded-lg text-sm ${groomingData.hasBlockingVaccineIssue ?"bg-destructive/10 border border-destructive/20" :"bg-warning/10 border border-warning/20"}`}>
  {groomingData.hasBlockingVaccineIssue ? (
- <p className="font-medium text-destructive mb-1">⚠ Booking cannot proceed:</p>
+ <p className="font-medium text-destructive mb-1 flex items-center gap-1"><AlertTriangle className="h-3.5 w-3.5" aria-hidden /> Booking cannot proceed:</p>
  ) : (
  <p className="font-medium text-warning mb-1">Heads up:</p>
  )}

@@ -173,7 +173,7 @@ export function GroomingReportCardForm({
  if (sendToCustomer) {
  await supabase.from("notifications").insert({
  user_id: customerUserId,
- title: `📋 Grooming Report Card for ${petName ||"your pet"}`,
+ title: `Grooming Report Card for ${petName ||"your pet"}`,
  message: `Your grooming report from ${serviceName ||"today's service"} is ready! Check out the photos and notes.`,
  category:"transactional",
  link_url:"/my-bookings",
