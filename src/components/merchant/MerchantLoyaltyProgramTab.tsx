@@ -26,6 +26,8 @@ import {
 import { Gift, Loader2, Pencil, Plus, Stamp, Trophy, Users } from "lucide-react";
 import { toast } from"sonner";
 import { format } from"date-fns";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 type LoyaltyProgram = {
  id: string;
@@ -47,6 +49,16 @@ type ProgramStats = {
  rewards_earned: number;
 };
 
+type CustomerPunchRow = {
+  user_id: string;
+  current_punches: number;
+  total_punches_earned: number;
+  cards_completed: number;
+  updated_at: string;
+  full_name: string | null;
+  email: string | null;
+};
+
 interface MerchantLoyaltyProgramTabProps {
  merchantId: string;
 }
@@ -58,6 +70,9 @@ export function MerchantLoyaltyProgramTab({ merchantId }: MerchantLoyaltyProgram
  const [dialogOpen, setDialogOpen] = useState(false);
  const [editingProgram, setEditingProgram] = useState<LoyaltyProgram | null>(null);
  const [saving, setSaving] = useState(false);
+  const [expandedProgram, setExpandedProgram] = useState<string | null>(null);
+  const [customersByProgram, setCustomersByProgram] = useState<Record<string, CustomerPunchRow[]>>({});
+  const [loadingCustomers, setLoadingCustomers] = useState<string | null>(null);
 
  // Form state
  const [formName, setFormName] = useState("");
@@ -110,6 +125,57 @@ export function MerchantLoyaltyProgramTab({ merchantId }: MerchantLoyaltyProgram
  useEffect(() => {
  loadPrograms();
  }, [merchantId]);
+
+  const loadCustomersForProgram = async (program: LoyaltyProgram) => {
+    setLoadingCustomers(program.id);
+    try {
+      const { data: cards, error: cardsErr } = await supabase
+        .from("customer_punch_cards")
+        .select("user_id, current_punches, total_punches_earned, cards_completed, updated_at")
+        .eq("program_id", program.id)
+        .order("current_punches", { ascending: false });
+      if (cardsErr) throw cardsErr;
+
+      const { data: contacts, error: contactsErr } = await supabase.rpc(
+        "get_merchant_customer_contacts",
+        { p_merchant_id: merchantId }
+      );
+      if (contactsErr) throw contactsErr;
+
+      const contactMap = new Map<string, { full_name: string | null; email: string | null }>();
+      (contacts || []).forEach((c: any) => {
+        contactMap.set(c.id, { full_name: c.full_name ?? null, email: c.email ?? null });
+      });
+
+      const rows: CustomerPunchRow[] = (cards || []).map((c) => ({
+        user_id: c.user_id,
+        current_punches: c.current_punches,
+        total_punches_earned: c.total_punches_earned,
+        cards_completed: c.cards_completed,
+        updated_at: c.updated_at,
+        full_name: contactMap.get(c.user_id)?.full_name ?? null,
+        email: contactMap.get(c.user_id)?.email ?? null,
+      }));
+
+      setCustomersByProgram((prev) => ({ ...prev, [program.id]: rows }));
+    } catch (err) {
+      console.error("Error loading customers:", err);
+      toast.error("Failed to load customers for this program");
+    } finally {
+      setLoadingCustomers(null);
+    }
+  };
+
+  const toggleExpanded = (program: LoyaltyProgram) => {
+    if (expandedProgram === program.id) {
+      setExpandedProgram(null);
+      return;
+    }
+    setExpandedProgram(program.id);
+    if (!customersByProgram[program.id]) {
+      loadCustomersForProgram(program);
+    }
+  };
 
  const resetForm = () => {
  setFormName("");
@@ -448,6 +514,94 @@ export function MerchantLoyaltyProgramTab({ merchantId }: MerchantLoyaltyProgram
  Edit
  </Button>
  </div>
+
+              {/* Customers per program */}
+              <Collapsible
+                open={expandedProgram === program.id}
+                onOpenChange={() => toggleExpanded(program)}
+              >
+                <CollapsibleTrigger asChild>
+                  <Button variant="ghost" size="sm" className="w-full justify-between mt-1">
+                    <span className="inline-flex items-center gap-2 text-sm">
+                      <Users className="w-4 h-4" />
+                      View customers ({programStats.active_cards})
+                    </span>
+                    {expandedProgram === program.id ? (
+                      <ChevronUp className="w-4 h-4" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4" />
+                    )}
+                  </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="mt-2 border rounded-lg overflow-hidden">
+                    {loadingCustomers === program.id ? (
+                      <div className="py-6 flex items-center justify-center">
+                        <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                      </div>
+                    ) : (customersByProgram[program.id]?.length ?? 0) === 0 ? (
+                      <p className="py-6 text-center text-sm text-muted-foreground">
+                        No customers have started this punch card yet.
+                      </p>
+                    ) : (
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Customer</TableHead>
+                            <TableHead className="text-right">Punches</TableHead>
+                            <TableHead className="text-right">Rewards</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {customersByProgram[program.id].map((row) => {
+                            const remaining = Math.max(
+                              program.punches_required - row.current_punches,
+                              0
+                            );
+                            const ready = row.current_punches >= program.punches_required;
+                            return (
+                              <TableRow key={row.user_id}>
+                                <TableCell>
+                                  <div className="flex flex-col">
+                                    <span className="font-medium text-sm">
+                                      {row.full_name || "Customer"}
+                                    </span>
+                                    {row.email && (
+                                      <span className="text-xs text-muted-foreground truncate max-w-[200px]">
+                                        {row.email}
+                                      </span>
+                                    )}
+                                    <span className="text-[11px] text-muted-foreground">
+                                      Last activity {format(new Date(row.updated_at), "MMM d, yyyy")}
+                                    </span>
+                                  </div>
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <div className="inline-flex flex-col items-end">
+                                    <span className="font-semibold text-sm">
+                                      {row.current_punches} / {program.punches_required}
+                                    </span>
+                                    {ready ? (
+                                      <Badge className="mt-1 text-[10px]">Reward ready</Badge>
+                                    ) : (
+                                      <span className="text-[11px] text-muted-foreground">
+                                        {remaining} to go
+                                      </span>
+                                    )}
+                                  </div>
+                                </TableCell>
+                                <TableCell className="text-right text-sm">
+                                  {row.cards_completed}
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
+                        </TableBody>
+                      </Table>
+                    )}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
  </CardContent>
  </Card>
  );

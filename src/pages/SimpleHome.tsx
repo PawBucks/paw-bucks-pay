@@ -18,6 +18,7 @@ import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { MaximusChat } from "@/components/maximus/MaximusChat";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
+import { CustomerLoyaltyCards } from "@/components/dashboard/CustomerLoyaltyCards";
 
 const PB_TO_USD = 0.001;
 
@@ -169,6 +170,12 @@ const SimpleHome = () => {
           </section>
 
           {/* Pets — desktop */}
+          {user && (
+            <section>
+              <CustomerLoyaltyCards userId={user.id} compact />
+            </section>
+          )}
+
           {pets.length > 0 && (
             <section className="hidden lg:block">
               <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">
